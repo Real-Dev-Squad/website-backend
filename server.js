@@ -4,6 +4,7 @@
 const http = require('http')
 const config = require('config')
 const app = require('./app')
+const logger = require('./utils/logger')
 
 /**
  * Get port from environment and store in Express.
@@ -42,11 +43,11 @@ function onError (error) {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges')
+      logger.error(bind + ' requires elevated privileges')
       process.exit(1)
 
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use')
+      logger.error(bind + ' is already in use')
       process.exit(1)
 
     default:
@@ -59,7 +60,7 @@ function onError (error) {
  */
 
 function onListening () {
-  console.info(`Express API running on port:${port} with environment:${process.env.NODE_ENV}`)
+  logger.info(`Express API running on port:${port} with environment:${process.env.NODE_ENV}`)
 }
 
 module.exports = server

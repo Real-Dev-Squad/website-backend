@@ -1,0 +1,47 @@
+const winston = require('winston')
+const config = require('config')
+
+// define the custom settings for each transport (file, console)
+const options = {
+  file: {
+    level: 'info',
+    filename: 'logs/app.log',
+    handleExceptions: true,
+    json: true,
+    maxsize: 5242880, // 5MB
+    maxFiles: 5,
+    colorize: false
+  },
+  console: {
+    level: 'info',
+    handleExceptions: true,
+    json: false,
+    colorize: true,
+    silent: process.env.NODE_ENV === 'test' // Disable logs in test env
+  }
+}
+
+// instantiate a new Winston Logger with the settings defined above
+const logger = new winston.createLogger({ // eslint-disable-line new-cap
+  /**
+   *   Env:
+   *   - production, staging: log to file
+   *   - development: log on console
+   *   - test: nothing
+   */
+  transports: (['production', 'staging'].includes(process.env.NODE_ENV) && config.get('enableLogTrasports'))
+    ? [new winston.transports.File(options.file)]
+    : [new winston.transports.Console(options.console)],
+
+  exitOnError: false // do not exit on handled exceptions
+})
+
+// create a stream object with a 'write' function that will be used by `morgan`
+logger.stream = {
+  write: function (message, encoding) {
+    // use the 'info' log level so the output will be picked up by both transports (file and console)
+    logger.info(message)
+  }
+}
+
+module.exports = logger

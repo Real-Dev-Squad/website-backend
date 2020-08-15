@@ -6,12 +6,15 @@ const boom = require('express-boom')
 const helmet = require('helmet')
 const cors = require('cors')
 
+// import utilities
+const logger = require('./utils/logger')
+
 // import routes
 const indexRouter = require('./routes/index')
 
 const app = express()
 
-app.use(morgan('combined'))
+app.use(morgan('combined', { stream: logger.stream }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
