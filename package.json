@@ -6,7 +6,9 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "lint": "standard",
-    "lint-fix": "standard --fix"
+    "lint-fix": "standard --fix",
+    "text-integration": "NODE_ENV=test mocha test/integration",
+    "test": "npm run lint && npm run text-integration"
   },
   "dependencies": {
     "config": "^3.3.1",
@@ -21,6 +23,9 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^8.1.1",
     "nodemon": "^2.0.4",
     "pre-commit": "^1.2.2",
     "standard": "^14.3.4"
