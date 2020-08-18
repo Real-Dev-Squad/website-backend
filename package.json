@@ -20,6 +20,8 @@
     "helmet": "^4.0.0",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
+    "passport": "^0.4.1",
+    "passport-github2": "^0.1.12",
     "winston": "^3.3.3"
   },
   "devDependencies": {
@@ -28,12 +30,16 @@
     "mocha": "^8.1.1",
     "nodemon": "^2.0.4",
     "pre-commit": "^1.2.2",
+    "sinon": "^9.0.3",
     "standard": "^14.3.4"
   },
   "standard": {
     "globals": [
       "describe",
-      "it"
+      "it",
+      "afterEach",
+      "beforeEach",
+      "before"
     ]
   },
   "pre-commit": [
