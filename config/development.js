@@ -3,7 +3,8 @@ const port = process.env.PORT || 3000
 
 module.exports = {
   port: port,
-  enableLogTrasports: setBooleanConfig(process.env.ENABLE_LOGS, true),
+  enableFileLogs: setBooleanConfig(process.env.ENABLE_FILE_LOGS, false),
+  enableConsoleLogs: setBooleanConfig(process.env.ENABLE_CONSOLE_LOGS, true),
 
   githubOauth: {
     clientId: process.env.GITHUB_CLIENT_ID,
