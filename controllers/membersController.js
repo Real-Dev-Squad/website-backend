@@ -1,4 +1,4 @@
-const getFirestoreDB = require('../utils/firestore');
+const getFirestoreDB = require('../utils/firestore')
 
 /**
  * Fetches the data about our members
@@ -8,39 +8,39 @@ const getFirestoreDB = require('../utils/firestore');
  * @param next {Function} - Express middleware function
  */
 
-async function getMembers(req, res) {
-  const db = getFirestoreDB();
+async function getMembers (req, res) {
+  const db = getFirestoreDB()
 
-  const snapshot = await db.collection('members').get();
-  
-  const allMembers = [];
-  
+  const snapshot = await db.collection('members').get()
+
+  const allMembers = []
+
   snapshot.forEach((doc) => {
-    allMembers.push( {
+    allMembers.push({
       id: doc.id,
       ...doc.data()
-    });
-  });
+    })
+  })
 
-  res.json(allMembers);
+  res.json(allMembers)
 }
 
-async function addNewMember(memberData) {
-  const memberId = 'test';
-  const db = getFirestoreDB();
-  const memberRef = db.collection('members').doc(memberId);
-  const doc = await memberRef.get();
-  
-  if(!doc.exists) {
+async function addNewMember (memberData) {
+  const memberId = 'test'
+  const db = getFirestoreDB()
+  const memberRef = db.collection('members').doc(memberId)
+  const doc = await memberRef.get()
+
+  if (!doc.exists) {
     await memberRef.set({
       first: 'First Name',
       last: 'Last Name',
       born: Math.random()
-    });
+    })
   }
 }
 
 module.exports = {
   getMembers,
   addNewMember
-};
+}
