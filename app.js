@@ -9,6 +9,8 @@ const indexRouter = require('./routes/index')
 
 const app = express()
 
+// random comment
+
 // Add Middlewares, routes
 AppMiddlewares(app)
 app.use('/', indexRouter)
