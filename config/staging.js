@@ -2,7 +2,8 @@ const setBooleanConfig = require('../utils/config').setBooleanConfig
 
 module.exports = {
   port: process.env.PORT || 3000,
-  enableLogTrasports: setBooleanConfig(process.env.ENABLE_LOGS, true),
+  enableFileLogs: setBooleanConfig(process.env.ENABLE_FILE_LOGS, true),
+  enableConsoleLogs: setBooleanConfig(process.env.ENABLE_CONSOLE_LOGS, false),
 
   githubOauth: {
     clientId: process.env.GITHUB_CLIENT_ID,
