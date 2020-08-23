@@ -20,5 +20,11 @@ module.exports = {
     fireStore: {
       projectId: process.env.FIRESTORE_PROJECT_ID
     }
+  },
+
+  userToken: {
+    cookieName: process.env.COOKIE_NAME || 'rds-session',
+    publicKey: process.env.PUBLIC_KEY,
+    privateKey: process.env.PRIVATE_KEY
   }
 }

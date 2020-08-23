@@ -35,6 +35,24 @@ const addOrUpdate = async (userData) => {
   }
 }
 
+/**
+ * Fetches the user data from the passes userId
+ *
+ * @param userId { string }: Firestore primary key for the `users` collection
+ * @return {Promise<{newUser: boolean, userId: string}|{newUser: boolean, userId: string}>}
+ */
+const fetchUser = async (userId) => {
+  // @todo: Make this function generic to query any number of users depending on the params passed
+  try {
+    const user = await userModel.doc(userId).get()
+
+    return user.data()
+  } catch (err) {
+    logger.error('Error retrieving user data', err)
+  }
+}
+
 module.exports = {
-  addOrUpdate
+  addOrUpdate,
+  fetchUser
 }

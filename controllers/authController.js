@@ -1,6 +1,8 @@
 const passport = require('passport')
+const config = require('config')
 const logger = require('../utils/logger')
 const users = require('../models/users')
+const authService = require('../services/authService')
 
 /**
  * Fetches the user info from GitHub and authenticates User
@@ -27,9 +29,17 @@ const githubAuth = (req, res, next) => {
         }
       }
 
-      const { isNewUser } = await users.addOrUpdate(userData)
+      const { isNewUser, userId } = await users.addOrUpdate(userData)
 
-      // @todo: Create JWT and return in a cookie
+      const token = await authService.generateAuthToken({ userId })
+
+      // respond with a cookie
+      res.cookie(config.get('userToken.cookieName'), token, {
+        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        httpOnly: true,
+        secure: true
+      })
+
       return res.json({
         isNewUser
       })
