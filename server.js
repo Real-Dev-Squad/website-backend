@@ -10,7 +10,7 @@ const logger = require('./utils/logger')
  * Get port from environment and store in Express.
  */
 
-const port = process.env.PORT || config.get('port') || 3000
+const port = config.get('port')
 app.set('port', port)
 
 /**

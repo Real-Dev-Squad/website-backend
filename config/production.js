@@ -11,7 +11,7 @@ module.exports = {
 
   services: {
     rdsApi: {
-      baseUrl: process.env.SERVICES_RDSAPI_BASEURL
+      baseUrl: process.env.SERVICES_RDSAPI_BASEURL || 'set-soon-default'
     }
   }
 }
