@@ -1,9 +1,10 @@
 const chai = require('chai')
 const sinon = require('sinon')
-const passport = require('passport')
 const { expect } = chai
 const chaiHttp = require('chai-http')
 chai.use(chaiHttp)
+const passport = require('passport')
+const users = require('../../models/users')
 
 const app = require('../../server')
 
@@ -21,6 +22,10 @@ describe('authController', function () {
       return (req, res, next) => {}
     })
 
+    sinon.stub(users, 'addOrUpdate').callsFake((userData) => {
+      return { isNewUser: true, userId: 'userId' }
+    })
+
     chai
       .request(app)
       .get('/auth/github/callback')
@@ -31,7 +36,7 @@ describe('authController', function () {
         expect(res).to.have.status(200)
         expect(res.body).to.be.an('object')
         expect(res.body).to.eql({
-          msg: 'success'
+          isNewUser: true
         })
 
         return done()
