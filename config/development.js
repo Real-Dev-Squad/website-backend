@@ -15,5 +15,11 @@ module.exports = {
     rdsApi: {
       baseUrl: `http://localhost:${port}`
     }
+  },
+
+  databases: {
+    fireStore: {
+      projectId: process.env.FIRESTORE_PROJECT_ID
+    }
   }
 }

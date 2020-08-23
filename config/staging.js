@@ -14,5 +14,11 @@ module.exports = {
     rdsApi: {
       baseUrl: process.env.SERVICES_RDSAPI_BASEURL
     }
+  },
+
+  databases: {
+    fireStore: {
+      projectId: process.env.FIRESTORE_PROJECT_ID
+    }
   }
 }
