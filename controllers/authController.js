@@ -35,7 +35,7 @@ const githubAuth = (req, res, next) => {
 
       // respond with a cookie
       res.cookie(config.get('userToken.cookieName'), token, {
-        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
         httpOnly: true,
         secure: true
       })

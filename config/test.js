@@ -18,21 +18,16 @@ module.exports = {
     }
   },
 
-  databases: {
-    fireStore: {
-      projectId: process.env.FIRESTORE_PROJECT_ID || 'rds-test'
-    }
-  },
-
   userToken: {
     cookieName: process.env.COOKIE_NAME || 'rds-session',
-    publicKey: '-----BEGIN PUBLIC KEY-----\n' +
+    ttl: 30 * 24 * 60 * 60, // in seconds
+    publicKey: process.env.PUBLIC_KEY || '-----BEGIN PUBLIC KEY-----\n' +
       'MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHo6sGbw8qk+XU9sBVa4w2aEq01i\n' +
       'oKDMFFQa9mPy0MRScTCsrfEjbypD4VqIjJcwXGmDWKVhMcJ8SMZuJumIJ10vU9ca\n' +
       'WSh/aHhAxiOIqOEe54IyYTwjcn5avdZry3zl62RYQ7tDZCPAR/WvFCIkgRXwjXfC\n' +
       'Xpm4LR6ynKDMvsDNAgMBAAE=\n' +
       '-----END PUBLIC KEY-----',
-    privateKey: '-----BEGIN RSA PRIVATE KEY-----\n' +
+    privateKey: process.env.PRIVATE_KEY || '-----BEGIN RSA PRIVATE KEY-----\n' +
       'MIICWwIBAAKBgHo6sGbw8qk+XU9sBVa4w2aEq01ioKDMFFQa9mPy0MRScTCsrfEj\n' +
       'bypD4VqIjJcwXGmDWKVhMcJ8SMZuJumIJ10vU9caWSh/aHhAxiOIqOEe54IyYTwj\n' +
       'cn5avdZry3zl62RYQ7tDZCPAR/WvFCIkgRXwjXfCXpm4LR6ynKDMvsDNAgMBAAEC\n' +

@@ -16,14 +16,9 @@ module.exports = {
     }
   },
 
-  databases: {
-    fireStore: {
-      projectId: process.env.FIRESTORE_PROJECT_ID
-    }
-  },
-
   userToken: {
     cookieName: process.env.COOKIE_NAME || 'rds-session',
+    ttl: 30 * 24 * 60 * 60, // in seconds
     publicKey: process.env.PUBLIC_KEY,
     privateKey: process.env.PRIVATE_KEY
   }
