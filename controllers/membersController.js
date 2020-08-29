@@ -1,4 +1,4 @@
-const getFirestoreDB = require('../utils/firestore')
+const db = require('../utils/firestore')
 
 /**
  * Fetches the data about our members
@@ -9,8 +9,6 @@ const getFirestoreDB = require('../utils/firestore')
  */
 
 async function getMembers (req, res) {
-  const db = getFirestoreDB()
-
   const snapshot = await db.collection('members').get()
 
   const allMembers = []
@@ -25,9 +23,9 @@ async function getMembers (req, res) {
   res.json(allMembers)
 }
 
+// #TODO
 async function addNewMember (memberData) {
   const memberId = 'test'
-  const db = getFirestoreDB()
   const memberRef = db.collection('members').doc(memberId)
   const doc = await memberRef.get()
 
