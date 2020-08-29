@@ -1,9 +1,10 @@
 const passport = require('passport')
 const GitHubStrategy = require('passport-github2').Strategy
 const config = require('config')
+const logger = require('../utils/logger')
 
-passport.use(
-  new GitHubStrategy({
+try {
+  passport.use(new GitHubStrategy({
     clientID: config.get('githubOauth.clientId'),
     clientSecret: config.get('githubOauth.clientSecret'),
     callbackURL: `${config.get('services.rdsApi.baseUrl')}/auth/github/callback`
@@ -11,3 +12,6 @@ passport.use(
     return done(null, accessToken, profile)
   }
   ))
+} catch (err) {
+  logger.error('Error initialising passport:', err)
+}
