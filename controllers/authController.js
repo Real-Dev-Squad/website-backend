@@ -4,6 +4,9 @@ const logger = require('../utils/logger')
 const users = require('../models/users')
 const authService = require('../services/authService')
 
+
+const tempRedirectPage = '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=https://realdevsquad.com/goto" /><title>Auth</title></head><body>Click <a href="https://realdevsquad.com">here</a> to go to the home page.</body></html>';
+
 /**
  * Fetches the user info from GitHub and authenticates User
  *
@@ -35,14 +38,13 @@ const githubAuth = (req, res, next) => {
 
       // respond with a cookie
       res.cookie(config.get('userToken.cookieName'), token, {
+        domain: 'realdevsquad.com',
         expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
         httpOnly: true,
         secure: true
       })
-
-      return res.json({
-        isNewUser
-      })
+      res.set('Content-Type', 'text/html')
+      return res.send(tempRedirectPage)
     })(req, res, next)
   } catch (err) {
     logger.error(err)
