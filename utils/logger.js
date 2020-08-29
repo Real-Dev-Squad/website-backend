@@ -24,14 +24,16 @@ const options = {
 // instantiate a new Winston Logger with the settings defined above
 const logger = new winston.createLogger({ // eslint-disable-line new-cap
   /**
-   *   Env:
-   *   - production, staging: log to file
-   *   - development: log on console
-   *   - test: nothing
+   * Application defaults:
+   * - File logs enabled in: [production, staging]
+   * - Console logs enabled in: [development]
+   *
+   * Modifications to be made through environment variables defined in config files
    */
-  transports: (['production', 'staging'].includes(process.env.NODE_ENV) && config.get('enableLogTrasports'))
-    ? [new winston.transports.File(options.file)]
-    : [new winston.transports.Console(options.console)],
+  transports: [
+    ...(config.get('enableFileLogs') ? [new winston.transports.File(options.file)] : []),
+    ...(config.get('enableConsoleLogs') ? [new winston.transports.Console(options.console)] : [])
+  ],
 
   exitOnError: false // do not exit on handled exceptions
 })

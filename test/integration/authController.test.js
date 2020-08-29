@@ -1,11 +1,14 @@
 const chai = require('chai')
 const sinon = require('sinon')
-const passport = require('passport')
+const config = require('config')
 const { expect } = chai
 const chaiHttp = require('chai-http')
-chai.use(chaiHttp)
+const passport = require('passport')
 
+const users = require('../../models/users')
 const app = require('../../server')
+
+chai.use(chaiHttp)
 
 // Import fixtures
 const githubUserInfo = require('../fixtures/auth/githubUserInfo')()
@@ -15,10 +18,14 @@ afterEach(() => {
 })
 
 describe('authController', function () {
-  it('should return success response on successful login', done => {
+  it('should return success response on successful login and JWT token in the cookie', done => {
     sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
       callback(null, 'accessToken', githubUserInfo[0])
       return (req, res, next) => {}
+    })
+
+    sinon.stub(users, 'addOrUpdate').callsFake((userData) => {
+      return { isNewUser: true, userId: 'userId' }
     })
 
     chai
@@ -31,8 +38,12 @@ describe('authController', function () {
         expect(res).to.have.status(200)
         expect(res.body).to.be.an('object')
         expect(res.body).to.eql({
-          msg: 'success'
+          isNewUser: true
         })
+
+        expect(res.headers['set-cookie']).to.have.length(1)
+        expect(res.headers['set-cookie'][0]).to.be.a('string')
+          .and.satisfy(msg => msg.startsWith(config.get('userToken.cookieName')))
 
         return done()
       })

@@ -1,9 +1,0 @@
-language: node_js
-node_js:
-  - node
-env:
-  - NODE_ENV=test
-before_script:
-  - npm install
-script:
-  - npm run test
