@@ -6,23 +6,22 @@ class MemberValidator {
       id: joi.string().required(),
       first_name: joi.string().required(),
       last_name: joi.string().required(),
-      yoe: joi.number().required(),
-      company: joi.string().required(),
-      designation: joi.string().required(),
+      yoe: joi.number().optional(),
+      company: joi.string().optional(),
+      designation: joi.string().optional(),
+      img: joi.string().optional(),
       github_id: joi.string().optional(),
       linkedin_id: joi.string().optional(),
       twitter_id: joi.string().optional(),
-      instagram_id: joi.string().optional()
+      instagram_id: joi.string().optional(),
+      site: joi.string().optional()
     })
 
     try {
-      const result = await joi.validate(req.body, schema)
-      if (result) return next()
+      await schema.validateAsync(req.body)
+      next()
     } catch (error) {
-      res.status(400).json({
-        error: 'Validation Error',
-        message: error.details[0].message
-      })
+      res.boom.badRequest(error.details[0].message)
     }
   }
 
@@ -34,20 +33,20 @@ class MemberValidator {
       yoe: joi.number().optional(),
       company: joi.string().optional(),
       designation: joi.string().optional(),
+      img: joi.string().optional(),
       github_id: joi.string().optional(),
       linkedin_id: joi.string().optional(),
       twitter_id: joi.string().optional(),
-      instagram_id: joi.string().optional()
+      instagram_id: joi.string().optional(),
+      site: joi.string().optional()
     })
     try {
-      const result = await joi.validate(req.body, schema)
-      if (result) return next()
+      await schema.validateAsync(req.body)
+      next()
     } catch (error) {
-      res.status(400).json({
-        error: 'Validation Error',
-        message: error.details[0].message
-      })
+      res.boom.badRequest(error.details[0].message)
     }
   }
 };
+
 module.exports = new MemberValidator()

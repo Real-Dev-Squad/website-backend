@@ -29,16 +29,10 @@ async function getMembers (req, res) {
       })
     }
 
-    res.status(404).json({
-      error: 'Not Found',
-      message: 'No members available'
-    })
+    res.boom.notFound('No members available')
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`)
-    res.status(503).json({
-      error: 'Service Unavailable',
-      message: 'Something went wrong please contact admin'
-    })
+    res.boom.serverUnavailable('Something went wrong please contact admin')
   }
 }
 
@@ -61,16 +55,10 @@ async function getMember (req, res) {
       })
     }
 
-    res.status(404).json({
-      error: 'Not Found',
-      message: "Member doesn't exist"
-    })
+    res.boom.notFound('Member doesn\'t exist')
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`)
-    res.status(503).json({
-      error: 'Service Unavailable',
-      message: 'Something went wrong please contact admin'
-    })
+    res.boom.serverUnavailable('Something went wrong please contact admin')
   }
 }
 
@@ -84,7 +72,7 @@ async function getMember (req, res) {
  */
 async function addNewMember (req, res) {
   try {
-    const memberRef = db.collection('members').doc(req.body.id)
+    const memberRef = await db.collection('members').doc(req.body.id)
     const doc = await memberRef.get()
 
     if (!doc.exists) {
@@ -94,16 +82,10 @@ async function addNewMember (req, res) {
       })
     }
 
-    res.status(400).json({
-      error: 'Bad Request',
-      message: 'Member already exists'
-    })
+    res.boom.badRequest('Member already exists')
   } catch (error) {
     logger.error(`Error while creting new member: ${error}`)
-    res.status(503).json({
-      error: 'Service Unavailable',
-      message: 'Something went wrong please contact admin'
-    })
+    res.boom.serverUnavailable('Something went wrong please contact admin')
   }
 }
 
