@@ -13,6 +13,13 @@ module.exports = {
   services: {
     rdsApi: {
       baseUrl: process.env.SERVICES_RDSAPI_BASEURL
+    },
+
+    rdsUi: {
+      baseUrl: process.env.SERVICES_RDSUI_BASEURL,
+      routes: {
+        authRedirection: '/goto'
+      }
     }
   },
 

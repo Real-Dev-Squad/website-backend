@@ -14,6 +14,13 @@ module.exports = {
   services: {
     rdsApi: {
       baseUrl: process.env.SERVICES_RDSAPI_BASEURL || `http://localhost:${port}`
+    },
+
+    rdsUi: {
+      baseUrl: process.env.SERVICES_RDSUI_BASEURL || 'https://www.realdevsquad.com',
+      routes: {
+        authRedirection: '/goto'
+      }
     }
   },
 

@@ -4,9 +4,6 @@ const logger = require('../utils/logger')
 const users = require('../models/users')
 const authService = require('../services/authService')
 
-
-const tempRedirectPage = '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=https://realdevsquad.com/goto" /><title>Auth</title></head><body>Click <a href="https://realdevsquad.com">here</a> to go to the home page.</body></html>';
-
 /**
  * Fetches the user info from GitHub and authenticates User
  *
@@ -16,6 +13,7 @@ const tempRedirectPage = '<!DOCTYPE html><html><head><meta http-equiv="refresh" 
  */
 const githubAuth = (req, res, next) => {
   let userData
+  const authRedirectionUrl = `${config.get('services.rdsUi.baseUrl')}${config.get('services.rdsUi.routes.authRedirection')}`
 
   try {
     passport.authenticate('github', { session: false }, async (err, accessToken, user) => {
@@ -32,9 +30,9 @@ const githubAuth = (req, res, next) => {
         }
       }
 
-      const { isNewUser, userId } = await users.addOrUpdate(userData)
+      const { userId } = await users.addOrUpdate(userData)
 
-      const token = await authService.generateAuthToken({ userId })
+      const token = authService.generateAuthToken({ userId })
 
       // respond with a cookie
       res.cookie(config.get('userToken.cookieName'), token, {
@@ -43,8 +41,8 @@ const githubAuth = (req, res, next) => {
         httpOnly: true,
         secure: true
       })
-      res.set('Content-Type', 'text/html')
-      return res.send(tempRedirectPage)
+
+      return res.redirect(authRedirectionUrl)
     })(req, res, next)
   } catch (err) {
     logger.error(err)

@@ -19,6 +19,8 @@ afterEach(() => {
 
 describe('authController', function () {
   it('should return success response on successful login and JWT token in the cookie', done => {
+    const authRedirectionUrl = `${config.get('services.rdsUi.baseUrl')}${config.get('services.rdsUi.routes.authRedirection')}`
+
     sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
       callback(null, 'accessToken', githubUserInfo[0])
       return (req, res, next) => {}
@@ -32,18 +34,17 @@ describe('authController', function () {
       .request(app)
       .get('/auth/github/callback')
       .query({ code: 'codeReturnedByGithub' })
+      .redirects(0)
       .end((err, res) => {
         if (err) { return done() }
 
-        expect(res).to.have.status(200)
-        expect(res.body).to.be.an('object')
-        expect(res.body).to.eql({
-          isNewUser: true
-        })
+        expect(res).to.have.status(302)
 
         expect(res.headers['set-cookie']).to.have.length(1)
         expect(res.headers['set-cookie'][0]).to.be.a('string')
           .and.satisfy(msg => msg.startsWith(config.get('userToken.cookieName')))
+
+        expect(res.headers.location).to.equal(authRedirectionUrl)
 
         return done()
       })
