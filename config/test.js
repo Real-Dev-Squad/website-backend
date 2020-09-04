@@ -15,6 +15,13 @@ module.exports = {
   services: {
     rdsApi: {
       baseUrl: `http://localhost:${port}`
+    },
+
+    rdsUi: {
+      baseUrl: 'https://www.realdevsquad.com',
+      routes: {
+        authRedirection: '/goto'
+      }
     }
   },
 
