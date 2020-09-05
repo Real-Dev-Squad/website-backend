@@ -13,6 +13,7 @@ const authService = require('../services/authService')
  */
 const githubAuth = (req, res, next) => {
   let userData
+  const authRedirectionUrl = `${config.get('services.rdsUi.baseUrl')}${config.get('services.rdsUi.routes.authRedirection')}`
 
   try {
     passport.authenticate('github', { session: false }, async (err, accessToken, user) => {
@@ -29,20 +30,19 @@ const githubAuth = (req, res, next) => {
         }
       }
 
-      const { isNewUser, userId } = await users.addOrUpdate(userData)
+      const { userId } = await users.addOrUpdate(userData)
 
-      const token = await authService.generateAuthToken({ userId })
+      const token = authService.generateAuthToken({ userId })
 
       // respond with a cookie
       res.cookie(config.get('userToken.cookieName'), token, {
-        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        domain: 'realdevsquad.com',
+        expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
         httpOnly: true,
         secure: true
       })
 
-      return res.json({
-        isNewUser
-      })
+      return res.redirect(authRedirectionUrl)
     })(req, res, next)
   } catch (err) {
     logger.error(err)

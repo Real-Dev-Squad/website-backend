@@ -7,8 +7,9 @@
     "dev": "nodemon server.js",
     "lint": "standard",
     "lint-fix": "standard --fix",
-    "text-integration": "NODE_ENV=test mocha test/integration",
-    "test": "npm run lint && npm run text-integration"
+    "text-integration": "NODE_ENV=test mocha test/integration/**",
+    "text-unit": "NODE_ENV=test mocha test/unit/**",
+    "test": "npm run lint && npm run text-integration && npm run text-unit"
   },
   "dependencies": {
     "@google-cloud/firestore": "^4.2.0",
@@ -37,13 +38,9 @@
     "standard": "^14.3.4"
   },
   "standard": {
-    "globals": [
-      "describe",
-      "it",
-      "afterEach",
-      "beforeEach",
-      "before"
-    ]
+    "env": {
+      "mocha": true
+    }
   },
   "pre-commit": [
     "lint"
