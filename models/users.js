@@ -14,8 +14,6 @@ const userModel = firestore.collection('users')
  * @return {Promise<{isNewUser: boolean, userId: string}|{isNewUser: boolean, userId: string}>}
  */
 const addUser = async (userData) => {
-  let userInfo
-
   try {
     // check if user already exists
     const user = await userModel.where('github_id', '==', userData.github_id).limit(1).get()
@@ -25,7 +23,7 @@ const addUser = async (userData) => {
     }
 
     // add user to the DB
-    userInfo = await userModel.add(userData)
+    const userInfo = await userModel.add(userData)
 
     return { isNewUser: true, userId: userInfo.id }
   } catch (err) {
@@ -92,13 +90,13 @@ const fetchUsers = async (query) => {
  * Fetches the user data from the passes userId
  *
  * @param userId { string }: User id
- * @return {Promise<userModel|Object>}
+ * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
 const fetchUser = async (userId) => {
   try {
     const user = await userModel.doc(userId).get()
 
-    return user.data()
+    return { userExists: !!user.data(), user: user.data() }
   } catch (err) {
     logger.error('Error retrieving user data', err)
   }

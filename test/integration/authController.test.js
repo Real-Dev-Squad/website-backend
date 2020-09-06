@@ -23,10 +23,10 @@ describe('authController', function () {
 
     sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
       callback(null, 'accessToken', githubUserInfo[0])
-      return (req, res, next) => {}
+      return (req, res, next) => { }
     })
 
-    sinon.stub(users, 'addOrUpdate').callsFake((userData) => {
+    sinon.stub(users, 'addUser').callsFake((userData) => {
       return { isNewUser: true, userId: 'userId' }
     })
 

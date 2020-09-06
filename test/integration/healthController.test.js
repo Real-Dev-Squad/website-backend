@@ -24,7 +24,7 @@ describe('healthController', function () {
   it('should return 401 from the authenticated healthcheck API for missing auth tokens', done => {
     chai
       .request(app)
-      .get('/healthcheckv2')
+      .get('/healthcheck/v2')
       .end((err, res) => {
         if (err) { return done() }
 
@@ -45,7 +45,7 @@ describe('healthController', function () {
 
     chai
       .request(app)
-      .get('/healthcheckv2')
+      .get('/healthcheck/v2')
       .set('cookie', `rds-session=${jwt}`)
       .end((err, res) => {
         if (err) { return done() }

@@ -36,12 +36,12 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const user = await userQuery.fetchUser(req.params.id)
+    const result = await userQuery.fetchUser(req.params.id)
 
-    if (user) {
+    if (result.userExists) {
       res.json({
         message: 'User returned successfully!',
-        user
+        user: result.user
       })
       return
     }
@@ -96,7 +96,7 @@ const updateUser = async (req, res) => {
       return
     }
 
-    res.boom.badRequest('User not found')
+    res.boom.notFound('User not found')
   } catch (error) {
     logger.error(`Error while updating user: ${error}`)
     res.boom.serverUnavailable('Something went wrong please contact admin')
