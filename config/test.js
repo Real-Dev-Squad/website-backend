@@ -27,7 +27,8 @@ module.exports = {
 
   userToken: {
     cookieName: process.env.COOKIE_NAME || 'rds-session',
-    ttl: 30 * 24 * 60 * 60, // in seconds
+    ttl: process.env.USER_TOKEN_TTL || 30 * 24 * 60 * 60, // in seconds
+    refreshTtl: process.env.USER_TOKEN_REFRESH_TTL || 180 * 24 * 60 * 60, // in seconds
     publicKey: process.env.PUBLIC_KEY || '-----BEGIN PUBLIC KEY-----\n' +
       'MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHo6sGbw8qk+XU9sBVa4w2aEq01i\n' +
       'oKDMFFQa9mPy0MRScTCsrfEjbypD4VqIjJcwXGmDWKVhMcJ8SMZuJumIJ10vU9ca\n' +
