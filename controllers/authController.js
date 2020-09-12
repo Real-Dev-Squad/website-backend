@@ -14,6 +14,7 @@ const authService = require('../services/authService')
 const githubAuth = (req, res, next) => {
   let userData
   const authRedirectionUrl = `${config.get('services.rdsUi.baseUrl')}${config.get('services.rdsUi.routes.authRedirection')}`
+  const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'))
 
   try {
     passport.authenticate('github', { session: false }, async (err, accessToken, user) => {
@@ -36,7 +37,7 @@ const githubAuth = (req, res, next) => {
 
       // respond with a cookie
       res.cookie(config.get('userToken.cookieName'), token, {
-        domain: 'realdevsquad.com',
+        domain: rdsUiUrl.hostname,
         expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
         httpOnly: true,
         secure: true

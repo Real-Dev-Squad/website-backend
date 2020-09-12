@@ -16,7 +16,7 @@ module.exports = {
     },
 
     rdsUi: {
-      baseUrl: process.env.SERVICES_RDSUI_BASEURL,
+      baseUrl: process.env.SERVICES_RDSUI_BASEURL || 'https://realdevsquad.com',
       routes: {
         authRedirection: '/goto'
       }

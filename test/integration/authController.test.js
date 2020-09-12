@@ -18,7 +18,7 @@ afterEach(() => {
 })
 
 describe('authController', function () {
-  it('should return success response on successful login and JWT token in the cookie', done => {
+  it('should redirect the request to the goto page on successful login', done => {
     const authRedirectionUrl = `${config.get('services.rdsUi.baseUrl')}${config.get('services.rdsUi.routes.authRedirection')}`
 
     sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
@@ -39,12 +39,40 @@ describe('authController', function () {
         if (err) { return done() }
 
         expect(res).to.have.status(302)
+        expect(res.headers.location).to.equal(authRedirectionUrl)
 
+        return done()
+      })
+  })
+
+  it('should send a cookie with JWT in the response', done => {
+    const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'))
+
+    sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
+      callback(null, 'accessToken', githubUserInfo[0])
+      return (req, res, next) => {}
+    })
+
+    sinon.stub(users, 'addOrUpdate').callsFake((userData) => {
+      return { isNewUser: true, userId: 'userId' }
+    })
+
+    chai
+      .request(app)
+      .get('/auth/github/callback')
+      .query({ code: 'codeReturnedByGithub' })
+      .redirects(0)
+      .end((err, res) => {
+        if (err) { return done() }
+
+        expect(res).to.have.status(302)
+        // rds-session=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c2VySWQiLCJpYXQiOjE1OTkzOTEzODcsImV4cCI6MTYwMTk4MzM4N30.AljtAmXpZUmErubhSBbA0fQtG9DwH4ci6iroa9z5MBjIPFfQ5FSbaOqU0CQlmgOe-U7XDVPuGBp7GzBzA4yCH7_3PSS9JrHwEVZQQBScTUC-WHDradit5nD1ryKPqJE2WlRO6q0uLOKEukMj-7iPXQ-ykdYwtlokhyJbLVS1S3E; Domain=realdevsquad.com; Path=/; Expires=Tue, 06 Oct 2020 11:23:07 GMT; HttpOnly; Secure
         expect(res.headers['set-cookie']).to.have.length(1)
         expect(res.headers['set-cookie'][0]).to.be.a('string')
           .and.satisfy(msg => msg.startsWith(config.get('userToken.cookieName')))
-
-        expect(res.headers.location).to.equal(authRedirectionUrl)
+        expect(res.headers['set-cookie'][0]).to.include('HttpOnly')
+        expect(res.headers['set-cookie'][0]).to.include('Secure')
+        expect(res.headers['set-cookie'][0]).to.include(`Domain=${rdsUiUrl.hostname}`)
 
         return done()
       })
