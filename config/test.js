@@ -18,7 +18,7 @@ module.exports = {
     },
 
     rdsUi: {
-      baseUrl: 'https://www.realdevsquad.com',
+      baseUrl: 'https://realdevsquad.com',
       routes: {
         authRedirection: '/goto'
       }
