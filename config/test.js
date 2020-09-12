@@ -1,6 +1,10 @@
 const setBooleanConfig = require('../utils/config').setBooleanConfig
 const port = process.env.PORT || 3000
 
+/**
+ * Set the environment specific config in this file.
+ * Defaults set from default.js
+ */
 module.exports = {
   port: port,
   enableFileLogs: setBooleanConfig(process.env.ENABLE_FILE_LOGS, false),
@@ -15,20 +19,10 @@ module.exports = {
   services: {
     rdsApi: {
       baseUrl: `http://localhost:${port}`
-    },
-
-    rdsUi: {
-      baseUrl: 'https://realdevsquad.com',
-      routes: {
-        authRedirection: '/goto'
-      }
     }
   },
 
   userToken: {
-    cookieName: process.env.COOKIE_NAME || 'rds-session',
-    ttl: process.env.USER_TOKEN_TTL || 30 * 24 * 60 * 60, // in seconds
-    refreshTtl: process.env.USER_TOKEN_REFRESH_TTL || 180 * 24 * 60 * 60, // in seconds
     publicKey: process.env.PUBLIC_KEY || '-----BEGIN PUBLIC KEY-----\n' +
       'MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHo6sGbw8qk+XU9sBVa4w2aEq01i\n' +
       'oKDMFFQa9mPy0MRScTCsrfEjbypD4VqIjJcwXGmDWKVhMcJ8SMZuJumIJ10vU9ca\n' +
