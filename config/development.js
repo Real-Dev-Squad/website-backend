@@ -1,6 +1,11 @@
 const setBooleanConfig = require('../utils/config').setBooleanConfig
 const port = process.env.PORT || 3000
 
+/**
+ * Set the environment specific config in this file.
+ * Defaults set from default.js
+ * Redundant config added in development file for ease in overriding config in dev mode
+ */
 module.exports = {
   port: port,
   enableFileLogs: setBooleanConfig(process.env.ENABLE_FILE_LOGS, false),
