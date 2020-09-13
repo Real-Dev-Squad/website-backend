@@ -11,24 +11,36 @@ const userModel = firestore.collection('users')
  * Adds or updates the user data
  *
  * @param userData { Object }: User data object to be stored in DB
+ * @param userId { String }: User Id String to be used to update the user
  * @return {Promise<{isNewUser: boolean, userId: string}|{isNewUser: boolean, userId: string}>}
  */
-const addOrUpdate = async (userData) => {
-  let userInfo
-
+const addOrUpdate = async (userData, userId = null) => {
   try {
-    // check if user already exists
+    // userId exists Update user
+    if (userId !== null) {
+      const user = await userModel.doc(userId).get()
+      const isNewUser = !(user.data())
+      // user exists update user
+      if (user.data()) {
+        await userModel.doc(userId).set({
+          ...user.data(),
+          ...userData
+        })
+      }
+
+      return { isNewUser, userId }
+    }
+
+    // userId is null, Add or Update user
     const user = await userModel.where('github_id', '==', userData.github_id).limit(1).get()
     if (!user.empty) {
-      // user exists, update the existing user
       await userModel.doc(user.docs[0].id).set(userData, { merge: true })
 
       return { isNewUser: false, userId: user.docs[0].id }
     }
 
-    // add user to the DB
-    userInfo = await userModel.add(userData)
-
+    // Add user
+    const userInfo = await userModel.add(userData)
     return { isNewUser: true, userId: userInfo.id }
   } catch (err) {
     logger.error('Error in adding or updating user', err)
@@ -36,17 +48,51 @@ const addOrUpdate = async (userData) => {
 }
 
 /**
+ * Fetches the data about our users
+ * @param query { Object }: Filter for users data
+ * @return {Promise<userModel|Array>}
+ */
+const fetchUsers = async (query) => {
+  try {
+    const snapshot = await userModel
+      .limit(parseInt(query.size) || 100)
+      .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
+      .get()
+
+    const allUsers = []
+
+    snapshot.forEach((doc) => {
+      allUsers.push({
+        id: doc.id,
+        ...doc.data(),
+        tokens: undefined
+      })
+    })
+
+    return allUsers
+  } catch (err) {
+    logger.error('Error retrieving user data', err)
+  }
+}
+
+/**
  * Fetches the user data from the passes userId
  *
- * @param userId { string }: Firestore primary key for the `users` collection
- * @return {Promise<{newUser: boolean, userId: string}|{newUser: boolean, userId: string}>}
+ * @param userId { string }: User id
+ * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
 const fetchUser = async (userId) => {
-  // @todo: Make this function generic to query any number of users depending on the params passed
   try {
     const user = await userModel.doc(userId).get()
 
-    return user.data()
+    return {
+      userExists: !!user.data(),
+      user: {
+        id: userId,
+        ...user.data(),
+        tokens: undefined
+      }
+    }
   } catch (err) {
     logger.error('Error retrieving user data', err)
   }
@@ -54,5 +100,6 @@ const fetchUser = async (userId) => {
 
 module.exports = {
   addOrUpdate,
+  fetchUsers,
   fetchUser
 }
