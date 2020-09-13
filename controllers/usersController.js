@@ -12,18 +12,13 @@ const getUsers = async (req, res) => {
   try {
     const allUsers = await userQuery.fetchUsers(req.query)
 
-    if (allUsers.length) {
-      res.json({
-        message: 'Users returned successfully!',
-        users: allUsers
-      })
-      return
-    }
-
-    res.boom.notFound('No users available')
+    return res.json({
+      message: 'Users returned successfully!',
+      users: allUsers
+    })
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`)
-    res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.serverUnavailable('Something went wrong please contact admin')
   }
 }
 
@@ -39,17 +34,16 @@ const getUser = async (req, res) => {
     const result = await userQuery.fetchUser(req.params.id)
 
     if (result.userExists) {
-      res.json({
+      return res.json({
         message: 'User returned successfully!',
         user: result.user
       })
-      return
     }
 
-    res.boom.notFound('User doesn\'t exist')
+    return res.boom.notFound('User doesn\'t exist')
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`)
-    res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.serverUnavailable('Something went wrong please contact admin')
   }
 }
 
@@ -62,19 +56,19 @@ const getUser = async (req, res) => {
  */
 const addNewUser = async (req, res) => {
   try {
-    const user = await userQuery.addUser(req.body)
+    const user = await userQuery.addOrUpdate(req.body)
+
     if (user.isNewUser) {
-      res.json({
+      return res.json({
         message: 'User added successfully!',
         userId: user.userId
       })
-      return
     }
 
-    res.boom.badRequest('User already exists')
+    return res.boom.conflict('User already exists')
   } catch (error) {
     logger.error(`Error while creating new user: ${error}`)
-    res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.serverUnavailable('Something went wrong please contact admin')
   }
 }
 
@@ -88,18 +82,19 @@ const addNewUser = async (req, res) => {
  */
 const updateUser = async (req, res) => {
   try {
-    const user = await userQuery.updateUser(req.params.id, req.body)
-    if (user.userExists) {
-      res.json({
-        message: 'User updated successfully!'
+    const user = await userQuery.addOrUpdate(req.body, req.params.id)
+
+    if (!user.isNewUser) {
+      return res.json({
+        message: 'User updated successfully!',
+        userId: user.userId
       })
-      return
     }
 
-    res.boom.notFound('User not found')
+    return res.boom.notFound('User not found')
   } catch (error) {
     logger.error(`Error while updating user: ${error}`)
-    res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.serverUnavailable('Something went wrong please contact admin')
   }
 }
 

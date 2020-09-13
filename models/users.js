@@ -8,51 +8,40 @@ const firestore = require('../utils/firestore')
 const userModel = firestore.collection('users')
 
 /**
- * Adds the user data
+ * Adds or updates the user data
  *
  * @param userData { Object }: User data object to be stored in DB
+ * @param userId { String }: User Id String to be used to update the user
  * @return {Promise<{isNewUser: boolean, userId: string}|{isNewUser: boolean, userId: string}>}
  */
-const addUser = async (userData) => {
+const addOrUpdate = async (userData, userId = null) => {
   try {
-    // check if user already exists
+    // userId exists Update user
+    if (userId !== null) {
+      const user = await userModel.doc(userId).get()
+      const isNewUser = !(user.data())
+      // user exists update user
+      if (user.data()) {
+        await userModel.doc(userId).set({
+          ...user.data(),
+          ...userData
+        })
+      }
+
+      return { isNewUser, userId }
+    }
+
+    // userId is null, Add or Update user
     const user = await userModel.where('github_id', '==', userData.github_id).limit(1).get()
-
     if (!user.empty) {
-      return { isNewUser: false }
+      await userModel.doc(user.docs[0].id).set(userData, { merge: true })
+
+      return { isNewUser: false, userId: user.docs[0].id }
     }
 
-    // add user to the DB
+    // Add user
     const userInfo = await userModel.add(userData)
-
     return { isNewUser: true, userId: userInfo.id }
-  } catch (err) {
-    logger.error('Error in adding or updating user', err)
-  }
-}
-
-/**
- * Updates the user data
- *
- * @param userData { Object }: User data object to be stored in DB
- * @return {Promise<{isNewUser: boolean, userId: string}|{isNewUser: boolean, userId: string}>}
- */
-const updateUser = async (userId, userData) => {
-  try {
-    const user = await userModel.doc(userId).get()
-
-    if (!user.exists) {
-      return { userExists: false }
-    }
-
-    await userModel
-      .doc(user.id)
-      .set(
-        userData,
-        { merge: true }
-      )
-
-    return { userExists: true }
   } catch (err) {
     logger.error('Error in adding or updating user', err)
   }
@@ -68,7 +57,6 @@ const fetchUsers = async (query) => {
     const snapshot = await userModel
       .limit(parseInt(query.size) || 100)
       .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
-      .orderBy('id')
       .get()
 
     const allUsers = []
@@ -76,7 +64,8 @@ const fetchUsers = async (query) => {
     snapshot.forEach((doc) => {
       allUsers.push({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
+        tokens: undefined
       })
     })
 
@@ -96,15 +85,21 @@ const fetchUser = async (userId) => {
   try {
     const user = await userModel.doc(userId).get()
 
-    return { userExists: !!user.data(), user: user.data() }
+    return {
+      userExists: !!user.data(),
+      user: {
+        id: userId,
+        ...user.data(),
+        tokens: undefined
+      }
+    }
   } catch (err) {
     logger.error('Error retrieving user data', err)
   }
 }
 
 module.exports = {
-  addUser,
-  updateUser,
+  addOrUpdate,
   fetchUsers,
   fetchUser
 }

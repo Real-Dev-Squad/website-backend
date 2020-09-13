@@ -18,7 +18,7 @@ describe('Users', function () {
 
   describe('POST /users - create one user', function () {
     it('Should return success response after adding the user', done => {
-      sinon.stub(userQuery, 'addUser').callsFake((userData) => {
+      sinon.stub(userQuery, 'addOrUpdate').callsFake((userData) => {
         return { isNewUser: true, userId: 'userId' }
       })
 
@@ -27,7 +27,6 @@ describe('Users', function () {
         .post('/users')
         .set('cookie', `rds-session=${jwt}`)
         .send({
-          id: 'nikhil',
           first_name: 'Nikhil',
           last_name: 'Bhandarkar',
           yoe: 0,
@@ -48,9 +47,9 @@ describe('Users', function () {
         })
     })
 
-    it('Should return 400 if user already exists', done => {
-      sinon.stub(userQuery, 'addUser').callsFake((userData) => {
-        return { isNewUser: false }
+    it('Should return 409 if user already exists', done => {
+      sinon.stub(userQuery, 'addOrUpdate').callsFake((userData) => {
+        return { isNewUser: false, userId: 'userId' }
       })
 
       chai
@@ -58,7 +57,6 @@ describe('Users', function () {
         .post('/users')
         .set('cookie', `rds-session=${jwt}`)
         .send({
-          id: 'nikhil',
           first_name: 'Nikhil',
           last_name: 'Bhandarkar',
           yoe: 0,
@@ -70,7 +68,7 @@ describe('Users', function () {
         .end((err, res) => {
           if (err) { return done() }
 
-          expect(res).to.have.status(400)
+          expect(res).to.have.status(409)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('User already exists')
 
@@ -81,8 +79,8 @@ describe('Users', function () {
 
   describe('PATCH /users', function () {
     it('Should update the user with given id', done => {
-      sinon.stub(userQuery, 'updateUser').callsFake((userId, userData) => {
-        return { userExists: true }
+      sinon.stub(userQuery, 'addOrUpdate').callsFake((userData, userId) => {
+        return { isNewUser: false, userId: 'userId' }
       })
 
       chai
@@ -104,8 +102,8 @@ describe('Users', function () {
     })
 
     it('Should return 404 if user does not exists', done => {
-      sinon.stub(userQuery, 'updateUser').callsFake((userId, userData) => {
-        return { userExists: false }
+      sinon.stub(userQuery, 'addOrUpdate').callsFake((userData, userId) => {
+        return { isNewUser: true, userId: 'userId' }
       })
 
       chai
@@ -155,26 +153,6 @@ describe('Users', function () {
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Users returned successfully!')
           expect(res.body.users).to.be.a('array')
-
-          return done()
-        })
-    })
-
-    it('Should return 404 if there are no users in the system', done => {
-      sinon.stub(userQuery, 'fetchUsers').callsFake((query) => {
-        return { error: 'Not Found', message: 'No users available' }
-      })
-
-      chai
-        .request(app)
-        .get('/users')
-        .set('cookie', `rds-session=${jwt}`)
-        .end((err, res) => {
-          if (err) { return done() }
-
-          expect(res).to.have.status(404)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('No users available')
 
           return done()
         })

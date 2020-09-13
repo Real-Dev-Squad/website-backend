@@ -26,7 +26,7 @@ describe('authController', function () {
       return (req, res, next) => { }
     })
 
-    sinon.stub(users, 'addUser').callsFake((userData) => {
+    sinon.stub(users, 'addOrUpdate').callsFake((userData) => {
       return { isNewUser: true, userId: 'userId' }
     })
 
