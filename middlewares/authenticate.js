@@ -26,7 +26,7 @@ module.exports = async (req, res, next) => {
 
     // add user data to `req.userData` for further use
     req.userData = await users.fetchUser(decoded.userId)
-    next()
+    return next()
   } catch (err) {
     logger.error(err)
 
@@ -49,7 +49,7 @@ module.exports = async (req, res, next) => {
         // add user data to `req.userData` for further use
         req.userData = await users.fetchUser(decoded.userId)
 
-        next()
+        return next()
       } else {
         return res.boom.unauthorized('Unauthenticated User')
       }

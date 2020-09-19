@@ -8,7 +8,10 @@ const config = require('config')
  * @return {String} - Generated JWT
  */
 const generateAuthToken = (payload) => {
-  return jwt.sign(payload, config.get('userToken.privateKey'), { algorithm: 'RS256', expiresIn: config.get('userToken.ttl') })
+  return jwt.sign(payload, config.get('userToken.privateKey'), {
+    algorithm: 'RS256',
+    expiresIn: config.get('userToken.ttl')
+  })
 }
 
 /**
