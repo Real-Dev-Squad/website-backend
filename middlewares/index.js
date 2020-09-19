@@ -7,6 +7,7 @@ const cors = require('cors')
 const passport = require('passport')
 const swaggerUi = require('swagger-ui-express')
 const swaggerDocs = require('../utils/swaggerDefinition')
+const contentTypeCheck = require('./contentTypeCheck')
 
 // import utilities
 const logger = require('../utils/logger')
@@ -15,23 +16,22 @@ const logger = require('../utils/logger')
 require('./passport')
 
 const middleware = (app) => {
+  // Middleware for sending error responses with express response object. To be required above all middlewares
+  app.use(boom())
+
   app.use(morgan('combined', { stream: logger.stream }))
 
   // Request parsing middlewares
+  app.use(contentTypeCheck)
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
-  app.use(passport.initialize())
-
   app.use(helmet())
+  app.use(cors({
+    optionsSuccessStatus: 200
+  }))
 
-  app.use(
-    cors({
-      optionsSuccessStatus: 200
-    })
-  )
-
-  app.use(boom())
+  app.use(passport.initialize())
 
   /* Swagger middleware */
   const options = {
