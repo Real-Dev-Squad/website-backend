@@ -24,6 +24,10 @@ const swaggerOptions = {
       {
         name: 'Healthcheck',
         description: 'API for health check in the system'
+      },
+      {
+        name: 'Authentication',
+        description: 'Authentication routes'
       }
     ], // tags are used to group api routes together in the UI
     servers: [
@@ -46,6 +50,22 @@ const swaggerOptions = {
           properties: {
             uptime: {
               type: 'number'
+            }
+          }
+        },
+        errors: {
+          unAuthorized: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
             }
           }
         }
