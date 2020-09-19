@@ -5,6 +5,8 @@ const boom = require('express-boom')
 const helmet = require('helmet')
 const cors = require('cors')
 const passport = require('passport')
+const swaggerUi = require('swagger-ui-express')
+const swaggerDocs = require('../utils/swaggerDefinition')
 
 // import utilities
 const logger = require('../utils/logger')
@@ -23,11 +25,20 @@ const middleware = (app) => {
 
   app.use(helmet())
 
-  app.use(cors({
-    optionsSuccessStatus: 200
-  }))
+  app.use(
+    cors({
+      optionsSuccessStatus: 200
+    })
+  )
 
   app.use(boom())
+
+  /* Swagger middleware */
+  const options = {
+    customCss: '.swagger-ui .topbar { display: none }'
+  } // custom css applied to Swagger UI
+
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, options))
 }
 
 module.exports = middleware

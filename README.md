@@ -22,3 +22,10 @@ Add the required keys in `config/development.json` for running the service.
 
 ## Running tests
 - `npm run test`: Runs the test suite
+
+## Steps to add API Doc:
+
+- Write JS Doc on top of your routes using YAML based annotations
+- `npm run create-api-doc`: Creates API doc in public/apidoc.json folder. You can also verify API docs by running locally on localhost:{PORT}/api-docs.
+- Create a [swaggerHUB account](https://app.swaggerhub.com) and import your apidoc.json file in there.
+- Public api will work instantly. But you need to set cookie to authorize for private API's.
