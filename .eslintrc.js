@@ -28,5 +28,6 @@ module.exports = {
     // Custom mocha rules
     'mocha/no-skipped-tests': 'error',
     'mocha/no-exclusive-tests': 'error'
-  }
+  },
+  ignorePatterns: ['public/*']
 }
