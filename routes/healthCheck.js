@@ -38,6 +38,10 @@ router.get('/', healthController.healthCheck)
  *               $ref: '#/components/schemas/healthCheck'
  *       401:
  *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
  */
 router.get('/v2', authenticate, healthController.healthCheck)
 
