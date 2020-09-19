@@ -71,6 +71,7 @@ repository. This will run the lint, integration and unit tests.
 
 ## Pull request guidelines
 
+  - Ensure that the tests pass locally before raising a PR.
   - All pull requests should be to the develop branch. 
   - Every pull request should have associated issue(s) on our [issue tracker](https://github.com/Real-Dev-Squad/website-backend/issues).
   - For any non-trivial fixes and features, unit and integration tests must be added. The PR reviewer should not approve/merge PR(s) that lack these.

@@ -33,12 +33,14 @@ const middleware = (app) => {
 
   app.use(passport.initialize())
 
-  /* Swagger middleware */
-  const options = {
-    customCss: '.swagger-ui .topbar { display: none }'
-  } // custom css applied to Swagger UI
+  // Enable Swagger API docs in non-production environments
+  if (process.env.NODE_ENV !== 'production') {
+    const options = {
+      customCss: '.swagger-ui .topbar { display: none }'
+    } // custom css applied to Swagger UI
 
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, options))
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, options))
+  }
 }
 
 module.exports = middleware

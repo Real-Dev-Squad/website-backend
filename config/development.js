@@ -19,20 +19,10 @@ module.exports = {
   services: {
     rdsApi: {
       baseUrl: process.env.SERVICES_RDSAPI_BASEURL || `http://localhost:${port}`
-    },
-
-    rdsUi: {
-      baseUrl: process.env.SERVICES_RDSUI_BASEURL || 'https://realdevsquad.com',
-      routes: {
-        authRedirection: '/goto'
-      }
     }
   },
 
   userToken: {
-    cookieName: process.env.COOKIE_NAME || 'rds-session',
-    ttl: process.env.USER_TOKEN_TTL || 30 * 24 * 60 * 60, // in seconds
-    refreshTtl: process.env.USER_TOKEN_REFRESH_TTL || 180 * 24 * 60 * 60, // in seconds
     publicKey: process.env.PUBLIC_KEY || '-----BEGIN PUBLIC KEY-----\n' +
       'MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHo6sGbw8qk+XU9sBVa4w2aEq01i\n' +
       'oKDMFFQa9mPy0MRScTCsrfEjbypD4VqIjJcwXGmDWKVhMcJ8SMZuJumIJ10vU9ca\n' +
