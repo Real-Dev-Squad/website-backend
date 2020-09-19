@@ -21,7 +21,16 @@ const users = require('../models/users')
  */
 module.exports = async (req, res, next) => {
   try {
-    const token = req.cookies[config.get('userToken.cookieName')]
+    let token = req.cookies[config.get('userToken.cookieName')]
+
+    /**
+     * Enable Bearer Token authentication for NON-PRODUCTION environments
+     * This is enabled as Swagger UI does not support cookie authe
+     */
+    if (process.env.NODE_ENV !== 'production' && !token) {
+      token = req.headers.authorization.split(' ')[1]
+    }
+
     const decoded = authService.verifyAuthToken(token)
 
     // add user data to `req.userData` for further use

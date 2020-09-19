@@ -1,5 +1,12 @@
 const swaggerJsDoc = require('swagger-jsdoc')
+const config = require('config')
 
+/**
+ * Read more on: https://swagger.io/docs/specification/about
+ *
+ * Cookie authentication issue in Swagger UI: https://github.com/swagger-api/swagger-js/issues/1163, https://swagger.io/docs/specification/authentication/cookie-authentication/
+ * We are supporting Bearer Authentication for non-production environments
+ */
 const swaggerOptions = {
   swaggerDefinition: {
     openapi: '3.0.1',
@@ -7,7 +14,7 @@ const swaggerOptions = {
       version: '1.0.0',
       title: 'RDS API documentation',
       description:
-        'This is documentation for all real dev squad"s API. Find out more about Real dev squad at [http://realdevsquad.com](http://realdevsquad.com)',
+        'This is documentation for Real Dev Squad\'s API. Find out more about Real dev squad at [http://realdevsquad.com](http://realdevsquad.com)',
       contact: {
         name: 'Real Dev Squad',
         url: 'http://realdevsquad.com'
@@ -21,31 +28,24 @@ const swaggerOptions = {
     ], // tags are used to group api routes together in the UI
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 3000}`,
+        url: config.get('services.rdsApi.baseUrl'),
         description: 'Local server URL'
-      },
-      {
-        url:
-          process.env.SERVICES_RDSAPI_BASEURL ||
-          `http://localhost:${process.env.PORT || 3000}`,
-        description: 'Remote server URL'
       }
     ],
     components: {
       securitySchemes: {
-        cookieAuth: {
-          // arbitrary name for the security scheme
-          type: 'apiKey',
-          in: 'cookie', // can be "header", "query" or "cookie"
-          name: 'rds-session' // name of the header, query parameter or cookie
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
         }
       },
       schemas: {
-        healthcheck: {
+        healthCheck: {
           type: 'object',
           properties: {
             uptime: {
-              type: 'integer'
+              type: 'number'
             }
           }
         }
@@ -57,10 +57,3 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions)
 module.exports = swaggerDocs
-
-/* Read more on: https://swagger.io/docs/specification/about/ */
-
-// @Findings
-// Cookie authentication issue in swagger-ui : https://stackoverflow.com/questions/49272171/sending-cookie-session-id-with-swagger-3-0
-
-// Localhost server issue in Swagger Hub: https://community.smartbear.com/t5/SwaggerHub/Can-I-use-localhost-as-host-in-swaggerhub/td-p/160421
