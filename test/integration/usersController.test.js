@@ -9,15 +9,19 @@ const userQuery = require('../../models/users')
 
 chai.use(chaiHttp)
 
-afterEach(() => {
-  sinon.restore()
-})
+let jwt
 
 describe('Users', function () {
-  const jwt = authService.generateAuthToken({ userId: 1 })
+  before(function () {
+    jwt = authService.generateAuthToken({ userId: 1 })
+  })
+
+  afterEach(function () {
+    sinon.restore()
+  })
 
   describe('POST /users - create one user', function () {
-    it('Should return success response after adding the user', done => {
+    it('Should return success response after adding the user', function (done) {
       sinon.stub(userQuery, 'addOrUpdate').callsFake((userData) => {
         return { isNewUser: true, userId: 'userId' }
       })
@@ -47,7 +51,7 @@ describe('Users', function () {
         })
     })
 
-    it('Should return 409 if user already exists', done => {
+    it('Should return 409 if user already exists', function (done) {
       sinon.stub(userQuery, 'addOrUpdate').callsFake((userData) => {
         return { isNewUser: false, userId: 'userId' }
       })
@@ -78,7 +82,7 @@ describe('Users', function () {
   })
 
   describe('PATCH /users', function () {
-    it('Should update the user with given id', done => {
+    it('Should update the user with given id', function (done) {
       sinon.stub(userQuery, 'addOrUpdate').callsFake((userData, userId) => {
         return { isNewUser: false, userId: 'userId' }
       })
@@ -101,7 +105,7 @@ describe('Users', function () {
         })
     })
 
-    it('Should return 404 if user does not exists', done => {
+    it('Should return 404 if user does not exists', function (done) {
       sinon.stub(userQuery, 'addOrUpdate').callsFake((userData, userId) => {
         return { isNewUser: true, userId: 'userId' }
       })
@@ -126,7 +130,7 @@ describe('Users', function () {
   })
 
   describe('GET /users', function () {
-    it('Should get all the users in system', done => {
+    it('Should get all the users in system', function (done) {
       sinon.stub(userQuery, 'fetchUsers').callsFake((query) => {
         return [
           {
@@ -160,7 +164,7 @@ describe('Users', function () {
   })
 
   describe('GET /users/id', function () {
-    it('Should return one user with given id', done => {
+    it('Should return one user with given id', function (done) {
       sinon.stub(userQuery, 'fetchUser').callsFake((userId) => {
         return {
           userExists: true,
@@ -193,7 +197,7 @@ describe('Users', function () {
         })
     })
 
-    it('Should return 404 if there is no user in the system', done => {
+    it('Should return 404 if there is no user in the system', function (done) {
       sinon.stub(userQuery, 'fetchUser').callsFake((userId) => {
         return { userExists: false, user: undefined }
       })

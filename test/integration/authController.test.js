@@ -13,12 +13,12 @@ chai.use(chaiHttp)
 // Import fixtures
 const githubUserInfo = require('../fixtures/auth/githubUserInfo')()
 
-afterEach(() => {
-  sinon.restore()
-})
-
 describe('authController', function () {
-  it('should redirect the request to the goto page on successful login', done => {
+  afterEach(function () {
+    sinon.restore()
+  })
+
+  it('should redirect the request to the goto page on successful login', function (done) {
     const authRedirectionUrl = `${config.get('services.rdsUi.baseUrl')}${config.get('services.rdsUi.routes.authRedirection')}`
 
     sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
@@ -45,7 +45,7 @@ describe('authController', function () {
       })
   })
 
-  it('should send a cookie with JWT in the response', done => {
+  it('should send a cookie with JWT in the response', function (done) {
     const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'))
 
     sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
@@ -78,7 +78,7 @@ describe('authController', function () {
       })
   })
 
-  it('should return 401 if github call fails', done => {
+  it('should return 401 if github call fails', function (done) {
     chai
       .request(app)
       .get('/auth/github/callback')
