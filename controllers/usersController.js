@@ -48,6 +48,17 @@ const getUser = async (req, res) => {
 }
 
 /**
+ * Fetches the data about logged in user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getSelfDetails = (req, res) => {
+  res.send(req.userData.user)
+}
+
+/**
  * Add new user
  *
  * @param req {Object} - Express request object
@@ -102,5 +113,6 @@ module.exports = {
   addNewUser,
   updateUser,
   getUsers,
+  getSelfDetails,
   getUser
 }

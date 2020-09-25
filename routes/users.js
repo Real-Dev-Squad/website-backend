@@ -7,6 +7,7 @@ const userValidator = require('../middlewares/validators/user')
 router.post('/', authenticate, userValidator.createUser, usersController.addNewUser)
 router.patch('/:id', authenticate, userValidator.updateUser, usersController.updateUser)
 router.get('/', authenticate, usersController.getUsers)
+router.get('/self', authenticate, usersController.getSelfDetails)
 router.get('/:id', authenticate, usersController.getUser)
 
 module.exports = router
