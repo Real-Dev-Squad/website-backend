@@ -12,14 +12,14 @@ const userModel = firestore.collection('users')
  *
  * @param userData { Object }: User data object to be stored in DB
  * @param userId { String }: User Id String to be used to update the user
- * @return {Promise<{isNewUser: boolean, userId: string}|{isNewUser: boolean, userId: string}>}
+ * @return {Promise<{incompleteUserDetails: boolean, userId: string}|{incompleteUserDetails: boolean, userId: string}>}
  */
 const addOrUpdate = async (userData, userId = null) => {
   try {
     // userId exists Update user
     if (userId !== null) {
       const user = await userModel.doc(userId).get()
-      const isNewUser = !(user.data())
+      const incompleteUserDetails = !(user.data())
       // user exists update user
       if (user.data()) {
         await userModel.doc(userId).set({
@@ -28,21 +28,22 @@ const addOrUpdate = async (userData, userId = null) => {
         })
       }
 
-      return { isNewUser, userId }
+      return { incompleteUserDetails, userId }
     }
 
     // userId is null, Add or Update user
     const user = await userModel.where('github_id', '==', userData.github_id).limit(1).get()
     if (!user.empty) {
+      userData.incompleteUserDetails = false
       await userModel.doc(user.docs[0].id).set(userData, { merge: true })
 
-      return { isNewUser: false, userId: user.docs[0].id }
+      return { incompleteUserDetails: false, userId: user.docs[0].id }
     }
 
     // Add user
-    userData.isNewUser = true
+    userData.incompleteUserDetails = true
     const userInfo = await userModel.add(userData)
-    return { isNewUser: true, userId: userInfo.id }
+    return { incompleteUserDetails: true, userId: userInfo.id }
   } catch (err) {
     logger.error('Error in adding or updating user', err)
     return err

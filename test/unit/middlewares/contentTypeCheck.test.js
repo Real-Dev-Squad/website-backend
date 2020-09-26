@@ -46,7 +46,7 @@ describe('contentTypeCheck', function () {
     const jwt = authService.generateAuthToken({ userId: 1 })
 
     sinon.stub(userQuery, 'addOrUpdate').callsFake((userData, userId) => {
-      return { isNewUser: false, userId: 'userId' }
+      return { incompleteUserDetails: false, userId: 'userId' }
     })
 
     chai

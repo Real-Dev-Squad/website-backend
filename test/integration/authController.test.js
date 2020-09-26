@@ -27,7 +27,7 @@ describe('authController', function () {
     })
 
     sinon.stub(users, 'addOrUpdate').callsFake((userData) => {
-      return { isNewUser: true, userId: 'userId' }
+      return { incompleteUserDetails: true, userId: 'userId' }
     })
 
     chai
@@ -54,7 +54,7 @@ describe('authController', function () {
     })
 
     sinon.stub(users, 'addOrUpdate').callsFake((userData) => {
-      return { isNewUser: true, userId: 'userId' }
+      return { incompleteUserDetails: true, userId: 'userId' }
     })
 
     chai
