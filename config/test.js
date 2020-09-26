@@ -1,15 +1,14 @@
-const setBooleanConfig = require('../utils/config').setBooleanConfig
-const port = process.env.PORT || 3000
-
 /**
  * Set the environment specific config in this file.
  * Defaults set from default.js
  */
+
+const port = 3000
+
 module.exports = {
-  port: port,
-  enableFileLogs: setBooleanConfig(process.env.ENABLE_FILE_LOGS, false),
+  enableFileLogs: false,
   // Console logs are set to avoid the winston error of no defined transports
-  enableConsoleLogs: setBooleanConfig(process.env.ENABLE_CONSOLE_LOGS, true),
+  enableConsoleLogs: true,
 
   githubOauth: {
     clientId: 'clientId',
@@ -23,13 +22,13 @@ module.exports = {
   },
 
   userToken: {
-    publicKey: process.env.PUBLIC_KEY || '-----BEGIN PUBLIC KEY-----\n' +
+    publicKey: '-----BEGIN PUBLIC KEY-----\n' +
       'MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHo6sGbw8qk+XU9sBVa4w2aEq01i\n' +
       'oKDMFFQa9mPy0MRScTCsrfEjbypD4VqIjJcwXGmDWKVhMcJ8SMZuJumIJ10vU9ca\n' +
       'WSh/aHhAxiOIqOEe54IyYTwjcn5avdZry3zl62RYQ7tDZCPAR/WvFCIkgRXwjXfC\n' +
       'Xpm4LR6ynKDMvsDNAgMBAAE=\n' +
       '-----END PUBLIC KEY-----',
-    privateKey: process.env.PRIVATE_KEY || '-----BEGIN RSA PRIVATE KEY-----\n' +
+    privateKey: '-----BEGIN RSA PRIVATE KEY-----\n' +
       'MIICWwIBAAKBgHo6sGbw8qk+XU9sBVa4w2aEq01ioKDMFFQa9mPy0MRScTCsrfEj\n' +
       'bypD4VqIjJcwXGmDWKVhMcJ8SMZuJumIJ10vU9caWSh/aHhAxiOIqOEe54IyYTwj\n' +
       'cn5avdZry3zl62RYQ7tDZCPAR/WvFCIkgRXwjXfCXpm4LR6ynKDMvsDNAgMBAAEC\n' +
