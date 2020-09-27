@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "echo $FIRESTORE_CONFIG_DATA > firestore-private-key.json && node server.js",
-    "dev": "NODE_ENV=development nodemon server.js",
+    "dev": "cross-env NODE_ENV=development nodemon server.js",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "test-integration": "NODE_ENV=test mocha test/integration/**",
@@ -34,6 +34,7 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
+    "cross-env": "^7.0.2",
     "eslint": "^7.9.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.22.0",
