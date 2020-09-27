@@ -58,7 +58,7 @@ const addNewUser = async (req, res) => {
   try {
     const user = await userQuery.addOrUpdate(req.body)
 
-    if (user.incompleteUserDetails) {
+    if (user.isNewUser) {
       return res.json({
         message: 'User added successfully!',
         userId: user.userId
@@ -84,7 +84,7 @@ const updateUser = async (req, res) => {
   try {
     const user = await userQuery.addOrUpdate(req.body, req.params.id)
 
-    if (!user.incompleteUserDetails) {
+    if (!user.isNewUser) {
       return res.json({
         message: 'User updated successfully!',
         userId: user.userId

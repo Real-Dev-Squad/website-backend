@@ -23,7 +23,7 @@ describe('Users', function () {
   describe('POST /users - create one user', function () {
     it('Should return success response after adding the user', function (done) {
       sinon.stub(userQuery, 'addOrUpdate').callsFake((userData) => {
-        return { incompleteUserDetails: true, userId: 'userId' }
+        return { isNewUser: true, userId: 'userId' }
       })
 
       chai
@@ -53,7 +53,7 @@ describe('Users', function () {
 
     it('Should return 409 if user already exists', function (done) {
       sinon.stub(userQuery, 'addOrUpdate').callsFake((userData) => {
-        return { incompleteUserDetails: false, userId: 'userId' }
+        return { isNewUser: false, userId: 'userId' }
       })
 
       chai
@@ -84,7 +84,7 @@ describe('Users', function () {
   describe('PATCH /users', function () {
     it('Should update the user with given id', function (done) {
       sinon.stub(userQuery, 'addOrUpdate').callsFake((userData, userId) => {
-        return { incompleteUserDetails: false, userId: 'userId' }
+        return { isNewUser: false, userId: 'userId' }
       })
 
       chai
@@ -107,7 +107,7 @@ describe('Users', function () {
 
     it('Should return 404 if user does not exists', function (done) {
       sinon.stub(userQuery, 'addOrUpdate').callsFake((userData, userId) => {
-        return { incompleteUserDetails: true, userId: 'userId' }
+        return { isNewUser: true, userId: 'userId' }
       })
 
       chai
