@@ -56,7 +56,7 @@ const getUser = async (req, res) => {
 
 const getSelfDetails = (req, res) => {
   try {
-    if(req.userData){
+    if (req.userData) {
       return res.send(req.userData)
     }
     return res.boom.notFound('User doesn\'t exist')
@@ -65,7 +65,6 @@ const getSelfDetails = (req, res) => {
     return res.boom.serverUnavailable('Something went wrong please contact admin')
   }
 }
-  
 
 /**
  * Add new user
