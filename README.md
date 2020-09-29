@@ -16,7 +16,7 @@ $ npm run dev
 ```
 
 ## Prerequisites
-- Create a new file: `config/local.js`. Copy the content from `config/development.js` to `config/local.js`. Override the required config values. The file `config/local.js` is not supposed to be added to Git.
+- Create a new file: `config/local.js`. Override the required config values from `config/development.js` and `config/default.js` into `config/local.js`.
 - Register the application for [GitHub OAuth](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps) to get the `clientId` and `clientSecret`
 - Create an application on [FireStore](https://firebase.google.com/docs/firestore) and [generate a service file](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). Add the service file with the name `firestore-private-key.json` in the project root. 
 
@@ -33,6 +33,6 @@ $ npm run dev
 
 ## API documentation:
 - If any API changes have been made:
-    - Write JS Doc on top of your routes using YAML based annotations in OPEN API 3.0 format(if any API changes have been made)
+    - Write JS Doc on top of your routes using YAML based annotations in OPEN API 3.0 format.
     - Run `npm run generate-api-schema` to generate the API schema. A file `public/apiSchema.json` will be created/updated.
 - Run the server and navigate to `http://localhost:<PORT>/api-docs`

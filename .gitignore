@@ -124,3 +124,6 @@ dist
 
 # Firestore key file
 firestore-private-key.json
+
+# Local config file
+config/local.js

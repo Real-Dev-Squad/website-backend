@@ -40,7 +40,7 @@ const addOrUpdate = async (userData, userId = null) => {
     }
 
     // Add user
-    userData.isNewUser = true
+    userData.incompleteUserDetails = true
     const userInfo = await userModel.add(userData)
     return { isNewUser: true, userId: userInfo.id }
   } catch (err) {

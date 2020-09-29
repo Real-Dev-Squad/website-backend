@@ -1,22 +1,27 @@
-const setBooleanConfig = require('../utils/config').setBooleanConfig
-
+/**
+ * Default config to be used if environment specific config for the specific key is absent
+ * Every config key to be added to `default.js` to keep a track of all config keys used in the project.
+ * Use placeholders as values wherever required.
+ *
+ * Documentation: https://github.com/lorenwest/node-config/wiki/Configuration-Files
+ */
 module.exports = {
-  port: process.env.PORT || 3000,
-  enableFileLogs: setBooleanConfig(process.env.ENABLE_FILE_LOGS, true),
-  enableConsoleLogs: setBooleanConfig(process.env.ENABLE_CONSOLE_LOGS, false),
+  port: 3000,
+  enableFileLogs: true,
+  enableConsoleLogs: false,
 
   githubOauth: {
-    clientId: process.env.GITHUB_CLIENT_ID,
-    clientSecret: process.env.GITHUB_CLIENT_SECRET
+    clientId: '<clientId>',
+    clientSecret: '<clientSecret>'
   },
 
   services: {
     rdsApi: {
-      baseUrl: process.env.SERVICES_RDSAPI_BASEURL
+      baseUrl: 'https://api.realdevsquad.com'
     },
 
     rdsUi: {
-      baseUrl: process.env.SERVICES_RDSUI_BASEURL || 'https://realdevsquad.com',
+      baseUrl: 'https://realdevsquad.com',
       routes: {
         authRedirection: '/goto'
       }
@@ -24,10 +29,10 @@ module.exports = {
   },
 
   userToken: {
-    cookieName: process.env.COOKIE_NAME || 'rds-session',
-    ttl: process.env.USER_TOKEN_TTL || 30 * 24 * 60 * 60, // in seconds
-    refreshTtl: process.env.USER_TOKEN_REFRESH_TTL || 180 * 24 * 60 * 60, // in seconds
-    publicKey: process.env.PUBLIC_KEY,
-    privateKey: process.env.PRIVATE_KEY
+    cookieName: 'rds-session',
+    ttl: 30 * 24 * 60 * 60, // in seconds
+    refreshTtl: 180 * 24 * 60 * 60, // in seconds
+    publicKey: '<publicKey>',
+    privateKey: '<privateKey>'
   }
 }
