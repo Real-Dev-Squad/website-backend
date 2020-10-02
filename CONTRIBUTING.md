@@ -1,31 +1,41 @@
 
-# Contributing to RDS website-backend
+# Contributing to Real Dev Squad API
 
-  - [Getting Started](#getting-started)
-  - [NPM Command Reference](#npm-command-reference)
-  - [Project Structure](#project-structure)
-  - [Pull request guidelines](#pull-request-guidelines)
+- [Getting Started](#getting-started)
+- [NPM Command Reference](#npm-command-reference)
+- [Project Structure](#project-structure)
+- [Generating Authentication Token](#generating-authentication-token)
+- [Pull request guidelines](#pull-request-guidelines)
 
 ## Getting Started
 
-Instructions on initial setup can be found in the [README](/README.md).
+Instructions for initial setup can be found in the [README](README.md).
 
 ## NPM Command Reference
 
-#### `npm install`
+##### `npm install`
 
 Installs all `dependencies` listed in the root `package.json`.
 
-#### `npm run test`
+##### `npm run test`
 
-The script associated with `npm test` will run all tests that ensures that your commit does not break anything in the
+The script associated with `npm run test` will run all tests that ensures that your commit does not break anything in the
 repository. This will run the lint, integration and unit tests.
 
+##### `npm run lint`
+Runs the lint checks in the project.
+
+##### `npm run generate-api-schema`
+Generates the API schema in the file `public/apiSchema.json`.
+
+
 ## Project Structure
+The following project structure should be followed:
 
 ``` shell script
 |-- website-backend
     |-- config
+    |   |-- custom-environment-variables.js
     |   |-- default.js
     |   |-- development.js
     |   |-- production.js
@@ -44,7 +54,7 @@ repository. This will run the lint, integration and unit tests.
     |   |-- index.js // routes files separated by their first path string
     |   |-- auth.js // the individual routes files should contain the OPEN API JSDOC reference
     |-- services
-    |   |-- authService.js // Files using any 3rd party service or providing any secific service in the project
+    |   |-- authService.js // Files using any 3rd party library/service or providing any secific service in the project
     |-- test
     |   |-- fixtures
     |   |   |-- auth
@@ -69,12 +79,18 @@ repository. This will run the lint, integration and unit tests.
 
 ```
 
+## Generating Authentication Token
+- Navigate to `https://github.com/login/oauth/authorize?client_id=<GITHUB_CLIENT_ID>`
+- Authorize the application.
+- Copy the response cookie named `rds-session` from the redirected request from the API.
+- Use the cookie for authenticated routes in the API.
+- For non-production environments, authentication is also supported with the `Authorization` header.
+- Authorization header: `Authorization: Bearer <token>`
+
 ## Pull request guidelines
-
-  - Ensure that the tests pass locally before raising a PR.
-  - All pull requests should be to the develop branch. 
-  - Every pull request should have associated issue(s) on our [issue tracker](https://github.com/Real-Dev-Squad/website-backend/issues).
-  - For any non-trivial fixes and features, unit and integration tests must be added. The PR reviewer should not approve/merge PR(s) that lack these.
-  - The PR(s) should be merged only after the CI passes.
-
+- Ensure that the tests pass locally before raising a PR.
+- All pull requests should be to the develop branch. 
+- Every pull request should have associated issue(s) on our [issue tracker](https://github.com/Real-Dev-Squad/website-backend/issues).
+- For any non-trivial fixes and features, unit and integration tests must be added. The PR reviewer should not approve/merge PR(s) that lack these.
+- The PR(s) should be merged only after the CI passes.
 
