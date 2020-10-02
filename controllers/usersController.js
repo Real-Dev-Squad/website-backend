@@ -62,7 +62,7 @@ const getSelfDetails = (req, res) => {
     return res.boom.notFound('User doesn\'t exist')
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.badImplementation('An internal server error occurred')
   }
 }
 

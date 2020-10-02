@@ -53,8 +53,91 @@ const swaggerOptions = {
             }
           }
         },
+        user: {
+          type: 'object',
+          properties: {
+            uptime: {
+              type: 'number'
+            }
+          }
+        },
+        users: {
+          type: 'object',
+          properties: {
+            first_name: {
+              type: 'string'
+            },
+            last_name: {
+              type: 'string'
+            },
+            yoe: {
+              type: 'number'
+            },
+            company: {
+              type: 'string'
+            },
+            designation: {
+              type: 'string'
+            },
+            img: {
+              type: 'string'
+            },
+            github_display_name: {
+              type: 'string'
+            },
+            github_id: {
+              type: 'string'
+            },
+            linkedin_id: {
+              type: 'string'
+            },
+            twitter_id: {
+              type: 'string'
+            },
+            instagram_id: {
+              type: 'string'
+            },
+            site: {
+              type: 'string'
+            },
+            isMember: {
+              type: 'boolean'
+            },
+            tokens: {
+              type: 'object'
+            }
+          }
+        },
         errors: {
           unAuthorized: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
+          notFound: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
+          badImplementation: {
             type: 'object',
             properties: {
               statusCode: {
