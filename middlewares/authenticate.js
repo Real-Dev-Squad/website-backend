@@ -34,7 +34,9 @@ module.exports = async (req, res, next) => {
     const decoded = authService.verifyAuthToken(token)
 
     // add user data to `req.userData` for further use
-    req.userData = await users.fetchUser(decoded.userId)
+    const userData = await users.fetchUser(decoded.userId)
+    req.userData = userData.user
+
     return next()
   } catch (err) {
     logger.error(err)
