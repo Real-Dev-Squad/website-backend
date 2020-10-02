@@ -48,6 +48,25 @@ const getUser = async (req, res) => {
 }
 
 /**
+ * Fetches the data about logged in user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getSelfDetails = (req, res) => {
+  try {
+    if (req.userData) {
+      return res.send(req.userData)
+    }
+    return res.boom.notFound('User doesn\'t exist')
+  } catch (error) {
+    logger.error(`Error while fetching user: ${error}`)
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+}
+
+/**
  * Add new user
  *
  * @param req {Object} - Express request object
@@ -102,5 +121,6 @@ module.exports = {
   addNewUser,
   updateUser,
   getUsers,
+  getSelfDetails,
   getUser
 }
