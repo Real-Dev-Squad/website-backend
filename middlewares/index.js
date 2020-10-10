@@ -8,6 +8,7 @@ const passport = require('passport')
 const swaggerUi = require('swagger-ui-express')
 const swaggerDocs = require('../utils/swaggerDefinition')
 const contentTypeCheck = require('./contentTypeCheck')
+const config = require('config')
 
 // import utilities
 const logger = require('../utils/logger')
@@ -28,6 +29,7 @@ const middleware = (app) => {
   app.use(cookieParser())
   app.use(helmet())
   app.use(cors({
+    origin: config.get('cors.allowedOrigins'),
     optionsSuccessStatus: 200
   }))
 

@@ -28,6 +28,10 @@ module.exports = {
     }
   },
 
+  cors: {
+    allowedOrigins: /realdevsquad\.com$/
+  },
+
   userToken: {
     cookieName: 'rds-session',
     ttl: 30 * 24 * 60 * 60, // in seconds
