@@ -30,6 +30,7 @@ const middleware = (app) => {
   app.use(helmet())
   app.use(cors({
     origin: config.get('cors.allowedOrigins'),
+    credentials: true,
     optionsSuccessStatus: 200
   }))
 
