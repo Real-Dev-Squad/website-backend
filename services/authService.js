@@ -21,7 +21,9 @@ const generateAuthToken = (payload) => {
  * @return {Object} - Decode value of JWT
  */
 const verifyAuthToken = (token) => {
-  return jwt.verify(token, config.get('userToken.publicKey'), { algorithms: ['RS256'] })
+  return jwt.verify(token, config.get('userToken.publicKey'), {
+    algorithms: ['RS256']
+  })
 }
 
 /**
