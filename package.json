@@ -7,8 +7,8 @@
     "dev": "cross-env NODE_ENV=development nodemon server.js",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
-    "test-integration": "NODE_ENV=test mocha test/integration/**",
-    "test-unit": "NODE_ENV=test mocha test/unit/**",
+    "test-integration": "cross-env NODE_ENV=test mocha test/integration/**",
+    "test-unit": "cross-env NODE_ENV=test mocha test/unit/**",
     "test": "npm run lint && npm run test-integration && npm run test-unit",
     "generate-api-schema": "node utils/generateAPISchema.js"
   },
