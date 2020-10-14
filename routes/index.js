@@ -1,11 +1,8 @@
 const express = require('express')
-const router = express.Router()
+const app = express()
 
-// import individual controllers
-const healthController = require('../controllers/healthController')
+app.use('/healthcheck', require('./healthCheck.js'))
+app.use('/auth', require('./auth.js'))
+app.use('/users', require('./users.js'))
 
-// Map routes to the respective controller functions
-// HealthController routes
-router.get('/healthcheck', healthController.healthCheck)
-
-module.exports = router
+module.exports = app
