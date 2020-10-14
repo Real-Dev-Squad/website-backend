@@ -45,7 +45,7 @@ const addOrUpdate = async (userData, userId = null) => {
     return { isNewUser: true, userId: userInfo.id }
   } catch (err) {
     logger.error('Error in adding or updating user', err)
-    return err
+    throw err
   }
 }
 
@@ -74,7 +74,7 @@ const fetchUsers = async (query) => {
     return allUsers
   } catch (err) {
     logger.error('Error retrieving user data', err)
-    return err
+    throw err
   }
 }
 
@@ -98,7 +98,7 @@ const fetchUser = async (userId) => {
     }
   } catch (err) {
     logger.error('Error retrieving user data', err)
-    return err
+    throw err
   }
 }
 

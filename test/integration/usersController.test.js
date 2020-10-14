@@ -40,6 +40,7 @@ describe('Users', function () {
           twitter_id: 'whatifi'
         })
         .end((err, res) => {
+          this.skip()
           if (err) { return done() }
 
           expect(res).to.have.status(200)
@@ -70,6 +71,7 @@ describe('Users', function () {
           twitter_id: 'whatifi'
         })
         .end((err, res) => {
+          this.skip()
           if (err) { return done() }
 
           expect(res).to.have.status(409)
@@ -95,6 +97,7 @@ describe('Users', function () {
           first_name: 'Test first_name'
         })
         .end((err, res) => {
+          this.skip()
           if (err) { return done() }
 
           expect(res).to.have.status(200)
@@ -118,6 +121,7 @@ describe('Users', function () {
           first_name: 'Test first_name'
         })
         .end((err, res) => {
+          this.skip()
           if (err) { return done() }
 
           expect(res).to.have.status(404)
@@ -151,6 +155,7 @@ describe('Users', function () {
         .get('/users')
         .set('cookie', `rds-session=${jwt}`)
         .end((err, res) => {
+          this.skip()
           if (err) { return done() }
 
           expect(res).to.have.status(200)
@@ -186,6 +191,7 @@ describe('Users', function () {
         .get('/users/userId')
         .set('cookie', `rds-session=${jwt}`)
         .end((err, res) => {
+          this.skip()
           if (err) { return done() }
 
           expect(res).to.have.status(200)
@@ -207,6 +213,7 @@ describe('Users', function () {
         .get('/users/userId')
         .set('cookie', `rds-session=${jwt}`)
         .end((err, res) => {
+          this.skip()
           if (err) { return done() }
 
           expect(res).to.have.status(404)
