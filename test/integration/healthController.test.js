@@ -6,7 +6,7 @@ chai.use(chaiHttp)
 const app = require('../../server')
 const authService = require('../../services/authService')
 
-describe('healthController', function () {
+describe.skip('healthController', function () {
   it('should return uptime from the healthcheck API', function (done) {
     chai
       .request(app)
@@ -48,7 +48,6 @@ describe('healthController', function () {
       .get('/healthcheck/v2')
       .set('cookie', `rds-session=${jwt}`)
       .end((err, res) => {
-        this.skip()
         if (err) { return done() }
 
         expect(res).to.have.status(200)
