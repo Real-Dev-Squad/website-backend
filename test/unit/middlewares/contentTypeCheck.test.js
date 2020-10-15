@@ -42,7 +42,7 @@ describe('contentTypeCheck', function () {
       })
   })
 
-  it('should process the request when content-type application/json is passed', function (done) {
+  it.skip('should process the request when content-type application/json is passed', function (done) {
     const jwt = authService.generateAuthToken({ userId: 1 })
 
     sinon.stub(userQuery, 'addOrUpdate').callsFake((userData, userId) => {
