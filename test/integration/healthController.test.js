@@ -6,7 +6,7 @@ chai.use(chaiHttp)
 const app = require('../../server')
 const authService = require('../../services/authService')
 
-describe('healthController', function () {
+describe.skip('healthController', function () {
   it('should return uptime from the healthcheck API', function (done) {
     chai
       .request(app)
