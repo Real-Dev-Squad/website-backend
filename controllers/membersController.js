@@ -10,7 +10,7 @@ const memberQuery = require('../models/members')
 
 const getMembers = async (req, res) => {
   try {
-    const allMembers = await memberQuery.fetchMembers(req.query)
+    const allMembers = await memberQuery.fetchMembers()
 
     return res.json({
       message: 'Members returned successfully!',

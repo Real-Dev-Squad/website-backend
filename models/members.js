@@ -9,28 +9,27 @@ const userModel = firestore.collection('users')
 
 /**
  * Fetches the data about our members
- * @param query { Object }: Filter for members data
  * @return {Promise<userModel|Array>}
  */
-const fetchMembers = async (query) => {
+
+const fetchMembers = async () => {
   try {
-    const snapshot = await userModel.get()
+    const snapshot = await userModel.where('isMember', '==', true).get()
 
     const allMembers = []
 
     snapshot.forEach((doc) => {
-      if (doc.data().isMember) {
-        allMembers.push({
-          id: doc.id,
-          ...doc.data(),
-          tokens: undefined
-        })
-      }
-    })
+      allMembers.push({
+        id: doc.id,
+        ...doc.data(),
+        tokens: undefined
+      })
+    }
+    )
 
     return allMembers
   } catch (err) {
-    logger.error('Error retrieving member data', err)
+    logger.error('Error retrieving members data', err)
     throw err
   }
 }
