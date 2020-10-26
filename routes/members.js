@@ -16,7 +16,7 @@ const membersController = require('../controllers/membersController')
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/users'
- *       503:
+ *       500:
  *         description: badImplementation
  *         content:
  *           application/json:
