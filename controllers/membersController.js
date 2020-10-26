@@ -18,7 +18,7 @@ const getMembers = async (req, res) => {
     })
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong. Please contact admin')
+    return res.boom.badImplementation('Something went wrong. Please contact admin')
   }
 }
 

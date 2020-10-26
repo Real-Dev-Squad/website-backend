@@ -150,20 +150,6 @@ const swaggerOptions = {
                 type: 'string'
               }
             }
-          },
-          serverUnavailable: {
-            type: 'object',
-            properties: {
-              statusCode: {
-                type: 'integer'
-              },
-              error: {
-                type: 'string'
-              },
-              message: {
-                type: 'string'
-              }
-            }
           }
         }
       } // schemas are used to group the common request/response for API's

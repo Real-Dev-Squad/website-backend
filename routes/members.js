@@ -2,8 +2,6 @@ const express = require('express')
 const router = express.Router()
 const membersController = require('../controllers/membersController')
 
-router.get('/', membersController.getMembers)
-
 /**
  * @swagger
  * /members:
@@ -19,11 +17,13 @@ router.get('/', membersController.getMembers)
  *             schema:
  *               $ref: '#/components/schemas/users'
  *       503:
- *         description: serverUnavailable
+ *         description: badImplementation
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/errors/serverUnavailable'
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
+
+router.get('/', membersController.getMembers)
 
 module.exports = router
