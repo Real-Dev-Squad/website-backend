@@ -121,6 +121,7 @@ dist
 
 # VSCode files
 .vscode
+.prettierrc
 
 # Firestore key file
 firestore-private-key.json
