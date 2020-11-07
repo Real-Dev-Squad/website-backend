@@ -1,5 +1,6 @@
 const logger = require('../utils/logger')
 const userQuery = require('../models/users')
+const { decodeAuthToken } = require('../services/authService')
 
 /**
  * Fetches the data about our users
@@ -117,9 +118,39 @@ const updateUser = async (req, res) => {
   }
 }
 
+/**
+ * Update the user
+ *
+ * @param req {Object} - Express request object
+ * @param req.body {Object} - User object
+ * @param res {Object} - Express response object
+ */
+const updateSelf = async (req, res) => {
+  try {
+    const authorization = req.headers.authorization
+    const token = (authorization.split(' '))[1]
+    const { userId } = decodeAuthToken(token)
+   
+    const user = await userQuery.addOrUpdate(req.body, userId)
+
+    if (!user.isNewUser) {
+      return res.json({
+        message: 'User updated successfully!',
+        userId: user.userId
+      })
+    }
+
+    return res.boom.notFound('User not found')
+  } catch (error) {
+    logger.error(`Error while updating user: ${error}`)
+    return res.boom.serverUnavailable('Something went wrong please contact admin')
+  }
+}
+
 module.exports = {
   addNewUser,
   updateUser,
+  updateSelf,
   getUsers,
   getSelfDetails,
   getUser
