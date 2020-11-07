@@ -127,10 +127,9 @@ const updateUser = async (req, res) => {
  */
 const updateSelf = async (req, res) => {
   try {
-    const authorization = req.headers.authorization
-    const token = (authorization.split(' '))[1]
+    const token = (req.headers.authorization.split(' '))[1]
     const { userId } = decodeAuthToken(token)
-   
+
     const user = await userQuery.addOrUpdate(req.body, userId)
 
     if (!user.isNewUser) {
