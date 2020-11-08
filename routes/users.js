@@ -5,6 +5,45 @@ const usersController = require('../controllers/usersController')
 const userValidator = require('../middlewares/validators/user')
 
 router.post('/', authenticate, userValidator.createUser, usersController.addNewUser)
+
+/**
+ * @swagger
+ * /users/self:
+ *   patch:
+ *     summary: Use to update the user data.
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: No content
+ *
+ *       401:
+ *         description: unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unauthorized'
+ *       403:
+ *         description: forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/forbidden'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *       503:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
 router.patch('/self', authenticate, userValidator.updateUser, usersController.updateSelf)
 router.get('/', authenticate, usersController.getUsers)
 
@@ -25,11 +64,11 @@ router.get('/', authenticate, usersController.getUsers)
  *             schema:
  *               $ref: '#/components/schemas/users'
  *       401:
- *         description: Unauthorized
+ *         description: unauthorized
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/errors/unAuthorized'
+ *               $ref: '#/components/schemas/errors/unauthorized'
  *       404:
  *         description: notFound
  *         content:
