@@ -115,7 +115,7 @@ const updateSelf = async (req, res) => {
     const user = await userQuery.addOrUpdate(req.body, userId)
 
     if (!user.isNewUser) {
-      return res.json({
+      return res.status(204).json({
         message: 'User updated successfully!'
       })
     }
