@@ -18,7 +18,7 @@ router.post('/', authenticate, userValidator.createUser, usersController.addNewU
  *     responses:
  *       204:
  *         description: No content
- *         
+ *
  *       401:
  *         description: unauthorized
  *         content:
