@@ -93,32 +93,6 @@ const addNewUser = async (req, res) => {
 }
 
 /**
- * Update user
- *
- * @param req {Object} - Express request object
- * @param req.params.id {string} - User id
- * @param req.body {Object} - User object
- * @param res {Object} - Express response object
- */
-const updateUser = async (req, res) => {
-  try {
-    const user = await userQuery.addOrUpdate(req.body, req.params.id)
-
-    if (!user.isNewUser) {
-      return res.json({
-        message: 'User updated successfully!',
-        userId: user.userId
-      })
-    }
-
-    return res.boom.notFound('User not found')
-  } catch (error) {
-    logger.error(`Error while updating user: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
-  }
-}
-
-/**
  * Update the user
  *
  * @param req {Object} - Express request object
@@ -130,12 +104,19 @@ const updateSelf = async (req, res) => {
     const token = (req.headers.authorization.split(' '))[1]
     const { userId } = decodeAuthToken(token)
 
+    if(req.body.hasOwnProperty('username')) {
+      const { user } = await userQuery.fetchUser(userId)
+      if(!user.incompleteUserDetails) {
+        return res.boom.forbidden('Cannot update username again')
+      }
+      await userQuery.setIncompleteUserDetails(userId)
+    }
+
     const user = await userQuery.addOrUpdate(req.body, userId)
 
     if (!user.isNewUser) {
       return res.json({
-        message: 'User updated successfully!',
-        userId: user.userId
+        message: 'User updated successfully!'
       })
     }
 
@@ -148,7 +129,6 @@ const updateSelf = async (req, res) => {
 
 module.exports = {
   addNewUser,
-  updateUser,
   updateSelf,
   getUsers,
   getSelfDetails,

@@ -3,7 +3,7 @@ const logger = require('../../utils/logger')
 
 const createUser = async (req, res, next) => {
   const schema = joi.object().keys({
-    user_name: joi.string().optional(),
+    username: joi.string().optional(),
     first_name: joi.string().required(),
     last_name: joi.string().required(),
     yoe: joi.number().optional(),
@@ -31,7 +31,7 @@ const createUser = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
   const schema = joi.object().keys({
-    user_name: joi.string().optional(),
+    username: joi.string().optional(),
     first_name: joi.string().optional(),
     last_name: joi.string().optional(),
     yoe: joi.number().optional(),

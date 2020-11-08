@@ -102,8 +102,26 @@ const fetchUser = async (userId) => {
   }
 }
 
+/**
+ * Sets the incompleteUserDetails field of passed UserId to false
+ *
+ * @param userId { string }: User id
+ * @return {Promise<{incompleteUserDetails: boolean}>}
+ */
+const setIncompleteUserDetails = async (userId) => {
+  const userRef = userModel.doc(userId)
+  const doc = await userRef.get()
+  if(doc.exists){
+    return userRef.update({
+      incompleteUserDetails: false 
+    })
+  }
+  return incompleteUserDetails
+}
+
 module.exports = {
   addOrUpdate,
   fetchUsers,
-  fetchUser
+  fetchUser,
+  setIncompleteUserDetails
 }
