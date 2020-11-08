@@ -5,7 +5,7 @@ const usersController = require('../controllers/usersController')
 const userValidator = require('../middlewares/validators/user')
 
 router.post('/', authenticate, userValidator.createUser, usersController.addNewUser)
-router.patch('/:id', authenticate, userValidator.updateUser, usersController.updateUser)
+router.patch('/self', authenticate, userValidator.updateUser, usersController.updateSelf)
 router.get('/', authenticate, usersController.getUsers)
 
 /**
