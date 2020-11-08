@@ -1,3 +1,4 @@
+const config = require('config')
 const logger = require('../utils/logger')
 const userQuery = require('../models/users')
 const { decodeAuthToken } = require('../services/authService')
@@ -101,7 +102,7 @@ const addNewUser = async (req, res) => {
  */
 const updateSelf = async (req, res) => {
   try {
-    const token = (req.headers.authorization.split(' '))[1]
+    const token = req.cookies[config.get('userToken.cookieName')]
     const { userId } = decodeAuthToken(token)
 
     if (req.body.username) {
@@ -115,9 +116,7 @@ const updateSelf = async (req, res) => {
     const user = await userQuery.addOrUpdate(req.body, userId)
 
     if (!user.isNewUser) {
-      return res.status(204).json({
-        message: 'User updated successfully!'
-      })
+      return res.status(204).send()
     }
 
     return res.boom.notFound('User not found')

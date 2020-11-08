@@ -111,10 +111,11 @@ const setIncompleteUserDetails = async (userId) => {
   const userRef = userModel.doc(userId)
   const doc = await userRef.get()
   if (doc.exists) {
-    userRef.update({
+    return userRef.update({
       incompleteUserDetails: false
     })
   }
+  return {}
 }
 
 module.exports = {
