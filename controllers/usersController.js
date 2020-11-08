@@ -104,9 +104,9 @@ const updateSelf = async (req, res) => {
     const token = (req.headers.authorization.split(' '))[1]
     const { userId } = decodeAuthToken(token)
 
-    if(req.body.hasOwnProperty('username')) {
+    if (req.body.username) {
       const { user } = await userQuery.fetchUser(userId)
-      if(!user.incompleteUserDetails) {
+      if (!user.incompleteUserDetails) {
         return res.boom.forbidden('Cannot update username again')
       }
       await userQuery.setIncompleteUserDetails(userId)
