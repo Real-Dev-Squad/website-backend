@@ -11,6 +11,14 @@ router.post('/', authenticate, userValidator.createUser, usersController.addNewU
  * /users/self:
  *   patch:
  *     summary: Use to update the user data.
+ *
+ *     requestBody:
+ *       description: User data to be updated
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/users'
+ *
  *     tags:
  *       - Users
  *     security:

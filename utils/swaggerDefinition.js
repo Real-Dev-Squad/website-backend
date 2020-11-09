@@ -64,6 +64,9 @@ const swaggerOptions = {
         users: {
           type: 'object',
           properties: {
+            username: {
+              type: 'string'
+            },
             first_name: {
               type: 'string'
             },
