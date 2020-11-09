@@ -53,14 +53,6 @@ const swaggerOptions = {
             }
           }
         },
-        user: {
-          type: 'object',
-          properties: {
-            uptime: {
-              type: 'number'
-            }
-          }
-        },
         users: {
           type: 'object',
           properties: {
