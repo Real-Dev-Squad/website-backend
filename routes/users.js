@@ -127,7 +127,8 @@ router.patch('/self', authenticate, userValidator.updateUser, usersController.up
  *                    example: Users returned successfully!
  *                  users:
  *                    type: array
- *                    $ref: '#/components/schemas/users'
+ *                    items:
+ *                      $ref: '#/components/schemas/users'
  *       401:
  *         description: unAuthorized
  *         content:
