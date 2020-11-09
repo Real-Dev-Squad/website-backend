@@ -112,7 +112,7 @@ const swaggerOptions = {
           }
         },
         errors: {
-          unauthorized: {
+          unAuthorized: {
             type: 'object',
             properties: {
               statusCode: {

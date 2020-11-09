@@ -28,11 +28,11 @@ router.post('/', authenticate, userValidator.createUser, usersController.addNewU
  *         description: No content
  *
  *       401:
- *         description: unauthorized
+ *         description: unAuthorized
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/errors/unauthorized'
+ *               $ref: '#/components/schemas/errors/unAuthorized'
  *       403:
  *         description: forbidden
  *         content:
@@ -72,11 +72,11 @@ router.get('/', authenticate, usersController.getUsers)
  *             schema:
  *               $ref: '#/components/schemas/users'
  *       401:
- *         description: unauthorized
+ *         description: unAuthorized
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/errors/unauthorized'
+ *               $ref: '#/components/schemas/errors/unAuthorized'
  *       404:
  *         description: notFound
  *         content:
