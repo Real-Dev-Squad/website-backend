@@ -1,27 +1,43 @@
-var fs = require('fs');
-
-// import github credential
-const githubCredentials = require('./config/local');
+var fs = require('fs')
+var Firestore = require('./utils/firestore.js')
+const config = require('config')
 
 // check whether github credentials are not falsy
 if (
-  !githubCredentials.githubOauth ||
-  !githubCredentials.githubOauth.clientId ||
-  !githubCredentials.githubOauth.clientSecret
+  !config.githubOauth ||
+  !config.githubOauth.clientId ||
+  !config.githubOauth.clientSecret
 ) {
-  throw 'Github credentials are not properly set';
+  throw new Error('Github credentials are not properly set')
 }
 
 // throw an error if unable to read file
 try {
-  var firestoreData = fs.readFileSync('./firestore-private-key.json', 'utf8');
+  var firestoreData = fs.readFileSync('./firestore-private-key.json', 'utf8')
 } catch (error) {
-  console.log(error);
-  throw 'Please make sure firestore-private-key.json file is correct';
+  throw new Error('Please make sure firestore-private-key.json file is correct')
 }
 
 // check whether firestoreData is empty, null, and  undefined
 if (firestoreData === '' || firestoreData === null || firestoreData === undefined) {
-  console.log(firestoreData);
-  throw 'Please make sure firestore-private-key.json file is not empty';
+  throw new Error('Please make sure firestore-private-key.json file is not empty')
+}
+
+readWriteCheck()
+
+// check local development have permission to read and write in firestore or not
+async function readWriteCheck () {
+  try {
+    const docRef = await Firestore.collection('dummy').doc('users')
+    await docRef.set({
+      user: 'dummy'
+    })
+    const resp = await docRef.get('user')
+    if (resp.data().user !== 'dummy') {
+      throw new Error('Problem with permission of read and write.\nCheck your firestore permissions')
+    }
+    await docRef.delete()
+  } catch (err) {
+    throw new Error(err)
+  }
 }
