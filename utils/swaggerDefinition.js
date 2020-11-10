@@ -64,9 +64,6 @@ const swaggerOptions = {
         users: {
           type: 'object',
           properties: {
-            username: {
-              type: 'string'
-            },
             first_name: {
               type: 'string'
             },
@@ -140,35 +137,7 @@ const swaggerOptions = {
               }
             }
           },
-          forbidden: {
-            type: 'object',
-            properties: {
-              statusCode: {
-                type: 'integer'
-              },
-              error: {
-                type: 'string'
-              },
-              message: {
-                type: 'string'
-              }
-            }
-          },
           badImplementation: {
-            type: 'object',
-            properties: {
-              statusCode: {
-                type: 'integer'
-              },
-              error: {
-                type: 'string'
-              },
-              message: {
-                type: 'string'
-              }
-            }
-          },
-          serverUnavailable: {
             type: 'object',
             properties: {
               statusCode: {

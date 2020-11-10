@@ -1,7 +1,5 @@
-const config = require('config')
 const logger = require('../utils/logger')
 const userQuery = require('../models/users')
-const { decodeAuthToken } = require('../services/authService')
 
 /**
  * Fetches the data about our users
@@ -94,29 +92,22 @@ const addNewUser = async (req, res) => {
 }
 
 /**
- * Update the user
+ * Update user
  *
  * @param req {Object} - Express request object
+ * @param req.params.id {string} - User id
  * @param req.body {Object} - User object
  * @param res {Object} - Express response object
  */
-const updateSelf = async (req, res) => {
+const updateUser = async (req, res) => {
   try {
-    const token = req.cookies[config.get('userToken.cookieName')]
-    const { userId } = decodeAuthToken(token)
-
-    if (req.body.username) {
-      const { user } = await userQuery.fetchUser(userId)
-      if (!user.incompleteUserDetails) {
-        return res.boom.forbidden('Cannot update username again')
-      }
-      await userQuery.setIncompleteUserDetails(userId)
-    }
-
-    const user = await userQuery.addOrUpdate(req.body, userId)
+    const user = await userQuery.addOrUpdate(req.body, req.params.id)
 
     if (!user.isNewUser) {
-      return res.status(204).send()
+      return res.json({
+        message: 'User updated successfully!',
+        userId: user.userId
+      })
     }
 
     return res.boom.notFound('User not found')
@@ -128,7 +119,7 @@ const updateSelf = async (req, res) => {
 
 module.exports = {
   addNewUser,
-  updateSelf,
+  updateUser,
   getUsers,
   getSelfDetails,
   getUser
