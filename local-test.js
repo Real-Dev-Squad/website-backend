@@ -1,5 +1,5 @@
-var fs = require('fs')
-var Firestore = require('./utils/firestore.js')
+const fs = require('fs')
+const Firestore = require('./utils/firestore.js')
 const config = require('config')
 
 // check whether github credentials are not falsy
