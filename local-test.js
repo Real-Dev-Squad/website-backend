@@ -1,5 +1,5 @@
-var fs = require('fs')
-var Firestore = require('./utils/firestore.js')
+const fs = require('fs')
+const Firestore = require('./utils/firestore.js')
 const config = require('config')
 
 // check whether github credentials are not falsy
@@ -19,7 +19,7 @@ try {
 }
 
 // check whether firestoreData is empty, null, and  undefined
-if (firestoreData === '' || firestoreData === null || firestoreData === undefined) {
+if (!firestoreData) {
   throw new Error('Please make sure firestore-private-key.json file is not empty')
 }
 
