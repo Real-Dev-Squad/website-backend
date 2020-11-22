@@ -108,6 +108,75 @@ const swaggerOptions = {
             }
           }
         },
+        crypto_user: {
+          type: 'object',
+          properties: {
+            first_name: {
+              type: 'string'
+            },
+            last_name: {
+              type: 'string'
+            },
+            id: {
+              type: 'string'
+            },
+            cart: {
+              type: 'array'
+            },
+            pendingTransaction: {
+              type: 'array'
+            },
+            shoppingHistory: {
+              type: 'array'
+            },
+            coins: {
+              type: 'object',
+              properties: {
+                copper: {
+                  type: 'integer'
+                },
+                silver: {
+                  type: 'integer'
+                },
+                gold: {
+                  type: 'integer'
+                }
+              }
+            },
+            transactionHistory: {
+              type: 'array'
+            }
+          }
+        },
+        crypto_product: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string'
+            },
+            description: {
+              type: 'string'
+            },
+            id: {
+              type: 'string'
+            },
+            price: {
+              type: 'integer'
+            },
+            discount: {
+              type: 'integer'
+            },
+            type: {
+              type: 'string'
+            },
+            category: {
+              type: 'string'
+            },
+            img: {
+              type: 'string'
+            }
+          }
+        },
         errors: {
           unAuthorized: {
             type: 'object',
