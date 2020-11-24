@@ -21,13 +21,15 @@ module.exports = {
   },
 
   userToken: {
-    publicKey: '-----BEGIN PUBLIC KEY-----\n' +
+    publicKey:
+      '-----BEGIN PUBLIC KEY-----\n' +
       'MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHo6sGbw8qk+XU9sBVa4w2aEq01i\n' +
       'oKDMFFQa9mPy0MRScTCsrfEjbypD4VqIjJcwXGmDWKVhMcJ8SMZuJumIJ10vU9ca\n' +
       'WSh/aHhAxiOIqOEe54IyYTwjcn5avdZry3zl62RYQ7tDZCPAR/WvFCIkgRXwjXfC\n' +
       'Xpm4LR6ynKDMvsDNAgMBAAE=\n' +
       '-----END PUBLIC KEY-----',
-    privateKey: '-----BEGIN RSA PRIVATE KEY-----\n' +
+    privateKey:
+      '-----BEGIN RSA PRIVATE KEY-----\n' +
       'MIICWwIBAAKBgHo6sGbw8qk+XU9sBVa4w2aEq01ioKDMFFQa9mPy0MRScTCsrfEj\n' +
       'bypD4VqIjJcwXGmDWKVhMcJ8SMZuJumIJ10vU9caWSh/aHhAxiOIqOEe54IyYTwj\n' +
       'cn5avdZry3zl62RYQ7tDZCPAR/WvFCIkgRXwjXfCXpm4LR6ynKDMvsDNAgMBAAEC\n' +
