@@ -1,29 +1,41 @@
 const logger = require('../utils/logger')
 const fetch = require('../lib/fetch')
-const getGithubId = require('../utils/getGithubId')
+// const getGithubId = require('../utils/getGithubId')
+const { fetchUser } = require('../models/users')
 
 const pullRequests = async (req, res) => {
   try {
-    const githubId = await getGithubId(req.params.id)
-    const url = `https://api.github.com/search/issues?q=org:Real-Dev-Squad+author:${githubId}+type:pr`
+    const BASE_URL = 'https://api.github.com'
+    const { user } = await fetchUser(req.params.id)
+    const url = `${BASE_URL}/search/issues?q=org:Real-Dev-Squad+author:${user.github_id}+type:pr`
     const { data } = await fetch(url)
-    const allPRs = []
+
+    const getNames = (arrayOfObjects, key) => {
+      const names = []
+      arrayOfObjects.forEach((object) => {
+        names.push(object[key])
+      })
+      return names
+    }
     if (data.total_count) {
-      data.items.forEach((res) => {
+      const allPRs = []
+      data.items.forEach(({ title, html_url: htmlUrl, state, created_at: createdAt, updated_at: updatedAt, draft, labels, assignees }) => {
+        const allAssignees = getNames(assignees, 'login')
+        const allLabels = getNames(labels, 'name')
         allPRs.push({
-          title: res.title,
-          url: res.url,
-          state: res.state,
-          created_at: res.created_at,
-          updated_at: res.updated_at,
-          ready_for_review: res.state === 'closed' ? false : !res.draft,
-          labels: res.labels,
-          assignees: res.assignees
+          title: title,
+          url: htmlUrl,
+          state: state,
+          created_at: createdAt,
+          updated_at: updatedAt,
+          ready_for_review: state === 'closed' ? false : !draft,
+          labels: allLabels,
+          assignees: allAssignees
         })
       })
-      return res.send(allPRs)
+      return res.json(allPRs)
     }
-    return res.send('No pull requests found!')
+    return res.json('No pull requests found!')
   } catch (err) {
     logger.error(`Error while fetching pull requests: ${err}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')
