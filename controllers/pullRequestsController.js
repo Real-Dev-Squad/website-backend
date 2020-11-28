@@ -1,22 +1,22 @@
 const logger = require('../utils/logger')
 const fetch = require('../lib/fetch')
-// const getGithubId = require('../utils/getGithubId')
+const config = require('../config')
 const { fetchUser } = require('../models/users')
+const { getNames } = require('../lib/getNames')
+
+/**
+ * Fetches the pull requests in Real-Dev-Squad by user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
 
 const pullRequests = async (req, res) => {
   try {
-    const BASE_URL = 'https://api.github.com'
     const { user } = await fetchUser(req.params.id)
-    const url = `${BASE_URL}/search/issues?q=org:Real-Dev-Squad+author:${user.github_id}+type:pr`
+    const url = `${config.baseUrl}/search/issues?q=org:${config.org}+author:${user.github_id}+type:pr`
     const { data } = await fetch(url)
 
-    const getNames = (arrayOfObjects, key) => {
-      const names = []
-      arrayOfObjects.forEach((object) => {
-        names.push(object[key])
-      })
-      return names
-    }
     if (data.total_count) {
       const allPRs = []
       data.items.forEach(({ title, html_url: htmlUrl, state, created_at: createdAt, updated_at: updatedAt, draft, labels, assignees }) => {
@@ -38,7 +38,7 @@ const pullRequests = async (req, res) => {
     return res.json('No pull requests found!')
   } catch (err) {
     logger.error(`Error while fetching pull requests: ${err}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.badImplementation('Something went wrong please contact admin')
   }
 }
 
