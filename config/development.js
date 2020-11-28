@@ -10,6 +10,11 @@ module.exports = {
   enableFileLogs: false,
   enableConsoleLogs: true,
 
+  githubApi: {
+    baseUrl: 'https://api.github.com',
+    org: 'Real-Dev-Squad'
+  },
+
   services: {
     rdsApi: {
       baseUrl: `http://localhost:${port}`

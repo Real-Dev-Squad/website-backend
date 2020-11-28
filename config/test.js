@@ -10,6 +10,11 @@ module.exports = {
   // Console logs are set to avoid the winston error of no defined transports
   enableConsoleLogs: true,
 
+  githubApi: {
+    baseUrl: 'https://api.github.com',
+    org: 'Real-Dev-Squad'
+  },
+
   githubOauth: {
     clientId: 'clientId',
     clientSecret: 'clientSecret'
