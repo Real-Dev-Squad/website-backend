@@ -1,8 +1,7 @@
 const logger = require('../utils/logger')
-const fetch = require('../lib/fetch')
-const config = require('../config')
+const config = require('config')
+const githubService = require('../services/githubService')
 const { fetchUser } = require('../models/users')
-const { getNames } = require('../lib/getNames')
 
 /**
  * Fetches the pull requests in Real-Dev-Squad by user
@@ -11,17 +10,17 @@ const { getNames } = require('../lib/getNames')
  * @param res {Object} - Express response object
  */
 
-const pullRequests = async (req, res) => {
+const getPullRequests = async (req, res) => {
   try {
     const { user } = await fetchUser(req.params.id)
     const url = `${config.baseUrl}/search/issues?q=org:${config.org}+author:${user.github_id}+type:pr`
-    const { data } = await fetch(url)
+    const { data } = await githubService.fetch(url)
 
     if (data.total_count) {
       const allPRs = []
       data.items.forEach(({ title, html_url: htmlUrl, state, created_at: createdAt, updated_at: updatedAt, draft, labels, assignees }) => {
-        const allAssignees = getNames(assignees, 'login')
-        const allLabels = getNames(labels, 'name')
+        const allAssignees = githubService.getNames(assignees, 'login')
+        const allLabels = githubService.getNames(labels, 'name')
         allPRs.push({
           title: title,
           url: htmlUrl,
@@ -43,5 +42,5 @@ const pullRequests = async (req, res) => {
 }
 
 module.exports = {
-  pullRequests
+  getPullRequests
 }
