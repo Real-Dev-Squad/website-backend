@@ -13,7 +13,7 @@ const { fetchUser } = require('../models/users')
 const getPullRequests = async (req, res) => {
   try {
     const { user } = await fetchUser(req.params.id)
-    const url = `${config.baseUrl}/search/issues?q=org:${config.org}+author:${user.github_id}+type:pr`
+    const url = `${config.githubApi.baseUrl}/search/issues?q=org:${config.githubApi.org}+author:${user.github_id}+type:pr`
     const { data } = await githubService.fetch(url)
 
     if (data.total_count) {

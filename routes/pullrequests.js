@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const pullRequestController = require('../controllers/pullRequestsController.js')
+const pullRequestController = require('../controllers/pullRequestsController')
 
 /**
  * @swagger
@@ -24,6 +24,6 @@ const pullRequestController = require('../controllers/pullRequestsController.js'
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/:id', pullRequestController.pullRequests)
+router.get('/:id', pullRequestController.getPullRequests)
 
 module.exports = router
