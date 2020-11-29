@@ -1,50 +1,27 @@
-const axios = require('axios')
 const logger = require('../utils/logger')
+const config = require('config')
+const { fetch } = require('../utils/fetch')
+const { fetchUser } = require('../models/users')
 
 /**
- * Used for network calls
+ * Fetches the pull requests in Real-Dev-Squad by user using GitHub API
  *
- * @param url {String} - API Endpoint URL
- * @param [method = 'get'] {String} - API Call Method (GET, POST etc.) - optional
- * @param [params = null] {Object} - Query Params for the API call - optional
- * @param [data = null] {Object} - Body to be sent - optional
- * @param [headers = null] {Object} - Headers to be sent - optional
- * @param [options = null] {Object} - Options to be sent via axios - optional
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
  */
 
-const fetch = async (url, method = 'get', params = null, data = null, headers = null, options = null) => {
+const fetchPRsByUser = async (id) => {
   try {
-    const response = await axios({
-      method,
-      url,
-      params,
-      data,
-      headers,
-      ...options
-    })
-    return response
+    const { user } = await fetchUser(id)
+    const url = `${config.get('githubApi.baseUrl')}/search/issues?q=org:${config.get('githubApi.org')}+author:${user.github_id}+type:pr`
+    const { data } = await fetch(url)
+    return data
   } catch (err) {
-    logger.error('Something went wrong. Please contact admin', err)
+    logger.error(`Error while fetching pull requests: ${err}`)
     throw err
   }
 }
 
-/**
- * Loops over an array of objects, takes a value corresponding to key provided and saves it in an array
- *
- * @param arrayOfObjects {Array} - Array of objects to loop over
- * @param key {String} - Value corresponding to this key is saved
- */
-
-const getNames = (arrayOfObjects, key) => {
-  const names = []
-  arrayOfObjects.forEach((object) => {
-    names.push(object[key])
-  })
-  return names
-}
-
 module.exports = {
-  fetch,
-  getNames
+  fetchPRsByUser
 }
