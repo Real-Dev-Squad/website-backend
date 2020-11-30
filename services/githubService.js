@@ -14,7 +14,7 @@ const fetchPRsByUser = async (id) => {
   try {
     const { user } = await fetchUser(id)
     const url = `${config.get('githubApi.baseUrl')}/search/issues?q=org:${config.get('githubApi.org')}+author:${user.github_id}+type:pr`
-    return fetch(url)
+    return fetch(url, 'get', null, null, null, { Authorization: `token ${process.env.GITHUB_ACCESS_TOKEN}` })
   } catch (err) {
     logger.error(`Error while fetching pull requests: ${err}`)
     throw err
