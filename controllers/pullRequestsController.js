@@ -33,12 +33,12 @@ const getPRdetails = async (req, res) => {
         const allAssignees = getNames(assignees, 'login')
         const allLabels = getNames(labels, 'name')
         allPRs.push({
-          title: title,
+          title,
+          state,
+          createdAt,
+          updatedAt,
           url: htmlUrl,
-          state: state,
-          created_at: createdAt,
-          updated_at: updatedAt,
-          ready_for_review: state === 'closed' ? false : !draft,
+          readyForReview: state === 'closed' ? false : !draft,
           labels: allLabels,
           assignees: allAssignees
         })
