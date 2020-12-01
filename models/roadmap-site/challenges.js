@@ -1,6 +1,8 @@
 const logger = require('../../utils/logger')
 const firestore = require('../../utils/firestore')
 
+
+
 const challengesModel = firestore.collection('/challenges')
 
 const errorMessages = 'error getting challenges'
@@ -26,7 +28,12 @@ async function fetchChallenges () {
 
 async function postChallenge (challengeData) {
   try {
-    const response = await challengesModel.add(challengeData)
+    const response = await challengesModel.add({
+      ...challengeData,
+      participants:[],
+      is_active:true
+
+    })
     const allChallenges = await fetchChallenges()
     if (response.id && allChallenges.length > 0) {
       return allChallenges

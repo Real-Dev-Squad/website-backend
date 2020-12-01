@@ -1,8 +1,13 @@
-const express = require('express')
-const router = express.Router()
-const authenticate = require('../../middlewares/authenticate')
-const challengesController = require('../../controllers/roadmap-site/challengeController')
+const express = require("express");
+const router = express.Router();
+const authenticate = require("../../middlewares/authenticate");
+const challengesController = require("../../controllers/roadmap-site/challengeController");
 
-router.get('/', authenticate, challengesController.sendChallengeResponse)
+router
+  .route("/")
+  .get(authenticate, challengesController.sendChallengeResponse)
+  .post(authenticate, challengesController.sendChallengeResponse);
 
-module.exports = router
+router.post("/subscribe", authenticate, challengesController.subscribeToChallenge);
+
+module.exports = router;
