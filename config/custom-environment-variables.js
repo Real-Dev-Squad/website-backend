@@ -26,8 +26,7 @@ module.exports = {
 
   githubOauth: {
     clientId: 'GITHUB_CLIENT_ID',
-    clientSecret: 'GITHUB_CLIENT_SECRET',
-    accessToken: '<accessToken>'
+    clientSecret: 'GITHUB_CLIENT_SECRET'
   },
 
   services: {
