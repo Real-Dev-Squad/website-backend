@@ -2,21 +2,6 @@ const logger = require('../utils/logger')
 const githubService = require('../services/githubService')
 
 /**
- * Loops over an array of objects, takes a value corresponding to key provided and saves it in an array
- *
- * @param arrayOfObjects {Array} - Array of objects to loop over
- * @param key {String} - Value corresponding to this key is saved
- */
-
-const getNames = (arrayOfObjects, key) => {
-  const names = []
-  arrayOfObjects.forEach((object) => {
-    names.push(object[key])
-  })
-  return names
-}
-
-/**
  * Collects all pull requests and sends only required data for each pull request
  *
  * @param req {Object} - Express request object
@@ -29,23 +14,29 @@ const getPRdetails = async (req, res) => {
 
     if (data.total_count) {
       const allPRs = []
-      data.items.forEach(({ title, html_url: htmlUrl, state, created_at: createdAt, updated_at: updatedAt, draft, labels, assignees }) => {
-        const allAssignees = getNames(assignees, 'login')
-        const allLabels = getNames(labels, 'name')
+      data.items.forEach(({ title, html_url: url, state, created_at: createdAt, updated_at: updatedAt, draft, labels, assignees }) => {
+        const allAssignees = assignees.map(object => object.login)
+        const allLabels = labels.map(object => object.name)
         allPRs.push({
           title,
           state,
           createdAt,
           updatedAt,
-          url: htmlUrl,
+          url,
           readyForReview: state === 'closed' ? false : !draft,
           labels: allLabels,
           assignees: allAssignees
         })
       })
-      return res.json(allPRs)
+      return res.json({
+        message: 'Pull requests returned successfully!',
+        pullRequests: allPRs
+      })
     }
-    return res.json([])
+    return res.json({
+      message: 'No pull requests found!',
+      pullRequests: []
+    })
   } catch (err) {
     logger.error(`Error while processing pull requests: ${err}`)
     return res.boom.badImplementation('Something went wrong please contact admin')
@@ -53,6 +44,5 @@ const getPRdetails = async (req, res) => {
 }
 
 module.exports = {
-  getPRdetails,
-  getNames
+  getPRdetails
 }

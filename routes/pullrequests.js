@@ -6,16 +6,24 @@ const pullRequestController = require('../controllers/pullRequestsController')
  * @swagger
  * /pullrequests/:id:
  *   get:
- *     summary: Gets pull requests of a user in Real Dev Squad Github organisation
+ *     summary: Pull Requests by a user in Real Dev Squad
  *     tags:
  *       - Pull Requests
  *     responses:
  *       200:
- *         description: Details of pull requests by a particular user in Real Dev Squad
+ *         description: Pull Requests
  *         content:
  *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/pullRequests'
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: Pull requests returned successfully!
+ *                  pullRequests:
+ *                    type: array
+ *                    items:
+ *                      $ref: '#/components/schemas/pullRequests'
  *       500:
  *         description: badImplementation
  *         content:

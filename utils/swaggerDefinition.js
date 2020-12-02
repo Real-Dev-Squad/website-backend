@@ -54,7 +54,7 @@ const swaggerOptions = {
           }
         },
         pullRequests: {
-          type: 'array',
+          type: 'object',
           properties: {
             title: {
               type: 'string'
@@ -65,20 +65,22 @@ const swaggerOptions = {
             state: {
               type: 'string'
             },
-            created_at: {
+            createdAt: {
               type: 'string'
             },
-            updated_at: {
+            updatedAt: {
               type: 'string'
             },
-            ready_for_review: {
+            readyForReview: {
               type: 'boolean'
             },
             labels: {
-              type: 'array'
+              type: 'array',
+              items: []
             },
             assignees: {
-              type: 'array'
+              type: 'array',
+              items: []
             }
           }
         },
