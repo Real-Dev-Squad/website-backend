@@ -53,6 +53,37 @@ const swaggerOptions = {
             }
           }
         },
+        pullRequests: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string'
+            },
+            url: {
+              type: 'string'
+            },
+            state: {
+              type: 'string'
+            },
+            createdAt: {
+              type: 'string'
+            },
+            updatedAt: {
+              type: 'string'
+            },
+            readyForReview: {
+              type: 'boolean'
+            },
+            labels: {
+              type: 'array',
+              items: []
+            },
+            assignees: {
+              type: 'array',
+              items: []
+            }
+          }
+        },
         users: {
           type: 'object',
           properties: {

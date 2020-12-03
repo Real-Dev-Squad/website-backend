@@ -1,5 +1,5 @@
 const axios = require('axios')
-const logger = require('../utils/logger')
+const logger = require('./logger')
 
 /**
  * Used for network calls
@@ -29,4 +29,6 @@ const fetch = async (url, method = 'get', params = null, data = null, headers = 
   }
 }
 
-module.exports = fetch
+module.exports = {
+  fetch
+}
