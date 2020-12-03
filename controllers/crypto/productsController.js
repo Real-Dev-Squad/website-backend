@@ -34,15 +34,15 @@ const getProduct = async (req, res) => {
     const product = await productQuery.fetchProduct(req.params.id)
     if (product) {
       return res.status(200).json({
-        message: 'Products returned successfully!',
+        message: 'Product returned successfully!',
         Products: product
       })
     }
     return res.status(404).json({
-      message: 'Products not found!'
+      message: 'Product not found!'
     })
   } catch (error) {
-    logger.error(`Error while fetching products: ${error}`)
+    logger.error(`Error while fetching product: ${error}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')
   }
 }

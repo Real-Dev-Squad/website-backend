@@ -15,18 +15,13 @@ function updateBalance (payer, receiver, requestCoins) {
     copper: add(receiver.copper, requestCoins.copper),
     silver: add(receiver.silver, requestCoins.silver),
     gold: add(receiver.gold, requestCoins.gold)
-
   }
   return { payerCoins, receiverCoins }
 }
 
-function diff (a, b) {
-  return (a - b)
-}
+const diff = (a, b) => (a - b)
 
-function add (a, b) {
-  return (a + b)
-}
+const add = (a, b) => (a + b)
 
 module.exports = {
   isBalanceSufficient,
