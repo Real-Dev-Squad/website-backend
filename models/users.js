@@ -87,8 +87,7 @@ const fetchUsers = async (query) => {
  */
 const fetchUser = async (username, userId = null) => {
   try {
-    let userData
-    let id = null
+    let userData, id
     if (username) {
       const user = await userModel.where('username', '==', username).limit(1).get()
 
