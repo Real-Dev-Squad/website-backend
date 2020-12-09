@@ -10,7 +10,7 @@ const githubService = require('../services/githubService')
 
 const getPRdetails = async (req, res) => {
   try {
-    const { data } = await githubService.fetchPRsByUser(req.params.id)
+    const { data } = await githubService.fetchPRsByUser(req.params.username)
 
     if (data.total_count) {
       const allPRs = []

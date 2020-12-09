@@ -81,18 +81,24 @@ const fetchUsers = async (query) => {
 /**
  * Fetches the user data from the passes userId
  *
- * @param userId { string }: User id
+ * @param username { string }: Username
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const fetchUser = async (userId) => {
+const fetchUser = async (username) => {
   try {
-    const user = await userModel.doc(userId).get()
+    const user = await userModel.where('username', '==', username).limit(1).get()
 
+    let userData, userId
+
+    user.forEach(doc => {
+      userId = doc.id
+      userData = doc.data()
+    })
     return {
-      userExists: !!user.data(),
+      userExists: !!userData,
       user: {
         id: userId,
-        ...user.data(),
+        ...userData,
         tokens: undefined
       }
     }

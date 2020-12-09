@@ -228,6 +228,6 @@ router.get('/self', authenticate, usersController.getSelfDetails)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:id', authenticate, usersController.getUser)
+router.get('/:username', authenticate, usersController.getUser)
 
 module.exports = router
