@@ -195,7 +195,7 @@ router.get('/self', authenticate, usersController.getSelfDetails)
 
 /**
  * @swagger
- * /users/:id:
+ * /users/:username:
  *   get:
  *     summary: Get the details of user with provided id.
  *     tags:
