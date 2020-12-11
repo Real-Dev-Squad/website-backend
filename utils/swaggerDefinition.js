@@ -53,11 +53,34 @@ const swaggerOptions = {
             }
           }
         },
-        user: {
+        pullRequests: {
           type: 'object',
           properties: {
-            uptime: {
-              type: 'number'
+            title: {
+              type: 'string'
+            },
+            url: {
+              type: 'string'
+            },
+            state: {
+              type: 'string'
+            },
+            createdAt: {
+              type: 'string'
+            },
+            updatedAt: {
+              type: 'string'
+            },
+            readyForReview: {
+              type: 'boolean'
+            },
+            labels: {
+              type: 'array',
+              items: []
+            },
+            assignees: {
+              type: 'array',
+              items: []
             }
           }
         },

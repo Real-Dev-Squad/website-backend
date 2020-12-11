@@ -10,6 +10,11 @@ module.exports = {
   enableFileLogs: true,
   enableConsoleLogs: false,
 
+  githubApi: {
+    baseUrl: 'https://api.github.com',
+    org: 'Real-Dev-Squad'
+  },
+
   githubOauth: {
     clientId: '<clientId>',
     clientSecret: '<clientSecret>'

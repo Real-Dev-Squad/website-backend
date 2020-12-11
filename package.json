@@ -7,6 +7,7 @@
     "dev": "cross-env NODE_ENV=development nodemon server.js",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
+    "test-config": "node local-test.js",
     "test-integration": "cross-env NODE_ENV=test mocha test/integration/**",
     "test-unit": "cross-env NODE_ENV=test mocha test/unit/**",
     "test": "npm run lint && npm run test-integration && npm run test-unit",
@@ -14,6 +15,7 @@
   },
   "dependencies": {
     "@google-cloud/firestore": "^4.2.0",
+    "axios": "^0.21.0",
     "config": "^3.3.2",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
@@ -23,6 +25,7 @@
     "helmet": "^4.0.0",
     "http-errors": "~1.6.3",
     "joi": "^17.2.1",
+    "jsdoc": "^3.6.6",
     "jsonwebtoken": "^8.5.1",
     "morgan": "~1.9.1",
     "passport": "^0.4.1",
