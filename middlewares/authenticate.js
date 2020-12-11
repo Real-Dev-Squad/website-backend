@@ -34,7 +34,7 @@ module.exports = async (req, res, next) => {
     const decoded = authService.verifyAuthToken(token)
 
     // add user data to `req.userData` for further use
-    const userData = await users.fetchUser(null, decoded.userId)
+    const userData = await users.fetchUser({ userId: decoded.userId })
     req.userData = userData.user
 
     return next()
@@ -58,7 +58,7 @@ module.exports = async (req, res, next) => {
         })
 
         // add user data to `req.userData` for further use
-        req.userData = await users.fetchUser(decoded.userId)
+        req.userData = await users.fetchUser({ userId: decoded.userId })
 
         return next()
       } else {

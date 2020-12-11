@@ -33,7 +33,7 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser(req.params.username)
+    const result = await userQuery.fetchUser({ username: req.params.username })
 
     if (result.userExists) {
       return res.json({
@@ -106,7 +106,7 @@ const updateSelf = async (req, res) => {
     const { userId } = decodeAuthToken(token)
 
     if (req.body.username) {
-      const { user } = await userQuery.fetchUser(req.body.username)
+      const { user } = await userQuery.fetchUser({ username: req.body.username })
       if (!user.incompleteUserDetails) {
         return res.boom.forbidden('Cannot update username again')
       }
