@@ -195,7 +195,7 @@ router.get('/self', authenticate, usersController.getSelfDetails)
 
 /**
  * @swagger
- * /users/:id:
+ * /users/:username:
  *   get:
  *     summary: Get the details of user with provided id.
  *     tags:
@@ -228,6 +228,6 @@ router.get('/self', authenticate, usersController.getSelfDetails)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:id', authenticate, usersController.getUser)
+router.get('/:username', authenticate, usersController.getUser)
 
 module.exports = router

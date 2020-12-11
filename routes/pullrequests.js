@@ -4,7 +4,7 @@ const pullRequestController = require('../controllers/pullRequestsController')
 
 /**
  * @swagger
- * /pullrequests/:id:
+ * /pullrequests/:username:
  *   get:
  *     summary: Pull Requests by a user in Real Dev Squad
  *     tags:
@@ -32,6 +32,6 @@ const pullRequestController = require('../controllers/pullRequestsController')
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/:id', pullRequestController.getPRdetails)
+router.get('/:username', pullRequestController.getPRdetails)
 
 module.exports = router
