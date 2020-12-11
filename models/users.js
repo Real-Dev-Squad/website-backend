@@ -84,7 +84,7 @@ const fetchUsers = async (query) => {
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const fetchUser = async ({ userId, username }) => {
+const fetchUser = async ({ userId = null, username = null }) => {
   try {
     let userData, id
     if (username) {
@@ -94,7 +94,7 @@ const fetchUser = async ({ userId, username }) => {
         id = doc.id
         userData = doc.data()
       })
-    } else {
+    } else if (userId) {
       const user = await userModel.doc(userId).get()
       id = userId
       userData = user.data()
