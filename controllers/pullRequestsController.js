@@ -43,6 +43,52 @@ const getPRdetails = async (req, res) => {
   }
 }
 
+const getStalePRs = async (req, res) => {
+  try {
+    const { data } = await githubService.fetchOpenPRs()
+
+    if (data.total_count) {
+      const allPRs = []
+      data.items.forEach(({
+        title,
+        html_url: url,
+        state,
+        created_at: createdAt,
+        updated_at: updatedAt,
+        draft,
+        labels,
+        user,
+        assignees
+      }) => {
+        const allAssignees = assignees.map(object => object.login)
+        const allLabels = labels.map(object => object.name)
+        allPRs.push({
+          title,
+          state,
+          createdAt,
+          updatedAt,
+          url,
+          username: user.login,
+          labels: allLabels,
+          assignees: allAssignees
+        })
+      })
+      return res.json({
+        message: 'Stale PRs',
+        pullRequests: allPRs
+      })
+    }
+    return res.json({
+      message: 'No pull requests found!',
+      pullRequests: []
+    })
+  } catch (err) {
+    logger.error(`Error while processing pull requests: ${err}`)
+    return res.boom.badImplementation('Something went wrong please contact admin')
+  }
+}
+
 module.exports = {
-  getPRdetails
+  getPRdetails,
+  getStalePRs
 }
