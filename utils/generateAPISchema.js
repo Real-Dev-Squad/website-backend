@@ -1,4 +1,4 @@
-const swaggerDocs = require('./swaggerDefinition')
+const swaggerDocs = require('../docs/swaggerDefinition')
 const fs = require('fs')
 
 module.exports = fs.writeFileSync(
