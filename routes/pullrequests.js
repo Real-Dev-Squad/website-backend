@@ -32,6 +32,6 @@ const pullRequestController = require('../controllers/pullRequestsController')
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/:username', pullRequestController.getPRdetails)
+router.get('/user/:username', pullRequestController.getPRdetails)
 
 module.exports = router
