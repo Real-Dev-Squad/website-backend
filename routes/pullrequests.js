@@ -35,7 +35,7 @@ router.get('/stale', pullRequestController.getStalePRs)
 
 /**
  * @swagger
- * /pullrequests/:username:
+ * /pullrequests/user/:username:
  *   get:
  *     summary: Pull Requests by a user in Real Dev Squad
  *     tags:
@@ -63,6 +63,6 @@ router.get('/stale', pullRequestController.getStalePRs)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/:username', pullRequestController.getPRdetails)
+router.get('/user/:username', pullRequestController.getPRdetails)
 
 module.exports = router
