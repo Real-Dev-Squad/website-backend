@@ -4,6 +4,8 @@ const { fetch } = require('../utils/fetch')
 const { fetchUser } = require('../models/users')
 
 /**
+ * Creates the custom API URL with the required params in the format
+ * expected by Github
  * https://docs.github.com/en/free-pro-team@latest/rest/reference/search
  * @access private
  * @param {Object} searchParams - List of params to create github API URL
@@ -75,6 +77,10 @@ const fetchPRsByUser = async (username) => {
   }
 }
 
+/**
+ * Fetches the oldest open N requests
+ * @todo fetch N from query params
+ */
 const fetchOpenPRs = async () => {
   try {
     const url = getGithubURL({

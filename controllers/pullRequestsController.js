@@ -43,6 +43,13 @@ const getPRdetails = async (req, res) => {
   }
 }
 
+/**
+ * Get stale PRs in open state for Real Dev Squad repos
+ *
+ * @param {Object} req
+ * @param {Object} res
+ * @todo create cache for RDS usernames <> github usernames
+ */
 const getStalePRs = async (req, res) => {
   try {
     const { data } = await githubService.fetchOpenPRs()
