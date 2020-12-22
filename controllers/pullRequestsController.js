@@ -18,13 +18,13 @@ const getPRdetails = async (req, res) => {
         const allAssignees = assignees.map(object => object.login)
         const allLabels = labels.map(object => object.name)
         const repositoryUrlSplit = repositoryUrl.split('/')
-        const repositoryName = repositoryUrlSplit[repositoryUrlSplit.length - 1]
+        const repository = repositoryUrlSplit[repositoryUrlSplit.length - 1]
         allPRs.push({
           title,
           state,
           createdAt,
           updatedAt,
-          repositoryName,
+          repository,
           url,
           readyForReview: state === 'closed' ? false : !draft,
           labels: allLabels,
