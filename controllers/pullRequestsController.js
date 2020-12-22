@@ -14,14 +14,17 @@ const getPRdetails = async (req, res) => {
 
     if (data.total_count) {
       const allPRs = []
-      data.items.forEach(({ title, html_url: url, state, created_at: createdAt, updated_at: updatedAt, draft, labels, assignees }) => {
+      data.items.forEach(({ title, html_url: url, state, created_at: createdAt, updated_at: updatedAt, repository_url: repositoryUrl, draft, labels, assignees }) => {
         const allAssignees = assignees.map(object => object.login)
         const allLabels = labels.map(object => object.name)
+        const repositoryUrlSplit = repositoryUrl.split('/')
+        const repository = repositoryUrlSplit[repositoryUrlSplit.length - 1]
         allPRs.push({
           title,
           state,
           createdAt,
           updatedAt,
+          repository,
           url,
           readyForReview: state === 'closed' ? false : !draft,
           labels: allLabels,
