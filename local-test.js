@@ -35,5 +35,5 @@ if (!firestoreData) {
     throw new Error('Problem with permission of read and write.\nCheck your firestore permissions')
   }
   await docRef.delete()
-  logger.info('SUCCESS!!! backend setup successful')
+  logger.info('Success! The backend was successfully set up.')
 })()
