@@ -37,4 +37,4 @@ if (!firestoreData) {
   await docRef.delete()
 })()
 
-logger.info("SUCCESS!!! backend setup successful")
+logger.info('SUCCESS!!! backend setup successful')
