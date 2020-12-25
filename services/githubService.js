@@ -81,7 +81,7 @@ const fetchPRsByUser = async (username) => {
  * Fetches the oldest open N requests
  * @todo fetch N from query params
  */
-const fetchOpenPRs = async () => {
+const fetchStalePRs = async () => {
   try {
     const url = getGithubURL({
       is: 'open'
@@ -98,7 +98,29 @@ const fetchOpenPRs = async () => {
   }
 }
 
+/**
+ * Fetches the latest 10 open PRs
+ * @todo fetch N from query params
+ */
+const fetchOpenPRs = async () => {
+  try {
+    const url = getGithubURL({
+      is: 'open'
+    }, {
+      sort: 'created',
+      order: 'desc',
+      per_page: 10,
+      page: 1
+    })
+    return getFetch(url)
+  } catch (err) {
+    logger.error(`Error while fetching pull requests: ${err}`)
+    throw err
+  }
+}
+
 module.exports = {
   fetchPRsByUser,
-  fetchOpenPRs
+  fetchOpenPRs,
+  fetchStalePRs
 }
