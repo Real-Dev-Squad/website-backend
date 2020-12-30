@@ -1,1 +1,90 @@
-{"openapi":"3.0.1","info":{"version":"1.0.0","title":"RDS API documentation","description":"This is documentation for Real Dev Squad's API. Find out more about Real dev squad at [http://realdevsquad.com](http://realdevsquad.com)","contact":{"name":"Real Dev Squad","url":"http://realdevsquad.com"}},"tags":[{"name":"Healthcheck","description":"API for health check in the system"},{"name":"Authentication","description":"Authentication routes"}],"servers":[{"url":"http://localhost:3000","description":"Local server URL"}],"components":{"securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}},"schemas":{"healthCheck":{"type":"object","properties":{"uptime":{"type":"number"}}},"errors":{"unAuthorized":{"type":"object","properties":{"statusCode":{"type":"integer"},"error":{"type":"string"},"message":{"type":"string"}}}}}},"paths":{"/auth/github/callback":{"get":{"summary":"Authenticates the user using the GitHub Oauth 2.0. Redirects to the UI on successful login","tags":["Authentication"],"parameters":[{"in":"query","name":"code","required":true,"type":"string","description":"Temporary code returned by GitHub Oauth"}],"responses":{"302":{"description":"Redirects to the UI on successful login","headers":{"Cookie":{"type":"string","description":"Cookie containing authentication token"},"Location":{"type":"string","description":"Redirection URL"}}},"401":{"description":"Unauthorized","content":{"application/json":{"schema":{"$ref":"#/components/schemas/errors/unAuthorized"}}}}}}},"/healthcheck":{"get":{"summary":"Use to check health status of the server.","tags":["Healthcheck"],"responses":{"200":{"description":"Server uptime status","content":{"application/json":{"schema":{"$ref":"#/components/schemas/healthCheck"}}}}}}},"/healthcheck/v2":{"get":{"summary":"Sample route to test authentication middleware.","tags":["Healthcheck"],"security":[{"bearerAuth":[]}],"responses":{"200":{"description":"Server uptime status","content":{"application/json":{"schema":{"$ref":"#/components/schemas/healthCheck"}}}},"401":{"description":"Unauthorized","content":{"application/json":{"schema":{"$ref":"#/components/schemas/errors/unAuthorized"}}}}}}}}}
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "1.0.0",
+    "title": "RDS API documentation",
+    "description": "This is documentation for Real Dev Squad's API. Find out more about Real dev squad at [http://realdevsquad.com](http://realdevsquad.com)",
+    "contact": { "name": "Real Dev Squad", "url": "http://realdevsquad.com" }
+  },
+  "tags": [
+    { "name": "Healthcheck", "description": "API for health check in the system" },
+    { "name": "Authentication", "description": "Authentication routes" }
+  ],
+  "servers": [{ "url": "http://localhost:3000", "description": "Local server URL" }],
+  "components": {
+    "securitySchemes": { "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" } },
+    "schemas": {
+      "healthCheck": { "type": "object", "properties": { "uptime": { "type": "number" } } },
+      "errors": {
+        "unAuthorized": {
+          "type": "object",
+          "properties": {
+            "statusCode": { "type": "integer" },
+            "error": { "type": "string" },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/github/callback": {
+      "get": {
+        "summary": "Authenticates the user using the GitHub Oauth 2.0. Redirects to the UI on successful login",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "code",
+            "required": true,
+            "type": "string",
+            "description": "Temporary code returned by GitHub Oauth"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to the UI on successful login",
+            "headers": {
+              "Cookie": { "type": "string", "description": "Cookie containing authentication token" },
+              "Location": { "type": "string", "description": "Redirection URL" }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/errors/unAuthorized" } } }
+          }
+        }
+      }
+    },
+    "/healthcheck": {
+      "get": {
+        "summary": "Use to check health status of the server.",
+        "tags": ["Healthcheck"],
+        "responses": {
+          "200": {
+            "description": "Server uptime status",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/healthCheck" } } }
+          }
+        }
+      }
+    },
+    "/healthcheck/v2": {
+      "get": {
+        "summary": "Sample route to test authentication middleware.",
+        "tags": ["Healthcheck"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Server uptime status",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/healthCheck" } } }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/errors/unAuthorized" } } }
+          }
+        }
+      }
+    },
+    "/roadmap"
+  }
+}
