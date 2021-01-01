@@ -28,6 +28,9 @@ Runs the lint checks in the project.
 ##### `npm run generate-api-schema`
 Generates the API schema in the file `public/apiSchema.json`.
 
+##### `npm run test-config`
+Runs the test for checking local development setup is working properly or not.
+
 
 ## Project Structure
 The following project structure should be followed:
