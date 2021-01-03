@@ -1,10 +1,17 @@
 /**
+ * Initialise globals
+ */
+const config = require('config')
+global.config = config
+
+const logger = require('./utils/logger')
+global.logger = logger
+
+/**
  * Module dependencies.
  */
 const http = require('http')
-const config = require('config')
 const app = require('./app')
-const logger = require('./utils/logger')
 
 /**
  * Get port from environment and store in Express.

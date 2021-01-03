@@ -3,7 +3,6 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 
-const logger = require('../utils/logger')
 const firestore = require('../utils/firestore')
 const userModel = firestore.collection('users')
 

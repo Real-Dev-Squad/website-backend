@@ -2,7 +2,6 @@
  * This file contains wrapper functions to interact with the DB.
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
-const logger = require('../../utils/logger')
 const Firestore = require('@google-cloud/firestore')
 
 const firestore = require('../../utils/firestore')

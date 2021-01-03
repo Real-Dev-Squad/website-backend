@@ -1,6 +1,5 @@
 const chai = require('chai')
 const sinon = require('sinon')
-const config = require('config')
 const { expect } = chai
 const chaiHttp = require('chai-http')
 const passport = require('passport')

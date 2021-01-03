@@ -1,4 +1,3 @@
-const logger = require('../../utils/logger')
 const challengeQuery = require('../../models/roadmap-site/challenges')
 const subscribeToChallengeQuery = require('../../models/roadmap-site/subscribe-challenge')
 

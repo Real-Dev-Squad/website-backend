@@ -1,4 +1,3 @@
-const logger = require('../utils/logger')
 const githubService = require('../services/githubService')
 
 /**

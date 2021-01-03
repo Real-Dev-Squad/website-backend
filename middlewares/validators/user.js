@@ -1,5 +1,4 @@
 const joi = require('joi')
-const logger = require('../../utils/logger')
 
 const createUser = async (req, res, next) => {
   const schema = joi.object().keys({

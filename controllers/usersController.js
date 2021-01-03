@@ -1,5 +1,4 @@
-const config = require('config')
-const logger = require('../utils/logger')
+
 const userQuery = require('../models/users')
 const { decodeAuthToken } = require('../services/authService')
 

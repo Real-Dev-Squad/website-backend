@@ -1,5 +1,4 @@
 const axios = require('axios')
-const logger = require('./logger')
 
 /**
  * Used for network calls

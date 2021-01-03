@@ -1,7 +1,5 @@
 const passport = require('passport')
 const GitHubStrategy = require('passport-github2').Strategy
-const config = require('config')
-const logger = require('../utils/logger')
 
 try {
   passport.use(new GitHubStrategy({
