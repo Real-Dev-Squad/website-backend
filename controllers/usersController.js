@@ -1,6 +1,9 @@
 
 const userQuery = require('../models/users')
 const { decodeAuthToken } = require('../services/authService')
+const {
+  setCache
+} = require('../services/cacheService')
 
 /**
  * Fetches the data about our users
@@ -12,11 +15,21 @@ const { decodeAuthToken } = require('../services/authService')
 const getUsers = async (req, res) => {
   try {
     const allUsers = await userQuery.fetchUsers(req.query)
+    const promises = []
 
-    return res.json({
+    res.json({
       message: 'Users returned successfully!',
       users: allUsers
     })
+
+    // ToDo: https://redis.io/topics/mass-insert
+    allUsers.forEach((user) => {
+      promises.push(setCache(user.id, user.github_id))
+      promises.push(setCache(user.github_id, user.id))
+    })
+
+    await Promise.all(promises)
+    return true
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')

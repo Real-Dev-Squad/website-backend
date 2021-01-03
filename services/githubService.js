@@ -1,5 +1,5 @@
 const { fetch } = require('../utils/fetch')
-const { fetchUser } = require('../models/users')
+const { getGitHubUsername } = require('./userService')
 
 /**
  * Creates the custom API URL with the required params in the format
@@ -61,7 +61,7 @@ function getFetch (url) {
 
 const fetchPRsByUser = async (username) => {
   try {
-    const { user } = await fetchUser({ username })
+    const user = await getGitHubUsername(username)
     const url = `${config.get('githubApi.baseUrl')}/search/issues?q=org:${config.get('githubApi.org')}+author:${user.github_id}+type:pr`
     return fetch(url, 'get', null, null, null, {
       auth: {
