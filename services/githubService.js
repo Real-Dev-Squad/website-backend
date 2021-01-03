@@ -1,5 +1,3 @@
-const logger = require('../utils/logger')
-const config = require('config')
 const { fetch } = require('../utils/fetch')
 const { fetchUser } = require('../models/users')
 

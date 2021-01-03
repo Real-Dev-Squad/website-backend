@@ -1,5 +1,4 @@
 const swaggerJsDoc = require('swagger-jsdoc')
-const config = require('config')
 
 /**
  * Read more on: https://swagger.io/docs/specification/about

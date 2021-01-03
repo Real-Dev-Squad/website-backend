@@ -1,5 +1,3 @@
-const config = require('config')
-const logger = require('../utils/logger')
 const authService = require('../services/authService')
 const users = require('../models/users')
 
