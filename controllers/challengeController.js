@@ -1,12 +1,13 @@
-const challengeQuery = require('../../models/roadmap-site/challenges')
-const subscribeToChallengeQuery = require('../../models/roadmap-site/subscribe-challenge')
+const { challengeQuery, subscribeToChallengeQuery } = require('../models/challenges')
 
-const errorAdminString = 'Something went wrong, please try again/contact admin'
+const errorAdminString = 'Something went wrong. Please try again/contact admin'
+
 /**
  * Get the challenges or add the challenge
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
+
 const sendChallengeResponse = async (req, res) => {
   try {
     if (req.method === 'GET') {
@@ -38,21 +39,23 @@ const sendChallengeResponse = async (req, res) => {
   }
   return ''
 }
+
 /**
  * Suscribe user to a challenge
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
+
 const subscribeToChallenge = async (req, res) => {
   try {
     const { user_id: userId, challenge_id: challengeId } = req.body
     const subscribeUser = await subscribeToChallengeQuery.subscribeUserToChallenge(userId, challengeId)
     if (subscribeUser) {
       return res.status(200).json({
-        message: 'user has suscribed to challenge'
+        message: 'User has suscribed to challenge'
       })
     } else {
-      return res.boom.notFound('user cannot be suscribed to challenge')
+      return res.boom.notFound('User cannot be suscribed to challenge')
     }
   } catch (err) {
     logger.error(`Error while retriving challenges ${err}`)
