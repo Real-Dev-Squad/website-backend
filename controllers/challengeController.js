@@ -1,4 +1,4 @@
-const { challengeQuery, subscribeToChallengeQuery } = require('../models/challenges')
+const challengeQuery = require('../models/challenges')
 
 const errorAdminString = 'Something went wrong. Please try again/contact admin'
 
@@ -49,7 +49,7 @@ const sendChallengeResponse = async (req, res) => {
 const subscribeToChallenge = async (req, res) => {
   try {
     const { user_id: userId, challenge_id: challengeId } = req.body
-    const subscribeUser = await subscribeToChallengeQuery.subscribeUserToChallenge(userId, challengeId)
+    const subscribeUser = await challengeQuery.subscribeUserToChallenge(userId, challengeId)
     if (subscribeUser) {
       return res.status(200).json({
         message: 'User has suscribed to challenge'
