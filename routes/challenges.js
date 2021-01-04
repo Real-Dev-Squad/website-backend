@@ -16,7 +16,9 @@ const challengesController = require('../controllers/challengeController')
  *       404:
  *         description : No challenges found
  *         content:
- *           application/json
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/challenges'
  *   post:
  *     summary: Post new challenge
  *     tags:
@@ -27,7 +29,9 @@ const challengesController = require('../controllers/challengeController')
  *       404:
  *         description : Not able to add challenge
  *         content:
- *           application/json
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/challenges'
  */
 
 router
@@ -45,10 +49,17 @@ router
  *    responses:
  *      200:
  *        description: subscribed sucessfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  example: User has subscribed to challenge
  *      404:
  *        description : not able to suscribed to challenge
- *        content:
- *          application/json
+ *
  */
 
 router.post('/subscribe', authenticate, challengesController.subscribeToChallenge)

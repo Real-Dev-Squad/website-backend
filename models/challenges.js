@@ -9,7 +9,7 @@ const firestore = require('../utils/firestore')
 const challengesModel = firestore.collection('challenges')
 const userModel = firestore.collection('users')
 
-const cannotSubscribe = 'User cannot be suscribed to challenge'
+const cannotSubscribe = 'User cannot be subscribed to challenge'
 const userDoesNotExistError = 'User does not exist. Please register to participate'
 const errorMessage = 'Error getting challenges'
 
