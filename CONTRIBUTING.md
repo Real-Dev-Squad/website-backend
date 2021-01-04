@@ -97,5 +97,3 @@ The following project structure should be followed:
 - Every pull request should have associated issue(s) on our [issue tracker](https://github.com/Real-Dev-Squad/website-backend/issues).
 - For any non-trivial fixes and features, unit and integration tests must be added. The PR reviewer should not approve/merge PR(s) that lack these.
 - The PR(s) should be merged only after the CI passes.
-
-
