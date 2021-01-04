@@ -94,6 +94,6 @@ router.get('/stale', pullRequestController.getStalePRs)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/user/:username', pullRequestController.getPRdetails)
+router.get('/user/:username', pullRequestController.getUserPRs)
 
 module.exports = router
