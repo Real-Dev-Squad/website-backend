@@ -1,5 +1,4 @@
 const winston = require('winston')
-const config = require('config')
 
 // define the custom settings for each transport (file, console)
 const options = {

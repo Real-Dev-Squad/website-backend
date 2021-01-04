@@ -1,5 +1,3 @@
-const config = require('config')
-const logger = require('../utils/logger')
 const authService = require('../services/authService')
 const users = require('../models/users')
 
@@ -31,10 +29,10 @@ module.exports = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1]
     }
 
-    const decoded = authService.verifyAuthToken(token)
+    const { userId } = authService.verifyAuthToken(token)
 
     // add user data to `req.userData` for further use
-    const userData = await users.fetchUser(decoded.userId)
+    const userData = await users.fetchUser({ userId })
     req.userData = userData.user
 
     return next()
@@ -44,12 +42,12 @@ module.exports = async (req, res, next) => {
     if (err.name === 'TokenExpiredError') {
       const refreshTtl = config.get('userToken.refreshTtl')
       const token = req.cookies[config.get('userToken.cookieName')]
-      const decoded = authService.decodeAuthToken(token)
-      const newToken = authService.generateAuthToken({ userId: decoded.userId })
+      const { userId, iat } = authService.decodeAuthToken(token)
+      const newToken = authService.generateAuthToken({ userId })
       const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'))
 
       // add new JWT to the response if it satisfies the refreshTtl time
-      if (Math.floor(Date.now() / 1000) - decoded.iat <= refreshTtl) {
+      if (Math.floor(Date.now() / 1000) - iat <= refreshTtl) {
         res.cookie(config.get('userToken.cookieName'), newToken, {
           domain: rdsUiUrl.hostname,
           expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
@@ -58,7 +56,7 @@ module.exports = async (req, res, next) => {
         })
 
         // add user data to `req.userData` for further use
-        req.userData = await users.fetchUser(decoded.userId)
+        req.userData = await users.fetchUser({ userId })
 
         return next()
       } else {

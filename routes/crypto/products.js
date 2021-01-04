@@ -27,8 +27,6 @@ const productsController = require('../../controllers/crypto/productsController'
  *               $ref: '#/components/schemas/errors/unAuthorized'
  */
 router.post('/', authenticate, productsController.addNewProduct)
-// router.patch('/:id', authenticate, productsController.getSelfDetails)
-// router.delete('/:id', authenticate, productsController.)
 
 /**
  * @swagger

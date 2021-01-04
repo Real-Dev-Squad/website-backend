@@ -1,6 +1,4 @@
 const swaggerJsDoc = require('swagger-jsdoc')
-const config = require('config')
-
 /**
  * Read more on: https://swagger.io/docs/specification/about
  *
@@ -53,17 +51,43 @@ const swaggerOptions = {
             }
           }
         },
-        user: {
+        pullRequests: {
           type: 'object',
           properties: {
-            uptime: {
-              type: 'number'
+            title: {
+              type: 'string'
+            },
+            url: {
+              type: 'string'
+            },
+            state: {
+              type: 'string'
+            },
+            createdAt: {
+              type: 'string'
+            },
+            updatedAt: {
+              type: 'string'
+            },
+            readyForReview: {
+              type: 'boolean'
+            },
+            labels: {
+              type: 'array',
+              items: []
+            },
+            assignees: {
+              type: 'array',
+              items: []
             }
           }
         },
         users: {
           type: 'object',
           properties: {
+            username: {
+              type: 'string'
+            },
             first_name: {
               type: 'string'
             },
@@ -206,7 +230,35 @@ const swaggerOptions = {
               }
             }
           },
+          forbidden: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
           badImplementation: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
+          serverUnavailable: {
             type: 'object',
             properties: {
               statusCode: {

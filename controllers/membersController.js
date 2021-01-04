@@ -1,4 +1,3 @@
-const logger = require('../utils/logger')
 const memberQuery = require('../models/members')
 
 /**

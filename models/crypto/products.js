@@ -23,8 +23,7 @@ const fetchProducts = async () => {
         id: doc.id,
         ...doc.data()
       })
-    }
-    )
+    })
 
     return allProducts
   } catch (err) {
@@ -49,7 +48,7 @@ const fetchProduct = async (id) => {
         }
       }
     }
-    return ''
+    return null
   } catch (err) {
     logger.error('Error retrieving product data', err)
     throw err
@@ -70,7 +69,7 @@ const addProduct = async (productData) => {
       return { productId: productInfo.id }
     }
 
-    return ''
+    return null
   } catch (err) {
     logger.error('Error adding product data', err)
     throw err

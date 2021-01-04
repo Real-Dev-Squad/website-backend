@@ -3,7 +3,6 @@ const router = express.Router()
 const authenticate = require('../../middlewares/authenticate')
 const usersController = require('../../controllers/crypto/usersController')
 
-// TODO: swager documantation
 /**
  * @swagger
  * /crypto/users/:id:

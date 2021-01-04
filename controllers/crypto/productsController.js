@@ -12,18 +12,18 @@ const getProducts = async (req, res) => {
   try {
     const allProducts = await productQuery.fetchProducts()
 
-    return res.json({
+    return res.status(200).json({
       message: 'Products returned successfully!',
       Products: allProducts
     })
   } catch (error) {
     logger.error(`Error while fetching all products: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.badImplementation('Something went wrong please contact admin')
   }
 }
 
 /**
- * Fetches the data od produc
+ * Fetches the data of product
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
@@ -38,12 +38,10 @@ const getProduct = async (req, res) => {
         Products: product
       })
     }
-    return res.status(404).json({
-      message: 'Product not found!'
-    })
+    return res.boom.notFound('Product not found!')
   } catch (error) {
     logger.error(`Error while fetching product: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.badImplementation('Something went wrong please contact admin')
   }
 }
 
@@ -68,7 +66,7 @@ const addNewProduct = async (req, res) => {
     return res.boom.conflict('Product already exists')
   } catch (error) {
     logger.error(`Error while creating new product: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.badImplementation('Something went wrong please contact admin')
   }
 }
 
