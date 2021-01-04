@@ -1,6 +1,6 @@
 const challengeQuery = require('../models/challenges')
 
-const errorAdminString = 'Something went wrong. Please try again/contact admin'
+const errorAdminString = 'Something went wrong. Please try again or contact admin'
 
 /**
  * Get the challenges or add the challenge
@@ -30,7 +30,7 @@ const sendChallengeResponse = async (req, res) => {
           })
         }
       } else {
-        return res.boom.notFound('Not able to add challenge')
+        return res.boom.notFound('Unable to add challenge')
       }
     }
   } catch (err) {
@@ -52,13 +52,13 @@ const subscribeToChallenge = async (req, res) => {
     const subscribeUser = await challengeQuery.subscribeUserToChallenge(userId, challengeId)
     if (subscribeUser) {
       return res.status(200).json({
-        message: 'User has suscribed to challenge'
+        message: 'User has subscribed to challenge'
       })
     } else {
-      return res.boom.notFound('User cannot be suscribed to challenge')
+      return res.boom.notFound('User cannot be subscribed to challenge')
     }
   } catch (err) {
-    logger.error(`Error while retriving challenges ${err}`)
+    logger.error(`Error while retrieving challenges ${err}`)
     return res.boom.serverUnavailable(errorAdminString)
   }
 }

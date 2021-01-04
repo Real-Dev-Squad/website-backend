@@ -7,21 +7,25 @@ const challengesController = require('../controllers/challengeController')
  * @swagger
  * /challenges/:
  *   get:
- *     summary: Use to get the challenges
+ *     summary: Used to get all the challenges
+ *     tags:
+ *       - Challenges
  *     responses:
  *       200:
- *         description: return challenges
+ *         description: Return challenges
  *       404:
- *         description : no challenges found
+ *         description : No challenges found
  *         content:
  *           application/json
  *   post:
  *     summary: Post new challenge
+ *     tags:
+ *       - Challenges
  *     responses:
  *       200:
- *         description: post challenge
+ *         description: Post challenge
  *       404:
- *         description : not able to add challenge
+ *         description : Not able to add challenge
  *         content:
  *           application/json
  */
@@ -36,6 +40,8 @@ router
  * /challenges/subscribe:
  *  post:
  *    summary: Subscribe user to challenge
+ *    tags:
+ *      - Challenges
  *    responses:
  *      200:
  *        description: subscribed sucessfully
