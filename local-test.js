@@ -1,7 +1,6 @@
 const fs = require('fs')
 const Firestore = require('./utils/firestore.js')
 const config = require('config')
-const logger = require('./utils/logger')
 
 // check whether github credentials are not falsy
 if (
@@ -35,5 +34,5 @@ if (!firestoreData) {
     throw new Error('Problem with permission of read and write.\nCheck your firestore permissions')
   }
   await docRef.delete()
-  logger.info('Success! The backend was successfully set up.')
+  console.log('Success! The backend was successfully set up.')
 })()
