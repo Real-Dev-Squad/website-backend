@@ -5,7 +5,7 @@ const challengesController = require('../controllers/challengeController')
 
 /**
  * @swagger
- * /challenges/:
+ * /challenges:
  *   get:
  *     summary: Used to get all the challenges
  *     tags:

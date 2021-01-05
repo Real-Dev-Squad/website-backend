@@ -9,9 +9,9 @@ const firestore = require('../utils/firestore')
 const challengesModel = firestore.collection('challenges')
 const userModel = firestore.collection('users')
 
-const cannotSubscribe = 'User cannot be subscribed to challenge'
-const userDoesNotExistError = 'User does not exist. Please register to participate'
-const errorMessage = 'Error getting challenges'
+const CANNOTSUBSCRIBE = 'User cannot be subscribed to challenge'
+const USERDOESNOTEXISTERROR = 'User does not exist. Please register to participate'
+const ERRORMESSAGE = 'Error getting challenges'
 
 /**
  * Fetch the challenges
@@ -21,18 +21,16 @@ const errorMessage = 'Error getting challenges'
 const fetchChallenges = async () => {
   try {
     const challengesSnapshot = await challengesModel.get()
-    return (function () {
-      const challenges = []
-      challengesSnapshot.forEach((challengeDoc) => {
-        challenges.push({
-          id: challengeDoc.id,
-          ...challengeDoc.data()
-        })
+    const challenges = []
+    challengesSnapshot.forEach((challengeDoc) => {
+      challenges.push({
+        id: challengeDoc.id,
+        ...challengeDoc.data()
       })
-      return challenges
-    })()
+    })
+    return challenges
   } catch (err) {
-    logger.error(errorMessage, err)
+    logger.error(ERRORMESSAGE, err)
     throw err
   }
 }
@@ -54,7 +52,7 @@ const postChallenge = async (challengeData) => {
       return allChallenges
     } else return ''
   } catch (err) {
-    logger.error(errorMessage, err)
+    logger.error(ERRORMESSAGE, err)
     throw err
   }
 }
@@ -74,10 +72,10 @@ const subscribeUserToChallenge = async (userId, challengeId) => {
       await challengeRef.update({ participants: Firestore.FieldValue.arrayUnion({ name: user }) })
       return challengeRef.get()
     } else {
-      throw new Error(userDoesNotExistError)
+      throw new Error(USERDOESNOTEXISTERROR)
     }
   } catch (err) {
-    logger.error(cannotSubscribe, err)
+    logger.error(CANNOTSUBSCRIBE, err)
     throw err
   }
 }

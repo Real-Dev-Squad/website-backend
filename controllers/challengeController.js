@@ -1,6 +1,6 @@
 const challengeQuery = require('../models/challenges')
 
-const errorAdminString = 'Something went wrong. Please try again or contact admin'
+const ERRORADMINSTRING = 'Something went wrong. Please try again or contact admin'
 
 /**
  * Get the challenges or add the challenge
@@ -33,11 +33,11 @@ const sendChallengeResponse = async (req, res) => {
         return res.boom.notFound('Unable to add challenge')
       }
     }
+    return ''
   } catch (err) {
     logger.error(`Error while retriving challenges ${err}`)
-    return res.boom.serverUnavailable(errorAdminString)
+    return res.boom.serverUnavailable(ERRORADMINSTRING)
   }
-  return ''
 }
 
 /**
@@ -59,7 +59,7 @@ const subscribeToChallenge = async (req, res) => {
     }
   } catch (err) {
     logger.error(`Error while retrieving challenges ${err}`)
-    return res.boom.serverUnavailable(errorAdminString)
+    return res.boom.serverUnavailable(ERRORADMINSTRING)
   }
 }
 
