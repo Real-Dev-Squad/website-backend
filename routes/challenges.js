@@ -33,7 +33,6 @@ const challengesController = require('../controllers/challengeController')
  *             schema:
  *               $ref: '#/components/schemas/challenges'
  */
-
 router
   .route('/')
   .get(authenticate, challengesController.sendChallengeResponse)
@@ -61,7 +60,6 @@ router
  *        description : not able to suscribed to challenge
  *
  */
-
 router.post('/subscribe', authenticate, challengesController.subscribeToChallenge)
 
 module.exports = router
