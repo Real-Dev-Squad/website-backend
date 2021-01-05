@@ -34,5 +34,7 @@ if (!firestoreData) {
     throw new Error('Problem with permission of read and write.\nCheck your firestore permissions')
   }
   await docRef.delete()
+
+  // eslint-disable-next-line no-console
   console.log('Success! The backend was successfully set up.')
 })()
