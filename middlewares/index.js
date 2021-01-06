@@ -23,7 +23,6 @@ const middleware = (app) => {
   app.use(morgan('combined', { stream: logger.stream }))
 
   // Request parsing middlewares
-  app.use(contentTypeCheck)
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
@@ -33,7 +32,7 @@ const middleware = (app) => {
     credentials: true,
     optionsSuccessStatus: 200
   }))
-
+  app.use(contentTypeCheck)
   app.use(passport.initialize())
 
   // Enable Swagger API docs in non-production environments

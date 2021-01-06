@@ -19,6 +19,11 @@ module.exports = {
     __format: 'boolean'
   },
 
+  githubApi: {
+    baseUrl: 'GITHUB_API_BASE_URL',
+    org: 'GITHUB_ORGANISATION'
+  },
+
   githubOauth: {
     clientId: 'GITHUB_CLIENT_ID',
     clientSecret: 'GITHUB_CLIENT_SECRET'
