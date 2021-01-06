@@ -102,15 +102,16 @@ const fetchStalePRs = async () => {
  * Fetches the latest 10 open PRs
  * @todo fetch N from query params
  */
-const fetchOpenPRs = async () => {
+const fetchOpenPRs = async (pageNumber) => {
   try {
+    
     const url = getGithubURL({
       is: 'open'
     }, {
       sort: 'created',
       order: 'desc',
       per_page: 10,
-      page: 1
+      page: pageNumber
     })
     return getFetch(url)
   } catch (err) {
