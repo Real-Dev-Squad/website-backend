@@ -107,7 +107,12 @@ const getStalePRs = async (req, res) => {
  */
 const getOpenPRs = async (req, res) => {
   try {
-    const { data } = await githubService.fetchOpenPRs(req.query.page)
+    let pageNumber = 1
+
+    if (req.query.page > 1) {
+      pageNumber = req.query.page
+    }
+    const { data } = await githubService.fetchOpenPRs(pageNumber)
 
     if (data.total_count) {
       const allPRs = []
