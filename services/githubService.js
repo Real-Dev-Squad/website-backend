@@ -104,7 +104,6 @@ const fetchStalePRs = async () => {
  */
 const fetchOpenPRs = async (pageNumber) => {
   try {
-    
     const url = getGithubURL({
       is: 'open'
     }, {

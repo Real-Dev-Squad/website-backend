@@ -107,7 +107,6 @@ const getStalePRs = async (req, res) => {
  */
 const getOpenPRs = async (req, res) => {
   try {
-    
     const { data } = await githubService.fetchOpenPRs(req.query.page)
 
     if (data.total_count) {
