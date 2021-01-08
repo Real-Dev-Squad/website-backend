@@ -13,12 +13,22 @@ const challengesController = require('../controllers/challengeController')
  *     responses:
  *       200:
  *         description: Return challenges
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/challenges'
  *       404:
  *         description : No challenges found
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/challenges'
+ *               $ref: '#/components/schemas/errors/notFound'
+ *       503:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
  *   post:
  *     summary: Post new challenge
  *     tags:
@@ -26,12 +36,22 @@ const challengesController = require('../controllers/challengeController')
  *     responses:
  *       200:
  *         description: Post challenge
- *       404:
- *         description : Not able to add challenge
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/challenges'
+ *       404:
+ *         description : Unable to add challenge
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *       503:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 router
   .route('/')
@@ -47,7 +67,7 @@ router
  *      - Challenges
  *    responses:
  *      200:
- *        description: subscribed sucessfully
+ *        description: Subscribed sucessfully
  *        content:
  *          application/json:
  *            schema:
@@ -57,7 +77,17 @@ router
  *                  type: string
  *                  example: User has subscribed to challenge
  *      404:
- *        description : not able to suscribed to challenge
+ *         description : Unable to add challenge
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *      503:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
  *
  */
 router.post('/subscribe', authenticate, challengesController.subscribeToChallenge)
