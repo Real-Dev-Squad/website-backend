@@ -8,13 +8,14 @@ const { fetchUser } = require('../models/users')
 
 const extractPRdetails = (data) => {
   const allPRs = []
-  data.items.forEach(({ title, html_url: url, state, created_at: createdAt, updated_at: updatedAt, repository_url: repositoryUrl, labels, assignees }) => {
+  data.items.forEach(({ title, user, html_url: url, state, created_at: createdAt, updated_at: updatedAt, repository_url: repositoryUrl, labels, assignees }) => {
     const allAssignees = assignees.map(object => object.login)
     const allLabels = labels.map(object => object.name)
     const repositoryUrlSplit = repositoryUrl.split('/')
     const repository = repositoryUrlSplit[repositoryUrlSplit.length - 1]
     allPRs.push({
       title,
+      username: user.login,
       state,
       createdAt,
       updatedAt,
