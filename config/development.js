@@ -4,6 +4,7 @@
  */
 
 const port = 3000
+const localUrl = `http://localhost:${port}`
 
 module.exports = {
   port: port,
@@ -12,7 +13,14 @@ module.exports = {
 
   services: {
     rdsApi: {
-      baseUrl: `http://localhost:${port}`
+      baseUrl: localUrl
+    },
+
+    rdsUi: {
+      baseUrl: localUrl,
+      routes: {
+        authRedirection: '/healthcheck'
+      }
     }
   },
 
