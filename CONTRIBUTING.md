@@ -5,6 +5,8 @@
 - [NPM Command Reference](#npm-command-reference)
 - [Project Structure](#project-structure)
 - [Generating Authentication Token](#generating-authentication-token)
+- [Testing Guidelines](#testing-guidelines)
+- [Using Firebase Emulator Locally](#using-firebase-emulator-locally)
 - [Pull request guidelines](#pull-request-guidelines)
 
 ## Getting Started
@@ -58,6 +60,7 @@ The following project structure should be followed:
     |   |-- auth.js // the individual routes files should contain the OPEN API JSDOC reference
     |-- services
     |   |-- authService.js // Files using any 3rd party library/service or providing any secific service in the project
+    |-- scripts // Standalone scripts
     |-- test
     |   |-- fixtures
     |   |   |-- auth
@@ -65,15 +68,19 @@ The following project structure should be followed:
     |   |-- integration // Integration tests
     |   |   |-- authController.test.js
     |   |-- unit // Unit tests
+    |   |   |-- middlewares
+    |   |   |-- services
+    |   |-- utils // Utility functions to be used while testing
     |-- utils // Files containing utility functions
     |    |-- logger.js
     |-- .github
     |   |-- workflows
     |       |-- // Github actions files
     |-- .gitignore
-    |-- .*rc, .*js, .*json, .*yml // config files for dependencies 
+    |-- .*rc, .*js, .*json, .*yml // config files for dependencies
     |-- CONTRIBUTING.md
     |-- README.md
+    |-- CHANGELOG.md
     |-- app.js
     |-- firestore-private-key.json // Firestore key file
     |-- package-lock.json
@@ -91,9 +98,31 @@ The following project structure should be followed:
 - For non-production environments, authentication is also supported with the `Authorization` header.
 - Authorization header: `Authorization: Bearer <token>`
 
+## Testing Guidelines
+- Libraries used in testing in the project:
+  - [mocha](https://mochajs.org/): Test framework
+  - [chai](https://www.chaijs.com/): Assertion library
+  - [sinon](https://sinonjs.org/): JavaScript test spies, stubs and mocks
+  - [nock](https://github.com/nock/nock/blob/main/README.md): HTTP requests mocking
+- The test suite uses [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) for running firestore for tests([documentation](https://firebase.google.com/docs/emulator-suite/install_and_configure)).
+- Pre-requisites:
+  - Node.js version 8.0 or higher.
+  - Java version 1.8 or higher.
+  - Firebase CLI: `npm install -g firebase-tools`
+
+## Using Firebase Emulator Locally
+- [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) can be used locally as the DB for the project
+- Pre-requisites:
+  - Node.js version 8.0 or higher.
+  - Java version 1.8 or higher.
+  - Firebase CLI: `npm install -g firebase-tools`
+- Run: `firebase emulators:start`
+- The emulator will be running on the port: 8080
+- You can view the emulator UI at: `http://localhost:4000`
+
 ## Pull request guidelines
 - Ensure that the tests pass locally before raising a PR.
-- All pull requests should be to the develop branch. 
+- All pull requests should have base as the develop branch.
 - Every pull request should have associated issue(s) on our [issue tracker](https://github.com/Real-Dev-Squad/website-backend/issues).
 - For any non-trivial fixes and features, unit and integration tests must be added. The PR reviewer should not approve/merge PR(s) that lack these.
 - The PR(s) should be merged only after the CI passes.

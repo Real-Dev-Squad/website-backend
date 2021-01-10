@@ -17,20 +17,25 @@
 This Project serves the backend APIs required for [Real Dev Squad](https://realdevsquad.com/) web projects. This project is built in [Express.js](https://expressjs.com/).
 
 ## Running the Project
-```shell script
+```shell
 $ npm install
-$ npm start 
+$ npm start
 ```
 #### Running in dev mode
-```shell script
+```shell
 $ npm run dev
 ```
 
+#### Test local setup
+```shell
+$ npm run test-config
+```
+
 ## Prerequisites
+- The application uses [node-config](https://github.com/lorenwest/node-config)([documentation](https://github.com/lorenwest/node-config/wiki/Configuration-Files)) for managing config.
 - Create a new file: `config/local.js`. Override the required config values from `config/development.js` and `config/default.js` into `config/local.js`.
 - Register the application for [GitHub OAuth](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps) to get the `clientId` and `clientSecret`. Add the callback URL as `http://<HOSTNAME>:<PORT>/auth/github/callback`
-- Create an application on [FireStore](https://firebase.google.com/docs/firestore) and [generate a service file](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). Add the service file with the name `firestore-private-key.json` in the project root. 
-- Make sure your local development setup is working properly by running the following command: `npm run test-config`.
+- Create an application on [FireStore](https://firebase.google.com/docs/firestore) and [generate a service file](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). Add the service file with the name `firestore-private-key.json` in the project root.
 
 ## API Documentation:
 - Run the server and navigate to `http://<HOSTNAME>:<PORT>/api-docs` to view the API documentation.
@@ -38,3 +43,5 @@ $ npm run dev
 - If any API changes have been made:
     - Write JS Doc on top of your routes using YAML based annotations in OPEN API 3.0 format.
     - Run `npm run generate-api-schema` to generate the API schema. A file `public/apiSchema.json` will be created/updated.
+
+Read more about contributing to the project: [CONTRIBUTING](CONTRIBUTING.md)
