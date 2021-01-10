@@ -8,8 +8,8 @@
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "test-config": "node local-test.js",
-    "test-integration": "cross-env NODE_ENV=test mocha test/integration/**",
-    "test-unit": "cross-env NODE_ENV=test mocha test/unit/**",
+    "test-integration": "./scripts/tests/testIntegration.sh",
+    "test-unit": "./scripts/tests/testUnit.sh",
     "test": "npm run lint && npm run test-integration && npm run test-unit",
     "generate-api-schema": "node utils/generateAPISchema.js"
   },
@@ -48,6 +48,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "mocha": "^8.1.1",
     "nodemon": "^2.0.4",
+    "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
     "sinon": "^9.0.3",
     "standard": "^14.3.4"
