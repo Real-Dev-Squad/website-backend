@@ -82,15 +82,38 @@ const swaggerOptions = {
               type: 'array',
               items: []
             },
-            participants: {
-              type: 'array',
-              items: []
-            },
             completionAward: {
               type: 'object'
             },
             lossRate: {
               type: 'object'
+            }
+          }
+        },
+        challenges: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string'
+            },
+            title: {
+              type: 'string'
+            },
+            level: {
+              type: 'string'
+            },
+            start_date: {
+              type: 'string'
+            },
+            end_date: {
+              type: 'string'
+            },
+            is_active: {
+              type: 'boolean'
+            },
+            participants: {
+              type: 'array',
+              items: []
             }
           }
         },
