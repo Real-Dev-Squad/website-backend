@@ -16,7 +16,7 @@ const addNewTask = async (req, res) => {
     })
   } catch (err) {
     logger.error(`Error while creating new task: ${err}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.badImplementation('An internal server error occurred')
   }
 }
 /**
@@ -37,7 +37,7 @@ const fetchTasks = async (req, res) => {
     return res.boom.notFound('No tasks found')
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.badImplementation('An internal server error occurred')
   }
 }
 

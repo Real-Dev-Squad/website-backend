@@ -53,6 +53,47 @@ const swaggerOptions = {
             }
           }
         },
+        tasks: {
+          type: 'object',
+          properties: {
+            type: {
+              type: 'string'
+            },
+            links: {
+              type: 'array',
+              items: []
+            },
+            endsOn: {
+              type: 'string'
+            },
+            startedOn: {
+              type: 'string'
+            },
+            status: {
+              type: 'string'
+            },
+            ownerId: {
+              type: 'string'
+            },
+            percentCompleted: {
+              type: 'number'
+            },
+            dependsOn: {
+              type: 'array',
+              items: []
+            },
+            participants: {
+              type: 'array',
+              items: []
+            },
+            completionAward: {
+              type: 'object'
+            },
+            lossRate: {
+              type: 'object'
+            }
+          }
+        },
         pullRequests: {
           type: 'object',
           properties: {
