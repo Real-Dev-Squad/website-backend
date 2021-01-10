@@ -27,7 +27,7 @@ const tasksController = require('../controllers/tasksController')
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/tasks', tasksController.fetchTasks)
+router.get('/', tasksController.fetchTasks)
 
 /**
  * @swagger
