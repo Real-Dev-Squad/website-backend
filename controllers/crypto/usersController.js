@@ -69,7 +69,7 @@ const updateTransactionHistory = async (req, res) => {
       })
     }
 
-    return res.boom.notFound('user doesnot exists')
+    return res.boom.notFound('User doesn\'t exist')
   } catch (error) {
     logger.error(`Error while updating user transaction history: ${error}`)
     return res.boom.badImplementation('Something went wrong please contact admin')
@@ -94,7 +94,7 @@ const updateShoppingHistory = async (req, res) => {
       })
     }
 
-    return res.boom.notFound('user doesnot exists')
+    return res.boom.notFound('User doesn\'t exist')
   } catch (error) {
     logger.error(`Error while updating user shopping history: ${error}`)
     return res.boom.badImplementation('Something went wrong please contact admin')
@@ -119,7 +119,7 @@ const updateCart = async (req, res) => {
       })
     }
 
-    return res.boom.notFound('user doesnot exists')
+    return res.boom.notFound('User doesn\'t exist')
   } catch (error) {
     logger.error(`Error while updating user cart: ${error}`)
     return res.boom.badImplementation('Something went wrong please contact admin')
@@ -144,7 +144,7 @@ const sendCoins = async (req, res) => {
       })
     }
 
-    return res.boom.notFound('user doesnot exists')
+    return res.boom.notFound('User doesn\'t exist')
   } catch (error) {
     logger.error(`Error while updating user cart: ${error}`)
     return res.boom.badImplementation('Something went wrong please contact admin')
@@ -168,7 +168,7 @@ const receiveCoins = async (req, res) => {
       })
     }
 
-    return res.boom.notFound('user doesnot exists')
+    return res.boom.notFound('User doesn\'t exist')
   } catch (error) {
     logger.error(`Error while updating user cart: ${error}`)
     return res.boom.badImplementation('Something went wrong please contact admin')

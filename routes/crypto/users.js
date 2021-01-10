@@ -15,15 +15,21 @@ const usersController = require('../../controllers/crypto/usersController')
  *         data: id
  *     responses:
  *       201:
- *         description: user added successfully
+ *         description: User added successfully
  *       409:
- *         description: user already exists
+ *         description: User doesn't exist
  *       401:
  *         description: Unauthorized
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
 router.put('/:id', authenticate, usersController.addNewUser)
 
@@ -39,15 +45,21 @@ router.put('/:id', authenticate, usersController.addNewUser)
  *         data: id, dataObject
  *     responses:
  *       201:
- *         description: user added successfully
+ *         description: User added successfully
  *       409:
- *         description: user already exists
+ *         description: User doesn't exist
  *       401:
  *         description: Unauthorized
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
 router.patch('/:id/transactionHistory', authenticate, usersController.updateTransactionHistory)
 
@@ -63,15 +75,21 @@ router.patch('/:id/transactionHistory', authenticate, usersController.updateTran
  *         data: id, dataObject
  *     responses:
  *       201:
- *         description: user added successfully
+ *         description: User added successfully
  *       409:
- *         description: user already exists
+ *         description: User doesn't exist
  *       401:
  *         description: Unauthorized
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
 router.patch('/:id/shoppingHistory', authenticate, usersController.updateShoppingHistory)
 
@@ -87,15 +105,21 @@ router.patch('/:id/shoppingHistory', authenticate, usersController.updateShoppin
  *         data: id, dataObject
  *     responses:
  *       201:
- *         description: user added successfully
+ *         description: User added successfully
  *       409:
- *         description: user already exists
+ *         description: User doesn't exist
  *       401:
  *         description: Unauthorized
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
 router.patch('/:id/cart', authenticate, usersController.updateCart)
 
@@ -111,15 +135,21 @@ router.patch('/:id/cart', authenticate, usersController.updateCart)
  *         data: id, dataObject
  *     responses:
  *       201:
- *         description: user added successfully
+ *         description: User added successfully
  *       409:
- *         description: user already exists
+ *         description: User doesn't exist
  *       401:
  *         description: Unauthorized
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
 router.patch('/:id/send', authenticate, usersController.sendCoins)
 
@@ -135,15 +165,21 @@ router.patch('/:id/send', authenticate, usersController.sendCoins)
  *         data: id, dataObject
  *     responses:
  *       201:
- *         description: user added successfully
+ *         description: User added successfully
  *       409:
- *         description: user already exists
+ *         description: User doesn't exist
  *       401:
  *         description: Unauthorized
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
 router.patch('/:id/receive', authenticate, usersController.receiveCoins)
 
@@ -168,6 +204,12 @@ router.patch('/:id/receive', authenticate, usersController.receiveCoins)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
 router.get('/:id', authenticate, usersController.getUser)
 

@@ -1,9 +1,8 @@
-function isBalanceSufficient (senderCoins, reveicerCoins) {
-  if (senderCoins.copper >= reveicerCoins.copper && senderCoins.silver >= reveicerCoins.silver && senderCoins.gold >= reveicerCoins.gold) {
-    return true
-  }
-  return false
-}
+const isBalanceSufficient = (senderCoins, reveicerCoins) => (
+  senderCoins.copper >= reveicerCoins.copper &&
+  senderCoins.silver >= reveicerCoins.silver &&
+  senderCoins.gold >= reveicerCoins.gold
+)
 
 function updateBalance (payer, receiver, requestCoins) {
   const payerCoins = {

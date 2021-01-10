@@ -3,7 +3,6 @@ const router = express.Router()
 const authenticate = require('../../middlewares/authenticate')
 const productsController = require('../../controllers/crypto/productsController')
 
-// TODO: swager documantation
 /**
  * @swagger
  * /crypto/products:
@@ -25,6 +24,12 @@ const productsController = require('../../controllers/crypto/productsController'
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
 router.post('/', authenticate, productsController.addNewProduct)
 
@@ -46,12 +51,18 @@ router.post('/', authenticate, productsController.addNewProduct)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('', productsController.getProducts)
+router.get('/', productsController.getProducts)
 
 /**
  * @swagger
- * /crypto/product:
+ * /crypto/product/:id:
  *   get:
  *     summary: Get product with id from crypto site
  *     tags:
@@ -67,6 +78,12 @@ router.get('', productsController.getProducts)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
 router.get('/:id', productsController.getProduct)
 

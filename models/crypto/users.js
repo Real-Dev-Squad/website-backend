@@ -148,7 +148,7 @@ const sendCoins = async (id, receiverData) => {
       await cryptoUsersModel.doc(receiver.id).update({ coins: receiverCoins }, { merge: true })
       return { message: 'Transaction Successful' }
     }
-    return { message: 'Insifficient funds' }
+    return { message: 'Insufficient funds' }
   } catch (err) {
     logger.error('Error adding user data', err)
     throw err
