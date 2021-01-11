@@ -36,6 +36,12 @@ router.get('/', tasksController.fetchTasks)
  * /tasks:
  *  post:
  *   summary: Used to create new task
+ *   requestBody:
+ *     description: Task data
+ *     content:
+ *       application/json:
+ *         schema:
+ *           $ref: '#/components/schemas/tasks'
  *   responses:
  *     200:
  *       description: returns newly created task
@@ -57,6 +63,12 @@ router.post('/', createTask, tasksController.addNewTask)
  * /tasks:
  *  patch:
  *   summary: Used to update task details
+ *   requestBody:
+ *     description: Task data to be updated
+ *     content:
+ *       application/json:
+ *         schema:
+ *           $ref: '#/components/schemas/tasks'
  *   responses:
  *     204:
  *       description: no content
