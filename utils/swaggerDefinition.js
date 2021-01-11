@@ -84,13 +84,39 @@ const swaggerOptions = {
             },
             dependsOn: {
               type: 'array',
-              items: []
+              items: {
+                taskid: {
+                  type: 'string'
+                }
+              }
             },
             completionAward: {
-              type: 'object'
+              type: 'object',
+              properties: {
+                gold: {
+                  type: 'number'
+                },
+                silver: {
+                  type: 'number'
+                },
+                bronze: {
+                  type: 'number'
+                }
+              }
             },
             lossRate: {
-              type: 'object'
+              type: 'object',
+              properties: {
+                gold: {
+                  type: 'number'
+                },
+                silver: {
+                  type: 'number'
+                },
+                bronze: {
+                  type: 'number'
+                }
+              }
             }
           }
         },
