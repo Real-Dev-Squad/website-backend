@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const tasksController = require('../controllers/tasksController')
+const { createTask, updateTask } = require('../middlewares/validators/tasks')
 
 /**
  * @swagger
@@ -49,7 +50,7 @@ router.get('/', tasksController.fetchTasks)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/', tasksController.addNewTask)
+router.post('/', createTask, tasksController.addNewTask)
 
 /**
  * @swagger
@@ -72,6 +73,6 @@ router.post('/', tasksController.addNewTask)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/:id', tasksController.updateTask)
+router.patch('/:id', updateTask, tasksController.updateTask)
 
 module.exports = router
