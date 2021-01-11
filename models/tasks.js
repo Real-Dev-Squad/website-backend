@@ -2,15 +2,25 @@ const firestore = require('../utils/firestore')
 const tasksModel = firestore.collection('tasks')
 
 /**
- * Adds new task
+ * Adds and Updates tasks
  *
  * @param taskData { Object }: task data object to be stored in DB
+ * @param taskId { string }: taskid which will be used to update the task in DB
  * @return {Promise<{taskId: string}>}
  */
-const addTask = async (taskData) => {
+const updateTask = async (taskData, taskId = null) => {
   try {
+    if (taskId) {
+      const task = await tasksModel.doc(taskId).get()
+      await tasksModel.doc(taskId).set({
+        ...task.data(),
+        ...taskData
+      })
+      return { taskId }
+    }
     const taskInfo = await tasksModel.add(taskData)
-    return { taskId: taskInfo.id }
+    const newlyCreatedTaskData = await fetchTask(taskInfo.id)
+    return { taskId: taskInfo.id, taskDetails: newlyCreatedTaskData.taskData }
   } catch (err) {
     logger.error('Error in creating task', err)
     throw err
@@ -39,7 +49,23 @@ const fetchTasks = async () => {
   }
 }
 
+/**
+ * Fetch a task
+ * @param taskId { string }: taskid which will be used to fetch the task
+ * @return {Promise<taskData|Object>}
+ */
+const fetchTask = async (taskId) => {
+  try {
+    const task = await tasksModel.doc(taskId).get()
+    return { taskData: task.data() }
+  } catch (err) {
+    logger.error('Error retrieving task data', err)
+    throw err
+  }
+}
+
 module.exports = {
-  addTask,
-  fetchTasks
+  updateTask,
+  fetchTasks,
+  fetchTask
 }

@@ -61,7 +61,11 @@ const swaggerOptions = {
             },
             links: {
               type: 'array',
-              items: []
+              items: {
+                link1: {
+                  type: 'string'
+                }
+              }
             },
             endsOn: {
               type: 'string'
