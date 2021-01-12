@@ -1,4 +1,4 @@
-const taskQuery = require('../models/tasks')
+const tasks = require('../models/tasks')
 /**
  * Creates new task
  *
@@ -8,7 +8,7 @@ const taskQuery = require('../models/tasks')
  */
 const addNewTask = async (req, res) => {
   try {
-    const task = await taskQuery.updateTask(req.body)
+    const task = await tasks.updateTask(req.body)
     return res.json({
       message: 'Task created successfully!',
       task: task.taskDetails,
@@ -27,14 +27,11 @@ const addNewTask = async (req, res) => {
  */
 const fetchTasks = async (req, res) => {
   try {
-    const allTasks = await taskQuery.fetchTasks()
-    if (allTasks.length > 0) {
-      return res.json({
-        message: 'Tasks returned successfully!',
-        tasks: allTasks
-      })
-    }
-    return res.boom.notFound('No tasks found')
+    const allTasks = await tasks.fetchTasks()
+    return res.json({
+      message: 'Tasks returned successfully!',
+      tasks: allTasks.length > 0 ? allTasks : []
+    })
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`)
     return res.boom.badImplementation('An internal server error occurred')
@@ -49,16 +46,16 @@ const fetchTasks = async (req, res) => {
  */
 const updateTask = async (req, res) => {
   try {
-    const task = await taskQuery.fetchTask(req.params.id)
+    const task = await tasks.fetchTask(req.params.id)
     if (!task.taskData) {
       return res.boom.notFound('Task not found')
     }
 
-    await taskQuery.updateTask(req.body, req.params.id)
+    await tasks.updateTask(req.body, req.params.id)
     return res.status(204).send()
   } catch (err) {
     logger.error(`Error while updating user: ${err}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.badImplementation('An internal server error occurred')
   }
 }
 
