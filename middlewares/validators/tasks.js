@@ -2,6 +2,9 @@ const joi = require('joi')
 
 const createTask = async (req, res, next) => {
   const schema = joi.object().keys({
+    title: joi.string().required(),
+    purpose: joi.string().required(),
+    featureUrl: joi.string().optional(),
     type: joi.string().required(),
     links: joi.array().items(joi.string()),
     endsOn: joi.string(),
@@ -20,7 +23,8 @@ const createTask = async (req, res, next) => {
       gold: joi.number(),
       silver: joi.number(),
       bronze: joi.number()
-    }).optional()
+    }).optional(),
+    isNoteworthy: joi.bool().optional()
   })
 
   try {
@@ -34,6 +38,9 @@ const createTask = async (req, res, next) => {
 
 const updateTask = async (req, res, next) => {
   const schema = joi.object().keys({
+    title: joi.string().optional(),
+    purpose: joi.string().optional(),
+    featureUrl: joi.string().optional(),
     type: joi.string().optional(),
     links: joi.array().items(joi.string()),
     endsOn: joi.string().optional(),
@@ -52,7 +59,8 @@ const updateTask = async (req, res, next) => {
       gold: joi.number(),
       silver: joi.number(),
       bronze: joi.number()
-    }).optional()
+    }).optional(),
+    isNoteworthy: joi.bool().optional()
   })
 
   try {

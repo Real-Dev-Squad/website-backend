@@ -56,6 +56,15 @@ const swaggerOptions = {
         tasks: {
           type: 'object',
           properties: {
+            title: {
+              type: 'string'
+            },
+            purpose: {
+              type: 'string'
+            },
+            featureUrl: {
+              type: 'string'
+            },
             type: {
               type: 'string'
             },
@@ -125,6 +134,9 @@ const swaggerOptions = {
                   type: 'number'
                 }
               }
+            },
+            isNoteworthy: {
+              type: 'boolean'
             }
           }
         },
