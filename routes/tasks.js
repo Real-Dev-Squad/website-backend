@@ -15,12 +15,6 @@ const { createTask, updateTask } = require('../middlewares/validators/tasks')
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/tasks'
- *     404:
- *       description : no tasks found
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/errors/notFound'
  *     500:
  *       description: badImplementation
  *       content:
