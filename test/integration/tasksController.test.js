@@ -9,6 +9,35 @@ const tasks = require('../../models/tasks')
 chai.use(chaiHttp)
 
 describe('Tasks', function () {
+  let tid = ''
+  before(async function () {
+    this.enableTimeouts(false)
+    const taskData = {
+      title: 'Test Task',
+      purpose: 'To Test mocha',
+      featureUrl: '<testUrl>',
+      type: 'Dev | Group',
+      links: [
+        'test1'
+      ],
+      endsOn: '<unix timestamp>',
+      startedOn: '<unix timestamp>',
+      status: 'Active',
+      ownerId: '<app owner user id>',
+      percentCompleted: 10,
+      dependsOn: [
+        'd12',
+        'd23'
+      ],
+      participants: ['id1'],
+      completionAward: { gold: 3, bronze: 300 },
+      lossRate: { gold: 1 },
+      isNoteWorthy: true
+    }
+    const { taskId } = await tasks.updateTask(taskData)
+    tid = taskId
+  })
+
   afterEach(function () {
     sinon.restore()
   })
@@ -23,6 +52,9 @@ describe('Tasks', function () {
         .request(app)
         .post('/tasks')
         .send({
+          title: 'Test Task',
+          purpose: 'To Test mocha',
+          featureUrl: '<testUrl>',
           type: 'Dev | Group',
           links: [
             'test1'
@@ -38,7 +70,8 @@ describe('Tasks', function () {
           ],
           participants: ['id1'],
           completionAward: { gold: 3, bronze: 300 },
-          lossRate: { gold: 1 }
+          lossRate: { gold: 1 },
+          isNoteWorthy: true
         })
         .end((err, res) => {
           if (err) { return done() }
@@ -58,6 +91,9 @@ describe('Tasks', function () {
       sinon.stub(tasks, 'fetchTasks').callsFake((query) => {
         return [
           {
+            title: 'Test Task',
+            purpose: 'To Test mocha',
+            featureUrl: '<testUrl>',
             type: 'Dev | Group',
             links: [
               'test1'
@@ -68,12 +104,13 @@ describe('Tasks', function () {
             ownerId: '<app owner user id>',
             percentCompleted: 10,
             dependsOn: [
-              'd1',
-              'd2'
+              'd12',
+              'd23'
             ],
             participants: ['id1'],
             completionAward: { gold: 3, bronze: 300 },
-            lossRate: { gold: 1 }
+            lossRate: { gold: 1 },
+            isNoteWorthy: true
           }
         ]
       })
@@ -101,7 +138,7 @@ describe('Tasks', function () {
 
       chai
         .request(app)
-        .patch('/tasks/78xu384O5TurRxZ58AjV')
+        .patch('/tasks/' + tid)
         .send({
           ownerId: 'sumit'
         })
