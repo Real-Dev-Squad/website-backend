@@ -1,12 +1,10 @@
 const chai = require('chai')
 const { expect } = chai
 const chaiHttp = require('chai-http')
-const sinon = require('sinon')
 
 const app = require('../../../server')
 const authService = require('../../../services/authService')
-const userQuery = require('../../../models/users')
-
+const addUser = require('../../utils/addUser')
 chai.use(chaiHttp)
 
 describe('contentTypeCheck', function () {
@@ -35,32 +33,28 @@ describe('contentTypeCheck', function () {
       .request(app)
       .get('/healthcheck')
       .end((err, res) => {
-        if (err) { return done() }
+        if (err) { return done(err) }
 
         expect(res).to.have.status(200)
         return done()
       })
   })
 
-  it.skip('should process the request when content-type application/json is passed', function (done) {
-    const jwt = authService.generateAuthToken({ userId: 1 })
-
-    sinon.stub(userQuery, 'addOrUpdate').callsFake((userData, userId) => {
-      return { isNewUser: false, userId: 'userId' }
-    })
+  it('should process the request when content-type application/json is passed', async function () {
+    const userId = await addUser()
+    const jwt = authService.generateAuthToken({ userId })
 
     chai
       .request(app)
-      .patch('/users/userId')
+      .patch('/users/self')
       .set('cookie', `rds-session=${jwt}`)
       .send({
         first_name: 'Test first_name'
       })
       .end((err, res) => {
-        if (err) { return done() }
+        if (err) { throw err }
 
-        expect(res).to.have.status(200)
-        return done()
+        expect(res).to.have.status(204)
       })
   })
 })

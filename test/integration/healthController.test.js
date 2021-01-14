@@ -5,8 +5,9 @@ chai.use(chaiHttp)
 
 const app = require('../../server')
 const authService = require('../../services/authService')
+const addUser = require('../utils/addUser')
 
-describe.skip('healthController', function () {
+describe('healthController', function () {
   it('should return uptime from the healthcheck API', function (done) {
     chai
       .request(app)
@@ -40,21 +41,20 @@ describe.skip('healthController', function () {
       })
   })
 
-  it('should return 200 from the authenticated healthcheck API when token is passed', function (done) {
-    const jwt = authService.generateAuthToken({ userId: 1 })
+  it('should return 200 from the authenticated healthcheck API when token is passed', async function () {
+    const userId = await addUser()
+    const jwt = authService.generateAuthToken({ userId })
 
     chai
       .request(app)
       .get('/healthcheck/v2')
       .set('cookie', `rds-session=${jwt}`)
       .end((err, res) => {
-        if (err) { return done() }
+        if (err) { throw err }
 
         expect(res).to.have.status(200)
         expect(res.body).to.be.an('object')
         expect(res.body).to.have.property('uptime').that.is.a('number')
-
-        return done()
       })
   })
 })
