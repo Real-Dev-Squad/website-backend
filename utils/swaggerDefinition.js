@@ -90,6 +90,14 @@ const swaggerOptions = {
                 }
               }
             },
+            participants: {
+              type: 'array',
+              items: {
+                userid: {
+                  type: 'string'
+                }
+              }
+            },
             completionAward: {
               type: 'object',
               properties: {
