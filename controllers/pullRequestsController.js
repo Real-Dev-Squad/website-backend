@@ -7,29 +7,12 @@ const githubService = require('../services/githubService')
  * @param res {Object} - Express response object
  */
 
-const getPRdetails = async (req, res) => {
+const getUserPRs = async (req, res) => {
   try {
     const { data } = await githubService.fetchPRsByUser(req.params.username)
 
     if (data.total_count) {
-      const allPRs = []
-      data.items.forEach(({ title, html_url: url, state, created_at: createdAt, updated_at: updatedAt, repository_url: repositoryUrl, draft, labels, assignees }) => {
-        const allAssignees = assignees.map(object => object.login)
-        const allLabels = labels.map(object => object.name)
-        const repositoryUrlSplit = repositoryUrl.split('/')
-        const repository = repositoryUrlSplit[repositoryUrlSplit.length - 1]
-        allPRs.push({
-          title,
-          state,
-          createdAt,
-          updatedAt,
-          repository,
-          url,
-          readyForReview: state === 'closed' ? false : !draft,
-          labels: allLabels,
-          assignees: allAssignees
-        })
-      })
+      const allPRs = githubService.extractPRdetails(data)
       return res.json({
         message: 'Pull requests returned successfully!',
         pullRequests: allPRs
@@ -57,31 +40,7 @@ const getStalePRs = async (req, res) => {
     const { data } = await githubService.fetchStalePRs()
 
     if (data.total_count) {
-      const allPRs = []
-      data.items.forEach(({
-        title,
-        html_url: url,
-        state,
-        created_at: createdAt,
-        updated_at: updatedAt,
-        draft,
-        labels,
-        user,
-        assignees
-      }) => {
-        const allAssignees = assignees.map(object => object.login)
-        const allLabels = labels.map(object => object.name)
-        allPRs.push({
-          title,
-          state,
-          createdAt,
-          updatedAt,
-          url,
-          username: user.login,
-          labels: allLabels,
-          assignees: allAssignees
-        })
-      })
+      const allPRs = githubService.extractPRdetails(data)
       return res.json({
         message: 'Stale PRs',
         pullRequests: allPRs
@@ -106,34 +65,10 @@ const getStalePRs = async (req, res) => {
  */
 const getOpenPRs = async (req, res) => {
   try {
-    const { data } = await githubService.fetchOpenPRs()
+    const { data } = await githubService.fetchOpenPRs((req.query.page) || 1)
 
     if (data.total_count) {
-      const allPRs = []
-      data.items.forEach(({
-        title,
-        html_url: url,
-        state,
-        created_at: createdAt,
-        updated_at: updatedAt,
-        draft,
-        labels,
-        user,
-        assignees
-      }) => {
-        const allAssignees = assignees.map(object => object.login)
-        const allLabels = labels.map(object => object.name)
-        allPRs.push({
-          title,
-          state,
-          createdAt,
-          updatedAt,
-          url,
-          username: user.login,
-          labels: allLabels,
-          assignees: allAssignees
-        })
-      })
+      const allPRs = githubService.extractPRdetails(data)
       return res.json({
         message: 'Open PRs',
         pullRequests: allPRs
@@ -150,7 +85,7 @@ const getOpenPRs = async (req, res) => {
 }
 
 module.exports = {
-  getPRdetails,
+  getUserPRs,
   getStalePRs,
   getOpenPRs
 }

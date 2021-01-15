@@ -2,12 +2,39 @@ const { fetch } = require('../utils/fetch')
 const { getGitHubUsername } = require('./userService')
 
 /**
+ * Extracts only the necessary details required from the object returned by Github API
+ * @param data {Object} - Object returned by Github API
+ */
+
+const extractPRdetails = (data) => {
+  const allPRs = []
+  data.items.forEach(({ title, user, html_url: url, state, created_at: createdAt, updated_at: updatedAt, repository_url: repositoryUrl, labels, assignees }) => {
+    const allAssignees = assignees.map(object => object.login)
+    const allLabels = labels.map(object => object.name)
+    const repositoryUrlSplit = repositoryUrl.split('/')
+    const repository = repositoryUrlSplit[repositoryUrlSplit.length - 1]
+    allPRs.push({
+      title,
+      username: user.login,
+      state,
+      createdAt,
+      updatedAt,
+      repository,
+      url,
+      labels: allLabels,
+      assignees: allAssignees
+    })
+  })
+  return allPRs
+}
+
+/**
  * Creates the custom API URL with the required params in the format
  * expected by Github
  * https://docs.github.com/en/free-pro-team@latest/rest/reference/search
  * @access private
- * @param {Object} searchParams - List of params to create github API URL
- * @param {Object} resultsOptions - Ordering and pagination of results
+ * @param searchParams {Object} - List of params to create github API URL
+ * @param resultsOptions {Object} - Ordering and pagination of results
  */
 const getGithubURL = (searchParams, resultsOptions = {}) => {
   const baseURL = config.get('githubApi.baseUrl')
@@ -43,7 +70,7 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
 
 /** Create the fetch object to call on github url
  * @access private
- * @param {string} url - URL on github to call
+ * @param url {string} - URL on github to call
  */
 function getFetch (url) {
   return fetch(url, 'get', null, null, null, {
@@ -62,13 +89,11 @@ function getFetch (url) {
 const fetchPRsByUser = async (username) => {
   try {
     const user = await getGitHubUsername(username)
-    const url = `${config.get('githubApi.baseUrl')}/search/issues?q=org:${config.get('githubApi.org')}+author:${user.github_id}+type:pr`
-    return fetch(url, 'get', null, null, null, {
-      auth: {
-        username: config.get('githubOauth.clientId'),
-        password: config.get('githubOauth.clientSecret')
-      }
+
+    const url = getGithubURL({
+      author: user.github_id
     })
+    return getFetch(url)
   } catch (err) {
     logger.error(`Error while fetching pull requests: ${err}`)
     throw err
@@ -100,7 +125,7 @@ const fetchStalePRs = async () => {
  * Fetches the latest 10 open PRs
  * @todo fetch N from query params
  */
-const fetchOpenPRs = async () => {
+const fetchOpenPRs = async (pageNumber) => {
   try {
     const url = getGithubURL({
       is: 'open'
@@ -108,7 +133,7 @@ const fetchOpenPRs = async () => {
       sort: 'created',
       order: 'desc',
       per_page: 10,
-      page: 1
+      page: pageNumber
     })
     return getFetch(url)
   } catch (err) {
@@ -120,5 +145,6 @@ const fetchOpenPRs = async () => {
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
-  fetchStalePRs
+  fetchStalePRs,
+  extractPRdetails
 }

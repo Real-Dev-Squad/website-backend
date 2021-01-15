@@ -1,12 +1,13 @@
-const challengeQuery = require('../../models/roadmap-site/challenges')
-const subscribeToChallengeQuery = require('../../models/roadmap-site/subscribe-challenge')
+const challengeQuery = require('../models/challenges')
 
-const errorAdminString = 'Something went wrong, please try again/contact admin'
+const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
+
 /**
  * Get the challenges or add the challenge
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
+
 const sendChallengeResponse = async (req, res) => {
   try {
     if (req.method === 'GET') {
@@ -29,34 +30,36 @@ const sendChallengeResponse = async (req, res) => {
           })
         }
       } else {
-        return res.boom.notFound('Not able to add challenge')
+        return res.boom.notFound('Unable to add challenge')
       }
     }
+    return ''
   } catch (err) {
     logger.error(`Error while retriving challenges ${err}`)
-    return res.boom.serverUnavailable(errorAdminString)
+    return res.boom.serverUnavailable(ERROR_MESSAGE)
   }
-  return ''
 }
+
 /**
  * Suscribe user to a challenge
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
+
 const subscribeToChallenge = async (req, res) => {
   try {
     const { user_id: userId, challenge_id: challengeId } = req.body
-    const subscribeUser = await subscribeToChallengeQuery.subscribeUserToChallenge(userId, challengeId)
+    const subscribeUser = await challengeQuery.subscribeUserToChallenge(userId, challengeId)
     if (subscribeUser) {
       return res.status(200).json({
-        message: 'user has suscribed to challenge'
+        message: 'User has subscribed to challenge'
       })
     } else {
-      return res.boom.notFound('user cannot be suscribed to challenge')
+      return res.boom.notFound('User cannot be subscribed to challenge')
     }
   } catch (err) {
-    logger.error(`Error while retriving challenges ${err}`)
-    return res.boom.serverUnavailable(errorAdminString)
+    logger.error(`Error while retrieving challenges ${err}`)
+    return res.boom.serverUnavailable(ERROR_MESSAGE)
   }
 }
 
