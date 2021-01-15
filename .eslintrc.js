@@ -31,7 +31,7 @@ module.exports = {
     'no-console': 'error',
 
     // Custom mocha rules
-    // 'mocha/no-skipped-tests': 'error',
+    'mocha/no-skipped-tests': 'error',
     'mocha/no-exclusive-tests': 'error'
   },
   ignorePatterns: ['public/*']
