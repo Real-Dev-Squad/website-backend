@@ -53,6 +53,93 @@ const swaggerOptions = {
             }
           }
         },
+        tasks: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string'
+            },
+            purpose: {
+              type: 'string'
+            },
+            featureUrl: {
+              type: 'string'
+            },
+            type: {
+              type: 'string'
+            },
+            links: {
+              type: 'array',
+              items: {
+                link1: {
+                  type: 'string'
+                }
+              }
+            },
+            endsOn: {
+              type: 'string'
+            },
+            startedOn: {
+              type: 'string'
+            },
+            status: {
+              type: 'string'
+            },
+            ownerId: {
+              type: 'string'
+            },
+            percentCompleted: {
+              type: 'number'
+            },
+            dependsOn: {
+              type: 'array',
+              items: {
+                taskid: {
+                  type: 'string'
+                }
+              }
+            },
+            participants: {
+              type: 'array',
+              items: {
+                userid: {
+                  type: 'string'
+                }
+              }
+            },
+            completionAward: {
+              type: 'object',
+              properties: {
+                gold: {
+                  type: 'number'
+                },
+                silver: {
+                  type: 'number'
+                },
+                bronze: {
+                  type: 'number'
+                }
+              }
+            },
+            lossRate: {
+              type: 'object',
+              properties: {
+                gold: {
+                  type: 'number'
+                },
+                silver: {
+                  type: 'number'
+                },
+                bronze: {
+                  type: 'number'
+                }
+              }
+            },
+            isNoteworthy: {
+              type: 'boolean'
+            }
+          }
+        },
         challenges: {
           type: 'object',
           properties: {
