@@ -8,15 +8,8 @@ module.exports = {
     node: true,
     mocha: true
   },
-  extends: [
-    'standard',
-    'plugin:mocha/recommended',
-    'plugin:security/recommended'
-  ],
-  plugins: [
-    'mocha',
-    'security'
-  ],
+  extends: ['standard', 'plugin:mocha/recommended', 'plugin:security/recommended'],
+  plugins: ['mocha', 'security'],
   parserOptions: {
     ecmaVersion: 12
   },
@@ -29,10 +22,11 @@ module.exports = {
     'no-trailing-spaces': 'error',
     'consistent-return': 'error',
     'no-console': 'error',
+    semi: 0,
 
     // Custom mocha rules
     // 'mocha/no-skipped-tests': 'error',
     'mocha/no-exclusive-tests': 'error'
   },
   ignorePatterns: ['public/*']
-}
+};
