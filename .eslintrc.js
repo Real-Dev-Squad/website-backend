@@ -22,10 +22,11 @@ module.exports = {
     'no-trailing-spaces': 'error',
     'consistent-return': 'error',
     'no-console': 'error',
+    semi: 0,
 
     // Custom mocha rules
     // 'mocha/no-skipped-tests': 'error',
     'mocha/no-exclusive-tests': 'error'
   },
   ignorePatterns: ['public/*']
-}
+};

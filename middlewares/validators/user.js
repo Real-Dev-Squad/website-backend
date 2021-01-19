@@ -1,4 +1,4 @@
-const joi = require('joi')
+const joi = require('joi');
 
 const createUser = async (req, res, next) => {
   const schema = joi.object().keys({
@@ -21,16 +21,16 @@ const createUser = async (req, res, next) => {
     isMember: joi.boolean().optional(),
     tokens: joi.object().optional(),
     website: joi.string().optional()
-  })
+  });
 
   try {
-    await schema.validateAsync(req.body)
-    next()
+    await schema.validateAsync(req.body);
+    next();
   } catch (error) {
-    logger.error(`Error validating createUser payload : ${error}`)
-    res.boom.badRequest(error.details[0].message)
+    logger.error(`Error validating createUser payload : ${error}`);
+    res.boom.badRequest(error.details[0].message);
   }
-}
+};
 
 const updateUser = async (req, res, next) => {
   const schema = joi.object().keys({
@@ -53,18 +53,18 @@ const updateUser = async (req, res, next) => {
     isMember: joi.boolean().optional(),
     tokens: joi.object().optional(),
     website: joi.string().optional()
-  })
+  });
 
   try {
-    await schema.validateAsync(req.body)
-    next()
+    await schema.validateAsync(req.body);
+    next();
   } catch (error) {
-    logger.error(`Error validating updateUser payload : ${error}`)
-    res.boom.badRequest(error.details[0].message)
+    logger.error(`Error validating updateUser payload : ${error}`);
+    res.boom.badRequest(error.details[0].message);
   }
-}
+};
 
 module.exports = {
   createUser,
   updateUser
-}
+};
