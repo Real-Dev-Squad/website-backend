@@ -230,4 +230,41 @@ router.get('/self', authenticate, usersController.getSelfDetails)
  */
 router.get('/:username', authenticate, usersController.getUser)
 
+/**
+ * @swagger
+ * /users/userAvailable/:username:
+ *   get:
+ *     summary: check user exists or not
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User Availability
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/userAvailable'
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.get('/userAvailable/:username', usersController.checkUser)
+
 module.exports = router

@@ -49,6 +49,29 @@ const getUser = async (req, res) => {
 }
 
 /**
+ * Checks whether a user exists or not
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const checkUser = async (req, res) => {
+  try {
+    const result = await userQuery.fetchUser({ username: req.params.username })
+    if (!result.userExists) {
+      return res.json({
+        message: 'User name Available',
+        userExists: result.userExists
+      })
+    }
+    return res.boom.notFound('User name not Available')
+  } catch (error) {
+    logger.error(`Error while checking user: ${error}`)
+    return res.boom.serverUnavailable('Something went wrong please contact admin')
+  }
+}
+
+/**
  * Fetches the data about logged in user
  *
  * @param req {Object} - Express request object
@@ -130,5 +153,6 @@ module.exports = {
   updateSelf,
   getUsers,
   getSelfDetails,
-  getUser
+  getUser,
+  checkUser
 }
