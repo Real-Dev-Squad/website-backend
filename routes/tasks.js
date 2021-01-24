@@ -2,7 +2,8 @@ const express = require('express')
 const router = express.Router()
 const tasksController = require('../controllers/tasksController')
 const { createTask, updateTask } = require('../middlewares/validators/tasks')
-
+const authorizeOwner = require('../middlewares/authorizeOwner')
+const authenticate = require('../middlewares/authenticate')
 /**
  * @swagger
  * /tasks:
@@ -50,7 +51,7 @@ router.get('/', tasksController.fetchTasks)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/', createTask, tasksController.addNewTask)
+router.post('/', authenticate, authorizeOwner, createTask, tasksController.addNewTask)
 
 /**
  * @swagger
@@ -79,6 +80,6 @@ router.post('/', createTask, tasksController.addNewTask)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/:id', updateTask, tasksController.updateTask)
+router.patch('/:id', authenticate, authorizeOwner, updateTask, tasksController.updateTask)
 
 module.exports = router
