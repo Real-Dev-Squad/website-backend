@@ -53,17 +53,157 @@ const swaggerOptions = {
             }
           }
         },
-        user: {
+        tasks: {
           type: 'object',
           properties: {
-            uptime: {
+            title: {
+              type: 'string'
+            },
+            purpose: {
+              type: 'string'
+            },
+            featureUrl: {
+              type: 'string'
+            },
+            type: {
+              type: 'string'
+            },
+            links: {
+              type: 'array',
+              items: {
+                link1: {
+                  type: 'string'
+                }
+              }
+            },
+            endsOn: {
+              type: 'string'
+            },
+            startedOn: {
+              type: 'string'
+            },
+            status: {
+              type: 'string'
+            },
+            ownerId: {
+              type: 'string'
+            },
+            percentCompleted: {
               type: 'number'
+            },
+            dependsOn: {
+              type: 'array',
+              items: {
+                taskid: {
+                  type: 'string'
+                }
+              }
+            },
+            participants: {
+              type: 'array',
+              items: {
+                userid: {
+                  type: 'string'
+                }
+              }
+            },
+            completionAward: {
+              type: 'object',
+              properties: {
+                gold: {
+                  type: 'number'
+                },
+                silver: {
+                  type: 'number'
+                },
+                bronze: {
+                  type: 'number'
+                }
+              }
+            },
+            lossRate: {
+              type: 'object',
+              properties: {
+                gold: {
+                  type: 'number'
+                },
+                silver: {
+                  type: 'number'
+                },
+                bronze: {
+                  type: 'number'
+                }
+              }
+            },
+            isNoteworthy: {
+              type: 'boolean'
+            }
+          }
+        },
+        challenges: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string'
+            },
+            title: {
+              type: 'string'
+            },
+            level: {
+              type: 'string'
+            },
+            start_date: {
+              type: 'string'
+            },
+            end_date: {
+              type: 'string'
+            },
+            is_active: {
+              type: 'boolean'
+            },
+            participants: {
+              type: 'array',
+              items: []
+            }
+          }
+        },
+        pullRequests: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string'
+            },
+            url: {
+              type: 'string'
+            },
+            state: {
+              type: 'string'
+            },
+            createdAt: {
+              type: 'string'
+            },
+            updatedAt: {
+              type: 'string'
+            },
+            readyForReview: {
+              type: 'boolean'
+            },
+            labels: {
+              type: 'array',
+              items: []
+            },
+            assignees: {
+              type: 'array',
+              items: []
             }
           }
         },
         users: {
           type: 'object',
           properties: {
+            username: {
+              type: 'string'
+            },
             first_name: {
               type: 'string'
             },
@@ -137,7 +277,35 @@ const swaggerOptions = {
               }
             }
           },
+          forbidden: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
           badImplementation: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
+          serverUnavailable: {
             type: 'object',
             properties: {
               statusCode: {

@@ -1,6 +1,4 @@
 const passport = require('passport')
-const config = require('config')
-const logger = require('../utils/logger')
 const users = require('../models/users')
 const authService = require('../services/authService')
 

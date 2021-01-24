@@ -1,11 +1,9 @@
 const chai = require('chai')
 const sinon = require('sinon')
-const config = require('config')
 const { expect } = chai
 const chaiHttp = require('chai-http')
 const passport = require('passport')
 
-const users = require('../../models/users')
 const app = require('../../server')
 
 chai.use(chaiHttp)
@@ -24,10 +22,6 @@ describe('authController', function () {
     sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
       callback(null, 'accessToken', githubUserInfo[0])
       return (req, res, next) => { }
-    })
-
-    sinon.stub(users, 'addOrUpdate').callsFake((userData) => {
-      return { isNewUser: true, userId: 'userId' }
     })
 
     chai
@@ -51,10 +45,6 @@ describe('authController', function () {
     sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
       callback(null, 'accessToken', githubUserInfo[0])
       return (req, res, next) => {}
-    })
-
-    sinon.stub(users, 'addOrUpdate').callsFake((userData) => {
-      return { isNewUser: true, userId: 'userId' }
     })
 
     chai

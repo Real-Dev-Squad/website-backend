@@ -8,17 +8,14 @@ module.exports = {
     node: true,
     mocha: true
   },
-  extends: [
-    'standard',
-    'plugin:mocha/recommended',
-    'plugin:security/recommended'
-  ],
-  plugins: [
-    'mocha',
-    'security'
-  ],
+  extends: ['standard', 'plugin:mocha/recommended', 'plugin:security/recommended'],
+  plugins: ['mocha', 'security'],
   parserOptions: {
     ecmaVersion: 12
+  },
+  globals: {
+    config: 'readonly',
+    logger: 'readonly'
   },
   rules: {
     // Custom eslint rules

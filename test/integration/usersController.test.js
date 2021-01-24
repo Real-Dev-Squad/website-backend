@@ -5,15 +5,19 @@ const chaiHttp = require('chai-http')
 
 const app = require('../../server')
 const authService = require('../../services/authService')
-const userQuery = require('../../models/users')
+const addUser = require('../utils/addUser')
+
+// Import fixtures
+const githubUserInfo = require('../fixtures/auth/githubUserInfo')()
 
 chai.use(chaiHttp)
 
 let jwt
 
 describe('Users', function () {
-  before(function () {
-    jwt = authService.generateAuthToken({ userId: 1 })
+  before(async function () {
+    const userId = await addUser()
+    jwt = authService.generateAuthToken({ userId })
   })
 
   afterEach(function () {
@@ -22,10 +26,6 @@ describe('Users', function () {
 
   describe('POST /users - create one user', function () {
     it('Should return success response after adding the user', function (done) {
-      sinon.stub(userQuery, 'addOrUpdate').callsFake((userData) => {
-        return { isNewUser: true, userId: 'userId' }
-      })
-
       chai
         .request(app)
         .post('/users')
@@ -52,10 +52,6 @@ describe('Users', function () {
     })
 
     it('Should return 409 if user already exists', function (done) {
-      sinon.stub(userQuery, 'addOrUpdate').callsFake((userData) => {
-        return { isNewUser: false, userId: 'userId' }
-      })
-
       chai
         .request(app)
         .post('/users')
@@ -80,50 +76,18 @@ describe('Users', function () {
         })
     })
   })
-
-  describe('PATCH /users', function () {
-    it('Should update the user with given id', function (done) {
-      sinon.stub(userQuery, 'addOrUpdate').callsFake((userData, userId) => {
-        return { isNewUser: false, userId: 'userId' }
-      })
-
+  describe('PATCH /users/self', function () {
+    it('Should update the user', function (done) {
       chai
         .request(app)
-        .patch('/users/userId')
+        .patch('/users/self')
         .set('cookie', `rds-session=${jwt}`)
         .send({
           first_name: 'Test first_name'
         })
         .end((err, res) => {
           if (err) { return done() }
-
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('User updated successfully!')
-
-          return done()
-        })
-    })
-
-    it('Should return 404 if user does not exists', function (done) {
-      sinon.stub(userQuery, 'addOrUpdate').callsFake((userData, userId) => {
-        return { isNewUser: true, userId: 'userId' }
-      })
-
-      chai
-        .request(app)
-        .patch('/users/userId')
-        .set('cookie', `rds-session=${jwt}`)
-        .send({
-          first_name: 'Test first_name'
-        })
-        .end((err, res) => {
-          if (err) { return done() }
-
-          expect(res).to.have.status(404)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('User not found')
-
+          expect(res).to.have.status(204)
           return done()
         })
     })
@@ -131,21 +95,6 @@ describe('Users', function () {
 
   describe('GET /users', function () {
     it('Should get all the users in system', function (done) {
-      sinon.stub(userQuery, 'fetchUsers').callsFake((query) => {
-        return [
-          {
-            id: 'nikhil',
-            yoe: 0,
-            twitter_id: 'whatifi',
-            first_name: 'Nikhil',
-            linkedin_id: 'nikhil-bhandarkar',
-            img: './img.png',
-            github_id: 'whydonti',
-            last_name: 'Bhandarkar'
-          }
-        ]
-      })
-
       chai
         .request(app)
         .get('/users')
@@ -165,25 +114,9 @@ describe('Users', function () {
 
   describe('GET /users/id', function () {
     it('Should return one user with given id', function (done) {
-      sinon.stub(userQuery, 'fetchUser').callsFake((userId) => {
-        return {
-          userExists: true,
-          user: {
-            id: 'nikhil',
-            yoe: 0,
-            twitter_id: 'whatifi',
-            first_name: 'Nikhil',
-            linkedin_id: 'nikhil-bhandarkar',
-            img: './img.png',
-            github_id: 'whydonti',
-            last_name: 'Bhandarkar'
-          }
-        }
-      })
-
       chai
         .request(app)
-        .get('/users/userId')
+        .get(`/users/${githubUserInfo[0].username}`)
         .set('cookie', `rds-session=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
@@ -198,13 +131,9 @@ describe('Users', function () {
     })
 
     it('Should return 404 if there is no user in the system', function (done) {
-      sinon.stub(userQuery, 'fetchUser').callsFake((userId) => {
-        return { userExists: false, user: undefined }
-      })
-
       chai
         .request(app)
-        .get('/users/userId')
+        .get('/users/invalidUser')
         .set('cookie', `rds-session=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }

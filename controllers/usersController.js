@@ -1,4 +1,4 @@
-const logger = require('../utils/logger')
+
 const userQuery = require('../models/users')
 
 /**
@@ -31,7 +31,7 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser(req.params.id)
+    const result = await userQuery.fetchUser({ username: req.params.username })
 
     if (result.userExists) {
       return res.json({
@@ -92,22 +92,27 @@ const addNewUser = async (req, res) => {
 }
 
 /**
- * Update user
+ * Update the user
  *
  * @param req {Object} - Express request object
- * @param req.params.id {string} - User id
  * @param req.body {Object} - User object
  * @param res {Object} - Express response object
  */
-const updateUser = async (req, res) => {
+const updateSelf = async (req, res) => {
   try {
-    const user = await userQuery.addOrUpdate(req.body, req.params.id)
+    const { id: userId } = req.userData
+    if (req.body.username) {
+      const { user } = await userQuery.fetchUser({ userId })
+      if (!user.incompleteUserDetails) {
+        return res.boom.forbidden('Cannot update username again')
+      }
+      await userQuery.setIncompleteUserDetails(userId)
+    }
+
+    const user = await userQuery.addOrUpdate(req.body, userId)
 
     if (!user.isNewUser) {
-      return res.json({
-        message: 'User updated successfully!',
-        userId: user.userId
-      })
+      return res.status(204).send()
     }
 
     return res.boom.notFound('User not found')
@@ -119,7 +124,7 @@ const updateUser = async (req, res) => {
 
 module.exports = {
   addNewUser,
-  updateUser,
+  updateSelf,
   getUsers,
   getSelfDetails,
   getUser
