@@ -143,4 +143,37 @@ describe('Users', function () {
         })
     })
   })
+
+  describe('GET /users/userAvailable/id', function () {
+    it('Should return user availability status', function (done) {
+      chai
+        .request(app)
+        .get('/users/userAvailable/availableUser')
+        .set('cookie', `rds-session=${jwt}`)
+        .end((err, res) => {
+          if (err) { return done() }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('User name Available')
+          expect(res.body.userExists).to.be.a('boolean')
+
+          return done()
+        })
+    })
+
+    it('Should return 404 if user name already exists', function (done) {
+      chai
+        .request(app)
+        .get(`/users/userAvailable/${githubUserInfo[0].username}`)
+        .set('cookie', `rds-session=${jwt}`)
+        .end((err, res) => {
+          if (err) { return done() }
+          expect(res).to.have.status(404)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('User name not Available')
+
+          return done()
+        })
+    })
+  })
 })
