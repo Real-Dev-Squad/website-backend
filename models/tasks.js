@@ -73,7 +73,7 @@ const fetchTask = async (taskId) => {
 const fetchUserTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.github_id).get()
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
       tasks.push({
