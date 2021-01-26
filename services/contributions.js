@@ -6,7 +6,7 @@ const tasks = require('../models/tasks')
  * @param {string} username
  */
 
-async function getUserContributions (username) {
+const getUserContributions = async (username) => {
   const contributions = {}
   const { data } = await githubService.fetchPRsByUser(username)
   const allUserTasks = await tasks.fetchUserTasks(username)
@@ -61,7 +61,6 @@ const extractPRdetails = (data) => {
   data.items.forEach(({ title, user, html_url: url, state, created_at: createdAt, updated_at: updatedAt }) => {
     allPRs.push({
       title,
-      username: user.login,
       state,
       createdAt,
       updatedAt,

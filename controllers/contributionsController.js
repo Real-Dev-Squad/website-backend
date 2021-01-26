@@ -9,7 +9,7 @@ const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
  * @param {Object} res - Express response object
  */
 
-async function getUserContributions (req, res) {
+const getUserContributions = async (req, res) => {
   try {
     const username = req.params.username
     const result = await fetchUser({ username: req.params.username })
@@ -20,7 +20,7 @@ async function getUserContributions (req, res) {
     return res.boom.notFound('User doesn\'t exist')
   } catch (err) {
     logger.error(`Error while retriving contributions ${err}`)
-    return res.boom.serverUnavailable(ERROR_MESSAGE)
+    return res.boom.badImplementation(ERROR_MESSAGE)
   }
 }
 

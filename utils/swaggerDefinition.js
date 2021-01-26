@@ -219,69 +219,13 @@ const swaggerOptions = {
               type: 'array',
               items: {
                 task: {
-                  type: 'object',
-                  properties: {
-                    title: {
-                      type: 'string'
-                    },
-                    purpose: {
-                      type: 'string'
-                    },
-                    featureUrl: {
-                      type: 'string'
-                    },
-                    endsOn: {
-                      type: 'string'
-                    },
-                    startedOn: {
-                      type: 'string'
-                    },
-                    dependsOn: {
-                      type: 'array',
-                      items: {
-                        taskid: {
-                          type: 'string'
-                        }
-                      }
-                    },
-                    participants: {
-                      type: 'array',
-                      items: {
-                        userid: {
-                          type: 'string'
-                        }
-                      }
-                    },
-                    isNoteworthy: {
-                      type: 'boolean'
-                    }
-                  }
+                  type: 'object'
                 },
                 prList: {
                   type: 'array',
                   items: {
                     pullRequests: {
-                      type: 'object',
-                      properties: {
-                        title: {
-                          type: 'string'
-                        },
-                        url: {
-                          type: 'string'
-                        },
-                        state: {
-                          type: 'string'
-                        },
-                        createdAt: {
-                          type: 'string'
-                        },
-                        updatedAt: {
-                          type: 'string'
-                        },
-                        raisedBy: {
-                          type: 'string'
-                        }
-                      }
+                      type: 'object'
                     }
                   }
                 }

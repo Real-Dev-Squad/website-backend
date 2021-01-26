@@ -16,15 +16,19 @@ const contributionsController = require('../controllers/contributionsController'
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/contributions'
- *       503:
- *         description: serverUnavailable
+ *       404:
+ *         description: notFound
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/errors/serverUnavailable'
+ *               $ref: '#/components/schemas/errors/notFound'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router
-  .route('/:username')
-  .get(contributionsController.getUserContributions)
+router.get('/:username', contributionsController.getUserContributions)
 
 module.exports = router
