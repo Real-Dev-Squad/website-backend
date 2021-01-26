@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const authenticate = require('../middlewares/authenticate')
 const contributionsController = require('../controllers/contributionsController')
 
 /**
@@ -26,6 +25,6 @@ const contributionsController = require('../controllers/contributionsController'
  */
 router
   .route('/:username')
-  .get(authenticate, contributionsController.getUserContributions)
+  .get(contributionsController.getUserContributions)
 
 module.exports = router
