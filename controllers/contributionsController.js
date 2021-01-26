@@ -1,5 +1,5 @@
 const contributionsService = require('../services/contributions')
-const { fetchUser } = require('../models/users');
+const { fetchUser } = require('../models/users')
 
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
