@@ -4,7 +4,7 @@ const contributionsController = require('../controllers/contributionsController'
 
 /**
  * @swagger
- * /contributions:
+ * /contributions/:username:
  *   get:
  *     summary: Used to get all the contributions of user
  *     tags:
