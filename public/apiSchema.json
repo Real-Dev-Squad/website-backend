@@ -155,7 +155,8 @@
                     "type": "object",
                     "properties": {
                         "statusCode": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 401
                         },
                         "error": {
                             "type": "string"
