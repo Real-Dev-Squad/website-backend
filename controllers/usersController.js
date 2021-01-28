@@ -58,13 +58,9 @@ const getUser = async (req, res) => {
 const checkUser = async (req, res) => {
   try {
     const result = await userQuery.fetchUser({ username: req.params.username })
-    if (!result.userExists) {
-      return res.json({
-        message: 'User name Available',
-        userExists: result.userExists
-      })
-    }
-    return res.boom.notFound('User name not Available')
+    return res.json({
+      userAvailable: !result.userExists
+    })
   } catch (error) {
     logger.error(`Error while checking user: ${error}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')
