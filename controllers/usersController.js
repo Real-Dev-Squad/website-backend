@@ -1,6 +1,5 @@
 
 const userQuery = require('../models/users')
-const { decodeAuthToken } = require('../services/authService')
 
 /**
  * Fetches the data about our users
@@ -101,11 +100,9 @@ const addNewUser = async (req, res) => {
  */
 const updateSelf = async (req, res) => {
   try {
-    const token = req.cookies[config.get('userToken.cookieName')]
-    const { userId } = decodeAuthToken(token)
-
+    const { id: userId } = req.userData
     if (req.body.username) {
-      const { user } = await userQuery.fetchUser({ username: req.body.username })
+      const { user } = await userQuery.fetchUser({ userId })
       if (!user.incompleteUserDetails) {
         return res.boom.forbidden('Cannot update username again')
       }
