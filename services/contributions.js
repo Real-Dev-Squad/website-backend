@@ -1,8 +1,9 @@
 const githubService = require('../services/githubService')
 const tasks = require('../models/tasks')
+const { fetchUser } = require('../models/users')
 
 /**
- * Get the  contributions of the user
+ * Get the contributions of the user
  * @param {string} username
  */
 
@@ -15,14 +16,34 @@ const getUserContributions = async (username) => {
 
   if (data.total_count) {
     const allPRsDetails = extractPRdetails(data)
+
+    const participantsDetailsMap = new Map()
     const prMaps = new Map()
+
     allPRsDetails.forEach(pr => {
       prMaps.set(pr.url, pr)
     })
-    allUserTasks.forEach(task => {
+
+    for (const task of allUserTasks) {
       const noteworthyObject = {}
+      const participantsDetails = []
+
       noteworthyObject.task = extractTaskdetails(task)
+
+      for (const username of task.participants) {
+        const userDetails = participantsDetailsMap.get(username)
+        if (userDetails) {
+          participantsDetails.push(userDetails)
+        } else {
+          const user = await getUserDetails(username)
+          participantsDetailsMap.set(username, user)
+          participantsDetails.push(user)
+        }
+      }
+
+      noteworthyObject.task.participants = participantsDetails
       const prList = []
+
       task.links.forEach(link => {
         const prObject = prMaps.get(link)
         if (prObject) {
@@ -30,6 +51,7 @@ const getUserContributions = async (username) => {
           prMaps.delete(link)
         }
       })
+
       noteworthyObject.prList = prList
 
       if (task.isNoteworthy) {
@@ -37,7 +59,8 @@ const getUserContributions = async (username) => {
       } else {
         all.push(noteworthyObject)
       }
-    })
+    }
+
     for (const prDetails of prMaps.values()) {
       const allObject = {
         prList: prDetails,
@@ -77,16 +100,47 @@ const extractPRdetails = (data) => {
  */
 
 const extractTaskdetails = (data) => {
-  const { title, purpose, endsOn, startedOn, dependsOn, participants, featureUrl, isNoteworthy } = data
+  const { title, purpose, endsOn, startedOn, dependsOn, status, participants, featureUrl, isNoteworthy } = data
   return {
     title,
     purpose,
     endsOn,
     startedOn,
     dependsOn,
+    status,
     participants,
     featureUrl,
     isNoteworthy
+  }
+}
+
+/**
+ * Get the user details
+ * @param username {string}
+ */
+
+const getUserDetails = async (username) => {
+  const { user } = await fetchUser({ username })
+  const userDetails = extractUserDetails(user)
+  return userDetails
+}
+
+/**
+ * Extracts only the necessary details required from the object returned by user API
+ * @param data {Object} - Object returned by User api
+ */
+
+const extractUserDetails = (data) => {
+  const { username, firstname, lastname, img } = data
+  if (!data.incompleteUserDetails) {
+    return {
+      firstname,
+      lastname,
+      img,
+      username
+    }
+  } else {
+    return { username }
   }
 }
 
