@@ -145,7 +145,7 @@ describe('Users', function () {
   })
 
   describe('GET /users/userAvailable/id', function () {
-    it('Should return user availability status', function (done) {
+    it('Should return userAvailable as true as we are passing new user', function (done) {
       chai
         .request(app)
         .get('/users/userAvailable/availableUser')
@@ -154,23 +154,22 @@ describe('Users', function () {
           if (err) { return done() }
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('User name Available')
-          expect(res.body.userExists).to.be.a('boolean')
+          expect(res.body.userAvailable).to.equal(true)
 
           return done()
         })
     })
 
-    it('Should return 404 if user name already exists', function (done) {
+    it('Should return userAvailable as false as we are passing existing user', function (done) {
       chai
         .request(app)
         .get(`/users/userAvailable/${githubUserInfo[0].username}`)
         .set('cookie', `rds-session=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
-          expect(res).to.have.status(404)
+          expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('User name not Available')
+          expect(res.body.userAvailable).to.equal(false)
 
           return done()
         })
