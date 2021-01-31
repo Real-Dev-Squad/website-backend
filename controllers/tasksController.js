@@ -55,9 +55,7 @@ const getSelfTasks = async (req, res) => {
     logger.error(`Error while fetching tasks: ${err}`)
     return res.boom.badImplementation('An internal server error occurred')
   }
-}
-
-/**
+}/**
  * Updates the task
  *
  * @param req {Object} - Express request object
