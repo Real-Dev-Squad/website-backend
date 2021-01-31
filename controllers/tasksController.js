@@ -37,7 +37,12 @@ const fetchTasks = async (req, res) => {
     return res.boom.badImplementation('An internal server error occurred')
   }
 }
-
+/**
+ * Fetches all the tasks of the logged in user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
 const getSelfTasks = async (req, res) => {
   try {
     const { username } = req.userData
