@@ -52,7 +52,7 @@ const updateUser = async (req, res, next) => {
     site: joi.string().optional(),
     isMember: joi.boolean().optional(),
     tokens: joi.object().optional(),
-    website: joi.string().optional()
+    website: joi.string().optional().allow('')
   })
 
   try {
