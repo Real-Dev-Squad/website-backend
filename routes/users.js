@@ -3,6 +3,7 @@ const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
 const usersController = require('../controllers/usersController')
 const userValidator = require('../middlewares/validators/user')
+const authorizeOwner = require('../middlewares/authorizeOwner')
 
 /**
  * @swagger
@@ -54,7 +55,7 @@ const userValidator = require('../middlewares/validators/user')
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.post('/', authenticate, userValidator.createUser, usersController.addNewUser)
+router.post('/', authenticate, authorizeOwner, userValidator.createUser, usersController.addNewUser)
 
 /**
  * @swagger
@@ -102,7 +103,7 @@ router.post('/', authenticate, userValidator.createUser, usersController.addNewU
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.patch('/self', authenticate, userValidator.updateUser, usersController.updateSelf)
+router.patch('/self', authenticate, authorizeOwner, userValidator.updateUser, usersController.updateSelf)
 
 /**
  * @swagger
