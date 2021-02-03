@@ -33,6 +33,7 @@ describe('Users', function () {
         .send({
           first_name: 'Nikhil',
           last_name: 'Bhandarkar',
+          username: 'nikhil',
           yoe: 0,
           img: './img.png',
           github_id: 'whydonti',
