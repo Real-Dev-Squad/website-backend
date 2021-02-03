@@ -38,8 +38,9 @@ $ npm run test-config
 - Create an application on [FireStore](https://firebase.google.com/docs/firestore) and [generate a service file](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). Add the service file with the name `firestore-private-key.json` in the project root.
 
 ## API Documentation:
-- Run the server and navigate to `http://<HOSTNAME>:<PORT>/api-docs` to view the API documentation.
-- Alternatively, you can import the file [API Schema](https://github.com/Real-Dev-Squad/website-backend/blob/develop/public/apiSchema.json) to [Postman](https://www.postman.com/) or [SwaggerHub](https://swagger.io/tools/swaggerhub/).
+- View the RDS API documentation: [Real Dev Squad API](https://documenter.getpostman.com/view/2021368/TW6wH8Ns)
+- You can also run the server and navigate to `http://<HOSTNAME>:<PORT>/api-docs` to view the API documentation.
+- You can import the file [API Schema](https://github.com/Real-Dev-Squad/website-backend/blob/develop/public/apiSchema.json) to [Postman](https://www.postman.com/) or [SwaggerHub](https://swagger.io/tools/swaggerhub/).
 - If any API changes have been made:
     - Write JS Doc on top of your routes using YAML based annotations in OPEN API 3.0 format.
     - Run `npm run generate-api-schema` to generate the API schema. A file `public/apiSchema.json` will be created/updated.
