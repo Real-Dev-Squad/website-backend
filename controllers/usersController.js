@@ -1,5 +1,5 @@
-
 const userQuery = require('../models/users')
+const accountOwners = require('../mockdata/appOwners.json')
 
 /**
  * Fetches the data about our users
@@ -23,6 +23,28 @@ const getUsers = async (req, res) => {
 }
 
 /**
+ * Fetches the data about our account Owners
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getAccountOwners = async (req, res) => {
+  try {
+    // const allUsers = await userQuery.fetchUsers(req.query)
+
+    // return res.json({
+    //   message: 'Users returned successfully!',
+    //   users: allUsers,
+    // })
+    return accountOwners
+  } catch (error) {
+    logger.error(`Error while fetching application owners: ${error}`)
+    return res.boom.serverUnavailable('Something went wrong please contact admin')
+  }
+}
+
+/**
  * Fetches the data about user with given id
  *
  * @param req {Object} - Express request object
@@ -40,7 +62,7 @@ const getUser = async (req, res) => {
       })
     }
 
-    return res.boom.notFound('User doesn\'t exist')
+    return res.boom.notFound("User doesn't exist")
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')
@@ -59,7 +81,7 @@ const getSelfDetails = (req, res) => {
     if (req.userData) {
       return res.send(req.userData)
     }
-    return res.boom.notFound('User doesn\'t exist')
+    return res.boom.notFound("User doesn't exist")
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`)
     return res.boom.badImplementation('An internal server error occurred')
@@ -127,5 +149,6 @@ module.exports = {
   updateSelf,
   getUsers,
   getSelfDetails,
-  getUser
+  getUser,
+  getAccountOwners
 }

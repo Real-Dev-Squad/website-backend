@@ -41,7 +41,6 @@ describe('Users', function () {
         })
         .end((err, res) => {
           if (err) { return done() }
-
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('User added successfully!')
@@ -67,7 +66,6 @@ describe('Users', function () {
         })
         .end((err, res) => {
           if (err) { return done() }
-
           expect(res).to.have.status(409)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('User already exists')
@@ -76,6 +74,7 @@ describe('Users', function () {
         })
     })
   })
+
   describe('PATCH /users/self', function () {
     it('Should update the user', function (done) {
       chai
@@ -88,6 +87,7 @@ describe('Users', function () {
         .end((err, res) => {
           if (err) { return done() }
           expect(res).to.have.status(204)
+
           return done()
         })
     })
@@ -101,7 +101,6 @@ describe('Users', function () {
         .set('cookie', `rds-session=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
-
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Users returned successfully!')
@@ -120,7 +119,6 @@ describe('Users', function () {
         .set('cookie', `rds-session=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
-
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('User returned successfully!')
@@ -137,7 +135,6 @@ describe('Users', function () {
         .set('cookie', `rds-session=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
-
           expect(res).to.have.status(404)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('User doesn\'t exist')
