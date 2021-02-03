@@ -23,7 +23,7 @@ const getUsers = async (req, res) => {
 }
 
 /**
- * Fetches the data about our account Owners
+ * Fetches the data about account Owners
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
