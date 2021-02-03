@@ -140,6 +140,183 @@ const swaggerOptions = {
             }
           }
         },
+        contributions: {
+          type: 'object',
+          properties: {
+            noteworthy: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  task: {
+                    type: 'object',
+                    properties: {
+                      title: {
+                        type: 'string'
+                      },
+                      purpose: {
+                        type: 'string'
+                      },
+                      featureUrl: {
+                        type: 'string'
+                      },
+                      endsOn: {
+                        type: 'string'
+                      },
+                      startedOn: {
+                        type: 'string'
+                      },
+                      status: {
+                        type: 'string'
+                      },
+                      dependsOn: {
+                        type: 'array',
+                        items: {
+                          type: 'string'
+                        }
+                      },
+                      participants: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            firstname: {
+                              type: 'string'
+                            },
+                            lastname: {
+                              type: 'string'
+                            },
+                            img: {
+                              type: 'string'
+                            },
+                            username: {
+                              type: 'string'
+                            }
+                          }
+                        }
+                      },
+                      isNoteworthy: {
+                        type: 'boolean'
+                      }
+                    }
+                  },
+                  prList: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        title: {
+                          type: 'string'
+                        },
+                        url: {
+                          type: 'string'
+                        },
+                        state: {
+                          type: 'string'
+                        },
+                        createdAt: {
+                          type: 'string'
+                        },
+                        updatedAt: {
+                          type: 'string'
+                        },
+                        raisedBy: {
+                          type: 'string'
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            all: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  task: {
+                    type: 'object',
+                    properties: {
+                      title: {
+                        type: 'string'
+                      },
+                      purpose: {
+                        type: 'string'
+                      },
+                      featureUrl: {
+                        type: 'string'
+                      },
+                      endsOn: {
+                        type: 'string'
+                      },
+                      startedOn: {
+                        type: 'string'
+                      },
+                      status: {
+                        type: 'string'
+                      },
+                      dependsOn: {
+                        type: 'array',
+                        items: {
+                          type: 'string'
+                        }
+                      },
+                      participants: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            firstname: {
+                              type: 'string'
+                            },
+                            lastname: {
+                              type: 'string'
+                            },
+                            img: {
+                              type: 'string'
+                            },
+                            username: {
+                              type: 'string'
+                            }
+                          }
+                        }
+                      },
+                      isNoteworthy: {
+                        type: 'boolean'
+                      }
+                    }
+                  },
+                  prList: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        title: {
+                          type: 'string'
+                        },
+                        url: {
+                          type: 'string'
+                        },
+                        state: {
+                          type: 'string'
+                        },
+                        createdAt: {
+                          type: 'string'
+                        },
+                        updatedAt: {
+                          type: 'string'
+                        },
+                        raisedBy: {
+                          type: 'string'
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         challenges: {
           type: 'object',
           properties: {
