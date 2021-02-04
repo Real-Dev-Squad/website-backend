@@ -46,9 +46,15 @@ const fetchTasks = async (req, res) => {
 const getSelfTasks = async (req, res) => {
   try {
     const { username } = req.userData
+
     if (username) {
-      const allTasks = await tasks.fetchUserTasks(username)
-      return res.send(allTasks)
+      if (req.query.Completed) {
+        const allCompletedTasks = await tasks.fetchUserCompletedTasks(username)
+        return res.send(allCompletedTasks)
+      } else {
+        const allTasks = await tasks.fetchUserActiveAndBlockedTasks(username)
+        return res.send(allTasks)
+      }
     }
     return res.boom.notFound('User doesn\'t exist')
   } catch (err) {

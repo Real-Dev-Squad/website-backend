@@ -14,7 +14,7 @@
     "generate-api-schema": "node utils/generateAPISchema.js"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^4.2.0",
+    "@google-cloud/firestore": "^4.9.1",
     "axios": "^0.21.1",
     "config": "^3.3.2",
     "cookie-parser": "~1.4.4",
