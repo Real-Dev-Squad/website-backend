@@ -24,13 +24,13 @@ module.exports = async (req, res, next) => {
       if (accountOwners.filter((owner) => owner.username === username)) {
         return next()
       } else {
-        return res.boom.unauthorized('Unauthorized User')
+        return res.boom.badImplementation('Unauthorized User')
       }
     } else {
-      return res.boom.unauthorized('Unauthorized User')
+      return res.boom.badImplementation('Unauthorized User')
     }
   } catch (err) {
     logger.error(err)
-    return res.boom.unauthorized('Unauthorized User')
+    return res.boom.badImplementation('Unauthorized User')
   }
 }
