@@ -48,7 +48,7 @@ const getSelfTasks = async (req, res) => {
     const { username } = req.userData
 
     if (username) {
-      if (req.query.Completed) {
+      if (req.query.completed) {
         const allCompletedTasks = await tasks.fetchUserCompletedTasks(username)
         return res.send(allCompletedTasks)
       } else {

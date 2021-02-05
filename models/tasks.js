@@ -73,7 +73,7 @@ const fetchTask = async (taskId) => {
 const fetchUserActiveAndBlockedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', '!=', 'Completed').get()
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', '!=', 'completed').get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
       tasks.push({
@@ -97,7 +97,7 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
 const fetchUserCompletedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', '==', 'Completed').get()
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', '==', 'completed').get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
       tasks.push({
