@@ -10,7 +10,7 @@ const githubUserInfo = require('../fixtures/auth/githubUserInfo')()
  */
 module.exports = async () => {
   const userData = {
-    username: githubUserInfo[0].username,
+    username: 'ankur',
     github_id: githubUserInfo[0].username,
     github_display_name: githubUserInfo[0].displayName,
     tokens: {
