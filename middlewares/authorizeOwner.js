@@ -19,13 +19,10 @@ module.exports = async (req, res, next) => {
   try {
     // get user data from `req.userData` for further use
     const accountOwners = await usersController.getAccountOwners()
-    const { incompleteUserDetails, username } = req.userData
-    if (!incompleteUserDetails) {
-      if (accountOwners.filter((owner) => owner.username === username)) {
-        return next()
-      } else {
-        return res.boom.notFound('Unauthorized User')
-      }
+    const { username } = req.userData
+
+    if (accountOwners.filter((owner) => owner.username === username)) {
+      return next()
     } else {
       return res.boom.notFound('Unauthorized User')
     }

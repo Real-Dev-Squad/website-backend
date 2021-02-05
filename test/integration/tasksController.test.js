@@ -5,10 +5,12 @@ const chaiHttp = require('chai-http')
 
 const app = require('../../server')
 const tasks = require('../../models/tasks')
-
+const addUser = require('../utils/addUser')
+const authService = require('../../services/authService')
 chai.use(chaiHttp)
 
 describe('Tasks', function () {
+  let jwt = ''
   let tid = ''
   before(async function () {
     const taskData = {
@@ -35,6 +37,8 @@ describe('Tasks', function () {
     }
     const { taskId } = await tasks.updateTask(taskData)
     tid = taskId
+    const userId = await addUser()
+    jwt = authService.generateAuthToken({ userId })
   })
 
   afterEach(function () {
@@ -46,6 +50,7 @@ describe('Tasks', function () {
       chai
         .request(app)
         .post('/tasks')
+        .set('cookie', `rds-session=${jwt}`)
         .send({
           title: 'Test Task',
           purpose: 'To Test mocha',
@@ -103,6 +108,7 @@ describe('Tasks', function () {
       chai
         .request(app)
         .patch('/tasks/' + tid)
+        .set('cookie', `rds-session=${jwt}`)
         .send({
           ownerId: 'sumit'
         })
@@ -118,6 +124,7 @@ describe('Tasks', function () {
       chai
         .request(app)
         .patch('/tasks/taskid')
+        .set('cookie', `rds-session=${jwt}`)
         .send({
           ownerId: 'umit'
         })
