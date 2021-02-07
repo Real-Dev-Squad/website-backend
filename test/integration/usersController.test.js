@@ -33,11 +33,14 @@ describe('Users', function () {
         .send({
           first_name: 'Nikhil',
           last_name: 'Bhandarkar',
+          username: 'nikhil',
           yoe: 0,
           img: './img.png',
           github_id: 'whydonti',
           linkedin_id: 'nikhil-bhandarkar',
-          twitter_id: 'whatifi'
+          twitter_id: 'whatifi',
+          phone: '1234567890',
+          email: 'abc@gmail.com'
         })
         .end((err, res) => {
           if (err) { return done() }
@@ -63,7 +66,9 @@ describe('Users', function () {
           img: './img.png',
           github_id: 'whydonti',
           linkedin_id: 'nikhil-bhandarkar',
-          twitter_id: 'whatifi'
+          twitter_id: 'whatifi',
+          phone: '1234567890',
+          email: 'abc@gmail.com'
         })
         .end((err, res) => {
           if (err) { return done() }
@@ -106,6 +111,65 @@ describe('Users', function () {
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Users returned successfully!')
           expect(res.body.users).to.be.a('array')
+          expect(res.body.users).to.not.have.property('phone')
+          expect(res.body.users).to.not.have.property('email')
+
+          return done()
+        })
+    })
+  })
+
+  describe('GET /users/self', function () {
+    it('Should return the logged user\'s details', function (done) {
+      chai
+        .request(app)
+        .get('/users/self')
+        .set('cookie', `rds-session=${jwt}`)
+        .end((err, res) => {
+          if (err) { return done() }
+
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body).to.not.have.property('phone')
+          expect(res.body).to.not.have.property('email')
+
+          return done()
+        })
+    })
+
+    it('Should return 401 if not logged in', function (done) {
+      chai
+        .request(app)
+        .get('/users/self')
+        .end((err, res) => {
+          if (err) { return done() }
+
+          expect(res).to.have.status(401)
+          expect(res.body).to.be.an('object')
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: 'Unauthorized',
+            message: 'Unauthenticated User'
+          })
+
+          return done()
+        })
+    })
+  })
+
+  describe('GET /users/self?private=true', function () {
+    it('Should return the logged user\'s details with phone and email', function (done) {
+      chai
+        .request(app)
+        .get('/users/self?private=true')
+        .set('cookie', `rds-session=${jwt}`)
+        .end((err, res) => {
+          if (err) { return done() }
+
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body).to.have.property('phone')
+          expect(res.body).to.have.property('email')
 
           return done()
         })
@@ -125,6 +189,8 @@ describe('Users', function () {
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('User returned successfully!')
           expect(res.body.user).to.be.a('object')
+          expect(res.body.user).to.not.have.property('phone')
+          expect(res.body.user).to.not.have.property('email')
 
           return done()
         })
