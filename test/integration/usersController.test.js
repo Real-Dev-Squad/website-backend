@@ -137,6 +137,23 @@ describe('Users', function () {
         })
     })
 
+    it('Should return details with phone and email when query \'private\' is true', function (done) {
+      chai
+        .request(app)
+        .get('/users/self?private=true')
+        .set('cookie', `rds-session=${jwt}`)
+        .end((err, res) => {
+          if (err) { return done() }
+
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body).to.have.property('phone')
+          expect(res.body).to.have.property('email')
+
+          return done()
+        })
+    })
+
     it('Should return 401 if not logged in', function (done) {
       chai
         .request(app)
@@ -151,25 +168,6 @@ describe('Users', function () {
             error: 'Unauthorized',
             message: 'Unauthenticated User'
           })
-
-          return done()
-        })
-    })
-  })
-
-  describe('GET /users/self?private=true', function () {
-    it('Should return the logged user\'s details with phone and email', function (done) {
-      chai
-        .request(app)
-        .get('/users/self?private=true')
-        .set('cookie', `rds-session=${jwt}`)
-        .end((err, res) => {
-          if (err) { return done() }
-
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body).to.have.property('phone')
-          expect(res.body).to.have.property('email')
 
           return done()
         })
