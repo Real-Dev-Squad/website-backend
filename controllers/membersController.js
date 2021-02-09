@@ -11,9 +11,15 @@ const getMembers = async (req, res) => {
   try {
     const allMembers = await memberQuery.fetchMembers()
 
+    if (allMembers.length) {
+      return res.json({
+        message: 'Members returned successfully!',
+        members: allMembers
+      })
+    }
+
     return res.json({
-      message: 'Members returned successfully!',
-      members: allMembers
+      message: 'No member found!'
     })
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`)
