@@ -108,7 +108,7 @@ The following project structure should be followed:
 - Pre-requisites:
   - Node.js version 8.0 or higher.
   - Java version 1.8 or higher.
-  - Firebase CLI: `npm install -g firebase-tools`
+  - Firebase CLI, mocha and nyc: `npm install -g firebase-tools mocha nyc`
 
 ## Using Firebase Emulator Locally
 - [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) can be used locally as the DB for the project
