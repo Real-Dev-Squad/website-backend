@@ -63,7 +63,7 @@ const getUserContributions = async (username) => {
 
     for (const prDetails of prMaps.values()) {
       const allObject = {
-        prList: prDetails,
+        prList: [prDetails],
         task: {}
       }
       all.push(allObject)
