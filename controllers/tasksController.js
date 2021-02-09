@@ -50,10 +50,10 @@ const getSelfTasks = async (req, res) => {
     if (username) {
       if (req.query.completed) {
         const allCompletedTasks = await tasks.fetchUserCompletedTasks(username)
-        return res.send(allCompletedTasks)
+        return res.json(allCompletedTasks)
       } else {
         const allTasks = await tasks.fetchUserActiveAndBlockedTasks(username)
-        return res.send(allTasks)
+        return res.json(allTasks)
       }
     }
     return res.boom.notFound('User doesn\'t exist')

@@ -73,6 +73,7 @@ const fetchTask = async (taskId) => {
 const fetchUserActiveAndBlockedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
+
     const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', '!=', 'completed').get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
@@ -81,6 +82,7 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
         ...task.data()
       })
     })
+
     return tasks
   } catch (err) {
     logger.error('error getting tasks', err)
@@ -105,6 +107,7 @@ const fetchUserCompletedTasks = async (username) => {
         ...task.data()
       })
     })
+
     return tasks
   } catch (err) {
     logger.error('error getting tasks', err)
