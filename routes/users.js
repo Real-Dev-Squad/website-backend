@@ -54,10 +54,10 @@ const userValidator = require('../middlewares/validators/user')
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.post('/', authenticate, userValidator.createUser, usersController.addNewUser)
+// router.post('/', authenticate, userValidator.createUser, usersController.addNewUser)
 
 /**
- * @swagger
+  * @swagger
  * /users/self:
  *   patch:
  *     summary: Use to update the user data.
