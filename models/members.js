@@ -35,6 +35,31 @@ const fetchMembers = async () => {
   }
 }
 
+/**
+ * Fetches the data about our member usernames
+ * @return {Promise<userModel|Array>}
+ */
+
+const fetchMemberUsernames = async () => {
+  try {
+    const snapshot = await userModel.where('isMember', '==', true).get()
+
+    const userNames = []
+
+    snapshot.forEach((doc) => {
+      userNames.push({
+        username: doc.data().username
+      })
+    }
+    )
+    return userNames
+  } catch (err) {
+    logger.error('Error retrieving members data', err)
+    throw err
+  }
+}
+
 module.exports = {
-  fetchMembers
+  fetchMembers,
+  fetchMemberUsernames
 }

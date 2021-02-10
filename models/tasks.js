@@ -50,6 +50,28 @@ const fetchTasks = async () => {
 }
 
 /**
+ * Fetch all participants whose task status is active/pending/blocked
+ *
+ * @return {Promise<tasks|Array>}
+ */
+
+const fetchActiveTaskMembers = async () => {
+  try {
+    const tasksSnapshot = await tasksModel.where('status', 'in', ['Active', 'pending', 'blocked']).get()
+    const activeMembers = []
+    tasksSnapshot.forEach((task) => {
+      activeMembers.push(
+        ...task.data().participants
+      )
+    })
+    return activeMembers
+  } catch (err) {
+    logger.error('error getting tasks', err)
+    throw err
+  }
+}
+
+/**
  * Fetch a task
  * @param taskId { string }: taskid which will be used to fetch the task
  * @return {Promise<taskData|Object>}
