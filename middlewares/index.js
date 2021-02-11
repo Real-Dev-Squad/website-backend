@@ -6,7 +6,7 @@ const helmet = require('helmet')
 const cors = require('cors')
 const passport = require('passport')
 const swaggerUi = require('swagger-ui-express')
-const swaggerDocs = require('../utils/swaggerDefinition')
+const swaggerDocs = require('../docs/swaggerDefinition')
 const contentTypeCheck = require('./contentTypeCheck')
 
 // require middlewares
