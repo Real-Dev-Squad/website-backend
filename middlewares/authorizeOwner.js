@@ -7,7 +7,6 @@ const usersController = require('../controllers/usersController')
  * The currently implemented mechanism satisfies the current use case.
  * Authentication with JWT and a refreshToken to be added once we have user permissions and authorizations to be handled
  *
- * @todo: Add tests to assert on refreshed JWT generation by modifying the TTL values for the specific test. Currently not possible in the absence of a test-suite.
  *
  *
  * @param req {Object} - Express request object
@@ -24,10 +23,10 @@ module.exports = async (req, res, next) => {
     if (accountOwners.filter((owner) => owner.username === username)) {
       return next()
     } else {
-      return res.boom.notFound('Unauthorized User')
+      return res.boom.forbidden('Unauthorized User')
     }
   } catch (err) {
     logger.error(err)
-    return res.boom.badImplementation('Unauthorized User')
+    return res.boom.badImplementation('Something went wrong please contact admin')
   }
 }

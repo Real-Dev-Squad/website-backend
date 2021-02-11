@@ -10,8 +10,8 @@ const authService = require('../../services/authService')
 chai.use(chaiHttp)
 
 describe('Tasks', function () {
-  let jwt = ''
-  let tid = ''
+  let jwt
+  let tid
   before(async function () {
     const taskData = {
       title: 'Test Task',
@@ -84,6 +84,44 @@ describe('Tasks', function () {
           return done()
         })
     })
+
+    it('Should return 403 if user is not authorized', function (done) {
+      chai
+        .request(app)
+        .post('/tasks')
+        .set('cookie', `rds-session=${jwt}`)
+        .send({
+          title: 'Test Task',
+          purpose: 'To Test mocha',
+          featureUrl: '<testUrl>',
+          type: 'Dev | Group',
+          links: [
+            'test1'
+          ],
+          endsOn: '<unix timestamp>',
+          startedOn: '<unix timestamp>',
+          status: 'Active',
+          ownerId: 'umit',
+          percentCompleted: 10,
+          dependsOn: [
+            'd12',
+            'd23'
+          ],
+          participants: ['id1'],
+          completionAward: { gold: 3, bronze: 300 },
+          lossRate: { gold: 1 },
+          isNoteworthy: true
+        })
+        .end((err, res) => {
+          if (err) { return done() }
+          expect(res).to.have.status(403)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Unauthorized User')
+          expect(res.body.id).to.be.a('string')
+          expect(res.body.task).to.be.a('object')
+          return done()
+        })
+    })
   })
 
   describe('GET /tasks', function () {
@@ -115,6 +153,24 @@ describe('Tasks', function () {
         .end((err, res) => {
           if (err) { return done() }
           expect(res).to.have.status(204)
+
+          return done()
+        })
+    })
+
+    it('Should return 403 if user is not authorized', function (done) {
+      chai
+        .request(app)
+        .patch('/tasks/taskid')
+        .set('cookie', `rds-session=${jwt}`)
+        .send({
+          ownerId: 'harshith'
+        })
+        .end((err, res) => {
+          if (err) { return done() }
+          expect(res).to.have.status(403)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Unauthorized User')
 
           return done()
         })
