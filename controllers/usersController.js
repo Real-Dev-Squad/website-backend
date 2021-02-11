@@ -32,15 +32,10 @@ const getUsers = async (req, res) => {
 
 const getAccountOwners = async (req, res) => {
   try {
-    // const allUsers = await userQuery.fetchUsers(req.query)
-    // return res.json({
-    //   message: 'Users returned successfully!',
-    //   users: allUsers,
-    // })
     return accountOwners
   } catch (error) {
     logger.error(`Error while fetching application owners: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.badImplementation('Something went wrong please contact admin')
   }
 }
 
