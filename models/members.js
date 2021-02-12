@@ -34,7 +34,7 @@ const fetchMembers = async () => {
 }
 
 /**
- * Fetches the data about our member usernames
+ * Fetches usernames of all the members in the database
  * @return {Promise<userModel|Array>}
  */
 
@@ -45,9 +45,9 @@ const fetchMemberUsernames = async () => {
     const userNames = []
 
     snapshot.forEach((doc) => {
-      userNames.push({
-        username: doc.data().username
-      })
+      userNames.push(
+        doc.data().username
+      )
     }
     )
     return userNames

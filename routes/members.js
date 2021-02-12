@@ -28,11 +28,11 @@ router.get('/', membersController.getMembers)
 
 /**
  * @swagger
- * /members:
+ * /members/idle:
  *   get:
  *     summary: Gets details of inactive/idle members of the Real Dev Squad
  *     tags:
- *       - IdleMembers
+ *       - Members
  *     responses:
  *       200:
  *         description: Details of inactive/idle members of the RDS members

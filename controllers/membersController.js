@@ -23,7 +23,7 @@ const getMembers = async (req, res) => {
 }
 
 /**
- * Fetches the data about our inactive/idle members
+ * Returns the usernames of inactive/idle members
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
@@ -31,13 +31,12 @@ const getMembers = async (req, res) => {
 
 const getIdleMembers = async (req, res) => {
   try {
-    let allMemberUsernames = await memberQuery.fetchMemberUsernames()
-    allMemberUsernames = allMemberUsernames.map(member => member.username)
+    const allMemberUsernames = await memberQuery.fetchMemberUsernames()
 
     let taskParticipants = await tasks.fetchActiveTaskMembers()
-    taskParticipants = [...new Set(taskParticipants)]
+    taskParticipants = new Set(taskParticipants)
 
-    const idleMemberUserNames = allMemberUsernames.filter(member => taskParticipants.indexOf(member) === -1)
+    const idleMemberUserNames = allMemberUsernames.filter(member => !taskParticipants.has(member))
 
     return res.json({
       message: 'Idle members returned successfully!',
