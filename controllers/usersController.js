@@ -32,11 +32,12 @@ const getUsers = async (req, res) => {
 const getUser = async (req, res) => {
   try {
     const result = await userQuery.fetchUser({ username: req.params.username })
+    const { phone, email, ...user } = result.user
 
     if (result.userExists) {
       return res.json({
         message: 'User returned successfully!',
-        user: result.user
+        user
       })
     }
 
@@ -57,7 +58,11 @@ const getUser = async (req, res) => {
 const getSelfDetails = (req, res) => {
   try {
     if (req.userData) {
-      return res.send(req.userData)
+      if (req.query.private) {
+        return res.send(req.userData)
+      }
+      const { phone, email, ...userData } = req.userData
+      return res.send(userData)
     }
     return res.boom.notFound('User doesn\'t exist')
   } catch (error) {
