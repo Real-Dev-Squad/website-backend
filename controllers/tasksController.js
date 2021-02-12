@@ -37,8 +37,31 @@ const fetchTasks = async (req, res) => {
     return res.boom.badImplementation('An internal server error occurred')
   }
 }
-
 /**
+ * Fetches all the tasks of the logged in user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const getSelfTasks = async (req, res) => {
+  try {
+    const { username } = req.userData
+
+    if (username) {
+      if (req.query.completed) {
+        const allCompletedTasks = await tasks.fetchUserCompletedTasks(username)
+        return res.json(allCompletedTasks)
+      } else {
+        const allTasks = await tasks.fetchUserActiveAndBlockedTasks(username)
+        return res.json(allTasks)
+      }
+    }
+    return res.boom.notFound('User doesn\'t exist')
+  } catch (err) {
+    logger.error(`Error while fetching tasks: ${err}`)
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+}/**
  * Updates the task
  *
  * @param req {Object} - Express request object
@@ -54,7 +77,7 @@ const updateTask = async (req, res) => {
     await tasks.updateTask(req.body, req.params.id)
     return res.status(204).send()
   } catch (err) {
-    logger.error(`Error while updating user: ${err}`)
+    logger.error(`Error while updating task: ${err}`)
     return res.boom.badImplementation('An internal server error occurred')
   }
 }
@@ -62,5 +85,6 @@ const updateTask = async (req, res) => {
 module.exports = {
   addNewTask,
   fetchTasks,
-  updateTask
+  updateTask,
+  getSelfTasks
 }
