@@ -70,6 +70,30 @@ const fetchTask = async (taskId) => {
  * @return {Promise<tasks|Array>}
  */
 
+/**
+ * Fetch all tasks of a user
+ *
+ * @return {Promise<tasks|Array>}
+ */
+
+const fetchUserTasks = async (username) => {
+  try {
+    const { user } = await fetchUser({ username })
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).get()
+    const tasks = []
+    tasksSnapshot.forEach((task) => {
+      tasks.push({
+        id: task.id,
+        ...task.data()
+      })
+    })
+    return tasks
+  } catch (err) {
+    logger.error('error getting tasks', err)
+    throw err
+  }
+}
+
 const fetchUserActiveAndBlockedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
@@ -119,6 +143,7 @@ module.exports = {
   updateTask,
   fetchTasks,
   fetchTask,
+  fetchUserTasks,
   fetchUserActiveAndBlockedTasks,
   fetchUserCompletedTasks
 }
