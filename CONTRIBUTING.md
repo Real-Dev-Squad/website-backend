@@ -108,7 +108,7 @@ The following project structure should be followed:
 - Pre-requisites:
   - Node.js version 8.0 or higher.
   - Java version 1.8 or higher.
-  - Firebase CLI, mocha and nyc: `npm install -g firebase-tools mocha nyc`
+  - Firebase CLI: `npm install -g firebase-tools`
 
 ## Using Firebase Emulator Locally
 - [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) can be used locally as the DB for the project
@@ -119,6 +119,13 @@ The following project structure should be followed:
 - Run: `firebase emulators:start`
 - The emulator will be running on the port: 8080
 - You can view the emulator UI at: `http://localhost:4000`
+
+## Running test scripts on Windows
+- Git Bash is recommended for running test scripts.
+- Run `npm run test-integration` for running integration tests.
+- Run `npm run test-unit` for running unit tests.
+- Make sure to close the emulator window after running the tests in order to avoid the blocking of the port for the next tests to run. 
+- For e.g - After running the integration tests, close the emulator window and then run the command for unit tests.
 
 ## Pull request guidelines
 - Ensure that the tests pass locally before raising a PR.
