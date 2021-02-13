@@ -8,8 +8,8 @@
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "test-config": "node scripts/local-test.js",
-    "test-integration": "./scripts/tests/testIntegration.sh",
-    "test-unit": "./scripts/tests/testUnit.sh",
+    "test-integration": "sh scripts/tests/testIntegration.sh",
+    "test-unit": "sh scripts/tests/testUnit.sh",
     "test": "npm run lint && npm run test-integration && npm run test-unit",
     "generate-api-schema": "node utils/generateAPISchema.js"
   },
