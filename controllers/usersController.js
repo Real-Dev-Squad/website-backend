@@ -13,6 +13,7 @@ const { decodeAuthToken } = require('../services/authService')
 const getUsers = async (req, res) => {
   try {
     const allUsers = await userQuery.fetchUsers(req.query)
+    console.log(allUsers);
 
     return res.json({
       message: 'Users returned successfully!',
