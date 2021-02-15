@@ -209,12 +209,7 @@ router.get('/self', authenticate, usersController.getSelfDetails)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/users'
- *       401:
- *         description: unAuthorized
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       
  *       404:
  *         description: notFound
  *         content:
@@ -228,6 +223,6 @@ router.get('/self', authenticate, usersController.getSelfDetails)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:username', authenticate, usersController.getUser)
+router.get('/:username', usersController.getUser)
 
 module.exports = router
