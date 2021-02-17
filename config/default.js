@@ -6,7 +6,7 @@
  * Documentation: https://github.com/lorenwest/node-config/wiki/Configuration-Files
  */
 
-var NODE_ENV = process.env.NODE_ENV
+const NODE_ENV = process.env.NODE_ENV
 module.exports = {
   port: 3000,
   enableFileLogs: true,
