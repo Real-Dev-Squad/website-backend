@@ -17,7 +17,7 @@ const userModel = firestore.collection('Users')
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const fetchUser = async ( name ) => {
+const fetchUser = async (name) => {
   try {
     let userData, id
     if (name) {
@@ -27,7 +27,7 @@ const fetchUser = async ( name ) => {
         id = doc.id
         userData = doc.data()
       })
-    } 
+    }
     return {
       userExists: !!userData,
       user: {
