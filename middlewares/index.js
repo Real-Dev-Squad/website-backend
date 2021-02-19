@@ -8,7 +8,6 @@ const passport = require('passport')
 const swaggerUi = require('swagger-ui-express')
 const swaggerDocs = require('../docs/swaggerDefinition')
 const contentTypeCheck = require('./contentTypeCheck')
-const config = require('config')
 
 // require middlewares
 require('./passport')

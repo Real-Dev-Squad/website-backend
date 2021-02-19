@@ -1,6 +1,5 @@
 const { fetch } = require('../utils/fetch')
 const { fetchUser } = require('../models/users')
-const config = require('config')
 /**
  * Extracts only the necessary details required from the object returned by Github API
  * @param data {Object} - Object returned by Github API
