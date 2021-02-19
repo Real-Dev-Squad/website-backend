@@ -5,6 +5,8 @@ const chaiHttp = require('chai-http')
 const app = require('../../../server')
 const authService = require('../../../services/authService')
 const addUser = require('../../utils/addUser')
+const config = require('config')
+const cookieName = config.get('userToken.cookieName')
 chai.use(chaiHttp)
 
 describe('contentTypeCheck', function () {
@@ -47,7 +49,7 @@ describe('contentTypeCheck', function () {
     chai
       .request(app)
       .patch('/users/self')
-      .set('cookie', `rds-session=${jwt}`)
+      .set('cookie', `${cookieName}=${jwt}`)
       .send({
         first_name: 'Test first_name'
       })

@@ -9,7 +9,8 @@ const addUser = require('../utils/addUser')
 
 // Import fixtures
 const githubUserInfo = require('../fixtures/auth/githubUserInfo')()
-
+const config = require('config')
+const cookieName = config.get('userToken.cookieName')
 chai.use(chaiHttp)
 
 let jwt
@@ -29,7 +30,7 @@ describe('Users', function () {
       chai
         .request(app)
         .post('/users')
-        .set('cookie', `rds-session=${jwt}`)
+        .set('cookie', `${cookieName}=${jwt}`)
         .send({
           first_name: 'Nikhil',
           last_name: 'Bhandarkar',
@@ -58,7 +59,7 @@ describe('Users', function () {
       chai
         .request(app)
         .post('/users')
-        .set('cookie', `rds-session=${jwt}`)
+        .set('cookie', `${cookieName}=${jwt}`)
         .send({
           first_name: 'Nikhil',
           last_name: 'Bhandarkar',
@@ -86,7 +87,7 @@ describe('Users', function () {
       chai
         .request(app)
         .patch('/users/self')
-        .set('cookie', `rds-session=${jwt}`)
+        .set('cookie', `${cookieName}=${jwt}`)
         .send({
           first_name: 'Test first_name'
         })
@@ -103,7 +104,7 @@ describe('Users', function () {
       chai
         .request(app)
         .get('/users')
-        .set('cookie', `rds-session=${jwt}`)
+        .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
 
@@ -124,7 +125,7 @@ describe('Users', function () {
       chai
         .request(app)
         .get('/users/self')
-        .set('cookie', `rds-session=${jwt}`)
+        .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
 
@@ -141,7 +142,7 @@ describe('Users', function () {
       chai
         .request(app)
         .get('/users/self?private=true')
-        .set('cookie', `rds-session=${jwt}`)
+        .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
 
@@ -179,7 +180,7 @@ describe('Users', function () {
       chai
         .request(app)
         .get(`/users/${githubUserInfo[0].username}`)
-        .set('cookie', `rds-session=${jwt}`)
+        .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
 
@@ -198,7 +199,7 @@ describe('Users', function () {
       chai
         .request(app)
         .get('/users/invalidUser')
-        .set('cookie', `rds-session=${jwt}`)
+        .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
 

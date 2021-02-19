@@ -6,7 +6,8 @@ chai.use(chaiHttp)
 const app = require('../../server')
 const authService = require('../../services/authService')
 const addUser = require('../utils/addUser')
-
+const config = require('config')
+const cookieName = config.get('userToken.cookieName')
 describe('healthController', function () {
   it('should return uptime from the healthcheck API', function (done) {
     chai
@@ -48,7 +49,7 @@ describe('healthController', function () {
     chai
       .request(app)
       .get('/healthcheck/v2')
-      .set('cookie', `rds-session=${jwt}`)
+      .set('cookie', `${cookieName}=${jwt}`)
       .end((err, res) => {
         if (err) { throw err }
 

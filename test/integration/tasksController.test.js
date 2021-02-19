@@ -7,7 +7,8 @@ const app = require('../../server')
 const tasks = require('../../models/tasks')
 const authService = require('../../services/authService')
 const addUser = require('../utils/addUser')
-
+const config = require('config')
+const cookieName = config.get('userToken.cookieName')
 chai.use(chaiHttp)
 
 let jwt
@@ -110,7 +111,7 @@ describe('Tasks', function () {
       chai
         .request(app)
         .get('/tasks/self')
-        .set('cookie', `rds-session=${jwt}`)
+        .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
           expect(res).to.have.status(200)
@@ -124,7 +125,7 @@ describe('Tasks', function () {
       chai
         .request(app)
         .get('/tasks/self?completed=true')
-        .set('cookie', `rds-session=${jwt}`)
+        .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return (done) }
           expect(res).to.have.status(200)
