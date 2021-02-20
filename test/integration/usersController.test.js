@@ -1,28 +1,31 @@
 const chai = require('chai')
-const sinon = require('sinon')
 const { expect } = chai
 const chaiHttp = require('chai-http')
 
 const app = require('../../server')
 const authService = require('../../services/authService')
 const addUser = require('../utils/addUser')
+const cleanDb = require('../utils/cleanDb')
+const users = require('../../models/users')
 
 // Import fixtures
-const githubUserInfo = require('../fixtures/auth/githubUserInfo')()
+const userData = require('../fixtures/user/user')()
+
 const config = require('config')
 const cookieName = config.get('userToken.cookieName')
+
 chai.use(chaiHttp)
 
-let jwt
-
 describe('Users', function () {
-  before(async function () {
+  let jwt
+
+  beforeEach(async function () {
     const userId = await addUser()
     jwt = authService.generateAuthToken({ userId })
   })
 
-  afterEach(function () {
-    sinon.restore()
+  afterEach(async function () {
+    await cleanDb()
   })
 
   describe('POST /users - create one user', function () {
@@ -31,20 +34,9 @@ describe('Users', function () {
         .request(app)
         .post('/users')
         .set('cookie', `${cookieName}=${jwt}`)
-        .send({
-          first_name: 'Nikhil',
-          last_name: 'Bhandarkar',
-          username: 'nikhil',
-          yoe: 0,
-          img: './img.png',
-          github_id: 'whydonti',
-          linkedin_id: 'nikhil-bhandarkar',
-          twitter_id: 'whatifi',
-          phone: '1234567890',
-          email: 'abc@gmail.com'
-        })
+        .send(userData[1])
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
@@ -55,33 +47,26 @@ describe('Users', function () {
         })
     })
 
-    it('Should return 409 if user already exists', function (done) {
+    it('Should return 409 if user already exists', async function () {
+      const userDataClone = Object.assign({}, userData[1])
+
+      await users.addOrUpdate(userDataClone)
+
       chai
         .request(app)
         .post('/users')
         .set('cookie', `${cookieName}=${jwt}`)
-        .send({
-          first_name: 'Nikhil',
-          last_name: 'Bhandarkar',
-          yoe: 0,
-          img: './img.png',
-          github_id: 'whydonti',
-          linkedin_id: 'nikhil-bhandarkar',
-          twitter_id: 'whatifi',
-          phone: '1234567890',
-          email: 'abc@gmail.com'
-        })
+        .send(userData[1])
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { throw err }
 
           expect(res).to.have.status(409)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('User already exists')
-
-          return done()
         })
     })
   })
+
   describe('PATCH /users/self', function () {
     it('Should update the user', function (done) {
       chai
@@ -92,8 +77,10 @@ describe('Users', function () {
           first_name: 'Test first_name'
         })
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
+
           expect(res).to.have.status(204)
+
           return done()
         })
     })
@@ -106,7 +93,7 @@ describe('Users', function () {
         .get('/users')
         .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
@@ -127,7 +114,7 @@ describe('Users', function () {
         .get('/users/self')
         .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
@@ -141,7 +128,8 @@ describe('Users', function () {
     it('Should return details with phone and email when query \'private\' is true', function (done) {
       chai
         .request(app)
-        .get('/users/self?private=true')
+        .get('/users/self')
+        .query({ private: true })
         .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
@@ -179,10 +167,10 @@ describe('Users', function () {
     it('Should return one user with given id', function (done) {
       chai
         .request(app)
-        .get(`/users/${githubUserInfo[0].username}`)
+        .get(`/users/${userData[0].username}`)
         .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
@@ -201,7 +189,7 @@ describe('Users', function () {
         .get('/users/invalidUser')
         .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(404)
           expect(res.body).to.be.a('object')
