@@ -14,11 +14,12 @@ describe('healthController', function () {
       .request(app)
       .get('/healthcheck')
       .end((err, res) => {
-        if (err) { return done() }
+        if (err) { return done(err) }
 
         expect(res).to.have.status(200)
         expect(res.body).to.be.an('object')
         expect(res.body).to.have.property('uptime').that.is.a('number')
+
         return done()
       })
   })
@@ -28,7 +29,7 @@ describe('healthController', function () {
       .request(app)
       .get('/healthcheck/v2')
       .end((err, res) => {
-        if (err) { return done() }
+        if (err) { return done(err) }
 
         expect(res).to.have.status(401)
         expect(res.body).to.be.an('object')

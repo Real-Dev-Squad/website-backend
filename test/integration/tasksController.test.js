@@ -14,12 +14,13 @@ chai.use(chaiHttp)
 let jwt
 
 describe('Tasks', function () {
-  let tid = ''
+  let taskId1, taskId
+
   before(async function () {
     const userId = await addUser()
     jwt = authService.generateAuthToken({ userId })
 
-    const taskData = {
+    const taskData = [{
       title: 'Test task',
       purpose: 'To Test mocha',
       featureUrl: '<testUrl>',
@@ -36,13 +37,39 @@ describe('Tasks', function () {
         'd12',
         'd23'
       ],
-      participants: ['ankurnarkhede'],
+      participants: ['ankur'],
       completionAward: { gold: 3, bronze: 300 },
       lossRate: { gold: 1 },
       isNoteWorthy: true
-    }
-    const { taskId } = await tasks.updateTask(taskData)
-    tid = taskId
+    }, {
+      title: 'Test task',
+      purpose: 'To Test mocha',
+      featureUrl: '<testUrl>',
+      type: 'Dev | Group',
+      links: [
+        'test1'
+      ],
+      endsOn: '<unix timestamp>',
+      startedOn: '<unix timestamp>',
+      status: 'completed',
+      ownerId: '<app owner user id>',
+      percentCompleted: 10,
+      dependsOn: [
+        'd12',
+        'd23'
+      ],
+      participants: ['ankur'],
+      completionAward: { gold: 3, bronze: 300 },
+      lossRate: { gold: 1 },
+      isNoteworthy: true
+    }]
+
+    // Add the active task
+    taskId = (await tasks.updateTask(taskData[0])).taskId
+    taskId1 = taskId
+
+    // Add the completed task
+    taskId = (await tasks.updateTask(taskData[1])).taskId
   })
 
   afterEach(function () {
@@ -71,13 +98,13 @@ describe('Tasks', function () {
             'd12',
             'd23'
           ],
-          participants: ['ankurnarkhede'],
+          participants: ['ankur'],
           completionAward: { gold: 3, bronze: 300 },
           lossRate: { gold: 1 },
           isNoteworthy: true
         })
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Task created successfully!')
@@ -95,7 +122,7 @@ describe('Tasks', function () {
         .request(app)
         .get('/tasks')
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Tasks returned successfully!')
@@ -108,6 +135,8 @@ describe('Tasks', function () {
 
   describe('GET /tasks/self', function () {
     it('Should get all the active and blocked tasks of the user', function (done) {
+      const taskStatus = ['active', 'completed']
+
       chai
         .request(app)
         .get('/tasks/self')
@@ -116,7 +145,11 @@ describe('Tasks', function () {
           if (err) { return done() }
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('array')
-          expect(res.body[0].status).to.not.equal('completed')
+          expect(res.body).to.have.length.above(0)
+          res.body.map((task) => {
+            expect(taskStatus).to.include(task.status)
+          })
+
           return done()
         })
     })
@@ -160,12 +193,12 @@ describe('Tasks', function () {
     it('Should update the task for the given taskid', function (done) {
       chai
         .request(app)
-        .patch('/tasks/' + tid)
+        .patch('/tasks/' + taskId1)
         .send({
           ownerId: 'sumit'
         })
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
           expect(res).to.have.status(204)
 
           return done()
@@ -180,7 +213,7 @@ describe('Tasks', function () {
           ownerId: 'umit'
         })
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
           expect(res).to.have.status(404)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Task not found')
