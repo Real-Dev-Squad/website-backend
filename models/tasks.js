@@ -98,7 +98,7 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
 
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', '!=', 'completed').get()
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', 'in', ['active', 'pending', 'blocked']).get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
       tasks.push({
