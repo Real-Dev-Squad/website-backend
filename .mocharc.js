@@ -3,5 +3,5 @@
  * Info: https://mochajs.org/#configuring-mocha-nodejs
  */
 module.exports = {
-  timeout: '5000'
+  timeout: '60000'
 }
