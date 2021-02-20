@@ -68,7 +68,7 @@ describe.only('Users', function () {
   })
 
   describe('PATCH /users/self', function () {
-    it('Should update the user', function (done) {
+    it.only('Should update the user', function (done) {
       chai
         .request(app)
         .patch('/users/self')
