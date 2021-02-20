@@ -25,63 +25,6 @@ describe('Users', function () {
     sinon.restore()
   })
 
-  describe('POST /users - create one user', function () {
-    it('Should return success response after adding the user', function (done) {
-      chai
-        .request(app)
-        .post('/users')
-        .set('cookie', `${cookieName}=${jwt}`)
-        .send({
-          first_name: 'Nikhil',
-          last_name: 'Bhandarkar',
-          username: 'nikhil',
-          yoe: 0,
-          img: './img.png',
-          github_id: 'whydonti',
-          linkedin_id: 'nikhil-bhandarkar',
-          twitter_id: 'whatifi',
-          phone: '1234567890',
-          email: 'abc@gmail.com'
-        })
-        .end((err, res) => {
-          if (err) { return done() }
-
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('User added successfully!')
-          expect(res.body.userId).to.be.a('string')
-
-          return done()
-        })
-    })
-
-    it('Should return 409 if user already exists', function (done) {
-      chai
-        .request(app)
-        .post('/users')
-        .set('cookie', `${cookieName}=${jwt}`)
-        .send({
-          first_name: 'Nikhil',
-          last_name: 'Bhandarkar',
-          yoe: 0,
-          img: './img.png',
-          github_id: 'whydonti',
-          linkedin_id: 'nikhil-bhandarkar',
-          twitter_id: 'whatifi',
-          phone: '1234567890',
-          email: 'abc@gmail.com'
-        })
-        .end((err, res) => {
-          if (err) { return done() }
-
-          expect(res).to.have.status(409)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('User already exists')
-
-          return done()
-        })
-    })
-  })
   describe('PATCH /users/self', function () {
     it('Should update the user', function (done) {
       chai
