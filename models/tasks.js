@@ -167,5 +167,6 @@ module.exports = {
   fetchTask,
   fetchUserTasks,
   fetchUserActiveAndBlockedTasks,
-  fetchUserCompletedTasks
+  fetchUserCompletedTasks,
+  fetchActiveTaskMembers
 }
