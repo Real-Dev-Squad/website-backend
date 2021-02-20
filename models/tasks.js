@@ -57,7 +57,7 @@ const fetchTasks = async () => {
 
 const fetchActiveTaskMembers = async () => {
   try {
-    const tasksSnapshot = await tasksModel.where('status', 'in', ['Active', 'pending', 'blocked']).get()
+    const tasksSnapshot = await tasksModel.where('status', '==', 'active').get()
     const activeMembers = []
     tasksSnapshot.forEach((task) => {
       activeMembers.push(

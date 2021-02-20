@@ -39,7 +39,7 @@ const getIdleMembers = async (req, res) => {
     const idleMemberUserNames = allMemberUsernames.filter(member => !taskParticipants.has(member))
 
     return res.json({
-      message: 'Idle members returned successfully!',
+      message: idleMemberUserNames.length ? 'Idle members returned successfully!' : 'No Idle Members',
       idleMemberUserNames
     })
   } catch (error) {
