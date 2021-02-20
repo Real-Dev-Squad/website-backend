@@ -47,7 +47,7 @@ describe.only('Users', function () {
         })
     })
 
-    it('Should return 409 if user already exists', async function () {
+    it.skip('Should return 409 if user already exists', async function () {
       const userDataClone = Object.assign({}, userData[1])
 
       await users.addOrUpdate(userDataClone)
@@ -68,7 +68,7 @@ describe.only('Users', function () {
   })
 
   describe('PATCH /users/self', function () {
-    it.only('Should update the user', function (done) {
+    it('Should update the user', function (done) {
       chai
         .request(app)
         .patch('/users/self')
