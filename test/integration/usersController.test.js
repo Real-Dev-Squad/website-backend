@@ -16,7 +16,7 @@ const cookieName = config.get('userToken.cookieName')
 
 chai.use(chaiHttp)
 
-describe.only('Users', function () {
+describe('Users', function () {
   let jwt
 
   beforeEach(async function () {
