@@ -6,7 +6,6 @@ const app = require('../../server')
 const authService = require('../../services/authService')
 const addUser = require('../utils/addUser')
 const cleanDb = require('../utils/cleanDb')
-const users = require('../../models/users')
 
 // Import fixtures
 const userData = require('../fixtures/user/user')()
@@ -26,45 +25,6 @@ describe('Users', function () {
 
   afterEach(async function () {
     await cleanDb()
-  })
-
-  describe('POST /users - create one user', function () {
-    it('Should return success response after adding the user', function (done) {
-      chai
-        .request(app)
-        .post('/users')
-        .set('cookie', `${cookieName}=${jwt}`)
-        .send(userData[1])
-        .end((err, res) => {
-          if (err) { return done(err) }
-
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('User added successfully!')
-          expect(res.body.userId).to.be.a('string')
-
-          return done()
-        })
-    })
-
-    it('Should return 409 if user already exists', async function () {
-      const userDataClone = Object.assign({}, userData[1])
-
-      await users.addOrUpdate(userDataClone)
-
-      chai
-        .request(app)
-        .post('/users')
-        .set('cookie', `${cookieName}=${jwt}`)
-        .send(userData[1])
-        .end((err, res) => {
-          if (err) { throw err }
-
-          expect(res).to.have.status(409)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('User already exists')
-        })
-    })
   })
 
   describe('PATCH /users/self', function () {
