@@ -8,13 +8,13 @@
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "test-config": "node scripts/local-test.js",
-    "test-integration": "./scripts/tests/testIntegration.sh",
-    "test-unit": "./scripts/tests/testUnit.sh",
+    "test-integration": "sh scripts/tests/testIntegration.sh",
+    "test-unit": "sh scripts/tests/testUnit.sh",
     "test": "npm run lint && npm run test-integration && npm run test-unit",
     "generate-api-schema": "node utils/generateAPISchema.js"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^4.2.0",
+    "@google-cloud/firestore": "^4.9.1",
     "axios": "^0.21.1",
     "config": "^3.3.2",
     "cookie-parser": "~1.4.4",

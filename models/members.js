@@ -21,7 +21,9 @@ const fetchMembers = async () => {
       allMembers.push({
         id: doc.id,
         ...doc.data(),
-        tokens: undefined
+        tokens: undefined,
+        phone: undefined,
+        email: undefined
       })
     }
     )

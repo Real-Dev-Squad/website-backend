@@ -13,7 +13,7 @@ const getMembers = async (req, res) => {
     const allMembers = await memberQuery.fetchMembers()
 
     return res.json({
-      message: 'Members returned successfully!',
+      message: allMembers.length ? 'Members returned successfully!' : 'No member found',
       members: allMembers
     })
   } catch (error) {
@@ -39,7 +39,7 @@ const getIdleMembers = async (req, res) => {
     const idleMemberUserNames = allMemberUsernames.filter(member => !taskParticipants.has(member))
 
     return res.json({
-      message: 'Idle members returned successfully!',
+      message: idleMemberUserNames.length ? 'Idle members returned successfully!' : 'No Idle Members',
       idleMemberUserNames
     })
   } catch (error) {
