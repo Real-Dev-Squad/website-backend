@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken')
-
 /**
  * Generates the JWT
  *

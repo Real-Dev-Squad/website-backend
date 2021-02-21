@@ -1,8 +1,8 @@
 const express = require('express')
 const router = express.Router()
+const authenticate = require('../middlewares/authenticate')
 const tasksController = require('../controllers/tasksController')
 const { createTask, updateTask } = require('../middlewares/validators/tasks')
-const authenticate = require('../middlewares/authenticate')
 const authorizeOwner = require('../middlewares/authorizeOwner')
 
 /**
@@ -10,6 +10,8 @@ const authorizeOwner = require('../middlewares/authorizeOwner')
  * /tasks:
  *  get:
  *   summary: Used to get all the tasks
+ *   tags:
+ *     - Tasks
  *   responses:
  *     200:
  *       description: returns tasks
@@ -29,9 +31,48 @@ router.get('/', tasksController.fetchTasks)
 
 /**
  * @swagger
+ * /tasks/self:
+ *   get:
+ *     summary: Use to get all the tasks of the logged in user
+ *     tags:
+ *       - Tasks
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: returns all tasks
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/tasks'
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.get('/self', authenticate, tasksController.getSelfTasks)
+
+/**
+ * @swagger
  * /tasks:
  *  post:
  *   summary: Used to create new task
+ *   tags:
+ *     - Tasks
  *   requestBody:
  *     description: Task data
  *     content:
@@ -59,6 +100,8 @@ router.post('/', authenticate, authorizeOwner, createTask, tasksController.addNe
  * /tasks:
  *  patch:
  *   summary: Used to update task details
+ *   tags:
+ *     - Tasks
  *   requestBody:
  *     description: Task data to be updated
  *     content:

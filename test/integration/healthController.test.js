@@ -6,18 +6,20 @@ chai.use(chaiHttp)
 const app = require('../../server')
 const authService = require('../../services/authService')
 const addUser = require('../utils/addUser')
-
+const config = require('config')
+const cookieName = config.get('userToken.cookieName')
 describe('healthController', function () {
   it('should return uptime from the healthcheck API', function (done) {
     chai
       .request(app)
       .get('/healthcheck')
       .end((err, res) => {
-        if (err) { return done() }
+        if (err) { return done(err) }
 
         expect(res).to.have.status(200)
         expect(res.body).to.be.an('object')
         expect(res.body).to.have.property('uptime').that.is.a('number')
+
         return done()
       })
   })
@@ -27,7 +29,7 @@ describe('healthController', function () {
       .request(app)
       .get('/healthcheck/v2')
       .end((err, res) => {
-        if (err) { return done() }
+        if (err) { return done(err) }
 
         expect(res).to.have.status(401)
         expect(res.body).to.be.an('object')
@@ -48,7 +50,7 @@ describe('healthController', function () {
     chai
       .request(app)
       .get('/healthcheck/v2')
-      .set('cookie', `rds-session=${jwt}`)
+      .set('cookie', `${cookieName}=${jwt}`)
       .end((err, res) => {
         if (err) { throw err }
 
