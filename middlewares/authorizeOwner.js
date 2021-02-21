@@ -20,7 +20,7 @@ module.exports = async (req, res, next) => {
     const accountOwners = await usersController.getAccountOwners()
     const { username } = req.userData
 
-    if (accountOwners.filter((owner) => owner.username === username)) {
+    if (accountOwners.some((owner) => owner.username === username)) {
       return next()
     } else {
       return res.boom.forbidden('Unauthorized User')
