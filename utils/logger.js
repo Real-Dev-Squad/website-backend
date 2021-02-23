@@ -1,5 +1,4 @@
 const winston = require('winston')
-
 // define the custom settings for each transport (file, console)
 const options = {
   file: {

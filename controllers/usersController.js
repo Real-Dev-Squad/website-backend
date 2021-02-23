@@ -72,31 +72,6 @@ const getSelfDetails = (req, res) => {
 }
 
 /**
- * Add new user
- *
- * @param req {Object} - Express request object
- * @param req.body {Object} - User object
- * @param res {Object} - Express response object
- */
-const addNewUser = async (req, res) => {
-  try {
-    const user = await userQuery.addOrUpdate(req.body)
-
-    if (user.isNewUser) {
-      return res.json({
-        message: 'User added successfully!',
-        userId: user.userId
-      })
-    }
-
-    return res.boom.conflict('User already exists')
-  } catch (error) {
-    logger.error(`Error while creating new user: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
-  }
-}
-
-/**
  * Update the user
  *
  * @param req {Object} - Express request object
@@ -128,7 +103,6 @@ const updateSelf = async (req, res) => {
 }
 
 module.exports = {
-  addNewUser,
   updateSelf,
   getUsers,
   getSelfDetails,
