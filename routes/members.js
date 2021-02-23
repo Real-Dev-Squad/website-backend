@@ -26,4 +26,6 @@ const membersController = require('../controllers/membersController')
 
 router.get('/', membersController.getMembers)
 
+router.post('/purgeCache', membersController.purgeMembersCache)
+
 module.exports = router
