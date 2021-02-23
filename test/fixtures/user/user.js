@@ -18,6 +18,7 @@ module.exports = () => {
       linkedin_id: 'ankurnarkhede',
       github_id: githubUserInfo[0].username,
       github_display_name: githubUserInfo[0].displayName,
+      isMember: true,
       phone: '1234567890',
       email: 'abc@gmail.com',
       tokens: {
