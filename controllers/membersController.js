@@ -31,7 +31,8 @@ const getMembers = async (req, res) => {
 
 const getIdleMembers = async (req, res) => {
   try {
-    const allMemberUsernames = await memberQuery.fetchMemberUsernames()
+    let allMemberUsernames = await memberQuery.fetchMembers()
+    allMemberUsernames = allMemberUsernames.map(member => member.username)
 
     let taskParticipants = await tasks.fetchActiveTaskMembers()
     taskParticipants = new Set(taskParticipants)
