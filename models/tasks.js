@@ -50,6 +50,28 @@ const fetchTasks = async () => {
 }
 
 /**
+ * Fetch all participants whose task status is active
+ *
+ * @return {Promise<tasks|Array>}
+ */
+
+const fetchActiveTaskMembers = async () => {
+  try {
+    const tasksSnapshot = await tasksModel.where('status', '==', 'active').get()
+    const activeMembers = []
+    tasksSnapshot.forEach((task) => {
+      activeMembers.push(
+        ...task.data().participants
+      )
+    })
+    return activeMembers
+  } catch (err) {
+    logger.error('error getting tasks', err)
+    throw err
+  }
+}
+
+/**
  * Fetch a task
  * @param taskId { string }: taskid which will be used to fetch the task
  * @return {Promise<taskData|Object>}
@@ -145,5 +167,6 @@ module.exports = {
   fetchTask,
   fetchUserTasks,
   fetchUserActiveAndBlockedTasks,
-  fetchUserCompletedTasks
+  fetchUserCompletedTasks,
+  fetchActiveTaskMembers
 }

@@ -51,4 +51,42 @@ describe('Members', function () {
         })
     })
   })
+
+  describe('GET /members/idle', function () {
+    before(async function () {
+      await cleanDb()
+    })
+    it('Should return empty array if no idle member is found', function (done) {
+      chai
+        .request(app)
+        .get('/members/idle')
+        .end((err, res) => {
+          if (err) { return done() }
+
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('No idle member found')
+          expect(res.body.idleMemberUserNames).to.eql([])
+
+          return done()
+        })
+    })
+
+    it('Get all the idle members in the database', function (done) {
+      chai
+        .request(app)
+        .get('/members/idle')
+        .end((err, res) => {
+          if (err) { return done() }
+
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Idle members returned successfully!')
+          expect(res.body.idleMemberUserNames).to.be.a('array')
+          expect(res.body.idleMemberUserNames[0]).to.be.a('string')
+
+          return done()
+        })
+    })
+  })
 })
