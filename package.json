@@ -51,8 +51,7 @@
     "nodemon": "^2.0.7",
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
-    "sinon": "^9.2.4",
-    "standard": "^16.0.3"
+    "sinon": "^9.2.4"
   },
   "pre-commit": [
     "lint"
