@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "echo $FIRESTORE_CONFIG_DATA > firestore-private-key.json && node server.js",
-    "dev": "cross-env NODE_ENV=devlopment nodemon server.js",
+    "dev": "cross-env NODE_ENV=development nodemon server.js",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "test-config": "node scripts/local-test.js",
