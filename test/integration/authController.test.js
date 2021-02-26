@@ -5,6 +5,7 @@ const chaiHttp = require('chai-http')
 const passport = require('passport')
 
 const app = require('../../server')
+const cleanDb = require('../utils/cleanDb')
 
 chai.use(chaiHttp)
 
@@ -12,7 +13,9 @@ chai.use(chaiHttp)
 const githubUserInfo = require('../fixtures/auth/githubUserInfo')()
 
 describe('authController', function () {
-  afterEach(function () {
+  afterEach(async function () {
+    await cleanDb()
+
     sinon.restore()
   })
 
@@ -30,7 +33,7 @@ describe('authController', function () {
       .query({ code: 'codeReturnedByGithub' })
       .redirects(0)
       .end((err, res) => {
-        if (err) { return done() }
+        if (err) { return done(err) }
 
         expect(res).to.have.status(302)
         expect(res.headers.location).to.equal(authRedirectionUrl)
@@ -53,7 +56,7 @@ describe('authController', function () {
       .query({ code: 'codeReturnedByGithub' })
       .redirects(0)
       .end((err, res) => {
-        if (err) { return done() }
+        if (err) { return done(err) }
 
         expect(res).to.have.status(302)
         // rds-session=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c2VySWQiLCJpYXQiOjE1OTkzOTEzODcsImV4cCI6MTYwMTk4MzM4N30.AljtAmXpZUmErubhSBbA0fQtG9DwH4ci6iroa9z5MBjIPFfQ5FSbaOqU0CQlmgOe-U7XDVPuGBp7GzBzA4yCH7_3PSS9JrHwEVZQQBScTUC-WHDradit5nD1ryKPqJE2WlRO6q0uLOKEukMj-7iPXQ-ykdYwtlokhyJbLVS1S3E; Domain=realdevsquad.com; Path=/; Expires=Tue, 06 Oct 2020 11:23:07 GMT; HttpOnly; Secure
@@ -74,7 +77,7 @@ describe('authController', function () {
       .get('/auth/github/callback')
       .query({ code: 'codeReturnedByGithub' })
       .end((err, res) => {
-        if (err) { return done() }
+        if (err) { return done(err) }
 
         expect(res).to.have.status(401)
         expect(res.body).to.be.an('object')
