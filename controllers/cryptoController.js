@@ -7,12 +7,11 @@ const userQuery = require('../models/crypto')
  * @param res {Object} - Express response object
  */
 
-
 const getUser = async (req, res) => {
-  try { 
+  try {
     const userInfo = await userQuery.fetchUser(req.query.user_id)
-  
-    if(userInfo) {
+
+    if (userInfo) {
       const transaction = userInfo.transaction
       const transactionCount = 7
 
@@ -20,17 +19,15 @@ const getUser = async (req, res) => {
 
       return res.json({
         message: 'User returned successfully!',
-        userInfo,
+        userInfo
       })
     }
     return res.boom.notFound('User doesn\'t exist')
-
   } catch (error) {
     logger.error(`Error while fetching the user data: ${error}`)
     return res.boom.badImplementation('Something went wrong please contact admin')
   }
 }
-
 
 module.exports = {
   getUser

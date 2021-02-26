@@ -11,7 +11,7 @@ const cryptoController = require('../controllers/cryptoController')
  *      -users
  *    responses:
  *      200:
- *        description: User details 
+ *        description: User details
  *        content:
  *          application/json:
  *            schema:
@@ -28,7 +28,7 @@ const cryptoController = require('../controllers/cryptoController')
  *          application/json:
  *            schema:
  *              $ref: '#/components/schemas/errors/badImplementation'
- * 
+ *
  */
 // router.get('/', cryptoController.userInfo)
 router.get('/', cryptoController.getUser)

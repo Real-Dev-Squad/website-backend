@@ -3,9 +3,9 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 
- const logger = require('../utils/logger')
- const firestore = require('../utils/firestore')
- const cryptoUserModel = firestore.collection('users')
+const logger = require('../utils/logger')
+const firestore = require('../utils/firestore')
+const cryptoUserModel = firestore.collection('users')
 
 /**
 * Get all user Information from crypto site
@@ -21,17 +21,16 @@ const fetchUser = async (userId) => {
       user.forEach((doc) => {
         userInfo = doc.data()
       })
-
       return {
         ...userInfo
       }
-    }   
+    }
   } catch (error) {
     logger.error('Error while fetching the user', error)
     throw error
   }
+  return ''
 }
-
 
 module.exports = {
   fetchUser
