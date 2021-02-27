@@ -1,3 +1,4 @@
+const { addProduct } = require('../models/crypto')
 const { fetchProducts } = require('../models/crypto')
 
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
@@ -19,6 +20,24 @@ const getProducts = async (req, res) => {
   }
 }
 
+const addNewProduct = async (req, res) => {
+  try {
+    const productData = req.body
+    const product = await addProduct(productData)
+    if (product) {
+      return res.json({
+        message: 'Product added successfully!',
+        product
+      })
+    }
+    return res.boom.conflict(`Product with id ${productData.id} already exist`)
+  } catch (err) {
+    logger.error(`Error while adding contributions ${err}`)
+    return res.boom.badImplementation(ERROR_MESSAGE)
+  }
+}
+
 module.exports = {
-  getProducts
+  getProducts,
+  addNewProduct
 }

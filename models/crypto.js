@@ -13,9 +13,8 @@ const fetchProducts = async () => {
     const productsData = []
 
     snapshot.forEach((doc) => {
-      productsData.push({
-        ...doc.data()
-      })
+      const data = doc.data()
+      productsData.push(data.id = { ...data })
     })
     return productsData
   } catch (err) {
@@ -24,6 +23,23 @@ const fetchProducts = async () => {
   }
 }
 
+const addProduct = async (productData) => {
+  try {
+    const { id } = productData
+    const product = await cryptoProductsCollection.where('id', '==', id).get()
+    if (product.empty) {
+      await cryptoProductsCollection.add(productData)
+      return productData
+    } else {
+      return null
+    }
+  } catch (err) {
+    logger.error('Error retrieving product data', err)
+    throw err
+  }
+}
+
 module.exports = {
-  fetchProducts
+  fetchProducts,
+  addProduct
 }
