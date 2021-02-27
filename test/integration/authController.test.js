@@ -66,6 +66,7 @@ describe('authController', function () {
         expect(res.headers['set-cookie'][0]).to.include('HttpOnly')
         expect(res.headers['set-cookie'][0]).to.include('Secure')
         expect(res.headers['set-cookie'][0]).to.include(`Domain=${rdsUiUrl.hostname}`)
+        expect(res.headers['set-cookie'][0]).to.include('sameSite', 'lax')
 
         return done()
       })
