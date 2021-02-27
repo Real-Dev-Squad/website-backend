@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const cryptoController = require('../controllers/cryptoController')
-
+const { send, receive, approve } = require('../middlewares/validators/cryptoReqValidator')
 /**
  * @swagger
  * /members:
@@ -24,7 +24,7 @@ const cryptoController = require('../controllers/cryptoController')
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.post('/send', cryptoController.send)
+router.post('/send', send, cryptoController.send)
 
 /**
  * @swagger
@@ -48,7 +48,7 @@ router.post('/send', cryptoController.send)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.post('/receive', cryptoController.request)
+router.post('/receive', receive, cryptoController.request)
 
 /**
  * @swagger
@@ -72,6 +72,6 @@ router.post('/receive', cryptoController.request)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.post('/approvedRequest', cryptoController.approved)
+router.post('/approvedRequest', approve , cryptoController.approved)
 
 module.exports = router
