@@ -10,12 +10,11 @@ const fetchProducts = async () => {
   try {
     const snapshot = await cryptoProductsCollection.get()
 
-    const productsData = []
+    const productsData = {}
 
     snapshot.forEach((doc) => {
-      productsData.push({
-        ...doc.data()
-      })
+      const data = doc.data()
+      productsData[data.id] = { ...data }
     })
     return productsData
   } catch (err) {

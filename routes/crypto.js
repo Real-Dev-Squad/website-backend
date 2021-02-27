@@ -4,7 +4,7 @@ const cryptoController = require('../controllers/crypto')
 
 /**
  * @swagger
- * /crypto/product:
+ * /crypto/products:
  *   get:
  *     summary: Used to get all the crypto products data
  *     tags:
