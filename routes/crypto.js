@@ -4,7 +4,7 @@ const cryptoController = require('../controllers/crypto')
 
 /**
  * @swagger
- * /crypto/product:
+ * /crypto/products:
  *   get:
  *     summary: Used to get all the crypto products data
  *     tags:
@@ -33,7 +33,7 @@ router.get('/products', cryptoController.getProducts)
 
 /**
  * @swagger
- * /crypto/product/{productid}:
+ * /crypto/products/{productid}:
  *   get:
  *     summary: Used to get the crypto product data
  *     tags:
