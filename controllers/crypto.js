@@ -16,7 +16,7 @@ const getProducts = async (req, res) => {
       products: productData
     })
   } catch (err) {
-    logger.error(`Error while retriving contributions ${err}`)
+    logger.error(`Error while retriving products ${err}`)
     return res.boom.badImplementation(ERROR_MESSAGE)
   }
 }
