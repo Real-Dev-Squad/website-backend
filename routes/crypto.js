@@ -72,6 +72,6 @@ router.post('/receive', receive, cryptoController.request)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.post('/approvedRequest', approve , cryptoController.approved)
+router.post('/approvedRequest', approve, cryptoController.approved)
 
 module.exports = router
