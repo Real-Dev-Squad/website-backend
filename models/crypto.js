@@ -24,6 +24,26 @@ const fetchProducts = async () => {
   }
 }
 
+/**
+ * Fetches the data of crypto product
+ * @return {Promise<userModel|Array>}
+ */
+
+const fetchProduct = async (productId) => {
+  try {
+    const snapshot = await cryptoProductsCollection.doc(productId).get()
+    if (snapshot.exists) {
+      const productData = snapshot.data()
+      return productData
+    }
+    return undefined
+  } catch (err) {
+    logger.error('Error retrieving product data', err)
+    throw err
+  }
+}
+
 module.exports = {
-  fetchProducts
+  fetchProducts,
+  fetchProduct
 }
