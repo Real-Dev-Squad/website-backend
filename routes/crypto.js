@@ -5,7 +5,7 @@ const authenticate = require('../middlewares/authenticate')
 const cryptoValidator = require('../middlewares/validators/crypto-products')
 /**
  * @swagger
- * /crypto/product:
+ * /crypto/products:
  *   get:
  *     summary: Used to get all the crypto products data
  *     tags:
@@ -34,7 +34,7 @@ router.get('/products', cryptoController.getProducts)
 
 /**
  * @swagger
- * /crypto/product:
+ * /crypto/products:
  *   post:
  *     summary: Write product data to db
  *     tags:
@@ -53,6 +53,6 @@ router.get('/products', cryptoController.getProducts)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/product', authenticate, cryptoValidator.createProduct, cryptoController.addNewProduct)
+router.post('/products', authenticate, cryptoValidator.createProduct, cryptoController.addNewProduct)
 
 module.exports = router
