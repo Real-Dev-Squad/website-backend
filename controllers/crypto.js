@@ -36,7 +36,7 @@ const getProduct = async (req, res) => {
     }
     return res.boom.notFound('Product doesn\'t exist')
   } catch (err) {
-    logger.error(`Error while retriving contributions ${err}`)
+    logger.error(`Error while retriving products ${err}`)
     return res.boom.badImplementation(ERROR_MESSAGE)
   }
 }
