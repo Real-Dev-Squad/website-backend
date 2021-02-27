@@ -18,7 +18,7 @@ const fetchProducts = async () => {
     })
     return productsData
   } catch (err) {
-    logger.error('Error retrieving product data', err)
+    logger.error('Error retrieving products data', err)
     throw err
   }
 }
@@ -39,6 +39,25 @@ const addProduct = async (productData) => {
       return undefined
     }
   } catch (err) {
+    logger.error('Error adding product data', err)
+    throw err
+  }
+}
+
+/**
+ * @param productId { string }: product id
+ * @return {Promise<userModel|Array>}
+ */
+
+const fetchProduct = async (productId) => {
+  try {
+    const snapshot = await cryptoProductsCollection.doc(productId).get()
+    if (snapshot.exists) {
+      const productData = snapshot.data()
+      return productData
+    }
+    return undefined
+  } catch (err) {
     logger.error('Error retrieving product data', err)
     throw err
   }
@@ -46,5 +65,6 @@ const addProduct = async (productData) => {
 
 module.exports = {
   fetchProducts,
-  addProduct
+  addProduct,
+  fetchProduct
 }

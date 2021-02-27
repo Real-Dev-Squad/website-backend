@@ -1,5 +1,4 @@
-const { addProduct } = require('../models/crypto')
-const { fetchProducts } = require('../models/crypto')
+const { fetchProducts, fetchProduct, addProduct } = require('../models/crypto')
 
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
@@ -23,7 +22,7 @@ const getProducts = async (req, res) => {
 }
 
 /**
- * Post new  product
+ * Post new product
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
@@ -44,7 +43,31 @@ const addNewProduct = async (req, res) => {
   }
 }
 
+/**
+ * Get the product details
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+
+const getProduct = async (req, res) => {
+  try {
+    const productId = req.params.productId
+    const productData = await fetchProduct(productId)
+    if (productData) {
+      return res.json({
+        message: 'Product returned successfully.',
+        product: productData
+      })
+    }
+    return res.boom.notFound('Product doesn\'t exist')
+  } catch (err) {
+    logger.error(`Error while retriving products ${err}`)
+    return res.boom.badImplementation(ERROR_MESSAGE)
+  }
+}
+
 module.exports = {
   getProducts,
-  addNewProduct
+  addNewProduct,
+  getProduct
 }

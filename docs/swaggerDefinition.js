@@ -425,6 +425,49 @@ const swaggerOptions = {
             }
           }
         },
+        crypto: {
+          type: 'object',
+          properties: {
+            product: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'string'
+                },
+                name: {
+                  type: 'string'
+                },
+                image: {
+                  type: 'string'
+                },
+                manufacturer: {
+                  type: 'string'
+                },
+                price: {
+                  type: 'number'
+                },
+                category: {
+                  type: 'string'
+                },
+                usage: {
+                  type: 'array',
+                  items: {
+                    type: 'string'
+                  }
+                }
+              }
+            },
+            products: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'object',
+                  $ref: '#/components/schemas/crypto/properties/product'
+                }
+              }
+            }
+          }
+        },
         errors: {
           unAuthorized: {
             type: 'object',
@@ -469,6 +512,20 @@ const swaggerOptions = {
             }
           },
           badImplementation: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
+          conflict: {
             type: 'object',
             properties: {
               statusCode: {
