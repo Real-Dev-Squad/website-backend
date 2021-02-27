@@ -25,6 +25,7 @@ const fetchProducts = async () => {
 
 /**
  * Fetches the data of crypto product
+ * @param productId { string }: product id
  * @return {Promise<userModel|Array>}
  */
 

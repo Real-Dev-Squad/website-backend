@@ -22,7 +22,7 @@ const getProducts = async (req, res) => {
 }
 
 /**
- * Get the  contributions of the user
+ * Get the  product details
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
