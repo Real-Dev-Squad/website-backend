@@ -1,6 +1,6 @@
 const firestore = require('../utils/firestore')
 const tasksModel = firestore.collection('tasks')
-
+const { fetchUser } = require('./users')
 /**
  * Adds and Updates tasks
  *
@@ -50,6 +50,28 @@ const fetchTasks = async () => {
 }
 
 /**
+ * Fetch all participants whose task status is active
+ *
+ * @return {Promise<tasks|Array>}
+ */
+
+const fetchActiveTaskMembers = async () => {
+  try {
+    const tasksSnapshot = await tasksModel.where('status', '==', 'active').get()
+    const activeMembers = []
+    tasksSnapshot.forEach((task) => {
+      activeMembers.push(
+        ...task.data().participants
+      )
+    })
+    return activeMembers
+  } catch (err) {
+    logger.error('error getting tasks', err)
+    throw err
+  }
+}
+
+/**
  * Fetch a task
  * @param taskId { string }: taskid which will be used to fetch the task
  * @return {Promise<taskData|Object>}
@@ -64,8 +86,87 @@ const fetchTask = async (taskId) => {
   }
 }
 
+/**
+ * Fetch all the active and blocked tasks of the user
+ *
+ * @return {Promise<tasks|Array>}
+ */
+
+/**
+ * Fetch all tasks of a user
+ *
+ * @return {Promise<tasks|Array>}
+ */
+
+const fetchUserTasks = async (username) => {
+  try {
+    const { user } = await fetchUser({ username })
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).get()
+    const tasks = []
+    tasksSnapshot.forEach((task) => {
+      tasks.push({
+        id: task.id,
+        ...task.data()
+      })
+    })
+    return tasks
+  } catch (err) {
+    logger.error('error getting tasks', err)
+    throw err
+  }
+}
+
+const fetchUserActiveAndBlockedTasks = async (username) => {
+  try {
+    const { user } = await fetchUser({ username })
+
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', 'in', ['active', 'pending', 'blocked']).get()
+    const tasks = []
+    tasksSnapshot.forEach((task) => {
+      tasks.push({
+        id: task.id,
+        ...task.data()
+      })
+    })
+
+    return tasks
+  } catch (err) {
+    logger.error('error getting tasks', err)
+    throw err
+  }
+}
+
+/**
+ * Fetch all the completed tasks of a user
+ *
+ * @return {Promise<tasks|Array>}
+ */
+
+const fetchUserCompletedTasks = async (username) => {
+  try {
+    const { user } = await fetchUser({ username })
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', '==', 'completed').get()
+    const tasks = []
+    tasksSnapshot.forEach((task) => {
+      tasks.push({
+        id: task.id,
+        ...task.data()
+      })
+    })
+
+    return tasks
+  } catch (err) {
+    logger.error('error getting tasks', err)
+    throw err
+  }
+}
+
 module.exports = {
   updateTask,
   fetchTasks,
-  fetchTask
+  fetchTask,
+  fetchUserTasks,
+  fetchUserActiveAndBlockedTasks,
+  fetchUserCompletedTasks,
+  fetchActiveTaskMembers
 }

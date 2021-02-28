@@ -66,6 +66,8 @@ const fetchUsers = async (query) => {
       allUsers.push({
         id: doc.id,
         ...doc.data(),
+        phone: undefined,
+        email: undefined,
         tokens: undefined
       })
     })
