@@ -179,7 +179,7 @@ describe('Users', function () {
     it('Should return userAvailable as false as we are passing existing user', function (done) {
       chai
         .request(app)
-        .get(`/users/userAvailable/${githubUserInfo[0].username}`)
+        .get(`/users/userAvailable/${userData[0].username}`)
         .set('cookie', `rds-session=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
