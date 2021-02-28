@@ -144,11 +144,11 @@ describe('Users', function () {
     })
   })
 
-  describe('GET /users/userAvailable/id', function () {
+  describe('GET /users/isUsernameAvailable/username', function () {
     it('Should return userAvailable as true as we are passing new user', function (done) {
       chai
         .request(app)
-        .get('/users/userAvailable/availableUser')
+        .get('/users/isUsernameAvailable/availableUser')
         .set('cookie', `rds-session=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
