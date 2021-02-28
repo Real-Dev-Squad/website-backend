@@ -174,7 +174,7 @@ router.get('/:username', usersController.getUser)
 
 /**
  * @swagger
- * /users/userAvailable/:username:
+ * /users/isUsernameAvailable/:username:
  *   get:
  *     summary: check user exists or not
  *     tags:
@@ -207,6 +207,6 @@ router.get('/:username', usersController.getUser)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/userAvailable/:username', usersController.checkUser)
+router.get('/isUsernameAvailable/:username', authenticate, usersController.checkUser)
 
 module.exports = router
