@@ -38,7 +38,8 @@ const githubAuth = (req, res, next) => {
         domain: rdsUiUrl.hostname,
         expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: 'lax'
       })
 
       return res.redirect(authRedirectionUrl)

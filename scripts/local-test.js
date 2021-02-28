@@ -11,9 +11,10 @@ if (
   throw new Error('Github credentials are not properly set')
 }
 
+let firestoreData
 // throw an error if unable to read file
 try {
-  var firestoreData = fs.readFileSync('./firestore-private-key.json', 'utf8')
+  firestoreData = fs.readFileSync('./firestore-private-key.json', 'utf8')
 } catch (error) {
   throw new Error('Please make sure firestore-private-key.json file is correct')
 }
