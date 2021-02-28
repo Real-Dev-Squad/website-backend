@@ -52,7 +52,8 @@ module.exports = async (req, res, next) => {
           domain: rdsUiUrl.hostname,
           expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
           httpOnly: true,
-          secure: true
+          secure: true,
+          sameSite: 'lax'
         })
 
         // add user data to `req.userData` for further use
