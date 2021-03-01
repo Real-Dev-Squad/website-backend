@@ -1,3 +1,4 @@
+const config = require('config')
 const { fetch } = require('../../utils/fetch')
 const firebaseConfig = require('../../firebase.json')
 
