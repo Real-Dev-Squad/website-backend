@@ -439,7 +439,9 @@ const swaggerOptions = {
             },
             users: {
               type: 'array',
-              items: []
+              items: {
+                type: 'string'
+              }
             }
           }
         },
