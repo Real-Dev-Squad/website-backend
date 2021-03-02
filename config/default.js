@@ -36,7 +36,8 @@ module.exports = {
   },
 
   cors: {
-    allowedOrigins: /\.realdevsquad\.com$/
+    allowedOrigins: /\.realdevsquad\.com$/,
+    allowedMethods: ['GET', 'POST', 'PATCH']
   },
 
   userToken: {

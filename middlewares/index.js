@@ -37,6 +37,7 @@ const middleware = (app) => {
 
   app.use(cors({
     origin: config.get('cors.allowedOrigins'),
+    methods: config.get('cors.allowedMethods'),
     credentials: true,
     optionsSuccessStatus: 200
   }))
