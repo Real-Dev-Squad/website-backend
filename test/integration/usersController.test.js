@@ -165,7 +165,7 @@ describe('Users', function () {
       chai
         .request(app)
         .get('/users/isUsernameAvailable/availableUser')
-        .set('cookie', `rds-session=${jwt}`)
+        .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
           expect(res).to.have.status(200)
@@ -179,8 +179,8 @@ describe('Users', function () {
     it('Should return userAvailable as false as we are passing existing user', function (done) {
       chai
         .request(app)
-        .get(`/users/userAvailable/${userData[0].username}`)
-        .set('cookie', `rds-session=${jwt}`)
+        .get(`/users/isUsernameAvailable/${userData[0].username}`)
+        .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done() }
           expect(res).to.have.status(200)
