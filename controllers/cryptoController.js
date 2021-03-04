@@ -1,5 +1,5 @@
 const logger = require('../utils/logger')
-const userQuery = require('../models/crypto')
+const userDetailsQuery = require('../models/crypto')
 
 /**
  * Fetches the data about the user
@@ -7,15 +7,14 @@ const userQuery = require('../models/crypto')
  * @param res {Object} - Express response object
  */
 
-const getUser = async (req, res) => {
+const getUserInfo = async (req, res) => {
   try {
-    const userInfo = await userQuery.fetchUser(req.query.user_id)
+    const userInfo = await userDetailsQuery.fetchUser(req.query.user_id)
 
     if (userInfo) {
-      const transaction = userInfo.transaction
       const transactionCount = 7
 
-      userInfo.transaction = transaction.slice(0, transactionCount)
+      userInfo.transaction = userInfo.transaction.slice(0, transactionCount)
 
       return res.json({
         message: 'User returned successfully!',
@@ -30,5 +29,5 @@ const getUser = async (req, res) => {
 }
 
 module.exports = {
-  getUser
+  getUserInfo
 }
