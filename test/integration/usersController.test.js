@@ -161,7 +161,7 @@ describe('Users', function () {
   })
 
   describe('GET /users/isUsernameAvailable/username', function () {
-    it('Should return userAvailable as true as we are passing new user', function (done) {
+    it('Should return isUsernameAvailable as true as we are passing new user', function (done) {
       chai
         .request(app)
         .get('/users/isUsernameAvailable/availableUser')
@@ -176,7 +176,7 @@ describe('Users', function () {
         })
     })
 
-    it('Should return userAvailable as false as we are passing existing user', function (done) {
+    it('Should return isUsernameAvailable as false as we are passing existing user', function (done) {
       chai
         .request(app)
         .get(`/users/isUsernameAvailable/${userData[0].username}`)
