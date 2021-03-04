@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const cryptoController = require('../controllers/cryptoController')
+const cryptoUserValidator = require('../middlewares/validators/cryptoUser')
 
 /**
  * @swagger
@@ -30,7 +31,7 @@ const cryptoController = require('../controllers/cryptoController')
  *              $ref: '#/components/schemas/errors/badImplementation'
  *
  */
-// router.get('/', cryptoController.userInfo)
-router.get('/', cryptoController.getUser)
+
+router.get('/', cryptoUserValidator.validateUser, cryptoController.getUserInfo)
 
 module.exports = router
