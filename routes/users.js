@@ -143,37 +143,6 @@ router.get('/self', authenticate, usersController.getSelfDetails)
 
 /**
  * @swagger
- * /users/:username:
- *   get:
- *     summary: Get the details of user with provided id.
- *     tags:
- *       - Users
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: User details
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/users'
- *       404:
- *         description: notFound
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/errors/notFound'
- *       500:
- *         description: badImplementation
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/errors/badImplementation'
- */
-router.get('/:username', usersController.getUser)
-
-/**
- * @swagger
  * /users/isUsernameAvailable/:username:
  *   get:
  *     summary: check user exists or not
@@ -207,6 +176,37 @@ router.get('/:username', usersController.getUser)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/isUsernameAvailable/:username', authenticate, usersController.checkUser)
+router.get('/isUsernameAvailable/:username', authenticate, usersController.getUsernameAvailabilty)
+
+/**
+ * @swagger
+ * /users/:username:
+ *   get:
+ *     summary: Get the details of user with provided id.
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/users'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.get('/:username', usersController.getUser)
 
 module.exports = router

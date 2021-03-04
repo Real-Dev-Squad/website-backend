@@ -170,7 +170,7 @@ describe('Users', function () {
           if (err) { return done() }
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
-          expect(res.body.userAvailable).to.equal(true)
+          expect(res.body.isUsernameAvailable).to.equal(true)
 
           return done()
         })
@@ -185,7 +185,7 @@ describe('Users', function () {
           if (err) { return done() }
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
-          expect(res.body.userAvailable).to.equal(false)
+          expect(res.body.isUsernameAvailable).to.equal(false)
 
           return done()
         })

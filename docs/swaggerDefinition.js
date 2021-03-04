@@ -428,7 +428,7 @@ const swaggerOptions = {
         userAvailable: {
           type: 'object',
           properties: {
-            userAvailable: {
+            isUsernameAvailable: {
               type: 'boolean'
             }
           }

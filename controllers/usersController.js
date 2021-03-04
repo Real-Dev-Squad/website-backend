@@ -49,17 +49,17 @@ const getUser = async (req, res) => {
 }
 
 /**
- * Checks whether a user exists or not
+ * checks whether a given username is available
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
 
-const checkUser = async (req, res) => {
+const getUsernameAvailabilty = async (req, res) => {
   try {
     const result = await userQuery.fetchUser({ username: req.params.username })
     return res.json({
-      userAvailable: !result.userExists
+      isUsernameAvailable: !result.userExists
     })
   } catch (error) {
     logger.error(`Error while checking user: ${error}`)
@@ -126,5 +126,5 @@ module.exports = {
   getUsers,
   getSelfDetails,
   getUser,
-  checkUser
+  getUsernameAvailabilty
 }
