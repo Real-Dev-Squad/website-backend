@@ -425,6 +425,26 @@ const swaggerOptions = {
             }
           }
         },
+        badges: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string'
+            },
+            description: {
+              type: 'string'
+            },
+            imgUrl: {
+              type: 'string'
+            },
+            users: {
+              type: 'array',
+              items: {
+                type: 'string'
+              }
+            }
+          }
+        },
         userAvailable: {
           type: 'object',
           properties: {
