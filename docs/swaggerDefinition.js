@@ -445,6 +445,14 @@ const swaggerOptions = {
             }
           }
         },
+        userAvailable: {
+          type: 'object',
+          properties: {
+            isUsernameAvailable: {
+              type: 'boolean'
+            }
+          }
+        },
         errors: {
           unAuthorized: {
             type: 'object',
