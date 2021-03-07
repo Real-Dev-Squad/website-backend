@@ -5,16 +5,27 @@ const chaiHttp = require('chai-http')
 
 const app = require('../../server')
 const cryptoModel = require('../../models/crypto')
+const userModel = require('../../models/users')
+const firestore = require('../../utils/firestore')
 const authService = require('../../services/authService')
-const addUser = require('../utils/addUser')
 const cookieName = config.get('userToken.cookieName')
 
 chai.use(chaiHttp)
 
 describe('Crypto', function () {
   let jwt
-  beforeEach(async function () {
-    const userId = await addUser()
+  before(async function () {
+    const user = {
+      first_name: 'Prakash',
+      last_name: 'C',
+      yoe: 0,
+      img: './img.png',
+      github_id: 'prakashchoudhary07',
+      username: 'prakash'
+    }
+    // Adding user
+    const { userId } = await userModel.addOrUpdate(user)
+    // Generatinf JWT
     jwt = authService.generateAuthToken({ userId })
   })
   describe('GET /crypto/products', function () {
@@ -232,6 +243,120 @@ describe('Crypto', function () {
           expect(res.body).to.be.a('object')
           expect(res.body.error).to.equal('Conflict')
           expect(res.body.message).to.equal('Product with id "water" already exist')
+          return done()
+        })
+    })
+  })
+  describe('POST /crypto/purchase', function () {
+    before(async function () {
+      const userCollection = firestore.collection('crypto-users')
+      await userCollection.doc('prakash').set({
+        coins: {
+          brass: 10,
+          silver: 5,
+          gold: 1
+        },
+        transaction: []
+      })
+    })
+    it('Should show 401 unauthenticated error', function (done) {
+      chai
+        .request(app)
+        .post('/crypto/purchase')
+        .send({
+          items: {
+            itemid: 'coffee'
+          },
+          amount: {
+            brass: 3,
+            silver: 0,
+            gold: 0
+          }
+        })
+        .end((err, res) => {
+          if (err) {
+            return done()
+          }
+          expect(res).to.have.status(401)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Unauthenticated User')
+          return done()
+        })
+    })
+    it('should retrun validation error when amount is not passed ', function (done) {
+      chai
+        .request(app)
+        .post('/crypto/purchase')
+        .send({
+          items: [{
+            itemid: 'coffee'
+          }]
+        })
+        .set('cookie', `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done()
+          }
+          expect(res).to.have.status(400)
+          expect(res.body).to.be.a('object')
+          expect(res.body.error).to.equal('Bad Request')
+          expect(res.body.message).to.equal('"amount" is required')
+          return done()
+        })
+    })
+    it('Should make successful transaction', function (done) {
+      chai
+        .request(app)
+        .post('/crypto/purchase')
+        .send({
+          items: [{
+            itemId: 'coffee',
+            quantity: 3
+          }],
+          totalQuantity: 3,
+          amount: {
+            brass: 3,
+            silver: 0,
+            gold: 0
+          }
+        })
+        .set('cookie', `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done()
+          }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body).to.contain.keys('message')
+          expect(res.body.message).to.equal('Transaction Successful.')
+          return done()
+        })
+    })
+    it('Should response 402 payment required', function (done) {
+      chai
+        .request(app)
+        .post('/crypto/purchase')
+        .send({
+          items: [{
+            itemId: 'coffee',
+            quantity: 3
+          }],
+          totalQuantity: 3,
+          amount: {
+            brass: 10,
+            silver: 4,
+            gold: 2
+          }
+        })
+        .set('cookie', `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done()
+          }
+          expect(res).to.have.status(402)
+          expect(res.body).to.be.a('object')
+          expect(res.body.error).to.equal('Payment Required')
+          expect(res.body.message).to.equal('Insufficient coins.')
           return done()
         })
     })

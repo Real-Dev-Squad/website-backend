@@ -96,4 +96,35 @@ router.post('/products', authenticate, cryptoValidator.createProduct, cryptoCont
  */
 router.get('/products/:productId', cryptoController.getProduct)
 
+/**
+ * @swagger
+ * /crypto/purchase:
+ *   post:
+ *     summary: enable user to make purchase.
+ *     tags:
+ *       - Crypto
+ *     responses:
+ *       200:
+ *         description: Success Message
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       402:
+ *         description: paymentRequired
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/paymentRequired'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.post('/purchase', authenticate, cryptoValidator.purchaseTransaction, cryptoController.makeTransaction)
+
 module.exports = router

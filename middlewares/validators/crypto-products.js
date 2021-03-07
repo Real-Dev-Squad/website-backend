@@ -20,6 +20,31 @@ const createProduct = async (req, res, next) => {
   }
 }
 
+const purchaseTransaction = async (req, res, next) => {
+  const schema = joi.object().keys({
+    amount: joi.object().keys({
+      brass: joi.number().min(0).required(),
+      silver: joi.number().min(0).required(),
+      gold: joi.number().min(0).required()
+    }).required(),
+    items: joi.array().items({
+      itemId: joi.string().required(),
+      name: joi.string().optional(),
+      quantity: joi.number()
+    }).required(),
+    totalQuantity: joi.number()
+  })
+
+  try {
+    await schema.validateAsync(req.body)
+    next()
+  } catch (error) {
+    logger.error(`Error validating purchase payload : ${error}`)
+    res.boom.badRequest(error.details[0].message)
+  }
+}
+
 module.exports = {
-  createProduct
+  createProduct,
+  purchaseTransaction
 }

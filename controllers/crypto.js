@@ -1,4 +1,4 @@
-const { fetchProducts, fetchProduct, addProduct } = require('../models/crypto')
+const { fetchProducts, fetchProduct, addProduct, purchaseTransaction } = require('../models/crypto')
 
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
@@ -66,8 +66,31 @@ const getProduct = async (req, res) => {
   }
 }
 
+/**
+ * Make purchase request
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const makeTransaction = async (req, res) => {
+  try {
+    const { amount, items, totalQuantity } = req.body
+    const { username: userId } = req.userData
+    const purchaseResponse = await purchaseTransaction({ userId, amount, items, totalQuantity })
+    if (purchaseResponse) {
+      return res.json({
+        message: 'Transaction Successful.'
+      })
+    }
+    return res.boom.paymentRequired('Insufficient coins.')
+  } catch (err) {
+    logger.error(`Error while retriving products ${err}`)
+    return res.boom.badImplementation(ERROR_MESSAGE)
+  }
+}
+
 module.exports = {
   getProducts,
   addNewProduct,
-  getProduct
+  getProduct,
+  makeTransaction
 }

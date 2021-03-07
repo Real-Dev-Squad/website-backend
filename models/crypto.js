@@ -1,6 +1,8 @@
+const Firestore = require('@google-cloud/firestore')
 const firestore = require('../utils/firestore')
+const { checkSufficientAmountAvaliable, debitCoins } = require('../utils/crypto/transaction')
 const cryptoProductsCollection = firestore.collection('crypto-products')
-
+const cryptoUsersCollection = firestore.collection('crypto-users') // Users collection name to be standardized
 /**
  * Fetches the data of crypto product
  * @return {Promise<product|Object>}
@@ -63,8 +65,41 @@ const fetchProduct = async (productId) => {
   }
 }
 
+/**
+ * @param Object : object with userId, amount, items, totalQuantity
+ * @return {Promise<boolean>}
+ */
+const purchaseTransaction = async ({ userId, amount, items, totalQuantity = null }) => {
+  try {
+    const userDoc = cryptoUsersCollection.doc(userId)
+    const transactionCompleted = await firestore.runTransaction(async t => {
+      const userRef = await t.get(userDoc)
+      const userData = userRef.data()
+      if (checkSufficientAmountAvaliable(amount, userData.coins)) {
+        const coins = debitCoins(amount, userData.coins)
+        await t.update(userDoc, {
+          coins: coins,
+          transactions: Firestore.FieldValue.arrayUnion({
+            items: items,
+            totalQuantity,
+            totlaAmount: amount,
+            time: Date.now()
+          })
+        })
+        return true
+      }
+      return false
+    })
+    return transactionCompleted
+  } catch (err) {
+    logger.error('Error while making purchase Transaction request \nTransaction failure:', err)
+    throw err
+  }
+}
+
 module.exports = {
   fetchProducts,
   addProduct,
-  fetchProduct
+  fetchProduct,
+  purchaseTransaction
 }
