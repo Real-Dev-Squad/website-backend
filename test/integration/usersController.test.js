@@ -159,4 +159,36 @@ describe('Users', function () {
         })
     })
   })
+
+  describe('GET /users/isUsernameAvailable/username', function () {
+    it('Should return isUsernameAvailable as true as we are passing new user', function (done) {
+      chai
+        .request(app)
+        .get('/users/isUsernameAvailable/availableUser')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) { return done() }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.isUsernameAvailable).to.equal(true)
+
+          return done()
+        })
+    })
+
+    it('Should return isUsernameAvailable as false as we are passing existing user', function (done) {
+      chai
+        .request(app)
+        .get(`/users/isUsernameAvailable/${userData[0].username}`)
+        .set('cookie', `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) { return done() }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.isUsernameAvailable).to.equal(false)
+
+          return done()
+        })
+    })
+  })
 })
