@@ -143,6 +143,43 @@ router.get('/self', authenticate, usersController.getSelfDetails)
 
 /**
  * @swagger
+ * /users/isUsernameAvailable/:username:
+ *   get:
+ *     summary: check user exists or not
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User Availability
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/userAvailable'
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.get('/isUsernameAvailable/:username', authenticate, usersController.getUsernameAvailabilty)
+
+/**
+ * @swagger
  * /users/:username:
  *   get:
  *     summary: Get the details of user with provided id.
