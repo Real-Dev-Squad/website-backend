@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const cryptoController = require('../controllers/crypto')
+const cryptoController = require('../controllers/cryptoController')
 const authenticate = require('../middlewares/authenticate')
 const cryptoValidator = require('../middlewares/validators/crypto-products')
 /**
