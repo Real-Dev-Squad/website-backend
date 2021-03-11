@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const members = require('../controllers/members')
-
+const members = require('../controllers/membersController')
+const recruitersController = require('../controllers/recruitersController')
 /**
  * @swagger
  * /members:
@@ -49,5 +49,7 @@ router.get('/', members.getMembers)
  */
 
 router.get('/idle', members.getIdleMembers)
+
+router.post('/intro/:username', recruitersController.addRecruiter)
 
 module.exports = router
