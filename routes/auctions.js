@@ -1,11 +1,18 @@
 const express = require('express')
 const router = express.Router()
+const authenticate = require('../middlewares/authenticate')
 const auctionController = require('../controllers/auctionController')
 
-router.get('/', auctionController.fetchOngoingAuctions)
+router.get('/:id', auctionController.fetchAuctionById)
 
-router.post('/', auctionController.createNewAuction)
+router.get('/', auctionController.fetchAvailableAuctions)
 
-router.post('/:id', auctionController.makeNewBid)
+router.get('/seller/:id', auctionController.fetchAuctionBySeller)
+
+router.post('/:id', authenticate, auctionController.makeNewBid)
+router.post('/bid/:id', authenticate, auctionController.makeNewBid)
+
+router.post('/', authenticate, auctionController.createNewAuction)
+router.post('/create', authenticate, auctionController.createNewAuction)
 
 module.exports = router

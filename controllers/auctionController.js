@@ -1,12 +1,33 @@
 const auctions = require('../models/auctions')
 
-const fetchOngoingAuctions = async (_req, res) => {
+const fetchAvailableAuctions = async (_req, res) => {
   try {
-    // const ongoingAuctions = auctions.fetchAvailableAuctions();
-    const ongoingAuctions = await auctions.fetchAuctionById('Mgu5rEvVwVyhTSNrrl9h')
-    logger.info(ongoingAuctions)
+    const ongoingAuctions = await auctions.fetchAvailableAuctions()
     return res.json(ongoingAuctions)
-    // return res.json({ ...ongoingAuctions });
+  } catch (error) {
+    logger.error(`Error fetching ongoing auctions: ${error}`)
+    return res.boom.badImplementation('An internal server error occured.')
+  }
+}
+
+const fetchAuctionById = async (req, res) => {
+  try {
+    const auctionId = req.params.id
+    const auctionData = await auctions.fetchAuctionById(auctionId)
+    logger.info(auctionData)
+    return res.json(auctionData)
+  } catch (error) {
+    logger.error(`Error fetching ongoing auctions: ${error}`)
+    return res.boom.badImplementation('An internal server error occured.')
+  }
+}
+
+const fetchAuctionBySeller = async (req, res) => {
+  try {
+    const sellerId = req.params.id
+    const auctionsBySeller = await auctions.fetchAuctionBySeller(sellerId)
+    logger.info(auctionsBySeller)
+    return res.json(auctionsBySeller)
   } catch (error) {
     logger.error(`Error fetching ongoing auctions: ${error}`)
     return res.boom.badImplementation('An internal server error occured.')
@@ -15,9 +36,10 @@ const fetchOngoingAuctions = async (_req, res) => {
 
 const createNewAuction = async (req, res) => {
   try {
-    const auctionData = req.body
-    const auctionRef = auctions.createNewAuction(auctionData)
-    return res.status(200).send(auctionRef.id)
+    const { username: seller } = req.userData
+    const { initialPrice, item, duration, quantity } = req.body
+    const auctionId = await auctions.createNewAuction({ seller, initialPrice, item, duration, quantity })
+    return res.json({ id: auctionId, message: 'Auction created successfully!' })
   } catch (error) {
     logger.error(`Error creating new auctions: ${error}`)
     return res.boom.badImplementation('An internal server error occured.')
@@ -26,9 +48,11 @@ const createNewAuction = async (req, res) => {
 
 const makeNewBid = async (req, res) => {
   try {
-    const bidData = req.body
-    const bidRef = await auctions.makeNewBid(bidData)
-    return res.status(200).send(bidRef.id)
+    const { username: bidderId } = req.userData
+    const auctionId = req.params.id
+    const { bid } = req.body
+    const bidRef = await auctions.makeNewBid({ auctionId, bidderId, bid })
+    return res.json({ id: bidRef, message: 'Successfully placed bid!' })
   } catch (error) {
     logger.error(`Error creating new auctions: ${error}`)
     return res.boom.badImplementation('An internal server error occured.')
@@ -36,7 +60,9 @@ const makeNewBid = async (req, res) => {
 }
 
 module.exports = {
-  fetchOngoingAuctions,
+  fetchAuctionById,
+  fetchAuctionBySeller,
+  fetchAvailableAuctions,
   createNewAuction,
   makeNewBid
 }
