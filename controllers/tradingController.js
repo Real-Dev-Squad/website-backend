@@ -14,8 +14,8 @@ const trade = async (req, res) => {
 
     const tradingResponse = await tradeModel.trade(req.body, username)
 
-    if (tradingResponse.userCannotPurchase) {
-      return res.boom.forbidden('Trading failed due to insufficient funds')
+    if (!tradingResponse.canUserTrade) {
+      return res.boom.forbidden(tradingResponse.errorMessage)
     }
 
     return res.status(200).json(tradingResponse)
