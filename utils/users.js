@@ -6,7 +6,7 @@ const { fetchUser } = require('../models/users')
  * @param username {String} - username of the User.
  * @returns id {String} - userId of the same user
  */
-const toUserId = async (username) => {
+const getUserId = async (username) => {
   try {
     const { user: { id } } = await fetchUser({ username })
     return id
@@ -21,7 +21,7 @@ const toUserId = async (username) => {
  * @param userId {String} - userId of the User.
  * @returns username {String} - username of the same user
  */
-const toUsername = async (userId) => {
+const getUsername = async (userId) => {
   try {
     const { user: { username } } = await fetchUser({ userId })
     return username
@@ -32,6 +32,6 @@ const toUsername = async (userId) => {
 }
 
 module.exports = {
-  toUserId,
-  toUsername
+  getUserId,
+  getUsername
 }
