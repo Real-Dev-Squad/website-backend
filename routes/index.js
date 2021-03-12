@@ -16,4 +16,3 @@ app.use('/auctions', require('./auctions.js'))
 app.use('/wallet', require('./wallets.js'))
 
 module.exports = app
-

@@ -7,46 +7,33 @@ const firestore = require('../utils/firestore')
 const recruiterModel = firestore.collection('recruiters')
 const userModel = firestore.collection('users')
 
-
-const addRecruiterInfo = async (recruiterData, username, timeStamp) => {
+const addRecruiterInfo = async (req) => {
   try {
+    const recruiterData = req.body
+    const username = req.params.username
     const recruiterInfo = await recruiterModel.add(recruiterData)
     const recruiter = await recruiterModel.doc(recruiterInfo.id).get()
-    const notifyUser= await sendDetails(recruiter, username, timeStamp)
-
+    const user = await userModel.where('username', '==', username).limit(1).get()
+    let userName
+    if (!user.empty) {
+      user.forEach(doc => {
+        const userFirstName = doc.data().first_name
+        const userLastName = doc.data().last_name
+        const userEmail = doc.data().email
+        userName = userFirstName + ' ' + userLastName + ' (' + userEmail + ')'
+      })
+    }
     return {
       message: 'Request Submission Successful!!',
-      id: recruiterInfo.id
-    }   
+      id: recruiterInfo.id,
+      recruiterName: recruiter.data().firstName + ' ' + recruiter.data().lastName,
+      userName: userName,
+      timestamp: req._startTime
+    }
   } catch (err) {
     logger.error('Error in adding recruiter', err)
     throw err
-  }    
-}
-
-    
-const sendDetails= async(recruiter, username, timeStamp) =>{
-  try{
-    const user = await userModel.where('username', '==', username).limit(1).get()
-    var userName;
-    if(!user.empty)
-    {
-      user.forEach(doc => {
-        const userFname = doc.data().first_name
-        const userLname = doc.data().last_name
-        userName = userFname+" "+userLname
-    })
-    } 
-    const recruiterName = recruiter.data().first_name+" "+recruiter.data().last_name
-  
-    console.log("Recruiter: " + recruiterName + "\n" +
-    "Member: " + userName + " " + "\n" + "Timestamp: " + timeStamp)
-    }
-    
-    catch (err) {
-      logger.error('Error in displaying details', err)
-      throw err
-      } 
+  }
 }
 
 module.exports = {
