@@ -2,10 +2,10 @@ const auctions = require('../models/auctions')
 
 const fetchAvailableAuctions = async (_req, res) => {
   try {
-    const ongoingAuctions = await auctions.fetchAvailableAuctions()
-    return res.json(ongoingAuctions)
+    const availableAuctions = await auctions.fetchAvailableAuctions()
+    return res.json(availableAuctions)
   } catch (error) {
-    logger.error(`Error fetching ongoing auctions: ${error}`)
+    logger.error(`Error fetching available auctions: ${error}`)
     return res.boom.badImplementation('An internal server error occured.')
   }
 }
@@ -17,7 +17,7 @@ const fetchAuctionById = async (req, res) => {
     logger.info(auctionData)
     return res.json(auctionData)
   } catch (error) {
-    logger.error(`Error fetching ongoing auctions: ${error}`)
+    logger.error(`Error fetching auction: ${error}`)
     return res.boom.badImplementation('An internal server error occured.')
   }
 }
@@ -29,7 +29,7 @@ const fetchAuctionBySeller = async (req, res) => {
     logger.info(auctionsBySeller)
     return res.json(auctionsBySeller)
   } catch (error) {
-    logger.error(`Error fetching ongoing auctions: ${error}`)
+    logger.error(`Error fetching auctions by seller: ${error}`)
     return res.boom.badImplementation('An internal server error occured.')
   }
 }
@@ -37,8 +37,8 @@ const fetchAuctionBySeller = async (req, res) => {
 const createNewAuction = async (req, res) => {
   try {
     const { username: seller } = req.userData
-    const { initialPrice, item, duration, quantity } = req.body
-    const auctionId = await auctions.createNewAuction({ seller, initialPrice, item, duration, quantity })
+    const { initialPrice, item_type: itemType, endTime, quantity } = req.body
+    const auctionId = await auctions.createNewAuction({ seller, initialPrice, itemType, endTime, quantity })
     return res.json({ id: auctionId, message: 'Auction created successfully!' })
   } catch (error) {
     logger.error(`Error creating new auctions: ${error}`)
@@ -51,8 +51,10 @@ const makeNewBid = async (req, res) => {
     const { username: bidderId } = req.userData
     const auctionId = req.params.id
     const { bid } = req.body
-    const bidRef = await auctions.makeNewBid({ auctionId, bidderId, bid })
-    return res.json({ id: bidRef, message: 'Successfully placed bid!' })
+    const bidId = await auctions.makeNewBid({ auctionId, bidderId, bid })
+    if (!bidId) return res.json({ message: 'Your bid was not higher than current one!' })
+
+    return res.json({ id: bidId, message: 'Successfully placed bid!' })
   } catch (error) {
     logger.error(`Error creating new auctions: ${error}`)
     return res.boom.badImplementation('An internal server error occured.')
