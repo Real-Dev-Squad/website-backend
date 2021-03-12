@@ -50,6 +50,29 @@ router.get('/', members.getMembers)
 
 router.get('/idle', members.getIdleMembers)
 
+/**
+ * @swagger
+ * /members/intro/{username}:
+ *   post:
+ *     summary: Posts details of the recruiter
+ *     tags:
+ *       - Members
+ *     responses:
+ *       200:
+ *         description: Details of the recruiter and the member in which recruiter is interested
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/recruiters'
+ *
+ *       500:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ */
+
 router.post('/intro/:username', recruitersController.addRecruiter)
 
 module.exports = router

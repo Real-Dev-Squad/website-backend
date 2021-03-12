@@ -7,12 +7,21 @@ const firestore = require('../utils/firestore')
 const recruiterModel = firestore.collection('recruiters')
 const userModel = firestore.collection('users')
 
-const addRecruiterInfo = async (req) => {
+/**
+ * Add the recruiter data
+ *
+ * @param recruiterData { Object }: Recruiter data object to be stored in DB
+ * @param username { String }: Username String to be used to fetch the about user
+ * @return {Promise<{message: string, id: string, recruiterName: string, userName: string, timestamp: string }>}
+ */
+
+const addRecruiterInfo = async (recruiterData, username) => {
   try {
-    const recruiterData = req.body
-    const username = req.params.username
+    // Add the recruiter data in DB
     const recruiterInfo = await recruiterModel.add(recruiterData)
+    // Fetch the recruiter from DB
     const recruiter = await recruiterModel.doc(recruiterInfo.id).get()
+    // Fetch the user from DB
     const user = await userModel.where('username', '==', username).limit(1).get()
     let userName
     if (!user.empty) {
@@ -28,7 +37,7 @@ const addRecruiterInfo = async (req) => {
       id: recruiterInfo.id,
       recruiterName: recruiter.data().firstName + ' ' + recruiter.data().lastName,
       userName: userName,
-      timestamp: req._startTime
+      timestamp: new Date().toUTCString()
     }
   } catch (err) {
     logger.error('Error in adding recruiter', err)
