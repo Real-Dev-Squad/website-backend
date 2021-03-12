@@ -35,7 +35,7 @@ const addRecruiterInfo = async (recruiterData, username) => {
     return {
       message: 'Request Submission Successful!!',
       id: recruiterInfo.id,
-      recruiterName: recruiter.data().firstName + ' ' + recruiter.data().lastName,
+      recruiterName: recruiter.data().first_name + ' ' + recruiter.data().last_name,
       userName: userName,
       timestamp: new Date().toUTCString()
     }

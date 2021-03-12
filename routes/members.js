@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router()
 const members = require('../controllers/membersController')
 const recruitersController = require('../controllers/recruitersController')
+const recruiterValidator = require('../middlewares/validators/recruiter')
+
 /**
  * @swagger
  * /members:
@@ -73,6 +75,6 @@ router.get('/idle', members.getIdleMembers)
  *               $ref: '#/components/schemas/errors/notFound'
  */
 
-router.post('/intro/:username', recruitersController.addRecruiter)
+router.post('/intro/:username', recruiterValidator.validateRecruiter, recruitersController.addRecruiter)
 
 module.exports = router
