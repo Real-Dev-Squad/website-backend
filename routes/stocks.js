@@ -47,6 +47,12 @@ router.get('/', fetchStocks)
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/stocks'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
  *     500:
  *       description: badImplementation
  *       content:

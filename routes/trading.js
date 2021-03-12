@@ -11,6 +11,8 @@ const { newTrade } = require('../middlewares/validators/trading')
  *   summary: Used for new trading request
  *   tags:
  *     - Trading
+ *   security:
+ *     - bearerAuth: []
  *   requestBody:
  *     description: Trading details
  *     content:
@@ -24,6 +26,12 @@ const { newTrade } = require('../middlewares/validators/trading')
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/tradingSuccess'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
  *     403:
  *       description: forbidden
  *       content:
