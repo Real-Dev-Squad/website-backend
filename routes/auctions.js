@@ -9,10 +9,8 @@ router.get('/', auctionController.fetchAvailableAuctions)
 
 router.get('/seller/:id', auctionController.fetchAuctionBySeller)
 
-router.post('/:id', authenticate, auctionController.makeNewBid)
 router.post('/bid/:id', authenticate, auctionController.makeNewBid)
 
 router.post('/', authenticate, auctionController.createNewAuction)
-router.post('/create', authenticate, auctionController.createNewAuction)
 
 module.exports = router

@@ -6,7 +6,7 @@ const fetchAuctionById = async (auctionId) => {
   try {
     const auctionRef = await auctionsModel.doc(auctionId).get()
     const auctionMetadata = auctionRef.data()
-    const biddersAndBidsRef = await bidsModel.where('auctionId', '==', auctionId).get()
+    const biddersAndBidsRef = await bidsModel.where('auction_id', '==', auctionId).get()
     const biddersAndBids = []
     biddersAndBidsRef.forEach((bidData) => {
       biddersAndBids.push(bidData.data())
@@ -20,11 +20,11 @@ const fetchAuctionById = async (auctionId) => {
 
 const fetchAuctionBidders = async (auctionId) => {
   try {
-    const biddersRef = await bidsModel.where('auctionId', '==', auctionId).get()
+    const biddersRef = await bidsModel.where('auction_id', '==', auctionId).get()
     const bidders = new Set([])
-    biddersRef.forEach((bidder) => {
-      const { bidderId } = bidder.data()
-      bidders.add(bidderId)
+    biddersRef.forEach((bid) => {
+      const { bidder } = bid.data()
+      bidders.add(bidder)
     })
     return [...bidders]
   } catch (error) {
@@ -55,7 +55,7 @@ const fetchAuctionBySeller = async (sellerId) => {
 const fetchAvailableAuctions = async () => {
   try {
     const now = new Date().getTime()
-    const auctionsRef = await auctionsModel.where('endTime', '>=', now).get()
+    const auctionsRef = await auctionsModel.where('end_time', '>=', now).get()
     const auctions = []
 
     auctionsRef.forEach((auction) => {
@@ -118,11 +118,10 @@ const createNewAuction = async ({ seller, initialPrice, endTime, itemType, quant
       highest_bidder: null,
       highest_bid: initialPrice,
       number_bidders: 0,
-      startTime: new Date().getTime(),
-      endTime: endTime
+      start_time: new Date().getTime(),
+      end_time: Number(endTime)
     })
 
-    logger.info(`Created new auction ${auctionRef.id}`)
     return auctionRef.id
   } catch (error) {
     logger.error(`Error creating new auction: ${error}`)
@@ -130,31 +129,28 @@ const createNewAuction = async ({ seller, initialPrice, endTime, itemType, quant
   }
 }
 
-const makeNewBid = async ({ bidderId, auctionId, bid }) => {
+const makeNewBid = async ({ bidder, auctionId, bid }) => {
   try {
     const auctionRef = await auctionsModel.doc(auctionId)
     const auctionDataRef = await auctionRef.get()
 
     const { highest_bid: highestBid } = await auctionDataRef.data()
-    logger.info(`Highest ${highestBid}, new ${bid}`)
-    if (bid <= highestBid) {
-      logger.info('Cannot bid lower!')
+    if (parseInt(bid) <= parseInt(highestBid)) {
       return ''
     }
 
     await auctionRef.update({
-      highest_bidder: bidderId,
+      highest_bidder: bidder,
       highest_bid: bid
     })
 
     const bidRef = await bidsModel.add({
-      auctionId: auctionId,
-      bidderId: bidderId,
+      auction_id: auctionId,
+      bidder: bidder,
       bid: bid,
       time: new Date().getTime()
     })
 
-    logger.info(`Made new bid ${bidRef.id}`)
     return bidRef.id
   } catch (error) {
     logger.error(`Error making bid: ${error}`)
@@ -168,8 +164,6 @@ module.exports = {
   fetchAvailableAuctions,
   fetchAuctionBidders,
   fetchAuctionsInRange,
-
   createNewAuction,
-
   makeNewBid
 }
