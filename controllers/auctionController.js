@@ -23,8 +23,8 @@ const fetchAuctionById = async (req, res) => {
 
 const fetchAuctionBySeller = async (req, res) => {
   try {
-    const sellerId = req.params.id
-    const auctionsBySeller = await auctions.fetchAuctionBySeller(sellerId)
+    const seller = req.params.id
+    const auctionsBySeller = await auctions.fetchAuctionBySeller(seller)
     return res.json(auctionsBySeller)
   } catch (error) {
     logger.error(`Error fetching auctions by seller: ${error}`)
@@ -34,7 +34,7 @@ const fetchAuctionBySeller = async (req, res) => {
 
 const createNewAuction = async (req, res) => {
   try {
-    const { username: seller } = req.userData
+    const { id: seller } = req.userData
     const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = req.body
     const auctionId = await auctions.createNewAuction({ seller, initialPrice, itemType, endTime, quantity })
     return res.json({ id: auctionId, message: 'Auction created successfully!' })
@@ -46,7 +46,7 @@ const createNewAuction = async (req, res) => {
 
 const makeNewBid = async (req, res) => {
   try {
-    const { username: bidder } = req.userData
+    const { id: bidder } = req.userData
     const auctionId = req.params.id
     const { bid } = req.body
     const bidId = await auctions.makeNewBid({ auctionId, bidder, bid })

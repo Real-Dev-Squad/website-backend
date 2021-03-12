@@ -1,6 +1,7 @@
 const firestore = require('../utils/firestore')
 const auctionsModel = firestore.collection('auctions')
 const bidsModel = firestore.collection('bids')
+const usersUtils = require('../utils/users')
 
 const fetchAuctionById = async (auctionId) => {
   try {
@@ -11,7 +12,18 @@ const fetchAuctionById = async (auctionId) => {
     biddersAndBidsRef.forEach((bidData) => {
       biddersAndBids.push(bidData.data())
     })
-    return { ...auctionMetadata, biddersAndBids }
+    const promises = biddersAndBids.map(async (bidData) => {
+      const bidderUsername = await usersUtils.getUsername(bidData.bidder)
+      return { ...bidData, bidder: bidderUsername }
+    })
+    const bidders = await Promise.all(promises)
+
+    const seller = usersUtils.getUsername(auctionMetadata.seller)
+    const highestBidder = usersUtils.getUsername(auctionMetadata.highest_bidder)
+    const promise = await Promise.all([seller, highestBidder])
+    const [sellerUsername, highestBidderUsername] = promise
+
+    return { ...auctionMetadata, bidders, seller: sellerUsername, highest_bidder: highestBidderUsername }
   } catch (error) {
     logger.error(`Error fetching auction ${auctionId}: ${error}`)
     throw error
@@ -21,30 +33,45 @@ const fetchAuctionById = async (auctionId) => {
 const fetchAuctionBidders = async (auctionId) => {
   try {
     const biddersRef = await bidsModel.where('auction_id', '==', auctionId).get()
-    const bidders = new Set([])
+    const biddersSet = new Set([])
     biddersRef.forEach((bid) => {
       const { bidder } = bid.data()
-      bidders.add(bidder)
+      biddersSet.add(bidder)
     })
-    return [...bidders]
+    const biddersArray = [...biddersSet]
+    const promises = biddersArray.map(async (bidder) => {
+      const bidderUsername = await usersUtils.getUsername(bidder)
+      return bidderUsername
+    })
+    const bidders = await Promise.all(promises)
+    return bidders
   } catch (error) {
     logger.error(`Error fetching bidders: ${error}`)
     throw error
   }
 }
 
-const fetchAuctionBySeller = async (sellerId) => {
+const fetchAuctionBySeller = async (seller) => {
   try {
+    const sellerId = await usersUtils.getUserId(seller)
     const auctionsRef = await auctionsModel.where('seller', '==', sellerId).get()
-    const auctions = []
+    const auctionsArray = []
 
     auctionsRef.forEach((auction) => {
-      auctions.push({
+      auctionsArray.push({
         id: auction.id,
         ...auction.data()
       })
     })
 
+    const promises = auctionsArray.map(async (auction) => {
+      const seller = usersUtils.getUsername(auction.seller)
+      const highestBidder = usersUtils.getUsername(auction.highest_bidder)
+      const promise = await Promise.all([seller, highestBidder])
+      const [sellerUsername, highestBidderUsername] = promise
+      return { ...auction, seller: sellerUsername, highest_bidder: highestBidderUsername }
+    })
+    const auctions = await Promise.all(promises)
     return auctions
   } catch (error) {
     logger.error(`Error fetching auction: ${error}`)
@@ -67,19 +94,19 @@ const fetchAvailableAuctions = async () => {
 
     const promises = auctions.map(async (auction) => {
       try {
-        const bidders = await fetchAuctionBidders(auction.id)
-        return {
-          bidders: bidders,
-          ...auction
-        }
+        const seller = usersUtils.getUsername(auction.seller)
+        const highestBidder = usersUtils.getUsername(auction.highest_bidder)
+        const biddersArray = fetchAuctionBidders(auction.id)
+        const promise = await Promise.all([seller, highestBidder, biddersArray])
+        const [sellerUsername, highestBidderUsername, bidders] = promise
+        return { ...auction, seller: sellerUsername, highest_bidder: highestBidderUsername, bidders }
       } catch (error) {
         logger.error(`Error fetching bidders for auction - ${auction.id}: ${error}`)
         throw error
       }
     })
 
-    const auctionsAndBidders = Promise.all(promises)
-
+    const auctionsAndBidders = await Promise.all(promises)
     return auctionsAndBidders
   } catch (error) {
     logger.error(`Error fetching auction: ${error}`)
