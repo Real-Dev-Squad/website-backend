@@ -3,33 +3,48 @@ const auctionsModel = firestore.collection('auctions')
 const bidsModel = firestore.collection('bids')
 const usersUtils = require('../utils/users')
 
+/**
+ * Fetches auction details by auctionId
+ *
+ * @param auctionsId { String }: Id for the auction to be fetched
+ * @return {Promise<{AuctionData|Object}>}
+ */
 const fetchAuctionById = async (auctionId) => {
   try {
     const auctionRef = await auctionsModel.doc(auctionId).get()
+    if (!auctionRef.data()) {
+      return false
+    }
     const auctionMetadata = auctionRef.data()
     const biddersAndBidsRef = await bidsModel.where('auction_id', '==', auctionId).get()
-    const biddersAndBids = []
+    const biddersAndBidsArray = []
     biddersAndBidsRef.forEach((bidData) => {
-      biddersAndBids.push(bidData.data())
+      biddersAndBidsArray.push(bidData.data())
     })
-    const promises = biddersAndBids.map(async (bidData) => {
+    const promises = biddersAndBidsArray.map(async (bidData) => {
       const bidderUsername = await usersUtils.getUsername(bidData.bidder)
       return { ...bidData, bidder: bidderUsername }
     })
-    const bidders = await Promise.all(promises)
+    const biddersAndBids = await Promise.all(promises)
 
     const seller = usersUtils.getUsername(auctionMetadata.seller)
     const highestBidder = usersUtils.getUsername(auctionMetadata.highest_bidder)
     const promise = await Promise.all([seller, highestBidder])
     const [sellerUsername, highestBidderUsername] = promise
 
-    return { ...auctionMetadata, bidders, seller: sellerUsername, highest_bidder: highestBidderUsername }
+    return { ...auctionMetadata, bidders_and_bids: biddersAndBids, seller: sellerUsername, highest_bidder: highestBidderUsername }
   } catch (error) {
     logger.error(`Error fetching auction ${auctionId}: ${error}`)
     throw error
   }
 }
 
+/**
+ * Fetches auction bidders usernames for a given auction
+ *
+ * @param auctionsId { String }: Id for the auction
+ * @return {Promise<{BiddersUsernames|Array}>}
+ */
 const fetchAuctionBidders = async (auctionId) => {
   try {
     const biddersRef = await bidsModel.where('auction_id', '==', auctionId).get()
@@ -51,34 +66,11 @@ const fetchAuctionBidders = async (auctionId) => {
   }
 }
 
-const fetchAuctionBySeller = async (seller) => {
-  try {
-    const sellerId = await usersUtils.getUserId(seller)
-    const auctionsRef = await auctionsModel.where('seller', '==', sellerId).get()
-    const auctionsArray = []
-
-    auctionsRef.forEach((auction) => {
-      auctionsArray.push({
-        id: auction.id,
-        ...auction.data()
-      })
-    })
-
-    const promises = auctionsArray.map(async (auction) => {
-      const seller = usersUtils.getUsername(auction.seller)
-      const highestBidder = usersUtils.getUsername(auction.highest_bidder)
-      const promise = await Promise.all([seller, highestBidder])
-      const [sellerUsername, highestBidderUsername] = promise
-      return { ...auction, seller: sellerUsername, highest_bidder: highestBidderUsername }
-    })
-    const auctions = await Promise.all(promises)
-    return auctions
-  } catch (error) {
-    logger.error(`Error fetching auction: ${error}`)
-    throw error
-  }
-}
-
+/**
+ * Fetches all active (ongoing) auctions
+ *
+ * @return {Promise<{AuctionData|Array}>}
+ */
 const fetchAvailableAuctions = async () => {
   try {
     const now = new Date().getTime()
@@ -114,28 +106,12 @@ const fetchAvailableAuctions = async () => {
   }
 }
 
-const fetchAuctionsInRange = async (startTime, endTime = null) => {
-  let auctionsRef
-  try {
-    if (endTime) {
-      auctionsRef = await auctionsModel.where('startTime', '>=', startTime).where('endTime', '<=', endTime).get()
-    } else {
-      auctionsRef = await auctionsModel.where('startTime', '>=', startTime).get()
-    }
-    const auctions = []
-    auctionsRef.forEach((auction) => {
-      auctions.push({
-        id: auction.id,
-        ...auction.data
-      })
-    })
-    return auctions
-  } catch (error) {
-    logger.error(`Error fetching auction: ${error}`)
-    throw error
-  }
-}
-
+/**
+ * Creates new auction
+ *
+ * @param { Object }: Details required to create an auction
+ * @return id {string}
+ */
 const createNewAuction = async ({ seller, initialPrice, endTime, itemType, quantity }) => {
   try {
     const auctionRef = await auctionsModel.add({
@@ -155,14 +131,22 @@ const createNewAuction = async ({ seller, initialPrice, endTime, itemType, quant
   }
 }
 
+/**
+ * Makes new bid for a given auction
+ *
+ * @param { Object }: Data required for placing a bid
+ * @return id { string }
+ */
 const makeNewBid = async ({ bidder, auctionId, bid }) => {
   try {
     const auctionRef = await auctionsModel.doc(auctionId)
     const auctionDataRef = await auctionRef.get()
 
+    if (!auctionDataRef.data()) return { auctionNotFound: true }
+
     const { highest_bid: highestBid } = await auctionDataRef.data()
     if (parseInt(bid) <= parseInt(highestBid)) {
-      return ''
+      return { notAllowed: true }
     }
 
     await auctionRef.update({
@@ -186,10 +170,8 @@ const makeNewBid = async ({ bidder, auctionId, bid }) => {
 
 module.exports = {
   fetchAuctionById,
-  fetchAuctionBySeller,
   fetchAvailableAuctions,
   fetchAuctionBidders,
-  fetchAuctionsInRange,
   createNewAuction,
   makeNewBid
 }
