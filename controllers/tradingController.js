@@ -12,13 +12,13 @@ const trade = async (req, res) => {
       return res.boom.forbidden('Invalid username')
     }
 
-    const tradingResponse = await tradeModel.trade(req.body, username)
+    const { canUserTrade, errorMessage, userBalance } = await tradeModel.trade(req.body, username)
 
-    if (!tradingResponse.canUserTrade) {
-      return res.boom.forbidden(tradingResponse.errorMessage)
+    if (!canUserTrade && canUserTrade !== undefined) {
+      return res.boom.forbidden(errorMessage)
     }
 
-    return res.status(200).json(tradingResponse)
+    return res.status(200).json({ userBalance })
   } catch (err) {
     logger.error(`Error while updating task: ${err}`)
     return res.boom.badImplementation('An internal server error occurred')
