@@ -117,7 +117,6 @@ const createNewAuction = async ({ seller, initialPrice, endTime, itemType, quant
       quantity: quantity,
       highest_bidder: null,
       highest_bid: initialPrice,
-      number_bidders: 0,
       start_time: new Date().getTime(),
       end_time: Number(endTime)
     })
