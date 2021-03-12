@@ -1,6 +1,7 @@
 const firestore = require('../utils/firestore')
 const tasksModel = firestore.collection('tasks')
 const { fetchUser } = require('./users')
+const userMapping = require('../utils/users')
 /**
  * Adds and Updates tasks
  *
@@ -101,7 +102,7 @@ const fetchTask = async (taskId) => {
 const fetchUserTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).get()
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userMapping.toUserId(user.username)).get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
       tasks.push({
@@ -120,7 +121,7 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
 
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', 'in', ['active', 'pending', 'blocked']).get()
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userMapping.toUserId(user.username)).where('status', 'in', ['active', 'pending', 'blocked']).get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
       tasks.push({
@@ -145,7 +146,7 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
 const fetchUserCompletedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', '==', 'completed').get()
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userMapping.toUserId(user.username)).where('status', '==', 'completed').get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
       tasks.push({
