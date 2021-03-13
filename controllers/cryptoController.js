@@ -9,13 +9,12 @@ const send = async (req, res) => {
   try {
     const request = req.body
     const [userTo, userFrom, currency, amount] = [request.to, request.from, request.currency, request.amount]
-    const message1 = `${amount} ${currency} Coins Transfered From ${userFrom} to ${userTo}`
-    const [verifyUserTO, verifyUserFrom] = await Promise.all([usersdata.fetchUser(userTo), usersdata.fetchUser(userFrom)])
-    const resultObj = calculation.cryptoCalc(verifyUserTO, verifyUserFrom, currency, amount)
+    const message1 = `${amount} ${currency} Coins Creditted From ${userFrom} to ${userTo} Succesfully`
+    const [fromUserWallet, toUserWallet] = await Promise.all([usersdata.fetchUserWallet(userTo), usersdata.fetchUserWallet(userFrom)])
+    const resultObj = calculation.cryptoCalc(fromUserWallet, toUserWallet, currency, amount)
+    await Promise.all([usersdata.updateWallet(resultObj.fromUserWallet), usersdata.updateWallet(resultObj.toUserWallet), usersdata.updateTransaction(message1)])
     return res.json({
-      message: message1,
-      to: resultObj.verifyUserTO,
-      from: resultObj.verifyUserFrom
+      message: message1
     })
   } catch (error) {
     logger.error(`Error while processing pull requests: ${error}`)
@@ -33,16 +32,12 @@ const request = async (req, res) => {
     const request = req.body
     const [userTo, userFrom, currency, amount] = [request.to, request.from, request.currency, request.amount]
     const notificationMessage = `${amount} ${currency} Coins Requested By ${userFrom}`
-    const message1 = `${amount} ${currency} Coins Requested By ${userFrom} From ${userTo}`
-    const [verifyUserTO, verifyUserFrom] = await Promise.all([usersdata.fetchUser(userTo), usersdata.fetchUser(userFrom)])
+    const [verifyUserTO, verifyUserFrom] = await Promise.all([usersdata.fetchUserWallet(userTo), usersdata.fetchUserWallet(userFrom)])
     if (verifyUserFrom && verifyUserTO) {
-      const notificationArray = verifyUserTO.user.notification
-      notificationArray.push(notificationMessage)
+      await usersdata.notification(notificationMessage, userTo)
     }
     return res.json({
-      message: message1,
-      to: verifyUserTO,
-      from: verifyUserFrom
+      message: notificationMessage
     })
   } catch (error) {
     logger.error(`Error while processing pull requests: ${error}`)
@@ -64,7 +59,7 @@ const approved = async (req, res) => {
   try {
     const request = req.body
     const [notification, userFrom] = [request.notification, request.userName]
-    const verifyUserFrom = await usersdata.fetchUser(userFrom)
+    const verifyUserFrom = await usersdata.fetchUserWallet(userFrom)
     const message = notification.split(' ')
     const [amount, currency, userTO] = [message[0], message[1], message[(message.length) - 1]]
     const verifyUserTo = await usersdata.fetchUser(userTO)

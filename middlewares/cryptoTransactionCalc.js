@@ -1,24 +1,30 @@
 /**
  * Does Calculation for Transaction from one User to Other
- * @param {Object} verifyUserTO - To whom currency should be transferred
- * @param {Object} verifyUserFrom - From whom currency should be deducted
+ * @param {Object} toUserWallet - To whom currency should be transferred
+ * @param {Object} fromUserWallet - From whom currency should be deducted
  * @param {Object} currency - Type of Currency
  * @param {Object} amount - amount of Currency
  */
-const cryptoCalc = (verifyUserTO, verifyUserFrom, currency, amount) => {
-  if (verifyUserTO && verifyUserFrom) {
-    if (currency === 'brass' && verifyUserFrom.user.coins.brass >= amount) {
-      verifyUserFrom.user.coins.brass = verifyUserFrom.user.coins.brass - parseInt(amount)
-      verifyUserTO.user.coins.brass = verifyUserTO.user.coins.brass + parseInt(amount)
-    } else if (currency === 'gold' && verifyUserFrom.user.coins.gold >= amount) {
-      verifyUserFrom.user.coins.gold = verifyUserFrom.user.coins.gold - parseInt(amount)
-      verifyUserTO.user.coins.gold = verifyUserTO.user.coins.gold + parseInt(amount)
-    } else if (currency === 'silver' && verifyUserFrom.user.coins.silver >= amount) {
-      verifyUserFrom.user.coins.silver = verifyUserFrom.user.coins.silver - parseInt(amount)
-      verifyUserTO.user.coins.silver = verifyUserTO.user.coins.silver + parseInt(amount)
+const cryptoCalc = (fromUserWallet, toUserWallet, currency, amount) => {
+  if (toUserWallet.user.isActive === true && fromUserWallet.user.isActive === true) {
+    if (currency === 'brass' && fromUserWallet.user.currency.brass >= amount) {
+      fromUserWallet.user.currency.brass = fromUserWallet.user.currency.brass - parseInt(amount)
+      toUserWallet.user.currency.brass = toUserWallet.user.currency.brass + parseInt(amount)
+    } else if (currency === 'gold' && fromUserWallet.user.currency.gold >= amount) {
+      fromUserWallet.user.currency.gold = fromUserWallet.user.currency.gold - parseInt(amount)
+      toUserWallet.user.currency.gold = toUserWallet.user.currency.gold + parseInt(amount)
+    } else if (currency === 'silver' && fromUserWallet.user.currency.silver >= amount) {
+      fromUserWallet.user.currency.silver = fromUserWallet.user.currency.silver - parseInt(amount)
+      toUserWallet.user.currency.silver = toUserWallet.user.currency.silver + parseInt(amount)
+    } else if (currency === 'neelam' && fromUserWallet.user.currency.neelam >= amount) {
+      fromUserWallet.user.currency.neelam = fromUserWallet.user.currency.neelam - parseInt(amount)
+      toUserWallet.user.currency.neelam = toUserWallet.user.currency.neelam + parseInt(amount)
+    } else if (currency === 'dinero' && fromUserWallet.user.currency.dinero >= amount) {
+      fromUserWallet.user.currency.dinero = fromUserWallet.user.currency.dinero - parseInt(amount)
+      toUserWallet.user.currency.dinero = toUserWallet.user.currency.dinero + parseInt(amount)
     }
   }
-  return { verifyUserFrom, verifyUserTO }
+  return { fromUserWallet, toUserWallet }
 }
 
 module.exports = {
