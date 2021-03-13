@@ -9,5 +9,7 @@ app.use('/tasks', require('./tasks'))
 app.use('/challenges', require('./challenges.js'))
 app.use('/pullrequests', require('./pullrequests.js'))
 app.use('/contributions', require('./contributions'))
+app.use('/badges', require('./badges.js'))
+app.use('/auctions', require('./auctions.js'))
 
 module.exports = app

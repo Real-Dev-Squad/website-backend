@@ -185,7 +185,7 @@ describe('Tasks', function () {
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('array')
           expect(res.body).to.have.length.above(0)
-          res.body.map((task) => {
+          res.body.forEach((task) => {
             expect(taskStatus).to.include(task.status)
           })
 

@@ -50,7 +50,7 @@ const fetchTasks = async () => {
 }
 
 /**
- * Fetch all participants whose task status is active/pending/blocked
+ * Fetch all participants whose task status is active
  *
  * @return {Promise<tasks|Array>}
  */

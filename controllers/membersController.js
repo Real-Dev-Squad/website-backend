@@ -31,7 +31,8 @@ const getMembers = async (req, res) => {
 
 const getIdleMembers = async (req, res) => {
   try {
-    const allMemberUsernames = await memberQuery.fetchMemberUsernames()
+    let allMemberUsernames = await memberQuery.fetchMembers()
+    allMemberUsernames = allMemberUsernames.map(member => member.username)
 
     let taskParticipants = await tasks.fetchActiveTaskMembers()
     taskParticipants = new Set(taskParticipants)
@@ -39,7 +40,7 @@ const getIdleMembers = async (req, res) => {
     const idleMemberUserNames = allMemberUsernames.filter(member => !taskParticipants.has(member))
 
     return res.json({
-      message: idleMemberUserNames.length ? 'Idle members returned successfully!' : 'No Idle Members',
+      message: idleMemberUserNames.length ? 'Idle members returned successfully!' : 'No idle member found',
       idleMemberUserNames
     })
   } catch (error) {
