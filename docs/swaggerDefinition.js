@@ -453,6 +453,38 @@ const swaggerOptions = {
             }
           }
         },
+        auctions: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string'
+            },
+            seller: {
+              type: 'string'
+            },
+            item_type: {
+              type: 'string'
+            },
+            quantity: {
+              type: 'number'
+            },
+            highest_bid: {
+              type: 'number'
+            },
+            highest_bidder: {
+              type: 'number'
+            },
+            start_time: {
+              type: 'number'
+            },
+            end_time: {
+              type: 'number'
+            },
+            bidders_and_bids: {
+              type: 'array'
+            }
+          }
+        },
         errors: {
           unAuthorized: {
             type: 'object',
