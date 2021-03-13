@@ -114,44 +114,6 @@ describe('Tasks', function () {
           return done()
         })
     })
-
-    // it('Should return 403 if user is unauthorized', function (done) {
-    //   jwt = authService.generateAuthToken(4454218)
-    //   chai
-    //     .request(app)
-    //     .post('/tasks')
-    //     .set('cookie', `${cookieName}=${jwt}`)
-    //     .send({
-    //       title: 'Test task',
-    //       purpose: 'To Test mocha',
-    //       featureUrl: '<testUrl>',
-    //       type: 'Dev | Group',
-    //       links: [
-    //         'test1'
-    //       ],
-    //       endsOn: '<unix timestamp>',
-    //       startedOn: '<unix timestamp>',
-    //       status: 'completed',
-    //       ownerId: '<app owner user id>',
-    //       percentCompleted: 10,
-    //       dependsOn: [
-    //         'd12',
-    //         'd23'
-    //       ],
-    //       participants: ['ankur'],
-    //       completionAward: { gold: 3, bronze: 300 },
-    //       lossRate: { gold: 1 },
-    //       isNoteworthy: true
-    //     })
-    //     .end((err, res) => {
-    //       if (err) { return done(err) }
-    //       expect(res).to.have.status(403)
-    //       expect(res.body).to.be.a('object')
-    //       expect(res.body.message).to.equal('Unauthorized User')
-
-    //       return done()
-    //     })
-    // })
   })
 
   describe('GET /tasks', function () {
@@ -243,26 +205,6 @@ describe('Tasks', function () {
           return done()
         })
     })
-
-    // it('Should return 403 if user is unauthorized', function (done) {
-    //   jwt = authService.generateAuthToken(4454218)
-    //   chai
-    //     .request(app)
-    //     .patch('/tasks/' + taskId1)
-    //     .set('cookie', `${cookieName}=${jwt}`)
-    //     .set('username', 'harshith')
-    //     .send({
-    //       ownerId: 'sumit'
-    //     })
-    //     .end((err, res) => {
-    //       if (err) { return done(err) }
-    //       expect(res).to.have.status(403)
-    //       expect(res.body).to.be.a('object')
-    //       expect(res.body.message).to.equal('Unauthorized User')
-
-    //       return done()
-    //     })
-    // })
 
     it('Should return 404 if task does not exist', function (done) {
       chai
