@@ -88,7 +88,7 @@ const notification = async (message, userId) => {
     }
     const date = new Date()
     const Status = true
-    await notificationModel.doc(userId).set({
+    await notificationModel.add({
       message, userId, date, Status, typeOfNotification
     })
     return {
@@ -110,6 +110,8 @@ const updateTransaction = async (message) => {
   try {
     let count = 0
     let transactionId = 0
+    const date = new Date()
+    const dateTime = date
     if (transactionId) {
       transactionId = count
       count++
@@ -121,8 +123,8 @@ const updateTransaction = async (message) => {
     } else {
       typeOfTransaction = 'debit'
     }
-    await transactionModel.doc(userId).set({
-      amount, currency, transactionId, typeOfTransaction, userTo, userId
+    await transactionModel.add({
+      amount, currency, transactionId, typeOfTransaction, userTo, userId, dateTime
     })
     return {
       message: 'success'
