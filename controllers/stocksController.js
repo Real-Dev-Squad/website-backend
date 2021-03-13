@@ -8,10 +8,10 @@ const stocks = require('../models/stocks')
  */
 const addNewStock = async (req, res) => {
   try {
-    const { id, stockDetails } = await stocks.addStock(req.body)
+    const { id, stockData } = await stocks.addStock(req.body)
     return res.json({
       message: 'Stock created successfully!',
-      stock: stockDetails,
+      stock: stockData,
       id
     })
   } catch (err) {
