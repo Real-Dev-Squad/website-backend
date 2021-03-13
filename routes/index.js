@@ -10,5 +10,6 @@ app.use('/challenges', require('./challenges.js'))
 app.use('/pullrequests', require('./pullrequests.js'))
 app.use('/contributions', require('./contributions'))
 app.use('/badges', require('./badges.js'))
+app.use('/exchange', require('./exchange.js'))
 
 module.exports = app
