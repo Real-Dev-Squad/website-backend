@@ -29,7 +29,7 @@ const fetchStocks = async (req, res) => {
   try {
     const allStock = await stocks.fetchStocks()
     return res.json({
-      message: 'stocks returned successfully!',
+      message: 'Stocks returned successfully!',
       stock: allStock.length > 0 ? allStock : []
     })
   } catch (err) {
