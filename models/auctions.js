@@ -2,6 +2,7 @@ const firestore = require('../utils/firestore')
 const auctionsModel = firestore.collection('auctions')
 const bidsModel = firestore.collection('bids')
 const usersUtils = require('../utils/users')
+const walletModels = require('./wallets')
 
 /**
  * Fetches auction details by auctionId
@@ -144,9 +145,19 @@ const makeNewBid = async ({ bidder, auctionId, bid }) => {
 
     if (!auctionDataRef.data()) return { auctionNotFound: true }
 
+    const wallet = await walletModels.fetchWallet(bidder)
+    let usersMoney = 0
+
+    if (Object.keys(wallet).length === 0) return { noWallet: true }
+    // todo: make the currency adaptive, dinero wont be default currency
+    else usersMoney = wallet.currencies.dinero
+
     const { highest_bid: highestBid } = await auctionDataRef.data()
     if (parseInt(bid) <= parseInt(highestBid)) {
-      return { notAllowed: true }
+      return { lowBid: true }
+    }
+    if (parseInt(bid) > parseInt(usersMoney)) {
+      return { insufficientMoney: true }
     }
 
     await auctionRef.update({
