@@ -35,7 +35,7 @@ const trade = async (tradeData) => {
     let orderValue = 0
     let qtyUserCanPurchase = 0
 
-    const { currency } = fetchWallet(userId)
+    const { currency } = await fetchWallet(userId)
     const updatedCurrencyData = {}
 
     if (!currency) {
@@ -57,7 +57,7 @@ const trade = async (tradeData) => {
         }
         orderValue = qtyUserCanPurchase * stockData.price
         quantityToUpdate = stockData.quantity - qtyUserCanPurchase
-        userBalance = currency.dinero + (totalPrice - orderValue)
+        userBalance = currency.dinero - orderValue
         updatedCurrencyData.dinero = userBalance
         stockPriceToBeUpdated = getUpdatedPrice(stockData.price)
         break
