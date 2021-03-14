@@ -16,7 +16,7 @@ const send = async (req, res) => {
     const request = req.body
     const [userTo, userFrom, currency, amount] = [request.to, request.from, request.currency, request.amount]
     const message1 = `${amount} ${currency} Coins Creditted From ${userFrom} to ${userTo} Succesfully`
-    const [fromUserWallet, toUserWallet] = await Promise.all([usersdata.fetchUserWallet(userTo), usersdata.fetchUserWallet(userFrom)])
+    const [fromUserWallet, toUserWallet] = await Promise.all([usersdata.fetchUserWallet(userFrom), usersdata.fetchUserWallet(userTo)])
     const resultObj = calculation.cryptoCalc(fromUserWallet, toUserWallet, currency, amount)
     await Promise.all([usersdata.updateWallet(resultObj.fromUserWallet), usersdata.updateWallet(resultObj.toUserWallet), usersdata.updateTransaction(message1)])
     return res.json({
