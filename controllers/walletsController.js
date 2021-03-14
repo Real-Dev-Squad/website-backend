@@ -17,7 +17,7 @@ const getUserWallet = async (req, res) => {
       wallet: walletData
     })
   } catch (err) {
-    logger.error(`Error while retriving contributions ${err}`)
+    logger.error(`Error while retriving wallet data ${err}`)
     return res.boom.badImplementation(ERROR_MESSAGE)
   }
 }
