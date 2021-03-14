@@ -4,6 +4,12 @@ const calculation = require('../middlewares/cryptoTransactionCalc')
  * Send Money from one User to Other
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * {
+ *  "to": "kratika",
+ *  "from": "uttam",
+ *  "amount": 25,
+ *  "currency": "dinero"
+ * }
  */
 const send = async (req, res) => {
   try {
@@ -26,6 +32,12 @@ const send = async (req, res) => {
  * Receive Money from one User to Other
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * {
+ *  "to": "kratika",
+ *  "from": "uttam",
+ *  "amount": 25,
+ *  "currency": "dinero"
+ * }
  */
 const request = async (req, res) => {
   try {
@@ -62,9 +74,10 @@ const approved = async (req, res) => {
     const verifyUserFrom = await usersdata.fetchUserWallet(userFrom)
     const message = notification.split(' ')
     const [amount, currency, userTO] = [message[0], message[1], message[(message.length) - 1]]
-    const verifyUserTo = await usersdata.fetchUser(userTO)
+    const verifyUserTo = await usersdata.fetchUserWallet(userTO)
     const message1 = `${amount} ${currency} Coins Transfered From ${userFrom} to ${userTO}`
-    const resultObj = calculation.cryptoCalc(verifyUserTo, verifyUserFrom, currency, amount)
+    const resultObj = calculation.cryptoCalc(verifyUserFrom, verifyUserTo, currency, amount)
+    await Promise.all([usersdata.updateWallet(resultObj.fromUserWallet), usersdata.updateWallet(resultObj.toUserWallet), usersdata.updateTransaction(message1)])
     return res.json({
       message: message1,
       to: resultObj.verifyUserTO,
