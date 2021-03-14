@@ -1,5 +1,7 @@
 const firestore = require('../utils/firestore')
 const stocksModel = firestore.collection('stocks')
+const transactionsModel = firestore.collection('transactions')
+const tradeLogsModel = firestore.collection('trade-logs')
 
 /**
  * Updates the stock Price
@@ -26,6 +28,8 @@ const trade = async (tradeData) => {
     let userBalance = 0
     let quantityToUpdate = 0
     let stockPriceToBeUpdated = stockData.price
+    let orderValue = 0
+    let qtyUserCanPurchase = 0
 
     switch (tradeType) {
       case 'SELL': {
@@ -35,12 +39,13 @@ const trade = async (tradeData) => {
         break
       }
       case 'BUY': {
-        const qtyUserCanPurchase = Math.floor(totalPrice / stockData.price)
+        qtyUserCanPurchase = Math.floor(totalPrice / stockData.price)
         if (qtyUserCanPurchase <= 0) {
           return { canUserTrade: false, errorMessage: 'Trade was not successful due to insufficient funds' }
         }
+        orderValue = qtyUserCanPurchase * stockData.price
         quantityToUpdate = stockData.quantity - qtyUserCanPurchase
-        userBalance = qtyUserCanPurchase * stockData.price - totalPrice
+        userBalance = orderValue - totalPrice
 
         stockPriceToBeUpdated = getUpdatedPrice(stockData.price)
         break
@@ -56,7 +61,24 @@ const trade = async (tradeData) => {
       price: stockPriceToBeUpdated
     }
 
-    // we will be adding logic here to create a transaction log
+    // Transaction Log
+
+    const { id } = await tradeLogsModel.add({
+      type: `STOCK_${tradeType}`,
+      userId: tradeData.userId,
+      stockName: stockData.name,
+      orderValue,
+      quantity: qtyUserCanPurchase,
+      price: stockData.price,
+      timestamp: +Date.now()
+    })
+
+    await transactionsModel.add({
+      userId: tradeData.userId,
+      type: `STOCK_${tradeType}`,
+      refId: id,
+      timestamp: +Date.now()
+    })
 
     // we will be adding logic here to update user funds
 

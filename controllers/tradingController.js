@@ -7,10 +7,11 @@ const tradeModel = require('../models/trading')
  */
 const trade = async (req, res) => {
   try {
-    const { username } = req.userData
+    const { id: userId, username } = req.userData
     const tradeStockData = {
       ...req.body,
-      username
+      username,
+      userId
     }
     const { canUserTrade, errorMessage, userBalance } = await tradeModel.trade(tradeStockData)
 
