@@ -81,6 +81,7 @@ describe('Tasks', function () {
       chai
         .request(app)
         .post('/tasks')
+        .set('cookie', `${cookieName}=${jwt}`)
         .send({
           title: 'Test task',
           purpose: 'To Test mocha',
@@ -194,6 +195,7 @@ describe('Tasks', function () {
       chai
         .request(app)
         .patch('/tasks/' + taskId1)
+        .set('cookie', `${cookieName}=${jwt}`)
         .send({
           ownerId: 'sumit'
         })
@@ -209,6 +211,7 @@ describe('Tasks', function () {
       chai
         .request(app)
         .patch('/tasks/taskid')
+        .set('cookie', `${cookieName}=${jwt}`)
         .send({
           ownerId: 'umit'
         })
