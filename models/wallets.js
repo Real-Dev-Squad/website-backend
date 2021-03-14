@@ -1,5 +1,5 @@
 const firestore = require('../utils/firestore')
-const walletModel = firestore.collection('wallet')
+const walletModel = firestore.collection('wallets')
 
 /**
  * Fetches the data from user wallet
