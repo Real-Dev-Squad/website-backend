@@ -28,7 +28,7 @@ const createWallet = async (userId) => {
     const walletData = {
       userId,
       isActive: true,
-      currency: {}
+      currencies: {}
     }
     const { id } = await walletModel.add(walletData)
     return {
@@ -45,15 +45,15 @@ const createWallet = async (userId) => {
  * Update currecny wallet for user
  * @return {Promise<walletModel|object>}
  */
-const updateWallet = async (userId, currency) => {
+const updateWallet = async (userId, currencies) => {
   try {
     let userWallet = await fetchWallet(userId)
     if (!userWallet.id) {
       userWallet = await createWallet(userId)
     }
     const firestoreKeysObject = {}
-    for (const key in currency) {
-      firestoreKeysObject[`currency.${key}`] = currency[`${key}`]
+    for (const key in currencies) {
+      firestoreKeysObject[`currencies.${key}`] = currencies[`${key}`]
     }
     const walletRef = walletModel.doc(userWallet.id)
     const res = await walletRef.update({
