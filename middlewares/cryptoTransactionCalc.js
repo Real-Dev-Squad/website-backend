@@ -7,11 +7,11 @@
  */
 const cryptoCalc = (fromUserWallet, toUserWallet, currencyType, amount) => {
   if (toUserWallet.user.isActive === true && fromUserWallet.user.isActive === true) {
-    if (fromUserWallet.user.currency[currencyType] >= amount) {
-      fromUserWallet.user.currency[currencyType] -= parseInt(amount)
-      toUserWallet.user.currency[currencyType] += parseInt(amount)
+    if (fromUserWallet.user.currency[`${currencyType}`] >= amount) {
+      fromUserWallet.user.currency[`${currencyType}`] -= parseInt(amount)
+      toUserWallet.user.currency[`${currencyType}`] += parseInt(amount)
+    }
   }
-}
   return { fromUserWallet, toUserWallet }
 }
 

@@ -17,7 +17,7 @@ const send = async (req, res) => {
     const [userTo, userFrom, currencyType, amount] = [request.to, request.from, request.currency, request.amount]
     const message1 = `${amount} ${currencyType} Coins Creditted From ${userFrom} to ${userTo} Succesfully`
     const fromUserWallet = await usersdata.fetchUserWallet(userFrom)
-    if(fromUserWallet.user.currency[currencyType] < amount) {
+    if (fromUserWallet.user.currency[`${currencyType}`] < amount) {
       return res.json({
         message: 'Amount of Currency need to be transfered is higher than your balance'
       })
@@ -52,9 +52,9 @@ const request = async (req, res) => {
     const [userTo, userFrom, currencyType, amount] = [request.to, request.from, request.currency, request.amount]
     const notificationMessage = `${amount} ${currencyType} Coins Requested By ${userFrom}`
     const toUserWallet = await usersdata.fetchUserWallet(userTo)
-    if(toUserWallet.user.currency[currencyType] < amount) {
+    if (toUserWallet.user.currency[`${currencyType}`] < amount) {
       return res.json({
-        message: 'Please request from someother person as Balance is low' 
+        message: 'Please request from someother person as Balance is low'
       })
     }
     const fromUserWallet = await usersdata.fetchUserWallet(userFrom)
