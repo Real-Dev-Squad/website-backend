@@ -7,7 +7,7 @@ const authenticate = require('../middlewares/authenticate')
  * @swagger
  * /wallet/:
  *   get:
- *     summary: Gets the user walelt details
+ *     summary: Gets the user wallet details
  *     tags:
  *       - wallet
  *     responses:

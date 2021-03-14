@@ -8,8 +8,9 @@ const walletModel = firestore.collection('wallet')
 const fetchWallet = async (userId) => {
   try {
     const walletDocs = await walletModel.where('userId', '==', userId).limit(1).get()
-    if ((!walletDocs.empty) && walletDocs.docs[0]) {
-      return { id: walletDocs.docs[0].id, ...walletDocs.docs[0].data() }
+    const userWallet = walletDocs.docs[0]
+    if ((!walletDocs.empty) && userWallet) {
+      return { id: userWallet.id, ...userWallet.data() }
     }
     return {}
   } catch (err) {
@@ -29,9 +30,9 @@ const createWallet = async (userId) => {
       isActive: true,
       currency: {}
     }
-    const wallet = await walletModel.add(walletData)
+    const { id } = await walletModel.add(walletData)
     return {
-      id: wallet.id,
+      id,
       data: walletData
     }
   } catch (err) {
@@ -51,16 +52,19 @@ const updateWallet = async (userId, currency) => {
       await createWallet(userId)
       userWallet = await fetchWallet(userId)
     }
-    const newCurrencyValues = {}
+    const firestoreKeyName = {}
     for (const key in currency) {
-      newCurrencyValues[`currency.${key}`] = currency[key]
+      firestoreKeyName[`currency.${key}`] = currency[`${key}`]
     }
     const walletRef = walletModel.doc(userWallet.id)
-    await walletRef.update({
-      ...newCurrencyValues
+    const res = await walletRef.update({
+      ...firestoreKeyName
     })
-    const updatedWallet = await fetchWallet(userId)
-    return updatedWallet
+    if (res) {
+      return true
+    } else {
+      return false
+    }
   } catch (err) {
     logger.error('Error updating currency to user wallets', err)
     return err
