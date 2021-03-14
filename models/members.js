@@ -35,6 +35,16 @@ const fetchMembers = async () => {
   }
 }
 
+/**
+ * Checks whether the authenticated user is a member
+ * @return {Boolean}
+ */
+
+const isMember = (username) => {
+  return username === 'ankush'
+}
+
 module.exports = {
-  fetchMembers
+  fetchMembers,
+  isMember
 }

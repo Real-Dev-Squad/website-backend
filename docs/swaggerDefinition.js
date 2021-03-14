@@ -453,6 +453,51 @@ const swaggerOptions = {
             }
           }
         },
+        stocks: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string'
+            },
+            price: {
+              type: 'number'
+            },
+            quantity: {
+              type: 'number'
+            }
+          }
+        },
+        trading: {
+          type: 'object',
+          properties: {
+            stockId: {
+              type: 'string'
+            },
+            tradeType: {
+              type: 'string'
+            },
+            stockName: {
+              type: 'string'
+            },
+            quantity: {
+              type: 'number'
+            },
+            listedPrice: {
+              type: 'number'
+            },
+            totalPrice: {
+              type: 'number'
+            }
+          }
+        },
+        tradingSuccess: {
+          type: 'object',
+          properties: {
+            userBalance: {
+              type: 'number'
+            }
+          }
+        },
         auctions: {
           type: 'object',
           properties: {
