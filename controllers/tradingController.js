@@ -14,11 +14,11 @@ const trade = async (req, res) => {
     }
     const { canUserTrade, errorMessage, userBalance } = await tradeModel.trade(tradeStockData)
 
-    if (!canUserTrade && canUserTrade !== undefined) {
+    if (!canUserTrade) {
       return res.boom.forbidden(errorMessage)
     }
 
-    return res.status(200).json({ userBalance })
+    return res.json({ userBalance })
   } catch (err) {
     logger.error(`Error while updating task: ${err}`)
     return res.boom.badImplementation('An internal server error occurred')

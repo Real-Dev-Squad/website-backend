@@ -46,7 +46,7 @@ const trade = async (tradeData) => {
         break
       }
       default: {
-        return { canUserTrade: false, errorMessage: 'Invalid tarde type' }
+        return { canUserTrade: false, errorMessage: 'Invalid trade type' }
       }
     }
 
@@ -61,7 +61,7 @@ const trade = async (tradeData) => {
     // we will be adding logic here to update user funds
 
     await stocksModel.doc(stockID).set(updatedStockData)
-    return { userBalance }
+    return { userBalance, canUserTrade: true }
   } catch (err) {
     logger.error('Error in trading', err)
     throw err
