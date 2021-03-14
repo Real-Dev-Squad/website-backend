@@ -2,6 +2,9 @@ const firestore = require('../utils/firestore')
 const stocksModel = firestore.collection('stocks')
 const transactionsModel = firestore.collection('transactions')
 const tradeLogsModel = firestore.collection('trade-logs')
+const { fetchWallet, updateWallet } = require('../models/wallets')
+
+const INSUFFICIENT_FUNDS = 'Trade was not successful due to insufficient funds'
 
 /**
  * Updates the stock Price
@@ -21,8 +24,9 @@ const getUpdatedPrice = (stockPrice) => {
  * @return {Promise<{taskId: string}>}
  */
 const trade = async (tradeData) => {
+  // ! TODO - update as per curreny type, currently only using dinero
   try {
-    const { stockID, quantity, tradeType, totalPrice } = tradeData
+    const { stockID, quantity, tradeType, totalPrice, userId } = tradeData
     const stockCollection = await stocksModel.doc(stockID).get()
     const stockData = stockCollection.data()
     let userBalance = 0
@@ -31,22 +35,30 @@ const trade = async (tradeData) => {
     let orderValue = 0
     let qtyUserCanPurchase = 0
 
+    const { currency } = fetchWallet(userId)
+    const updatedCurrencyData = {}
+
+    if (!currency) {
+      return { canUserTrade: false, errorMessage: INSUFFICIENT_FUNDS }
+    }
+
     switch (tradeType) {
       case 'SELL': {
         quantityToUpdate = quantity + stockData.quantity
         userBalance = quantity * stockData.price
+        updatedCurrencyData.dinero = userBalance + currency.dinero
         stockPriceToBeUpdated = getUpdatedPrice(stockData.price)
         break
       }
       case 'BUY': {
         qtyUserCanPurchase = Math.floor(totalPrice / stockData.price)
-        if (qtyUserCanPurchase <= 0) {
-          return { canUserTrade: false, errorMessage: 'Trade was not successful due to insufficient funds' }
+        if (qtyUserCanPurchase <= 0 || totalPrice > currency.dinero) {
+          return { canUserTrade: false, errorMessage: INSUFFICIENT_FUNDS }
         }
         orderValue = qtyUserCanPurchase * stockData.price
         quantityToUpdate = stockData.quantity - qtyUserCanPurchase
-        userBalance = orderValue - totalPrice
-
+        userBalance = currency.dinero + (totalPrice - orderValue)
+        updatedCurrencyData.dinero = userBalance
         stockPriceToBeUpdated = getUpdatedPrice(stockData.price)
         break
       }
@@ -65,7 +77,7 @@ const trade = async (tradeData) => {
 
     const { id } = await tradeLogsModel.add({
       type: `STOCK_${tradeType}`,
-      userId: tradeData.userId,
+      userId: userId,
       stockName: stockData.name,
       orderValue,
       quantity: qtyUserCanPurchase,
@@ -74,13 +86,18 @@ const trade = async (tradeData) => {
     })
 
     await transactionsModel.add({
-      userId: tradeData.userId,
+      userId: userId,
       type: `STOCK_${tradeType}`,
       refId: id,
       timestamp: +Date.now()
     })
 
-    // we will be adding logic here to update user funds
+    // update user wallet
+
+    updateWallet(userId, {
+      ...currency,
+      ...updatedCurrencyData
+    })
 
     await stocksModel.doc(stockID).set(updatedStockData)
     return { userBalance, canUserTrade: true }
