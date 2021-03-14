@@ -470,6 +470,9 @@ const swaggerOptions = {
         trading: {
           type: 'object',
           properties: {
+            stockId: {
+              type: 'string'
+            },
             tradeType: {
               type: 'string'
             },

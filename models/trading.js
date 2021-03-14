@@ -26,8 +26,8 @@ const getUpdatedPrice = (stockPrice) => {
 const trade = async (tradeData) => {
   // ! TODO - update as per curreny type, currently only using dinero
   try {
-    const { stockID, quantity, tradeType, totalPrice, userId } = tradeData
-    const stockCollection = await stocksModel.doc(stockID).get()
+    const { stockId, quantity, tradeType, totalPrice, userId } = tradeData
+    const stockCollection = await stocksModel.doc(stockId).get()
     const stockData = stockCollection.data()
     let userBalance = 0
     let quantityToUpdate = 0
@@ -99,7 +99,7 @@ const trade = async (tradeData) => {
       ...updatedCurrencyData
     })
 
-    await stocksModel.doc(stockID).set(updatedStockData)
+    await stocksModel.doc(stockId).set(updatedStockData)
     return { userBalance, canUserTrade: true }
   } catch (err) {
     logger.error('Error in trading', err)
