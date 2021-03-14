@@ -7,12 +7,12 @@ const tradeModel = require('../models/trading')
  */
 const trade = async (req, res) => {
   try {
-    const { username } = req.params
-    if (!username) {
-      return res.boom.forbidden('Invalid username')
+    const { username } = req.userData
+    const tradeStockData = {
+      ...req.body,
+      username
     }
-
-    const { canUserTrade, errorMessage, userBalance } = await tradeModel.trade(req.body, username)
+    const { canUserTrade, errorMessage, userBalance } = await tradeModel.trade(tradeStockData)
 
     if (!canUserTrade && canUserTrade !== undefined) {
       return res.boom.forbidden(errorMessage)

@@ -6,8 +6,8 @@ const { newTrade } = require('../middlewares/validators/trading')
 
 /**
  * @swagger
- * /trade:
- *  patch:
+ * /trade/stock/new/self:
+ *  post:
  *   summary: Used for new trading request
  *   tags:
  *     - Trading
@@ -45,6 +45,6 @@ const { newTrade } = require('../middlewares/validators/trading')
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/:username', authenticate, newTrade, trade)
+router.post('/stock/new/self', authenticate, newTrade, trade)
 
 module.exports = router

@@ -16,10 +16,9 @@ const getUpdatedPrice = (stockPrice) => {
  * New trade
  *
  * @param tradeData { Object }: new trading data
- * @param username { string }: username for the user who is trading
  * @return {Promise<{taskId: string}>}
  */
-const trade = async (tradeData, username = null) => {
+const trade = async (tradeData) => {
   try {
     const { stockID, quantity, tradeType, totalPrice } = tradeData
     const stockCollection = await stocksModel.doc(stockID).get()
@@ -58,6 +57,7 @@ const trade = async (tradeData, username = null) => {
     }
 
     // we will be adding logic here to create a transaction log
+
     // we will be adding logic here to update user funds
 
     await stocksModel.doc(stockID).set(updatedStockData)
