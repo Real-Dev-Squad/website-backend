@@ -12,7 +12,7 @@ const getUserWallet = async (req, res) => {
   try {
     const { id: userId } = req.userData
     const walletData = await fetchWallet(userId)
-    return res.status.json({
+    return res.json({
       message: 'Wallet returned successfully',
       wallet: walletData
     })
