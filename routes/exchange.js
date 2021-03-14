@@ -35,7 +35,7 @@ router.get('/rates', exchangeController.getExchangeRate)
  *     tags:
  *       - exchange
  *     responses:
- *       200:
+ *       201:
  *         description: Return exchange
  *         content:
  *           application/json:
@@ -92,7 +92,7 @@ router.get('/banks', exchangeController.getAllBanksName)
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/exchange'
+ *               $ref: '#/components/schemas/exchange/currency'
  *       404:
  *         description: notFound
  *         content:

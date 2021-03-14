@@ -485,6 +485,34 @@ const swaggerOptions = {
             }
           }
         },
+        exchange: {
+          type: 'object',
+          properties: {
+            bankName: {
+              type: 'string'
+            },
+            bankId: {
+              type: 'string'
+            },
+            isActive: {
+              type: 'boolean'
+            },
+            quantity: {
+              type: 'number'
+            },
+            currency: {
+              type: 'object',
+              properties: {
+                denaru: {
+                  type: 'number'
+                },
+                neelaam: {
+                  type: 'number'
+                }
+              }
+            }
+          }
+        },
         errors: {
           unAuthorized: {
             type: 'object',
