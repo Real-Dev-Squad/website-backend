@@ -11,5 +11,6 @@ app.use('/pullrequests', require('./pullrequests.js'))
 app.use('/contributions', require('./contributions'))
 app.use('/badges', require('./badges.js'))
 app.use('/auctions', require('./auctions.js'))
+app.use('/wallet', require('./wallets.js'))
 
 module.exports = app
