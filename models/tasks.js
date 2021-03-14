@@ -19,7 +19,14 @@ const updateTask = async (taskData, taskId = null) => {
       })
       return { taskId }
     }
-    const taskInfo = await tasksModel.add(taskData)
+    const participants = await userMapping.getParticipantUserIds(taskData.participants)
+    const ownerId = await userMapping.getUserId(taskData.ownerId)
+    const newTaskData = ({
+      ...taskData,
+      participants,
+      ownerId
+    })
+    const taskInfo = await tasksModel.add(newTaskData)
     const newlyCreatedTaskData = await fetchTask(taskInfo.id)
     return { taskId: taskInfo.id, taskDetails: newlyCreatedTaskData.taskData }
   } catch (err) {
@@ -43,7 +50,13 @@ const fetchTasks = async () => {
         ...task.data()
       })
     })
-    return tasks
+    const promises = tasks.map(async (task) => {
+      const participants = await userMapping.getParticipantUsernames(task.participants)
+      const ownerId = await userMapping.getUsername(task.ownerId)
+      return { ...task, ownerId, participants }
+    })
+    const updatedTasks = await Promise.all(promises)
+    return updatedTasks
   } catch (err) {
     logger.error('error getting tasks', err)
     throw err
@@ -102,7 +115,8 @@ const fetchTask = async (taskId) => {
 const fetchUserTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userMapping.toUserId(user.username)).get()
+    const userId = await userMapping.getUserId(user.username)
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId).get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
       tasks.push({
@@ -120,8 +134,8 @@ const fetchUserTasks = async (username) => {
 const fetchUserActiveAndBlockedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
-
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userMapping.toUserId(user.username)).where('status', 'in', ['active', 'pending', 'blocked']).get()
+    const userId = await userMapping.getUserId(user.username)
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId).where('status', 'in', ['active', 'pending', 'blocked']).get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
       tasks.push({
@@ -146,7 +160,8 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
 const fetchUserCompletedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userMapping.toUserId(user.username)).where('status', '==', 'completed').get()
+    const userId = await userMapping.getUserId(user.username)
+    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId).where('status', '==', 'completed').get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
       tasks.push({

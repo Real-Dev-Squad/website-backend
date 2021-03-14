@@ -31,7 +31,7 @@ describe('Tasks', function () {
       endsOn: '<unix timestamp>',
       startedOn: '<unix timestamp>',
       status: 'active',
-      ownerId: '<app owner user id>',
+      ownerId: 'ankur',
       percentCompleted: 10,
       dependsOn: [
         'd12',
@@ -52,7 +52,7 @@ describe('Tasks', function () {
       endsOn: '<unix timestamp>',
       startedOn: '<unix timestamp>',
       status: 'completed',
-      ownerId: '<app owner user id>',
+      ownerId: 'ankur',
       percentCompleted: 10,
       dependsOn: [
         'd12',
@@ -92,7 +92,7 @@ describe('Tasks', function () {
           endsOn: '<unix timestamp>',
           startedOn: '<unix timestamp>',
           status: 'completed',
-          ownerId: '<app owner user id>',
+          ownerId: 'ankur',
           percentCompleted: 10,
           dependsOn: [
             'd12',
