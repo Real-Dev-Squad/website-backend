@@ -14,13 +14,20 @@ const calculation = require('../middlewares/cryptoTransactionCalc')
 const send = async (req, res) => {
   try {
     const request = req.body
-    const [userTo, userFrom, currency, amount] = [request.to, request.from, request.currency, request.amount]
-    const message1 = `${amount} ${currency} Coins Creditted From ${userFrom} to ${userTo} Succesfully`
-    const [fromUserWallet, toUserWallet] = await Promise.all([usersdata.fetchUserWallet(userFrom), usersdata.fetchUserWallet(userTo)])
-    const resultObj = calculation.cryptoCalc(fromUserWallet, toUserWallet, currency, amount)
+    const [userTo, userFrom, currencyType, amount] = [request.to, request.from, request.currency, request.amount]
+    const message1 = `${amount} ${currencyType} Coins Creditted From ${userFrom} to ${userTo} Succesfully`
+    const fromUserWallet = await usersdata.fetchUserWallet(userFrom)
+    if(fromUserWallet.user.currency[currencyType] < amount) {
+      return res.json({
+        message: 'Amount of Currency need to be transfered is higher than your balance'
+      })
+    }
+    const toUserWallet = await usersdata.fetchUserWallet(userTo)
+    const resultObj = calculation.cryptoCalc(fromUserWallet, toUserWallet, currencyType, amount)
     await Promise.all([usersdata.updateWallet(resultObj.fromUserWallet), usersdata.updateWallet(resultObj.toUserWallet), usersdata.updateTransaction(message1)])
     return res.json({
-      message: message1
+      message: message1,
+      status: 200
     })
   } catch (error) {
     logger.error(`Error while processing pull requests: ${error}`)
@@ -42,14 +49,21 @@ const send = async (req, res) => {
 const request = async (req, res) => {
   try {
     const request = req.body
-    const [userTo, userFrom, currency, amount] = [request.to, request.from, request.currency, request.amount]
-    const notificationMessage = `${amount} ${currency} Coins Requested By ${userFrom}`
-    const [verifyUserTO, verifyUserFrom] = await Promise.all([usersdata.fetchUserWallet(userTo), usersdata.fetchUserWallet(userFrom)])
-    if (verifyUserFrom && verifyUserTO) {
+    const [userTo, userFrom, currencyType, amount] = [request.to, request.from, request.currency, request.amount]
+    const notificationMessage = `${amount} ${currencyType} Coins Requested By ${userFrom}`
+    const toUserWallet = await usersdata.fetchUserWallet(userTo)
+    if(toUserWallet.user.currency[currencyType] < amount) {
+      return res.json({
+        message: 'Please request from someother person as Balance is low' 
+      })
+    }
+    const fromUserWallet = await usersdata.fetchUserWallet(userFrom)
+    if (fromUserWallet && toUserWallet) {
       await usersdata.notification(notificationMessage, userTo)
     }
     return res.json({
-      message: notificationMessage
+      message: notificationMessage,
+      status: 200
     })
   } catch (error) {
     logger.error(`Error while processing pull requests: ${error}`)
@@ -80,8 +94,7 @@ const approved = async (req, res) => {
     await Promise.all([usersdata.updateWallet(resultObj.fromUserWallet), usersdata.updateWallet(resultObj.toUserWallet), usersdata.updateTransaction(message1)])
     return res.json({
       message: message1,
-      to: resultObj.verifyUserTO,
-      from: resultObj.verifyUserFrom
+      status: 200
     })
   } catch (error) {
     logger.error(`Error while processing pull requests: ${error}`)
