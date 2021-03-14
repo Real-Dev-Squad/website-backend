@@ -103,7 +103,7 @@ const extractRefDocsId = (doc) => {
 }
 
 /**
- * Fetch the currency exchange rates
+ * Update bank currecy after excbange
  * @return {Promise<exchangeData>}
  */
 const updateBankWalletAfterExchange = (bankCurrency, exchangeData, totalTargetCurrencyRequest) => {
@@ -113,7 +113,7 @@ const updateBankWalletAfterExchange = (bankCurrency, exchangeData, totalTargetCu
 }
 
 /**
- * Fetch the currency exchange rates
+ * Update user currecy after excbange
  * @return {Promise<exchangeData>}
  */
 const updateUserWalletAfterExchange = (userCurrency, exchangeData, totalTargetCurrencyRequest) => {

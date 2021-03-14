@@ -71,17 +71,10 @@ const getCurrencyAvailabeInBank = async (req, res) => {
 const getAllBanksName = async (req, res) => {
   try {
     const bankData = await getAllBanks()
-    if (bankData) {
-      return res.json({
-        message: 'Bank returned successfully!',
-        banks: bankData
-      })
-    } else {
-      return res.status(428).json({
-        status: 'failed',
-        message: 'Something went wrong. Call Prakash!'
-      })
-    }
+    return res.json({
+      message: 'Bank returned successfully!',
+      banks: bankData
+    })
   } catch (err) {
     logger.error(`Error while fetching all users: ${err}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')
