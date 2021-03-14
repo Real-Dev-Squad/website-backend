@@ -35,10 +35,10 @@ const trade = async (tradeData) => {
     let orderValue = 0
     let qtyUserCanPurchase = 0
 
-    const { currency } = await fetchWallet(userId)
+    const { currencies } = await fetchWallet(userId)
     const updatedCurrencyData = {}
 
-    if (!currency) {
+    if (!currencies) {
       return { canUserTrade: false, errorMessage: INSUFFICIENT_FUNDS }
     }
 
@@ -46,18 +46,18 @@ const trade = async (tradeData) => {
       case 'SELL': {
         quantityToUpdate = quantity + stockData.quantity
         userBalance = quantity * stockData.price
-        updatedCurrencyData.dinero = userBalance + currency.dinero
+        updatedCurrencyData.dinero = userBalance + currencies.dinero
         stockPriceToBeUpdated = getUpdatedPrice(stockData.price)
         break
       }
       case 'BUY': {
         qtyUserCanPurchase = Math.floor(totalPrice / stockData.price)
-        if (qtyUserCanPurchase <= 0 || totalPrice > currency.dinero) {
+        if (qtyUserCanPurchase <= 0 || totalPrice > currencies.dinero) {
           return { canUserTrade: false, errorMessage: INSUFFICIENT_FUNDS }
         }
         orderValue = qtyUserCanPurchase * stockData.price
         quantityToUpdate = stockData.quantity - qtyUserCanPurchase
-        userBalance = currency.dinero - orderValue
+        userBalance = currencies.dinero - orderValue
         updatedCurrencyData.dinero = userBalance
         stockPriceToBeUpdated = getUpdatedPrice(stockData.price)
         break
@@ -95,7 +95,7 @@ const trade = async (tradeData) => {
     // update user wallet
 
     updateWallet(userId, {
-      ...currency,
+      ...currencies,
       ...updatedCurrencyData
     })
 
