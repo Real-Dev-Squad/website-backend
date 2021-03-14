@@ -91,7 +91,7 @@ const convertCurrency = async (req, res) => {
     const exchangeData = req.body
     const { id: userId } = req.userData
     const exchangeTransactionStatus = await exchangeTransaction(userId, exchangeData)
-    return res.status(200).json({ // TODO update status
+    return res.status(200).json({
       status: (exchangeTransactionStatus.status) ? 'success' : 'failure',
       message: exchangeTransactionStatus.message
     })
