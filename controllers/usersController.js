@@ -1,7 +1,7 @@
 
 const userQuery = require('../models/users')
 const accountOwners = require('../mockdata/appOwners')
-
+const { fetchWallet, createWallet } = require('../models/wallets')
 /**
  * Fetches the data about our users
  *
@@ -126,7 +126,10 @@ const updateSelf = async (req, res) => {
     }
 
     const user = await userQuery.addOrUpdate(req.body, userId)
-
+    const userWallet = await fetchWallet(userId)
+    if (!userWallet.id) {
+      await createWallet(userId, { dineros: 1000 })
+    }
     if (!user.isNewUser) {
       return res.status(204).send()
     }

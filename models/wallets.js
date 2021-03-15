@@ -23,12 +23,12 @@ const fetchWallet = async (userId) => {
  * Create new wallet for user
  * @return {Promise<walletModel|object>}
  */
-const createWallet = async (userId) => {
+const createWallet = async (userId, currencies = {}) => {
   try {
     const walletData = {
       userId,
       isActive: true,
-      currencies: {}
+      currencies
     }
     const { id } = await walletModel.add(walletData)
     return {
@@ -71,5 +71,6 @@ const updateWallet = async (userId, currencies) => {
 
 module.exports = {
   fetchWallet,
-  updateWallet
+  updateWallet,
+  createWallet
 }
