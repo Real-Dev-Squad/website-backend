@@ -10,10 +10,10 @@ const transactionsModel = require('../models/transaction')
 const fetchLatestTransactions = async (req, res) => {
   try {
     const userId = req.params.userId
-    const data  = await transactionsModel.fetchLatestTransactions(userId)
+    const data = await transactionsModel.fetchLatestTransactions(userId)
     return res.json({
       data
-    });
+    })
   } catch (err) {
     logger.error(`Error while processing transactions fetch request: ${err}`)
     return res.boom.badImplementation('Something went wrong please contact admin')
