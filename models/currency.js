@@ -1,8 +1,8 @@
 const firestore = require('../utils/firestore')
-const walletModel = firestore.collection('wallet')
+const walletModel = firestore.collection('wallets')
 const bankModel = firestore.collection('banks')
 const currencyExchangeModel = firestore.collection('currencyExchange')
-// const transactionModel = firestore.collection('transaction')
+// const transactionModel = firestore.collection('transactions')
 
 const allCurrencyName = 'allCurrencies'
 
@@ -133,7 +133,6 @@ const exchangeTransaction = async (userId, exchangeData) => {
     const userWalletRef = await walletModel.where('userId', '==', userId).limit(1)
     const bankWalletRef = await bankModel.where('bankId', '==', bankId).limit(1)
     const exchangeRateRef = await currencyExchangeModel.doc(allCurrencyName)
-
     const exchangeResponse = await firestore.runTransaction(async t => {
       const responseObj = {
         status: false,
@@ -147,11 +146,10 @@ const exchangeTransaction = async (userId, exchangeData) => {
       const bankWalletId = await extractRefDocsId(bankWalletDoc)
       const bankWallet = await extractRefDocsData(bankWalletDoc)
 
-      if (bankWallet && bankWallet.isActive) {
+      if (bankWallet?.isActive) {
         const exchangeRates = (await t.get(exchangeRateRef)).data()
         const srcExchangeRate = exchangeRates[exchangeData.src][exchangeData.target]
         const totalTargetCurrencyRequest = (srcExchangeRate * exchangeData.quantity)
-
         if (userWallet.currency[exchangeData.src] >= exchangeData.quantity &&
           bankWallet.currency[exchangeData.target] >= totalTargetCurrencyRequest) {
           // Update bank currency
@@ -163,6 +161,7 @@ const exchangeTransaction = async (userId, exchangeData) => {
           // update User wallet currency
           const userWalletUpdateRef = walletModel.doc(userWalletId)
           t.update(userWalletUpdateRef, { currency: userWalletAfterExchange })
+          // Log in Tranaction collection
           responseObj.status = true
           responseObj.message = 'Transaction Successful'
           // TODO: if required update transaction

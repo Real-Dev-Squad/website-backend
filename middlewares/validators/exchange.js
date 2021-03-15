@@ -17,7 +17,6 @@ const postCurrencyRates = async (req, res, next) => {
 
 const patchExchange = async (req, res, next) => {
   const schema = joi.object().keys({
-    userId: joi.string().required(),
     src: joi.string().required(),
     target: joi.string().required(),
     quantity: joi.number().required(),
@@ -27,7 +26,7 @@ const patchExchange = async (req, res, next) => {
     await schema.validateAsync(req.body)
     next()
   } catch (error) {
-    logger.error(`Error creating auction : ${error}`)
+    logger.error(`Error exchange : ${error}`)
     res.boom.badRequest(error.details[0].message)
   }
 }

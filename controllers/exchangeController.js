@@ -72,7 +72,7 @@ const getAllBanksName = async (req, res) => {
   try {
     const bankData = await getAllBanks()
     return res.json({
-      message: 'Bank returned successfully!',
+      message: 'Banks returned successfully!',
       banks: bankData
     })
   } catch (err) {
@@ -82,7 +82,7 @@ const getAllBanksName = async (req, res) => {
 }
 
 /**
- * Get the challenges or add the challenge
+ * Exchange currency in between user and bank
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
