@@ -60,9 +60,10 @@ const fetchActiveTaskMembers = async () => {
     const tasksSnapshot = await tasksModel.where('status', '==', 'active').get()
     const activeMembers = []
     tasksSnapshot.forEach((task) => {
-      if (task.data().participants) {
+      const taskData = task.data()
+      if (taskData.participants) {
         activeMembers.push(
-          ...task.data().participants
+          ...taskData.participants
         )
       }
     })
