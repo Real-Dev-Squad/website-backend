@@ -1,5 +1,5 @@
 const firestore = require('../utils/firestore')
-const walletModel = firestore.collection('wallet')
+const walletModel = firestore.collection('wallets')
 const bankModel = firestore.collection('banks')
 const currencyExchangeModel = firestore.collection('currencyExchange')
 // const transactionModel = firestore.collection('transactions')
