@@ -95,7 +95,7 @@ const extractRefDocsData = (doc) => {
 }
 
 /**
- * Gets the id of frestore documenr
+ * Gets the id of firestore document
  * @return {Promise<object>}
  */
 const extractRefDocsId = (doc) => {

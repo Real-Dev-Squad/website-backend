@@ -8,7 +8,7 @@ const exchangeVaidatore = require('../middlewares/validators/exchange')
  * @swagger
  * /exchange/rates:
  *   get:
- *     summary: Get exhcange rate
+ *     summary: Get exchange rate
  *     tags:
  *       - exchange
  *     responses:
@@ -31,7 +31,7 @@ router.get('/rates', exchangeController.getExchangeRate)
  * @swagger
  * /exchange/rates:
  *   get:
- *     summary: post exhcange rate
+ *     summary: post exchange rate
  *     tags:
  *       - exchange
  *     responses:

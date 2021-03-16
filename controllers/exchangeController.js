@@ -1,7 +1,7 @@
 const { fetchExchangeRates, fetchCurrencyAvailablity, getAllBanks, exchangeTransaction, createCurrencyRates } = require('../models/currency')
 
 /**
- * Get the challenges or add the challenge
+ * Get currency Exchange rates
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
@@ -18,14 +18,14 @@ const getExchangeRate = async (req, res) => {
 }
 
 /**
- * Get the challenges or add the challenge
+ * Create exchange rates
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
 const createExchangeRate = (req, res) => {
   try {
     const { username } = req.userData
-    // This id temperory hack, to make ankuhs set the exchange rate
+    // This id temporary hack, to make ankush set the exchange rate
     if (username === 'ankush') {
       const currencyData = { ...req.body, timestamp: new Date() }
       createCurrencyRates(currencyData)
@@ -42,7 +42,7 @@ const createExchangeRate = (req, res) => {
 }
 
 /**
- * Get the challenges or add the challenge
+ * Get the bank's currency details
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
@@ -64,7 +64,7 @@ const getCurrencyAvailabeInBank = async (req, res) => {
 }
 
 /**
- * Get the challenges or add the challenge
+ * Gets the names of all active banks
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
@@ -82,7 +82,7 @@ const getAllBanksName = async (req, res) => {
 }
 
 /**
- * Get the challenges or add the challenge
+ * Converts the currency, based on currecy exchange rates and bank availability
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
