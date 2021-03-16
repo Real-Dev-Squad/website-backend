@@ -50,7 +50,7 @@ const createNewAuction = async (req, res) => {
     const { id: seller } = req.userData
     const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = req.body
     const auctionId = await auctions.createNewAuction({ seller, initialPrice, itemType, endTime, quantity })
-    return res.status(204).json({ id: auctionId, message: 'Auction created successfully!' })
+    return res.status(201).json({ id: auctionId, message: 'Auction created successfully!' })
   } catch (error) {
     logger.error(`Error creating new auctions: ${error}`)
     return res.boom.badImplementation('An internal server error occured.')
@@ -69,10 +69,13 @@ const makeNewBid = async (req, res) => {
     const auctionId = req.params.id
     const { bid } = req.body
     const newBid = await auctions.makeNewBid({ auctionId, bidder, bid })
-    if (newBid.auctionNotFound) return res.boom.notFound('Auction doesn\'t exist')
-    if (newBid.notAllowed) return res.boom.forbidden('Your bid was not higher than current one!')
 
-    return res.status(204).json({ id: newBid, message: 'Successfully placed bid!' })
+    if (newBid.auctionNotFound) return res.boom.notFound('Auction doesn\'t exist')
+    if (newBid.noWallet) return res.boom.forbidden('You do not have a wallet!')
+    if (newBid.insufficientMoney) return res.boom.forbidden('You do not have sufficient money')
+    if (newBid.lowBid) return res.boom.forbidden('Your bid was not higher than current one!')
+
+    return res.status(201).json({ message: 'Successfully placed bid!' })
   } catch (error) {
     logger.error(`Error creating new auctions: ${error}`)
     return res.boom.badImplementation('An internal server error occured.')
