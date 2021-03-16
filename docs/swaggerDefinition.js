@@ -498,6 +498,29 @@ const swaggerOptions = {
             }
           }
         },
+        userStocks: {
+          type: 'object',
+          properties: {
+            userId: {
+              type: 'string'
+            },
+            stockId: {
+              type: 'string'
+            },
+            stockName: {
+              type: 'string'
+            },
+            quantity: {
+              type: 'number'
+            },
+            orderValue: {
+              type: 'number'
+            },
+            initialStockValue: {
+              type: 'number'
+            }
+          }
+        },
         auctions: {
           type: 'object',
           properties: {
