@@ -1,4 +1,4 @@
-const { fetchWallet } = require('../models/wallets')
+const { fetchWallet, createWalletForAllUsers } = require('../models/wallets')
 
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
@@ -22,6 +22,32 @@ const getUserWallet = async (req, res) => {
   }
 }
 
+/**
+ * Create wallet for all users
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+
+const createWalletForUsers = async (req, res) => {
+  try {
+    const { username } = req.userData
+    if (username === 'ankush') {
+      const walletsStatus = await createWalletForAllUsers()
+      return res.json({
+        message: 'Create wallet for all users request accepted.',
+        status: walletsStatus/*  ? 'success' : 'failure' */
+      })
+    }
+    return res.status(403).json({
+      message: 'Sorry, you cannot use this endpoint, Please contact admin'
+    })
+  } catch (err) {
+    logger.error(`Error while creating wallet's for users ${err}`)
+    return res.boom.badImplementation(ERROR_MESSAGE)
+  }
+}
+
 module.exports = {
-  getUserWallet
+  getUserWallet,
+  createWalletForUsers
 }
