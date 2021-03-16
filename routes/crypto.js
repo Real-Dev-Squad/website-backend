@@ -48,7 +48,7 @@ router.post('/send', send, cryptoController.send)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.post('/receive', receive, cryptoController.request)
+router.post('/request', receive, cryptoController.request)
 
 /**
  * @swagger
