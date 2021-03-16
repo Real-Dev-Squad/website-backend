@@ -146,7 +146,7 @@ const exchangeTransaction = async (userId, exchangeData) => {
       const bankWalletId = await extractRefDocsId(bankWalletDoc)
       const bankWallet = await extractRefDocsData(bankWalletDoc)
 
-      if (bankWallet?.isActive) {
+      if (bankWallet && bankWallet.isActive) {
         const exchangeRates = (await t.get(exchangeRateRef)).data()
         const srcExchangeRate = exchangeRates[exchangeData.src][exchangeData.target]
         const totalTargetCurrencyRequest = (srcExchangeRate * exchangeData.quantity)
