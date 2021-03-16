@@ -1,7 +1,7 @@
 const firestore = require('../utils/firestore')
 const tasksModel = firestore.collection('tasks')
 const { fetchUser } = require('./users')
-const userMapping = require('../utils/users')
+const userUtils = require('../utils/users')
 /**
  * Adds and Updates tasks
  *
@@ -19,16 +19,15 @@ const updateTask = async (taskData, taskId = null) => {
       })
       return { taskId }
     }
-    const participants = await userMapping.getParticipantUserIds(taskData.participants)
-    const ownerId = await userMapping.getUserId(taskData.ownerId)
+    const participants = await userUtils.getParticipantUserIds(taskData.participants)
+    const ownerId = await userUtils.getUserId(taskData.ownerId)
     const newTaskData = ({
       ...taskData,
       participants,
       ownerId
     })
     const taskInfo = await tasksModel.add(newTaskData)
-    const newlyCreatedTaskData = await fetchTask(taskInfo.id)
-    return { taskId: taskInfo.id, taskDetails: newlyCreatedTaskData.taskData }
+    return { taskId: taskInfo.id, taskDetails: taskData }
   } catch (err) {
     logger.error('Error in creating task', err)
     throw err
@@ -51,8 +50,8 @@ const fetchTasks = async () => {
       })
     })
     const promises = tasks.map(async (task) => {
-      const participants = await userMapping.getParticipantUsernames(task.participants)
-      const ownerId = await userMapping.getUsername(task.ownerId)
+      const participants = await userUtils.getParticipantUsernames(task.participants)
+      const ownerId = await userUtils.getUsername(task.ownerId)
       return { ...task, ownerId, participants }
     })
     const updatedTasks = await Promise.all(promises)
@@ -115,7 +114,7 @@ const fetchTask = async (taskId) => {
 const fetchUserTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
-    const userId = await userMapping.getUserId(user.username)
+    const userId = await userUtils.getUserId(user.username)
     const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId).get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
@@ -134,7 +133,7 @@ const fetchUserTasks = async (username) => {
 const fetchUserActiveAndBlockedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
-    const userId = await userMapping.getUserId(user.username)
+    const userId = await userUtils.getUserId(user.username)
     const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId).where('status', 'in', ['active', 'pending', 'blocked']).get()
     const tasks = []
     tasksSnapshot.forEach((task) => {
@@ -160,7 +159,7 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
 const fetchUserCompletedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
-    const userId = await userMapping.getUserId(user.username)
+    const userId = await userUtils.getUserId(user.username)
     const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId).where('status', '==', 'completed').get()
     const tasks = []
     tasksSnapshot.forEach((task) => {

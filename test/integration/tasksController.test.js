@@ -111,7 +111,8 @@ describe('Tasks', function () {
           expect(res.body.message).to.equal('Task created successfully!')
           expect(res.body.id).to.be.a('string')
           expect(res.body.task).to.be.a('object')
-
+          expect(res.body.task.ownerId).to.equal('ankur')
+          expect(res.body.task.participants).to.include('ankur')
           return done()
         })
     })
@@ -128,7 +129,10 @@ describe('Tasks', function () {
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Tasks returned successfully!')
           expect(res.body.tasks).to.be.a('array')
-
+          res.body.tasks.forEach((task) => {
+            expect(task.ownerId).to.equal('ankur')
+            expect(task.participants).to.include('ankur')
+          })
           return done()
         })
     })
