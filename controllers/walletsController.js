@@ -38,9 +38,7 @@ const createWalletForUsers = async (req, res) => {
         status: walletsStatus/*  ? 'success' : 'failure' */
       })
     }
-    return res.status(403).json({
-      message: 'Sorry, you cannot use this endpoint, Please contact admin'
-    })
+    return res.boom.forbidden('You cannot not create wallets, please contact admin')
   } catch (err) {
     logger.error(`Error while creating wallet's for users ${err}`)
     return res.boom.badImplementation(ERROR_MESSAGE)
