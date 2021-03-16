@@ -5,7 +5,7 @@
 
 const firestore = require('../utils/firestore')
 const recruiterModel = firestore.collection('recruiters')
-const userModel = firestore.collection('users')
+const userModel = require('./users')
 
 /**
  * Add the recruiter data
@@ -17,27 +17,20 @@ const userModel = firestore.collection('users')
 
 const addRecruiterInfo = async (recruiterData, username) => {
   try {
+    recruiterData.timestamp = Date.now()
     // Add the recruiter data in DB
     const recruiterInfo = await recruiterModel.add(recruiterData)
     // Fetch the recruiter from DB
-    const recruiter = await recruiterModel.doc(recruiterInfo.id).get()
+    const recruiter = (await recruiterModel.doc(recruiterInfo.id).get()).data()
     // Fetch the user from DB
-    const user = await userModel.where('username', '==', username).limit(1).get()
-    let userName
-    if (!user.empty) {
-      user.forEach(doc => {
-        const userFirstName = doc.data().first_name
-        const userLastName = doc.data().last_name
-        const userEmail = doc.data().email
-        userName = userFirstName + ' ' + userLastName + ' (' + userEmail + ')'
-      })
-    }
+    const { user: { first_name: userFirstName, last_name: userLastName, email: userEmail } } = await userModel.fetchUser({ username })
+    const userInfo = userFirstName + ' ' + userLastName + ' (' + userEmail + ')'
     return {
       message: 'Request Submission Successful!!',
-      id: recruiterInfo.id,
-      recruiterName: recruiter.data().first_name + ' ' + recruiter.data().last_name,
-      userName: userName,
-      timestamp: new Date().toUTCString()
+      recruiterId: recruiterInfo.id,
+      recruiterName: recruiter.first_name + ' ' + recruiter.last_name,
+      userInfo: userInfo,
+      timestamp: recruiter.timestamp
     }
   } catch (err) {
     logger.error('Error in adding recruiter', err)

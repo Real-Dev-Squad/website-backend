@@ -54,7 +54,7 @@ router.get('/idle', members.getIdleMembers)
 
 /**
  * @swagger
- * /members/intro/{username}:
+ * /members/intro/:username:
  *   post:
  *     summary: Posts details of the recruiter
  *     tags:

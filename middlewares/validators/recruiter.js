@@ -9,7 +9,8 @@ const validateRecruiter = async (req, res, next) => {
     reason: joi.string().optional(),
     email: joi.string().optional(),
     currency: joi.string().optional(),
-    package: joi.number().optional()
+    package: joi.number().optional(),
+    timestamp: joi.string().optional()
   })
 
   try {

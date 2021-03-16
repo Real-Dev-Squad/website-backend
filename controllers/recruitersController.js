@@ -13,7 +13,7 @@ const addRecruiter = async (req, res) => {
     return res.json(result)
   } catch (error) {
     logger.error(`Error while adding recruiterInfo: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.notFound('Something went wrong please contact admin')
   }
 }
 
