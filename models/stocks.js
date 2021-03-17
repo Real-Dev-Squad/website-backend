@@ -46,17 +46,25 @@ const fetchStocks = async () => {
  */
 const fetchUserStocks = async (userId, stockId = null) => {
   try {
-    userStocksModel.where('userId', '==', userId)
-
+    let userStocksRef = ''
     if (stockId) {
-      userStocksModel.where('stockId', '==', stockId)
+      userStocksRef = await userStocksModel.where('userId', '==', userId).where('stockId', '==', stockId).get()
+      const [userStocks] = userStocksRef.docs
+      if (userStocks) {
+        return { id: userStocks.id, ...userStocks.data() }
+      }
+      return {}
     }
-    const { docs } = await userStocksModel.get()
-    const [userStocks] = docs
-    if (userStocks) {
-      return { id: userStocks.id, ...userStocks.data() }
-    }
-    return {}
+
+    userStocksRef = await userStocksModel.where('userId', '==', userId).get()
+    const userStocks = []
+    userStocksRef.forEach((stock) => {
+      userStocks.push({
+        id: stock.id,
+        ...stock.data()
+      })
+    })
+    return userStocks
   } catch (err) {
     logger.error('Error retrieving user stocks', err)
     throw err
