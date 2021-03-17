@@ -7,10 +7,11 @@ const transactionsModel = require('../models/transaction')
  * @param res {Object} - Express response object
  */
 
-const fetchLatestTransactions = async (req, res) => {
+const fetchLatest = async (req, res) => {
   try {
     const userId = req.params.userId
-    const data = await transactionsModel.fetchLatestTransactions(userId)
+    const noOfRecords = req.params.noOfRecords
+    const data = await transactionsModel.fetchLatest(userId, noOfRecords)
     return res.json({
       data
     })
@@ -21,5 +22,5 @@ const fetchLatestTransactions = async (req, res) => {
 }
 
 module.exports = {
-  fetchLatestTransactions
+  fetchLatest
 }

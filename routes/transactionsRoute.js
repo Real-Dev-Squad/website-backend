@@ -31,6 +31,6 @@ const transactionsController = require('../controllers/transactionsController.js
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/fetchLatestTransactions/:userId', transactionsController.fetchLatestTransactions)
+router.get('/fetchLatest/:userId/:noOfRecords', transactionsController.fetchLatest)
 
 module.exports = router
