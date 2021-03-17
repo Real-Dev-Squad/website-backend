@@ -79,15 +79,10 @@ const updateWallet = async (from) => {
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const notification = async (message, userId) => {
+const notification = async (message, userId, typeOfNotification) => {
   try {
-    const messageToBeNotified = message.split(' ')
-    let typeOfNotification = ''
-    if (messageToBeNotified[3] === 'Requested') {
-      typeOfNotification = 'Credit Request'
-    }
     const date = new Date()
-    const Status = true
+    const Status = false
     await notificationModel.add({
       message, userId, date, Status, typeOfNotification
     })

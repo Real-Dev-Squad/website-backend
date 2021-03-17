@@ -46,8 +46,23 @@ const approve = async (req, res, next) => {
   }
 }
 
+const decline = async (req, res, next) => {
+  const schema = joi.object().keys({
+    notification: joi.string(),
+    userName: joi.string()
+  })
+  try {
+    await schema.validateAsync(req.body)
+    next()
+  } catch (error) {
+    logger.error(`Error validating approve payload : ${error}`)
+    res.boom.badRequest(error.details[0].message)
+  }
+}
+
 module.exports = {
   send,
   receive,
-  approve
+  approve,
+  decline
 }

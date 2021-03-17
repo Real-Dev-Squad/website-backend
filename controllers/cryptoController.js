@@ -61,7 +61,7 @@ const request = async (req, res) => {
     }
     const fromUserWallet = await usersdata.fetchUserWallet(userFrom)
     if (fromUserWallet && toUserWallet) {
-      await usersdata.notification(notificationMessage, userTo)
+      await usersdata.notification(notificationMessage, userTo, 'Credit Request')
     }
     return res.json({
       message: notificationMessage,
@@ -104,8 +104,37 @@ const approved = async (req, res) => {
   }
 }
 
+/**
+ * Receive Money from one User to Other
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+// Json Body
+//  {
+//   "notification":  "30 silver Coins Requested By kratika is declined",
+//   "userName": "uttam"
+// }
+const decline = async (req, res) => {
+  try {
+    const request = req.body
+    const [notification, userFrom] = [request.notification, request.userName]
+    const message = notification.split(' ')
+    const notificationMessage = notification + ` by ${userFrom}`
+    const userTO = message[5]
+    await usersdata.notification(notificationMessage, userTO, 'Credit Request Declined')
+    return res.json({
+      message: notification,
+      status: 200
+    })
+  } catch (error) {
+    logger.error(`Error while processing pull requests: ${error}`)
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+}
+
 module.exports = {
   send,
   request,
-  approved
+  approved,
+  decline
 }

@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const cryptoController = require('../controllers/cryptoController')
-const { send, receive, approve } = require('../middlewares/validators/cryptoReqValidator')
+const { send, receive, approve, decline } = require('../middlewares/validators/cryptoReqValidator')
 /**
  * @swagger
  * /members:
@@ -73,5 +73,28 @@ router.post('/request', receive, cryptoController.request)
  */
 
 router.post('/approvedRequest', approve, cryptoController.approved)
+
+/**
+ * @swagger
+ * /members:
+ *   get:
+ *     summary: once money request is accepted by user then for transferring money this api could be used
+ *     tags:
+ *       - Members
+ *     responses:
+ *       200:
+ *         description: Details of all the RDS members
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/users'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.post('/declineRequest', decline, cryptoController.decline)
 
 module.exports = router
