@@ -112,14 +112,14 @@ const updateTransaction = async (message) => {
       count++
     }
     const data = message.split(' ')
-    let [amount, currency, typeOfTransaction, userId, userTo] = [data[0], data[1], data[3], data[5], data[(data.length) - 2]]
-    if (typeOfTransaction === 'Creditted') {
-      typeOfTransaction = 'credit'
+    let [amount, currency, type, userId, userTo] = [data[0], data[1], data[3], data[5], data[(data.length) - 2]]
+    if (type === 'Creditted') {
+      type = 'credit'
     } else {
-      typeOfTransaction = 'debit'
+      type = 'debit'
     }
     await transactionModel.add({
-      amount, currency, transactionId, typeOfTransaction, userTo, userId, dateTime
+      amount, currency, transactionId, type, userTo, userId, dateTime
     })
     return {
       message: 'success'
