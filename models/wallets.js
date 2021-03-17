@@ -15,7 +15,7 @@ const fetchWallet = async (userId) => {
     return {}
   } catch (err) {
     logger.error('Error retrieving wallets', err)
-    return err
+    throw err
   }
 }
 
@@ -37,7 +37,7 @@ const createWallet = async (userId, currencies = {}) => {
     }
   } catch (err) {
     logger.error('Error creating user wallet', err)
-    return err
+    throw err
   }
 }
 
@@ -65,7 +65,7 @@ const updateWallet = async (userId, currencies) => {
     return false
   } catch (err) {
     logger.error('Error updating currency to user wallets', err)
-    return err
+    throw err
   }
 }
 
@@ -92,7 +92,7 @@ const createWalletForAllUsers = async () => {
     return true
   } catch (err) {
     logger.error('Error updating currency to user wallets', err)
-    return err
+    throw err
   }
 }
 
