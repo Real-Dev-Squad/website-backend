@@ -23,8 +23,8 @@ const send = async (req, res) => {
       })
     }
     const toUserWallet = await usersdata.fetchUserWallet(userTo)
-    const result = await Promise.all([usersdata.updateWallet({ fromUserWallet, toUserWallet, currencyType, amount })])
-    if (result[0].message === 'success') {
+    const result = await usersdata.updateWallet({ fromUserWallet, toUserWallet, currencyType, amount })
+    if (result.message === 'success') {
       await usersdata.updateTransaction(message1)
     }
     return res.json({
@@ -93,7 +93,7 @@ const approved = async (req, res) => {
     const [amount, currencyType, userTO] = [message[0], message[1], message[(message.length) - 1]]
     const toUserWallet = await usersdata.fetchUserWallet(userTO)
     const message1 = `${amount} ${currencyType} Coins Transfered From ${userFrom} to ${userTO}`
-    const result = await Promise.all([usersdata.updateWallet({ fromUserWallet, toUserWallet, currencyType, amount })])
+    const result = await usersdata.updateWallet({ fromUserWallet, toUserWallet, currencyType, amount })
     if (result[0].message === 'success') {
       await usersdata.updateTransaction(message1)
     }
