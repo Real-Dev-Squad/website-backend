@@ -1,5 +1,4 @@
 const usersdata = require('../models/crypto')
-const calculation = require('../middlewares/cryptoTransactionCalc')
 /**
  * Send Money from one User to Other
  * @param {Object} req - Express request object
@@ -24,8 +23,10 @@ const send = async (req, res) => {
       })
     }
     const toUserWallet = await usersdata.fetchUserWallet(userTo)
-    const resultObj = calculation.cryptoCalc(fromUserWallet, toUserWallet, currencyType, amount)
-    await Promise.all([usersdata.updateWallet(resultObj.fromUserWallet), usersdata.updateWallet(resultObj.toUserWallet), usersdata.updateTransaction(message1)])
+    const result = await Promise.all([usersdata.updateWallet({ fromUserWallet, toUserWallet, currencyType, amount })])
+    if (result[0].message === 'success') {
+      await usersdata.updateTransaction(message1)
+    }
     return res.json({
       message: message1,
       status: 200
@@ -80,20 +81,22 @@ const request = async (req, res) => {
  */
 // Json Body
 //  {
-//   "notification":  "30 silver Coins Requested By kratika",
+//   "notification":  "30 dinero Coins Requested By kratika",
 //   "userName": "uttam"
 // }
 const approved = async (req, res) => {
   try {
     const request = req.body
     const [notification, userFrom] = [request.notification, request.userName]
-    const verifyUserFrom = await usersdata.fetchUserWallet(userFrom)
+    const fromUserWallet = await usersdata.fetchUserWallet(userFrom)
     const message = notification.split(' ')
-    const [amount, currency, userTO] = [message[0], message[1], message[(message.length) - 1]]
-    const verifyUserTo = await usersdata.fetchUserWallet(userTO)
-    const message1 = `${amount} ${currency} Coins Transfered From ${userFrom} to ${userTO}`
-    const resultObj = calculation.cryptoCalc(verifyUserFrom, verifyUserTo, currency, amount)
-    await Promise.all([usersdata.updateWallet(resultObj.fromUserWallet), usersdata.updateWallet(resultObj.toUserWallet), usersdata.updateTransaction(message1)])
+    const [amount, currencyType, userTO] = [message[0], message[1], message[(message.length) - 1]]
+    const toUserWallet = await usersdata.fetchUserWallet(userTO)
+    const message1 = `${amount} ${currencyType} Coins Transfered From ${userFrom} to ${userTO}`
+    const result = await Promise.all([usersdata.updateWallet({ fromUserWallet, toUserWallet, currencyType, amount })])
+    if (result[0].message === 'success') {
+      await usersdata.updateTransaction(message1)
+    }
     return res.json({
       message: message1,
       status: 200
@@ -111,7 +114,7 @@ const approved = async (req, res) => {
  */
 // Json Body
 //  {
-//   "notification":  "30 silver Coins Requested By kratika is declined",
+//   "notification":  "30 dinero Coins Requested By kratika is declined",
 //   "userName": "uttam"
 // }
 const decline = async (req, res) => {

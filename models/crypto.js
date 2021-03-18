@@ -2,11 +2,11 @@
  * This file contains wrapper functions to interact with the DB.
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
-
 const firestore = require('../utils/firestore')
 const walletModel = firestore.collection('Wallet')
 const transactionModel = firestore.collection('Transaction')
 const notificationModel = firestore.collection('Notification')
+const calculation = require('../middlewares/cryptoTransactionCalc')
 
 /**
  * Fetches the data about our members
@@ -49,21 +49,19 @@ const fetchUserWallet = async (userId) => {
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const updateWallet = async (from) => {
+const updateWallet = async ({ fromUserWallet, toUserWallet, currencyType, amount }) => {
   try {
-    let id, userData
-    const userId = from.user.userId
-    const currency = from.user.currency
-    const user = await walletModel.where('userId', '==', userId).get()
-    user.forEach(doc => {
-      id = doc.id
-      userData = doc.data()
+    const fromUserId = fromUserWallet.user.id
+    const toUserId = toUserWallet.user.id
+    const fromDoc = walletModel.doc(fromUserId)
+    const toDoc = walletModel.doc(toUserId)
+    await firestore.runTransaction(async (t) => {
+      const result = calculation.cryptoCalc(fromUserWallet, toUserWallet, currencyType, amount)
+      const updateFromCurrency = result.fromUserWallet.user.currency
+      const updateToCurrency = result.toUserWallet.user.currency
+      await t.update(fromDoc, { currency: updateFromCurrency })
+      await t.update(toDoc, { currency: updateToCurrency })
     })
-    if (userData) {
-      await walletModel.doc(id).update({
-        currency
-      })
-    }
     return {
       message: 'success'
     }
