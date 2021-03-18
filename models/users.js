@@ -18,7 +18,7 @@ const addOrUpdate = async (userData, userId = null) => {
     // userId exists Update user
     if (userId !== null) {
       const user = await userModel.doc(userId).get()
-      const isNewUser = !(user.data())
+      const isNewUser = !user.data()
       // user exists update user
       if (user.data()) {
         await userModel.doc(userId).set({
@@ -40,6 +40,7 @@ const addOrUpdate = async (userData, userId = null) => {
 
     // Add user
     userData.incompleteUserDetails = true
+    userData.createdOn = Date.now()
     const userInfo = await userModel.add(userData)
     return { isNewUser: true, userId: userInfo.id }
   } catch (err) {
@@ -91,7 +92,7 @@ const fetchUser = async ({ userId = null, username = null }) => {
     if (username) {
       const user = await userModel.where('username', '==', username).limit(1).get()
 
-      user.forEach(doc => {
+      user.forEach((doc) => {
         id = doc.id
         userData = doc.data()
       })
