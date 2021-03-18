@@ -37,6 +37,10 @@ const getUsername = async (userId) => {
  */
 const getParticipantUsernames = async (participantArray) => {
   try {
+    if (!Array.isArray(participantArray)) {
+      return []
+    }
+
     const promises = participantArray.map(async (participant) => {
       const participantUsername = await getUsername(participant.trim())
       return participantUsername
@@ -55,6 +59,10 @@ const getParticipantUsernames = async (participantArray) => {
  */
 const getParticipantUserIds = async (participantArray) => {
   try {
+    if (!Array.isArray(participantArray)) {
+      return []
+    }
+
     const promises = participantArray.map(async (participant) => {
       const participantUserId = await getUserId(participant.trim())
       return participantUserId
