@@ -68,11 +68,11 @@ router.get('/idle', members.getIdleMembers)
  *               $ref: '#/components/schemas/recruiters'
  *
  *       500:
- *         description: notFound
+ *         description: serverUnavailable
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/errors/notFound'
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
 router.post('/intro/:username', recruiterValidator.validateRecruiter, recruitersController.addRecruiter)
