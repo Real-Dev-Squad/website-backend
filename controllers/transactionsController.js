@@ -13,6 +13,8 @@ const fetchLatest = async (req, res) => {
     const noOfRecords = req.params.noOfRecords
     const data = await transactionsModel.fetchLatest(userId, noOfRecords)
     return res.json({
+      'message': 'Transactions returned successfully!',
+      'responseCode': 200,
       data
     })
   } catch (err) {
