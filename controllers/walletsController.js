@@ -1,4 +1,5 @@
-const { fetchWallet } = require('../models/wallets')
+const walletConstants = require('../constants/wallets')
+const { fetchWallet, createWallet } = require('../models/wallets')
 
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
@@ -11,10 +12,16 @@ const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 const getUserWallet = async (req, res) => {
   try {
     const { id: userId } = req.userData
-    const walletData = await fetchWallet(userId)
+
+    let wallet = await fetchWallet(userId)
+
+    if (!wallet) {
+      // #TODO Log which users didn't have a wallet
+      wallet = await createWallet(userId, walletConstants.INITIAL_WALLET)
+    }
     return res.json({
       message: 'Wallet returned successfully',
-      wallet: walletData
+      wallet
     })
   } catch (err) {
     logger.error(`Error while retriving wallet data ${err}`)
