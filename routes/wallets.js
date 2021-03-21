@@ -53,6 +53,12 @@ router.get('/', authenticate, walletController.getUserWallet)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       403:
+ *         description: forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/forbidden'
  *       500:
  *         description: badImplementation
  *         content:
