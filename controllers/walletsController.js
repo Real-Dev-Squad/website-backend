@@ -5,23 +5,39 @@ const walletConstants = require('../constants/wallets')
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
 /**
- * Get the wallet details of user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * Get the wallet for userId, or create default one for
+ * existing members
+ * @param {string} userId
  */
-
-const getUserWallet = async (req, res) => {
+const getWallet = async (userId) => {
   try {
-    const { id: userId } = req.userData
-
     let wallet = await fetchWallet(userId)
 
     if (!wallet) {
       // #TODO Log which users didn't have a wallet
       wallet = await createWallet(userId, walletConstants.INITIAL_WALLET)
+      logger.info('Created new wallet for user')
     }
+    return wallet
+  } catch (err) {
+    logger.error(`Error in getWallet ${err}`)
+    return null
+  }
+}
+
+/**
+ * Get the wallet details of user
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const getOwnWallet = async (req, res) => {
+  const { id: userId } = req.userData
+
+  try {
+    const wallet = await getWallet(userId)
+
     return res.json({
-      message: 'Wallet returned successfully',
+      message: 'Wallet returned successfully for user',
       wallet
     })
   } catch (err) {
@@ -35,15 +51,16 @@ const getUserWallet = async (req, res) => {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const getWallet = async (req, res) => {
-  try {
-    const { params: { username } = {} } = req
-    const userId = await userUtils.getUserId(username)
+const getUserWallet = async (req, res) => {
+  const { params: { username } = {} } = req
+  const userId = await userUtils.getUserId(username)
 
-    const walletData = await fetchWallet(userId)
+  try {
+    const wallet = await getWallet(userId)
+
     return res.json({
       message: 'Wallet returned successfully',
-      wallet: walletData
+      wallet
     })
   } catch (err) {
     logger.error(`Error while retriving wallet data ${err}`)
@@ -52,6 +69,6 @@ const getWallet = async (req, res) => {
 }
 
 module.exports = {
-  getUserWallet,
-  getWallet
+  getOwnWallet,
+  getUserWallet
 }

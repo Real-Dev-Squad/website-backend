@@ -31,7 +31,7 @@ const authorization = require('../middlewares/authorization')
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/', authenticate, walletController.getUserWallet)
+router.get('/', authenticate, walletController.getOwnWallet)
 
 /**
  * @swagger
@@ -66,6 +66,6 @@ router.get('/', authenticate, walletController.getUserWallet)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:username', authenticate, authorization, walletController.getWallet)
+router.get('/:username', authenticate, authorization, walletController.getUserWallet)
 
 module.exports = router
