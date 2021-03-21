@@ -69,36 +69,8 @@ const updateWallet = async (userId, currencies) => {
   }
 }
 
-/**
- * Initialize wallet for all users
- * @return {Promise<walletModel|object>}
- */
-const createWalletForAllUsers = async () => {
-  try {
-    const currencies = {
-      dineros: 1000
-    }
-    const usersData = await usersModel.get()
-    const usersWalletCreateArray = []
-    usersData.forEach(user => {
-      const { id } = user
-      usersWalletCreateArray.push(updateWallet(id, currencies))
-    })
-    const promiseValues = await Promise.all(usersWalletCreateArray)
-    const status = promiseValues.find((val) => val === false)
-    if (status) {
-      return false
-    }
-    return true
-  } catch (err) {
-    logger.error('Error updating currency to user wallets', err)
-    throw err
-  }
-}
-
 module.exports = {
   fetchWallet,
   updateWallet,
-  createWallet,
-  createWalletForAllUsers
+  createWallet
 }
