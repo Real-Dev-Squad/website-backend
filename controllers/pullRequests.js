@@ -37,7 +37,7 @@ const getUserPRs = async (req, res) => {
  */
 const getStalePRs = async (req, res) => {
   try {
-    const { data } = await githubService.fetchStalePRs()
+    const { data } = await githubService.fetchStalePRs((req.query.page) || 1)
 
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data)

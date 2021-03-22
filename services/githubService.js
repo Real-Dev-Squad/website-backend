@@ -99,18 +99,18 @@ const fetchPRsByUser = async (username) => {
 }
 
 /**
- * Fetches the oldest open N requests
+ * Fetches the oldest open 10 requests
  * @todo fetch N from query params
  */
-const fetchStalePRs = async () => {
+const fetchStalePRs = async (pageNumber) => {
   try {
     const url = getGithubURL({
       is: 'open'
     }, {
       sort: 'created',
       order: 'asc',
-      per_page: 5,
-      page: 1
+      per_page: 10,
+      page: pageNumber
     })
     return getFetch(url)
   } catch (err) {
