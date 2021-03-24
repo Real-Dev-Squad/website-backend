@@ -1,4 +1,4 @@
-const { fetchProducts, fetchProduct, addProduct, purchaseTransaction } = require('../models/crypto')
+const { fetchProducts, fetchProduct, addProduct, purchaseTransaction } = require('../models/products')
 
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
@@ -74,7 +74,7 @@ const getProduct = async (req, res) => {
 const makeTransaction = async (req, res) => {
   try {
     const { amount, items, totalQuantity } = req.body
-    const { username: userId } = req.userData
+    const { id: userId } = req.userData
     const purchaseResponse = await purchaseTransaction({ userId, amount, items, totalQuantity })
     if (purchaseResponse) {
       return res.json({

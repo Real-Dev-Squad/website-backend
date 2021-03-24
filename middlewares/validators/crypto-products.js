@@ -22,11 +22,7 @@ const createProduct = async (req, res, next) => {
 
 const purchaseTransaction = async (req, res, next) => {
   const schema = joi.object().keys({
-    amount: joi.object().keys({
-      brass: joi.number().min(0).required(),
-      silver: joi.number().min(0).required(),
-      gold: joi.number().min(0).required()
-    }).required(),
+    amount: joi.object().keys().required(),
     items: joi.array().items({
       itemId: joi.string().required(),
       name: joi.string().optional(),

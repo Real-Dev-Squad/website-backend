@@ -1,8 +1,8 @@
-const Firestore = require('@google-cloud/firestore')
 const firestore = require('../utils/firestore')
 const { checkSufficientAmountAvaliable, debitCoins } = require('../utils/crypto/transaction')
-const cryptoProductsCollection = firestore.collection('crypto-products')
-const cryptoUsersCollection = firestore.collection('crypto-users') // Users collection name to be standardized
+const productsCollection = firestore.collection('crypto-products')
+const walletsCollection = firestore.collection('wallets') // Users collection name to be standardized
+const transactionCollection = firestore.collection('transactions') // Users collection name to be standardized
 /**
  * Fetches the data of crypto product
  * @return {Promise<product|Object>}
@@ -10,7 +10,7 @@ const cryptoUsersCollection = firestore.collection('crypto-users') // Users coll
 
 const fetchProducts = async () => {
   try {
-    const snapshot = await cryptoProductsCollection.get()
+    const snapshot = await productsCollection.get()
 
     const productsData = {}
 
@@ -33,9 +33,9 @@ const fetchProducts = async () => {
 const addProduct = async (productData) => {
   try {
     const { id } = productData
-    const product = await cryptoProductsCollection.doc(id).get()
+    const product = await productsCollection.doc(id).get()
     if (!product.exists) {
-      await cryptoProductsCollection.doc(id).set(productData)
+      await productsCollection.doc(id).set(productData)
       return productData
     } else {
       return undefined
@@ -53,7 +53,7 @@ const addProduct = async (productData) => {
 
 const fetchProduct = async (productId) => {
   try {
-    const snapshot = await cryptoProductsCollection.doc(productId).get()
+    const snapshot = await productsCollection.doc(productId).get()
     if (snapshot.exists) {
       const productData = snapshot.data()
       return productData
@@ -71,26 +71,28 @@ const fetchProduct = async (productId) => {
  */
 const purchaseTransaction = async ({ userId, amount, items, totalQuantity = null }) => {
   try {
-    const userDoc = cryptoUsersCollection.doc(userId)
-    const transactionCompleted = await firestore.runTransaction(async t => {
-      const userRef = await t.get(userDoc)
-      const userData = userRef.data()
-      if (checkSufficientAmountAvaliable(amount, userData.coins)) {
-        const coins = debitCoins(amount, userData.coins)
-        await t.update(userDoc, {
-          coins: coins,
-          transactions: Firestore.FieldValue.arrayUnion({
-            items: items,
-            totalQuantity,
-            totlaAmount: amount,
-            time: Date.now()
-          })
+    const userWalletRef = await walletsCollection.where('userId', '==', userId).limit(1)
+    const isTransactionCompleted = await firestore.runTransaction(async t => {
+      const userWalletDocsArray = await t.get(userWalletRef)
+      const [userWalletDoc] = userWalletDocsArray.docs
+      const userWallet = await userWalletDoc.data()
+      if (checkSufficientAmountAvaliable(amount, userWallet.currencies)) {
+        const currencies = debitCoins(amount, userWallet.currencies)
+        const userWalletUpdateRef = walletsCollection.doc(userWalletDoc.id)
+        t.update(userWalletUpdateRef, { currencies })
+        const transactionDocument = transactionCollection.doc()
+        t.set(transactionDocument, {
+          userId,
+          amount,
+          items,
+          totalQuantity,
+          timestamp: Date.now()
         })
         return true
       }
       return false
     })
-    return transactionCompleted
+    return isTransactionCompleted
   } catch (err) {
     logger.error('Error while making purchase Transaction request \nTransaction failure:', err)
     throw err

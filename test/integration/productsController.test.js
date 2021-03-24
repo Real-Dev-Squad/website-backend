@@ -4,7 +4,7 @@ const { expect } = chai
 const chaiHttp = require('chai-http')
 
 const app = require('../../server')
-const cryptoModel = require('../../models/crypto')
+const productsModel = require('../../models/products')
 const userModel = require('../../models/users')
 const firestore = require('../../utils/firestore')
 const authService = require('../../services/authService')
@@ -12,8 +12,9 @@ const cookieName = config.get('userToken.cookieName')
 
 chai.use(chaiHttp)
 
-describe('Crypto', function () {
+describe('Products', function () {
   let jwt
+  let createdUserId
   before(async function () {
     const user = {
       first_name: 'Prakash',
@@ -25,10 +26,11 @@ describe('Crypto', function () {
     }
     // Adding user
     const { userId } = await userModel.addOrUpdate(user)
+    createdUserId = userId
     // Generatinf JWT
     jwt = authService.generateAuthToken({ userId })
   })
-  describe('GET /crypto/products', function () {
+  describe('GET /products', function () {
     afterEach(async function () {
       const product = {
         id: 'coffee',
@@ -39,12 +41,12 @@ describe('Crypto', function () {
         category: 'food',
         usage: ['To make coffee']
       }
-      await cryptoModel.addProduct(product)
+      await productsModel.addProduct(product)
     })
     it('should return empty ', function (done) {
       chai
         .request(app)
-        .get('/crypto/products')
+        .get('/products')
         .end((err, res) => {
           if (err) {
             return done()
@@ -60,7 +62,7 @@ describe('Crypto', function () {
     it('Should return product details', function (done) {
       chai
         .request(app)
-        .get('/crypto/products')
+        .get('/products')
         .end((err, res) => {
           if (err) {
             return done()
@@ -83,7 +85,7 @@ describe('Crypto', function () {
         })
     })
   })
-  describe('GET /crypto/products/:productId', function () {
+  describe('GET /products/:productId', function () {
     afterEach(async function () {
       const product = {
         id: 'milk',
@@ -94,13 +96,13 @@ describe('Crypto', function () {
         category: 'food',
         usage: ['To make coffee']
       }
-      await cryptoModel.addProduct(product)
+      await productsModel.addProduct(product)
     })
     it('should return empty ', function (done) {
       const productId = 'milk'
       chai
         .request(app)
-        .get(`/crypto/products/${productId}`)
+        .get(`/products/${productId}`)
         .end((err, res) => {
           if (err) {
             return done()
@@ -115,7 +117,7 @@ describe('Crypto', function () {
       const productId = 'milk'
       chai
         .request(app)
-        .get(`/crypto/products/${productId}`)
+        .get(`/products/${productId}`)
         .end((err, res) => {
           if (err) {
             return done()
@@ -138,11 +140,11 @@ describe('Crypto', function () {
         })
     })
   })
-  describe('POST /crypto/products', function () {
+  describe('POST /products', function () {
     it('Should show 401 unauthenticated error', function (done) {
       chai
         .request(app)
-        .post('/crypto/products')
+        .post('/products')
         .send({
           id: 'water',
           image: 'waterImage',
@@ -165,7 +167,7 @@ describe('Crypto', function () {
     it('should retrun validation error when id is not passed ', function (done) {
       chai
         .request(app)
-        .post('/crypto/products')
+        .post('/products')
         .send({
           image: 'coffeeImage',
           name: 'coffee',
@@ -189,7 +191,7 @@ describe('Crypto', function () {
     it('Should create water product', function (done) {
       chai
         .request(app)
-        .post('/crypto/products')
+        .post('/products')
         .send({
           id: 'water',
           image: 'waterImage',
@@ -224,7 +226,7 @@ describe('Crypto', function () {
     it('Should response conflict when creating water product that is already created', function (done) {
       chai
         .request(app)
-        .post('/crypto/products')
+        .post('/products')
         .send({
           id: 'water',
           image: 'waterImage',
@@ -247,29 +249,29 @@ describe('Crypto', function () {
         })
     })
   })
-  describe('POST /crypto/purchase', function () {
+  describe('POST /products/purchase', function () {
     before(async function () {
-      const userCollection = firestore.collection('crypto-users')
+      const userCollection = firestore.collection('wallets')
       await userCollection.doc('prakash').set({
-        coins: {
-          brass: 10,
-          silver: 5,
+        currencies: {
+          dineraos: 10,
+          neelam: 5,
           gold: 1
         },
-        transaction: []
+        userId: createdUserId
       })
     })
     it('Should show 401 unauthenticated error', function (done) {
       chai
         .request(app)
-        .post('/crypto/purchase')
+        .post('/products/purchase')
         .send({
           items: {
             itemid: 'coffee'
           },
           amount: {
-            brass: 3,
-            silver: 0,
+            dineraos: 3,
+            neelam: 0,
             gold: 0
           }
         })
@@ -286,7 +288,7 @@ describe('Crypto', function () {
     it('should retrun validation error when amount is not passed ', function (done) {
       chai
         .request(app)
-        .post('/crypto/purchase')
+        .post('/products/purchase')
         .send({
           items: [{
             itemid: 'coffee'
@@ -307,7 +309,7 @@ describe('Crypto', function () {
     it('Should make successful transaction', function (done) {
       chai
         .request(app)
-        .post('/crypto/purchase')
+        .post('/products/purchase')
         .send({
           items: [{
             itemId: 'coffee',
@@ -315,8 +317,8 @@ describe('Crypto', function () {
           }],
           totalQuantity: 3,
           amount: {
-            brass: 3,
-            silver: 0,
+            dineraos: 3,
+            neelam: 0,
             gold: 0
           }
         })
@@ -335,7 +337,7 @@ describe('Crypto', function () {
     it('Should response 402 payment required', function (done) {
       chai
         .request(app)
-        .post('/crypto/purchase')
+        .post('/products/purchase')
         .send({
           items: [{
             itemId: 'coffee',
@@ -343,8 +345,8 @@ describe('Crypto', function () {
           }],
           totalQuantity: 3,
           amount: {
-            brass: 10,
-            silver: 4,
+            dineraos: 10,
+            neelam: 4,
             gold: 2
           }
         })

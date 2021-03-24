@@ -1,11 +1,11 @@
 const express = require('express')
 const router = express.Router()
-const cryptoController = require('../controllers/cryptoController')
+const productsController = require('../controllers/productsController')
 const authenticate = require('../middlewares/authenticate')
-const cryptoValidator = require('../middlewares/validators/crypto-products')
+const productsValidator = require('../middlewares/validators/crypto-products')
 /**
  * @swagger
- * /crypto/products:
+ * /products:
  *   get:
  *     summary: Used to get all the crypto products data
  *     tags:
@@ -30,11 +30,11 @@ const cryptoValidator = require('../middlewares/validators/crypto-products')
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/products', cryptoController.getProducts)
+router.get('/', productsController.getProducts)
 
 /**
  * @swagger
- * /crypto/products:
+ * /products:
  *   post:
  *     summary: Write product data to db
  *     tags:
@@ -65,11 +65,11 @@ router.get('/products', cryptoController.getProducts)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/products', authenticate, cryptoValidator.createProduct, cryptoController.addNewProduct)
+router.post('/', authenticate, productsValidator.createProduct, productsController.addNewProduct)
 
 /**
  * @swagger
- * /crypto/products/{productid}:
+ * /products/{productid}:
  *   get:
  *     summary: Used to get the crypto product data
  *     tags:
@@ -94,11 +94,11 @@ router.post('/products', authenticate, cryptoValidator.createProduct, cryptoCont
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/products/:productId', cryptoController.getProduct)
+router.get('/:productId', productsController.getProduct)
 
 /**
  * @swagger
- * /crypto/purchase:
+ * /products/purchase:
  *   post:
  *     summary: enable user to make purchase.
  *     tags:
@@ -125,6 +125,6 @@ router.get('/products/:productId', cryptoController.getProduct)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/purchase', authenticate, cryptoValidator.purchaseTransaction, cryptoController.makeTransaction)
+router.post('/purchase', authenticate, productsValidator.purchaseTransaction, productsController.makeTransaction)
 
 module.exports = router
