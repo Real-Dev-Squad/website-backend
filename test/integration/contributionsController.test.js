@@ -45,7 +45,7 @@ describe('Contributions', function () {
       endsOn: '1613798827750',
       startedOn: '1613698827750',
       status: 'Active',
-      ownerId: '<app owner user id>',
+      ownerId: 'prakash',
       percentCompleted: 10,
       dependsOn: ['Depends on task 2'],
       participants: ['prakash'],
