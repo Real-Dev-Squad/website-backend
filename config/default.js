@@ -5,6 +5,8 @@
  *
  * Documentation: https://github.com/lorenwest/node-config/wiki/Configuration-Files
  */
+
+const NODE_ENV = process.env.NODE_ENV
 module.exports = {
   port: 3000,
   enableFileLogs: true,
@@ -38,7 +40,7 @@ module.exports = {
   },
 
   userToken: {
-    cookieName: 'rds-session',
+    cookieName: `rds-session-${NODE_ENV}`,
     ttl: 30 * 24 * 60 * 60, // in seconds
     refreshTtl: 180 * 24 * 60 * 60, // in seconds
     publicKey: '<publicKey>',
