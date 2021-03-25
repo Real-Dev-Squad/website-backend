@@ -35,6 +35,16 @@ const fetchMembers = async () => {
   }
 }
 
+/**
+ * Checks whether the user is a superuser
+ * @return {Boolean}
+ */
+
+const isSuperUser = (username) => {
+  return username === 'ankush'
+}
+
 module.exports = {
-  fetchMembers
+  fetchMembers,
+  isSuperUser
 }

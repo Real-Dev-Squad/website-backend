@@ -425,6 +425,111 @@ const swaggerOptions = {
             }
           }
         },
+        badges: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string'
+            },
+            description: {
+              type: 'string'
+            },
+            imgUrl: {
+              type: 'string'
+            },
+            users: {
+              type: 'array',
+              items: {
+                type: 'string'
+              }
+            }
+          }
+        },
+        userAvailable: {
+          type: 'object',
+          properties: {
+            isUsernameAvailable: {
+              type: 'boolean'
+            }
+          }
+        },
+        stocks: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string'
+            },
+            price: {
+              type: 'number'
+            },
+            quantity: {
+              type: 'number'
+            }
+          }
+        },
+        trading: {
+          type: 'object',
+          properties: {
+            stockId: {
+              type: 'string'
+            },
+            tradeType: {
+              type: 'string'
+            },
+            stockName: {
+              type: 'string'
+            },
+            quantity: {
+              type: 'number'
+            },
+            listedPrice: {
+              type: 'number'
+            },
+            totalPrice: {
+              type: 'number'
+            }
+          }
+        },
+        tradingSuccess: {
+          type: 'object',
+          properties: {
+            userBalance: {
+              type: 'number'
+            }
+          }
+        },
+        auctions: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string'
+            },
+            seller: {
+              type: 'string'
+            },
+            item_type: {
+              type: 'string'
+            },
+            quantity: {
+              type: 'number'
+            },
+            highest_bid: {
+              type: 'number'
+            },
+            highest_bidder: {
+              type: 'number'
+            },
+            start_time: {
+              type: 'number'
+            },
+            end_time: {
+              type: 'number'
+            },
+            bidders_and_bids: {
+              type: 'array'
+            }
+          }
+        },
         errors: {
           unAuthorized: {
             type: 'object',

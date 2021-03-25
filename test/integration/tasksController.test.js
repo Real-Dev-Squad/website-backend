@@ -31,7 +31,7 @@ describe('Tasks', function () {
       endsOn: '<unix timestamp>',
       startedOn: '<unix timestamp>',
       status: 'active',
-      ownerId: '<app owner user id>',
+      ownerId: 'ankur',
       percentCompleted: 10,
       dependsOn: [
         'd12',
@@ -52,7 +52,7 @@ describe('Tasks', function () {
       endsOn: '<unix timestamp>',
       startedOn: '<unix timestamp>',
       status: 'completed',
-      ownerId: '<app owner user id>',
+      ownerId: 'ankur',
       percentCompleted: 10,
       dependsOn: [
         'd12',
@@ -81,6 +81,7 @@ describe('Tasks', function () {
       chai
         .request(app)
         .post('/tasks')
+        .set('cookie', `${cookieName}=${jwt}`)
         .send({
           title: 'Test task',
           purpose: 'To Test mocha',
@@ -92,7 +93,7 @@ describe('Tasks', function () {
           endsOn: '<unix timestamp>',
           startedOn: '<unix timestamp>',
           status: 'completed',
-          ownerId: '<app owner user id>',
+          ownerId: 'ankur',
           percentCompleted: 10,
           dependsOn: [
             'd12',
@@ -110,7 +111,8 @@ describe('Tasks', function () {
           expect(res.body.message).to.equal('Task created successfully!')
           expect(res.body.id).to.be.a('string')
           expect(res.body.task).to.be.a('object')
-
+          expect(res.body.task.ownerId).to.equal('ankur')
+          expect(res.body.task.participants).to.include('ankur')
           return done()
         })
     })
@@ -127,7 +129,10 @@ describe('Tasks', function () {
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Tasks returned successfully!')
           expect(res.body.tasks).to.be.a('array')
-
+          res.body.tasks.forEach((task) => {
+            expect(task.ownerId).to.equal('ankur')
+            expect(task.participants).to.include('ankur')
+          })
           return done()
         })
     })
@@ -194,6 +199,7 @@ describe('Tasks', function () {
       chai
         .request(app)
         .patch('/tasks/' + taskId1)
+        .set('cookie', `${cookieName}=${jwt}`)
         .send({
           ownerId: 'sumit'
         })
@@ -209,6 +215,7 @@ describe('Tasks', function () {
       chai
         .request(app)
         .patch('/tasks/taskid')
+        .set('cookie', `${cookieName}=${jwt}`)
         .send({
           ownerId: 'umit'
         })
