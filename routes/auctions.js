@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
-const auctionController = require('../controllers/auctionController')
+const auction = require('../controllers/auction')
 const auctionValidator = require('../middlewares/validators/auctions')
 
 /**
@@ -33,7 +33,7 @@ const auctionValidator = require('../middlewares/validators/auctions')
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:id', auctionController.fetchAuctionById)
+router.get('/:id', auction.fetchAuctionById)
 
 /**
  * @swagger
@@ -73,7 +73,7 @@ router.get('/:id', auctionController.fetchAuctionById)
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.get('/', auctionController.fetchAvailableAuctions)
+router.get('/', auction.fetchAvailableAuctions)
 
 /**
  * @swagger
@@ -122,7 +122,7 @@ router.get('/', auctionController.fetchAvailableAuctions)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/bid/:id', authenticate, auctionValidator.placeBid, auctionController.makeNewBid)
+router.post('/bid/:id', authenticate, auctionValidator.placeBid, auction.makeNewBid)
 
 /**
  * @swagger
@@ -159,6 +159,6 @@ router.post('/bid/:id', authenticate, auctionValidator.placeBid, auctionControll
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/', authenticate, auctionValidator.createAuction, auctionController.createNewAuction)
+router.post('/', authenticate, auctionValidator.createAuction, auction.createNewAuction)
 
 module.exports = router
