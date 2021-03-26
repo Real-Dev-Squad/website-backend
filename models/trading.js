@@ -6,6 +6,7 @@ const { fetchWallet, updateWallet } = require('../models/wallets')
 const { fetchUserStocks, updateUserStocks } = require('../models/stocks')
 
 const INSUFFICIENT_FUNDS = 'Trade was not successful due to insufficient funds'
+const INSUFFICIENT_QUANTITIES = 'Trade was not successful because you do not have enough quantity'
 
 /**
  * Updates the stock Price
@@ -46,9 +47,12 @@ const trade = async (tradeData) => {
 
     switch (tradeType) {
       case 'SELL': {
+        if (!userStocks.id || userStocks.quantity < quantity) {
+          return { canUserTrade: false, errorMessage: INSUFFICIENT_QUANTITIES }
+        }
+
         quantityToUpdate = quantity + stockData.quantity
         userBalance = (quantity * stockData.price) + currencies.dinero
-        updatedCurrencyData.dinero = userBalance
         userStocksQty = userStocks.quantity - quantity
         break
       }
@@ -59,7 +63,6 @@ const trade = async (tradeData) => {
         }
         quantityToUpdate = stockData.quantity - qtyUserCanPurchase
         userBalance = currencies.dinero - (qtyUserCanPurchase * stockData.price)
-        updatedCurrencyData.dinero = userBalance
         userStocksQty = qtyUserCanPurchase
 
         initialStockValue = stockData.price
@@ -77,6 +80,7 @@ const trade = async (tradeData) => {
 
     const orderValue = qtyUserCanPurchase * stockData.price
     const stockPriceToBeUpdated = getUpdatedPrice(stockData.price)
+    updatedCurrencyData.dinero = userBalance
 
     const updatedStockData = {
       ...stockData,

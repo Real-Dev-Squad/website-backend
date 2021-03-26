@@ -3,7 +3,6 @@ const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
 const usersController = require('../controllers/usersController')
 const userValidator = require('../middlewares/validators/user')
-const { getUserStocks } = require('../controllers/stocksController')
 
 /**
  * @swagger
@@ -209,29 +208,5 @@ router.get('/isUsernameAvailable/:username', authenticate, usersController.getUs
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 router.get('/:username', usersController.getUser)
-
-/**
- * @swagger
- * /stocks/self:
- *  get:
- *   summary: Used to get all the stocks
- *   tags:
- *     - Users Stocks
- *   responses:
- *     200:
- *       description: returns stocks of the user
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/userStocks'
- *     500:
- *       description: badImplementation
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/errors/badImplementation'
- */
-
-router.get('/stocks/self', authenticate, getUserStocks)
 
 module.exports = router
