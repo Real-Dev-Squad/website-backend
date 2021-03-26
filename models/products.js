@@ -84,9 +84,11 @@ const purchaseTransaction = async ({ userId, amount, items, totalQuantity = null
         t.set(transactionDocument, {
           userId,
           amount,
-          items,
+          orders: items,
+          typeOfTransaction: 'products',
           totalQuantity,
-          timestamp: Date.now()
+          transactionId: transactionDocument.id,
+          'Date&Time': Date()
         })
         return true
       }

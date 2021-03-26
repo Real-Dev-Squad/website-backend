@@ -125,6 +125,6 @@ router.get('/:productId', productsController.getProduct)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/purchase', authenticate, productsValidator.purchaseTransaction, productsController.makeTransaction)
+router.post('/purchase', authenticate, productsValidator.purchaseTransaction, productsController.makePurchase)
 
 module.exports = router

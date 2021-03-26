@@ -5,20 +5,19 @@
  * @param {Object} available - actual amount avaliable (conins object)
  */
 function checkSufficientAmountAvaliable (debit, available) {
-  const currenciesAvailableStatus = []
+  let isCurrenciesSufficient = true
   for (const key in debit) {
     if (Object.hasOwnProperty.call(debit, key) && Object.hasOwnProperty.call(available, key)) {
       const debitCurrency = debit[key]
       const availableCurrency = available[key]
-      if (debitCurrency <= availableCurrency) {
-        currenciesAvailableStatus.push(true)
-      } else {
-        currenciesAvailableStatus.push(false)
+      if (!(debitCurrency <= availableCurrency)) {
+        isCurrenciesSufficient = false
       }
+    } else {
+      isCurrenciesSufficient = false
     }
   }
-  const status = !(currenciesAvailableStatus.some((val) => val === false))
-  return status
+  return isCurrenciesSufficient
 }
 
 /**

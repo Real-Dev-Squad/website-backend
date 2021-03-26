@@ -38,7 +38,7 @@ const addNewProduct = async (req, res) => {
     }
     return res.boom.conflict(`Product with id "${productData.id}" already exist`)
   } catch (err) {
-    logger.error(`Error while adding products in crypto ${err}`)
+    logger.error(`Error while adding products ${err}`)
     return res.boom.badImplementation(ERROR_MESSAGE)
   }
 }
@@ -71,19 +71,19 @@ const getProduct = async (req, res) => {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const makeTransaction = async (req, res) => {
+const makePurchase = async (req, res) => {
   try {
     const { amount, items, totalQuantity } = req.body
     const { id: userId } = req.userData
     const purchaseResponse = await purchaseTransaction({ userId, amount, items, totalQuantity })
     if (purchaseResponse) {
       return res.json({
-        message: 'Transaction Successful.'
+        message: 'Purchase successful.'
       })
     }
     return res.boom.paymentRequired('Insufficient coins.')
   } catch (err) {
-    logger.error(`Error while retriving products ${err}`)
+    logger.error(`Error while purchasing products ${err}`)
     return res.boom.badImplementation(ERROR_MESSAGE)
   }
 }
@@ -92,5 +92,5 @@ module.exports = {
   getProducts,
   addNewProduct,
   getProduct,
-  makeTransaction
+  makePurchase
 }
