@@ -88,7 +88,7 @@ const purchaseTransaction = async ({ userId, amount, items, totalQuantity = null
           typeOfTransaction: 'products',
           totalQuantity,
           transactionId: transactionDocument.id,
-          'Date&Time': Date()
+          timestamp: Date.now()
         })
         return true
       }

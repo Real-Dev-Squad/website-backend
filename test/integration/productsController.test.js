@@ -330,7 +330,7 @@ describe('Products', function () {
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body).to.contain.keys('message')
-          expect(res.body.message).to.equal('Transaction Successful.')
+          expect(res.body.message).to.equal('Purchase successful.')
           return done()
         })
     })
