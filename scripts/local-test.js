@@ -4,11 +4,10 @@ const config = require('config')
 
 // check whether github credentials are not falsy
 if (
-  !config.githubOauth ||
-  !config.githubOauth.clientId ||
-  !config.githubOauth.clientSecret
+  config.githubOauth.clientId === '<clientId>' ||
+  config.githubOauth.clientSecret === '<clientSecret>'
 ) {
-  throw new Error('Github credentials are not properly set')
+  throw new Error('Github credentials are not set.')
 } else {
   // eslint-disable-next-line no-console
   console.log('Github cridentials are properly set.')
