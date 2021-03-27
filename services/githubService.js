@@ -1,6 +1,5 @@
 const { fetch } = require('../utils/fetch')
 const { getGitHubUsername } = require('./userService')
-// const { fetchUser } = require('../models/users')
 /**
  * Extracts only the necessary details required from the object returned by Github API
  * @param data {Object} - Object returned by Github API

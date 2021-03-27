@@ -31,7 +31,6 @@
     "morgan": "~1.10.0",
     "passport": "^0.4.1",
     "passport-github2": "^0.1.12",
-    "redis": "^3.0.2",
     "swagger-jsdoc": "^6.0.6",
     "swagger-ui-express": "^4.1.6",
     "winston": "^3.3.3"

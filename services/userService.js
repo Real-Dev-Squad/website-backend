@@ -29,6 +29,7 @@ const getGitHubUsername = async (RDSUsername) => {
   })
   if (userExists) {
     cacheUser(user)
+    return user.github_id
   }
   return null
 }
