@@ -520,7 +520,7 @@
                 }
             }
         },
-        "responses": {
+        "responses1": {
             "unAuthorized": {
                 "description": "User is not authorized to access the resource",
                 "content": {
