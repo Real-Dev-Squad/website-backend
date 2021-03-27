@@ -2,8 +2,11 @@
  * This file contains wrapper functions to interact with the DB.
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
+const walletConstants = require('../constants/wallets')
 
 const firestore = require('../utils/firestore')
+const { fetchWallet, createWallet } = require('../models/wallets')
+
 const userModel = firestore.collection('users')
 
 /**
@@ -140,9 +143,26 @@ const setIncompleteUserDetails = async (userId) => {
   return {}
 }
 
+/**
+ * Once the user is fully signed up, initialize other
+ * stuff needed for their account
+ *
+ * @param userId { string }: User id
+ */
+const initializeUser = async (userId) => {
+  // Create wallet and give them initial amount
+  const userWallet = await fetchWallet(userId)
+  if (!userWallet) {
+    await createWallet(userId, walletConstants.INITIAL_WALLET)
+  }
+
+  return true
+}
+
 module.exports = {
   addOrUpdate,
   fetchUsers,
   fetchUser,
-  setIncompleteUserDetails
+  setIncompleteUserDetails,
+  initializeUser
 }
