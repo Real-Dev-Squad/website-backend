@@ -60,9 +60,7 @@
                     "links": {
                         "type": "array",
                         "items": {
-                            "link1": {
-                                "type": "string"
-                            }
+                            "type": "string"
                         }
                     },
                     "endsOn": {
@@ -83,17 +81,13 @@
                     "dependsOn": {
                         "type": "array",
                         "items": {
-                            "taskid": {
-                                "type": "string"
-                            }
+                            "type": "string"
                         }
                     },
                     "participants": {
                         "type": "array",
                         "items": {
-                            "userid": {
-                                "type": "string"
-                            }
+                            "type": "string"
                         }
                     },
                     "completionAward": {
@@ -329,7 +323,9 @@
                     },
                     "participants": {
                         "type": "array",
-                        "items": []
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 }
             },
@@ -356,11 +352,15 @@
                     },
                     "labels": {
                         "type": "array",
-                        "items": []
+                        "items": {
+                            "type": "string"
+                        }
                     },
                     "assignees": {
                         "type": "array",
-                        "items": []
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 }
             },
@@ -518,75 +518,110 @@
                         "type": "array"
                     }
                 }
+            }
+        },
+        "responses": {
+            "unAuthorized": {
+                "description": "User is not authorized to access the resource",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode": {
+                                    "type": "integer"
+                                },
+                                "error": {
+                                    "type": "string"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
             },
-            "errors": {
-                "unAuthorized": {
-                    "type": "object",
-                    "properties": {
-                        "statusCode": {
-                            "type": "integer"
-                        },
-                        "error": {
-                            "type": "string"
-                        },
-                        "message": {
-                            "type": "string"
+            "notFound": {
+                "description": "Resource not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode": {
+                                    "type": "integer"
+                                },
+                                "error": {
+                                    "type": "string"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
-                },
-                "notFound": {
-                    "type": "object",
-                    "properties": {
-                        "statusCode": {
-                            "type": "integer"
-                        },
-                        "error": {
-                            "type": "string"
-                        },
-                        "message": {
-                            "type": "string"
+                }
+            },
+            "forbidden": {
+                "description": "User is forbidden to access the resource",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode": {
+                                    "type": "integer"
+                                },
+                                "error": {
+                                    "type": "string"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
-                },
-                "forbidden": {
-                    "type": "object",
-                    "properties": {
-                        "statusCode": {
-                            "type": "integer"
-                        },
-                        "error": {
-                            "type": "string"
-                        },
-                        "message": {
-                            "type": "string"
+                }
+            },
+            "badImplementation": {
+                "description": "Server Error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode": {
+                                    "type": "integer"
+                                },
+                                "error": {
+                                    "type": "string"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
-                },
-                "badImplementation": {
-                    "type": "object",
-                    "properties": {
-                        "statusCode": {
-                            "type": "integer"
-                        },
-                        "error": {
-                            "type": "string"
-                        },
-                        "message": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "serverUnavailable": {
-                    "type": "object",
-                    "properties": {
-                        "statusCode": {
-                            "type": "integer"
-                        },
-                        "error": {
-                            "type": "string"
-                        },
-                        "message": {
-                            "type": "string"
+                }
+            },
+            "serverUnavailable": {
+                "description": "Service unavailable",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "statusCode": {
+                                    "type": "integer"
+                                },
+                                "error": {
+                                    "type": "string"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -833,7 +868,9 @@
                         "in": "query",
                         "name": "code",
                         "required": true,
-                        "type": "string",
+                        "schema": {
+                            "type": "string"
+                        },
                         "description": "Temporary code returned by GitHub Oauth"
                     }
                 ],
@@ -842,11 +879,15 @@
                         "description": "Redirects to the UI on successful login",
                         "headers": {
                             "Cookie": {
-                                "type": "string",
+                                "schema": {
+                                    "type": "string"
+                                },
                                 "description": "Cookie containing authentication token"
                             },
                             "Location": {
-                                "type": "string",
+                                "schema": {
+                                    "type": "string"
+                                },
                                 "description": "Redirection URL"
                             }
                         }
