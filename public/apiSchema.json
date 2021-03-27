@@ -543,23 +543,16 @@
                 }
             },
             "notFound": {
-                "description": "Resource not found",
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "statusCode": {
-                                    "type": "integer"
-                                },
-                                "error": {
-                                    "type": "string"
-                                },
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
-                        }
+                "type": "object",
+                "properties": {
+                    "statusCode": {
+                        "type": "integer"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
                     }
                 }
             },
