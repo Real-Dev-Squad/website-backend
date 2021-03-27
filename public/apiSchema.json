@@ -2,7 +2,7 @@
     "openapi": "3.0.1",
     "info": {
         "version": "1.0.0",
-        "title": "RDS API documentation",
+        "title": "Real Dev Squad API",
         "description": "This is documentation for Real Dev Squad's API. Find out more about Real dev squad at [http://realdevsquad.com](http://realdevsquad.com)",
         "contact": {
             "name": "Real Dev Squad",
