@@ -27,6 +27,7 @@
     "joi": "^17.4.0",
     "jsdoc": "^3.6.6",
     "jsonwebtoken": "^8.5.1",
+    "memory-cache": "^0.2.0",
     "morgan": "~1.10.0",
     "passport": "^0.4.1",
     "passport-github2": "^0.1.12",

@@ -1,28 +1,38 @@
-const {
-  getCache
-} = require('./cacheService')
+const { set, get } = require('./cacheService')
 const {
   fetchUser
 } = require('../models/users')
 
-const getGitHubUsername = async (RDSUsername) => {
-  return Promise.any(
-    getCache(RDSUsername),
-    fetchUser({
-      username: RDSUsername
-    })
-  )
+const cacheUser = (user) => {
+  if (!user) {
+    return false
+  }
+  const userObject = {
+    github_id: user.github_id,
+    id: user.id,
+    username: user.username
+  }
+  set(user.id, userObject)
+  set(user.github_id, userObject)
+  set(user.username, userObject)
+  return true
 }
 
-const getRDSUsername = async (gitHubUsername) => {
-  return Promise.any(
-    getCache(gitHubUsername),
-    () => 'GitHub_Username'
-  )
-  // ToDo: Define getGitHubUsernameFromDatabase(gitHubUsername)
+const getGitHubUsername = async (RDSUsername) => {
+  const gitHubUserName = await get(RDSUsername)
+  if (gitHubUserName) {
+    return gitHubUserName
+  }
+
+  const { userExists, user } = fetchUser({
+    username: RDSUsername
+  })
+  if (userExists) {
+    cacheUser(user)
+  }
+  return null
 }
 
 module.exports = {
-  getGitHubUsername,
-  getRDSUsername
+  getGitHubUsername
 }
