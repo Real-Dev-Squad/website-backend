@@ -53,14 +53,14 @@ const addOrUpdate = async (userData, userId = null) => {
 
 /**
  * Fetches the data about our users
- * @param query { Object }: Filter for users data
+ * @param query { Object }: Filter for users data, {userType: string<'new'|'blocked'|'member'>}
  * @return {Promise<userModel|Array>}
  */
 const fetchUsers = async (query) => {
   const allowedUserTypes = ['new', 'blocked', 'member']
   let snapshot
   try {
-    if (typeof query.userType !== 'undefined' && allowedUserTypes.includes(query.userType)) {
+    if (query.userType && allowedUserTypes.includes(query.userType)) {
       snapshot = await userModel
         .where('userType', '==', query.userType)
         .limit(parseInt(query.size) || 100)
