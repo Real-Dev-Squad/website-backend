@@ -1,0 +1,3758 @@
+{
+	"info": {
+		"_postman_id": "b24ef60b-a280-4e9b-ba84-483a9d7a7d21",
+		"name": "Real Dev Squad API",
+		"description": "This is documentation for Real Dev Squad's API. Find out more about Real dev squad at [http://realdevsquad.com](http://realdevsquad.com)\n\n<img src=\"https://members.realdevsquad.com/images/Real-Dev-Squad@1x.png\" alt=\"Real Dev Squad Logo\" width=\"300\" height=\"300\"/>\n\nContact Support:\n Name: Real Dev Squad",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auctions",
+			"item": [
+				{
+					"name": "Get all the active (ongoing) auctions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auctions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auctions"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "serverUnavailable",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions"
+									]
+								}
+							},
+							"status": "Service Unavailable",
+							"code": 503,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "notFound",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "All ongoing auctions",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"message\": \"Auctions returned successfully!\",\n \"auctions\": [\n  {\n   \"id\": \"sint adipisicing exercitation eu\",\n   \"seller\": \"Excepteur Lorem sed\",\n   \"item_type\": \"nisi et\",\n   \"quantity\": -43693738.50292382,\n   \"highest_bid\": -20577137.53361164,\n   \"highest_bidder\": 77846864.21290594,\n   \"start_time\": 6141937.593973562,\n   \"end_time\": 13280509.112506509\n  },\n  {\n   \"id\": \"dolore et ullamco ex ea\",\n   \"seller\": \"in pariatur\",\n   \"item_type\": \"amet \",\n   \"quantity\": 18222926.925988898,\n   \"highest_bid\": 79875292.51654908,\n   \"highest_bidder\": 90324030.8583309,\n   \"start_time\": -16904789.97736004,\n   \"end_time\": -91782218.61217679\n  }\n ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Creates a new auction",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auctions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auctions"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "New auction",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions"
+									]
+								}
+							},
+							"status": "No Content",
+							"code": 204,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"message\": \"Auction created successfully!\",\n \"id\": \"aute minim elit ex\"\n}"
+						},
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "unAuthorized",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Fetches auction details for given auctionId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auctions/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auctions",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Auction details",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"id\": \"veniam id irure\",\n \"seller\": \"nulla\",\n \"item_type\": \"cillum\",\n \"quantity\": -22789234.007661104,\n \"highest_bid\": -60632372.41626886,\n \"highest_bidder\": 18969500.217589274,\n \"start_time\": -316075.0811971128,\n \"end_time\": 17417086.398938954\n}"
+						},
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "notFound",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Makes a new bid given auctionId",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auctions/bid/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auctions",
+								"bid",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions/bid/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions",
+										"bid",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "New bid",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions/bid/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions",
+										"bid",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "No Content",
+							"code": 204,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"message\": \"Successfully placed bid!\",\n \"id\": \"Duis i\"\n}"
+						},
+						{
+							"name": "notFound",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions/bid/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions",
+										"bid",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "forbidden",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions/bid/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions",
+										"bid",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "unAuthorized",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auctions/bid/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auctions",
+										"bid",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Challenges",
+			"item": [
+				{
+					"name": "Used to get all the challenges",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/challenges",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challenges"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "serverUnavailable",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/challenges",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"challenges"
+									]
+								}
+							},
+							"status": "Service Unavailable",
+							"code": 503,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Return challenges",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/challenges",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"challenges"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"id\": \"cupidatat culpa pa\",\n \"title\": \"esse velit nisi\",\n \"level\": \"enim ea\",\n \"start_date\": \"amet ullamco\",\n \"end_date\": \"sunt aliquip nulla laborum\",\n \"is_active\": false,\n \"participants\": [\n  \"nulla officia fugiat sint\",\n  \"ullamco in ut\"\n ]\n}"
+						},
+						{
+							"name": "No challenges found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/challenges",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"challenges"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Post new challenge",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/challenges",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challenges"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Post challenge",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/challenges",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"challenges"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"id\": \"dolore ipsum dolore\",\n \"title\": \"irure dolore qui\",\n \"level\": \"laborum tempo\",\n \"start_date\": \"non dolor do\",\n \"end_date\": \"de\",\n \"is_active\": false,\n \"participants\": [\n  \"sunt ex mollit\",\n  \"dolore sint elit\"\n ]\n}"
+						},
+						{
+							"name": "serverUnavailable",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/challenges",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"challenges"
+									]
+								}
+							},
+							"status": "Service Unavailable",
+							"code": 503,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Unable to add challenge",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/challenges",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"challenges"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Subscribe user to challenge",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/challenges/subscribe",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challenges",
+								"subscribe"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Subscribed sucessfully",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/challenges/subscribe",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"challenges",
+										"subscribe"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"message\": \"User has subscribed to challenge\"\n}"
+						},
+						{
+							"name": "serverUnavailable",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/challenges/subscribe",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"challenges",
+										"subscribe"
+									]
+								}
+							},
+							"status": "Service Unavailable",
+							"code": 503,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Unable to add challenge",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/challenges/subscribe",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"challenges",
+										"subscribe"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Healthcheck",
+			"item": [
+				{
+					"name": "Use to check health status of the server.",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/healthcheck",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"healthcheck"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Server uptime status",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/healthcheck",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"healthcheck"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"uptime\": -92756192.43969402\n}"
+						}
+					]
+				},
+				{
+					"name": "Sample route to test authentication middleware.",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/healthcheck/v2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"healthcheck",
+								"v2"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Unauthorized",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/healthcheck/v2",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"healthcheck",
+										"v2"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Server uptime status",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/healthcheck/v2",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"healthcheck",
+										"v2"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"uptime\": -92756192.43969402\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Members",
+			"item": [
+				{
+					"name": "Gets details of all the Real Dev Squad members",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/members",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"members"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/members",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"members"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Details of all the RDS members",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/members",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"members"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"username\": \"tempor culpa cillum sunt consectetur\",\n \"first_name\": \"dolor do in\",\n \"last_name\": \"nisi ut Excepteur reprehenderit\",\n \"yoe\": 68143585.27701172,\n \"company\": \"eu sint veniam nisi\",\n \"designation\": \"esse veniam\",\n \"img\": \"irure cillum consequat\",\n \"github_display_name\": \"labore esse exerc\",\n \"github_id\": \"commodo sed\",\n \"linkedin_id\": \"exercitation sunt\",\n \"twitter_id\": \"enim Excepteur labore velit\",\n \"instagram_id\": \"aliquip adipisicing\",\n \"site\": \"laborum ipsum eiusmod in dolore\",\n \"isMember\": true,\n \"tokens\": {}\n}"
+						}
+					]
+				},
+				{
+					"name": "Gets details of idle members of the Real Dev Squad",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/members/idle",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"members",
+								"idle"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/members/idle",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"members",
+										"idle"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Details of inactive/idle members of the RDS members",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/members/idle",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"members",
+										"idle"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"username\": \"tempor culpa cillum sunt consectetur\",\n \"first_name\": \"dolor do in\",\n \"last_name\": \"nisi ut Excepteur reprehenderit\",\n \"yoe\": 68143585.27701172,\n \"company\": \"eu sint veniam nisi\",\n \"designation\": \"esse veniam\",\n \"img\": \"irure cillum consequat\",\n \"github_display_name\": \"labore esse exerc\",\n \"github_id\": \"commodo sed\",\n \"linkedin_id\": \"exercitation sunt\",\n \"twitter_id\": \"enim Excepteur labore velit\",\n \"instagram_id\": \"aliquip adipisicing\",\n \"site\": \"laborum ipsum eiusmod in dolore\",\n \"isMember\": true,\n \"tokens\": {}\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Pull Requests",
+			"item": [
+				{
+					"name": "Latest 10 Pull Requests in Real Dev Squad",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pullrequests/open",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pullrequests",
+								"open"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pullrequests/open",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pullrequests",
+										"open"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Pull Requests",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pullrequests/open",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pullrequests",
+										"open"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"message\": \"Open PRs\",\n \"pullRequests\": [\n  {\n   \"title\": \"reprehenderit dolore sunt\",\n   \"url\": \"labore quis\",\n   \"state\": \"dolor irure et elit\",\n   \"createdAt\": \"proident\",\n   \"updatedAt\": \"voluptate anim irure\",\n   \"readyForReview\": true,\n   \"labels\": [\n    \"elit\",\n    \"minim in quis dolor\"\n   ],\n   \"assignees\": [\n    \"eu qui\",\n    \"dolor proident\"\n   ]\n  },\n  {\n   \"title\": \"in deserunt\",\n   \"url\": \"enim Excepteur\",\n   \"state\": \"Lorem Excepteur\",\n   \"createdAt\": \"enim\",\n   \"updatedAt\": \"dolore ipsum\",\n   \"readyForReview\": false,\n   \"labels\": [\n    \"adipisicing Lorem\",\n    \"velit in tempor\"\n   ],\n   \"assignees\": [\n    \"ut tempor elit cillum aute\",\n    \"ut quis\"\n   ]\n  }\n ]\n}"
+						}
+					]
+				},
+				{
+					"name": "All open Pull Requests in Real Dev Squad",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pullrequests/stale",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pullrequests",
+								"stale"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pullrequests/stale",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pullrequests",
+										"stale"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Pull Requests",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pullrequests/stale",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pullrequests",
+										"stale"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"message\": \"Stale PRs\",\n \"pullRequests\": [\n  {\n   \"title\": \"aute\",\n   \"url\": \"aliquip non in\",\n   \"state\": \"adipisicing nulla tempor\",\n   \"createdAt\": \"aliqua\",\n   \"updatedAt\": \"velit pariatur sunt Excepteur\",\n   \"readyForReview\": false,\n   \"labels\": [\n    \"laboris nostrud Ut\",\n    \"pariatur deserunt in\"\n   ],\n   \"assignees\": [\n    \"ut nulla esse in in\",\n    \"ut co\"\n   ]\n  },\n  {\n   \"title\": \"fugiat e\",\n   \"url\": \"et a\",\n   \"state\": \"ea eu nisi\",\n   \"createdAt\": \"ulla\",\n   \"updatedAt\": \"in consequat cillum quis\",\n   \"readyForReview\": true,\n   \"labels\": [\n    \"dolore cillum\",\n    \"minim sed officia anim\"\n   ],\n   \"assignees\": [\n    \"amet sed\",\n    \"dolor labore\"\n   ]\n  }\n ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Pull Requests by a user in Real Dev Squad",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pullrequests/user/:username",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pullrequests",
+								"user",
+								":username"
+							],
+							"variable": [
+								{
+									"key": "username"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pullrequests/user/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pullrequests",
+										"user",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Pull Requests",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pullrequests/user/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pullrequests",
+										"user",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"message\": \"Pull requests returned successfully!\",\n \"pullRequests\": [\n  {\n   \"title\": \"consequat aute exercit\",\n   \"url\": \"laborum ea\",\n   \"state\": \"ut incididunt min\",\n   \"createdAt\": \"nisi officia cupidatat velit\",\n   \"updatedAt\": \"pariatur laborum\",\n   \"readyForReview\": false,\n   \"labels\": [\n    \"veniam Lorem eiusmod\",\n    \"nisi velit\"\n   ],\n   \"assignees\": [\n    \"dolore ut dolor exercitation\",\n    \"Duis cupi\"\n   ]\n  },\n  {\n   \"title\": \"sint Lorem\",\n   \"url\": \"occaecat\",\n   \"state\": \"aliquip labore\",\n   \"createdAt\": \"minim cons\",\n   \"updatedAt\": \"dolore aute ullamco occaecat ex\",\n   \"readyForReview\": true,\n   \"labels\": [\n    \"aute Excepteur ut\",\n    \"id consectetur veniam ut\"\n   ],\n   \"assignees\": [\n    \"reprehenderit occaecat aliqua labore cillum\",\n    \"elit\"\n   ]\n  }\n ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Stocks",
+			"item": [
+				{
+					"name": "Used to get all the stocks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/stocks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stocks"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/stocks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"stocks"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "returns stocks",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/stocks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"stocks"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"name\": \"veniam sunt\",\n \"price\": -21199603.81999965,\n \"quantity\": -7969690.923818767\n}"
+						}
+					]
+				},
+				{
+					"name": "Used to create new stock",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"veniam sunt\",\n    \"price\": -21199603.81999965,\n    \"quantity\": -7969690.923818767\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/stocks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stocks"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "returns newly created stock",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"veniam sunt\",\n    \"price\": -21199603.81999965,\n    \"quantity\": -7969690.923818767\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/stocks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"stocks"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"name\": \"veniam sunt\",\n \"price\": -21199603.81999965,\n \"quantity\": -7969690.923818767\n}"
+						},
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"veniam sunt\",\n    \"price\": -21199603.81999965,\n    \"quantity\": -7969690.923818767\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/stocks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"stocks"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "unAuthorized",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"veniam sunt\",\n    \"price\": -21199603.81999965,\n    \"quantity\": -7969690.923818767\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/stocks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"stocks"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Tasks",
+			"item": [
+				{
+					"name": "Used to get all the tasks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/tasks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "returns tasks",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/tasks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"title\": \"fugiat qui\",\n \"purpose\": \"cu\",\n \"featureUrl\": \"tempor consectetur\",\n \"type\": \"adipisicing sed\",\n \"links\": [\n  \"culpa \",\n  \"mollit ea dolor\"\n ],\n \"endsOn\": \"et eu elit eiusmod\",\n \"startedOn\": \"ex Lorem\",\n \"status\": \"et officia eiusmod\",\n \"ownerId\": \"in ex magna ullamco\",\n \"percentCompleted\": -81510971.494228,\n \"dependsOn\": [\n  \"eiusmod o\",\n  \"do Duis dolore\"\n ],\n \"participants\": [\n  \"deserunt\",\n  \"eu ad pariatur\"\n ],\n \"completionAward\": {\n  \"gold\": -87668349.75377966,\n  \"silver\": -33987335.523273684,\n  \"bronze\": -41703863.6721426\n },\n \"lossRate\": {\n  \"gold\": -72623697.41496544,\n  \"silver\": -72901433.76342049,\n  \"bronze\": 72684269.11514392\n },\n \"isNoteworthy\": false\n}"
+						},
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/tasks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Used to create new task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Lorem laborum\",\n    \"purpose\": \"non sed aute labore\",\n    \"featureUrl\": \"\",\n    \"type\": \"et cupidatat cillum eiusmod\",\n    \"links\": [\n        \"est\",\n        \"ea nulla sunt\"\n    ],\n    \"endsOn\": \"dolor aliquip q\",\n    \"startedOn\": \"Duis est adipisicing Ut\",\n    \"status\": \"elit magna non nisi Duis\",\n    \"ownerId\": \"proident adipisicing culpa cupidatat\",\n    \"percentCompleted\": 32238692.075454265,\n    \"dependsOn\": [\n        \"fugiat nostrud aliqua occaecat\",\n        \"mollit eiusmod deserunt\"\n    ],\n    \"participants\": [\n        \"eiusmod sunt\",\n        \"id ad velit amet\"\n    ],\n    \"completionAward\": {\n        \"gold\": 86679421.5494909,\n        \"silver\": 15672853.041856036,\n        \"bronze\": 50545057.09029961\n    },\n    \"lossRate\": {\n        \"gold\": 96550368.73891002,\n        \"silver\": 88515882.42522156,\n        \"bronze\": 75906877.99545747\n    },\n    \"isNoteworthy\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/tasks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Lorem laborum\",\n    \"purpose\": \"non sed aute labore\",\n    \"featureUrl\": \"\",\n    \"type\": \"et cupidatat cillum eiusmod\",\n    \"links\": [\n        \"est\",\n        \"ea nulla sunt\"\n    ],\n    \"endsOn\": \"dolor aliquip q\",\n    \"startedOn\": \"Duis est adipisicing Ut\",\n    \"status\": \"elit magna non nisi Duis\",\n    \"ownerId\": \"proident adipisicing culpa cupidatat\",\n    \"percentCompleted\": 32238692.075454265,\n    \"dependsOn\": [\n        \"fugiat nostrud aliqua occaecat\",\n        \"mollit eiusmod deserunt\"\n    ],\n    \"participants\": [\n        \"eiusmod sunt\",\n        \"id ad velit amet\"\n    ],\n    \"completionAward\": {\n        \"gold\": 86679421.5494909,\n        \"silver\": 15672853.041856036,\n        \"bronze\": 50545057.09029961\n    },\n    \"lossRate\": {\n        \"gold\": 96550368.73891002,\n        \"silver\": 88515882.42522156,\n        \"bronze\": 75906877.99545747\n    },\n    \"isNoteworthy\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/tasks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "returns newly created task",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Lorem laborum\",\n    \"purpose\": \"non sed aute labore\",\n    \"featureUrl\": \"\",\n    \"type\": \"et cupidatat cillum eiusmod\",\n    \"links\": [\n        \"est\",\n        \"ea nulla sunt\"\n    ],\n    \"endsOn\": \"dolor aliquip q\",\n    \"startedOn\": \"Duis est adipisicing Ut\",\n    \"status\": \"elit magna non nisi Duis\",\n    \"ownerId\": \"proident adipisicing culpa cupidatat\",\n    \"percentCompleted\": 32238692.075454265,\n    \"dependsOn\": [\n        \"fugiat nostrud aliqua occaecat\",\n        \"mollit eiusmod deserunt\"\n    ],\n    \"participants\": [\n        \"eiusmod sunt\",\n        \"id ad velit amet\"\n    ],\n    \"completionAward\": {\n        \"gold\": 86679421.5494909,\n        \"silver\": 15672853.041856036,\n        \"bronze\": 50545057.09029961\n    },\n    \"lossRate\": {\n        \"gold\": 96550368.73891002,\n        \"silver\": 88515882.42522156,\n        \"bronze\": 75906877.99545747\n    },\n    \"isNoteworthy\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/tasks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"title\": \"Lorem laborum\",\n \"purpose\": \"non sed aute labore\",\n \"featureUrl\": \"\",\n \"type\": \"et cupidatat cillum eiusmod\",\n \"links\": [\n  \"est\",\n  \"ea nulla sunt\"\n ],\n \"endsOn\": \"dolor aliquip q\",\n \"startedOn\": \"Duis est adipisicing Ut\",\n \"status\": \"elit magna non nisi Duis\",\n \"ownerId\": \"proident adipisicing culpa cupidatat\",\n \"percentCompleted\": 32238692.075454265,\n \"dependsOn\": [\n  \"fugiat nostrud aliqua occaecat\",\n  \"mollit eiusmod deserunt\"\n ],\n \"participants\": [\n  \"eiusmod sunt\",\n  \"id ad velit amet\"\n ],\n \"completionAward\": {\n  \"gold\": 86679421.5494909,\n  \"silver\": 15672853.041856036,\n  \"bronze\": 50545057.09029961\n },\n \"lossRate\": {\n  \"gold\": 96550368.73891002,\n  \"silver\": 88515882.42522156,\n  \"bronze\": 75906877.99545747\n },\n \"isNoteworthy\": true\n}"
+						}
+					]
+				},
+				{
+					"name": "Used to update task details",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Lorem laborum\",\n    \"purpose\": \"non sed aute labore\",\n    \"featureUrl\": \"\",\n    \"type\": \"et cupidatat cillum eiusmod\",\n    \"links\": [\n        \"est\",\n        \"ea nulla sunt\"\n    ],\n    \"endsOn\": \"dolor aliquip q\",\n    \"startedOn\": \"Duis est adipisicing Ut\",\n    \"status\": \"elit magna non nisi Duis\",\n    \"ownerId\": \"proident adipisicing culpa cupidatat\",\n    \"percentCompleted\": 32238692.075454265,\n    \"dependsOn\": [\n        \"fugiat nostrud aliqua occaecat\",\n        \"mollit eiusmod deserunt\"\n    ],\n    \"participants\": [\n        \"eiusmod sunt\",\n        \"id ad velit amet\"\n    ],\n    \"completionAward\": {\n        \"gold\": 86679421.5494909,\n        \"silver\": 15672853.041856036,\n        \"bronze\": 50545057.09029961\n    },\n    \"lossRate\": {\n        \"gold\": 96550368.73891002,\n        \"silver\": 88515882.42522156,\n        \"bronze\": 75906877.99545747\n    },\n    \"isNoteworthy\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/tasks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "notFound",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Lorem laborum\",\n    \"purpose\": \"non sed aute labore\",\n    \"featureUrl\": \"\",\n    \"type\": \"et cupidatat cillum eiusmod\",\n    \"links\": [\n        \"est\",\n        \"ea nulla sunt\"\n    ],\n    \"endsOn\": \"dolor aliquip q\",\n    \"startedOn\": \"Duis est adipisicing Ut\",\n    \"status\": \"elit magna non nisi Duis\",\n    \"ownerId\": \"proident adipisicing culpa cupidatat\",\n    \"percentCompleted\": 32238692.075454265,\n    \"dependsOn\": [\n        \"fugiat nostrud aliqua occaecat\",\n        \"mollit eiusmod deserunt\"\n    ],\n    \"participants\": [\n        \"eiusmod sunt\",\n        \"id ad velit amet\"\n    ],\n    \"completionAward\": {\n        \"gold\": 86679421.5494909,\n        \"silver\": 15672853.041856036,\n        \"bronze\": 50545057.09029961\n    },\n    \"lossRate\": {\n        \"gold\": 96550368.73891002,\n        \"silver\": 88515882.42522156,\n        \"bronze\": 75906877.99545747\n    },\n    \"isNoteworthy\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/tasks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Lorem laborum\",\n    \"purpose\": \"non sed aute labore\",\n    \"featureUrl\": \"\",\n    \"type\": \"et cupidatat cillum eiusmod\",\n    \"links\": [\n        \"est\",\n        \"ea nulla sunt\"\n    ],\n    \"endsOn\": \"dolor aliquip q\",\n    \"startedOn\": \"Duis est adipisicing Ut\",\n    \"status\": \"elit magna non nisi Duis\",\n    \"ownerId\": \"proident adipisicing culpa cupidatat\",\n    \"percentCompleted\": 32238692.075454265,\n    \"dependsOn\": [\n        \"fugiat nostrud aliqua occaecat\",\n        \"mollit eiusmod deserunt\"\n    ],\n    \"participants\": [\n        \"eiusmod sunt\",\n        \"id ad velit amet\"\n    ],\n    \"completionAward\": {\n        \"gold\": 86679421.5494909,\n        \"silver\": 15672853.041856036,\n        \"bronze\": 50545057.09029961\n    },\n    \"lossRate\": {\n        \"gold\": 96550368.73891002,\n        \"silver\": 88515882.42522156,\n        \"bronze\": 75906877.99545747\n    },\n    \"isNoteworthy\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/tasks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "no content",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Lorem laborum\",\n    \"purpose\": \"non sed aute labore\",\n    \"featureUrl\": \"\",\n    \"type\": \"et cupidatat cillum eiusmod\",\n    \"links\": [\n        \"est\",\n        \"ea nulla sunt\"\n    ],\n    \"endsOn\": \"dolor aliquip q\",\n    \"startedOn\": \"Duis est adipisicing Ut\",\n    \"status\": \"elit magna non nisi Duis\",\n    \"ownerId\": \"proident adipisicing culpa cupidatat\",\n    \"percentCompleted\": 32238692.075454265,\n    \"dependsOn\": [\n        \"fugiat nostrud aliqua occaecat\",\n        \"mollit eiusmod deserunt\"\n    ],\n    \"participants\": [\n        \"eiusmod sunt\",\n        \"id ad velit amet\"\n    ],\n    \"completionAward\": {\n        \"gold\": 86679421.5494909,\n        \"silver\": 15672853.041856036,\n        \"bronze\": 50545057.09029961\n    },\n    \"lossRate\": {\n        \"gold\": 96550368.73891002,\n        \"silver\": 88515882.42522156,\n        \"bronze\": 75906877.99545747\n    },\n    \"isNoteworthy\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/tasks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks"
+									]
+								}
+							},
+							"status": "No Content",
+							"code": 204,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Use to get all the tasks of the logged in user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/tasks/self",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks",
+								"self"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/tasks/self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks",
+										"self"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "returns all tasks",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/tasks/self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks",
+										"self"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"title\": \"Lorem laborum\",\n \"purpose\": \"non sed aute labore\",\n \"featureUrl\": \"\",\n \"type\": \"et cupidatat cillum eiusmod\",\n \"links\": [\n  \"est\",\n  \"ea nulla sunt\"\n ],\n \"endsOn\": \"dolor aliquip q\",\n \"startedOn\": \"Duis est adipisicing Ut\",\n \"status\": \"elit magna non nisi Duis\",\n \"ownerId\": \"proident adipisicing culpa cupidatat\",\n \"percentCompleted\": 32238692.075454265,\n \"dependsOn\": [\n  \"fugiat nostrud aliqua occaecat\",\n  \"mollit eiusmod deserunt\"\n ],\n \"participants\": [\n  \"eiusmod sunt\",\n  \"id ad velit amet\"\n ],\n \"completionAward\": {\n  \"gold\": 86679421.5494909,\n  \"silver\": 15672853.041856036,\n  \"bronze\": 50545057.09029961\n },\n \"lossRate\": {\n  \"gold\": 96550368.73891002,\n  \"silver\": 88515882.42522156,\n  \"bronze\": 75906877.99545747\n },\n \"isNoteworthy\": true\n}"
+						},
+						{
+							"name": "notFound",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/tasks/self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks",
+										"self"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "unAuthorized",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/tasks/self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"tasks",
+										"self"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Self Data",
+					"item": [
+						{
+							"name": "Use to update the user data.",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"tempor culpa cillum sunt consectetur\",\n    \"first_name\": \"dolor do in\",\n    \"last_name\": \"nisi ut Excepteur reprehenderit\",\n    \"yoe\": 68143585.27701172,\n    \"company\": \"eu sint veniam nisi\",\n    \"designation\": \"esse veniam\",\n    \"img\": \"irure cillum consequat\",\n    \"github_display_name\": \"labore esse exerc\",\n    \"github_id\": \"commodo sed\",\n    \"linkedin_id\": \"exercitation sunt\",\n    \"twitter_id\": \"enim Excepteur labore velit\",\n    \"instagram_id\": \"aliquip adipisicing\",\n    \"site\": \"laborum ipsum eiusmod in dolore\",\n    \"isMember\": true,\n    \"tokens\": {}\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users/self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"self"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "forbidden",
+									"originalRequest": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"username\": \"tempor culpa cillum sunt consectetur\",\n    \"first_name\": \"dolor do in\",\n    \"last_name\": \"nisi ut Excepteur reprehenderit\",\n    \"yoe\": 68143585.27701172,\n    \"company\": \"eu sint veniam nisi\",\n    \"designation\": \"esse veniam\",\n    \"img\": \"irure cillum consequat\",\n    \"github_display_name\": \"labore esse exerc\",\n    \"github_id\": \"commodo sed\",\n    \"linkedin_id\": \"exercitation sunt\",\n    \"twitter_id\": \"enim Excepteur labore velit\",\n    \"instagram_id\": \"aliquip adipisicing\",\n    \"site\": \"laborum ipsum eiusmod in dolore\",\n    \"isMember\": true,\n    \"tokens\": {}\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/users/self",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"self"
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+								},
+								{
+									"name": "No content",
+									"originalRequest": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"username\": \"tempor culpa cillum sunt consectetur\",\n    \"first_name\": \"dolor do in\",\n    \"last_name\": \"nisi ut Excepteur reprehenderit\",\n    \"yoe\": 68143585.27701172,\n    \"company\": \"eu sint veniam nisi\",\n    \"designation\": \"esse veniam\",\n    \"img\": \"irure cillum consequat\",\n    \"github_display_name\": \"labore esse exerc\",\n    \"github_id\": \"commodo sed\",\n    \"linkedin_id\": \"exercitation sunt\",\n    \"twitter_id\": \"enim Excepteur labore velit\",\n    \"instagram_id\": \"aliquip adipisicing\",\n    \"site\": \"laborum ipsum eiusmod in dolore\",\n    \"isMember\": true,\n    \"tokens\": {}\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/users/self",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"self"
+											]
+										}
+									},
+									"status": "No Content",
+									"code": 204,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "serverUnavailable",
+									"originalRequest": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"username\": \"tempor culpa cillum sunt consectetur\",\n    \"first_name\": \"dolor do in\",\n    \"last_name\": \"nisi ut Excepteur reprehenderit\",\n    \"yoe\": 68143585.27701172,\n    \"company\": \"eu sint veniam nisi\",\n    \"designation\": \"esse veniam\",\n    \"img\": \"irure cillum consequat\",\n    \"github_display_name\": \"labore esse exerc\",\n    \"github_id\": \"commodo sed\",\n    \"linkedin_id\": \"exercitation sunt\",\n    \"twitter_id\": \"enim Excepteur labore velit\",\n    \"instagram_id\": \"aliquip adipisicing\",\n    \"site\": \"laborum ipsum eiusmod in dolore\",\n    \"isMember\": true,\n    \"tokens\": {}\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/users/self",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"self"
+											]
+										}
+									},
+									"status": "Service Unavailable",
+									"code": 503,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+								},
+								{
+									"name": "notFound",
+									"originalRequest": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"username\": \"tempor culpa cillum sunt consectetur\",\n    \"first_name\": \"dolor do in\",\n    \"last_name\": \"nisi ut Excepteur reprehenderit\",\n    \"yoe\": 68143585.27701172,\n    \"company\": \"eu sint veniam nisi\",\n    \"designation\": \"esse veniam\",\n    \"img\": \"irure cillum consequat\",\n    \"github_display_name\": \"labore esse exerc\",\n    \"github_id\": \"commodo sed\",\n    \"linkedin_id\": \"exercitation sunt\",\n    \"twitter_id\": \"enim Excepteur labore velit\",\n    \"instagram_id\": \"aliquip adipisicing\",\n    \"site\": \"laborum ipsum eiusmod in dolore\",\n    \"isMember\": true,\n    \"tokens\": {}\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/users/self",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"self"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+								},
+								{
+									"name": "unAuthorized",
+									"originalRequest": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"username\": \"tempor culpa cillum sunt consectetur\",\n    \"first_name\": \"dolor do in\",\n    \"last_name\": \"nisi ut Excepteur reprehenderit\",\n    \"yoe\": 68143585.27701172,\n    \"company\": \"eu sint veniam nisi\",\n    \"designation\": \"esse veniam\",\n    \"img\": \"irure cillum consequat\",\n    \"github_display_name\": \"labore esse exerc\",\n    \"github_id\": \"commodo sed\",\n    \"linkedin_id\": \"exercitation sunt\",\n    \"twitter_id\": \"enim Excepteur labore velit\",\n    \"instagram_id\": \"aliquip adipisicing\",\n    \"site\": \"laborum ipsum eiusmod in dolore\",\n    \"isMember\": true,\n    \"tokens\": {}\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/users/self",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"self"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Use to get self details.",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/users/self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"self"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "notFound",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/users/self",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"self"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+								},
+								{
+									"name": "unAuthorized",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/users/self",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"self"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+								},
+								{
+									"name": "User details",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/users/self",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"self"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"username\": \"tempor culpa cillum sunt consectetur\",\n \"first_name\": \"dolor do in\",\n \"last_name\": \"nisi ut Excepteur reprehenderit\",\n \"yoe\": 68143585.27701172,\n \"company\": \"eu sint veniam nisi\",\n \"designation\": \"esse veniam\",\n \"img\": \"irure cillum consequat\",\n \"github_display_name\": \"labore esse exerc\",\n \"github_id\": \"commodo sed\",\n \"linkedin_id\": \"exercitation sunt\",\n \"twitter_id\": \"enim Excepteur labore velit\",\n \"instagram_id\": \"aliquip adipisicing\",\n \"site\": \"laborum ipsum eiusmod in dolore\",\n \"isMember\": true,\n \"tokens\": {}\n}"
+								},
+								{
+									"name": "badImplementation",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/users/self",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"self"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Get all the users in system.",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "serverUnavailable",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "Service Unavailable",
+							"code": 503,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "unAuthorized",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "User details",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"message\": \"Users returned successfully!\",\n \"users\": [\n  {\n   \"username\": \"laboris ex est\",\n   \"first_name\": \"magna reprehenderit\",\n   \"last_name\": \"eiusmod in de\",\n   \"yoe\": 87131179.89673007,\n   \"company\": \"officia nisi commodo\",\n   \"designation\": \"esse nostrud ea\",\n   \"img\": \"anim velit\",\n   \"github_display_name\": \"in deserunt irure\",\n   \"github_id\": \"officia cupidatat est in\",\n   \"linkedin_id\": \"ad sed non id in\",\n   \"twitter_id\": \"Duis sed\",\n   \"instagram_id\": \"nulla non tempor eu\",\n   \"site\": \"ex nostrud\",\n   \"isMember\": true,\n   \"tokens\": {}\n  },\n  {\n   \"username\": \"ut sunt\",\n   \"first_name\": \"ipsum \",\n   \"last_name\": \"sed laborum eu laboris aliqua\",\n   \"yoe\": 89795583.30487958,\n   \"company\": \"deserunt sint aliquip cillum\",\n   \"designation\": \"Excepteur\",\n   \"img\": \"incididunt sunt eu cupidatat\",\n   \"github_display_name\": \"incididunt ut qui\",\n   \"github_id\": \"cillum\",\n   \"linkedin_id\": \"ex amet dolor\",\n   \"twitter_id\": \"ut ven\",\n   \"instagram_id\": \"consequat proident culpa\",\n   \"site\": \"exercitation\",\n   \"isMember\": true,\n   \"tokens\": {}\n  }\n ]\n}"
+						},
+						{
+							"name": "forbidden",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "notFound",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				},
+				{
+					"name": "check user exists or not",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/isUsernameAvailable/:username",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"isUsernameAvailable",
+								":username"
+							],
+							"variable": [
+								{
+									"key": "username",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "User Availability",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/isUsernameAvailable/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"isUsernameAvailable",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"isUsernameAvailable\": false\n}"
+						},
+						{
+							"name": "notFound",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/isUsernameAvailable/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"isUsernameAvailable",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/isUsernameAvailable/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"isUsernameAvailable",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "unAuthorized",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/isUsernameAvailable/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"isUsernameAvailable",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get the details of user with provided id.",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "<Bearer Token>",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:username",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":username"
+							],
+							"variable": [
+								{
+									"key": "username"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "User details",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"username\": \"tempor culpa cillum sunt consectetur\",\n \"first_name\": \"dolor do in\",\n \"last_name\": \"nisi ut Excepteur reprehenderit\",\n \"yoe\": 68143585.27701172,\n \"company\": \"eu sint veniam nisi\",\n \"designation\": \"esse veniam\",\n \"img\": \"irure cillum consequat\",\n \"github_display_name\": \"labore esse exerc\",\n \"github_id\": \"commodo sed\",\n \"linkedin_id\": \"exercitation sunt\",\n \"twitter_id\": \"enim Excepteur labore velit\",\n \"instagram_id\": \"aliquip adipisicing\",\n \"site\": \"laborum ipsum eiusmod in dolore\",\n \"isMember\": true,\n \"tokens\": {}\n}"
+						},
+						{
+							"name": "notFound",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Wallet",
+			"item": [
+				{
+					"name": "Gets the user wallet details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/wallet/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"wallet",
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "unAuthorized",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/wallet/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"wallet",
+										""
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Return wallet",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/wallet/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"wallet",
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						},
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/wallet/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"wallet",
+										""
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Gets the user wallet details for a username, if you are an authorized superuser",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/wallet/:username",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"wallet",
+								":username"
+							],
+							"variable": [
+								{
+									"key": "username"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/wallet/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"wallet",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "forbidden",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/wallet/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"wallet",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Return wallet",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/wallet/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"wallet",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						},
+						{
+							"name": "unAuthorized",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/wallet/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"wallet",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Github OAuth 2.0 Callback",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/github/callback?code=in enim et",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"github",
+								"callback"
+							],
+							"query": [
+								{
+									"key": "code",
+									"value": "in enim et",
+									"description": "(Required) Temporary code returned by GitHub Oauth"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Redirects to the UI on successful login",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/auth/github/callback?code=in enim et",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"github",
+										"callback"
+									],
+									"query": [
+										{
+											"key": "code",
+											"value": "in enim et"
+										}
+									]
+								}
+							},
+							"status": "Found",
+							"code": 302,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Cookie",
+									"value": "in enim et",
+									"description": "Cookie containing authentication token"
+								},
+								{
+									"key": "Location",
+									"value": "in enim et",
+									"description": "Redirection URL"
+								},
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Unauthorized",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/auth/github/callback?code=in enim et",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"github",
+										"callback"
+									],
+									"query": [
+										{
+											"key": "code",
+											"value": "in enim et"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Trade",
+			"item": [
+				{
+					"name": "Used for new trading request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stockId\": \"aute in officia\",\n    \"tradeType\": \"quis Lorem irure in\",\n    \"stockName\": \"non exercitation\",\n    \"quantity\": -25874725.550828874,\n    \"listedPrice\": 9050664.290945143,\n    \"totalPrice\": 74073807.5688324\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/trade/stock/new/self",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"trade",
+								"stock",
+								"new",
+								"self"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stockId\": \"aute in officia\",\n    \"tradeType\": \"quis Lorem irure in\",\n    \"stockName\": \"non exercitation\",\n    \"quantity\": -25874725.550828874,\n    \"listedPrice\": 9050664.290945143,\n    \"totalPrice\": 74073807.5688324\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/trade/stock/new/self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"trade",
+										"stock",
+										"new",
+										"self"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "unAuthorized",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stockId\": \"aute in officia\",\n    \"tradeType\": \"quis Lorem irure in\",\n    \"stockName\": \"non exercitation\",\n    \"quantity\": -25874725.550828874,\n    \"listedPrice\": 9050664.290945143,\n    \"totalPrice\": 74073807.5688324\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/trade/stock/new/self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"trade",
+										"stock",
+										"new",
+										"self"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Successful trading details",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stockId\": \"aute in officia\",\n    \"tradeType\": \"quis Lorem irure in\",\n    \"stockName\": \"non exercitation\",\n    \"quantity\": -25874725.550828874,\n    \"listedPrice\": 9050664.290945143,\n    \"totalPrice\": 74073807.5688324\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/trade/stock/new/self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"trade",
+										"stock",
+										"new",
+										"self"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"userBalance\": 78214640.58695677\n}"
+						},
+						{
+							"name": "forbidden",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer <token>"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stockId\": \"aute in officia\",\n    \"tradeType\": \"quis Lorem irure in\",\n    \"stockName\": \"non exercitation\",\n    \"quantity\": -25874725.550828874,\n    \"listedPrice\": 9050664.290945143,\n    \"totalPrice\": 74073807.5688324\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/trade/stock/new/self",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"trade",
+										"stock",
+										"new",
+										"self"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Contributions",
+			"item": [
+				{
+					"name": "Used to get all the contributions of user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/contributions/:username",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contributions",
+								":username"
+							],
+							"variable": [
+								{
+									"key": "username"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "notFound",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/contributions/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"contributions",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Return contributions",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/contributions/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"contributions",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"noteworthy\": [\n  {\n   \"task\": {\n    \"title\": \"o\",\n    \"purpose\": \"dolore nostrud nulla tempor\",\n    \"featureUrl\": \"Lorem ex id mollit\",\n    \"endsOn\": \"do ex aliquip\",\n    \"startedOn\": \"laborum mollit elit aliquip nulla\",\n    \"status\": \"in\",\n    \"dependsOn\": [\n     \"sunt in Excepteur dolor \",\n     \"ullamco\"\n    ],\n    \"participants\": [\n     {\n      \"firstname\": \"eiusmod do elit aliqua adipisicing\",\n      \"lastname\": \"eu non pariatur laborum sunt\",\n      \"img\": \"in Lorem qui in\",\n      \"username\": \"labore ipsum\"\n     },\n     {\n      \"firstname\": \"occaecat irure eu \",\n      \"lastname\": \"et Duis\",\n      \"img\": \"pariatur \",\n      \"username\": \"fugiat Lorem officia cupidatat proident\"\n     }\n    ],\n    \"isNoteworthy\": false\n   },\n   \"prList\": [\n    {\n     \"title\": \"ut Excepteur eiusmod\",\n     \"url\": \"sit nostrud\",\n     \"state\": \"dolore r\",\n     \"createdAt\": \"mollit ut \",\n     \"updatedAt\": \"anim velit commodo\",\n     \"raisedBy\": \"in aliqua voluptate esse\"\n    },\n    {\n     \"title\": \"nostrud\",\n     \"url\": \"in dolore laborum\",\n     \"state\": \"dolore in dolor\",\n     \"createdAt\": \"Lorem nulla ad\",\n     \"updatedAt\": \"sint nostrud\",\n     \"raisedBy\": \"qui commodo nulla\"\n    }\n   ]\n  },\n  {\n   \"task\": {\n    \"title\": \"et\",\n    \"purpose\": \"nostrud proident nisi et minim\",\n    \"featureUrl\": \"amet proi\",\n    \"endsOn\": \"elit dolor\",\n    \"startedOn\": \"minim ad\",\n    \"status\": \"elit ipsum cupidatat veniam qui\",\n    \"dependsOn\": [\n     \"nulla non occaecat sunt\",\n     \"consequat pariatur eu proident nisi\"\n    ],\n    \"participants\": [\n     {\n      \"firstname\": \"qui enim\",\n      \"lastname\": \"cupidatat deserunt commodo irure\",\n      \"img\": \"s\",\n      \"username\": \"in cillum nostrud offici\"\n     },\n     {\n      \"firstname\": \"Ut consequat\",\n      \"lastname\": \"in esse eu commodo\",\n      \"img\": \"ea Duis non ad elit\",\n      \"username\": \"irure Duis dolore\"\n     }\n    ],\n    \"isNoteworthy\": false\n   },\n   \"prList\": [\n    {\n     \"title\": \"eiusmod incididunt\",\n     \"url\": \"irure et esse non\",\n     \"state\": \"velit quis\",\n     \"createdAt\": \"est ex aute exercitation\",\n     \"updatedAt\": \"culpa\",\n     \"raisedBy\": \"nisi est\"\n    },\n    {\n     \"title\": \"dolor minim quis ipsum\",\n     \"url\": \"velit dolore incididunt culpa\",\n     \"state\": \"in nostrud do\",\n     \"createdAt\": \"ullamco sint pariatur\",\n     \"updatedAt\": \"incididunt quis cupidatat ipsum\",\n     \"raisedBy\": \"sed\"\n    }\n   ]\n  }\n ],\n \"all\": [\n  {\n   \"task\": {\n    \"title\": \"irure\",\n    \"purpose\": \"incididunt adipisicing dolore Ut\",\n    \"featureUrl\": \"labo\",\n    \"endsOn\": \"sed Excepteur reprehenderit officia\",\n    \"startedOn\": \"proident ad\",\n    \"status\": \"aliqua labore dolor aute\",\n    \"dependsOn\": [\n     \"commodo culpa\",\n     \"consequat reprehenderit\"\n    ],\n    \"participants\": [\n     {\n      \"firstname\": \"reprehenderit in proident\",\n      \"lastname\": \"irure\",\n      \"img\": \"dolor non in aliquip magna\",\n      \"username\": \"laborum esse quis ullamco ipsum\"\n     },\n     {\n      \"firstname\": \"minim sit ea anim\",\n      \"lastname\": \"quis ut\",\n      \"img\": \"fugiat qui ipsum cupidatat\",\n      \"username\": \"sed velit\"\n     }\n    ],\n    \"isNoteworthy\": true\n   },\n   \"prList\": [\n    {\n     \"title\": \"anim amet ullamco dolore\",\n     \"url\": \"labore ut\",\n     \"state\": \"\",\n     \"createdAt\": \"laborum Duis sed\",\n     \"updatedAt\": \"cupidatat consecte\",\n     \"raisedBy\": \"non consequat amet voluptate dolore\"\n    },\n    {\n     \"title\": \"sit Excepteur m\",\n     \"url\": \"laborum est sint Lorem pariatur\",\n     \"state\": \"ex Duis in\",\n     \"createdAt\": \"quis dolor elit anim\",\n     \"updatedAt\": \"deserunt nulla non\",\n     \"raisedBy\": \"ut sit nisi\"\n    }\n   ]\n  },\n  {\n   \"task\": {\n    \"title\": \"adipisicing enim cupidatat elit\",\n    \"purpose\": \"fugiat officia\",\n    \"featureUrl\": \"exercitation aliqua\",\n    \"endsOn\": \"vo\",\n    \"startedOn\": \"consequat nostrud adipisicing id\",\n    \"status\": \"in aute anim\",\n    \"dependsOn\": [\n     \"in elit\",\n     \"ullamco velit aute minim incididunt\"\n    ],\n    \"participants\": [\n     {\n      \"firstname\": \"Excepteur dolor cillum ad\",\n      \"lastname\": \"in proident Lorem\",\n      \"img\": \"aliqua dolor\",\n      \"username\": \"exercitation laborum consectetur eu\"\n     },\n     {\n      \"firstname\": \"mollit sed in sint\",\n      \"lastname\": \"nisi et ad est pariatur\",\n      \"img\": \"nisi exercitation reprehenderit\",\n      \"username\": \"reprehenderit minim\"\n     }\n    ],\n    \"isNoteworthy\": true\n   },\n   \"prList\": [\n    {\n     \"title\": \"dolore in\",\n     \"url\": \"occaecat irure\",\n     \"state\": \"in\",\n     \"createdAt\": \"ipsum ex non\",\n     \"updatedAt\": \"in est ut\",\n     \"raisedBy\": \"magna fugiat\"\n    },\n    {\n     \"title\": \"anim veniam Ut\",\n     \"url\": \"dolor ad\",\n     \"state\": \"est\",\n     \"createdAt\": \"Ut qui eiusmod\",\n     \"updatedAt\": \"eu ea ut commodo Duis\",\n     \"raisedBy\": \"occaecat sit voluptate\"\n    }\n   ]\n  }\n ]\n}"
+						},
+						{
+							"name": "badImplementation",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/contributions/:username",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"contributions",
+										":username"
+									],
+									"variable": [
+										{
+											"key": "username"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Badges",
+			"item": [
+				{
+					"name": "Get all the badges in system.",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/badges",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"badges"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "serverUnavailable",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/badges",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"badges"
+									]
+								}
+							},
+							"status": "Service Unavailable",
+							"code": 503,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"statusCode\": 18124028,\n \"error\": \"adipisicing veniam amet\",\n \"message\": \"qui aliqua\"\n}"
+						},
+						{
+							"name": "Badge details",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/badges",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"badges"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"message\": \"Badges returned successfully!\",\n \"badges\": [\n  {\n   \"title\": \"ad velit ess\",\n   \"description\": \"mollit\",\n   \"imgUrl\": \"est Excepteur\",\n   \"users\": [\n    \"nulla commodo \",\n    \"culpa\"\n   ]\n  },\n  {\n   \"title\": \"exercitation Ut\",\n   \"description\": \"laboris consectetur\",\n   \"imgUrl\": \"r\",\n   \"users\": [\n    \"magna dolor\",\n    \"ea id\"\n   ]\n  }\n ]\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://staging-api.realdevsquad.com"
+		}
+	]
+}
