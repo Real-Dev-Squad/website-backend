@@ -25,31 +25,28 @@ const getMembers = async (_, res) => {
   }
 }
 
-const purgeMembersCache = async (_, res) => {
+const purgeMembersCache = async (req, res) => {
   try {
+    const { username } = req.userData?.username
+
+    if (!username) {
+      return res.boom.badRequest('Username is not valid')
+    }
+
     const rep = await axios.post(
       CLOUD_FARE_PURGE_CACHE_API,
       {
-        files: [
-          'https://members.realdevsquad.com',
-          {
-            url: 'https://members.realdevsquad.com',
-            headers: {
-              Origin: 'https://www.cloudflare.com',
-              'CF-IPCountry': 'US',
-              'CF-Device-Type': 'desktop'
-            }
-          }
-        ]
+        files: [`https://members.realdevsquad.com/${username}`]
       },
       {
         headers: {
-          'X-Auth-Key': 'ce6ed15370a25ae6b0825d2ed59ebbf1271ac',
-          'X-Auth-Email': 'ashversache@gmail.com',
-          Authorization: 'Bearer TiuuAHl_d8-yI0CQL6pF7-Z8bc2xVnN5uiWuw_ia'
+          'X-Auth-Key': config.get('CLOUD_FARE_X_AUTH_KEY'),
+          'X-Auth-Email': config.get('CLOUD_FARE_AUTH_EMAIL'),
+          Authorization: `Bearer ${config.get('CLOUD_FARE_WORDPRESS_AUTHORIZATION_TOKEN')}`
         }
       }
     )
+
     return res.json(rep.data)
   } catch (error) {
     logger.error(`Error while clearing members cache: ${error}`)

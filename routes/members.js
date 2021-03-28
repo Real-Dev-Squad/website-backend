@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const membersController = require('../controllers/membersController')
+const authenticate = require('../middlewares/authenticate')
 
 /**
  * @swagger
@@ -26,6 +27,6 @@ const membersController = require('../controllers/membersController')
 
 router.get('/', membersController.getMembers)
 
-router.post('/purgeCache', membersController.purgeMembersCache)
+router.get('/cache/clear/self/:username', authenticate, membersController.purgeMembersCache)
 
 module.exports = router
