@@ -21,7 +21,7 @@ const trade = async (req, res) => {
 
     return res.json({ userBalance })
   } catch (err) {
-    logger.error(`Error while updating task: ${err}`)
+    logger.error(`Error during trading: ${err}`)
     return res.boom.badImplementation('An internal server error occurred')
   }
 }
