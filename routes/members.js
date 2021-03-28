@@ -27,6 +27,6 @@ const authenticate = require('../middlewares/authenticate')
 
 router.get('/', membersController.getMembers)
 
-router.get('/cache/clear/self/:username', authenticate, membersController.purgeMembersCache)
+router.get('/cache/clear/self', authenticate, membersController.purgeMembersCache)
 
 module.exports = router
