@@ -39,7 +39,7 @@ $ npm run test-config
 - For running the project locally, [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) can also be used instead of using the remote DB. Steps for setting it up: [CONTRIBUTING.md - Using Firebase Emulator Locally](https://github.com/Real-Dev-Squad/website-backend/blob/develop/CONTRIBUTING.md#using-firebase-emulator-locally)
 
 ## API Documentation:
-- View the RDS API documentation: [Real Dev Squad API](https://documenter.getpostman.com/view/2021368/TW6wH8Ns)
+- View the RDS API documentation: [Real Dev Squad API](https://documenter.getpostman.com/view/2021368/TzCJgqAb)
 - You can also run the server and navigate to `http://<HOSTNAME>:<PORT>/api-docs` to view the API documentation.
 - You can import the file [API Schema](https://github.com/Real-Dev-Squad/website-backend/blob/develop/public/apiSchema.json) to [Postman](https://www.postman.com/) or [SwaggerHub](https://swagger.io/tools/swaggerhub/).
 - If any API changes have been made:
