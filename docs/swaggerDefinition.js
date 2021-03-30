@@ -387,9 +387,6 @@ const swaggerOptions = {
             last_name: {
               type: 'string'
             },
-            userType: {
-              type: 'string'
-            },
             yoe: {
               type: 'number'
             },
