@@ -33,18 +33,12 @@ const getUserPRs = async (req, res) => {
   try {
     const { username } = req.params
 
-    let message
-    const prs = await getPRs({ username })
-
-    if (prs.length) {
-      message = 'User PRs'
-    } else {
-      message = 'No pull requests found!'
-    }
+    const pullRequests = await getPRs({ username })
+    const message = pullRequests.length ? 'User PRs' : 'No pull requests found!'
 
     return res.json({
-      message: message,
-      pullRequests: prs
+      message,
+      pullRequests
     })
   } catch (err) {
     return res.boom.badImplementation('Something went wrong please contact admin')
@@ -62,19 +56,12 @@ const getStalePRs = async (req, res) => {
   try {
     const { page, n: perPage } = req.query
 
-    let message
-    const isOpen = false
-    const prs = await getPRs({ page, perPage, isOpen })
-
-    if (prs.length) {
-      message = 'Stale PRs'
-    } else {
-      message = 'No pull requests found!'
-    }
+    const pullRequests = getPRs({ page, perPage, isOpen: false })
+    const message = pullRequests.length ? 'Stale PRs' : 'No pull requests found!'
 
     return res.json({
-      message: message,
-      pullRequests: prs
+      message,
+      pullRequests
     })
   } catch (err) {
     return res.boom.badImplementation('Something went wrong please contact admin')
@@ -92,18 +79,12 @@ const getOpenPRs = async (req, res) => {
   try {
     const { page, n: perPage } = req.query
 
-    let message
-    const prs = await getPRs({ page, perPage })
-
-    if (prs) {
-      message = 'Open PRs'
-    } else {
-      message = 'No pull requests found!'
-    }
+    const pullRequests = getPRs({ page, perPage })
+    const message = pullRequests.length ? 'Open PRs' : 'No pull requests found!'
 
     return res.json({
-      message: message,
-      pullRequests: prs
+      message,
+      pullRequests
     })
   } catch (err) {
     return res.boom.badImplementation('Something went wrong please contact admin')
