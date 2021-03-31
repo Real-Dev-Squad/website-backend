@@ -1,29 +1,40 @@
-const { fetch } = require('../utils/fetch')
+const axios = require('axios')
 const { fetchUser } = require('../models/users')
+
 /**
  * Extracts only the necessary details required from the object returned by Github API
  * @param data {Object} - Object returned by Github API
  */
-
 const extractPRdetails = (data) => {
   const allPRs = []
-  data.items.forEach(({ title, user, html_url: url, state, created_at: createdAt, updated_at: updatedAt, repository_url: repositoryUrl, labels, assignees }) => {
-    const allAssignees = assignees.map(object => object.login)
-    const allLabels = labels.map(object => object.name)
-    const repositoryUrlSplit = repositoryUrl.split('/')
-    const repository = repositoryUrlSplit[repositoryUrlSplit.length - 1]
-    allPRs.push({
+  data.items.forEach(
+    ({
       title,
-      username: user.login,
+      user,
+      html_url: url,
       state,
-      createdAt,
-      updatedAt,
-      repository,
-      url,
-      labels: allLabels,
-      assignees: allAssignees
-    })
-  })
+      created_at: createdAt,
+      updated_at: updatedAt,
+      repository_url: repositoryUrl,
+      labels,
+      assignees
+    }) => {
+      const allAssignees = assignees.map((assignee) => assignee.login)
+      const allLabels = labels.map((label) => label.name)
+      const repository = repositoryUrl.split('/').pop()
+      allPRs.push({
+        title,
+        username: user.login,
+        state,
+        createdAt,
+        updatedAt,
+        repository,
+        url,
+        labels: allLabels,
+        assignees: allAssignees
+      })
+    }
+  )
   return allPRs
 }
 
@@ -42,37 +53,36 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
   const urlObj = new URL(baseURL)
   urlObj.pathname = issuesAndPRsPath
 
-  const defaultParams = {
+  const finalSearchParams = {
     org: config.get('githubApi.org'),
-    type: 'pr'
+    type: 'pr',
+    ...searchParams
   }
 
-  const finalSearchParams = Object.assign({}, defaultParams, searchParams)
-
-  const paramsObjArr = Object.entries(finalSearchParams)
-  const paramsStrArr = paramsObjArr.map(([key, value]) => `${key}:${value}`)
-
-  // The string that can be entrered as text on Github website for simple search
-  const prsSearchText = paramsStrArr.join(' ')
-
-  urlObj.searchParams.append('q', prsSearchText)
+  // The string that can be entered as text on Github website for simple search
+  let prsSearchText = ''
+  for (const [key, value] of Object.entries(finalSearchParams)) {
+    prsSearchText += `${key}:${value} `
+  }
+  urlObj.searchParams.append('q', prsSearchText.trim())
 
   // Manipulate returned results
   // e.g number of results, pagination, etc
-  Object.entries(resultsOptions).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(resultsOptions)) {
     urlObj.searchParams.append(key, value)
-  })
+  }
 
   const createdURL = urlObj.href
   return createdURL
 }
 
-/** Create the fetch object to call on github url
+/**
+ * Create the fetch object to call on github url
  * @access private
  * @param url {string} - URL on github to call
  */
-function getFetch (url) {
-  return fetch(url, 'get', null, null, null, {
+function fetchGithub (url) {
+  return axios.get(url, {
     auth: {
       username: config.get('githubOauth.clientId'),
       password: config.get('githubOauth.clientSecret')
@@ -84,35 +94,11 @@ function getFetch (url) {
  * Fetches the pull requests in Real-Dev-Squad by user using GitHub API
  * @param username {string} - Username String
  */
-
 const fetchPRsByUser = async (username) => {
   try {
     const { user } = await fetchUser({ username })
-    const url = getGithubURL({
-      author: user.github_id
-    })
-    return getFetch(url)
-  } catch (err) {
-    logger.error(`Error while fetching pull requests: ${err}`)
-    throw err
-  }
-}
-
-/**
- * Fetches the oldest open 10 requests
- * @todo fetch N from query params
- */
-const fetchStalePRs = async (pageNumber) => {
-  try {
-    const url = getGithubURL({
-      is: 'open'
-    }, {
-      sort: 'created',
-      order: 'asc',
-      per_page: 10,
-      page: pageNumber
-    })
-    return getFetch(url)
+    const url = getGithubURL({ author: user.github_id })
+    return fetchGithub(url)
   } catch (err) {
     logger.error(`Error while fetching pull requests: ${err}`)
     throw err
@@ -121,19 +107,22 @@ const fetchStalePRs = async (pageNumber) => {
 
 /**
  * Fetches the latest 10 open PRs
- * @todo fetch N from query params
+ * @param pageNumber pagination page number
+ * @param perPage number of entries per page
+ * @param isOpen boolean checking for open or stale PRs
  */
-const fetchOpenPRs = async (pageNumber) => {
+const fetchPRs = async (pageNumber = 1, perPage = 10, isOpen = true) => {
   try {
-    const url = getGithubURL({
-      is: 'open'
-    }, {
-      sort: 'created',
-      order: 'desc',
-      per_page: 10,
-      page: pageNumber
-    })
-    return getFetch(url)
+    const url = getGithubURL(
+      { is: 'open' },
+      {
+        sort: 'created',
+        order: isOpen ? 'desc' : 'asc',
+        per_page: perPage,
+        page: pageNumber
+      }
+    )
+    return fetchGithub(url)
   } catch (err) {
     logger.error(`Error while fetching pull requests: ${err}`)
     throw err
@@ -142,7 +131,6 @@ const fetchOpenPRs = async (pageNumber) => {
 
 module.exports = {
   fetchPRsByUser,
-  fetchOpenPRs,
-  fetchStalePRs,
+  fetchPRs,
   extractPRdetails
 }
