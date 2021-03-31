@@ -55,8 +55,8 @@ const challengesController = require('../controllers/challengeController')
  */
 router
   .route('/')
-  .get(authenticate, challengesController.sendChallengeResponse)
-  .post(authenticate, challengesController.sendChallengeResponse)
+  .get(authenticate, challengesController.fetchChallenges)
+  .post(authenticate, challengesController.createChallenge)
 
 /**
  * @swagger

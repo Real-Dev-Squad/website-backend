@@ -42,15 +42,13 @@ const fetchChallenges = async () => {
 
 const postChallenge = async (challengeData) => {
   try {
-    const response = await challengesModel.add({
+    const challengeRef = await challengesModel.add({
       ...challengeData,
       participants: [],
       is_active: true
     })
-    const allChallenges = await fetchChallenges()
-    if (response.id && allChallenges.length > 0) {
-      return allChallenges
-    } else return ''
+
+    return challengeRef.id
   } catch (err) {
     logger.error(ERROR_MESSAGE, err)
     throw err
