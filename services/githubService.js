@@ -110,11 +110,19 @@ const fetchPRsByUser = async (username) => {
  * @param pageNumber pagination page number
  * @param perPage number of entries per page
  * @param isOpen boolean checking for open or stale PRs
+ *
+ * TODO: Fix pending for default args using destructuring
  */
-const fetchPRs = async (pageNumber = 1, perPage = 10, isOpen = true) => {
+const fetchPRs = async ({ pageNumber = 1, perPage = 10, isOpen = true, username = null }) => {
   try {
+    const searchParams = { is: 'open' }
+    if (username) {
+      const user = await fetchUser({ username })
+      searchParams.author = user.github_id
+    }
+
     const url = getGithubURL(
-      { is: 'open' },
+      searchParams,
       {
         sort: 'created',
         order: isOpen ? 'desc' : 'asc',

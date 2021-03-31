@@ -3,12 +3,16 @@ const githubService = require('../services/githubService')
 /**
  * Get Latest PRs in open or stale state for Real Dev Squad repos
  *
+ * @param {boolean} page page number to retrieve
+ * @param {boolean} perPage number of PRs per page
  * @param {boolean} isOpen boolean value indication open or stale
- * Get stale PRs in open state for Real Dev Squad repos
+ * @param {string} username retrieve PRs of username
+ *
+ * @returns {Array} List of PRs based on provided conditions
  */
-const getPRs = async (page = 1, n = 10, isOpen = true, username = null) => {
+const getPRs = async ({ page = 1, perPage = 10, isOpen = true, username = null }) => {
   try {
-    const { data } = await githubService.fetchPRs(page, n, isOpen)
+    const { data } = await githubService.fetchPRs({ page, perPage, isOpen, username })
     if (!data.total_count) {
       return []
     }
@@ -28,18 +32,19 @@ const getPRs = async (page = 1, n = 10, isOpen = true, username = null) => {
 const getUserPRs = async (req, res) => {
   try {
     const { username } = req.params
-    const { data } = await githubService.fetchPRsByUser(username)
 
-    if (data.total_count) {
-      const allPRs = githubService.extractPRdetails(data)
-      return res.json({
-        message: 'Pull requests returned successfully!',
-        pullRequests: allPRs
-      })
+    let message
+    const prs = await getPRs({ username })
+
+    if (prs.length) {
+      message = 'User PRs'
+    } else {
+      message = 'No pull requests found!'
     }
+
     return res.json({
-      message: 'No pull requests found!',
-      pullRequests: []
+      message: message,
+      pullRequests: prs
     })
   } catch (err) {
     return res.boom.badImplementation('Something went wrong please contact admin')
@@ -55,11 +60,11 @@ const getUserPRs = async (req, res) => {
  */
 const getStalePRs = async (req, res) => {
   try {
-    const { page, n } = req.query
+    const { page, n: perPage } = req.query
 
     let message
     const isOpen = false
-    const prs = await getPRs(page, n, isOpen)
+    const prs = await getPRs({ page, perPage, isOpen })
 
     if (prs.length) {
       message = 'Stale PRs'
@@ -85,10 +90,10 @@ const getStalePRs = async (req, res) => {
  */
 const getOpenPRs = async (req, res) => {
   try {
-    const { page, n } = req.query
+    const { page, n: perPage } = req.query
 
     let message
-    const prs = await getPRs(page, n)
+    const prs = await getPRs({ page, perPage })
 
     if (prs) {
       message = 'Open PRs'
