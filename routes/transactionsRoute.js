@@ -6,7 +6,7 @@ const transactionsController = require('../controllers/transactionsController.js
  * @swagger
  * /transactions/fetchLatestTransactions:
  *   get:
- *     summary: Transactions done by userId in Real Dev Squad
+ *     summary: Transactions done by username in Real Dev Squad
  *     tags:
  *       - Transaction Management
  *     responses:
@@ -31,6 +31,6 @@ const transactionsController = require('../controllers/transactionsController.js
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/fetchLatest/:userId/:noOfRecords', transactionsController.fetchLatest)
+router.get('/fetchLatest/:username/:noOfRecords', transactionsController.fetchLatest)
 
 module.exports = router
