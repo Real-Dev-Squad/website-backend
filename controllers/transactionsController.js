@@ -3,7 +3,6 @@ const { getUserId } = require('../utils/users')
 
 /**
  * Collects all transactions and sends only required data for username spicified in url
- * 
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
@@ -11,8 +10,8 @@ const { getUserId } = require('../utils/users')
 const fetchLatest = async (req, res) => {
   try {
     const userId = await getUserId(req.params.username)
-    if (userId != undefined) {
-      const noOfRecords = req.params.noOfRecords
+    if (userId !== undefined) {
+      const noOfRecords = req.query.noOfRecords
       const data = await transactionsModel.fetchLatest(userId, noOfRecords)
       if (data.length > 0) {
         return res.json({

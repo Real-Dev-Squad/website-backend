@@ -7,12 +7,12 @@ const firestore = require('../utils/firestore')
 const transactionsModel = firestore.collection('transaction')
 
 /**
- * fetch latest 10 transactions from DB from specific userId provided
+ * fetch latest N transactions from transactions collection for specific userid provided
  * @param userId { String }: User Id String to be used to fetch latest transactions
- * @param noOfRecords { String }: no of records to fetch from transaction table
+ * @param noOfRecords { String }: no of records to fetch from transaction table, if not specified in URL then default will be 10
  * @returns {Promise<{isUserExist: boolean, transactions: []}>}
  */
-const fetchLatest = async (userId, noOfRecords) => {
+const fetchLatest = async (userId, noOfRecords = 10) => {
   const transactionsRef = await transactionsModel.where('userId', '==', userId).get()
   const transactions = []
   transactionsRef.forEach((doc) => {
