@@ -16,7 +16,6 @@ const fetchLatest = async (req, res) => {
       if (data.length > 0) {
         return res.json({
           message: 'Transactions returned successfully!',
-          responseCode: 200,
           data
         })
       } else {
