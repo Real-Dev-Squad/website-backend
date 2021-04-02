@@ -4,7 +4,7 @@ const transactionsController = require('../controllers/transactionsController.js
 
 /**
  * @swagger
- * /transactions/fetchLatestTransactions:
+ * /transactions/fetchLatest/:username:
  *   get:
  *     summary: Transactions done by username in Real Dev Squad
  *     tags:
