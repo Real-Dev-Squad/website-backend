@@ -1,7 +1,6 @@
 
 const userQuery = require('../models/users')
 const accountOwners = require('../mockdata/appOwners')
-
 /**
  * Fetches the data about our users
  *
@@ -127,7 +126,8 @@ const updateSelf = async (req, res) => {
 
     const user = await userQuery.addOrUpdate(req.body, userId)
 
-    if (!user.isNewUser) {
+    if (!user.isNewUser) { // Success criteria, user finished the sign up process.
+      userQuery.initializeUser(userId)
       return res.status(204).send()
     }
 

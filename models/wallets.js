@@ -1,3 +1,4 @@
+const { INITIAL_WALLET } = require('../constants/wallets')
 const firestore = require('../utils/firestore')
 const walletModel = firestore.collection('wallets')
 
@@ -12,10 +13,10 @@ const fetchWallet = async (userId) => {
     if (userWallet) {
       return { id: userWallet.id, ...userWallet.data() }
     }
-    return {}
+    return null
   } catch (err) {
     logger.error('Error retrieving wallets', err)
-    return err
+    throw err
   }
 }
 
@@ -23,12 +24,12 @@ const fetchWallet = async (userId) => {
  * Create new wallet for user
  * @return {Promise<walletModel|object>}
  */
-const createWallet = async (userId) => {
+const createWallet = async (userId, currencies = {}) => {
   try {
     const walletData = {
       userId,
       isActive: true,
-      currencies: {}
+      currencies
     }
     const { id } = await walletModel.add(walletData)
     return {
@@ -37,19 +38,19 @@ const createWallet = async (userId) => {
     }
   } catch (err) {
     logger.error('Error creating user wallet', err)
-    return err
+    throw err
   }
 }
 
 /**
- * Update currecny wallet for user
+ * Update wallet for user
  * @return {Promise<walletModel|object>}
  */
 const updateWallet = async (userId, currencies) => {
   try {
     let userWallet = await fetchWallet(userId)
-    if (!userWallet.id) {
-      userWallet = await createWallet(userId)
+    if (!userWallet) {
+      userWallet = await createWallet(userId, INITIAL_WALLET)
     }
     const firestoreKeysObject = {}
     for (const key in currencies) {
@@ -65,11 +66,12 @@ const updateWallet = async (userId, currencies) => {
     return false
   } catch (err) {
     logger.error('Error updating currency to user wallets', err)
-    return err
+    throw err
   }
 }
 
 module.exports = {
   fetchWallet,
-  updateWallet
+  updateWallet,
+  createWallet
 }
