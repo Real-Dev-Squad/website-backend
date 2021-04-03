@@ -1,4 +1,4 @@
-const { fetch: rdsFetch } = require('../utils/fetch')
+const { fetch } = require('../utils/fetch')
 const { fetchUser } = require('../models/users')
 
 /**
@@ -88,7 +88,7 @@ function fetchGithub (url) {
       password: config.get('githubOauth.clientSecret')
     }
   }
-  return rdsFetch(url, 'get', null, null, null, options)
+  return fetch(url, 'get', null, null, null, options)
 }
 
 /**
