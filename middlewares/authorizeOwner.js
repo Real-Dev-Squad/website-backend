@@ -1,4 +1,4 @@
-const usersController = require('../controllers/usersController')
+const users = require('../controllers/users')
 /**
  * Middleware to validate the authorized routes to be able to create & Update tasks
  * 1] Verifies the user's role as Application owner
@@ -17,7 +17,7 @@ const usersController = require('../controllers/usersController')
 module.exports = async (req, res, next) => {
   try {
     // get user data from `req.userData` for further use
-    const accountOwners = await usersController.getAccountOwners()
+    const accountOwners = await users.getAccountOwners()
     const { username } = req.userData
 
     if (accountOwners.some((owner) => owner.username === username)) {

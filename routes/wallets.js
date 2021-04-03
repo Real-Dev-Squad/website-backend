@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const walletController = require('../controllers/walletsController')
+const wallet = require('../controllers/wallets')
 const authenticate = require('../middlewares/authenticate')
 const authorization = require('../middlewares/authorization')
 
@@ -31,7 +31,7 @@ const authorization = require('../middlewares/authorization')
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/', authenticate, walletController.getOwnWallet)
+router.get('/', authenticate, wallet.getOwnWallet)
 
 /**
  * @swagger
@@ -66,6 +66,6 @@ router.get('/', authenticate, walletController.getOwnWallet)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:username', authenticate, authorization, walletController.getUserWallet)
+router.get('/:username', authenticate, authorization, wallet.getUserWallet)
 
 module.exports = router

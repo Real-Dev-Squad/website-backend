@@ -47,7 +47,7 @@ The following project structure should be followed:
     |   |-- staging.js
     |   |-- test.js
     |-- controllers
-    |   |-- healthController.js
+    |   |-- health.js
     |   |-- // Controller files concerning function on a similar entity
     |-- logs
     |   |-- // log files
@@ -66,7 +66,7 @@ The following project structure should be followed:
     |   |   |-- auth
     |   |       |-- githubUserInfo.js
     |   |-- integration // Integration tests
-    |   |   |-- authController.test.js
+    |   |   |-- auth.test.js
     |   |-- unit // Unit tests
     |   |   |-- middlewares
     |   |   |-- services
