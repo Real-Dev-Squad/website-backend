@@ -11,9 +11,9 @@ const fetch = async (req, res) => {
   try {
     const userId = await getUserId(req.params.username)
     if (userId) {
-      const n = req.query.n || 10
-      const o = req.query.o || 'DESC'
-      const data = await transactionsModel.fetch(userId, n, o)
+      const noOfOrders = req.query.n || 10
+      const orderBy = req.query.o || 'DESC'
+      const data = await transactionsModel.fetch(userId, noOfOrders, orderBy)
       if (data.length > 0) {
         return res.json({
           message: 'Transactions returned successfully!',
