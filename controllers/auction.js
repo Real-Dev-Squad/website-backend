@@ -53,8 +53,7 @@ const createNewAuction = async (req, res) => {
 
     const { currencies } = await wallet.fetchWallet(seller)
     const itemQuantity = parseInt(currencies[`${itemType}`])
-    if (!itemQuantity) return res.boom.forbidden(`You do not have any ${itemType}!`)
-    if (itemQuantity < quantity) return res.boom.forbidden(`You do not have enough of ${itemType}s!`)
+    if (!itemQuantity || itemQuantity < quantity) return res.boom.forbidden(`You do not have enough of ${itemType}s!`)
 
     const auctionId = await auctions.createNewAuction({ seller, initialPrice, itemType, endTime, quantity })
     return res.status(201).json({ id: auctionId, message: 'Auction created successfully!' })
