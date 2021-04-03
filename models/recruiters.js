@@ -21,9 +21,7 @@ const addRecruiterInfo = async (recruiterData, username) => {
     const { userExists, user: { first_name: userFirstName, last_name: userLastName, email: userEmail } } = await userModel.fetchUser({ username })
     const userInfo = userFirstName + ' ' + userLastName + ' (' + userEmail + ')'
     if (!userExists) {
-      return {
-        userExist: false
-      }
+      return userExists
     }
     recruiterData.timestamp = Date.now()
     // Add the recruiter data in DB
