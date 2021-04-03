@@ -10,6 +10,9 @@ const recruiterQuery = require('../models/recruiters')
 const addRecruiter = async (req, res) => {
   try {
     const result = await recruiterQuery.addRecruiterInfo(req.body, req.params.username)
+    if (result.userExist === false) {
+      return res.boom.notFound('User doesn\'t exist')
+    }
     return res.json(result)
   } catch (error) {
     logger.error(`Error while adding recruiterInfo: ${error}`)

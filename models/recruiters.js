@@ -17,14 +17,19 @@ const userModel = require('./users')
 
 const addRecruiterInfo = async (recruiterData, username) => {
   try {
+    // Fetch the user from DB
+    const { userExists, user: { first_name: userFirstName, last_name: userLastName, email: userEmail } } = await userModel.fetchUser({ username })
+    const userInfo = userFirstName + ' ' + userLastName + ' (' + userEmail + ')'
+    if (!userExists) {
+      return {
+        userExist: false
+      }
+    }
     recruiterData.timestamp = Date.now()
     // Add the recruiter data in DB
     const recruiterInfo = await recruiterModel.add(recruiterData)
     // Fetch the recruiter from DB
     const recruiter = (await recruiterModel.doc(recruiterInfo.id).get()).data()
-    // Fetch the user from DB
-    const { user: { first_name: userFirstName, last_name: userLastName, email: userEmail } } = await userModel.fetchUser({ username })
-    const userInfo = userFirstName + ' ' + userLastName + ' (' + userEmail + ')'
     return {
       message: 'Request Submission Successful!!',
       recruiterId: recruiterInfo.id,

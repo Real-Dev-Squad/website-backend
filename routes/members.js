@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const members = require('../controllers/membersController')
-const recruitersController = require('../controllers/recruitersController')
+const recruitersController = require('../controllers/recruiters')
 const recruiterValidator = require('../middlewares/validators/recruiter')
 
 /**
@@ -66,6 +66,13 @@ router.get('/idle', members.getIdleMembers)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/recruiters'
+ *
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
  *
  *       500:
  *         description: serverUnavailable
