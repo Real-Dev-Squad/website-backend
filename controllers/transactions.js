@@ -11,17 +11,13 @@ const fetch = async (req, res) => {
   try {
     const userId = await getUserId(req.params.username)
     if (userId) {
-      const noOfOrders = req.query.n || 10
-      const orderBy = req.query.o || 'DESC'
+      const noOfOrders = req.query.noOfOrders || 10
+      const orderBy = req.query.orderBy || 'DESC'
       const data = await transactionsModel.fetch(userId, noOfOrders, orderBy)
-      if (data.length > 0) {
-        return res.json({
-          message: 'Transactions returned successfully!',
-          data
-        })
-      } else {
-        return res.boom.notFound('No transactions exist!')
-      }
+      return res.json({
+        message: data.length > 0 ? 'Transactions returned successfully!' : 'No transactions exist!',
+        data
+      })
     } else {
       return res.boom.notFound('User does not exist!')
     }
