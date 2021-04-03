@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
-const usersController = require('../controllers/usersController')
+const users = require('../controllers/users')
 const userValidator = require('../middlewares/validators/user')
 
 /**
@@ -50,7 +50,7 @@ const userValidator = require('../middlewares/validators/user')
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.patch('/self', authenticate, userValidator.updateUser, usersController.updateSelf)
+router.patch('/self', authenticate, userValidator.updateUser, users.updateSelf)
 
 /**
  * @swagger
@@ -102,7 +102,7 @@ router.patch('/self', authenticate, userValidator.updateUser, usersController.up
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.get('/', authenticate, usersController.getUsers)
+router.get('/', authenticate, users.getUsers)
 
 /**
  * @swagger
@@ -139,7 +139,7 @@ router.get('/', authenticate, usersController.getUsers)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/self', authenticate, usersController.getSelfDetails)
+router.get('/self', authenticate, users.getSelfDetails)
 
 /**
  * @swagger
@@ -176,7 +176,7 @@ router.get('/self', authenticate, usersController.getSelfDetails)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/isUsernameAvailable/:username', authenticate, usersController.getUsernameAvailabilty)
+router.get('/isUsernameAvailable/:username', authenticate, users.getUsernameAvailabilty)
 
 /**
  * @swagger
@@ -207,6 +207,6 @@ router.get('/isUsernameAvailable/:username', authenticate, usersController.getUs
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:username', usersController.getUser)
+router.get('/:username', users.getUser)
 
 module.exports = router

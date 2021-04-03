@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const membersController = require('../controllers/membersController')
+const members = require('../controllers/members')
 
 /**
  * @swagger
@@ -24,7 +24,7 @@ const membersController = require('../controllers/membersController')
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', membersController.getMembers)
+router.get('/', members.getMembers)
 
 /**
  * @swagger
@@ -48,6 +48,6 @@ router.get('/', membersController.getMembers)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/idle', membersController.getIdleMembers)
+router.get('/idle', members.getIdleMembers)
 
 module.exports = router
