@@ -11,8 +11,8 @@ const fetch = async (req, res) => {
   try {
     const userId = await getUserId(req.params.username);
     if (userId) {
-      const n = req.query.n;
-      const o = req.query.o;
+      const n = req.query.n || 10;
+      const o = req.query.o || 'DESC';
       const data = await transactionsModel.fetch(userId, n, o);
       if (data.length > 0) {
         return res.json({
