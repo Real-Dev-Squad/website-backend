@@ -1,4 +1,4 @@
-const axios = require('axios')
+const { fetch: rdsFetch } = require('../utils/fetch')
 const { fetchUser } = require('../models/users')
 
 /**
@@ -82,12 +82,13 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
  * @param url {string} - URL on github to call
  */
 function fetchGithub (url) {
-  return axios.get(url, {
+  const options = {
     auth: {
       username: config.get('githubOauth.clientId'),
       password: config.get('githubOauth.clientSecret')
     }
-  })
+  }
+  return rdsFetch(url, 'get', null, null, null, options)
 }
 
 /**
