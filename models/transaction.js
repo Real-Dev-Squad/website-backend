@@ -10,8 +10,8 @@ const transactionsModel = firestore.collection('transaction')
  * fetch latest N transactions from transactions collection for specific userid provided
  *
  * @param userId { String }: User Id String to be used to fetch latest transactions
- * @param n { number }: no of records to fetch from transaction table, if not specified in URL then default will be 10
- * @param o { String }: to order the transactions in ascending or descending manner, by default will fetch latest first
+ * @param noOfOrders { number }: no of records to fetch from transaction table, if not specified in URL then default will be 10
+ * @param orderBy { String }: to order the transactions in ascending or descending manner, by default will fetch latest first
  * @returns {Promise<{transactions: []}>}
  */
 const fetch = async (userId, noOfOrders, orderBy) => {
