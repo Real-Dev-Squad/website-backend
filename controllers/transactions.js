@@ -11,9 +11,10 @@ const fetch = async (req, res) => {
   try {
     const userId = await getUserId(req.params.username)
     if (userId) {
-      const noOfOrders = req.query.noOfOrders || 10
-      const orderBy = req.query.orderBy || 'DESC'
-      const data = await transactionsModel.fetch(userId, noOfOrders, orderBy)
+      const orderBy = parseInt(req.query.orderBy, 10) || 'DESC'
+      const startAt = parseInt(req.query.startAt, 10) || 0
+      const size = parseInt(req.query.size, 10) + startAt || 10
+      const data = await transactionsModel.fetch(userId, startAt, size, orderBy)
       return res.json({
         message: data.length > 0 ? 'Transactions returned successfully!' : 'No transactions exist!',
         data
