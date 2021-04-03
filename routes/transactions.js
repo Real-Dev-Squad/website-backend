@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router()
-const transactionsController = require('../controllers/transactionsController.js')
+const transactions = require('../controllers/transactions.js')
 
 /**
  * @swagger
- * /transactions/fetchLatest/:username:
+ * /transactions/fetch/:username:
  *   get:
  *     summary: Transactions done by username in Real Dev Squad
  *     tags:
@@ -24,6 +24,14 @@ const transactionsController = require('../controllers/transactionsController.js
  *                    type: array
  *                    items:
  *                      $ref: '#/components/schemas/transactions'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               example: User does not exist!
+ *               $ref: '#/components/schemas/transactions'
  *       500:
  *         description: badImplementation
  *         content:
@@ -31,6 +39,6 @@ const transactionsController = require('../controllers/transactionsController.js
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/fetchLatest/:username', transactionsController.fetchLatest)
+router.get('/fetch/:username', transactions.fetch)
 
 module.exports = router
