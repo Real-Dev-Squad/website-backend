@@ -3,8 +3,8 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 
-const firestore = require("../utils/firestore");
-const transactionsModel = firestore.collection("transaction");
+const firestore = require('../utils/firestore')
+const transactionsModel = firestore.collection('transaction')
 
 /**
  * fetch latest N transactions from transactions collection for specific userid provided
@@ -15,20 +15,20 @@ const transactionsModel = firestore.collection("transaction");
  * @returns {Promise<{transactions: []}>}
  */
 const fetch = async (userId, n, o) => {
-  const transactionsRef = await transactionsModel.where("userId", "==", userId).get();
-  const transactions = [];
+  const transactionsRef = await transactionsModel.where('userId', '==', userId).get()
+  const transactions = []
   transactionsRef.forEach((doc) => {
-    const transaction = doc.data();
-    transaction.dateInMillis = doc.data().dateTime._seconds * 1000;
-    delete transaction.dateTime;
-    transactions.push(transaction);
-  });
+    const transaction = doc.data()
+    transaction.dateInMillis = doc.data().dateTime._seconds * 1000
+    delete transaction.dateTime
+    transactions.push(transaction)
+  })
   transactions.sort((a, b) => {
-    return o === "DESC" ? (a.dateInMillis > b.dateInMillis ? -1 : 1) : a.dateInMillis > b.dateInMillis ? 1 : -1;
-  });
-  return transactions.slice(0, n);
-};
+    return o === 'DESC' ? (a.dateInMillis > b.dateInMillis ? -1 : 1) : a.dateInMillis > b.dateInMillis ? 1 : -1
+  })
+  return transactions.slice(0, n)
+}
 
 module.exports = {
-  fetch,
-};
+  fetch
+}
