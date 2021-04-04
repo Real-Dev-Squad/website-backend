@@ -28,7 +28,8 @@ describe('Members', function () {
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('No member found')
-          expect(res.body.members).to.eql([])
+          expect(res.body.members.newMembers).to.eql([])
+          expect(res.body.members.oldMembers).to.eql([])
 
           return done()
         })
@@ -44,8 +45,9 @@ describe('Members', function () {
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Members returned successfully!')
-          expect(res.body.members).to.be.a('array')
-          expect(res.body.members[0].isMember).to.eql(true)
+          expect(res.body.members.newMembers).to.be.a('array')
+          expect(res.body.members.oldMembers).to.be.a('array')
+          expect(res.body.members.oldMembers[0].isMember).to.eql(true)
 
           return done()
         })

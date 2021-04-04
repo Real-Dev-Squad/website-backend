@@ -13,7 +13,7 @@ const getMembers = async (req, res) => {
     const allMembers = await memberQuery.fetchMembers()
 
     return res.json({
-      message: allMembers.length ? 'Members returned successfully!' : 'No member found',
+      message: allMembers.newMembers.length || allMembers.oldMembers.length ? 'Members returned successfully!' : 'No member found',
       members: allMembers
     })
   } catch (error) {

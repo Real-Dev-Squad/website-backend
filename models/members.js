@@ -15,7 +15,7 @@ const fetchMembers = async () => {
   try {
     const snapshot = await userModel.where('isMember', '==', true).get()
 
-    const allMembers = []
+    const allMembers = { oldMembers: [], newMembers: [] }
 
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
@@ -28,6 +28,7 @@ const fetchMembers = async () => {
         })
       }
       )
+
     }
 
     return allMembers
