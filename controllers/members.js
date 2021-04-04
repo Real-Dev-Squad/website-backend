@@ -13,7 +13,7 @@ const getMembers = async (req, res) => {
     const allMembers = await memberQuery.fetchMembers()
 
     return res.json({
-      message: allMembers.length ? 'Members returned successfully!' : 'No member found',
+      message: allMembers.newMembers.length || allMembers.oldMembers.length ? 'Members returned successfully!' : 'No member found',
       members: allMembers
     })
   } catch (error) {
@@ -32,7 +32,7 @@ const getMembers = async (req, res) => {
 const getIdleMembers = async (req, res) => {
   try {
     let allMemberUsernames = await memberQuery.fetchMembers()
-    allMemberUsernames = allMemberUsernames.map(member => member.username)
+    allMemberUsernames = allMemberUsernames.oldMembers.map(member => member.username)
 
     let taskParticipants = await tasks.fetchActiveTaskMembers()
     taskParticipants = new Set(taskParticipants)

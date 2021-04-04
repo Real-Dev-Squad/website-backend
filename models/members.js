@@ -15,16 +15,32 @@ const fetchMembers = async () => {
   try {
     const snapshot = await userModel.where('isMember', '==', true).get()
 
-    const allMembers = []
+    const allMembers = { oldMembers: [], newMembers: [] }
 
     snapshot.forEach((doc) => {
-      allMembers.push({
+      const memberData = doc.data()
+      const curatedMemberData = {
         id: doc.id,
-        ...doc.data(),
+        ...memberData,
         tokens: undefined,
         phone: undefined,
         email: undefined
-      })
+      }
+      switch (memberData.userType) {
+        case 'new':
+          allMembers.newMembers.push(curatedMemberData)
+          break
+        case 'blocked':
+          // intentionally left blank for future use case
+          break
+        case 'member':
+          // intentionally left break statement to fall through default case
+          // so that doc with no userType field considered as members
+          break
+        default:
+          allMembers.oldMembers.push(curatedMemberData)
+          break
+      }
     }
     )
 
