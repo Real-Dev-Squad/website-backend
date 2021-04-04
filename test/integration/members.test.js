@@ -48,7 +48,6 @@ describe('Members', function () {
           expect(res.body.members.newMembers).to.be.a('array')
           expect(res.body.members.oldMembers).to.be.a('array')
           expect(res.body.members.oldMembers[0].isMember).to.eql(true)
-          expect(res.body.members.newMembers[0].isMember).to.eql(true)
 
           return done()
         })
