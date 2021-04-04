@@ -3,7 +3,6 @@
  * It gives linting errors in testing the DB data with keys from fixtures
  */
 /* eslint-disable security/detect-object-injection */
-
 const chai = require('chai')
 const { expect } = chai
 
@@ -13,8 +12,12 @@ const firestore = require('../../../utils/firestore')
 const recruiterModel = firestore.collection('recruiters')
 const recruiterDataArray = require('../../fixtures/recruiter/recruiter')()
 const userDataArray = require('../../fixtures/user/user')()
+const addUser = require('../../utils/addUser')
 
 describe('Recruiters', function () {
+  beforeEach(async function () {
+    await addUser()
+  })
   after(async function () {
     await cleanDb()
   })
@@ -31,7 +34,6 @@ describe('Recruiters', function () {
         userInfo,
         timestamp
       } = await recruiters.addRecruiterInfo(recruiterData, username)
-
       const data = (await recruiterModel.doc(recruiterId).get()).data()
 
       Object.keys(recruiterData).forEach(key => {

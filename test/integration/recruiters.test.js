@@ -49,5 +49,34 @@ describe('Recruiters', function () {
           return done()
         })
     })
+
+    it('Should return 404 if user not found ', function (done) {
+      chai
+        .request(app)
+        .post('/members/intro/invalidUsername')
+        .send({
+          company: 'Test-feature',
+          first_name: 'Ankita',
+          last_name: 'Bannore',
+          designation: 'Student',
+          reason: 'Test',
+          email: 'abc@gmail.com',
+          currency: '$',
+          package: 100000
+        })
+        .end((err, res) => {
+          if (err) { return done() }
+
+          expect(res).to.have.status(404)
+          expect(res.body).to.be.an('object')
+          expect(res.body).to.eql({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'User doesn\'t exist'
+          })
+
+          return done()
+        })
+    })
   })
 })
