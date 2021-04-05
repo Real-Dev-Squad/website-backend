@@ -5,15 +5,15 @@ const multerMemoryStorage = multer.memoryStorage()
 const MB_1 = multerConstant.FILE_SIZE_1MB
 const profileFileSize = multerConstant.PROFILE_FILE_SIZE
 
-function fileFilterImagesOnly (req, file, cb) {
+const fileFilterImagesOnly = (req, file, cb) => {
   const mimetype = file.mimetype
-  const isMimeTypePng = (mimetype === 'image/png')
-  const isMimeTypeJpeg = (mimetype === 'image/jpeg')
-  if (isMimeTypePng || isMimeTypeJpeg) {
+  const allowedMimeTypes = ['image/png', 'image/jpeg']
+  const isMimeTypeAllowed = allowedMimeTypes.includes(mimetype)
+  if (isMimeTypeAllowed) {
     return cb(null, true)
   }
   return cb(new multer.MulterError('TYPE_UNSUPPORTED_FILE'), false)
-};
+}
 
 const upload = multer({
   storage: multerMemoryStorage,

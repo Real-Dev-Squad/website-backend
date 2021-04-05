@@ -151,7 +151,7 @@ const postUserPicture = async (req, res) => {
     const { id: userId } = req.userData
     const imageData = await imageService.uploadProfilePicture(file, userId)
     return res.json({
-      message: 'Profile picture upload success',
+      message: 'Profile picture uploaded successfully!',
       image: imageData
     })
   } catch (error) {
