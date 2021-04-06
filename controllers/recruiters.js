@@ -13,6 +13,7 @@ const addRecruiter = async (req, res) => {
     if (!result) {
       return res.boom.notFound('User doesn\'t exist')
     }
+    result.message = 'Request Submission Successful!!'
     return res.json(result)
   } catch (error) {
     logger.error(`Error while adding recruiterInfo: ${error}`)

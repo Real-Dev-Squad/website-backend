@@ -28,7 +28,6 @@ describe('Recruiters', function () {
       const username = userDataArray[0].username
       // Add recruiter data
       const {
-        message,
         recruiterId,
         recruiterName,
         userInfo,
@@ -39,7 +38,6 @@ describe('Recruiters', function () {
       Object.keys(recruiterData).forEach(key => {
         expect(recruiterData[key]).to.deep.equal(data[key])
       })
-      expect(message).to.equal('Request Submission Successful!!')
       expect(recruiterId).to.be.a('string')
       expect(recruiterName).to.be.a('string')
       expect(userInfo).to.be.a('string')

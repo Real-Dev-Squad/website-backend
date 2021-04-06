@@ -29,7 +29,6 @@ const addRecruiterInfo = async (recruiterData, username) => {
     // Fetch the recruiter from DB
     const recruiter = (await recruiterModel.doc(recruiterInfo.id).get()).data()
     return {
-      message: 'Request Submission Successful!!',
       recruiterId: recruiterInfo.id,
       recruiterName: recruiter.first_name + ' ' + recruiter.last_name,
       userInfo: userInfo,
