@@ -4,7 +4,7 @@ const transactions = require('../controllers/transactions.js')
 
 /**
  * @swagger
- * /transactions/fetch/:username:
+ * /transactions/:username:
  *   get:
  *     summary: Transactions done by username in Real Dev Squad
  *     tags:
@@ -39,6 +39,6 @@ const transactions = require('../controllers/transactions.js')
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/fetch/:username', transactions.fetch)
+router.get('/:username', transactions.fetch)
 
 module.exports = router
