@@ -4,6 +4,7 @@
  */
 
 const port = 3000
+const firebaseConfig = require('../firebase.json')
 
 module.exports = {
   enableFileLogs: false,
@@ -51,7 +52,9 @@ module.exports = {
 
   db: {
     firestore: {
-      projectId: 'rds-dev'
+      projectId: 'rds-dev',
+      useEmulator: false, // set to true to use emulator
+      emulatorHost: `localhost:${firebaseConfig.emulators.firestore.port}`
     }
   }
 }
