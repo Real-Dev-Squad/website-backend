@@ -1,15 +1,17 @@
 const Firestore = require('@google-cloud/firestore')
 const config = require('config')
 
-const firestoreConfig = config.get('db.firestore')
+if (config.has('db.firestore')) {
+  const firestoreConfig = config.get('db.firestore')
 
-if (firestoreConfig.has('useEmulator') && firestoreConfig.get('useEmulator')) {
-  if (!firestoreConfig.has('emulatorHost')) {
-    throw new Error(
-      'Invalid configuration. Cannot use firestore emulator. Property db.firestore.emulatorHost is missing.'
-    )
+  if (firestoreConfig.has('useEmulator') && firestoreConfig.get('useEmulator')) {
+    if (!firestoreConfig.has('emulatorHost')) {
+      throw new Error(
+        'Invalid configuration. Cannot use firestore emulator. Property db.firestore.emulatorHost is missing.'
+      )
+    }
+    process.env.FIRESTORE_EMULATOR_HOST = firestoreConfig.get('emulatorHost')
   }
-  process.env.FIRESTORE_EMULATOR_HOST = firestoreConfig.get('emulatorHost')
 }
 
 /**
