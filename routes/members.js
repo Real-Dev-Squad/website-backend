@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const members = require('../controllers/membersController')
+const members = require('../controllers/members')
 const recruitersController = require('../controllers/recruiters')
 const recruiterValidator = require('../middlewares/validators/recruiter')
 
