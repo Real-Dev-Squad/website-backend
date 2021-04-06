@@ -13,8 +13,8 @@ const fetch = async (req, res) => {
     if (userId) {
       const orderBy = parseInt(req.query.orderBy, 10) || 'DESC'
       const startAt = parseInt(req.query.startAt, 10) || 0
-      const size = parseInt(req.query.size, 10) + startAt || 10
-      const data = await transactionsModel.fetch(userId, startAt, size, orderBy)
+      const limit = parseInt(req.query.limit, 10) + startAt || 10
+      const data = await transactionsModel.fetch(userId, startAt, limit, orderBy)
       return res.json({
         message: data.length > 0 ? 'Transactions returned successfully!' : 'No transactions exist!',
         data
