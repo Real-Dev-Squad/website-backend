@@ -22,7 +22,7 @@ const addRecruiterInfo = async (recruiterData, username) => {
     if (!userExists) {
       return userExists
     }
-    const userInfo = userFirstName + ' ' + userLastName + ' (' + userEmail + ')'
+    const userInfo = `${userFirstName} ${userLastName} (${userEmail})`
     recruiterData.timestamp = Date.now()
     // Add the recruiter data in DB
     const recruiterInfo = await recruiterModel.add(recruiterData)
@@ -30,7 +30,7 @@ const addRecruiterInfo = async (recruiterData, username) => {
     const recruiter = (await recruiterModel.doc(recruiterInfo.id).get()).data()
     return {
       recruiterId: recruiterInfo.id,
-      recruiterName: recruiter.first_name + ' ' + recruiter.last_name,
+      recruiterName: `${recruiter.first_name} ${recruiter.last_name}`,
       userInfo: userInfo,
       timestamp: recruiter.timestamp
     }

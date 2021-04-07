@@ -6,15 +6,18 @@ const app = require('../../server')
 const users = require('../../models/users')
 const addUser = require('../utils/addUser')
 const cleanDb = require('../utils/cleanDb')
+const recruiterDataArray = require('../fixtures/recruiter/recruiter')()
 
 chai.use(chaiHttp)
 
 describe('Recruiters', function () {
   let username
+  let recruiterData
   beforeEach(async function () {
     const userId = await addUser()
     const { user } = await users.fetchUser({ userId })
     username = user.username
+    recruiterData = recruiterDataArray[0]
   })
 
   afterEach(async function () {
@@ -25,17 +28,8 @@ describe('Recruiters', function () {
     it('Should return success response after adding recruiter data', function (done) {
       chai
         .request(app)
-        .post('/members/intro/' + username)
-        .send({
-          company: 'Test-feature',
-          first_name: 'Ankita',
-          last_name: 'Bannore',
-          designation: 'Student',
-          reason: 'Test',
-          email: 'abc@gmail.com',
-          currency: '$',
-          package: 100000
-        })
+        .post(`/members/intro/${username}`)
+        .send(recruiterData)
         .end((err, res) => {
           if (err) { return done(err) }
           expect(res).to.have.status(200)
@@ -54,16 +48,7 @@ describe('Recruiters', function () {
       chai
         .request(app)
         .post('/members/intro/invalidUsername')
-        .send({
-          company: 'Test-feature',
-          first_name: 'Ankita',
-          last_name: 'Bannore',
-          designation: 'Student',
-          reason: 'Test',
-          email: 'abc@gmail.com',
-          currency: '$',
-          package: 100000
-        })
+        .send(recruiterData)
         .end((err, res) => {
           if (err) { return done() }
 
