@@ -375,6 +375,35 @@ const swaggerOptions = {
             }
           }
         },
+        recruiters: {
+          type: 'object',
+          properties: {
+            company: {
+              type: 'string'
+            },
+            first_name: {
+              type: 'string'
+            },
+            last_name: {
+              type: 'string'
+            },
+            designation: {
+              type: 'string'
+            },
+            reason: {
+              type: 'string'
+            },
+            email: {
+              type: 'string'
+            },
+            currency: {
+              type: 'string'
+            },
+            package: {
+              type: 'number'
+            }
+          }
+        },
         users: {
           type: 'object',
           properties: {
