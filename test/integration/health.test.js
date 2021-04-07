@@ -8,7 +8,7 @@ const authService = require('../../services/authService')
 const addUser = require('../utils/addUser')
 const config = require('config')
 const cookieName = config.get('userToken.cookieName')
-describe('healthController', function () {
+describe('health', function () {
   it('should return uptime from the healthcheck API', function (done) {
     chai
       .request(app)
