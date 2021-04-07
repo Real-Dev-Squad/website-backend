@@ -25,14 +25,14 @@ const addRecruiterInfo = async (recruiterData, username) => {
     const userInfo = `${userFirstName} ${userLastName} (${userEmail})`
     recruiterData.timestamp = Date.now()
     // Add the recruiter data in DB
-    const recruiterInfo = await recruiterModel.add(recruiterData)
+    const { id } = await recruiterModel.add(recruiterData)
     // Fetch the recruiter from DB
-    const recruiter = (await recruiterModel.doc(recruiterInfo.id).get()).data()
+    const { first_name: firstName, last_name: lastName, timestamp } = (await recruiterModel.doc(id).get()).data()
     return {
-      recruiterId: recruiterInfo.id,
-      recruiterName: `${recruiter.first_name} ${recruiter.last_name}`,
+      recruiterId: id,
+      recruiterName: `${firstName} ${lastName}`,
       userInfo: userInfo,
-      timestamp: recruiter.timestamp
+      timestamp: timestamp
     }
   } catch (err) {
     logger.error('Error in adding recruiter', err)

@@ -13,8 +13,10 @@ const addRecruiter = async (req, res) => {
     if (!result) {
       return res.boom.notFound('User doesn\'t exist')
     }
-    result.message = 'Request Submission Successful!!'
-    return res.json(result)
+    return res.json({
+      message: 'Request Submission Successful!!',
+      result
+    })
   } catch (error) {
     logger.error(`Error while adding recruiterInfo: ${error}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')

@@ -1,8 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const members = require('../controllers/members')
-const recruitersController = require('../controllers/recruiters')
-const recruiterValidator = require('../middlewares/validators/recruiter')
+const { addRecruiter } = require('../controllers/recruiters')
+const { validateRecruiter } = require('../middlewares/validators/recruiter')
 
 /**
  * @swagger
@@ -82,6 +82,6 @@ router.get('/idle', members.getIdleMembers)
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.post('/intro/:username', recruiterValidator.validateRecruiter, recruitersController.addRecruiter)
+router.post('/intro/:username', validateRecruiter, addRecruiter)
 
 module.exports = router
