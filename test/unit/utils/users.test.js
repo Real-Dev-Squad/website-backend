@@ -19,9 +19,12 @@ const tasks = require('../../../models/tasks')
 
 describe('users', function () {
   let userId, taskId
+  let username, userData
   let task, taskData
   beforeEach(async function () {
     userId = await addUser()
+    userData = userDataArray[0]
+    username = userData.username
 
     taskData = {
       title: 'Test task',
@@ -56,25 +59,20 @@ describe('users', function () {
 
   describe('getUsername', function () {
     it('should receive userId of user from database and return username', async function () {
-      const userData = userDataArray[0]
-      const username = await usersUtils.getUsername(userId)
-      expect(username).to.equal(userData.username)
+      const convertedUsername = await usersUtils.getUsername(userId)
+      expect(convertedUsername).to.equal(username)
     })
   })
 
   describe('getUserId', function () {
     it('should receive username of user and return userId', async function () {
-      const userData1 = userDataArray[0]
-      const username1 = userData1.username
-      const userId1 = await usersUtils.getUserId(username1)
-      expect(userId1).to.equal(userId)
+      const convertedUserId = await usersUtils.getUserId(username)
+      expect(convertedUserId).to.equal(userId)
     })
   })
 
   describe('getParticipantUsernames', function () {
     it('should receive userId of users from database and return their usernames', async function () {
-      const userData = userDataArray[0]
-      const username = userData.username
       const participantArray = task.taskData.participants
       const participantUsername = await usersUtils.getParticipantUsernames(participantArray)
 
