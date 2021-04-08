@@ -93,7 +93,7 @@ The following project structure should be followed:
 - Run the project locally, make sure the server is listening to requests
 - Navigate to `https://github.com/login/oauth/authorize?client_id=<GITHUB_CLIENT_ID>`
 - Authorize the application
-- Once authorized, check browser's cookies section. There's your 🍪 named `rds-session` (`rds-session-development` in development mode).
+- Once authorized, check browser's cookies section. Copy the value of the cookie named `rds-session` (`rds-session-development` for development mode).
 - Use the cookie for authenticated routes in the API.
 - For non-production environments, authentication is also supported with the `Authorization` header.
 - Authorization header: `Authorization: Bearer <token>`
