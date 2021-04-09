@@ -3,7 +3,7 @@ const tasksModel = firestore.collection('tasks')
 const { fetchUser } = require('./users')
 const userUtils = require('../utils/users')
 
-const convertUserIdsToUsernames = async (task) => {
+const fromFirestoreData = async (task) => {
   if (!task) {
     return task
   }
@@ -32,7 +32,7 @@ const convertUserIdsToUsernames = async (task) => {
   }
 }
 
-const convertUsernamesToUserIds = async (task) => {
+const toFirestoreData = async (task) => {
   if (!task) {
     return task
   }
@@ -64,7 +64,7 @@ const convertUsernamesToUserIds = async (task) => {
  */
 const updateTask = async (taskData, taskId = null) => {
   try {
-    taskData = await convertUsernamesToUserIds(taskData)
+    taskData = await toFirestoreData(taskData)
     if (taskId) {
       const task = await tasksModel.doc(taskId).get()
       await tasksModel.doc(taskId).set({
@@ -75,7 +75,7 @@ const updateTask = async (taskData, taskId = null) => {
     }
     const taskInfo = await tasksModel.add(taskData)
 
-    return { taskId: taskInfo.id, taskDetails: await convertUserIdsToUsernames(taskData) }
+    return { taskId: taskInfo.id, taskDetails: await fromFirestoreData(taskData) }
   } catch (err) {
     logger.error('Error in creating task', err)
     throw err
@@ -97,7 +97,7 @@ const fetchTasks = async () => {
         ...task.data()
       })
     })
-    const promises = tasks.map(async (task) => convertUserIdsToUsernames(task))
+    const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
     return updatedTasks
   } catch (err) {
@@ -140,7 +140,7 @@ const fetchTask = async (taskId) => {
   try {
     const task = await tasksModel.doc(taskId).get()
     const taskData = task.data()
-    return { taskData: await convertUserIdsToUsernames(taskData) }
+    return { taskData: await fromFirestoreData(taskData) }
   } catch (err) {
     logger.error('Error retrieving task data', err)
     throw err
@@ -180,7 +180,7 @@ const fetchUserTasks = async (username, statuses = []) => {
         ...task.data()
       })
     })
-    const promises = tasks.map(async (task) => convertUserIdsToUsernames(task))
+    const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
     return updatedTasks
   } catch (err) {
