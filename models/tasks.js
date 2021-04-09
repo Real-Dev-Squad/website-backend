@@ -163,11 +163,16 @@ const fetchUserTasks = async (username, statuses = []) => {
   try {
     const { user } = await fetchUser({ username })
     const userId = await userUtils.getUserId(user.username)
-    const tasksQuery = tasksModel.where('participants', 'array-contains', userId)
+    let tasksSnapshot = []
     if (statuses && statuses.length) {
-      tasksQuery.where('status', 'in', statuses)
+      tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
+        .where('status', 'in', statuses)
+        .get()
+    } else {
+      tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
+        .get()
     }
-    const tasksSnapshot = await tasksQuery.get()
+
     const tasks = []
     tasksSnapshot.forEach((task) => {
       tasks.push({
