@@ -195,7 +195,7 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
  */
 
 const fetchUserCompletedTasks = async (username) => {
-  return fetchUserTasks(username, ['completed'])
+  return await fetchUserTasks(username, ['completed'])
 }
 
 module.exports = {
