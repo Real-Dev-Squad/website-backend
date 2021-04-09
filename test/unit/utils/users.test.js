@@ -10,7 +10,7 @@ const { expect } = chai
 const usersUtils = require('../../../utils/users')
 const cleanDb = require('../../utils/cleanDb')
 const addUser = require('../../utils/addUser')
-const userDataArray = require('../../fixtures/user/user')()
+const userData = require('../../fixtures/user/user')()[0]
 const tasks = require('../../../models/tasks')
 
 /**
@@ -18,37 +18,32 @@ const tasks = require('../../../models/tasks')
  */
 
 describe('users', function () {
-  let userId, taskId
-  let username, userData
-  let task, taskData
+  let userId, taskId, task
+  const taskData = {
+    title: 'Test task',
+    purpose: 'To Test mocha',
+    featureUrl: '<testUrl>',
+    type: 'Dev | Group',
+    links: [
+      'test1'
+    ],
+    endsOn: '<unix timestamp>',
+    startedOn: '<unix timestamp>',
+    status: 'active',
+    ownerId: 'ankur',
+    percentCompleted: 10,
+    dependsOn: [
+      'd12',
+      'd23'
+    ],
+    participants: ['ankur'],
+    completionAward: { gold: 3, bronze: 300 },
+    lossRate: { gold: 1 },
+    isNoteWorthy: true
+  }
+
   beforeEach(async function () {
     userId = await addUser()
-    userData = userDataArray[0]
-    username = userData.username
-
-    taskData = {
-      title: 'Test task',
-      purpose: 'To Test mocha',
-      featureUrl: '<testUrl>',
-      type: 'Dev | Group',
-      links: [
-        'test1'
-      ],
-      endsOn: '<unix timestamp>',
-      startedOn: '<unix timestamp>',
-      status: 'active',
-      ownerId: 'ankur',
-      percentCompleted: 10,
-      dependsOn: [
-        'd12',
-        'd23'
-      ],
-      participants: ['ankur'],
-      completionAward: { gold: 3, bronze: 300 },
-      lossRate: { gold: 1 },
-      isNoteWorthy: true
-    }
-
     taskId = (await tasks.updateTask(taskData)).taskId
     task = await tasks.fetchTask(taskId)
   })
@@ -60,13 +55,13 @@ describe('users', function () {
   describe('getUsername', function () {
     it('should receive userId of user from database and return username', async function () {
       const convertedUsername = await usersUtils.getUsername(userId)
-      expect(convertedUsername).to.equal(username)
+      expect(convertedUsername).to.equal(userData.username)
     })
   })
 
   describe('getUserId', function () {
     it('should receive username of user and return userId', async function () {
-      const convertedUserId = await usersUtils.getUserId(username)
+      const convertedUserId = await usersUtils.getUserId(userData.username)
       expect(convertedUserId).to.equal(userId)
     })
   })
@@ -76,7 +71,7 @@ describe('users', function () {
       const participantArray = task.taskData.participants
       const participantUsername = await usersUtils.getParticipantUsernames(participantArray)
 
-      expect(participantUsername).to.include(username)
+      expect(participantUsername).to.include(userData.username)
     })
   })
 
