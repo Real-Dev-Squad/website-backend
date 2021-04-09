@@ -24,7 +24,8 @@ const createTask = async (req, res, next) => {
       silver: joi.number(),
       bronze: joi.number()
     }).optional(),
-    isNoteworthy: joi.bool().optional()
+    isNoteworthy: joi.bool().optional(),
+    assignedTo: joi.string().optional() // username
   })
 
   try {
@@ -60,7 +61,8 @@ const updateTask = async (req, res, next) => {
       silver: joi.number(),
       bronze: joi.number()
     }).optional(),
-    isNoteworthy: joi.bool().optional()
+    isNoteworthy: joi.bool().optional(),
+    assignedTo: joi.string().optional() // username
   })
 
   try {

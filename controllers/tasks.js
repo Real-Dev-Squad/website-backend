@@ -8,7 +8,13 @@ const tasks = require('../models/tasks')
  */
 const addNewTask = async (req, res) => {
   try {
-    const task = await tasks.updateTask(req.body)
+    const { username } = req.userData
+    const body = {
+      ...req.body,
+      createdBy: username
+    }
+    const task = await tasks.updateTask(body)
+
     return res.json({
       message: 'Task created successfully!',
       task: task.taskDetails,

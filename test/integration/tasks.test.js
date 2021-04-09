@@ -7,6 +7,7 @@ const app = require('../../server')
 const tasks = require('../../models/tasks')
 const authService = require('../../services/authService')
 const addUser = require('../utils/addUser')
+const userModel = require('../../models/users')
 const config = require('config')
 const cookieName = config.get('userToken.cookieName')
 chai.use(chaiHttp)
@@ -102,7 +103,8 @@ describe('Tasks', function () {
           participants: ['ankur'],
           completionAward: { gold: 3, bronze: 300 },
           lossRate: { gold: 1 },
-          isNoteworthy: true
+          isNoteworthy: true,
+          assignedTo: 'ankur'
         })
         .end((err, res) => {
           if (err) { return done(err) }
@@ -112,6 +114,8 @@ describe('Tasks', function () {
           expect(res.body.id).to.be.a('string')
           expect(res.body.task).to.be.a('object')
           expect(res.body.task.ownerId).to.equal('ankur')
+          expect(res.body.task.createdBy).to.equal('ankur')
+          expect(res.body.task.assignedTo).to.equal('ankur')
           expect(res.body.task.participants).to.include('ankur')
           return done()
         })
@@ -195,6 +199,19 @@ describe('Tasks', function () {
   })
 
   describe('PATCH /tasks', function () {
+    before(async function () {
+      const user = {
+        first_name: 'Prakash',
+        last_name: 'C',
+        yoe: 0,
+        img: './img.png',
+        github_id: 'prakashchoudhary07',
+        username: 'sumit'
+      }
+      // Adding user
+      await userModel.addOrUpdate(user)
+    })
+
     it('Should update the task for the given taskid', function (done) {
       chai
         .request(app)
