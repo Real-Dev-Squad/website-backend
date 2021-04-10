@@ -2,58 +2,7 @@ const firestore = require('../utils/firestore')
 const tasksModel = firestore.collection('tasks')
 const { fetchUser } = require('./users')
 const userUtils = require('../utils/users')
-
-const fromFirestoreData = async (task) => {
-  if (!task) {
-    return task
-  }
-  const { getUsername, getParticipantUsernames } = userUtils
-  let { ownerId, createdBy, assignedTo, participants } = task
-  if (ownerId) {
-    ownerId = await getUsername(ownerId)
-  }
-  if (createdBy) {
-    createdBy = await getUsername(createdBy)
-  }
-  if (assignedTo) {
-    assignedTo = await getUsername(assignedTo)
-  }
-
-  if (participants) {
-    participants = await getParticipantUsernames(participants)
-  }
-
-  return {
-    ...task,
-    ownerId,
-    createdBy,
-    assignedTo,
-    participants
-  }
-}
-
-const toFirestoreData = async (task) => {
-  if (!task) {
-    return task
-  }
-  const updatedTask = { ...task }
-  const { getUserId, getParticipantUserIds } = userUtils
-  const { ownerId, createdBy, assignedTo, participants } = task
-  if (ownerId) {
-    updatedTask.ownerId = await getUserId(ownerId)
-  }
-  if (createdBy) {
-    updatedTask.createdBy = await getUserId(createdBy)
-  }
-  if (assignedTo) {
-    updatedTask.assignedTo = await getUserId(assignedTo)
-  }
-
-  if (participants) {
-    updatedTask.participants = await getParticipantUserIds(participants)
-  }
-  return updatedTask
-}
+const { fromFirestoreData, toFirestoreData } = require('../utils/tasks')
 
 /**
  * Adds and Updates tasks
@@ -74,8 +23,9 @@ const updateTask = async (taskData, taskId = null) => {
       return { taskId }
     }
     const taskInfo = await tasksModel.add(taskData)
+    const taskDetails = await fromFirestoreData(taskData)
 
-    return { taskId: taskInfo.id, taskDetails: await fromFirestoreData(taskData) }
+    return { taskId: taskInfo.id, taskDetails }
   } catch (err) {
     logger.error('Error in creating task', err)
     throw err
@@ -164,17 +114,31 @@ const fetchUserTasks = async (username, statuses = []) => {
     const { user } = await fetchUser({ username })
     const userId = await userUtils.getUserId(user.username)
     let tasksSnapshot = []
+    let assignedToSnapshot = []
+
     if (statuses && statuses.length) {
       tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
+        .where('status', 'in', statuses)
+        .get()
+      assignedToSnapshot = await tasksModel.where('assignedTo', '==', userId)
         .where('status', 'in', statuses)
         .get()
     } else {
       tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
         .get()
+      assignedToSnapshot = await tasksModel.where('assignedTo', '==', userId)
+        .get()
     }
 
     const tasks = []
     tasksSnapshot.forEach((task) => {
+      tasks.push({
+        id: task.id,
+        ...task.data()
+      })
+    })
+
+    assignedToSnapshot.forEach((task) => {
       tasks.push({
         id: task.id,
         ...task.data()

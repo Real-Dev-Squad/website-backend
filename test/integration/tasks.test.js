@@ -178,6 +178,44 @@ describe('Tasks', function () {
         })
     })
 
+    it('Should return assignedTo task', async function () {
+      const { userId: assignedUser } = await userModel.addOrUpdate({
+        github_id: 'prakashchoudhary07',
+        username: 'user1'
+      })
+      const assignedTask = {
+        title: 'Assigned task',
+        purpose: 'To Test mocha',
+        featureUrl: '<testUrl>',
+        type: 'Dev | Group',
+        links: [
+          'test1'
+        ],
+        endsOn: '<unix timestamp>',
+        startedOn: '<unix timestamp>',
+        status: 'active',
+        ownerId: 'ankur',
+        percentCompleted: 10,
+        dependsOn: [
+          'd12',
+          'd23'
+        ],
+        participants: ['ankur'],
+        completionAward: { gold: 3, bronze: 300 },
+        lossRate: { gold: 1 },
+        isNoteworthy: true,
+        assignedTo: 'user1'
+      }
+      const { taskId } = await tasks.updateTask(assignedTask)
+      const res = await chai
+        .request(app)
+        .get('/tasks/self')
+        .set('cookie', `${cookieName}=${authService.generateAuthToken({ userId: assignedUser })}`)
+      expect(res).to.have.status(200)
+      expect(res.body).to.be.a('array')
+      expect(res.body[0].id).to.equal(taskId)
+    })
+
     it('Should return 401 if not logged in', function (done) {
       chai
         .request(app)
@@ -200,16 +238,10 @@ describe('Tasks', function () {
 
   describe('PATCH /tasks', function () {
     before(async function () {
-      const user = {
-        first_name: 'Prakash',
-        last_name: 'C',
-        yoe: 0,
-        img: './img.png',
+      await userModel.addOrUpdate({
         github_id: 'prakashchoudhary07',
         username: 'sumit'
-      }
-      // Adding user
-      await userModel.addOrUpdate(user)
+      })
     })
 
     it('Should update the task for the given taskid', function (done) {

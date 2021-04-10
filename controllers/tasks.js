@@ -8,10 +8,10 @@ const tasks = require('../models/tasks')
  */
 const addNewTask = async (req, res) => {
   try {
-    const { username } = req.userData
+    const { id: createdBy } = req.userData
     const body = {
       ...req.body,
-      createdBy: username
+      createdBy
     }
     const task = await tasks.updateTask(body)
 
