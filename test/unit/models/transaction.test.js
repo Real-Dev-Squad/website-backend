@@ -9,7 +9,7 @@ const { expect } = chai
 
 const cleanDb = require('../../utils/cleanDb')
 const transactionModelImpl = require('../../../models/transaction')
-const transactionDataArray = require('../../fixtures/transaction/transactions')()
+const transactionDataArray = require('../../fixtures/transaction/transaction')()
 
 /**
  * Test the model functions and validate the data stored
