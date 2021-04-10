@@ -25,7 +25,7 @@ describe('transaction', function () {
       const transactionData = transactionDataArray[0]
       const data = await transactionModelImpl.fetch('kratika', 0, 2, 'DESC')
       Object.keys(transactionData).forEach(key => {
-        expect(data[key]).to.deep.equal(data[key])
+        expect(transactionData[key]).to.deep.equal(data[key])
       })
     })
   })
