@@ -27,7 +27,6 @@ const fetchMembers = async () => {
       })
     }
     )
-
     return allMembers
   } catch (err) {
     logger.error('Error retrieving members data', err)
