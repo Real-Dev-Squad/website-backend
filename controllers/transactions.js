@@ -11,7 +11,7 @@ const fetch = async (req, res) => {
   try {
     const userId = await getUserId(req.params.username)
     if (userId) {
-      const orderBy = parseInt(req.query.orderBy, 10) || 'DESC'
+      const orderBy = req.query.orderBy|| 'DESC'
       const offset = parseInt(req.query.offset, 10) || 0
       const limit = parseInt(req.query.limit, 10) + offset || 10
       const data = await transactionsModel.fetch(userId, offset, limit, orderBy)
