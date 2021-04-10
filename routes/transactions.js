@@ -8,7 +8,7 @@ const transactions = require('../controllers/transactions.js')
  *   get:
  *     summary: Transactions done by username in Real Dev Squad
  *     tags:
- *       - Transaction Management
+ *       - Transactions
  *     responses:
  *       200:
  *         description: Transaction Management
