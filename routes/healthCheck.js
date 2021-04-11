@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
-const healthController = require('../controllers/healthController')
+const health = require('../controllers/health')
 
 /**
  * @swagger
@@ -18,7 +18,7 @@ const healthController = require('../controllers/healthController')
  *             schema:
  *               $ref: '#/components/schemas/healthCheck'
  */
-router.get('/', healthController.healthCheck)
+router.get('/', health.healthCheck)
 
 /**
  * @swagger
@@ -43,6 +43,6 @@ router.get('/', healthController.healthCheck)
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
  */
-router.get('/v2', authenticate, healthController.healthCheck)
+router.get('/v2', authenticate, health.healthCheck)
 
 module.exports = router

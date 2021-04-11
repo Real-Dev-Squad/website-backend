@@ -12,7 +12,7 @@ chai.use(chaiHttp)
 // Import fixtures
 const githubUserInfo = require('../fixtures/auth/githubUserInfo')()
 
-describe('authController', function () {
+describe('auth', function () {
   afterEach(async function () {
     await cleanDb()
 
