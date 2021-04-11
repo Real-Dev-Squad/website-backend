@@ -1,4 +1,4 @@
-const tradeModel = require('../models/trading')
+const tradeService = require('../services/tradingService')
 /**
  * New Trading Request
  *
@@ -13,7 +13,7 @@ const trade = async (req, res) => {
       username,
       userId
     }
-    const { canUserTrade, errorMessage, userBalance } = await tradeModel.trade(tradeStockData)
+    const { canUserTrade, errorMessage, userBalance } = await tradeService.trade(tradeStockData)
 
     if (!canUserTrade) {
       return res.boom.forbidden(errorMessage)
