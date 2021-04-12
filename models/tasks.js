@@ -23,9 +23,12 @@ const updateTask = async (taskData, taskId = null) => {
       return { taskId }
     }
     const taskInfo = await tasksModel.add(taskData)
-    const taskDetails = await fromFirestoreData(taskData)
+    const result = {
+      taskId: taskInfo.id,
+      taskDetails: await fromFirestoreData(taskData)
+    }
 
-    return { taskId: taskInfo.id, taskDetails }
+    return result
   } catch (err) {
     logger.error('Error in creating task', err)
     throw err
