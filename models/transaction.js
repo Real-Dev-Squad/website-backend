@@ -15,7 +15,7 @@ const transactionsModel = firestore.collection('transaction')
  * @param orderBy { String }: to order the transactions in ascending or descending manner, by default will fetch latest first
  * @returns {Promise<{transactions: []}>}
  */
-const fetch = async (userId, offset, limit, orderBy) => {
+const fetchByUserid = async (userId, offset, limit, orderBy) => {
   const transactionsRef = await transactionsModel.where('userId', '==', userId).get()
 
   const transactions = []
@@ -32,5 +32,5 @@ const fetch = async (userId, offset, limit, orderBy) => {
 }
 
 module.exports = {
-  fetch
+  fetchByUserid
 }
