@@ -3,27 +3,25 @@ const joi = require('joi')
 const createTask = async (req, res, next) => {
   const schema = joi.object().keys({
     title: joi.string().required(),
-    purpose: joi.string().required(),
+    purpose: joi.string().optional(),
     featureUrl: joi.string().optional(),
     type: joi.string().required(),
-    links: joi.array().items(joi.string()),
-    endsOn: joi.string(),
+    links: joi.array().items(joi.string()).optional(),
+    endsOn: joi.string().required(),
     startedOn: joi.string().required(),
     status: joi.string().required(),
-    ownerId: joi.string().required(),
-    percentCompleted: joi.number().optional(),
-    dependsOn: joi.array().items(joi.string()),
-    participants: joi.array().items(joi.string()),
+    assignee: joi.string().optional(),
+    percentCompleted: joi.number().required(),
+    dependsOn: joi.array().items(joi.string()).optional(),
+    participants: joi.array().items(joi.string()).optional(),
     completionAward: joi.object().keys({
-      gold: joi.number(),
-      silver: joi.number(),
-      bronze: joi.number()
-    }).optional(),
+      dinero: joi.number().optional(),
+      neelam: joi.number().optional()
+    }),
     lossRate: joi.object().keys({
-      gold: joi.number(),
-      silver: joi.number(),
-      bronze: joi.number()
-    }).optional(),
+      dinero: joi.number().optional(),
+      neelam: joi.number().optional()
+    }),
     isNoteworthy: joi.bool().optional()
   })
 
@@ -42,24 +40,22 @@ const updateTask = async (req, res, next) => {
     purpose: joi.string().optional(),
     featureUrl: joi.string().optional(),
     type: joi.string().optional(),
-    links: joi.array().items(joi.string()),
+    links: joi.array().items(joi.string()).optional(),
     endsOn: joi.string().optional(),
     startedOn: joi.string().optional(),
     status: joi.string().optional(),
-    ownerId: joi.string().optional(),
+    assignee: joi.string().optional(),
     percentCompleted: joi.number().optional(),
-    dependsOn: joi.array().items(joi.string()),
-    participants: joi.array().items(joi.string()),
+    dependsOn: joi.array().items(joi.string()).optional(),
+    participants: joi.array().items(joi.string()).optional(),
     completionAward: joi.object().keys({
-      gold: joi.number(),
-      silver: joi.number(),
-      bronze: joi.number()
-    }).optional(),
+      dinero: joi.number().optional(),
+      neelam: joi.number().optional()
+    }),
     lossRate: joi.object().keys({
-      gold: joi.number(),
-      silver: joi.number(),
-      bronze: joi.number()
-    }).optional(),
+      dinero: joi.number().optional(),
+      neelam: joi.number().optional()
+    }),
     isNoteworthy: joi.bool().optional()
   })
 

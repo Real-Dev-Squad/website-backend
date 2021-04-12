@@ -19,13 +19,21 @@ const updateTask = async (taskData, taskId = null) => {
       })
       return { taskId }
     }
-    const participants = await userUtils.getParticipantUserIds(taskData.participants)
-    const ownerId = await userUtils.getUserId(taskData.ownerId)
-    const newTaskData = ({
-      ...taskData,
-      participants,
-      ownerId
-    })
+
+    const newTaskData = {
+      ...taskData
+    }
+
+    if (taskData.type === 'group') {
+      const participants = await userUtils.getParticipantUserIds(taskData.participants)
+      newTaskData.participants = participants
+    }
+
+    if (taskData.type === 'dev') {
+      const assignee = await userUtils.getUserId(taskData.assignee)
+      newTaskData.assignee = assignee
+    }
+
     const taskInfo = await tasksModel.add(newTaskData)
     return { taskId: taskInfo.id, taskDetails: taskData }
   } catch (err) {
@@ -50,9 +58,21 @@ const fetchTasks = async () => {
       })
     })
     const promises = tasks.map(async (task) => {
-      const participants = await userUtils.getParticipantUsernames(task.participants)
-      const ownerId = await userUtils.getUsername(task.ownerId)
-      return { ...task, ownerId, participants }
+      const newTaskData = {
+        ...task
+      }
+
+      if (task.type === 'group') {
+        const participants = await userUtils.getParticipantUsernames(task.participants)
+        newTaskData.participants = participants
+      }
+
+      if (task.type === 'dev') {
+        const assignee = await userUtils.getUsername(task.assignee)
+        newTaskData.assignee = assignee
+      }
+
+      return newTaskData
     })
     const updatedTasks = await Promise.all(promises)
     return updatedTasks
@@ -118,9 +138,18 @@ const fetchUserTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
     const userId = await userUtils.getUserId(user.username)
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId).get()
     const tasks = []
-    tasksSnapshot.forEach((task) => {
+    const groupTasks = await tasksModel.where('participants', 'array-contains', userId).get()
+    const devTasks = await tasksModel.where('assignee', '==', userId).get()
+
+    groupTasks.forEach((task) => {
+      tasks.push({
+        id: task.id,
+        ...task.data()
+      })
+    })
+
+    devTasks.forEach((task) => {
       tasks.push({
         id: task.id,
         ...task.data()
@@ -137,9 +166,18 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
     const userId = await userUtils.getUserId(user.username)
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId).where('status', 'in', ['active', 'pending', 'blocked']).get()
     const tasks = []
-    tasksSnapshot.forEach((task) => {
+    const groupTasks = await tasksModel.where('participants', 'array-contains', userId).where('status', 'in', ['active', 'pending', 'blocked']).get()
+    const devTasks = await tasksModel.where('assignee', '==', userId).where('status', 'in', ['active', 'pending', 'blocked']).get()
+
+    groupTasks.forEach((task) => {
+      tasks.push({
+        id: task.id,
+        ...task.data()
+      })
+    })
+
+    devTasks.forEach((task) => {
       tasks.push({
         id: task.id,
         ...task.data()
@@ -163,9 +201,18 @@ const fetchUserCompletedTasks = async (username) => {
   try {
     const { user } = await fetchUser({ username })
     const userId = await userUtils.getUserId(user.username)
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId).where('status', '==', 'completed').get()
     const tasks = []
-    tasksSnapshot.forEach((task) => {
+    const groupTasks = await tasksModel.where('participants', 'array-contains', userId).where('status', '==', 'completed').get()
+    const devTasks = await tasksModel.where('assignee', '==', userId).where('status', '==', 'completed').get()
+
+    groupTasks.forEach((task) => {
+      tasks.push({
+        id: task.id,
+        ...task.data()
+      })
+    })
+
+    devTasks.forEach((task) => {
       tasks.push({
         id: task.id,
         ...task.data()
