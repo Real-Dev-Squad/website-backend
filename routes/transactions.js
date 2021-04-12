@@ -39,6 +39,6 @@ const transactions = require('../controllers/transactions.js')
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:username', transactions.fetchTransactionByUsername)
+router.get('/:username', transactions.fetchTransactionsByUserId)
 
 module.exports = router
