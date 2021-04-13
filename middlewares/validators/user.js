@@ -11,8 +11,6 @@ const updateUser = async (req, res, next) => {
     company: joi.string().optional(),
     designation: joi.string().optional(),
     img: joi.string().optional(),
-    github_display_name: joi.string().optional(),
-    github_id: joi.string().optional(),
     linkedin_id: joi.string().optional(),
     twitter_id: joi.string().optional(),
     instagram_id: joi.string().optional(),
