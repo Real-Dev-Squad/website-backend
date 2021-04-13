@@ -117,19 +117,19 @@ const fetchUserTasks = async (username, statuses = []) => {
     const { user } = await fetchUser({ username })
     const userId = await userUtils.getUserId(user.username)
     let tasksSnapshot = []
-    let assignedToSnapshot = []
+    let assigneeSnapshot = []
 
     if (statuses && statuses.length) {
       tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
         .where('status', 'in', statuses)
         .get()
-      assignedToSnapshot = await tasksModel.where('assignedTo', '==', userId)
+      assigneeSnapshot = await tasksModel.where('assignee', '==', userId)
         .where('status', 'in', statuses)
         .get()
     } else {
       tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
         .get()
-      assignedToSnapshot = await tasksModel.where('assignedTo', '==', userId)
+      assigneeSnapshot = await tasksModel.where('assignee', '==', userId)
         .get()
     }
 
@@ -141,7 +141,7 @@ const fetchUserTasks = async (username, statuses = []) => {
       })
     })
 
-    assignedToSnapshot.forEach((task) => {
+    assigneeSnapshot.forEach((task) => {
       tasks.push({
         id: task.id,
         ...task.data()

@@ -5,15 +5,12 @@ const fromFirestoreData = async (task) => {
   if (!task) {
     return task
   }
-  let { ownerId, createdBy, assignedTo, participants } = task
-  if (ownerId) {
-    ownerId = await getUsername(ownerId)
-  }
+  let { createdBy, assignee, participants } = task
   if (createdBy) {
     createdBy = await getUsername(createdBy)
   }
-  if (assignedTo) {
-    assignedTo = await getUsername(assignedTo)
+  if (assignee) {
+    assignee = await getUsername(assignee)
   }
 
   if (participants) {
@@ -22,9 +19,8 @@ const fromFirestoreData = async (task) => {
 
   return {
     ...task,
-    ownerId,
     createdBy,
-    assignedTo,
+    assignee,
     participants
   }
 }
@@ -34,12 +30,9 @@ const toFirestoreData = async (task) => {
     return task
   }
   const updatedTask = { ...task }
-  const { ownerId, assignedTo, participants } = task
-  if (ownerId) {
-    updatedTask.ownerId = await getUserId(ownerId)
-  }
-  if (assignedTo) {
-    updatedTask.assignedTo = await getUserId(assignedTo)
+  const { assignee, participants } = task
+  if (assignee) {
+    updatedTask.assignee = await getUserId(assignee)
   }
 
   if (participants) {

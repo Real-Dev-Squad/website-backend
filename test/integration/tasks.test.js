@@ -32,15 +32,14 @@ describe('Tasks', function () {
       endsOn: '<unix timestamp>',
       startedOn: '<unix timestamp>',
       status: 'active',
-      ownerId: 'ankur',
       percentCompleted: 10,
       dependsOn: [
         'd12',
         'd23'
       ],
       participants: ['ankur'],
-      completionAward: { gold: 3, bronze: 300 },
-      lossRate: { gold: 1 },
+      completionAward: { dinero: 3, neelam: 300 },
+      lossRate: { dinero: 1 },
       isNoteWorthy: true
     }, {
       title: 'Test task',
@@ -53,15 +52,14 @@ describe('Tasks', function () {
       endsOn: '<unix timestamp>',
       startedOn: '<unix timestamp>',
       status: 'completed',
-      ownerId: 'ankur',
       percentCompleted: 10,
       dependsOn: [
         'd12',
         'd23'
       ],
       participants: ['ankur'],
-      completionAward: { gold: 3, bronze: 300 },
-      lossRate: { gold: 1 },
+      completionAward: { dinero: 3, neelam: 300 },
+      lossRate: { dinero: 1 },
       isNoteworthy: true
     }]
 
@@ -94,17 +92,16 @@ describe('Tasks', function () {
           endsOn: '<unix timestamp>',
           startedOn: '<unix timestamp>',
           status: 'completed',
-          ownerId: 'ankur',
           percentCompleted: 10,
           dependsOn: [
             'd12',
             'd23'
           ],
           participants: ['ankur'],
-          completionAward: { gold: 3, bronze: 300 },
-          lossRate: { gold: 1 },
+          completionAward: { dinero: 3, neelam: 300 },
+          lossRate: { dinero: 1 },
           isNoteworthy: true,
-          assignedTo: 'ankur'
+          assignee: 'ankur'
         })
         .end((err, res) => {
           if (err) { return done(err) }
@@ -113,9 +110,8 @@ describe('Tasks', function () {
           expect(res.body.message).to.equal('Task created successfully!')
           expect(res.body.id).to.be.a('string')
           expect(res.body.task).to.be.a('object')
-          expect(res.body.task.ownerId).to.equal('ankur')
           expect(res.body.task.createdBy).to.equal('ankur')
-          expect(res.body.task.assignedTo).to.equal('ankur')
+          expect(res.body.task.assignee).to.equal('ankur')
           expect(res.body.task.participants).to.include('ankur')
           return done()
         })
@@ -134,7 +130,6 @@ describe('Tasks', function () {
           expect(res.body.message).to.equal('Tasks returned successfully!')
           expect(res.body.tasks).to.be.a('array')
           res.body.tasks.forEach((task) => {
-            expect(task.ownerId).to.equal('ankur')
             expect(task.participants).to.include('ankur')
           })
           return done()
@@ -178,7 +173,7 @@ describe('Tasks', function () {
         })
     })
 
-    it('Should return assignedTo task', async function () {
+    it('Should return assignee task', async function () {
       const { userId: assignedUser } = await userModel.addOrUpdate({
         github_id: 'prakashchoudhary07',
         username: 'user1'
@@ -194,17 +189,16 @@ describe('Tasks', function () {
         endsOn: '<unix timestamp>',
         startedOn: '<unix timestamp>',
         status: 'active',
-        ownerId: 'ankur',
         percentCompleted: 10,
         dependsOn: [
           'd12',
           'd23'
         ],
         participants: ['ankur'],
-        completionAward: { gold: 3, bronze: 300 },
-        lossRate: { gold: 1 },
+        completionAward: { dinero: 3, neelam: 300 },
+        lossRate: { dinero: 1 },
         isNoteworthy: true,
-        assignedTo: 'user1'
+        assignee: 'user1'
       }
       const { taskId } = await tasks.updateTask(assignedTask)
       const res = await chai
@@ -237,20 +231,13 @@ describe('Tasks', function () {
   })
 
   describe('PATCH /tasks', function () {
-    before(async function () {
-      await userModel.addOrUpdate({
-        github_id: 'prakashchoudhary07',
-        username: 'sumit'
-      })
-    })
-
     it('Should update the task for the given taskid', function (done) {
       chai
         .request(app)
         .patch('/tasks/' + taskId1)
         .set('cookie', `${cookieName}=${jwt}`)
         .send({
-          ownerId: 'sumit'
+          title: 'new-title'
         })
         .end((err, res) => {
           if (err) { return done(err) }
@@ -266,7 +253,7 @@ describe('Tasks', function () {
         .patch('/tasks/taskid')
         .set('cookie', `${cookieName}=${jwt}`)
         .send({
-          ownerId: 'umit'
+          title: 'new-title'
         })
         .end((err, res) => {
           if (err) { return done(err) }
