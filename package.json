@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "config": "^3.3.3",
+    "config": "^3.3.6",
     "cookie-parser": "~1.4.5",
     "cors": "^2.8.5",
     "debug": "~4.3.1",
@@ -30,28 +30,28 @@
     "morgan": "~1.10.0",
     "passport": "^0.4.1",
     "passport-github2": "^0.1.12",
-    "swagger-jsdoc": "^6.0.6",
+    "swagger-jsdoc": "^6.1.0",
     "swagger-ui-express": "^4.1.6",
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "chai": "^4.3.0",
+    "chai": "^4.3.4",
     "chai-http": "^4.3.0",
     "cross-env": "^7.0.3",
-    "eslint": "^7.20.0",
+    "eslint": "^7.24.0",
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-mocha": "^8.1.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.3.1",
+    "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-standard": "^4.1.0",
-    "mocha": "^8.3.0",
-    "nock": "^13.0.7",
+    "mocha": "^8.3.2",
+    "nock": "^13.0.11",
     "nodemon": "^2.0.7",
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
-    "sinon": "^9.2.4"
+    "sinon": "^10.0.0"
   },
   "pre-commit": [
     "lint"
