@@ -86,6 +86,12 @@ router.get('/stale', pullRequest.getStalePRs)
  *                    type: array
  *                    items:
  *                      $ref: '#/components/schemas/pullRequests'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/errors/notFound'
  *       500:
  *         description: badImplementation
  *         content:

@@ -87,9 +87,12 @@ function getFetch (url) {
 
 const fetchPRsByUser = async (username) => {
   try {
-    const { user } = await fetchUser({ username })
+    const { user: { github_id: githubId } } = await fetchUser({ username })
+    if (!githubId) {
+      return { userNotFound: true }
+    }
     const url = getGithubURL({
-      author: user.github_id
+      author: githubId
     })
     return getFetch(url)
   } catch (err) {
@@ -144,5 +147,6 @@ module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
   fetchStalePRs,
-  extractPRdetails
+  extractPRdetails,
+  getFetch
 }
