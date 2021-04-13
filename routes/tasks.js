@@ -1,8 +1,9 @@
 const express = require('express')
 const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
-const tasksController = require('../controllers/tasksController')
+const tasks = require('../controllers/tasks')
 const { createTask, updateTask } = require('../middlewares/validators/tasks')
+const authorizeOwner = require('../middlewares/authorizeOwner')
 
 /**
  * @swagger
@@ -26,7 +27,7 @@ const { createTask, updateTask } = require('../middlewares/validators/tasks')
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', tasksController.fetchTasks)
+router.get('/', tasks.fetchTasks)
 
 /**
  * @swagger
@@ -63,7 +64,7 @@ router.get('/', tasksController.fetchTasks)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/self', authenticate, tasksController.getSelfTasks)
+router.get('/self', authenticate, tasks.getSelfTasks)
 
 /**
  * @swagger
@@ -92,7 +93,7 @@ router.get('/self', authenticate, tasksController.getSelfTasks)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/', createTask, tasksController.addNewTask)
+router.post('/', authenticate, authorizeOwner, createTask, tasks.addNewTask)
 
 /**
  * @swagger
@@ -123,6 +124,6 @@ router.post('/', createTask, tasksController.addNewTask)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/:id', updateTask, tasksController.updateTask)
+router.patch('/:id', authenticate, authorizeOwner, updateTask, tasks.updateTask)
 
 module.exports = router

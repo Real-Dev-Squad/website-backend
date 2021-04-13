@@ -12,7 +12,7 @@ chai.use(chaiHttp)
 // Import fixtures
 const githubUserInfo = require('../fixtures/auth/githubUserInfo')()
 
-describe('authController', function () {
+describe('auth', function () {
   afterEach(async function () {
     await cleanDb()
 
@@ -66,6 +66,7 @@ describe('authController', function () {
         expect(res.headers['set-cookie'][0]).to.include('HttpOnly')
         expect(res.headers['set-cookie'][0]).to.include('Secure')
         expect(res.headers['set-cookie'][0]).to.include(`Domain=${rdsUiUrl.hostname}`)
+        expect(res.headers['set-cookie'][0]).to.include('SameSite=Lax')
 
         return done()
       })

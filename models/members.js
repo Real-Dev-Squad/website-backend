@@ -27,7 +27,6 @@ const fetchMembers = async () => {
       })
     }
     )
-
     return allMembers
   } catch (err) {
     logger.error('Error retrieving members data', err)
@@ -35,6 +34,16 @@ const fetchMembers = async () => {
   }
 }
 
+/**
+ * Checks whether the user is a superuser
+ * @return {Boolean}
+ */
+
+const isSuperUser = (username) => {
+  return username === 'ankush'
+}
+
 module.exports = {
-  fetchMembers
+  fetchMembers,
+  isSuperUser
 }

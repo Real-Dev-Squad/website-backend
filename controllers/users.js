@@ -1,6 +1,6 @@
 
 const userQuery = require('../models/users')
-
+const accountOwners = require('../mockdata/appOwners')
 /**
  * Fetches the data about our users
  *
@@ -19,6 +19,22 @@ const getUsers = async (req, res) => {
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')
+  }
+}
+
+/**
+ * Fetches the data about our account Owners
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getAccountOwners = async (req, res) => {
+  try {
+    return accountOwners
+  } catch (error) {
+    logger.error(`Error while fetching application owners: ${error}`)
+    return res.boom.badImplementation('Something went wrong please contact admin')
   }
 }
 
@@ -44,6 +60,25 @@ const getUser = async (req, res) => {
     return res.boom.notFound('User doesn\'t exist')
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`)
+    return res.boom.serverUnavailable('Something went wrong please contact admin')
+  }
+}
+
+/**
+ * checks whether a given username is available
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getUsernameAvailabilty = async (req, res) => {
+  try {
+    const result = await userQuery.fetchUser({ username: req.params.username })
+    return res.json({
+      isUsernameAvailable: !result.userExists
+    })
+  } catch (error) {
+    logger.error(`Error while checking user: ${error}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')
   }
 }
@@ -91,7 +126,8 @@ const updateSelf = async (req, res) => {
 
     const user = await userQuery.addOrUpdate(req.body, userId)
 
-    if (!user.isNewUser) {
+    if (!user.isNewUser) { // Success criteria, user finished the sign up process.
+      userQuery.initializeUser(userId)
       return res.status(204).send()
     }
 
@@ -106,5 +142,7 @@ module.exports = {
   updateSelf,
   getUsers,
   getSelfDetails,
-  getUser
+  getUser,
+  getUsernameAvailabilty,
+  getAccountOwners
 }
