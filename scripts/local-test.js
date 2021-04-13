@@ -1,4 +1,3 @@
-const fs = require('fs')
 const Firestore = require('../utils/firestore.js')
 const config = require('config')
 
@@ -10,25 +9,25 @@ if (
   throw new Error('Github credentials are not set.')
 } else {
   // eslint-disable-next-line no-console
-  console.log('Github cridentials are properly set.')
+  console.log('Github credentials are properly set.')
 }
 
-let firestoreData
+let firestoreConfig
 // throw an error if unable to read file
 try {
-  firestoreData = fs.readFileSync('./firestore-private-key.json', 'utf8')
+  firestoreConfig = JSON.parse(config.firestore)
   // eslint-disable-next-line no-console
-  console.log('Firestore-private-key.json file is correct.')
+  console.log('firestore config is correct.')
 } catch (error) {
-  throw new Error('Please make sure firestore-private-key.json file is correct')
+  throw new Error('Please make sure firestore config exists as a String (not an object) and is correctly set up.')
 }
 
-// check whether firestoreData is empty, null, and  undefined
-if (!firestoreData) {
-  throw new Error('Please make sure firestore-private-key.json file is not empty')
+// check whether firestoreConfig is empty, null, and  undefined
+if (!firestoreConfig) {
+  throw new Error('Please make sure firestore config is not empty')
 } else {
   // eslint-disable-next-line no-console
-  console.log('Firestore-private-key.json file is not empty.')
+  console.log('firestore config is not empty.')
 }
 
 // check local development have permission to read and write in firestore or not

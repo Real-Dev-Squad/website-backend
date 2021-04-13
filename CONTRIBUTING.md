@@ -82,7 +82,6 @@ The following project structure should be followed:
     |-- README.md
     |-- CHANGELOG.md
     |-- app.js
-    |-- firestore-private-key.json // Firestore key file
     |-- package-lock.json
     |-- package.json
     |-- server.js // Contains server start logic
