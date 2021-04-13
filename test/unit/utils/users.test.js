@@ -5,14 +5,12 @@ const usersUtils = require('../../../utils/users')
 const cleanDb = require('../../utils/cleanDb')
 const addUser = require('../../utils/addUser')
 const userData = require('../../fixtures/user/user')()[0]
-const tasks = require('../../../models/tasks')
-
 /**
  * Test the utils functions and validate the data returned
  */
 
 describe('users', function () {
-  let userId, taskId, task
+  let userId
   const taskData = {
     title: 'Test task',
     purpose: 'To Test mocha',
@@ -38,8 +36,6 @@ describe('users', function () {
 
   beforeEach(async function () {
     userId = await addUser()
-    taskId = (await tasks.updateTask(taskData)).taskId
-    task = await tasks.fetchTask(taskId)
   })
 
   afterEach(async function () {
@@ -62,9 +58,7 @@ describe('users', function () {
 
   describe('getParticipantUsernames', function () {
     it('should receive userId of users from database and return their usernames', async function () {
-      const participantArray = task.taskData.participants
-      const participantUsername = await usersUtils.getParticipantUsernames(participantArray)
-
+      const participantUsername = await usersUtils.getParticipantUsernames([userId])
       expect(participantUsername).to.include(userData.username)
     })
   })

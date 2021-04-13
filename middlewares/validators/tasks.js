@@ -1,4 +1,5 @@
 const joi = require('joi')
+const { DINERO, NEELAM } = require('../../constants/wallets')
 
 const createTask = async (req, res, next) => {
   const schema = joi.object().keys({
@@ -15,12 +16,12 @@ const createTask = async (req, res, next) => {
     dependsOn: joi.array().items(joi.string()).optional(),
     participants: joi.array().items(joi.string()).optional(),
     completionAward: joi.object().keys({
-      dinero: joi.number().optional(),
-      neelam: joi.number().optional()
+      [DINERO]: joi.number().optional(),
+      [NEELAM]: joi.number().optional()
     }),
     lossRate: joi.object().keys({
-      dinero: joi.number().optional(),
-      neelam: joi.number().optional()
+      [DINERO]: joi.number().optional(),
+      [NEELAM]: joi.number().optional()
     }),
     isNoteworthy: joi.bool().optional()
   })
@@ -49,12 +50,12 @@ const updateTask = async (req, res, next) => {
     dependsOn: joi.array().items(joi.string()).optional(),
     participants: joi.array().items(joi.string()).optional(),
     completionAward: joi.object().keys({
-      dinero: joi.number().optional(),
-      neelam: joi.number().optional()
+      [DINERO]: joi.number().optional(),
+      [NEELAM]: joi.number().optional()
     }),
     lossRate: joi.object().keys({
-      dinero: joi.number().optional(),
-      neelam: joi.number().optional()
+      [DINERO]: joi.number().optional(),
+      [NEELAM]: joi.number().optional()
     }),
     isNoteworthy: joi.bool().optional()
   })

@@ -10,6 +10,7 @@ const addUser = require('../utils/addUser')
 const userModel = require('../../models/users')
 const config = require('config')
 const cookieName = config.get('userToken.cookieName')
+const { DINERO, NEELAM } = require('../../constants/wallets')
 chai.use(chaiHttp)
 
 let jwt
@@ -38,8 +39,8 @@ describe('Tasks', function () {
         'd23'
       ],
       participants: ['ankur'],
-      completionAward: { dinero: 3, neelam: 300 },
-      lossRate: { dinero: 1 },
+      completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+      lossRate: { [DINERO]: 1 },
       isNoteWorthy: true
     }, {
       title: 'Test task',
@@ -58,8 +59,8 @@ describe('Tasks', function () {
         'd23'
       ],
       participants: ['ankur'],
-      completionAward: { dinero: 3, neelam: 300 },
-      lossRate: { dinero: 1 },
+      completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+      lossRate: { [DINERO]: 1 },
       isNoteworthy: true
     }]
 
@@ -98,8 +99,8 @@ describe('Tasks', function () {
             'd23'
           ],
           participants: ['ankur'],
-          completionAward: { dinero: 3, neelam: 300 },
-          lossRate: { dinero: 1 },
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
           isNoteworthy: true,
           assignee: 'ankur'
         })
@@ -195,8 +196,8 @@ describe('Tasks', function () {
           'd23'
         ],
         participants: ['ankur'],
-        completionAward: { dinero: 3, neelam: 300 },
-        lossRate: { dinero: 1 },
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
         isNoteworthy: true,
         assignee: 'user1'
       }
