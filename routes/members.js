@@ -84,6 +84,6 @@ router.get('/idle', members.getIdleMembers)
 
 router.post('/intro/:username', validateRecruiter, addRecruiter)
 
-router.post('/purgeCache', members.purgeMembersCache)
+router.post('/cache/clear/self', members.purgeMembersCache)
 
 module.exports = router
