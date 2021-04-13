@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
-const authorization = require('../middlewares/authorization')
+const { authorizeUser } = require('../middlewares/authorization')
 const { addNewStock, fetchStocks } = require('../controllers/stocks')
 const { createStock } = require('../middlewares/validators/stocks')
 
@@ -62,6 +62,6 @@ router.get('/', fetchStocks)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/', authenticate, authorization, createStock, addNewStock)
+router.post('/', authenticate, authorizeUser('superUser'), createStock, addNewStock)
 
 module.exports = router
