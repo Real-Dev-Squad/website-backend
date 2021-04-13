@@ -16,9 +16,8 @@ const updateUser = async (req, res, next) => {
     linkedin_id: joi.string().optional(),
     twitter_id: joi.string().optional(),
     instagram_id: joi.string().optional(),
-    site: joi.string().optional(),
-    isMember: joi.boolean().optional(),
-    tokens: joi.object().optional()
+    website: joi.string().optional(),
+    isMember: joi.boolean().optional()
   })
 
   try {
