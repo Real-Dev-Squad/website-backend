@@ -2,7 +2,7 @@ const axios = require('axios')
 const memberQuery = require('../models/members')
 const tasks = require('../models/tasks')
 
-const CLOUD_FARE_ZONE_ID = 'ba637cab83d148e6935cbba0b197d495'
+const CLOUD_FARE_ZONE_ID = config.get('CLOUD_FARE_ZONE_ID')
 const CLOUD_FARE_PURGE_CACHE_API = `https://api.cloudflare.com/client/v4/zones/${CLOUD_FARE_ZONE_ID}/purge_cache`
 
 /**
