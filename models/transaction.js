@@ -10,12 +10,12 @@ const transactionsModel = firestore.collection('transaction')
  * fetch latest N transactions from transactions collection for specific userid provided
  *
  * @param userId { String }: User Id String to be used to fetch latest transactions
- * @param size { number }: no of records to fetch from transaction table, if not specified in URL then default will be 10
- * @param startAt { number }: starting index of set of records, default value is 0, useful for pagination
+ * @param limit { number }: no of records to fetch from transaction table, if not specified in URL then default will be 10
+ * @param offset { number }: starting index of set of records, default value is 0, useful for pagination
  * @param orderBy { String }: to order the transactions in ascending or descending manner, by default will fetch latest first
  * @returns {Promise<{transactions: []}>}
  */
-const fetch = async (userId, startAt, size, orderBy) => {
+const fetchTransactionsByUserId = async (userId, offset, limit, orderBy) => {
   const transactionsRef = await transactionsModel.where('userId', '==', userId).get()
 
   const transactions = []
@@ -28,9 +28,9 @@ const fetch = async (userId, startAt, size, orderBy) => {
   transactions.sort((a, b) => {
     return orderBy === 'DESC' ? (a.dateInMillis > b.dateInMillis ? -1 : 1) : a.dateInMillis > b.dateInMillis ? 1 : -1
   })
-  return transactions.slice(startAt, size)
+  return transactions.slice(offset, limit)
 }
 
 module.exports = {
-  fetch
+  fetchTransactionsByUserId
 }

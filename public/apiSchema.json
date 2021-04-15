@@ -364,6 +364,35 @@
             }
           }
         },
+        "recruiters": {
+          "type": "object",
+          "properties": {
+            "company": {
+              "type": "string"
+            },
+            "first_name": {
+              "type": "string"
+            },
+            "last_name": {
+              "type": "string"
+            },
+            "designation": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "currency": {
+              "type": "string"
+            },
+            "package": {
+              "type": "number"
+            }
+          }
+        },
         "users": {
           "type": "object",
           "properties": {
@@ -1185,6 +1214,46 @@
           }
         }
       },
+      "/members/intro/:username": {
+        "post": {
+          "summary": "Posts details of the recruiter",
+          "tags": [
+            "Members"
+          ],
+          "responses": {
+            "200": {
+              "description": "Details of the recruiter and the member in which recruiter is interested",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/recruiters"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "notFound",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/errors/notFound"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "serverUnavailable",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/errors/serverUnavailable"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "/pullrequests/open": {
         "get": {
           "summary": "Latest 10 Pull Requests in Real Dev Squad",
@@ -1618,11 +1687,11 @@
           }
         }
       },
-      "/transactions/fetch/:username": {
+      "/transactions/:username": {
         "get": {
           "summary": "Transactions done by username in Real Dev Squad",
           "tags": [
-            "Transaction Management"
+            "Transactions"
           ],
           "responses": {
             "200": {

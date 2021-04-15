@@ -7,14 +7,14 @@ const { getUserId } = require('../utils/users')
  * @param res {Object} - Express response object
  */
 
-const fetch = async (req, res) => {
+const fetchTransactionsByUserId = async (req, res) => {
   try {
     const userId = await getUserId(req.params.username)
     if (userId) {
-      const orderBy = parseInt(req.query.orderBy, 10) || 'DESC'
-      const startAt = parseInt(req.query.startAt, 10) || 0
-      const size = parseInt(req.query.size, 10) + startAt || 10
-      const data = await transactionsModel.fetch(userId, startAt, size, orderBy)
+      const orderBy = req.query.orderBy || 'DESC'
+      const offset = parseInt(req.query.offset, 10) || 0
+      const limit = parseInt(req.query.limit, 10) + offset || 10
+      const data = await transactionsModel.fetchTransactionsByUserId(userId, offset, limit, orderBy)
       return res.json({
         message: data.length > 0 ? 'Transactions returned successfully!' : 'No transactions exist!',
         data
@@ -29,5 +29,5 @@ const fetch = async (req, res) => {
 }
 
 module.exports = {
-  fetch
+  fetchTransactionsByUserId
 }
