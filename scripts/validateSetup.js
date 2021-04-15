@@ -2,8 +2,10 @@ const Firestore = require('../utils/firestore.js')
 const config = require('config')
 
 // check whether github credentials are not falsy
-if (config.githubOauth.clientId === '<clientId>' ||
-    config.githubOauth.clientSecret === '<clientSecret>') {
+if (
+  config.githubOauth.clientId === '<clientId>' ||
+  config.githubOauth.clientSecret === '<clientSecret>'
+) {
   throw new Error('Github credentials are not set.')
 } else {
   // eslint-disable-next-line no-console
