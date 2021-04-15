@@ -29,6 +29,8 @@ module.exports = {
     clientSecret: 'GITHUB_CLIENT_SECRET'
   },
 
+  firestore: 'FIRESTORE_CONFIG',
+
   services: {
     rdsApi: {
       baseUrl: 'SERVICES_RDSAPI_BASEURL'
