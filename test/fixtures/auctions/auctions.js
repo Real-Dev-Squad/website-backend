@@ -8,10 +8,10 @@ const { NEELAM } = require('../../../constants/wallets')
  */
 
 const auctionData = {
-  itemType: NEELAM,
-  quantity: 5,
-  initialPrice: 1000,
-  endTime: Date.now() + 60 * 60 * 1000
+  item_type: NEELAM,
+  quantity: 2,
+  initial_price: 100,
+  end_time: Date.now() + 60 * 60 * 1000
 }
 
 module.exports = auctionData

@@ -85,7 +85,7 @@ router.get('/', auction.fetchAvailableAuctions)
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       204:
+ *       201:
  *         description: New bid
  *         content:
  *           application/json:
@@ -134,7 +134,7 @@ router.post('/bid/:id', authenticate, auctionValidator.placeBid, auction.makeNew
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       204:
+ *       201:
  *         description: New auction
  *         content:
  *           application/json:
