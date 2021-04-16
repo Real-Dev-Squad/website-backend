@@ -8,7 +8,7 @@ const chai = require('chai')
 const { expect } = chai
 
 const cleanDb = require('../../utils/cleanDb')
-const transactionModelImpl = require('../../../controllers/transactions')
+const transactionModelsImpl = require('../../../models/transaction')
 const transactionDataArray = require('../../fixtures/transaction/transactions')()
 
 /**
@@ -20,10 +20,10 @@ describe('transaction', function () {
     await cleanDb()
   })
 
-  describe('when fetch called, it ', function () {
+  describe('when fetchTransactionsByUserId called, it ', function () {
     it('should fetch transaction', async function () {
       const transactionData = transactionDataArray[0]
-      const data = await transactionModelImpl.fetchTransactionsByUserId('kratika', 0, 2, 'DESC')
+      const data = await transactionModelsImpl.fetchTransactionsByUserId('kratika', 0, 2, 'DESC')
       Object.keys(transactionData).forEach(key => {
         expect(data[key]).to.deep.equal(data[key])
       })
