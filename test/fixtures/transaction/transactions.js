@@ -16,12 +16,12 @@ module.exports = () => {
       dateInMillis: 1615710600000
     },
     {
-      userId: 'kratika',
+      amount: 130,
       userTo: 'Rishab',
-      amount: 400,
-      typeOfTransaction: 'Credit',
-      typeOfCurrency: 'Gold',
-      dateInMillis: 1615707000000
+      typeOfTransaction: 'Debit',
+      typeOfCurrency: 'neelam',
+      userId: 'kratika',
+      dateInMillis: 1615689000000
     }
   ]
 }

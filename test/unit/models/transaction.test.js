@@ -21,11 +21,18 @@ describe('transaction', function () {
   })
 
   describe('when fetchTransactionsByUserId called, it ', function () {
-    it('should fetch transaction', async function () {
+    it('in DESC order', async function () {
       const transactionData = transactionDataArray[0]
-      const data = await transactionModelsImpl.fetchTransactionsByUserId('kratika', 0, 2, 'DESC')
+      const data = await transactionModelsImpl.fetchTransactionsByUserId(transactionData.userId, 0, 1, 'DESC')
       Object.keys(transactionData).forEach(key => {
-        expect(data[key]).to.deep.equal(data[key])
+        expect(data.transactions[key]).to.deep.equal(transactionData[key])
+      })
+    })
+    it('in ASC order', async function () {
+      const transactionData = transactionDataArray[1]
+      const data = await transactionModelsImpl.fetchTransactionsByUserId(transactionData.userId, 0, 1, 'ASC')
+      Object.keys(transactionData).forEach(key => {
+        expect(data.transactions[key]).to.deep.equal(transactionData[key])
       })
     })
   })
