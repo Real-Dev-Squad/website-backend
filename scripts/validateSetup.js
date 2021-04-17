@@ -7,25 +7,25 @@ if (
   config.githubOauth.clientId === '<clientId>' ||
   config.githubOauth.clientSecret === '<clientSecret>'
 ) {
-  throw new Error('Github credentials are not set.')
+  throw new Error('❌ Github credentials are not set. ❌')
 } else {
-  console.log('Github credentials are properly set.')
+  console.info('✅ GitHub credentials are properly set.')
 }
 
 let firestoreConfig
 // throw an error if unable to read file
 try {
   firestoreConfig = JSON.parse(config.firestore)
-  console.log('firestore config is correct.')
+  console.info('✅ Firestore config is correct.')
 } catch (error) {
-  throw new Error('Please make sure firestore config exists as a String (not an object) and is correctly set up.')
+  throw new Error('⚠️ Please make sure firestore config exists as a String (not an object) and is correctly set up. ⚠️')
 }
 
 // check whether firestoreConfig is empty, null, and  undefined
 if (!firestoreConfig) {
-  throw new Error('Please make sure firestore config is not empty')
+  throw new Error('⚠️ Please make sure firestore config is not empty ⚠️')
 } else {
-  console.log('firestore config is not empty.')
+  console.info('✅ Firestore config is not empty.')
 }
 
 // check local development have permission to read and write in firestore or not
@@ -36,11 +36,11 @@ if (!firestoreConfig) {
   })
   const resp = await docRef.get('user')
   if (resp.data().user !== 'dummy') {
-    throw new Error('Problem with permission of read and write.\nCheck your firestore permissions')
+    throw new Error('⛔️ Problem with permission of read and write.\nPlease check your firestore permissions.')
   } else {
-    console.log('Local development has permission to read and write in firestore.')
+    console.info('✅ Local development has permission to read and write in firestore.')
   }
   await docRef.delete()
 
-  console.log('Success! The backend was successfully set up.')
+  console.info('\n🎉🎉🎉🎉🎉🎉 Success! The backend was successfully set up 👍. 🎉🎉🎉🎉🎉')
 })()
