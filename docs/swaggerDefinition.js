@@ -85,7 +85,7 @@ const swaggerOptions = {
             status: {
               type: 'string'
             },
-            ownerId: {
+            assignee: {
               type: 'string'
             },
             percentCompleted: {
@@ -102,7 +102,7 @@ const swaggerOptions = {
             participants: {
               type: 'array',
               items: {
-                userid: {
+                username: {
                   type: 'string'
                 }
               }
@@ -110,13 +110,10 @@ const swaggerOptions = {
             completionAward: {
               type: 'object',
               properties: {
-                gold: {
+                neelam: {
                   type: 'number'
                 },
-                silver: {
-                  type: 'number'
-                },
-                bronze: {
+                dinero: {
                   type: 'number'
                 }
               }
@@ -124,13 +121,10 @@ const swaggerOptions = {
             lossRate: {
               type: 'object',
               properties: {
-                gold: {
+                neelam: {
                   type: 'number'
                 },
-                silver: {
-                  type: 'number'
-                },
-                bronze: {
+                dinero: {
                   type: 'number'
                 }
               }
@@ -372,6 +366,35 @@ const swaggerOptions = {
             assignees: {
               type: 'array',
               items: []
+            }
+          }
+        },
+        recruiters: {
+          type: 'object',
+          properties: {
+            company: {
+              type: 'string'
+            },
+            first_name: {
+              type: 'string'
+            },
+            last_name: {
+              type: 'string'
+            },
+            designation: {
+              type: 'string'
+            },
+            reason: {
+              type: 'string'
+            },
+            email: {
+              type: 'string'
+            },
+            currency: {
+              type: 'string'
+            },
+            package: {
+              type: 'number'
             }
           }
         },
