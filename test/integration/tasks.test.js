@@ -24,34 +24,25 @@ describe('Tasks', function () {
 
     const taskData = [{
       title: 'Test task',
-      purpose: 'To Test mocha',
-      featureUrl: '<testUrl>',
-      type: 'Dev | Group',
-      links: [
-        'test1'
-      ],
-      endsOn: '<unix timestamp>',
-      startedOn: '<unix timestamp>',
+      type: 'feature',
+      endsOn: 1234,
+      startedOn: 4567,
       status: 'active',
       percentCompleted: 10,
-      dependsOn: [
-        'd12',
-        'd23'
-      ],
       participants: ['ankur'],
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
       lossRate: { [DINERO]: 1 },
-      isNoteWorthy: true
+      isNoteworthy: true
     }, {
       title: 'Test task',
       purpose: 'To Test mocha',
       featureUrl: '<testUrl>',
-      type: 'Dev | Group',
+      type: 'group',
       links: [
         'test1'
       ],
-      endsOn: '<unix timestamp>',
-      startedOn: '<unix timestamp>',
+      endsOn: 1234,
+      startedOn: 54321,
       status: 'completed',
       percentCompleted: 10,
       dependsOn: [
@@ -61,7 +52,7 @@ describe('Tasks', function () {
       participants: ['ankur'],
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
       lossRate: { [DINERO]: 1 },
-      isNoteworthy: true
+      isNoteworthy: false
     }]
 
     // Add the active task
@@ -83,25 +74,14 @@ describe('Tasks', function () {
         .post('/tasks')
         .set('cookie', `${cookieName}=${jwt}`)
         .send({
-          title: 'Test task',
-          purpose: 'To Test mocha',
-          featureUrl: '<testUrl>',
-          type: 'Dev | Group',
-          links: [
-            'test1'
-          ],
-          endsOn: '<unix timestamp>',
-          startedOn: '<unix timestamp>',
+          title: 'Test task - Create',
+          type: 'feature',
+          endsOn: 123,
+          startedOn: 456,
           status: 'completed',
           percentCompleted: 10,
-          dependsOn: [
-            'd12',
-            'd23'
-          ],
-          participants: ['ankur'],
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
-          isNoteworthy: true,
           assignee: 'ankur'
         })
         .end((err, res) => {
@@ -113,7 +93,6 @@ describe('Tasks', function () {
           expect(res.body.task).to.be.a('object')
           expect(res.body.task.createdBy).to.equal('ankur')
           expect(res.body.task.assignee).to.equal('ankur')
-          expect(res.body.task.participants).to.include('ankur')
           return done()
         })
     })
@@ -130,9 +109,8 @@ describe('Tasks', function () {
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Tasks returned successfully!')
           expect(res.body.tasks).to.be.a('array')
-          res.body.tasks.forEach((task) => {
-            expect(task.participants).to.include('ankur')
-          })
+          const taskWithParticipants = res.body.tasks[1]
+          expect(taskWithParticipants.participants).to.have.members(['ankur'])
           return done()
         })
     })
