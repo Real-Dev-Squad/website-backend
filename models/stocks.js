@@ -83,9 +83,7 @@ const createUserStock = async (userId, stockData) => {
       ...stockData
     }
     const { id } = await userStocksModel.add(userStocks)
-    return {
-      id
-    }
+    return { id }
   } catch (err) {
     logger.error('Error creating user stocks', err)
     throw err
@@ -106,10 +104,7 @@ const updateUserStocks = async (userId, stockData) => {
 
     const userStocksRef = userStocksModel.doc(userStocks.id)
     const res = await userStocksRef.update(stockData)
-    if (res) {
-      return true
-    }
-    return false
+    return !!res
   } catch (err) {
     logger.error('Error updating users stocks', err)
     throw err
