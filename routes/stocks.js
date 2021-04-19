@@ -78,6 +78,12 @@ router.post('/', authenticate, authorization, createStock, addNewStock)
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/userStocks'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
  *     500:
  *       description: badImplementation
  *       content:
