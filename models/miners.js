@@ -1,6 +1,12 @@
 const firestore = require('../utils/firestore')
 const minersModel = firestore.collection('miners')
 
+/**
+ * Fetches all available miners in the system
+ * @param size { number } filter data with size
+ * @param page { number } filter data with page
+ * @return {Promise<minersModel|Array>}
+ */
 const fetchMiners = async (size = 100, page = 0) => {
   try {
     const snapshot = await minersModel

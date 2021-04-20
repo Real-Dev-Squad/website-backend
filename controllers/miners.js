@@ -9,7 +9,7 @@ const getMiners = async (req, res) => {
   try {
     const allMiners = await minersModel.fetchMiners()
     return res.json({
-      message: 'Mines returned successfully!',
+      message: 'Miners returned successfully!',
       miners: allMiners
     })
   } catch (error) {
