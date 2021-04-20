@@ -30,15 +30,17 @@ const getUserContributions = async (username) => {
 
       noteworthyObject.task = extractTaskdetails(task)
 
-      for (const userId of task.participants) {
-        const username = await userUtils.getUsername(userId)
-        const userDetails = participantsDetailsMap.get(username)
-        if (userDetails) {
-          participantsDetails.push(userDetails)
-        } else {
-          const user = await getUserDetails(username)
-          participantsDetailsMap.set(username, user)
-          participantsDetails.push(user)
+      if (Array.isArray(task.participants)) {
+        for (const userId of task.participants) {
+          const username = await userUtils.getUsername(userId)
+          const userDetails = participantsDetailsMap.get(username)
+          if (userDetails) {
+            participantsDetails.push(userDetails)
+          } else {
+            const user = await getUserDetails(username)
+            participantsDetailsMap.set(username, user)
+            participantsDetails.push(user)
+          }
         }
       }
 
