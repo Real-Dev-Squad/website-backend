@@ -8,8 +8,8 @@ const createTask = async (req, res, next) => {
     featureUrl: joi.string().optional(),
     type: joi.string().required(),
     links: joi.array().items(joi.string()).optional(),
-    endsOn: joi.string().required(),
-    startedOn: joi.string().required(),
+    startedOn: joi.number().optional(),
+    endsOn: joi.number().optional(),
     status: joi.string().required(),
     assignee: joi.string().optional(),
     percentCompleted: joi.number().required(),
@@ -18,11 +18,11 @@ const createTask = async (req, res, next) => {
     completionAward: joi.object().keys({
       [DINERO]: joi.number().optional(),
       [NEELAM]: joi.number().optional()
-    }),
+    }).optional(),
     lossRate: joi.object().keys({
       [DINERO]: joi.number().optional(),
       [NEELAM]: joi.number().optional()
-    }),
+    }).optional(),
     isNoteworthy: joi.bool().optional()
   })
 
@@ -42,8 +42,8 @@ const updateTask = async (req, res, next) => {
     featureUrl: joi.string().optional(),
     type: joi.string().optional(),
     links: joi.array().items(joi.string()).optional(),
-    endsOn: joi.string().optional(),
-    startedOn: joi.string().optional(),
+    endsOn: joi.number().optional(),
+    startedOn: joi.number().optional(),
     status: joi.string().optional(),
     assignee: joi.string().optional(),
     percentCompleted: joi.number().optional(),
@@ -52,11 +52,11 @@ const updateTask = async (req, res, next) => {
     completionAward: joi.object().keys({
       [DINERO]: joi.number().optional(),
       [NEELAM]: joi.number().optional()
-    }),
+    }).optional(),
     lossRate: joi.object().keys({
       [DINERO]: joi.number().optional(),
       [NEELAM]: joi.number().optional()
-    }),
+    }).optional(),
     isNoteworthy: joi.bool().optional()
   })
   try {
