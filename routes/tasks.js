@@ -126,4 +126,6 @@ router.post('/', authenticate, authorizeOwner, createTask, tasks.addNewTask)
  */
 router.patch('/:id', authenticate, authorizeOwner, updateTask, tasks.updateTask)
 
+router.get('/:username', authenticate, tasks.getTaskByUser)
+
 module.exports = router

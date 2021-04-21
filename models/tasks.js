@@ -112,10 +112,11 @@ const fetchTask = async (taskId) => {
  * @return {Promise<tasks|Array>}
  */
 
-const fetchUserTasks = async (username, statuses = []) => {
+const fetchUserTasks = async (username, statuses = [], hasUser = false) => {
   try {
     const { user } = await fetchUser({ username })
     const userId = await userUtils.getUserId(user.username)
+
     let tasksSnapshot = []
     let assigneeSnapshot = []
 
@@ -127,8 +128,11 @@ const fetchUserTasks = async (username, statuses = []) => {
         .where('status', 'in', statuses)
         .get()
     } else {
-      tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
-        .get()
+      if (hasUser === false) {
+        tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
+          .get()
+      }
+
       assigneeSnapshot = await tasksModel.where('assignee', '==', userId)
         .get()
     }
@@ -160,6 +164,10 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
   return await fetchUserTasks(username, ['active', 'pending', 'blocked'])
 }
 
+const fetchAllTaskOfUser = async (username) => {
+  return await fetchUserTasks(username, [], true)
+}
+
 /**
  * Fetch all the completed tasks of a user
  *
@@ -177,5 +185,6 @@ module.exports = {
   fetchUserTasks,
   fetchUserActiveAndBlockedTasks,
   fetchUserCompletedTasks,
-  fetchActiveTaskMembers
+  fetchActiveTaskMembers,
+  fetchAllTaskOfUser
 }
