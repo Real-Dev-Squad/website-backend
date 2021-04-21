@@ -164,10 +164,6 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
   return await fetchUserTasks(username, ['active', 'pending', 'blocked'])
 }
 
-const fetchAllTaskOfUser = async (username) => {
-  return await fetchUserTasks(username, [], true)
-}
-
 /**
  * Fetch all the completed tasks of a user
  *
@@ -185,6 +181,5 @@ module.exports = {
   fetchUserTasks,
   fetchUserActiveAndBlockedTasks,
   fetchUserCompletedTasks,
-  fetchActiveTaskMembers,
-  fetchAllTaskOfUser
+  fetchActiveTaskMembers
 }

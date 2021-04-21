@@ -44,13 +44,16 @@ const fetchTasks = async (req, res) => {
   }
 }
 
-const getTaskByUser = async (req, res) => {
+const getUserTasks = async (req, res) => {
   try {
     const { username } = req.params
 
     if (username) {
-      const allTasks = await tasks.fetchAllTaskOfUser(username)
-      return res.json(allTasks)
+      const allTasks = await tasks.fetchUserTasks(username, [], true)
+      return res.json({
+        message: 'Tasks returned successfully!',
+        tasks: allTasks.length > 0 ? allTasks : []
+      })
     }
 
     return res.boom.notFound('User doesn\'t exist')
@@ -111,5 +114,5 @@ module.exports = {
   fetchTasks,
   updateTask,
   getSelfTasks,
-  getTaskByUser
+  getUserTasks
 }
