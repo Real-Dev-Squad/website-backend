@@ -44,6 +44,12 @@ const fetchTasks = async (req, res) => {
   }
 }
 
+/**
+ * Fetches all the tasks of the requested user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
 const getUserTasks = async (req, res) => {
   try {
     const { username } = req.params
