@@ -63,20 +63,18 @@ const fetchTasks = async () => {
 /**
  * Fetch all participants whose task status is active
  *
- * @return {Promise<tasks|Array>}
+ * @return {Promise<userIds|Set>}
  */
 
 const fetchActiveTaskMembers = async () => {
   try {
     const tasksSnapshot = await tasksModel.where('type', '==', TASK_TYPE.FEATURE).where('status', '==', TASK_STATUS.ACTIVE).get()
-    const activeMembers = []
-    tasksSnapshot.forEach((task) => {
-      const taskData = task.data()
-      if (taskData.assignee) {
-        activeMembers.push(
-          taskData.assignee
-        )
-      }
+    const activeMembers = new Set()
+    tasksSnapshot?.forEach((task) => {
+      const { assignee } = task.data()
+      activeMembers.add(
+        assignee
+      )
     })
     return activeMembers
   } catch (err) {
