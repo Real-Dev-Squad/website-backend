@@ -3,6 +3,7 @@ const router = express.Router()
 const members = require('../controllers/members')
 const { addRecruiter } = require('../controllers/recruiters')
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
+const authenticate = require('../middlewares/authenticate')
 
 /**
  * @swagger
@@ -83,5 +84,7 @@ router.get('/idle', members.getIdleMembers)
  */
 
 router.post('/intro/:username', validateRecruiter, addRecruiter)
+
+router.post('/cache/clear/self', authenticate, members.purgeMembersCache)
 
 module.exports = router

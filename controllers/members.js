@@ -1,5 +1,9 @@
+const axios = require('axios')
 const memberQuery = require('../models/members')
 const tasks = require('../models/tasks')
+
+const CLOUD_FARE_ZONE_ID = config.get('CLOUD_FARE_ZONE_ID')
+const CLOUD_FARE_PURGE_CACHE_API = `https://api.cloudflare.com/client/v4/zones/${CLOUD_FARE_ZONE_ID}/purge_cache`
 
 /**
  * Fetches the data about our members
@@ -32,12 +36,12 @@ const getMembers = async (req, res) => {
 const getIdleMembers = async (req, res) => {
   try {
     let allMemberUsernames = await memberQuery.fetchMembers()
-    allMemberUsernames = allMemberUsernames.map(member => member.username)
+    allMemberUsernames = allMemberUsernames.map((member) => member.username)
 
     let taskParticipants = await tasks.fetchActiveTaskMembers()
     taskParticipants = new Set(taskParticipants)
 
-    const idleMemberUserNames = allMemberUsernames.filter(member => !taskParticipants.has(member))
+    const idleMemberUserNames = allMemberUsernames.filter((member) => !taskParticipants.has(member))
 
     return res.json({
       message: idleMemberUserNames.length ? 'Idle members returned successfully!' : 'No idle member found',
@@ -49,7 +53,37 @@ const getIdleMembers = async (req, res) => {
   }
 }
 
+const purgeMembersCache = async (req, res) => {
+  try {
+    const { username } = req.userData?.username
+
+    if (!username) {
+      return res.boom.badRequest('Username is not valid')
+    }
+
+    const rep = await axios.post(
+      CLOUD_FARE_PURGE_CACHE_API,
+      {
+        files: [`https://members.realdevsquad.com/${username}`]
+      },
+      {
+        headers: {
+          'X-Auth-Key': config.get('CLOUD_FARE_X_AUTH_KEY'),
+          'X-Auth-Email': config.get('CLOUD_FARE_AUTH_EMAIL'),
+          Authorization: `Bearer ${config.get('CLOUD_FARE_WORDPRESS_AUTHORIZATION_TOKEN')}`
+        }
+      }
+    )
+
+    return res.json(rep.data)
+  } catch (error) {
+    logger.error(`Error while clearing members cache: ${error}`)
+    return res.boom.badImplementation('Something went wrong. Please contact admin')
+  }
+}
+
 module.exports = {
   getMembers,
-  getIdleMembers
+  getIdleMembers,
+  purgeMembersCache
 }
