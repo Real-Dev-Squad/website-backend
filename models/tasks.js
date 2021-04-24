@@ -112,10 +112,13 @@ const fetchTask = async (taskId) => {
  * @return {Promise<tasks|Array>}
  */
 
-const fetchUserTasks = async (username, statuses = [], hasUser = false) => {
+const fetchUserTasks = async (username, statuses = []) => {
   try {
     const { user } = await fetchUser({ username })
     const userId = await userUtils.getUserId(user.username)
+    if (!userId) {
+      return false
+    }
 
     let tasksSnapshot = []
     let assigneeSnapshot = []
@@ -128,10 +131,8 @@ const fetchUserTasks = async (username, statuses = [], hasUser = false) => {
         .where('status', 'in', statuses)
         .get()
     } else {
-      if (hasUser === false) {
-        tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
-          .get()
-      }
+      tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
+        .get()
 
       assigneeSnapshot = await tasksModel.where('assignee', '==', userId)
         .get()

@@ -53,9 +53,9 @@ const fetchTasks = async (req, res) => {
 const getUserTasks = async (req, res) => {
   try {
     const { username } = req.params
+    const allTasks = await tasks.fetchUserTasks(username)
 
-    if (username) {
-      const allTasks = await tasks.fetchUserTasks(username, [], true)
+    if (allTasks) {
       return res.json({
         message: 'Tasks returned successfully!',
         tasks: allTasks.length > 0 ? allTasks : []
