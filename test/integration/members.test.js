@@ -23,7 +23,7 @@ describe('Members', function () {
         .request(app)
         .get('/members')
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
@@ -39,7 +39,7 @@ describe('Members', function () {
         .request(app)
         .get('/members')
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
@@ -61,7 +61,7 @@ describe('Members', function () {
         .request(app)
         .get('/members/idle')
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
@@ -77,7 +77,7 @@ describe('Members', function () {
         .request(app)
         .get('/members/idle')
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
