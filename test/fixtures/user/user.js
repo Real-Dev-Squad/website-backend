@@ -70,6 +70,24 @@ module.exports = () => {
         restricted: false,
         app_owner: true
       }
+    },
+    {
+      username: 'ankush',
+      first_name: 'Ankush',
+      last_name: 'Dharkar',
+      yoe: 10,
+      img: './img.png',
+      linkedin_id: 'ankushdharkar',
+      github_id: 'ankushdharkar',
+      github_display_name: 'Ankush Dharkar',
+      phone: '1234567890',
+      email: 'ad@amazon.com',
+      tokens: {
+        githubAccessToken: 'githubAccessToken'
+      },
+      roles: {
+        super_user: true
+      }
     }
   ]
 }

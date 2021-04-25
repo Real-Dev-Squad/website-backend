@@ -49,5 +49,6 @@ const authorizeUser = (requiredRole) => {
 }
 
 module.exports = {
-  authorizeUser
+  authorizeUser,
+  userHasPermission
 }
