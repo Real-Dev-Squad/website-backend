@@ -11,9 +11,7 @@ const getUserId = async (username) => {
     const user = await fetchUser({ username })
 
     if (user.userExists) {
-      const { user: { id } } = user
-
-      return id
+      return user.user.id
     } else {
       return false
     }

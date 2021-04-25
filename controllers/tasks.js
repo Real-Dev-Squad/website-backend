@@ -55,14 +55,14 @@ const getUserTasks = async (req, res) => {
     const { username } = req.params
     const allTasks = await tasks.fetchUserTasks(username)
 
-    if (allTasks) {
-      return res.json({
-        message: 'Tasks returned successfully!',
-        tasks: allTasks.length > 0 ? allTasks : []
-      })
+    if (allTasks === false) {
+      return res.boom.notFound('User doesn\'t exist')
     }
 
-    return res.boom.notFound('User doesn\'t exist')
+    return res.json({
+      message: 'Tasks returned successfully!',
+      tasks: allTasks.length > 0 ? allTasks : []
+    })
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`)
 

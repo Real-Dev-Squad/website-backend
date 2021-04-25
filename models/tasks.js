@@ -1,6 +1,5 @@
 const firestore = require('../utils/firestore')
 const tasksModel = firestore.collection('tasks')
-const { fetchUser } = require('./users')
 const userUtils = require('../utils/users')
 const { fromFirestoreData, toFirestoreData } = require('../utils/tasks')
 
@@ -114,8 +113,8 @@ const fetchTask = async (taskId) => {
 
 const fetchUserTasks = async (username, statuses = []) => {
   try {
-    const { user } = await fetchUser({ username })
-    const userId = await userUtils.getUserId(user.username)
+    const userId = await userUtils.getUserId(username)
+
     if (!userId) {
       return false
     }
