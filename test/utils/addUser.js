@@ -9,11 +9,9 @@ const userData = require('../fixtures/user/user')()
  * @return {string} userId - userId for the added user
  */
 module.exports = async (user) => {
-  user = user && Object.keys(user).length === 0 && user.constructor === Object
-
+  const isValid = user && Object.keys(user).length !== 0 && user.constructor === Object
   // Use the user data sent as arguments, else use data from fixtures
-  user = user || userData[0]
-
+  user = isValid ? user : userData[0]
   const { userId } = await users.addOrUpdate(user)
 
   return userId

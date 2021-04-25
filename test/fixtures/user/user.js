@@ -36,6 +36,21 @@ module.exports = () => {
       twitter_id: 'whatifi',
       phone: '1234567891',
       email: 'abc1@gmail.com'
+    },
+    {
+      username: 'pranavg',
+      first_name: 'Pranav',
+      last_name: 'Gajjewar',
+      yoe: 0,
+      img: './img.png',
+      github_id: 'cartmanishere',
+      linkedin_id: 'pranav-gajjewar',
+      twitter_id: 'PGajjewar',
+      phone: '1234567891',
+      email: 'pgajjewar@gmail.com',
+      roles: {
+        restricted: true
+      }
     }
   ]
 }
