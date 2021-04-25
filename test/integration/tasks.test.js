@@ -109,7 +109,7 @@ describe('Tasks', function () {
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Tasks returned successfully!')
           expect(res.body.tasks).to.be.a('array')
-          const taskWithParticipants = res.body.tasks[1]
+          const taskWithParticipants = res.body.tasks[0]
           expect(taskWithParticipants.participants).to.have.members(['ankur'])
           return done()
         })
