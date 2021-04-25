@@ -116,7 +116,7 @@ const fetchUserTasks = async (username, statuses = []) => {
     const userId = await userUtils.getUserId(username)
 
     if (!userId) {
-      return false
+      return { userNotFound: true }
     }
 
     let tasksSnapshot = []

@@ -55,7 +55,7 @@ const getUserTasks = async (req, res) => {
     const { username } = req.params
     const allTasks = await tasks.fetchUserTasks(username)
 
-    if (allTasks === false) {
+    if (allTasks.userNotFound) {
       return res.boom.notFound('User doesn\'t exist')
     }
 
