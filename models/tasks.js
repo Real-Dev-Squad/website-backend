@@ -3,6 +3,7 @@ const tasksModel = firestore.collection('tasks')
 const { fetchUser } = require('./users')
 const userUtils = require('../utils/users')
 const { fromFirestoreData, toFirestoreData } = require('../utils/tasks')
+const { TASK_TYPE, TASK_STATUS } = require('../constants/tasks')
 
 /**
  * Adds and Updates tasks
@@ -62,20 +63,18 @@ const fetchTasks = async () => {
 /**
  * Fetch all participants whose task status is active
  *
- * @return {Promise<tasks|Array>}
+ * @return {Promise<userIds|Set>}
  */
 
 const fetchActiveTaskMembers = async () => {
   try {
-    const tasksSnapshot = await tasksModel.where('status', '==', 'active').get()
-    const activeMembers = []
-    tasksSnapshot.forEach((task) => {
-      const taskData = task.data()
-      if (taskData.participants) {
-        activeMembers.push(
-          ...taskData.participants
-        )
-      }
+    const tasksSnapshot = await tasksModel.where('type', '==', TASK_TYPE.FEATURE).where('status', '==', TASK_STATUS.ACTIVE).get()
+    const activeMembers = new Set()
+    tasksSnapshot?.forEach((task) => {
+      const { assignee } = task.data()
+      activeMembers.add(
+        assignee
+      )
     })
     return activeMembers
   } catch (err) {

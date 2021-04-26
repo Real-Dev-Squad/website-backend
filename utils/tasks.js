@@ -13,7 +13,7 @@ const fromFirestoreData = async (task) => {
     assignee = await getUsername(assignee)
   }
 
-  if (participants) {
+  if (Array.isArray(participants)) {
     participants = await getParticipantUsernames(participants)
   }
 
@@ -35,7 +35,7 @@ const toFirestoreData = async (task) => {
     updatedTask.assignee = await getUserId(assignee)
   }
 
-  if (participants) {
+  if (Array.isArray(participants)) {
     updatedTask.participants = await getParticipantUserIds(participants)
   }
   return updatedTask
