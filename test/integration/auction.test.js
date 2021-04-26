@@ -1,5 +1,3 @@
-/* eslint-disable mocha/no-exclusive-tests */
-/* eslint-disable no-console */
 const chai = require('chai')
 const { expect } = chai
 const chaiHttp = require('chai-http')
@@ -14,7 +12,7 @@ const { createWallet } = require('../../models/wallets')
 
 // Import fixtures
 const userData = require('../fixtures/user/user')()
-const auctionData = require('../fixtures/auctions/auctions')
+const { auctionData, auctionKeys, auctionWithIdKeys } = require('../fixtures/auctions/auctions')
 const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = auctionData
 const currenciesData = require('../fixtures/currencies/currencies')
 
@@ -23,7 +21,7 @@ const cookieName = config.get('userToken.cookieName')
 
 chai.use(chaiHttp)
 
-describe.only('Auctions', function () {
+describe('Auctions', function () {
   let jwt
   let auctionId
 
@@ -48,27 +46,9 @@ describe.only('Auctions', function () {
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
+          expect(res.body).to.have.all.keys(...auctionKeys)
           expect(res.body.message).to.be.equal('Auctions returned successfully!')
           expect(res.body.auctions).to.be.a('array')
-
-          return done()
-        })
-    })
-
-    it('Should return 404, for Auction not Found', function (done) {
-      chai
-        .request(app)
-        .get('/auction')
-        .end((err, res) => {
-          if (err) { return done(err) }
-
-          expect(res).to.have.status(404)
-          expect(res.body).to.be.a('object')
-          expect(res.body).to.deep.equal({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found'
-          })
 
           return done()
         })
@@ -85,6 +65,7 @@ describe.only('Auctions', function () {
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
+          expect(res.body).to.have.all.keys(...auctionWithIdKeys)
           expect(res.body.seller).to.be.equal(userData[0].username)
 
           return done()
@@ -142,19 +123,19 @@ describe.only('Auctions', function () {
         })
     })
 
-    it('Should return 404, for Auction not Found', function (done) {
+    it('Should return 401, for Unauthenticated User', function (done) {
       chai
         .request(app)
-        .post('/auction')
+        .post('/auctions')
         .end((err, res) => {
           if (err) { return done(err) }
 
-          expect(res).to.have.status(404)
+          expect(res).to.have.status(401)
           expect(res.body).to.be.a('object')
           expect(res.body).to.deep.equal({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found'
+            statusCode: 401,
+            error: 'Unauthorized',
+            message: 'Unauthenticated User'
           })
 
           return done()
@@ -175,6 +156,24 @@ describe.only('Auctions', function () {
           expect(res).to.have.status(201)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.be.equal('Successfully placed bid!')
+
+          return done()
+        })
+    })
+
+    it('Should have a sufficient balance', function (done) {
+      chai
+        .request(app)
+        .post(`/auctions/bid/${auctionId}`)
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({ bid: 1001 })
+
+        .end((err, res) => {
+          if (err) { return done(err) }
+
+          expect(res).to.have.status(403)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.be.equal('You do not have sufficient money')
 
           return done()
         })
@@ -210,25 +209,6 @@ describe.only('Auctions', function () {
             statusCode: 401,
             error: 'Unauthorized',
             message: 'Unauthenticated User'
-          })
-
-          return done()
-        })
-    })
-
-    it('Should return 404, for Bid not found', function (done) {
-      chai
-        .request(app)
-        .post('/auction/bids')
-        .end((err, res) => {
-          if (err) { return done(err) }
-
-          expect(res).to.have.status(404)
-          expect(res.body).to.be.a('object')
-          expect(res.body).to.deep.equal({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found'
           })
 
           return done()
