@@ -10,11 +10,7 @@ const getUserId = async (username) => {
   try {
     const { userExists, user: { id } } = await fetchUser({ username })
 
-    if (!userExists) {
-      return false
-    }
-
-    return id
+    return userExists ? id : false
   } catch (error) {
     logger.error('Something went wrong', error)
     throw error
