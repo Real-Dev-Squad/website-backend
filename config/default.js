@@ -51,6 +51,6 @@ module.exports = {
   cloudinary: {
     cloud_name: 'Cloud_name',
     api_key: 'API_KEY',
-    api_secret: 'api_secreat_key'
+    api_secret: 'api_secret_key'
   }
 }

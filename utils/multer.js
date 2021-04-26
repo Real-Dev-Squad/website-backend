@@ -1,5 +1,6 @@
 const multer = require('multer')
 const multerConstant = require('../constants/multer')
+const errorMessage = require('../constants/errorMessages')
 const multerMemoryStorage = multer.memoryStorage()
 
 const MB_1 = multerConstant.FILE_SIZE_1MB
@@ -23,13 +24,13 @@ const upload = multer({
 
 const multerErrorHandling = (err, req, res, next) => {
   if (err.code === 'LIMIT_FILE_SIZE') {
-    res.boom.entityTooLarge(`File too large, max accepted size is ${(profileFileSize / MB_1)} MB`)
+    res.boom.entityTooLarge(errorMessage.FILE_TOO_LARGE(profileFileSize / MB_1))
   } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-    res.boom.badImplementation('Only one file allowed')
+    res.boom.badImplementation(errorMessage.ONLY_ONE_FILE_ALLOWED)
   } else if (err.code === 'TYPE_UNSUPPORTED_FILE') {
-    res.boom.unsupportedMediaType('Only image/jpeg, image/png supported')
+    res.boom.unsupportedMediaType(errorMessage.ONLY_IMAGE_SUPPORTED)
   } else {
-    res.boom.badImplementation('An internal server error occurred')
+    res.boom.badImplementation(errorMessage.INTERNAL_SERVER_ERROR)
   }
 }
 

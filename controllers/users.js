@@ -147,7 +147,7 @@ const updateSelf = async (req, res) => {
  */
 const postUserPicture = async (req, res) => {
   try {
-    const file = req.file
+    const { file } = req
     const { id: userId } = req.userData
     const imageData = await imageService.uploadProfilePicture(file, userId)
     return res.json({
