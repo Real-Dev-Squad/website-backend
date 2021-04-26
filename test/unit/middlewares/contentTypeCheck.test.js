@@ -37,7 +37,7 @@ describe('contentTypeCheck', function () {
         expect(res.body).to.eql({
           statusCode: 415,
           error: 'Unsupported Media Type',
-          message: 'Invalid content-type header: application/xml, expected: application/json'
+          message: 'Invalid content-type header: application/xml, expected: application/json or multipart/form-data'
         })
 
         return done()

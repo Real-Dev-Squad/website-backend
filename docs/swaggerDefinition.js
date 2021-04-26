@@ -610,6 +610,34 @@ const swaggerOptions = {
               }
             }
           },
+          entityTooLarge: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
+          unsupportedMediaType: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
           serverUnavailable: {
             type: 'object',
             properties: {

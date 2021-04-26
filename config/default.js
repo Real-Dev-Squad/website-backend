@@ -58,5 +58,12 @@ module.exports = {
     refreshTtl: 180 * 24 * 60 * 60, // in seconds
     publicKey: '<publicKey>',
     privateKey: '<privateKey>'
+  },
+
+  // Cloudinary keys
+  cloudinary: {
+    cloud_name: 'Cloud_name',
+    api_key: 'API_KEY',
+    api_secret: 'api_secret_key'
   }
 }
