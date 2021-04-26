@@ -126,4 +126,33 @@ router.post('/', authenticate, authorizeOwner, createTask, tasks.addNewTask)
  */
 router.patch('/:id', authenticate, authorizeOwner, updateTask, tasks.updateTask)
 
+/**
+ * @swagger
+ * /tasks/username:
+ *   get:
+ *     summary: Use to get all the tasks of the requested user
+ *     tags:
+ *       - Tasks
+ *     responses:
+ *       200:
+ *         description: returns all tasks of the requested user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/tasks'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.get('/:username', tasks.getUserTasks)
+
 module.exports = router
