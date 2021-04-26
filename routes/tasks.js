@@ -133,8 +133,6 @@ router.patch('/:id', authenticate, authorizeOwner, updateTask, tasks.updateTask)
  *     summary: Use to get all the tasks of the requested user
  *     tags:
  *       - Tasks
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: returns all tasks of the requested user
