@@ -70,12 +70,14 @@ const fetchActiveTaskMembers = async () => {
   try {
     const tasksSnapshot = await tasksModel.where('type', '==', TASK_TYPE.FEATURE).where('status', '==', TASK_STATUS.ACTIVE).get()
     const activeMembers = new Set()
-    tasksSnapshot?.forEach((task) => {
-      const { assignee } = task.data()
-      activeMembers.add(
-        assignee
-      )
-    })
+    if (!tasksSnapshot.empty) {
+      tasksSnapshot.forEach((task) => {
+        const { assignee } = task.data()
+        activeMembers.add(
+          assignee
+        )
+      })
+    }
     return activeMembers
   } catch (err) {
     logger.error('error getting tasks', err)
@@ -133,19 +135,25 @@ const fetchUserTasks = async (username, statuses = []) => {
     }
 
     const tasks = []
-    tasksSnapshot.forEach((task) => {
-      tasks.push({
-        id: task.id,
-        ...task.data()
-      })
-    })
 
-    assigneeSnapshot.forEach((task) => {
-      tasks.push({
-        id: task.id,
-        ...task.data()
+    if (!tasksSnapshot.empty) {
+      tasksSnapshot.forEach((task) => {
+        tasks.push({
+          id: task.id,
+          ...task.data()
+        })
       })
-    })
+    }
+
+    if (!assigneeSnapshot.empty) {
+      assigneeSnapshot.forEach((task) => {
+        tasks.push({
+          id: task.id,
+          ...task.data()
+        })
+      })
+    }
+
     const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
     return updatedTasks
