@@ -7,8 +7,10 @@ const app = require('../../server')
 const tasks = require('../../models/tasks')
 const authService = require('../../services/authService')
 const addUser = require('../utils/addUser')
+const userModel = require('../../models/users')
 const config = require('config')
 const cookieName = config.get('userToken.cookieName')
+const { DINERO, NEELAM } = require('../../constants/wallets')
 chai.use(chaiHttp)
 
 let jwt
@@ -22,46 +24,35 @@ describe('Tasks', function () {
 
     const taskData = [{
       title: 'Test task',
-      purpose: 'To Test mocha',
-      featureUrl: '<testUrl>',
-      type: 'Dev | Group',
-      links: [
-        'test1'
-      ],
-      endsOn: '<unix timestamp>',
-      startedOn: '<unix timestamp>',
+      type: 'feature',
+      endsOn: 1234,
+      startedOn: 4567,
       status: 'active',
-      ownerId: 'ankur',
       percentCompleted: 10,
-      dependsOn: [
-        'd12',
-        'd23'
-      ],
       participants: ['ankur'],
-      completionAward: { gold: 3, bronze: 300 },
-      lossRate: { gold: 1 },
-      isNoteWorthy: true
+      completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+      lossRate: { [DINERO]: 1 },
+      isNoteworthy: true
     }, {
       title: 'Test task',
       purpose: 'To Test mocha',
       featureUrl: '<testUrl>',
-      type: 'Dev | Group',
+      type: 'group',
       links: [
         'test1'
       ],
-      endsOn: '<unix timestamp>',
-      startedOn: '<unix timestamp>',
+      endsOn: 1234,
+      startedOn: 54321,
       status: 'completed',
-      ownerId: 'ankur',
       percentCompleted: 10,
       dependsOn: [
         'd12',
         'd23'
       ],
       participants: ['ankur'],
-      completionAward: { gold: 3, bronze: 300 },
-      lossRate: { gold: 1 },
-      isNoteworthy: true
+      completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+      lossRate: { [DINERO]: 1 },
+      isNoteworthy: false
     }]
 
     // Add the active task
@@ -83,26 +74,15 @@ describe('Tasks', function () {
         .post('/tasks')
         .set('cookie', `${cookieName}=${jwt}`)
         .send({
-          title: 'Test task',
-          purpose: 'To Test mocha',
-          featureUrl: '<testUrl>',
-          type: 'Dev | Group',
-          links: [
-            'test1'
-          ],
-          endsOn: '<unix timestamp>',
-          startedOn: '<unix timestamp>',
+          title: 'Test task - Create',
+          type: 'feature',
+          endsOn: 123,
+          startedOn: 456,
           status: 'completed',
-          ownerId: 'ankur',
           percentCompleted: 10,
-          dependsOn: [
-            'd12',
-            'd23'
-          ],
-          participants: ['ankur'],
-          completionAward: { gold: 3, bronze: 300 },
-          lossRate: { gold: 1 },
-          isNoteworthy: true
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          assignee: 'ankur'
         })
         .end((err, res) => {
           if (err) { return done(err) }
@@ -111,8 +91,8 @@ describe('Tasks', function () {
           expect(res.body.message).to.equal('Task created successfully!')
           expect(res.body.id).to.be.a('string')
           expect(res.body.task).to.be.a('object')
-          expect(res.body.task.ownerId).to.equal('ankur')
-          expect(res.body.task.participants).to.include('ankur')
+          expect(res.body.task.createdBy).to.equal('ankur')
+          expect(res.body.task.assignee).to.equal('ankur')
           return done()
         })
     })
@@ -129,10 +109,8 @@ describe('Tasks', function () {
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Tasks returned successfully!')
           expect(res.body.tasks).to.be.a('array')
-          res.body.tasks.forEach((task) => {
-            expect(task.ownerId).to.equal('ankur')
-            expect(task.participants).to.include('ankur')
-          })
+          const taskWithParticipants = res.body.tasks[0]
+          expect(taskWithParticipants.participants).to.have.members(['ankur'])
           return done()
         })
     })
@@ -174,6 +152,43 @@ describe('Tasks', function () {
         })
     })
 
+    it('Should return assignee task', async function () {
+      const { userId: assignedUser } = await userModel.addOrUpdate({
+        github_id: 'prakashchoudhary07',
+        username: 'user1'
+      })
+      const assignedTask = {
+        title: 'Assigned task',
+        purpose: 'To Test mocha',
+        featureUrl: '<testUrl>',
+        type: 'Dev | Group',
+        links: [
+          'test1'
+        ],
+        endsOn: '<unix timestamp>',
+        startedOn: '<unix timestamp>',
+        status: 'active',
+        percentCompleted: 10,
+        dependsOn: [
+          'd12',
+          'd23'
+        ],
+        participants: ['ankur'],
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+        assignee: 'user1'
+      }
+      const { taskId } = await tasks.updateTask(assignedTask)
+      const res = await chai
+        .request(app)
+        .get('/tasks/self')
+        .set('cookie', `${cookieName}=${authService.generateAuthToken({ userId: assignedUser })}`)
+      expect(res).to.have.status(200)
+      expect(res.body).to.be.a('array')
+      expect(res.body[0].id).to.equal(taskId)
+    })
+
     it('Should return 401 if not logged in', function (done) {
       chai
         .request(app)
@@ -201,7 +216,7 @@ describe('Tasks', function () {
         .patch('/tasks/' + taskId1)
         .set('cookie', `${cookieName}=${jwt}`)
         .send({
-          ownerId: 'sumit'
+          title: 'new-title'
         })
         .end((err, res) => {
           if (err) { return done(err) }
@@ -217,7 +232,7 @@ describe('Tasks', function () {
         .patch('/tasks/taskid')
         .set('cookie', `${cookieName}=${jwt}`)
         .send({
-          ownerId: 'umit'
+          title: 'new-title'
         })
         .end((err, res) => {
           if (err) { return done(err) }

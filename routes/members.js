@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const members = require('../controllers/members')
+const { addRecruiter } = require('../controllers/recruiters')
+const { validateRecruiter } = require('../middlewares/validators/recruiter')
 
 /**
  * @swagger
@@ -49,5 +51,37 @@ router.get('/', members.getMembers)
  */
 
 router.get('/idle', members.getIdleMembers)
+
+/**
+ * @swagger
+ * /members/intro/:username:
+ *   post:
+ *     summary: Posts details of the recruiter
+ *     tags:
+ *       - Members
+ *     responses:
+ *       200:
+ *         description: Details of the recruiter and the member in which recruiter is interested
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/recruiters'
+ *
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *
+ *       500:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+
+router.post('/intro/:username', validateRecruiter, addRecruiter)
 
 module.exports = router
