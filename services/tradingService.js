@@ -4,6 +4,7 @@ const transactionsModel = firestore.collection('transactions')
 const tradeLogsModel = firestore.collection('trade-logs')
 const { fetchWallet, updateWallet } = require('../models/wallets')
 const { fetchUserStocks, updateUserStocks } = require('../models/stocks')
+const { DINERO } = require('../constants/wallets')
 
 const INSUFFICIENT_FUNDS = 'Trade was not successful due to insufficient funds'
 const INSUFFICIENT_QUANTITIES = 'Trade was not successful because you do not have enough quantity'
@@ -52,17 +53,17 @@ const trade = async (tradeData) => {
         }
 
         quantityToUpdate = quantity + stockData.quantity
-        userBalance = (quantity * stockData.price) + currencies.dinero
+        userBalance = (quantity * stockData.price) + currencies.DINERO
         userStocksQty = userStocks.quantity - quantity
         break
       }
       case 'BUY': {
         qtyUserCanPurchase = Math.floor(totalPrice / stockData.price)
-        if (qtyUserCanPurchase <= 0 || totalPrice > currencies.dinero) {
+        if (qtyUserCanPurchase <= 0 || totalPrice > currencies.DINERO) {
           return { canUserTrade: false, errorMessage: INSUFFICIENT_FUNDS }
         }
         quantityToUpdate = stockData.quantity - qtyUserCanPurchase
-        userBalance = currencies.dinero - (qtyUserCanPurchase * stockData.price)
+        userBalance = currencies.DINERO - (qtyUserCanPurchase * stockData.price)
         userStocksQty = qtyUserCanPurchase
 
         initialStockValue = stockData.price
@@ -80,7 +81,7 @@ const trade = async (tradeData) => {
 
     const orderValue = qtyUserCanPurchase * stockData.price
     const stockPriceToBeUpdated = getUpdatedPrice(stockData.price)
-    updatedCurrencyData.dinero = userBalance
+    updatedCurrencyData.DINERO = userBalance
 
     const updatedStockData = {
       ...stockData,

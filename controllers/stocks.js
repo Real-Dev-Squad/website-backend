@@ -43,7 +43,7 @@ const fetchStocks = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const getUserStocks = async (req, res, next) => {
+const getUserStocks = async (req, res) => {
   try {
     const { id: userId } = req.userData
     const userStocks = await stocks.fetchUserStocks(userId)
