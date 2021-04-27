@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
 const authorization = require('../middlewares/authorization')
-const { addNewStock, fetchStocks, getUserStocks } = require('../controllers/stocks')
+const { addNewStock, fetchStocks, getSelfStocks } = require('../controllers/stocks')
 const { createStock } = require('../middlewares/validators/stocks')
 
 /**
@@ -92,6 +92,6 @@ router.post('/', authenticate, authorization, createStock, addNewStock)
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/user/self', authenticate, getUserStocks)
+router.get('/user/self', authenticate, getSelfStocks)
 
 module.exports = router

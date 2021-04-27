@@ -43,7 +43,7 @@ const fetchStocks = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const getUserStocks = async (req, res) => {
+const getSelfStocks = async (req, res) => {
   try {
     const { id: userId } = req.userData
     const userStocks = await stocks.fetchUserStocks(userId)
@@ -60,5 +60,5 @@ const getUserStocks = async (req, res) => {
 module.exports = {
   addNewStock,
   fetchStocks,
-  getUserStocks
+  getSelfStocks
 }

@@ -73,24 +73,6 @@ const fetchUserStocks = async (userId, stockId = null) => {
 }
 
 /**
- * Create user stocks
- * @return {Promise<userStocks|object>}
- */
-const createUserStock = async (userId, stockData) => {
-  try {
-    const userStocks = {
-      userId,
-      ...stockData
-    }
-    const { id } = await userStocksModel.add(userStocks)
-    return { id }
-  } catch (err) {
-    logger.error('Error creating user stocks', err)
-    throw err
-  }
-}
-
-/**
  * Update Users Stocks
  * @return {Promise<userStocks|object>}
  */
@@ -98,7 +80,10 @@ const updateUserStocks = async (userId, stockData) => {
   try {
     const userStocks = await fetchUserStocks(userId, stockData.stockId)
     if (!userStocks.id) {
-      await createUserStock(userId, stockData)
+      await userStocksModel.add({
+        userId,
+        ...stockData
+      })
       return true
     }
 
