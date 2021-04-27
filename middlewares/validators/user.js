@@ -1,6 +1,7 @@
 const joi = require('joi')
 
 const updateUser = async (req, res, next) => {
+  const userStatusEnum = ['ooo', 'idle', 'active']
   const schema = joi.object().keys({
     phone: joi.string().optional(),
     email: joi.string().optional(),
@@ -14,7 +15,8 @@ const updateUser = async (req, res, next) => {
     linkedin_id: joi.string().optional(),
     twitter_id: joi.string().optional(),
     instagram_id: joi.string().optional(),
-    website: joi.string().optional()
+    website: joi.string().optional(),
+    status: joi.any().valid(...userStatusEnum)
   })
 
   try {
