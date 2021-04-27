@@ -13,7 +13,7 @@ const userModel = firestore.collection('users')
 
 const fetchMembers = async () => {
   try {
-    const snapshot = await userModel.where('isMember', '==', true).get()
+    const snapshot = await userModel.get()
 
     const allMembers = { oldMembers: [], newMembers: [] }
 
@@ -26,20 +26,10 @@ const fetchMembers = async () => {
         phone: undefined,
         email: undefined
       }
-      switch (memberData.userType) {
-        case 'new':
-          allMembers.newMembers.push(curatedMemberData)
-          break
-        case 'blocked':
-          // intentionally left blank for future use case
-          break
-        case 'member':
-          // intentionally left break statement to fall through default case
-          // so that doc with no userType field considered as members
-          break
-        default:
-          allMembers.oldMembers.push(curatedMemberData)
-          break
+      if (typeof memberData.roles === 'undefined') {
+        allMembers.newMembers.push(curatedMemberData)
+      } else if (memberData.roles && memberData.roles.member) {
+        allMembers.oldMembers.push(curatedMemberData)
       }
     }
     )

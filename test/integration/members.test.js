@@ -47,7 +47,7 @@ describe('Members', function () {
           expect(res.body.message).to.equal('Members returned successfully!')
           expect(res.body.members.newMembers).to.be.a('array')
           expect(res.body.members.oldMembers).to.be.a('array')
-          expect(res.body.members.oldMembers[0].isMember).to.eql(true)
+          expect(res.body.members.oldMembers[0].roles.members).to.eql(true)
 
           return done()
         })
