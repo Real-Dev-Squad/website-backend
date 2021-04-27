@@ -85,7 +85,8 @@ describe('Tasks', function () {
           percentCompleted: 10,
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
-          assignee: appOwner.username
+          assignee: appOwner.username,
+          participants: []
         })
         .end((err, res) => {
           if (err) { return done(err) }
@@ -96,6 +97,7 @@ describe('Tasks', function () {
           expect(res.body.task).to.be.a('object')
           expect(res.body.task.createdBy).to.equal(appOwner.username)
           expect(res.body.task.assignee).to.equal(appOwner.username)
+          expect(res.body.task.participants).to.be.a('array')
           return done()
         })
     })
