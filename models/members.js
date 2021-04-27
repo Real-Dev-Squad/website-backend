@@ -16,7 +16,7 @@ const fetchMembers = async () => {
     const snapshot = await userModel.get()
 
     const allMembers = { oldMembers: [], newMembers: [] }
-    
+
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
         allMembers.push({
@@ -26,9 +26,7 @@ const fetchMembers = async () => {
           phone: undefined,
           email: undefined
         })
-      }
-      )
-
+      })
     }
 
     return allMembers
