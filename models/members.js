@@ -13,10 +13,10 @@ const userModel = firestore.collection('users')
 
 const fetchMembers = async () => {
   try {
-    const snapshot = await userModel.where('isMember', '==', true).get()
+    const snapshot = await userModel.get()
 
     const allMembers = { oldMembers: [], newMembers: [] }
-
+    
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
         allMembers.push({
