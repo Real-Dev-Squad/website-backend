@@ -19,13 +19,19 @@ const fetchMembers = async () => {
 
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
-        allMembers.push({
+        const memberData = doc.data()
+        const curatedMemberData = {
           id: doc.id,
-          ...doc.data(),
+          ...memberData,
           tokens: undefined,
           phone: undefined,
           email: undefined
-        })
+        }
+        if (typeof memberData.roles === 'undefined') {
+          allMembers.newMembers.push(curatedMemberData)
+        } else if (memberData.roles && memberData.roles.member) {
+          allMembers.oldMembers.push(curatedMemberData)
+        }
       })
     }
 
