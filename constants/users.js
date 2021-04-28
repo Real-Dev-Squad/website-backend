@@ -1,1 +1,2 @@
-module.exports = ['ooo', 'idle', 'active']
+const userStatusEnum = ['ooo', 'idle', 'active']
+module.exports = userStatusEnum
