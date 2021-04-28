@@ -37,6 +37,40 @@ const fetchMembers = async () => {
   }
 }
 
+/**
+ * Migrate user roles
+ * @return {Promise<usersMigrated|Object>}
+ */
+const migrateUsers = async () => {
+  try {
+    const userSnapShot = await userModel.get()
+    const migratedUsers = []
+
+    const usersArr = []
+
+    userSnapShot.forEach(doc => usersArr.push({ id: doc.id, ...doc.data() }))
+
+    for (const user of usersArr) {
+      const roles = { member: true }
+
+      if (!user.isMember) roles.member = false
+      delete user.isMember
+
+      await userModel.doc(user.id).set({
+        ...user,
+        roles
+      })
+
+      migratedUsers.push(user.username)
+    }
+
+    return { count: migratedUsers.length, users: migratedUsers }
+  } catch (err) {
+    logger.error('Error migrating user roles', err)
+    throw err
+  }
+}
 module.exports = {
-  fetchMembers
+  fetchMembers,
+  migrateUsers
 }

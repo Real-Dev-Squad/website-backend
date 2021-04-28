@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const members = require('../controllers/members')
+const { getMembers, getIdleMembers, migrateUserRoles } = require('../controllers/members')
+const authorization = require('../middlewares/authorization')
+const authenticate = require('../middlewares/authenticate')
 const { addRecruiter } = require('../controllers/recruiters')
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
 
@@ -26,7 +28,7 @@ const { validateRecruiter } = require('../middlewares/validators/recruiter')
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', members.getMembers)
+router.get('/', getMembers)
 
 /**
  * @swagger
@@ -50,7 +52,7 @@ router.get('/', members.getMembers)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/idle', members.getIdleMembers)
+router.get('/idle', getIdleMembers)
 
 /**
  * @swagger
@@ -83,5 +85,40 @@ router.get('/idle', members.getIdleMembers)
  */
 
 router.post('/intro/:username', validateRecruiter, addRecruiter)
+
+/**
+ * @swagger
+ * /members/member-to-role-migration:
+ *  patch:
+ *   summary: One time call to update roles of the users
+ *   tags:
+ *     - Members
+ *   responses:
+ *     200:
+ *       description: Details of the users migrated
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/migratedUsers'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
+ *     403:
+ *       description: forbidden
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/forbidden'
+ *     500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.patch('/member-to-role-migration', authenticate, authorization, migrateUserRoles)
 
 module.exports = router

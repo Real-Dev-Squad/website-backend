@@ -1,4 +1,4 @@
-const memberQuery = require('../models/members')
+const { fetchMembers, migrateUsers } = require('../models/members')
 const tasks = require('../models/tasks')
 
 /**
@@ -10,7 +10,7 @@ const tasks = require('../models/tasks')
 
 const getMembers = async (req, res) => {
   try {
-    const allMembers = await memberQuery.fetchMembers()
+    const allMembers = await fetchMembers()
 
     return res.json({
       message: allMembers.length ? 'Members returned successfully!' : 'No member found',
@@ -31,7 +31,7 @@ const getMembers = async (req, res) => {
 
 const getIdleMembers = async (req, res) => {
   try {
-    const allMembers = await memberQuery.fetchMembers()
+    const allMembers = await fetchMembers()
     const taskParticipants = await tasks.fetchActiveTaskMembers()
     const idleMembers = allMembers?.filter(({ id }) => !taskParticipants.has(id))
     const idleMemberUserNames = idleMembers?.map((member) => member.username)
@@ -46,7 +46,27 @@ const getIdleMembers = async (req, res) => {
   }
 }
 
+/**
+ * Returns the lists of usernames migrated
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const migrateUserRoles = async (req, res) => {
+  try {
+    const migratedUserData = await migrateUsers()
+    return res.json({
+      message: 'Users migrated successfully',
+      ...migratedUserData
+    })
+  } catch (error) {
+    logger.error(`Error while migrating user roles: ${error}`)
+    return res.boom.badImplementation('Something went wrong. Please contact admin')
+  }
+}
+
 module.exports = {
   getMembers,
-  getIdleMembers
+  getIdleMembers,
+  migrateUserRoles
 }
