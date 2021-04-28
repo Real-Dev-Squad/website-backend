@@ -9,6 +9,17 @@ const pullRequest = require('../controllers/pullRequests')
  *     summary: Latest 10 Pull Requests in Real Dev Squad
  *     tags:
  *       - Pull Requests
+ *     parameters:
+ *        - in: query
+ *          name: size
+ *          schema:
+ *             type: integer
+ *          description: Number of pull requests to be returned
+ *        - in: query
+ *          name: page
+ *          schema:
+ *            type: integer
+ *          description: Page number for pagination
  *     responses:
  *       200:
  *         description: Pull Requests
@@ -40,6 +51,17 @@ router.get('/open', pullRequest.getOpenPRs)
  *     summary: All open Pull Requests in Real Dev Squad
  *     tags:
  *       - Pull Requests
+ *     parameters:
+ *        - in: query
+ *          name: size
+ *          schema:
+ *             type: integer
+ *          description: Number of pull requests to be returned
+ *        - in: query
+ *          name: page
+ *          schema:
+ *            type: integer
+ *          description: Page number for pagination
  *     responses:
  *       200:
  *         description: Pull Requests

@@ -37,7 +37,8 @@ const getUserPRs = async (req, res) => {
  */
 const getStalePRs = async (req, res) => {
   try {
-    const { data } = await githubService.fetchStalePRs()
+    const { size, page } = req.query
+    const { data } = await githubService.fetchStalePRs(size, page)
 
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data)
@@ -65,7 +66,8 @@ const getStalePRs = async (req, res) => {
  */
 const getOpenPRs = async (req, res) => {
   try {
-    const { data } = await githubService.fetchOpenPRs((req.query.page) || 1)
+    const { size, page } = req.query
+    const { data } = await githubService.fetchOpenPRs(size, page)
 
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data)
