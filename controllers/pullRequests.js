@@ -9,8 +9,10 @@ const githubService = require('../services/githubService')
 
 const getUserPRs = async (req, res) => {
   try {
-    const { data } = await githubService.fetchPRsByUser(req.params.username)
+    const response = await githubService.fetchPRsByUser(req.params.username)
+    if (response.userNotFound) return res.boom.notFound('Cannot find the user!')
 
+    const { data } = response
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data)
       return res.json({
