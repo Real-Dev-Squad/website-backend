@@ -23,7 +23,8 @@ module.exports = () => {
       email: 'abc@gmail.com',
       tokens: {
         githubAccessToken: 'githubAccessToken'
-      }
+      },
+      status: 'active'
     },
     {
       username: 'nikhil',
