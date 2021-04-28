@@ -29,7 +29,7 @@ const fetchMembers = async () => {
         }
         if (typeof memberData.roles === 'undefined') {
           allMembers.newMembers.push(curatedMemberData)
-        } else if (memberData.roles && memberData.roles.member) {
+        } else {
           allMembers.oldMembers.push(curatedMemberData)
         }
       })
