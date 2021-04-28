@@ -6,6 +6,7 @@ const badgeModel = firestore.collection('badges')
  * @param query { Object }: Filter for badges data
  * @return {Promise<badgeModel|Array>}
  */
+
 const fetchBadges = async ({
   size = 100,
   page = 0
@@ -15,10 +16,12 @@ const fetchBadges = async ({
       .limit(parseInt(size))
       .offset((parseInt(size)) * (parseInt(page)))
       .get()
-
     const allBadges = []
     snapshot.forEach((doc) => {
-      allBadges.push(doc.data())
+      allBadges.push({
+        id: doc.id,
+        ...doc.data()
+      })
     })
     return allBadges
   } catch (err) {
@@ -27,6 +30,69 @@ const fetchBadges = async ({
   }
 }
 
+/**
+ * Create the badge data
+ *
+ * @param badgeData { Object }: Badge data object to be stored in DB
+ * @return {Promise<badgeModel|Array>}
+ */
+
+const createBadges = async (badgeData) => {
+  try {
+    const snapshot = await badgeModel
+    snapshot.add(badgeData)
+
+    const allBadges = []
+    snapshot.get()
+      .then(function (querySnapshot) {
+        querySnapshot.forEach(function (doc) {
+          allBadges.push({
+            id: doc.id,
+            ...doc.data()
+          })
+        })
+      })
+
+    return allBadges
+  } catch (err) {
+    logger.error('Error retrieving badges', err)
+    return err
+  }
+}
+
+/**
+ * Updates the badge data
+ *
+ * @param badgeData { Object }: Badge data object to be stored in DB
+ * @param badgeId { String }: Badge Id String to be used to update the badge
+ * @return {Promise<{ badgeId: string }|{ badgeId: string >}
+ */
+
+const updateBadges = async (badgeData, badgeId = null) => {
+  try {
+    const snapshot = await badgeModel
+    snapshot.doc(badgeId).update({ ...badgeData })
+
+    const allBadges = []
+    snapshot.get()
+      .then(function (querySnapshot) {
+        querySnapshot.forEach(function (doc) {
+          allBadges.push({
+            id: doc.id,
+            ...doc.data()
+          })
+        })
+      })
+
+    return allBadges
+  } catch (err) {
+    logger.error('Error retrieving badges', err)
+    return err
+  }
+}
+
 module.exports = {
-  fetchBadges
+  fetchBadges,
+  createBadges,
+  updateBadges
 }
