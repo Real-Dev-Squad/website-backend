@@ -445,6 +445,9 @@ const swaggerOptions = {
             },
             tokens: {
               type: 'object'
+            },
+            status: {
+              type: 'string'
             }
           }
         },
