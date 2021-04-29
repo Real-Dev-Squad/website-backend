@@ -42,7 +42,9 @@ describe('Auctions', function () {
         .request(app)
         .get('/auctions')
         .end((err, res) => {
-          if (err) { return done(err) }
+          if (err) {
+            return done(err)
+          }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
@@ -61,12 +63,24 @@ describe('Auctions', function () {
         .request(app)
         .get(`/auctions/${auctionId}`)
         .end((err, res) => {
-          if (err) { return done(err) }
+          if (err) {
+            return done(err)
+          }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body).to.have.all.keys(...auctionWithIdKeys)
+          expect(res.body.item).to.be.a('string')
+          expect(res.body.quantity).to.be.a('number')
+          expect(res.body.end_time).to.be.a('number')
+          expect(res.body.highest_bid).to.be.a('number')
+          expect(res.body.start_time).to.be.a('number')
+          expect(res.body.bidders_and_bids).to.be.a('array')
           expect(res.body.seller).to.be.equal(userData[0].username)
+          expect(res.body.item).to.be.equal(auctionData.item_type)
+          expect(res.body.quantity).to.be.equal(auctionData.quantity)
+          expect(res.body.end_time).to.be.equal(auctionData.end_time)
+          expect(res.body.highest_bid).to.be.equal(auctionData.initial_price)
 
           return done()
         })
@@ -77,7 +91,9 @@ describe('Auctions', function () {
         .request(app)
         .get('/auctions/invalidId')
         .end((err, res) => {
-          if (err) { return done(err) }
+          if (err) {
+            return done(err)
+          }
 
           expect(res).to.have.status(404)
           expect(res.body).to.be.a('object')
@@ -96,7 +112,9 @@ describe('Auctions', function () {
         .set('cookie', `${cookieName}=${jwt}`)
         .send(auctionData)
         .end((err, res) => {
-          if (err) { return done(err) }
+          if (err) {
+            return done(err)
+          }
 
           expect(res).to.have.status(201)
           expect(res.body).to.be.a('object')
@@ -106,14 +124,16 @@ describe('Auctions', function () {
         })
     })
 
-    it('Should have enough Item Type in wallet', function (done) {
+    it('User should have enough items in wallet to sell', function (done) {
       chai
         .request(app)
         .post('/auctions')
         .set('cookie', `${cookieName}=${jwt}`)
         .send({ ...auctionData, quantity: 5 })
         .end((err, res) => {
-          if (err) { return done(err) }
+          if (err) {
+            return done(err)
+          }
 
           expect(res).to.have.status(403)
           expect(res.body).to.be.a('object')
@@ -128,7 +148,9 @@ describe('Auctions', function () {
         .request(app)
         .post('/auctions')
         .end((err, res) => {
-          if (err) { return done(err) }
+          if (err) {
+            return done(err)
+          }
 
           expect(res).to.have.status(401)
           expect(res.body).to.be.a('object')
@@ -151,7 +173,9 @@ describe('Auctions', function () {
         .set('cookie', `${cookieName}=${jwt}`)
         .send({ bid: 500 })
         .end((err, res) => {
-          if (err) { return done(err) }
+          if (err) {
+            return done(err)
+          }
 
           expect(res).to.have.status(201)
           expect(res.body).to.be.a('object')
@@ -161,7 +185,7 @@ describe('Auctions', function () {
         })
     })
 
-    it('Should have a sufficient balance', function (done) {
+    it('User should have sufficient balance for bidding', function (done) {
       chai
         .request(app)
         .post(`/auctions/bid/${auctionId}`)
@@ -169,7 +193,9 @@ describe('Auctions', function () {
         .send({ bid: 1001 })
 
         .end((err, res) => {
-          if (err) { return done(err) }
+          if (err) {
+            return done(err)
+          }
 
           expect(res).to.have.status(403)
           expect(res.body).to.be.a('object')
@@ -179,14 +205,16 @@ describe('Auctions', function () {
         })
     })
 
-    it('Should be higher than the previous bid', function (done) {
+    it('Bid Should be higher than the previous bid', function (done) {
       chai
         .request(app)
         .post(`/auctions/bid/${auctionId}`)
         .set('cookie', `${cookieName}=${jwt}`)
         .send({ bid: 50 })
         .end((err, res) => {
-          if (err) { return done(err) }
+          if (err) {
+            return done(err)
+          }
 
           expect(res).to.have.status(403)
           expect(res.body).to.be.a('object')
@@ -201,7 +229,9 @@ describe('Auctions', function () {
         .request(app)
         .post('/auctions/bid/invalidId')
         .end((err, res) => {
-          if (err) { return done(err) }
+          if (err) {
+            return done(err)
+          }
 
           expect(res).to.have.status(401)
           expect(res.body).to.be.a('object')
