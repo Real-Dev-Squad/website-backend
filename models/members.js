@@ -27,7 +27,7 @@ const fetchMembers = async () => {
           phone: undefined,
           email: undefined
         }
-        if (typeof memberData.roles === 'undefined') {
+        if (memberData.roles && memberData.roles.member) {
           allMembers.newMembers.push(curatedMemberData)
         } else {
           allMembers.oldMembers.push(curatedMemberData)
