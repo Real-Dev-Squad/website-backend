@@ -81,7 +81,7 @@ const trade = async (tradeData) => {
 
     const orderValue = qtyUserCanPurchase * stockData.price
     const stockPriceToBeUpdated = getUpdatedPrice(stockData.price)
-    updatedCurrencyData.walletConstants.DINERO = userBalance
+    updatedCurrencyData[walletConstants.DINERO] = userBalance
 
     const updatedStockData = {
       ...stockData,
