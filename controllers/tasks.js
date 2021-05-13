@@ -43,6 +43,33 @@ const fetchTasks = async (req, res) => {
     return res.boom.badImplementation('An internal server error occurred')
   }
 }
+
+/**
+ * Fetches all the tasks of the requested user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const getUserTasks = async (req, res) => {
+  try {
+    const { username } = req.params
+    const allTasks = await tasks.fetchUserTasks(username)
+
+    if (allTasks.userNotFound) {
+      return res.boom.notFound('User doesn\'t exist')
+    }
+
+    return res.json({
+      message: 'Tasks returned successfully!',
+      tasks: allTasks.length > 0 ? allTasks : []
+    })
+  } catch (err) {
+    logger.error(`Error while fetching tasks: ${err}`)
+
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+}
+
 /**
  * Fetches all the tasks of the logged in user
  *
@@ -92,5 +119,6 @@ module.exports = {
   addNewTask,
   fetchTasks,
   updateTask,
-  getSelfTasks
+  getSelfTasks,
+  getUserTasks
 }
