@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
 const { authorizeUser } = require('../middlewares/authorization')
-const { addNewStock, fetchStocks } = require('../controllers/stocks')
+const { addNewStock, fetchStocks, getSelfStocks } = require('../controllers/stocks')
 const { createStock } = require('../middlewares/validators/stocks')
 
 /**
