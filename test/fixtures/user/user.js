@@ -52,6 +52,43 @@ module.exports = () => {
       roles: {
         restricted: true
       }
+    },
+    {
+      username: 'sagar',
+      first_name: 'Sagar',
+      last_name: 'Bajpai',
+      yoe: 3,
+      img: './img.png',
+      linkedin_id: 'sagarbajpai',
+      github_id: 'sagarbajpai',
+      github_display_name: 'Sagar Bajpai',
+      phone: '1234567890',
+      email: 'abc@gmail.com',
+      tokens: {
+        githubAccessToken: 'githubAccessToken'
+      },
+      roles: {
+        restricted: false,
+        app_owner: true
+      }
+    },
+    {
+      username: 'ankush',
+      first_name: 'Ankush',
+      last_name: 'Dharkar',
+      yoe: 10,
+      img: './img.png',
+      linkedin_id: 'ankushdharkar',
+      github_id: 'ankushdharkar',
+      github_display_name: 'Ankush Dharkar',
+      phone: '1234567890',
+      email: 'ad@amazon.com',
+      tokens: {
+        githubAccessToken: 'githubAccessToken'
+      },
+      roles: {
+        super_user: true
+      }
     }
   ]
 }

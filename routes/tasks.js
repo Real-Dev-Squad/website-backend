@@ -3,7 +3,7 @@ const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
 const tasks = require('../controllers/tasks')
 const { createTask, updateTask } = require('../middlewares/validators/tasks')
-const authorizeOwner = require('../middlewares/authorizeOwner')
+const { authorizeUser } = require('../middlewares/authorization')
 
 /**
  * @swagger
@@ -93,7 +93,7 @@ router.get('/self', authenticate, tasks.getSelfTasks)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/', authenticate, authorizeOwner, createTask, tasks.addNewTask)
+router.post('/', authenticate, authorizeUser('appOwner'), createTask, tasks.addNewTask)
 
 /**
  * @swagger
@@ -124,7 +124,7 @@ router.post('/', authenticate, authorizeOwner, createTask, tasks.addNewTask)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/:id', authenticate, authorizeOwner, updateTask, tasks.updateTask)
+router.patch('/:id', authenticate, authorizeUser('appOwner'), updateTask, tasks.updateTask)
 
 /**
  * @swagger
