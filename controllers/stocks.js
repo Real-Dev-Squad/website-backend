@@ -29,7 +29,7 @@ const fetchStocks = async (req, res) => {
   try {
     const allStock = await stocks.fetchStocks()
     return res.json({
-      message: 'Stocks returned successfully!',
+      message: allStock.length > 0 ? 'Stocks returned successfully!' : 'No stocks found',
       stock: allStock.length > 0 ? allStock : []
     })
   } catch (err) {
@@ -48,7 +48,7 @@ const getSelfStocks = async (req, res) => {
     const { id: userId } = req.userData
     const userStocks = await stocks.fetchUserStocks(userId)
     return res.json({
-      message: 'User stocks returned successfully!',
+      message: userStocks.length > 0 ? 'User stocks returned successfully!' : 'No stocks found',
       userStocks
     })
   } catch (err) {
