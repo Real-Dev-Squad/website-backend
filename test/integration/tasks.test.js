@@ -244,4 +244,33 @@ describe('Tasks', function () {
         })
     })
   })
+
+  describe('GET /tasks/:username', function () {
+    it('Should return 200 when username is valid', function (done) {
+      chai
+        .request(app)
+        .get('/tasks/ankur')
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Tasks returned successfully!')
+          expect(res.body.tasks).to.be.a('array')
+          return done()
+        })
+    })
+
+    it('Should return 404 when username is invalid', function (done) {
+      chai
+        .request(app)
+        .get('/tasks/dummyUser')
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(404)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('User doesn\'t exist')
+          return done()
+        })
+    })
+  })
 })
