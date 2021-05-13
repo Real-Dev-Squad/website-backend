@@ -254,7 +254,7 @@ describe('Tasks', function () {
     it('Should return 200 when username is valid', function (done) {
       chai
         .request(app)
-        .get('/tasks/ankur')
+        .get('/tasks/sagar')
         .end((err, res) => {
           if (err) { return done(err) }
           expect(res).to.have.status(200)
