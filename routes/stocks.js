@@ -64,4 +64,34 @@ router.get('/', fetchStocks)
  */
 router.post('/', authenticate, authorizeUser('superUser'), createStock, addNewStock)
 
+/**
+ * @swagger
+ * /stocks/user/self:
+ *  get:
+ *   summary: Used to get all the stocks of the user
+ *   tags:
+ *     - User Stocks
+ *   responses:
+ *     200:
+ *       description: returns stocks of the user
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/userStocks'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
+ *     500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+
+router.get('/user/self', authenticate, getSelfStocks)
+
 module.exports = router

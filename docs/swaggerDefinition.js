@@ -445,6 +445,9 @@ const swaggerOptions = {
             },
             tokens: {
               type: 'object'
+            },
+            status: {
+              type: 'string'
             }
           }
         },
@@ -517,6 +520,29 @@ const swaggerOptions = {
           type: 'object',
           properties: {
             userBalance: {
+              type: 'number'
+            }
+          }
+        },
+        userStocks: {
+          type: 'object',
+          properties: {
+            userId: {
+              type: 'string'
+            },
+            stockId: {
+              type: 'string'
+            },
+            stockName: {
+              type: 'string'
+            },
+            quantity: {
+              type: 'number'
+            },
+            orderValue: {
+              type: 'number'
+            },
+            initialStockValue: {
               type: 'number'
             }
           }
