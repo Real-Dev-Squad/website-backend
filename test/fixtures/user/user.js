@@ -21,6 +21,9 @@ module.exports = () => {
       isMember: true,
       phone: '1234567890',
       email: 'abc@gmail.com',
+      roles: {
+        admin: true
+      },
       tokens: {
         githubAccessToken: 'githubAccessToken'
       }
