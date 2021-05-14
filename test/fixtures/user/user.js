@@ -21,6 +21,7 @@ module.exports = () => {
       isMember: true,
       phone: '1234567890',
       email: 'abc@gmail.com',
+      createdAt: 1621025657,
       tokens: {
         githubAccessToken: 'githubAccessToken'
       }
@@ -35,7 +36,8 @@ module.exports = () => {
       linkedin_id: 'nikhil-bhandarkar',
       twitter_id: 'whatifi',
       phone: '1234567891',
-      email: 'abc1@gmail.com'
+      email: 'abc1@gmail.com',
+      createdAt: 1621025681
     }
   ]
 }

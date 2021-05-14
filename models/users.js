@@ -4,6 +4,7 @@
  */
 
 const firestore = require('../utils/firestore')
+const { getUnixEpochTime } = require('../utils/time')
 const userModel = firestore.collection('users')
 
 /**
@@ -40,7 +41,7 @@ const addOrUpdate = async (userData, userId = null) => {
 
     // Add user
     userData.incompleteUserDetails = true
-    userData.createdOn = Date.now()
+    userData.createdOn = getUnixEpochTime()
     const userInfo = await userModel.add(userData)
     return { isNewUser: true, userId: userInfo.id }
   } catch (err) {
