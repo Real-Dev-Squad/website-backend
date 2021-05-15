@@ -43,7 +43,7 @@ const fetchMembers = async () => {
  */
 const migrateUsers = async () => {
   try {
-    const userSnapShot = await userModel.get()
+    const userSnapShot = await userModel.where('isMember', '==', true).get()
     const migratedUsers = []
 
     const usersArr = []

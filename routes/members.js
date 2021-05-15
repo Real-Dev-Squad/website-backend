@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { getMembers, getIdleMembers, migrateUserRoles } = require('../controllers/members')
-const authorization = require('../middlewares/authorization')
+const { authorizeUser } = require('../middlewares/authorization')
 const authenticate = require('../middlewares/authenticate')
 const { addRecruiter } = require('../controllers/recruiters')
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
@@ -119,6 +119,6 @@ router.post('/intro/:username', validateRecruiter, addRecruiter)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/member-to-role-migration', authenticate, authorization, migrateUserRoles)
+router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser'), migrateUserRoles)
 
 module.exports = router
