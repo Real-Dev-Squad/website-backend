@@ -3,6 +3,8 @@ const router = express.Router()
 const members = require('../controllers/members')
 const { addRecruiter } = require('../controllers/recruiters')
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
+const authenticate = require('../middlewares/authenticate')
+const { authorizeUser } = require('../middlewares/authorization')
 
 /**
  * @swagger
@@ -83,5 +85,35 @@ router.get('/idle', members.getIdleMembers)
  */
 
 router.post('/intro/:username', validateRecruiter, addRecruiter)
+
+/**
+ * @swagger
+ * /moveToMembers/:username:
+ *   patch:
+ *     summary: Changes the role of a new member(the username provided in params) to member
+ *     tags:
+ *       - Members
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: No content
+ *
+ *       401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
+ *
+ *       500:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+
+router.patch('/moveToMembers/:username', authenticate, authorizeUser('superUser'), members.moveToMembers)
 
 module.exports = router
