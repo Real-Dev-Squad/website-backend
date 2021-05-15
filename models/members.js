@@ -28,9 +28,9 @@ const fetchMembers = async () => {
           email: undefined
         }
         if (memberData.roles && memberData.roles.member) {
-          allMembers.newMembers.push(curatedMemberData)
-        } else {
           allMembers.oldMembers.push(curatedMemberData)
+        } else {
+          allMembers.newMembers.push(curatedMemberData)
         }
       })
     }

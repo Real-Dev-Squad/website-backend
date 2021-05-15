@@ -33,7 +33,7 @@ const getIdleMembers = async (req, res) => {
   try {
     const allMembers = await memberQuery.fetchMembers()
     const taskParticipants = await tasks.fetchActiveTaskMembers()
-    const idleMembers = allMembers?.filter(({ id }) => !taskParticipants.has(id))
+    const idleMembers = allMembers.oldMembers?.filter(({ id }) => !taskParticipants.has(id))
     const idleMemberUserNames = idleMembers?.map((member) => member.username)
 
     return res.json({
