@@ -15,7 +15,7 @@ const fetchMembers = async () => {
   try {
     const snapshot = await userModel.get()
 
-    const allMembers = { oldMembers: [], newMembers: [] }
+    const allMembers = []
 
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
@@ -28,10 +28,11 @@ const fetchMembers = async () => {
           email: undefined
         }
         if (memberData.roles && memberData.roles.member) {
-          allMembers.oldMembers.push(curatedMemberData)
+          allMembers.isMember = true
         } else {
-          allMembers.newMembers.push(curatedMemberData)
+          allMembers.isMember = false
         }
+        allMembers.push(curatedMemberData)
       })
     }
 
