@@ -39,17 +39,16 @@ const fetchMembers = async () => {
 
 /**
  * changes the role of a new user to member
- * @param userData { Object }: User data object to be modified
+ * @param userId { String }: User id of user to be modified
  * @return {Promise<userModel|object>}
  */
 
-const moveToMembers = async (userData) => {
+const moveToMembers = async (userId) => {
   try {
-    const userDoc = await userModel.doc(userData.id).get()
+    const userDoc = await userModel.doc(userId).get()
     const user = userDoc.data()
     const roles = user.roles ? { ...user.roles, member: true } : { member: true }
-    await userModel.doc(userData.id).set({
-      ...user,
+    await userModel.doc(userId).update({
       roles
     })
     return user

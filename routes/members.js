@@ -5,6 +5,7 @@ const { addRecruiter } = require('../controllers/recruiters')
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
 const authenticate = require('../middlewares/authenticate')
 const { authorizeUser } = require('../middlewares/authorization')
+const { ROLES } = require('../constants/roles')
 
 /**
  * @swagger
@@ -100,11 +101,17 @@ router.post('/intro/:username', validateRecruiter, addRecruiter)
  *         description: No content
  *
  *       401:
- *       description: unAuthorized
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/errors/unAuthorized'
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
  *
  *       500:
  *         description: serverUnavailable
@@ -114,6 +121,6 @@ router.post('/intro/:username', validateRecruiter, addRecruiter)
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.patch('/moveToMembers/:username', authenticate, authorizeUser('superUser'), members.moveToMembers)
+router.patch('/moveToMembers/:username', authenticate, authorizeUser(ROLES.SUPERUSER), members.moveToMembers)
 
 module.exports = router

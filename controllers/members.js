@@ -59,9 +59,9 @@ const getIdleMembers = async (req, res) => {
 const moveToMembers = async (req, res) => {
   try {
     const username = req.params.username
-    const result = await fetchUser({ username: username })
+    const result = await fetchUser({ username })
     if (result.userExists) {
-      await memberQuery.moveToMembers(result.user)
+      await memberQuery.moveToMembers(result.user.id)
       return res.status(204).send()
     }
     return res.boom.notFound("User doesn't exist")
