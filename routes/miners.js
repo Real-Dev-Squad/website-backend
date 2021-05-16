@@ -25,12 +25,12 @@ const miners = require('../controllers/miners.js')
  *                    type: array
  *                    items:
  *                      $ref: '#/components/schemas/miners'
- *       503:
- *         description: serverUnavailable
+ *       500:
+ *         description: badImplementation
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/errors/serverUnavailable'
+ *               $ref: '#/components/schemas/errors/badImplementation'
  */
 router.get('/list', miners.getMiners)
 

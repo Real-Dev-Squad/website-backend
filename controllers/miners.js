@@ -14,7 +14,7 @@ const getMiners = async (req, res) => {
     })
   } catch (error) {
     logger.error(`Error while fetching all miners: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    return res.boom.badImplementation('An internal server error occured.')
   }
 }
 
