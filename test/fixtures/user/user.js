@@ -1,3 +1,5 @@
+const { getUnixEpochTime } = require('../../../utils/time')
+
 // Import fixtures
 const githubUserInfo = require('../auth/githubUserInfo')()
 
@@ -21,7 +23,7 @@ module.exports = () => {
       isMember: true,
       phone: '1234567890',
       email: 'abc@gmail.com',
-      createdAt: 1621025657,
+      createdAt: getUnixEpochTime(),
       tokens: {
         githubAccessToken: 'githubAccessToken'
       },
@@ -38,7 +40,7 @@ module.exports = () => {
       twitter_id: 'whatifi',
       phone: '1234567891',
       email: 'abc1@gmail.com',
-      createdAt: 1621025681
+      createdAt: getUnixEpochTime()
     },
     {
       username: 'pranavg',
