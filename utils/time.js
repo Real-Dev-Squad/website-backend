@@ -1,6 +1,6 @@
 /**
  * Converts Time in milliseconds to Epoch Time
- * @param {number} time 
+ * @param {number} time
  * @returns {number}
  */
 
