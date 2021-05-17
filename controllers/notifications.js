@@ -1,27 +1,33 @@
 const notificationQuery = require('../models/notifications')
 /**
- * Fetches the data about our users
+ * Fetches the notifications data for current user
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
 
-module.exports.getNotificationsForUser = async (req, res) => {
+const getNotificationsForUser = async (req, res) => {
   try {
-    const { page: currentPage, n: limit } = req.query
+    let { page: currentPage, n: limit } = req.query
     const { id: userId } = req.userData
 
-    if (!currentPage || !limit) {
-      logger.error('currentPage/ limit not present in the query')
-      return res.boom.badRequest('Please check your query again')
+    if (!currentPage) {
+      currentPage = 1
     }
 
-    const parsedCurrentPage = +currentPage
-    const parsedLimit = +limit
+    if (!limit) {
+      limit = 10
+    }
 
-    if (isNaN(parsedCurrentPage) || isNaN(parsedLimit) || parsedCurrentPage <= 0 || parsedLimit <= 0) {
-      logger.error('page/limit are not valid integers present in the query')
-      return res.boom.badRequest('Please check your query again')
+    let parsedCurrentPage = +currentPage
+    let parsedLimit = +limit
+
+    if (isNaN(parsedCurrentPage) || parsedCurrentPage <= 0) {
+      parsedCurrentPage = 1
+    }
+
+    if (isNaN(parsedLimit) || parsedLimit <= 0) {
+      parsedLimit = 10
     }
 
     const paginatedNotifications = await notificationQuery.fetchNotifications({
@@ -38,4 +44,8 @@ module.exports.getNotificationsForUser = async (req, res) => {
     logger.error(`Error while fetching notifications: ${error}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')
   }
+}
+
+module.exports = {
+  getNotificationsForUser
 }

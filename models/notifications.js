@@ -9,7 +9,7 @@ const notificationModal = firestore.collection('notifications')
  * @return {Promise<notificationModal|Array>}}
  */
 
-module.exports.fetchNotifications = async ({ currentPage, limit, userId }) => {
+const fetchNotifications = async ({ currentPage, limit, userId }) => {
   try {
     const skip = (currentPage - 1) * limit
 
@@ -36,4 +36,8 @@ module.exports.fetchNotifications = async ({ currentPage, limit, userId }) => {
     logger.error('Error fetching notifications', err)
     throw err
   }
+}
+
+module.exports = {
+  fetchNotifications
 }
