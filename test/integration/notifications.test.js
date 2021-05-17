@@ -82,7 +82,7 @@ describe('Notifications', function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'Please Check your query'
+            message: 'Please check your query again'
           })
 
           return done()
@@ -104,7 +104,7 @@ describe('Notifications', function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'Please Check your query'
+            message: 'Please check your query again'
           })
 
           return done()
@@ -126,7 +126,7 @@ describe('Notifications', function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'Please Check your query'
+            message: 'Please check your query again'
           })
 
           return done()
@@ -148,7 +148,7 @@ describe('Notifications', function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'Please Check your query'
+            message: 'Please check your query again'
           })
 
           return done()
@@ -169,7 +169,7 @@ describe('Notifications', function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'Please Check your query'
+            message: 'Please check your query again'
           })
 
           return done()
@@ -190,7 +190,7 @@ describe('Notifications', function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'Please Check your query'
+            message: 'Please check your query again'
           })
 
           return done()
@@ -210,7 +210,7 @@ describe('Notifications', function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'Please Check your query'
+            message: 'Please check your query again'
           })
 
           return done()
