@@ -13,7 +13,7 @@ module.exports.fetchNotifications = async ({ currentPage, limit, userId }) => {
   try {
     const skip = (currentPage - 1) * limit
 
-    const snapshot = await notificationModal.where('userId', '==', 'anshul').limit(limit)
+    const snapshot = await notificationModal.where('userId', '==', userId).limit(limit)
       .offset(skip)
       .get()
 

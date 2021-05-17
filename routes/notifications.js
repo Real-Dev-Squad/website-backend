@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-// const authenticate = require('../middlewares/authenticate')
+const authenticate = require('../middlewares/authenticate')
 const notifications = require('../controllers/notifications')
 
 /**
@@ -47,7 +47,6 @@ const notifications = require('../controllers/notifications')
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-// TODO add authenticate middleware
-router.get('/', notifications.getNotificationsForUser)
+router.get('/', authenticate, notifications.getNotificationsForUser)
 
 module.exports = router

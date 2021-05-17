@@ -9,7 +9,7 @@ const notificationQuery = require('../models/notifications')
 module.exports.getNotificationsForUser = async (req, res) => {
   try {
     const { page: currentPage, n: limit } = req.query
-    // const { id: userId } = req.userData
+    const { id: userId } = req.userData
 
     if (!currentPage || !limit) {
       logger.error('currentPage/ limit not present in the query')
@@ -27,8 +27,7 @@ module.exports.getNotificationsForUser = async (req, res) => {
     const paginatedNotifications = await notificationQuery.fetchNotifications({
       currentPage: parsedCurrentPage,
       limit: parsedLimit,
-      // TODO userId
-      userId: ''
+      userId
     })
 
     return res.status(200).json({
