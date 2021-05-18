@@ -61,8 +61,11 @@ const moveToMembers = async (req, res) => {
     const username = req.params.username
     const result = await fetchUser({ username })
     if (result.userExists) {
-      await memberQuery.moveToMembers(result.user.id)
-      return res.status(204).send()
+      const alreadyMember = await memberQuery.moveToMembers(result.user.id)
+      if (alreadyMember) {
+        return res.status(400).json({ message: 'User Already is a member' })
+      }
+      return res.status(204).json({ message: 'User successfully made a member' })
     }
     return res.boom.notFound("User doesn't exist")
   } catch (err) {

@@ -40,18 +40,21 @@ const fetchMembers = async () => {
 /**
  * changes the role of a new user to member
  * @param userId { String }: User id of user to be modified
- * @return {Promise<userModel|object>}
+ * @return existingMember { Boolean }: to show if user is already a member
  */
 
 const moveToMembers = async (userId) => {
   try {
     const userDoc = await userModel.doc(userId).get()
     const user = userDoc.data()
+    if (user.roles && user.roles.member) {
+      return true
+    }
     const roles = user.roles ? { ...user.roles, member: true } : { member: true }
     await userModel.doc(userId).update({
       roles
     })
-    return user
+    return false
   } catch (err) {
     logger.error('Error updating user', err)
     throw err
