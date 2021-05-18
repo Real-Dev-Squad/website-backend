@@ -32,7 +32,8 @@ describe('Tasks', function () {
       startedOn: 4567,
       status: 'active',
       percentCompleted: 10,
-      participants: [appOwner.username],
+      participants: [],
+      assignee: appOwner.username,
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
       lossRate: { [DINERO]: 1 },
       isNoteworthy: true
@@ -115,7 +116,13 @@ describe('Tasks', function () {
           expect(res.body.message).to.equal('Tasks returned successfully!')
           expect(res.body.tasks).to.be.a('array')
           const taskWithParticipants = res.body.tasks[0]
-          expect(taskWithParticipants.participants).to.have.members([appOwner.username])
+
+          if (taskWithParticipants.type === 'group') {
+            expect(taskWithParticipants.participants).to.include(appOwner.username)
+          } else {
+            expect(taskWithParticipants.assignee).to.equal(appOwner.username)
+          }
+
           return done()
         })
     })
@@ -254,12 +261,21 @@ describe('Tasks', function () {
     it('Should return 200 when username is valid', function (done) {
       chai
         .request(app)
-        .get('/tasks/sagar')
+        .get(`/tasks/${appOwner.username}`)
         .end((err, res) => {
           if (err) { return done(err) }
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Tasks returned successfully!')
+
+          const task1 = res.body.tasks[0]
+
+          if (task1.type === 'group') {
+            expect(task1.participants).to.include(appOwner.username)
+          } else {
+            expect(task1.assignee).to.equal(appOwner.username)
+          }
+
           expect(res.body.tasks).to.be.a('array')
           return done()
         })
