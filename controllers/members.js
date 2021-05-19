@@ -58,7 +58,7 @@ const getIdleMembers = async (req, res) => {
 
 const moveToMembers = async (req, res) => {
   try {
-    const username = req.params.username
+    const { username } = req.params
     const result = await fetchUser({ username })
     if (result.userExists) {
       const alreadyMember = await memberQuery.moveToMembers(result.user.id)

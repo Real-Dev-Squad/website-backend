@@ -3,4 +3,4 @@ const ROLES = {
   APPOWNER: 'appOwner'
 }
 
-module.exports = { ROLES }
+module.exports = ROLES

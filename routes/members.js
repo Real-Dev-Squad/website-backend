@@ -1,11 +1,11 @@
 const express = require('express')
 const router = express.Router()
-const members = require('../controllers/members')
+const { getMembers, getIdleMembers, moveToMembers } = require('../controllers/members')
 const { addRecruiter } = require('../controllers/recruiters')
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
 const authenticate = require('../middlewares/authenticate')
 const { authorizeUser } = require('../middlewares/authorization')
-const { ROLES } = require('../constants/roles')
+const { SUPERUSER } = require('../constants/roles')
 
 /**
  * @swagger
@@ -29,7 +29,7 @@ const { ROLES } = require('../constants/roles')
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', members.getMembers)
+router.get('/', getMembers)
 
 /**
  * @swagger
@@ -53,7 +53,7 @@ router.get('/', members.getMembers)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/idle', members.getIdleMembers)
+router.get('/idle', getIdleMembers)
 
 /**
  * @swagger
@@ -139,6 +139,6 @@ router.post('/intro/:username', validateRecruiter, addRecruiter)
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.patch('/moveToMembers/:username', authenticate, authorizeUser(ROLES.SUPERUSER), members.moveToMembers)
+router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPERUSER), moveToMembers)
 
 module.exports = router
