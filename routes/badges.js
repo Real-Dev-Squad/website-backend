@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const badgeController = require('../controllers/badgeController.js')
+const badge = require('../controllers/badge.js')
 
 /**
  * @swagger
@@ -32,6 +32,6 @@ const badgeController = require('../controllers/badgeController.js')
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.get('/', badgeController.getBadges)
+router.get('/', badge.getBadges)
 
 module.exports = router

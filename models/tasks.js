@@ -1,6 +1,9 @@
 const firestore = require('../utils/firestore')
 const tasksModel = firestore.collection('tasks')
-const { fetchUser } = require('./users')
+const userUtils = require('../utils/users')
+const { fromFirestoreData, toFirestoreData } = require('../utils/tasks')
+const { TASK_TYPE, TASK_STATUS } = require('../constants/tasks')
+
 /**
  * Adds and Updates tasks
  *
@@ -10,6 +13,7 @@ const { fetchUser } = require('./users')
  */
 const updateTask = async (taskData, taskId = null) => {
   try {
+    taskData = await toFirestoreData(taskData)
     if (taskId) {
       const task = await tasksModel.doc(taskId).get()
       await tasksModel.doc(taskId).set({
@@ -19,8 +23,12 @@ const updateTask = async (taskData, taskId = null) => {
       return { taskId }
     }
     const taskInfo = await tasksModel.add(taskData)
-    const newlyCreatedTaskData = await fetchTask(taskInfo.id)
-    return { taskId: taskInfo.id, taskDetails: newlyCreatedTaskData.taskData }
+    const result = {
+      taskId: taskInfo.id,
+      taskDetails: await fromFirestoreData(taskData)
+    }
+
+    return result
   } catch (err) {
     logger.error('Error in creating task', err)
     throw err
@@ -42,7 +50,9 @@ const fetchTasks = async () => {
         ...task.data()
       })
     })
-    return tasks
+    const promises = tasks.map(async (task) => fromFirestoreData(task))
+    const updatedTasks = await Promise.all(promises)
+    return updatedTasks
   } catch (err) {
     logger.error('error getting tasks', err)
     throw err
@@ -52,18 +62,21 @@ const fetchTasks = async () => {
 /**
  * Fetch all participants whose task status is active
  *
- * @return {Promise<tasks|Array>}
+ * @return {Promise<userIds|Set>}
  */
 
 const fetchActiveTaskMembers = async () => {
   try {
-    const tasksSnapshot = await tasksModel.where('status', '==', 'active').get()
-    const activeMembers = []
-    tasksSnapshot.forEach((task) => {
-      activeMembers.push(
-        ...task.data().participants
-      )
-    })
+    const tasksSnapshot = await tasksModel.where('type', '==', TASK_TYPE.FEATURE).where('status', '==', TASK_STATUS.ACTIVE).get()
+    const activeMembers = new Set()
+    if (!tasksSnapshot.empty) {
+      tasksSnapshot.forEach((task) => {
+        const { assignee } = task.data()
+        activeMembers.add(
+          assignee
+        )
+      })
+    }
     return activeMembers
   } catch (err) {
     logger.error('error getting tasks', err)
@@ -79,7 +92,8 @@ const fetchActiveTaskMembers = async () => {
 const fetchTask = async (taskId) => {
   try {
     const task = await tasksModel.doc(taskId).get()
-    return { taskData: task.data() }
+    const taskData = task.data()
+    return { taskData: await fromFirestoreData(taskData) }
   } catch (err) {
     logger.error('Error retrieving task data', err)
     throw err
@@ -98,18 +112,55 @@ const fetchTask = async (taskId) => {
  * @return {Promise<tasks|Array>}
  */
 
-const fetchUserTasks = async (username) => {
+const fetchUserTasks = async (username, statuses = []) => {
   try {
-    const { user } = await fetchUser({ username })
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).get()
+    const userId = await userUtils.getUserId(username)
+
+    if (!userId) {
+      return { userNotFound: true }
+    }
+
+    let tasksSnapshot = []
+    let assigneeSnapshot = []
+
+    if (statuses && statuses.length) {
+      tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
+        .where('status', 'in', statuses)
+        .get()
+      assigneeSnapshot = await tasksModel.where('assignee', '==', userId)
+        .where('status', 'in', statuses)
+        .get()
+    } else {
+      tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
+        .get()
+
+      assigneeSnapshot = await tasksModel.where('assignee', '==', userId)
+        .get()
+    }
+
     const tasks = []
-    tasksSnapshot.forEach((task) => {
-      tasks.push({
-        id: task.id,
-        ...task.data()
+
+    if (!tasksSnapshot.empty) {
+      tasksSnapshot.forEach((task) => {
+        tasks.push({
+          id: task.id,
+          ...task.data()
+        })
       })
-    })
-    return tasks
+    }
+
+    if (!assigneeSnapshot.empty) {
+      assigneeSnapshot.forEach((task) => {
+        tasks.push({
+          id: task.id,
+          ...task.data()
+        })
+      })
+    }
+
+    const promises = tasks.map(async (task) => fromFirestoreData(task))
+    const updatedTasks = await Promise.all(promises)
+    return updatedTasks
   } catch (err) {
     logger.error('error getting tasks', err)
     throw err
@@ -117,23 +168,7 @@ const fetchUserTasks = async (username) => {
 }
 
 const fetchUserActiveAndBlockedTasks = async (username) => {
-  try {
-    const { user } = await fetchUser({ username })
-
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', 'in', ['active', 'pending', 'blocked']).get()
-    const tasks = []
-    tasksSnapshot.forEach((task) => {
-      tasks.push({
-        id: task.id,
-        ...task.data()
-      })
-    })
-
-    return tasks
-  } catch (err) {
-    logger.error('error getting tasks', err)
-    throw err
-  }
+  return await fetchUserTasks(username, ['active', 'pending', 'blocked'])
 }
 
 /**
@@ -143,22 +178,7 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
  */
 
 const fetchUserCompletedTasks = async (username) => {
-  try {
-    const { user } = await fetchUser({ username })
-    const tasksSnapshot = await tasksModel.where('participants', 'array-contains', user.username).where('status', '==', 'completed').get()
-    const tasks = []
-    tasksSnapshot.forEach((task) => {
-      tasks.push({
-        id: task.id,
-        ...task.data()
-      })
-    })
-
-    return tasks
-  } catch (err) {
-    logger.error('error getting tasks', err)
-    throw err
-  }
+  return await fetchUserTasks(username, ['completed'])
 }
 
 module.exports = {

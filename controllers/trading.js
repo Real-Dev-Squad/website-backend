@@ -1,4 +1,4 @@
-const tradeModel = require('../models/trading')
+const tradeService = require('../services/tradingService')
 /**
  * New Trading Request
  *
@@ -13,7 +13,7 @@ const trade = async (req, res) => {
       username,
       userId
     }
-    const { canUserTrade, errorMessage, userBalance } = await tradeModel.trade(tradeStockData)
+    const { canUserTrade, errorMessage, userBalance } = await tradeService.trade(tradeStockData)
 
     if (!canUserTrade) {
       return res.boom.forbidden(errorMessage)
@@ -21,7 +21,7 @@ const trade = async (req, res) => {
 
     return res.json({ userBalance })
   } catch (err) {
-    logger.error(`Error while updating task: ${err}`)
+    logger.error(`Error during trading: ${err}`)
     return res.boom.badImplementation('An internal server error occurred')
   }
 }
