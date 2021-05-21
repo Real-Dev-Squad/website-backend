@@ -2,7 +2,8 @@ const firestore = require('../utils/firestore')
 const walletModel = firestore.collection('wallets')
 const bankModel = firestore.collection('banks')
 const currencyExchangeModel = firestore.collection('currencyExchange')
-// const transactionModel = firestore.collection('transactions')
+const transactionModel = firestore.collection('transactions')
+const { extractReferenceDocumentData, extractReferenceDocumentId } = require('../utils/firestore-helper')
 
 const allCurrencyName = 'allCurrencies'
 
@@ -54,7 +55,7 @@ const createCurrencyRates = async (currencyData) => {
       [currencyData.src]: {
         [currencyData.target]: currencyData.quantity
       },
-      lastUpdate: new Date()
+      lastUpdate: Date.now()
     }, {
       merge: true
     })
@@ -87,19 +88,11 @@ const getAllBanks = async () => {
 }
 
 /**
- * Extracts the data form the first doc of firestore response
+ * Rounds number to 2 precision after decimal point
  * @return {Promise<object>}
  */
-const extractRefDocsData = (doc) => {
-  return doc.docs[0] && doc.docs[0].data()
-}
-
-/**
- * Gets the id of firestore document
- * @return {Promise<object>}
- */
-const extractRefDocsId = (doc) => {
-  return doc.docs[0] && doc.docs[0].id
+const roundToTwoDigits = (num) => {
+  return Math.round(num * 100) / 100
 }
 
 /**
@@ -107,8 +100,8 @@ const extractRefDocsId = (doc) => {
  * @return {Promise<exchangeData>}
  */
 const updateBankWalletAfterExchange = (bankCurrency, exchangeData, totalTargetCurrencyRequest) => {
-  bankCurrency[exchangeData.src] = (bankCurrency[exchangeData.src] || 0) + parseInt(exchangeData.quantity)
-  bankCurrency[exchangeData.target] -= totalTargetCurrencyRequest
+  bankCurrency[exchangeData.src] = roundToTwoDigits((bankCurrency[exchangeData.src] || 0) + parseFloat(exchangeData.quantity))
+  bankCurrency[exchangeData.target] = roundToTwoDigits(bankCurrency[exchangeData.target] - totalTargetCurrencyRequest)
   return { ...bankCurrency }
 }
 
@@ -117,8 +110,8 @@ const updateBankWalletAfterExchange = (bankCurrency, exchangeData, totalTargetCu
  * @return {Promise<exchangeData>}
  */
 const updateUserWalletAfterExchange = (userCurrency, exchangeData, totalTargetCurrencyRequest) => {
-  userCurrency[exchangeData.target] = (userCurrency[exchangeData.target] || 0) + parseInt(totalTargetCurrencyRequest)
-  userCurrency[exchangeData.src] -= exchangeData.quantity
+  userCurrency[exchangeData.target] = roundToTwoDigits((userCurrency[exchangeData.target] || 0) + parseFloat(totalTargetCurrencyRequest))
+  userCurrency[exchangeData.src] = roundToTwoDigits(userCurrency[exchangeData.src] - exchangeData.quantity)
   return { ...userCurrency }
 }
 
@@ -130,9 +123,9 @@ const exchangeTransaction = async (userId, exchangeData) => {
   try {
     const { bankId } = exchangeData
     // db models refs
-    const userWalletRef = await walletModel.where('userId', '==', userId).limit(1)
-    const bankWalletRef = await bankModel.where('bankId', '==', bankId).limit(1)
-    const exchangeRateRef = await currencyExchangeModel.doc(allCurrencyName)
+    const userWalletRef = walletModel.where('userId', '==', userId).limit(1)
+    const bankWalletRef = bankModel.where('bankId', '==', bankId).limit(1)
+    const exchangeRateRef = currencyExchangeModel.doc(allCurrencyName)
     const exchangeResponse = await firestore.runTransaction(async t => {
       const responseObj = {
         status: false,
@@ -140,12 +133,11 @@ const exchangeTransaction = async (userId, exchangeData) => {
       }
 
       const userWalletDoc = await t.get(userWalletRef)
-      const userWalletId = await extractRefDocsId(userWalletDoc)
-      const userWallet = await extractRefDocsData(userWalletDoc)
+      const userWalletId = await extractReferenceDocumentId(userWalletDoc)
+      const userWallet = await extractReferenceDocumentData(userWalletDoc)
       const bankWalletDoc = await t.get(bankWalletRef)
-      const bankWalletId = await extractRefDocsId(bankWalletDoc)
-      const bankWallet = await extractRefDocsData(bankWalletDoc)
-
+      const bankWalletId = await extractReferenceDocumentId(bankWalletDoc)
+      const bankWallet = await extractReferenceDocumentData(bankWalletDoc)
       if (bankWallet && bankWallet.isActive) {
         const exchangeRates = (await t.get(exchangeRateRef)).data()
         const srcExchangeRate = exchangeRates[exchangeData.src][exchangeData.target]
@@ -161,10 +153,8 @@ const exchangeTransaction = async (userId, exchangeData) => {
           // update User wallet currency
           const userWalletUpdateRef = walletModel.doc(userWalletId)
           t.update(userWalletUpdateRef, { currency: userWalletAfterExchange })
-          // Log in Tranaction collection
           responseObj.status = true
           responseObj.message = 'Transaction Successful'
-          // TODO: if required update transaction
         } else {
           responseObj.message = 'Insufficient funds'
         }
@@ -173,6 +163,15 @@ const exchangeTransaction = async (userId, exchangeData) => {
       }
       return responseObj
     })
+    transactionModel.add({
+      bankId,
+      userId,
+      timestamp: Date.now(),
+      status: (exchangeResponse.status) ? 'success' : 'failed',
+      message: exchangeResponse.message,
+      ...exchangeData
+    })
+    // t.set(transactionDocument,)
     return exchangeResponse
   } catch (err) {
     logger.error('Error while exchanging currency data', err)

@@ -24,17 +24,12 @@ const getExchangeRate = async (req, res) => {
  */
 const createExchangeRate = (req, res) => {
   try {
-    const { username } = req.userData
-    // This id temporary hack, to make ankush set the exchange rate
-    if (username === 'ankush') {
-      const currencyData = { ...req.body, timestamp: new Date() }
-      createCurrencyRates(currencyData)
-      return res.json({
-        message: 'currency created successfully!',
-        banks: currencyData
-      })
-    }
-    return res.boom.unauthorized('You are not authorized to use this, only ankush can XD')
+    const currencyData = { ...req.body, timestamp: Date.now() }
+    createCurrencyRates(currencyData)
+    return res.json({
+      message: 'currency created successfully!',
+      banks: currencyData
+    })
   } catch (err) {
     logger.error(`Error while creating new exchange rate: ${err}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')

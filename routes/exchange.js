@@ -2,7 +2,8 @@ const express = require('express')
 const router = express.Router()
 const exchangeController = require('../controllers/exchangeController')
 const authenticate = require('../middlewares/authenticate')
-const exchangeVaidatore = require('../middlewares/validators/exchange')
+const { postCurrencyRates, patchExchange } = require('../middlewares/validators/exchange')
+const { authorizeUser } = require('../middlewares/authorization')
 
 /**
  * @swagger
@@ -54,7 +55,7 @@ router.get('/rates', exchangeController.getExchangeRate)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/rates', authenticate, exchangeVaidatore.postCurrencyRates, exchangeController.createExchangeRate)
+router.post('/rates', authenticate, authorizeUser('superUser'), postCurrencyRates, exchangeController.createExchangeRate)
 
 /**
  * @swagger
@@ -129,6 +130,6 @@ router.get('/:bankId', exchangeController.getCurrencyAvailabeInBank)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/', authenticate, exchangeVaidatore.patchExchange, exchangeController.convertCurrency)
+router.patch('/', authenticate, patchExchange, exchangeController.convertCurrency)
 
 module.exports = router
