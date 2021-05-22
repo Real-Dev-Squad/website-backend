@@ -22,10 +22,10 @@ const getExchangeRate = async (req, res) => {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const createExchangeRate = (req, res) => {
+const createExchangeRate = async (req, res) => {
   try {
     const currencyData = { ...req.body, timestamp: Date.now() }
-    createCurrencyRates(currencyData)
+    await createCurrencyRates(currencyData)
     return res.json({
       message: 'currency created successfully!',
       banks: currencyData
@@ -86,7 +86,7 @@ const convertCurrency = async (req, res) => {
     const exchangeData = req.body
     const { id: userId } = req.userData
     const exchangeTransactionStatus = await exchangeTransaction(userId, exchangeData)
-    return res.status(200).json({
+    return res.json({
       status: (exchangeTransactionStatus.status) ? 'success' : 'failure',
       message: exchangeTransactionStatus.message
     })

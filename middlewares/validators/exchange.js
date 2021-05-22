@@ -1,9 +1,10 @@
 const joi = require('joi')
+const { SUPPORTED_CURRENCIES } = require('../../constants/wallets')
 
 const postCurrencyRates = async (req, res, next) => {
   const schema = joi.object().keys({
-    src: joi.string().required(),
-    target: joi.string().required(),
+    src: joi.string().valid(...SUPPORTED_CURRENCIES).required(),
+    target: joi.string().valid(...SUPPORTED_CURRENCIES).required(),
     quantity: joi.number().required()
   })
   try {
@@ -17,8 +18,8 @@ const postCurrencyRates = async (req, res, next) => {
 
 const patchExchange = async (req, res, next) => {
   const schema = joi.object().keys({
-    src: joi.string().required(),
-    target: joi.string().required(),
+    src: joi.string().valid(...SUPPORTED_CURRENCIES).required(),
+    target: joi.string().valid(...SUPPORTED_CURRENCIES).required(),
     quantity: joi.number().required(),
     bankId: joi.string().required()
   })

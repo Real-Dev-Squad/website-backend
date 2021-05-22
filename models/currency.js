@@ -1,11 +1,11 @@
 const firestore = require('../utils/firestore')
-const walletModel = firestore.collection('wallets')
-const bankModel = firestore.collection('banks')
-const currencyExchangeModel = firestore.collection('currencyExchange')
-const transactionModel = firestore.collection('transactions')
 const { extractReferenceDocumentData, extractReferenceDocumentId } = require('../utils/firestore-helper')
-
-const allCurrencyName = 'allCurrencies'
+const { WALLETS, BANKS, CURRENCY_EXCHANGE, TRANSACTIONS } = require('../constants/firestore-collections')
+const { ALL_CURRENCY_EXCHANGE_DOCUMENT_NAME: allCurrencyName } = require('../constants/currency-exchange')
+const walletModel = firestore.collection(WALLETS)
+const bankModel = firestore.collection(BANKS)
+const currencyExchangeModel = firestore.collection(CURRENCY_EXCHANGE)
+const transactionModel = firestore.collection(TRANSACTIONS)
 
 /**
  * Fetch the currency exchange rates
@@ -26,6 +26,7 @@ const fetchExchangeRates = async () => {
 
 /**
  * Fetch the currency exchange from the bank
+ * @param bankId { String }
  * @return {Promise<exchangeData>}
  */
 const fetchCurrencyAvailablity = async (bankId) => {
@@ -46,6 +47,7 @@ const fetchCurrencyAvailablity = async (bankId) => {
 
 /**
  * Sets the currency exchange rates
+ * @param currencyData { Object }
  * @return {Promise<exchangeData>}
  */
 const createCurrencyRates = async (currencyData) => {
@@ -75,9 +77,9 @@ const getAllBanks = async () => {
     const bankSnapshot = await bankModel.get()
     const bankData = []
     bankSnapshot.forEach(bank => {
-      const data = bank.data()
-      if (data.isActive) {
-        bankData.push({ bankId: data.bankId, bankName: data.bankName })
+      const { bankId, bankName, isActive } = bank.data()
+      if (isActive) {
+        bankData.push({ bankId, bankName })
       }
     })
     return bankData
@@ -89,14 +91,35 @@ const getAllBanks = async () => {
 
 /**
  * Rounds number to 2 precision after decimal point
- * @return {Promise<object>}
+ * @param num { Number }
+ * @return {Number}
  */
 const roundToTwoDigits = (num) => {
   return Math.round(num * 100) / 100
 }
 
 /**
+ * Checks if currency requested for exchange is available in bank and with user
+ * @param bank { Object }: Bank currency details
+ * @param user { Object }: User currency details
+ * @param exchangeData { Object }
+ * @return {Boolean}
+ */
+const checkIfCurrenyTypeAvailable = (bank, user, exchangeData) => {
+  const currencyStatus = {}
+  const { src, target } = exchangeData
+  const { currency: bankCurrency } = bank
+  const { currency: userCurrency } = user
+  currencyStatus.bank = Object.hasOwnProperty.call(bankCurrency, target)
+  currencyStatus.user = Object.hasOwnProperty.call(userCurrency, src)
+  return currencyStatus
+}
+
+/**
  * Update bank currecy after excbange
+ * @param bankCurrency { Object }: Bank's available currency
+ * @param exchangeData { Object }: Requested currency
+ * @param totalTargetCurrencyRequest { Number }: Total request amount for exchange
  * @return {Promise<exchangeData>}
  */
 const updateBankWalletAfterExchange = (bankCurrency, exchangeData, totalTargetCurrencyRequest) => {
@@ -107,6 +130,9 @@ const updateBankWalletAfterExchange = (bankCurrency, exchangeData, totalTargetCu
 
 /**
  * Update user currecy after excbange
+ * @param userCurrency { Object }: User's available currency
+ * @param exchangeData { Object }: Requested currency
+ * @param totalTargetCurrencyRequest { Number }: Total request amount for exchange
  * @return {Promise<exchangeData>}
  */
 const updateUserWalletAfterExchange = (userCurrency, exchangeData, totalTargetCurrencyRequest) => {
@@ -117,6 +143,8 @@ const updateUserWalletAfterExchange = (userCurrency, exchangeData, totalTargetCu
 
 /**
  * Transaction for currency exchange
+ * @param userId { String }
+ * @param exchangeData { Object }
  * @return {Promise<exchangeData>}
  */
 const exchangeTransaction = async (userId, exchangeData) => {
@@ -132,34 +160,43 @@ const exchangeTransaction = async (userId, exchangeData) => {
         message: ''
       }
 
-      const userWalletDoc = await t.get(userWalletRef)
+      const [userWalletDoc, bankWalletDoc] = await Promise.all([t.get(userWalletRef), t.get(bankWalletRef)])
       const userWalletId = await extractReferenceDocumentId(userWalletDoc)
       const userWallet = await extractReferenceDocumentData(userWalletDoc)
-      const bankWalletDoc = await t.get(bankWalletRef)
       const bankWalletId = await extractReferenceDocumentId(bankWalletDoc)
       const bankWallet = await extractReferenceDocumentData(bankWalletDoc)
-      if (bankWallet && bankWallet.isActive) {
-        const exchangeRates = (await t.get(exchangeRateRef)).data()
-        const srcExchangeRate = exchangeRates[exchangeData.src][exchangeData.target]
-        const totalTargetCurrencyRequest = (srcExchangeRate * exchangeData.quantity)
-        if (userWallet.currency[exchangeData.src] >= exchangeData.quantity &&
-          bankWallet.currency[exchangeData.target] >= totalTargetCurrencyRequest) {
-          // Update bank currency
-          const bankWalletAfterExchange = updateBankWalletAfterExchange(bankWallet.currency, exchangeData, totalTargetCurrencyRequest)
-          const userWalletAfterExchange = updateUserWalletAfterExchange(userWallet.currency, exchangeData, totalTargetCurrencyRequest)
-          // update Bank wallet currency
-          const bankWalletUpdateRef = bankModel.doc(bankWalletId)
-          t.update(bankWalletUpdateRef, { currency: bankWalletAfterExchange })
-          // update User wallet currency
-          const userWalletUpdateRef = walletModel.doc(userWalletId)
-          t.update(userWalletUpdateRef, { currency: userWalletAfterExchange })
-          responseObj.status = true
-          responseObj.message = 'Transaction Successful'
+      const currencyStatus = checkIfCurrenyTypeAvailable(bankWallet, userWallet, exchangeData)
+      if (currencyStatus.bank && currencyStatus.user) {
+        if (bankWallet && bankWallet.isActive) {
+          const exchangeRates = (await t.get(exchangeRateRef)).data()
+          const srcExchangeRate = exchangeRates[exchangeData.src][exchangeData.target]
+          const totalTargetCurrencyRequest = (srcExchangeRate * exchangeData.quantity)
+          const userFunds = userWallet.currency[exchangeData.src] >= exchangeData.quantity
+          const bankFunds = bankWallet.currency[exchangeData.target] >= totalTargetCurrencyRequest
+          if (userFunds && bankFunds) {
+            // Update bank currency
+            const bankWalletAfterExchange = updateBankWalletAfterExchange(bankWallet.currency, exchangeData, totalTargetCurrencyRequest)
+            const userWalletAfterExchange = updateUserWalletAfterExchange(userWallet.currency, exchangeData, totalTargetCurrencyRequest)
+            const bankWalletUpdateRef = bankModel.doc(bankWalletId)
+            const userWalletUpdateRef = walletModel.doc(userWalletId)
+            await Promise.all(
+              [
+                t.update(bankWalletUpdateRef, { currency: bankWalletAfterExchange }),
+                t.update(userWalletUpdateRef, { currency: userWalletAfterExchange })
+              ])
+            responseObj.status = true
+            responseObj.message = 'Transaction Successful'
+          } else {
+            const insufficientFundsWith = !(bankFunds && userFunds) ? 'bank and user' : (!bankFunds) ? 'bank' : (!userFunds) ? 'user' : ''
+            responseObj.message = `Insufficient funds with ${(insufficientFundsWith)}`
+          }
         } else {
-          responseObj.message = 'Insufficient funds'
+          responseObj.message = 'Bank not found or it is inactive'
         }
       } else {
-        responseObj.message = 'Bank not found or it is inactive'
+        const { bank, user } = currencyStatus
+        const notSupportedBy = (bank) ? 'bank' : (user) ? 'user' : 'bank and user'
+        responseObj.message = `Transaction currency type not supported by ${notSupportedBy}`
       }
       return responseObj
     })
@@ -171,7 +208,6 @@ const exchangeTransaction = async (userId, exchangeData) => {
       message: exchangeResponse.message,
       ...exchangeData
     })
-    // t.set(transactionDocument,)
     return exchangeResponse
   } catch (err) {
     logger.error('Error while exchanging currency data', err)

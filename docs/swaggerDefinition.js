@@ -597,10 +597,10 @@ const swaggerOptions = {
             currency: {
               type: 'object',
               properties: {
-                denaru: {
+                dinero: {
                   type: 'number'
                 },
-                neelaam: {
+                neelam: {
                   type: 'number'
                 }
               }

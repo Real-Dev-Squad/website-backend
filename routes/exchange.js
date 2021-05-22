@@ -82,7 +82,7 @@ router.get('/banks', exchangeController.getAllBanksName)
 
 /**
  * @swagger
- * /exchange/{bankId}::
+ * /exchange/:bankId:
  *   get:
  *     summary: gets currecy details form the bank
  *     tags:
@@ -111,7 +111,7 @@ router.get('/:bankId', exchangeController.getCurrencyAvailabeInBank)
 
 /**
  * @swagger
- * /exchange/{bankId}::
+ * /exchange/:bankId:
  *   patch:
  *     summary: exchange currency transaction
  *     tags:
