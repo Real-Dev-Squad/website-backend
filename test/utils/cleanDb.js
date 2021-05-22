@@ -7,8 +7,11 @@ const firebaseConfig = require('../../firebase.json')
  * To be used during tests for deleting the data as required.
  */
 module.exports = async () => {
+  const credentialsObject = JSON.parse(config.firestore)
+  const projectId = credentialsObject.project_id
+
   const firestoreCleanUrl = `http://localhost:${firebaseConfig.emulators.firestore.port}` +
-    `/emulator/v1/projects/${config.get('db.firestore.projectId')}/databases/(default)/documents`
+    `/emulator/v1/projects/${projectId}/databases/(default)/documents`
 
   return await fetch(firestoreCleanUrl, 'delete')
 }

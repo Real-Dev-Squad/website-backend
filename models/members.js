@@ -17,16 +17,18 @@ const fetchMembers = async () => {
 
     const allMembers = []
 
-    snapshot.forEach((doc) => {
-      allMembers.push({
-        id: doc.id,
-        ...doc.data(),
-        tokens: undefined,
-        phone: undefined,
-        email: undefined
-      })
+    if (!snapshot.empty) {
+      snapshot.forEach((doc) => {
+        allMembers.push({
+          id: doc.id,
+          ...doc.data(),
+          tokens: undefined,
+          phone: undefined,
+          email: undefined
+        })
+      }
+      )
     }
-    )
 
     return allMembers
   } catch (err) {
@@ -35,16 +37,6 @@ const fetchMembers = async () => {
   }
 }
 
-/**
- * Checks whether the user is a superuser
- * @return {Boolean}
- */
-
-const isSuperUser = (username) => {
-  return username === 'ankush'
-}
-
 module.exports = {
-  fetchMembers,
-  isSuperUser
+  fetchMembers
 }

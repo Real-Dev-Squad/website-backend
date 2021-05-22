@@ -1,4 +1,5 @@
 const auctions = require('../models/auctions')
+const wallet = require('../models/wallets')
 
 /**
  * Fetches all the active (ongoing) auctions
@@ -49,6 +50,11 @@ const createNewAuction = async (req, res) => {
   try {
     const { id: seller } = req.userData
     const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = req.body
+
+    const { currencies } = await wallet.fetchWallet(seller)
+    const itemQuantity = parseInt(currencies[`${itemType}`])
+    if (!itemQuantity || itemQuantity < quantity) return res.boom.forbidden(`You do not have enough of ${itemType}s!`)
+
     const auctionId = await auctions.createNewAuction({ seller, initialPrice, itemType, endTime, quantity })
     return res.status(201).json({ id: auctionId, message: 'Auction created successfully!' })
   } catch (error) {

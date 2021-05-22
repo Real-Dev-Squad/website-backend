@@ -44,6 +44,46 @@ describe('Users', function () {
           return done()
         })
     })
+
+    it('Should update the user status', function (done) {
+      chai
+        .request(app)
+        .patch('/users/self')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({
+          status: 'ooo'
+        })
+        .end((err, res) => {
+          if (err) { return done(err) }
+
+          expect(res).to.have.status(204)
+
+          return done()
+        })
+    })
+
+    it('Should return 400 for invalid status value', function (done) {
+      chai
+        .request(app)
+        .patch('/users/self')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({
+          status: 'blah'
+        })
+        .end((err, res) => {
+          if (err) { return done(err) }
+
+          expect(res).to.have.status(400)
+          expect(res.body).to.be.an('object')
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: '"status" must be one of [ooo, idle, active]'
+          })
+
+          return done()
+        })
+    })
   })
 
   describe('GET /users', function () {

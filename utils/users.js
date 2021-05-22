@@ -8,8 +8,9 @@ const { fetchUser } = require('../models/users')
  */
 const getUserId = async (username) => {
   try {
-    const { user: { id } } = await fetchUser({ username })
-    return id
+    const { userExists, user: { id } } = await fetchUser({ username })
+
+    return userExists ? id : false
   } catch (error) {
     logger.error('Something went wrong', error)
     throw error
