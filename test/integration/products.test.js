@@ -10,38 +10,23 @@ const firestore = require('../../utils/firestore')
 const authService = require('../../services/authService')
 const cookieName = config.get('userToken.cookieName')
 
+// Import fixtures
+const { PRAKASH: userPrakash } = require('../fixtures/products/user')
+const { COFFEE, MILK, WATER, PRODUCT_KEY_LIST } = require('../fixtures/products/product')
+
 chai.use(chaiHttp)
 
 describe('Products', function () {
   let jwt
   let createdUserId
   before(async function () {
-    const user = {
-      first_name: 'Prakash',
-      last_name: 'C',
-      yoe: 0,
-      img: './img.png',
-      github_id: 'prakashchoudhary07',
-      username: 'prakash'
-    }
-    // Adding user
-    const { userId } = await userModel.addOrUpdate(user)
+    const { userId } = await userModel.addOrUpdate(userPrakash)
     createdUserId = userId
-    // Generatinf JWT
     jwt = authService.generateAuthToken({ userId })
   })
   describe('GET /products', function () {
     afterEach(async function () {
-      const product = {
-        id: 'coffee',
-        image: 'coffeeImage',
-        name: 'coffee',
-        manufacturer: 'RDS',
-        price: 55,
-        category: 'food',
-        usage: ['To make coffee']
-      }
-      await productsModel.addProduct(product)
+      await productsModel.addProduct(COFFEE)
     })
     it('should return empty ', function (done) {
       chai
@@ -72,31 +57,14 @@ describe('Products', function () {
           expect(res.body).to.contain.keys('message', 'products')
           expect(res.body.message).to.equal('Products returned successfully!')
           expect(res.body.products).to.be.a('object')
-          expect(res.body.products.coffee).to.have.all.keys(
-            'id',
-            'image',
-            'name',
-            'manufacturer',
-            'price',
-            'category',
-            'usage'
-          )
+          expect(res.body.products.coffee).to.have.all.keys(...PRODUCT_KEY_LIST)
           return done()
         })
     })
   })
   describe('GET /products/:productId', function () {
     afterEach(async function () {
-      const product = {
-        id: 'milk',
-        image: 'milkImage',
-        name: 'milk',
-        manufacturer: 'RDS',
-        price: 55,
-        category: 'food',
-        usage: ['To make coffee']
-      }
-      await productsModel.addProduct(product)
+      await productsModel.addProduct(MILK)
     })
     it('should return empty ', function (done) {
       const productId = 'milk'
@@ -127,15 +95,7 @@ describe('Products', function () {
           expect(res.body).to.contain.keys('message', 'product')
           expect(res.body.message).to.equal('Product returned successfully.')
           expect(res.body.product).to.be.a('object')
-          expect(res.body.product).to.have.all.keys(
-            'id',
-            'image',
-            'name',
-            'manufacturer',
-            'price',
-            'category',
-            'usage'
-          )
+          expect(res.body.product).to.have.all.keys(...PRODUCT_KEY_LIST)
           return done()
         })
     })
@@ -145,15 +105,7 @@ describe('Products', function () {
       chai
         .request(app)
         .post('/products')
-        .send({
-          id: 'water',
-          image: 'waterImage',
-          name: 'water',
-          manufacturer: 'RDS',
-          price: 55,
-          category: 'food',
-          usage: ['To drink ']
-        })
+        .send(WATER)
         .end((err, res) => {
           if (err) {
             return done()
@@ -165,17 +117,12 @@ describe('Products', function () {
         })
     })
     it('should retrun validation error when id is not passed ', function (done) {
+      const coffee = JSON.parse(JSON.stringify(COFFEE))
+      delete coffee.id
       chai
         .request(app)
         .post('/products')
-        .send({
-          image: 'coffeeImage',
-          name: 'coffee',
-          manufacturer: 'RDS',
-          price: 55,
-          category: 'food',
-          usage: ['To make coffee']
-        })
+        .send(coffee)
         .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -192,15 +139,7 @@ describe('Products', function () {
       chai
         .request(app)
         .post('/products')
-        .send({
-          id: 'water',
-          image: 'waterImage',
-          name: 'water',
-          manufacturer: 'RDS',
-          price: 55,
-          category: 'food',
-          usage: ['To drink ']
-        })
+        .send(WATER)
         .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -211,15 +150,7 @@ describe('Products', function () {
           expect(res.body).to.contain.keys('message', 'product')
           expect(res.body.message).to.equal('Product added successfully!')
           expect(res.body.product).to.be.a('object')
-          expect(res.body.product).to.have.all.keys(
-            'id',
-            'image',
-            'name',
-            'manufacturer',
-            'price',
-            'category',
-            'usage'
-          )
+          expect(res.body.product).to.have.all.keys(...PRODUCT_KEY_LIST)
           return done()
         })
     })
@@ -227,15 +158,7 @@ describe('Products', function () {
       chai
         .request(app)
         .post('/products')
-        .send({
-          id: 'water',
-          image: 'waterImage',
-          name: 'water',
-          manufacturer: 'RDS',
-          price: 55,
-          category: 'food',
-          usage: ['To drink ']
-        })
+        .send(WATER)
         .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -254,9 +177,8 @@ describe('Products', function () {
       const userCollection = firestore.collection('wallets')
       await userCollection.doc('prakash').set({
         currencies: {
-          dineraos: 10,
-          neelam: 5,
-          gold: 1
+          dinero: 10,
+          neelam: 5
         },
         userId: createdUserId
       })
@@ -270,9 +192,8 @@ describe('Products', function () {
             itemid: 'coffee'
           },
           amount: {
-            dineraos: 3,
-            neelam: 0,
-            gold: 0
+            dinero: 3,
+            neelam: 0
           }
         })
         .end((err, res) => {
@@ -317,9 +238,8 @@ describe('Products', function () {
           }],
           totalQuantity: 3,
           amount: {
-            dineraos: 3,
-            neelam: 0,
-            gold: 0
+            dinero: 3,
+            neelam: 0
           }
         })
         .set('cookie', `${cookieName}=${jwt}`)
@@ -345,9 +265,8 @@ describe('Products', function () {
           }],
           totalQuantity: 3,
           amount: {
-            dineraos: 10,
-            neelam: 4,
-            gold: 2
+            dinero: 10,
+            neelam: 4
           }
         })
         .set('cookie', `${cookieName}=${jwt}`)

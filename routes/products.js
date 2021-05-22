@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const productsController = require('../controllers/productsController')
+const productsController = require('../controllers/products')
 const authenticate = require('../middlewares/authenticate')
 const productsValidator = require('../middlewares/validators/crypto-products')
 /**
@@ -69,7 +69,7 @@ router.post('/', authenticate, productsValidator.createProduct, productsControll
 
 /**
  * @swagger
- * /products/{productid}:
+ * /products/:productid:
  *   get:
  *     summary: Used to get the crypto product data
  *     tags:
