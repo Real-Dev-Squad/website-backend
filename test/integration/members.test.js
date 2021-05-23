@@ -16,6 +16,7 @@ const cookieName = config.get('userToken.cookieName')
 chai.use(chaiHttp)
 
 const superUser = userData[4]
+const userToBeMadeMember = userData[0]
 
 describe('Members', function () {
   let jwt
@@ -110,31 +111,75 @@ describe('Members', function () {
       const userId = await addUser(superUser)
       jwt = authService.generateAuthToken({ userId })
     })
-    it('Should make the user a member', function (done) {
+
+    it("Should return 404 if user doesn't exist", function (done) {
       chai
         .request(app)
-        .patch(`/members/moveToMembers/${superUser.username}`)
+        .patch(`/members/moveToMembers/${userToBeMadeMember.username}`)
         .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done(err) }
 
-          expect(res).to.have.status(204)
+          expect(res).to.have.status(404)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal("User doesn't exist")
 
           return done()
         })
     })
+
+    it('Should make the user a member', function (done) {
+      addUser(userToBeMadeMember).then(() => {
+        chai
+          .request(app)
+          .patch(`/members/moveToMembers/${userToBeMadeMember.username}`)
+          .set('cookie', `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) { return done(err) }
+
+            expect(res).to.have.status(204)
+            /* eslint-disable no-unused-expressions */
+            expect(res.body).to.be.a('object').to.be.empty
+
+            return done()
+          })
+      })
+    })
+
     it('Should return 400 if user is already a member', function (done) {
       chai
         .request(app)
-        .patch(`/members/moveToMembers/${superUser.username}`)
+        .patch(`/members/moveToMembers/${userToBeMadeMember.username}`)
         .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done(err) }
 
           expect(res).to.have.status(400)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('User Already is a member')
 
           return done()
         })
+    })
+
+    it('Should return 401 if user is not a super_user', function (done) {
+      const nonSuperUser = userData[2]
+      addUser(nonSuperUser).then(nonSuperUserId => {
+        const nonSuperUserJwt = authService.generateAuthToken({ nonSuperUserId })
+        chai
+          .request(app)
+          .patch(`/members/moveToMembers/${nonSuperUser.username}`)
+          .set('cookie', `${cookieName}=${nonSuperUserJwt}`)
+          .end((err, res) => {
+            if (err) { return done(err) }
+
+            expect(res).to.have.status(401)
+            expect(res.body).to.be.a('object')
+            expect(res.body.message).to.equal('You are not authorized for this action.')
+
+            return done()
+          })
+      })
     })
   })
 })
