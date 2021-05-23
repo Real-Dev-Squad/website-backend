@@ -1,8 +1,9 @@
 const firestore = require('../utils/firestore')
 const { checkSufficientAmountAvaliable, debitCoins } = require('../utils/crypto/transaction')
-const productsCollection = firestore.collection('crypto-products')
-const walletsCollection = firestore.collection('wallets') // Users collection name to be standardized
-const transactionCollection = firestore.collection('transactions') // Users collection name to be standardized
+const { WALLETS, TRANSACTIONS, CRYPTO_PRODUCTS } = require('../constants/firestore-collections')
+const productsCollection = firestore.collection(CRYPTO_PRODUCTS)
+const walletsCollection = firestore.collection(WALLETS) // Users collection name to be standardized
+const transactionCollection = firestore.collection(TRANSACTIONS) // Users collection name to be standardized
 /**
  * Fetches the data of crypto product
  * @return {Promise<product|Object>}

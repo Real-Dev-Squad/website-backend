@@ -113,11 +113,11 @@ router.get('/:productId', productsController.getProduct)
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
  *       402:
- *         description: paymentRequired
+ *         description: forbidden
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/errors/paymentRequired'
+ *               $ref: '#/components/schemas/errors/forbidden'
  *       500:
  *         description: badImplementation
  *         content:

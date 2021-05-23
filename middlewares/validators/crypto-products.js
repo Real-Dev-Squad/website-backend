@@ -26,7 +26,7 @@ const purchaseTransaction = async (req, res, next) => {
     items: joi.array().items({
       itemId: joi.string().required(),
       name: joi.string().optional(),
-      quantity: joi.number()
+      quantity: joi.number().required()
     }).required(),
     totalQuantity: joi.number()
   })

@@ -55,7 +55,7 @@ const getProduct = async (req, res) => {
     const productData = await fetchProduct(productId)
     if (productData) {
       return res.json({
-        message: 'Product returned successfully.',
+        message: 'Product returned successfully!',
         product: productData
       })
     }
@@ -78,10 +78,10 @@ const makePurchase = async (req, res) => {
     const purchaseResponse = await purchaseTransaction({ userId, amount, items, totalQuantity })
     if (purchaseResponse) {
       return res.json({
-        message: 'Purchase successful.'
+        message: 'Purchase successful!'
       })
     }
-    return res.boom.paymentRequired('Insufficient coins.')
+    return res.boom.forbidden('Insufficient coins.')
   } catch (err) {
     logger.error(`Error while purchasing products ${err}`)
     return res.boom.badImplementation(ERROR_MESSAGE)
