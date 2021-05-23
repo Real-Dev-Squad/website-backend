@@ -17,6 +17,7 @@ chai.use(chaiHttp)
 
 const superUser = userData[4]
 const userToBeMadeMember = userData[0]
+const nonSuperUser = userData[2]
 
 describe('Members', function () {
   let jwt
@@ -163,7 +164,6 @@ describe('Members', function () {
     })
 
     it('Should return 401 if user is not a super_user', function (done) {
-      const nonSuperUser = userData[2]
       addUser(nonSuperUser).then(nonSuperUserId => {
         const nonSuperUserJwt = authService.generateAuthToken({ nonSuperUserId })
         chai
