@@ -98,15 +98,7 @@ router.post('/intro/:username', validateRecruiter, addRecruiter)
  *       - bearerAuth: []
  *     responses:
  *       204:
- *         description: Success Message
- *         content:
- *           application/json:
- *             schema:
- *                type: object
- *                properties:
- *                  message:
- *                    type: string
- *                    example: User successfully made a member
+ *         description: no content
  *       400:
  *         description: badRequest
  *         content:

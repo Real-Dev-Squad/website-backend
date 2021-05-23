@@ -65,7 +65,7 @@ const moveToMembers = async (req, res) => {
       if (alreadyMember) {
         return res.status(400).json({ message: 'User Already is a member' })
       }
-      return res.status(204).json({ message: 'User successfully made a member' })
+      return res.status(204).send()
     }
     return res.boom.notFound("User doesn't exist")
   } catch (err) {
