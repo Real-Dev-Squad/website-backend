@@ -93,7 +93,7 @@ describe('Products', function () {
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body).to.contain.keys('message', 'product')
-          expect(res.body.message).to.equal('Product returned successfully.')
+          expect(res.body.message).to.equal('Product returned successfully!')
           expect(res.body.product).to.be.a('object')
           expect(res.body.product).to.have.all.keys(...PRODUCT_KEY_LIST)
           return done()
@@ -250,11 +250,11 @@ describe('Products', function () {
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body).to.contain.keys('message')
-          expect(res.body.message).to.equal('Purchase successful.')
+          expect(res.body.message).to.equal('Purchase successful!')
           return done()
         })
     })
-    it('Should response 402 payment required', function (done) {
+    it('Should response 403 forbidden', function (done) {
       chai
         .request(app)
         .post('/products/purchase')
@@ -274,9 +274,9 @@ describe('Products', function () {
           if (err) {
             return done()
           }
-          expect(res).to.have.status(402)
+          expect(res).to.have.status(403)
           expect(res.body).to.be.a('object')
-          expect(res.body.error).to.equal('Payment Required')
+          expect(res.body.error).to.equal('Forbidden')
           expect(res.body.message).to.equal('Insufficient coins.')
           return done()
         })
