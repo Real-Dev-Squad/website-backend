@@ -1,8 +1,9 @@
+const CURRENCY_TYPES = { DINERO: 'dinero', NEELAM: 'neelam' }
+
 module.exports = {
-  DINERO: 'dinero',
-  NEELAM: 'neelam',
+  ...CURRENCY_TYPES,
   INITIAL_WALLET: {
     dinero: 1000
   },
-  SUPPORTED_CURRENCIES: ['dinero', 'neelam']
+  SUPPORTED_CURRENCIES: [CURRENCY_TYPES.DINERO, CURRENCY_TYPES.NEELAM]
 }

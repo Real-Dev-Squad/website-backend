@@ -1,4 +1,4 @@
-const { fetchExchangeRates, fetchCurrencyAvailablity, getAllBanks, exchangeTransaction, createCurrencyRates } = require('../models/currency')
+const { fetchExchangeRates, fetchCurrencyAvailablity, getAllBanks, exchangeTransaction, createCurrencyRates } = require('../models/exchange')
 
 /**
  * Get currency Exchange rates
@@ -27,7 +27,7 @@ const createExchangeRate = async (req, res) => {
     const currencyData = { ...req.body, timestamp: Date.now() }
     await createCurrencyRates(currencyData)
     return res.json({
-      message: 'currency created successfully!',
+      message: 'Currency created successfully!',
       banks: currencyData
     })
   } catch (err) {
@@ -43,11 +43,11 @@ const createExchangeRate = async (req, res) => {
  */
 const getCurrencyAvailabeInBank = async (req, res) => {
   try {
-    const bankId = req.params.bankId
+    const { bankId } = req.params
     const currencyData = await fetchCurrencyAvailablity(bankId)
     if (currencyData) {
       return res.json({
-        message: 'currency returned successfully!',
+        message: 'Currency returned successfully!',
         currency: currencyData
       })
     }

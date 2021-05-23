@@ -1,5 +1,6 @@
 const firestore = require('../utils/firestore')
 const { extractReferenceDocumentData, extractReferenceDocumentId } = require('../utils/firestore-helper')
+const { roundToTwoDigits } = require('../utils/math-helpers')
 const { WALLETS, BANKS, CURRENCY_EXCHANGE, TRANSACTIONS } = require('../constants/firestore-collections')
 const { ALL_CURRENCY_EXCHANGE_DOCUMENT_NAME: allCurrencyName } = require('../constants/currency-exchange')
 const walletModel = firestore.collection(WALLETS)
@@ -35,7 +36,7 @@ const fetchCurrencyAvailablity = async (bankId) => {
     if (!bankSnapshot.empty) {
       const bank = (bankSnapshot.docs[0] && (bankSnapshot.docs[0].data()))
       if (bank.isActive) {
-        return bank.currency
+        return bank.currencies
       }
     }
     return undefined
@@ -90,15 +91,6 @@ const getAllBanks = async () => {
 }
 
 /**
- * Rounds number to 2 precision after decimal point
- * @param num { Number }
- * @return {Number}
- */
-const roundToTwoDigits = (num) => {
-  return Math.round(num * 100) / 100
-}
-
-/**
  * Checks if currency requested for exchange is available in bank and with user
  * @param bank { Object }: Bank currency details
  * @param user { Object }: User currency details
@@ -108,8 +100,8 @@ const roundToTwoDigits = (num) => {
 const checkIfCurrenyTypeAvailable = (bank, user, exchangeData) => {
   const currencyStatus = {}
   const { src, target } = exchangeData
-  const { currency: bankCurrency } = bank
-  const { currency: userCurrency } = user
+  const { currencies: bankCurrency } = bank
+  const { currencies: userCurrency } = user
   currencyStatus.bank = Object.hasOwnProperty.call(bankCurrency, target)
   currencyStatus.user = Object.hasOwnProperty.call(userCurrency, src)
   return currencyStatus
@@ -171,21 +163,21 @@ const exchangeTransaction = async (userId, exchangeData) => {
           const exchangeRates = (await t.get(exchangeRateRef)).data()
           const srcExchangeRate = exchangeRates[exchangeData.src][exchangeData.target]
           const totalTargetCurrencyRequest = (srcExchangeRate * exchangeData.quantity)
-          const userFunds = userWallet.currency[exchangeData.src] >= exchangeData.quantity
-          const bankFunds = bankWallet.currency[exchangeData.target] >= totalTargetCurrencyRequest
+          const userFunds = userWallet.currencies[exchangeData.src] >= exchangeData.quantity
+          const bankFunds = bankWallet.currencies[exchangeData.target] >= totalTargetCurrencyRequest
           if (userFunds && bankFunds) {
             // Update bank currency
-            const bankWalletAfterExchange = updateBankWalletAfterExchange(bankWallet.currency, exchangeData, totalTargetCurrencyRequest)
-            const userWalletAfterExchange = updateUserWalletAfterExchange(userWallet.currency, exchangeData, totalTargetCurrencyRequest)
+            const bankWalletAfterExchange = updateBankWalletAfterExchange(bankWallet.currencies, exchangeData, totalTargetCurrencyRequest)
+            const userWalletAfterExchange = updateUserWalletAfterExchange(userWallet.currencies, exchangeData, totalTargetCurrencyRequest)
             const bankWalletUpdateRef = bankModel.doc(bankWalletId)
             const userWalletUpdateRef = walletModel.doc(userWalletId)
             await Promise.all(
               [
-                t.update(bankWalletUpdateRef, { currency: bankWalletAfterExchange }),
-                t.update(userWalletUpdateRef, { currency: userWalletAfterExchange })
+                t.update(bankWalletUpdateRef, { currencies: bankWalletAfterExchange }),
+                t.update(userWalletUpdateRef, { currencies: userWalletAfterExchange })
               ])
             responseObj.status = true
-            responseObj.message = 'Transaction Successful'
+            responseObj.message = 'Transaction Successful!'
           } else {
             const insufficientFundsWith = !(bankFunds && userFunds) ? 'bank and user' : (!bankFunds) ? 'bank' : (!userFunds) ? 'user' : ''
             responseObj.message = `Insufficient funds with ${(insufficientFundsWith)}`

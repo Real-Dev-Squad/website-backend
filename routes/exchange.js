@@ -1,9 +1,10 @@
 const express = require('express')
 const router = express.Router()
-const exchangeController = require('../controllers/exchangeController')
+const exchangeController = require('../controllers/exchange')
 const authenticate = require('../middlewares/authenticate')
 const { postCurrencyRates, patchExchange } = require('../middlewares/validators/exchange')
 const { authorizeUser } = require('../middlewares/authorization')
+const { SUPERUSER } = require('../constants/roles')
 
 /**
  * @swagger
@@ -55,7 +56,7 @@ router.get('/rates', exchangeController.getExchangeRate)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/rates', authenticate, authorizeUser('superUser'), postCurrencyRates, exchangeController.createExchangeRate)
+router.post('/rates', authenticate, authorizeUser(SUPERUSER), postCurrencyRates, exchangeController.createExchangeRate)
 
 /**
  * @swagger
