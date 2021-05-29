@@ -5,7 +5,7 @@ const fromFirestoreData = async (task) => {
   if (!task) {
     return task
   }
-  let { createdBy, assignee, participants } = task
+  let { createdBy, assignee, participants, type } = task
   if (createdBy) {
     createdBy = await getUsername(createdBy)
   }
@@ -13,7 +13,7 @@ const fromFirestoreData = async (task) => {
     assignee = await getUsername(assignee)
   }
 
-  if (Array.isArray(participants)) {
+  if (type === 'group') {
     participants = await getParticipantUsernames(participants)
   }
 
@@ -41,7 +41,21 @@ const toFirestoreData = async (task) => {
   return updatedTask
 }
 
+const buildTasks = (tasks, initialTaskArray = []) => {
+  if (!tasks.empty) {
+    tasks.forEach((task) => {
+      initialTaskArray.push({
+        id: task.id,
+        ...task.data()
+      })
+    })
+  }
+
+  return initialTaskArray
+}
+
 module.exports = {
   fromFirestoreData,
-  toFirestoreData
+  toFirestoreData,
+  buildTasks
 }
