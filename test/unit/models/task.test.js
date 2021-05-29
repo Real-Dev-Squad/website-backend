@@ -131,5 +131,11 @@ describe('tasks', function () {
         expect(allTasks).to.deep.equal(validatedTasks)
       })
     })
+    describe('When user does not exists', function () {
+      it('Should return user not found', async function () {
+        const allTasks = await tasks.fetchUserTasks('dummyUser')
+        expect(allTasks.userNotFound).to.equal(true)
+      })
+    })
   })
 })
