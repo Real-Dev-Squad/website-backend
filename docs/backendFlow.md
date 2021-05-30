@@ -16,7 +16,7 @@
   - [config.js](#configjs)
   - [test](#test)
   - [package.json file](#packagejson-file)
-    - [Want to Contribute ??](#want-to-contribute-)
+  - [Want to Contribute ??](#want-to-contribute-)
 
 ## server.js
 
@@ -242,12 +242,11 @@ Tests are written using:
 - `scripts` : For different scripts needed for development & others
 - `Dependencies` : Modules needed for the project to work/ be functional
 - `devDependencies` : Dependencies only needed for the devlopment purpose
-  <br>
+ 
+<br>
 
 ---
 
-<br>
+## Want to Contribute ??
 
-### Want to Contribute ??
-
-👉[Guide](https://github.com/Real-Dev-Squad/website-backend/blob/develop/CONTRIBUTING.md "Follow the guidelines")
+[Guide](https://github.com/Real-Dev-Squad/website-backend/blob/develop/CONTRIBUTING.md "Follow the guidelines")
