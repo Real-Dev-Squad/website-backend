@@ -53,7 +53,7 @@ const fetchTasks = async (req, res) => {
 const getUserTasks = async (req, res) => {
   try {
     const { username } = req.params
-    const allTasks = await tasks.fetchUserTasks(username)
+    const allTasks = await tasks.fetchUserActiveTasks(username, ['active'])
 
     if (allTasks.userNotFound) {
       return res.boom.notFound('User doesn\'t exist')
