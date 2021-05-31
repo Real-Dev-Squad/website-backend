@@ -173,7 +173,7 @@ describe('Tasks', function () {
         title: 'Assigned task',
         purpose: 'To Test mocha',
         featureUrl: '<testUrl>',
-        type: 'Dev | Group',
+        type: 'group',
         links: [
           'test1'
         ],
@@ -185,11 +185,10 @@ describe('Tasks', function () {
           'd12',
           'd23'
         ],
-        participants: [appOwner.username],
+        participants: ['user1'],
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-        assignee: 'user1'
+        isNoteworthy: true
       }
       const { taskId } = await tasks.updateTask(assignedTask)
       const res = await chai
