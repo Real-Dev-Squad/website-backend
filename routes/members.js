@@ -1,8 +1,11 @@
 const express = require('express')
 const router = express.Router()
-const members = require('../controllers/members')
+const { getMembers, getIdleMembers, moveToMembers } = require('../controllers/members')
 const { addRecruiter } = require('../controllers/recruiters')
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
+const authenticate = require('../middlewares/authenticate')
+const { authorizeUser } = require('../middlewares/authorization')
+const { SUPERUSER } = require('../constants/roles')
 
 /**
  * @swagger
@@ -26,7 +29,7 @@ const { validateRecruiter } = require('../middlewares/validators/recruiter')
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', members.getMembers)
+router.get('/', getMembers)
 
 /**
  * @swagger
@@ -50,7 +53,7 @@ router.get('/', members.getMembers)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/idle', members.getIdleMembers)
+router.get('/idle', getIdleMembers)
 
 /**
  * @swagger
@@ -83,5 +86,51 @@ router.get('/idle', members.getIdleMembers)
  */
 
 router.post('/intro/:username', validateRecruiter, addRecruiter)
+
+/**
+ * @swagger
+ * /moveToMembers/:username:
+ *   patch:
+ *     summary: Changes the role of a new member(the username provided in params) to member
+ *     tags:
+ *       - Members
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: no content
+ *       400:
+ *         description: badRequest
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: User Already is a member
+ *
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *
+ *       500:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+
+router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPERUSER), moveToMembers)
 
 module.exports = router

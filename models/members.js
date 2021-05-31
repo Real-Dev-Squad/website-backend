@@ -37,6 +37,29 @@ const fetchMembers = async () => {
   }
 }
 
+/**
+ * changes the role of a new user to member
+ * @param userId { String }: User id of user to be modified
+ * @return { Object }: whether moveToMember was successful or not and whether user is already a member or not
+ */
+
+const moveToMembers = async (userId) => {
+  try {
+    const userDoc = await userModel.doc(userId).get()
+    const user = userDoc.data()
+    if (user.roles && user.roles.member) return { isAlreadyMember: true, movedToMember: false }
+    const roles = user.roles ? { ...user.roles, member: true } : { member: true }
+    await userModel.doc(userId).update({
+      roles
+    })
+    return { isAlreadyMember: false, movedToMember: true }
+  } catch (err) {
+    logger.error('Error updating user', err)
+    throw err
+  }
+}
+
 module.exports = {
-  fetchMembers
+  fetchMembers,
+  moveToMembers
 }
