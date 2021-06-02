@@ -1,7 +1,7 @@
 const firestore = require('../utils/firestore')
 const tasksModel = firestore.collection('tasks')
 const userUtils = require('../utils/users')
-const { fromFirestoreData, toFirestoreData, buildTasks } = require('../utils/tasks')
+const { fromFirestoreData, toFirestoreData } = require('../utils/tasks')
 const { TASK_TYPE, TASK_STATUS } = require('../constants/tasks')
 
 /**
@@ -43,7 +43,13 @@ const updateTask = async (taskData, taskId = null) => {
 const fetchTasks = async () => {
   try {
     const tasksSnapshot = await tasksModel.get()
-    const tasks = buildTasks(tasksSnapshot)
+    const tasks = []
+    tasksSnapshot.forEach((task) => {
+      tasks.push({
+        id: task.id,
+        ...task.data()
+      })
+    })
     const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
     return updatedTasks
@@ -114,26 +120,43 @@ const fetchUserTasks = async (username, statuses = []) => {
       return { userNotFound: true }
     }
 
-    let groupTasksSnapshot = []
-    let featureTasksSnapshot = []
+    let tasksSnapshot = []
+    let assigneeSnapshot = []
 
     if (statuses && statuses.length) {
-      groupTasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
+      tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
         .where('status', 'in', statuses)
         .get()
-      featureTasksSnapshot = await tasksModel.where('assignee', '==', userId)
+      assigneeSnapshot = await tasksModel.where('assignee', '==', userId)
         .where('status', 'in', statuses)
         .get()
     } else {
-      groupTasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
+      tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
         .get()
 
-      featureTasksSnapshot = await tasksModel.where('assignee', '==', userId)
+      assigneeSnapshot = await tasksModel.where('assignee', '==', userId)
         .get()
     }
 
-    const groupTasks = buildTasks(groupTasksSnapshot)
-    const tasks = buildTasks(featureTasksSnapshot, groupTasks)
+    const tasks = []
+
+    if (!tasksSnapshot.empty) {
+      tasksSnapshot.forEach((task) => {
+        tasks.push({
+          id: task.id,
+          ...task.data()
+        })
+      })
+    }
+
+    if (!assigneeSnapshot.empty) {
+      assigneeSnapshot.forEach((task) => {
+        tasks.push({
+          id: task.id,
+          ...task.data()
+        })
+      })
+    }
 
     const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
