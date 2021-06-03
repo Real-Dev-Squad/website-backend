@@ -14,7 +14,6 @@ const { TASK_TYPE, TASK_STATUS } = require('../constants/tasks')
 const updateTask = async (taskData, taskId = null) => {
   try {
     taskData = await toFirestoreData(taskData)
-
     if (taskId) {
       const task = await tasksModel.doc(taskId).get()
       await tasksModel.doc(taskId).set({
@@ -23,9 +22,7 @@ const updateTask = async (taskData, taskId = null) => {
       })
       return { taskId }
     }
-
     const taskInfo = await tasksModel.add(taskData)
-
     const result = {
       taskId: taskInfo.id,
       taskDetails: await fromFirestoreData(taskData)
@@ -163,7 +160,6 @@ const fetchUserTasks = async (username, statuses = []) => {
 
     const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
-
     return updatedTasks
   } catch (err) {
     logger.error('error getting tasks', err)

@@ -5,7 +5,7 @@ const fromFirestoreData = async (task) => {
   if (!task) {
     return task
   }
-  let { createdBy, assignee, participants, type } = task
+  let { createdBy, assignee, participants } = task
   if (createdBy) {
     createdBy = await getUsername(createdBy)
   }
@@ -13,7 +13,7 @@ const fromFirestoreData = async (task) => {
     assignee = await getUsername(assignee)
   }
 
-  if (type === 'group') {
+  if (Array.isArray(participants)) {
     participants = await getParticipantUsernames(participants)
   }
 
