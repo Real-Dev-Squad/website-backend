@@ -58,13 +58,11 @@ describe('Wallet', function () {
           return done()
         })
     })
-  })
 
-  describe('GET /wallet/:username of own username', function () {
-    it('Should return the user their own wallet', function (done) {
+    it('Should return the user their own wallet with 1000 dineros', function (done) {
       chai
         .request(app)
-        .get('/wallet/')
+        .get('/wallet')
         .set('cookie', `${cookieName}=${authToken}`)
         .end((error, response) => {
           if (error) {
@@ -73,24 +71,7 @@ describe('Wallet', function () {
 
           expect(response).to.have.status(200)
           expect(response.body.wallet.data.userId).to.be.equal(userId)
-
-          return done()
-        })
-    })
-  })
-
-  describe('Check if the newly created wallet (by default we create a wallet for the new user) for the new user is pre-loader with 1000 dineros', function () {
-    it('Should return the user their own wallet with 1000 dineros', function (done) {
-      chai
-        .request(app)
-        .get('/wallet/')
-        .set('cookie', `${cookieName}=${authToken}`)
-        .end((error, response) => {
-          if (error) {
-            return done(error)
-          }
-
-          expect(response).to.have.status(200)
+          expect(response.body.message).to.be.equal('Wallet returned successfully for user')
           expect(response.body.wallet.data.currencies.dinero).to.be.equal(1000)
 
           return done()
@@ -98,18 +79,19 @@ describe('Wallet', function () {
     })
   })
 
-  describe('GET /wallet/:username of different user by an unauthorized user & unauthorized user', function () {
-    let newUserName
+  describe('GET /wallet/:username of different user by an unauthorized user & authorized user', function () {
     let newUserId
+    let newUserAuthToken
+
     let superUserId
     let superUserAuthToken
 
     before(async function () {
       newUserId = await addUser(newUser)
-      newUserName = await usersUtils.getUsername(newUserId)
+      newUserAuthToken = authService.generateAuthToken({ userId: newUserId })
 
       superUserId = await addUser(superUser)
-      superUserAuthToken = authService.generateAuthToken({ superUserId })
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId })
     })
 
     it('Should return wallet when trying to access someone else\'s wallet, using authorized user (super_user)', function (done) {
@@ -122,9 +104,9 @@ describe('Wallet', function () {
             return done(error)
           }
 
-          expect(response).to.have.status(401)
-          expect(response.body.error).to.be.equal('Unauthorized')
-          expect(response.body.message).to.be.equal('You are not authorized for this action.')
+          expect(response).to.have.status(200)
+          expect(response.body.wallet.data.userId).to.be.equal(userId)
+          expect(response.body.message).to.be.equal('Wallet returned successfully')
 
           return done()
         })
@@ -133,12 +115,13 @@ describe('Wallet', function () {
     it('Should return unauthorized when trying to access someone else\'s wallet when not authorized', function (done) {
       chai
         .request(app)
-        .get(`/wallet/${newUserName}`)
-        .set('cookie', `${cookieName}=${authToken}`)
+        .get(`/wallet/${userName}`)
+        .set('cookie', `${cookieName}=${newUserAuthToken}`)
         .end((error, response) => {
           if (error) {
             return done(error)
           }
+
           expect(response).to.have.status(401)
           expect(response.body.error).to.be.equal('Unauthorized')
           expect(response.body.message).to.be.equal('You are not authorized for this action.')
