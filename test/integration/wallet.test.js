@@ -37,7 +37,7 @@ describe('Wallet', function () {
   })
 
   describe('Check /wallet', function () {
-    it('Should return userId and wallet information', function (done) {
+    it('Should return wallet information', function (done) {
       chai
         .request(app)
         .get('/wallet')
@@ -59,7 +59,7 @@ describe('Wallet', function () {
         })
     })
 
-    it('Should return the user their own wallet with 1000 dineros', function (done) {
+    it('Should return the user their own wallet with 1000 dineros loaded', function (done) {
       chai
         .request(app)
         .get('/wallet')
@@ -79,7 +79,7 @@ describe('Wallet', function () {
     })
   })
 
-  describe('GET /wallet/:username of different user by an unauthorized user & authorized user', function () {
+  describe('GET /wallet/:username', function () {
     let newUserId
     let newUserAuthToken
 
@@ -112,7 +112,7 @@ describe('Wallet', function () {
         })
     })
 
-    it('Should return unauthorized when trying to access someone else\'s wallet when not authorized', function (done) {
+    it('Should return unauthorized error when trying to access someone else\'s wallet when not authorized', function (done) {
       chai
         .request(app)
         .get(`/wallet/${userName}`)
