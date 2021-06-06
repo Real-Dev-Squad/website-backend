@@ -51,10 +51,7 @@ const migrateUsers = async () => {
     userSnapShot.forEach(doc => usersArr.push({ id: doc.id, ...doc.data() }))
 
     for (const user of usersArr) {
-      const roles = { member: true }
-
-      if (!user.isMember) roles.member = false
-      delete user.isMember
+      const roles = { ...user.roles, member: true }
 
       await userModel.doc(user.id).set({
         ...user,
@@ -70,7 +67,37 @@ const migrateUsers = async () => {
     throw err
   }
 }
+
+/**
+ * Deletes isMember property from user object
+ * @return {Promise<usersMigrated|Object>}
+ */
+const deleteIsMemberProperty = async () => {
+  try {
+    const userSnapShot = await userModel.where('roles', '!=', false).get()
+    const migratedUsers = []
+
+    const usersArr = []
+
+    userSnapShot.forEach(doc => usersArr.push({ id: doc.id, ...doc.data() }))
+
+    for (const user of usersArr) {
+      delete user.isMember
+
+      await userModel.doc(user.id).set({ ...user })
+
+      migratedUsers.push(user.username)
+    }
+
+    return { count: migratedUsers.length, users: migratedUsers }
+  } catch (err) {
+    logger.error('Error deleting isMember property', err)
+    throw err
+  }
+}
+
 module.exports = {
   fetchMembers,
-  migrateUsers
+  migrateUsers,
+  deleteIsMemberProperty
 }

@@ -1,4 +1,4 @@
-const { fetchMembers, migrateUsers } = require('../models/members')
+const { fetchMembers, migrateUsers, deleteIsMemberProperty } = require('../models/members')
 const tasks = require('../models/tasks')
 
 /**
@@ -65,8 +65,28 @@ const migrateUserRoles = async (req, res) => {
   }
 }
 
+/**
+ * Returns the lists of usernames whose isMember property was deleted
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const deleteIsMember = async (req, res) => {
+  try {
+    const deletedIsMemberData = await deleteIsMemberProperty()
+    return res.json({
+      message: 'Users isMember deleted successfully',
+      ...deletedIsMemberData
+    })
+  } catch (error) {
+    logger.error(`Error while deleting isMember: ${error}`)
+    return res.boom.badImplementation('Something went wrong. Please contact admin')
+  }
+}
+
 module.exports = {
   getMembers,
   getIdleMembers,
-  migrateUserRoles
+  migrateUserRoles,
+  deleteIsMember
 }

@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getMembers, getIdleMembers, migrateUserRoles } = require('../controllers/members')
+const { getMembers, getIdleMembers, migrateUserRoles, deleteIsMember } = require('../controllers/members')
 const { authorizeUser } = require('../middlewares/authorization')
 const authenticate = require('../middlewares/authenticate')
 const { addRecruiter } = require('../controllers/recruiters')
@@ -120,5 +120,40 @@ router.post('/intro/:username', validateRecruiter, addRecruiter)
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
 router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser'), migrateUserRoles)
+
+/**
+ * @swagger
+ * /members/delete-isMember:
+ *  patch:
+ *   summary: One time call to remove isMember field for all the migrated users
+ *   tags:
+ *     - Members
+ *   responses:
+ *     200:
+ *       description: Details of the users migrated
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/migratedUsers'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
+ *     403:
+ *       description: forbidden
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/forbidden'
+ *     500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), deleteIsMember)
 
 module.exports = router
