@@ -1,0 +1,39 @@
+const joi = require('joi')
+
+const validateFeatureFlag = async (req, res, next) => {
+  const schema = joi.object().keys({
+    name: joi.string().required(),
+    title: joi.string().required(),
+    created_at: joi.number().optional(),
+    updated_at: joi.number().optional(),
+    config: joi.object().required(),
+    launched_at: joi.number().optional()
+  })
+
+  try {
+    await schema.validateAsync(req.body)
+    next()
+  } catch (error) {
+    logger.error(`Error in validating featureFlag data: ${error}`)
+    res.boom.badRequest(error.details[0].message)
+  }
+}
+
+const updateFeatureFlags = async (req, res, next) => {
+  const schema = joi.object().keys({
+    title: joi.string().optional(),
+    config: joi.object().required()
+  })
+  try {
+    await schema.validateAsync(req.body)
+    next()
+  } catch (error) {
+    logger.error(`Error in validating featureFlag data: ${error}`)
+    res.boom.badRequest(error.details[0].message)
+  }
+}
+
+module.exports = {
+  validateFeatureFlag,
+  updateFeatureFlags
+}
