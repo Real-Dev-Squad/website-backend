@@ -8,27 +8,11 @@ const notificationQuery = require('../models/notifications')
 
 const getNotificationsForUser = async (req, res) => {
   try {
-    let { page: currentPage, n: limit } = req.query
+    const { page: currentPage = 1, n: limit = 10 } = req.query
     const { id: userId } = req.userData
 
-    if (!currentPage) {
-      currentPage = 1
-    }
-
-    if (!limit) {
-      limit = 10
-    }
-
-    let parsedCurrentPage = +currentPage
-    let parsedLimit = +limit
-
-    if (isNaN(parsedCurrentPage) || parsedCurrentPage <= 0) {
-      parsedCurrentPage = 1
-    }
-
-    if (isNaN(parsedLimit) || parsedLimit <= 0) {
-      parsedLimit = 10
-    }
+    const parsedCurrentPage = (isNaN(currentPage) || +currentPage <= 0) ? 1 : +currentPage
+    const parsedLimit = (isNaN(limit) || +limit <= 0) ? 10 : +limit
 
     const paginatedNotifications = await notificationQuery.fetchNotifications({
       currentPage: parsedCurrentPage,
