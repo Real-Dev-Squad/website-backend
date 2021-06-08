@@ -1,4 +1,5 @@
 const notificationQuery = require('../models/notifications')
+const { DEFAULT_LIMIT, DEFAULT_CURRENT_PAGE } = require('../constants/pagination')
 /**
  * Fetches the notifications data for current user
  *
@@ -8,7 +9,7 @@ const notificationQuery = require('../models/notifications')
 
 const getNotificationsForUser = async (req, res) => {
   try {
-    const { page: currentPage = 1, n: limit = 10 } = req.query
+    const { page: currentPage = DEFAULT_CURRENT_PAGE, n: limit = DEFAULT_LIMIT } = req.query
     const { id: userId } = req.userData
 
     const parsedCurrentPage = (isNaN(currentPage) || +currentPage <= 0) ? 1 : +currentPage
