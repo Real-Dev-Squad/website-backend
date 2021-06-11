@@ -52,12 +52,5 @@ module.exports = {
       'QnrvpfRSihRktA2dDQJAH+dQBx3nG3bZ9khVAZQ1jTJ7j0cKixaGndFuYS1TJvJ2\n' +
       'Zzn584h/xbSIcP9/4SXmEK3wtoueUtMkvS3yKTvk+w==\n' +
       '-----END RSA PRIVATE KEY-----'
-  },
-
-  cache: {
-    ttl: {
-      defaut: 7200000, // 2 hours
-      userCache: 7200000
-    }
   }
 }

@@ -1,5 +1,5 @@
 const userQuery = require('../models/users')
-const { set } = require('../services/cacheService')
+const { cacheUser } = require('../services/userService')
 
 const accountOwners = require('../mockdata/appOwners')
 const imageService = require('../services/imageService')
@@ -20,14 +20,7 @@ const getUsers = async (req, res) => {
     })
 
     allUsers.forEach((user) => {
-      const userObject = {
-        github_id: user.github_id,
-        id: user.id,
-        username: user.username
-      }
-      set(user.id, userObject)
-      set(user.github_id, userObject)
-      set(user.username, userObject)
+      cacheUser(user)
     })
 
     return true
@@ -66,6 +59,7 @@ const getUser = async (req, res) => {
     const { phone, email, ...user } = result.user
 
     if (result.userExists) {
+      cacheUser(user)
       return res.json({
         message: 'User returned successfully!',
         user

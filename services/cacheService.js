@@ -1,10 +1,22 @@
-const cache = require('memory-cache')
+const {
+  get,
+  put,
+  ...cache
+} = require('memory-cache')
 
-const set = (key, value, time = 7200000) => {
-  return cache.put(key, value, time)
+/**
+ * Set in memory cache
+ * @param {(string|symbol)} key
+ * @param {*} value
+ * @param {number} [time=<cache.ttl.default>]
+ */
+const set = (key, value, time = config.get('cache.ttl.default')) => {
+  return put(key, value, time)
 }
 
+// Check the APIs available at https://www.npmjs.com/package/memory-cache
 module.exports = {
-  get: cache.get,
-  set: set
+  get,
+  set,
+  ...cache
 }

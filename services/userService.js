@@ -2,6 +2,7 @@ const { set, get } = require('./cacheService')
 const {
   fetchUser
 } = require('../models/users')
+const userCacheTTL = config.get('cache.ttl.userCache')
 
 const cacheUser = (user) => {
   if (!user) {
@@ -12,9 +13,10 @@ const cacheUser = (user) => {
     id: user.id,
     username: user.username
   }
-  set(user.id, userObject)
-  set(user.github_id, userObject)
-  set(user.username, userObject)
+
+  set(user.id, userObject, userCacheTTL)
+  set(user.github_id, userObject, userCacheTTL)
+  set(user.username, userObject, userCacheTTL)
   return true
 }
 
@@ -35,5 +37,6 @@ const getGitHubUsername = async (RDSUsername) => {
 }
 
 module.exports = {
-  getGitHubUsername
+  getGitHubUsername,
+  cacheUser
 }
