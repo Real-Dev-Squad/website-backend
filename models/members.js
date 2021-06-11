@@ -13,21 +13,23 @@ const userModel = firestore.collection('users')
 
 const fetchMembers = async () => {
   try {
-    const snapshot = await userModel.where('isMember', '==', true).get()
+    const snapshot = await userModel.get()
 
     const allMembers = []
 
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
-        allMembers.push({
+        const memberData = doc.data()
+        const curatedMemberData = {
           id: doc.id,
-          ...doc.data(),
+          ...memberData,
           tokens: undefined,
           phone: undefined,
           email: undefined
-        })
-      }
-      )
+        }
+        curatedMemberData.isMember = !!(memberData.roles && memberData.roles.member)
+        allMembers.push(curatedMemberData)
+      })
     }
 
     return allMembers
