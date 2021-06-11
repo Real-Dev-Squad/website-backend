@@ -27,11 +27,7 @@ const fetchMembers = async () => {
           phone: undefined,
           email: undefined
         }
-        if (memberData.roles && memberData.roles.member) {
-          allMembers.isMember = true
-        } else {
-          allMembers.isMember = false
-        }
+        curatedMemberData.isMember = !!(memberData.roles && memberData.roles.member)
         allMembers.push(curatedMemberData)
       })
     }
