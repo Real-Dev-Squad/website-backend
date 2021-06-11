@@ -1,5 +1,7 @@
-
 const userQuery = require('../models/users')
+const { cacheUser } = require('../services/userService')
+
+const accountOwners = require('../mockdata/appOwners')
 const imageService = require('../services/imageService')
 /**
  * Fetches the data about our users
@@ -12,13 +14,35 @@ const getUsers = async (req, res) => {
   try {
     const allUsers = await userQuery.fetchUsers(req.query)
 
-    return res.json({
+    res.json({
       message: 'Users returned successfully!',
       users: allUsers
     })
+
+    allUsers.forEach((user) => {
+      cacheUser(user)
+    })
+
+    return true
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')
+  }
+}
+
+/**
+ * Fetches the data about our account Owners
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getAccountOwners = async (req, res) => {
+  try {
+    return accountOwners
+  } catch (error) {
+    logger.error(`Error while fetching application owners: ${error}`)
+    return res.boom.badImplementation('Something went wrong please contact admin')
   }
 }
 
@@ -35,6 +59,7 @@ const getUser = async (req, res) => {
     const { phone, email, ...user } = result.user
 
     if (result.userExists) {
+      cacheUser(user)
       return res.json({
         message: 'User returned successfully!',
         user
@@ -149,5 +174,6 @@ module.exports = {
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
+  getAccountOwners,
   postUserPicture
 }

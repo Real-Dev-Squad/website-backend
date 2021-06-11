@@ -1,5 +1,5 @@
 const { fetch } = require('../utils/fetch')
-const { fetchUser } = require('../models/users')
+const { getGitHubUsername } = require('./userService')
 /**
  * Extracts only the necessary details required from the object returned by Github API
  * @param data {Object} - Object returned by Github API
@@ -87,7 +87,8 @@ function getFetch (url) {
 
 const fetchPRsByUser = async (username) => {
   try {
-    const { user } = await fetchUser({ username })
+    const user = await getGitHubUsername(username)
+
     const url = getGithubURL({
       author: user.github_id
     })
