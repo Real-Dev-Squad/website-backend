@@ -29,7 +29,7 @@ const fetchStocks = async (req, res) => {
   try {
     const allStock = await stocks.fetchStocks()
     return res.json({
-      message: 'Stocks returned successfully!',
+      message: allStock.length > 0 ? 'Stocks returned successfully!' : 'No stocks found',
       stock: allStock.length > 0 ? allStock : []
     })
   } catch (err) {
@@ -37,8 +37,28 @@ const fetchStocks = async (req, res) => {
     return res.boom.badImplementation('An internal server error occurred')
   }
 }
+/**
+ * Fetches all the stocks of the user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const getSelfStocks = async (req, res) => {
+  try {
+    const { id: userId } = req.userData
+    const userStocks = await stocks.fetchUserStocks(userId)
+    return res.json({
+      message: userStocks.length > 0 ? 'User stocks returned successfully!' : 'No stocks found',
+      userStocks
+    })
+  } catch (err) {
+    logger.error(`Error while getting user stocks ${err}`)
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+}
 
 module.exports = {
   addNewStock,
-  fetchStocks
+  fetchStocks,
+  getSelfStocks
 }

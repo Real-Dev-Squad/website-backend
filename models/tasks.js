@@ -1,6 +1,5 @@
 const firestore = require('../utils/firestore')
 const tasksModel = firestore.collection('tasks')
-const { fetchUser } = require('./users')
 const userUtils = require('../utils/users')
 const { fromFirestoreData, toFirestoreData } = require('../utils/tasks')
 const { TASK_TYPE, TASK_STATUS } = require('../constants/tasks')
@@ -70,12 +69,14 @@ const fetchActiveTaskMembers = async () => {
   try {
     const tasksSnapshot = await tasksModel.where('type', '==', TASK_TYPE.FEATURE).where('status', '==', TASK_STATUS.ACTIVE).get()
     const activeMembers = new Set()
-    tasksSnapshot?.forEach((task) => {
-      const { assignee } = task.data()
-      activeMembers.add(
-        assignee
-      )
-    })
+    if (!tasksSnapshot.empty) {
+      tasksSnapshot.forEach((task) => {
+        const { assignee } = task.data()
+        activeMembers.add(
+          assignee
+        )
+      })
+    }
     return activeMembers
   } catch (err) {
     logger.error('error getting tasks', err)
@@ -113,8 +114,12 @@ const fetchTask = async (taskId) => {
 
 const fetchUserTasks = async (username, statuses = []) => {
   try {
-    const { user } = await fetchUser({ username })
-    const userId = await userUtils.getUserId(user.username)
+    const userId = await userUtils.getUserId(username)
+
+    if (!userId) {
+      return { userNotFound: true }
+    }
+
     let tasksSnapshot = []
     let assigneeSnapshot = []
 
@@ -128,24 +133,31 @@ const fetchUserTasks = async (username, statuses = []) => {
     } else {
       tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
         .get()
+
       assigneeSnapshot = await tasksModel.where('assignee', '==', userId)
         .get()
     }
 
     const tasks = []
-    tasksSnapshot.forEach((task) => {
-      tasks.push({
-        id: task.id,
-        ...task.data()
-      })
-    })
 
-    assigneeSnapshot.forEach((task) => {
-      tasks.push({
-        id: task.id,
-        ...task.data()
+    if (!tasksSnapshot.empty) {
+      tasksSnapshot.forEach((task) => {
+        tasks.push({
+          id: task.id,
+          ...task.data()
+        })
       })
-    })
+    }
+
+    if (!assigneeSnapshot.empty) {
+      assigneeSnapshot.forEach((task) => {
+        tasks.push({
+          id: task.id,
+          ...task.data()
+        })
+      })
+    }
+
     const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
     return updatedTasks
