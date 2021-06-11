@@ -38,15 +38,66 @@ const fetchMembers = async () => {
 }
 
 /**
- * Checks whether the user is a superuser
- * @return {Boolean}
+ * Migrate user roles
+ * @return {Promise<usersMigrated|Object>}
  */
+const migrateUsers = async () => {
+  try {
+    const userSnapShot = await userModel.where('isMember', '==', true).get()
+    const migratedUsers = []
 
-const isSuperUser = (username) => {
-  return username === 'ankush'
+    const usersArr = []
+
+    userSnapShot.forEach(doc => usersArr.push({ id: doc.id, ...doc.data() }))
+
+    for (const user of usersArr) {
+      const roles = { ...user.roles, member: true }
+
+      await userModel.doc(user.id).set({
+        ...user,
+        roles
+      })
+
+      migratedUsers.push(user.username)
+    }
+
+    return { count: migratedUsers.length, users: migratedUsers }
+  } catch (err) {
+    logger.error('Error migrating user roles', err)
+    throw err
+  }
+}
+
+/**
+ * Deletes isMember property from user object
+ * @return {Promise<usersMigrated|Object>}
+ */
+const deleteIsMemberProperty = async () => {
+  try {
+    const userSnapShot = await userModel.where('roles', '!=', false).get()
+    const migratedUsers = []
+
+    const usersArr = []
+
+    userSnapShot.forEach(doc => usersArr.push({ id: doc.id, ...doc.data() }))
+
+    for (const user of usersArr) {
+      delete user.isMember
+
+      await userModel.doc(user.id).set({ ...user })
+
+      migratedUsers.push(user.username)
+    }
+
+    return { count: migratedUsers.length, users: migratedUsers }
+  } catch (err) {
+    logger.error('Error deleting isMember property', err)
+    throw err
+  }
 }
 
 module.exports = {
   fetchMembers,
-  isSuperUser
+  migrateUsers,
+  deleteIsMemberProperty
 }
