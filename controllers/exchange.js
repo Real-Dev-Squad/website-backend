@@ -12,7 +12,7 @@ const getExchangeRate = async (req, res) => {
       data: exchangeRates
     })
   } catch (err) {
-    logger.error(`Error while fetching exchange currency rates${err}`)
+    logger.error(`Error while fetching exchange currency rates, ${err}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')
   }
 }

@@ -3,9 +3,7 @@
  * @param num { Number }
  * @return {Number}
  */
-const roundToTwoDigits = (num) => {
-  return Math.round(num * 100) / 100
-}
+const roundToTwoDigits = (num) => Math.round(num * 100) / 100
 
 module.exports = {
   roundToTwoDigits

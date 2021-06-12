@@ -15,10 +15,7 @@ const transactionModel = firestore.collection(TRANSACTIONS)
 const fetchExchangeRates = async () => {
   try {
     const exchangeSnapshot = await currencyExchangeModel.doc(allCurrencyName).get()
-    if (exchangeSnapshot.exists) {
-      return exchangeSnapshot.data()
-    }
-    return undefined
+    return exchangeSnapshot.exists && exchangeSnapshot.data()
   } catch (err) {
     logger.error('Error while getting currency rates from exchange', err)
     throw err
@@ -33,13 +30,8 @@ const fetchExchangeRates = async () => {
 const fetchCurrencyAvailablity = async (bankId) => {
   try {
     const bankSnapshot = await bankModel.where('bankId', '==', bankId).limit(1).get()
-    if (!bankSnapshot.empty) {
-      const bank = (bankSnapshot.docs[0] && (bankSnapshot.docs[0].data()))
-      if (bank.isActive) {
-        return bank.currencies
-      }
-    }
-    return undefined
+    const bank = (!bankSnapshot.empty) && extractReferenceDocumentData(bankSnapshot)
+    return bank.isActive && bank.currencies
   } catch (err) {
     logger.error('Error while getting currency data from bank', err)
     throw err
@@ -146,13 +138,13 @@ const exchangeTransaction = async (userId, exchangeData) => {
     const userWalletRef = walletModel.where('userId', '==', userId).limit(1)
     const bankWalletRef = bankModel.where('bankId', '==', bankId).limit(1)
     const exchangeRateRef = currencyExchangeModel.doc(allCurrencyName)
-    const exchangeResponse = await firestore.runTransaction(async t => {
+    const exchangeResponse = await firestore.runTransaction(async transaction => {
       const responseObj = {
         status: false,
         message: ''
       }
 
-      const [userWalletDoc, bankWalletDoc] = await Promise.all([t.get(userWalletRef), t.get(bankWalletRef)])
+      const [userWalletDoc, bankWalletDoc] = await Promise.all([transaction.get(userWalletRef), transaction.get(bankWalletRef)])
       const userWalletId = await extractReferenceDocumentId(userWalletDoc)
       const userWallet = await extractReferenceDocumentData(userWalletDoc)
       const bankWalletId = await extractReferenceDocumentId(bankWalletDoc)
@@ -160,7 +152,7 @@ const exchangeTransaction = async (userId, exchangeData) => {
       const currencyStatus = checkIfCurrenyTypeAvailable(bankWallet, userWallet, exchangeData)
       if (currencyStatus.bank && currencyStatus.user) {
         if (bankWallet && bankWallet.isActive) {
-          const exchangeRates = (await t.get(exchangeRateRef)).data()
+          const exchangeRates = (await transaction.get(exchangeRateRef)).data()
           const srcExchangeRate = exchangeRates[exchangeData.src][exchangeData.target]
           const totalTargetCurrencyRequest = (srcExchangeRate * exchangeData.quantity)
           const userFunds = userWallet.currencies[exchangeData.src] >= exchangeData.quantity
@@ -173,8 +165,8 @@ const exchangeTransaction = async (userId, exchangeData) => {
             const userWalletUpdateRef = walletModel.doc(userWalletId)
             await Promise.all(
               [
-                t.update(bankWalletUpdateRef, { currencies: bankWalletAfterExchange }),
-                t.update(userWalletUpdateRef, { currencies: userWalletAfterExchange })
+                transaction.update(bankWalletUpdateRef, { currencies: bankWalletAfterExchange }),
+                transaction.update(userWalletUpdateRef, { currencies: userWalletAfterExchange })
               ])
             responseObj.status = true
             responseObj.message = 'Transaction Successful!'
