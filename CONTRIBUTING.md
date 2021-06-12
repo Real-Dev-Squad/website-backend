@@ -108,17 +108,15 @@ The following project structure should be followed:
 - Pre-requisites:
   - Node.js version 8.0 or higher.
   - Java version 1.8 or higher.
-  - Firebase CLI: `npm install -g firebase-tools`
 
 ## Using Firebase Emulator Locally
 - [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) can be used locally as the DB for the project
 - Pre-requisites:
   - Node.js version 8.0 or higher.
   - Java version 1.8 or higher.
-  - Firebase CLI: `npm install -g firebase-tools`
-- Run: `firebase emulators:start`
-- The emulator will be running on the port: 8080
-- You can view the emulator UI at: `http://localhost:4000`
+- Run: `npx firebase emulators:start`
+- The emulator will run and display the url you can access it on.
+- [Future] You can view the emulator UI at: `http://localhost:4000`
 
 ## Running test scripts on Windows
 - Git Bash is recommended for running test scripts on Windows.

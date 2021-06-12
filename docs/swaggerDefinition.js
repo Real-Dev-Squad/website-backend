@@ -398,6 +398,17 @@ const swaggerOptions = {
             }
           }
         },
+        migratedUsers: {
+          type: 'object',
+          properties: {
+            count: {
+              type: 'number'
+            },
+            users: {
+              type: 'array'
+            }
+          }
+        },
         users: {
           type: 'object',
           properties: {
