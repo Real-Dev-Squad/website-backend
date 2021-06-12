@@ -57,7 +57,7 @@ const getUserTasks = async (req, res) => {
     let allTasks = []
 
     if (status) {
-      allTasks = await tasks.fetchUserTasks(username, status)
+      allTasks = await tasks.fetchUserTasks(username, [status])
     } else {
       allTasks = await tasks.fetchUserTasks(username)
     }
