@@ -52,8 +52,13 @@ const fetchTasks = async (req, res) => {
  */
 const getUserTasks = async (req, res) => {
   try {
+    const statuses = req.query.status
     const { username } = req.params
-    const allTasks = await tasks.fetchUserActiveTasks(username)
+    let allTasks = []
+
+    if (statuses) {
+      allTasks = await tasks.fetchUserTasks(username, statuses.split(','))
+    }
 
     if (allTasks.userNotFound) {
       return res.boom.notFound('User doesn\'t exist')

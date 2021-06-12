@@ -181,22 +181,11 @@ const fetchUserCompletedTasks = async (username) => {
   return await fetchUserTasks(username, ['completed'])
 }
 
-/**
- * Fetch all the active tasks of a user
- *
- * @return {Promise<tasks|Array>}
- */
-
-const fetchUserActiveTasks = async (username) => {
-  return await fetchUserTasks(username, ['active'])
-}
-
 module.exports = {
   updateTask,
   fetchTasks,
   fetchTask,
   fetchUserTasks,
-  fetchUserActiveTasks,
   fetchUserActiveAndBlockedTasks,
   fetchUserCompletedTasks,
   fetchActiveTaskMembers

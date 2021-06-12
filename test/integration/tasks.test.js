@@ -260,7 +260,7 @@ describe('Tasks', function () {
     it('Should return 200 when username is valid', function (done) {
       chai
         .request(app)
-        .get(`/tasks/${appOwner.username}`)
+        .get(`/tasks/${appOwner.username}?status=active`)
         .end((err, res) => {
           if (err) { return done(err) }
           expect(res).to.have.status(200)
@@ -283,7 +283,7 @@ describe('Tasks', function () {
     it('Should return 404 when username is invalid', function (done) {
       chai
         .request(app)
-        .get('/tasks/dummyUser')
+        .get('/tasks/dummyUser?status=active')
         .end((err, res) => {
           if (err) { return done(err) }
           expect(res).to.have.status(404)
