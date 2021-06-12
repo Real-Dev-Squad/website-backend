@@ -52,12 +52,14 @@ const fetchTasks = async (req, res) => {
  */
 const getUserTasks = async (req, res) => {
   try {
-    const statuses = req.query.status
+    const status = req.query.status
     const { username } = req.params
     let allTasks = []
 
-    if (statuses) {
-      allTasks = await tasks.fetchUserTasks(username, statuses.split(','))
+    if (status) {
+      allTasks = await tasks.fetchUserTasks(username, status)
+    } else {
+      allTasks = await tasks.fetchUserTasks(username)
     }
 
     if (allTasks.userNotFound) {
