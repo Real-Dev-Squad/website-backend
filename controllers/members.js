@@ -1,4 +1,4 @@
-const { fetchMembers, migrateUsers, deleteIsMemberProperty } = require('../models/members')
+const { fetchMembers, migrateUsers, deleteIsMemberProperty, fetchOnlyMembers } = require('../models/members')
 const tasks = require('../models/tasks')
 
 /**
@@ -31,9 +31,9 @@ const getMembers = async (req, res) => {
 
 const getIdleMembers = async (req, res) => {
   try {
-    const allMembers = await fetchMembers()
+    const onlyMembers = await fetchOnlyMembers()
     const taskParticipants = await tasks.fetchActiveTaskMembers()
-    const idleMembers = allMembers?.filter(({ id }) => !taskParticipants.has(id))
+    const idleMembers = onlyMembers?.filter(({ id }) => !taskParticipants.has(id))
     const idleMemberUserNames = idleMembers?.map((member) => member.username)
 
     return res.json({

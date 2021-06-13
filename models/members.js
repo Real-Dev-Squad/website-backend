@@ -98,8 +98,37 @@ const deleteIsMemberProperty = async () => {
   }
 }
 
+/**
+ * Fetches the data about our members with role member:true
+ * @return {Promise<userModel|Array>}
+ */
+
+const fetchOnlyMembers = async () => {
+  try {
+    const snapshot = await userModel.where('roles.member', '==', true).get()
+    const onlyMembers = []
+
+    if (!snapshot.empty) {
+      snapshot.forEach((doc) => {
+        onlyMembers.push({
+          id: doc.id,
+          ...doc.data(),
+          phone: undefined,
+          email: undefined,
+          tokens: undefined
+        })
+      })
+    }
+    return onlyMembers
+  } catch (err) {
+    logger.error('Error retrieving members data with roles of member', err)
+    throw err
+  }
+}
+
 module.exports = {
   fetchMembers,
   migrateUsers,
-  deleteIsMemberProperty
+  deleteIsMemberProperty,
+  fetchOnlyMembers
 }
