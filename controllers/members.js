@@ -1,4 +1,5 @@
-const { fetchMembers, migrateUsers, deleteIsMemberProperty, fetchOnlyMembers } = require('../models/members')
+const { ROLES } = require('../constants/users')
+const { fetchUsers, migrateUsers, deleteIsMemberProperty, fetchUsersWithRole } = require('../models/members')
 const tasks = require('../models/tasks')
 
 /**
@@ -10,7 +11,7 @@ const tasks = require('../models/tasks')
 
 const getMembers = async (req, res) => {
   try {
-    const allMembers = await fetchMembers()
+    const allMembers = await fetchUsers()
 
     return res.json({
       message: allMembers.length ? 'Members returned successfully!' : 'No member found',
@@ -31,7 +32,7 @@ const getMembers = async (req, res) => {
 
 const getIdleMembers = async (req, res) => {
   try {
-    const onlyMembers = await fetchOnlyMembers()
+    const onlyMembers = await fetchUsersWithRole(ROLES.MEMBER)
     const taskParticipants = await tasks.fetchActiveTaskMembers()
     const idleMembers = onlyMembers?.filter(({ id }) => !taskParticipants.has(id))
     const idleMemberUserNames = idleMembers?.map((member) => member.username)
