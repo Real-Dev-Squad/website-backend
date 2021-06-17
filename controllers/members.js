@@ -33,8 +33,8 @@ const getIdleMembers = async (req, res) => {
   try {
     const allMembers = await fetchMembers()
     const taskParticipants = await tasks.fetchActiveTaskMembers()
-    const idleMembers = allMembers?.filter(({ id }) => !taskParticipants.has(id))
-    const idleMemberUserNames = idleMembers?.map((member) => member.username)
+    const idleMembers = allMembers.filter(({ id }) => !taskParticipants.has(id))
+    const idleMemberUserNames = idleMembers.map((member) => member.username)
 
     return res.json({
       message: idleMemberUserNames.length ? 'Idle members returned successfully!' : 'No idle member found',
