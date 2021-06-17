@@ -5,11 +5,6 @@
  * @return {Object}
  */
 
-const currencies = [
-  'neelam',
-  'dinero'
-]
-
 const walletKeys = [
   'id',
   'data'
