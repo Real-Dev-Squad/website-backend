@@ -36,8 +36,8 @@ describe('Wallet', function () {
     await cleanDb()
   })
 
-  describe('Check /wallet', function () {
-    it('Should return wallet information', function (done) {
+  describe('GET /wallet', function () {
+    it('Should return wallet information of the logged in user', function (done) {
       chai
         .request(app)
         .get('/wallet')
