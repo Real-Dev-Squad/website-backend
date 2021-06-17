@@ -174,12 +174,11 @@ const updateUserPicture = async (image, userId) => {
  */
 const fetchUserImage = async (users) => {
   const data = await userModel.where('username', 'in', users).get()
-  const hash = {}
+  const images = {}
   data.forEach((item) => {
-    hash[item.data().username] = item.data().img
+    images[item.data().username] = item.data().img
   })
-  // console.log(hash)
-  return hash
+  return images
 }
 
 module.exports = {

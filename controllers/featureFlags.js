@@ -10,8 +10,9 @@ const featureFlagQuery = require('../models/featureFlags')
 const getFeatureFlags = async (req, res) => {
   try {
     const allFeatureFlags = await featureFlagQuery.fetchFeatureFlag()
+    // console.log(res.status);
     return res.json({
-      message: 'All feature-flags returned successfully',
+      message: 'FeatureFlags returned successfully!',
       featureflags: allFeatureFlags.length > 0 ? allFeatureFlags : []
     })
   } catch (err) {
@@ -31,8 +32,8 @@ const addFeatureFlag = async (req, res) => {
   try {
     const featureFlag = await featureFlagQuery.addFeatureFlags(req.body, req.userData.username)
     return res.json({
-      message: 'FeatureFlag added successfully',
-      featureFlag
+      message: 'FeatureFlag added successfully!',
+      data: featureFlag
     })
   } catch (err) {
     logger.error(`Error while adding featureFlag info: ${err}`)
@@ -51,7 +52,7 @@ const updateFeatureFlag = async (req, res) => {
   try {
     const result = await featureFlagQuery.updateFeatureFlags(req.body, req.params.id)
     if (result.isUpdated) {
-      return res.json({ message: 'FeatureFlag updated successfully!' })
+      return res.status(204).send()
     }
     return res.boom.notFound('FeatureFlag doesn\'t exist')
   } catch (err) {

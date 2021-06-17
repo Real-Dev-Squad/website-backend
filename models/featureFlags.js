@@ -24,18 +24,14 @@ const fetchFeatureFlag = async () => {
       if (!users.includes(item.owner)) { users.push(item.owner) }
     })
 
-    const getImage = async (usersData) => {
-      return await userModel.fetchUserImage(usersData)
-    }
-
     let start = 0
     let end = 10
 
     for (let i = 0; i < Math.ceil(users.length / 10); i++) {
       const usersData = users.slice(start, end)
+      const image = await userModel.fetchUserImage(usersData)
       start = end
       end += 10
-      const image = await getImage(usersData)
       Object.assign(result, image)
     }
 
@@ -120,6 +116,7 @@ const deleteFeatureFlag = async (featureFlagId) => {
         isDeleted: false
       }
     }
+    await featureFlagModel.doc(featureFlagId).delete()
     return {
       isDeleted: true
     }
