@@ -21,4 +21,4 @@ const walletDataKeys = [
   'currencies'
 ]
 
-module.exports = { currencies, walletBodyKeys, walletKeys, walletDataKeys }
+module.exports = { walletBodyKeys, walletKeys, walletDataKeys }
