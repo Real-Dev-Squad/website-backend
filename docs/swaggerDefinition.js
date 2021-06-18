@@ -590,6 +590,34 @@ const swaggerOptions = {
             }
           }
         },
+        exchange: {
+          type: 'object',
+          properties: {
+            bankName: {
+              type: 'string'
+            },
+            bankId: {
+              type: 'string'
+            },
+            isActive: {
+              type: 'boolean'
+            },
+            quantity: {
+              type: 'number'
+            },
+            currency: {
+              type: 'object',
+              properties: {
+                dinero: {
+                  type: 'number'
+                },
+                neelam: {
+                  type: 'number'
+                }
+              }
+            }
+          }
+        },
         errors: {
           unAuthorized: {
             type: 'object',
