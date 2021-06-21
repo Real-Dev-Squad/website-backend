@@ -590,6 +590,26 @@ const swaggerOptions = {
             }
           }
         },
+        notifications: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string'
+            },
+            userId: {
+              type: 'string'
+            },
+            createdOn: {
+              type: 'timestamp'
+            },
+            message: {
+              type: 'string'
+            },
+            type: {
+              type: 'string'
+            }
+          }
+        },
         errors: {
           unAuthorized: {
             type: 'object',
@@ -662,6 +682,20 @@ const swaggerOptions = {
             }
           },
           unsupportedMediaType: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
+          badRequest: {
             type: 'object',
             properties: {
               statusCode: {
