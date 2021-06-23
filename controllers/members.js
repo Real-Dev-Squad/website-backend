@@ -11,11 +11,11 @@ const tasks = require('../models/tasks')
 
 const getMembers = async (req, res) => {
   try {
-    const allMembers = await fetchUsers()
+    const allUsers = await fetchUsers()
 
     return res.json({
-      message: allMembers.length ? 'Members returned successfully!' : 'No member found',
-      members: allMembers
+      message: allUsers.length ? 'Members returned successfully!' : 'No member found',
+      members: allUsers
     })
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`)
