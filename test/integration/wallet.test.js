@@ -77,6 +77,23 @@ describe('Wallet', function () {
           return done()
         })
     })
+
+    it('Without cookie access should be unauthorized', function (done) {
+      chai
+        .request(app)
+        .get(`/wallet/${userName}`)
+        .end((error, response) => {
+          if (error) {
+            return done(error)
+          }
+
+          expect(response).to.have.status(401)
+          expect(response.body.error).to.be.equal('Unauthorized')
+          expect(response.body.message).to.be.equal('Unauthenticated User')
+
+          return done()
+        })
+    })
   })
 
   describe('GET /wallet/:username', function () {
