@@ -173,7 +173,7 @@ describe('Tasks', function () {
         title: 'Assigned task',
         purpose: 'To Test mocha',
         featureUrl: '<testUrl>',
-        type: 'Dev | Group',
+        type: 'group',
         links: [
           'test1'
         ],
@@ -185,11 +185,10 @@ describe('Tasks', function () {
           'd12',
           'd23'
         ],
-        participants: [appOwner.username],
+        participants: ['user1'],
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-        assignee: 'sagar'
+        isNoteworthy: true
       }
       const { taskId } = await tasks.updateTask(assignedTask)
       const res = await chai
@@ -261,7 +260,7 @@ describe('Tasks', function () {
     it('Should return 200 when username is valid', function (done) {
       chai
         .request(app)
-        .get(`/tasks/${appOwner.username}`)
+        .get(`/tasks/${appOwner.username}?status=active`)
         .end((err, res) => {
           if (err) { return done(err) }
           expect(res).to.have.status(200)
@@ -284,7 +283,7 @@ describe('Tasks', function () {
     it('Should return 404 when username is invalid', function (done) {
       chai
         .request(app)
-        .get('/tasks/dummyUser')
+        .get('/tasks/dummyUser?status=active')
         .end((err, res) => {
           if (err) { return done(err) }
           expect(res).to.have.status(404)
