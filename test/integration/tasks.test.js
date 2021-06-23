@@ -166,8 +166,8 @@ describe('Tasks', function () {
 
     it('Should return assignee task', async function () {
       const { userId: assignedUser } = await userModel.addOrUpdate({
-        github_id: 'SagarBajpai',
-        username: 'sagar'
+        github_id: 'prakashchoudhary07',
+        username: 'user1'
       })
       const assignedTask = {
         title: 'Assigned task',
