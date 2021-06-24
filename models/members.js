@@ -7,11 +7,11 @@ const firestore = require('../utils/firestore')
 const userModel = firestore.collection('users')
 
 /**
- * Fetches the data about our members
+ * Fetches the data about our users
  * @return {Promise<userModel|Array>}
  */
 
-const fetchMembers = async () => {
+const fetchUsers = async () => {
   try {
     const snapshot = await userModel.get()
 
@@ -98,8 +98,37 @@ const deleteIsMemberProperty = async () => {
   }
 }
 
+/**
+ * Fetches the data about our users with roles
+ * @return {Promise<userModel|Array>}
+ */
+
+const fetchUsersWithRole = async (role) => {
+  try {
+    const snapshot = await userModel.where(`roles.${role}`, '==', true).get()
+    const onlyMembers = []
+
+    if (!snapshot.empty) {
+      snapshot.forEach((doc) => {
+        onlyMembers.push({
+          id: doc.id,
+          ...doc.data(),
+          phone: undefined,
+          email: undefined,
+          tokens: undefined
+        })
+      })
+    }
+    return onlyMembers
+  } catch (err) {
+    logger.error('Error retrieving members data with roles of member', err)
+    throw err
+  }
+}
+
 module.exports = {
-  fetchMembers,
+  fetchUsers,
   migrateUsers,
-  deleteIsMemberProperty
+  deleteIsMemberProperty,
+  fetchUsersWithRole
 }
