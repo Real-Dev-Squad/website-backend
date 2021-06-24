@@ -81,7 +81,7 @@ describe('Wallet', function () {
     it('Without cookie access should be unauthorized', function (done) {
       chai
         .request(app)
-        .get(`/wallet/${userName}`)
+        .get('/wallet')
         .end((error, response) => {
           if (error) {
             return done(error)
