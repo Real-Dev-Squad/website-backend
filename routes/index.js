@@ -14,5 +14,6 @@ app.use('/trade', require('./trading.js'))
 app.use('/stocks', require('./stocks.js'))
 app.use('/auctions', require('./auctions.js'))
 app.use('/wallet', require('./wallets.js'))
+app.use('/miners', require('./miners.js'))
 
 module.exports = app
