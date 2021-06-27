@@ -10,7 +10,6 @@ const featureFlagQuery = require('../models/featureFlags')
 const getFeatureFlags = async (req, res) => {
   try {
     const allFeatureFlags = await featureFlagQuery.fetchFeatureFlag()
-    // console.log(res.status);
     return res.json({
       message: 'FeatureFlags returned successfully!',
       featureflags: allFeatureFlags.length > 0 ? allFeatureFlags : []
