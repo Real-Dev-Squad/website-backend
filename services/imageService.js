@@ -1,6 +1,6 @@
 const DatauriParser = require('datauri/parser')
 const userModel = require('../models/users')
-const { upload, generateUrl } = require('../utils/cloudinary')
+const { upload } = require('../utils/cloudinary')
 const cloudinaryMetaData = require('../constants/cloudinary')
 
 /**
@@ -15,16 +15,12 @@ const uploadProfilePicture = async (file, userId) => {
     const imageDataUri = parser.format(file.originalname, file.buffer)
     const imageDataInBase64 = imageDataUri.content
     const uploadResponse = await upload(imageDataInBase64, {
-      folder: cloudinaryMetaData.PROFILE.FOLDER,
+      folder: `${cloudinaryMetaData.PROFILE.FOLDER}/${userId}`,
       tags: cloudinaryMetaData.PROFILE.TAGS
     })
-    const url = await generateUrl(uploadResponse.public_id)
-    const imageData = {
-      publicId: uploadResponse.public_id,
-      url
-    }
-    await userModel.updateUserPicture(imageData, userId)
-    return imageData
+    const { public_id: publicId, secure_url: url } = uploadResponse
+    await userModel.updateUserPicture({ publicId, url }, userId)
+    return { publicId, url }
   } catch (err) {
     logger.error(`Error while uploading profile picture ${err}`)
     throw err
