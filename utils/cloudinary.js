@@ -8,12 +8,6 @@ const upload = async (file, options = {}) => {
   return response
 }
 
-const generateUrl = async (publicId, transformations = {}) => {
-  const url = cloudinary.url(publicId, transformations)
-  return url
-}
-
 module.exports = {
-  upload,
-  generateUrl
+  upload
 }
