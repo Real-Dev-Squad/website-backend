@@ -167,11 +167,26 @@ const updateUserPicture = async (image, userId) => {
   }
 }
 
+/**
+ * fetch the users image by passing array of users
+ *
+ * @param users {array}
+ */
+const fetchUserImage = async (users) => {
+  const data = await userModel.where('username', 'in', users).get()
+  const images = {}
+  data.forEach((item) => {
+    images[item.data().username] = item.data().img
+  })
+  return images
+}
+
 module.exports = {
   addOrUpdate,
   fetchUsers,
   fetchUser,
   setIncompleteUserDetails,
   initializeUser,
-  updateUserPicture
+  updateUserPicture,
+  fetchUserImage
 }
