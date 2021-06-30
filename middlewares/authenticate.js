@@ -97,6 +97,18 @@ const authenticate = async (req, res, next, strict = true) => {
   }
 }
 
+/**
+ * Check if authentication is present. If the request contains user auth, then add user details to the req object.
+ * If user is not logged in, just call the next handler.
+ * @param {Object} req
+ * @param {Object} res
+ * @param {function} next
+ */
+const maybeAuthenticate = async (req, res, next) => {
+  authenticate(req, res, next, false)
+}
+
 module.exports = {
-  authenticate
+  authenticate,
+  maybeAuthenticate
 }
