@@ -1,13 +1,14 @@
 const firestore = require('../utils/firestore')
 const featureFlagModel = firestore.collection('featureFlags')
 const userModel = require('./users')
+const { defaultConfig } = require('../constants/featureFlag')
 
 /**
  * Fetch all tasks
- *
+ * @param getOwnerInfo: Fetch the owner info for all the feature flags if true.
  * @return {Promise<featureFlags|Array>}
  */
-const fetchFeatureFlag = async () => {
+const fetchFeatureFlag = async (getOwnerInfo = true) => {
   try {
     const snapshot = await featureFlagModel.get()
     const featureFlags = []
@@ -17,6 +18,11 @@ const fetchFeatureFlag = async () => {
         ...doc.data()
       })
     })
+
+    if (!getOwnerInfo) {
+      return featureFlags
+    }
+
     const users = []
     const result = {}
 
@@ -60,6 +66,7 @@ const addFeatureFlags = async (featureFlag, username) => {
     featureFlag.created_at = Date.now()
     featureFlag.updated_at = featureFlag.created_at
     featureFlag.owner = username
+    featureFlag.config = defaultConfig
     const { id } = await featureFlagModel.add(featureFlag)
     const featureFlagData = (await featureFlagModel.doc(id).get()).data()
     featureFlagData.id = id
@@ -80,17 +87,21 @@ const addFeatureFlags = async (featureFlag, username) => {
 const updateFeatureFlags = async (featureFlag, featureFlagId) => {
   try {
     const doc = await featureFlagModel.doc(featureFlagId).get()
-    if (!doc.data()) {
+    if (!doc.data() || Object.keys(featureFlag).length === 0) {
       return {
         isUpdated: false
       }
     }
     if (doc.data()) {
+      const featureConfig = {
+        ...doc.data().config,
+        ...featureFlag.config
+      }
       featureFlag.updated_at = Date.now()
-      featureFlag.launched_at = Date.now()
       await featureFlagModel.doc(featureFlagId).set({
         ...doc.data(),
-        ...featureFlag
+        ...featureFlag,
+        config: featureConfig
       })
     }
     return {
