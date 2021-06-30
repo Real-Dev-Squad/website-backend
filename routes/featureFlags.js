@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const authenticate = require('../middlewares/authenticate')
+const { authenticate } = require('../middlewares/authenticate')
 const { authorizeUser } = require('../middlewares/authorization')
 const { validateFeatureFlag, updateFeatureFlags } = require('../middlewares/validators/featureFlags')
 const featureFlag = require('../controllers/featureFlags')

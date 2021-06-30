@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const wallet = require('../controllers/wallets')
-const authenticate = require('../middlewares/authenticate')
+const { authenticate } = require('../middlewares/authenticate')
 const { authorizeUser } = require('../middlewares/authorization')
 
 /**
