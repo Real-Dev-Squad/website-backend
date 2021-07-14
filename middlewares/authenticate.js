@@ -40,9 +40,10 @@ const checkRestricted = async (req, res, next) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  * @param next {Function} - Express middleware function
+ * @param strict {Boolean} - If strict is set to false, then next handler is called even if user is not authenticated
  * @return {Object} - Returns unauthenticated object if token is invalid
  */
-module.exports = async (req, res, next) => {
+const authenticate = async (req, res, next, strict = true) => {
   try {
     let token = req.cookies[config.get('userToken.cookieName')]
 
@@ -83,13 +84,31 @@ module.exports = async (req, res, next) => {
 
         // add user data to `req.userData` for further use
         req.userData = await users.fetchUser({ userId })
-
         return checkRestricted(req, res, next)
-      } else {
-        return res.boom.unauthorized('Unauthenticated User')
       }
-    } else {
-      return res.boom.unauthorized('Unauthenticated User')
     }
+
+    // If auth is not strictly required, just call the next handler.
+    if (!strict) {
+      return next()
+    }
+
+    return res.boom.unauthorized('Unauthenticated User')
   }
+}
+
+/**
+ * Check if authentication is present. If the request contains user auth, then add user details to the req object.
+ * If user is not logged in, just call the next handler.
+ * @param {Object} req
+ * @param {Object} res
+ * @param {function} next
+ */
+const maybeAuthenticate = async (req, res, next) => {
+  authenticate(req, res, next, false)
+}
+
+module.exports = {
+  authenticate,
+  maybeAuthenticate
 }

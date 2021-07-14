@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const authenticate = require('../middlewares/authenticate')
+const { authenticate } = require('../middlewares/authenticate')
 const tasks = require('../controllers/tasks')
 const { createTask, updateTask } = require('../middlewares/validators/tasks')
 const { authorizeUser } = require('../middlewares/authorization')

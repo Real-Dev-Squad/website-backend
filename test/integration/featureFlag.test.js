@@ -7,6 +7,7 @@ const authService = require('../../services/authService')
 const addUser = require('../utils/addUser')
 const cleanDb = require('../utils/cleanDb')
 const featureFlagQuery = require('../../models/featureFlags')
+const { defaultConfig } = require('../../constants/featureFlag')
 
 // Import fixtures
 const userData = require('../fixtures/user/user')()
@@ -57,13 +58,10 @@ describe('FeatureFlag', function () {
         .set('cookie', `${cookieName} = ${jwt}`)
         .send({
           name: 'test',
-          title: 'test-feature',
-          config: {
-            enabled: true
-          }
+          title: 'test-feature'
         }, appOwner.username)
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           const { data } = res.body
@@ -73,7 +71,7 @@ describe('FeatureFlag', function () {
           expect(data.created_at).to.be.a('number')
           expect(data.updated_at).to.be.a('number')
           expect(data.config).to.be.a('object')
-          expect(data.config.enabled).to.be.a('boolean')
+          expect(data.config).to.be.deep.equal(defaultConfig)
           expect(data.owner).to.be.a('string')
           expect(res.body.message).to.equal('FeatureFlag added successfully!')
 
@@ -119,6 +117,8 @@ describe('FeatureFlag', function () {
           return done()
         })
     })
+
+    // TODO: Add test cases to update all the possible updates to the featureFlag config
 
     it('Should return 401 if user not logged in', function (done) {
       chai

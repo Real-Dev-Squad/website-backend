@@ -3,13 +3,7 @@ const joi = require('joi')
 const validateFeatureFlag = async (req, res, next) => {
   const schema = joi.object().keys({
     name: joi.string().required(),
-    title: joi.string().required(),
-    created_at: joi.number().optional(),
-    updated_at: joi.number().optional(),
-    config: joi.object({
-      enabled: joi.boolean().required()
-    }).required(),
-    launched_at: joi.number().optional()
+    title: joi.string().required()
   })
 
   try {
@@ -25,8 +19,16 @@ const updateFeatureFlags = async (req, res, next) => {
   const schema = joi.object().keys({
     title: joi.string().optional(),
     config: joi.object({
-      enabled: joi.boolean().required()
-    }).required()
+      roleBased: joi.object({
+        roles: joi.array().required(),
+        active: joi.boolean().required()
+      }).optional(),
+      percentage: joi.object({
+        value: joi.number().required(),
+        active: joi.boolean().required()
+      }).optional(),
+      enabled: joi.boolean().optional()
+    }).optional()
   })
   try {
     await schema.validateAsync(req.body)

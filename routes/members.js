@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { getMembers, getIdleMembers, migrateUserRoles, deleteIsMember } = require('../controllers/members')
 const { authorizeUser } = require('../middlewares/authorization')
-const authenticate = require('../middlewares/authenticate')
+const { authenticate } = require('../middlewares/authenticate')
 const { addRecruiter } = require('../controllers/recruiters')
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
 

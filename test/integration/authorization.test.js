@@ -2,7 +2,7 @@ const chai = require('chai')
 const { expect } = chai
 
 const { authorizeUser } = require('../../middlewares/authorization')
-const authenticate = require('../../middlewares/authenticate')
+const { authenticate } = require('../../middlewares/authenticate')
 const authService = require('../../services/authService')
 const addUser = require('../utils/addUser')
 const cleanDb = require('../utils/cleanDb')
