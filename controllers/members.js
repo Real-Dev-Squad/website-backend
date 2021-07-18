@@ -1,4 +1,5 @@
-const { fetchMembers, migrateUsers, deleteIsMemberProperty } = require('../models/members')
+const { ROLES } = require('../constants/users')
+const { fetchUsers, migrateUsers, deleteIsMemberProperty, fetchUsersWithRole } = require('../models/members')
 const tasks = require('../models/tasks')
 
 /**
@@ -10,11 +11,11 @@ const tasks = require('../models/tasks')
 
 const getMembers = async (req, res) => {
   try {
-    const allMembers = await fetchMembers()
+    const allUsers = await fetchUsers()
 
     return res.json({
-      message: allMembers.length ? 'Members returned successfully!' : 'No member found',
-      members: allMembers
+      message: allUsers.length ? 'Members returned successfully!' : 'No member found',
+      members: allUsers
     })
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`)
@@ -31,9 +32,9 @@ const getMembers = async (req, res) => {
 
 const getIdleMembers = async (req, res) => {
   try {
-    const allMembers = await fetchMembers()
+    const onlyMembers = await fetchUsersWithRole(ROLES.MEMBER)
     const taskParticipants = await tasks.fetchActiveTaskMembers()
-    const idleMembers = allMembers?.filter(({ id }) => !taskParticipants.has(id))
+    const idleMembers = onlyMembers?.filter(({ id }) => !taskParticipants.has(id))
     const idleMemberUserNames = idleMembers?.map((member) => member.username)
 
     return res.json({
