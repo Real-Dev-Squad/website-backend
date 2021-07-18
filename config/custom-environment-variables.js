@@ -62,5 +62,18 @@ module.exports = {
     cloud_name: 'CLOUDINARY_CLOUD_NAME',
     api_key: 'CLOUDINARY_API_KEY',
     api_secret: 'CLOUDINARY_API_SECRET_KEY'
+  },
+
+  cache: {
+    ttl: {
+      default: {
+        __name: 'CACHE_DEFAULT_TTL',
+        __format: 'number'
+      },
+      userCache: {
+        __name: 'CACHE_USER_TTL',
+        __format: 'number'
+      }
+    }
   }
 }

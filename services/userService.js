@@ -8,27 +8,23 @@ const cacheUser = (user) => {
   if (!user) {
     return false
   }
-  const userObject = {
-    github_id: user.github_id,
-    id: user.id,
-    username: user.username
-  }
 
-  set(user.id, userObject, userCacheTTL)
-  set(user.github_id, userObject, userCacheTTL)
-  set(user.username, userObject, userCacheTTL)
+  set(`user:${user.id}`, user, userCacheTTL)
+  set(`user:${user.github_id}`, user, userCacheTTL)
+  set(`user:${user.username}`, user, userCacheTTL)
   return true
 }
 
-const getGitHubUsername = async (RDSUsername) => {
-  const gitHubUserName = await get(RDSUsername)
-  if (gitHubUserName) {
-    return gitHubUserName
+const getGitHubUsername = async (username) => {
+  const cachedUser = get(`user:${username}`)
+  if (cachedUser) {
+    return cachedUser.github_id
   }
 
-  const { userExists, user } = fetchUser({
-    username: RDSUsername
+  const { userExists, user } = await fetchUser({
+    username
   })
+
   if (userExists) {
     cacheUser(user)
     return user.github_id
