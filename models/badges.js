@@ -27,6 +27,35 @@ const fetchBadges = async ({
   }
 }
 
+/**
+ * Fetches the data about user badges
+ * @param query { Object }: Filter for badges data
+ * @return {Promise<userBadgeModel|Array>}
+ */
+
+const fetchUserBadges = async (username) => {
+  try {
+    const snapshot = await badgeModel.get()
+    const allBadges = []
+    snapshot.forEach((doc) => {
+      allBadges.push(doc.data())
+    })
+    const userBadges = []
+    allBadges.forEach((badge) => {
+      badge.users.forEach((user) => {
+        if (user === username) {
+          userBadges.push({ title: badge.title, description: badge.description })
+        }
+      })
+    })
+    return userBadges
+  } catch (err) {
+    logger.error('Error retrieving user badges', err)
+    return err
+  }
+}
+
 module.exports = {
-  fetchBadges
+  fetchBadges,
+  fetchUserBadges
 }
