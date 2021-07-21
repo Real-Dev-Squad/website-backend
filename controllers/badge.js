@@ -20,6 +20,20 @@ const getBadges = async (req, res) => {
   }
 }
 
+const getUserBadges = async (req, res) => {
+  try {
+    const allUserBadges = await badgeQuery.fetchUserBadges(req.params.username)
+    return res.json({
+      message: 'User badges returned successfully!',
+      userBadges: allUserBadges
+    })
+  } catch (error) {
+    logger.error(`Error while fetching all user badges: ${error}`)
+    return res.boom.serverUnavailable('Something went wrong please contact admin')
+  }
+}
+
 module.exports = {
-  getBadges
+  getBadges,
+  getUserBadges
 }
