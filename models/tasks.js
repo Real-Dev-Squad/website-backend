@@ -35,6 +35,21 @@ const updateTask = async (taskData, taskId = null) => {
   }
 }
 
+const updateTaskStatus = async (taskData, taskId) => {
+  try {
+    taskData = await toFirestoreData(taskData)
+    const task = await tasksModel.doc(taskId).get()
+    await tasksModel.doc(taskId).set({
+      ...task.data(),
+      ...taskData
+    })
+    return { taskId }
+  } catch (err) {
+    logger.error('Error in updating task status', err)
+    throw err
+  }
+}
+
 /**
  * Fetch all tasks
  *
@@ -93,6 +108,7 @@ const fetchTask = async (taskId) => {
   try {
     const task = await tasksModel.doc(taskId).get()
     const taskData = task.data()
+    if (!taskData) return { taskIdnotfound: true }
     return { taskData: await fromFirestoreData(taskData) }
   } catch (err) {
     logger.error('Error retrieving task data', err)
@@ -188,5 +204,6 @@ module.exports = {
   fetchUserTasks,
   fetchUserActiveAndBlockedTasks,
   fetchUserCompletedTasks,
-  fetchActiveTaskMembers
+  fetchActiveTaskMembers,
+  updateTaskStatus
 }
