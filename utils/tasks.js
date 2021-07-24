@@ -45,7 +45,21 @@ const toFirestoreData = async (task) => {
   return updatedTask
 }
 
+const buildTasks = (tasks, initialTaskArray = []) => {
+  if (!tasks.empty) {
+    tasks.forEach((task) => {
+      initialTaskArray.push({
+        id: task.id,
+        ...task.data()
+      })
+    })
+  }
+
+  return initialTaskArray
+}
+
 module.exports = {
   fromFirestoreData,
-  toFirestoreData
+  toFirestoreData,
+  buildTasks
 }

@@ -46,4 +46,6 @@ $ npm run validate-setup
     - Write JS Doc on top of your routes using YAML based annotations in OPEN API 3.0 format.
     - Run `npm run generate-api-schema` to generate the API schema. A file `public/apiSchema.json` will be created/updated.
 
+Check out our video on how to setup the backend here: [Wiki link](https://github.com/Real-Dev-Squad/website-backend/wiki/Backend-setup-and-understanding-the-flow)
+
 Read more about contributing to the project: [CONTRIBUTING](CONTRIBUTING.md)
