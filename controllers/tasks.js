@@ -123,17 +123,22 @@ const updateTask = async (req, res) => {
   }
 }
 
+/**
+ * Updates self task status
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
 const updateTaskStatus = async (req, res) => {
   try {
     const taskId = req.params.id
-    const { username } = req.userData
-    const task = await tasks.fetchTask(taskId)
+    const { id } = req.userData
+    const task = await tasks.fetchSelfTask(taskId, id)
 
-    if (task.taskIdnotfound) return res.boom.notFound("Task doesn't exist")
-    if (username !== task.taskData.assignee) return res.boom.forbidden('This task is not assigned to you')
+    if (task.taskIdNotFound) return res.boom.notFound("Task doesn't exist")
+    if (task.notAssignedToYou) return res.boom.forbidden('This task is not assigned to you')
 
     await tasks.updateTaskStatus(req.body, taskId)
-    return res.json({ message: 'Task updated successfully!' })
+    return res.json({ message: 'Task updated successfully!', user: req.userData, task })
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`)
     return res.boom.badImplementation('An internal server error occured')

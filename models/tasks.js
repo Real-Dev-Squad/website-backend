@@ -35,6 +35,13 @@ const updateTask = async (taskData, taskId = null) => {
   }
 }
 
+/**
+ * Updates self task status
+ *
+ * @param taskData { Object }: task data object to be stored in DB
+ * @param taskId { string }: taskid which will be used to update the task in DB
+ * @return {Promise<{taskId: string}>}
+ */
 const updateTaskStatus = async (taskData, taskId) => {
   try {
     taskData = await toFirestoreData(taskData)
@@ -108,7 +115,25 @@ const fetchTask = async (taskId) => {
   try {
     const task = await tasksModel.doc(taskId).get()
     const taskData = task.data()
-    if (!taskData) return { taskIdnotfound: true }
+    return { taskData: await fromFirestoreData(taskData) }
+  } catch (err) {
+    logger.error('Error retrieving task data', err)
+    throw err
+  }
+}
+
+/**
+ * Fetch assigned self task
+ * @param taskId { string }: taskId which will be used to fetch the task
+ * @param id { string }: id to check task is assigned to self or not
+ * @return {Promsie<taskData|Object>}
+ */
+const fetchSelfTask = async (taskId, id) => {
+  try {
+    const task = await tasksModel.doc(taskId).get()
+    const taskData = task.data()
+    if (!taskData) return { taskNotFound: true }
+    if (id !== taskData.assignee) return { notAssignedToYou: true }
     return { taskData: await fromFirestoreData(taskData) }
   } catch (err) {
     logger.error('Error retrieving task data', err)
@@ -205,5 +230,6 @@ module.exports = {
   fetchUserActiveAndBlockedTasks,
   fetchUserCompletedTasks,
   fetchActiveTaskMembers,
-  updateTaskStatus
+  updateTaskStatus,
+  fetchSelfTask
 }

@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
 const tasks = require('../controllers/tasks')
-const { createTask, updateTask } = require('../middlewares/validators/tasks')
+const { createTask, updateTask, updateSelfTask } = require('../middlewares/validators/tasks')
 const { authorizeUser } = require('../middlewares/authorization')
 
 /**
@@ -200,6 +200,6 @@ router.get('/:username', tasks.getUserTasks)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/self/:id', authenticate, updateTask, tasks.updateTaskStatus)
+router.patch('/self/:id', authenticate, updateSelfTask, tasks.updateTaskStatus)
 
 module.exports = router

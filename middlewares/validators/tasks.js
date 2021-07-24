@@ -68,7 +68,21 @@ const updateTask = async (req, res, next) => {
   }
 }
 
+const updateSelfTask = async (req, res, next) => {
+  const schema = joi.object().keys({
+    status: joi.string().optional()
+  })
+  try {
+    await schema.validateAsync(req.body)
+    next()
+  } catch (error) {
+    logger.error(`Error validating updateSelfTask payload : ${error}`)
+    res.boom.badRequest(error.details[0].message)
+  }
+}
+
 module.exports = {
   createTask,
-  updateTask
+  updateTask,
+  updateSelfTask
 }
