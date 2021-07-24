@@ -131,13 +131,13 @@ const updateTask = async (req, res) => {
 const updateTaskStatus = async (req, res) => {
   try {
     const taskId = req.params.id
-    const { id } = req.userData
-    const task = await tasks.fetchSelfTask(taskId, id)
+    const { id: userId } = req.userData
+    const task = await tasks.fetchSelfTask(taskId, userId)
 
     if (task.taskIdNotFound) return res.boom.notFound("Task doesn't exist")
     if (task.notAssignedToYou) return res.boom.forbidden('This task is not assigned to you')
 
-    await tasks.updateTaskStatus(req.body, taskId)
+    await tasks.updateTask(req.body, taskId)
     return res.status(200).json({ message: 'Task updated successfully!' })
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`)

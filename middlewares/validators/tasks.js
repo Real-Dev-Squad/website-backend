@@ -70,7 +70,8 @@ const updateTask = async (req, res, next) => {
 
 const updateSelfTask = async (req, res, next) => {
   const schema = joi.object().keys({
-    status: joi.string().required()
+    status: joi.string().required(),
+    percentCompleted: joi.number().required()
   })
   try {
     await schema.validateAsync(req.body)

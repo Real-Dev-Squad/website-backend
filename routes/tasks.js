@@ -164,6 +164,7 @@ router.get('/:username', tasks.getUserTasks)
  *     - Tasks
  *   requestBody:
  *     desciption: Task status
+ *     required: true
  *     content:
  *       application/json:
  *         schema:
