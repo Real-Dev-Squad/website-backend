@@ -69,7 +69,7 @@ const updateTask = async (req, res, next) => {
 }
 
 const updateSelfTask = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     status: joi.string().optional(),
     percentCompleted: joi.number().optional()
   })
