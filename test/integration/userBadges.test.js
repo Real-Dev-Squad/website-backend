@@ -30,7 +30,7 @@ describe('User badges', function () {
           return done()
         })
     })
-    it('Should return a not found message if the user in not found', function (done) {
+    it('Should return a not found message if the user is not found', function (done) {
       sinon.stub(badges, 'fetchUserBadges').returns(userBadges.userNotFound)
       chai
         .request(app)
@@ -40,20 +40,6 @@ describe('User badges', function () {
           expect(res).to.have.status(404)
           expect(res.body.error).to.equal('Not Found')
           expect(res.body.message).to.equal('The user does not exist')
-
-          return done()
-        })
-    })
-    it('Should return no badges found if the user does not have any badges', function (done) {
-      sinon.stub(badges, 'fetchUserBadges').returns(userBadges.badgesEmpty)
-      chai
-        .request(app)
-        .get('/badges/someuser')
-        .end((err, res) => {
-          if (err) { return done() }
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('This user does not have any badges')
 
           return done()
         })

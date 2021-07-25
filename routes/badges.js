@@ -57,6 +57,12 @@ router.get('/', badge.getBadges)
  *                    type: array
  *                    items:
  *                      $ref: '#/components/schemas/userBadges'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
  *       503:
  *         description: serverUnavailable
  *         content:
