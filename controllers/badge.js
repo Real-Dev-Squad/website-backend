@@ -1,4 +1,5 @@
 const badgeQuery = require('../models/badges')
+const logger = require('../utils/logger')
 
 /**
  * Get badges data
@@ -22,11 +23,20 @@ const getBadges = async (req, res) => {
 
 const getUserBadges = async (req, res) => {
   try {
-    const allUserBadges = await badgeQuery.fetchUserBadges(req.params.username)
-    return res.json({
-      message: 'User badges returned successfully!',
-      userBadges: allUserBadges
-    })
+    const result = await badgeQuery.fetchUserBadges(req.params.username)
+    if (result.userExists) {
+      if (result.userBadges.length === 0) {
+        return res.json({
+          message: 'This user does not have any badges'
+        })
+      }
+      return res.json({
+        message: 'User badges returned successfully!',
+        userBadges: result.userBadges
+      })
+    } else {
+      return res.boom.notFound('The user does not exist')
+    }
   } catch (error) {
     logger.error(`Error while fetching all user badges: ${error}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')

@@ -1,5 +1,6 @@
 const firestore = require('../utils/firestore')
 const badgeModel = firestore.collection('badges')
+const { fetchUser } = require('../models/users')
 
 /**
  * Fetches the data about our badges
@@ -35,20 +36,19 @@ const fetchBadges = async ({
 
 const fetchUserBadges = async (username) => {
   try {
-    const snapshot = await badgeModel.get()
-    const allBadges = []
-    snapshot.forEach((doc) => {
-      allBadges.push(doc.data())
-    })
-    const userBadges = []
-    allBadges.forEach((badge) => {
-      badge.users.forEach((user) => {
-        if (user === username) {
-          userBadges.push({ title: badge.title, description: badge.description })
+    const result = await fetchUser({ username })
+    if (result.userExists) {
+      const userID = result.user.id
+      const snapshot = await badgeModel.get()
+      const userBadges = []
+      snapshot.forEach((item) => {
+        if (item.data().users.includes(userID)) {
+          userBadges.push({ title: item.data().title, description: item.data().description })
         }
       })
-    })
-    return userBadges
+      return { userExists: true, userBadges: userBadges }
+    }
+    return { userExists: false, userBadges: [] }
   } catch (err) {
     logger.error('Error retrieving user badges', err)
     return err
