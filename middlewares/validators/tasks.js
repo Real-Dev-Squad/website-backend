@@ -2,7 +2,7 @@ const joi = require('joi')
 const { DINERO, NEELAM } = require('../../constants/wallets')
 
 const createTask = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     title: joi.string().required(),
     purpose: joi.string().optional(),
     featureUrl: joi.string().optional(),
@@ -36,7 +36,7 @@ const createTask = async (req, res, next) => {
 }
 
 const updateTask = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     title: joi.string().optional(),
     purpose: joi.string().optional(),
     featureUrl: joi.string().optional(),
