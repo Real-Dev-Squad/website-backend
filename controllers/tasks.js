@@ -138,7 +138,7 @@ const updateTaskStatus = async (req, res) => {
     if (task.notAssignedToYou) return res.boom.forbidden('This task is not assigned to you')
 
     await tasks.updateTask(req.body, taskId)
-    return res.status(200).json({ message: 'Task updated successfully!' })
+    return res.json({ message: 'Task updated successfully!' })
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`)
     return res.boom.badImplementation('An internal server error occured')
