@@ -1,7 +1,7 @@
 const joi = require('joi')
 
 const validateRecruiter = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     company: joi.string().required(),
     first_name: joi.string().required(),
     last_name: joi.string().required(),
