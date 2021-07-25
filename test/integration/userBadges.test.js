@@ -44,5 +44,19 @@ describe('User badges', function () {
           return done()
         })
     })
+    it('Should return no badges message if the user does not have any badges', function (done) {
+      sinon.stub(badges, 'fetchUserBadges').returns(userBadges.badgesEmpty)
+      chai
+        .request(app)
+        .get('/badges/some-user')
+        .end((err, res) => {
+          if (err) { return done() }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('This user does not have any badges')
+
+          return done()
+        })
+    })
   })
 })

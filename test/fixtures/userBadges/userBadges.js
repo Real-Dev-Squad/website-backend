@@ -15,4 +15,9 @@ const userNotFound = {
   userBadges: []
 }
 
-module.exports = { userFound, userNotFound }
+const badgesEmpty = {
+  userExists: true,
+  userBadges: []
+}
+
+module.exports = { userFound, userNotFound, badgesEmpty }
