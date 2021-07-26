@@ -30,7 +30,7 @@ const updateTask = async (taskData, taskId = null) => {
 
     return result
   } catch (err) {
-    logger.error('Error in creating task', err)
+    logger.error('Error in updating task', err)
     throw err
   }
 }
@@ -90,6 +90,25 @@ const fetchTask = async (taskId) => {
     return { taskData: await fromFirestoreData(taskData) }
   } catch (err) {
     logger.error('Error retrieving task data', err)
+    throw err
+  }
+}
+
+/**
+ * Fetch assigned self task
+ * @param taskId { string }: taskId which will be used to fetch the task
+ * @param id { string }: id to check task is assigned to self or not
+ * @return {Promsie<taskData|Object>}
+ */
+const fetchSelfTask = async (taskId, userId) => {
+  try {
+    const task = await tasksModel.doc(taskId).get()
+    const taskData = task.data()
+    if (!taskData) return { taskNotFound: true }
+    if (userId !== taskData.assignee) return { notAssignedToYou: true }
+    return { taskData: await fromFirestoreData(taskData) }
+  } catch (err) {
+    logger.error('Error retrieving self task data', err)
     throw err
   }
 }
@@ -165,5 +184,6 @@ module.exports = {
   fetchUserTasks,
   fetchUserActiveAndBlockedTasks,
   fetchUserCompletedTasks,
-  fetchActiveTaskMembers
+  fetchActiveTaskMembers,
+  fetchSelfTask
 }
