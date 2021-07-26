@@ -43,12 +43,15 @@ const fetchUserBadges = async (username) => {
       userExists = true
       const userID = result.user.id
       const snapshot = await badgeModel.get()
+
       snapshot.forEach((item) => {
         if (item.data()?.users?.includes(userID)) {
-          userBadges.push({ title: item.data().title, description: item.data().description })
+          const { title, description } = item.data()
+          userBadges.push({ title, description })
         }
       })
     }
+
     return { userExists, userBadges }
   } catch (err) {
     logger.error('Error retrieving user badges', err)
