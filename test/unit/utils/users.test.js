@@ -31,7 +31,7 @@ describe('users', function () {
     participants: ['ankur'],
     completionAward: { gold: 3, bronze: 300 },
     lossRate: { gold: 1 },
-    isNoteWorthy: true
+    isNoteworthy: true
   }
 
   beforeEach(async function () {

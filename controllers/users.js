@@ -1,6 +1,6 @@
 
 const userQuery = require('../models/users')
-const accountOwners = require('../mockdata/appOwners')
+const imageService = require('../services/imageService')
 /**
  * Fetches the data about our users
  *
@@ -19,22 +19,6 @@ const getUsers = async (req, res) => {
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')
-  }
-}
-
-/**
- * Fetches the data about our account Owners
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-
-const getAccountOwners = async (req, res) => {
-  try {
-    return accountOwners
-  } catch (error) {
-    logger.error(`Error while fetching application owners: ${error}`)
-    return res.boom.badImplementation('Something went wrong please contact admin')
   }
 }
 
@@ -138,11 +122,32 @@ const updateSelf = async (req, res) => {
   }
 }
 
+/**
+ * Post user profile picture
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const postUserPicture = async (req, res) => {
+  try {
+    const { file } = req
+    const { id: userId } = req.userData
+    const imageData = await imageService.uploadProfilePicture(file, userId)
+    return res.json({
+      message: 'Profile picture uploaded successfully!',
+      image: imageData
+    })
+  } catch (error) {
+    logger.error(`Error while adding profile picture of user: ${error}`)
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+}
+
 module.exports = {
   updateSelf,
   getUsers,
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
-  getAccountOwners
+  postUserPicture
 }

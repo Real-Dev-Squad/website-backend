@@ -28,7 +28,7 @@ $ npm run dev
 
 #### Test local setup
 ```shell
-$ npm run test-config
+$ npm run validate-setup
 ```
 
 ## Prerequisites

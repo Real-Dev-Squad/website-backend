@@ -23,7 +23,7 @@ describe('Members', function () {
         .request(app)
         .get('/members')
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
@@ -39,13 +39,13 @@ describe('Members', function () {
         .request(app)
         .get('/members')
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Members returned successfully!')
           expect(res.body.members).to.be.a('array')
-          expect(res.body.members[0].isMember).to.eql(true)
+          expect(res.body.members[0].roles.member).to.eql(true)
 
           return done()
         })
@@ -61,7 +61,7 @@ describe('Members', function () {
         .request(app)
         .get('/members/idle')
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
@@ -77,7 +77,7 @@ describe('Members', function () {
         .request(app)
         .get('/members/idle')
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) { return done(err) }
 
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')

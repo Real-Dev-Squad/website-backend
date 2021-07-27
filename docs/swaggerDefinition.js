@@ -398,6 +398,17 @@ const swaggerOptions = {
             }
           }
         },
+        migratedUsers: {
+          type: 'object',
+          properties: {
+            count: {
+              type: 'number'
+            },
+            users: {
+              type: 'array'
+            }
+          }
+        },
         users: {
           type: 'object',
           properties: {
@@ -445,6 +456,9 @@ const swaggerOptions = {
             },
             tokens: {
               type: 'object'
+            },
+            status: {
+              type: 'string'
             }
           }
         },
@@ -521,6 +535,29 @@ const swaggerOptions = {
             }
           }
         },
+        userStocks: {
+          type: 'object',
+          properties: {
+            userId: {
+              type: 'string'
+            },
+            stockId: {
+              type: 'string'
+            },
+            stockName: {
+              type: 'string'
+            },
+            quantity: {
+              type: 'number'
+            },
+            orderValue: {
+              type: 'number'
+            },
+            initialStockValue: {
+              type: 'number'
+            }
+          }
+        },
         auctions: {
           type: 'object',
           properties: {
@@ -551,6 +588,36 @@ const swaggerOptions = {
             bidders_and_bids: {
               type: 'array'
             }
+          }
+        },
+        featureFlag: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string'
+            },
+            id: {
+              type: 'string'
+            },
+            title: {
+              type: 'string'
+            },
+            created_at: {
+              type: 'number'
+            },
+            updated_at: {
+              type: 'number'
+            },
+            config: {
+              type: 'object'
+            },
+            owner: {
+              type: 'string'
+            },
+            launched_at: {
+              type: 'number'
+            }
+
           }
         },
         errors: {
@@ -597,6 +664,34 @@ const swaggerOptions = {
             }
           },
           badImplementation: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
+          entityTooLarge: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
+          unsupportedMediaType: {
             type: 'object',
             properties: {
               statusCode: {

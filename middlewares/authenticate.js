@@ -2,6 +2,31 @@ const authService = require('../services/authService')
 const users = require('../models/users')
 
 /**
+ * Middleware to check if the user has been restricted. If user is restricted,
+ * then only allow read requests and do not allow to any edit/create requests.
+ *
+ * Note: This requires that user is authenticated hence must be called after
+ * the user authentication middleware. We are calling it from within the
+ * `authenticate` middleware itself to avoid explicitly adding this middleware
+ * while defining routes.
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express middleware function
+ * @returns {Object} - Returns unauthorized object if user has been restricted.
+ */
+const checkRestricted = async (req, res, next) => {
+  const { roles } = req.userData
+  if (
+    roles &&
+    roles.restricted &&
+    req.method !== 'GET') {
+    return res.boom.forbidden('You are restricted from performing this action')
+  }
+  return next()
+}
+
+/**
  * Middleware to validate the authenticated routes
  * 1] Verifies the token and adds user info to `req.userData` for further use
  * 2] In case of JWT expiry, adds a new JWT to the response if `currTime - tokenInitialisationTime <= refreshTtl`
@@ -35,7 +60,7 @@ module.exports = async (req, res, next) => {
     const userData = await users.fetchUser({ userId })
     req.userData = userData.user
 
-    return next()
+    return checkRestricted(req, res, next)
   } catch (err) {
     logger.error(err)
 
@@ -59,7 +84,7 @@ module.exports = async (req, res, next) => {
         // add user data to `req.userData` for further use
         req.userData = await users.fetchUser({ userId })
 
-        return next()
+        return checkRestricted(req, res, next)
       } else {
         return res.boom.unauthorized('Unauthenticated User')
       }

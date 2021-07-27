@@ -10,8 +10,11 @@ const addUser = require('../utils/addUser')
 const userModel = require('../../models/users')
 const config = require('config')
 const cookieName = config.get('userToken.cookieName')
+const userData = require('../fixtures/user/user')()
 const { DINERO, NEELAM } = require('../../constants/wallets')
 chai.use(chaiHttp)
+
+const appOwner = userData[3]
 
 let jwt
 
@@ -19,49 +22,41 @@ describe('Tasks', function () {
   let taskId1, taskId
 
   before(async function () {
-    const userId = await addUser()
+    const userId = await addUser(appOwner)
     jwt = authService.generateAuthToken({ userId })
 
     const taskData = [{
       title: 'Test task',
-      purpose: 'To Test mocha',
-      featureUrl: '<testUrl>',
-      type: 'Dev | Group',
-      links: [
-        'test1'
-      ],
-      endsOn: '<unix timestamp>',
-      startedOn: '<unix timestamp>',
+      type: 'feature',
+      endsOn: 1234,
+      startedOn: 4567,
       status: 'active',
       percentCompleted: 10,
-      dependsOn: [
-        'd12',
-        'd23'
-      ],
-      participants: ['ankur'],
+      participants: [],
+      assignee: appOwner.username,
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
       lossRate: { [DINERO]: 1 },
-      isNoteWorthy: true
+      isNoteworthy: true
     }, {
       title: 'Test task',
       purpose: 'To Test mocha',
       featureUrl: '<testUrl>',
-      type: 'Dev | Group',
+      type: 'group',
       links: [
         'test1'
       ],
-      endsOn: '<unix timestamp>',
-      startedOn: '<unix timestamp>',
+      endsOn: 1234,
+      startedOn: 54321,
       status: 'completed',
       percentCompleted: 10,
       dependsOn: [
         'd12',
         'd23'
       ],
-      participants: ['ankur'],
+      participants: [appOwner.username],
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
       lossRate: { [DINERO]: 1 },
-      isNoteworthy: true
+      isNoteworthy: false
     }]
 
     // Add the active task
@@ -83,26 +78,16 @@ describe('Tasks', function () {
         .post('/tasks')
         .set('cookie', `${cookieName}=${jwt}`)
         .send({
-          title: 'Test task',
-          purpose: 'To Test mocha',
-          featureUrl: '<testUrl>',
-          type: 'Dev | Group',
-          links: [
-            'test1'
-          ],
-          endsOn: '<unix timestamp>',
-          startedOn: '<unix timestamp>',
+          title: 'Test task - Create',
+          type: 'feature',
+          endsOn: 123,
+          startedOn: 456,
           status: 'completed',
           percentCompleted: 10,
-          dependsOn: [
-            'd12',
-            'd23'
-          ],
-          participants: ['ankur'],
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
-          isNoteworthy: true,
-          assignee: 'ankur'
+          assignee: appOwner.username,
+          participants: []
         })
         .end((err, res) => {
           if (err) { return done(err) }
@@ -111,9 +96,9 @@ describe('Tasks', function () {
           expect(res.body.message).to.equal('Task created successfully!')
           expect(res.body.id).to.be.a('string')
           expect(res.body.task).to.be.a('object')
-          expect(res.body.task.createdBy).to.equal('ankur')
-          expect(res.body.task.assignee).to.equal('ankur')
-          expect(res.body.task.participants).to.include('ankur')
+          expect(res.body.task.createdBy).to.equal(appOwner.username)
+          expect(res.body.task.assignee).to.equal(appOwner.username)
+          expect(res.body.task.participants).to.be.a('array')
           return done()
         })
     })
@@ -130,9 +115,14 @@ describe('Tasks', function () {
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Tasks returned successfully!')
           expect(res.body.tasks).to.be.a('array')
-          res.body.tasks.forEach((task) => {
-            expect(task.participants).to.include('ankur')
-          })
+          const taskWithParticipants = res.body.tasks[0]
+
+          if (taskWithParticipants.type === 'group') {
+            expect(taskWithParticipants.participants).to.include(appOwner.username)
+          } else {
+            expect(taskWithParticipants.assignee).to.equal(appOwner.username)
+          }
+
           return done()
         })
     })
@@ -183,7 +173,7 @@ describe('Tasks', function () {
         title: 'Assigned task',
         purpose: 'To Test mocha',
         featureUrl: '<testUrl>',
-        type: 'Dev | Group',
+        type: 'group',
         links: [
           'test1'
         ],
@@ -195,11 +185,10 @@ describe('Tasks', function () {
           'd12',
           'd23'
         ],
-        participants: ['ankur'],
+        participants: ['user1'],
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-        assignee: 'user1'
+        isNoteworthy: true
       }
       const { taskId } = await tasks.updateTask(assignedTask)
       const res = await chai
@@ -262,6 +251,44 @@ describe('Tasks', function () {
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Task not found')
 
+          return done()
+        })
+    })
+  })
+
+  describe('GET /tasks/:username', function () {
+    it('Should return 200 when username is valid', function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${appOwner.username}?status=active`)
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Tasks returned successfully!')
+
+          const task1 = res.body.tasks[0]
+
+          if (task1.type === 'group') {
+            expect(task1.participants).to.include(appOwner.username)
+          } else {
+            expect(task1.assignee).to.equal(appOwner.username)
+          }
+
+          expect(res.body.tasks).to.be.a('array')
+          return done()
+        })
+    })
+
+    it('Should return 404 when username is invalid', function (done) {
+      chai
+        .request(app)
+        .get('/tasks/dummyUser?status=active')
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(404)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('User doesn\'t exist')
           return done()
         })
     })
