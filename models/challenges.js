@@ -19,23 +19,6 @@ const ERROR_MESSAGE = 'Error getting challenges'
  * @return {Promise<challengesModel|Array>}
  */
 
-// const fetchChallenges = async () => {
-//   try {
-//     const challengesSnapshot = await challengesModel.get()
-//     const challenges = []
-//     challengesSnapshot.forEach((challengeDoc) => {
-//       challenges.push({
-//         id: challengeDoc.id,
-//         ...challengeDoc.data()
-//       })
-//     })
-//     return challenges
-//   } catch (err) {
-//     logger.error(ERROR_MESSAGE, err)
-//     throw err
-//   }
-// }
-
 const fetchChallenges = async () => {
   try {
     const challengesSnapshot = await challengesModel.get()
@@ -53,16 +36,27 @@ const fetchChallenges = async () => {
   }
 }
 
+/**
+ * Fetch the <user object> from participants array
+ * @param {Array} participants
+ * @returns {Promise<challengesModel|Array>}
+ */
 const fetchParticipants = async (participants) => {
   try {
     const fetchedparticipants = []
-    const getParticipants = await userModel.where(admin.firestore.FieldPath.documentId(), 'in', participants).get()
-    getParticipants.forEach(userData => {
-      fetchedparticipants.push({
-        id: userData.id,
-        ...userData.data()
+    while (participants.length) {
+      const currentParticipants = participants.splice(0, 10)
+      const getParticipants = await userModel.where(admin.firestore.FieldPath.documentId(), 'in', currentParticipants).get()
+      getParticipants.forEach(userData => {
+        fetchedparticipants.push({
+          id: userData.id,
+          ...userData.data(),
+          email: undefined,
+          phone: undefined,
+          tokens: undefined
+        })
       })
-    })
+    }
     return fetchedparticipants
   } catch (err) {
     logger.error('Failed to get participated users', err)
