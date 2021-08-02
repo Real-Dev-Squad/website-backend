@@ -5,6 +5,7 @@
 
 const Firestore = require('@google-cloud/firestore')
 const firestore = require('../utils/firestore')
+const admin = require('firebase-admin')
 
 const challengesModel = firestore.collection('challenges')
 const userModel = firestore.collection('users')
@@ -17,6 +18,23 @@ const ERROR_MESSAGE = 'Error getting challenges'
  * Fetch the challenges
  * @return {Promise<challengesModel|Array>}
  */
+
+// const fetchChallenges = async () => {
+//   try {
+//     const challengesSnapshot = await challengesModel.get()
+//     const challenges = []
+//     challengesSnapshot.forEach((challengeDoc) => {
+//       challenges.push({
+//         id: challengeDoc.id,
+//         ...challengeDoc.data()
+//       })
+//     })
+//     return challenges
+//   } catch (err) {
+//     logger.error(ERROR_MESSAGE, err)
+//     throw err
+//   }
+// }
 
 const fetchChallenges = async () => {
   try {
@@ -35,6 +53,22 @@ const fetchChallenges = async () => {
   }
 }
 
+const fetchParticipants = async (participants) => {
+  try {
+    const fetchedparticipants = []
+    const getParticipants = await userModel.where(admin.firestore.FieldPath.documentId(), 'in', participants).get()
+    getParticipants.forEach(userData => {
+      fetchedparticipants.push({
+        id: userData.id,
+        ...userData.data()
+      })
+    })
+    return fetchedparticipants
+  } catch (err) {
+    logger.error('Failed to get participated users', err)
+    throw err
+  }
+}
 /**
  * Post the challenge
  *  @return {Promise<challengesModel|Array>}
@@ -83,5 +117,6 @@ const subscribeUserToChallenge = async (userId, challengeId) => {
 module.exports = {
   fetchChallenges,
   postChallenge,
-  subscribeUserToChallenge
+  subscribeUserToChallenge,
+  fetchParticipants
 }
