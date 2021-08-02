@@ -94,10 +94,10 @@ const postChallenge = async (challengeData) => {
 const subscribeUserToChallenge = async (userId, challengeId) => {
   try {
     const getUser = await userModel.doc(userId).get()
-    const user = getUser.data().github_display_name
+    const user = getUser.data()
     if (user) {
       const challengeRef = await challengesModel.doc(challengeId)
-      await challengeRef.update({ participants: Firestore.FieldValue.arrayUnion({ name: user }) })
+      await challengeRef.update({ participants: Firestore.FieldValue.arrayUnion({ id: userId }) })
       return challengeRef.get()
     } else {
       throw new Error(USER_DOES_NOT_EXIST_ERROR)
