@@ -5,7 +5,7 @@
 
 const Firestore = require('@google-cloud/firestore')
 const firestore = require('../utils/firestore')
-const admin = require('firebase-admin')
+const userQuery = require('./users')
 
 const challengesModel = firestore.collection('challenges')
 const userModel = firestore.collection('users')
@@ -43,20 +43,14 @@ const fetchChallenges = async () => {
  */
 const fetchParticipants = async (participants) => {
   try {
-    const fetchedparticipants = []
-    while (participants.length) {
-      const currentParticipants = participants.splice(0, 10)
-      const getParticipants = await userModel.where(admin.firestore.FieldPath.documentId(), 'in', currentParticipants).get()
-      getParticipants.forEach(userData => {
-        fetchedparticipants.push({
-          id: userData.id,
-          ...userData.data(),
-          email: undefined,
-          phone: undefined,
-          tokens: undefined
-        })
-      })
-    }
+    const fetchedparticipants = await Promise.all(participants.map(async (userId) => {
+      const { user } = await userQuery.fetchUser({ userId: userId })
+      return {
+        ...user,
+        phone: undefined,
+        email: undefined
+      }
+    }))
     return fetchedparticipants
   } catch (err) {
     logger.error('Failed to get participated users', err)
