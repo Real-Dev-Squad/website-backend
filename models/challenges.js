@@ -5,7 +5,7 @@
 
 const Firestore = require('@google-cloud/firestore')
 const firestore = require('../utils/firestore')
-const userQuery = require('./users')
+const { fetchUser } = require('./users')
 
 const challengesModel = firestore.collection('challenges')
 const userModel = firestore.collection('users')
@@ -41,10 +41,10 @@ const fetchChallenges = async () => {
  * @param {Array} participants
  * @returns {Promise<challengesModel|Array>}
  */
-const fetchParticipants = async (participants) => {
+const fetchParticipantsData = async (participants) => {
   try {
     const fetchedparticipants = await Promise.all(participants.map(async (userId) => {
-      const { user } = await userQuery.fetchUser({ userId: userId })
+      const { user } = await fetchUser({ userId })
       return {
         ...user,
         phone: undefined,
@@ -91,7 +91,7 @@ const subscribeUserToChallenge = async (userId, challengeId) => {
     const user = getUser.data()
     if (user) {
       const challengeRef = await challengesModel.doc(challengeId)
-      await challengeRef.update({ participants: Firestore.FieldValue.arrayUnion({ id: userId }) })
+      await challengeRef.update({ participants: Firestore.FieldValue.arrayUnion(userId) })
       return challengeRef.get()
     } else {
       throw new Error(USER_DOES_NOT_EXIST_ERROR)
@@ -106,5 +106,5 @@ module.exports = {
   fetchChallenges,
   postChallenge,
   subscribeUserToChallenge,
-  fetchParticipants
+  fetchParticipantsData
 }

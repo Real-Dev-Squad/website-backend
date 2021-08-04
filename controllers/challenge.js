@@ -12,17 +12,17 @@ const sendChallengeResponse = async (req, res) => {
   try {
     if (req.method === 'GET') {
       const allChallenges = await challengeQuery.fetchChallenges()
-      const newChallenges = await Promise.all(allChallenges.map(async (challenge) => {
-        const getParticipants = await challengeQuery.fetchParticipants(challenge.participants)
+      const updatedChallengesData = await Promise.all(allChallenges.map(async (challenge) => {
+        const participants = await challengeQuery.fetchParticipantsData(challenge.participants)
         return {
           ...challenge,
-          participants: getParticipants
+          participants
         }
       }))
-      if (newChallenges) {
+      if (updatedChallengesData) {
         return res.status(200).json({
           message: 'Challenges returned successfully!',
-          challenges: newChallenges
+          challenges: updatedChallengesData
         })
       } else {
         return res.boom.notFound('No challenges found')
