@@ -11,9 +11,9 @@ module.exports = () => {
       typeOfCurrency: 'Silver',
       userTo: 'Rishab',
       userId: 'kratika',
-      typrOfTransaction: 'Credit',
+      typeOfTransaction: 'Credit',
       amount: 500,
-      dateInMillis: 1615710600000
+      dateTime: 1615710600000
     },
     {
       amount: 130,
@@ -21,7 +21,23 @@ module.exports = () => {
       typeOfTransaction: 'Debit',
       typeOfCurrency: 'neelam',
       userId: 'kratika',
-      dateInMillis: 1615689000000
+      dateTime: 1615689000000
+    },
+    {
+      typeOfCurrency: 'Silver',
+      userTo: 'Rishab',
+      userId: 'kratika',
+      typeOfTransaction: 'Credit',
+      amount: 420,
+      dateTime: 1615710600001
+    },
+    {
+      amount: 630,
+      userTo: 'Rishab',
+      typeOfTransaction: 'Debit',
+      typeOfCurrency: 'neelam',
+      userId: 'kratika',
+      dateTime: 1615689000002
     }
   ]
 }

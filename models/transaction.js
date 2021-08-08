@@ -20,16 +20,15 @@ const fetchTransactionsByUserId = async (userId, offset, limit, orderBy) => {
   const transactions = []
   transactionsRef.forEach((doc) => {
     const transaction = doc.data()
-    transaction.dateInMillis = doc.data().dateTime._seconds * 1000
-    delete transaction.dateTime
+    // transaction.dateTime = Date.now()
+    // delete transaction.dateTime
     transactions.push(transaction)
   })
   transactions.sort((a, b) => {
-    return orderBy === 'DESC' ? (a.dateInMillis > b.dateInMillis ? -1 : 1) : a.dateInMillis > b.dateInMillis ? 1 : -1
+    return orderBy === 'DESC' ? (a.dateTime > b.dateTime ? -1 : 1) : a.dateTime > b.dateTime ? 1 : -1
   })
   return transactions.slice(offset, limit)
 }
-
 module.exports = {
   fetchTransactionsByUserId
 }
