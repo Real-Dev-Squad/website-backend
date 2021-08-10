@@ -293,4 +293,54 @@ describe('Tasks', function () {
         })
     })
   })
+
+  describe('PATCH /self/:id', function () {
+    const taskStatusData = {
+      status: 'currentStatus',
+      percentCompleted: 50
+    }
+
+    it('Should update the task status for given self taskid', function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(200)
+          expect(res.body.message).to.equal('Task updated successfully!')
+          return done()
+        })
+    })
+
+    it('Should return 404 if task doesnt exist', function (done) {
+      chai
+        .request(app)
+        .patch('/tasks/self/wrongtaskId')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(404)
+          expect(res.body.message).to.equal('Task doesn\'t exist')
+          return done()
+        })
+    })
+
+    it('Should return Forbidden error if task is not assigned to self', async function () {
+      const { user: { id, username } } = await userModel.fetchUser({ username: 'akshay' })
+
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set('cookie', `${cookieName}=${authService.generateAuthToken({ userId: id })}`)
+
+      const { taskData: { assignee } } = await tasks.fetchTask(taskId1)
+      if (username !== assignee) {
+        expect(res).to.have.status(403)
+        expect(res.body.message).to.equal('This task is not assigned to you')
+      }
+    })
+  })
 })
