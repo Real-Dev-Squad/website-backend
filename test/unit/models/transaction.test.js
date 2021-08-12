@@ -18,10 +18,10 @@ const transactionsModel = firestore.collection('transaction')
  */
 
 describe('transaction', function () {
-  beforeEach(async function () {
-    for (let i = 0; i < transactionDataArray.length; i++) {
-      await transactionsModel.add(transactionDataArray[i])
-    }
+  beforeEach(function () {
+    transactionDataArray.forEach((element, index) => {
+      transactionsModel.add(transactionDataArray[index])
+    })
   })
   afterEach(async function () {
     await cleanDb()
@@ -51,24 +51,20 @@ describe('transaction', function () {
         return new Date(b.dateTime) - new Date(a.dateTime)
       })
       const inputUserID = expectedTransactionData[0].userId
-      const data = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 10, 'DESC')
-      const DATA_LENGTH = data.length
-      for (let i = 0; i < DATA_LENGTH; i++) {
-        const outputTransactionData = data[i]
-        expect(expectedTransactionData[i]).to.deep.equal(outputTransactionData)
-      }
+      const outputTransactionData = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 10, 'DESC')
+      outputTransactionData.forEach((element, index) => {
+        expect(expectedTransactionData[index]).to.deep.equal(outputTransactionData[index])
+      })
     })
     it('All data in ASC order ', async function () {
       const expectedTransactionData = transactionDataArray.sort((a, b) => {
         return new Date(a.dateTime) - new Date(b.dateTime)
       })
       const inputUserID = expectedTransactionData[0].userId
-      const data = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 10, 'ASC')
-      const DATA_LENGTH = data.length
-      for (let i = 0; i < DATA_LENGTH; i++) {
-        const outputTransactionData = data[i]
-        expect(expectedTransactionData[i]).to.deep.equal(outputTransactionData)
-      }
+      const outputTransactionData = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 10, 'ASC')
+      outputTransactionData.forEach((element, index) => {
+        expect(expectedTransactionData[index]).to.deep.equal(outputTransactionData[index])
+      })
     })
   })
 })
