@@ -2,6 +2,10 @@
   "name": "website-backend",
   "version": "1.0.0",
   "private": true,
+  "engineStrict": true,
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "cross-env NODE_ENV=development nodemon server.js",
@@ -10,8 +14,10 @@
     "validate-setup": "node scripts/validateSetup.js",
     "test-integration": "sh scripts/tests/testIntegration.sh",
     "test-unit": "sh scripts/tests/testUnit.sh",
-    "test": "npm run lint && npm run test-integration && npm run test-unit",
-    "generate-api-schema": "node utils/generateAPISchema.js"
+    "test": "npm run lint && npm run test-integration && npm run test-unit && bundle exec rake cucumber && bundle exec rake rspec && bundle exec rake jasmine:ci",
+    "generate-api-schema": "node utils/generateAPISchema.js",
+    "requirements-check": "node check_node_version.js",
+    "postinstall": ":.\node_modules/bower/bin/bower install && npm run requirements-check"
   },
   "dependencies": {
     "axios": "^0.21.1",
@@ -33,6 +39,7 @@
     "multer": "^1.4.2",
     "passport": "^0.4.1",
     "passport-github2": "^0.1.12",
+    "semver": "^7.3.5",
     "swagger-jsdoc": "^6.1.0",
     "swagger-ui-express": "^4.1.6",
     "winston": "^3.3.3"
