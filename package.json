@@ -14,7 +14,7 @@
     "validate-setup": "node scripts/validateSetup.js",
     "test-integration": "sh scripts/tests/testIntegration.sh",
     "test-unit": "sh scripts/tests/testUnit.sh",
-    "test": "npm run lint && npm run test-integration && npm run test-unit && bundle exec rake cucumber && bundle exec rake rspec && bundle exec rake jasmine:ci",
+    "test": "npm run lint && npm run test-integration && npm run test-unit",
     "generate-api-schema": "node utils/generateAPISchema.js",
     "requirements-check": "node check_node_version.js",
     "postinstall": ":.\node_modules/bower/bin/bower install && npm run requirements-check"
