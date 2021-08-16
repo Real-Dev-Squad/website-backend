@@ -20,8 +20,6 @@ const fetchTransactionsByUserId = async (userId, offset, limit, orderBy) => {
   const transactions = []
   transactionsRef.forEach((doc) => {
     const transaction = doc.data()
-    // transaction.dateTime = Date.now()
-    // delete transaction.dateTime
     transactions.push(transaction)
   })
   transactions.sort((a, b) => {
