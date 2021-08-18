@@ -18,12 +18,12 @@ const transactionsModel = firestore.collection('transaction')
  */
 
 describe('transaction', function () {
-  beforeEach(function () {
-    transactionDataArray.forEach((element, index) => {
-      transactionsModel.add(transactionDataArray[index])
+  before(function () {
+    transactionDataArray.forEach(async (element, index) => {
+      await transactionsModel.add(transactionDataArray[index])
     })
   })
-  afterEach(async function () {
+  after(async function () {
     await cleanDb()
   })
 
@@ -34,6 +34,8 @@ describe('transaction', function () {
       })[0]
       const inputUserID = expectedTransactionData.userId
       const data = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 1, 'DESC')
+      // eslint-disable-next-line no-console
+      console.log('desc data', data)
       const outputTransactionData = data[0]
       expect(expectedTransactionData).to.deep.equal(outputTransactionData)
     })
@@ -43,6 +45,8 @@ describe('transaction', function () {
       })[0]
       const inputUserID = expectedTransactionData.userId
       const data = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 1, 'ASC')
+      // eslint-disable-next-line no-console
+      console.log('asc dta', data)
       const outputTransactionData = data[0]
       expect(expectedTransactionData).to.deep.equal(outputTransactionData)
     })
