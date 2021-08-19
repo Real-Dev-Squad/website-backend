@@ -12,6 +12,7 @@ const config = require('config')
 const cookieName = config.get('userToken.cookieName')
 const userData = require('../fixtures/user/user')()
 const { DINERO, NEELAM } = require('../../constants/wallets')
+const cleanDb = require('../utils/cleanDb')
 chai.use(chaiHttp)
 
 const appOwner = userData[3]
@@ -329,15 +330,19 @@ describe('Tasks', function () {
     })
 
     it('Should return Forbidden error if task is not assigned to self', async function () {
-      const { user: { id } } = await userModel.fetchUser({ username: 'akshay' })
+      const { userId } = await userModel.addOrUpdate({
+        github_id: 'akshay1502',
+        username: 'akshay'
+      })
 
       const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId1}`)
-        .set('cookie', `${cookieName}=${authService.generateAuthToken({ userId: id })}`)
+        .set('cookie', `${cookieName}=${authService.generateAuthToken({ userId })}`)
 
       expect(res).to.have.status(403)
       expect(res.body.message).to.equal('This task is not assigned to you')
+      await cleanDb()
     })
   })
 })
