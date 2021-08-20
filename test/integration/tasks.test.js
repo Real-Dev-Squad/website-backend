@@ -331,12 +331,8 @@ describe('Tasks', function () {
 
     it('Should return Forbidden error if task is not assigned to self', async function () {
       const { userId } = await addUser(userData[1])
-      // const { userId } = await userModel.addOrUpdate({
-      //   github_id: 'akshay1502',
-      //   username: 'akshay'
-      // })
-
       const jwt = authService.generateAuthToken({ userId })
+
       const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId1}`)
