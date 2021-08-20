@@ -330,15 +330,17 @@ describe('Tasks', function () {
     })
 
     it('Should return Forbidden error if task is not assigned to self', async function () {
-      const { userId } = await userModel.addOrUpdate({
-        github_id: 'akshay1502',
-        username: 'akshay'
-      })
+      const { userId } = await addUser(userData[1])
+      // const { userId } = await userModel.addOrUpdate({
+      //   github_id: 'akshay1502',
+      //   username: 'akshay'
+      // })
 
+      const jwt = authService.generateAuthToken({ userId })
       const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId1}`)
-        .set('cookie', `${cookieName}=${authService.generateAuthToken({ userId })}`)
+        .set('cookie', `${cookieName}=${jwt}`)
 
       expect(res).to.have.status(403)
       expect(res.body.message).to.equal('This task is not assigned to you')
