@@ -68,7 +68,11 @@ describe('Tasks', function () {
     taskId = (await tasks.updateTask(taskData[1])).taskId
   })
 
-  afterEach(function () {
+  after(async function () {
+    await cleanDb()
+  })
+
+  afterEach(async function () {
     sinon.restore()
   })
 
@@ -340,7 +344,20 @@ describe('Tasks', function () {
 
       expect(res).to.have.status(403)
       expect(res.body.message).to.equal('This task is not assigned to you')
-      await cleanDb()
+    })
+
+    it('Should give error for no cookie', async function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(401)
+          expect(res.body.message).to.be.equal('Unauthenticated User')
+          return done()
+        })
+        .catch(done())
     })
   })
 })
