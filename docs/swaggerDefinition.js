@@ -482,6 +482,17 @@ const swaggerOptions = {
             }
           }
         },
+        userBadges: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string'
+            },
+            description: {
+              type: 'string'
+            }
+          }
+        },
         userAvailable: {
           type: 'object',
           properties: {

@@ -1,7 +1,7 @@
 const joi = require('joi')
 
 const newTrade = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     stockId: joi.string().required(),
     tradeType: joi.string().required(),
     stockName: joi.string().required(),

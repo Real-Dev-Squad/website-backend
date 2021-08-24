@@ -58,6 +58,9 @@
     "pre-commit": "^1.2.2",
     "sinon": "^10.0.0"
   },
+  "engines": {
+    "node": "14.x"
+  },
   "pre-commit": [
     "lint"
   ]
