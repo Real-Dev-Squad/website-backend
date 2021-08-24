@@ -29,31 +29,21 @@ describe('transaction', function () {
 
   describe('when fetchTransactionsByUserId called, it ', function () {
     it('in DESC order', async function () {
-      const expectedTransactionData = transactionDataArray.sort((a, b) => {
-        return new Date(b.dateTime) - new Date(a.dateTime)
-      })[0]
+      const expectedTransactionData = transactionDataArray.sort((a, b) => b.dateTime - a.dateTime)[0]
       const inputUserID = expectedTransactionData.userId
       const data = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 1, 'DESC')
-      // eslint-disable-next-line no-console
-      console.log('desc data', data)
       const outputTransactionData = data[0]
       expect(expectedTransactionData).to.deep.equal(outputTransactionData)
     })
     it('in ASC order', async function () {
-      const expectedTransactionData = transactionDataArray.sort((a, b) => {
-        return new Date(a.dateTime) - new Date(b.dateTime)
-      })[0]
+      const expectedTransactionData = transactionDataArray.sort((a, b) => a.dateTime - b.dateTime)[0]
       const inputUserID = expectedTransactionData.userId
       const data = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 1, 'ASC')
-      // eslint-disable-next-line no-console
-      console.log('asc dta', data)
       const outputTransactionData = data[0]
       expect(expectedTransactionData).to.deep.equal(outputTransactionData)
     })
     it('All data in DESC order', async function () {
-      const expectedTransactionData = transactionDataArray.sort((a, b) => {
-        return new Date(b.dateTime) - new Date(a.dateTime)
-      })
+      const expectedTransactionData = transactionDataArray.sort((a, b) => b.dateTime - a.dateTime)
       const inputUserID = expectedTransactionData[0].userId
       const outputTransactionData = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 10, 'DESC')
       outputTransactionData.forEach((element, index) => {
@@ -61,9 +51,7 @@ describe('transaction', function () {
       })
     })
     it('All data in ASC order ', async function () {
-      const expectedTransactionData = transactionDataArray.sort((a, b) => {
-        return new Date(a.dateTime) - new Date(b.dateTime)
-      })
+      const expectedTransactionData = transactionDataArray.sort((a, b) => a.dateTime - b.dateTime)
       const inputUserID = expectedTransactionData[0].userId
       const outputTransactionData = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 10, 'ASC')
       outputTransactionData.forEach((element, index) => {
