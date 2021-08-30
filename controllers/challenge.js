@@ -59,7 +59,8 @@ const subscribeToChallenge = async (req, res) => {
     const subscribeUser = await challengeQuery.subscribeUserToChallenge(userId, challengeId)
     if (subscribeUser) {
       return res.status(200).json({
-        message: 'User has subscribed to challenge'
+        challenge_id: challengeId,
+        is_user_subscribed: 1
       })
     } else {
       return res.boom.notFound('User cannot be subscribed to challenge')
