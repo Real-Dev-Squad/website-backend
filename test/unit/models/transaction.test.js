@@ -27,7 +27,7 @@ describe('Transactions', function () {
     await cleanDb()
   })
 
-  describe('fetchTransactionsByUserId using transaction route and get() call', function () {
+  describe('fetchTransactionsByUserId', function () {
     it('Should return data in descending order', async function () {
       const expectedTransactionData = transactionDataArray.sort((a, b) => b.dateTime - a.dateTime)[0]
       const inputUserID = expectedTransactionData.userId
