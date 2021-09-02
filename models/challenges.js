@@ -43,19 +43,28 @@ const fetchChallenges = async () => {
  */
 const fetchParticipantsData = async (participants) => {
   try {
-    const fetchedparticipants = await Promise.all(participants.map(async (userId) => {
-      const { user } = await fetchUser({ userId })
-      return {
-        ...user,
-        phone: undefined,
-        email: undefined
-      }
-    }))
+    const fetchedparticipants = getParticipantsData(participants)
     return fetchedparticipants
   } catch (err) {
     logger.error('Failed to get participated users', err)
     throw err
   }
+}
+
+/**
+ * Fetch the partipantsData from participants array
+ * @param {Array} participants
+ * @returns {Promise<participantsData|Array>}
+ */
+const getParticipantsData = async (participants) => {
+  return await Promise.all(participants.map(async (userId) => {
+    const { user } = await fetchUser({ userId })
+    return {
+      ...user,
+      phone: undefined,
+      email: undefined
+    }
+  }))
 }
 /**
  * Post the challenge
