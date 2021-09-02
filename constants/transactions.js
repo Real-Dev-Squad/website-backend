@@ -1,3 +1,3 @@
-const transactionsFetchLimit = 10
+const TRANSACTIONS_FETCH_LIMIT = 10
 
-module.exports = { transactionsFetchLimit }
+module.exports = { TRANSACTIONS_FETCH_LIMIT }

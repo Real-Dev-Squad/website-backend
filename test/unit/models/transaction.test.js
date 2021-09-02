@@ -17,7 +17,7 @@ const transactionsModel = firestore.collection('transaction')
  * Test the model functions and validate the data stored
  */
 
-describe('transaction', function () {
+describe('Transactions', function () {
   before(function () {
     transactionDataArray.forEach(async (element, index) => {
       await transactionsModel.add(transactionDataArray[index])
@@ -27,22 +27,22 @@ describe('transaction', function () {
     await cleanDb()
   })
 
-  describe('when fetchTransactionsByUserId called, it ', function () {
-    it('in DESC order', async function () {
+  describe('fetch Transactions By `UserId` using transaction route and get() call', function () {
+    it('Should return data in descending order', async function () {
       const expectedTransactionData = transactionDataArray.sort((a, b) => b.dateTime - a.dateTime)[0]
       const inputUserID = expectedTransactionData.userId
       const data = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 1, 'DESC')
       const outputTransactionData = data[0]
       expect(expectedTransactionData).to.deep.equal(outputTransactionData)
     })
-    it('in ASC order', async function () {
+    it('Should return data in ascending order', async function () {
       const expectedTransactionData = transactionDataArray.sort((a, b) => a.dateTime - b.dateTime)[0]
       const inputUserID = expectedTransactionData.userId
       const data = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 1, 'ASC')
       const outputTransactionData = data[0]
       expect(expectedTransactionData).to.deep.equal(outputTransactionData)
     })
-    it('All data in DESC order', async function () {
+    it('Should return all data in descending order', async function () {
       const expectedTransactionData = transactionDataArray.sort((a, b) => b.dateTime - a.dateTime)
       const inputUserID = expectedTransactionData[0].userId
       const outputTransactionData = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 10, 'DESC')
@@ -50,7 +50,7 @@ describe('transaction', function () {
         expect(expectedTransactionData[index]).to.deep.equal(outputTransactionData[index])
       })
     })
-    it('All data in ASC order ', async function () {
+    it('Should return all data in ascending order ', async function () {
       const expectedTransactionData = transactionDataArray.sort((a, b) => a.dateTime - b.dateTime)
       const inputUserID = expectedTransactionData[0].userId
       const outputTransactionData = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 10, 'ASC')

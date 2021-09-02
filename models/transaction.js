@@ -20,6 +20,7 @@ const fetchTransactionsByUserId = async (userId, offset, limit, orderBy) => {
   const transactions = []
   transactionsRef.forEach((doc) => {
     const transaction = doc.data()
+    // const transaction = []
     transactions.push(transaction)
   })
   transactions.sort((a, b) => {

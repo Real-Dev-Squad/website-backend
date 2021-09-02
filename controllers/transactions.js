@@ -1,4 +1,4 @@
-const { transactionsFetchLimit } = require('../constants/transactions')
+const { TRANSACTIONS_FETCH_LIMIT } = require('../constants/transactions')
 const transactionsModel = require('../models/transaction')
 const { getUserId } = require('../utils/users')
 
@@ -14,7 +14,7 @@ const fetchTransactionsByUserId = async (req, res) => {
     if (userId) {
       const orderBy = req.query.orderBy || 'DESC'
       const offset = parseInt(req.query.offset, 10) || 0
-      const limit = parseInt(req.query.limit, 10) + offset || transactionsFetchLimit
+      const limit = parseInt(req.query.limit, 10) + offset || TRANSACTIONS_FETCH_LIMIT
       const data = await transactionsModel.fetchTransactionsByUserId(userId, offset, limit, orderBy)
       return res.json({
         message: data.length > 0 ? 'Transactions returned successfully!' : 'No transactions exist!',
