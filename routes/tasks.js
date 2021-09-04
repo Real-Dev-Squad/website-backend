@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { authenticate } = require('../middlewares/authenticate')
 const tasks = require('../controllers/tasks')
-const { createTask, updateTask } = require('../middlewares/validators/tasks')
+const { createTask, updateTask, updateSelfTask } = require('../middlewares/validators/tasks')
 const { authorizeUser } = require('../middlewares/authorization')
 
 /**
@@ -154,5 +154,53 @@ router.patch('/:id', authenticate, authorizeUser('appOwner'), updateTask, tasks.
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 router.get('/:username', tasks.getUserTasks)
+
+/**
+ * @swagger
+ * /tasks/self/:id:
+ *  patch:
+ *   summary: used to update self task status
+ *   tags:
+ *     - Tasks
+ *   requestBody:
+ *     desciption: Task status
+ *     required: true
+ *     content:
+ *       application/json:
+ *         schema:
+ *           $ref: '#/components/schemas/tasks'
+ *   responses:
+ *     204:
+ *       description: Status of self task udpated
+ *       content:
+ *         application/json:
+ *           schma:
+ *             $ref: '#/components/schemas/tasks'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
+ *     403:
+ *       description: forbidden
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/forbidden'
+ *     404:
+ *       description: notFound
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/notFound'
+ *     500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.patch('/self/:id', authenticate, updateSelfTask, tasks.updateTaskStatus)
 
 module.exports = router

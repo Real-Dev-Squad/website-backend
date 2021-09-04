@@ -1,7 +1,7 @@
 const joi = require('joi')
 
 const validateFeatureFlag = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     name: joi.string().required(),
     title: joi.string().required()
   })
@@ -16,7 +16,7 @@ const validateFeatureFlag = async (req, res, next) => {
 }
 
 const updateFeatureFlags = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     title: joi.string().optional(),
     config: joi.object({
       roleBased: joi.object({

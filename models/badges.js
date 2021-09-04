@@ -1,5 +1,6 @@
 const firestore = require('../utils/firestore')
 const badgeModel = firestore.collection('badges')
+const { fetchUser } = require('../models/users')
 
 /**
  * Fetches the data about our badges
@@ -27,6 +28,38 @@ const fetchBadges = async ({
   }
 }
 
+/**
+ * Fetches the data about user badges
+ * @param query { Object }: Filter for badges data
+ * @return {Promise<userBadgeModel|Array>}
+ */
+
+const fetchUserBadges = async (username) => {
+  try {
+    const userBadges = []
+    let userExists = false
+    const result = await fetchUser({ username })
+    if (result.userExists) {
+      userExists = true
+      const userID = result.user.id
+      const snapshot = await badgeModel.get()
+
+      snapshot.forEach((item) => {
+        if (item.data()?.users?.includes(userID)) {
+          const { title, description } = item.data()
+          userBadges.push({ title, description })
+        }
+      })
+    }
+
+    return { userExists, userBadges }
+  } catch (err) {
+    logger.error('Error retrieving user badges', err)
+    return err
+  }
+}
+
 module.exports = {
-  fetchBadges
+  fetchBadges,
+  fetchUserBadges
 }
