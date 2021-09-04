@@ -32,14 +32,14 @@ describe('Transactions', function () {
       const expectedTransactionData = transactionDataArray.sort((a, b) => b.dateTime - a.dateTime)[0]
       const inputUserID = expectedTransactionData.userId
       const data = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 1, 'DESC')
-      const outputTransactionData = data[0]
+      const [outputTransactionData] = data
       expect(expectedTransactionData).to.deep.equal(outputTransactionData)
     })
     it('Should return data in ascending order', async function () {
       const expectedTransactionData = transactionDataArray.sort((a, b) => a.dateTime - b.dateTime)[0]
       const inputUserID = expectedTransactionData.userId
       const data = await transactionModelsImpl.fetchTransactionsByUserId(inputUserID, 0, 1, 'ASC')
-      const outputTransactionData = data[0]
+      const [outputTransactionData] = data
       expect(expectedTransactionData).to.deep.equal(outputTransactionData)
     })
     it('Should return all data in descending order', async function () {
