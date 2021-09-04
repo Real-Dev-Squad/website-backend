@@ -10,7 +10,7 @@ const { featureFlagRollout } = require('../utils/rollout')
 
 const getFeatureFlags = async (req, res) => {
   try {
-    const allFeatureFlags = await featureFlagQuery.fetchFeatureFlag()
+    const allFeatureFlags = await featureFlagQuery.fetchFeatureFlags()
     return res.json({
       message: 'FeatureFlags returned successfully!',
       featureflags: allFeatureFlags.length > 0 ? allFeatureFlags : []
@@ -91,7 +91,7 @@ const deleteFeatureFlag = async (req, res) => {
  */
 const getConfig = async (req, res) => {
   try {
-    const featureFlags = await featureFlagQuery.fetchFeatureFlag(false)
+    const featureFlags = await featureFlagQuery.fetchFeatureFlags(false)
     return res.json({
       data: featureFlags.map((featureFlag) => ({
         name: featureFlag.name,

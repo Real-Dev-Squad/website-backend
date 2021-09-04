@@ -8,7 +8,7 @@ const { defaultConfig } = require('../constants/featureFlag')
  * @param getOwnerInfo: Fetch the owner info for all the feature flags if true.
  * @return {Promise<featureFlags|Array>}
  */
-const fetchFeatureFlag = async (getOwnerInfo = true) => {
+const fetchFeatureFlags = async (getOwnerInfo = true) => {
   try {
     const snapshot = await featureFlagModel.get()
     const featureFlags = []
@@ -138,7 +138,7 @@ const deleteFeatureFlag = async (featureFlagId) => {
 }
 
 module.exports = {
-  fetchFeatureFlag,
+  fetchFeatureFlags,
   addFeatureFlags,
   updateFeatureFlags,
   deleteFeatureFlag
