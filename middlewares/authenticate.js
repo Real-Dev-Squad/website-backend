@@ -27,6 +27,61 @@ const checkRestricted = async (req, res, next) => {
 }
 
 /**
+ * Verify if the token in the request is correct and add user data to the request.
+ * @param req
+ * @returns {Promise<Request>}
+ */
+const verifyUserToken = async (req) => {
+  let token = req.cookies[config.get('userToken.cookieName')]
+
+  // Enable Bearer Token authentication for NON-PRODUCTION environments
+  // This is enabled as Swagger UI does not support cookie auth
+  if (process.env.NODE_ENV !== 'production' && !token) {
+    token = req.headers.authorization.split(' ')[1]
+  }
+
+  const { userId } = authService.verifyAuthToken(token)
+
+  // add user data to `req.userData` for further use
+  const userData = await users.fetchUser({ userId })
+  req.userData = userData.user
+
+  return req
+}
+
+/**
+ * Add a refresh token if it satisfies the refresh TTL and add user data to the request.
+ * @param req
+ * @param res
+ * @returns {Promise<{res, isTokenRefreshed: boolean, req}>}
+ */
+const refreshToken = async (req, res) => {
+  const refreshTtl = config.get('userToken.refreshTtl')
+  const token = req.cookies[config.get('userToken.cookieName')]
+  const { userId, iat } = authService.decodeAuthToken(token)
+  const newToken = authService.generateAuthToken({ userId })
+  const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'))
+  let isTokenRefreshed = false
+
+  // add new JWT to the response if it satisfies the refreshTtl time
+  if (Math.floor(Date.now() / 1000) - iat <= refreshTtl) {
+    res.cookie(config.get('userToken.cookieName'), newToken, {
+      domain: rdsUiUrl.hostname,
+      expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax'
+    })
+
+    // add user data to `req.userData` for further use
+    req.userData = await users.fetchUser({ userId })
+    isTokenRefreshed = true
+  }
+
+  return { req, res, isTokenRefreshed }
+}
+
+/**
  * Middleware to validate the authenticated routes
  * 1] Verifies the token and adds user info to `req.userData` for further use
  * 2] In case of JWT expiry, adds a new JWT to the response if `currTime - tokenInitialisationTime <= refreshTtl`
@@ -45,46 +100,15 @@ const checkRestricted = async (req, res, next) => {
  */
 const authenticate = async (req, res, next, strict = true) => {
   try {
-    let token = req.cookies[config.get('userToken.cookieName')]
-
-    /**
-     * Enable Bearer Token authentication for NON-PRODUCTION environments
-     * This is enabled as Swagger UI does not support cookie authe
-     */
-    if (process.env.NODE_ENV !== 'production' && !token) {
-      token = req.headers.authorization.split(' ')[1]
-    }
-
-    const { userId } = authService.verifyAuthToken(token)
-
-    // add user data to `req.userData` for further use
-    const userData = await users.fetchUser({ userId })
-    req.userData = userData.user
-
+    req = await verifyUserToken(req)
     return checkRestricted(req, res, next)
   } catch (err) {
     logger.error(err)
 
     if (err.name === 'TokenExpiredError') {
-      const refreshTtl = config.get('userToken.refreshTtl')
-      const token = req.cookies[config.get('userToken.cookieName')]
-      const { userId, iat } = authService.decodeAuthToken(token)
-      const newToken = authService.generateAuthToken({ userId })
-      const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'))
-
-      // add new JWT to the response if it satisfies the refreshTtl time
-      if (Math.floor(Date.now() / 1000) - iat <= refreshTtl) {
-        res.cookie(config.get('userToken.cookieName'), newToken, {
-          domain: rdsUiUrl.hostname,
-          expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
-          httpOnly: true,
-          secure: true,
-          sameSite: 'lax'
-        })
-
-        // add user data to `req.userData` for further use
-        req.userData = await users.fetchUser({ userId })
-        return checkRestricted(req, res, next)
+      const refresh = await refreshToken(req)
+      if (refresh.isTokenRefreshed) {
+        return checkRestricted(refresh.req, refresh.res, next)
       }
     }
 
