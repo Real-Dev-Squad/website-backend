@@ -5,6 +5,8 @@
 
 const firestore = require('../utils/firestore')
 const userModel = firestore.collection('users')
+const { fetchWallet, createWallet } = require('../models/wallets')
+const walletConstants = require('../constants/wallets')
 
 /**
  * Fetches the data about our users
@@ -14,14 +16,21 @@ const userModel = firestore.collection('users')
 const fetchUsers = async () => {
   try {
     const snapshot = await userModel.get()
-
+    const queryArray = []
+    snapshot.forEach((doc) => queryArray.push(doc))
     const allMembers = []
 
     if (!snapshot.empty) {
-      snapshot.forEach((doc) => {
+      await Promise.all(queryArray.map(async (doc) => {
         const memberData = doc.data()
+        let memberWallet = await fetchWallet(memberData.id)
+        if (!memberWallet) {
+          memberWallet = await createWallet(memberData.id, walletConstants.INITIAL_WALLET)
+          logger.info('Created new wallet for user')
+        }
         const curatedMemberData = {
           id: doc.id,
+          wallet: memberWallet,
           ...memberData,
           tokens: undefined,
           phone: undefined,
@@ -29,9 +38,8 @@ const fetchUsers = async () => {
         }
         curatedMemberData.isMember = !!(memberData.roles && memberData.roles.member)
         allMembers.push(curatedMemberData)
-      })
+      }))
     }
-
     return allMembers
   } catch (err) {
     logger.error('Error retrieving members data', err)
