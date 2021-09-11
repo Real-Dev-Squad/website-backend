@@ -16,19 +16,24 @@ const transactionsModel = firestore.collection('transaction')
  * @returns {Promise<{transactions: []}>}
  */
 const fetchTransactionsByUserId = async (userId, offset, limit, orderBy) => {
-  const transactionsRef = await transactionsModel.where('userId', '==', userId).get()
-  if (transactionsRef.empty) {
-    return logger.error('No matching documents.')
+  try {
+    const transactionsRef = await transactionsModel.where('userId', '==', userId).get()
+    if (transactionsRef.exists) {
+      const transactions = []
+      transactionsRef.forEach((doc) => {
+        const transaction = doc.data()
+        transactions.push(transaction)
+      })
+      transactions.sort((a, b) => {
+        return orderBy === 'DESC' ? (a.dateTime > b.dateTime ? -1 : 1) : a.dateTime > b.dateTime ? 1 : -1
+      })
+      return transactions.slice(offset, limit)
+    } else {
+      return logger.error('No matching documents.')
+    }
+  } catch (err) {
+    return logger.error(`Error while processing transactions fetch request: ${err}`)
   }
-  const transactions = []
-  transactionsRef.forEach((doc) => {
-    const transaction = doc.data()
-    transactions.push(transaction)
-  })
-  transactions.sort((a, b) => {
-    return orderBy === 'DESC' ? (a.dateTime > b.dateTime ? -1 : 1) : a.dateTime > b.dateTime ? 1 : -1
-  })
-  return transactions.slice(offset, limit)
 }
 module.exports = {
   fetchTransactionsByUserId
