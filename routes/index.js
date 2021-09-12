@@ -14,7 +14,6 @@ app.use('/stocks', require('./stocks.js'))
 app.use('/transactions', require('./transactions.js'))
 app.use('/trade', require('./trading.js'))
 app.use('/tasks', require('./tasks.js'))
-app.use('/trade', require('./trading.js'))
 app.use('/users', require('./users.js'))
 app.use('/wallet', require('./wallets.js'))
 

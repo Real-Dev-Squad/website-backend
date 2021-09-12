@@ -29,7 +29,7 @@ const fetchTransactionsByUserId = async (userId, offset, limit, orderBy) => {
       })
       return transactions.slice(offset, limit)
     } else {
-      return logger.error('No matching documents.')
+      return []
     }
   } catch (err) {
     return logger.error(`Error while processing transactions fetch request: ${err}`)
