@@ -13,14 +13,10 @@ const sendChallengeResponse = async (req, res) => {
     if (req.method === 'GET') {
       const allChallenges = await challengeQuery.fetchChallenges()
       const challengesWithParticipants = await getParticipantsofChallenges(allChallenges)
-      if (challengesWithParticipants.length > 0) {
-        return res.status(200).json({
-          message: 'Challenges returned successfully!',
-          challenges: challengesWithParticipants
-        })
-      } else {
-        return res.status(204).send()
-      }
+      return res.status(200).json({
+        message: challengesWithParticipants.length ? 'Challenges returned successfully!' : 'No Challenges found',
+        challenges: challengesWithParticipants
+      })
     } else {
       if (req.method === 'POST') {
         const challengeAdded = await challengeQuery.postChallenge(req.body)
