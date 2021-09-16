@@ -12,7 +12,8 @@ const sendChallengeResponse = async (req, res) => {
   try {
     if (req.method === 'GET') {
       const allChallenges = await challengeQuery.fetchChallenges()
-      const challengesWithParticipants = await Promise.all(await getParticipantsofChallenges(allChallenges))
+      const promiseArray = await getParticipantsofChallenges(allChallenges)
+      const challengesWithParticipants = await Promise.all(promiseArray)
       return res.json({
         message: challengesWithParticipants.length ? 'Challenges returned successfully!' : 'No Challenges found',
         challenges: challengesWithParticipants
