@@ -1,7 +1,7 @@
 const joi = require('joi')
 
 const createStock = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     name: joi.string().required(),
     quantity: joi.number().required(),
     price: joi.number().required()
