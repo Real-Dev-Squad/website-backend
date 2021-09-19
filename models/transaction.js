@@ -18,7 +18,7 @@ const transactionsModel = firestore.collection('transaction')
 const fetchTransactionsByUserId = async (userId, offset, limit, orderBy) => {
   try {
     const transactionsRef = await transactionsModel.where('userId', '==', userId).get()
-    if (transactionsRef.exists) {
+    if (!transactionsRef.empty) {
       const transactions = []
       transactionsRef.forEach((doc) => {
         const transaction = doc.data()
