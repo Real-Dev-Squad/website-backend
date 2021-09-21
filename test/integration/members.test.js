@@ -16,7 +16,7 @@ const cookieName = config.get('userToken.cookieName')
 chai.use(chaiHttp)
 
 const superUser = userData[4]
-const userToBeMadeMember = userData[0]
+const userToBeMadeMember = userData[1]
 const nonSuperUser = userData[2]
 
 describe('Members', function () {
