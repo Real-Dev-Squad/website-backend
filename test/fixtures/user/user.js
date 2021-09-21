@@ -21,6 +21,9 @@ module.exports = () => {
       isMember: true,
       phone: '1234567890',
       email: 'abc@gmail.com',
+      roles: {
+        member: true
+      },
       tokens: {
         githubAccessToken: 'githubAccessToken'
       },
@@ -88,6 +91,26 @@ module.exports = () => {
       },
       roles: {
         super_user: true
+      }
+    },
+    {
+      username: 'ankita',
+      first_name: 'Ankita',
+      last_name: 'Bannore',
+      yoe: 0,
+      img: './img.png',
+      linkedin_id: 'ankitabannore',
+      github_id: 'Ankita2002-Fr',
+      github_display_name: 'Ankita Bannore',
+      isMember: true,
+      phone: '1234567890',
+      email: 'abc@gmail.com',
+      tokens: {
+        githubAccessToken: 'githubAccessToken'
+      },
+      status: 'active',
+      roles: {
+        app_owner: true
       }
     }
   ]

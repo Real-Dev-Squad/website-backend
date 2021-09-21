@@ -398,6 +398,17 @@ const swaggerOptions = {
             }
           }
         },
+        migratedUsers: {
+          type: 'object',
+          properties: {
+            count: {
+              type: 'number'
+            },
+            users: {
+              type: 'array'
+            }
+          }
+        },
         users: {
           type: 'object',
           properties: {
@@ -468,6 +479,17 @@ const swaggerOptions = {
               items: {
                 type: 'string'
               }
+            }
+          }
+        },
+        userBadges: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string'
+            },
+            description: {
+              type: 'string'
             }
           }
         },
@@ -577,6 +599,36 @@ const swaggerOptions = {
             bidders_and_bids: {
               type: 'array'
             }
+          }
+        },
+        featureFlag: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string'
+            },
+            id: {
+              type: 'string'
+            },
+            title: {
+              type: 'string'
+            },
+            created_at: {
+              type: 'number'
+            },
+            updated_at: {
+              type: 'number'
+            },
+            config: {
+              type: 'object'
+            },
+            owner: {
+              type: 'string'
+            },
+            launched_at: {
+              type: 'number'
+            }
+
           }
         },
         errors: {

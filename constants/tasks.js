@@ -8,7 +8,8 @@ const TASK_STATUS = {
   ACTIVE: 'active',
   ASSIGNED: 'assigned',
   BLOCKED: 'blocked',
-  COMPLETED: 'completed'
+  COMPLETED: 'completed',
+  UNASSIGNED: 'unAssigned'
 }
 
 module.exports = { TASK_TYPE, TASK_STATUS }
