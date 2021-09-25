@@ -157,7 +157,7 @@ describe('Members', function () {
 
           expect(res).to.have.status(400)
           expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('User Already is a member')
+          expect(res.body.message).to.equal('User is already a member')
 
           return done()
         })
