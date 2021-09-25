@@ -5,7 +5,7 @@ const { authorizeUser } = require('../middlewares/authorization')
 const authenticate = require('../middlewares/authenticate')
 const { addRecruiter } = require('../controllers/recruiters')
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
-const { SUPERUSER } = require('../constants/roles')
+const { SUPER_USER } = require('../constants/roles')
 
 /**
  * @swagger
@@ -131,7 +131,7 @@ router.post('/intro/:username', validateRecruiter, addRecruiter)
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPERUSER), moveToMembers)
+router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPER_USER), moveToMembers)
 /**
  * @swagger
  * /members/member-to-role-migration:
