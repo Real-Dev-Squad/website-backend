@@ -64,7 +64,7 @@ const moveToMembers = async (req, res) => {
     if (result.userExists) {
       const successObject = await updateToMemberRole(result.user.id)
       if (successObject.isAlreadyMember) {
-        return res.boom.badRequest('User Already is a member')
+        return res.boom.badRequest('User is already a member')
       }
       return res.status(204).send()
     }
