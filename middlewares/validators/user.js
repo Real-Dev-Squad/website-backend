@@ -5,9 +5,6 @@ const updateUser = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     phone: joi.string().optional(),
     email: joi.string().optional(),
-    username: joi.string().optional(),
-    first_name: joi.string().optional(),
-    last_name: joi.string().optional(),
     yoe: joi.number().optional(),
     company: joi.string().optional(),
     designation: joi.string().optional(),
