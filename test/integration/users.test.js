@@ -1,7 +1,5 @@
 const chai = require('chai')
-const {
-  expect
-} = chai
+const { expect } = chai
 const chaiHttp = require('chai-http')
 
 const app = require('../../server')
@@ -17,22 +15,22 @@ const cookieName = config.get('userToken.cookieName')
 
 chai.use(chaiHttp)
 
-describe('Users', function() {
+describe('Users', function () {
   let jwt
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     const userId = await addUser()
     jwt = authService.generateAuthToken({
       userId
     })
   })
 
-  afterEach(async function() {
+  afterEach(async function () {
     await cleanDb()
   })
 
-  describe('PATCH /users/self', function() {
-    it('Should update the user', function(done) {
+  describe('PATCH /users/self', function () {
+    it('Should update the user', function (done) {
       chai
         .request(app)
         .patch('/users/self')
@@ -51,7 +49,7 @@ describe('Users', function() {
         })
     })
 
-    it('Should update the user status', function(done) {
+    it('Should update the user status', function (done) {
       chai
         .request(app)
         .patch('/users/self')
@@ -70,7 +68,7 @@ describe('Users', function() {
         })
     })
 
-    it('Should return 400 for invalid status value', function(done) {
+    it('Should return 400 for invalid status value', function (done) {
       chai
         .request(app)
         .patch('/users/self')
@@ -95,7 +93,7 @@ describe('Users', function() {
         })
     })
 
-    it('Should return 400 for updating username', function(done) {
+    it('Should return 400 for updating username', function (done) {
       chai
         .request(app)
         .patch('/users/self')
@@ -113,7 +111,7 @@ describe('Users', function() {
         })
     })
 
-    it('Should return 400 for updating first name', function(done) {
+    it('Should return 400 for updating first name', function (done) {
       chai
         .request(app)
         .patch('/users/self')
@@ -132,8 +130,8 @@ describe('Users', function() {
     })
   })
 
-  describe('GET /users', function() {
-    it('Should get all the users in system', function(done) {
+  describe('GET /users', function () {
+    it('Should get all the users in system', function (done) {
       chai
         .request(app)
         .get('/users')
@@ -155,8 +153,8 @@ describe('Users', function() {
     })
   })
 
-  describe('GET /users/self', function() {
-    it('Should return the logged user\'s details', function(done) {
+  describe('GET /users/self', function () {
+    it('Should return the logged user\'s details', function (done) {
       chai
         .request(app)
         .get('/users/self')
@@ -175,7 +173,7 @@ describe('Users', function() {
         })
     })
 
-    it('Should return details with phone and email when query \'private\' is true', function(done) {
+    it('Should return details with phone and email when query \'private\' is true', function (done) {
       chai
         .request(app)
         .get('/users/self')
@@ -197,7 +195,7 @@ describe('Users', function() {
         })
     })
 
-    it('Should return 401 if not logged in', function(done) {
+    it('Should return 401 if not logged in', function (done) {
       chai
         .request(app)
         .get('/users/self')
@@ -219,8 +217,8 @@ describe('Users', function() {
     })
   })
 
-  describe('GET /users/id', function() {
-    it('Should return one user with given id', function(done) {
+  describe('GET /users/id', function () {
+    it('Should return one user with given id', function (done) {
       chai
         .request(app)
         .get(`/users/${userData[0].username}`)
@@ -241,7 +239,7 @@ describe('Users', function() {
         })
     })
 
-    it('Should return 404 if there is no user in the system', function(done) {
+    it('Should return 404 if there is no user in the system', function (done) {
       chai
         .request(app)
         .get('/users/invalidUser')
@@ -260,8 +258,8 @@ describe('Users', function() {
     })
   })
 
-  describe('GET /users/isUsernameAvailable/username', function() {
-    it('Should return isUsernameAvailable as true as we are passing new user', function(done) {
+  describe('GET /users/isUsernameAvailable/username', function () {
+    it('Should return isUsernameAvailable as true as we are passing new user', function (done) {
       chai
         .request(app)
         .get('/users/isUsernameAvailable/availableUser')
@@ -278,7 +276,7 @@ describe('Users', function() {
         })
     })
 
-    it('Should return isUsernameAvailable as false as we are passing existing user', function(done) {
+    it('Should return isUsernameAvailable as false as we are passing existing user', function (done) {
       chai
         .request(app)
         .get(`/users/isUsernameAvailable/${userData[0].username}`)
