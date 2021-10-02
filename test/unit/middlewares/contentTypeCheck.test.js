@@ -63,7 +63,7 @@ describe('contentTypeCheck', function () {
       .patch('/users/self')
       .set('cookie', `${cookieName}=${jwt}`)
       .send({
-        first_name: 'Test first_name'
+        company: 'newCompany'
       })
       .end((err, res) => {
         if (err) { return done(err) }
