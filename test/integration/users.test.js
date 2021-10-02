@@ -95,9 +95,7 @@ describe('Users', function () {
         })
         .end((err, res) => {
           if (err) { return done(err) }
-
           expect(res).to.have.status(400)
-          })
 
           return done()
         })
@@ -113,9 +111,7 @@ describe('Users', function () {
           })
           .end((err, res) => {
             if (err) { return done(err) }
-
             expect(res).to.have.status(400)
-            })
 
             return done()
           })
