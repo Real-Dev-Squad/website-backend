@@ -8,7 +8,6 @@ const updateUser = async (req, res, next) => {
     yoe: joi.number().optional(),
     company: joi.string().optional(),
     designation: joi.string().optional(),
-    img: joi.string().optional(),
     linkedin_id: joi.string().optional(),
     twitter_id: joi.string().optional(),
     instagram_id: joi.string().optional(),
