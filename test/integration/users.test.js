@@ -34,7 +34,7 @@ describe('Users', function () {
         .patch('/users/self')
         .set('cookie', `${cookieName}=${jwt}`)
         .send({
-          first_name: 'Test first_name'
+          company: 'Test first_name'
         })
         .end((err, res) => {
           if (err) { return done(err) }
@@ -84,6 +84,42 @@ describe('Users', function () {
           return done()
         })
     })
+    
+    it('Should return 400 for updating username', function (done) {
+      chai
+        .request(app)
+        .patch('/users/self')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({
+          username: 'newUsername'
+        })
+        .end((err, res) => {
+          if (err) { return done(err) }
+
+          expect(res).to.have.status(400)
+          })
+
+          return done()
+        })
+    })
+  
+    it('Should return 400 for updating first name', function (done) {
+        chai
+          .request(app)
+          .patch('/users/self')
+          .set('cookie', `${cookieName}=${jwt}`)
+          .send({
+            first_name: 'somethingNew'
+          })
+          .end((err, res) => {
+            if (err) { return done(err) }
+
+            expect(res).to.have.status(400)
+            })
+
+            return done()
+          })
+      })
   })
 
   describe('GET /users', function () {
