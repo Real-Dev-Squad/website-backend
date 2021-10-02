@@ -49,7 +49,7 @@ describe('checkRestrictedUser', function () {
       .patch('/users/self')
       .set('cookie', `${cookieName}=${unrestrictedJwt}`)
       .send({
-        first_name: 'Test'
+        company: 'Test'
       })
       .end((err, res) => {
         if (err) { return done(err) }
