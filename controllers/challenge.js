@@ -9,15 +9,17 @@ const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
  */
 
 const fetchChallenges = async (req, res) => {
-  const allChallenges = await challengeQuery.fetchChallenges()
-
-  if (allChallenges.length > 0) {
+  try {
+    const allChallenges = await challengeQuery.fetchChallenges()
+    const promiseArray = await getParticipantsofChallenges(allChallenges)
+    const challengesWithParticipants = await Promise.all(promiseArray)
     return res.json({
-      message: 'Challenges returned successfully!',
-      challenges: allChallenges
+      message: challengesWithParticipants.length ? 'Challenges returned successfully!' : 'No Challenges found',
+      challenges: challengesWithParticipants
     })
-  } else {
-    return res.boom.notFound('No challenges found')
+  } catch (err) {
+    logger.error(`Error while retriving challenges ${err}`)
+    return res.boom.serverUnavailable(ERROR_MESSAGE)
   }
 }
 
@@ -29,37 +31,17 @@ const fetchChallenges = async (req, res) => {
 
 const createChallenge = async (req, res) => {
   try {
-    if (req.method === 'GET') {
-      const allChallenges = await challengeQuery.fetchChallenges()
-      const promiseArray = await getParticipantsofChallenges(allChallenges)
-      const challengesWithParticipants = await Promise.all(promiseArray)
-      return res.json({
-        message: challengesWithParticipants.length ? 'Challenges returned successfully!' : 'No Challenges found',
-        challenges: challengesWithParticipants
+    const challengeAdded = await challengeQuery.postChallenge(req.body)
+    if (challengeAdded) {
+      return res.status(200).json({
+        message: 'Challenge added successfully',
+        challenges: challengeAdded
       })
     } else {
-      if (req.method === 'POST') {
-        const challengeAdded = await challengeQuery.postChallenge(req.body)
-        if (challengeAdded) {
-          return res.status(200).json({
-            message: 'Challenge added successfully',
-            challenges: challengeAdded
-          })
-        }
-      } else {
-        return res.boom.notFound('Unable to add challenge')
-      }
+      return res.boom.notFound('Unable to add challenge')
     }
-
-    const currentChallenges = await challengeQuery.fetchChallenges()
-
-    // TODO: replace challenges object with challengeId
-    return res.json({
-      message: 'Challenge added successfully',
-      challenges: currentChallenges
-    })
   } catch (err) {
-    logger.error(`Error while retriving challenges ${err}`)
+    logger.error(`Error while adding challenge ${err}`)
     return res.boom.serverUnavailable(ERROR_MESSAGE)
   }
 }
