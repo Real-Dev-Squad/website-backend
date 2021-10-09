@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
 const challenges = require('../controllers/challenge')
-
+const { createChallenge } = require('../middlewares/validators/challenges')
 /**
  * @swagger
  * /challenges:
@@ -56,7 +56,7 @@ const challenges = require('../controllers/challenge')
 router
   .route('/')
   .get(authenticate, challenges.fetchChallenges)
-  .post(authenticate, challenges.createChallenge)
+  .post(authenticate, createChallenge, challenges.createChallenge)
 
 /**
  * @swagger
