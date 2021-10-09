@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
-const challengesController = require('../controllers/challengeController')
+const challenges = require('../controllers/challenge')
 
 /**
  * @swagger
@@ -55,8 +55,8 @@ const challengesController = require('../controllers/challengeController')
  */
 router
   .route('/')
-  .get(authenticate, challengesController.fetchChallenges)
-  .post(authenticate, challengesController.createChallenge)
+  .get(authenticate, challenges.fetchChallenges)
+  .post(authenticate, challenges.createChallenge)
 
 /**
  * @swagger
@@ -90,6 +90,6 @@ router
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  *
  */
-router.post('/subscribe', authenticate, challengesController.subscribeToChallenge)
+router.post('/subscribe', authenticate, challenges.subscribeToChallenge)
 
 module.exports = router

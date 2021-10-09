@@ -8,8 +8,9 @@ const { fetchUser } = require('../models/users')
  */
 const getUserId = async (username) => {
   try {
-    const { user: { id } } = await fetchUser({ username })
-    return id
+    const { userExists, user: { id } } = await fetchUser({ username })
+
+    return userExists ? id : false
   } catch (error) {
     logger.error('Something went wrong', error)
     throw error
@@ -37,6 +38,10 @@ const getUsername = async (userId) => {
  */
 const getParticipantUsernames = async (participantArray) => {
   try {
+    if (!Array.isArray(participantArray)) {
+      return []
+    }
+
     const promises = participantArray.map(async (participant) => {
       const participantUsername = await getUsername(participant.trim())
       return participantUsername
@@ -55,6 +60,10 @@ const getParticipantUsernames = async (participantArray) => {
  */
 const getParticipantUserIds = async (participantArray) => {
   try {
+    if (!Array.isArray(participantArray)) {
+      return []
+    }
+
     const promises = participantArray.map(async (participant) => {
       const participantUserId = await getUserId(participant.trim())
       return participantUserId

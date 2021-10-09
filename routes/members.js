@@ -1,6 +1,10 @@
 const express = require('express')
 const router = express.Router()
-const membersController = require('../controllers/membersController')
+const { getMembers, getIdleMembers, migrateUserRoles, deleteIsMember } = require('../controllers/members')
+const { authorizeUser } = require('../middlewares/authorization')
+const authenticate = require('../middlewares/authenticate')
+const { addRecruiter } = require('../controllers/recruiters')
+const { validateRecruiter } = require('../middlewares/validators/recruiter')
 
 /**
  * @swagger
@@ -24,7 +28,7 @@ const membersController = require('../controllers/membersController')
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', membersController.getMembers)
+router.get('/', getMembers)
 
 /**
  * @swagger
@@ -48,6 +52,108 @@ router.get('/', membersController.getMembers)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/idle', membersController.getIdleMembers)
+router.get('/idle', getIdleMembers)
+
+/**
+ * @swagger
+ * /members/intro/:username:
+ *   post:
+ *     summary: Posts details of the recruiter
+ *     tags:
+ *       - Members
+ *     responses:
+ *       200:
+ *         description: Details of the recruiter and the member in which recruiter is interested
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/recruiters'
+ *
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *
+ *       500:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+
+router.post('/intro/:username', validateRecruiter, addRecruiter)
+
+/**
+ * @swagger
+ * /members/member-to-role-migration:
+ *  patch:
+ *   summary: One time call to update roles of the users
+ *   tags:
+ *     - Members
+ *   responses:
+ *     200:
+ *       description: Details of the users migrated
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/migratedUsers'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
+ *     403:
+ *       description: forbidden
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/forbidden'
+ *     500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser'), migrateUserRoles)
+
+/**
+ * @swagger
+ * /members/delete-isMember:
+ *  patch:
+ *   summary: One time call to remove isMember field for all the migrated users
+ *   tags:
+ *     - Members
+ *   responses:
+ *     200:
+ *       description: Details of the users migrated
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/migratedUsers'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
+ *     403:
+ *       description: forbidden
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/forbidden'
+ *     500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), deleteIsMember)
 
 module.exports = router

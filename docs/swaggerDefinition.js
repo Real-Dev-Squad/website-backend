@@ -85,7 +85,7 @@ const swaggerOptions = {
             status: {
               type: 'string'
             },
-            ownerId: {
+            assignee: {
               type: 'string'
             },
             percentCompleted: {
@@ -102,7 +102,7 @@ const swaggerOptions = {
             participants: {
               type: 'array',
               items: {
-                userid: {
+                username: {
                   type: 'string'
                 }
               }
@@ -110,13 +110,10 @@ const swaggerOptions = {
             completionAward: {
               type: 'object',
               properties: {
-                gold: {
+                neelam: {
                   type: 'number'
                 },
-                silver: {
-                  type: 'number'
-                },
-                bronze: {
+                dinero: {
                   type: 'number'
                 }
               }
@@ -124,13 +121,10 @@ const swaggerOptions = {
             lossRate: {
               type: 'object',
               properties: {
-                gold: {
+                neelam: {
                   type: 'number'
                 },
-                silver: {
-                  type: 'number'
-                },
-                bronze: {
+                dinero: {
                   type: 'number'
                 }
               }
@@ -375,6 +369,46 @@ const swaggerOptions = {
             }
           }
         },
+        recruiters: {
+          type: 'object',
+          properties: {
+            company: {
+              type: 'string'
+            },
+            first_name: {
+              type: 'string'
+            },
+            last_name: {
+              type: 'string'
+            },
+            designation: {
+              type: 'string'
+            },
+            reason: {
+              type: 'string'
+            },
+            email: {
+              type: 'string'
+            },
+            currency: {
+              type: 'string'
+            },
+            package: {
+              type: 'number'
+            }
+          }
+        },
+        migratedUsers: {
+          type: 'object',
+          properties: {
+            count: {
+              type: 'number'
+            },
+            users: {
+              type: 'array'
+            }
+          }
+        },
         users: {
           type: 'object',
           properties: {
@@ -422,6 +456,9 @@ const swaggerOptions = {
             },
             tokens: {
               type: 'object'
+            },
+            status: {
+              type: 'string'
             }
           }
         },
@@ -442,6 +479,17 @@ const swaggerOptions = {
               items: {
                 type: 'string'
               }
+            }
+          }
+        },
+        userBadges: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string'
+            },
+            description: {
+              type: 'string'
             }
           }
         },
@@ -498,6 +546,29 @@ const swaggerOptions = {
             }
           }
         },
+        userStocks: {
+          type: 'object',
+          properties: {
+            userId: {
+              type: 'string'
+            },
+            stockId: {
+              type: 'string'
+            },
+            stockName: {
+              type: 'string'
+            },
+            quantity: {
+              type: 'number'
+            },
+            orderValue: {
+              type: 'number'
+            },
+            initialStockValue: {
+              type: 'number'
+            }
+          }
+        },
         auctions: {
           type: 'object',
           properties: {
@@ -528,6 +599,36 @@ const swaggerOptions = {
             bidders_and_bids: {
               type: 'array'
             }
+          }
+        },
+        featureFlag: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string'
+            },
+            id: {
+              type: 'string'
+            },
+            title: {
+              type: 'string'
+            },
+            created_at: {
+              type: 'number'
+            },
+            updated_at: {
+              type: 'number'
+            },
+            config: {
+              type: 'object'
+            },
+            owner: {
+              type: 'string'
+            },
+            launched_at: {
+              type: 'number'
+            }
+
           }
         },
         errors: {
@@ -574,6 +675,34 @@ const swaggerOptions = {
             }
           },
           badImplementation: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
+          entityTooLarge: {
+            type: 'object',
+            properties: {
+              statusCode: {
+                type: 'integer'
+              },
+              error: {
+                type: 'string'
+              },
+              message: {
+                type: 'string'
+              }
+            }
+          },
+          unsupportedMediaType: {
             type: 'object',
             properties: {
               statusCode: {

@@ -1,8 +1,9 @@
 const express = require('express')
 const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
-const usersController = require('../controllers/usersController')
+const users = require('../controllers/users')
 const userValidator = require('../middlewares/validators/user')
+const { upload } = require('../utils/multer')
 
 /**
  * @swagger
@@ -50,7 +51,7 @@ const userValidator = require('../middlewares/validators/user')
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.patch('/self', authenticate, userValidator.updateUser, usersController.updateSelf)
+router.patch('/self', authenticate, userValidator.updateUser, users.updateSelf)
 
 /**
  * @swagger
@@ -102,7 +103,7 @@ router.patch('/self', authenticate, userValidator.updateUser, usersController.up
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.get('/', authenticate, usersController.getUsers)
+router.get('/', authenticate, users.getUsers)
 
 /**
  * @swagger
@@ -139,7 +140,7 @@ router.get('/', authenticate, usersController.getUsers)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/self', authenticate, usersController.getSelfDetails)
+router.get('/self', authenticate, users.getSelfDetails)
 
 /**
  * @swagger
@@ -176,7 +177,7 @@ router.get('/self', authenticate, usersController.getSelfDetails)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/isUsernameAvailable/:username', authenticate, usersController.getUsernameAvailabilty)
+router.get('/isUsernameAvailable/:username', authenticate, users.getUsernameAvailabilty)
 
 /**
  * @swagger
@@ -207,6 +208,61 @@ router.get('/isUsernameAvailable/:username', authenticate, usersController.getUs
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:username', usersController.getUser)
+router.get('/:username', users.getUser)
+
+/**
+ * @swagger
+ * /users/picture:
+ *   post:
+ *     summary: Post user profile picture
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: formData
+ *         name: profile
+ *         type: file
+ *         description: Profile picture to upload
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: User image
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/users/img'
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *       413:
+ *         description: entityTooLarge
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/entityTooLarge'
+ *       415:
+ *         description: unsupportedMediaType
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unsupportedMediaType'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
+ */
+// upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
+router.post('/picture', authenticate, upload.single('profile'), users.postUserPicture)
 
 module.exports = router

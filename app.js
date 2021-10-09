@@ -1,5 +1,6 @@
 const createError = require('http-errors')
 const express = require('express')
+const { isMulterError, multerErrorHandling } = require('./utils/multer')
 
 // Attach response headers
 const responseHeaders = require('./middlewares/responseHeaders')
@@ -23,7 +24,11 @@ app.use(function (req, res, next) {
 
 // error handler
 app.use(function (err, req, res, next) {
-  return res.boom.notFound(err)
+  if (isMulterError(err)) {
+    multerErrorHandling(err, req, res)
+  } else {
+    res.boom.notFound(err)
+  }
 })
 
 module.exports = app

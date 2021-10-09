@@ -2,8 +2,11 @@
  * This file contains wrapper functions to interact with the DB.
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
+const walletConstants = require('../constants/wallets')
 
 const firestore = require('../utils/firestore')
+const { fetchWallet, createWallet } = require('../models/wallets')
+
 const userModel = firestore.collection('users')
 
 /**
@@ -130,9 +133,60 @@ const setIncompleteUserDetails = async (userId) => {
   return {}
 }
 
+/**
+ * Once the user is fully signed up, initialize other
+ * stuff needed for their account
+ *
+ * @param userId { string }: User id
+ */
+const initializeUser = async (userId) => {
+  // Create wallet and give them initial amount
+  const userWallet = await fetchWallet(userId)
+  if (!userWallet) {
+    await createWallet(userId, walletConstants.INITIAL_WALLET)
+  }
+
+  return true
+}
+
+/**
+ * Sets the user picture field of passed UserId to image data
+ *
+ * @param image { Object }: image data ( {publicId, url} )
+ * @param userId { string }: User id
+ */
+const updateUserPicture = async (image, userId) => {
+  try {
+    const userDoc = userModel.doc(userId)
+    await userDoc.update({
+      picture: image
+    })
+  } catch (err) {
+    logger.error('Error updating user picture data', err)
+    throw err
+  }
+}
+
+/**
+ * fetch the users image by passing array of users
+ *
+ * @param users {array}
+ */
+const fetchUserImage = async (users) => {
+  const data = await userModel.where('username', 'in', users).get()
+  const images = {}
+  data.forEach((item) => {
+    images[item.data().username] = item.data().img
+  })
+  return images
+}
+
 module.exports = {
   addOrUpdate,
   fetchUsers,
   fetchUser,
-  setIncompleteUserDetails
+  setIncompleteUserDetails,
+  initializeUser,
+  updateUserPicture,
+  fetchUserImage
 }

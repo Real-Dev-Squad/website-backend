@@ -21,9 +21,13 @@ module.exports = () => {
       isMember: true,
       phone: '1234567890',
       email: 'abc@gmail.com',
+      roles: {
+        member: true
+      },
       tokens: {
         githubAccessToken: 'githubAccessToken'
-      }
+      },
+      status: 'active'
     },
     {
       username: 'nikhil',
@@ -36,6 +40,78 @@ module.exports = () => {
       twitter_id: 'whatifi',
       phone: '1234567891',
       email: 'abc1@gmail.com'
+    },
+    {
+      username: 'pranavg',
+      first_name: 'Pranav',
+      last_name: 'Gajjewar',
+      yoe: 0,
+      img: './img.png',
+      github_id: 'cartmanishere',
+      linkedin_id: 'pranav-gajjewar',
+      twitter_id: 'PGajjewar',
+      phone: '1234567891',
+      email: 'pgajjewar@gmail.com',
+      roles: {
+        restricted: true
+      }
+    },
+    {
+      username: 'sagar',
+      first_name: 'Sagar',
+      last_name: 'Bajpai',
+      yoe: 3,
+      img: './img.png',
+      linkedin_id: 'sagarbajpai',
+      github_id: 'sagarbajpai',
+      github_display_name: 'Sagar Bajpai',
+      phone: '1234567890',
+      email: 'abc@gmail.com',
+      tokens: {
+        githubAccessToken: 'githubAccessToken'
+      },
+      roles: {
+        restricted: false,
+        app_owner: true
+      }
+    },
+    {
+      username: 'ankush',
+      first_name: 'Ankush',
+      last_name: 'Dharkar',
+      yoe: 10,
+      img: './img.png',
+      linkedin_id: 'ankushdharkar',
+      github_id: 'ankushdharkar',
+      github_display_name: 'Ankush Dharkar',
+      phone: '1234567890',
+      email: 'ad@amazon.com',
+      tokens: {
+        githubAccessToken: 'githubAccessToken'
+      },
+      roles: {
+        super_user: true
+      }
+    },
+    {
+      username: 'ankita',
+      first_name: 'Ankita',
+      last_name: 'Bannore',
+      yoe: 0,
+      img: './img.png',
+      linkedin_id: 'ankitabannore',
+      github_id: 'Ankita2002-Fr',
+      github_display_name: 'Ankita Bannore',
+      isMember: true,
+      phone: '1234567890',
+      email: 'abc@gmail.com',
+      tokens: {
+        githubAccessToken: 'githubAccessToken'
+      },
+      status: 'active',
+      roles: {
+        app_owner: true
+      }
     }
   ]
 }
