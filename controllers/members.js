@@ -1,6 +1,8 @@
 const { ROLES } = require('../constants/users')
-const { fetchUsers, migrateUsers, deleteIsMemberProperty, fetchUsersWithRole } = require('../models/members')
+const { fetchUsers, migrateUsers, deleteIsMemberProperty, fetchUsersWithRole, addArchiveRoleToMembers } = require('../models/members')
 const tasks = require('../models/tasks')
+const { fetchUser } = require('../models/users')
+const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
 /**
  * Fetches the data about our members
@@ -85,7 +87,33 @@ const deleteIsMember = async (req, res) => {
   }
 }
 
+/**
+ * Achives old member from new members list.
+*
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const archiveMembers = async (req, res) => {
+  try {
+    const { username } = req.params
+    const user = await fetchUser({ username })
+    if (user.userExists) {
+      const successObject = await addArchiveRoleToMembers(user.user.id)
+      if (successObject.isNotMember) {
+        return res.boom.badRequest('User is not a member so we cannot archive the user.')
+      }
+      return res.status(204).send()
+    }
+    return res.boom.notFound("User doesn't exist")
+  } catch (err) {
+    logger.error(`Error while retriving contributions ${err}`)
+    return res.boom.badImplementation(ERROR_MESSAGE)
+  }
+}
+
 module.exports = {
+  archiveMembers,
   getMembers,
   getIdleMembers,
   migrateUserRoles,
