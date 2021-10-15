@@ -18,7 +18,7 @@ const fetchChallenges = async (req, res) => {
       challenges: challengesWithParticipants
     })
   } catch (err) {
-    logger.error(`Error while retriving challenges ${err}`)
+    logger.error(`Error while retrieving challenges ${err}`)
     return res.boom.serverUnavailable(ERROR_MESSAGE)
   }
 }
@@ -33,9 +33,8 @@ const createChallenge = async (req, res) => {
   try {
     const challengeAdded = await challengeQuery.postChallenge(req.body)
     if (challengeAdded) {
-      return res.status(200).json({
-        message: 'Challenge added successfully',
-        challenges: challengeAdded
+      return res.json({
+        message: 'Challenge added successfully'
       })
     } else {
       return res.boom.notFound('Unable to add challenge')

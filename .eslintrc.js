@@ -22,6 +22,7 @@ module.exports = {
     'no-trailing-spaces': 'error',
     'consistent-return': 'error',
     'no-console': 'error',
+    camelcase: [2, { properties: 'never', ignoreDestructuring: true }],
 
     // Custom mocha rules
     'mocha/no-skipped-tests': 'error',
