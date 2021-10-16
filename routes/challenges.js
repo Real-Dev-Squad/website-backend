@@ -3,6 +3,7 @@ const router = express.Router()
 const authenticate = require('../middlewares/authenticate')
 const challenges = require('../controllers/challenge')
 const { createChallenge } = require('../middlewares/validators/challenges')
+
 /**
  * @swagger
  * /challenges:
@@ -29,6 +30,12 @@ const { createChallenge } = require('../middlewares/validators/challenges')
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+router.get('/', authenticate, challenges.fetchChallenges)
+
+/**
+ * @swagger
+ * /challenges:
  *   post:
  *     summary: Post new challenge
  *     tags:
@@ -53,10 +60,7 @@ const { createChallenge } = require('../middlewares/validators/challenges')
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router
-  .route('/')
-  .get(authenticate, challenges.fetchChallenges)
-  .post(authenticate, createChallenge, challenges.createChallenge)
+router.post('/', authenticate, createChallenge, challenges.createChallenge)
 
 /**
  * @swagger
@@ -88,7 +92,6 @@ router
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
- *
  */
 router.post('/subscribe', authenticate, challenges.subscribeToChallenge)
 
