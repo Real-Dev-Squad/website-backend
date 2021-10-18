@@ -37,7 +37,7 @@ const createChallenge = async (req, res) => {
         message: 'Challenge added successfully'
       })
     } else {
-      return res.boom.notFound('Unable to add challenge')
+      return res.boom.badRequest('Unable to add challenge')
     }
   } catch (err) {
     logger.error(`Error while adding challenge ${err}`)
