@@ -1,7 +1,7 @@
 const joi = require('joi')
 
 const createAuction = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     item_type: joi.string().required(),
     quantity: joi.number().required(),
     initial_price: joi.number().required(),
@@ -17,7 +17,7 @@ const createAuction = async (req, res, next) => {
 }
 
 const placeBid = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     bid: joi.number().required()
   })
   try {
