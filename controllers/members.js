@@ -100,8 +100,8 @@ const archiveMembers = async (req, res) => {
     const user = await fetchUser({ username })
     if (user.userExists) {
       const successObject = await addArchiveRoleToMembers(user.user.id)
-      if (successObject.isNotMember) {
-        return res.boom.badRequest('User is not a member so we cannot archive the user.')
+      if (successObject.isArchived) {
+        return res.boom.badRequest('User is already archived')
       }
       return res.status(204).send()
     }
