@@ -66,15 +66,17 @@ const fetchParticipantsData = async (participants) => {
 
 const postChallenge = async (challengeData) => {
   try {
-    const response = await challengesModel.add({
+    const { start_date: startDate, end_date: endDate } = challengeData
+    const startdate = new Firestore.Timestamp(startDate, 0)
+    const enddate = new Firestore.Timestamp(endDate, 0)
+    const challengeRef = await challengesModel.add({
       ...challengeData,
+      start_date: startdate,
+      end_date: enddate,
       participants: [],
       is_active: true
     })
-    const allChallenges = await fetchChallenges()
-    if (response.id && allChallenges.length > 0) {
-      return allChallenges
-    } else return ''
+    return challengeRef.id
   } catch (err) {
     logger.error(ERROR_MESSAGE, err)
     throw err
