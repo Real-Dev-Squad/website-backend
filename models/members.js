@@ -49,7 +49,7 @@ const moveToMembers = async (userId) => {
   try {
     const userDoc = await userModel.doc(userId).get()
     const user = userDoc.data()
-    if (user.roles && user.roles.member) return { isAlreadyMember: true, movedToMember: false }
+    if (user?.roles?.member) return { isAlreadyMember: true, movedToMember: false }
     const roles = user.roles ? { ...user.roles, member: true } : { member: true }
     await userModel.doc(userId).update({
       roles
