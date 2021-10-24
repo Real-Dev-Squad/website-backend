@@ -2,7 +2,7 @@ const joi = require('joi')
 const { userStatusEnum } = require('../../constants/users')
 
 const updateUser = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     phone: joi.string().optional(),
     email: joi.string().optional(),
     username: joi.string().optional(),
