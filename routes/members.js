@@ -1,10 +1,11 @@
 const express = require('express')
 const router = express.Router()
-const { getMembers, getIdleMembers, migrateUserRoles, deleteIsMember } = require('../controllers/members')
+const { getMembers, getIdleMembers, migrateUserRoles, deleteIsMember, moveToMembers } = require('../controllers/members')
 const { authorizeUser } = require('../middlewares/authorization')
 const authenticate = require('../middlewares/authenticate')
 const { addRecruiter } = require('../controllers/recruiters')
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
+const { SUPER_USER } = require('../constants/roles')
 
 /**
  * @swagger
@@ -86,6 +87,51 @@ router.get('/idle', getIdleMembers)
 
 router.post('/intro/:username', validateRecruiter, addRecruiter)
 
+/**
+ * @swagger
+ * /moveToMembers/:username:
+ *   patch:
+ *     summary: Changes the role of a new member(the username provided in params) to member
+ *     tags:
+ *       - Members
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: no content
+ *       400:
+ *         description: badRequest
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: User Already is a member
+ *
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *
+ *       500:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+
+router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPER_USER), moveToMembers)
 /**
  * @swagger
  * /members/member-to-role-migration:
