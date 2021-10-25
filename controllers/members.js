@@ -1,7 +1,8 @@
 const { ROLES } = require('../constants/users')
-const { fetchUsers, migrateUsers, deleteIsMemberProperty, fetchUsersWithRole, addArchiveRoleToMembers } = require('../models/members')
+const { fetchUsers, migrateUsers, deleteIsMemberProperty, fetchUsersWithRole, moveToMembers: updateToMemberRole, addArchiveRoleToMembers } = require('../models/members')
 const tasks = require('../models/tasks')
 const { fetchUser } = require('../models/users')
+
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
 /**
@@ -50,11 +51,37 @@ const getIdleMembers = async (req, res) => {
 }
 
 /**
+ * Makes a new member a member
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const moveToMembers = async (req, res) => {
+  try {
+    const { username } = req.params
+    const result = await fetchUser({ username })
+    if (result.userExists) {
+      const successObject = await updateToMemberRole(result.user.id)
+      if (successObject.isAlreadyMember) {
+        return res.boom.badRequest('User is already a member')
+      }
+      return res.status(204).send()
+    }
+    return res.boom.notFound("User doesn't exist")
+  } catch (err) {
+    logger.error(`Error while retriving contributions ${err}`)
+    return res.boom.badImplementation(ERROR_MESSAGE)
+  }
+}
+
+/**
  * Returns the lists of usernames migrated
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
+
 const migrateUserRoles = async (req, res) => {
   try {
     const migratedUserData = await migrateUsers()
@@ -116,6 +143,7 @@ module.exports = {
   archiveMembers,
   getMembers,
   getIdleMembers,
+  moveToMembers,
   migrateUserRoles,
   deleteIsMember
 }
