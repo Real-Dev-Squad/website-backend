@@ -110,7 +110,28 @@ module.exports = () => {
       },
       status: 'active',
       roles: {
-        app_owner: true
+        app_owner: true,
+        archived_member: true
+      }
+    },
+    {
+      username: 'mehul',
+      first_name: 'Mehul',
+      last_name: 'Chaudhari',
+      yoe: 0,
+      img: './img.png',
+      github_id: 'mehulkchaudhari',
+      linkedin_id: 'mehulkchaudhari',
+      twitter_id: 'mehulkchaudhari',
+      phone: '1234567891',
+      email: 'mehul@gmail.com',
+      tokens: {
+        githubAccessToken: 'githubAccessToken'
+      },
+      status: 'active',
+      roles: {
+        member: true,
+        archived_member: true
       }
     }
   ]
