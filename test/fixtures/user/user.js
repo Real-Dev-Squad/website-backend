@@ -111,7 +111,7 @@ module.exports = () => {
       status: 'active',
       roles: {
         app_owner: true,
-        archived_member: true
+        archivedMember: true
       }
     },
     {
