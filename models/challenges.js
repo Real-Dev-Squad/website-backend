@@ -5,6 +5,7 @@
 
 const Firestore = require('@google-cloud/firestore')
 const firestore = require('../utils/firestore')
+const { fetchUser } = require('./users')
 
 const challengesModel = firestore.collection('challenges')
 const userModel = firestore.collection('users')
@@ -36,21 +37,46 @@ const fetchChallenges = async () => {
 }
 
 /**
+ * Fetch the <user object> from participants array
+ * @param {Array} participants
+ * @returns {Promise<challengesModel|Array>}
+ */
+const fetchParticipantsData = async (participants) => {
+  try {
+    const promises = participants.map(async (userId) => {
+      const { user } = await fetchUser({ userId })
+      return {
+        ...user,
+        phone: undefined,
+        email: undefined
+      }
+    })
+    const fetchedparticipants = await Promise.all(promises)
+    return fetchedparticipants
+  } catch (err) {
+    logger.error('Failed to get participated users', err)
+    throw err
+  }
+}
+
+/**
  * Post the challenge
  *  @return {Promise<challengesModel|Array>}
  */
 
 const postChallenge = async (challengeData) => {
   try {
-    const response = await challengesModel.add({
+    const { start_date: startDate, end_date: endDate } = challengeData
+    const startdate = new Firestore.Timestamp(startDate, 0)
+    const enddate = new Firestore.Timestamp(endDate, 0)
+    const challengeRef = await challengesModel.add({
       ...challengeData,
+      start_date: startdate,
+      end_date: enddate,
       participants: [],
       is_active: true
     })
-    const allChallenges = await fetchChallenges()
-    if (response.id && allChallenges.length > 0) {
-      return allChallenges
-    } else return ''
+    return challengeRef.id
   } catch (err) {
     logger.error(ERROR_MESSAGE, err)
     throw err
@@ -66,10 +92,10 @@ const postChallenge = async (challengeData) => {
 const subscribeUserToChallenge = async (userId, challengeId) => {
   try {
     const getUser = await userModel.doc(userId).get()
-    const user = getUser.data().github_display_name
+    const user = getUser.data()
     if (user) {
       const challengeRef = await challengesModel.doc(challengeId)
-      await challengeRef.update({ participants: Firestore.FieldValue.arrayUnion({ name: user }) })
+      await challengeRef.update({ participants: Firestore.FieldValue.arrayUnion(userId) })
       return challengeRef.get()
     } else {
       throw new Error(USER_DOES_NOT_EXIST_ERROR)
@@ -83,5 +109,6 @@ const subscribeUserToChallenge = async (userId, challengeId) => {
 module.exports = {
   fetchChallenges,
   postChallenge,
-  subscribeUserToChallenge
+  subscribeUserToChallenge,
+  fetchParticipantsData
 }

@@ -14,7 +14,7 @@
     "generate-api-schema": "node utils/generateAPISchema.js"
   },
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "cloudinary": "^1.25.1",
     "config": "^3.3.6",
     "cookie-parser": "~1.4.5",
@@ -56,6 +56,9 @@
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
     "sinon": "^10.0.0"
+  },
+  "engines": {
+    "node": "14.x"
   },
   "pre-commit": [
     "lint"
