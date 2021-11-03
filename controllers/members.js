@@ -1,5 +1,5 @@
 const { ROLES } = require('../constants/users')
-const { fetchUsers, migrateUsers, deleteIsMemberProperty, fetchUsersWithRole, moveToMembers: updateToMemberRole, addArchiveRoleToMembers } = require('../models/members')
+const members = require('../models/members')
 const tasks = require('../models/tasks')
 const { fetchUser } = require('../models/users')
 
@@ -14,7 +14,7 @@ const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
 const getMembers = async (req, res) => {
   try {
-    const allUsers = await fetchUsers()
+    const allUsers = await members.fetchUsers()
 
     return res.json({
       message: allUsers.length ? 'Members returned successfully!' : 'No member found',
@@ -35,7 +35,7 @@ const getMembers = async (req, res) => {
 
 const getIdleMembers = async (req, res) => {
   try {
-    const onlyMembers = await fetchUsersWithRole(ROLES.MEMBER)
+    const onlyMembers = await members.fetchUsersWithRole(ROLES.MEMBER)
     const taskParticipants = await tasks.fetchActiveTaskMembers()
     const idleMembers = onlyMembers?.filter(({ id }) => !taskParticipants.has(id))
     const idleMemberUserNames = idleMembers?.map((member) => member.username)
@@ -62,7 +62,7 @@ const moveToMembers = async (req, res) => {
     const { username } = req.params
     const result = await fetchUser({ username })
     if (result.userExists) {
-      const successObject = await updateToMemberRole(result.user.id)
+      const successObject = await members.moveToMembers(result.user.id)
       if (successObject.isAlreadyMember) {
         return res.boom.badRequest('User is already a member')
       }
@@ -84,7 +84,7 @@ const moveToMembers = async (req, res) => {
 
 const migrateUserRoles = async (req, res) => {
   try {
-    const migratedUserData = await migrateUsers()
+    const migratedUserData = await members.migrateUsers()
     return res.json({
       message: 'Users migrated successfully',
       ...migratedUserData
@@ -103,7 +103,7 @@ const migrateUserRoles = async (req, res) => {
  */
 const deleteIsMember = async (req, res) => {
   try {
-    const deletedIsMemberData = await deleteIsMemberProperty()
+    const deletedIsMemberData = await members.deleteIsMemberProperty()
     return res.json({
       message: 'Users isMember deleted successfully',
       ...deletedIsMemberData
@@ -126,7 +126,7 @@ const archiveMembers = async (req, res) => {
     const { username } = req.params
     const user = await fetchUser({ username })
     if (user.userExists) {
-      const successObject = await addArchiveRoleToMembers(user.user.id)
+      const successObject = await members.addArchiveRoleToMembers(user.user.id)
       if (successObject.isArchived) {
         return res.boom.badRequest('User is already archived')
       }
