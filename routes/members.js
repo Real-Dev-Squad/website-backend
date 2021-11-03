@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getMembers, getIdleMembers, migrateUserRoles, deleteIsMember, moveToMembers, archiveMembers } = require('../controllers/members')
+const members = require('../controllers/members')
 const { authorizeUser } = require('../middlewares/authorization')
 const authenticate = require('../middlewares/authenticate')
 const { addRecruiter } = require('../controllers/recruiters')
@@ -29,7 +29,7 @@ const { SUPER_USER } = require('../constants/roles')
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', getMembers)
+router.get('/', members.getMembers)
 
 /**
  * @swagger
@@ -53,7 +53,7 @@ router.get('/', getMembers)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/idle', getIdleMembers)
+router.get('/idle', members.getIdleMembers)
 
 /**
  * @swagger
@@ -131,7 +131,7 @@ router.post('/intro/:username', validateRecruiter, addRecruiter)
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPER_USER), moveToMembers)
+router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPER_USER), members.moveToMembers)
 /**
  * @swagger
  * /members/member-to-role-migration:
@@ -165,7 +165,7 @@ router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPER_USER)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser'), migrateUserRoles)
+router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser'), members.migrateUserRoles)
 
 /**
  * @swagger
@@ -200,7 +200,7 @@ router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), deleteIsMember)
+router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), members.deleteIsMember)
 
 /**
  * @swagger
@@ -246,6 +246,6 @@ router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), delet
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.patch('/archiveMembers/:username', authenticate, authorizeUser(SUPER_USER), archiveMembers)
+router.patch('/archiveMembers/:username', authenticate, authorizeUser(SUPER_USER), members.archiveMembers)
 
 module.exports = router
