@@ -115,7 +115,7 @@ const deleteIsMember = async (req, res) => {
 }
 
 /**
- * Achives old member from new members list.
+ * Archives old member from new members list.
 *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
