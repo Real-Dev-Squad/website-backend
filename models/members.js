@@ -163,7 +163,7 @@ const addArchiveRoleToMembers = async (userId) => {
     await userModel.doc(userId).update({
       roles
     })
-    return { isArchived: false, addArchiveRole: true }
+    return { isArchived: false }
   } catch (err) {
     logger.error('Error updating user', err)
     throw err
