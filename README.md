@@ -19,7 +19,7 @@ This Project serves the backend APIs required for [Real Dev Squad](https://reald
 ## Running the Project
 ```shell
 npm install
-npm start
+node server.js
 ```
 #### Running in dev mode
 ```shell
