@@ -18,17 +18,17 @@ This Project serves the backend APIs required for [Real Dev Squad](https://reald
 
 ## Running the Project
 ```shell
-$ npm install
-$ npm start
+npm install
+npm start
 ```
 #### Running in dev mode
 ```shell
-$ npm run dev
+npm run dev
 ```
 
 #### Test local setup
 ```shell
-$ npm run validate-setup
+npm run validate-setup
 ```
 
 ## Prerequisites
