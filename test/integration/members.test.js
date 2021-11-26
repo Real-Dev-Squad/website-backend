@@ -246,7 +246,7 @@ describe('Members', function () {
       })
     })
 
-    it('Should return 401 if user is not a super_user', function (done) {
+    it('Should return 401 if user is not a super user', function (done) {
       addUser(nonSuperUser).then(nonSuperUserId => {
         const nonSuperUserJwt = authService.generateAuthToken({ nonSuperUserId })
         chai
