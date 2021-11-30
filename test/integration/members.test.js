@@ -19,6 +19,9 @@ const superUser = userData[4]
 const userAlreadyMember = userData[0]
 const userToBeMadeMember = userData[1]
 const nonSuperUser = userData[2]
+const userDoesNotExists = userData[1]
+const userToBeArchived = userData[3]
+const userAlreadyArchived = userData[5]
 
 describe('Members', function () {
   let jwt
@@ -167,6 +170,83 @@ describe('Members', function () {
     })
 
     it('Should return 401 if user is not a super_user', function (done) {
+      addUser(nonSuperUser).then(nonSuperUserId => {
+        const nonSuperUserJwt = authService.generateAuthToken({ nonSuperUserId })
+        chai
+          .request(app)
+          .patch(`/members/moveToMembers/${nonSuperUser.username}`)
+          .set('cookie', `${cookieName}=${nonSuperUserJwt}`)
+          .end((err, res) => {
+            if (err) { return done(err) }
+
+            expect(res).to.have.status(401)
+            expect(res.body).to.be.a('object')
+            expect(res.body.message).to.equal('You are not authorized for this action.')
+
+            return done()
+          })
+      })
+    })
+  })
+
+  describe('PATCH /members/archiveMembers/:username', function () {
+    before(async function () {
+      await cleanDb()
+      const userId = await addUser(superUser)
+      jwt = authService.generateAuthToken({ userId })
+    })
+
+    it("Should return 404 if user doesn't exist", function (done) {
+      chai
+        .request(app)
+        .patch(`/members/archiveMembers/${userDoesNotExists.username}`)
+        .set('cookie', `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(404)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal("User doesn't exist")
+          return done()
+        })
+    })
+
+    it('Should archive the user', function (done) {
+      addUser(userToBeArchived).then(() => {
+        chai
+          .request(app)
+          .patch(`/members/archiveMembers/${userToBeArchived.username}`)
+          .set('cookie', `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) { return done(err) }
+
+            expect(res).to.have.status(204)
+            /* eslint-disable no-unused-expressions */
+            expect(res.body).to.be.a('object').to.be.empty
+
+            return done()
+          })
+      })
+    })
+
+    it('Should return 400 if user is already archived', function (done) {
+      addUser(userAlreadyArchived).then(() => {
+        chai
+          .request(app)
+          .patch(`/members/archiveMembers/${userAlreadyArchived.username}`)
+          .set('cookie', `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) { return done(err) }
+
+            expect(res).to.have.status(400)
+            expect(res.body).to.be.a('object')
+            expect(res.body.message).to.equal('User is already archived')
+
+            return done()
+          })
+      })
+    })
+
+    it('Should return 401 if user is not a super user', function (done) {
       addUser(nonSuperUser).then(nonSuperUserId => {
         const nonSuperUserJwt = authService.generateAuthToken({ nonSuperUserId })
         chai
