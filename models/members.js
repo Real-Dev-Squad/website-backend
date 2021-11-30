@@ -148,8 +148,31 @@ const fetchUsersWithRole = async (role) => {
   }
 }
 
+/**
+ * changes the role of a new user to member
+ * @param userId { String }: User id of user to be modified
+ * @return { Object }: whether moveToMember was successful or not and whether user is already a member or not
+ */
+
+const addArchiveRoleToMembers = async (userId) => {
+  try {
+    const userDoc = await userModel.doc(userId).get()
+    const user = userDoc.data()
+    if (user?.roles?.archivedMember) return { isArchived: true }
+    const roles = { ...user.roles, archivedMember: true }
+    await userModel.doc(userId).update({
+      roles
+    })
+    return { isArchived: false }
+  } catch (err) {
+    logger.error('Error updating user', err)
+    throw err
+  }
+}
+
 module.exports = {
   moveToMembers,
+  addArchiveRoleToMembers,
   fetchUsers,
   migrateUsers,
   deleteIsMemberProperty,
