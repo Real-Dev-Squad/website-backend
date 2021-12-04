@@ -59,5 +59,5 @@ rds-session
 ## Staging login:
 https://github.com/login/oauth/authorize?client_id=c4a84431feaf604e89d1
 
-### Staging login - Cookie:
+### Staging login - Cookie: 
 rds-session-staging
