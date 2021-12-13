@@ -49,15 +49,3 @@ $ npm run validate-setup
 Check out our video on how to setup the backend here: [Wiki link](https://github.com/Real-Dev-Squad/website-backend/wiki/Backend-setup-and-understanding-the-flow)
 
 Read more about contributing to the project: [CONTRIBUTING](CONTRIBUTING.md)
-
-## Production login:
-https://github.com/login/oauth/authorize?client_id=23c78f66ab7964e5ef97
-
-### Production login - Cookie:
-rds-session
-
-## Staging login:
-https://github.com/login/oauth/authorize?client_id=c4a84431feaf604e89d1
-
-### Staging login - Cookie: 
-rds-session-staging
