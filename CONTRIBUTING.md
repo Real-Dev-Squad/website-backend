@@ -100,6 +100,18 @@ The following project structure should be followed:
 - For non-production environments, authentication is also supported with the `Authorization` header.
 - Authorization header: `Authorization: Bearer <token>`
 
+## Production login:
+https://github.com/login/oauth/authorize?client_id=23c78f66ab7964e5ef97
+
+### Production login - Cookie:
+rds-session
+
+## Staging login:
+https://github.com/login/oauth/authorize?client_id=c4a84431feaf604e89d1
+
+### Staging login - Cookie: 
+rds-session-staging
+
 ## Testing Guidelines
 
 - Libraries used in testing in the project:
