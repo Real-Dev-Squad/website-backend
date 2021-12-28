@@ -1,0 +1,76 @@
+const firestore = require('../utils/firestore')
+const storiesModel = firestore.collection('stories')
+const { fromFirestoreData, toFirestoreData, buildStories } = require('../utils/stories')
+
+/**
+ * Adds and Updates stories
+ *
+ * @param storyData { Object }: story data object to be stored in DB
+ * @param storyId { string }: storyId which will be used to update the story in DB
+ * @return {Promise<{storyId: string}>}
+ */
+const updateStory = async (storyData, storyId = null) => {
+  try {
+    storyData = await toFirestoreData(storyData)
+    if (storyData) {
+      if (storyId) {
+        const story = await storiesModel.doc(storyId).get()
+        await storiesModel.doc(storyId).set({
+          ...story.data(),
+          ...storyData
+        })
+        return { storyId }
+      }
+      const storyInfo = await storiesModel.add(storyData)
+      const result = {
+        storyId: storyInfo.id,
+        storyDetails: await fromFirestoreData(storyData)
+      }
+      return result
+    }
+    return false
+  } catch (err) {
+    logger.error('Error in updating story', err)
+    throw err
+  }
+}
+
+/**
+ * Fetch all stories
+ *
+ * @return {Promise<stories|Array>}
+ */
+const fetchStories = async () => {
+  try {
+    const storiesSnapshot = await storiesModel.get()
+    const stories = buildStories(storiesSnapshot)
+    const promises = stories.map(async (story) => fromFirestoreData(story))
+    const updatedStories = await Promise.all(promises)
+    return updatedStories
+  } catch (err) {
+    logger.error('Error getting stories', err)
+    throw err
+  }
+}
+
+/**
+ * Fetch a story
+ * @param storyId { string }: storyId which will be used to fetch the story
+ * @return {Promise<storyData|Object>}
+ */
+const fetchStory = async (storyId) => {
+  try {
+    const story = await storiesModel.doc(storyId).get()
+    const storyData = story.data()
+    return { storyData: await fromFirestoreData(storyData) }
+  } catch (err) {
+    logger.error('Error retrieving story data', err)
+    throw err
+  }
+}
+
+module.exports = {
+  updateStory,
+  fetchStory,
+  fetchStories
+}
