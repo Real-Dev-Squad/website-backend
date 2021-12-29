@@ -18,17 +18,17 @@ This Project serves the backend APIs required for [Real Dev Squad](https://reald
 
 ## Running the Project
 ```shell
-$ npm install
-$ npm start
+$ yarn
+$ yarn start
 ```
 #### Running in dev mode
 ```shell
-$ npm run dev
+$ yarn run dev
 ```
 
 #### Test local setup
 ```shell
-$ npm run validate-setup
+$ yarn run validate-setup
 ```
 
 ## Prerequisites
@@ -44,7 +44,7 @@ $ npm run validate-setup
 - You can import the file [API Schema](https://github.com/Real-Dev-Squad/website-backend/blob/develop/public/apiSchema.json) to [Postman](https://www.postman.com/) or [SwaggerHub](https://swagger.io/tools/swaggerhub/).
 - If any API changes have been made:
     - Write JS Doc on top of your routes using YAML based annotations in OPEN API 3.0 format.
-    - Run `npm run generate-api-schema` to generate the API schema. A file `public/apiSchema.json` will be created/updated.
+    - Run `yarn run generate-api-schema` to generate the API schema. A file `public/apiSchema.json` will be created/updated.
 
 Check out our video on how to setup the backend here: [Wiki link](https://github.com/Real-Dev-Squad/website-backend/wiki/Backend-setup-and-understanding-the-flow)
 
