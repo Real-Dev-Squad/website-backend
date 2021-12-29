@@ -17,6 +17,9 @@
 This Project serves the backend APIs required for [Real Dev Squad](https://realdevsquad.com/) web projects. This project is built in [Express.js](https://expressjs.com/).
 
 ## Running the Project
+We are moving to yarn, to ensure that we use yarn , we are moving ahead with Volta
+[Why Volta](https://docs.volta.sh/guide/#why-volta)
+To install Volta, please follow the [process](https://docs.volta.sh/guide/getting-started)
 ```shell
 $ yarn
 $ yarn start
