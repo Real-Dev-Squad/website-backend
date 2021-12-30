@@ -4,12 +4,12 @@ const { storyStatusEnum } = require('../../constants/stories')
 const createStory = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     title: joi.string().required(),
-    description: joi.string().required(),
-    status: joi.any().valid(...storyStatusEnum).optional(),
+    description: joi.string().optional(),
+    status: joi.any().valid(...storyStatusEnum).required(),
     tasks: joi.array().items(joi.string()).optional(),
-    featureOwner: joi.string().required(),
-    backendEngineer: joi.string().required(),
-    frontendEngineer: joi.string().required(),
+    featureOwner: joi.string().optional(),
+    backendEngineer: joi.string().optional(),
+    frontendEngineer: joi.string().optional(),
     startedOn: joi.number().optional(),
     endsOn: joi.number().optional()
   })
