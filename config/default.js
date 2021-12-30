@@ -65,5 +65,12 @@ module.exports = {
     cloud_name: 'Cloud_name',
     api_key: 'API_KEY',
     api_secret: 'api_secret_key'
+  },
+
+  integrations: {
+    newrelic: {
+      appName: 'RDS-API (production)',
+      licenseKey: '<newrelicLicenseKey>'
+    }
   }
 }
