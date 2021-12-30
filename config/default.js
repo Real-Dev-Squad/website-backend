@@ -69,7 +69,7 @@ module.exports = {
 
   integrations: {
     newrelic: {
-      appName: 'RDS-API (production)',
+      appName: 'RDS_API_production',
       licenseKey: '<newrelicLicenseKey>'
     }
   }
