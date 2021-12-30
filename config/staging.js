@@ -22,7 +22,7 @@ module.exports = {
 
   integrations: {
     newrelic: {
-      appName: 'RDS-API (staging)'
+      appName: 'RDS_API_staging'
     }
   }
 }
