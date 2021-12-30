@@ -2,7 +2,21 @@
   "compilerOptions": {
     "outDir": "./built",
     "allowJs": true,
-    "target": "es5"
+    "checkJs": true,
+    "target": "es6",
+    // "module": "commonjs",
+    "strictNullChecks": true,
+    "noImplicitReturns": true,
+    "allowUnreachableCode": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitThis": true,
+    "noFallthroughCasesInSwitch": true,
+    "strictFunctionTypes": true,
+    "suppressImplicitAnyIndexErrors": false,
+    "noImplicitAny": true
   },
-  "include": ["./**/*"]
+  "exclude": ["node_modules"],
+  "include": ["./**/*.ts"],
+  "typeRoots": ["./node_modules/@types", "./types"]
 }
