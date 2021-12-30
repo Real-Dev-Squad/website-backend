@@ -1,5 +1,6 @@
 
 const { getUsername, getUserId } = require('./users')
+const { fetchTask } = require('../models/tasks')
 
 const fromFirestoreData = async (story) => {
   if (!story) {
@@ -33,7 +34,7 @@ const toFirestoreData = async (story) => {
     return story
   }
   const updatedStory = { ...story }
-  const { featureOwner, backendEngineer, frontendEngineer } = story
+  const { featureOwner, backendEngineer, frontendEngineer, tasks } = story
 
   if (featureOwner) {
     updatedStory.featureOwner = await getUserId(featureOwner)
@@ -50,6 +51,10 @@ const toFirestoreData = async (story) => {
     if (!updatedStory.frontendEngineer) return false
   }
 
+  if (Array.isArray(tasks)) {
+    updatedStory.tasks = await getValidTaskIds(tasks)
+  }
+
   return updatedStory
 }
 
@@ -64,6 +69,24 @@ const buildStories = (stories, initialStoryArray = []) => {
   }
 
   return initialStoryArray
+}
+
+const getValidTaskIds = async (taskArray) => {
+  try {
+    if (!Array.isArray(taskArray)) {
+      return []
+    }
+    const promises = taskArray.map(async (taskId) => {
+      const task = await fetchTask(taskId)
+      return task.taskData ? taskId : false
+    })
+    let taskIdArray = await Promise.all(promises)
+    taskIdArray = taskIdArray.filter(Boolean)
+    return taskIdArray
+  } catch (err) {
+    logger.error('Error in updating the story object', err)
+    throw err
+  }
 }
 
 module.exports = {
