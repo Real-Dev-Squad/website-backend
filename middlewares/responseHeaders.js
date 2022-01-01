@@ -14,7 +14,7 @@ module.exports = (req, res, next) => {
   try {
     const cacheExpiry = config.get('routesCacheTTL')
 
-    ttl = cacheExpiry[req.url] || ttl
+    ttl = cacheExpiry[req.path] || ttl
   } catch (e) {
     logger.error(`Error finding TTL config:: ${e}`)
   }
