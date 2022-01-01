@@ -69,5 +69,9 @@ module.exports = {
       appName: 'INTEGRATIONS_NEWRELIC_APPNAME',
       licenseKey: 'INTEGRATIONS_NEWRELIC_LICENSEKEY'
     }
+  },
+
+  routesCacheTTL: {
+    '/members': 'ROUTESCACHETTL_MEMBERS'
   }
 }
