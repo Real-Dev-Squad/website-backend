@@ -72,5 +72,9 @@ module.exports = {
       appName: 'RDS_API_production',
       licenseKey: '<newrelicLicenseKey>'
     }
+  },
+
+  routesCacheTTL: {
+    '/members': 900
   }
 }

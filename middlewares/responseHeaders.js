@@ -9,6 +9,11 @@
  */
 
 module.exports = (req, res, next) => {
-  res.header('Cache-Control', 'max-age=0')
+  const cacheExpiry = config.get('routes')
+
+  const ttl = cacheExpiry[req.url] || 0
+
+  res.header('Cache-Control', `max-age=${ttl}`)
+
   next()
 }
