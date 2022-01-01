@@ -9,6 +9,17 @@
  */
 
 module.exports = (req, res, next) => {
-  res.header('Cache-Control', 'max-age=0')
+  let ttl = 0
+
+  try {
+    const cacheExpiry = config.get('routesCacheTTL')
+
+    ttl = cacheExpiry[req.url] || ttl
+  } catch (e) {
+    logger.error(`Error finding TTL config:: ${e}`)
+  }
+
+  res.header('Cache-Control', `max-age=${ttl}`)
+
   next()
 }
