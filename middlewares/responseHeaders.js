@@ -19,7 +19,7 @@
 module.exports = (req, res, next) => {
   try {
     const cacheExpiry = config.get('routesCacheTTL')
-    let cacheControl = 'max-age=0'
+    let cacheControl = 'private, max-age=0'
     const ttl = cacheExpiry[req.path]
 
     if (ttl > 0) {
