@@ -142,12 +142,26 @@ const postUserPicture = async (req, res) => {
     return res.boom.badImplementation('An internal server error occurred')
   }
 }
-
+const identityURL = async (req, res) => {
+  try {
+    const userId = req.userData.id
+    await userQuery.addOrUpdate(req.body, userId)
+    const { user } = await userQuery.fetchUser({ userId })
+    return res.json({
+      message: 'updated identity URL!!',
+      identityURL: user.identityURL
+    })
+  } catch (error) {
+    logger.error(`Internal Server Error: ${error}`)
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+}
 module.exports = {
   updateSelf,
   getUsers,
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
-  postUserPicture
+  postUserPicture,
+  identityURL
 }

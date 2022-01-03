@@ -231,4 +231,23 @@ describe('Users', function () {
         })
     })
   })
+  describe('PATCH /users/identityURL', function () {
+    it('Should update the identityURL', function (done) {
+      chai
+        .request(app)
+        .patch('/users/identityURL')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({
+          identityURL: 'identityURL'
+        })
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('updated identity URL!!')
+
+          return done()
+        })
+    })
+  })
 })
