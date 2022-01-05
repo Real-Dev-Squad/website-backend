@@ -18,11 +18,5 @@ module.exports = {
 
   cors: {
     allowedOrigins: /(\.realdevsquad\.com$)|(localhost)/ // Allow *.realdevsquad.com and localhost for non-production envs
-  },
-
-  integrations: {
-    newrelic: {
-      appName: 'RDS_API_staging'
-    }
   }
 }

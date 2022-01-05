@@ -65,16 +65,5 @@ module.exports = {
     cloud_name: 'Cloud_name',
     api_key: 'API_KEY',
     api_secret: 'api_secret_key'
-  },
-
-  integrations: {
-    newrelic: {
-      appName: 'RDS_API_production',
-      licenseKey: '<newrelicLicenseKey>'
-    }
-  },
-
-  routesCacheTTL: {
-    '/members': 900
   }
 }

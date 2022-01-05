@@ -7,10 +7,6 @@ global.config = config
 const logger = require('./utils/logger')
 global.logger = logger
 
-logger.info(`Initialising newrelic with app name:: ${config.get('integrations.newrelic.appName')}`)
-// Initialise newrelic
-require('newrelic')
-
 /**
  * Module dependencies.
  */
