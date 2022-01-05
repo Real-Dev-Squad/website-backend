@@ -1,6 +1,7 @@
 
 const userQuery = require('../models/users')
 const imageService = require('../services/imageService')
+const uuid = require('uuid')
 /**
  * Fetches the data about our users
  *
@@ -143,11 +144,33 @@ const postUserPicture = async (req, res) => {
   }
 }
 
+/**
+ * Post user profile picture
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const updateChainCode = async (req, res) => {
+  try {
+    const key = uuid.v4()
+    const { id: userId } = req.userData
+    await userQuery.addOrUpdate({ chainCode: key }, userId)
+    return res.json({
+      message: 'Generated New Chaincode!!',
+      chainCode: key
+    })
+  } catch (error) {
+    logger.error(`Error while updating user: ${error}`)
+    return res.boom.serverUnavailable('Something went wrong please contact admin')
+  }
+}
+
 module.exports = {
   updateSelf,
   getUsers,
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
-  postUserPicture
+  postUserPicture,
+  updateChainCode
 }

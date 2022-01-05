@@ -231,4 +231,42 @@ describe('Users', function () {
         })
     })
   })
+
+  describe('PATCH /users/chainCode', function () {
+    it('Should return and update the user with a new chain code', function (done) {
+      chai
+        .request(app)
+        .patch('/users/chainCode')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) { return done(err) }
+
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Generated New Chaincode!!')
+          expect(res.body).to.have.property('chainCode')
+
+          return done()
+        })
+    })
+
+    it('Should return 401 if not logged in', function (done) {
+      chai
+        .request(app)
+        .patch('/users/chainCode')
+        .end((err, res) => {
+          if (err) { return done(err) }
+
+          expect(res).to.have.status(401)
+          expect(res.body).to.be.a('object')
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: 'Unauthorized',
+            message: 'Unauthenticated User'
+          })
+
+          return done()
+        })
+    })
+  })
 })
