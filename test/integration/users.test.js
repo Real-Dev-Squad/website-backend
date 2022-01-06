@@ -232,11 +232,11 @@ describe('Users', function () {
     })
   })
 
-  describe('PATCH /users/chainCode', function () {
-    it('Should return and update the user with a new chain code', function (done) {
+  describe('PATCH /users/chaincode', function () {
+    it('Should return and update the user with a new chaincode', function (done) {
       chai
         .request(app)
-        .patch('/users/chainCode')
+        .patch('/users/chaincode')
         .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done(err) }
@@ -244,7 +244,7 @@ describe('Users', function () {
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Generated New Chaincode!!')
-          expect(res.body).to.have.property('chainCode')
+          expect(res.body).to.have.property('chaincode')
 
           return done()
         })
@@ -253,7 +253,7 @@ describe('Users', function () {
     it('Should return 401 if not logged in', function (done) {
       chai
         .request(app)
-        .patch('/users/chainCode')
+        .patch('/users/chaincode')
         .end((err, res) => {
           if (err) { return done(err) }
 

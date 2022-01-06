@@ -145,19 +145,19 @@ const postUserPicture = async (req, res) => {
 }
 
 /**
- * Post user profile picture
+ * Updates the user with a new chaincode key
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const updateChainCode = async (req, res) => {
+const updateChaincode = async (req, res) => {
   try {
     const key = uuid.v4()
     const { id: userId } = req.userData
-    await userQuery.addOrUpdate({ chainCode: key }, userId)
+    await userQuery.addOrUpdate({ chaincode: key }, userId)
     return res.json({
       message: 'Generated New Chaincode!!',
-      chainCode: key
+      chaincode: key
     })
   } catch (error) {
     logger.error(`Error while updating user: ${error}`)
@@ -172,5 +172,5 @@ module.exports = {
   getUser,
   getUsernameAvailabilty,
   postUserPicture,
-  updateChainCode
+  updateChaincode
 }
