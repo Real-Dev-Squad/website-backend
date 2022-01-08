@@ -270,5 +270,24 @@ describe('Users', function () {
           return done()
         })
     })
+    it('Should return 400 for no identityURL value', function (done) {
+      chai
+        .request(app)
+        .patch('/users/identityURL')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({})
+        .end((err, res) => {
+          if (err) { return done(err) }
+
+          expect(res).to.have.status(400)
+          expect(res.body).to.be.an('object')
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: '"identityURL" is required'
+          })
+          return done()
+        })
+    })
   })
 })
