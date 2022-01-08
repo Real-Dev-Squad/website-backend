@@ -29,7 +29,7 @@ const updateUser = async (req, res, next) => {
 }
 const updateIdentityURL = async (req, res, next) => {
   const schema = joi.object().strict().keys({
-    identityURL: joi.string().required()
+    identityURL: joi.string().uri().required()
   })
 
   try {

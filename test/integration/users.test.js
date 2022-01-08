@@ -238,13 +238,34 @@ describe('Users', function () {
         .patch('/users/identityURL')
         .set('cookie', `${cookieName}=${jwt}`)
         .send({
-          identityURL: 'identityURL'
+          identityURL: 'http://localhost:3000/healthcheck'
         })
         .end((err, res) => {
           if (err) { return done(err) }
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('updated identity URL!!')
+          return done()
+        })
+    })
+    it('Should return 400 for invalid identityURL value', function (done) {
+      chai
+        .request(app)
+        .patch('/users/identityURL')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({
+          status: 'random'
+        })
+        .end((err, res) => {
+          if (err) { return done(err) }
+
+          expect(res).to.have.status(400)
+          expect(res.body).to.be.an('object')
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'identityURL must be a valid uri'
+          })
 
           return done()
         })
