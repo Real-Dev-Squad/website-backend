@@ -10,7 +10,7 @@
     "validate-setup": "node scripts/validateSetup.js",
     "test-integration": "sh scripts/tests/testIntegration.sh",
     "test-unit": "sh scripts/tests/testUnit.sh",
-    "test": "npm run lint && npm run test-integration && npm run test-unit",
+    "test": "yarn run lint && yarn run test-integration && yarn run test-unit",
     "generate-api-schema": "node utils/generateAPISchema.js"
   },
   "dependencies": {
@@ -64,5 +64,9 @@
   },
   "pre-commit": [
     "lint"
-  ]
+  ],
+  "volta": {
+    "node": "14.18.2",
+    "yarn": "1.22.17"
+  }
 }
