@@ -254,7 +254,7 @@ describe('Users', function () {
         .patch('/users/identityURL')
         .set('cookie', `${cookieName}=${jwt}`)
         .send({
-          status: 'random'
+          identityURL: 'random'
         })
         .end((err, res) => {
           if (err) { return done(err) }
@@ -264,7 +264,7 @@ describe('Users', function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'identityURL must be a valid uri'
+            message: '"identityURL" must be a valid uri'
           })
 
           return done()
