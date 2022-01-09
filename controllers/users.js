@@ -158,7 +158,7 @@ const updateChaincode = async (req, res) => {
       chaincode: key
     })
   } catch (error) {
-    logger.error(`Error while updating user: ${error}`)
+    logger.error(`Error while updating user's chaincode: ${error}`)
     return res.boom.serverUnavailable('Something went wrong please contact admin')
   }
 }
