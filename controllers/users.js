@@ -145,12 +145,12 @@ const postUserPicture = async (req, res) => {
 }
 
 /**
- * Updates the chaincode with a newly generated key
+ * Gets a newly generated chaincode
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const updateChaincode = async (req, res) => {
+const getChaincode = (req, res) => {
   try {
     const key = uuid.v4()
     return res.json({
@@ -158,8 +158,8 @@ const updateChaincode = async (req, res) => {
       chaincode: key
     })
   } catch (error) {
-    logger.error(`Error while updating user's chaincode: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    logger.error(`Error while generating chaincode: ${error}`)
+    return res.boom.badImplementation('An internal server error occurred')
   }
 }
 
@@ -170,5 +170,5 @@ module.exports = {
   getUser,
   getUsernameAvailabilty,
   postUserPicture,
-  updateChaincode
+  getChaincode
 }

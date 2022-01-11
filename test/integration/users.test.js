@@ -232,11 +232,11 @@ describe('Users', function () {
     })
   })
 
-  describe('PATCH /users/chaincode', function () {
-    it('Should return and update the user with a new chain code', function (done) {
+  describe('GET /users/chaincode', function () {
+    it('Should return the user with a new chaincode', function (done) {
       chai
         .request(app)
-        .patch('/users/chaincode')
+        .get('/users/chaincode')
         .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) { return done(err) }
@@ -253,7 +253,7 @@ describe('Users', function () {
     it('Should return 401 if not logged in', function (done) {
       chai
         .request(app)
-        .patch('/users/chaincode')
+        .get('/users/chaincode')
         .end((err, res) => {
           if (err) { return done(err) }
 

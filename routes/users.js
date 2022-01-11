@@ -179,6 +179,8 @@ router.get('/self', authenticate, users.getSelfDetails)
  */
 router.get('/isUsernameAvailable/:username', authenticate, users.getUsernameAvailabilty)
 
+router.get('/chaincode', authenticate, users.getChaincode)
+
 /**
  * @swagger
  * /users/:username:
@@ -264,7 +266,5 @@ router.get('/:username', users.getUser)
  */
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post('/picture', authenticate, upload.single('profile'), users.postUserPicture)
-
-router.patch('/chaincode', authenticate, users.updateChaincode)
 
 module.exports = router
