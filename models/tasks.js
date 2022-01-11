@@ -46,7 +46,11 @@ const fetchTasks = async () => {
     const tasks = buildTasks(tasksSnapshot)
     const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
-    return updatedTasks
+    const taskList = updatedTasks.map(task => {
+      task.status = TASK_STATUS[task.status.toUpperCase()]
+      return task
+    })
+    return taskList
   } catch (err) {
     logger.error('error getting tasks', err)
     throw err
@@ -86,8 +90,9 @@ const fetchActiveTaskMembers = async () => {
 const fetchTask = async (taskId) => {
   try {
     const task = await tasksModel.doc(taskId).get()
-    const taskData = task.data()
-    return { taskData: await fromFirestoreData(taskData) }
+    const taskData = await fromFirestoreData(task.data())
+    const taskList = { ...taskData, status: TASK_STATUS[taskData.status] }
+    return { taskData: taskList }
   } catch (err) {
     logger.error('Error retrieving task data', err)
     throw err
@@ -106,7 +111,9 @@ const fetchSelfTask = async (taskId, userId) => {
     const taskData = task.data()
     if (!taskData) return { taskNotFound: true }
     if (userId !== taskData.assignee) return { notAssignedToYou: true }
-    return { taskData: await fromFirestoreData(taskData) }
+    const taskfromFirestoreData = await fromFirestoreData(taskData)
+    const taskList = { ...taskfromFirestoreData, status: TASK_STATUS[taskfromFirestoreData.status] }
+    return { taskData: taskList }
   } catch (err) {
     logger.error('Error retrieving self task data', err)
     throw err
@@ -156,7 +163,11 @@ const fetchUserTasks = async (username, statuses = []) => {
 
     const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
-    return updatedTasks
+    const taskList = updatedTasks.map(task => {
+      task.status = TASK_STATUS[task.status.toUpperCase()]
+      return task
+    })
+    return taskList
   } catch (err) {
     logger.error('error getting tasks', err)
     throw err
