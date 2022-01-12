@@ -57,7 +57,7 @@ const getUserTasks = async (req, res) => {
     const { username } = req.params
     let allTasks = []
 
-    if (status && !Object.values(TASK_STATUS).includes(status)) {
+    if (status && !Object.keys(TASK_STATUS).includes(status.toUpperCase())) {
       return res.boom.notFound('Status not found!')
     }
 

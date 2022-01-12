@@ -135,7 +135,7 @@ describe('Tasks', function () {
 
   describe('GET /tasks/self', function () {
     it('Should get all the active and blocked tasks of the user', function (done) {
-      const taskStatus = ['active', 'completed']
+      const taskStatus = ['IN_PROGRESS', 'COMPLETED']
 
       chai
         .request(app)
@@ -163,7 +163,7 @@ describe('Tasks', function () {
           if (err) { return (done) }
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('array')
-          expect(res.body[0].status).to.equal('completed')
+          expect(res.body[0].status).to.equal('COMPLETED')
 
           return done()
         })

@@ -91,8 +91,10 @@ const fetchTask = async (taskId) => {
   try {
     const task = await tasksModel.doc(taskId).get()
     const taskData = await fromFirestoreData(task.data())
-    const taskList = { ...taskData, status: TASK_STATUS[taskData.status] }
-    return { taskData: taskList }
+    if (taskData?.status) {
+      taskData.status = TASK_STATUS[taskData.status]
+    }
+    return { taskData }
   } catch (err) {
     logger.error('Error retrieving task data', err)
     throw err
