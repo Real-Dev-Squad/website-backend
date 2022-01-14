@@ -146,10 +146,8 @@ const identityURL = async (req, res) => {
   try {
     const userId = req.userData.id
     await userQuery.addOrUpdate(req.body, userId)
-    const { user } = await userQuery.fetchUser({ userId })
     return res.json({
-      message: 'updated identity URL!!',
-      identityURL: user.identityURL
+      message: 'updated identity URL!!'
     })
   } catch (error) {
     logger.error(`Internal Server Error: ${error}`)
