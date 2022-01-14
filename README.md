@@ -16,29 +16,50 @@
 ## About the Project
 This Project serves the backend APIs required for [Real Dev Squad](https://realdevsquad.com/) web projects. This project is built in [Express.js](https://expressjs.com/).
 
-## Running the Project
-We are moving to yarn, to ensure that we use yarn , we are moving ahead with [Volta](https://docs.volta.sh/guide/#why-volta)
-To install Volta, please follow the [process](https://docs.volta.sh/guide/getting-started)
-```shell
-$ yarn
-$ yarn start
-```
-#### Running in dev mode
-```shell
-$ yarn run dev
-```
-
-#### Test local setup
-```shell
-$ yarn run validate-setup
-```
-
 ## Prerequisites
 - The application uses [node-config](https://github.com/lorenwest/node-config)([documentation](https://github.com/lorenwest/node-config/wiki/Configuration-Files)) for managing config.
 - Create a new file: `config/local.js`. Override the required config values from `config/development.js` and `config/default.js` into `config/local.js`.
 - Register the application for [GitHub OAuth](https://docs.github.com/en/developers/apps/creating-an-oauth-app) to get the `clientId` and `clientSecret`. Add the callback URL as `http://<HOSTNAME>:<PORT>/auth/github/callback`
 - Create an application on [FireStore](https://firebase.google.com/docs/firestore) and [generate a service file](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). Add the service file credentials in the local config (or your env variables) as a string (don't forget to escape the newline in private_key)
 - For running the project locally, [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) can also be used instead of using the remote DB. Steps for setting it up: [CONTRIBUTING.md - Using Firebase Emulator Locally](https://github.com/Real-Dev-Squad/website-backend/blob/develop/CONTRIBUTING.md#using-firebase-emulator-locally)
+
+## Starting Local Development
+Please install `yarn` and `volta`
+
+[Why Volta?](https://docs.volta.sh/guide/#why-volta)
+
+To install Volta, please follow the [process](https://docs.volta.sh/guide/getting-started)
+
+### Local Development Setup
+
+Install all the packages using the following command:
+```shell
+yarn
+```
+
+#### Confirm correct configuration setup
+
+This command should be successful, before moving to development.
+```shell
+yarn validate-setup
+```
+
+#### TDD Local Development
+
+Head over to [TDD Tests Files List](scripts/tests/tdd-files-list.txt), and add the list of your new (or old) test files.
+
+> You can use wildcard '*' in the filepaths
+
+Run TDD in watch mode. Exiting this command will print the coverage report. Try to achieve 100% coverage.
+
+```shell
+yarn tdd:watch
+```
+#### Running a server in Dev mode
+```shell
+yarn dev
+```
+> In production, a separate process will take place, that will be mentioned here - TK
 
 ## API Documentation:
 - View the RDS API documentation: [Real Dev Squad API](https://documenter.getpostman.com/view/2021368/TW6wH8Ns)
