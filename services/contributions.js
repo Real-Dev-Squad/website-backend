@@ -47,7 +47,7 @@ const getUserContributions = async (username) => {
       noteworthyObject.task.participants = participantsDetails
       const prList = []
 
-      task.links.forEach(link => {
+      task.links?.forEach(link => {
         const prObject = prMaps.get(link)
         if (prObject) {
           prList.push(prObject)
