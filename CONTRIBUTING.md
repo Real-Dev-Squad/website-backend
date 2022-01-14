@@ -1,7 +1,7 @@
 # Contributing to Real Dev Squad API
 
 - [Getting Started](#getting-started)
-- [NPM Command Reference](#npm-command-reference)
+- [Yarn Command Reference](#yarn-command-reference)
 - [Project Structure](#project-structure)
 - [Generating Authentication Token](#generating-authentication-token)
 - [Testing Guidelines](#testing-guidelines)
@@ -12,26 +12,26 @@
 
 Instructions for initial setup can be found in the [README](README.md).
 
-## NPM Command Reference
+## Yarn Command Reference
 
-##### `npm install`
+##### `yarn`
 
 Installs all `dependencies` listed in the root `package.json`.
 
-##### `npm run test`
+##### `yarn run test`
 
-The script associated with `npm run test` will run all tests that ensures that your commit does not break anything in the
+The script associated with `yarn run test` will run all tests that ensures that your commit does not break anything in the
 repository. This will run the lint, integration and unit tests.
 
-##### `npm run lint`
+##### `yarn run lint`
 
 Runs the lint checks in the project.
 
-##### `npm run generate-api-schema`
+##### `yarn run generate-api-schema`
 
 Generates the API schema in the file `public/apiSchema.json`.
 
-##### `npm run validate-setup`
+##### `yarn run validate-setup`
 
 Runs the test for checking local development setup is working properly or not.
 
@@ -137,8 +137,8 @@ rds-session-staging
 ## Running test scripts on Windows
 
 - Git Bash is recommended for running test scripts on Windows.
-- Run `npm run test-integration` for running integration tests.
-- Run `npm run test-unit` for running unit tests.
+- Run `yarn run test-integration` for running integration tests.
+- Run `yarn run test-unit` for running unit tests.
 - Make sure the server is not running.
 - Make sure to close the emulator window after running the tests in order to avoid the blocking of the port for the next tests to run.
 - For e.g - After running the integration tests, close the emulator window and then run the command for unit tests.
