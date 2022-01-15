@@ -10,11 +10,11 @@
     "validate-setup": "node scripts/validateSetup.js",
     "test-integration": "sh scripts/tests/testIntegration.sh",
     "test-unit": "sh scripts/tests/testUnit.sh",
-    "test": "npm run lint && npm run test-integration && npm run test-unit",
+    "test": "yarn run lint && yarn run test-integration && yarn run test-unit",
     "generate-api-schema": "node utils/generateAPISchema.js"
   },
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "cloudinary": "^1.25.1",
     "config": "^3.3.6",
     "cookie-parser": "~1.4.5",
@@ -31,6 +31,7 @@
     "jsonwebtoken": "^8.5.1",
     "morgan": "~1.10.0",
     "multer": "^1.4.2",
+    "newrelic": "^8.6.0",
     "passport": "^0.4.1",
     "passport-github2": "^0.1.12",
     "swagger-jsdoc": "^6.1.0",
@@ -62,5 +63,9 @@
   },
   "pre-commit": [
     "lint"
-  ]
+  ],
+  "volta": {
+    "node": "14.18.2",
+    "yarn": "1.22.17"
+  }
 }

@@ -1,10 +1,11 @@
 const express = require('express')
 const router = express.Router()
-const { getMembers, getIdleMembers, migrateUserRoles, deleteIsMember } = require('../controllers/members')
+const members = require('../controllers/members')
 const { authorizeUser } = require('../middlewares/authorization')
 const { authenticate } = require('../middlewares/authenticate')
 const { addRecruiter } = require('../controllers/recruiters')
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
+const { SUPER_USER } = require('../constants/roles')
 
 /**
  * @swagger
@@ -28,7 +29,7 @@ const { validateRecruiter } = require('../middlewares/validators/recruiter')
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', getMembers)
+router.get('/', members.getMembers)
 
 /**
  * @swagger
@@ -52,7 +53,7 @@ router.get('/', getMembers)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/idle', getIdleMembers)
+router.get('/idle', members.getIdleMembers)
 
 /**
  * @swagger
@@ -88,6 +89,51 @@ router.post('/intro/:username', validateRecruiter, addRecruiter)
 
 /**
  * @swagger
+ * /moveToMembers/:username:
+ *   patch:
+ *     summary: Changes the role of a new member(the username provided in params) to member
+ *     tags:
+ *       - Members
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: no content
+ *       400:
+ *         description: badRequest
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: User Already is a member
+ *
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *
+ *       500:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+
+router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPER_USER), members.moveToMembers)
+/**
+ * @swagger
  * /members/member-to-role-migration:
  *  patch:
  *   summary: One time call to update roles of the users
@@ -119,7 +165,7 @@ router.post('/intro/:username', validateRecruiter, addRecruiter)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser'), migrateUserRoles)
+router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser'), members.migrateUserRoles)
 
 /**
  * @swagger
@@ -154,6 +200,52 @@ router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), deleteIsMember)
+router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), members.deleteIsMember)
+
+/**
+ * @swagger
+ * /archiveMembers/:username:
+ *   patch:
+ *     summary: Changes the role of a old member(the username provided in params) in new members list to archive_member
+ *     tags:
+ *       - Members
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: no content
+ *       400:
+ *         description: badRequest
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: User Already is a member
+ *
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *
+ *       500:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+
+router.patch('/archiveMembers/:username', authenticate, authorizeUser(SUPER_USER), members.archiveMembers)
 
 module.exports = router
