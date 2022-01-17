@@ -59,7 +59,18 @@ yarn tdd:watch
 ```shell
 yarn dev
 ```
-> In production, a separate process will take place, that will be mentioned here - TK
+## What happens in production:
+- Run tests
+```
+yarn run test
+```
+- Install packages
+- Run build
+- Prune dev dependencies
+- Run start command (with port information)
+```
+yarn start
+```
 
 ## API Documentation:
 - View the RDS API documentation: [Real Dev Squad API](https://documenter.getpostman.com/view/2021368/TW6wH8Ns)
