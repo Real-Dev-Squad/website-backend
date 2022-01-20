@@ -1,5 +1,6 @@
 const passport = require('passport')
-const GitHubStrategy = require('passport-github2').Strategy
+const GitHubStrategy = require('passport-github2').Strategyc
+const logger = require('../utils/logger')
 
 try {
   passport.use(new GitHubStrategy({

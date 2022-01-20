@@ -1,22 +1,19 @@
 {
   "compilerOptions": {
-    "outDir": "./built",
-    "allowJs": true,
-    "checkJs": true,
     "target": "es5",
-    // "module": "commonjs",
-    "strictNullChecks": true,
-    "noImplicitReturns": true,
-    "allowUnreachableCode": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitThis": true,
-    "noFallthroughCasesInSwitch": true,
-    "strictFunctionTypes": true,
-    "suppressImplicitAnyIndexErrors": false,
-    "noImplicitAny": true
+    "module": "commonjs",
+    "lib": ["esnext"],
+    "allowJs": true,
+    "outDir": "build",
+    "rootDir": "./",
+    "strict": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "types": ["node"]
   },
-  "exclude": ["node_modules"],
-  "include": ["./**/*.ts"],
+
+  "exclude": ["node_modules", "dist"],
+  "include": ["./**/*.ts", "server.js"],
   "typeRoots": ["./node_modules/@types", "./types"]
 }
