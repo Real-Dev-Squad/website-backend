@@ -10,10 +10,11 @@
     "noImplicitAny": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "types": ["node"]
+    "types": ["node"],
+    "checkJs": false
   },
 
   "exclude": ["node_modules", "dist"],
-  "include": ["./**/*.ts", "server.js"],
+  "include": ["./**/*.ts", "server.ts"],
   "typeRoots": ["./node_modules/@types", "./types"]
 }

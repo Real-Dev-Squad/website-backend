@@ -10,10 +10,10 @@ import logger from './utils/logger'
  */
 import http from 'http'
 import app from './app'
+
 // @ts-ignore
-global.config = config
-// @ts-ignore
-global.logger = logger
+// global.config = config
+// global.logger = logger
 
 /**
  * Get port from environment and store in Express.
@@ -36,8 +36,10 @@ server.listen(port)
 server.on('error', onError)
 server.on('listening', onListening)
 
+// @ts-ignore
+
 /**
- * Event listener for HTTP server "error" event.
+ * Event listener for HTTP server 'error' event.
  */
 
 // @ts-ignore
@@ -70,7 +72,7 @@ function onError (error) {
 }
 
 /**
- * Event listener for HTTP server "listening" event.
+ * Event listener for HTTP server 'listening' event.
  */
 
 function onListening () {

@@ -1,3 +1,5 @@
+import config from 'config'
+import logger from '../utils/logger'
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const morgan = require('morgan')
