@@ -7,11 +7,14 @@
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
 
-- [About the Project](#about-the-project)
-- [Running the Project](#running-the-project)
-- [Prerequisites](#prerequisites)
-- [API Documentation](#api-documentation)
-- [CONTRIBUTING](CONTRIBUTING.md)
+- [Real Dev Squad API](#real-dev-squad-api)
+  - [Table of Contents](#table-of-contents)
+  - [About the Project](#about-the-project)
+  - [Running the Project](#running-the-project)
+      - [Running in dev mode](#running-in-dev-mode)
+      - [Test local setup](#test-local-setup)
+  - [Prerequisites](#prerequisites)
+  - [API Documentation:](#api-documentation)
 
 ## About the Project
 This Project serves the backend APIs required for [Real Dev Squad](https://realdevsquad.com/) web projects. This project is built in [Express.js](https://expressjs.com/).
@@ -37,7 +40,7 @@ $ yarn run validate-setup
 - The application uses [node-config](https://github.com/lorenwest/node-config)([documentation](https://github.com/lorenwest/node-config/wiki/Configuration-Files)) for managing config.
 - Create a new file: `config/local.js`. Override the required config values from `config/development.js` and `config/default.js` into `config/local.js`.
 - Register the application for [GitHub OAuth](https://docs.github.com/en/developers/apps/creating-an-oauth-app) to get the `clientId` and `clientSecret`. Add the callback URL as `http://<HOSTNAME>:<PORT>/auth/github/callback`
-- Create an application on [FireStore](https://firebase.google.com/docs/firestore) and [generate a service file](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). Add the service file credentials in the local config (or your env variables) as a string (don't forget to escape the newline in private_key)
+- Create an application on [FireStore](https://firebase.google.com/docs/firestore) and [generate a service file](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). Add the service file credentials in the local config (or your env variables) as a string (don't forget to escape the newline in private_key). [Learn cloud Firestore from byte sized videos](https://youtube.com/playlist?list=PLl-K7zZEsYLluG5MCVEzXAQ7ACZBCuZgZ)
 - For running the project locally, [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) can also be used instead of using the remote DB. Steps for setting it up: [CONTRIBUTING.md - Using Firebase Emulator Locally](https://github.com/Real-Dev-Squad/website-backend/blob/develop/CONTRIBUTING.md#using-firebase-emulator-locally)
 
 ## API Documentation:
