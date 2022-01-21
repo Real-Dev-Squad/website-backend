@@ -4,16 +4,19 @@
 import config from 'config'
 
 import logger from './utils/logger'
+import http from 'http'
+import app from './app'
+
+logger.info(`Initialising newrelic with app name:: ${config.get('integrations.newrelic.appName')}`)
+// Initialise newrelic
+require('newrelic')
 
 /**
  * Module dependencies.
  */
-import http from 'http'
-import app from './app'
 
-// @ts-ignore
-// global.config = config
-// global.logger = logger
+global.config = config
+global.logger = logger
 
 /**
  * Get port from environment and store in Express.
