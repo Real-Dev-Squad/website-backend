@@ -107,6 +107,63 @@ describe('Tasks', function () {
           return done()
         })
     })
+    it('Should return 400 if assignee username does not exist', function (done) {
+      chai
+        .request(app)
+        .post('/tasks')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({
+          title: 'Test task - Create',
+          type: 'feature',
+          endsOn: 123,
+          startedOn: 456,
+          status: 'completed',
+          percentCompleted: 10,
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          assignee: 'dummyUser',
+          participants: []
+        })
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(400)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Unable to add task')
+          return done()
+        })
+    })
+    it('Should not return invalid username in participants', function (done) {
+      chai
+        .request(app)
+        .post('/tasks')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({
+          title: 'Test task - Create',
+          type: 'group',
+          endsOn: 123,
+          startedOn: 456,
+          status: 'completed',
+          percentCompleted: 10,
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          assignee: appOwner.username,
+          participants: ['dummyUser']
+        })
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Task created successfully!')
+          expect(res.body.id).to.be.a('string')
+          expect(res.body.task).to.be.a('object')
+          expect(res.body.task.createdBy).to.equal(appOwner.username)
+          expect(res.body.task.assignee).to.equal(appOwner.username)
+          expect(res.body.task.participants).to.be.an('array')
+          expect(res.body.task.participants).to.have.a.lengthOf(0)
+
+          return done()
+        })
+    })
   })
 
   describe('GET /tasks', function () {
@@ -237,6 +294,24 @@ describe('Tasks', function () {
         .end((err, res) => {
           if (err) { return done(err) }
           expect(res).to.have.status(204)
+
+          return done()
+        })
+    })
+
+    it('Should return 400 if assignee username does not exist', function (done) {
+      chai
+        .request(app)
+        .patch('/tasks/' + taskId1)
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({
+          assignee: 'dummyUser'
+        })
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(400)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Unable to update task')
 
           return done()
         })
