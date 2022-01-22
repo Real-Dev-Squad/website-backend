@@ -37,6 +37,7 @@ const toFirestoreData = async (task) => {
   const { assignee, participants } = task
   if (assignee) {
     updatedTask.assignee = await getUserId(assignee)
+    if (!updatedTask.assignee) return { userNotFound: true }
   }
 
   if (Array.isArray(participants)) {

@@ -14,6 +14,9 @@ const { TASK_TYPE, TASK_STATUS } = require('../constants/tasks')
 const updateTask = async (taskData, taskId = null) => {
   try {
     taskData = await toFirestoreData(taskData)
+    if (taskData.userNotFound) {
+      return taskData
+    }
     if (taskId) {
       const task = await tasksModel.doc(taskId).get()
       await tasksModel.doc(taskId).set({

@@ -66,9 +66,11 @@ const getParticipantUserIds = async (participantArray) => {
 
     const promises = participantArray.map(async (participant) => {
       const participantUserId = await getUserId(participant.trim())
+      if (!participantUserId) return false
       return participantUserId
     })
-    const participantUserIds = await Promise.all(promises)
+    let participantUserIds = await Promise.all(promises)
+    participantUserIds = participantUserIds.filter(Boolean) // remove invalid users
     return participantUserIds
   } catch (err) {
     logger.error('Error in updating the task object', err)
