@@ -1,6 +1,7 @@
 const firestore = require('../utils/firestore')
 const storiesModel = firestore.collection('stories')
-const { fromFirestoreData, toFirestoreData, buildStories } = require('../utils/stories')
+const { fromFirestoreData, toFirestoreData } = require('../utils/stories')
+const { snapshotToArray } = require('../utils/firestoreHelper')
 
 /**
  * Adds and Updates stories
@@ -43,7 +44,7 @@ const addOrUpdateStory = async (storyData, storyId = null) => {
 const fetchStories = async () => {
   try {
     const storiesSnapshot = await storiesModel.get()
-    const stories = buildStories(storiesSnapshot)
+    const stories = snapshotToArray(storiesSnapshot)
     const promises = stories.map(async (story) => fromFirestoreData(story))
     const updatedStories = await Promise.all(promises)
     return updatedStories
