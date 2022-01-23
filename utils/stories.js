@@ -58,25 +58,12 @@ const toFirestoreData = async (story) => {
   return updatedStory
 }
 
-const buildStories = (stories, initialStoryArray = []) => {
-  if (!stories.empty) {
-    stories.forEach((story) => {
-      initialStoryArray.push({
-        id: story.id,
-        ...story.data()
-      })
-    })
-  }
-
-  return initialStoryArray
-}
-
-const getValidTaskIds = async (taskArray) => {
+const getValidTaskIds = async (taskIds) => {
   try {
-    if (!Array.isArray(taskArray)) {
+    if (!Array.isArray(taskIds)) {
       return []
     }
-    const promises = taskArray.map(async (taskId) => {
+    const promises = taskIds.map(async (taskId) => {
       const task = await fetchTask(taskId)
       return task.taskData ? taskId : false
     })
@@ -91,6 +78,5 @@ const getValidTaskIds = async (taskArray) => {
 
 module.exports = {
   fromFirestoreData,
-  toFirestoreData,
-  buildStories
+  toFirestoreData
 }
