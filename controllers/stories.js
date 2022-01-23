@@ -57,7 +57,7 @@ const updateStory = async (req, res) => {
       return res.boom.notFound('Story not found')
     }
 
-    const updateStoryResult = await stories.updateStory(req.body, req.params.id)
+    const updateStoryResult = await stories.addOrUpdateStory(req.body, req.params.id)
     if (updateStoryResult) {
       return res.status(204).send()
     } else {
