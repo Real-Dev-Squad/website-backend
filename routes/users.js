@@ -1,9 +1,11 @@
-const express = require('express')
-const router = express.Router()
-const authenticate = require('../middlewares/authenticate')
-const users = require('../controllers/users')
-const userValidator = require('../middlewares/validators/user')
-const { upload } = require('../utils/multer')
+const express = require("express");
+const router = express.Router();
+const authenticate = require("../middlewares/authenticate");
+const users = require("../controllers/users");
+const userValidator = require("../middlewares/validators/user");
+const { upload } = require("../utils/multer");
+
+router.get("/verify", authenticate, users.verifyUser);
 
 /**
  * @swagger
@@ -51,7 +53,7 @@ const { upload } = require('../utils/multer')
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.patch('/self', authenticate, userValidator.updateUser, users.updateSelf)
+router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
 
 /**
  * @swagger
@@ -103,7 +105,7 @@ router.patch('/self', authenticate, userValidator.updateUser, users.updateSelf)
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.get('/', authenticate, users.getUsers)
+router.get("/", authenticate, users.getUsers);
 
 /**
  * @swagger
@@ -140,7 +142,7 @@ router.get('/', authenticate, users.getUsers)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/self', authenticate, users.getSelfDetails)
+router.get("/self", authenticate, users.getSelfDetails);
 
 /**
  * @swagger
@@ -177,7 +179,7 @@ router.get('/self', authenticate, users.getSelfDetails)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/isUsernameAvailable/:username', authenticate, users.getUsernameAvailabilty)
+router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
 
 /**
  * @swagger
@@ -208,7 +210,7 @@ router.get('/isUsernameAvailable/:username', authenticate, users.getUsernameAvai
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:username', users.getUser)
+router.get("/:username", users.getUser);
 
 /**
  * @swagger
@@ -263,6 +265,6 @@ router.get('/:username', users.getUser)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
-router.post('/picture', authenticate, upload.single('profile'), users.postUserPicture)
+router.post("/picture", authenticate, upload.single("profile"), users.postUserPicture);
 
-module.exports = router
+module.exports = router;
