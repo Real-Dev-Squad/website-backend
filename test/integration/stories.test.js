@@ -52,11 +52,11 @@ describe('Stories', function () {
     await addUser(userToBeBackendEngineer)
     await addUser(userToBeFrontendEngineer)
     // Add the active story
-    storyId = (await stories.updateStory(storyData[0])).storyId
+    storyId = (await stories.addOrUpdateStory(storyData[0])).storyId
     storyId1 = storyId
 
     // Add the completed story
-    storyId = (await stories.updateStory(storyData[1])).storyId
+    storyId = (await stories.addOrUpdateStory(storyData[1])).storyId
   })
 
   after(async function () {

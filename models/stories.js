@@ -9,7 +9,7 @@ const { fromFirestoreData, toFirestoreData, buildStories } = require('../utils/s
  * @param storyId { string }: storyId which will be used to update the story in DB
  * @return {Promise<{storyId: string}>}
  */
-const updateStory = async (storyData, storyId = null) => {
+const addOrUpdateStory = async (storyData, storyId = null) => {
   try {
     storyData = await toFirestoreData(storyData)
     if (storyData) {
@@ -70,7 +70,7 @@ const fetchStory = async (storyId) => {
 }
 
 module.exports = {
-  updateStory,
+  addOrUpdateStory,
   fetchStory,
   fetchStories
 }

@@ -8,10 +8,7 @@ const stories = require('../models/stories')
  */
 const addNewStory = async (req, res) => {
   try {
-    const body = {
-      ...req.body
-    }
-    const story = await stories.updateStory(body)
+    const story = await stories.addOrUpdateStory(req.body)
 
     if (story) {
       return res.json({
