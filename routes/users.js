@@ -5,6 +5,9 @@ const users = require('../controllers/users')
 const userValidator = require('../middlewares/validators/user')
 const { upload } = require('../utils/multer')
 
+
+router.get("/verify", authenticate, users.verifyUser)
+
 /**
  * @swagger
  * /users/self:

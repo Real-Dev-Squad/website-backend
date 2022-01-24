@@ -8,6 +8,28 @@ const imageService = require('../services/imageService')
  * @param res {Object} - Express response object
  */
 
+
+const verifyUser = async (req, res) => {
+  try {
+    const userId = req.userData.id;
+    await userQuery.addOrUpdate(req.userData.identityStatus, userId);
+    let fetchData = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: req.userData.username,
+        identityURL: req.userData.identityURL,
+      }),
+    };
+    fetch('https://someurl/verify', fetchData)
+  } catch (error) {
+    logger.error(`Error while Processing the Request : ${error}`);
+  }
+};
+
+
 const getUsers = async (req, res) => {
   try {
     const allUsers = await userQuery.fetchUsers(req.query)
@@ -144,6 +166,7 @@ const postUserPicture = async (req, res) => {
 }
 
 module.exports = {
+  verifyUser
   updateSelf,
   getUsers,
   getSelfDetails,
