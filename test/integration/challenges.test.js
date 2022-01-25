@@ -29,6 +29,7 @@ describe('Challenges', function () {
       chai
         .request(app)
         .get('/challenges')
+        .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err)
@@ -45,11 +46,13 @@ describe('Challenges', function () {
       chai
         .request(app)
         .get('/challenges')
+        .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done()
           }
-          expect(res).to.have.status(404)
+          expect(res).to.have.status(200)
+          expect(res.body.challenges).to.eql([])
           expect(res.body.message).to.be.equal('No Challenges found')
 
           return done()
@@ -63,7 +66,12 @@ describe('Challenges', function () {
         .request(app)
         .post('/challenges')
         .set('cookie', `${cookieName}=${jwt}`)
-        .send()
+        .send({
+          title: 'Test challenge-create',
+          level: 'easy',
+          start_date: 123,
+          end_date: 456
+        })
         .end((err, res) => {
           if (err) {
             return done(err)
@@ -82,6 +90,7 @@ describe('Challenges', function () {
       chai
         .request(app)
         .post('/challenges/subscribe')
+        .set('cookie', `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err)
