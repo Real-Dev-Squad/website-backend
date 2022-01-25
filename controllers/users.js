@@ -1,4 +1,4 @@
-
+const chaincodeQuery = require('../models/chaincodes')
 const userQuery = require('../models/users')
 const imageService = require('../services/imageService')
 /**
@@ -143,7 +143,22 @@ const postUserPicture = async (req, res) => {
   }
 }
 
+const generateChaincode = async (req, res) => {
+  try{
+    const {username} = req.userData 
+    const chaincode = await chaincodeQuery.storeChaincode(username)
+    return res.json({
+      chaincode,
+      message: 'Chaincode is returned'
+    }) 
+    }catch(error){
+    logger.error(`Error while generating chaincode: ${error}`)
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+}
+
 module.exports = {
+  generateChaincode,
   updateSelf,
   getUsers,
   getSelfDetails,

@@ -231,4 +231,21 @@ describe('Users', function () {
         })
     })
   })
+  describe('GET /users/chaincode', function () {
+    it('Should save the username and timestamp in firestore collection and return the document ID as chaincode in response', function (done) {
+      chai
+        .request(app)
+        .get('/users/chaincode')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) { return done() }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Chaincode is returned')
+          expect(res.body.chaincode).to.be.a('string')
+
+          return done()
+        })
+    })
+  })
 })

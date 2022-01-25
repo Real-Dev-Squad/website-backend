@@ -208,6 +208,8 @@ router.get('/isUsernameAvailable/:username', authenticate, users.getUsernameAvai
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
+router.get('/chaincode', authenticate, users.generateChaincode)
+
 router.get('/:username', users.getUser)
 
 /**
