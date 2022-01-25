@@ -144,14 +144,14 @@ const postUserPicture = async (req, res) => {
 }
 
 const generateChaincode = async (req, res) => {
-  try  {  
-    const {  username  } = req.userData
+  try {
+    const { username } = req.userData
     const chaincode = await chaincodeQuery.storeChaincode(username)
     return res.json({
       chaincode,
       message: 'Chaincode is returned'
     })
-  }  catch  (error)  {
+  } catch (error) {
     logger.error(`Error while generating chaincode: ${error}`)
     return res.boom.badImplementation('An internal server error occurred')
   }
