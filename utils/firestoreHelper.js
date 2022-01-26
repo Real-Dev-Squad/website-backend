@@ -18,6 +18,24 @@ const snapshotToArray = (snapshot, initialArray = []) => {
   return initialArray
 }
 
+const getDocFromIds = async (docIds, modelFunc) => {
+  try {
+    if (!Array.isArray(docIds)) {
+      return []
+    }
+    const promises = docIds.map(async (docId) => {
+      const doc = await modelFunc(docId)
+      return doc
+    })
+    const docData = await Promise.all(promises)
+    return docData
+  } catch (err) {
+    logger.error(`Error populating documents in ${modelFunc}`, err)
+    throw err
+  }
+}
+
 module.exports = {
-  snapshotToArray
+  snapshotToArray,
+  getDocFromIds
 }
