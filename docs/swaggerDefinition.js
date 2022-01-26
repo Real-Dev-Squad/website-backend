@@ -134,6 +134,43 @@ const swaggerOptions = {
             }
           }
         },
+        stories: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string'
+            },
+            description: {
+              type: 'string'
+            },
+            status: {
+              type: 'string'
+            },
+            tasks: {
+              type: 'array',
+              items: {
+                task1: {
+                  type: 'string'
+                }
+              }
+            },
+            featureOwner: {
+              type: 'string'
+            },
+            backendEngineer: {
+              type: 'string'
+            },
+            frontendEngineer: {
+              type: 'string'
+            },
+            endsOn: {
+              type: 'string'
+            },
+            startedOn: {
+              type: 'string'
+            }
+          }
+        },
         contributions: {
           type: 'object',
           properties: {
