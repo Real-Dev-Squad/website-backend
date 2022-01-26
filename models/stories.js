@@ -32,7 +32,7 @@ const addOrUpdateStory = async (storyData, storyId = null) => {
     }
     return false
   } catch (err) {
-    logger.error('Error in updating story', err)
+    logger.error('Error in adding or updating story', err)
     throw err
   }
 }

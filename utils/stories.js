@@ -1,77 +1,68 @@
 
 const { getUsername, getUserId } = require('./users')
 const { fetchTask } = require('../models/tasks')
+const logger = require('./logger')
+const { getDocFromIds } = require('../utils/firestoreHelper')
 
 const fromFirestoreData = async (story) => {
-  if (!story) {
-    return story
-  }
+  try {
+    if (!story) {
+      return story
+    }
 
-  let { featureOwner, backendEngineer, frontendEngineer } = story
+    let { featureOwner, backendEngineer, frontendEngineer } = story
 
-  if (featureOwner) {
-    featureOwner = await getUsername(featureOwner)
-  }
+    const promises = [featureOwner, backendEngineer, frontendEngineer].map(async (userId) => {
+      const username = await getUsername(userId)
+      return username
+    });
+    [featureOwner, backendEngineer, frontendEngineer] = await Promise.all(promises)
 
-  if (backendEngineer) {
-    backendEngineer = await getUsername(backendEngineer)
-  }
+    if (featureOwner) story.featureOwner = featureOwner
+    if (backendEngineer) story.backendEngineer = backendEngineer
+    if (frontendEngineer) story.frontendEngineer = frontendEngineer
 
-  if (frontendEngineer) {
-    frontendEngineer = await getUsername(frontendEngineer)
-  }
-
-  return {
-    ...story,
-    featureOwner,
-    backendEngineer,
-    frontendEngineer
+    return {
+      ...story
+    }
+  } catch (err) {
+    logger.error('Error retrieving user data for story', err)
+    throw err
   }
 }
 
 const toFirestoreData = async (story) => {
-  if (!story) {
-    return story
-  }
-  const updatedStory = { ...story }
-  const { featureOwner, backendEngineer, frontendEngineer, tasks } = story
-
-  if (featureOwner) {
-    updatedStory.featureOwner = await getUserId(featureOwner)
-    if (!updatedStory.featureOwner) return false
-  }
-
-  if (backendEngineer) {
-    updatedStory.backendEngineer = await getUserId(backendEngineer)
-    if (!updatedStory.backendEngineer) return false
-  }
-
-  if (frontendEngineer) {
-    updatedStory.frontendEngineer = await getUserId(frontendEngineer)
-    if (!updatedStory.frontendEngineer) return false
-  }
-
-  if (Array.isArray(tasks)) {
-    updatedStory.tasks = await getValidTaskIds(tasks)
-  }
-
-  return updatedStory
-}
-
-const getValidTaskIds = async (taskIds) => {
   try {
-    if (!Array.isArray(taskIds)) {
-      return []
+    if (!story) {
+      return story
     }
-    const promises = taskIds.map(async (taskId) => {
-      const task = await fetchTask(taskId)
-      return task.taskData ? taskId : false
+    const updatedStory = { ...story }
+    const { featureOwner, backendEngineer, frontendEngineer, tasks: taskIds } = story
+
+    const usernames = [featureOwner, backendEngineer, frontendEngineer]
+    const promises = usernames.map(async (username) => {
+      if (!username) return null
+      const userId = await getUserId(username)
+      return userId
     })
-    let taskIdArray = await Promise.all(promises)
-    taskIdArray = taskIdArray.filter(Boolean)
-    return taskIdArray
+    const userIds = await Promise.all(promises)
+    if (userIds.includes(false)) return false
+
+    if (featureOwner) updatedStory.featureOwner = userIds[0]
+    if (backendEngineer) updatedStory.backendEngineer = userIds[1]
+    if (frontendEngineer) updatedStory.frontendEngineer = userIds[2]
+
+    if (Array.isArray(taskIds)) {
+      const validTaskIds = []
+      const tasksData = await getDocFromIds(taskIds, fetchTask)
+      taskIds.forEach((taskId, index) => {
+        if (tasksData[index]?.taskData) validTaskIds.push(taskId)
+      })
+      updatedStory.tasks = validTaskIds
+    }
+    return updatedStory
   } catch (err) {
-    logger.error('Error in updating the story object', err)
+    logger.error('Error retrieving user or task data for story', err)
     throw err
   }
 }
