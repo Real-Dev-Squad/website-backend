@@ -63,7 +63,7 @@ describe('Stories', function () {
     await cleanDb()
   })
 
-  describe('POST /story - creates a new story', function () {
+  describe('POST /story', function () {
     it('Should return success response after adding the story', function (done) {
       chai
         .request(app)
@@ -113,11 +113,44 @@ describe('Stories', function () {
     })
   })
 
+  describe('GET /story/id', function () {
+    it('Should return one story with given id', function (done) {
+      chai
+        .request(app)
+        .get(`/story/${storyId1}`)
+        .end((err, res) => {
+          if (err) { return done(err) }
+
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Story returned successfully!')
+          expect(res.body.story).to.be.a('object')
+
+          return done()
+        })
+    })
+
+    it('Should return 404 if story does not exist', function (done) {
+      chai
+        .request(app)
+        .get('/story/storyId')
+        .end((err, res) => {
+          if (err) { return done(err) }
+
+          expect(res).to.have.status(404)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Story not found')
+
+          return done()
+        })
+    })
+  })
+
   describe('PATCH /story', function () {
     it('Should update the story for the given storyId', function (done) {
       chai
         .request(app)
-        .patch('/story/' + storyId1)
+        .patch(`/story/${storyId1}`)
         .set('cookie', `${cookieName}=${jwt}`)
         .send({
           title: 'Test update story title'

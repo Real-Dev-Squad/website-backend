@@ -14,6 +14,7 @@ const addOrUpdateStory = async (storyData, storyId = null) => {
   try {
     storyData = await toFirestoreData(storyData)
     if (storyData) {
+      // storyId exists Update story
       if (storyId) {
         const story = await storiesModel.doc(storyId).get()
         await storiesModel.doc(storyId).set({

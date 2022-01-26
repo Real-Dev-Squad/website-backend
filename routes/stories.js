@@ -18,7 +18,7 @@ const { createStory, updateStory } = require('../middlewares/validators/stories'
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/story'
+ *             $ref: '#/components/schemas/stories'
  *     500:
  *       description: badImplementation
  *       content:
@@ -28,6 +28,35 @@ const { createStory, updateStory } = require('../middlewares/validators/stories'
  */
 
 router.get('/', stories.fetchStories)
+
+/**
+ * @swagger
+ * /story/id:
+ *  get:
+ *   summary: Get the details of story with provided id.
+ *   tags:
+ *     - Stories
+ *   responses:
+ *     200:
+ *       description: returns story details
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/stories'
+ *     404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *     500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.get('/:id', stories.fetchStory)
 
 /**
  * @swagger

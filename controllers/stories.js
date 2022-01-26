@@ -44,6 +44,22 @@ const fetchStories = async (req, res) => {
   }
 }
 
+const fetchStory = async (req, res) => {
+  try {
+    const story = await stories.fetchStory(req.params.id)
+    if (!story.storyData) {
+      return res.boom.notFound('Story not found')
+    }
+    return res.json({
+      message: 'Story returned successfully!',
+      story: story.storyData
+    })
+  } catch (err) {
+    logger.error(`Error while fetching story ${err}`)
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+}
+
 /**
  * Updates the story
  *
@@ -73,5 +89,6 @@ const updateStory = async (req, res) => {
 module.exports = {
   addNewStory,
   fetchStories,
+  fetchStory,
   updateStory
 }
