@@ -132,7 +132,12 @@ rds-session-staging
   - Java version 1.8 or higher.
 - Run: `npx firebase emulators:start`
 - The emulator will run and display the url you can access it on.
-- [Future] You can view the emulator UI at: `http://localhost:4000`
+- You can view the emulator UI at: `http://localhost:4000`
+- To run the application with using firebase emulator, run the following command([docs](https://firebase.google.com/docs/emulator-suite/connect_firestore#admin_sdks)):
+
+```shell
+export FIRESTORE_EMULATOR_HOST="localhost:<Firebase emulator PORT>"
+```
 
 ## Running test scripts on Windows
 
