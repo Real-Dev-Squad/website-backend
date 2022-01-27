@@ -145,11 +145,33 @@ const updateTaskStatus = async (req, res) => {
   }
 }
 
+/**
+ * Fetches all the overdue tasks
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const overdueTasks = async (req, res) => {
+  try {
+    const allTasks = await tasks.fetchTasks()
+    const now = Math.floor(Date.now() / 1000)
+    const overDueTasks = allTasks.filter(task => (task.status === 'ASSIGNED' || task.status === 'IN_PROGRESS') && task.endsOn < now)
+    const newAvailableTasks = await tasks.overdueTasks(overDueTasks)
+    return res.json({
+      newAvailableTasks
+    })
+  } catch (err) {
+    logger.error(`Error while setting new task workflow : ${err}`)
+    return res.boom.badImplementation('An internal server error occured')
+  }
+}
+
 module.exports = {
   addNewTask,
   fetchTasks,
   updateTask,
   getSelfTasks,
   getUserTasks,
-  updateTaskStatus
+  updateTaskStatus,
+  overdueTasks
 }

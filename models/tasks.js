@@ -177,7 +177,10 @@ const fetchUserTasks = async (username, statuses = []) => {
 }
 
 const fetchUserActiveAndBlockedTasks = async (username) => {
-  return await fetchUserTasks(username, ['active', 'pending', 'blocked'])
+  return await fetchUserTasks(username,
+    ['active', 'pending', 'blocked', // old task workflow
+      'IN_PROGRESS', 'BLOCKED', 'NEEDS_REVIEW', 'IN_REVIEW', 'SMOKE_TESTING', 'SANITY-CHECK', 'REGRESSION-CHECK'] // new task workflow
+  )
 }
 
 /**
@@ -187,9 +190,32 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
  */
 
 const fetchUserCompletedTasks = async (username) => {
-  return await fetchUserTasks(username, ['completed'])
+  return await fetchUserTasks(username, ['completed', 'COMPLETED'])
 }
 
+/**
+ * Fetch all overdue tasks
+ * @param overdueTasks <Array>: tasks which are overdue
+ * @return {Promsie<Array>}
+ */
+const overdueTasks = async (overDueTasks) => {
+  try {
+    const newAvailableTasks = await Promise.all(overDueTasks.map(async (task) => {
+      let { status, assignee, id } = task
+      status = TASK_STATUS.UNASSIGNED
+      await tasksModel.doc(id).update({ status, assignee: '' })
+      const unassignedTask = await fetchTask(id)
+      return {
+        unassignedMember: assignee,
+        unassignedTask
+      }
+    }))
+    return newAvailableTasks
+  } catch (err) {
+    logger.error('error updating to new task workflow', err)
+    throw err
+  }
+}
 module.exports = {
   updateTask,
   fetchTasks,
@@ -198,5 +224,6 @@ module.exports = {
   fetchUserActiveAndBlockedTasks,
   fetchUserCompletedTasks,
   fetchActiveTaskMembers,
-  fetchSelfTask
+  fetchSelfTask,
+  overdueTasks
 }
