@@ -9,14 +9,19 @@ const cloudinaryMetaData = require('../constants/cloudinary')
  * @param file { Object }: multipart file data
  * @param userId { string }: User id
  */
-const uploadProfilePicture = async (file, userId) => {
+const uploadProfilePicture = async ({ file, userId, coordinates }) => {
   try {
     const parser = new DatauriParser()
     const imageDataUri = parser.format(file.originalname, file.buffer)
     const imageDataInBase64 = imageDataUri.content
     const uploadResponse = await upload(imageDataInBase64, {
       folder: `${cloudinaryMetaData.PROFILE.FOLDER}/${userId}`,
-      tags: cloudinaryMetaData.PROFILE.TAGS
+      tags: cloudinaryMetaData.PROFILE.TAGS,
+      transformation: {
+        ...coordinates,
+        crop: 'crop',
+        fetch_format: 'auto'
+      }
     })
     const { public_id: publicId, secure_url: url } = uploadResponse
     await userModel.updateUserPicture({ publicId, url }, userId)
