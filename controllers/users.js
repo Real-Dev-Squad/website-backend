@@ -12,21 +12,27 @@ const imageService = require('../services/imageService')
 const verifyUser = async (req, res) => {
   try {
     const userId = req.userData.id;
-    await userQuery.addOrUpdate(req.userData.identityStatus, userId);
-    let fetchData = {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        username: req.userData.username,
-        identityURL: req.userData.identityURL,
-      }),
-    };
-    fetch('https://someurl/verify', fetchData)
+    if (!req.userData.identityURl) {
+      return res.boom.serverUnavailable('IdentityURL is Missing')
+    }
+    await userQuery.addOrUpdate({ identityStatus: 'QUEUED' }, userId);
   } catch (error) {
-    logger.error(`Error while Processing the Request : ${error}`);
+    logger.error(`Error while fetching all users: ${error}`)
+    return res.boom.serverUnavailable('Something went wrong please contact admin')
   }
+  let fetchData = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      username: req.userData.username,
+    }),
+  };
+  fetch('https://someurl/verify', fetchData)
+  return res.json({
+    message: 'Your request has been queued successfully'
+  })
 };
 
 

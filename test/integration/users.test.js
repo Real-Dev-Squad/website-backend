@@ -11,6 +11,7 @@ const cleanDb = require('../utils/cleanDb')
 const userData = require('../fixtures/user/user')()
 
 const config = require('config')
+const { function } = require('joi')
 const cookieName = config.get('userToken.cookieName')
 
 chai.use(chaiHttp)
@@ -231,4 +232,36 @@ describe('Users', function () {
         })
     })
   })
+
+  describe('POST /users/verify', function () {
+    it('Should queue the Request', function (done) {
+      chai
+        .request(app)
+        .post('/users/verify')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) { return done() }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          return done()
+        })
+    })
+
+    it('Should return 401 if the user is not logged in', function (done) {
+      chai
+        .request(app)
+        .post('/users/verify')
+        .end((err, res) => {
+          expect(res).to.have.status(401)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Unauthenticated User')
+          return done()
+        })
+    })
+  })
+
 })
+
+
+
+
