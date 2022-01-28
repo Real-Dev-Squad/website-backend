@@ -254,14 +254,12 @@ describe('Users', function () {
         .get('/users/chaincode')
         .end((err, res) => {
           if (err) { return done() }
-          expect(res).to.have.status(200)
+          expect(res).to.have.status(400)
           expect(res.body).to.be.a('object')
           expect(res.body).to.eql({
-            statusCode: 400,
             error: 'Bad Request',
-            message: 'Authorization Failed'
+            message: 'Unauthenticated User'
           })
-          expect(res.body.chaincode).to.be.a('string')
 
           return done()
         })
