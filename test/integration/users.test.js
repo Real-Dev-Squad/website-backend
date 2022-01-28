@@ -254,12 +254,9 @@ describe('Users', function () {
         .get('/users/chaincode')
         .end((err, res) => {
           if (err) { return done() }
-          expect(res).to.have.status(400)
+          expect(res).to.have.status(401)
           expect(res.body).to.be.a('object')
-          expect(res.body).to.eql({
-            error: 'Bad Request',
-            message: 'Unauthenticated User'
-          })
+          expect(res.body.message).to.equal('Unauthenticated User')
 
           return done()
         })
