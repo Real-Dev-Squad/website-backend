@@ -247,5 +247,24 @@ describe('Users', function () {
           return done()
         })
     })
+
+    it('Unauthorized user', function (done) {
+      chai
+        .request(app)
+        .get('/users/chaincode')
+        .end((err, res) => {
+          if (err) { return done() }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'Authorization Failed'
+          })
+          expect(res.body.chaincode).to.be.a('string')
+
+          return done()
+        })
+    })
   })
 })
