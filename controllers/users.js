@@ -157,6 +157,19 @@ const generateChaincode = async (req, res) => {
   }
 }
 
+const identityURL = async (req, res) => {
+  try {
+    const userId = req.userData.id
+    await userQuery.addOrUpdate(req.body, userId)
+    return res.json({
+      message: 'updated identity URL!!'
+    })
+  } catch (error) {
+    logger.error(`Internal Server Error: ${error}`)
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+}
+
 module.exports = {
   generateChaincode,
   updateSelf,
@@ -164,5 +177,6 @@ module.exports = {
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
-  postUserPicture
+  postUserPicture,
+  identityURL
 }

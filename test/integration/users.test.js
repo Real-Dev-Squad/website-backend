@@ -231,6 +231,7 @@ describe('Users', function () {
         })
     })
   })
+  
   describe('GET /users/chaincode', function () {
     it('Should save the username and timestamp in firestore collection and return the document ID as chaincode in response', function (done) {
       chai
@@ -257,7 +258,67 @@ describe('Users', function () {
           expect(res).to.have.status(401)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Unauthenticated User')
+          
+          return done()
+        })
+    })
+  })
 
+  describe('PATCH /users/identityURL', function () {
+    it('Should update the identityURL', function (done) {
+      chai
+        .request(app)
+        .patch('/users/identityURL')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({
+          identityURL: 'http://localhost:3000/healthcheck'
+        })
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('updated identity URL!!')
+          return done()
+        })
+    })
+    it('Should return 400 for invalid identityURL value', function (done) {
+      chai
+        .request(app)
+        .patch('/users/identityURL')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({
+          identityURL: 'random'
+        })
+        .end((err, res) => {
+          if (err) { return done(err) }
+
+          expect(res).to.have.status(400)
+          expect(res.body).to.be.an('object')
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: '"identityURL" must be a valid uri'
+          })
+
+          return done()
+        })
+    })
+    it('Should return 400 for no identityURL value', function (done) {
+      chai
+        .request(app)
+        .patch('/users/identityURL')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send({})
+        .end((err, res) => {
+          if (err) { return done(err) }
+
+          expect(res).to.have.status(400)
+          expect(res.body).to.be.an('object')
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: '"identityURL" is required'
+          })
           return done()
         })
     })
