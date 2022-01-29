@@ -179,6 +179,8 @@ router.get('/self', authenticate, users.getSelfDetails)
  */
 router.get('/isUsernameAvailable/:username', authenticate, users.getUsernameAvailabilty)
 
+router.get('/chaincode', authenticate, users.generateChaincode)
+
 /**
  * @swagger
  * /users/:username:
@@ -208,7 +210,7 @@ router.get('/isUsernameAvailable/:username', authenticate, users.getUsernameAvai
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/chaincode', authenticate, users.generateChaincode)
+
 
 router.get('/:username', users.getUser)
 

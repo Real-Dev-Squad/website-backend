@@ -149,7 +149,7 @@ const generateChaincode = async (req, res) => {
     const chaincode = await chaincodeQuery.storeChaincode(username)
     return res.json({
       chaincode,
-      message: 'Chaincode is returned'
+      message: 'Chaincode returned successfully'
     })
   } catch (error) {
     logger.error(`Error while generating chaincode: ${error}`)

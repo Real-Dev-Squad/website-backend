@@ -248,7 +248,7 @@ describe('Users', function () {
         })
     })
 
-    it('Unauthorized user', function (done) {
+    it('Should return 401 if user not logged in', function (done) {
       chai
         .request(app)
         .get('/users/chaincode')
