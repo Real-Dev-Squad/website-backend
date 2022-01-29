@@ -23,10 +23,7 @@ const getDocFromIds = async (docIds, modelFunc) => {
     if (!Array.isArray(docIds)) {
       return []
     }
-    const promises = docIds.map(async (docId) => {
-      const doc = await modelFunc(docId)
-      return doc
-    })
+    const promises = docIds.map(docId => modelFunc(docId))
     const docData = await Promise.all(promises)
     return docData
   } catch (err) {

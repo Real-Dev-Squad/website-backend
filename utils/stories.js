@@ -56,6 +56,7 @@ const toFirestoreData = async (story) => {
       const validTaskIds = []
       const tasksData = await getDocFromIds(taskIds, fetchTask)
       taskIds.forEach((taskId, index) => {
+        // eslint-disable-next-line security/detect-object-injection
         if (tasksData[index]?.taskData) validTaskIds.push(taskId)
       })
       updatedStory.tasks = validTaskIds
