@@ -211,7 +211,6 @@ router.get('/chaincode', authenticate, users.generateChaincode)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-
 router.get('/:username', users.getUser)
 
 /**

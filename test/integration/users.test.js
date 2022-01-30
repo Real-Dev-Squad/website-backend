@@ -231,7 +231,7 @@ describe('Users', function () {
         })
     })
   })
-  
+
   describe('GET /users/chaincode', function () {
     it('Should save the username and timestamp in firestore collection and return the document ID as chaincode in response', function (done) {
       chai
@@ -258,7 +258,7 @@ describe('Users', function () {
           expect(res).to.have.status(401)
           expect(res.body).to.be.a('object')
           expect(res.body.message).to.equal('Unauthenticated User')
-          
+
           return done()
         })
     })
