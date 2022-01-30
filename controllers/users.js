@@ -1,6 +1,7 @@
 
 const userQuery = require('../models/users')
 const imageService = require('../services/imageService')
+const fetch = require('node-fetch')
 /**
  * Fetches the data about our users
  *
@@ -28,7 +29,7 @@ const verifyUser = async (req, res) => {
       username: req.userData.username
     })
   }
-  fetch('https://someurl/verify', fetchData)
+  fetch(process.env.IDENTITYURL, fetchData)
   return res.json({
     message: 'Your request has been queued successfully'
   })
