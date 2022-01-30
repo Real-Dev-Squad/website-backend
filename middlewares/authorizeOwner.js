@@ -1,4 +1,4 @@
-const users = require('../controllers/users')
+const users = require('../controllers/users');
 /**
  * Middleware to validate the authorized routes to be able to create & Update tasks
  * 1] Verifies the user's role as Application owner
@@ -17,16 +17,16 @@ const users = require('../controllers/users')
 module.exports = async (req, res, next) => {
   try {
     // get user data from `req.userData` for further use
-    const accountOwners = await users.getAccountOwners()
-    const { username } = req.userData
+    const accountOwners = await users.getAccountOwners();
+    const { username } = req.userData;
 
     if (accountOwners.some((owner) => owner.username === username)) {
-      return next()
+      return next();
     } else {
-      return res.boom.forbidden('Unauthorized User')
+      return res.boom.forbidden('Unauthorized User');
     }
   } catch (err) {
-    logger.error(err)
-    return res.boom.badImplementation('Something went wrong please contact admin')
+    logger.error(err);
+    return res.boom.badImplementation('Something went wrong please contact admin');
   }
-}
+};

@@ -1,5 +1,5 @@
 // Import fixtures
-const githubUserInfo = require('../auth/githubUserInfo')()
+const githubUserInfo = require('../auth/githubUserInfo')();
 
 /**
  * User info for GitHub auth response
@@ -22,12 +22,12 @@ module.exports = () => {
       phone: '1234567890',
       email: 'abc@gmail.com',
       roles: {
-        member: true
+        member: true,
       },
       tokens: {
-        githubAccessToken: 'githubAccessToken'
+        githubAccessToken: 'githubAccessToken',
       },
-      status: 'active'
+      status: 'active',
     },
     {
       username: 'nikhil',
@@ -39,7 +39,7 @@ module.exports = () => {
       linkedin_id: 'nikhil-bhandarkar',
       twitter_id: 'whatifi',
       phone: '1234567891',
-      email: 'abc1@gmail.com'
+      email: 'abc1@gmail.com',
     },
     {
       username: 'pranavg',
@@ -53,8 +53,8 @@ module.exports = () => {
       phone: '1234567891',
       email: 'pgajjewar@gmail.com',
       roles: {
-        restricted: true
-      }
+        restricted: true,
+      },
     },
     {
       username: 'sagar',
@@ -68,12 +68,12 @@ module.exports = () => {
       phone: '1234567890',
       email: 'abc@gmail.com',
       tokens: {
-        githubAccessToken: 'githubAccessToken'
+        githubAccessToken: 'githubAccessToken',
       },
       roles: {
         restricted: false,
-        app_owner: true
-      }
+        app_owner: true,
+      },
     },
     {
       username: 'ankush',
@@ -87,11 +87,11 @@ module.exports = () => {
       phone: '1234567890',
       email: 'ad@amazon.com',
       tokens: {
-        githubAccessToken: 'githubAccessToken'
+        githubAccessToken: 'githubAccessToken',
       },
       roles: {
-        super_user: true
-      }
+        super_user: true,
+      },
     },
     {
       username: 'ankita',
@@ -106,13 +106,13 @@ module.exports = () => {
       phone: '1234567890',
       email: 'abc@gmail.com',
       tokens: {
-        githubAccessToken: 'githubAccessToken'
+        githubAccessToken: 'githubAccessToken',
       },
       status: 'active',
       roles: {
         app_owner: true,
-        archivedMember: true
-      }
+        archivedMember: true,
+      },
     },
     {
       username: 'mehul',
@@ -126,13 +126,13 @@ module.exports = () => {
       phone: '1234567891',
       email: 'mehul@gmail.com',
       tokens: {
-        githubAccessToken: 'githubAccessToken'
+        githubAccessToken: 'githubAccessToken',
       },
       status: 'active',
       roles: {
         member: true,
-        archivedMember: true
-      }
-    }
-  ]
-}
+        archivedMember: true,
+      },
+    },
+  ];
+};

@@ -1,4 +1,4 @@
-const recruiterQuery = require('../models/recruiters')
+const recruiterQuery = require('../models/recruiters');
 
 /**
  * Posts the data about the recruiter
@@ -9,20 +9,20 @@ const recruiterQuery = require('../models/recruiters')
 
 const addRecruiter = async (req, res) => {
   try {
-    const result = await recruiterQuery.addRecruiterInfo(req.body, req.params.username)
+    const result = await recruiterQuery.addRecruiterInfo(req.body, req.params.username);
     if (!result) {
-      return res.boom.notFound('User doesn\'t exist')
+      return res.boom.notFound("User doesn't exist");
     }
     return res.json({
       message: 'Request Submission Successful!!',
-      result
-    })
+      result,
+    });
   } catch (error) {
-    logger.error(`Error while adding recruiterInfo: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    logger.error(`Error while adding recruiterInfo: ${error}`);
+    return res.boom.serverUnavailable('Something went wrong please contact admin');
   }
-}
+};
 
 module.exports = {
-  addRecruiter
-}
+  addRecruiter,
+};

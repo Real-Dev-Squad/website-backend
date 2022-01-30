@@ -15,7 +15,7 @@ module.exports = () => {
       reason: 'Test',
       email: 'abc@gmail.com',
       currency: '$',
-      package: 100000
-    }
-  ]
-}
+      package: 100000,
+    },
+  ];
+};

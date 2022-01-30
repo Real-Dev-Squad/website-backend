@@ -40,7 +40,7 @@ module.exports = () => {
               events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
               received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
               type: 'User',
-              site_admin: false
+              site_admin: false,
             },
             labels: [],
             state: 'closed',
@@ -59,11 +59,11 @@ module.exports = () => {
               url: 'https://api.github.com/repos/Real-Dev-Squad/website-backend/pulls/145',
               html_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/145',
               diff_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/145.diff',
-              patch_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/145.patch'
+              patch_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/145.patch',
             },
             body: '',
             performed_via_github_app: null,
-            score: 1
+            score: 1,
           },
           {
             url: 'https://api.github.com/repos/Real-Dev-Squad/website-backend/issues/83',
@@ -94,7 +94,7 @@ module.exports = () => {
               events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
               received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
               type: 'User',
-              site_admin: false
+              site_admin: false,
             },
             labels: [],
             state: 'open',
@@ -117,7 +117,7 @@ module.exports = () => {
               events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
               received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
               type: 'User',
-              site_admin: false
+              site_admin: false,
             },
             assignees: [
               {
@@ -138,8 +138,8 @@ module.exports = () => {
                 events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
                 received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
                 type: 'User',
-                site_admin: false
-              }
+                site_admin: false,
+              },
             ],
             milestone: null,
             comments: 0,
@@ -153,11 +153,11 @@ module.exports = () => {
               url: 'https://api.github.com/repos/Real-Dev-Squad/website-backend/pulls/83',
               html_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/83',
               diff_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/83.diff',
-              patch_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/83.patch'
+              patch_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/83.patch',
             },
             body: '',
             performed_via_github_app: null,
-            score: 1
+            score: 1,
           },
           {
             url: 'https://api.github.com/repos/Real-Dev-Squad/website-static/issues/48',
@@ -188,7 +188,7 @@ module.exports = () => {
               events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
               received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
               type: 'User',
-              site_admin: false
+              site_admin: false,
             },
             labels: [],
             state: 'closed',
@@ -207,11 +207,11 @@ module.exports = () => {
               url: 'https://api.github.com/repos/Real-Dev-Squad/website-static/pulls/48',
               html_url: 'https://github.com/Real-Dev-Squad/website-static/pull/48',
               diff_url: 'https://github.com/Real-Dev-Squad/website-static/pull/48.diff',
-              patch_url: 'https://github.com/Real-Dev-Squad/website-static/pull/48.patch'
+              patch_url: 'https://github.com/Real-Dev-Squad/website-static/pull/48.patch',
             },
             body: "Adding info and image to member's page",
             performed_via_github_app: null,
-            score: 1
+            score: 1,
           },
           {
             url: 'https://api.github.com/repos/Real-Dev-Squad/website-backend/issues/72',
@@ -242,7 +242,7 @@ module.exports = () => {
               events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
               received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
               type: 'User',
-              site_admin: false
+              site_admin: false,
             },
             labels: [],
             state: 'open',
@@ -265,7 +265,7 @@ module.exports = () => {
               events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
               received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
               type: 'User',
-              site_admin: false
+              site_admin: false,
             },
             assignees: [
               {
@@ -286,8 +286,8 @@ module.exports = () => {
                 events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
                 received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
                 type: 'User',
-                site_admin: false
-              }
+                site_admin: false,
+              },
             ],
             milestone: null,
             comments: 0,
@@ -301,11 +301,11 @@ module.exports = () => {
               url: 'https://api.github.com/repos/Real-Dev-Squad/website-backend/pulls/72',
               html_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/72',
               diff_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/72.diff',
-              patch_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/72.patch'
+              patch_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/72.patch',
             },
             body: 'Products api \r\nget /crypto/products\r\nget /crypto/products/id\r\npost /crypto/products    body:{data}\r\n\r\nCrypto user transaction will be done in next pr\r\n ',
             performed_via_github_app: null,
-            score: 1
+            score: 1,
           },
           {
             url: 'https://api.github.com/repos/Real-Dev-Squad/website-crypto/issues/34',
@@ -336,7 +336,7 @@ module.exports = () => {
               events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
               received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
               type: 'User',
-              site_admin: false
+              site_admin: false,
             },
             labels: [],
             state: 'closed',
@@ -355,21 +355,21 @@ module.exports = () => {
               url: 'https://api.github.com/repos/Real-Dev-Squad/website-crypto/pulls/34',
               html_url: 'https://github.com/Real-Dev-Squad/website-crypto/pull/34',
               diff_url: 'https://github.com/Real-Dev-Squad/website-crypto/pull/34.diff',
-              patch_url: 'https://github.com/Real-Dev-Squad/website-crypto/pull/34.patch'
+              patch_url: 'https://github.com/Real-Dev-Squad/website-crypto/pull/34.patch',
             },
             body: 'Changed CSS of transactionCard .\r\nChanged Coin color.\r\nOther minor changes\r\n',
             performed_via_github_app: null,
-            score: 1
-          }
-        ]
-      }
+            score: 1,
+          },
+        ],
+      },
     },
     userWithNoPrs: {
       data: {
         total_count: 0,
         incomplete_results: false,
-        items: []
-      }
+        items: [],
+      },
     },
     userNoTask: {
       data: {
@@ -405,7 +405,7 @@ module.exports = () => {
               events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
               received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
               type: 'User',
-              site_admin: false
+              site_admin: false,
             },
             labels: [],
             state: 'closed',
@@ -424,11 +424,11 @@ module.exports = () => {
               url: 'https://api.github.com/repos/Real-Dev-Squad/website-backend/pulls/145',
               html_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/145',
               diff_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/145.diff',
-              patch_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/145.patch'
+              patch_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/145.patch',
             },
             body: '',
             performed_via_github_app: null,
-            score: 1
+            score: 1,
           },
           {
             url: 'https://api.github.com/repos/Real-Dev-Squad/website-backend/issues/83',
@@ -459,7 +459,7 @@ module.exports = () => {
               events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
               received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
               type: 'User',
-              site_admin: false
+              site_admin: false,
             },
             labels: [],
             state: 'open',
@@ -482,7 +482,7 @@ module.exports = () => {
               events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
               received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
               type: 'User',
-              site_admin: false
+              site_admin: false,
             },
             assignees: [
               {
@@ -503,8 +503,8 @@ module.exports = () => {
                 events_url: 'https://api.github.com/users/prakashchoudhary07/events{/privacy}',
                 received_events_url: 'https://api.github.com/users/prakashchoudhary07/received_events',
                 type: 'User',
-                site_admin: false
-              }
+                site_admin: false,
+              },
             ],
             milestone: null,
             comments: 0,
@@ -518,14 +518,14 @@ module.exports = () => {
               url: 'https://api.github.com/repos/Real-Dev-Squad/website-backend/pulls/83',
               html_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/83',
               diff_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/83.diff',
-              patch_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/83.patch'
+              patch_url: 'https://github.com/Real-Dev-Squad/website-backend/pull/83.patch',
             },
             body: '',
             performed_via_github_app: null,
-            score: 1
-          }
-        ]
-      }
-    }
-  }
-}
+            score: 1,
+          },
+        ],
+      },
+    },
+  };
+};

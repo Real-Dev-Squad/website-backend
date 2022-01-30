@@ -1,5 +1,5 @@
-const auctions = require('../models/auctions')
-const wallet = require('../models/wallets')
+const auctions = require('../models/auctions');
+const wallet = require('../models/wallets');
 
 /**
  * Fetches all the active (ongoing) auctions
@@ -9,16 +9,16 @@ const wallet = require('../models/wallets')
  */
 const fetchAvailableAuctions = async (_req, res) => {
   try {
-    const availableAuctions = await auctions.fetchAvailableAuctions()
+    const availableAuctions = await auctions.fetchAvailableAuctions();
     return res.json({
       message: 'Auctions returned successfully!',
-      auctions: availableAuctions
-    })
+      auctions: availableAuctions,
+    });
   } catch (error) {
-    logger.error(`Error fetching available auctions: ${error}`)
-    return res.boom.badImplementation('An internal server error occured.')
+    logger.error(`Error fetching available auctions: ${error}`);
+    return res.boom.badImplementation('An internal server error occured.');
   }
-}
+};
 
 /**
  * Fetches auction given the auction id
@@ -28,17 +28,17 @@ const fetchAvailableAuctions = async (_req, res) => {
  */
 const fetchAuctionById = async (req, res) => {
   try {
-    const auctionId = req.params.id
-    const auctionData = await auctions.fetchAuctionById(auctionId)
+    const auctionId = req.params.id;
+    const auctionData = await auctions.fetchAuctionById(auctionId);
     if (!auctionData) {
-      return res.boom.notFound('Auction doesn\'t exist')
+      return res.boom.notFound("Auction doesn't exist");
     }
-    return res.json(auctionData)
+    return res.json(auctionData);
   } catch (error) {
-    logger.error(`Error fetching auction: ${error}`)
-    return res.boom.badImplementation('An internal server error occured.')
+    logger.error(`Error fetching auction: ${error}`);
+    return res.boom.badImplementation('An internal server error occured.');
   }
-}
+};
 
 /**
  * Creates new auction
@@ -48,20 +48,20 @@ const fetchAuctionById = async (req, res) => {
  */
 const createNewAuction = async (req, res) => {
   try {
-    const { id: seller } = req.userData
-    const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = req.body
+    const { id: seller } = req.userData;
+    const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = req.body;
 
-    const { currencies } = await wallet.fetchWallet(seller)
-    const itemQuantity = parseInt(currencies[`${itemType}`])
-    if (!itemQuantity || itemQuantity < quantity) return res.boom.forbidden(`You do not have enough of ${itemType}s!`)
+    const { currencies } = await wallet.fetchWallet(seller);
+    const itemQuantity = parseInt(currencies[`${itemType}`]);
+    if (!itemQuantity || itemQuantity < quantity) return res.boom.forbidden(`You do not have enough of ${itemType}s!`);
 
-    const auctionId = await auctions.createNewAuction({ seller, initialPrice, itemType, endTime, quantity })
-    return res.status(201).json({ id: auctionId, message: 'Auction created successfully!' })
+    const auctionId = await auctions.createNewAuction({ seller, initialPrice, itemType, endTime, quantity });
+    return res.status(201).json({ id: auctionId, message: 'Auction created successfully!' });
   } catch (error) {
-    logger.error(`Error creating new auctions: ${error}`)
-    return res.boom.badImplementation('An internal server error occured.')
+    logger.error(`Error creating new auctions: ${error}`);
+    return res.boom.badImplementation('An internal server error occured.');
   }
-}
+};
 
 /**
  * Makes new bid on a given auction
@@ -71,26 +71,26 @@ const createNewAuction = async (req, res) => {
  */
 const makeNewBid = async (req, res) => {
   try {
-    const { id: bidder } = req.userData
-    const auctionId = req.params.id
-    const { bid } = req.body
-    const newBid = await auctions.makeNewBid({ auctionId, bidder, bid })
+    const { id: bidder } = req.userData;
+    const auctionId = req.params.id;
+    const { bid } = req.body;
+    const newBid = await auctions.makeNewBid({ auctionId, bidder, bid });
 
-    if (newBid.auctionNotFound) return res.boom.notFound('Auction doesn\'t exist')
-    if (newBid.noWallet) return res.boom.forbidden('You do not have a wallet!')
-    if (newBid.insufficientMoney) return res.boom.forbidden('You do not have sufficient money')
-    if (newBid.lowBid) return res.boom.forbidden('Your bid was not higher than current one!')
+    if (newBid.auctionNotFound) return res.boom.notFound("Auction doesn't exist");
+    if (newBid.noWallet) return res.boom.forbidden('You do not have a wallet!');
+    if (newBid.insufficientMoney) return res.boom.forbidden('You do not have sufficient money');
+    if (newBid.lowBid) return res.boom.forbidden('Your bid was not higher than current one!');
 
-    return res.status(201).json({ message: 'Successfully placed bid!' })
+    return res.status(201).json({ message: 'Successfully placed bid!' });
   } catch (error) {
-    logger.error(`Error creating new auctions: ${error}`)
-    return res.boom.badImplementation('An internal server error occured.')
+    logger.error(`Error creating new auctions: ${error}`);
+    return res.boom.badImplementation('An internal server error occured.');
   }
-}
+};
 
 module.exports = {
   fetchAuctionById,
   fetchAvailableAuctions,
   createNewAuction,
-  makeNewBid
-}
+  makeNewBid,
+};

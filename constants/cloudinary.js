@@ -6,9 +6,9 @@ module.exports = {
       transformation: [
         {
           quality: 'auto',
-          fetch_format: 'auto'
-        }
-      ]
-    }
-  }
-}
+          fetch_format: 'auto',
+        },
+      ],
+    },
+  },
+};

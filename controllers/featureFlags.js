@@ -1,4 +1,4 @@
-const featureFlagQuery = require('../models/featureFlags')
+const featureFlagQuery = require('../models/featureFlags');
 
 /**
  * Fetches all the featureFlag
@@ -9,16 +9,16 @@ const featureFlagQuery = require('../models/featureFlags')
 
 const getFeatureFlags = async (req, res) => {
   try {
-    const allFeatureFlags = await featureFlagQuery.fetchFeatureFlag()
+    const allFeatureFlags = await featureFlagQuery.fetchFeatureFlag();
     return res.json({
       message: 'FeatureFlags returned successfully!',
-      featureflags: allFeatureFlags.length > 0 ? allFeatureFlags : []
-    })
+      featureflags: allFeatureFlags.length > 0 ? allFeatureFlags : [],
+    });
   } catch (err) {
-    logger.error(`Error while fetching tasks ${err}`)
-    return res.boom.badImplementation('An internal server error occurred')
+    logger.error(`Error while fetching tasks ${err}`);
+    return res.boom.badImplementation('An internal server error occurred');
   }
-}
+};
 
 /**
  * Posts the data of the featureFlag
@@ -29,16 +29,16 @@ const getFeatureFlags = async (req, res) => {
 
 const addFeatureFlag = async (req, res) => {
   try {
-    const featureFlag = await featureFlagQuery.addFeatureFlags(req.body, req.userData.username)
+    const featureFlag = await featureFlagQuery.addFeatureFlags(req.body, req.userData.username);
     return res.json({
       message: 'FeatureFlag added successfully!',
-      data: featureFlag
-    })
+      data: featureFlag,
+    });
   } catch (err) {
-    logger.error(`Error while adding featureFlag info: ${err}`)
-    return res.boom.badImplementation('Something went wrong please contact admin')
+    logger.error(`Error while adding featureFlag info: ${err}`);
+    return res.boom.badImplementation('Something went wrong please contact admin');
   }
-}
+};
 
 /**
  * Update the data of the featureFlag
@@ -49,16 +49,16 @@ const addFeatureFlag = async (req, res) => {
 
 const updateFeatureFlag = async (req, res) => {
   try {
-    const result = await featureFlagQuery.updateFeatureFlags(req.body, req.params.id)
+    const result = await featureFlagQuery.updateFeatureFlags(req.body, req.params.id);
     if (result.isUpdated) {
-      return res.status(204).send()
+      return res.status(204).send();
     }
-    return res.boom.notFound('FeatureFlag doesn\'t exist')
+    return res.boom.notFound("FeatureFlag doesn't exist");
   } catch (err) {
-    logger.error(`Error while updating featureFlag info: ${err}`)
-    return res.boom.badImplementation('Something went wrong please contact admin')
+    logger.error(`Error while updating featureFlag info: ${err}`);
+    return res.boom.badImplementation('Something went wrong please contact admin');
   }
-}
+};
 
 /**
  * Delete featureFlag
@@ -69,22 +69,22 @@ const updateFeatureFlag = async (req, res) => {
 
 const deleteFeatureFlag = async (req, res) => {
   try {
-    const result = await featureFlagQuery.deleteFeatureFlag(req.params.id)
+    const result = await featureFlagQuery.deleteFeatureFlag(req.params.id);
     if (result.isDeleted) {
       return res.json({
-        message: 'FeatureFlag deleted successfully!!'
-      })
+        message: 'FeatureFlag deleted successfully!!',
+      });
     }
-    return res.boom.notFound('featureFlag doesn\'t exist')
+    return res.boom.notFound("featureFlag doesn't exist");
   } catch (err) {
-    logger.error(`Error while deleting featureFlag info: ${err}`)
-    return res.boom.badImplementation('Something went wrong please contact admin')
+    logger.error(`Error while deleting featureFlag info: ${err}`);
+    return res.boom.badImplementation('Something went wrong please contact admin');
   }
-}
+};
 
 module.exports = {
   getFeatureFlags,
   addFeatureFlag,
   updateFeatureFlag,
-  deleteFeatureFlag
-}
+  deleteFeatureFlag,
+};

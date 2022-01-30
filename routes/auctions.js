@@ -1,8 +1,8 @@
-const express = require('express')
-const router = express.Router()
-const authenticate = require('../middlewares/authenticate')
-const auction = require('../controllers/auction')
-const auctionValidator = require('../middlewares/validators/auctions')
+const express = require('express');
+const router = express.Router();
+const authenticate = require('../middlewares/authenticate');
+const auction = require('../controllers/auction');
+const auctionValidator = require('../middlewares/validators/auctions');
 
 /**
  * @swagger
@@ -33,7 +33,7 @@ const auctionValidator = require('../middlewares/validators/auctions')
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:id', auction.fetchAuctionById)
+router.get('/:id', auction.fetchAuctionById);
 
 /**
  * @swagger
@@ -73,7 +73,7 @@ router.get('/:id', auction.fetchAuctionById)
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.get('/', auction.fetchAvailableAuctions)
+router.get('/', auction.fetchAvailableAuctions);
 
 /**
  * @swagger
@@ -122,7 +122,7 @@ router.get('/', auction.fetchAvailableAuctions)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/bid/:id', authenticate, auctionValidator.placeBid, auction.makeNewBid)
+router.post('/bid/:id', authenticate, auctionValidator.placeBid, auction.makeNewBid);
 
 /**
  * @swagger
@@ -159,6 +159,6 @@ router.post('/bid/:id', authenticate, auctionValidator.placeBid, auction.makeNew
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/', authenticate, auctionValidator.createAuction, auction.createNewAuction)
+router.post('/', authenticate, auctionValidator.createAuction, auction.createNewAuction);
 
-module.exports = router
+module.exports = router;

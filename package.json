@@ -12,7 +12,8 @@
     "test-unit": "sh scripts/tests/testUnit.sh",
     "test": "yarn lint && yarn test-unit && yarn test-integration",
     "tdd:watch": "sh scripts/tests/tdd.sh",
-    "generate-api-schema": "node utils/generateAPISchema.js"
+    "generate-api-schema": "node utils/generateAPISchema.js",
+    "pretty": "prettier --write \"./**/*.{js,jsx,json}\""
   },
   "dependencies": {
     "axios": "^0.21.2",
@@ -43,11 +44,13 @@
     "chai": "^4.3.4",
     "chai-http": "^4.3.0",
     "cross-env": "^7.0.3",
-    "eslint": "^7.24.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-mocha": "^8.1.0",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-standard": "^4.1.0",
@@ -57,6 +60,7 @@
     "nodemon": "^2.0.7",
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
+    "prettier": "^2.5.1",
     "sinon": "^10.0.0"
   },
   "engines": {
