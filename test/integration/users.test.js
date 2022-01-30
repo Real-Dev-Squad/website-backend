@@ -242,7 +242,7 @@ describe('Users', function () {
           if (err) { return done() }
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('Chaincode is returned')
+          expect(res.body.message).to.equal('Chaincode returned successfully')
           expect(res.body.chaincode).to.be.a('string')
 
           return done()
