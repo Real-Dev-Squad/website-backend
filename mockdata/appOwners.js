@@ -5,7 +5,7 @@ const appOwners = [
     last_name: 'Narkhede',
     github_id: 'ankurnarkhede',
     github_display_name: 'Ankur Narkhede',
-    incompleteUserDetails: false
+    incompleteUserDetails: false,
   },
   {
     username: 'ankush',
@@ -13,7 +13,7 @@ const appOwners = [
     last_name: 'Dharkar',
     github_id: 'AnkushDharkar',
     github_display_name: 'Ankush Dharkar',
-    incompleteUserDetails: false
+    incompleteUserDetails: false,
   },
   {
     username: 'kratika',
@@ -21,7 +21,7 @@ const appOwners = [
     last_name: 'Chowdhary',
     github_id: 'Kratika0907',
     github_display_name: 'Kratika Chowdhary',
-    incompleteUserDetails: false
+    incompleteUserDetails: false,
   },
   {
     username: 'nikhil',
@@ -29,7 +29,7 @@ const appOwners = [
     last_name: 'Bhandarkar',
     github_id: 'whydonti',
     github_display_name: 'Nikhil Bhandarkar',
-    incompleteUserDetails: false
+    incompleteUserDetails: false,
   },
   {
     username: 'sumit',
@@ -37,7 +37,7 @@ const appOwners = [
     last_name: 'Dhanania',
     github_id: 'sumitd94',
     github_display_name: 'Sumit Dhanania',
-    incompleteUserDetails: false
+    incompleteUserDetails: false,
   },
   {
     username: 'swaraj',
@@ -45,8 +45,8 @@ const appOwners = [
     last_name: 'Rajpure',
     github_id: 'swarajpure',
     github_display_name: 'Swaraj Rajpure',
-    incompleteUserDetails: false
-  }
-]
+    incompleteUserDetails: false,
+  },
+];
 
-module.exports = appOwners
+module.exports = appOwners;

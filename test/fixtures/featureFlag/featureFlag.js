@@ -4,8 +4,8 @@ module.exports = () => {
       name: 'Test-feature',
       title: 'Test',
       config: {
-        enabled: true
-      }
-    }
-  ]
-}
+        enabled: true,
+      },
+    },
+  ];
+};

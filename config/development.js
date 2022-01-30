@@ -3,8 +3,8 @@
  * Defaults set from default.js
  */
 
-const port = 3000
-const localUrl = `http://localhost:${port}`
+const port = 3000;
+const localUrl = `http://localhost:${port}`;
 
 module.exports = {
   port: port,
@@ -13,19 +13,19 @@ module.exports = {
 
   services: {
     rdsApi: {
-      baseUrl: localUrl
+      baseUrl: localUrl,
     },
 
     rdsUi: {
       baseUrl: localUrl,
       routes: {
-        authRedirection: '/healthcheck'
-      }
-    }
+        authRedirection: '/healthcheck',
+      },
+    },
   },
 
   cors: {
-    allowedOrigins: /(\.realdevsquad\.com$)|(localhost)/ // Allow *.realdevsquad.com and localhost for non-production envs
+    allowedOrigins: /(\.realdevsquad\.com$)|(localhost)/, // Allow *.realdevsquad.com and localhost for non-production envs
   },
 
   userToken: {
@@ -51,12 +51,12 @@ module.exports = {
       'NoWsgW64Z/+89cbKFMzgHdvhvL7rQNhBAAm1byPmn8aTV7LlTclMWfb4sV6e+ef8\n' +
       'QnrvpfRSihRktA2dDQJAH+dQBx3nG3bZ9khVAZQ1jTJ7j0cKixaGndFuYS1TJvJ2\n' +
       'Zzn584h/xbSIcP9/4SXmEK3wtoueUtMkvS3yKTvk+w==\n' +
-      '-----END RSA PRIVATE KEY-----'
+      '-----END RSA PRIVATE KEY-----',
   },
 
   integrations: {
     newrelic: {
-      appName: 'RDS_API_development'
-    }
-  }
-}
+      appName: 'RDS_API_development',
+    },
+  },
+};

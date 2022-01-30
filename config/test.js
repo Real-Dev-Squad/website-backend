@@ -3,7 +3,7 @@
  * Defaults set from default.js
  */
 
-const port = 3000
+const port = 3000;
 
 module.exports = {
   enableFileLogs: false,
@@ -12,7 +12,7 @@ module.exports = {
 
   githubOauth: {
     clientId: 'clientId',
-    clientSecret: 'clientSecret'
+    clientSecret: 'clientSecret',
   },
   firestore: `{
     "type": "service_account",
@@ -28,22 +28,24 @@ module.exports = {
   }`,
   services: {
     rdsApi: {
-      baseUrl: `http://localhost:${port}`
-    }
+      baseUrl: `http://localhost:${port}`,
+    },
   },
 
   cors: {
-    allowedOrigins: /(\.realdevsquad\.com$)|(localhost)/ // Allow *.realdevsquad.com and localhost for non-production envs
+    allowedOrigins: /(\.realdevsquad\.com$)|(localhost)/, // Allow *.realdevsquad.com and localhost for non-production envs
   },
 
   userToken: {
-    publicKey: '-----BEGIN PUBLIC KEY-----\n' +
+    publicKey:
+      '-----BEGIN PUBLIC KEY-----\n' +
       'MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHo6sGbw8qk+XU9sBVa4w2aEq01i\n' +
       'oKDMFFQa9mPy0MRScTCsrfEjbypD4VqIjJcwXGmDWKVhMcJ8SMZuJumIJ10vU9ca\n' +
       'WSh/aHhAxiOIqOEe54IyYTwjcn5avdZry3zl62RYQ7tDZCPAR/WvFCIkgRXwjXfC\n' +
       'Xpm4LR6ynKDMvsDNAgMBAAE=\n' +
       '-----END PUBLIC KEY-----',
-    privateKey: '-----BEGIN RSA PRIVATE KEY-----\n' +
+    privateKey:
+      '-----BEGIN RSA PRIVATE KEY-----\n' +
       'MIICWwIBAAKBgHo6sGbw8qk+XU9sBVa4w2aEq01ioKDMFFQa9mPy0MRScTCsrfEj\n' +
       'bypD4VqIjJcwXGmDWKVhMcJ8SMZuJumIJ10vU9caWSh/aHhAxiOIqOEe54IyYTwj\n' +
       'cn5avdZry3zl62RYQ7tDZCPAR/WvFCIkgRXwjXfCXpm4LR6ynKDMvsDNAgMBAAEC\n' +
@@ -57,6 +59,6 @@ module.exports = {
       'NoWsgW64Z/+89cbKFMzgHdvhvL7rQNhBAAm1byPmn8aTV7LlTclMWfb4sV6e+ef8\n' +
       'QnrvpfRSihRktA2dDQJAH+dQBx3nG3bZ9khVAZQ1jTJ7j0cKixaGndFuYS1TJvJ2\n' +
       'Zzn584h/xbSIcP9/4SXmEK3wtoueUtMkvS3yKTvk+w==\n' +
-      '-----END RSA PRIVATE KEY-----'
-  }
-}
+      '-----END RSA PRIVATE KEY-----',
+  },
+};
