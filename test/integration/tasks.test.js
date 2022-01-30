@@ -136,7 +136,7 @@ describe('Tasks', function () {
   describe('GET /tasks/self', function () {
     it('Should get all the active and blocked tasks of the user', function (done) {
       const taskStatus = ['active', 'pending', 'blocked', // old task workflow
-        'IN_PROGRESS', 'BLOCKED', 'NEEDS_REVIEW', 'IN_REVIEW', 'APPROVED', 'SMOKE_TESTING', 'SANITY-CHECK', 'REGRESSION-CHECK']
+        'IN_PROGRESS', 'BLOCKED', 'SMOKE_TESTING']
 
       chai
         .request(app)
