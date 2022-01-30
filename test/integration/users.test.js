@@ -317,6 +317,4 @@ describe('Users', function () {
         })
     })
   })
-
-
 })
