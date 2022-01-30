@@ -53,7 +53,7 @@ const fetchTasks = async (req, res) => {
  */
 const getUserTasks = async (req, res) => {
   try {
-    const { status } = req.query
+    let { status } = req.query
     const { username } = req.params
     let allTasks = []
 
@@ -61,7 +61,15 @@ const getUserTasks = async (req, res) => {
       return res.boom.notFound('Status not found!')
     }
 
-    allTasks = await tasks.fetchUserTasks(username, status ? [status] : [])
+    if (status) {
+      if (status === 'active') {
+        status = ['active', 'blocked', 'pending', 'IN_PROGRESS', 'BLOCKED', 'SMOKE_TESTING']
+      } else {
+        status = [status]
+      }
+    }
+    logger.info(status)
+    allTasks = await tasks.fetchUserTasks(username, status || [])
 
     if (allTasks.userNotFound) {
       return res.boom.notFound('User doesn\'t exist')
@@ -161,7 +169,7 @@ const overdueTasks = async (req, res) => {
       newAvailableTasks
     })
   } catch (err) {
-    logger.error(`Error while setting new task workflow : ${err}`)
+    logger.error(`Error while fetching overdue tasks : ${err}`)
     return res.boom.badImplementation('An internal server error occured')
   }
 }

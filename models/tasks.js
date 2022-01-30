@@ -65,7 +65,8 @@ const fetchTasks = async () => {
 
 const fetchActiveTaskMembers = async () => {
   try {
-    const tasksSnapshot = await tasksModel.where('type', '==', TASK_TYPE.FEATURE).where('status', '==', TASK_STATUS.ACTIVE).get()
+    const status = ['active', 'blocked', 'pending', 'IN_PROGRESS', 'BLOCKED', 'SMOKE_TESTING']
+    const tasksSnapshot = await tasksModel.where('type', '==', TASK_TYPE.FEATURE).where('status', 'in', status).get()
     const activeMembers = new Set()
     if (!tasksSnapshot.empty) {
       tasksSnapshot.forEach((task) => {
@@ -92,7 +93,7 @@ const fetchTask = async (taskId) => {
     const task = await tasksModel.doc(taskId).get()
     const taskData = await fromFirestoreData(task.data())
     if (taskData?.status) {
-      taskData.status = TASK_STATUS[taskData.status]
+      taskData.status = TASK_STATUS[taskData.status.toUpperCase()]
     }
     return { taskData }
   } catch (err) {
@@ -114,7 +115,7 @@ const fetchSelfTask = async (taskId, userId) => {
     if (!taskData) return { taskNotFound: true }
     if (userId !== taskData.assignee) return { notAssignedToYou: true }
     const taskfromFirestoreData = await fromFirestoreData(taskData)
-    const taskList = { ...taskfromFirestoreData, status: TASK_STATUS[taskfromFirestoreData.status] }
+    const taskList = { ...taskfromFirestoreData, status: TASK_STATUS[taskfromFirestoreData.status.toUpperCase()] }
     return { taskData: taskList }
   } catch (err) {
     logger.error('Error retrieving self task data', err)
@@ -179,7 +180,7 @@ const fetchUserTasks = async (username, statuses = []) => {
 const fetchUserActiveAndBlockedTasks = async (username) => {
   return await fetchUserTasks(username,
     ['active', 'pending', 'blocked', // old task workflow
-      'IN_PROGRESS', 'BLOCKED', 'NEEDS_REVIEW', 'IN_REVIEW', 'SMOKE_TESTING', 'SANITY-CHECK', 'REGRESSION-CHECK'] // new task workflow
+      'IN_PROGRESS', 'BLOCKED', 'SMOKE_TESTING'] // new task workflow
   )
 }
 
