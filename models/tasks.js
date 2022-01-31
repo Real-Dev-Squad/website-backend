@@ -47,7 +47,7 @@ const fetchTasks = async () => {
     const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
     const taskList = updatedTasks.map(task => {
-      task.status = TASK_STATUS[task.status.toUpperCase()]
+      task.status = TASK_STATUS[task.status.toUpperCase()] || task.status
       return task
     })
     return taskList
@@ -93,7 +93,7 @@ const fetchTask = async (taskId) => {
     const task = await tasksModel.doc(taskId).get()
     const taskData = await fromFirestoreData(task.data())
     if (taskData?.status) {
-      taskData.status = TASK_STATUS[taskData.status.toUpperCase()]
+      taskData.status = TASK_STATUS[taskData.status.toUpperCase()] || task.status
     }
     return { taskData }
   } catch (err) {
@@ -115,7 +115,7 @@ const fetchSelfTask = async (taskId, userId) => {
     if (!taskData) return { taskNotFound: true }
     if (userId !== taskData.assignee) return { notAssignedToYou: true }
     const taskfromFirestoreData = await fromFirestoreData(taskData)
-    const taskList = { ...taskfromFirestoreData, status: TASK_STATUS[taskfromFirestoreData.status.toUpperCase()] }
+    const taskList = { ...taskfromFirestoreData, status: TASK_STATUS[taskfromFirestoreData.status.toUpperCase()] || task.status }
     return { taskData: taskList }
   } catch (err) {
     logger.error('Error retrieving self task data', err)
@@ -203,7 +203,7 @@ const overdueTasks = async (overDueTasks) => {
   try {
     const newAvailableTasks = await Promise.all(overDueTasks.map(async (task) => {
       let { status, assignee, id } = task
-      status = TASK_STATUS.UNASSIGNED
+      status = TASK_STATUS.AVAILABLE
       await tasksModel.doc(id).update({ status, assignee: '' })
       const unassignedTask = await fetchTask(id)
       return {
