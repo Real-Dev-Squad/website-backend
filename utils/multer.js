@@ -26,7 +26,7 @@ const multerErrorHandling = (err, req, res, next) => {
   if (err.code === 'LIMIT_FILE_SIZE') {
     res.boom.entityTooLarge(errorMessage.FILE_TOO_LARGE(profileFileSize / MB_1))
   } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-    res.boom.badImplementation(errorMessage.ONLY_ONE_FILE_ALLOWED)
+    res.boom.badData(errorMessage.ONLY_ONE_FILE_ALLOWED)
   } else if (err.code === 'TYPE_UNSUPPORTED_FILE') {
     res.boom.unsupportedMediaType(errorMessage.ONLY_IMAGE_SUPPORTED)
   } else {
