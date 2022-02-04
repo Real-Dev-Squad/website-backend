@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "lib": ["esnext"],
+    "allowJs": true,
+    "outDir": "./build",
+    "strict": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "checkJs": false
+  },
+
+  "exclude": ["node_modules"],
+  "include": ["./**/*.ts"],
+  "typeRoots": ["./node_modules/@types", "./types"]
+}
