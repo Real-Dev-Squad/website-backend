@@ -166,6 +166,7 @@ const overdueTasks = async (req, res) => {
     const overDueTasks = allTasks.filter(task => (task.status === 'ASSIGNED' || task.status === 'IN_PROGRESS') && task.endsOn < now)
     const newAvailableTasks = await tasks.overdueTasks(overDueTasks)
     return res.json({
+      message: 'Overdue Tasks returned successfully!',
       newAvailableTasks
     })
   } catch (err) {
