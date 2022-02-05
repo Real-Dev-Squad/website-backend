@@ -1,16 +1,22 @@
 /**
  * Initialise globals
  */
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const config = require('config')
+// @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'global'.
 global.config = config
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const logger = require('./utils/logger')
+// @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'global'.
 global.logger = logger
 
 /**
  * Module dependencies.
  */
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const http = require('http')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const app = require('./app')
 
 /**
@@ -38,7 +44,7 @@ server.on('listening', onListening)
  * Event listener for HTTP server "error" event.
  */
 
-function onError (error) {
+function onError (error: any) {
   if (error.syscall !== 'listen') {
     throw error
   }
@@ -51,12 +57,14 @@ function onError (error) {
   switch (error.code) {
     case 'EACCES':
       logger.error(bind + ' requires elevated privileges')
+      // @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
       process.exit(1)
       // eslint-disable-next-line no-unreachable
       break
 
     case 'EADDRINUSE':
       logger.error(bind + ' is already in use')
+      // @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
       process.exit(1)
       // eslint-disable-next-line no-unreachable
       break
@@ -71,7 +79,9 @@ function onError (error) {
  */
 
 function onListening () {
+  // @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
   logger.info(`Express API running on port:${port} with environment:${process.env.NODE_ENV}`)
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = server
