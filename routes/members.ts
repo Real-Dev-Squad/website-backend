@@ -1,10 +1,18 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'express'.
 const express = require('express')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'router'.
 const router = express.Router()
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'getMembers... Remove this comment to see the full error message
 const { getMembers, getIdleMembers, migrateUserRoles, deleteIsMember, moveToMembers } = require('../controllers/members')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'authorizeU... Remove this comment to see the full error message
 const { authorizeUser } = require('../middlewares/authorization')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'authentica... Remove this comment to see the full error message
 const authenticate = require('../middlewares/authenticate')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'addRecruit... Remove this comment to see the full error message
 const { addRecruiter } = require('../controllers/recruiters')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'validateRe... Remove this comment to see the full error message
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const { SUPER_USER } = require('../constants/roles')
 
 /**
@@ -202,4 +210,5 @@ router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser
  */
 router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), deleteIsMember)
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = router

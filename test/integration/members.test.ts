@@ -1,45 +1,62 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'chai'.
 const chai = require('chai')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'expect'.
 const { expect } = chai
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'chaiHttp'.
 const chaiHttp = require('chai-http')
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'app'.
 const app = require('../../server')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'authServic... Remove this comment to see the full error message
 const authService = require('../../services/authService')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'addUser'.
 const addUser = require('../utils/addUser')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'cleanDb'.
 const cleanDb = require('../utils/cleanDb')
 
 // Import fixtures
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userData'.
 const userData = require('../fixtures/user/user')()
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'config'.
 const config = require('config')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'cookieName... Remove this comment to see the full error message
 const cookieName = config.get('userToken.cookieName')
 
 chai.use(chaiHttp)
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'superUser'... Remove this comment to see the full error message
 const superUser = userData[4]
 const userAlreadyMember = userData[0]
 const userToBeMadeMember = userData[1]
 const nonSuperUser = userData[2]
 
+// @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
 describe('Members', function () {
-  let jwt
+  let jwt: any
 
+  // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'afterEach'.
   afterEach(async function () {
     await addUser()
   })
 
+  // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'after'.
   after(async function () {
     await cleanDb()
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('GET /members', function () {
+    // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'before'.
     before(async function () {
       await cleanDb()
     })
-    it('Should return empty array if no member is found', function (done) {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('Should return empty array if no member is found', function (done: any) {
       chai
         .request(app)
         .get('/members')
-        .end((err, res) => {
+        .end((err: any, res: any) => {
           if (err) { return done(err) }
 
           expect(res).to.have.status(200)
@@ -51,11 +68,12 @@ describe('Members', function () {
         })
     })
 
-    it('Get all the members in the database', function (done) {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('Get all the members in the database', function (done: any) {
       chai
         .request(app)
         .get('/members')
-        .end((err, res) => {
+        .end((err: any, res: any) => {
           if (err) { return done(err) }
 
           expect(res).to.have.status(200)
@@ -69,15 +87,18 @@ describe('Members', function () {
     })
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('GET /members/idle', function () {
+    // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'before'.
     before(async function () {
       await cleanDb()
     })
-    it('Should return empty array if no idle member is found', function (done) {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('Should return empty array if no idle member is found', function (done: any) {
       chai
         .request(app)
         .get('/members/idle')
-        .end((err, res) => {
+        .end((err: any, res: any) => {
           if (err) { return done(err) }
 
           expect(res).to.have.status(200)
@@ -89,11 +110,12 @@ describe('Members', function () {
         })
     })
 
-    it('Get all the idle members in the database', function (done) {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('Get all the idle members in the database', function (done: any) {
       chai
         .request(app)
         .get('/members/idle')
-        .end((err, res) => {
+        .end((err: any, res: any) => {
           if (err) { return done(err) }
 
           expect(res).to.have.status(200)
@@ -107,19 +129,22 @@ describe('Members', function () {
     })
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('PATCH /members/moveToMembers/:username', function () {
+    // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'before'.
     before(async function () {
       await cleanDb()
       const userId = await addUser(superUser)
       jwt = authService.generateAuthToken({ userId })
     })
 
-    it("Should return 404 if user doesn't exist", function (done) {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it("Should return 404 if user doesn't exist", function (done: any) {
       chai
         .request(app)
         .patch(`/members/moveToMembers/${userToBeMadeMember.username}`)
         .set('cookie', `${cookieName}=${jwt}`)
-        .end((err, res) => {
+        .end((err: any, res: any) => {
           if (err) { return done(err) }
 
           expect(res).to.have.status(404)
@@ -130,13 +155,14 @@ describe('Members', function () {
         })
     })
 
-    it('Should make the user a member', function (done) {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('Should make the user a member', function (done: any) {
       addUser(userToBeMadeMember).then(() => {
         chai
           .request(app)
           .patch(`/members/moveToMembers/${userToBeMadeMember.username}`)
           .set('cookie', `${cookieName}=${jwt}`)
-          .end((err, res) => {
+          .end((err: any, res: any) => {
             if (err) { return done(err) }
 
             expect(res).to.have.status(204)
@@ -148,13 +174,14 @@ describe('Members', function () {
       })
     })
 
-    it('Should return 400 if user is already a member', function (done) {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('Should return 400 if user is already a member', function (done: any) {
       addUser(userAlreadyMember).then(() => {
         chai
           .request(app)
           .patch(`/members/moveToMembers/${userAlreadyMember.username}`)
           .set('cookie', `${cookieName}=${jwt}`)
-          .end((err, res) => {
+          .end((err: any, res: any) => {
             if (err) { return done(err) }
 
             expect(res).to.have.status(400)
@@ -166,14 +193,15 @@ describe('Members', function () {
       })
     })
 
-    it('Should return 401 if user is not a super_user', function (done) {
-      addUser(nonSuperUser).then(nonSuperUserId => {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('Should return 401 if user is not a super_user', function (done: any) {
+      addUser(nonSuperUser).then((nonSuperUserId: any) => {
         const nonSuperUserJwt = authService.generateAuthToken({ nonSuperUserId })
         chai
           .request(app)
           .patch(`/members/moveToMembers/${nonSuperUser.username}`)
           .set('cookie', `${cookieName}=${nonSuperUserJwt}`)
-          .end((err, res) => {
+          .end((err: any, res: any) => {
             if (err) { return done(err) }
 
             expect(res).to.have.status(401)

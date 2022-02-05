@@ -1,4 +1,5 @@
 // Import fixtures
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'githubUser... Remove this comment to see the full error message
 const githubUserInfo = require('../auth/githubUserInfo')()
 
 /**
@@ -7,6 +8,7 @@ const githubUserInfo = require('../auth/githubUserInfo')()
  *
  * @return {Object}
  */
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = () => {
   return [
     {

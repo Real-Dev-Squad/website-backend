@@ -1,13 +1,18 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'githubServ... Remove this comment to see the full error message
 const githubService = require('../services/githubService')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'tasks'.
 const tasks = require('../models/tasks')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchUser'... Remove this comment to see the full error message
 const { fetchUser } = require('../models/users')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userUtils'... Remove this comment to see the full error message
 const userUtils = require('../utils/users')
 /**
  * Get the contributions of the user
  * @param {string} username
  */
 
-const getUserContributions = async (username) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'getUserCon... Remove this comment to see the full error message
+const getUserContributions = async (username: any) => {
   const contributions = {}
   const { data } = await githubService.fetchPRsByUser(username)
   const allUserTasks = await tasks.fetchUserTasks(username)
@@ -20,6 +25,7 @@ const getUserContributions = async (username) => {
     const participantsDetailsMap = new Map()
     const prMaps = new Map()
 
+    // @ts-expect-error ts-migrate(7006) FIXME: Parameter 'pr' implicitly has an 'any' type.
     allPRsDetails.forEach(pr => {
       prMaps.set(pr.url, pr)
     })
@@ -28,6 +34,7 @@ const getUserContributions = async (username) => {
       const noteworthyObject = {}
       const participantsDetails = []
 
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'task' does not exist on type '{}'.
       noteworthyObject.task = extractTaskdetails(task)
 
       if (Array.isArray(task.participants)) {
@@ -44,10 +51,11 @@ const getUserContributions = async (username) => {
         }
       }
 
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'task' does not exist on type '{}'.
       noteworthyObject.task.participants = participantsDetails
-      const prList = []
+      const prList: any = []
 
-      task.links.forEach(link => {
+      task.links.forEach((link: any) => {
         const prObject = prMaps.get(link)
         if (prObject) {
           prList.push(prObject)
@@ -55,6 +63,7 @@ const getUserContributions = async (username) => {
         }
       })
 
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'prList' does not exist on type '{}'.
       noteworthyObject.prList = prList
 
       if (task.isNoteworthy) {
@@ -64,6 +73,7 @@ const getUserContributions = async (username) => {
       }
     }
 
+    // @ts-expect-error ts-migrate(2569) FIXME: Type 'IterableIterator<any>' is not an array type ... Remove this comment to see the full error message
     for (const prDetails of prMaps.values()) {
       const allObject = {
         prList: [prDetails],
@@ -72,7 +82,9 @@ const getUserContributions = async (username) => {
       all.push(allObject)
     }
   }
+  // @ts-expect-error ts-migrate(2339) FIXME: Property 'noteworthy' does not exist on type '{}'.
   contributions.noteworthy = noteworthy
+  // @ts-expect-error ts-migrate(2339) FIXME: Property 'all' does not exist on type '{}'.
   contributions.all = all
   return contributions
 }
@@ -82,9 +94,17 @@ const getUserContributions = async (username) => {
  * @param data {Object} - Object returned by Github API
  */
 
-const extractPRdetails = (data) => {
-  const allPRs = []
-  data.items.forEach(({ title, user, html_url: url, state, created_at: createdAt, updated_at: updatedAt }) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'extractPRd... Remove this comment to see the full error message
+const extractPRdetails = (data: any) => {
+  const allPRs: any = []
+  data.items.forEach(({
+    title,
+    user,
+    html_url: url,
+    state,
+    created_at: createdAt,
+    updated_at: updatedAt
+  }: any) => {
     allPRs.push({
       title,
       state,
@@ -102,7 +122,7 @@ const extractPRdetails = (data) => {
  * @param data {Object} - Object returned by Task API
  */
 
-const extractTaskdetails = (data) => {
+const extractTaskdetails = (data: any) => {
   const { title, purpose, endsOn, startedOn, dependsOn, status, participants, featureUrl, isNoteworthy } = data
   return {
     title,
@@ -122,7 +142,7 @@ const extractTaskdetails = (data) => {
  * @param username {string}
  */
 
-const getUserDetails = async (username) => {
+const getUserDetails = async (username: any) => {
   const { user } = await fetchUser({ username })
   const userDetails = extractUserDetails(user)
   return userDetails
@@ -133,7 +153,7 @@ const getUserDetails = async (username) => {
  * @param data {Object} - Object returned by User api
  */
 
-const extractUserDetails = (data) => {
+const extractUserDetails = (data: any) => {
   const { username, firstname, lastname, img } = data
   if (!data.incompleteUserDetails) {
     return {
@@ -147,6 +167,7 @@ const extractUserDetails = (data) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   getUserContributions
 }

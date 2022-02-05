@@ -1,5 +1,8 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'firestore'... Remove this comment to see the full error message
 const firestore = require('../utils/firestore')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'featureFla... Remove this comment to see the full error message
 const featureFlagModel = firestore.collection('featureFlags')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userModel'... Remove this comment to see the full error message
 const userModel = require('./users')
 
 /**
@@ -10,16 +13,17 @@ const userModel = require('./users')
 const fetchFeatureFlag = async () => {
   try {
     const snapshot = await featureFlagModel.get()
-    const featureFlags = []
-    snapshot.forEach((doc) => {
+    const featureFlags: any = []
+    snapshot.forEach((doc: any) => {
       featureFlags.push({
         id: doc.id,
         ...doc.data()
       })
     })
-    const users = []
+    const users: any = []
     const result = {}
 
+    // @ts-expect-error ts-migrate(7006) FIXME: Parameter 'item' implicitly has an 'any' type.
     featureFlags.forEach((item) => {
       if (!users.includes(item.owner)) { users.push(item.owner) }
     })
@@ -35,9 +39,11 @@ const fetchFeatureFlag = async () => {
       Object.assign(result, image)
     }
 
+    // @ts-expect-error ts-migrate(7006) FIXME: Parameter 'item' implicitly has an 'any' type.
     featureFlags.forEach((item) => {
       item.owner = {
         username: item.owner,
+        // @ts-expect-error ts-migrate(7053) FIXME: Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         img: result[item.owner]
       }
     })
@@ -55,7 +61,7 @@ const fetchFeatureFlag = async () => {
  * @param username { String }: Username String to be used to add owner in feature flag object
  * @return {Promise<{featureFlagData:object}>}
  */
-const addFeatureFlags = async (featureFlag, username) => {
+const addFeatureFlags = async (featureFlag: any, username: any) => {
   try {
     featureFlag.created_at = Date.now()
     featureFlag.updated_at = featureFlag.created_at
@@ -77,7 +83,8 @@ const addFeatureFlags = async (featureFlag, username) => {
  * @param featureFlagId { String }: feature flag Id String to be used to update the feature Flag
  * @return {Promise<{isUpdated: boolean}>}
  */
-const updateFeatureFlags = async (featureFlag, featureFlagId) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'updateFeat... Remove this comment to see the full error message
+const updateFeatureFlags = async (featureFlag: any, featureFlagId: any) => {
   try {
     const doc = await featureFlagModel.doc(featureFlagId).get()
     if (!doc.data()) {
@@ -108,7 +115,8 @@ const updateFeatureFlags = async (featureFlag, featureFlagId) => {
  * @param featureFlagId { String }: feature flag Id String to be used to delete the feature Flag
  * @return {Promise<{isDeleted: boolean}>}
  */
-const deleteFeatureFlag = async (featureFlagId) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'deleteFeat... Remove this comment to see the full error message
+const deleteFeatureFlag = async (featureFlagId: any) => {
   try {
     const doc = await featureFlagModel.doc(featureFlagId).get()
     if (!doc.exists) {
@@ -126,6 +134,7 @@ const deleteFeatureFlag = async (featureFlagId) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   fetchFeatureFlag,
   addFeatureFlags,

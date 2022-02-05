@@ -1,3 +1,4 @@
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const tradeService = require('../services/tradingService')
 /**
  * New Trading Request
@@ -5,7 +6,8 @@ const tradeService = require('../services/tradingService')
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const trade = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'trade'.
+const trade = async (req: any, res: any) => {
   try {
     const { id: userId, username } = req.userData
     const tradeStockData = {
@@ -26,6 +28,7 @@ const trade = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   trade
 }

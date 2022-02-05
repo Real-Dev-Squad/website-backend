@@ -1,5 +1,7 @@
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const challengeQuery = require('../models/challenges')
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'ERROR_MESS... Remove this comment to see the full error message
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
 /**
@@ -8,7 +10,8 @@ const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
  * @param {Object} res - Express response object
  */
 
-const fetchChallenges = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchChall... Remove this comment to see the full error message
+const fetchChallenges = async (req: any, res: any) => {
   try {
     const allChallenges = await challengeQuery.fetchChallenges()
     const promiseArray = await getParticipantsofChallenges(allChallenges)
@@ -29,7 +32,8 @@ const fetchChallenges = async (req, res) => {
  * @param {Object} res - Express response object
  */
 
-const createChallenge = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'createChal... Remove this comment to see the full error message
+const createChallenge = async (req: any, res: any) => {
   try {
     const challengeAdded = await challengeQuery.postChallenge(req.body)
     if (challengeAdded) {
@@ -49,14 +53,14 @@ const createChallenge = async (req, res) => {
  * @param {Array} allChallenges
  * @returns {Promise<participants|Array>}
  */
-const getParticipantsofChallenges = async (allChallenges) => {
-  return allChallenges.map(async (challenge) => {
+const getParticipantsofChallenges = async (allChallenges: any) => {
+  return allChallenges.map(async (challenge: any) => {
     const participants = await challengeQuery.fetchParticipantsData(challenge.participants)
     return {
       ...challenge,
       participants
     }
-  })
+  });
 }
 
 /**
@@ -65,7 +69,7 @@ const getParticipantsofChallenges = async (allChallenges) => {
  * @param {Object} res - Express response object
  */
 
-const subscribeToChallenge = async (req, res) => {
+const subscribeToChallenge = async (req: any, res: any) => {
   try {
     const { user_id: userId, challenge_id: challengeId } = req.body
     const subscribeUser = await challengeQuery.subscribeUserToChallenge(userId, challengeId)
@@ -83,6 +87,7 @@ const subscribeToChallenge = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   fetchChallenges,
   createChallenge,

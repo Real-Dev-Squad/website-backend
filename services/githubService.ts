@@ -1,15 +1,28 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetch'.
 const { fetch } = require('../utils/fetch')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchUser'... Remove this comment to see the full error message
 const { fetchUser } = require('../models/users')
 /**
  * Extracts only the necessary details required from the object returned by Github API
  * @param data {Object} - Object returned by Github API
  */
 
-const extractPRdetails = (data) => {
-  const allPRs = []
-  data.items.forEach(({ title, user, html_url: url, state, created_at: createdAt, updated_at: updatedAt, repository_url: repositoryUrl, labels, assignees }) => {
-    const allAssignees = assignees.map(object => object.login)
-    const allLabels = labels.map(object => object.name)
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'extractPRd... Remove this comment to see the full error message
+const extractPRdetails = (data: any) => {
+  const allPRs: any = []
+  data.items.forEach(({
+    title,
+    user,
+    html_url: url,
+    state,
+    created_at: createdAt,
+    updated_at: updatedAt,
+    repository_url: repositoryUrl,
+    labels,
+    assignees
+  }: any) => {
+    const allAssignees = assignees.map((object: any) => object.login)
+    const allLabels = labels.map((object: any) => object.name)
     const repositoryUrlSplit = repositoryUrl.split('/')
     const repository = repositoryUrlSplit[repositoryUrlSplit.length - 1]
     allPRs.push({
@@ -35,10 +48,11 @@ const extractPRdetails = (data) => {
  * @param searchParams {Object} - List of params to create github API URL
  * @param resultsOptions {Object} - Ordering and pagination of results
  */
-const getGithubURL = (searchParams, resultsOptions = {}) => {
+const getGithubURL = (searchParams: any, resultsOptions = {}) => {
   const baseURL = config.get('githubApi.baseUrl')
   const issuesAndPRsPath = '/search/issues'
 
+  // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'URL'.
   const urlObj = new URL(baseURL)
   urlObj.pathname = issuesAndPRsPath
 
@@ -71,7 +85,7 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
  * @access private
  * @param url {string} - URL on github to call
  */
-function getFetch (url) {
+function getFetch (url: any) {
   return fetch(url, 'get', null, null, null, {
     auth: {
       username: config.get('githubOauth.clientId'),
@@ -85,7 +99,7 @@ function getFetch (url) {
  * @param username {string} - Username String
  */
 
-const fetchPRsByUser = async (username) => {
+const fetchPRsByUser = async (username: any) => {
   try {
     const { user } = await fetchUser({ username })
     const url = getGithubURL({
@@ -138,6 +152,7 @@ const fetchOpenPRs = async (per_page = 10, page = 1) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,

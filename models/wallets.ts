@@ -1,4 +1,6 @@
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const { INITIAL_WALLET } = require('../constants/wallets')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'firestore'... Remove this comment to see the full error message
 const firestore = require('../utils/firestore')
 const walletModel = firestore.collection('wallets')
 
@@ -6,7 +8,8 @@ const walletModel = firestore.collection('wallets')
  * Fetches the data from user wallet
  * @return {Promise<walletModel|object>}
  */
-const fetchWallet = async (userId) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchWalle... Remove this comment to see the full error message
+const fetchWallet = async (userId: any) => {
   try {
     const walletDocs = await walletModel.where('userId', '==', userId).limit(1).get()
     const [userWallet] = walletDocs.docs
@@ -24,7 +27,8 @@ const fetchWallet = async (userId) => {
  * Create new wallet for user
  * @return {Promise<walletModel|object>}
  */
-const createWallet = async (userId, currencies = {}) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'createWall... Remove this comment to see the full error message
+const createWallet = async (userId: any, currencies = {}) => {
   try {
     const walletData = {
       userId,
@@ -46,7 +50,8 @@ const createWallet = async (userId, currencies = {}) => {
  * Update wallet for user
  * @return {Promise<walletModel|object>}
  */
-const updateWallet = async (userId, currencies) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'updateWall... Remove this comment to see the full error message
+const updateWallet = async (userId: any, currencies: any) => {
   try {
     let userWallet = await fetchWallet(userId)
     if (!userWallet) {
@@ -54,6 +59,7 @@ const updateWallet = async (userId, currencies) => {
     }
     const firestoreKeysObject = {}
     for (const key in currencies) {
+      // @ts-expect-error ts-migrate(7053) FIXME: Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       firestoreKeysObject[`currencies.${key}`] = currencies[`${key}`]
     }
     const walletRef = walletModel.doc(userWallet.id)
@@ -70,6 +76,7 @@ const updateWallet = async (userId, currencies) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   fetchWallet,
   updateWallet,

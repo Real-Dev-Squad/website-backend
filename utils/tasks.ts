@@ -1,8 +1,11 @@
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'getUsernam... Remove this comment to see the full error message
 const { getUsername, getUserId, getParticipantUsernames, getParticipantUserIds } = require('./users')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'TASK_TYPE'... Remove this comment to see the full error message
 const { TASK_TYPE } = require('../constants/tasks')
 
-const fromFirestoreData = async (task) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fromFirest... Remove this comment to see the full error message
+const fromFirestoreData = async (task: any) => {
   if (!task) {
     return task
   }
@@ -29,7 +32,8 @@ const fromFirestoreData = async (task) => {
   }
 }
 
-const toFirestoreData = async (task) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'toFirestor... Remove this comment to see the full error message
+const toFirestoreData = async (task: any) => {
   if (!task) {
     return task
   }
@@ -45,10 +49,12 @@ const toFirestoreData = async (task) => {
   return updatedTask
 }
 
-const buildTasks = (tasks, initialTaskArray = []) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'buildTasks... Remove this comment to see the full error message
+const buildTasks = (tasks: any, initialTaskArray = []) => {
   if (!tasks.empty) {
-    tasks.forEach((task) => {
+    tasks.forEach((task: any) => {
       initialTaskArray.push({
+        // @ts-expect-error ts-migrate(2322) FIXME: Type 'any' is not assignable to type 'never'.
         id: task.id,
         ...task.data()
       })
@@ -58,6 +64,7 @@ const buildTasks = (tasks, initialTaskArray = []) => {
   return initialTaskArray
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   fromFirestoreData,
   toFirestoreData,

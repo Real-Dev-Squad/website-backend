@@ -1,3 +1,4 @@
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const badgeQuery = require('../models/badges')
 
 /**
@@ -7,7 +8,7 @@ const badgeQuery = require('../models/badges')
  * @param res {Object} - Express response object
  */
 
-const getBadges = async (req, res) => {
+const getBadges = async (req: any, res: any) => {
   try {
     const allBadges = await badgeQuery.fetchBadges(req.query)
     return res.json({
@@ -20,7 +21,7 @@ const getBadges = async (req, res) => {
   }
 }
 
-const getUserBadges = async (req, res) => {
+const getUserBadges = async (req: any, res: any) => {
   try {
     const result = await badgeQuery.fetchUserBadges(req.params.username)
     let responseMsg = ''
@@ -38,6 +39,7 @@ const getUserBadges = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   getBadges,
   getUserBadges

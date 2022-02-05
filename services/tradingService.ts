@@ -1,9 +1,14 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'firestore'... Remove this comment to see the full error message
 const firestore = require('../utils/firestore')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'stocksMode... Remove this comment to see the full error message
 const stocksModel = firestore.collection('stocks')
 const transactionsModel = firestore.collection('transactions')
 const tradeLogsModel = firestore.collection('trade-logs')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchWalle... Remove this comment to see the full error message
 const { fetchWallet, updateWallet } = require('../models/wallets')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchUserS... Remove this comment to see the full error message
 const { fetchUserStocks, updateUserStocks } = require('../models/stocks')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'DINERO'.
 const { DINERO } = require('../constants/wallets')
 
 const INSUFFICIENT_FUNDS = 'Trade was not successful due to insufficient funds'
@@ -15,7 +20,7 @@ const INSUFFICIENT_QUANTITIES = 'Trade was not successful because you do not hav
  * @param stockPrice { number }: Stock price
  * @return {stockPrice: number}
  */
-const getUpdatedPrice = (stockPrice) => {
+const getUpdatedPrice = (stockPrice: any) => {
   // We will be adding logic to update the stock price each a trading take place
   return stockPrice
 }
@@ -26,7 +31,8 @@ const getUpdatedPrice = (stockPrice) => {
  * @param tradeData { Object }: new trading data
  * @return {Promise<{taskId: string}>}
  */
-const trade = async (tradeData) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'trade'.
+const trade = async (tradeData: any) => {
   // ! TODO - update as per curreny type, currently only using dinero
   try {
     const { stockId, stockName, quantity, tradeType, totalPrice, userId } = tradeData
@@ -81,6 +87,7 @@ const trade = async (tradeData) => {
 
     const orderValue = qtyUserCanPurchase * stockData.price
     const stockPriceToBeUpdated = getUpdatedPrice(stockData.price)
+    // @ts-expect-error ts-migrate(7053) FIXME: Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     updatedCurrencyData[`${DINERO}`] = userBalance
 
     const updatedStockData = {
@@ -133,6 +140,7 @@ const trade = async (tradeData) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   trade
 }

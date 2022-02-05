@@ -1,3 +1,4 @@
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const winston = require('winston')
 // define the custom settings for each transport (file, console)
 const options = {
@@ -15,11 +16,13 @@ const options = {
     handleExceptions: true,
     json: false,
     colorize: true,
+    // @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
     silent: process.env.NODE_ENV === 'test' // Disable logs in test env
   }
 }
 
 // instantiate a new Winston Logger with the settings defined above
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'logger'.
 const logger = new winston.createLogger({ // eslint-disable-line new-cap
   /**
    * Application defaults:
@@ -38,10 +41,11 @@ const logger = new winston.createLogger({ // eslint-disable-line new-cap
 
 // create a stream object with a 'write' function that will be used by `morgan`
 logger.stream = {
-  write: function (message, encoding) {
+  write: function (message: any, encoding: any) {
     // use the 'info' log level so the output will be picked up by both transports (file and console)
     logger.info(message)
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = logger

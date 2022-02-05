@@ -1,7 +1,10 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'firestore'... Remove this comment to see the full error message
 const firestore = require('../utils/firestore')
 const auctionsModel = firestore.collection('auctions')
 const bidsModel = firestore.collection('bids')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'usersUtils... Remove this comment to see the full error message
 const usersUtils = require('../utils/users')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const walletModels = require('./wallets')
 
 /**
@@ -10,7 +13,8 @@ const walletModels = require('./wallets')
  * @param auctionsId { String }: Id for the auction to be fetched
  * @return {Promise<{AuctionData|Object}>}
  */
-const fetchAuctionById = async (auctionId) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchAucti... Remove this comment to see the full error message
+const fetchAuctionById = async (auctionId: any) => {
   try {
     const auctionRef = await auctionsModel.doc(auctionId).get()
     if (!auctionRef.data()) {
@@ -18,10 +22,11 @@ const fetchAuctionById = async (auctionId) => {
     }
     const auctionMetadata = auctionRef.data()
     const biddersAndBidsRef = await bidsModel.where('auction_id', '==', auctionId).get()
-    const biddersAndBidsArray = []
-    biddersAndBidsRef.forEach((bidData) => {
+    const biddersAndBidsArray: any = []
+    biddersAndBidsRef.forEach((bidData: any) => {
       biddersAndBidsArray.push(bidData.data())
     })
+    // @ts-expect-error ts-migrate(7006) FIXME: Parameter 'bidData' implicitly has an 'any' type.
     const promises = biddersAndBidsArray.map(async (bidData) => {
       const bidderUsername = await usersUtils.getUsername(bidData.bidder)
       return { ...bidData, bidder: bidderUsername }
@@ -46,14 +51,16 @@ const fetchAuctionById = async (auctionId) => {
  * @param auctionsId { String }: Id for the auction
  * @return {Promise<{BiddersUsernames|Array}>}
  */
-const fetchAuctionBidders = async (auctionId) => {
+const fetchAuctionBidders = async (auctionId: any) => {
   try {
     const biddersRef = await bidsModel.where('auction_id', '==', auctionId).get()
     const biddersSet = new Set([])
-    biddersRef.forEach((bid) => {
+    biddersRef.forEach((bid: any) => {
       const { bidder } = bid.data()
+      // @ts-expect-error ts-migrate(2345) FIXME: Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
       biddersSet.add(bidder)
     })
+    // @ts-expect-error ts-migrate(2569) FIXME: Type 'Set<never>' is not an array type or a string... Remove this comment to see the full error message
     const biddersArray = [...biddersSet]
     const promises = biddersArray.map(async (bidder) => {
       const bidderUsername = await usersUtils.getUsername(bidder)
@@ -72,19 +79,21 @@ const fetchAuctionBidders = async (auctionId) => {
  *
  * @return {Promise<{AuctionData|Array}>}
  */
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchAvail... Remove this comment to see the full error message
 const fetchAvailableAuctions = async () => {
   try {
     const now = new Date().getTime()
     const auctionsRef = await auctionsModel.where('end_time', '>=', now).get()
-    const auctions = []
+    const auctions: any = []
 
-    auctionsRef.forEach((auction) => {
+    auctionsRef.forEach((auction: any) => {
       auctions.push({
         id: auction.id,
         ...auction.data()
       })
     })
 
+    // @ts-expect-error ts-migrate(7006) FIXME: Parameter 'auction' implicitly has an 'any' type.
     const promises = auctions.map(async (auction) => {
       try {
         const seller = usersUtils.getUsername(auction.seller)
@@ -113,7 +122,14 @@ const fetchAvailableAuctions = async () => {
  * @param { Object }: Details required to create an auction
  * @return id {string}
  */
-const createNewAuction = async ({ seller, initialPrice, endTime, itemType, quantity }) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'createNewA... Remove this comment to see the full error message
+const createNewAuction = async ({
+  seller,
+  initialPrice,
+  endTime,
+  itemType,
+  quantity
+}: any) => {
   try {
     const auctionRef = await auctionsModel.add({
       seller: seller,
@@ -138,7 +154,12 @@ const createNewAuction = async ({ seller, initialPrice, endTime, itemType, quant
  * @param { Object }: Data required for placing a bid
  * @return id { string }
  */
-const makeNewBid = async ({ bidder, auctionId, bid }) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'makeNewBid... Remove this comment to see the full error message
+const makeNewBid = async ({
+  bidder,
+  auctionId,
+  bid
+}: any) => {
   try {
     const auctionRef = await auctionsModel.doc(auctionId)
     const auctionDataRef = await auctionRef.get()
@@ -156,6 +177,7 @@ const makeNewBid = async ({ bidder, auctionId, bid }) => {
     if (parseInt(bid) <= parseInt(highestBid)) {
       return { lowBid: true }
     }
+    // @ts-expect-error ts-migrate(2345) FIXME: Argument of type 'number' is not assignable to par... Remove this comment to see the full error message
     if (parseInt(bid) > parseInt(usersMoney)) {
       return { insufficientMoney: true }
     }
@@ -179,6 +201,7 @@ const makeNewBid = async ({ bidder, auctionId, bid }) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   fetchAuctionById,
   fetchAvailableAuctions,

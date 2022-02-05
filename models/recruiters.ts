@@ -3,8 +3,11 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'firestore'... Remove this comment to see the full error message
 const firestore = require('../utils/firestore')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'recruiterM... Remove this comment to see the full error message
 const recruiterModel = firestore.collection('recruiters')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userModel'... Remove this comment to see the full error message
 const userModel = require('./users')
 
 /**
@@ -15,7 +18,7 @@ const userModel = require('./users')
  * @return {Promise<{message: string, id: string, recruiterName: string, userName: string, timestamp: string }>}
  */
 
-const addRecruiterInfo = async (recruiterData, username) => {
+const addRecruiterInfo = async (recruiterData: any, username: any) => {
   try {
     // Fetch the user from DB
     const { userExists, user: { first_name: userFirstName, last_name: userLastName, email: userEmail } } = await userModel.fetchUser({ username })
@@ -40,6 +43,7 @@ const addRecruiterInfo = async (recruiterData, username) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   addRecruiterInfo
 }

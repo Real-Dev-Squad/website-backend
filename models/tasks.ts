@@ -1,7 +1,11 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'firestore'... Remove this comment to see the full error message
 const firestore = require('../utils/firestore')
 const tasksModel = firestore.collection('tasks')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userUtils'... Remove this comment to see the full error message
 const userUtils = require('../utils/users')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fromFirest... Remove this comment to see the full error message
 const { fromFirestoreData, toFirestoreData, buildTasks } = require('../utils/tasks')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'TASK_TYPE'... Remove this comment to see the full error message
 const { TASK_TYPE, TASK_STATUS } = require('../constants/tasks')
 
 /**
@@ -11,7 +15,8 @@ const { TASK_TYPE, TASK_STATUS } = require('../constants/tasks')
  * @param taskId { string }: taskid which will be used to update the task in DB
  * @return {Promise<{taskId: string}>}
  */
-const updateTask = async (taskData, taskId = null) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'updateTask... Remove this comment to see the full error message
+const updateTask = async (taskData: any, taskId = null) => {
   try {
     taskData = await toFirestoreData(taskData)
     if (taskId) {
@@ -40,11 +45,12 @@ const updateTask = async (taskData, taskId = null) => {
  *
  * @return {Promise<tasks|Array>}
  */
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchTasks... Remove this comment to see the full error message
 const fetchTasks = async () => {
   try {
     const tasksSnapshot = await tasksModel.get()
     const tasks = buildTasks(tasksSnapshot)
-    const promises = tasks.map(async (task) => fromFirestoreData(task))
+    const promises = tasks.map(async (task: any) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
     return updatedTasks
   } catch (err) {
@@ -64,7 +70,7 @@ const fetchActiveTaskMembers = async () => {
     const tasksSnapshot = await tasksModel.where('type', '==', TASK_TYPE.FEATURE).where('status', '==', TASK_STATUS.ACTIVE).get()
     const activeMembers = new Set()
     if (!tasksSnapshot.empty) {
-      tasksSnapshot.forEach((task) => {
+      tasksSnapshot.forEach((task: any) => {
         const { assignee } = task.data()
         activeMembers.add(
           assignee
@@ -83,7 +89,7 @@ const fetchActiveTaskMembers = async () => {
  * @param taskId { string }: taskid which will be used to fetch the task
  * @return {Promise<taskData|Object>}
  */
-const fetchTask = async (taskId) => {
+const fetchTask = async (taskId: any) => {
   try {
     const task = await tasksModel.doc(taskId).get()
     const taskData = task.data()
@@ -100,7 +106,7 @@ const fetchTask = async (taskId) => {
  * @param id { string }: id to check task is assigned to self or not
  * @return {Promsie<taskData|Object>}
  */
-const fetchSelfTask = async (taskId, userId) => {
+const fetchSelfTask = async (taskId: any, userId: any) => {
   try {
     const task = await tasksModel.doc(taskId).get()
     const taskData = task.data()
@@ -125,7 +131,7 @@ const fetchSelfTask = async (taskId, userId) => {
  * @return {Promise<tasks|Array>}
  */
 
-const fetchUserTasks = async (username, statuses = []) => {
+const fetchUserTasks = async (username: any, statuses = []) => {
   try {
     const userId = await userUtils.getUserId(username)
 
@@ -154,7 +160,7 @@ const fetchUserTasks = async (username, statuses = []) => {
     const groupTasks = buildTasks(groupTasksSnapshot)
     const tasks = buildTasks(featureTasksSnapshot, groupTasks)
 
-    const promises = tasks.map(async (task) => fromFirestoreData(task))
+    const promises = tasks.map(async (task: any) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
     return updatedTasks
   } catch (err) {
@@ -163,7 +169,8 @@ const fetchUserTasks = async (username, statuses = []) => {
   }
 }
 
-const fetchUserActiveAndBlockedTasks = async (username) => {
+const fetchUserActiveAndBlockedTasks = async (username: any) => {
+  // @ts-expect-error ts-migrate(2322) FIXME: Type 'string' is not assignable to type 'never'.
   return await fetchUserTasks(username, ['active', 'pending', 'blocked'])
 }
 
@@ -173,10 +180,12 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
  * @return {Promise<tasks|Array>}
  */
 
-const fetchUserCompletedTasks = async (username) => {
+const fetchUserCompletedTasks = async (username: any) => {
+  // @ts-expect-error ts-migrate(2322) FIXME: Type 'string' is not assignable to type 'never'.
   return await fetchUserTasks(username, ['completed'])
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   updateTask,
   fetchTasks,

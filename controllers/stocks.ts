@@ -1,3 +1,4 @@
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const stocks = require('../models/stocks')
 /**
  * Creates new stock
@@ -6,7 +7,8 @@ const stocks = require('../models/stocks')
  * @param req.body {Object} - Stock object
  * @param res {Object} - Express response object
  */
-const addNewStock = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'addNewStoc... Remove this comment to see the full error message
+const addNewStock = async (req: any, res: any) => {
   try {
     const { id, stockData } = await stocks.addStock(req.body)
     return res.json({
@@ -25,7 +27,8 @@ const addNewStock = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const fetchStocks = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchStock... Remove this comment to see the full error message
+const fetchStocks = async (req: any, res: any) => {
   try {
     const allStock = await stocks.fetchStocks()
     return res.json({
@@ -43,7 +46,8 @@ const fetchStocks = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const getSelfStocks = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'getSelfSto... Remove this comment to see the full error message
+const getSelfStocks = async (req: any, res: any) => {
   try {
     const { id: userId } = req.userData
     const userStocks = await stocks.fetchUserStocks(userId)
@@ -57,6 +61,7 @@ const getSelfStocks = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   addNewStock,
   fetchStocks,

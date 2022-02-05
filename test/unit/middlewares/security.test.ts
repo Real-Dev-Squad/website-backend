@@ -1,13 +1,19 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'chai'.
 const chai = require('chai')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'expect'.
 const { expect } = chai
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'chaiHttp'.
 const chaiHttp = require('chai-http')
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'app'.
 const app = require('../../../server')
 
 chai.use(chaiHttp)
 
+// @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
 describe('CORS', function () {
-  it('should allow preflight requests from allowed domains', function (done) {
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+  it('should allow preflight requests from allowed domains', function (done: any) {
     const origin = 'https://www.realdevsquad.com'
 
     chai
@@ -15,7 +21,7 @@ describe('CORS', function () {
       .options('/users')
       .set('origin', origin)
       .send()
-      .end((err, res) => {
+      .end((err: any, res: any) => {
         if (err) { return done(err) }
 
         expect(res).to.have.status(200)
@@ -28,7 +34,8 @@ describe('CORS', function () {
       })
   })
 
-  it('should allow preflight requests from localhost in test env', function (done) {
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+  it('should allow preflight requests from localhost in test env', function (done: any) {
     const origin = 'http://localhost:3000'
 
     chai
@@ -36,7 +43,7 @@ describe('CORS', function () {
       .options('/users')
       .set('origin', origin)
       .send()
-      .end((err, res) => {
+      .end((err: any, res: any) => {
         if (err) { return done(err) }
 
         expect(res).to.have.status(200)
@@ -49,7 +56,8 @@ describe('CORS', function () {
       })
   })
 
-  it('should not allow preflight requests from non specified origin', function (done) {
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+  it('should not allow preflight requests from non specified origin', function (done: any) {
     const origin = 'http://notspecifieddomain.com'
 
     chai
@@ -57,7 +65,7 @@ describe('CORS', function () {
       .options('/users')
       .set('origin', origin)
       .send()
-      .end((err, res) => {
+      .end((err: any, res: any) => {
         if (err) { return done(err) }
 
         expect(res).to.have.status(200)

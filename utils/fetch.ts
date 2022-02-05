@@ -1,3 +1,4 @@
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const axios = require('axios')
 
 /**
@@ -11,7 +12,8 @@ const axios = require('axios')
  * @param [options = null] {Object} - Options to be sent via axios - optional
  */
 
-const fetch = async (url, method = 'get', params = null, data = null, headers = null, options = null) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetch'.
+const fetch = async (url: any, method = 'get', params = null, data = null, headers = null, options = null) => {
   try {
     const response = await axios({
       method,
@@ -19,6 +21,7 @@ const fetch = async (url, method = 'get', params = null, data = null, headers = 
       params,
       data,
       headers,
+      // @ts-expect-error ts-migrate(2698) FIXME: Spread types may only be created from object types... Remove this comment to see the full error message
       ...options
     })
     return response
@@ -28,6 +31,7 @@ const fetch = async (url, method = 'get', params = null, data = null, headers = 
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   fetch
 }

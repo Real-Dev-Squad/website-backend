@@ -1,8 +1,13 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'ROLES'.
 const { ROLES } = require('../constants/users')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchUsers... Remove this comment to see the full error message
 const { fetchUsers, migrateUsers, deleteIsMemberProperty, fetchUsersWithRole, moveToMembers: updateToMemberRole } = require('../models/members')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'tasks'.
 const tasks = require('../models/tasks')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchUser'... Remove this comment to see the full error message
 const { fetchUser } = require('../models/users')
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'ERROR_MESS... Remove this comment to see the full error message
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
 /**
@@ -12,7 +17,8 @@ const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
  * @param res {Object} - Express response object
  */
 
-const getMembers = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'getMembers... Remove this comment to see the full error message
+const getMembers = async (req: any, res: any) => {
   try {
     const allUsers = await fetchUsers()
 
@@ -33,12 +39,16 @@ const getMembers = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getIdleMembers = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'getIdleMem... Remove this comment to see the full error message
+const getIdleMembers = async (req: any, res: any) => {
   try {
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'MEMBER' does not exist on type '{ SUPER_... Remove this comment to see the full error message
     const onlyMembers = await fetchUsersWithRole(ROLES.MEMBER)
     const taskParticipants = await tasks.fetchActiveTaskMembers()
-    const idleMembers = onlyMembers?.filter(({ id }) => !taskParticipants.has(id))
-    const idleMemberUserNames = idleMembers?.map((member) => member.username)
+    const idleMembers = onlyMembers?.filter(({
+      id
+    }: any) => !taskParticipants.has(id))
+    const idleMemberUserNames = idleMembers?.map((member: any) => member.username)
 
     return res.json({
       message: idleMemberUserNames.length ? 'Idle members returned successfully!' : 'No idle member found',
@@ -57,7 +67,8 @@ const getIdleMembers = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const moveToMembers = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'moveToMemb... Remove this comment to see the full error message
+const moveToMembers = async (req: any, res: any) => {
   try {
     const { username } = req.params
     const result = await fetchUser({ username })
@@ -82,7 +93,8 @@ const moveToMembers = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const migrateUserRoles = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'migrateUse... Remove this comment to see the full error message
+const migrateUserRoles = async (req: any, res: any) => {
   try {
     const migratedUserData = await migrateUsers()
     return res.json({
@@ -101,7 +113,8 @@ const migrateUserRoles = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const deleteIsMember = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'deleteIsMe... Remove this comment to see the full error message
+const deleteIsMember = async (req: any, res: any) => {
   try {
     const deletedIsMemberData = await deleteIsMemberProperty()
     return res.json({
@@ -114,6 +127,7 @@ const deleteIsMember = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   getMembers,
   getIdleMembers,

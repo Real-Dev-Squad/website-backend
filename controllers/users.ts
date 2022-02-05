@@ -1,5 +1,7 @@
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const userQuery = require('../models/users')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const imageService = require('../services/imageService')
 /**
  * Fetches the data about our users
@@ -8,7 +10,7 @@ const imageService = require('../services/imageService')
  * @param res {Object} - Express response object
  */
 
-const getUsers = async (req, res) => {
+const getUsers = async (req: any, res: any) => {
   try {
     const allUsers = await userQuery.fetchUsers(req.query)
 
@@ -29,7 +31,7 @@ const getUsers = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getUser = async (req, res) => {
+const getUser = async (req: any, res: any) => {
   try {
     const result = await userQuery.fetchUser({ username: req.params.username })
     const { phone, email, ...user } = result.user
@@ -55,7 +57,7 @@ const getUser = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getUsernameAvailabilty = async (req, res) => {
+const getUsernameAvailabilty = async (req: any, res: any) => {
   try {
     const result = await userQuery.fetchUser({ username: req.params.username })
     return res.json({
@@ -74,7 +76,7 @@ const getUsernameAvailabilty = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getSelfDetails = (req, res) => {
+const getSelfDetails = (req: any, res: any) => {
   try {
     if (req.userData) {
       if (req.query.private) {
@@ -97,7 +99,7 @@ const getSelfDetails = (req, res) => {
  * @param req.body {Object} - User object
  * @param res {Object} - Express response object
  */
-const updateSelf = async (req, res) => {
+const updateSelf = async (req: any, res: any) => {
   try {
     const { id: userId } = req.userData
     if (req.body.username) {
@@ -128,7 +130,7 @@ const updateSelf = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const postUserPicture = async (req, res) => {
+const postUserPicture = async (req: any, res: any) => {
   try {
     const { file } = req
     const { id: userId } = req.userData
@@ -143,6 +145,7 @@ const postUserPicture = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   updateSelf,
   getUsers,

@@ -2,11 +2,15 @@
  * This file contains wrapper functions to interact with the DB.
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'walletCons... Remove this comment to see the full error message
 const walletConstants = require('../constants/wallets')
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'firestore'... Remove this comment to see the full error message
 const firestore = require('../utils/firestore')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchWalle... Remove this comment to see the full error message
 const { fetchWallet, createWallet } = require('../models/wallets')
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userModel'... Remove this comment to see the full error message
 const userModel = firestore.collection('users')
 
 /**
@@ -16,7 +20,7 @@ const userModel = firestore.collection('users')
  * @param userId { String }: User Id String to be used to update the user
  * @return {Promise<{isNewUser: boolean, userId: string}|{isNewUser: boolean, userId: string}>}
  */
-const addOrUpdate = async (userData, userId = null) => {
+const addOrUpdate = async (userData: any, userId = null) => {
   try {
     // userId exists Update user
     if (userId !== null) {
@@ -56,16 +60,17 @@ const addOrUpdate = async (userData, userId = null) => {
  * @param query { Object }: Filter for users data
  * @return {Promise<userModel|Array>}
  */
-const fetchUsers = async (query) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchUsers... Remove this comment to see the full error message
+const fetchUsers = async (query: any) => {
   try {
     const snapshot = await userModel
       .limit(parseInt(query.size) || 100)
       .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
       .get()
 
-    const allUsers = []
+    const allUsers: any = []
 
-    snapshot.forEach((doc) => {
+    snapshot.forEach((doc: any) => {
       allUsers.push({
         id: doc.id,
         ...doc.data(),
@@ -88,13 +93,14 @@ const fetchUsers = async (query) => {
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchUser'... Remove this comment to see the full error message
 const fetchUser = async ({ userId = null, username = null }) => {
   try {
     let userData, id
     if (username) {
       const user = await userModel.where('username', '==', username).limit(1).get()
 
-      user.forEach(doc => {
+      user.forEach((doc: any) => {
         id = doc.id
         userData = doc.data()
       })
@@ -122,7 +128,7 @@ const fetchUser = async ({ userId = null, username = null }) => {
  *
  * @param userId { string }: User id
  */
-const setIncompleteUserDetails = async (userId) => {
+const setIncompleteUserDetails = async (userId: any) => {
   const userRef = userModel.doc(userId)
   const doc = await userRef.get()
   if (doc.exists) {
@@ -139,7 +145,7 @@ const setIncompleteUserDetails = async (userId) => {
  *
  * @param userId { string }: User id
  */
-const initializeUser = async (userId) => {
+const initializeUser = async (userId: any) => {
   // Create wallet and give them initial amount
   const userWallet = await fetchWallet(userId)
   if (!userWallet) {
@@ -155,7 +161,7 @@ const initializeUser = async (userId) => {
  * @param image { Object }: image data ( {publicId, url} )
  * @param userId { string }: User id
  */
-const updateUserPicture = async (image, userId) => {
+const updateUserPicture = async (image: any, userId: any) => {
   try {
     const userDoc = userModel.doc(userId)
     await userDoc.update({
@@ -172,15 +178,17 @@ const updateUserPicture = async (image, userId) => {
  *
  * @param users {array}
  */
-const fetchUserImage = async (users) => {
+const fetchUserImage = async (users: any) => {
   const data = await userModel.where('username', 'in', users).get()
   const images = {}
-  data.forEach((item) => {
+  data.forEach((item: any) => {
+    // @ts-expect-error ts-migrate(7053) FIXME: Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     images[item.data().username] = item.data().img
   })
   return images
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   addOrUpdate,
   fetchUsers,

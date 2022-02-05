@@ -3,7 +3,9 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'firestore'... Remove this comment to see the full error message
 const firestore = require('../utils/firestore')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userModel'... Remove this comment to see the full error message
 const userModel = firestore.collection('users')
 
 /**
@@ -11,14 +13,15 @@ const userModel = firestore.collection('users')
  * @return {Promise<userModel|Array>}
  */
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchUsers... Remove this comment to see the full error message
 const fetchUsers = async () => {
   try {
     const snapshot = await userModel.get()
 
-    const allMembers = []
+    const allMembers: any = []
 
     if (!snapshot.empty) {
-      snapshot.forEach((doc) => {
+      snapshot.forEach((doc: any) => {
         const memberData = doc.data()
         const curatedMemberData = {
           id: doc.id,
@@ -45,7 +48,8 @@ const fetchUsers = async () => {
  * @return { Object }: whether moveToMember was successful or not and whether user is already a member or not
  */
 
-const moveToMembers = async (userId) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'moveToMemb... Remove this comment to see the full error message
+const moveToMembers = async (userId: any) => {
   try {
     const userDoc = await userModel.doc(userId).get()
     const user = userDoc.data()
@@ -65,14 +69,15 @@ const moveToMembers = async (userId) => {
  * Migrate user roles
  * @return {Promise<usersMigrated|Object>}
  */
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'migrateUse... Remove this comment to see the full error message
 const migrateUsers = async () => {
   try {
     const userSnapShot = await userModel.where('isMember', '==', true).get()
     const migratedUsers = []
 
-    const usersArr = []
+    const usersArr: any = []
 
-    userSnapShot.forEach(doc => usersArr.push({ id: doc.id, ...doc.data() }))
+    userSnapShot.forEach((doc: any) => usersArr.push({ id: doc.id, ...doc.data() }))
 
     for (const user of usersArr) {
       const roles = { ...user.roles, member: true }
@@ -96,14 +101,15 @@ const migrateUsers = async () => {
  * Deletes isMember property from user object
  * @return {Promise<usersMigrated|Object>}
  */
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'deleteIsMe... Remove this comment to see the full error message
 const deleteIsMemberProperty = async () => {
   try {
     const userSnapShot = await userModel.where('roles', '!=', false).get()
     const migratedUsers = []
 
-    const usersArr = []
+    const usersArr: any = []
 
-    userSnapShot.forEach(doc => usersArr.push({ id: doc.id, ...doc.data() }))
+    userSnapShot.forEach((doc: any) => usersArr.push({ id: doc.id, ...doc.data() }))
 
     for (const user of usersArr) {
       delete user.isMember
@@ -125,13 +131,14 @@ const deleteIsMemberProperty = async () => {
  * @return {Promise<userModel|Array>}
  */
 
-const fetchUsersWithRole = async (role) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchUsers... Remove this comment to see the full error message
+const fetchUsersWithRole = async (role: any) => {
   try {
     const snapshot = await userModel.where(`roles.${role}`, '==', true).get()
-    const onlyMembers = []
+    const onlyMembers: any = []
 
     if (!snapshot.empty) {
-      snapshot.forEach((doc) => {
+      snapshot.forEach((doc: any) => {
         onlyMembers.push({
           id: doc.id,
           ...doc.data(),
@@ -148,6 +155,7 @@ const fetchUsersWithRole = async (role) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   moveToMembers,
   fetchUsers,

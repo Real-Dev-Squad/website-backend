@@ -1,3 +1,4 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchUser'... Remove this comment to see the full error message
 const { fetchUser } = require('../models/users')
 
 /**
@@ -6,7 +7,8 @@ const { fetchUser } = require('../models/users')
  * @param username {String} - username of the User.
  * @returns id {String} - userId of the same user
  */
-const getUserId = async (username) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'getUserId'... Remove this comment to see the full error message
+const getUserId = async (username: any) => {
   try {
     const { userExists, user: { id } } = await fetchUser({ username })
 
@@ -22,7 +24,8 @@ const getUserId = async (username) => {
  * @param userId {String} - userId of the User.
  * @returns username {String} - username of the same user
  */
-const getUsername = async (userId) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'getUsernam... Remove this comment to see the full error message
+const getUsername = async (userId: any) => {
   try {
     const { user: { username } } = await fetchUser({ userId })
     return username
@@ -36,7 +39,8 @@ const getUsername = async (userId) => {
  * @param participantArray {array} : participants array to be updated
  * @returns participantUsernames {array} : array of usernames of all participants
  */
-const getParticipantUsernames = async (participantArray) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'getPartici... Remove this comment to see the full error message
+const getParticipantUsernames = async (participantArray: any) => {
   try {
     if (!Array.isArray(participantArray)) {
       return []
@@ -58,7 +62,8 @@ const getParticipantUsernames = async (participantArray) => {
  * @param participantArray {array} : participants array to be updated
  * @returns participantUserIds {array} : array of user ids of all participants
  */
-const getParticipantUserIds = async (participantArray) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'getPartici... Remove this comment to see the full error message
+const getParticipantUserIds = async (participantArray: any) => {
   try {
     if (!Array.isArray(participantArray)) {
       return []
@@ -76,6 +81,7 @@ const getParticipantUserIds = async (participantArray) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   getUserId,
   getUsername,

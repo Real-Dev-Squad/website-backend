@@ -6,7 +6,9 @@
  * Documentation: https://github.com/lorenwest/node-config/wiki/Configuration-Files
  */
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
 const NODE_ENV = process.env.NODE_ENV
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   port: 3000,
   enableFileLogs: true,

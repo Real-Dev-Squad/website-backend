@@ -1,6 +1,9 @@
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const contributionsService = require('../services/contributions')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchUser'... Remove this comment to see the full error message
 const { fetchUser } = require('../models/users')
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'ERROR_MESS... Remove this comment to see the full error message
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
 /**
@@ -9,7 +12,8 @@ const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
  * @param {Object} res - Express response object
  */
 
-const getUserContributions = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'getUserCon... Remove this comment to see the full error message
+const getUserContributions = async (req: any, res: any) => {
   try {
     const username = req.params.username
     const result = await fetchUser({ username: req.params.username })
@@ -24,6 +28,7 @@ const getUserContributions = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   getUserContributions
 }

@@ -1,3 +1,4 @@
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const recruiterQuery = require('../models/recruiters')
 
 /**
@@ -7,7 +8,8 @@ const recruiterQuery = require('../models/recruiters')
  * @param res {Object} - Express response object
  */
 
-const addRecruiter = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'addRecruit... Remove this comment to see the full error message
+const addRecruiter = async (req: any, res: any) => {
   try {
     const result = await recruiterQuery.addRecruiterInfo(req.body, req.params.username)
     if (!result) {
@@ -23,6 +25,7 @@ const addRecruiter = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   addRecruiter
 }

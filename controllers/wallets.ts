@@ -1,7 +1,11 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchWalle... Remove this comment to see the full error message
 const { fetchWallet, createWallet } = require('../models/wallets')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userUtils'... Remove this comment to see the full error message
 const userUtils = require('../utils/users')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'walletCons... Remove this comment to see the full error message
 const walletConstants = require('../constants/wallets')
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'ERROR_MESS... Remove this comment to see the full error message
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
 /**
@@ -9,7 +13,7 @@ const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
  * existing members
  * @param {string} userId
  */
-const getWallet = async (userId) => {
+const getWallet = async (userId: any) => {
   try {
     let wallet = await fetchWallet(userId)
 
@@ -30,7 +34,7 @@ const getWallet = async (userId) => {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const getOwnWallet = async (req, res) => {
+const getOwnWallet = async (req: any, res: any) => {
   const { id: userId } = req.userData
 
   try {
@@ -51,7 +55,8 @@ const getOwnWallet = async (req, res) => {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const getUserWallet = async (req, res) => {
+const getUserWallet = async (req: any, res: any) => {
+  // @ts-expect-error ts-migrate(2525) FIXME: Initializer provides no value for this binding ele... Remove this comment to see the full error message
   const { params: { username } = {} } = req
   const userId = await userUtils.getUserId(username)
 
@@ -68,6 +73,7 @@ const getUserWallet = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   getOwnWallet,
   getUserWallet

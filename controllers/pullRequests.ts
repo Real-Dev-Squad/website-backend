@@ -1,3 +1,4 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'githubServ... Remove this comment to see the full error message
 const githubService = require('../services/githubService')
 
 /**
@@ -7,7 +8,7 @@ const githubService = require('../services/githubService')
  * @param res {Object} - Express response object
  */
 
-const getUserPRs = async (req, res) => {
+const getUserPRs = async (req: any, res: any) => {
   try {
     const { data } = await githubService.fetchPRsByUser(req.params.username)
 
@@ -35,7 +36,7 @@ const getUserPRs = async (req, res) => {
  * @param {Object} res
  * @todo create cache for RDS usernames <> github usernames
  */
-const getStalePRs = async (req, res) => {
+const getStalePRs = async (req: any, res: any) => {
   try {
     const { size, page } = req.query
     const { data } = await githubService.fetchStalePRs(size, page)
@@ -64,7 +65,7 @@ const getStalePRs = async (req, res) => {
  * @param {Object} res
  * @todo create cache for RDS usernames <> github usernames
  */
-const getOpenPRs = async (req, res) => {
+const getOpenPRs = async (req: any, res: any) => {
   try {
     const { size, page } = req.query
     const { data } = await githubService.fetchOpenPRs(size, page)
@@ -86,6 +87,7 @@ const getOpenPRs = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   getUserPRs,
   getStalePRs,

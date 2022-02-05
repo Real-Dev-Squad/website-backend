@@ -1,3 +1,4 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'featureFla... Remove this comment to see the full error message
 const featureFlagQuery = require('../models/featureFlags')
 
 /**
@@ -7,7 +8,7 @@ const featureFlagQuery = require('../models/featureFlags')
  * @param res {Object} - Express response object
  */
 
-const getFeatureFlags = async (req, res) => {
+const getFeatureFlags = async (req: any, res: any) => {
   try {
     const allFeatureFlags = await featureFlagQuery.fetchFeatureFlag()
     return res.json({
@@ -27,7 +28,7 @@ const getFeatureFlags = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const addFeatureFlag = async (req, res) => {
+const addFeatureFlag = async (req: any, res: any) => {
   try {
     const featureFlag = await featureFlagQuery.addFeatureFlags(req.body, req.userData.username)
     return res.json({
@@ -47,7 +48,7 @@ const addFeatureFlag = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const updateFeatureFlag = async (req, res) => {
+const updateFeatureFlag = async (req: any, res: any) => {
   try {
     const result = await featureFlagQuery.updateFeatureFlags(req.body, req.params.id)
     if (result.isUpdated) {
@@ -67,7 +68,8 @@ const updateFeatureFlag = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const deleteFeatureFlag = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'deleteFeat... Remove this comment to see the full error message
+const deleteFeatureFlag = async (req: any, res: any) => {
   try {
     const result = await featureFlagQuery.deleteFeatureFlag(req.params.id)
     if (result.isDeleted) {
@@ -82,6 +84,7 @@ const deleteFeatureFlag = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   getFeatureFlags,
   addFeatureFlag,

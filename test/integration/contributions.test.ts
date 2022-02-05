@@ -1,21 +1,32 @@
 /* eslint-disable no-unused-expressions */
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'chai'.
 const chai = require('chai')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'sinon'.
 const sinon = require('sinon')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'expect'.
 const { expect } = chai
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'chaiHttp'.
 const chaiHttp = require('chai-http')
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'githubServ... Remove this comment to see the full error message
 const githubService = require('../../services/githubService')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const testModel = require('../../models/tasks')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userModel'... Remove this comment to see the full error message
 const userModel = require('../../models/users')
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'app'.
 const app = require('../../server')
 
 chai.use(chaiHttp)
 
 // Import fixtures
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const githubPRInfo = require('../fixtures/contributions/githubPRInfo')()
 
+// @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
 describe('Contributions', function () {
+  // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'before'.
   before(async function () {
     const user = {
       first_name: 'Prakash',
@@ -58,16 +69,19 @@ describe('Contributions', function () {
     task.isNoteworthy = false
     await testModel.updateTask(task)
   })
+  // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'afterEach'.
   afterEach(function () {
     sinon.restore()
   })
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('GET /contributions/{username}', function () {
-    it('Should get all the contributions of the user', function (done) {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('Should get all the contributions of the user', function (done: any) {
       sinon.stub(githubService, 'fetchPRsByUser').returns(githubPRInfo.prakash)
       chai
         .request(app)
         .get('/contributions/prakash')
-        .end((err, res) => {
+        .end((err: any, res: any) => {
           if (err) {
             return done()
           }
@@ -103,11 +117,12 @@ describe('Contributions', function () {
           return done()
         })
     })
-    it('Should respond 404 for unregistered user', function (done) {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('Should respond 404 for unregistered user', function (done: any) {
       chai
         .request(app)
         .get('/contributions/prakashchoudhary')
-        .end((err, res) => {
+        .end((err: any, res: any) => {
           if (err) {
             return done()
           }
@@ -117,12 +132,13 @@ describe('Contributions', function () {
           return done()
         })
     })
-    it('Should respond empty object when user has no pr and task available', function (done) {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('Should respond empty object when user has no pr and task available', function (done: any) {
       sinon.stub(githubService, 'fetchPRsByUser').returns(githubPRInfo.userWithNoPrs)
       chai
         .request(app)
         .get('/contributions/userWithNoPrs')
-        .end((err, res) => {
+        .end((err: any, res: any) => {
           if (err) {
             return done()
           }
@@ -134,12 +150,13 @@ describe('Contributions', function () {
         })
     })
 
-    it('Should respond with all data, noteworthy to be empty', function (done) {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('Should respond with all data, noteworthy to be empty', function (done: any) {
       sinon.stub(githubService, 'fetchPRsByUser').returns(githubPRInfo.userNoTask)
       chai
         .request(app)
         .get('/contributions/userNoTask')
-        .end((err, res) => {
+        .end((err: any, res: any) => {
           if (err) {
             return done()
           }

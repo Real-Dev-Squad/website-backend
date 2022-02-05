@@ -4,25 +4,36 @@
  */
 /* eslint-disable security/detect-object-injection */
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'chai'.
 const chai = require('chai')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'expect'.
 const { expect } = chai
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'cleanDb'.
 const cleanDb = require('../../utils/cleanDb')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'users'.
 const users = require('../../../models/users')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'firestore'... Remove this comment to see the full error message
 const firestore = require('../../../utils/firestore')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userModel'... Remove this comment to see the full error message
 const userModel = firestore.collection('users')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userDataAr... Remove this comment to see the full error message
 const userDataArray = require('../../fixtures/user/user')()
 
 /**
  * Test the model functions and validate the data stored
  */
 
+// @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
 describe('users', function () {
+  // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'afterEach'.
   afterEach(async function () {
     await cleanDb()
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('addOrUpdate', function () {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('should add the user collection and set the flag incompleteUserDetails and isNewUser', async function () {
       const userData = userDataArray[0]
       const { isNewUser, userId } = await users.addOrUpdate(userData)
@@ -37,6 +48,7 @@ describe('users', function () {
       expect(isNewUser).to.equal(true)
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('should update the user collection and unset the flag isNewUser', async function () {
       const userData = userDataArray[0]
 
@@ -50,6 +62,7 @@ describe('users', function () {
       expect(updatedIsNewUserFlag).to.equal(false)
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('should update the user collection when userId is passed', async function () {
       const userData1 = userDataArray[0]
       const userData2 = userDataArray[1]
@@ -66,6 +79,7 @@ describe('users', function () {
       const data = (await userModel.doc(userId).get()).data()
 
       Object.keys(updatedUserData).forEach(key => {
+        // @ts-expect-error ts-migrate(7053) FIXME: Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         expect(updatedUserData[key]).to.deep.equal(data[key])
       })
 

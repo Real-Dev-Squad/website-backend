@@ -1,8 +1,14 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'express'.
 const express = require('express')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'router'.
 const router = express.Router()
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'authentica... Remove this comment to see the full error message
 const authenticate = require('../middlewares/authenticate')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'tasks'.
 const tasks = require('../controllers/tasks')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'createTask... Remove this comment to see the full error message
 const { createTask, updateTask, updateSelfTask } = require('../middlewares/validators/tasks')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'authorizeU... Remove this comment to see the full error message
 const { authorizeUser } = require('../middlewares/authorization')
 
 /**
@@ -203,4 +209,5 @@ router.get('/:username', tasks.getUserTasks)
  */
 router.patch('/self/:id', authenticate, updateSelfTask, tasks.updateTaskStatus)
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = router

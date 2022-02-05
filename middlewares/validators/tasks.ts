@@ -1,7 +1,10 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'joi'.
 const joi = require('joi')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'DINERO'.
 const { DINERO, NEELAM } = require('../../constants/wallets')
 
-const createTask = async (req, res, next) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'createTask... Remove this comment to see the full error message
+const createTask = async (req: any, res: any, next: any) => {
   const schema = joi.object().strict().keys({
     title: joi.string().required(),
     purpose: joi.string().optional(),
@@ -35,7 +38,8 @@ const createTask = async (req, res, next) => {
   }
 }
 
-const updateTask = async (req, res, next) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'updateTask... Remove this comment to see the full error message
+const updateTask = async (req: any, res: any, next: any) => {
   const schema = joi.object().strict().keys({
     title: joi.string().optional(),
     purpose: joi.string().optional(),
@@ -68,7 +72,8 @@ const updateTask = async (req, res, next) => {
   }
 }
 
-const updateSelfTask = async (req, res, next) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'updateSelf... Remove this comment to see the full error message
+const updateSelfTask = async (req: any, res: any, next: any) => {
   const schema = joi.object().strict().keys({
     status: joi.string().optional(),
     percentCompleted: joi.number().optional()
@@ -82,6 +87,7 @@ const updateSelfTask = async (req, res, next) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   createTask,
   updateTask,

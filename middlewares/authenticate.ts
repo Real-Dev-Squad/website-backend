@@ -1,4 +1,6 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'authServic... Remove this comment to see the full error message
 const authService = require('../services/authService')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'users'.
 const users = require('../models/users')
 
 /**
@@ -15,7 +17,7 @@ const users = require('../models/users')
  * @param {Function} next - Express middleware function
  * @returns {Object} - Returns unauthorized object if user has been restricted.
  */
-const checkRestricted = async (req, res, next) => {
+const checkRestricted = async (req: any, res: any, next: any) => {
   const { roles } = req.userData
   if (
     roles &&
@@ -42,7 +44,8 @@ const checkRestricted = async (req, res, next) => {
  * @param next {Function} - Express middleware function
  * @return {Object} - Returns unauthenticated object if token is invalid
  */
-module.exports = async (req, res, next) => {
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
+module.exports = async (req: any, res: any, next: any) => {
   try {
     let token = req.cookies[config.get('userToken.cookieName')]
 
@@ -50,6 +53,7 @@ module.exports = async (req, res, next) => {
      * Enable Bearer Token authentication for NON-PRODUCTION environments
      * This is enabled as Swagger UI does not support cookie authe
      */
+    // @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'process'. Do you need to install... Remove this comment to see the full error message
     if (process.env.NODE_ENV !== 'production' && !token) {
       token = req.headers.authorization.split(' ')[1]
     }
@@ -69,6 +73,7 @@ module.exports = async (req, res, next) => {
       const token = req.cookies[config.get('userToken.cookieName')]
       const { userId, iat } = authService.decodeAuthToken(token)
       const newToken = authService.generateAuthToken({ userId })
+      // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'URL'.
       const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'))
 
       // add new JWT to the response if it satisfies the refreshTtl time

@@ -1,4 +1,6 @@
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const auctions = require('../models/auctions')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'wallet'.
 const wallet = require('../models/wallets')
 
 /**
@@ -7,7 +9,8 @@ const wallet = require('../models/wallets')
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const fetchAvailableAuctions = async (_req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchAvail... Remove this comment to see the full error message
+const fetchAvailableAuctions = async (_req: any, res: any) => {
   try {
     const availableAuctions = await auctions.fetchAvailableAuctions()
     return res.json({
@@ -26,7 +29,8 @@ const fetchAvailableAuctions = async (_req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const fetchAuctionById = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchAucti... Remove this comment to see the full error message
+const fetchAuctionById = async (req: any, res: any) => {
   try {
     const auctionId = req.params.id
     const auctionData = await auctions.fetchAuctionById(auctionId)
@@ -46,7 +50,8 @@ const fetchAuctionById = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const createNewAuction = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'createNewA... Remove this comment to see the full error message
+const createNewAuction = async (req: any, res: any) => {
   try {
     const { id: seller } = req.userData
     const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = req.body
@@ -69,7 +74,8 @@ const createNewAuction = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const makeNewBid = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'makeNewBid... Remove this comment to see the full error message
+const makeNewBid = async (req: any, res: any) => {
   try {
     const { id: bidder } = req.userData
     const auctionId = req.params.id
@@ -88,6 +94,7 @@ const makeNewBid = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   fetchAuctionById,
   fetchAvailableAuctions,

@@ -1,6 +1,8 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'joi'.
 const joi = require('joi')
 
-const validateFeatureFlag = async (req, res, next) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'validateFe... Remove this comment to see the full error message
+const validateFeatureFlag = async (req: any, res: any, next: any) => {
   const schema = joi.object().strict().keys({
     name: joi.string().required(),
     title: joi.string().required(),
@@ -21,7 +23,8 @@ const validateFeatureFlag = async (req, res, next) => {
   }
 }
 
-const updateFeatureFlags = async (req, res, next) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'updateFeat... Remove this comment to see the full error message
+const updateFeatureFlags = async (req: any, res: any, next: any) => {
   const schema = joi.object().strict().keys({
     title: joi.string().optional(),
     config: joi.object({
@@ -37,6 +40,7 @@ const updateFeatureFlags = async (req, res, next) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   validateFeatureFlag,
   updateFeatureFlags

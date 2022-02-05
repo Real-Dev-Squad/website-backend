@@ -1,4 +1,6 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'tasks'.
 const tasks = require('../models/tasks')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'TASK_STATU... Remove this comment to see the full error message
 const { TASK_STATUS } = require('../constants/tasks')
 /**
  * Creates new task
@@ -7,7 +9,7 @@ const { TASK_STATUS } = require('../constants/tasks')
  * @param req.body {Object} - Task object
  * @param res {Object} - Express response object
  */
-const addNewTask = async (req, res) => {
+const addNewTask = async (req: any, res: any) => {
   try {
     const { id: createdBy } = req.userData
     const body = {
@@ -32,7 +34,8 @@ const addNewTask = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const fetchTasks = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'fetchTasks... Remove this comment to see the full error message
+const fetchTasks = async (req: any, res: any) => {
   try {
     const allTasks = await tasks.fetchTasks()
     return res.json({
@@ -51,7 +54,7 @@ const fetchTasks = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const getUserTasks = async (req, res) => {
+const getUserTasks = async (req: any, res: any) => {
   try {
     const { status } = req.query
     const { username } = req.params
@@ -84,7 +87,7 @@ const getUserTasks = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const getSelfTasks = async (req, res) => {
+const getSelfTasks = async (req: any, res: any) => {
   try {
     const { username } = req.userData
 
@@ -108,7 +111,8 @@ const getSelfTasks = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const updateTask = async (req, res) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'updateTask... Remove this comment to see the full error message
+const updateTask = async (req: any, res: any) => {
   try {
     const task = await tasks.fetchTask(req.params.id)
     if (!task.taskData) {
@@ -128,7 +132,7 @@ const updateTask = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const updateTaskStatus = async (req, res) => {
+const updateTaskStatus = async (req: any, res: any) => {
   try {
     const taskId = req.params.id
     const { id: userId } = req.userData
@@ -145,6 +149,7 @@ const updateTaskStatus = async (req, res) => {
   }
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   addNewTask,
   fetchTasks,

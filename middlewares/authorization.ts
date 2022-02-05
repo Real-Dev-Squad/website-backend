@@ -19,11 +19,13 @@ const REQUIRED_ROLES_PRIORITY = {
  * @param {Object} userRoles - Roles information of the current user.
  * @returns {Boolean} - Whether the current user is authorized for required role level.
  */
-const userHasPermission = (requiredRole, userRoles) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userHasPer... Remove this comment to see the full error message
+const userHasPermission = (requiredRole: any, userRoles: any) => {
+  // @ts-expect-error ts-migrate(7053) FIXME: Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   const allowedRoles = REQUIRED_ROLES_PRIORITY[`${requiredRole}`] || ['default']
-  return allowedRoles.some((role) => {
+  return allowedRoles.some((role: any) => {
     return Boolean(userRoles[`${role}`])
-  })
+  });
 }
 
 /**
@@ -35,8 +37,9 @@ const userHasPermission = (requiredRole, userRoles) => {
  * @param {String} requiredRole - The least role authority required for a route.
  * @returns {Function} - A middleware function that authorizes given role.
  */
-const authorizeUser = (requiredRole) => {
-  return (req, res, next) => {
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'authorizeU... Remove this comment to see the full error message
+const authorizeUser = (requiredRole: any) => {
+  return (req: any, res: any, next: any) => {
     const { roles = {} } = req.userData
     // All users should have `default` role
     roles.default = true
@@ -45,9 +48,10 @@ const authorizeUser = (requiredRole) => {
       return res.boom.unauthorized('You are not authorized for this action.')
     }
     return next()
-  }
+  };
 }
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = {
   authorizeUser,
   userHasPermission

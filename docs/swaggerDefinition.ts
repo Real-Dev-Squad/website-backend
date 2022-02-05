@@ -1,4 +1,6 @@
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const swaggerJsDoc = require('swagger-jsdoc')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'config'.
 const config = require('config')
 
 /**
@@ -737,5 +739,7 @@ const swaggerOptions = {
   apis: ['./routes/*.js']
 }
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'swaggerDoc... Remove this comment to see the full error message
 const swaggerDocs = swaggerJsDoc(swaggerOptions)
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
 module.exports = swaggerDocs

@@ -1,3 +1,4 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'users'.
 const users = require('../controllers/users')
 /**
  * Middleware to validate the authorized routes to be able to create & Update tasks
@@ -14,13 +15,14 @@ const users = require('../controllers/users')
  * @param next {Function} - Express middleware function
  * @return {Object} - Returns unauthorized user if the role is not assigned
  */
-module.exports = async (req, res, next) => {
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'module'. Do you need to install ... Remove this comment to see the full error message
+module.exports = async (req: any, res: any, next: any) => {
   try {
     // get user data from `req.userData` for further use
     const accountOwners = await users.getAccountOwners()
     const { username } = req.userData
 
-    if (accountOwners.some((owner) => owner.username === username)) {
+    if (accountOwners.some((owner: any) => owner.username === username)) {
       return next()
     } else {
       return res.boom.forbidden('Unauthorized User')
