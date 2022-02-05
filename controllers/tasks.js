@@ -163,7 +163,7 @@ const overdueTasks = async (req, res) => {
   try {
     const allTasks = await tasks.fetchTasks()
     const now = Math.floor(Date.now() / 1000)
-    const overDueTasks = allTasks.filter(task => (task.status === 'ASSIGNED' || task.status === 'IN_PROGRESS') && task.endsOn < now)
+    const overDueTasks = allTasks.filter(task => (task.status === TASK_STATUS.ASSIGNED || task.status === TASK_STATUS.IN_PROGRESS) && task.endsOn < now)
     const newAvailableTasks = await tasks.overdueTasks(overDueTasks)
     return res.json({
       message: 'Overdue Tasks returned successfully!',
