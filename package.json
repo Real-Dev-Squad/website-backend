@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./dist/server.js",
-    "dev": "cross-env NODE_ENV=development ts-node-dev server.js",
+    "start": "node ./dist/server.ts",
+    "dev": "cross-env NODE_ENV=development ts-node-dev server.ts",
     "build": "tsc",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
