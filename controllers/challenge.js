@@ -3,41 +3,60 @@ const challengeQuery = require('../models/challenges')
 const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
 /**
- * Get the challenges or add the challenge
+ * Get the challenges
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
 
-const sendChallengeResponse = async (req, res) => {
+const fetchChallenges = async (req, res) => {
   try {
-    if (req.method === 'GET') {
-      const allChallenges = await challengeQuery.fetchChallenges()
-      if (allChallenges.length > 0) {
-        return res.status(200).json({
-          message: 'Challenges returned successfully!',
-          challenges: allChallenges
-        })
-      } else {
-        return res.boom.notFound('No challenges found')
-      }
-    } else {
-      if (req.method === 'POST') {
-        const challengeAdded = await challengeQuery.postChallenge(req.body)
-        if (challengeAdded) {
-          return res.status(200).json({
-            message: 'Challenge added successfully',
-            challenges: challengeAdded
-          })
-        }
-      } else {
-        return res.boom.notFound('Unable to add challenge')
-      }
-    }
-    return ''
+    const allChallenges = await challengeQuery.fetchChallenges()
+    const promiseArray = await getParticipantsofChallenges(allChallenges)
+    const challengesWithParticipants = await Promise.all(promiseArray)
+    return res.json({
+      message: challengesWithParticipants.length ? 'Challenges returned successfully!' : 'No Challenges found',
+      challenges: challengesWithParticipants
+    })
   } catch (err) {
-    logger.error(`Error while retriving challenges ${err}`)
+    logger.error(`Error while retrieving challenges ${err}`)
     return res.boom.serverUnavailable(ERROR_MESSAGE)
   }
+}
+
+/**
+ * Add a challenge
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+
+const createChallenge = async (req, res) => {
+  try {
+    const challengeAdded = await challengeQuery.postChallenge(req.body)
+    if (challengeAdded) {
+      return res.json({
+        message: 'Challenge added successfully'
+      })
+    } else {
+      return res.boom.badRequest('Unable to add challenge')
+    }
+  } catch (err) {
+    logger.error(`Error while adding challenge ${err}`)
+    return res.boom.serverUnavailable(ERROR_MESSAGE)
+  }
+}
+
+/**
+ * @param {Array} allChallenges
+ * @returns {Promise<participants|Array>}
+ */
+const getParticipantsofChallenges = async (allChallenges) => {
+  return allChallenges.map(async (challenge) => {
+    const participants = await challengeQuery.fetchParticipantsData(challenge.participants)
+    return {
+      ...challenge,
+      participants
+    }
+  })
 }
 
 /**
@@ -52,7 +71,8 @@ const subscribeToChallenge = async (req, res) => {
     const subscribeUser = await challengeQuery.subscribeUserToChallenge(userId, challengeId)
     if (subscribeUser) {
       return res.status(200).json({
-        message: 'User has subscribed to challenge'
+        challenge_id: challengeId,
+        is_user_subscribed: 1
       })
     } else {
       return res.boom.notFound('User cannot be subscribed to challenge')
@@ -64,6 +84,7 @@ const subscribeToChallenge = async (req, res) => {
 }
 
 module.exports = {
-  sendChallengeResponse,
+  fetchChallenges,
+  createChallenge,
   subscribeToChallenge
 }

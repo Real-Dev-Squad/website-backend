@@ -12,6 +12,7 @@ const config = require('config')
 const cookieName = config.get('userToken.cookieName')
 const userData = require('../fixtures/user/user')()
 const { DINERO, NEELAM } = require('../../constants/wallets')
+const cleanDb = require('../utils/cleanDb')
 chai.use(chaiHttp)
 
 const appOwner = userData[3]
@@ -67,7 +68,11 @@ describe('Tasks', function () {
     taskId = (await tasks.updateTask(taskData[1])).taskId
   })
 
-  afterEach(function () {
+  after(async function () {
+    await cleanDb()
+  })
+
+  afterEach(async function () {
     sinon.restore()
   })
 
@@ -173,7 +178,7 @@ describe('Tasks', function () {
         title: 'Assigned task',
         purpose: 'To Test mocha',
         featureUrl: '<testUrl>',
-        type: 'Dev | Group',
+        type: 'group',
         links: [
           'test1'
         ],
@@ -185,11 +190,10 @@ describe('Tasks', function () {
           'd12',
           'd23'
         ],
-        participants: [appOwner.username],
+        participants: ['user1'],
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-        assignee: 'user1'
+        isNoteworthy: true
       }
       const { taskId } = await tasks.updateTask(assignedTask)
       const res = await chai
@@ -261,7 +265,7 @@ describe('Tasks', function () {
     it('Should return 200 when username is valid', function (done) {
       chai
         .request(app)
-        .get(`/tasks/${appOwner.username}`)
+        .get(`/tasks/${appOwner.username}?status=active`)
         .end((err, res) => {
           if (err) { return done(err) }
           expect(res).to.have.status(200)
@@ -284,7 +288,7 @@ describe('Tasks', function () {
     it('Should return 404 when username is invalid', function (done) {
       chai
         .request(app)
-        .get('/tasks/dummyUser')
+        .get('/tasks/dummyUser?status=active')
         .end((err, res) => {
           if (err) { return done(err) }
           expect(res).to.have.status(404)
@@ -292,6 +296,68 @@ describe('Tasks', function () {
           expect(res.body.message).to.equal('User doesn\'t exist')
           return done()
         })
+    })
+  })
+
+  describe('PATCH /self/:id', function () {
+    const taskStatusData = {
+      status: 'currentStatus',
+      percentCompleted: 50
+    }
+
+    it('Should update the task status for given self taskid', function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(200)
+          expect(res.body.message).to.equal('Task updated successfully!')
+          return done()
+        })
+    })
+
+    it('Should return 404 if task doesnt exist', function (done) {
+      chai
+        .request(app)
+        .patch('/tasks/self/wrongtaskId')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(404)
+          expect(res.body.message).to.equal('Task doesn\'t exist')
+          return done()
+        })
+    })
+
+    it('Should return Forbidden error if task is not assigned to self', async function () {
+      const { userId } = await addUser(userData[1])
+      const jwt = authService.generateAuthToken({ userId })
+
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set('cookie', `${cookieName}=${jwt}`)
+
+      expect(res).to.have.status(403)
+      expect(res.body.message).to.equal('This task is not assigned to you')
+    })
+
+    it('Should give error for no cookie', async function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(401)
+          expect(res.body.message).to.be.equal('Unauthenticated User')
+          return done()
+        })
+        .catch(done())
     })
   })
 })

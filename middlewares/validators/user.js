@@ -1,8 +1,8 @@
 const joi = require('joi')
-const userStatusEnum = require('../../constants/users')
+const { userStatusEnum } = require('../../constants/users')
 
 const updateUser = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     phone: joi.string().optional(),
     email: joi.string().optional(),
     username: joi.string().optional(),
@@ -27,7 +27,20 @@ const updateUser = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message)
   }
 }
+const updateIdentityURL = async (req, res, next) => {
+  const schema = joi.object().strict().keys({
+    identityURL: joi.string().uri().required()
+  })
 
+  try {
+    await schema.validateAsync(req.body)
+    next()
+  } catch (error) {
+    logger.error(`Error validating updateIdentityURL payload : ${error}`)
+    res.boom.badRequest(error.details[0].message)
+  }
+}
 module.exports = {
-  updateUser
+  updateUser,
+  updateIdentityURL
 }

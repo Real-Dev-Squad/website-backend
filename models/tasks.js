@@ -1,7 +1,7 @@
 const firestore = require('../utils/firestore')
 const tasksModel = firestore.collection('tasks')
 const userUtils = require('../utils/users')
-const { fromFirestoreData, toFirestoreData } = require('../utils/tasks')
+const { fromFirestoreData, toFirestoreData, buildTasks } = require('../utils/tasks')
 const { TASK_TYPE, TASK_STATUS } = require('../constants/tasks')
 
 /**
@@ -30,7 +30,7 @@ const updateTask = async (taskData, taskId = null) => {
 
     return result
   } catch (err) {
-    logger.error('Error in creating task', err)
+    logger.error('Error in updating task', err)
     throw err
   }
 }
@@ -43,13 +43,7 @@ const updateTask = async (taskData, taskId = null) => {
 const fetchTasks = async () => {
   try {
     const tasksSnapshot = await tasksModel.get()
-    const tasks = []
-    tasksSnapshot.forEach((task) => {
-      tasks.push({
-        id: task.id,
-        ...task.data()
-      })
-    })
+    const tasks = buildTasks(tasksSnapshot)
     const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
     return updatedTasks
@@ -101,6 +95,25 @@ const fetchTask = async (taskId) => {
 }
 
 /**
+ * Fetch assigned self task
+ * @param taskId { string }: taskId which will be used to fetch the task
+ * @param id { string }: id to check task is assigned to self or not
+ * @return {Promsie<taskData|Object>}
+ */
+const fetchSelfTask = async (taskId, userId) => {
+  try {
+    const task = await tasksModel.doc(taskId).get()
+    const taskData = task.data()
+    if (!taskData) return { taskNotFound: true }
+    if (userId !== taskData.assignee) return { notAssignedToYou: true }
+    return { taskData: await fromFirestoreData(taskData) }
+  } catch (err) {
+    logger.error('Error retrieving self task data', err)
+    throw err
+  }
+}
+
+/**
  * Fetch all the active and blocked tasks of the user
  *
  * @return {Promise<tasks|Array>}
@@ -120,43 +133,26 @@ const fetchUserTasks = async (username, statuses = []) => {
       return { userNotFound: true }
     }
 
-    let tasksSnapshot = []
-    let assigneeSnapshot = []
+    let groupTasksSnapshot = []
+    let featureTasksSnapshot = []
 
     if (statuses && statuses.length) {
-      tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
+      groupTasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
         .where('status', 'in', statuses)
         .get()
-      assigneeSnapshot = await tasksModel.where('assignee', '==', userId)
+      featureTasksSnapshot = await tasksModel.where('assignee', '==', userId)
         .where('status', 'in', statuses)
         .get()
     } else {
-      tasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
+      groupTasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
         .get()
 
-      assigneeSnapshot = await tasksModel.where('assignee', '==', userId)
+      featureTasksSnapshot = await tasksModel.where('assignee', '==', userId)
         .get()
     }
 
-    const tasks = []
-
-    if (!tasksSnapshot.empty) {
-      tasksSnapshot.forEach((task) => {
-        tasks.push({
-          id: task.id,
-          ...task.data()
-        })
-      })
-    }
-
-    if (!assigneeSnapshot.empty) {
-      assigneeSnapshot.forEach((task) => {
-        tasks.push({
-          id: task.id,
-          ...task.data()
-        })
-      })
-    }
+    const groupTasks = buildTasks(groupTasksSnapshot)
+    const tasks = buildTasks(featureTasksSnapshot, groupTasks)
 
     const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
@@ -188,5 +184,6 @@ module.exports = {
   fetchUserTasks,
   fetchUserActiveAndBlockedTasks,
   fetchUserCompletedTasks,
-  fetchActiveTaskMembers
+  fetchActiveTaskMembers,
+  fetchSelfTask
 }

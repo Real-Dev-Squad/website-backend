@@ -1,19 +1,23 @@
 
 const { getUsername, getUserId, getParticipantUsernames, getParticipantUserIds } = require('./users')
+const { TASK_TYPE } = require('../constants/tasks')
 
 const fromFirestoreData = async (task) => {
   if (!task) {
     return task
   }
-  let { createdBy, assignee, participants } = task
+
+  let { createdBy, assignee, participants, type } = task
+
   if (createdBy) {
     createdBy = await getUsername(createdBy)
   }
+
   if (assignee) {
     assignee = await getUsername(assignee)
   }
 
-  if (Array.isArray(participants)) {
+  if (type === TASK_TYPE.GROUP) {
     participants = await getParticipantUsernames(participants)
   }
 
@@ -41,7 +45,21 @@ const toFirestoreData = async (task) => {
   return updatedTask
 }
 
+const buildTasks = (tasks, initialTaskArray = []) => {
+  if (!tasks.empty) {
+    tasks.forEach((task) => {
+      initialTaskArray.push({
+        id: task.id,
+        ...task.data()
+      })
+    })
+  }
+
+  return initialTaskArray
+}
+
 module.exports = {
   fromFirestoreData,
-  toFirestoreData
+  toFirestoreData,
+  buildTasks
 }

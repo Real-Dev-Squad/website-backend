@@ -132,7 +132,9 @@ const postUserPicture = async (req, res) => {
   try {
     const { file } = req
     const { id: userId } = req.userData
-    const imageData = await imageService.uploadProfilePicture(file, userId)
+    const { coordinates } = req.body
+    const coordinatesObject = coordinates && JSON.parse(coordinates)
+    const imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject })
     return res.json({
       message: 'Profile picture uploaded successfully!',
       image: imageData
@@ -142,12 +144,24 @@ const postUserPicture = async (req, res) => {
     return res.boom.badImplementation('An internal server error occurred')
   }
 }
-
+const identityURL = async (req, res) => {
+  try {
+    const userId = req.userData.id
+    await userQuery.addOrUpdate(req.body, userId)
+    return res.json({
+      message: 'updated identity URL!!'
+    })
+  } catch (error) {
+    logger.error(`Internal Server Error: ${error}`)
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+}
 module.exports = {
   updateSelf,
   getUsers,
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
-  postUserPicture
+  postUserPicture,
+  identityURL
 }

@@ -1,4 +1,5 @@
 const tasks = require('../models/tasks')
+const { TASK_STATUS } = require('../constants/tasks')
 /**
  * Creates new task
  *
@@ -52,8 +53,15 @@ const fetchTasks = async (req, res) => {
  */
 const getUserTasks = async (req, res) => {
   try {
+    const { status } = req.query
     const { username } = req.params
-    const allTasks = await tasks.fetchUserTasks(username)
+    let allTasks = []
+
+    if (status && !Object.values(TASK_STATUS).includes(status)) {
+      return res.boom.notFound('Status not found!')
+    }
+
+    allTasks = await tasks.fetchUserTasks(username, status ? [status] : [])
 
     if (allTasks.userNotFound) {
       return res.boom.notFound('User doesn\'t exist')
@@ -115,10 +123,33 @@ const updateTask = async (req, res) => {
   }
 }
 
+/**
+ * Updates self task status
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const updateTaskStatus = async (req, res) => {
+  try {
+    const taskId = req.params.id
+    const { id: userId } = req.userData
+    const task = await tasks.fetchSelfTask(taskId, userId)
+
+    if (task.taskNotFound) return res.boom.notFound('Task doesn\'t exist')
+    if (task.notAssignedToYou) return res.boom.forbidden('This task is not assigned to you')
+
+    await tasks.updateTask(req.body, taskId)
+    return res.json({ message: 'Task updated successfully!' })
+  } catch (err) {
+    logger.error(`Error while updating task status : ${err}`)
+    return res.boom.badImplementation('An internal server error occured')
+  }
+}
+
 module.exports = {
   addNewTask,
   fetchTasks,
   updateTask,
   getSelfTasks,
-  getUserTasks
+  getUserTasks,
+  updateTaskStatus
 }

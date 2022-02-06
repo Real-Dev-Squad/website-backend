@@ -482,6 +482,17 @@ const swaggerOptions = {
             }
           }
         },
+        userBadges: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string'
+            },
+            description: {
+              type: 'string'
+            }
+          }
+        },
         userAvailable: {
           type: 'object',
           properties: {
@@ -608,6 +619,36 @@ const swaggerOptions = {
             type: {
               type: 'string'
             }
+          }
+        },
+        featureFlag: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string'
+            },
+            id: {
+              type: 'string'
+            },
+            title: {
+              type: 'string'
+            },
+            created_at: {
+              type: 'number'
+            },
+            updated_at: {
+              type: 'number'
+            },
+            config: {
+              type: 'object'
+            },
+            owner: {
+              type: 'string'
+            },
+            launched_at: {
+              type: 'number'
+            }
+
           }
         },
         errors: {
