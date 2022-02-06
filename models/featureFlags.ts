@@ -23,8 +23,7 @@ const fetchFeatureFlag = async () => {
     const users: any = []
     const result = {}
 
-    // @ts-expect-error ts-migrate(7006) FIXME: Parameter 'item' implicitly has an 'any' type.
-    featureFlags.forEach((item) => {
+    featureFlags.forEach((item: any) => {
       if (!users.includes(item.owner)) { users.push(item.owner) }
     })
 
@@ -39,8 +38,7 @@ const fetchFeatureFlag = async () => {
       Object.assign(result, image)
     }
 
-    // @ts-expect-error ts-migrate(7006) FIXME: Parameter 'item' implicitly has an 'any' type.
-    featureFlags.forEach((item) => {
+    featureFlags.forEach((item: any) => {
       item.owner = {
         username: item.owner,
         // @ts-expect-error ts-migrate(7053) FIXME: Element implicitly has an 'any' type because expre... Remove this comment to see the full error message

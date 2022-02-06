@@ -25,8 +25,7 @@ const getUserContributions = async (username: any) => {
     const participantsDetailsMap = new Map()
     const prMaps = new Map()
 
-    // @ts-expect-error ts-migrate(7006) FIXME: Parameter 'pr' implicitly has an 'any' type.
-    allPRsDetails.forEach(pr => {
+    allPRsDetails.forEach((pr: any) => {
       prMaps.set(pr.url, pr)
     })
 

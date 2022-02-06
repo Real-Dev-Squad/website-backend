@@ -26,8 +26,7 @@ const fetchAuctionById = async (auctionId: any) => {
     biddersAndBidsRef.forEach((bidData: any) => {
       biddersAndBidsArray.push(bidData.data())
     })
-    // @ts-expect-error ts-migrate(7006) FIXME: Parameter 'bidData' implicitly has an 'any' type.
-    const promises = biddersAndBidsArray.map(async (bidData) => {
+    const promises = biddersAndBidsArray.map(async (bidData: any) => {
       const bidderUsername = await usersUtils.getUsername(bidData.bidder)
       return { ...bidData, bidder: bidderUsername }
     })
@@ -93,8 +92,7 @@ const fetchAvailableAuctions = async () => {
       })
     })
 
-    // @ts-expect-error ts-migrate(7006) FIXME: Parameter 'auction' implicitly has an 'any' type.
-    const promises = auctions.map(async (auction) => {
+    const promises = auctions.map(async (auction: any) => {
       try {
         const seller = usersUtils.getUsername(auction.seller)
         const highestBidder = usersUtils.getUsername(auction.highest_bidder)
