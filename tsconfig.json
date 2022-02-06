@@ -13,6 +13,6 @@
   },
 
   "exclude": ["node_modules"],
-  "include": ["./**/*.ts", "server.ts"],
+  "include": ["/**/*.ts", "server.ts", "test/**/*"],
   "typeRoots": ["./node_modules/@types", "./types"]
 }
