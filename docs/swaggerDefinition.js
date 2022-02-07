@@ -631,6 +631,17 @@ const swaggerOptions = {
 
           }
         },
+        featureFlagsConfig: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string'
+            },
+            enabled: {
+              type: 'boolean'
+            }
+          }
+        },
         errors: {
           unAuthorized: {
             type: 'object',

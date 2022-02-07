@@ -1,4 +1,5 @@
 const featureFlagQuery = require('../models/featureFlags')
+const { featureFlagRollout } = require('../utils/rollout')
 
 /**
  * Fetches all the featureFlag
@@ -82,9 +83,31 @@ const deleteFeatureFlag = async (req, res) => {
   }
 }
 
+/**
+ * Get featureFlag config.
+ *
+ * This returns a list of feature flags and whether they are enabled or not.
+ * Feature flag being enabled depends on rollout config.
+ */
+const getConfig = async (req, res) => {
+  try {
+    const featureFlags = await featureFlagQuery.fetchFeatureFlag(false)
+    return res.json({
+      data: featureFlags.map((featureFlag) => ({
+        name: featureFlag.name,
+        enabled: featureFlagRollout(featureFlag, req.userData)
+      }))
+    })
+  } catch (err) {
+    logger.error(`Error while fetching feature Flags: ${err}`)
+    return res.boom.badImplementation('Something went wrong please contact admin')
+  }
+}
+
 module.exports = {
   getFeatureFlags,
   addFeatureFlag,
   updateFeatureFlag,
-  deleteFeatureFlag
+  deleteFeatureFlag,
+  getConfig
 }

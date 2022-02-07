@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { authenticate } = require('../middlewares/authenticate')
+const { authenticate, maybeAuthenticate } = require('../middlewares/authenticate')
 const { authorizeUser } = require('../middlewares/authorization')
 const { validateFeatureFlag, updateFeatureFlags } = require('../middlewares/validators/featureFlags')
 const featureFlag = require('../controllers/featureFlags')
@@ -156,5 +156,28 @@ router.patch('/:id', authenticate, authorizeUser('appOwner'), updateFeatureFlags
  */
 
 router.delete('/:id', authenticate, authorizeUser('appOwner'), featureFlag.deleteFeatureFlag)
+
+/**
+ * @swagger
+ * /featureFlags/config:
+ *   get:
+ *     summary: Gets config of all the featureFlags for this request
+ *     tags:
+ *       - FeatureFlags
+ *     responses:
+ *       200:
+ *         description: Toggles of all the featureFlags
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/featureFlagsConfig'
+ *       500:
+ *         description: badImplementation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.get('/config', maybeAuthenticate, featureFlag.getConfig)
 
 module.exports = router
