@@ -84,7 +84,7 @@ const addFeatureFlags = async (featureFlag, username) => {
  * @param featureFlagId { String }: feature flag Id String to be used to update the feature Flag
  * @return {Promise<{isUpdated: boolean}>}
  */
-const updateFeatureFlags = async (featureFlag, featureFlagId) => {
+const updateFeatureFlags = async (featureFlag = {}, featureFlagId) => {
   try {
     const doc = await featureFlagModel.doc(featureFlagId).get()
     if (!doc.data() || Object.keys(featureFlag).length === 0) {

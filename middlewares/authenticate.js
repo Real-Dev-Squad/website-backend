@@ -59,12 +59,12 @@ const refreshToken = async (req, res) => {
   const refreshTtl = config.get('userToken.refreshTtl')
   const token = req.cookies[config.get('userToken.cookieName')]
   const { userId, iat } = authService.decodeAuthToken(token)
-  const newToken = authService.generateAuthToken({ userId })
-  const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'))
   let isTokenRefreshed = false
 
   // add new JWT to the response if it satisfies the refreshTtl time
   if (Math.floor(Date.now() / 1000) - iat <= refreshTtl) {
+    const newToken = authService.generateAuthToken({ userId })
+    const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'))
     res.cookie(config.get('userToken.cookieName'), newToken, {
       domain: rdsUiUrl.hostname,
       expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
