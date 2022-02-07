@@ -13,6 +13,7 @@ const cookieName = config.get('userToken.cookieName')
 const userData = require('../fixtures/user/user')()
 const { DINERO, NEELAM } = require('../../constants/wallets')
 const cleanDb = require('../utils/cleanDb')
+const { TASK_STATUS_OLD, TASK_STATUS } = require('../../constants/tasks')
 chai.use(chaiHttp)
 
 const appOwner = userData[3]
@@ -135,8 +136,10 @@ describe('Tasks', function () {
 
   describe('GET /tasks/self', function () {
     it('Should get all the active and blocked tasks of the user', function (done) {
-      const taskStatus = ['active', 'pending', 'blocked', // old task workflow
-        'IN_PROGRESS', 'BLOCKED', 'SMOKE_TESTING']
+      const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD
+      const { IN_PROGRESS, BLOCKED, SMOKE_TESTING } = TASK_STATUS
+      const taskStatus = [OLD_ACTIVE, OLD_PENDING, OLD_BLOCKED,
+        IN_PROGRESS, BLOCKED, SMOKE_TESTING]
 
       chai
         .request(app)

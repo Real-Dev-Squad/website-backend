@@ -2,8 +2,9 @@ const firestore = require('../utils/firestore')
 const tasksModel = firestore.collection('tasks')
 const userUtils = require('../utils/users')
 const { fromFirestoreData, toFirestoreData, buildTasks } = require('../utils/tasks')
-const { TASK_TYPE, TASK_STATUS } = require('../constants/tasks')
-
+const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require('../constants/tasks')
+const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS
+const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD
 /**
  * Adds and Updates tasks
  *
@@ -65,7 +66,7 @@ const fetchTasks = async () => {
 
 const fetchActiveTaskMembers = async () => {
   try {
-    const status = ['active', 'blocked', 'pending', 'IN_PROGRESS', 'BLOCKED', 'SMOKE_TESTING']
+    const status = [OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, IN_PROGRESS, BLOCKED, SMOKE_TESTING]
     const tasksSnapshot = await tasksModel.where('type', '==', TASK_TYPE.FEATURE).where('status', 'in', status).get()
     const activeMembers = new Set()
     if (!tasksSnapshot.empty) {
@@ -179,8 +180,8 @@ const fetchUserTasks = async (username, statuses = []) => {
 
 const fetchUserActiveAndBlockedTasks = async (username) => {
   return await fetchUserTasks(username,
-    ['active', 'pending', 'blocked', // old task workflow
-      'IN_PROGRESS', 'BLOCKED', 'SMOKE_TESTING'] // new task workflow
+    [OLD_ACTIVE, OLD_PENDING, OLD_BLOCKED, // old task workflow
+      IN_PROGRESS, BLOCKED, SMOKE_TESTING] // new task workflow
   )
 }
 
@@ -191,7 +192,7 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
  */
 
 const fetchUserCompletedTasks = async (username) => {
-  return await fetchUserTasks(username, ['completed', 'COMPLETED'])
+  return await fetchUserTasks(username, [OLD_COMPLETED, COMPLETED])
 }
 
 /**

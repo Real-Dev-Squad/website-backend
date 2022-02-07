@@ -1,5 +1,7 @@
 const tasks = require('../models/tasks')
-const { TASK_STATUS } = require('../constants/tasks')
+const { TASK_STATUS, TASK_STATUS_OLD } = require('../constants/tasks')
+const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD
+const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS
 /**
  * Creates new task
  *
@@ -62,8 +64,8 @@ const getUserTasks = async (req, res) => {
     }
 
     if (status) {
-      if (status === 'active') {
-        status = ['active', 'blocked', 'pending', 'IN_PROGRESS', 'BLOCKED', 'SMOKE_TESTING']
+      if (status === OLD_ACTIVE) {
+        status = [OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, IN_PROGRESS, BLOCKED, SMOKE_TESTING]
       } else {
         status = [status]
       }
@@ -163,7 +165,7 @@ const overdueTasks = async (req, res) => {
   try {
     const allTasks = await tasks.fetchTasks()
     const now = Math.floor(Date.now() / 1000)
-    const overDueTasks = allTasks.filter(task => (task.status === TASK_STATUS.ASSIGNED || task.status === TASK_STATUS.IN_PROGRESS) && task.endsOn < now)
+    const overDueTasks = allTasks.filter(task => (task.status === ASSIGNED || task.status === IN_PROGRESS) && task.endsOn < now)
     const newAvailableTasks = await tasks.overdueTasks(overDueTasks)
     return res.json({
       message: 'Overdue Tasks returned successfully!',

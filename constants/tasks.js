@@ -28,4 +28,11 @@ const TASK_STATUS = {
   VERIFIED: 'VERIFIED'
 }
 
-module.exports = { TASK_TYPE, TASK_STATUS }
+const TASK_STATUS_OLD = {
+  OLD_ACTIVE: 'active',
+  OLD_BLOCKED: 'blocked',
+  OLD_PENDING: 'pending',
+  OLD_COMPLETED: 'completed'
+}
+
+module.exports = { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD }
