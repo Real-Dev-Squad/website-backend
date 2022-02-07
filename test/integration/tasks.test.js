@@ -167,7 +167,7 @@ describe('Tasks', function () {
           if (err) { return (done) }
           expect(res).to.have.status(200)
           expect(res.body).to.be.a('array')
-          expect(res.body[0].status).to.equal('COMPLETED')
+          expect(res.body[0].status).to.equal(TASK_STATUS.COMPLETED)
 
           return done()
         })
