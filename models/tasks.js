@@ -204,10 +204,9 @@ const fetchUserCompletedTasks = async (username) => {
 const overdueTasks = async (overDueTasks) => {
   try {
     const newAvailableTasks = await Promise.all(overDueTasks.map(async (task) => {
-      let { status, assignee, id } = task
-      status = TASK_STATUS.AVAILABLE
+      const { assignee, id } = task
       await tasksModel.doc(id).update({
-        status,
+        status: TASK_STATUS.AVAILABLE,
         assignee: admin.firestore.FieldValue.delete(),
         endsOn: admin.firestore.FieldValue.delete(),
         startedOn: admin.firestore.FieldValue.delete()
