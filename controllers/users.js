@@ -1,6 +1,7 @@
 
 const userQuery = require('../models/users')
 const profileQuery = require('../models/profile')
+const logsQuery = require('../models/logs')
 const imageService = require('../services/imageService')
 
 /**
@@ -156,29 +157,35 @@ const postUserPicture = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const userResult = await userQuery.fetchUser({ username: req.params.username })
-    const newProfile = await profileQuery.fetchProfileDiffData(req.params.username)
+    const { id: profileId, ...profileResult } = await profileQuery.fetchProfileDiffData(req.params.username)
     const userData = userResult.user
 
-    await userQuery.addOrUpdate(newProfile, userData.id)
+    await profileQuery.addOrUpdate({ approval: 'APPROVED' }, profileId)
+    await userQuery.addOrUpdate(profileResult, userData.id)
 
-    const oldProfile = {
-      first_name: null,
-      last_name: null,
-      email: null,
-      phone: null,
-      yoe: null,
-      company: null,
-      designation: null,
-      github_id: null,
-      linkedin_id: null,
-      twitter_id: null,
-      instagram_id: null,
-      website: null
-    }
+    const profile = [
+      'first_name',
+      'last_name',
+      'email',
+      'phone',
+      'yoe',
+      'company',
+      'designation',
+      'github_id',
+      'linkedin_id',
+      'twitter_id',
+      'instagram_id',
+      'website'
+    ]
 
-    Object.keys(oldProfile).forEach((prop) => {
+    const oldProfile = {}; const newProfile = {}
+    profile.forEach((prop) => {
       oldProfile[prop] = userData[prop] ? userData[prop] : ''
+      newProfile[prop] = profileResult[prop] ? profileResult[prop] : ''
     })
+
+    const logBody = `username=${req.params.username} oldData=${JSON.stringify(oldProfile)} newData=${JSON.stringify(newProfile)}`
+    await logsQuery.add('profileChanges', logBody)
 
     return res.json({
       message: 'Updated user\'s data successfully!'
