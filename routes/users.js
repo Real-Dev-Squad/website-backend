@@ -265,8 +265,8 @@ router.get('/:username', users.getUser)
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post('/picture', authenticate, upload.single('profile'), users.postUserPicture)
 
-router.patch('/:username', users.updateUser)
-
 router.patch('/identityURL', authenticate, userValidator.updateIdentityURL, users.identityURL)
+
+router.patch('/:username', users.updateUser)
 
 module.exports = router
