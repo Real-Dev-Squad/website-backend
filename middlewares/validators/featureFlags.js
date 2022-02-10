@@ -18,12 +18,12 @@ const validateFeatureFlag = async (req, res, next) => {
 const updateFeatureFlags = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     title: joi.string().optional(),
-    config: joi.object.strict.keys({
-      roleBased: joi.object.strict().keys({
+    config: joi.object().strict().keys({
+      roleBased: joi.object().strict().keys({
         roles: joi.array().required(),
         active: joi.boolean().required()
       }).optional(),
-      percentage: joi.object.strict().keys({
+      percentage: joi.object().strict().keys({
         value: joi.number().required(),
         active: joi.boolean().required()
       }).optional(),

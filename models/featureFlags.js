@@ -87,7 +87,7 @@ const addFeatureFlags = async (featureFlag, username) => {
 const updateFeatureFlags = async (featureFlag = {}, featureFlagId) => {
   try {
     const doc = await featureFlagModel.doc(featureFlagId).get()
-    if (!doc.data() || Object.keys(featureFlag).length === 0) {
+    if (!doc.data() || !Object.keys(featureFlag).length) {
       return {
         isUpdated: false
       }
