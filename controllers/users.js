@@ -159,7 +159,9 @@ const postUserPicture = async (req, res) => {
   try {
     const { file } = req
     const { id: userId } = req.userData
-    const imageData = await imageService.uploadProfilePicture(file, userId)
+    const { coordinates } = req.body
+    const coordinatesObject = coordinates && JSON.parse(coordinates)
+    const imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject })
     return res.json({
       message: 'Profile picture uploaded successfully!',
       image: imageData
