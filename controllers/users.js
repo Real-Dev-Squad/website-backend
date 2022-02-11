@@ -1,6 +1,6 @@
 
 const userQuery = require('../models/users')
-const profileQuery = require('../models/profile')
+const profileDiffsQuery = require('../models/profileDiffs')
 const logsQuery = require('../models/logs')
 const imageService = require('../services/imageService')
 
@@ -157,11 +157,11 @@ const postUserPicture = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { user } = await userQuery.fetchUser({ username: req.params.username })
-    const { id: profileId, ...profileResult } = await profileQuery.fetchProfileDiffData(req.params.username)
+    const { id: profileId, ...profileDiffs } = await profileDiffsQuery.fetchProfileDiffsData(req.params.username)
 
-    await profileQuery.addOrUpdate({ approval: 'APPROVED' }, profileId)
-    await userQuery.addOrUpdate(profileResult, user.id)
-    await logsQuery.addProfileLog(user, profileResult, req.params.username)
+    await profileDiffsQuery.update({ approval: 'APPROVED' }, profileId)
+    await userQuery.addOrUpdate(profileDiffs, user.id)
+    await logsQuery.addProfileLog(user, profileDiffs, req.params.username)
 
     return res.json({
       message: 'Updated user\'s data successfully!'
