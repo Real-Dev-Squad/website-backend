@@ -171,7 +171,7 @@ describe('Members', function () {
 
     it('Should return 401 if user is not a super_user', function (done) {
       addUser(nonSuperUser).then(nonSuperUserId => {
-        const nonSuperUserJwt = authService.generateAuthToken({ nonSuperUserId })
+        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId })
         chai
           .request(app)
           .patch(`/members/moveToMembers/${nonSuperUser.username}`)
@@ -248,7 +248,7 @@ describe('Members', function () {
 
     it('Should return 401 if user is not a super user', function (done) {
       addUser(nonSuperUser).then(nonSuperUserId => {
-        const nonSuperUserJwt = authService.generateAuthToken({ nonSuperUserId })
+        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId })
         chai
           .request(app)
           .patch(`/members/moveToMembers/${nonSuperUser.username}`)
