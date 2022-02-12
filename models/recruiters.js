@@ -46,7 +46,7 @@ const addRecruiterInfo = async (recruiterData, username) => {
  *
  * @return {Promise<recruiters|Array>}
  */
-const fetchRecruitersInfo = async ({ limit }) => {
+const fetchRecruitersInfo = async () => {
   try {
     const recruiterSnapshot = await recruiterModel.get()
     const recruiters = []
@@ -58,7 +58,7 @@ const fetchRecruitersInfo = async ({ limit }) => {
     })
     return recruiters
   } catch (err) {
-    logger.error('Error fetching recruiters', err)
+    logger.error('Error while fetching recruiters', err)
     throw err
   }
 }
