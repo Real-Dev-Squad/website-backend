@@ -27,7 +27,7 @@ module.exports = {
     'mocha/no-skipped-tests': 'error',
     'mocha/no-exclusive-tests': 'error',
 
-    //Prettier for formatting
+    // Prettier for formatting
     'prettier/prettier': 'error',
   },
   ignorePatterns: ['public/*'],

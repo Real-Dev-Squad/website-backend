@@ -20,8 +20,9 @@ const options = {
 };
 
 // instantiate a new Winston Logger with the settings defined above
+// eslint-disable-line new-cap
+/* eslint new-cap: ["error", { "properties": false }] */
 const logger = new winston.createLogger({
-  // eslint-disable-line new-cap
   /**
    * Application defaults:
    * - File logs enabled in: [production, staging]
