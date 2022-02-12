@@ -3,7 +3,7 @@ const router = express.Router()
 const members = require('../controllers/members')
 const { authorizeUser } = require('../middlewares/authorization')
 const authenticate = require('../middlewares/authenticate')
-const { addRecruiter } = require('../controllers/recruiters')
+const { addRecruiter, fetchRecruitersInfo } = require('../controllers/recruiters')
 const { validateRecruiter } = require('../middlewares/validators/recruiter')
 const { SUPER_USER } = require('../constants/roles')
 
@@ -86,6 +86,8 @@ router.get('/idle', members.getIdleMembers)
  */
 
 router.post('/intro/:username', validateRecruiter, addRecruiter)
+
+router.get('/intro', authenticate, authorizeUser(SUPER_USER), fetchRecruitersInfo)
 
 /**
  * @swagger

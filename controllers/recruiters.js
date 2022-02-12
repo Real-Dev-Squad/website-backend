@@ -23,6 +23,26 @@ const addRecruiter = async (req, res) => {
   }
 }
 
+/**
+ * Fetch all the recruiters information
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const fetchRecruitersInfo = async (req, res) => {
+  try {
+    const allRecruiter = await recruiterQuery.fetchRecruitersInfo()
+    return res.json({
+      message: 'Recruiters returned successfully!',
+      stock: allRecruiter.length > 0 ? allRecruiter : []
+    })
+  } catch (error) {
+    logger.error(`Error while fetching recruiters: ${error}`)
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+}
+
 module.exports = {
-  addRecruiter
+  addRecruiter,
+  fetchRecruitersInfo
 }
