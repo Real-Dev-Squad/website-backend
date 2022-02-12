@@ -18,7 +18,7 @@ chai.use(chaiHttp);
 const superUser = userData[4];
 const userAlreadyMember = userData[0];
 const userToBeMadeMember = userData[1];
-const nonSuperUser = userData[2];
+const nonSuperUser = userData[0];
 const userDoesNotExists = userData[1];
 const userToBeArchived = userData[3];
 const userAlreadyArchived = userData[5];
@@ -185,7 +185,7 @@ describe("Members", function () {
 
     it("Should return 401 if user is not a super_user", function (done) {
       addUser(nonSuperUser).then((nonSuperUserId) => {
-        const nonSuperUserJwt = authService.generateAuthToken({ nonSuperUserId });
+        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
         chai
           .request(app)
           .patch(`/members/moveToMembers/${nonSuperUser.username}`)
@@ -270,7 +270,7 @@ describe("Members", function () {
 
     it("Should return 401 if user is not a super user", function (done) {
       addUser(nonSuperUser).then((nonSuperUserId) => {
-        const nonSuperUserJwt = authService.generateAuthToken({ nonSuperUserId });
+        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
         chai
           .request(app)
           .patch(`/members/moveToMembers/${nonSuperUser.username}`)
