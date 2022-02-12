@@ -18,7 +18,7 @@ chai.use(chaiHttp)
 const superUser = userData[4]
 const userAlreadyMember = userData[0]
 const userToBeMadeMember = userData[1]
-const nonSuperUser = userData[2]
+const nonSuperUser = userData[0]
 const userDoesNotExists = userData[1]
 const userToBeArchived = userData[3]
 const userAlreadyArchived = userData[5]
