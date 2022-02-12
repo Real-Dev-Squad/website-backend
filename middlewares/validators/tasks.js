@@ -1,5 +1,5 @@
-const joi = require('joi');
-const { DINERO, NEELAM } = require('../../constants/wallets');
+const joi = require("joi");
+const { DINERO, NEELAM } = require("../../constants/wallets");
 
 const createTask = async (req, res, next) => {
   const schema = joi

@@ -7,7 +7,7 @@
 
 const userFound = {
   userExists: true,
-  userBadges: [{ title: 'badgeTitle', description: 'badgeDescription' }],
+  userBadges: [{ title: "badgeTitle", description: "badgeDescription" }],
 };
 
 const userNotFound = {

@@ -1,6 +1,6 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const contributions = require('../controllers/contributions');
+const contributions = require("../controllers/contributions");
 
 /**
  * @swagger
@@ -29,6 +29,6 @@ const contributions = require('../controllers/contributions');
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:username', contributions.getUserContributions);
+router.get("/:username", contributions.getUserContributions);
 
 module.exports = router;

@@ -1,6 +1,6 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const badge = require('../controllers/badge.js');
+const badge = require("../controllers/badge.js");
 
 /**
  * @swagger
@@ -32,7 +32,7 @@ const badge = require('../controllers/badge.js');
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router.get('/', badge.getBadges);
+router.get("/", badge.getBadges);
 
 /**
  * @swagger
@@ -71,6 +71,6 @@ router.get('/', badge.getBadges);
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.get('/:username', badge.getUserBadges);
+router.get("/:username", badge.getUserBadges);
 
 module.exports = router;

@@ -1,5 +1,5 @@
-const swaggerJsDoc = require('swagger-jsdoc');
-const config = require('config');
+const swaggerJsDoc = require("swagger-jsdoc");
+const config = require("config");
 
 /**
  * Read more on: https://swagger.io/docs/specification/about
@@ -9,213 +9,213 @@ const config = require('config');
  */
 const swaggerOptions = {
   swaggerDefinition: {
-    openapi: '3.0.1',
+    openapi: "3.0.1",
     info: {
-      version: '1.0.0',
-      title: 'RDS API documentation',
+      version: "1.0.0",
+      title: "RDS API documentation",
       description:
         "This is documentation for Real Dev Squad's API. Find out more about Real dev squad at [http://realdevsquad.com](http://realdevsquad.com)",
       contact: {
-        name: 'Real Dev Squad',
-        url: 'http://realdevsquad.com',
+        name: "Real Dev Squad",
+        url: "http://realdevsquad.com",
       },
     },
     tags: [
       {
-        name: 'Healthcheck',
-        description: 'API for health check in the system',
+        name: "Healthcheck",
+        description: "API for health check in the system",
       },
       {
-        name: 'Authentication',
-        description: 'Authentication routes',
+        name: "Authentication",
+        description: "Authentication routes",
       },
     ], // tags are used to group api routes together in the UI
     servers: [
       {
-        url: config.get('services.rdsApi.baseUrl'),
-        description: 'Local server URL',
+        url: config.get("services.rdsApi.baseUrl"),
+        description: "Local server URL",
       },
     ],
     components: {
       securitySchemes: {
         bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
         },
       },
       schemas: {
         healthCheck: {
-          type: 'object',
+          type: "object",
           properties: {
             uptime: {
-              type: 'number',
+              type: "number",
             },
           },
         },
         tasks: {
-          type: 'object',
+          type: "object",
           properties: {
             title: {
-              type: 'string',
+              type: "string",
             },
             purpose: {
-              type: 'string',
+              type: "string",
             },
             featureUrl: {
-              type: 'string',
+              type: "string",
             },
             type: {
-              type: 'string',
+              type: "string",
             },
             links: {
-              type: 'array',
+              type: "array",
               items: {
                 link1: {
-                  type: 'string',
+                  type: "string",
                 },
               },
             },
             endsOn: {
-              type: 'string',
+              type: "string",
             },
             startedOn: {
-              type: 'string',
+              type: "string",
             },
             status: {
-              type: 'string',
+              type: "string",
             },
             assignee: {
-              type: 'string',
+              type: "string",
             },
             percentCompleted: {
-              type: 'number',
+              type: "number",
             },
             dependsOn: {
-              type: 'array',
+              type: "array",
               items: {
                 taskid: {
-                  type: 'string',
+                  type: "string",
                 },
               },
             },
             participants: {
-              type: 'array',
+              type: "array",
               items: {
                 username: {
-                  type: 'string',
+                  type: "string",
                 },
               },
             },
             completionAward: {
-              type: 'object',
+              type: "object",
               properties: {
                 neelam: {
-                  type: 'number',
+                  type: "number",
                 },
                 dinero: {
-                  type: 'number',
+                  type: "number",
                 },
               },
             },
             lossRate: {
-              type: 'object',
+              type: "object",
               properties: {
                 neelam: {
-                  type: 'number',
+                  type: "number",
                 },
                 dinero: {
-                  type: 'number',
+                  type: "number",
                 },
               },
             },
             isNoteworthy: {
-              type: 'boolean',
+              type: "boolean",
             },
           },
         },
         contributions: {
-          type: 'object',
+          type: "object",
           properties: {
             noteworthy: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   task: {
-                    type: 'object',
+                    type: "object",
                     properties: {
                       title: {
-                        type: 'string',
+                        type: "string",
                       },
                       purpose: {
-                        type: 'string',
+                        type: "string",
                       },
                       featureUrl: {
-                        type: 'string',
+                        type: "string",
                       },
                       endsOn: {
-                        type: 'string',
+                        type: "string",
                       },
                       startedOn: {
-                        type: 'string',
+                        type: "string",
                       },
                       status: {
-                        type: 'string',
+                        type: "string",
                       },
                       dependsOn: {
-                        type: 'array',
+                        type: "array",
                         items: {
-                          type: 'string',
+                          type: "string",
                         },
                       },
                       participants: {
-                        type: 'array',
+                        type: "array",
                         items: {
-                          type: 'object',
+                          type: "object",
                           properties: {
                             firstname: {
-                              type: 'string',
+                              type: "string",
                             },
                             lastname: {
-                              type: 'string',
+                              type: "string",
                             },
                             img: {
-                              type: 'string',
+                              type: "string",
                             },
                             username: {
-                              type: 'string',
+                              type: "string",
                             },
                           },
                         },
                       },
                       isNoteworthy: {
-                        type: 'boolean',
+                        type: "boolean",
                       },
                     },
                   },
                   prList: {
-                    type: 'array',
+                    type: "array",
                     items: {
-                      type: 'object',
+                      type: "object",
                       properties: {
                         title: {
-                          type: 'string',
+                          type: "string",
                         },
                         url: {
-                          type: 'string',
+                          type: "string",
                         },
                         state: {
-                          type: 'string',
+                          type: "string",
                         },
                         createdAt: {
-                          type: 'string',
+                          type: "string",
                         },
                         updatedAt: {
-                          type: 'string',
+                          type: "string",
                         },
                         raisedBy: {
-                          type: 'string',
+                          type: "string",
                         },
                       },
                     },
@@ -224,84 +224,84 @@ const swaggerOptions = {
               },
             },
             all: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   task: {
-                    type: 'object',
+                    type: "object",
                     properties: {
                       title: {
-                        type: 'string',
+                        type: "string",
                       },
                       purpose: {
-                        type: 'string',
+                        type: "string",
                       },
                       featureUrl: {
-                        type: 'string',
+                        type: "string",
                       },
                       endsOn: {
-                        type: 'string',
+                        type: "string",
                       },
                       startedOn: {
-                        type: 'string',
+                        type: "string",
                       },
                       status: {
-                        type: 'string',
+                        type: "string",
                       },
                       dependsOn: {
-                        type: 'array',
+                        type: "array",
                         items: {
-                          type: 'string',
+                          type: "string",
                         },
                       },
                       participants: {
-                        type: 'array',
+                        type: "array",
                         items: {
-                          type: 'object',
+                          type: "object",
                           properties: {
                             firstname: {
-                              type: 'string',
+                              type: "string",
                             },
                             lastname: {
-                              type: 'string',
+                              type: "string",
                             },
                             img: {
-                              type: 'string',
+                              type: "string",
                             },
                             username: {
-                              type: 'string',
+                              type: "string",
                             },
                           },
                         },
                       },
                       isNoteworthy: {
-                        type: 'boolean',
+                        type: "boolean",
                       },
                     },
                   },
                   prList: {
-                    type: 'array',
+                    type: "array",
                     items: {
-                      type: 'object',
+                      type: "object",
                       properties: {
                         title: {
-                          type: 'string',
+                          type: "string",
                         },
                         url: {
-                          type: 'string',
+                          type: "string",
                         },
                         state: {
-                          type: 'string',
+                          type: "string",
                         },
                         createdAt: {
-                          type: 'string',
+                          type: "string",
                         },
                         updatedAt: {
-                          type: 'string',
+                          type: "string",
                         },
                         raisedBy: {
-                          type: 'string',
+                          type: "string",
                         },
                       },
                     },
@@ -312,420 +312,420 @@ const swaggerOptions = {
           },
         },
         challenges: {
-          type: 'object',
+          type: "object",
           properties: {
             id: {
-              type: 'string',
+              type: "string",
             },
             title: {
-              type: 'string',
+              type: "string",
             },
             level: {
-              type: 'string',
+              type: "string",
             },
             start_date: {
-              type: 'string',
+              type: "string",
             },
             end_date: {
-              type: 'string',
+              type: "string",
             },
             is_active: {
-              type: 'boolean',
+              type: "boolean",
             },
             participants: {
-              type: 'array',
+              type: "array",
               items: [],
             },
           },
         },
         pullRequests: {
-          type: 'object',
+          type: "object",
           properties: {
             title: {
-              type: 'string',
+              type: "string",
             },
             url: {
-              type: 'string',
+              type: "string",
             },
             state: {
-              type: 'string',
+              type: "string",
             },
             createdAt: {
-              type: 'string',
+              type: "string",
             },
             updatedAt: {
-              type: 'string',
+              type: "string",
             },
             readyForReview: {
-              type: 'boolean',
+              type: "boolean",
             },
             labels: {
-              type: 'array',
+              type: "array",
               items: [],
             },
             assignees: {
-              type: 'array',
+              type: "array",
               items: [],
             },
           },
         },
         recruiters: {
-          type: 'object',
+          type: "object",
           properties: {
             company: {
-              type: 'string',
+              type: "string",
             },
             first_name: {
-              type: 'string',
+              type: "string",
             },
             last_name: {
-              type: 'string',
+              type: "string",
             },
             designation: {
-              type: 'string',
+              type: "string",
             },
             reason: {
-              type: 'string',
+              type: "string",
             },
             email: {
-              type: 'string',
+              type: "string",
             },
             currency: {
-              type: 'string',
+              type: "string",
             },
             package: {
-              type: 'number',
+              type: "number",
             },
           },
         },
         migratedUsers: {
-          type: 'object',
+          type: "object",
           properties: {
             count: {
-              type: 'number',
+              type: "number",
             },
             users: {
-              type: 'array',
+              type: "array",
             },
           },
         },
         users: {
-          type: 'object',
+          type: "object",
           properties: {
             username: {
-              type: 'string',
+              type: "string",
             },
             first_name: {
-              type: 'string',
+              type: "string",
             },
             last_name: {
-              type: 'string',
+              type: "string",
             },
             yoe: {
-              type: 'number',
+              type: "number",
             },
             company: {
-              type: 'string',
+              type: "string",
             },
             designation: {
-              type: 'string',
+              type: "string",
             },
             img: {
-              type: 'string',
+              type: "string",
             },
             github_display_name: {
-              type: 'string',
+              type: "string",
             },
             github_id: {
-              type: 'string',
+              type: "string",
             },
             linkedin_id: {
-              type: 'string',
+              type: "string",
             },
             twitter_id: {
-              type: 'string',
+              type: "string",
             },
             instagram_id: {
-              type: 'string',
+              type: "string",
             },
             site: {
-              type: 'string',
+              type: "string",
             },
             isMember: {
-              type: 'boolean',
+              type: "boolean",
             },
             tokens: {
-              type: 'object',
+              type: "object",
             },
             status: {
-              type: 'string',
+              type: "string",
             },
           },
         },
         badges: {
-          type: 'object',
+          type: "object",
           properties: {
             title: {
-              type: 'string',
+              type: "string",
             },
             description: {
-              type: 'string',
+              type: "string",
             },
             imgUrl: {
-              type: 'string',
+              type: "string",
             },
             users: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'string',
+                type: "string",
               },
             },
           },
         },
         userBadges: {
-          type: 'object',
+          type: "object",
           properties: {
             title: {
-              type: 'string',
+              type: "string",
             },
             description: {
-              type: 'string',
+              type: "string",
             },
           },
         },
         userAvailable: {
-          type: 'object',
+          type: "object",
           properties: {
             isUsernameAvailable: {
-              type: 'boolean',
+              type: "boolean",
             },
           },
         },
         stocks: {
-          type: 'object',
+          type: "object",
           properties: {
             name: {
-              type: 'string',
+              type: "string",
             },
             price: {
-              type: 'number',
+              type: "number",
             },
             quantity: {
-              type: 'number',
+              type: "number",
             },
           },
         },
         trading: {
-          type: 'object',
+          type: "object",
           properties: {
             stockId: {
-              type: 'string',
+              type: "string",
             },
             tradeType: {
-              type: 'string',
+              type: "string",
             },
             stockName: {
-              type: 'string',
+              type: "string",
             },
             quantity: {
-              type: 'number',
+              type: "number",
             },
             listedPrice: {
-              type: 'number',
+              type: "number",
             },
             totalPrice: {
-              type: 'number',
+              type: "number",
             },
           },
         },
         tradingSuccess: {
-          type: 'object',
+          type: "object",
           properties: {
             userBalance: {
-              type: 'number',
+              type: "number",
             },
           },
         },
         userStocks: {
-          type: 'object',
+          type: "object",
           properties: {
             userId: {
-              type: 'string',
+              type: "string",
             },
             stockId: {
-              type: 'string',
+              type: "string",
             },
             stockName: {
-              type: 'string',
+              type: "string",
             },
             quantity: {
-              type: 'number',
+              type: "number",
             },
             orderValue: {
-              type: 'number',
+              type: "number",
             },
             initialStockValue: {
-              type: 'number',
+              type: "number",
             },
           },
         },
         auctions: {
-          type: 'object',
+          type: "object",
           properties: {
             id: {
-              type: 'string',
+              type: "string",
             },
             seller: {
-              type: 'string',
+              type: "string",
             },
             item_type: {
-              type: 'string',
+              type: "string",
             },
             quantity: {
-              type: 'number',
+              type: "number",
             },
             highest_bid: {
-              type: 'number',
+              type: "number",
             },
             highest_bidder: {
-              type: 'number',
+              type: "number",
             },
             start_time: {
-              type: 'number',
+              type: "number",
             },
             end_time: {
-              type: 'number',
+              type: "number",
             },
             bidders_and_bids: {
-              type: 'array',
+              type: "array",
             },
           },
         },
         featureFlag: {
-          type: 'object',
+          type: "object",
           properties: {
             name: {
-              type: 'string',
+              type: "string",
             },
             id: {
-              type: 'string',
+              type: "string",
             },
             title: {
-              type: 'string',
+              type: "string",
             },
             created_at: {
-              type: 'number',
+              type: "number",
             },
             updated_at: {
-              type: 'number',
+              type: "number",
             },
             config: {
-              type: 'object',
+              type: "object",
             },
             owner: {
-              type: 'string',
+              type: "string",
             },
             launched_at: {
-              type: 'number',
+              type: "number",
             },
           },
         },
         errors: {
           unAuthorized: {
-            type: 'object',
+            type: "object",
             properties: {
               statusCode: {
-                type: 'integer',
+                type: "integer",
               },
               error: {
-                type: 'string',
+                type: "string",
               },
               message: {
-                type: 'string',
+                type: "string",
               },
             },
           },
           notFound: {
-            type: 'object',
+            type: "object",
             properties: {
               statusCode: {
-                type: 'integer',
+                type: "integer",
               },
               error: {
-                type: 'string',
+                type: "string",
               },
               message: {
-                type: 'string',
+                type: "string",
               },
             },
           },
           forbidden: {
-            type: 'object',
+            type: "object",
             properties: {
               statusCode: {
-                type: 'integer',
+                type: "integer",
               },
               error: {
-                type: 'string',
+                type: "string",
               },
               message: {
-                type: 'string',
+                type: "string",
               },
             },
           },
           badImplementation: {
-            type: 'object',
+            type: "object",
             properties: {
               statusCode: {
-                type: 'integer',
+                type: "integer",
               },
               error: {
-                type: 'string',
+                type: "string",
               },
               message: {
-                type: 'string',
+                type: "string",
               },
             },
           },
           entityTooLarge: {
-            type: 'object',
+            type: "object",
             properties: {
               statusCode: {
-                type: 'integer',
+                type: "integer",
               },
               error: {
-                type: 'string',
+                type: "string",
               },
               message: {
-                type: 'string',
+                type: "string",
               },
             },
           },
           unsupportedMediaType: {
-            type: 'object',
+            type: "object",
             properties: {
               statusCode: {
-                type: 'integer',
+                type: "integer",
               },
               error: {
-                type: 'string',
+                type: "string",
               },
               message: {
-                type: 'string',
+                type: "string",
               },
             },
           },
           serverUnavailable: {
-            type: 'object',
+            type: "object",
             properties: {
               statusCode: {
-                type: 'integer',
+                type: "integer",
               },
               error: {
-                type: 'string',
+                type: "string",
               },
               message: {
-                type: 'string',
+                type: "string",
               },
             },
           },
@@ -733,7 +733,7 @@ const swaggerOptions = {
       }, // schemas are used to group the common request/response for API's
     },
   },
-  apis: ['./routes/*.js'],
+  apis: ["./routes/*.js"],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);

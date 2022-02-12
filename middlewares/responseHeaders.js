@@ -18,15 +18,15 @@
 
 module.exports = (req, res, next) => {
   try {
-    const cacheExpiry = config.get('routesCacheTTL');
-    let cacheControl = 'private, max-age=0';
+    const cacheExpiry = config.get("routesCacheTTL");
+    let cacheControl = "private, max-age=0";
     const ttl = cacheExpiry[req.path];
 
     if (ttl > 0) {
       cacheControl = `public, max-age=${ttl}, stale-if-error=300`;
     }
 
-    res.header('Cache-Control', cacheControl);
+    res.header("Cache-Control", cacheControl);
   } catch (e) {
     logger.error(`Error finding TTL config:: ${e}`);
   }

@@ -1,6 +1,6 @@
-const { INITIAL_WALLET } = require('../constants/wallets');
-const firestore = require('../utils/firestore');
-const walletModel = firestore.collection('wallets');
+const { INITIAL_WALLET } = require("../constants/wallets");
+const firestore = require("../utils/firestore");
+const walletModel = firestore.collection("wallets");
 
 /**
  * Fetches the data from user wallet
@@ -8,14 +8,14 @@ const walletModel = firestore.collection('wallets');
  */
 const fetchWallet = async (userId) => {
   try {
-    const walletDocs = await walletModel.where('userId', '==', userId).limit(1).get();
+    const walletDocs = await walletModel.where("userId", "==", userId).limit(1).get();
     const [userWallet] = walletDocs.docs;
     if (userWallet) {
       return { id: userWallet.id, ...userWallet.data() };
     }
     return null;
   } catch (err) {
-    logger.error('Error retrieving wallets', err);
+    logger.error("Error retrieving wallets", err);
     throw err;
   }
 };
@@ -37,7 +37,7 @@ const createWallet = async (userId, currencies = {}) => {
       data: walletData,
     };
   } catch (err) {
-    logger.error('Error creating user wallet', err);
+    logger.error("Error creating user wallet", err);
     throw err;
   }
 };
@@ -65,7 +65,7 @@ const updateWallet = async (userId, currencies) => {
     }
     return false;
   } catch (err) {
-    logger.error('Error updating currency to user wallets', err);
+    logger.error("Error updating currency to user wallets", err);
     throw err;
   }
 };

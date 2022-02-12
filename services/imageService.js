@@ -1,7 +1,7 @@
-const DatauriParser = require('datauri/parser');
-const userModel = require('../models/users');
-const { upload } = require('../utils/cloudinary');
-const cloudinaryMetaData = require('../constants/cloudinary');
+const DatauriParser = require("datauri/parser");
+const userModel = require("../models/users");
+const { upload } = require("../utils/cloudinary");
+const cloudinaryMetaData = require("../constants/cloudinary");
 
 /**
  * upload user profile picture to cloudinary
@@ -19,8 +19,8 @@ const uploadProfilePicture = async ({ file, userId, coordinates }) => {
       tags: cloudinaryMetaData.PROFILE.TAGS,
       transformation: {
         ...coordinates,
-        crop: 'crop',
-        fetch_format: 'auto',
+        crop: "crop",
+        fetch_format: "auto",
       },
     });
     const { public_id: publicId, secure_url: url } = uploadResponse;

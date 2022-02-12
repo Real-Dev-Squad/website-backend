@@ -1,8 +1,8 @@
-const firestore = require('../utils/firestore');
-const tasksModel = firestore.collection('tasks');
-const userUtils = require('../utils/users');
-const { fromFirestoreData, toFirestoreData, buildTasks } = require('../utils/tasks');
-const { TASK_TYPE, TASK_STATUS } = require('../constants/tasks');
+const firestore = require("../utils/firestore");
+const tasksModel = firestore.collection("tasks");
+const userUtils = require("../utils/users");
+const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
+const { TASK_TYPE, TASK_STATUS } = require("../constants/tasks");
 
 /**
  * Adds and Updates tasks
@@ -30,7 +30,7 @@ const updateTask = async (taskData, taskId = null) => {
 
     return result;
   } catch (err) {
-    logger.error('Error in updating task', err);
+    logger.error("Error in updating task", err);
     throw err;
   }
 };
@@ -48,7 +48,7 @@ const fetchTasks = async () => {
     const updatedTasks = await Promise.all(promises);
     return updatedTasks;
   } catch (err) {
-    logger.error('error getting tasks', err);
+    logger.error("error getting tasks", err);
     throw err;
   }
 };
@@ -62,8 +62,8 @@ const fetchTasks = async () => {
 const fetchActiveTaskMembers = async () => {
   try {
     const tasksSnapshot = await tasksModel
-      .where('type', '==', TASK_TYPE.FEATURE)
-      .where('status', '==', TASK_STATUS.ACTIVE)
+      .where("type", "==", TASK_TYPE.FEATURE)
+      .where("status", "==", TASK_STATUS.ACTIVE)
       .get();
     const activeMembers = new Set();
     if (!tasksSnapshot.empty) {
@@ -74,7 +74,7 @@ const fetchActiveTaskMembers = async () => {
     }
     return activeMembers;
   } catch (err) {
-    logger.error('error getting tasks', err);
+    logger.error("error getting tasks", err);
     throw err;
   }
 };
@@ -90,7 +90,7 @@ const fetchTask = async (taskId) => {
     const taskData = task.data();
     return { taskData: await fromFirestoreData(taskData) };
   } catch (err) {
-    logger.error('Error retrieving task data', err);
+    logger.error("Error retrieving task data", err);
     throw err;
   }
 };
@@ -109,7 +109,7 @@ const fetchSelfTask = async (taskId, userId) => {
     if (userId !== taskData.assignee) return { notAssignedToYou: true };
     return { taskData: await fromFirestoreData(taskData) };
   } catch (err) {
-    logger.error('Error retrieving self task data', err);
+    logger.error("Error retrieving self task data", err);
     throw err;
   }
 };
@@ -139,14 +139,14 @@ const fetchUserTasks = async (username, statuses = []) => {
 
     if (statuses && statuses.length) {
       groupTasksSnapshot = await tasksModel
-        .where('participants', 'array-contains', userId)
-        .where('status', 'in', statuses)
+        .where("participants", "array-contains", userId)
+        .where("status", "in", statuses)
         .get();
-      featureTasksSnapshot = await tasksModel.where('assignee', '==', userId).where('status', 'in', statuses).get();
+      featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).where("status", "in", statuses).get();
     } else {
-      groupTasksSnapshot = await tasksModel.where('participants', 'array-contains', userId).get();
+      groupTasksSnapshot = await tasksModel.where("participants", "array-contains", userId).get();
 
-      featureTasksSnapshot = await tasksModel.where('assignee', '==', userId).get();
+      featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).get();
     }
 
     const groupTasks = buildTasks(groupTasksSnapshot);
@@ -156,13 +156,13 @@ const fetchUserTasks = async (username, statuses = []) => {
     const updatedTasks = await Promise.all(promises);
     return updatedTasks;
   } catch (err) {
-    logger.error('error getting tasks', err);
+    logger.error("error getting tasks", err);
     throw err;
   }
 };
 
 const fetchUserActiveAndBlockedTasks = async (username) => {
-  return await fetchUserTasks(username, ['active', 'pending', 'blocked']);
+  return await fetchUserTasks(username, ["active", "pending", "blocked"]);
 };
 
 /**
@@ -172,7 +172,7 @@ const fetchUserActiveAndBlockedTasks = async (username) => {
  */
 
 const fetchUserCompletedTasks = async (username) => {
-  return await fetchUserTasks(username, ['completed']);
+  return await fetchUserTasks(username, ["completed"]);
 };
 
 module.exports = {

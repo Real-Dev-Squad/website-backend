@@ -4,26 +4,26 @@
  */
 /* eslint-disable security/detect-object-injection */
 
-const chai = require('chai');
+const chai = require("chai");
 const { expect } = chai;
 
-const cleanDb = require('../../utils/cleanDb');
-const users = require('../../../models/users');
-const firestore = require('../../../utils/firestore');
-const userModel = firestore.collection('users');
-const userDataArray = require('../../fixtures/user/user')();
+const cleanDb = require("../../utils/cleanDb");
+const users = require("../../../models/users");
+const firestore = require("../../../utils/firestore");
+const userModel = firestore.collection("users");
+const userDataArray = require("../../fixtures/user/user")();
 
 /**
  * Test the model functions and validate the data stored
  */
 
-describe('users', function () {
+describe("users", function () {
   afterEach(async function () {
     await cleanDb();
   });
 
-  describe('addOrUpdate', function () {
-    it('should add the user collection and set the flag incompleteUserDetails and isNewUser', async function () {
+  describe("addOrUpdate", function () {
+    it("should add the user collection and set the flag incompleteUserDetails and isNewUser", async function () {
       const userData = userDataArray[0];
       const { isNewUser, userId } = await users.addOrUpdate(userData);
 
@@ -37,7 +37,7 @@ describe('users', function () {
       expect(isNewUser).to.equal(true);
     });
 
-    it('should update the user collection and unset the flag isNewUser', async function () {
+    it("should update the user collection and unset the flag isNewUser", async function () {
       const userData = userDataArray[0];
 
       // Add the user the first time
@@ -50,7 +50,7 @@ describe('users', function () {
       expect(updatedIsNewUserFlag).to.equal(false);
     });
 
-    it('should update the user collection when userId is passed', async function () {
+    it("should update the user collection when userId is passed", async function () {
       const userData1 = userDataArray[0];
       const userData2 = userDataArray[1];
       const updatedUserData = {};

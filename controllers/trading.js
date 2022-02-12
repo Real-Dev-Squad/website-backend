@@ -1,4 +1,4 @@
-const tradeService = require('../services/tradingService');
+const tradeService = require("../services/tradingService");
 /**
  * New Trading Request
  *
@@ -22,7 +22,7 @@ const trade = async (req, res) => {
     return res.json({ userBalance });
   } catch (err) {
     logger.error(`Error during trading: ${err}`);
-    return res.boom.badImplementation('An internal server error occurred');
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 

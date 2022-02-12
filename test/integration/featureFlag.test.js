@@ -1,24 +1,24 @@
-const chai = require('chai');
-const { expect } = require('chai');
-const chaiHttp = require('chai-http');
+const chai = require("chai");
+const { expect } = require("chai");
+const chaiHttp = require("chai-http");
 
-const app = require('../../server');
-const authService = require('../../services/authService');
-const addUser = require('../utils/addUser');
-const cleanDb = require('../utils/cleanDb');
-const featureFlagQuery = require('../../models/featureFlags');
+const app = require("../../server");
+const authService = require("../../services/authService");
+const addUser = require("../utils/addUser");
+const cleanDb = require("../utils/cleanDb");
+const featureFlagQuery = require("../../models/featureFlags");
 
 // Import fixtures
-const userData = require('../fixtures/user/user')();
-const featureFlagData = require('../fixtures/featureFlag/featureFlag')();
+const userData = require("../fixtures/user/user")();
+const featureFlagData = require("../fixtures/featureFlag/featureFlag")();
 
-const config = require('config');
-const cookieName = config.get('userToken.cookieName');
+const config = require("config");
+const cookieName = config.get("userToken.cookieName");
 
 const appOwner = userData[5];
 chai.use(chaiHttp);
 
-describe('FeatureFlag', function () {
+describe("FeatureFlag", function () {
   let jwt;
   let featureFlag;
   beforeEach(async function () {
@@ -31,36 +31,36 @@ describe('FeatureFlag', function () {
     await cleanDb();
   });
 
-  describe('GET /featureFlags', function () {
-    it('Should return all feature flags', function (done) {
+  describe("GET /featureFlags", function () {
+    it("Should return all feature flags", function (done) {
       chai
         .request(app)
-        .get('/featureFlags')
+        .get("/featureFlags")
         .end((res, err) => {
           if (err) {
             return done();
           }
 
           expect(res).to.have.status(200);
-          expect(res.body).to.be.a('object');
-          expect(res.body.message).to.equal('FeatureFlags returned successfully!');
-          expect(res.body.featureFlags).to.be.a('array');
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("FeatureFlags returned successfully!");
+          expect(res.body.featureFlags).to.be.a("array");
 
           return done();
         });
     });
   });
 
-  describe('POST /featureFlags', function () {
-    it('Should add the feature flag in db', function (done) {
+  describe("POST /featureFlags", function () {
+    it("Should add the feature flag in db", function (done) {
       chai
         .request(app)
-        .post('/featureFlags')
-        .set('cookie', `${cookieName} = ${jwt}`)
+        .post("/featureFlags")
+        .set("cookie", `${cookieName} = ${jwt}`)
         .send(
           {
-            name: 'test',
-            title: 'test-feature',
+            name: "test",
+            title: "test-feature",
             config: {
               enabled: true,
             },
@@ -72,37 +72,37 @@ describe('FeatureFlag', function () {
             return done();
           }
           expect(res).to.have.status(200);
-          expect(res.body).to.be.a('object');
+          expect(res.body).to.be.a("object");
           const { data } = res.body;
-          expect(data).to.be.a('object');
-          expect(data.name).to.be.a('string');
-          expect(data.title).to.be.a('string');
-          expect(data.created_at).to.be.a('number');
-          expect(data.updated_at).to.be.a('number');
-          expect(data.config).to.be.a('object');
-          expect(data.config.enabled).to.be.a('boolean');
-          expect(data.owner).to.be.a('string');
-          expect(res.body.message).to.equal('FeatureFlag added successfully!');
+          expect(data).to.be.a("object");
+          expect(data.name).to.be.a("string");
+          expect(data.title).to.be.a("string");
+          expect(data.created_at).to.be.a("number");
+          expect(data.updated_at).to.be.a("number");
+          expect(data.config).to.be.a("object");
+          expect(data.config.enabled).to.be.a("boolean");
+          expect(data.owner).to.be.a("string");
+          expect(res.body.message).to.equal("FeatureFlag added successfully!");
 
           return done();
         });
     });
 
-    it('Should return 401 if user not logged in', function (done) {
+    it("Should return 401 if user not logged in", function (done) {
       chai
         .request(app)
-        .post('/featureFlags')
+        .post("/featureFlags")
         .end((res, err) => {
           if (err) {
             return done();
           }
 
           expect(res).to.have.status(401);
-          expect(res.body).to.be.an('object');
+          expect(res.body).to.be.an("object");
           expect(res.body).to.eql({
             statusCode: 401,
-            error: 'Unauthorized',
-            message: 'Unauthenticated User',
+            error: "Unauthorized",
+            message: "Unauthenticated User",
           });
 
           return done();
@@ -110,12 +110,12 @@ describe('FeatureFlag', function () {
     });
   });
 
-  describe('PATCH /featureFlags/:id', function () {
-    it('Should update the feature flag', function (done) {
+  describe("PATCH /featureFlags/:id", function () {
+    it("Should update the feature flag", function (done) {
       chai
         .request(app)
         .patch(`/featureFlags/${featureFlag.id}`)
-        .set('cookie', `${cookieName}=${jwt}`)
+        .set("cookie", `${cookieName}=${jwt}`)
         .send({
           config: {
             enabled: false,
@@ -131,7 +131,7 @@ describe('FeatureFlag', function () {
         });
     });
 
-    it('Should return 401 if user not logged in', function (done) {
+    it("Should return 401 if user not logged in", function (done) {
       chai
         .request(app)
         .patch(`/featureFlags/${featureFlag.id}`)
@@ -141,32 +141,32 @@ describe('FeatureFlag', function () {
           }
 
           expect(res).to.have.status(401);
-          expect(res.body).to.be.an('object');
+          expect(res.body).to.be.an("object");
           expect(res.body).to.eql({
             statusCode: 401,
-            error: 'Unauthorized',
-            message: 'Unauthenticated User',
+            error: "Unauthorized",
+            message: "Unauthenticated User",
           });
 
           return done();
         });
     });
 
-    it('Should return 404 if feature flag does not exist', function (done) {
+    it("Should return 404 if feature flag does not exist", function (done) {
       chai
         .request(app)
-        .patch('/featureFlags/featureFlagId')
+        .patch("/featureFlags/featureFlagId")
         .end((res, err) => {
           if (err) {
             return done();
           }
 
           expect(res).to.have.status(404);
-          expect(res.body).to.be.an('object');
+          expect(res.body).to.be.an("object");
           expect(res.body).to.eql({
             statusCode: 404,
-            error: 'Not Found',
-            message: 'No featureFlag found',
+            error: "Not Found",
+            message: "No featureFlag found",
           });
 
           return done();
@@ -174,12 +174,12 @@ describe('FeatureFlag', function () {
     });
   });
 
-  describe('DELETE /featureFlags/:id', function () {
-    it('Should delete the feature flag', function (done) {
+  describe("DELETE /featureFlags/:id", function () {
+    it("Should delete the feature flag", function (done) {
       chai
         .request(app)
         .delete(`/featureFlags/${featureFlag.id}`)
-        .set('cookie', `${cookieName}=${jwt}`)
+        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done();
@@ -191,7 +191,7 @@ describe('FeatureFlag', function () {
         });
     });
 
-    it('Should return 401 if user not logged in', function (done) {
+    it("Should return 401 if user not logged in", function (done) {
       chai
         .request(app)
         .delete(`/featureFlags/${featureFlag.id}`)
@@ -201,32 +201,32 @@ describe('FeatureFlag', function () {
           }
 
           expect(res).to.have.status(401);
-          expect(res.body).to.be.an('object');
+          expect(res.body).to.be.an("object");
           expect(res.body).to.eql({
             statusCode: 401,
-            error: 'Unauthorized',
-            message: 'Unauthenticated User',
+            error: "Unauthorized",
+            message: "Unauthenticated User",
           });
 
           return done();
         });
     });
 
-    it('Should return 404 if feature flag does not exist', function (done) {
+    it("Should return 404 if feature flag does not exist", function (done) {
       chai
         .request(app)
-        .delete('/featureFlags/featureFlagId')
+        .delete("/featureFlags/featureFlagId")
         .end((res, err) => {
           if (err) {
             return done();
           }
 
           expect(res).to.have.status(404);
-          expect(res.body).to.be.an('object');
+          expect(res.body).to.be.an("object");
           expect(res.body).to.eql({
             statusCode: 404,
-            error: 'Not Found',
-            message: 'No feature flag found',
+            error: "Not Found",
+            message: "No feature flag found",
           });
 
           return done();

@@ -1,7 +1,7 @@
-const githubService = require('../services/githubService');
-const tasks = require('../models/tasks');
-const { fetchUser } = require('../models/users');
-const userUtils = require('../utils/users');
+const githubService = require("../services/githubService");
+const tasks = require("../models/tasks");
+const { fetchUser } = require("../models/users");
+const userUtils = require("../utils/users");
 /**
  * Get the contributions of the user
  * @param {string} username

@@ -1,6 +1,6 @@
-const passport = require('passport');
-const users = require('../models/users');
-const authService = require('../services/authService');
+const passport = require("passport");
+const users = require("../models/users");
+const authService = require("../services/authService");
 
 /**
  * Fetches the user info from GitHub and authenticates User
@@ -11,16 +11,16 @@ const authService = require('../services/authService');
  */
 const githubAuth = (req, res, next) => {
   let userData;
-  const authRedirectionUrl = `${config.get('services.rdsUi.baseUrl')}${config.get(
-    'services.rdsUi.routes.authRedirection'
+  const authRedirectionUrl = `${config.get("services.rdsUi.baseUrl")}${config.get(
+    "services.rdsUi.routes.authRedirection"
   )}`;
-  const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'));
+  const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
 
   try {
-    return passport.authenticate('github', { session: false }, async (err, accessToken, user) => {
+    return passport.authenticate("github", { session: false }, async (err, accessToken, user) => {
       if (err) {
         logger.error(err);
-        return res.boom.unauthorized('User cannot be authenticated');
+        return res.boom.unauthorized("User cannot be authenticated");
       }
 
       userData = {
@@ -36,19 +36,19 @@ const githubAuth = (req, res, next) => {
       const token = authService.generateAuthToken({ userId });
 
       // respond with a cookie
-      res.cookie(config.get('userToken.cookieName'), token, {
+      res.cookie(config.get("userToken.cookieName"), token, {
         domain: rdsUiUrl.hostname,
-        expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
+        expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
         httpOnly: true,
         secure: true,
-        sameSite: 'lax',
+        sameSite: "lax",
       });
 
       return res.redirect(authRedirectionUrl);
     })(req, res, next);
   } catch (err) {
     logger.error(err);
-    return res.boom.unauthorized('User cannot be authenticated');
+    return res.boom.unauthorized("User cannot be authenticated");
   }
 };
 

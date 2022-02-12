@@ -1,5 +1,5 @@
-const authService = require('../services/authService');
-const users = require('../models/users');
+const authService = require("../services/authService");
+const users = require("../models/users");
 
 /**
  * Middleware to check if the user has been restricted. If user is restricted,
@@ -17,8 +17,8 @@ const users = require('../models/users');
  */
 const checkRestricted = async (req, res, next) => {
   const { roles } = req.userData;
-  if (roles && roles.restricted && req.method !== 'GET') {
-    return res.boom.forbidden('You are restricted from performing this action');
+  if (roles && roles.restricted && req.method !== "GET") {
+    return res.boom.forbidden("You are restricted from performing this action");
   }
   return next();
 };
@@ -41,14 +41,14 @@ const checkRestricted = async (req, res, next) => {
  */
 module.exports = async (req, res, next) => {
   try {
-    let token = req.cookies[config.get('userToken.cookieName')];
+    let token = req.cookies[config.get("userToken.cookieName")];
 
     /**
      * Enable Bearer Token authentication for NON-PRODUCTION environments
      * This is enabled as Swagger UI does not support cookie authe
      */
-    if (process.env.NODE_ENV !== 'production' && !token) {
-      token = req.headers.authorization.split(' ')[1];
+    if (process.env.NODE_ENV !== "production" && !token) {
+      token = req.headers.authorization.split(" ")[1];
     }
 
     const { userId } = authService.verifyAuthToken(token);
@@ -61,21 +61,21 @@ module.exports = async (req, res, next) => {
   } catch (err) {
     logger.error(err);
 
-    if (err.name === 'TokenExpiredError') {
-      const refreshTtl = config.get('userToken.refreshTtl');
-      const token = req.cookies[config.get('userToken.cookieName')];
+    if (err.name === "TokenExpiredError") {
+      const refreshTtl = config.get("userToken.refreshTtl");
+      const token = req.cookies[config.get("userToken.cookieName")];
       const { userId, iat } = authService.decodeAuthToken(token);
       const newToken = authService.generateAuthToken({ userId });
-      const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'));
+      const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
 
       // add new JWT to the response if it satisfies the refreshTtl time
       if (Math.floor(Date.now() / 1000) - iat <= refreshTtl) {
-        res.cookie(config.get('userToken.cookieName'), newToken, {
+        res.cookie(config.get("userToken.cookieName"), newToken, {
           domain: rdsUiUrl.hostname,
-          expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
+          expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
           httpOnly: true,
           secure: true,
-          sameSite: 'lax',
+          sameSite: "lax",
         });
 
         // add user data to `req.userData` for further use
@@ -83,10 +83,10 @@ module.exports = async (req, res, next) => {
 
         return checkRestricted(req, res, next);
       } else {
-        return res.boom.unauthorized('Unauthenticated User');
+        return res.boom.unauthorized("Unauthenticated User");
       }
     } else {
-      return res.boom.unauthorized('Unauthenticated User');
+      return res.boom.unauthorized("Unauthenticated User");
     }
   }
 };

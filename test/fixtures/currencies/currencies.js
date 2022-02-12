@@ -1,4 +1,4 @@
-const { DINERO, NEELAM } = require('../../../constants/wallets');
+const { DINERO, NEELAM } = require("../../../constants/wallets");
 
 /* Import fixtures
  *

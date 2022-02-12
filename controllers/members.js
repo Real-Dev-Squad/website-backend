@@ -1,9 +1,9 @@
-const { ROLES } = require('../constants/users');
-const members = require('../models/members');
-const tasks = require('../models/tasks');
-const { fetchUser } = require('../models/users');
+const { ROLES } = require("../constants/users");
+const members = require("../models/members");
+const tasks = require("../models/tasks");
+const { fetchUser } = require("../models/users");
 
-const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin';
+const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
 /**
  * Fetches the data about our members
@@ -17,12 +17,12 @@ const getMembers = async (req, res) => {
     const allUsers = await members.fetchUsers();
 
     return res.json({
-      message: allUsers.length ? 'Members returned successfully!' : 'No member found',
+      message: allUsers.length ? "Members returned successfully!" : "No member found",
       members: allUsers,
     });
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`);
-    return res.boom.badImplementation('Something went wrong. Please contact admin');
+    return res.boom.badImplementation("Something went wrong. Please contact admin");
   }
 };
 
@@ -41,12 +41,12 @@ const getIdleMembers = async (req, res) => {
     const idleMemberUserNames = idleMembers?.map((member) => member.username);
 
     return res.json({
-      message: idleMemberUserNames.length ? 'Idle members returned successfully!' : 'No idle member found',
+      message: idleMemberUserNames.length ? "Idle members returned successfully!" : "No idle member found",
       idleMemberUserNames,
     });
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`);
-    return res.boom.badImplementation('Something went wrong. Please contact admin');
+    return res.boom.badImplementation("Something went wrong. Please contact admin");
   }
 };
 
@@ -64,7 +64,7 @@ const moveToMembers = async (req, res) => {
     if (result.userExists) {
       const successObject = await members.moveToMembers(result.user.id);
       if (successObject.isAlreadyMember) {
-        return res.boom.badRequest('User is already a member');
+        return res.boom.badRequest("User is already a member");
       }
       return res.status(204).send();
     }
@@ -86,12 +86,12 @@ const migrateUserRoles = async (req, res) => {
   try {
     const migratedUserData = await members.migrateUsers();
     return res.json({
-      message: 'Users migrated successfully',
+      message: "Users migrated successfully",
       ...migratedUserData,
     });
   } catch (error) {
     logger.error(`Error while migrating user roles: ${error}`);
-    return res.boom.badImplementation('Something went wrong. Please contact admin');
+    return res.boom.badImplementation("Something went wrong. Please contact admin");
   }
 };
 
@@ -105,12 +105,12 @@ const deleteIsMember = async (req, res) => {
   try {
     const deletedIsMemberData = await members.deleteIsMemberProperty();
     return res.json({
-      message: 'Users isMember deleted successfully',
+      message: "Users isMember deleted successfully",
       ...deletedIsMemberData,
     });
   } catch (error) {
     logger.error(`Error while deleting isMember: ${error}`);
-    return res.boom.badImplementation('Something went wrong. Please contact admin');
+    return res.boom.badImplementation("Something went wrong. Please contact admin");
   }
 };
 
@@ -128,7 +128,7 @@ const archiveMembers = async (req, res) => {
     if (user?.userExists) {
       const successObject = await members.addArchiveRoleToMembers(user.user.id);
       if (successObject.isArchived) {
-        return res.boom.badRequest('User is already archived');
+        return res.boom.badRequest("User is already archived");
       }
       return res.status(204).send();
     }

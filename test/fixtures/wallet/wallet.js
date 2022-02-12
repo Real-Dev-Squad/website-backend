@@ -5,10 +5,10 @@
  * @return {Object}
  */
 
-const walletKeys = ['id', 'data'];
+const walletKeys = ["id", "data"];
 
-const walletBodyKeys = ['message', 'wallet'];
+const walletBodyKeys = ["message", "wallet"];
 
-const walletDataKeys = ['userId', 'isActive', 'currencies'];
+const walletDataKeys = ["userId", "isActive", "currencies"];
 
 module.exports = { walletBodyKeys, walletKeys, walletDataKeys };

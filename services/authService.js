@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 /**
  * Generates the JWT
  *
@@ -6,9 +6,9 @@ const jwt = require('jsonwebtoken');
  * @return {String} - Generated JWT
  */
 const generateAuthToken = (payload) => {
-  return jwt.sign(payload, config.get('userToken.privateKey'), {
-    algorithm: 'RS256',
-    expiresIn: config.get('userToken.ttl'),
+  return jwt.sign(payload, config.get("userToken.privateKey"), {
+    algorithm: "RS256",
+    expiresIn: config.get("userToken.ttl"),
   });
 };
 
@@ -19,7 +19,7 @@ const generateAuthToken = (payload) => {
  * @return {Object} - Decode value of JWT
  */
 const verifyAuthToken = (token) => {
-  return jwt.verify(token, config.get('userToken.publicKey'), { algorithms: ['RS256'] });
+  return jwt.verify(token, config.get("userToken.publicKey"), { algorithms: ["RS256"] });
 };
 
 /**

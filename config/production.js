@@ -4,6 +4,6 @@
  */
 module.exports = {
   userToken: {
-    cookieName: 'rds-session',
+    cookieName: "rds-session",
   },
 };

@@ -1,4 +1,4 @@
-const githubService = require('../services/githubService');
+const githubService = require("../services/githubService");
 
 /**
  * Collects all pull requests and sends only required data for each pull request
@@ -14,17 +14,17 @@ const getUserPRs = async (req, res) => {
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data);
       return res.json({
-        message: 'Pull requests returned successfully!',
+        message: "Pull requests returned successfully!",
         pullRequests: allPRs,
       });
     }
     return res.json({
-      message: 'No pull requests found!',
+      message: "No pull requests found!",
       pullRequests: [],
     });
   } catch (err) {
     logger.error(`Error while processing pull requests: ${err}`);
-    return res.boom.badImplementation('Something went wrong please contact admin');
+    return res.boom.badImplementation("Something went wrong please contact admin");
   }
 };
 
@@ -43,17 +43,17 @@ const getStalePRs = async (req, res) => {
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data);
       return res.json({
-        message: 'Stale PRs',
+        message: "Stale PRs",
         pullRequests: allPRs,
       });
     }
     return res.json({
-      message: 'No pull requests found!',
+      message: "No pull requests found!",
       pullRequests: [],
     });
   } catch (err) {
     logger.error(`Error while processing pull requests: ${err}`);
-    return res.boom.badImplementation('Something went wrong please contact admin');
+    return res.boom.badImplementation("Something went wrong please contact admin");
   }
 };
 
@@ -72,17 +72,17 @@ const getOpenPRs = async (req, res) => {
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data);
       return res.json({
-        message: 'Open PRs',
+        message: "Open PRs",
         pullRequests: allPRs,
       });
     }
     return res.json({
-      message: 'No pull requests found!',
+      message: "No pull requests found!",
       pullRequests: [],
     });
   } catch (err) {
     logger.error(`Error while processing pull requests: ${err}`);
-    return res.boom.badImplementation('Something went wrong please contact admin');
+    return res.boom.badImplementation("Something went wrong please contact admin");
   }
 };
 

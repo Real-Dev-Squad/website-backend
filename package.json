@@ -12,8 +12,7 @@
     "test-unit": "sh scripts/tests/testUnit.sh",
     "test": "yarn lint && yarn test-unit && yarn test-integration",
     "tdd:watch": "sh scripts/tests/tdd.sh",
-    "generate-api-schema": "node utils/generateAPISchema.js",
-    "pretty": "prettier --write \"./**/*.{js,jsx,json}\""
+    "generate-api-schema": "node utils/generateAPISchema.js"
   },
   "dependencies": {
     "axios": "^0.21.2",

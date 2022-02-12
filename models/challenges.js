@@ -3,16 +3,16 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 
-const Firestore = require('@google-cloud/firestore');
-const firestore = require('../utils/firestore');
-const { fetchUser } = require('./users');
+const Firestore = require("@google-cloud/firestore");
+const firestore = require("../utils/firestore");
+const { fetchUser } = require("./users");
 
-const challengesModel = firestore.collection('challenges');
-const userModel = firestore.collection('users');
+const challengesModel = firestore.collection("challenges");
+const userModel = firestore.collection("users");
 
-const CANNOT_SUBSCRIBE = 'User cannot be subscribed to challenge';
-const USER_DOES_NOT_EXIST_ERROR = 'User does not exist. Please register to participate';
-const ERROR_MESSAGE = 'Error getting challenges';
+const CANNOT_SUBSCRIBE = "User cannot be subscribed to challenge";
+const USER_DOES_NOT_EXIST_ERROR = "User does not exist. Please register to participate";
+const ERROR_MESSAGE = "Error getting challenges";
 
 /**
  * Fetch the challenges
@@ -54,7 +54,7 @@ const fetchParticipantsData = async (participants) => {
     const fetchedparticipants = await Promise.all(promises);
     return fetchedparticipants;
   } catch (err) {
-    logger.error('Failed to get participated users', err);
+    logger.error("Failed to get participated users", err);
     throw err;
   }
 };

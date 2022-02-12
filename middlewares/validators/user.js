@@ -1,5 +1,5 @@
-const joi = require('joi');
-const { userStatusEnum } = require('../../constants/users');
+const joi = require("joi");
+const { userStatusEnum } = require("../../constants/users");
 
 const updateUser = async (req, res, next) => {
   const schema = joi

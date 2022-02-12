@@ -1,8 +1,8 @@
-const firestore = require('../utils/firestore');
-const auctionsModel = firestore.collection('auctions');
-const bidsModel = firestore.collection('bids');
-const usersUtils = require('../utils/users');
-const walletModels = require('./wallets');
+const firestore = require("../utils/firestore");
+const auctionsModel = firestore.collection("auctions");
+const bidsModel = firestore.collection("bids");
+const usersUtils = require("../utils/users");
+const walletModels = require("./wallets");
 
 /**
  * Fetches auction details by auctionId
@@ -17,7 +17,7 @@ const fetchAuctionById = async (auctionId) => {
       return false;
     }
     const auctionMetadata = auctionRef.data();
-    const biddersAndBidsRef = await bidsModel.where('auction_id', '==', auctionId).get();
+    const biddersAndBidsRef = await bidsModel.where("auction_id", "==", auctionId).get();
     const biddersAndBidsArray = [];
     biddersAndBidsRef.forEach((bidData) => {
       biddersAndBidsArray.push(bidData.data());
@@ -53,7 +53,7 @@ const fetchAuctionById = async (auctionId) => {
  */
 const fetchAuctionBidders = async (auctionId) => {
   try {
-    const biddersRef = await bidsModel.where('auction_id', '==', auctionId).get();
+    const biddersRef = await bidsModel.where("auction_id", "==", auctionId).get();
     const biddersSet = new Set([]);
     biddersRef.forEach((bid) => {
       const { bidder } = bid.data();
@@ -80,7 +80,7 @@ const fetchAuctionBidders = async (auctionId) => {
 const fetchAvailableAuctions = async () => {
   try {
     const now = new Date().getTime();
-    const auctionsRef = await auctionsModel.where('end_time', '>=', now).get();
+    const auctionsRef = await auctionsModel.where("end_time", ">=", now).get();
     const auctions = [];
 
     auctionsRef.forEach((auction) => {

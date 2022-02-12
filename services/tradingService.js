@@ -1,13 +1,13 @@
-const firestore = require('../utils/firestore');
-const stocksModel = firestore.collection('stocks');
-const transactionsModel = firestore.collection('transactions');
-const tradeLogsModel = firestore.collection('trade-logs');
-const { fetchWallet, updateWallet } = require('../models/wallets');
-const { fetchUserStocks, updateUserStocks } = require('../models/stocks');
-const { DINERO } = require('../constants/wallets');
+const firestore = require("../utils/firestore");
+const stocksModel = firestore.collection("stocks");
+const transactionsModel = firestore.collection("transactions");
+const tradeLogsModel = firestore.collection("trade-logs");
+const { fetchWallet, updateWallet } = require("../models/wallets");
+const { fetchUserStocks, updateUserStocks } = require("../models/stocks");
+const { DINERO } = require("../constants/wallets");
 
-const INSUFFICIENT_FUNDS = 'Trade was not successful due to insufficient funds';
-const INSUFFICIENT_QUANTITIES = 'Trade was not successful because you do not have enough quantity';
+const INSUFFICIENT_FUNDS = "Trade was not successful due to insufficient funds";
+const INSUFFICIENT_QUANTITIES = "Trade was not successful because you do not have enough quantity";
 
 /**
  * Updates the stock Price
@@ -47,7 +47,7 @@ const trade = async (tradeData) => {
     }
 
     switch (tradeType) {
-      case 'SELL': {
+      case "SELL": {
         if (!userStocks.id || userStocks.quantity < quantity) {
           return { canUserTrade: false, errorMessage: INSUFFICIENT_QUANTITIES };
         }
@@ -57,7 +57,7 @@ const trade = async (tradeData) => {
         userStocksQty = userStocks.quantity - quantity;
         break;
       }
-      case 'BUY': {
+      case "BUY": {
         qtyUserCanPurchase = Math.floor(totalPrice / stockData.price);
         if (qtyUserCanPurchase <= 0 || totalPrice > currencies[`${DINERO}`]) {
           return { canUserTrade: false, errorMessage: INSUFFICIENT_FUNDS };
@@ -75,7 +75,7 @@ const trade = async (tradeData) => {
         break;
       }
       default: {
-        return { canUserTrade: false, errorMessage: 'Invalid trade type' };
+        return { canUserTrade: false, errorMessage: "Invalid trade type" };
       }
     }
 
@@ -128,7 +128,7 @@ const trade = async (tradeData) => {
     await stocksModel.doc(stockId).set(updatedStockData);
     return { userBalance, canUserTrade: true };
   } catch (err) {
-    logger.error('Error in trading', err);
+    logger.error("Error in trading", err);
     throw err;
   }
 };

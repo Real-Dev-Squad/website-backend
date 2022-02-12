@@ -1,5 +1,5 @@
-const userQuery = require('../models/users');
-const imageService = require('../services/imageService');
+const userQuery = require("../models/users");
+const imageService = require("../services/imageService");
 /**
  * Fetches the data about our users
  *
@@ -12,12 +12,12 @@ const getUsers = async (req, res) => {
     const allUsers = await userQuery.fetchUsers(req.query);
 
     return res.json({
-      message: 'Users returned successfully!',
+      message: "Users returned successfully!",
       users: allUsers,
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
-    return res.boom.serverUnavailable('Something went wrong please contact admin');
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
 };
 
@@ -35,7 +35,7 @@ const getUser = async (req, res) => {
 
     if (result.userExists) {
       return res.json({
-        message: 'User returned successfully!',
+        message: "User returned successfully!",
         user,
       });
     }
@@ -43,7 +43,7 @@ const getUser = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
-    return res.boom.serverUnavailable('Something went wrong please contact admin');
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
 };
 
@@ -62,7 +62,7 @@ const getUsernameAvailabilty = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while checking user: ${error}`);
-    return res.boom.serverUnavailable('Something went wrong please contact admin');
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
 };
 
@@ -85,7 +85,7 @@ const getSelfDetails = (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
-    return res.boom.badImplementation('An internal server error occurred');
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -102,7 +102,7 @@ const updateSelf = async (req, res) => {
     if (req.body.username) {
       const { user } = await userQuery.fetchUser({ userId });
       if (!user.incompleteUserDetails) {
-        return res.boom.forbidden('Cannot update username again');
+        return res.boom.forbidden("Cannot update username again");
       }
       await userQuery.setIncompleteUserDetails(userId);
     }
@@ -115,10 +115,10 @@ const updateSelf = async (req, res) => {
       return res.status(204).send();
     }
 
-    return res.boom.notFound('User not found');
+    return res.boom.notFound("User not found");
   } catch (error) {
     logger.error(`Error while updating user: ${error}`);
-    return res.boom.serverUnavailable('Something went wrong please contact admin');
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
 };
 
@@ -136,12 +136,12 @@ const postUserPicture = async (req, res) => {
     const coordinatesObject = coordinates && JSON.parse(coordinates);
     const imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
     return res.json({
-      message: 'Profile picture uploaded successfully!',
+      message: "Profile picture uploaded successfully!",
       image: imageData,
     });
   } catch (error) {
     logger.error(`Error while adding profile picture of user: ${error}`);
-    return res.boom.badImplementation('An internal server error occurred');
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 const identityURL = async (req, res) => {
@@ -149,11 +149,11 @@ const identityURL = async (req, res) => {
     const userId = req.userData.id;
     await userQuery.addOrUpdate(req.body, userId);
     return res.json({
-      message: 'updated identity URL!!',
+      message: "updated identity URL!!",
     });
   } catch (error) {
     logger.error(`Internal Server Error: ${error}`);
-    return res.boom.badImplementation('An internal server error occurred');
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 module.exports = {

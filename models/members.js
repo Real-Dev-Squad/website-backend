@@ -3,8 +3,8 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 
-const firestore = require('../utils/firestore');
-const userModel = firestore.collection('users');
+const firestore = require("../utils/firestore");
+const userModel = firestore.collection("users");
 
 /**
  * Fetches the data about our users
@@ -34,7 +34,7 @@ const fetchUsers = async () => {
 
     return allMembers;
   } catch (err) {
-    logger.error('Error retrieving members data', err);
+    logger.error("Error retrieving members data", err);
     throw err;
   }
 };
@@ -56,7 +56,7 @@ const moveToMembers = async (userId) => {
     });
     return { isAlreadyMember: false, movedToMember: true };
   } catch (err) {
-    logger.error('Error updating user', err);
+    logger.error("Error updating user", err);
     throw err;
   }
 };
@@ -67,7 +67,7 @@ const moveToMembers = async (userId) => {
  */
 const migrateUsers = async () => {
   try {
-    const userSnapShot = await userModel.where('isMember', '==', true).get();
+    const userSnapShot = await userModel.where("isMember", "==", true).get();
     const migratedUsers = [];
 
     const usersArr = [];
@@ -87,7 +87,7 @@ const migrateUsers = async () => {
 
     return { count: migratedUsers.length, users: migratedUsers };
   } catch (err) {
-    logger.error('Error migrating user roles', err);
+    logger.error("Error migrating user roles", err);
     throw err;
   }
 };
@@ -98,7 +98,7 @@ const migrateUsers = async () => {
  */
 const deleteIsMemberProperty = async () => {
   try {
-    const userSnapShot = await userModel.where('roles', '!=', false).get();
+    const userSnapShot = await userModel.where("roles", "!=", false).get();
     const migratedUsers = [];
 
     const usersArr = [];
@@ -115,7 +115,7 @@ const deleteIsMemberProperty = async () => {
 
     return { count: migratedUsers.length, users: migratedUsers };
   } catch (err) {
-    logger.error('Error deleting isMember property', err);
+    logger.error("Error deleting isMember property", err);
     throw err;
   }
 };
@@ -127,7 +127,7 @@ const deleteIsMemberProperty = async () => {
 
 const fetchUsersWithRole = async (role) => {
   try {
-    const snapshot = await userModel.where(`roles.${role}`, '==', true).get();
+    const snapshot = await userModel.where(`roles.${role}`, "==", true).get();
     const onlyMembers = [];
 
     if (!snapshot.empty) {
@@ -143,7 +143,7 @@ const fetchUsersWithRole = async (role) => {
     }
     return onlyMembers;
   } catch (err) {
-    logger.error('Error retrieving members data with roles of member', err);
+    logger.error("Error retrieving members data with roles of member", err);
     throw err;
   }
 };
@@ -165,7 +165,7 @@ const addArchiveRoleToMembers = async (userId) => {
     });
     return { isArchived: false };
   } catch (err) {
-    logger.error('Error updating user', err);
+    logger.error("Error updating user", err);
     throw err;
   }
 };

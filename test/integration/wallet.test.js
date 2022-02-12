@@ -1,27 +1,27 @@
-const chai = require('chai');
+const chai = require("chai");
 const { expect } = chai;
-const chaiHttp = require('chai-http');
+const chaiHttp = require("chai-http");
 
-const app = require('../../server');
-const authService = require('../../services/authService');
+const app = require("../../server");
+const authService = require("../../services/authService");
 
-const addUser = require('../utils/addUser');
-const cleanDb = require('../utils/cleanDb');
-const usersUtils = require('../../utils/users');
+const addUser = require("../utils/addUser");
+const cleanDb = require("../utils/cleanDb");
+const usersUtils = require("../../utils/users");
 
-const userData = require('../fixtures/user/user')();
-const { walletBodyKeys, walletKeys, walletDataKeys } = require('../fixtures/wallet/wallet');
+const userData = require("../fixtures/user/user")();
+const { walletBodyKeys, walletKeys, walletDataKeys } = require("../fixtures/wallet/wallet");
 
 const defaultUser = userData[0];
 const newUser = userData[3];
 const superUser = userData[4];
 
-const config = require('config');
-const cookieName = config.get('userToken.cookieName');
+const config = require("config");
+const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
-describe('Wallet', function () {
+describe("Wallet", function () {
   let authToken;
   let userId;
   let userName;
@@ -36,22 +36,22 @@ describe('Wallet', function () {
     await cleanDb();
   });
 
-  describe('GET /wallet', function () {
-    it('Should return wallet information of the logged in user', function (done) {
+  describe("GET /wallet", function () {
+    it("Should return wallet information of the logged in user", function (done) {
       chai
         .request(app)
-        .get('/wallet')
-        .set('cookie', `${cookieName}=${authToken}`)
+        .get("/wallet")
+        .set("cookie", `${cookieName}=${authToken}`)
         .end((error, response) => {
           if (error) {
             return done(error);
           }
 
           expect(response).to.have.status(200);
-          expect(response.body).to.be.a('object');
+          expect(response.body).to.be.a("object");
           expect(response.body).to.have.all.keys(...walletBodyKeys);
-          expect(response.body.message).to.be.equal('Wallet returned successfully for user');
-          expect(response.body.wallet).to.be.a('object');
+          expect(response.body.message).to.be.equal("Wallet returned successfully for user");
+          expect(response.body.wallet).to.be.a("object");
           expect(response.body.wallet).to.have.all.keys(...walletKeys);
           expect(response.body.wallet.data).to.have.all.keys(...walletDataKeys);
 
@@ -59,11 +59,11 @@ describe('Wallet', function () {
         });
     });
 
-    it('Should return the user their own wallet with 1000 dineros loaded', function (done) {
+    it("Should return the user their own wallet with 1000 dineros loaded", function (done) {
       chai
         .request(app)
-        .get('/wallet')
-        .set('cookie', `${cookieName}=${authToken}`)
+        .get("/wallet")
+        .set("cookie", `${cookieName}=${authToken}`)
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -71,32 +71,32 @@ describe('Wallet', function () {
 
           expect(response).to.have.status(200);
           expect(response.body.wallet.data.userId).to.be.equal(userId);
-          expect(response.body.message).to.be.equal('Wallet returned successfully for user');
+          expect(response.body.message).to.be.equal("Wallet returned successfully for user");
           expect(response.body.wallet.data.currencies.dinero).to.be.equal(1000);
 
           return done();
         });
     });
 
-    it('Without cookie access should be unauthorized', function (done) {
+    it("Without cookie access should be unauthorized", function (done) {
       chai
         .request(app)
-        .get('/wallet')
+        .get("/wallet")
         .end((error, response) => {
           if (error) {
             return done(error);
           }
 
           expect(response).to.have.status(401);
-          expect(response.body.error).to.be.equal('Unauthorized');
-          expect(response.body.message).to.be.equal('Unauthenticated User');
+          expect(response.body.error).to.be.equal("Unauthorized");
+          expect(response.body.message).to.be.equal("Unauthenticated User");
 
           return done();
         });
     });
   });
 
-  describe('GET /wallet/:username', function () {
+  describe("GET /wallet/:username", function () {
     let newUserId;
     let newUserAuthToken;
 
@@ -115,7 +115,7 @@ describe('Wallet', function () {
       chai
         .request(app)
         .get(`/wallet/${userName}`)
-        .set('cookie', `${cookieName}=${superUserAuthToken}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -123,7 +123,7 @@ describe('Wallet', function () {
 
           expect(response).to.have.status(200);
           expect(response.body.wallet.data.userId).to.be.equal(userId);
-          expect(response.body.message).to.be.equal('Wallet returned successfully');
+          expect(response.body.message).to.be.equal("Wallet returned successfully");
 
           return done();
         });
@@ -133,15 +133,15 @@ describe('Wallet', function () {
       chai
         .request(app)
         .get(`/wallet/${userName}`)
-        .set('cookie', `${cookieName}=${newUserAuthToken}`)
+        .set("cookie", `${cookieName}=${newUserAuthToken}`)
         .end((error, response) => {
           if (error) {
             return done(error);
           }
 
           expect(response).to.have.status(401);
-          expect(response.body.error).to.be.equal('Unauthorized');
-          expect(response.body.message).to.be.equal('You are not authorized for this action.');
+          expect(response.body.error).to.be.equal("Unauthorized");
+          expect(response.body.message).to.be.equal("You are not authorized for this action.");
 
           return done();
         });

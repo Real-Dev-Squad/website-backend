@@ -1,5 +1,5 @@
-const { fetch } = require('../utils/fetch');
-const { fetchUser } = require('../models/users');
+const { fetch } = require("../utils/fetch");
+const { fetchUser } = require("../models/users");
 /**
  * Extracts only the necessary details required from the object returned by Github API
  * @param data {Object} - Object returned by Github API
@@ -21,7 +21,7 @@ const extractPRdetails = (data) => {
     }) => {
       const allAssignees = assignees.map((object) => object.login);
       const allLabels = labels.map((object) => object.name);
-      const repositoryUrlSplit = repositoryUrl.split('/');
+      const repositoryUrlSplit = repositoryUrl.split("/");
       const repository = repositoryUrlSplit[repositoryUrlSplit.length - 1];
       allPRs.push({
         title,
@@ -48,15 +48,15 @@ const extractPRdetails = (data) => {
  * @param resultsOptions {Object} - Ordering and pagination of results
  */
 const getGithubURL = (searchParams, resultsOptions = {}) => {
-  const baseURL = config.get('githubApi.baseUrl');
-  const issuesAndPRsPath = '/search/issues';
+  const baseURL = config.get("githubApi.baseUrl");
+  const issuesAndPRsPath = "/search/issues";
 
   const urlObj = new URL(baseURL);
   urlObj.pathname = issuesAndPRsPath;
 
   const defaultParams = {
-    org: config.get('githubApi.org'),
-    type: 'pr',
+    org: config.get("githubApi.org"),
+    type: "pr",
   };
 
   const finalSearchParams = Object.assign({}, defaultParams, searchParams);
@@ -65,9 +65,9 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
   const paramsStrArr = paramsObjArr.map(([key, value]) => `${key}:${value}`);
 
   // The string that can be entrered as text on Github website for simple search
-  const prsSearchText = paramsStrArr.join(' ');
+  const prsSearchText = paramsStrArr.join(" ");
 
-  urlObj.searchParams.append('q', prsSearchText);
+  urlObj.searchParams.append("q", prsSearchText);
 
   // Manipulate returned results
   // e.g number of results, pagination, etc
@@ -84,10 +84,10 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
  * @param url {string} - URL on github to call
  */
 function getFetch(url) {
-  return fetch(url, 'get', null, null, null, {
+  return fetch(url, "get", null, null, null, {
     auth: {
-      username: config.get('githubOauth.clientId'),
-      password: config.get('githubOauth.clientSecret'),
+      username: config.get("githubOauth.clientId"),
+      password: config.get("githubOauth.clientSecret"),
     },
   });
 }
@@ -117,11 +117,11 @@ const fetchStalePRs = async (per_page = 10, page = 1) => {
   try {
     const url = getGithubURL(
       {
-        is: 'open',
+        is: "open",
       },
       {
-        sort: 'created',
-        order: 'asc',
+        sort: "created",
+        order: "asc",
         per_page,
         page,
       }
@@ -140,11 +140,11 @@ const fetchOpenPRs = async (per_page = 10, page = 1) => {
   try {
     const url = getGithubURL(
       {
-        is: 'open',
+        is: "open",
       },
       {
-        sort: 'created',
-        order: 'desc',
+        sort: "created",
+        order: "desc",
         per_page,
         page,
       }

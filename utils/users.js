@@ -1,4 +1,4 @@
-const { fetchUser } = require('../models/users');
+const { fetchUser } = require("../models/users");
 
 /**
  * Used for receiving userId when providing username
@@ -15,7 +15,7 @@ const getUserId = async (username) => {
 
     return userExists ? id : false;
   } catch (error) {
-    logger.error('Something went wrong', error);
+    logger.error("Something went wrong", error);
     throw error;
   }
 };
@@ -32,7 +32,7 @@ const getUsername = async (userId) => {
     } = await fetchUser({ userId });
     return username;
   } catch (error) {
-    logger.error('Something went wrong', error);
+    logger.error("Something went wrong", error);
     throw error;
   }
 };
@@ -54,7 +54,7 @@ const getParticipantUsernames = async (participantArray) => {
     const participantUsernames = await Promise.all(promises);
     return participantUsernames;
   } catch (err) {
-    logger.error('Error in updating the task object', err);
+    logger.error("Error in updating the task object", err);
     throw err;
   }
 };
@@ -76,7 +76,7 @@ const getParticipantUserIds = async (participantArray) => {
     const participantUserIds = await Promise.all(promises);
     return participantUserIds;
   } catch (err) {
-    logger.error('Error in updating the task object', err);
+    logger.error("Error in updating the task object", err);
     throw err;
   }
 };

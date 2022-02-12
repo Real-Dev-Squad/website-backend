@@ -1,7 +1,7 @@
-const contributionsService = require('../services/contributions');
-const { fetchUser } = require('../models/users');
+const contributionsService = require("../services/contributions");
+const { fetchUser } = require("../models/users");
 
-const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin';
+const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
 /**
  * Get the  contributions of the user

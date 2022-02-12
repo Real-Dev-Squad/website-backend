@@ -1,4 +1,4 @@
-const joi = require('joi');
+const joi = require("joi");
 
 const createChallenge = async (req, res, next) => {
   const schema = joi.object().strict().keys({

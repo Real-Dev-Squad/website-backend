@@ -1,4 +1,4 @@
-const recruiterQuery = require('../models/recruiters');
+const recruiterQuery = require("../models/recruiters");
 
 /**
  * Posts the data about the recruiter
@@ -14,12 +14,12 @@ const addRecruiter = async (req, res) => {
       return res.boom.notFound("User doesn't exist");
     }
     return res.json({
-      message: 'Request Submission Successful!!',
+      message: "Request Submission Successful!!",
       result,
     });
   } catch (error) {
     logger.error(`Error while adding recruiterInfo: ${error}`);
-    return res.boom.serverUnavailable('Something went wrong please contact admin');
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
 };
 

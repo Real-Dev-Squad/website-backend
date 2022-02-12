@@ -1,7 +1,7 @@
-const users = require('../../models/users');
+const users = require("../../models/users");
 
 // Import fixtures
-const userData = require('../fixtures/user/user')();
+const userData = require("../fixtures/user/user")();
 
 /**
  * File to be required in every test file where userId is required to generate the JWT

@@ -1,5 +1,5 @@
-const tasks = require('../models/tasks');
-const { TASK_STATUS } = require('../constants/tasks');
+const tasks = require("../models/tasks");
+const { TASK_STATUS } = require("../constants/tasks");
 /**
  * Creates new task
  *
@@ -17,13 +17,13 @@ const addNewTask = async (req, res) => {
     const task = await tasks.updateTask(body);
 
     return res.json({
-      message: 'Task created successfully!',
+      message: "Task created successfully!",
       task: task.taskDetails,
       id: task.taskId,
     });
   } catch (err) {
     logger.error(`Error while creating new task: ${err}`);
-    return res.boom.badImplementation('An internal server error occurred');
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 /**
@@ -36,12 +36,12 @@ const fetchTasks = async (req, res) => {
   try {
     const allTasks = await tasks.fetchTasks();
     return res.json({
-      message: 'Tasks returned successfully!',
+      message: "Tasks returned successfully!",
       tasks: allTasks.length > 0 ? allTasks : [],
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);
-    return res.boom.badImplementation('An internal server error occurred');
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -58,7 +58,7 @@ const getUserTasks = async (req, res) => {
     let allTasks = [];
 
     if (status && !Object.values(TASK_STATUS).includes(status)) {
-      return res.boom.notFound('Status not found!');
+      return res.boom.notFound("Status not found!");
     }
 
     allTasks = await tasks.fetchUserTasks(username, status ? [status] : []);
@@ -68,13 +68,13 @@ const getUserTasks = async (req, res) => {
     }
 
     return res.json({
-      message: 'Tasks returned successfully!',
+      message: "Tasks returned successfully!",
       tasks: allTasks.length > 0 ? allTasks : [],
     });
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`);
 
-    return res.boom.badImplementation('An internal server error occurred');
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -100,7 +100,7 @@ const getSelfTasks = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`);
-    return res.boom.badImplementation('An internal server error occurred');
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 /**
@@ -113,14 +113,14 @@ const updateTask = async (req, res) => {
   try {
     const task = await tasks.fetchTask(req.params.id);
     if (!task.taskData) {
-      return res.boom.notFound('Task not found');
+      return res.boom.notFound("Task not found");
     }
 
     await tasks.updateTask(req.body, req.params.id);
     return res.status(204).send();
   } catch (err) {
     logger.error(`Error while updating task: ${err}`);
-    return res.boom.badImplementation('An internal server error occurred');
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -136,13 +136,13 @@ const updateTaskStatus = async (req, res) => {
     const task = await tasks.fetchSelfTask(taskId, userId);
 
     if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
-    if (task.notAssignedToYou) return res.boom.forbidden('This task is not assigned to you');
+    if (task.notAssignedToYou) return res.boom.forbidden("This task is not assigned to you");
 
     await tasks.updateTask(req.body, taskId);
-    return res.json({ message: 'Task updated successfully!' });
+    return res.json({ message: "Task updated successfully!" });
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`);
-    return res.boom.badImplementation('An internal server error occured');
+    return res.boom.badImplementation("An internal server error occured");
   }
 };
 

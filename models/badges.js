@@ -1,6 +1,6 @@
-const firestore = require('../utils/firestore');
-const badgeModel = firestore.collection('badges');
-const { fetchUser } = require('../models/users');
+const firestore = require("../utils/firestore");
+const badgeModel = firestore.collection("badges");
+const { fetchUser } = require("../models/users");
 
 /**
  * Fetches the data about our badges
@@ -20,7 +20,7 @@ const fetchBadges = async ({ size = 100, page = 0 }) => {
     });
     return allBadges;
   } catch (err) {
-    logger.error('Error retrieving badges', err);
+    logger.error("Error retrieving badges", err);
     return err;
   }
 };
@@ -51,7 +51,7 @@ const fetchUserBadges = async (username) => {
 
     return { userExists, userBadges };
   } catch (err) {
-    logger.error('Error retrieving user badges', err);
+    logger.error("Error retrieving user badges", err);
     return err;
   }
 };

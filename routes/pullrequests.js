@@ -1,6 +1,6 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const pullRequest = require('../controllers/pullRequests');
+const pullRequest = require("../controllers/pullRequests");
 
 /**
  * @swagger
@@ -42,7 +42,7 @@ const pullRequest = require('../controllers/pullRequests');
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/open', pullRequest.getOpenPRs);
+router.get("/open", pullRequest.getOpenPRs);
 
 /**
  * @swagger
@@ -84,7 +84,7 @@ router.get('/open', pullRequest.getOpenPRs);
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/stale', pullRequest.getStalePRs);
+router.get("/stale", pullRequest.getStalePRs);
 
 /**
  * @swagger
@@ -115,6 +115,6 @@ router.get('/stale', pullRequest.getStalePRs);
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/user/:username', pullRequest.getUserPRs);
+router.get("/user/:username", pullRequest.getUserPRs);
 
 module.exports = router;

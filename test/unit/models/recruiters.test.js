@@ -3,26 +3,26 @@
  * It gives linting errors in testing the DB data with keys from fixtures
  */
 /* eslint-disable security/detect-object-injection */
-const chai = require('chai');
+const chai = require("chai");
 const { expect } = chai;
 
-const cleanDb = require('../../utils/cleanDb');
-const recruiters = require('../../../models/recruiters');
-const firestore = require('../../../utils/firestore');
-const recruiterModel = firestore.collection('recruiters');
-const recruiterDataArray = require('../../fixtures/recruiter/recruiter')();
-const userDataArray = require('../../fixtures/user/user')();
-const addUser = require('../../utils/addUser');
+const cleanDb = require("../../utils/cleanDb");
+const recruiters = require("../../../models/recruiters");
+const firestore = require("../../../utils/firestore");
+const recruiterModel = firestore.collection("recruiters");
+const recruiterDataArray = require("../../fixtures/recruiter/recruiter")();
+const userDataArray = require("../../fixtures/user/user")();
+const addUser = require("../../utils/addUser");
 
-describe('Recruiters', function () {
+describe("Recruiters", function () {
   beforeEach(async function () {
     await addUser();
   });
   after(async function () {
     await cleanDb();
   });
-  describe('addRecruiterInfo', function () {
-    it('should add the recruiter data', async function () {
+  describe("addRecruiterInfo", function () {
+    it("should add the recruiter data", async function () {
       const recruiterData = recruiterDataArray[0];
       recruiterData.timestamp = Date.now();
       const username = userDataArray[0].username;
@@ -36,10 +36,10 @@ describe('Recruiters', function () {
       Object.keys(recruiterData).forEach((key) => {
         expect(recruiterData[key]).to.deep.equal(data[key]);
       });
-      expect(recruiterId).to.be.a('string');
-      expect(recruiterName).to.be.a('string');
-      expect(userInfo).to.be.a('string');
-      expect(timestamp).to.be.a('number');
+      expect(recruiterId).to.be.a("string");
+      expect(recruiterName).to.be.a("string");
+      expect(userInfo).to.be.a("string");
+      expect(timestamp).to.be.a("number");
     });
   });
 });

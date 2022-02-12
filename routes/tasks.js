@@ -1,9 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authenticate = require('../middlewares/authenticate');
-const tasks = require('../controllers/tasks');
-const { createTask, updateTask, updateSelfTask } = require('../middlewares/validators/tasks');
-const { authorizeUser } = require('../middlewares/authorization');
+const authenticate = require("../middlewares/authenticate");
+const tasks = require("../controllers/tasks");
+const { createTask, updateTask, updateSelfTask } = require("../middlewares/validators/tasks");
+const { authorizeUser } = require("../middlewares/authorization");
 
 /**
  * @swagger
@@ -27,7 +27,7 @@ const { authorizeUser } = require('../middlewares/authorization');
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', tasks.fetchTasks);
+router.get("/", tasks.fetchTasks);
 
 /**
  * @swagger
@@ -64,7 +64,7 @@ router.get('/', tasks.fetchTasks);
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/self', authenticate, tasks.getSelfTasks);
+router.get("/self", authenticate, tasks.getSelfTasks);
 
 /**
  * @swagger
@@ -93,7 +93,7 @@ router.get('/self', authenticate, tasks.getSelfTasks);
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/', authenticate, authorizeUser('appOwner'), createTask, tasks.addNewTask);
+router.post("/", authenticate, authorizeUser("appOwner"), createTask, tasks.addNewTask);
 
 /**
  * @swagger
@@ -124,7 +124,7 @@ router.post('/', authenticate, authorizeUser('appOwner'), createTask, tasks.addN
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/:id', authenticate, authorizeUser('appOwner'), updateTask, tasks.updateTask);
+router.patch("/:id", authenticate, authorizeUser("appOwner"), updateTask, tasks.updateTask);
 
 /**
  * @swagger
@@ -153,7 +153,7 @@ router.patch('/:id', authenticate, authorizeUser('appOwner'), updateTask, tasks.
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:username', tasks.getUserTasks);
+router.get("/:username", tasks.getUserTasks);
 
 /**
  * @swagger
@@ -201,6 +201,6 @@ router.get('/:username', tasks.getUserTasks);
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/self/:id', authenticate, updateSelfTask, tasks.updateTaskStatus);
+router.patch("/self/:id", authenticate, updateSelfTask, tasks.updateTaskStatus);
 
 module.exports = router;

@@ -1,6 +1,6 @@
-const challengeQuery = require('../models/challenges');
+const challengeQuery = require("../models/challenges");
 
-const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin';
+const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
 /**
  * Get the challenges
@@ -14,7 +14,7 @@ const fetchChallenges = async (req, res) => {
     const promiseArray = await getParticipantsofChallenges(allChallenges);
     const challengesWithParticipants = await Promise.all(promiseArray);
     return res.json({
-      message: challengesWithParticipants.length ? 'Challenges returned successfully!' : 'No Challenges found',
+      message: challengesWithParticipants.length ? "Challenges returned successfully!" : "No Challenges found",
       challenges: challengesWithParticipants,
     });
   } catch (err) {
@@ -34,10 +34,10 @@ const createChallenge = async (req, res) => {
     const challengeAdded = await challengeQuery.postChallenge(req.body);
     if (challengeAdded) {
       return res.json({
-        message: 'Challenge added successfully',
+        message: "Challenge added successfully",
       });
     } else {
-      return res.boom.badRequest('Unable to add challenge');
+      return res.boom.badRequest("Unable to add challenge");
     }
   } catch (err) {
     logger.error(`Error while adding challenge ${err}`);
@@ -75,7 +75,7 @@ const subscribeToChallenge = async (req, res) => {
         is_user_subscribed: 1,
       });
     } else {
-      return res.boom.notFound('User cannot be subscribed to challenge');
+      return res.boom.notFound("User cannot be subscribed to challenge");
     }
   } catch (err) {
     logger.error(`Error while retrieving challenges ${err}`);

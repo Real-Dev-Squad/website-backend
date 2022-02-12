@@ -2,12 +2,12 @@
  * This file contains wrapper functions to interact with the DB.
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
-const walletConstants = require('../constants/wallets');
+const walletConstants = require("../constants/wallets");
 
-const firestore = require('../utils/firestore');
-const { fetchWallet, createWallet } = require('../models/wallets');
+const firestore = require("../utils/firestore");
+const { fetchWallet, createWallet } = require("../models/wallets");
 
-const userModel = firestore.collection('users');
+const userModel = firestore.collection("users");
 
 /**
  * Adds or updates the user data
@@ -34,7 +34,7 @@ const addOrUpdate = async (userData, userId = null) => {
     }
 
     // userId is null, Add or Update user
-    const user = await userModel.where('github_id', '==', userData.github_id).limit(1).get();
+    const user = await userModel.where("github_id", "==", userData.github_id).limit(1).get();
     if (!user.empty) {
       await userModel.doc(user.docs[0].id).set(userData, { merge: true });
 
@@ -46,7 +46,7 @@ const addOrUpdate = async (userData, userId = null) => {
     const userInfo = await userModel.add(userData);
     return { isNewUser: true, userId: userInfo.id };
   } catch (err) {
-    logger.error('Error in adding or updating user', err);
+    logger.error("Error in adding or updating user", err);
     throw err;
   }
 };
@@ -77,7 +77,7 @@ const fetchUsers = async (query) => {
 
     return allUsers;
   } catch (err) {
-    logger.error('Error retrieving user data', err);
+    logger.error("Error retrieving user data", err);
     throw err;
   }
 };
@@ -92,7 +92,7 @@ const fetchUser = async ({ userId = null, username = null }) => {
   try {
     let userData, id;
     if (username) {
-      const user = await userModel.where('username', '==', username).limit(1).get();
+      const user = await userModel.where("username", "==", username).limit(1).get();
 
       user.forEach((doc) => {
         id = doc.id;
@@ -112,7 +112,7 @@ const fetchUser = async ({ userId = null, username = null }) => {
       },
     };
   } catch (err) {
-    logger.error('Error retrieving user data', err);
+    logger.error("Error retrieving user data", err);
     throw err;
   }
 };
@@ -162,7 +162,7 @@ const updateUserPicture = async (image, userId) => {
       picture: image,
     });
   } catch (err) {
-    logger.error('Error updating user picture data', err);
+    logger.error("Error updating user picture data", err);
     throw err;
   }
 };
@@ -173,7 +173,7 @@ const updateUserPicture = async (image, userId) => {
  * @param users {array}
  */
 const fetchUserImage = async (users) => {
-  const data = await userModel.where('username', 'in', users).get();
+  const data = await userModel.where("username", "in", users).get();
   const images = {};
   data.forEach((item) => {
     images[item.data().username] = item.data().img;

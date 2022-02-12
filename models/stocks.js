@@ -1,6 +1,6 @@
-const firestore = require('../utils/firestore');
-const stocksModel = firestore.collection('stocks');
-const userStocksModel = firestore.collection('user-stocks');
+const firestore = require("../utils/firestore");
+const stocksModel = firestore.collection("stocks");
+const userStocksModel = firestore.collection("user-stocks");
 
 /**
  * Adds Stocks
@@ -13,7 +13,7 @@ const addStock = async (stockData) => {
     const { id } = await stocksModel.add(stockData);
     return { id, stockData };
   } catch (err) {
-    logger.error('Error in creating stock', err);
+    logger.error("Error in creating stock", err);
     throw err;
   }
 };
@@ -35,7 +35,7 @@ const fetchStocks = async () => {
     });
     return stocks;
   } catch (err) {
-    logger.error('error getting stocks', err);
+    logger.error("error getting stocks", err);
     throw err;
   }
 };
@@ -46,10 +46,10 @@ const fetchStocks = async () => {
  */
 const fetchUserStocks = async (userId, stockId = null) => {
   try {
-    let userStocksRef = '';
-    const query = userStocksModel.where('userId', '==', userId);
+    let userStocksRef = "";
+    const query = userStocksModel.where("userId", "==", userId);
     if (stockId) {
-      userStocksRef = await query.where('stockId', '==', stockId).get();
+      userStocksRef = await query.where("stockId", "==", stockId).get();
       const [userStocks] = userStocksRef.docs;
       if (userStocks) {
         return { id: userStocks.id, ...userStocks.data() };
@@ -67,7 +67,7 @@ const fetchUserStocks = async (userId, stockId = null) => {
     });
     return userStocks;
   } catch (err) {
-    logger.error('Error retrieving user stocks', err);
+    logger.error("Error retrieving user stocks", err);
     throw err;
   }
 };
@@ -91,7 +91,7 @@ const updateUserStocks = async (userId, stockData) => {
     const res = await userStocksRef.update(stockData);
     return !!res;
   } catch (err) {
-    logger.error('Error updating users stocks', err);
+    logger.error("Error updating users stocks", err);
     throw err;
   }
 };

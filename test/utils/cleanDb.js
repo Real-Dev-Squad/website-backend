@@ -1,6 +1,6 @@
-const config = require('config');
-const { fetch } = require('../../utils/fetch');
-const firebaseConfig = require('../../firebase.json');
+const config = require("config");
+const { fetch } = require("../../utils/fetch");
+const firebaseConfig = require("../../firebase.json");
 
 /**
  * Deletes all data from firestore emulator running locally.
@@ -14,5 +14,5 @@ module.exports = async () => {
     `http://localhost:${firebaseConfig.emulators.firestore.port}` +
     `/emulator/v1/projects/${projectId}/databases/(default)/documents`;
 
-  return await fetch(firestoreCleanUrl, 'delete');
+  return await fetch(firestoreCleanUrl, "delete");
 };

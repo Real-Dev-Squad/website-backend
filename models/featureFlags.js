@@ -1,6 +1,6 @@
-const firestore = require('../utils/firestore');
-const featureFlagModel = firestore.collection('featureFlags');
-const userModel = require('./users');
+const firestore = require("../utils/firestore");
+const featureFlagModel = firestore.collection("featureFlags");
+const userModel = require("./users");
 
 /**
  * Fetch all tasks
@@ -45,7 +45,7 @@ const fetchFeatureFlag = async () => {
     });
     return featureFlags;
   } catch (err) {
-    logger.error('error getting featureFlags', err);
+    logger.error("error getting featureFlags", err);
     throw err;
   }
 };
@@ -67,7 +67,7 @@ const addFeatureFlags = async (featureFlag, username) => {
     featureFlagData.id = id;
     return featureFlagData;
   } catch (err) {
-    logger.error('Error in adding featureFlag', err);
+    logger.error("Error in adding featureFlag", err);
     throw err;
   }
 };
@@ -99,7 +99,7 @@ const updateFeatureFlags = async (featureFlag, featureFlagId) => {
       isUpdated: true,
     };
   } catch (err) {
-    logger.error('Error in updating featureFlag', err);
+    logger.error("Error in updating featureFlag", err);
     throw err;
   }
 };
@@ -123,7 +123,7 @@ const deleteFeatureFlag = async (featureFlagId) => {
       isDeleted: true,
     };
   } catch (err) {
-    logger.error('Error in deleting featureFlag', err);
+    logger.error("Error in deleting featureFlag", err);
     throw err;
   }
 };

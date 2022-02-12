@@ -6,9 +6,9 @@
  * - Route requiring `appOwner` role is allowed for `superUser` and `app_owner`.
  */
 const REQUIRED_ROLES_PRIORITY = {
-  superUser: ['super_user'],
-  appOwner: ['app_owner', 'super_user'],
-  default: ['default', 'super_user', 'app_owner'],
+  superUser: ["super_user"],
+  appOwner: ["app_owner", "super_user"],
+  default: ["default", "super_user", "app_owner"],
 };
 
 /**
@@ -20,7 +20,7 @@ const REQUIRED_ROLES_PRIORITY = {
  * @returns {Boolean} - Whether the current user is authorized for required role level.
  */
 const userHasPermission = (requiredRole, userRoles) => {
-  const allowedRoles = REQUIRED_ROLES_PRIORITY[`${requiredRole}`] || ['default'];
+  const allowedRoles = REQUIRED_ROLES_PRIORITY[`${requiredRole}`] || ["default"];
   return allowedRoles.some((role) => {
     return Boolean(userRoles[`${role}`]);
   });
@@ -42,7 +42,7 @@ const authorizeUser = (requiredRole) => {
     roles.default = true;
 
     if (!userHasPermission(requiredRole, roles)) {
-      return res.boom.unauthorized('You are not authorized for this action.');
+      return res.boom.unauthorized("You are not authorized for this action.");
     }
     return next();
   };

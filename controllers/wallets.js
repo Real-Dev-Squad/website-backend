@@ -1,8 +1,8 @@
-const { fetchWallet, createWallet } = require('../models/wallets');
-const userUtils = require('../utils/users');
-const walletConstants = require('../constants/wallets');
+const { fetchWallet, createWallet } = require("../models/wallets");
+const userUtils = require("../utils/users");
+const walletConstants = require("../constants/wallets");
 
-const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin';
+const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
 /**
  * Get the wallet for userId, or create default one for
@@ -16,7 +16,7 @@ const getWallet = async (userId) => {
     if (!wallet) {
       // #TODO Log which users didn't have a wallet
       wallet = await createWallet(userId, walletConstants.INITIAL_WALLET);
-      logger.info('Created new wallet for user');
+      logger.info("Created new wallet for user");
     }
     return wallet;
   } catch (err) {
@@ -37,7 +37,7 @@ const getOwnWallet = async (req, res) => {
     const wallet = await getWallet(userId);
 
     return res.json({
-      message: 'Wallet returned successfully for user',
+      message: "Wallet returned successfully for user",
       wallet,
     });
   } catch (err) {
@@ -59,7 +59,7 @@ const getUserWallet = async (req, res) => {
     const wallet = await getWallet(userId);
 
     return res.json({
-      message: 'Wallet returned successfully',
+      message: "Wallet returned successfully",
       wallet,
     });
   } catch (err) {

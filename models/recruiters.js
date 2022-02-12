@@ -3,9 +3,9 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 
-const firestore = require('../utils/firestore');
-const recruiterModel = firestore.collection('recruiters');
-const userModel = require('./users');
+const firestore = require("../utils/firestore");
+const recruiterModel = firestore.collection("recruiters");
+const userModel = require("./users");
 
 /**
  * Add the recruiter data
@@ -38,7 +38,7 @@ const addRecruiterInfo = async (recruiterData, username) => {
       timestamp: timestamp,
     };
   } catch (err) {
-    logger.error('Error in adding recruiter', err);
+    logger.error("Error in adding recruiter", err);
     throw err;
   }
 };

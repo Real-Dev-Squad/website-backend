@@ -1,5 +1,5 @@
-const { getUsername, getUserId, getParticipantUsernames, getParticipantUserIds } = require('./users');
-const { TASK_TYPE } = require('../constants/tasks');
+const { getUsername, getUserId, getParticipantUsernames, getParticipantUserIds } = require("./users");
+const { TASK_TYPE } = require("../constants/tasks");
 
 const fromFirestoreData = async (task) => {
   if (!task) {
