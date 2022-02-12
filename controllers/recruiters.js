@@ -34,7 +34,7 @@ const fetchRecruitersInfo = async (req, res) => {
     const allRecruiter = await recruiterQuery.fetchRecruitersInfo()
     return res.json({
       message: 'Recruiters returned successfully!',
-      stock: allRecruiter.length > 0 ? allRecruiter : []
+      recruiters: allRecruiter.length > 0 ? allRecruiter : []
     })
   } catch (error) {
     logger.error(`Error while fetching recruiters: ${error}`)
