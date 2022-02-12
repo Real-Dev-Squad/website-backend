@@ -3,19 +3,32 @@ const { expect } = chai
 const chaiHttp = require('chai-http')
 
 const app = require('../../server')
+const authService = require('../../services/authService')
 const users = require('../../models/users')
+const recruiters = require('../../models/recruiters')
 const addUser = require('../utils/addUser')
 const cleanDb = require('../utils/cleanDb')
+const cookieName = config.get('userToken.cookieName')
+// Import fixtures
+const userData = require('../fixtures/user/user')()
 const recruiterDataArray = require('../fixtures/recruiter/recruiter')()
+
+const superUser = userData[4]
+const nonSuperUser = userData[2]
 
 chai.use(chaiHttp)
 
 describe('Recruiters', function () {
   let username
   let recruiterData
+  let jwt
   beforeEach(async function () {
+    const superUserId = await addUser(superUser)
+    jwt = authService.generateAuthToken({ userId: superUserId })
+
     const userId = await addUser()
     const { user } = await users.fetchUser({ userId })
+
     username = user.username
     recruiterData = recruiterDataArray[0]
   })
@@ -63,6 +76,76 @@ describe('Recruiters', function () {
 
           return done()
         })
+    })
+  })
+
+  describe('GET /members/intro', function () {
+    it('Should return empty array if no recruiters data is found', function (done) {
+      chai
+        .request(app)
+        .get('/members/intro')
+        .set('cookie', `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) { return done(err) }
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.a('object')
+          expect(res.body.message).to.equal('Recruiters returned successfully!')
+          expect(res.body.recruiters).to.eql([])
+
+          return done()
+        })
+    })
+
+    it('Get all the recruiters data in the database', function (done) {
+      recruiters.addRecruiterInfo(recruiterData, username).then(() => {
+        chai
+          .request(app)
+          .get('/members/intro')
+          .set('cookie', `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) { return done(err) }
+            expect(res).to.have.status(200)
+            expect(res.body).to.be.a('object')
+            expect(res.body.message).to.equal('Recruiters returned successfully!')
+            expect(res.body.recruiters).to.be.a('array')
+            expect(res.body.recruiters).to.have.length.above(0)
+            expect(res.body.recruiters[0]).to.have.all.keys(
+              'company',
+              'first_name',
+              'last_name',
+              'designation',
+              'reason',
+              'email',
+              'currency',
+              'package',
+              'timestamp',
+              'package',
+              'username'
+            )
+            expect(res.body.recruiters[0].username).to.equal(username)
+
+            return done()
+          })
+      })
+    })
+
+    it('Should return 401 if user is not a super_user', function (done) {
+      addUser(nonSuperUser).then(nonSuperUserId => {
+        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId })
+        chai
+          .request(app)
+          .get('/members/intro')
+          .set('cookie', `${cookieName}=${nonSuperUserJwt}`)
+          .end((err, res) => {
+            if (err) { return done(err) }
+
+            expect(res).to.have.status(401)
+            expect(res.body).to.be.a('object')
+            expect(res.body.message).to.equal('You are not authorized for this action.')
+
+            return done()
+          })
+      })
     })
   })
 })

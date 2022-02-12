@@ -110,12 +110,6 @@ router.post('/intro/:username', validateRecruiter, addRecruiter)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
- *       404:
- *         description: notFound
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/errors/notFound'
  *
  *       500:
  *         description: serverUnavailable
