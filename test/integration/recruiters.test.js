@@ -11,7 +11,7 @@ const cleanDb = require("../utils/cleanDb");
 const cookieName = config.get("userToken.cookieName");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
-const recruiterDataArray = require("../fixtures/recruiter/recruiter")();
+const { recruiterDataArray, recruiterWithIdKeys } = require("../fixtures/recruiter/recruiter");
 
 const superUser = userData[4];
 const nonSuperUser = userData[2];
@@ -117,19 +117,7 @@ describe("Recruiters", function () {
             expect(res.body.message).to.equal("Recruiters returned successfully!");
             expect(res.body.recruiters).to.be.a("array");
             expect(res.body.recruiters).to.have.length.above(0);
-            expect(res.body.recruiters[0]).to.have.all.keys(
-              "company",
-              "first_name",
-              "last_name",
-              "designation",
-              "reason",
-              "email",
-              "currency",
-              "package",
-              "timestamp",
-              "package",
-              "username"
-            );
+            expect(res.body.recruiters[0]).to.have.all.keys(...recruiterWithIdKeys);
             expect(res.body.recruiters[0].username).to.equal(username);
 
             return done();
