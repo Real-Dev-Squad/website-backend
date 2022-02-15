@@ -64,7 +64,7 @@ const fetchActiveTaskMembers = async () => {
     const tasksSnapshot = await tasksModel.where('type', '==', TASK_TYPE.FEATURE).where('status', '==', TASK_STATUS.ACTIVE).get()
     const activeMembers = new Set()
     if (!tasksSnapshot.empty) {
-      tasksSnapshot.forEach((task) => {
+      tasksSnapshot.forEach((task) => {  
         const { assignee } = task.data()
         activeMembers.add(
           assignee
@@ -163,8 +163,9 @@ const fetchUserTasks = async (username, statuses = []) => {
   }
 }
 
-const fetchUserActiveAndBlockedTasks = async (username) => {
-  return await fetchUserTasks(username, ['active', 'pending', 'blocked'])
+const getAllSortedUserTasks = async (username) => {
+  const usertasks = await fetchUserTasks(username);
+  return await usertasks.orderBy('endsOn');
 }
 
 /**
@@ -182,7 +183,7 @@ module.exports = {
   fetchTasks,
   fetchTask,
   fetchUserTasks,
-  fetchUserActiveAndBlockedTasks,
+  getAllSortedUserTasks,
   fetchUserCompletedTasks,
   fetchActiveTaskMembers,
   fetchSelfTask

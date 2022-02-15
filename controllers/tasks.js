@@ -93,7 +93,7 @@ const getSelfTasks = async (req, res) => {
         const allCompletedTasks = await tasks.fetchUserCompletedTasks(username)
         return res.json(allCompletedTasks)
       } else {
-        const allTasks = await tasks.fetchUserActiveAndBlockedTasks(username)
+        const allTasks = await tasks.getAllSortedUserTasks(username)
         return res.json(allTasks)
       }
     }
