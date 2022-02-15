@@ -161,8 +161,9 @@ const fetchUserTasks = async (username, statuses = []) => {
   }
 };
 
-const fetchUserActiveAndBlockedTasks = async (username) => {
-  return await fetchUserTasks(username, ["active", "pending", "blocked"]);
+const fetchAllSortedUserTasks = async (username) => {
+  const selftasks =  await fetchUserTasks(username);
+  return await selftasks.orderBy(endsOn);
 };
 
 /**
