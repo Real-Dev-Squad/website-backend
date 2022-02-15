@@ -163,7 +163,7 @@ const fetchUserTasks = async (username, statuses = []) => {
 
 const fetchAllSortedUserTasks = async (username) => {
   const selftasks = await fetchUserTasks(username);
-  return await selftasks.orderBy(endsOn);
+  return await selftasks.orderBy("endsOn");
 };
 
 /**
