@@ -1,4 +1,4 @@
-const stories = require('../models/stories')
+const stories = require("../models/stories");
 /**
  * Creates new story
  *
@@ -8,23 +8,23 @@ const stories = require('../models/stories')
  */
 const addNewStory = async (req, res) => {
   try {
-    const story = await stories.addOrUpdateStory(req.body)
+    const story = await stories.addOrUpdateStory(req.body);
 
     if (story) {
       return res.json({
-        message: 'Story created successfully!',
+        message: "Story created successfully!",
         story: story.storyDetails,
-        id: story.storyId
-      })
+        id: story.storyId,
+      });
     } else {
-      logger.error('Error while creating new story: Incorrect username passed')
-      return res.boom.badRequest('Unable to add story')
+      logger.error("Error while creating new story: Incorrect username passed");
+      return res.boom.badRequest("Unable to add story");
     }
   } catch (err) {
-    logger.error(`Error while creating new story: ${err}`)
-    return res.boom.badImplementation('An internal server error occurred')
+    logger.error(`Error while creating new story: ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
   }
-}
+};
 /**
  * Fetches all the stories
  *
@@ -33,36 +33,36 @@ const addNewStory = async (req, res) => {
  */
 const fetchStories = async (req, res) => {
   try {
-    const allStories = await stories.fetchStories(req.query)
+    const allStories = await stories.fetchStories(req.query);
     if (!allStories) {
-      logger.error('Error while fetching story: Incorrect query parameters')
-      return res.boom.badRequest('Unable to fetch stories')
+      logger.error("Error while fetching story: Incorrect query parameters");
+      return res.boom.badRequest("Unable to fetch stories");
     }
     return res.json({
-      message: 'Stories returned successfully!',
-      stories: allStories.length > 0 ? allStories : []
-    })
+      message: "Stories returned successfully!",
+      stories: allStories.length > 0 ? allStories : [],
+    });
   } catch (err) {
-    logger.error(`Error while fetching stories ${err}`)
-    return res.boom.badImplementation('An internal server error occurred')
+    logger.error(`Error while fetching stories ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
   }
-}
+};
 
 const fetchStory = async (req, res) => {
   try {
-    const story = await stories.fetchStory(req.params.id)
+    const story = await stories.fetchStory(req.params.id);
     if (!story.storyData) {
-      return res.boom.notFound('Story not found')
+      return res.boom.notFound("Story not found");
     }
     return res.json({
-      message: 'Story returned successfully!',
-      story: story.storyData
-    })
+      message: "Story returned successfully!",
+      story: story.storyData,
+    });
   } catch (err) {
-    logger.error(`Error while fetching story ${err}`)
-    return res.boom.badImplementation('An internal server error occurred')
+    logger.error(`Error while fetching story ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
   }
-}
+};
 
 /**
  * Updates the story
@@ -72,27 +72,27 @@ const fetchStory = async (req, res) => {
  */
 const updateStory = async (req, res) => {
   try {
-    const story = await stories.fetchStory(req.params.id)
+    const story = await stories.fetchStory(req.params.id);
     if (!story.storyData) {
-      return res.boom.notFound('Story not found')
+      return res.boom.notFound("Story not found");
     }
 
-    const updateStoryResult = await stories.addOrUpdateStory(req.body, req.params.id)
+    const updateStoryResult = await stories.addOrUpdateStory(req.body, req.params.id);
     if (updateStoryResult) {
-      return res.status(204).send()
+      return res.status(204).send();
     } else {
-      logger.error(`Error while updating storyId ${req.params.id}: Incorrect username passed`)
-      return res.boom.badRequest('Unable to update story')
+      logger.error(`Error while updating storyId ${req.params.id}: Incorrect username passed`);
+      return res.boom.badRequest("Unable to update story");
     }
   } catch (err) {
-    logger.error(`Error while updating story: ${err}`)
-    return res.boom.badImplementation('An internal server error occurred')
+    logger.error(`Error while updating story: ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
   }
-}
+};
 
 module.exports = {
   addNewStory,
   fetchStories,
   fetchStory,
-  updateStory
-}
+  updateStory,
+};

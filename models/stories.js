@@ -1,9 +1,9 @@
-const firestore = require('../utils/firestore')
-const storiesModel = firestore.collection('stories')
-const userUtils = require('../utils/users')
-const { fromFirestoreData, toFirestoreData } = require('../utils/stories')
-const { snapshotToArray } = require('../utils/firestoreHelper')
-const { storyStatusEnum } = require('../constants/stories')
+const firestore = require("../utils/firestore");
+const storiesModel = firestore.collection("stories");
+const userUtils = require("../utils/users");
+const { fromFirestoreData, toFirestoreData } = require("../utils/stories");
+const { snapshotToArray } = require("../utils/firestoreHelper");
+const { storyStatusEnum } = require("../constants/stories");
 
 /**
  * Adds and Updates stories
@@ -14,30 +14,30 @@ const { storyStatusEnum } = require('../constants/stories')
  */
 const addOrUpdateStory = async (storyData, storyId = null) => {
   try {
-    storyData = await toFirestoreData(storyData)
+    storyData = await toFirestoreData(storyData);
     if (storyData) {
       // storyId exists Update story
       if (storyId) {
-        const story = await storiesModel.doc(storyId).get()
+        const story = await storiesModel.doc(storyId).get();
         await storiesModel.doc(storyId).set({
           ...story.data(),
-          ...storyData
-        })
-        return { storyId }
+          ...storyData,
+        });
+        return { storyId };
       }
-      const storyInfo = await storiesModel.add(storyData)
+      const storyInfo = await storiesModel.add(storyData);
       const result = {
         storyId: storyInfo.id,
-        storyDetails: await fromFirestoreData(storyData)
-      }
-      return result
+        storyDetails: await fromFirestoreData(storyData),
+      };
+      return result;
     }
-    return false
+    return false;
   } catch (err) {
-    logger.error('Error in adding or updating story', err)
-    throw err
+    logger.error("Error in adding or updating story", err);
+    throw err;
   }
-}
+};
 
 /**
  * Fetch all stories
@@ -46,40 +46,38 @@ const addOrUpdateStory = async (storyData, storyId = null) => {
  */
 const fetchStories = async ({ page = {}, filter }) => {
   try {
-    const { offset = 0, limit = 100 } = page
+    const { offset = 0, limit = 100 } = page;
 
-    let query = storiesModel
-    query = query
-      .limit(parseInt(limit))
-      .offset(parseInt(offset))
+    let query = storiesModel;
+    query = query.limit(parseInt(limit)).offset(parseInt(offset));
 
     if (filter) {
       for (let [fieldName, fieldValue] of Object.entries(filter)) {
-        if (Array.isArray(fieldValue)) return false
+        if (Array.isArray(fieldValue)) return false;
 
-        if (['featureOwner', 'backendEngineer', 'frontendEngineer'].includes(fieldName)) {
-          const userId = await userUtils.getUserId(fieldValue)
-          if (!userId) return false
-          fieldValue = userId
-        } else if (fieldName === 'status') {
-          if (!storyStatusEnum.includes(fieldValue)) return false
+        if (["featureOwner", "backendEngineer", "frontendEngineer"].includes(fieldName)) {
+          const userId = await userUtils.getUserId(fieldValue);
+          if (!userId) return false;
+          fieldValue = userId;
+        } else if (fieldName === "status") {
+          if (!storyStatusEnum.includes(fieldValue)) return false;
         } else {
-          return false
+          return false;
         }
-        query = query.where(fieldName, '==', fieldValue)
+        query = query.where(fieldName, "==", fieldValue);
       }
     }
 
-    const storiesSnapshot = await query.get()
-    const stories = snapshotToArray(storiesSnapshot)
-    const promises = stories.map(async (story) => fromFirestoreData(story))
-    const updatedStories = await Promise.all(promises)
-    return updatedStories
+    const storiesSnapshot = await query.get();
+    const stories = snapshotToArray(storiesSnapshot);
+    const promises = stories.map(async (story) => fromFirestoreData(story));
+    const updatedStories = await Promise.all(promises);
+    return updatedStories;
   } catch (err) {
-    logger.error('Error getting stories', err)
-    throw err
+    logger.error("Error getting stories", err);
+    throw err;
   }
-}
+};
 
 /**
  * Fetch a story
@@ -88,17 +86,17 @@ const fetchStories = async ({ page = {}, filter }) => {
  */
 const fetchStory = async (storyId) => {
   try {
-    const story = await storiesModel.doc(storyId).get()
-    const storyData = story.data()
-    return { storyData: await fromFirestoreData(storyData) }
+    const story = await storiesModel.doc(storyId).get();
+    const storyData = story.data();
+    return { storyData: await fromFirestoreData(storyData) };
   } catch (err) {
-    logger.error('Error retrieving story data', err)
-    throw err
+    logger.error("Error retrieving story data", err);
+    throw err;
   }
-}
+};
 
 module.exports = {
   addOrUpdateStory,
   fetchStory,
-  fetchStories
-}
+  fetchStories,
+};

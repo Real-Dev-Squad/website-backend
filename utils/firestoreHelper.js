@@ -10,29 +10,29 @@ const snapshotToArray = (snapshot, initialArray = []) => {
     snapshot.forEach((doc) => {
       initialArray.push({
         id: doc.id,
-        ...doc.data()
-      })
-    })
+        ...doc.data(),
+      });
+    });
   }
 
-  return initialArray
-}
+  return initialArray;
+};
 
 const getDocFromIds = async (docIds, modelFunc) => {
   try {
     if (!Array.isArray(docIds)) {
-      return []
+      return [];
     }
-    const promises = docIds.map(docId => modelFunc(docId))
-    const docData = await Promise.all(promises)
-    return docData
+    const promises = docIds.map((docId) => modelFunc(docId));
+    const docData = await Promise.all(promises);
+    return docData;
   } catch (err) {
-    logger.error(`Error populating documents in ${modelFunc}`, err)
-    throw err
+    logger.error(`Error populating documents in ${modelFunc}`, err);
+    throw err;
   }
-}
+};
 
 module.exports = {
   snapshotToArray,
-  getDocFromIds
-}
+  getDocFromIds,
+};

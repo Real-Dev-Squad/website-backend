@@ -1,9 +1,9 @@
-const express = require('express')
-const router = express.Router()
-const authenticate = require('../middlewares/authenticate')
-const stories = require('../controllers/stories')
-const { authorizeUser } = require('../middlewares/authorization')
-const { createStory, updateStory } = require('../middlewares/validators/stories')
+const express = require("express");
+const router = express.Router();
+const authenticate = require("../middlewares/authenticate");
+const stories = require("../controllers/stories");
+const { authorizeUser } = require("../middlewares/authorization");
+const { createStory, updateStory } = require("../middlewares/validators/stories");
 
 /**
  * @swagger
@@ -27,7 +27,7 @@ const { createStory, updateStory } = require('../middlewares/validators/stories'
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', stories.fetchStories)
+router.get("/", stories.fetchStories);
 
 /**
  * @swagger
@@ -56,7 +56,7 @@ router.get('/', stories.fetchStories)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:id', stories.fetchStory)
+router.get("/:id", stories.fetchStory);
 
 /**
  * @swagger
@@ -85,7 +85,7 @@ router.get('/:id', stories.fetchStory)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/', authenticate, authorizeUser('appOwner'), createStory, stories.addNewStory)
+router.post("/", authenticate, authorizeUser("appOwner"), createStory, stories.addNewStory);
 
 /**
  * @swagger
@@ -116,6 +116,6 @@ router.post('/', authenticate, authorizeUser('appOwner'), createStory, stories.a
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/:id', authenticate, authorizeUser('appOwner'), updateStory, stories.updateStory)
+router.patch("/:id", authenticate, authorizeUser("appOwner"), updateStory, stories.updateStory);
 
-module.exports = router
+module.exports = router;

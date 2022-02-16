@@ -6,20 +6,20 @@
  * Documentation: https://github.com/lorenwest/node-config/wiki/Configuration-Files
  */
 
-const NODE_ENV = process.env.NODE_ENV
+const NODE_ENV = process.env.NODE_ENV;
 module.exports = {
   port: 3000,
   enableFileLogs: true,
   enableConsoleLogs: false,
 
   githubApi: {
-    baseUrl: 'https://api.github.com',
-    org: 'Real-Dev-Squad'
+    baseUrl: "https://api.github.com",
+    org: "Real-Dev-Squad",
   },
 
   githubOauth: {
-    clientId: '<clientId>',
-    clientSecret: '<clientSecret>'
+    clientId: "<clientId>",
+    clientSecret: "<clientSecret>",
   },
 
   firestore: `{
@@ -37,40 +37,44 @@ module.exports = {
 
   services: {
     rdsApi: {
-      baseUrl: 'https://api.realdevsquad.com'
+      baseUrl: "https://api.realdevsquad.com",
     },
 
     rdsUi: {
-      baseUrl: 'https://realdevsquad.com',
+      baseUrl: "https://realdevsquad.com",
       routes: {
-        authRedirection: '/goto'
-      }
-    }
+        authRedirection: "/goto",
+      },
+    },
   },
 
   cors: {
-    allowedOrigins: /\.realdevsquad\.com$/
+    allowedOrigins: /\.realdevsquad\.com$/,
   },
 
   userToken: {
     cookieName: `rds-session-${NODE_ENV}`,
     ttl: 30 * 24 * 60 * 60, // in seconds
     refreshTtl: 180 * 24 * 60 * 60, // in seconds
-    publicKey: '<publicKey>',
-    privateKey: '<privateKey>'
+    publicKey: "<publicKey>",
+    privateKey: "<privateKey>",
   },
 
   // Cloudinary keys
   cloudinary: {
-    cloud_name: 'Cloud_name',
-    api_key: 'API_KEY',
-    api_secret: 'api_secret_key'
+    cloud_name: "Cloud_name",
+    api_key: "API_KEY",
+    api_secret: "api_secret_key",
   },
 
   integrations: {
     newrelic: {
-      appName: 'RDS_API_production',
-      licenseKey: '<newrelicLicenseKey>'
-    }
-  }
-}
+      appName: "RDS_API_production",
+      licenseKey: "<newrelicLicenseKey>",
+    },
+  },
+
+  routesCacheTTL: {
+    "/members": 900,
+  },
+};
