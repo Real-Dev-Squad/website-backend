@@ -33,7 +33,7 @@ const addNewStory = async (req, res) => {
  */
 const fetchStories = async (req, res) => {
   try {
-    const allStories = await stories.fetchStories()
+    const allStories = await stories.fetchStories(req.query)
     return res.json({
       message: 'Stories returned successfully!',
       stories: allStories.length > 0 ? allStories : []

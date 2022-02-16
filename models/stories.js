@@ -42,9 +42,16 @@ const addOrUpdateStory = async (storyData, storyId = null) => {
  *
  * @return {Promise<stories|Array>}
  */
-const fetchStories = async () => {
+const fetchStories = async ({ page = {} }) => {
   try {
-    const storiesSnapshot = await storiesModel.get()
+    const { offset = 0, limit = 10 } = page
+
+    let query = {}
+    query = storiesModel
+      .limit(parseInt(limit))
+      .offset(parseInt(offset))
+
+    const storiesSnapshot = await query.get()
     const stories = snapshotToArray(storiesSnapshot)
     const promises = stories.map(async (story) => fromFirestoreData(story))
     const updatedStories = await Promise.all(promises)
