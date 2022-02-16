@@ -34,6 +34,10 @@ const addNewStory = async (req, res) => {
 const fetchStories = async (req, res) => {
   try {
     const allStories = await stories.fetchStories(req.query)
+    if (!allStories) {
+      logger.error('Error while fetching story: Incorrect query parameters')
+      return res.boom.badRequest('Unable to fetch stories')
+    }
     return res.json({
       message: 'Stories returned successfully!',
       stories: allStories.length > 0 ? allStories : []

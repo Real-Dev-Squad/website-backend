@@ -1,7 +1,9 @@
 const firestore = require('../utils/firestore')
 const storiesModel = firestore.collection('stories')
+const userUtils = require('../utils/users')
 const { fromFirestoreData, toFirestoreData } = require('../utils/stories')
 const { snapshotToArray } = require('../utils/firestoreHelper')
+const { storyStatusEnum } = require('../constants/stories')
 
 /**
  * Adds and Updates stories
@@ -42,14 +44,31 @@ const addOrUpdateStory = async (storyData, storyId = null) => {
  *
  * @return {Promise<stories|Array>}
  */
-const fetchStories = async ({ page = {} }) => {
+const fetchStories = async ({ page = {}, filter }) => {
   try {
-    const { offset = 0, limit = 10 } = page
+    const { offset = 0, limit = 100 } = page
 
-    let query = {}
-    query = storiesModel
+    let query = storiesModel
+    query = query
       .limit(parseInt(limit))
       .offset(parseInt(offset))
+
+    if (filter) {
+      for (let [fieldName, fieldValue] of Object.entries(filter)) {
+        if (Array.isArray(fieldValue)) return false
+
+        if (['featureOwner', 'backendEngineer', 'frontendEngineer'].includes(fieldName)) {
+          const userId = await userUtils.getUserId(fieldValue)
+          if (!userId) return false
+          fieldValue = userId
+        } else if (fieldName === 'status') {
+          if (!storyStatusEnum.includes(fieldValue)) return false
+        } else {
+          return false
+        }
+        query = query.where(fieldName, '==', fieldValue)
+      }
+    }
 
     const storiesSnapshot = await query.get()
     const stories = snapshotToArray(storiesSnapshot)
