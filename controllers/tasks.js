@@ -1,7 +1,7 @@
-const tasks = require('../models/tasks')
-const { TASK_STATUS, TASK_STATUS_OLD } = require('../constants/tasks')
-const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS
+const tasks = require("../models/tasks");
+const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
+const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
+const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 /**
  * Creates new task
  *
@@ -55,22 +55,22 @@ const fetchTasks = async (req, res) => {
  */
 const getUserTasks = async (req, res) => {
   try {
-    let { status } = req.query
-    const { username } = req.params
-    let allTasks = []
+    let { status } = req.query;
+    const { username } = req.params;
+    let allTasks = [];
 
     if (status && !Object.keys(TASK_STATUS).includes(status.toUpperCase())) {
-      return res.boom.notFound('Status not found!')
+      return res.boom.notFound("Status not found!");
     }
 
     if (status) {
       if (status === OLD_ACTIVE) {
-        status = [OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, IN_PROGRESS, BLOCKED, SMOKE_TESTING]
+        status = [OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, IN_PROGRESS, BLOCKED, SMOKE_TESTING];
       } else {
-        status = [status]
+        status = [status];
       }
     }
-    allTasks = await tasks.fetchUserTasks(username, status || [])
+    allTasks = await tasks.fetchUserTasks(username, status || []);
 
     if (allTasks.userNotFound) {
       return res.boom.notFound("User doesn't exist");
@@ -163,19 +163,21 @@ const updateTaskStatus = async (req, res) => {
  */
 const overdueTasks = async (req, res) => {
   try {
-    const allTasks = await tasks.fetchTasks()
-    const now = Math.floor(Date.now() / 1000)
-    const overDueTasks = allTasks.filter(task => (task.status === ASSIGNED || task.status === IN_PROGRESS) && task.endsOn < now)
-    const newAvailableTasks = await tasks.overdueTasks(overDueTasks)
+    const allTasks = await tasks.fetchTasks();
+    const now = Math.floor(Date.now() / 1000);
+    const overDueTasks = allTasks.filter(
+      (task) => (task.status === ASSIGNED || task.status === IN_PROGRESS) && task.endsOn < now
+    );
+    const newAvailableTasks = await tasks.overdueTasks(overDueTasks);
     return res.json({
-      message: 'Overdue Tasks returned successfully!',
-      newAvailableTasks
-    })
+      message: "Overdue Tasks returned successfully!",
+      newAvailableTasks,
+    });
   } catch (err) {
-    logger.error(`Error while fetching overdue tasks : ${err}`)
-    return res.boom.badImplementation('An internal server error occured')
+    logger.error(`Error while fetching overdue tasks : ${err}`);
+    return res.boom.badImplementation("An internal server error occured");
   }
-}
+};
 
 module.exports = {
   addNewTask,
@@ -184,5 +186,5 @@ module.exports = {
   getSelfTasks,
   getUserTasks,
   updateTaskStatus,
-  overdueTasks
-}
+  overdueTasks,
+};

@@ -1,27 +1,27 @@
-const chai = require('chai')
-const sinon = require('sinon')
-const { expect } = chai
-const chaiHttp = require('chai-http')
+const chai = require("chai");
+const sinon = require("sinon");
+const { expect } = chai;
+const chaiHttp = require("chai-http");
 
-const app = require('../../server')
-const tasks = require('../../models/tasks')
-const authService = require('../../services/authService')
-const addUser = require('../utils/addUser')
-const userModel = require('../../models/users')
-const config = require('config')
-const cookieName = config.get('userToken.cookieName')
-const userData = require('../fixtures/user/user')()
-const { DINERO, NEELAM } = require('../../constants/wallets')
-const cleanDb = require('../utils/cleanDb')
-const { TASK_STATUS_OLD, TASK_STATUS } = require('../../constants/tasks')
-chai.use(chaiHttp)
+const app = require("../../server");
+const tasks = require("../../models/tasks");
+const authService = require("../../services/authService");
+const addUser = require("../utils/addUser");
+const userModel = require("../../models/users");
+const config = require("config");
+const cookieName = config.get("userToken.cookieName");
+const userData = require("../fixtures/user/user")();
+const { DINERO, NEELAM } = require("../../constants/wallets");
+const cleanDb = require("../utils/cleanDb");
+const { TASK_STATUS_OLD, TASK_STATUS } = require("../../constants/tasks");
+chai.use(chaiHttp);
 
-const appOwner = userData[3]
+const appOwner = userData[3];
 
-let jwt
+let jwt;
 
-describe('Tasks', function () {
-  let taskId1, taskId
+describe("Tasks", function () {
+  let taskId1, taskId;
 
   before(async function () {
     const userId = await addUser(appOwner);
@@ -136,12 +136,11 @@ describe('Tasks', function () {
     });
   });
 
-  describe('GET /tasks/self', function () {
-    it('Should get all the active and blocked tasks of the user', function (done) {
-      const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD
-      const { IN_PROGRESS, BLOCKED, SMOKE_TESTING } = TASK_STATUS
-      const taskStatus = [OLD_ACTIVE, OLD_PENDING, OLD_BLOCKED,
-        IN_PROGRESS, BLOCKED, SMOKE_TESTING]
+  describe("GET /tasks/self", function () {
+    it("Should get all the active and blocked tasks of the user", function (done) {
+      const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
+      const { IN_PROGRESS, BLOCKED, SMOKE_TESTING } = TASK_STATUS;
+      const taskStatus = [OLD_ACTIVE, OLD_PENDING, OLD_BLOCKED, IN_PROGRESS, BLOCKED, SMOKE_TESTING];
 
       chai
         .request(app)
@@ -168,10 +167,12 @@ describe('Tasks', function () {
         .get("/tasks/self?completed=true")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
-          if (err) { return (done) }
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('array')
-          expect(res.body[0].status).to.equal(TASK_STATUS.COMPLETED)
+          if (err) {
+            return done;
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("array");
+          expect(res.body[0].status).to.equal(TASK_STATUS.COMPLETED);
 
           return done();
         });

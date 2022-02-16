@@ -99,7 +99,7 @@ router.get("/self", authenticate, tasks.getSelfTasks);
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/overduetasks', authenticate, authorizeUser('appOwner'), tasks.overdueTasks)
+router.get("/overduetasks", authenticate, authorizeUser("appOwner"), tasks.overdueTasks);
 
 /**
  * @swagger
