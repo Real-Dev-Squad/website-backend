@@ -1,8 +1,8 @@
 const TASK_TYPE = {
-  FEATURE: 'feature',
-  GROUP: 'group',
-  STORY: 'story'
-}
+  FEATURE: "feature",
+  GROUP: "group",
+  STORY: "story",
+};
 
 const TASK_STATUS = {
   // old task workflow

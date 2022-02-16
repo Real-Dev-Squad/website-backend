@@ -15,27 +15,27 @@ const admin = require('firebase-admin')
  */
 const updateTask = async (taskData, taskId = null) => {
   try {
-    taskData = await toFirestoreData(taskData)
+    taskData = await toFirestoreData(taskData);
     if (taskId) {
-      const task = await tasksModel.doc(taskId).get()
+      const task = await tasksModel.doc(taskId).get();
       await tasksModel.doc(taskId).set({
         ...task.data(),
-        ...taskData
-      })
-      return { taskId }
+        ...taskData,
+      });
+      return { taskId };
     }
-    const taskInfo = await tasksModel.add(taskData)
+    const taskInfo = await tasksModel.add(taskData);
     const result = {
       taskId: taskInfo.id,
-      taskDetails: await fromFirestoreData(taskData)
-    }
+      taskDetails: await fromFirestoreData(taskData),
+    };
 
-    return result
+    return result;
   } catch (err) {
-    logger.error('Error in updating task', err)
-    throw err
+    logger.error("Error in updating task", err);
+    throw err;
   }
-}
+};
 
 /**
  * Fetch all tasks
@@ -54,10 +54,10 @@ const fetchTasks = async () => {
     })
     return taskList
   } catch (err) {
-    logger.error('error getting tasks', err)
-    throw err
+    logger.error("error getting tasks", err);
+    throw err;
   }
-}
+};
 
 /**
  * Fetch all participants whose task status is active
@@ -72,18 +72,16 @@ const fetchActiveTaskMembers = async () => {
     const activeMembers = new Set()
     if (!tasksSnapshot.empty) {
       tasksSnapshot.forEach((task) => {
-        const { assignee } = task.data()
-        activeMembers.add(
-          assignee
-        )
-      })
+        const { assignee } = task.data();
+        activeMembers.add(assignee);
+      });
     }
-    return activeMembers
+    return activeMembers;
   } catch (err) {
-    logger.error('error getting tasks', err)
-    throw err
+    logger.error("error getting tasks", err);
+    throw err;
   }
-}
+};
 
 /**
  * Fetch a task
@@ -99,10 +97,10 @@ const fetchTask = async (taskId) => {
     }
     return { taskData }
   } catch (err) {
-    logger.error('Error retrieving task data', err)
-    throw err
+    logger.error("Error retrieving task data", err);
+    throw err;
   }
-}
+};
 
 /**
  * Fetch assigned self task
@@ -120,10 +118,10 @@ const fetchSelfTask = async (taskId, userId) => {
     const taskList = { ...taskfromFirestoreData, status: TASK_STATUS[taskfromFirestoreData.status.toUpperCase()] || task.status }
     return { taskData: taskList }
   } catch (err) {
-    logger.error('Error retrieving self task data', err)
-    throw err
+    logger.error("Error retrieving self task data", err);
+    throw err;
   }
-}
+};
 
 /**
  * Fetch all the active and blocked tasks of the user
@@ -139,32 +137,29 @@ const fetchSelfTask = async (taskId, userId) => {
 
 const fetchUserTasks = async (username, statuses = []) => {
   try {
-    const userId = await userUtils.getUserId(username)
+    const userId = await userUtils.getUserId(username);
 
     if (!userId) {
-      return { userNotFound: true }
+      return { userNotFound: true };
     }
 
-    let groupTasksSnapshot = []
-    let featureTasksSnapshot = []
+    let groupTasksSnapshot = [];
+    let featureTasksSnapshot = [];
 
     if (statuses && statuses.length) {
-      groupTasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
-        .where('status', 'in', statuses)
-        .get()
-      featureTasksSnapshot = await tasksModel.where('assignee', '==', userId)
-        .where('status', 'in', statuses)
-        .get()
+      groupTasksSnapshot = await tasksModel
+        .where("participants", "array-contains", userId)
+        .where("status", "in", statuses)
+        .get();
+      featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).where("status", "in", statuses).get();
     } else {
-      groupTasksSnapshot = await tasksModel.where('participants', 'array-contains', userId)
-        .get()
+      groupTasksSnapshot = await tasksModel.where("participants", "array-contains", userId).get();
 
-      featureTasksSnapshot = await tasksModel.where('assignee', '==', userId)
-        .get()
+      featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).get();
     }
 
-    const groupTasks = buildTasks(groupTasksSnapshot)
-    const tasks = buildTasks(featureTasksSnapshot, groupTasks)
+    const groupTasks = buildTasks(groupTasksSnapshot);
+    const tasks = buildTasks(featureTasksSnapshot, groupTasks);
 
     const promises = tasks.map(async (task) => fromFirestoreData(task))
     const updatedTasks = await Promise.all(promises)
@@ -174,10 +169,10 @@ const fetchUserTasks = async (username, statuses = []) => {
     })
     return taskList
   } catch (err) {
-    logger.error('error getting tasks', err)
-    throw err
+    logger.error("error getting tasks", err);
+    throw err;
   }
-}
+};
 
 const fetchUserActiveAndBlockedTasks = async (username) => {
   return await fetchUserTasks(username,

@@ -3,16 +3,16 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 
-const Firestore = require('@google-cloud/firestore')
-const firestore = require('../utils/firestore')
-const { fetchUser } = require('./users')
+const Firestore = require("@google-cloud/firestore");
+const firestore = require("../utils/firestore");
+const { fetchUser } = require("./users");
 
-const challengesModel = firestore.collection('challenges')
-const userModel = firestore.collection('users')
+const challengesModel = firestore.collection("challenges");
+const userModel = firestore.collection("users");
 
-const CANNOT_SUBSCRIBE = 'User cannot be subscribed to challenge'
-const USER_DOES_NOT_EXIST_ERROR = 'User does not exist. Please register to participate'
-const ERROR_MESSAGE = 'Error getting challenges'
+const CANNOT_SUBSCRIBE = "User cannot be subscribed to challenge";
+const USER_DOES_NOT_EXIST_ERROR = "User does not exist. Please register to participate";
+const ERROR_MESSAGE = "Error getting challenges";
 
 /**
  * Fetch the challenges
@@ -21,20 +21,20 @@ const ERROR_MESSAGE = 'Error getting challenges'
 
 const fetchChallenges = async () => {
   try {
-    const challengesSnapshot = await challengesModel.get()
-    const challenges = []
+    const challengesSnapshot = await challengesModel.get();
+    const challenges = [];
     challengesSnapshot.forEach((challengeDoc) => {
       challenges.push({
         id: challengeDoc.id,
-        ...challengeDoc.data()
-      })
-    })
-    return challenges
+        ...challengeDoc.data(),
+      });
+    });
+    return challenges;
   } catch (err) {
-    logger.error(ERROR_MESSAGE, err)
-    throw err
+    logger.error(ERROR_MESSAGE, err);
+    throw err;
   }
-}
+};
 
 /**
  * Fetch the <user object> from participants array
@@ -44,20 +44,20 @@ const fetchChallenges = async () => {
 const fetchParticipantsData = async (participants) => {
   try {
     const promises = participants.map(async (userId) => {
-      const { user } = await fetchUser({ userId })
+      const { user } = await fetchUser({ userId });
       return {
         ...user,
         phone: undefined,
-        email: undefined
-      }
-    })
-    const fetchedparticipants = await Promise.all(promises)
-    return fetchedparticipants
+        email: undefined,
+      };
+    });
+    const fetchedparticipants = await Promise.all(promises);
+    return fetchedparticipants;
   } catch (err) {
-    logger.error('Failed to get participated users', err)
-    throw err
+    logger.error("Failed to get participated users", err);
+    throw err;
   }
-}
+};
 
 /**
  * Post the challenge
@@ -66,22 +66,22 @@ const fetchParticipantsData = async (participants) => {
 
 const postChallenge = async (challengeData) => {
   try {
-    const { start_date: startDate, end_date: endDate } = challengeData
-    const startdate = new Firestore.Timestamp(startDate, 0)
-    const enddate = new Firestore.Timestamp(endDate, 0)
+    const { start_date: startDate, end_date: endDate } = challengeData;
+    const startdate = new Firestore.Timestamp(startDate, 0);
+    const enddate = new Firestore.Timestamp(endDate, 0);
     const challengeRef = await challengesModel.add({
       ...challengeData,
       start_date: startdate,
       end_date: enddate,
       participants: [],
-      is_active: true
-    })
-    return challengeRef.id
+      is_active: true,
+    });
+    return challengeRef.id;
   } catch (err) {
-    logger.error(ERROR_MESSAGE, err)
-    throw err
+    logger.error(ERROR_MESSAGE, err);
+    throw err;
   }
-}
+};
 
 /**
  * @param {String} userId
@@ -91,24 +91,24 @@ const postChallenge = async (challengeData) => {
 
 const subscribeUserToChallenge = async (userId, challengeId) => {
   try {
-    const getUser = await userModel.doc(userId).get()
-    const user = getUser.data()
+    const getUser = await userModel.doc(userId).get();
+    const user = getUser.data();
     if (user) {
-      const challengeRef = await challengesModel.doc(challengeId)
-      await challengeRef.update({ participants: Firestore.FieldValue.arrayUnion(userId) })
-      return challengeRef.get()
+      const challengeRef = await challengesModel.doc(challengeId);
+      await challengeRef.update({ participants: Firestore.FieldValue.arrayUnion(userId) });
+      return challengeRef.get();
     } else {
-      throw new Error(USER_DOES_NOT_EXIST_ERROR)
+      throw new Error(USER_DOES_NOT_EXIST_ERROR);
     }
   } catch (err) {
-    logger.error(CANNOT_SUBSCRIBE, err)
-    throw err
+    logger.error(CANNOT_SUBSCRIBE, err);
+    throw err;
   }
-}
+};
 
 module.exports = {
   fetchChallenges,
   postChallenge,
   subscribeUserToChallenge,
-  fetchParticipantsData
-}
+  fetchParticipantsData,
+};
