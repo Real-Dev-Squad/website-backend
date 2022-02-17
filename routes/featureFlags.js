@@ -1,9 +1,9 @@
-const express = require('express')
-const router = express.Router()
-const authenticate = require('../middlewares/authenticate')
-const { authorizeUser } = require('../middlewares/authorization')
-const { validateFeatureFlag, updateFeatureFlags } = require('../middlewares/validators/featureFlags')
-const featureFlag = require('../controllers/featureFlags')
+const express = require("express");
+const router = express.Router();
+const authenticate = require("../middlewares/authenticate");
+const { authorizeUser } = require("../middlewares/authorization");
+const { validateFeatureFlag, updateFeatureFlags } = require("../middlewares/validators/featureFlags");
+const featureFlag = require("../controllers/featureFlags");
 
 /**
  * @swagger
@@ -26,7 +26,7 @@ const featureFlag = require('../controllers/featureFlags')
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/', featureFlag.getFeatureFlags)
+router.get("/", featureFlag.getFeatureFlags);
 
 /**
  * @swagger
@@ -69,7 +69,7 @@ router.get('/', featureFlag.getFeatureFlags)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.post('/', authenticate, authorizeUser('appOwner'), validateFeatureFlag, featureFlag.addFeatureFlag)
+router.post("/", authenticate, authorizeUser("appOwner"), validateFeatureFlag, featureFlag.addFeatureFlag);
 
 /**
  * @swagger
@@ -112,7 +112,7 @@ router.post('/', authenticate, authorizeUser('appOwner'), validateFeatureFlag, f
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.patch('/:id', authenticate, authorizeUser('appOwner'), updateFeatureFlags, featureFlag.updateFeatureFlag)
+router.patch("/:id", authenticate, authorizeUser("appOwner"), updateFeatureFlags, featureFlag.updateFeatureFlag);
 
 /**
  * @swagger
@@ -155,6 +155,6 @@ router.patch('/:id', authenticate, authorizeUser('appOwner'), updateFeatureFlags
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.delete('/:id', authenticate, authorizeUser('appOwner'), featureFlag.deleteFeatureFlag)
+router.delete("/:id", authenticate, authorizeUser("appOwner"), featureFlag.deleteFeatureFlag);
 
-module.exports = router
+module.exports = router;

@@ -1,4 +1,4 @@
-const githubService = require('../services/githubService')
+const githubService = require("../services/githubService");
 
 /**
  * Collects all pull requests and sends only required data for each pull request
@@ -9,24 +9,24 @@ const githubService = require('../services/githubService')
 
 const getUserPRs = async (req, res) => {
   try {
-    const { data } = await githubService.fetchPRsByUser(req.params.username)
+    const { data } = await githubService.fetchPRsByUser(req.params.username);
 
     if (data.total_count) {
-      const allPRs = githubService.extractPRdetails(data)
+      const allPRs = githubService.extractPRdetails(data);
       return res.json({
-        message: 'Pull requests returned successfully!',
-        pullRequests: allPRs
-      })
+        message: "Pull requests returned successfully!",
+        pullRequests: allPRs,
+      });
     }
     return res.json({
-      message: 'No pull requests found!',
-      pullRequests: []
-    })
+      message: "No pull requests found!",
+      pullRequests: [],
+    });
   } catch (err) {
-    logger.error(`Error while processing pull requests: ${err}`)
-    return res.boom.badImplementation('Something went wrong please contact admin')
+    logger.error(`Error while processing pull requests: ${err}`);
+    return res.boom.badImplementation("Something went wrong please contact admin");
   }
-}
+};
 
 /**
  * Get stale PRs in open state for Real Dev Squad repos
@@ -37,25 +37,25 @@ const getUserPRs = async (req, res) => {
  */
 const getStalePRs = async (req, res) => {
   try {
-    const { size, page } = req.query
-    const { data } = await githubService.fetchStalePRs(size, page)
+    const { size, page } = req.query;
+    const { data } = await githubService.fetchStalePRs(size, page);
 
     if (data.total_count) {
-      const allPRs = githubService.extractPRdetails(data)
+      const allPRs = githubService.extractPRdetails(data);
       return res.json({
-        message: 'Stale PRs',
-        pullRequests: allPRs
-      })
+        message: "Stale PRs",
+        pullRequests: allPRs,
+      });
     }
     return res.json({
-      message: 'No pull requests found!',
-      pullRequests: []
-    })
+      message: "No pull requests found!",
+      pullRequests: [],
+    });
   } catch (err) {
-    logger.error(`Error while processing pull requests: ${err}`)
-    return res.boom.badImplementation('Something went wrong please contact admin')
+    logger.error(`Error while processing pull requests: ${err}`);
+    return res.boom.badImplementation("Something went wrong please contact admin");
   }
-}
+};
 
 /**
  * Get Latest PRs in open state for Real Dev Squad repos
@@ -66,28 +66,28 @@ const getStalePRs = async (req, res) => {
  */
 const getOpenPRs = async (req, res) => {
   try {
-    const { size, page } = req.query
-    const { data } = await githubService.fetchOpenPRs(size, page)
+    const { size, page } = req.query;
+    const { data } = await githubService.fetchOpenPRs(size, page);
 
     if (data.total_count) {
-      const allPRs = githubService.extractPRdetails(data)
+      const allPRs = githubService.extractPRdetails(data);
       return res.json({
-        message: 'Open PRs',
-        pullRequests: allPRs
-      })
+        message: "Open PRs",
+        pullRequests: allPRs,
+      });
     }
     return res.json({
-      message: 'No pull requests found!',
-      pullRequests: []
-    })
+      message: "No pull requests found!",
+      pullRequests: [],
+    });
   } catch (err) {
-    logger.error(`Error while processing pull requests: ${err}`)
-    return res.boom.badImplementation('Something went wrong please contact admin')
+    logger.error(`Error while processing pull requests: ${err}`);
+    return res.boom.badImplementation("Something went wrong please contact admin");
   }
-}
+};
 
 module.exports = {
   getUserPRs,
   getStalePRs,
-  getOpenPRs
-}
+  getOpenPRs,
+};

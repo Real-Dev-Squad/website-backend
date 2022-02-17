@@ -1,4 +1,4 @@
-const { fetchUser } = require('../models/users')
+const { fetchUser } = require("../models/users");
 
 /**
  * Used for receiving userId when providing username
@@ -8,14 +8,17 @@ const { fetchUser } = require('../models/users')
  */
 const getUserId = async (username) => {
   try {
-    const { userExists, user: { id } } = await fetchUser({ username })
+    const {
+      userExists,
+      user: { id },
+    } = await fetchUser({ username });
 
-    return userExists ? id : false
+    return userExists ? id : false;
   } catch (error) {
-    logger.error('Something went wrong', error)
-    throw error
+    logger.error("Something went wrong", error);
+    throw error;
   }
-}
+};
 /**
  * Used for receiving username when providing userId
  *
@@ -24,13 +27,15 @@ const getUserId = async (username) => {
  */
 const getUsername = async (userId) => {
   try {
-    const { user: { username } } = await fetchUser({ userId })
-    return username
+    const {
+      user: { username },
+    } = await fetchUser({ userId });
+    return username;
   } catch (error) {
-    logger.error('Something went wrong', error)
-    throw error
+    logger.error("Something went wrong", error);
+    throw error;
   }
-}
+};
 /**
  * Converts the userIds entered in the array to corresponding usernames
  * @param participantArray {array} : participants array to be updated
@@ -39,20 +44,20 @@ const getUsername = async (userId) => {
 const getParticipantUsernames = async (participantArray) => {
   try {
     if (!Array.isArray(participantArray)) {
-      return []
+      return [];
     }
 
     const promises = participantArray.map(async (participant) => {
-      const participantUsername = await getUsername(participant.trim())
-      return participantUsername
-    })
-    const participantUsernames = await Promise.all(promises)
-    return participantUsernames
+      const participantUsername = await getUsername(participant.trim());
+      return participantUsername;
+    });
+    const participantUsernames = await Promise.all(promises);
+    return participantUsernames;
   } catch (err) {
-    logger.error('Error in updating the task object', err)
-    throw err
+    logger.error("Error in updating the task object", err);
+    throw err;
   }
-}
+};
 /**
  * Converts the usernames entered in the database to corresponding usernames
  * @param participantArray {array} : participants array to be updated
@@ -61,26 +66,26 @@ const getParticipantUsernames = async (participantArray) => {
 const getParticipantUserIds = async (participantArray) => {
   try {
     if (!Array.isArray(participantArray)) {
-      return []
+      return [];
     }
 
     const promises = participantArray.map(async (participant) => {
-      const participantUserId = await getUserId(participant.trim())
-      if (!participantUserId) return false
-      return participantUserId
-    })
-    let participantUserIds = await Promise.all(promises)
-    participantUserIds = participantUserIds.filter(Boolean) // remove invalid users
-    return participantUserIds
+      const participantUserId = await getUserId(participant.trim());
+      if (!participantUserId) return false;
+      return participantUserId;
+    });
+    let participantUserIds = await Promise.all(promises);
+    participantUserIds = participantUserIds.filter(Boolean); // remove invalid users
+    return participantUserIds;
   } catch (err) {
-    logger.error('Error in updating the task object', err)
-    throw err
+    logger.error("Error in updating the task object", err);
+    throw err;
   }
-}
+};
 
 module.exports = {
   getUserId,
   getUsername,
   getParticipantUserIds,
-  getParticipantUsernames
-}
+  getParticipantUsernames,
+};
