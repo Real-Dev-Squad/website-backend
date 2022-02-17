@@ -56,7 +56,7 @@ router.get("/", stories.fetchStories);
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get("/:id", stories.fetchStory);
+router.get("/:id", stories.fetchStories);
 
 /**
  * @swagger

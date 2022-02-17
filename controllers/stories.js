@@ -33,33 +33,26 @@ const addNewStory = async (req, res) => {
  */
 const fetchStories = async (req, res) => {
   try {
-    const allStories = await stories.fetchStories(req.query);
-    if (!allStories) {
-      logger.error("Error while fetching story: Incorrect query parameters");
-      return res.boom.badRequest("Unable to fetch stories");
+    const result = {};
+    if (req.params.id) {
+      const story = await stories.fetchStory(req.params.id);
+      if (!story.storyData) {
+        return res.boom.notFound("Story not found");
+      }
+      result.message = "Story returned successfully!";
+      result.story = story.storyData;
+    } else {
+      const allStories = await stories.fetchStories(req.query);
+      if (!allStories) {
+        logger.error("Error while fetching story: Incorrect query parameters");
+        return res.boom.badRequest("Unable to fetch stories");
+      }
+      result.message = "Stories returned successfully!";
+      result.stories = allStories.length > 0 ? allStories : [];
     }
-    return res.json({
-      message: "Stories returned successfully!",
-      stories: allStories.length > 0 ? allStories : [],
-    });
+    return res.json({ ...result });
   } catch (err) {
     logger.error(`Error while fetching stories ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
-  }
-};
-
-const fetchStory = async (req, res) => {
-  try {
-    const story = await stories.fetchStory(req.params.id);
-    if (!story.storyData) {
-      return res.boom.notFound("Story not found");
-    }
-    return res.json({
-      message: "Story returned successfully!",
-      story: story.storyData,
-    });
-  } catch (err) {
-    logger.error(`Error while fetching story ${err}`);
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
@@ -93,6 +86,5 @@ const updateStory = async (req, res) => {
 module.exports = {
   addNewStory,
   fetchStories,
-  fetchStory,
   updateStory,
 };

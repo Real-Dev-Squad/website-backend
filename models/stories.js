@@ -44,7 +44,7 @@ const addOrUpdateStory = async (storyData, storyId = null) => {
  *
  * @return {Promise<stories|Array>}
  */
-const fetchStories = async ({ page = {}, filter }) => {
+const fetchStories = async ({ page = {}, filter, sort }) => {
   try {
     const { offset = 0, limit = 100 } = page;
 
@@ -68,6 +68,26 @@ const fetchStories = async ({ page = {}, filter }) => {
       }
     }
 
+    if (sort) {
+      const sortByFields = sort?.split(",");
+      const validFields = ["startedOn", "endsOn"];
+      const isFieldValid = (fieldName) => {
+        fieldName = fieldName.startsWith("-") ? fieldName.substring(1) : fieldName;
+        return validFields.includes(fieldName);
+      };
+      if (sortByFields?.length > 0) {
+        for (const fieldName of sortByFields) {
+          if (!isFieldValid(fieldName)) {
+            return false;
+          }
+          if (fieldName.startsWith("-")) {
+            query = query.orderBy(fieldName.substring(1), "desc");
+          } else {
+            query = query.orderBy(fieldName);
+          }
+        }
+      }
+    }
     const storiesSnapshot = await query.get();
     const stories = snapshotToArray(storiesSnapshot);
     const promises = stories.map(async (story) => fromFirestoreData(story));
