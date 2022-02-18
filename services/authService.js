@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
 /**
  * Generates the JWT
  *
@@ -6,11 +6,11 @@ const jwt = require('jsonwebtoken')
  * @return {String} - Generated JWT
  */
 const generateAuthToken = (payload) => {
-  return jwt.sign(payload, config.get('userToken.privateKey'), {
-    algorithm: 'RS256',
-    expiresIn: config.get('userToken.ttl')
-  })
-}
+  return jwt.sign(payload, config.get("userToken.privateKey"), {
+    algorithm: "RS256",
+    expiresIn: config.get("userToken.ttl"),
+  });
+};
 
 /**
  * Verifies if the JWT is valid. Throws error in case of signature error or expiry
@@ -19,8 +19,8 @@ const generateAuthToken = (payload) => {
  * @return {Object} - Decode value of JWT
  */
 const verifyAuthToken = (token) => {
-  return jwt.verify(token, config.get('userToken.publicKey'), { algorithms: ['RS256'] })
-}
+  return jwt.verify(token, config.get("userToken.publicKey"), { algorithms: ["RS256"] });
+};
 
 /**
  * Decodes the JWT. This is irrespective of the signature error or expiry
@@ -29,11 +29,11 @@ const verifyAuthToken = (token) => {
  * @return {Object} - Decode value of JWT
  */
 const decodeAuthToken = (token) => {
-  return jwt.decode(token)
-}
+  return jwt.decode(token);
+};
 
 module.exports = {
   generateAuthToken,
   verifyAuthToken,
-  decodeAuthToken
-}
+  decodeAuthToken,
+};
