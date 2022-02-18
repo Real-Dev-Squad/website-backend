@@ -13,6 +13,7 @@ const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
+const { TASK_STATUS } = require("../../constants/tasks");
 chai.use(chaiHttp);
 
 const appOwner = userData[3];
@@ -136,8 +137,8 @@ describe("Tasks", function () {
   });
 
   describe("GET /tasks/self", function () {
-    it("Should get all the active and blocked tasks of the user", function (done) {
-      const taskStatus = ["active", "completed"];
+    it("Should return all tasks of the user", function (done) {
+      const taskStatus = Object.values(TASK_STATUS);
 
       chai
         .request(app)

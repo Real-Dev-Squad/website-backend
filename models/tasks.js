@@ -161,9 +161,14 @@ const fetchUserTasks = async (username, statuses = []) => {
   }
 };
 
-const fetchAllSortedUserTasks = async (username) => {
-  const selftasks = await fetchUserTasks(username);
-  return await selftasks.orderBy("endsOn");
+/**
+ *
+ * @param username { string } : username which will be used to fetch all self tasks
+ * @returns {Promise<tasks>|Array}
+ */
+const fetchSelfTasks = async (username) => {
+  const allTasks = await fetchUserTasks(username);
+  return allTasks.sort((a, b) => a.endsOn - b.endsOn);
 };
 
 /**
@@ -181,7 +186,7 @@ module.exports = {
   fetchTasks,
   fetchTask,
   fetchUserTasks,
-  fetchAllSortedUserTasks,
+  fetchSelfTasks,
   fetchUserCompletedTasks,
   fetchActiveTaskMembers,
   fetchSelfTask,
