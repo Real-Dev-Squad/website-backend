@@ -156,6 +156,7 @@ const identityURL = async (req, res) => {
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
+
 module.exports = {
   updateSelf,
   getUsers,
