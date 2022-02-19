@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
+const { authorizeUser } = require("../middlewares/authorization");
 const users = require("../controllers/users");
 const userValidator = require("../middlewares/validators/user");
 const { upload } = require("../utils/multer");
@@ -266,5 +267,7 @@ router.get("/:username", users.getUser);
 router.post("/picture", authenticate, upload.single("profile"), users.postUserPicture);
 
 router.patch("/identityURL", authenticate, userValidator.updateIdentityURL, users.identityURL);
+
+router.patch("/:username", authenticate, authorizeUser("superUser"), users.updateUser);
 
 module.exports = router;

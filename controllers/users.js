@@ -1,5 +1,8 @@
 const userQuery = require("../models/users");
+const profileDiffsQuery = require("../models/profileDiffs");
+const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
+
 /**
  * Fetches the data about our users
  *
@@ -144,6 +147,31 @@ const postUserPicture = async (req, res) => {
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
+
+/**
+ * Updates the user data to the latest diffs
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const updateUser = async (req, res) => {
+  try {
+    const { user } = await userQuery.fetchUser({ username: req.params.username });
+    const { id: profileId, ...profileDiffs } = await profileDiffsQuery.fetchProfileDiffsData(req.params.username);
+
+    await profileDiffsQuery.update({ approval: "APPROVED" }, profileId);
+    await userQuery.addOrUpdate(profileDiffs, user.id);
+    await logsQuery.addProfileLog(user, profileDiffs, req.params.username);
+
+    return res.json({
+      message: "Updated user's data successfully!",
+    });
+  } catch (error) {
+    logger.error(`Error while updating user data: ${error}`);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
 const identityURL = async (req, res) => {
   try {
     const userId = req.userData.id;
@@ -163,5 +191,6 @@ module.exports = {
   getUser,
   getUsernameAvailabilty,
   postUserPicture,
+  updateUser,
   identityURL,
 };
