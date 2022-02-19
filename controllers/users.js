@@ -157,7 +157,7 @@ const postUserPicture = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { user } = await userQuery.fetchUser({ username: req.params.username })
-    const { id: profileId, ...profileDiffs } = await profileDiffsQuery.fetchProfileDiffsData(req.params.username)
+    const { id: profileId, ...profileDiffs } = req.body
 
     await profileDiffsQuery.update({ approval: 'APPROVED' }, profileId)
     await userQuery.addOrUpdate(profileDiffs, user.id)

@@ -21,10 +21,11 @@ describe('Users', function () {
   let jwt
   let superUserId
   let superUserAuthToken
+  let profileDiffsId
 
   beforeEach(async function () {
     const userId = await addUser()
-    await addProfileDiffs()
+    profileDiffsId = await addProfileDiffs()
     jwt = authService.generateAuthToken({ userId })
 
     superUserId = await addUser(superUser)
@@ -245,6 +246,22 @@ describe('Users', function () {
         .request(app)
         .patch(`/users/${userData[0].username}`)
         .set('cookie', `${cookieName}=${superUserAuthToken}`)
+        .send({
+          id: `${profileDiffsId}`,
+          username: 'ankur',
+          first_name: 'Ankur',
+          last_name: 'Narkhede',
+          email: 'ankurnarkhede999@gmail.com',
+          phone: '123456789',
+          yoe: '0',
+          company: '',
+          designation: 'AO',
+          github_id: 'ankur1337',
+          linkedin_id: 'ankurnarkhede',
+          twitter_id: 'ankur909',
+          instagram_id: '',
+          website: ''
+        })
         .end((err, res) => {
           if (err) { return done(err) }
           expect(res).to.have.status(200)

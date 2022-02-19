@@ -39,9 +39,10 @@ const fetchProfileDiffsData = async (username) => {
  */
 const add = async (profileDiffsData) => {
   try {
-    await profileDiffsModel.add({
+    const profileDiffs = await profileDiffsModel.add({
       ...profileDiffsData
     })
+    return profileDiffs.id
   } catch (err) {
     logger.error('Error in adding profile diffs', err)
     throw err

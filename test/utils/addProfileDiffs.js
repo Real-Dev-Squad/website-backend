@@ -10,5 +10,5 @@ module.exports = async (profile) => {
   const isValid = profile && Object.keys(profile).length !== 0 && profile.constructor === Object
   // Use the user data sent as arguments, else use data from fixtures
   profile = isValid ? profile : profileDiffsData[0]
-  await profileDiffs.add(profile)
+  return await profileDiffs.add(profile)
 }
