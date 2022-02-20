@@ -1,6 +1,6 @@
-const chaincodeQuery = require('../models/chaincodes')
-const userQuery = require('../models/users')
-const imageService = require('../services/imageService')
+const chaincodeQuery = require("../models/chaincodes");
+const userQuery = require("../models/users");
+const imageService = require("../services/imageService");
 /**
  * Fetches the data about our users
  *
@@ -144,21 +144,21 @@ const postUserPicture = async (req, res) => {
     logger.error(`Error while adding profile picture of user: ${error}`);
     return res.boom.badImplementation("An internal server error occurred");
   }
-}
+};
 
 const generateChaincode = async (req, res) => {
   try {
-    const { username } = req.userData
-    const chaincode = await chaincodeQuery.storeChaincode(username)
+    const { username } = req.userData;
+    const chaincode = await chaincodeQuery.storeChaincode(username);
     return res.json({
       chaincode,
-      message: 'Chaincode returned successfully'
-    })
+      message: "Chaincode returned successfully",
+    });
   } catch (error) {
-    logger.error(`Error while generating chaincode: ${error}`)
-    return res.boom.badImplementation('An internal server error occurred')
+    logger.error(`Error while generating chaincode: ${error}`);
+    return res.boom.badImplementation("An internal server error occurred");
   }
-}
+};
 
 const identityURL = async (req, res) => {
   try {

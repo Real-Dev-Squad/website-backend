@@ -242,51 +242,55 @@ describe("Users", function () {
         .get(`/users/isUsernameAvailable/${userData[0].username}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.isUsernameAvailable).to.equal(false);
 
-          if (err) { return done() }
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body.isUsernameAvailable).to.equal(false)
+          return done();
+        });
+    });
+  });
 
-          return done()
-        })
-    })
-  })
-
-  describe('GET /users/chaincode', function () {
-    it('Should save the username and timestamp in firestore collection and return the document ID as chaincode in response', function (done) {
+  describe("GET /users/chaincode", function () {
+    it("Should save the username and timestamp in firestore collection and return the document ID as chaincode in response", function (done) {
       chai
         .request(app)
-        .get('/users/chaincode')
-        .set('cookie', `${cookieName}=${jwt}`)
+        .get("/users/chaincode")
+        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
-          if (err) { return done() }
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('Chaincode returned successfully')
-          expect(res.body.chaincode).to.be.a('string')
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Chaincode returned successfully");
+          expect(res.body.chaincode).to.be.a("string");
 
-          return done()
-        })
-    })
+          return done();
+        });
+    });
 
-    it('Should return 401 if user not logged in', function (done) {
+    it("Should return 401 if user not logged in", function (done) {
       chai
         .request(app)
-        .get('/users/chaincode')
+        .get("/users/chaincode")
         .end((err, res) => {
-          if (err) { return done() }
-          expect(res).to.have.status(401)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('Unauthenticated User')
-          return done()
-        })
-    })
-  })
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
 
-  describe('PATCH /users/identityURL', function () {
-    it('Should update the identityURL', function (done) {
-
+  describe("PATCH /users/identityURL", function () {
+    it("Should update the identityURL", function (done) {
       chai
         .request(app)
         .patch("/users/identityURL")

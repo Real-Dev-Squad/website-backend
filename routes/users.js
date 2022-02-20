@@ -179,7 +179,7 @@ router.get("/self", authenticate, users.getSelfDetails);
  */
 router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
 
-router.get('/chaincode', authenticate, users.generateChaincode)
+router.get("/chaincode", authenticate, users.generateChaincode);
 
 /**
  * @swagger
