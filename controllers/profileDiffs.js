@@ -1,4 +1,4 @@
-const profileDiffsQuery = require('../models/profileDiffs')
+const profileDiffsQuery = require("../models/profileDiffs");
 /**
  * Fetches the pending profile diffs
  *
@@ -8,18 +8,18 @@ const profileDiffsQuery = require('../models/profileDiffs')
 
 const getProfileDiffs = async (req, res) => {
   try {
-    const pendingProfileDiffs = await profileDiffsQuery.fetchProfileDiffs()
+    const pendingProfileDiffs = await profileDiffsQuery.fetchProfileDiffs();
 
     return res.json({
-      message: 'Profile Diffs returned successfully!',
-      profileDiffs: pendingProfileDiffs
-    })
+      message: "Profile Diffs returned successfully!",
+      profileDiffs: pendingProfileDiffs,
+    });
   } catch (error) {
-    logger.error(`Error while fetching profile diffs: ${error}`)
-    return res.boom.serverUnavailable('Something went wrong please contact admin')
+    logger.error(`Error while fetching profile diffs: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
-}
+};
 
 module.exports = {
-  getProfileDiffs
-}
+  getProfileDiffs,
+};
