@@ -1,6 +1,5 @@
-
-const firestore = require('../utils/firestore')
-const profileDiffsModel = firestore.collection('profileDiffs')
+const firestore = require("../utils/firestore");
+const profileDiffsModel = firestore.collection("profileDiffs");
 
 /**
  * Fetches the data about our users
@@ -9,28 +8,28 @@ const profileDiffsModel = firestore.collection('profileDiffs')
  */
 const fetchProfileDiffsData = async (username) => {
   try {
-    let profileDiffsData, id
+    let profileDiffsData, id;
     const profileDiffs = await profileDiffsModel
-      .where('username', '==', username)
-      .where('approval', '==', 'PENDING')
-      .orderBy('timestamp', 'desc')
+      .where("username", "==", username)
+      .where("approval", "==", "PENDING")
+      .orderBy("timestamp", "desc")
       .limit(1)
-      .get()
+      .get();
 
-    profileDiffs.forEach(doc => {
-      profileDiffsData = doc.data()
-      id = doc.id
-    })
-    const { approval, timestamp, username: name, ...result } = profileDiffsData
+    profileDiffs.forEach((doc) => {
+      profileDiffsData = doc.data();
+      id = doc.id;
+    });
+    const { approval, timestamp, username: name, ...result } = profileDiffsData;
     return {
       id,
-      ...result
-    }
+      ...result,
+    };
   } catch (err) {
-    logger.error('Error retrieving profile diffs data', err)
-    throw err
+    logger.error("Error retrieving profile diffs data", err);
+    throw err;
   }
-}
+};
 
 /**
  * Sets the user picture field of passed UserId to image data
@@ -40,14 +39,14 @@ const fetchProfileDiffsData = async (username) => {
 const add = async (profileDiffsData) => {
   try {
     const profileDiffs = await profileDiffsModel.add({
-      ...profileDiffsData
-    })
-    return profileDiffs.id
+      ...profileDiffsData,
+    });
+    return profileDiffs.id;
   } catch (err) {
-    logger.error('Error in adding profile diffs', err)
-    throw err
+    logger.error("Error in adding profile diffs", err);
+    throw err;
   }
-}
+};
 
 /**
  * Sets the user picture field of passed UserId to image data
@@ -57,19 +56,19 @@ const add = async (profileDiffsData) => {
  */
 const update = async (profileDiffsData, profileId) => {
   try {
-    const profileDiffs = await profileDiffsModel.doc(profileId).get()
+    const profileDiffs = await profileDiffsModel.doc(profileId).get();
     await profileDiffsModel.doc(profileId).set({
       ...profileDiffs.data(),
-      ...profileDiffsData
-    })
+      ...profileDiffsData,
+    });
   } catch (err) {
-    logger.error('Error in updating user', err)
-    throw err
+    logger.error("Error in updating user", err);
+    throw err;
   }
-}
+};
 
 module.exports = {
   fetchProfileDiffsData,
   add,
-  update
-}
+  update,
+};

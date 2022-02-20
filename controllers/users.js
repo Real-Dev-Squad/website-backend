@@ -1,7 +1,7 @@
-const userQuery = require('../models/users')
-const profileDiffsQuery = require('../models/profileDiffs')
-const logsQuery = require('../models/logs')
-const imageService = require('../services/imageService')
+const userQuery = require("../models/users");
+const profileDiffsQuery = require("../models/profileDiffs");
+const logsQuery = require("../models/logs");
+const imageService = require("../services/imageService");
 
 /**
  * Fetches the data about our users
@@ -146,7 +146,7 @@ const postUserPicture = async (req, res) => {
     logger.error(`Error while adding profile picture of user: ${error}`);
     return res.boom.badImplementation("An internal server error occurred");
   }
-}
+};
 
 /**
  * Updates the user data to the latest diffs
@@ -156,21 +156,21 @@ const postUserPicture = async (req, res) => {
  */
 const updateUser = async (req, res) => {
   try {
-    const { user } = await userQuery.fetchUser({ username: req.params.username })
-    const { id: profileId, ...profileDiffs } = req.body
+    const { user } = await userQuery.fetchUser({ username: req.params.username });
+    const { id: profileId, ...profileDiffs } = req.body;
 
-    await profileDiffsQuery.update({ approval: 'APPROVED' }, profileId)
-    await userQuery.addOrUpdate(profileDiffs, user.id)
-    await logsQuery.addProfileLog(user, profileDiffs, req.params.username)
+    await profileDiffsQuery.update({ approval: "APPROVED" }, profileId);
+    await userQuery.addOrUpdate(profileDiffs, user.id);
+    await logsQuery.addProfileLog(user, profileDiffs, req.params.username);
 
     return res.json({
-      message: 'Updated user\'s data successfully!'
-    })
+      message: "Updated user's data successfully!",
+    });
   } catch (error) {
-    logger.error(`Error while updating user data: ${error}`)
-    return res.boom.badImplementation('An internal server error occurred')
+    logger.error(`Error while updating user data: ${error}`);
+    return res.boom.badImplementation("An internal server error occurred");
   }
-}
+};
 
 const identityURL = async (req, res) => {
   try {
@@ -192,5 +192,5 @@ module.exports = {
   getUsernameAvailabilty,
   postUserPicture,
   updateUser,
-  identityURL
-}
+  identityURL,
+};

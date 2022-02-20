@@ -2,35 +2,35 @@ const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 
-const app = require('../../server')
-const authService = require('../../services/authService')
-const addUser = require('../utils/addUser')
-const addProfileDiffs = require('../utils/addProfileDiffs')
-const cleanDb = require('../utils/cleanDb')
+const app = require("../../server");
+const authService = require("../../services/authService");
+const addUser = require("../utils/addUser");
+const addProfileDiffs = require("../utils/addProfileDiffs");
+const cleanDb = require("../utils/cleanDb");
 
 // Import fixtures
-const userData = require('../fixtures/user/user')()
-const superUser = userData[4]
+const userData = require("../fixtures/user/user")();
+const superUser = userData[4];
 
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
-describe('Users', function () {
-  let jwt
-  let superUserId
-  let superUserAuthToken
-  let profileDiffsId
+describe("Users", function () {
+  let jwt;
+  let superUserId;
+  let superUserAuthToken;
+  let profileDiffsId;
 
   beforeEach(async function () {
-    const userId = await addUser()
-    profileDiffsId = await addProfileDiffs()
-    jwt = authService.generateAuthToken({ userId })
+    const userId = await addUser();
+    profileDiffsId = await addProfileDiffs();
+    jwt = authService.generateAuthToken({ userId });
 
-    superUserId = await addUser(superUser)
-    superUserAuthToken = authService.generateAuthToken({ userId: superUserId })
-  })
+    superUserId = await addUser(superUser);
+    superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+  });
 
   afterEach(async function () {
     await cleanDb();
@@ -251,80 +251,88 @@ describe('Users', function () {
         .get(`/users/isUsernameAvailable/${userData[0].username}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
-          if (err) { return done() }
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body.isUsernameAvailable).to.equal(false)
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.isUsernameAvailable).to.equal(false);
 
-          return done()
-        })
-    })
-  })
-  describe('PATCH /users/:username', function () {
-    it('Should update the user profile with latest pending profileDiffs, using authorized user (super_user)', function (done) {
+          return done();
+        });
+    });
+  });
+  describe("PATCH /users/:username", function () {
+    it("Should update the user profile with latest pending profileDiffs, using authorized user (super_user)", function (done) {
       chai
         .request(app)
         .patch(`/users/${userData[0].username}`)
-        .set('cookie', `${cookieName}=${superUserAuthToken}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({
           id: `${profileDiffsId}`,
-          username: 'ankur',
-          first_name: 'Ankur',
-          last_name: 'Narkhede',
-          email: 'ankurnarkhede999@gmail.com',
-          phone: '123456789',
-          yoe: '0',
-          company: '',
-          designation: 'AO',
-          github_id: 'ankur1337',
-          linkedin_id: 'ankurnarkhede',
-          twitter_id: 'ankur909',
-          instagram_id: '',
-          website: ''
+          username: "ankur",
+          first_name: "Ankur",
+          last_name: "Narkhede",
+          email: "ankurnarkhede999@gmail.com",
+          phone: "123456789",
+          yoe: "0",
+          company: "",
+          designation: "AO",
+          github_id: "ankur1337",
+          linkedin_id: "ankurnarkhede",
+          twitter_id: "ankur909",
+          instagram_id: "",
+          website: "",
         })
         .end((err, res) => {
-          if (err) { return done(err) }
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('Updated user\'s data successfully!')
-          return done()
-        })
-    })
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Updated user's data successfully!");
+          return done();
+        });
+    });
 
-    it('Should return unauthorized error when not authorized', function (done) {
+    it("Should return unauthorized error when not authorized", function (done) {
       chai
         .request(app)
         .patch(`/users/${userData[0].username}`)
-        .set('cookie', `${cookieName}=${jwt}`)
+        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
-          if (err) { return done(err) }
+          if (err) {
+            return done(err);
+          }
 
-          expect(res).to.have.status(401)
-          expect(res.body.error).to.be.equal('Unauthorized')
-          expect(res.body.message).to.be.equal('You are not authorized for this action.')
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.be.equal("Unauthorized");
+          expect(res.body.message).to.be.equal("You are not authorized for this action.");
 
-          return done()
-        })
-    })
-    it('Should return unauthorized error when not logged in', function (done) {
+          return done();
+        });
+    });
+    it("Should return unauthorized error when not logged in", function (done) {
       chai
         .request(app)
         .patch(`/users/${userData[0].username}`)
         .end((err, res) => {
-          if (err) { return done(err) }
+          if (err) {
+            return done(err);
+          }
 
-          expect(res).to.have.status(401)
+          expect(res).to.have.status(401);
           expect(res.body).to.eql({
             statusCode: 401,
-            error: 'Unauthorized',
-            message: 'Unauthenticated User'
-          })
-          return done()
-        })
-    })
-  })
-  describe('PATCH /users/identityURL', function () {
-    it('Should update the identityURL', function (done) {
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+          return done();
+        });
+    });
+  });
+  describe("PATCH /users/identityURL", function () {
+    it("Should update the identityURL", function (done) {
       chai
         .request(app)
         .patch("/users/identityURL")
