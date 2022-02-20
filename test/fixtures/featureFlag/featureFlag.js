@@ -1,11 +1,11 @@
 module.exports = () => {
   return [
     {
-      name: 'Test-feature',
-      title: 'Test',
+      name: "Test-feature",
+      title: "Test",
       config: {
-        enabled: true
-      }
-    }
-  ]
-}
+        enabled: true,
+      },
+    },
+  ];
+};

@@ -6,10 +6,10 @@
  */
 const healthCheck = (req, res) => {
   return res.json({
-    uptime: process.uptime()
-  })
-}
+    uptime: process.uptime(),
+  });
+};
 
 module.exports = {
-  healthCheck
-}
+  healthCheck,
+};
