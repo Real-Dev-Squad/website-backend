@@ -2,12 +2,12 @@
  * This file contains wrapper functions to interact with the DB.
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
-const walletConstants = require('../constants/wallets')
+const walletConstants = require("../constants/wallets");
 
-const firestore = require('../utils/firestore')
-const { fetchWallet, createWallet } = require('../models/wallets')
+const firestore = require("../utils/firestore");
+const { fetchWallet, createWallet } = require("../models/wallets");
 
-const userModel = firestore.collection('users')
+const userModel = firestore.collection("users");
 
 /**
  * Adds or updates the user data
@@ -20,36 +20,36 @@ const addOrUpdate = async (userData, userId = null) => {
   try {
     // userId exists Update user
     if (userId !== null) {
-      const user = await userModel.doc(userId).get()
-      const isNewUser = !(user.data())
+      const user = await userModel.doc(userId).get();
+      const isNewUser = !user.data();
       // user exists update user
       if (user.data()) {
         await userModel.doc(userId).set({
           ...user.data(),
-          ...userData
-        })
+          ...userData,
+        });
       }
 
-      return { isNewUser, userId }
+      return { isNewUser, userId };
     }
 
     // userId is null, Add or Update user
-    const user = await userModel.where('github_id', '==', userData.github_id).limit(1).get()
+    const user = await userModel.where("github_id", "==", userData.github_id).limit(1).get();
     if (!user.empty) {
-      await userModel.doc(user.docs[0].id).set(userData, { merge: true })
+      await userModel.doc(user.docs[0].id).set(userData, { merge: true });
 
-      return { isNewUser: false, userId: user.docs[0].id }
+      return { isNewUser: false, userId: user.docs[0].id };
     }
 
     // Add user
-    userData.incompleteUserDetails = true
-    const userInfo = await userModel.add(userData)
-    return { isNewUser: true, userId: userInfo.id }
+    userData.incompleteUserDetails = true;
+    const userInfo = await userModel.add(userData);
+    return { isNewUser: true, userId: userInfo.id };
   } catch (err) {
-    logger.error('Error in adding or updating user', err)
-    throw err
+    logger.error("Error in adding or updating user", err);
+    throw err;
   }
-}
+};
 
 /**
  * Fetches the data about our users
@@ -61,9 +61,9 @@ const fetchUsers = async (query) => {
     const snapshot = await userModel
       .limit(parseInt(query.size) || 100)
       .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
-      .get()
+      .get();
 
-    const allUsers = []
+    const allUsers = [];
 
     snapshot.forEach((doc) => {
       allUsers.push({
@@ -71,16 +71,16 @@ const fetchUsers = async (query) => {
         ...doc.data(),
         phone: undefined,
         email: undefined,
-        tokens: undefined
-      })
-    })
+        tokens: undefined,
+      });
+    });
 
-    return allUsers
+    return allUsers;
   } catch (err) {
-    logger.error('Error retrieving user data', err)
-    throw err
+    logger.error("Error retrieving user data", err);
+    throw err;
   }
-}
+};
 
 /**
  * Fetches the user data from the the provided username or userId
@@ -90,32 +90,32 @@ const fetchUsers = async (query) => {
  */
 const fetchUser = async ({ userId = null, username = null }) => {
   try {
-    let userData, id
+    let userData, id;
     if (username) {
-      const user = await userModel.where('username', '==', username).limit(1).get()
+      const user = await userModel.where("username", "==", username).limit(1).get();
 
-      user.forEach(doc => {
-        id = doc.id
-        userData = doc.data()
-      })
+      user.forEach((doc) => {
+        id = doc.id;
+        userData = doc.data();
+      });
     } else if (userId) {
-      const user = await userModel.doc(userId).get()
-      id = userId
-      userData = user.data()
+      const user = await userModel.doc(userId).get();
+      id = userId;
+      userData = user.data();
     }
     return {
       userExists: !!userData,
       user: {
         id,
         ...userData,
-        tokens: undefined
-      }
-    }
+        tokens: undefined,
+      },
+    };
   } catch (err) {
-    logger.error('Error retrieving user data', err)
-    throw err
+    logger.error("Error retrieving user data", err);
+    throw err;
   }
-}
+};
 
 /**
  * Sets the incompleteUserDetails field of passed UserId to false
@@ -123,15 +123,15 @@ const fetchUser = async ({ userId = null, username = null }) => {
  * @param userId { string }: User id
  */
 const setIncompleteUserDetails = async (userId) => {
-  const userRef = userModel.doc(userId)
-  const doc = await userRef.get()
+  const userRef = userModel.doc(userId);
+  const doc = await userRef.get();
   if (doc.exists) {
     return userRef.update({
-      incompleteUserDetails: false
-    })
+      incompleteUserDetails: false,
+    });
   }
-  return {}
-}
+  return {};
+};
 
 /**
  * Once the user is fully signed up, initialize other
@@ -141,13 +141,13 @@ const setIncompleteUserDetails = async (userId) => {
  */
 const initializeUser = async (userId) => {
   // Create wallet and give them initial amount
-  const userWallet = await fetchWallet(userId)
+  const userWallet = await fetchWallet(userId);
   if (!userWallet) {
-    await createWallet(userId, walletConstants.INITIAL_WALLET)
+    await createWallet(userId, walletConstants.INITIAL_WALLET);
   }
 
-  return true
-}
+  return true;
+};
 
 /**
  * Sets the user picture field of passed UserId to image data
@@ -157,15 +157,15 @@ const initializeUser = async (userId) => {
  */
 const updateUserPicture = async (image, userId) => {
   try {
-    const userDoc = userModel.doc(userId)
+    const userDoc = userModel.doc(userId);
     await userDoc.update({
-      picture: image
-    })
+      picture: image,
+    });
   } catch (err) {
-    logger.error('Error updating user picture data', err)
-    throw err
+    logger.error("Error updating user picture data", err);
+    throw err;
   }
-}
+};
 
 /**
  * fetch the users image by passing array of users
@@ -173,13 +173,13 @@ const updateUserPicture = async (image, userId) => {
  * @param users {array}
  */
 const fetchUserImage = async (users) => {
-  const data = await userModel.where('username', 'in', users).get()
-  const images = {}
+  const data = await userModel.where("username", "in", users).get();
+  const images = {};
   data.forEach((item) => {
-    images[item.data().username] = item.data().img
-  })
-  return images
-}
+    images[item.data().username] = item.data().img;
+  });
+  return images;
+};
 
 module.exports = {
   addOrUpdate,
@@ -188,5 +188,5 @@ module.exports = {
   setIncompleteUserDetails,
   initializeUser,
   updateUserPicture,
-  fetchUserImage
-}
+  fetchUserImage,
+};
