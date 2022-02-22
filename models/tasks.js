@@ -168,7 +168,7 @@ const fetchUserTasks = async (username, statuses = []) => {
  */
 const fetchSelfTasks = async (username) => {
   const allTasks = await fetchUserTasks(username);
-  return allTasks.sort((a, b) => a.endsOn - b.endsOn);
+  return allTasks.sort((a, b) => b.startedOn - a.startedOn);
 };
 
 /**
