@@ -5,7 +5,7 @@
 module.exports = {
   all: true,
   "check-coverage": false, // Will be enabled after reaching 50% coverage: https://github.com/Real-Dev-Squad/website-backend/issues/493
-  exclude: ["test/**"],
+  exclude: ["test/**", "mockdata/**", "docs/**", "public/**"],
   reporter: ["text", "lcov", "text-summary"],
   reportDir: ".coverage",
   tempDir: ".coverage",
