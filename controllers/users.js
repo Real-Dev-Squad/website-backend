@@ -174,10 +174,18 @@ const updateUser = async (req, res) => {
 
 const identityURL = async (req, res) => {
   try {
+    const { username, identityURL: oldIdentityURL } = req.userData;
+    const newIdentityURL = req.body.identityURL;
     const userId = req.userData.id;
-    await userQuery.addOrUpdate(req.body, userId);
+    oldIdentityURL !== newIdentityURL &&
+      (await userQuery.addOrUpdate(req.body, userId)) &&
+      (await logsQuery.add(
+        "identityURL",
+        `username=${username} oldIdentityURL=${oldIdentityURL} newIdentityURL=${newIdentityURL}`
+      ));
     return res.json({
-      message: "updated identity URL!!",
+      message:
+        oldIdentityURL !== newIdentityURL ? "Updated identity URL!!" : "Please pass a new Identity URL to update!",
     });
   } catch (error) {
     logger.error(`Internal Server Error: ${error}`);

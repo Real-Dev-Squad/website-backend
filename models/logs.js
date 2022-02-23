@@ -1,6 +1,6 @@
-const firestore = require('../utils/firestore')
-const logsModel = firestore.collection('logs')
-const admin = require('firebase-admin')
+const firestore = require("../utils/firestore");
+const logsModel = firestore.collection("logs");
+const admin = require("firebase-admin");
 
 /**
  * Adds log
@@ -13,14 +13,14 @@ const add = async (type, data) => {
     const log = {
       type,
       timestamp: admin.firestore.Timestamp.fromDate(new Date()),
-      body: data
-    }
-    await logsModel.add(log)
+      body: data,
+    };
+    await logsModel.add(log);
   } catch (err) {
-    logger.error('Error in adding log', err)
-    throw err
+    logger.error("Error in adding log", err);
+    throw err;
   }
-}
+};
 
 /**
  * Add user profile changes to logs
@@ -31,7 +31,7 @@ const add = async (type, data) => {
  */
 const addProfileLog = async (user, profileDiffs, username) => {
   try {
-    const returnData = (arg) => arg || ''
+    const returnData = (arg) => arg || "";
     const profileObject = (data) => {
       return {
         first_name: returnData(data.first_name),
@@ -45,21 +45,21 @@ const addProfileLog = async (user, profileDiffs, username) => {
         linkedin_id: returnData(data.linkedin_id),
         twitter_id: returnData(data.twitter_id),
         instagram_id: returnData(data.instagram_id),
-        website: returnData(data.website)
-      }
-    }
-    const oldProfile = profileObject(user)
-    const newProfile = profileObject(profileDiffs)
-    const logBody = `username=${username} oldData=${JSON.stringify(oldProfile)} newData=${JSON.stringify(newProfile)}`
+        website: returnData(data.website),
+      };
+    };
+    const oldProfile = profileObject(user);
+    const newProfile = profileObject(profileDiffs);
+    const logBody = `username=${username} oldData=${JSON.stringify(oldProfile)} newData=${JSON.stringify(newProfile)}`;
 
-    await add('profileChange', logBody)
+    await add("profileChange", logBody);
   } catch (err) {
-    logger.error('Error in creating profile change log', err)
-    throw err
+    logger.error("Error in creating profile change log", err);
+    throw err;
   }
-}
+};
 
 module.exports = {
   add,
-  addProfileLog
-}
+  addProfileLog,
+};

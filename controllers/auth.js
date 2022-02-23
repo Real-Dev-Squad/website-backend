@@ -22,7 +22,6 @@ const githubAuth = (req, res, next) => {
         logger.error(err);
         return res.boom.unauthorized("User cannot be authenticated");
       }
-
       userData = {
         github_id: user.username,
         github_display_name: user.displayName,
@@ -30,9 +29,7 @@ const githubAuth = (req, res, next) => {
           githubAccessToken: accessToken,
         },
       };
-
       const { userId } = await users.addOrUpdate(userData);
-
       const token = authService.generateAuthToken({ userId });
 
       // respond with a cookie
