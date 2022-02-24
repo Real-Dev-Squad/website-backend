@@ -2,46 +2,46 @@ const percentageConfig = {
   config: {
     roleBased: {
       roles: [],
-      active: false
+      active: false,
     },
     percentage: {
       value: 75,
-      active: true
+      active: true,
     },
-    enabled: false
-  }
-}
+    enabled: false,
+  },
+};
 
 const roleBasedConfig = {
   config: {
     roleBased: {
-      roles: ['app_owner'],
-      active: true
+      roles: ["app_owner"],
+      active: true,
     },
     percentage: {
       value: 0,
-      active: false
+      active: false,
     },
-    enabled: false
-  }
-}
+    enabled: false.valueOf,
+  },
+};
 
 const toggleConfig = {
   config: {
     roleBased: {
       roles: [],
-      active: false
+      active: false,
     },
     percentage: {
       value: 0,
-      active: false
+      active: false,
     },
-    enabled: true
-  }
-}
+    enabled: true,
+  },
+};
 
 module.exports = {
   percentageConfig,
   roleBasedConfig,
-  toggleConfig
-}
+  toggleConfig,
+};

@@ -1,5 +1,5 @@
 // Import fixtures
-const githubUserInfo = require('../auth/githubUserInfo')()
+const githubUserInfo = require("../auth/githubUserInfo")();
 
 /**
  * User info for GitHub auth response
@@ -10,129 +10,129 @@ const githubUserInfo = require('../auth/githubUserInfo')()
 module.exports = () => {
   return [
     {
-      username: 'ankur',
-      first_name: 'Ankur',
-      last_name: 'Narkhede',
+      username: "ankur",
+      first_name: "Ankur",
+      last_name: "Narkhede",
       yoe: 0,
-      img: './img.png',
-      linkedin_id: 'ankurnarkhede',
+      img: "./img.png",
+      linkedin_id: "ankurnarkhede",
       github_id: githubUserInfo[0].username,
       github_display_name: githubUserInfo[0].displayName,
       isMember: true,
-      phone: '1234567890',
-      email: 'abc@gmail.com',
+      phone: "1234567890",
+      email: "abc@gmail.com",
       roles: {
-        member: true
+        member: true,
       },
       tokens: {
-        githubAccessToken: 'githubAccessToken'
+        githubAccessToken: "githubAccessToken",
       },
-      status: 'active'
+      status: "active",
     },
     {
-      username: 'nikhil',
-      first_name: 'Nikhil',
-      last_name: 'Bhandarkar',
+      username: "nikhil",
+      first_name: "Nikhil",
+      last_name: "Bhandarkar",
       yoe: 0,
-      img: './img.png',
-      github_id: 'whydonti',
-      linkedin_id: 'nikhil-bhandarkar',
-      twitter_id: 'whatifi',
-      phone: '1234567891',
-      email: 'abc1@gmail.com'
+      img: "./img.png",
+      github_id: "whydonti",
+      linkedin_id: "nikhil-bhandarkar",
+      twitter_id: "whatifi",
+      phone: "1234567891",
+      email: "abc1@gmail.com",
     },
     {
-      username: 'pranavg',
-      first_name: 'Pranav',
-      last_name: 'Gajjewar',
+      username: "pranavg",
+      first_name: "Pranav",
+      last_name: "Gajjewar",
       yoe: 0,
-      img: './img.png',
-      github_id: 'cartmanishere',
-      linkedin_id: 'pranav-gajjewar',
-      twitter_id: 'PGajjewar',
-      phone: '1234567891',
-      email: 'pgajjewar@gmail.com',
+      img: "./img.png",
+      github_id: "cartmanishere",
+      linkedin_id: "pranav-gajjewar",
+      twitter_id: "PGajjewar",
+      phone: "1234567891",
+      email: "pgajjewar@gmail.com",
       roles: {
-        restricted: true
-      }
+        restricted: true,
+      },
     },
     {
-      username: 'sagar',
-      first_name: 'Sagar',
-      last_name: 'Bajpai',
+      username: "sagar",
+      first_name: "Sagar",
+      last_name: "Bajpai",
       yoe: 3,
-      img: './img.png',
-      linkedin_id: 'sagarbajpai',
-      github_id: 'sagarbajpai',
-      github_display_name: 'Sagar Bajpai',
-      phone: '1234567890',
-      email: 'abc@gmail.com',
+      img: "./img.png",
+      linkedin_id: "sagarbajpai",
+      github_id: "sagarbajpai",
+      github_display_name: "Sagar Bajpai",
+      phone: "1234567890",
+      email: "abc@gmail.com",
       tokens: {
-        githubAccessToken: 'githubAccessToken'
+        githubAccessToken: "githubAccessToken",
       },
       roles: {
         restricted: false,
-        app_owner: true
-      }
+        app_owner: true,
+      },
     },
     {
-      username: 'ankush',
-      first_name: 'Ankush',
-      last_name: 'Dharkar',
+      username: "ankush",
+      first_name: "Ankush",
+      last_name: "Dharkar",
       yoe: 10,
-      img: './img.png',
-      linkedin_id: 'ankushdharkar',
-      github_id: 'ankushdharkar',
-      github_display_name: 'Ankush Dharkar',
-      phone: '1234567890',
-      email: 'ad@amazon.com',
+      img: "./img.png",
+      linkedin_id: "ankushdharkar",
+      github_id: "ankushdharkar",
+      github_display_name: "Ankush Dharkar",
+      phone: "1234567890",
+      email: "ad@amazon.com",
       tokens: {
-        githubAccessToken: 'githubAccessToken'
+        githubAccessToken: "githubAccessToken",
       },
       roles: {
-        super_user: true
-      }
+        super_user: true,
+      },
     },
     {
-      username: 'ankita',
-      first_name: 'Ankita',
-      last_name: 'Bannore',
+      username: "ankita",
+      first_name: "Ankita",
+      last_name: "Bannore",
       yoe: 0,
-      img: './img.png',
-      linkedin_id: 'ankitabannore',
-      github_id: 'Ankita2002-Fr',
-      github_display_name: 'Ankita Bannore',
+      img: "./img.png",
+      linkedin_id: "ankitabannore",
+      github_id: "Ankita2002-Fr",
+      github_display_name: "Ankita Bannore",
       isMember: true,
-      phone: '1234567890',
-      email: 'abc@gmail.com',
+      phone: "1234567890",
+      email: "abc@gmail.com",
       tokens: {
-        githubAccessToken: 'githubAccessToken'
+        githubAccessToken: "githubAccessToken",
       },
-      status: 'active',
+      status: "active",
       roles: {
         app_owner: true,
-        archivedMember: true
-      }
+        archivedMember: true,
+      },
     },
     {
-      username: 'mehul',
-      first_name: 'Mehul',
-      last_name: 'Chaudhari',
+      username: "mehul",
+      first_name: "Mehul",
+      last_name: "Chaudhari",
       yoe: 0,
-      img: './img.png',
-      github_id: 'mehulkchaudhari',
-      linkedin_id: 'mehulkchaudhari',
-      twitter_id: 'mehulkchaudhari',
-      phone: '1234567891',
-      email: 'mehul@gmail.com',
+      img: "./img.png",
+      github_id: "mehulkchaudhari",
+      linkedin_id: "mehulkchaudhari",
+      twitter_id: "mehulkchaudhari",
+      phone: "1234567891",
+      email: "mehul@gmail.com",
       tokens: {
-        githubAccessToken: 'githubAccessToken'
+        githubAccessToken: "githubAccessToken",
       },
-      status: 'active',
+      status: "active",
       roles: {
         member: true,
-        archivedMember: true
-      }
-    }
-  ]
-}
+        archivedMember: true,
+      },
+    },
+  ];
+};

@@ -1,5 +1,5 @@
-const authService = require('../services/authService')
-const users = require('../models/users')
+const authService = require("../services/authService");
+const users = require("../models/users");
 
 /**
  * Middleware to check if the user has been restricted. If user is restricted,
@@ -16,15 +16,12 @@ const users = require('../models/users')
  * @returns {Object} - Returns unauthorized object if user has been restricted.
  */
 const checkRestricted = async (req, res, next) => {
-  const { roles } = req.userData
-  if (
-    roles &&
-    roles.restricted &&
-    req.method !== 'GET') {
-    return res.boom.forbidden('You are restricted from performing this action')
+  const { roles } = req.userData;
+  if (roles && roles.restricted && req.method !== "GET") {
+    return res.boom.forbidden("You are restricted from performing this action");
   }
-  return next()
-}
+  return next();
+};
 
 /**
  * Verify if the token in the request is correct and add user data to the request.
@@ -32,22 +29,22 @@ const checkRestricted = async (req, res, next) => {
  * @returns {Promise<Request>}
  */
 const verifyUserToken = async (req) => {
-  let token = req.cookies[config.get('userToken.cookieName')]
+  let token = req.cookies[config.get("userToken.cookieName")];
 
   // Enable Bearer Token authentication for NON-PRODUCTION environments
   // This is enabled as Swagger UI does not support cookie auth
-  if (process.env.NODE_ENV !== 'production' && !token) {
-    token = req.headers.authorization.split(' ')[1]
+  if (process.env.NODE_ENV !== "production" && !token) {
+    token = req.headers.authorization.split(" ")[1];
   }
 
-  const { userId } = authService.verifyAuthToken(token)
+  const { userId } = authService.verifyAuthToken(token);
 
   // add user data to `req.userData` for further use
-  const userData = await users.fetchUser({ userId })
-  req.userData = userData.user
+  const userData = await users.fetchUser({ userId });
+  req.userData = userData.user;
 
-  return req
-}
+  return req;
+};
 
 /**
  * Add a refresh token if it satisfies the refresh TTL and add user data to the request.
@@ -56,30 +53,30 @@ const verifyUserToken = async (req) => {
  * @returns {Promise<{res, isTokenRefreshed: boolean, req}>}
  */
 const refreshToken = async (req, res) => {
-  const refreshTtl = config.get('userToken.refreshTtl')
-  const token = req.cookies[config.get('userToken.cookieName')]
-  const { userId, iat } = authService.decodeAuthToken(token)
-  let isTokenRefreshed = false
+  const refreshTtl = config.get("userToken.refreshTtl");
+  const token = req.cookies[config.get("userToken.cookieName")];
+  const { userId, iat } = authService.decodeAuthToken(token);
+  let isTokenRefreshed = false;
 
   // add new JWT to the response if it satisfies the refreshTtl time
   if (Math.floor(Date.now() / 1000) - iat <= refreshTtl) {
-    const newToken = authService.generateAuthToken({ userId })
-    const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'))
-    res.cookie(config.get('userToken.cookieName'), newToken, {
+    const newToken = authService.generateAuthToken({ userId });
+    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+    res.cookie(config.get("userToken.cookieName"), newToken, {
       domain: rdsUiUrl.hostname,
-      expires: new Date(Date.now() + config.get('userToken.ttl') * 1000),
+      expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
       httpOnly: true,
       secure: true,
-      sameSite: 'lax'
-    })
+      sameSite: "lax",
+    });
 
     // add user data to `req.userData` for further use
-    req.userData = await users.fetchUser({ userId })
-    isTokenRefreshed = true
+    req.userData = await users.fetchUser({ userId });
+    isTokenRefreshed = true;
   }
 
-  return { req, res, isTokenRefreshed }
-}
+  return { req, res, isTokenRefreshed };
+};
 
 /**
  * Middleware to validate the authenticated routes
@@ -100,26 +97,26 @@ const refreshToken = async (req, res) => {
  */
 const authenticate = async (req, res, next, strict = true) => {
   try {
-    req = await verifyUserToken(req)
-    return checkRestricted(req, res, next)
+    req = await verifyUserToken(req);
+    return checkRestricted(req, res, next);
   } catch (err) {
-    logger.error(err)
+    logger.error(err);
 
-    if (err.name === 'TokenExpiredError') {
-      const refresh = await refreshToken(req)
+    if (err.name === "TokenExpiredError") {
+      const refresh = await refreshToken(req);
       if (refresh.isTokenRefreshed) {
-        return checkRestricted(refresh.req, refresh.res, next)
+        return checkRestricted(refresh.req, refresh.res, next);
       }
     }
 
     // If auth is not strictly required, just call the next handler.
     if (!strict) {
-      return next()
+      return next();
     }
 
-    return res.boom.unauthorized('Unauthenticated User')
+    return res.boom.unauthorized("Unauthenticated User");
   }
-}
+};
 
 /**
  * Check if authentication is present. If the request contains user auth, then add user details to the req object.
@@ -129,10 +126,10 @@ const authenticate = async (req, res, next, strict = true) => {
  * @param {function} next
  */
 const maybeAuthenticate = async (req, res, next) => {
-  authenticate(req, res, next, false)
-}
+  authenticate(req, res, next, false);
+};
 
 module.exports = {
   authenticate,
-  maybeAuthenticate
-}
+  maybeAuthenticate,
+};

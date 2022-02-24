@@ -1,13 +1,13 @@
 const defaultConfig = {
   roleBased: {
     roles: [],
-    active: false
+    active: false,
   },
   percentage: {
     value: 50,
-    active: false
+    active: false,
   },
-  enabled: false
-}
+  enabled: false,
+};
 
-module.exports = { defaultConfig }
+module.exports = { defaultConfig };

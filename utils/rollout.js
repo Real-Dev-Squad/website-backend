@@ -1,8 +1,8 @@
-const crypto = require('crypto')
+const crypto = require("crypto");
 
 const generateUUID = () => {
-  return crypto.randomBytes(8).toString('hex')
-}
+  return crypto.randomBytes(8).toString("hex");
+};
 
 /**
  * Calculate a numerical hash for a string.
@@ -13,12 +13,12 @@ const generateUUID = () => {
  * @returns {Int}: A hash number for the input string.
  */
 const hashCode = (str) => {
-  let hash = 0
+  let hash = 0;
   for (let i = 0; i < str.length; i++) {
-    hash = Math.imul(31, hash) + str.charCodeAt(i) | 0
+    hash = (Math.imul(31, hash) + str.charCodeAt(i)) | 0;
   }
-  return Math.abs(hash)
-}
+  return Math.abs(hash);
+};
 
 /**
  * Check if the user has any one of the roles that are allowed for this feature.
@@ -27,9 +27,9 @@ const hashCode = (str) => {
  */
 const roleBasedRollout = (allowedRoles, userRoles) => {
   return allowedRoles.some((role) => {
-    return Boolean(userRoles[`${role}`])
-  })
-}
+    return Boolean(userRoles[`${role}`]);
+  });
+};
 
 /**
  * Rollout the feature to a percentage of users. We use bucket based percentage rollout.
@@ -45,13 +45,13 @@ const roleBasedRollout = (allowedRoles, userRoles) => {
  */
 const percentageRollout = (percentValue, userId) => {
   if (percentValue > 100) {
-    throw Error('Invalid percentage rollout value')
+    throw Error("Invalid percentage rollout value");
   }
 
-  const indentifier = userId || generateUUID()
-  const hash = hashCode(indentifier)
-  return (hash % 100) < percentValue
-}
+  const indentifier = userId || generateUUID();
+  const hash = hashCode(indentifier);
+  return hash % 100 < percentValue;
+};
 
 /**
  * Check the featureFlag and determine whether this flag is enabled for this request.
@@ -88,24 +88,24 @@ const percentageRollout = (percentValue, userId) => {
  */
 const featureFlagRollout = (featureFlag, userData) => {
   if (!featureFlag.config) {
-    throw Error('Feature flag config is absent')
+    throw Error("Feature flag config is absent");
   }
 
-  const { roleBased, percentage, enabled } = featureFlag.config
+  const { roleBased, percentage, enabled } = featureFlag.config;
 
   // Check if roleBased rollout can be used
   if (roleBased && roleBased.active && userData) {
-    return roleBasedRollout(roleBased.roles || [], userData.roles || {})
+    return roleBasedRollout(roleBased.roles || [], userData.roles || {});
   }
 
   // Check if percentage rollout can be used
   if (percentage?.active) {
-    return percentageRollout(percentage.value, userData && userData.id)
+    return percentageRollout(percentage.value, userData && userData.id);
   }
 
-  return enabled
-}
+  return enabled;
+};
 
 module.exports = {
-  featureFlagRollout
-}
+  featureFlagRollout,
+};

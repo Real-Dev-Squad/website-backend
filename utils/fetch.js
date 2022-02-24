@@ -1,4 +1,4 @@
-const axios = require('axios')
+const axios = require("axios");
 
 /**
  * Used for network calls
@@ -11,7 +11,7 @@ const axios = require('axios')
  * @param [options = null] {Object} - Options to be sent via axios - optional
  */
 
-const fetch = async (url, method = 'get', params = null, data = null, headers = null, options = null) => {
+const fetch = async (url, method = "get", params = null, data = null, headers = null, options = null) => {
   try {
     const response = await axios({
       method,
@@ -19,15 +19,15 @@ const fetch = async (url, method = 'get', params = null, data = null, headers = 
       params,
       data,
       headers,
-      ...options
-    })
-    return response
+      ...options,
+    });
+    return response;
   } catch (err) {
-    logger.error('Something went wrong. Please contact admin', err)
-    throw err
+    logger.error("Something went wrong. Please contact admin", err);
+    throw err;
   }
-}
+};
 
 module.exports = {
-  fetch
-}
+  fetch,
+};

@@ -7,22 +7,22 @@ module.exports = {
   enableConsoleLogs: true,
 
   githubOauth: {
-    clientId: 'c4a84431feaf604e89d1'
+    clientId: "c4a84431feaf604e89d1",
   },
 
   services: {
     rdsApi: {
-      baseUrl: 'https://staging-api.realdevsquad.com'
-    }
+      baseUrl: "https://staging-api.realdevsquad.com",
+    },
   },
 
   cors: {
-    allowedOrigins: /(\.realdevsquad\.com$)|(localhost)/ // Allow *.realdevsquad.com and localhost for non-production envs
+    allowedOrigins: /(\.realdevsquad\.com$)|(localhost)/, // Allow *.realdevsquad.com and localhost for non-production envs
   },
 
   integrations: {
     newrelic: {
-      appName: 'RDS_API_staging'
-    }
-  }
-}
+      appName: "RDS_API_staging",
+    },
+  },
+};
