@@ -39,6 +39,7 @@ describe("featureFlagRollout", function () {
       };
 
       const featureEnabled = featureFlagRollout(featureConfig);
+      logger.info(featureEnabled);
       expect(featureEnabled).to.equal(true);
     });
 
@@ -51,11 +52,12 @@ describe("featureFlagRollout", function () {
             roles: [],
             active: false,
           },
+          enabled: true,
         },
       };
 
       const featureEnabled = featureFlagRollout(featureConfig);
-      expect(featureEnabled).to.equal(false);
+      expect(featureEnabled).to.equal(true);
     });
   });
 
