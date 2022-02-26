@@ -270,4 +270,6 @@ router.patch("/identityURL", authenticate, userValidator.updateIdentityURL, user
 
 router.patch("/:username", authenticate, authorizeUser("superUser"), users.updateUser);
 
+router.patch("/rejectDiffs", authenticate, authorizeUser('superUser'), users.rejectProfileDiff)
+
 module.exports = router;

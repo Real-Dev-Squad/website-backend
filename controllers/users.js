@@ -184,6 +184,19 @@ const identityURL = async (req, res) => {
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
+
+const rejectProfileDiff = async (req, res) => {
+  try {
+    await profileDiffsQuery.update({ approval: "NOT APPROVED" }, req.body.profileDiffId)
+    return res.json({
+      message: "Rejected profile diff successfully"
+    })
+  } catch (error) {
+    logger.error(`Error while updating user data: ${error}`)
+    return res.boom.badImplementation('An internal server error occurred')
+  }
+};
+
 module.exports = {
   updateSelf,
   getUsers,
@@ -193,4 +206,5 @@ module.exports = {
   postUserPicture,
   updateUser,
   identityURL,
+  rejectProfileDiff
 };

@@ -331,6 +331,64 @@ describe("Users", function () {
         });
     });
   });
+
+  describe("PATCH /users/rejectDiffs", function () {
+    it("Should reject pending profileDiffs, using authorized user (super_user)", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/rejectDiffs`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({
+          id: `${profileDiffsId}`,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Rejected profile diff successfully!");
+          return done();
+        });
+    });
+
+    it("Should return unauthorized error when not authorized", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/rejectDiffs`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.be.equal("Unauthorized");
+          expect(res.body.message).to.be.equal("You are not authorized for this action.");
+
+          return done();
+        });
+    });
+    it("Should return unauthorized error when not logged in", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/rejectDiffs`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+          return done();
+        });
+    });
+  });
+
   describe("PATCH /users/identityURL", function () {
     it("Should update the identityURL", function (done) {
       chai
