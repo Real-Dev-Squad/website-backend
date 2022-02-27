@@ -18,7 +18,7 @@ const addNewTask = async (req, res) => {
 
     if (task.userNotFound) {
       logger.error("Error while creating new task: Incorrect username passed");
-      return res.boom.badRequest("Unable to add task");
+      return res.boom.badRequest("User not found");
     }
     return res.json({
       message: "Task created successfully!",
@@ -123,7 +123,7 @@ const updateTask = async (req, res) => {
     const updateTaskResult = await tasks.updateTask(req.body, req.params.id);
     if (updateTaskResult.userNotFound) {
       logger.error(`Error while updating taskId ${req.params.id}: Incorrect username passed`);
-      return res.boom.badRequest("Unable to update task");
+      return res.boom.badRequest("User not found");
     }
     return res.status(204).send();
   } catch (err) {

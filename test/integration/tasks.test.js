@@ -130,7 +130,7 @@ describe("Tasks", function () {
           }
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Unable to add task");
+          expect(res.body.message).to.equal("User not found");
           return done();
         });
     });
@@ -322,7 +322,7 @@ describe("Tasks", function () {
           }
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Unable to update task");
+          expect(res.body.message).to.equal("User not found");
 
           return done();
         });
