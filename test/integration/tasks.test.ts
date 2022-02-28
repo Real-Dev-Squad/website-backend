@@ -1,27 +1,42 @@
+// @ts-expect-error ts-migrate(6200) FIXME: Definitions of the following identifiers conflict ... Remove this comment to see the full error message
 const chai = require('chai')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'sinon'.
 const sinon = require('sinon')
 const { expect } = chai
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const chaiHttp = require('chai-http')
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const app = require('../../server')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const tasks = require('../../models/tasks')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const authService = require('../../services/authService')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const addUser = require('../utils/addUser')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'userModel'... Remove this comment to see the full error message
 const userModel = require('../../models/users')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const config = require('config')
 const cookieName = config.get('userToken.cookieName')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const userData = require('../fixtures/user/user')()
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'DINERO'.
 const { DINERO, NEELAM } = require('../../constants/wallets')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const cleanDb = require('../utils/cleanDb')
 chai.use(chaiHttp)
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'appOwner'.
 const appOwner = userData[3]
 
 let jwt
 
+// @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
 describe('Tasks', function () {
   let taskId1, taskId
 
+  // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'before'.
   before(async function () {
     const userId = await addUser(appOwner)
     jwt = authService.generateAuthToken({ userId })
@@ -68,15 +83,19 @@ describe('Tasks', function () {
     taskId = (await tasks.updateTask(taskData[1])).taskId
   })
 
+  // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'after'.
   after(async function () {
     await cleanDb()
   })
 
+  // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'afterEach'.
   afterEach(async function () {
     sinon.restore()
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('POST /tasks - creates a new task', function () {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return success response after adding the task', function (done) {
       chai
         .request(app)
@@ -109,7 +128,9 @@ describe('Tasks', function () {
     })
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('GET /tasks', function () {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should get all the list of tasks', function (done) {
       chai
         .request(app)
@@ -133,7 +154,9 @@ describe('Tasks', function () {
     })
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('GET /tasks/self', function () {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should get all the active and blocked tasks of the user', function (done) {
       const taskStatus = ['active', 'completed']
 
@@ -154,6 +177,7 @@ describe('Tasks', function () {
         })
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return all the completed tasks of the user when query \'completed\' is true', function (done) {
       chai
         .request(app)
@@ -169,6 +193,7 @@ describe('Tasks', function () {
         })
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return assignee task', async function () {
       const { userId: assignedUser } = await userModel.addOrUpdate({
         github_id: 'prakashchoudhary07',
@@ -205,6 +230,7 @@ describe('Tasks', function () {
       expect(res.body[0].id).to.equal(taskId)
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return 401 if not logged in', function (done) {
       chai
         .request(app)
@@ -225,7 +251,9 @@ describe('Tasks', function () {
     })
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('PATCH /tasks', function () {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should update the task for the given taskid', function (done) {
       chai
         .request(app)
@@ -242,6 +270,7 @@ describe('Tasks', function () {
         })
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return 404 if task does not exist', function (done) {
       chai
         .request(app)
@@ -261,7 +290,9 @@ describe('Tasks', function () {
     })
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('GET /tasks/:username', function () {
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return 200 when username is valid', function (done) {
       chai
         .request(app)
@@ -285,6 +316,7 @@ describe('Tasks', function () {
         })
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return 404 when username is invalid', function (done) {
       chai
         .request(app)
@@ -299,12 +331,14 @@ describe('Tasks', function () {
     })
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('PATCH /self/:id', function () {
     const taskStatusData = {
       status: 'currentStatus',
       percentCompleted: 50
     }
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should update the task status for given self taskid', function (done) {
       chai
         .request(app)
@@ -319,6 +353,7 @@ describe('Tasks', function () {
         })
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return 404 if task doesnt exist', function (done) {
       chai
         .request(app)
@@ -333,6 +368,7 @@ describe('Tasks', function () {
         })
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return Forbidden error if task is not assigned to self', async function () {
       const { userId } = await addUser(userData[1])
       const jwt = authService.generateAuthToken({ userId })
@@ -346,6 +382,7 @@ describe('Tasks', function () {
       expect(res.body.message).to.equal('This task is not assigned to you')
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should give error for no cookie', async function (done) {
       chai
         .request(app)

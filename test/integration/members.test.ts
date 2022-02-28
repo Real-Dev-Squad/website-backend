@@ -1,40 +1,55 @@
+// @ts-expect-error ts-migrate(6200) FIXME: Definitions of the following identifiers conflict ... Remove this comment to see the full error message
 const chai = require('chai')
 const { expect } = chai
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const chaiHttp = require('chai-http')
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const app = require('../../server')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const authService = require('../../services/authService')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const addUser = require('../utils/addUser')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const cleanDb = require('../utils/cleanDb')
 
 // Import fixtures
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const userData = require('../fixtures/user/user')()
 
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const config = require('config')
 const cookieName = config.get('userToken.cookieName')
 
 chai.use(chaiHttp)
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'superUser'... Remove this comment to see the full error message
 const superUser = userData[4]
 const userAlreadyMember = userData[0]
 const userToBeMadeMember = userData[1]
 const nonSuperUser = userData[2]
 
+// @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
 describe('Members', function () {
   let jwt
 
+  // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'afterEach'.
   afterEach(async function () {
     await addUser()
   })
 
+  // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'after'.
   after(async function () {
     await cleanDb()
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('GET /members', function () {
+    // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'before'.
     before(async function () {
       await cleanDb()
     })
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return empty array if no member is found', function (done) {
       chai
         .request(app)
@@ -51,6 +66,7 @@ describe('Members', function () {
         })
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Get all the members in the database', function (done) {
       chai
         .request(app)
@@ -69,10 +85,13 @@ describe('Members', function () {
     })
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('GET /members/idle', function () {
+    // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'before'.
     before(async function () {
       await cleanDb()
     })
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return empty array if no idle member is found', function (done) {
       chai
         .request(app)
@@ -89,6 +108,7 @@ describe('Members', function () {
         })
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Get all the idle members in the database', function (done) {
       chai
         .request(app)
@@ -107,13 +127,16 @@ describe('Members', function () {
     })
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
   describe('PATCH /members/moveToMembers/:username', function () {
+    // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'before'.
     before(async function () {
       await cleanDb()
       const userId = await addUser(superUser)
       jwt = authService.generateAuthToken({ userId })
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it("Should return 404 if user doesn't exist", function (done) {
       chai
         .request(app)
@@ -130,6 +153,7 @@ describe('Members', function () {
         })
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should make the user a member', function (done) {
       addUser(userToBeMadeMember).then(() => {
         chai
@@ -148,6 +172,7 @@ describe('Members', function () {
       })
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return 400 if user is already a member', function (done) {
       addUser(userAlreadyMember).then(() => {
         chai
@@ -166,6 +191,7 @@ describe('Members', function () {
       })
     })
 
+    // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
     it('Should return 401 if user is not a super_user', function (done) {
       addUser(nonSuperUser).then(nonSuperUserId => {
         const nonSuperUserJwt = authService.generateAuthToken({ nonSuperUserId })
