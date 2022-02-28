@@ -1,24 +1,35 @@
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'chai'.
 const chai = require('chai')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'sinon'.
 const sinon = require('sinon')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'expect'.
 const { expect } = chai
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'chaiHttp'.
 const chaiHttp = require('chai-http')
+// @ts-expect-error ts-migrate(2580) FIXME: Cannot find name 'require'. Do you need to install... Remove this comment to see the full error message
 const passport = require('passport')
 
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'app'.
 const app = require('../../server')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'cleanDb'.
 const cleanDb = require('../utils/cleanDb')
 
 chai.use(chaiHttp)
 
 // Import fixtures
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'githubUser... Remove this comment to see the full error message
 const githubUserInfo = require('../fixtures/auth/githubUserInfo')()
 
+// @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
 describe('auth', function () {
+  // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'afterEach'.
   afterEach(async function () {
     await cleanDb()
 
     sinon.restore()
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
   it('should redirect the request to the goto page on successful login', function (done) {
     const authRedirectionUrl = `${config.get('services.rdsUi.baseUrl')}${config.get('services.rdsUi.routes.authRedirection')}`
 
@@ -42,7 +53,9 @@ describe('auth', function () {
       })
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
   it('should send a cookie with JWT in the response', function (done) {
+    // @ts-expect-error ts-migrate(2304) FIXME: Cannot find name 'URL'.
     const rdsUiUrl = new URL(config.get('services.rdsUi.baseUrl'))
 
     sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
@@ -72,6 +85,7 @@ describe('auth', function () {
       })
   })
 
+  // @ts-expect-error ts-migrate(2582) FIXME: Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
   it('should return 401 if github call fails', function (done) {
     chai
       .request(app)
