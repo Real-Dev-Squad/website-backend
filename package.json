@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./dist/server.ts",
     "dev": "cross-env NODE_ENV=development ts-node-dev server.ts",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.json",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "validate-setup": "node scripts/validateSetup.js",
