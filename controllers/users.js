@@ -161,7 +161,7 @@ const updateUser = async (req, res) => {
 
     await profileDiffsQuery.update({ approval: "APPROVED" }, profileId);
     await userQuery.addOrUpdate(profileDiffs, user.id);
-    await logsQuery.addProfileLog(user, profileDiffs, req.params.username);
+    await logsQuery.addProfileLog(user, profileDiffs, req.params.username, req.userData.username);
 
     return res.json({
       message: "Updated user's data successfully!",

@@ -270,11 +270,8 @@ describe("Users", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({
           id: `${profileDiffsId}`,
-          username: "ankur",
           first_name: "Ankur",
           last_name: "Narkhede",
-          email: "ankurnarkhede999@gmail.com",
-          phone: "123456789",
           yoe: "0",
           company: "",
           designation: "AO",
