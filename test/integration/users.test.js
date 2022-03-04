@@ -262,6 +262,7 @@ describe("Users", function () {
         });
     });
   });
+  
   describe("PATCH /users/:username", function () {
     it("Should update the user profile with latest pending profileDiffs, using authorized user (super_user)", function (done) {
       chai
@@ -305,10 +306,10 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body.error).to.be.equal("Unauthorized");
           expect(res.body.message).to.be.equal("You are not authorized for this action.");
-
           return done();
         });
     });
+    
     it("Should return unauthorized error when not logged in", function (done) {
       chai
         .request(app)
@@ -328,6 +329,41 @@ describe("Users", function () {
         });
     });
   });
+
+  describe("GET /users/chaincode", function () {
+    it("Should save the username and timestamp in firestore collection and return the document ID as chaincode in response", function (done) {
+      chai
+        .request(app)
+        .get("/users/chaincode")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Chaincode returned successfully");
+          expect(res.body.chaincode).to.be.a("string");
+          return done();
+        });
+    });
+    
+    it("Should return 401 if user not logged in", function (done) {
+      chai
+        .request(app)
+        .get("/users/chaincode")
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+  
   describe("PATCH /users/identityURL", function () {
     it("Should update the identityURL", function (done) {
       chai
@@ -347,6 +383,7 @@ describe("Users", function () {
           return done();
         });
     });
+    
     it("Should return 400 for invalid identityURL value", function (done) {
       chai
         .request(app)
