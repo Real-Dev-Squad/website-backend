@@ -262,7 +262,7 @@ describe("Users", function () {
         });
     });
   });
-  
+
   describe("PATCH /users/:username", function () {
     it("Should update the user profile with latest pending profileDiffs, using authorized user (super_user)", function (done) {
       chai
@@ -309,7 +309,7 @@ describe("Users", function () {
           return done();
         });
     });
-    
+
     it("Should return unauthorized error when not logged in", function (done) {
       chai
         .request(app)
@@ -347,7 +347,7 @@ describe("Users", function () {
           return done();
         });
     });
-    
+
     it("Should return 401 if user not logged in", function (done) {
       chai
         .request(app)
@@ -363,7 +363,7 @@ describe("Users", function () {
         });
     });
   });
-  
+
   describe("PATCH /users/identityURL", function () {
     it("Should update the identityURL", function (done) {
       chai
@@ -383,7 +383,7 @@ describe("Users", function () {
           return done();
         });
     });
-    
+
     it("Should return 400 for invalid identityURL value", function (done) {
       chai
         .request(app)
