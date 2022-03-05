@@ -141,12 +141,20 @@ const fetchUserTasks = async (username, statuses = []) => {
       groupTasksSnapshot = await tasksModel
         .where("participants", "array-contains", userId)
         .where("status", "in", statuses)
+        .orderBy("startedOn", "desc")
         .get();
-      featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).where("status", "in", statuses).get();
+      featureTasksSnapshot = await tasksModel
+        .where("assignee", "==", userId)
+        .where("status", "in", statuses)
+        .orderBy("startedOn", "desc")
+        .get();
     } else {
-      groupTasksSnapshot = await tasksModel.where("participants", "array-contains", userId).get();
+      groupTasksSnapshot = await tasksModel
+        .where("participants", "array-contains", userId)
+        .orderBy("startedOn", "desc")
+        .get();
 
-      featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).get();
+      featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).orderBy("startedOn", "desc").get();
     }
 
     const groupTasks = buildTasks(groupTasksSnapshot);
@@ -167,8 +175,7 @@ const fetchUserTasks = async (username, statuses = []) => {
  * @returns {Promise<tasks>|Array}
  */
 const fetchSelfTasks = async (username) => {
-  const allTasks = await fetchUserTasks(username);
-  return allTasks.sort((a, b) => b.startedOn - a.startedOn);
+  return await fetchUserTasks(username);
 };
 
 /**
