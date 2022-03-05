@@ -158,11 +158,11 @@ const postUserPicture = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { user } = await userQuery.fetchUser({ username: req.params.username });
-    const { id: profileId, ...profileDiffs } = req.body;
+    const { id: profileId, ...profileDiff } = req.body;
 
     await profileDiffsQuery.update({ approval: "APPROVED" }, profileId);
-    await userQuery.addOrUpdate(profileDiffs, user.id);
-    await logsQuery.addProfileLog(user, profileDiffs, req.params.username, req.userData.username);
+    await userQuery.addOrUpdate(profileDiff, user.id);
+    await logsQuery.addProfileLog(user, profileDiff, req.params.username, req.userData.username);
 
     return res.json({
       message: "Updated user's data successfully!",

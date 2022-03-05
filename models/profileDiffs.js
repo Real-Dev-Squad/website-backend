@@ -2,73 +2,42 @@ const firestore = require("../utils/firestore");
 const profileDiffsModel = firestore.collection("profileDiffs");
 
 /**
- * Fetches the data about our users
- * @param username { String }: Username of the user to fetch data of
- * @return {Promise<profileDiffsModel>}
+ * Add profileDiff
+ *
+ * @param profileDiffData { Object }: Data to be added
  */
-const fetchProfileDiffsData = async (username) => {
+const add = async (profileDiffData) => {
   try {
-    let profileDiffsData, id;
-    const profileDiffs = await profileDiffsModel
-      .where("username", "==", username)
-      .where("approval", "==", "PENDING")
-      .orderBy("timestamp", "desc")
-      .limit(1)
-      .get();
-
-    profileDiffs.forEach((doc) => {
-      profileDiffsData = doc.data();
-      id = doc.id;
+    const profileDiff = await profileDiffsModel.add({
+      ...profileDiffData,
     });
-    const { approval, timestamp, username: name, ...result } = profileDiffsData;
-    return {
-      id,
-      ...result,
-    };
+    return profileDiff.id;
   } catch (err) {
-    logger.error("Error retrieving profile diffs data", err);
+    logger.error("Error in adding profile diff", err);
     throw err;
   }
 };
 
 /**
- * Sets the user picture field of passed UserId to image data
+ * Update profileDiff
  *
- * @param profileDiffsData { Object }: Data to be added
- */
-const add = async (profileDiffsData) => {
-  try {
-    const profileDiffs = await profileDiffsModel.add({
-      ...profileDiffsData,
-    });
-    return profileDiffs.id;
-  } catch (err) {
-    logger.error("Error in adding profile diffs", err);
-    throw err;
-  }
-};
-
-/**
- * Sets the user picture field of passed UserId to image data
- *
- * @param profileDiffsData { Object }: Data to be added
+ * @param profileDiffData { Object }: Data to be added
  * @param profileId { String }: Id of the profileDiff
  */
-const update = async (profileDiffsData, profileId) => {
+const update = async (profileDiffData, profileId) => {
   try {
-    const profileDiffs = await profileDiffsModel.doc(profileId).get();
+    const profileDiff = await profileDiffsModel.doc(profileId).get();
     await profileDiffsModel.doc(profileId).set({
-      ...profileDiffs.data(),
-      ...profileDiffsData,
+      ...profileDiff.data(),
+      ...profileDiffData,
     });
   } catch (err) {
-    logger.error("Error in updating user", err);
+    logger.error("Error in updating profile diff", err);
     throw err;
   }
 };
 
 module.exports = {
-  fetchProfileDiffsData,
   add,
   update,
 };

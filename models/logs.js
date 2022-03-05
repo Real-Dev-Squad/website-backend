@@ -28,11 +28,11 @@ const add = async (type, meta, body) => {
  * Add user profile changes to logs
  *
  * @param user { Object }: Data of the current user
- * @param profileDiffs { Object }: Data of the requested changes
+ * @param profileDiff { Object }: Data of the requested changes
  * @param username { String }: Username of the user
  * @param approvedBy { String }: Username of the super_user
  */
-const addProfileLog = async (user, profileDiffs, username, approvedBy) => {
+const addProfileLog = async (user, profileDiff, username, approvedBy) => {
   try {
     const profileObject = (data) => {
       return {
@@ -49,10 +49,10 @@ const addProfileLog = async (user, profileDiffs, username, approvedBy) => {
       };
     };
     const oldProfile = profileObject(user);
-    const newProfile = profileObject(profileDiffs);
+    const newProfile = profileObject(profileDiff);
     const logBody = { oldProfile, newProfile };
 
-    await add("ProfileChange", { username, approvedBy }, logBody);
+    await add("PROFILE_DIFF_APPROVED", { username, approvedBy }, logBody);
   } catch (err) {
     logger.error("Error in creating profile change log", err);
     throw err;
