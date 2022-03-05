@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 
 app.use("/auctions", require("./auctions.js"));
+app.use("/arts", require("./arts.js"));
 app.use("/auth", require("./auth.js"));
 app.use("/badges", require("./badges.js"));
 app.use("/challenges", require("./challenges.js"));
