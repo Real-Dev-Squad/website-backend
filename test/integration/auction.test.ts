@@ -30,6 +30,7 @@ const currenciesData = require('../fixtures/currencies/currencies')
 
 // @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'config'.
 const config = require('config')
+// @ts-expect-error ts-migrate(2451) FIXME: Cannot redeclare block-scoped variable 'cookieName... Remove this comment to see the full error message
 const cookieName = config.get('userToken.cookieName')
 
 chai.use(chaiHttp)
