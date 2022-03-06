@@ -8,8 +8,8 @@ const artsModel = firestore.collection("arts");
  */
 const addArt = async (artData, userId) => {
   try {
-    const artId = await artsModel.add(artData, userId);
-    return artId.id;
+    const art = await artsModel.add({ ...artData, userId });
+    return art.id;
   } catch (err) {
     logger.error("Error in creating art", err);
     throw err;
