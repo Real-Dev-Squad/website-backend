@@ -6,8 +6,6 @@ const cleanDb = require("../../utils/cleanDb");
 const members = require("../../../models/members");
 const { ROLES } = require("../../../constants/users");
 const userData = require("../../fixtures/user/user")();
-// const firestore = require("../../../utils/firestore");
-// const userModel = firestore.collection("users");
 
 describe("members", function () {
   let user;
@@ -27,7 +25,9 @@ describe("members", function () {
       expect(user.first_name).to.be.a("string");
       expect(user.last_name).to.be.a("string");
       expect(user.username).to.be.a("string");
-      expect(user.isMember).to.be.a("boolean");
+      expect(user.first_name).to.be.equal(userData[0].first_name);
+      expect(user.last_name).to.be.equal(userData[0].last_name);
+      expect(user.username).to.be.equal(userData[0].username);
     });
   });
 
@@ -39,7 +39,10 @@ describe("members", function () {
       expect(result).to.be.a("array");
       expect(user.first_name).to.be.a("string");
       expect(user.last_name).to.be.a("string");
-      expect(user.isMember).to.be.equal(true);
+      expect(user.first_name).to.be.equal(userData[0].first_name);
+      expect(user.last_name).to.be.equal(userData[0].last_name);
+      expect(user.username).to.be.equal(userData[0].username);
+      expect(user.roles[ROLES.MEMBER]).to.be.equal(true);
     });
     it("should return empty array", async function () {
       const result = await members.fetchUsersWithRole(undefined);
@@ -53,6 +56,7 @@ describe("members", function () {
     beforeEach(async function () {
       user2 = await addUser(userData[2]);
     });
+
     it("should not move the user to member if already a member", async function () {
       const response = await members.moveToMembers(user);
 
@@ -76,6 +80,7 @@ describe("members", function () {
       expect(response).to.be.a("object");
       expect(response.count).to.be.a("number");
       expect(response.users).to.be.a("array");
+      expect(response.users[0]).to.be.equal(userData[0].username);
     });
   });
 
@@ -86,15 +91,29 @@ describe("members", function () {
       expect(response).to.be.a("object");
       expect(response.count).to.be.a("number");
       expect(response.users).to.be.a("array");
+      expect(response.users[0]).to.be.equal(userData[0].username);
     });
   });
 
   describe("addArchiveRoleToMembers", function () {
+    let user2;
+    beforeEach(async function () {
+      user2 = await addUser(userData[5]);
+    });
     it("should add role of archivedMember=true", async function () {
       const response = await members.addArchiveRoleToMembers(user);
 
       expect(response).to.be.a("object");
       expect(response.isArchived).to.be.a("boolean");
+      expect(response.isArchived).to.be.equal(false);
+    });
+
+    it("should not add a role of archivedMember if already exist", async function () {
+      const response = await members.addArchiveRoleToMembers(user2);
+
+      expect(response).to.be.a("object");
+      expect(response.isArchived).to.be.a("boolean");
+      expect(response.isArchived).to.be.equal(true);
     });
   });
 });
