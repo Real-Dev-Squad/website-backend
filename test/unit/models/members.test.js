@@ -5,10 +5,11 @@ const addUser = require("../../utils/addUser");
 const cleanDb = require("../../utils/cleanDb");
 const members = require("../../../models/members");
 const { ROLES } = require("../../../constants/users");
-const userData = require("../../fixtures/user/user")();
+const userDataArray = require("../../fixtures/user/user")();
 
 describe("members", function () {
   let user;
+  const ignoreKeys = ["phone", "email", "tokens"];
   beforeEach(async function () {
     user = await addUser();
   });
@@ -20,14 +21,16 @@ describe("members", function () {
     it("should return all the users", async function () {
       const result = await members.fetchUsers();
       const user = result[0];
+      const userData = userDataArray[0];
 
       expect(result).to.be.a("array");
-      expect(user.first_name).to.be.a("string");
-      expect(user.last_name).to.be.a("string");
-      expect(user.username).to.be.a("string");
-      expect(user.first_name).to.be.equal(userData[0].first_name);
-      expect(user.last_name).to.be.equal(userData[0].last_name);
-      expect(user.username).to.be.equal(userData[0].username);
+      Object.keys(userData).forEach((key) => {
+        if (!ignoreKeys.includes(key)) {
+          expect(user[parseInt(key) || key]).to.deep.equal(userData[parseInt(key) || key]);
+        } else {
+          expect(user[parseInt(key) || key]).to.be.equal(undefined);
+        }
+      });
     });
   });
 
@@ -35,13 +38,16 @@ describe("members", function () {
     it("should return user with role:member", async function () {
       const result = await members.fetchUsersWithRole(ROLES.MEMBER);
       const user = result[0];
+      const userData = userDataArray[0];
 
       expect(result).to.be.a("array");
-      expect(user.first_name).to.be.a("string");
-      expect(user.last_name).to.be.a("string");
-      expect(user.first_name).to.be.equal(userData[0].first_name);
-      expect(user.last_name).to.be.equal(userData[0].last_name);
-      expect(user.username).to.be.equal(userData[0].username);
+      Object.keys(userData).forEach((key) => {
+        if (!ignoreKeys.includes(key)) {
+          expect(userData[parseInt(key) || key]).to.deep.equal(user[parseInt(key) || key]);
+        } else {
+          expect(user[parseInt(key) || key]).to.be.equal(undefined);
+        }
+      });
       expect(user.roles[ROLES.MEMBER]).to.be.equal(true);
     });
     it("should return empty array", async function () {
@@ -54,7 +60,7 @@ describe("members", function () {
   describe("moveToMember", function () {
     let user2;
     beforeEach(async function () {
-      user2 = await addUser(userData[2]);
+      user2 = await addUser(userDataArray[2]);
     });
 
     it("should not move the user to member if already a member", async function () {
@@ -80,7 +86,7 @@ describe("members", function () {
       expect(response).to.be.a("object");
       expect(response.count).to.be.a("number");
       expect(response.users).to.be.a("array");
-      expect(response.users[0]).to.be.equal(userData[0].username);
+      expect(response.users[0]).to.be.equal(userDataArray[0].username);
     });
   });
 
@@ -91,20 +97,19 @@ describe("members", function () {
       expect(response).to.be.a("object");
       expect(response.count).to.be.a("number");
       expect(response.users).to.be.a("array");
-      expect(response.users[0]).to.be.equal(userData[0].username);
+      expect(response.users[0]).to.be.equal(userDataArray[0].username);
     });
   });
 
   describe("addArchiveRoleToMembers", function () {
     let user2;
     beforeEach(async function () {
-      user2 = await addUser(userData[5]);
+      user2 = await addUser(userDataArray[5]);
     });
     it("should add role of archivedMember=true", async function () {
       const response = await members.addArchiveRoleToMembers(user);
 
       expect(response).to.be.a("object");
-      expect(response.isArchived).to.be.a("boolean");
       expect(response.isArchived).to.be.equal(false);
     });
 
@@ -112,7 +117,6 @@ describe("members", function () {
       const response = await members.addArchiveRoleToMembers(user2);
 
       expect(response).to.be.a("object");
-      expect(response.isArchived).to.be.a("boolean");
       expect(response.isArchived).to.be.equal(true);
     });
   });
