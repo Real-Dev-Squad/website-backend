@@ -22,24 +22,6 @@ const addArt = async (req, res) => {
 };
 
 /**
- * Update art
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-const updateArt = async (req, res) => {
-  try {
-    await artsQuery.updateArt({ ...req.body, userId: req.userData.id });
-    return res.json({
-      message: "Art successfully updated!",
-    });
-  } catch (error) {
-    logger.error(`Error in udpating art: ${error}`);
-    return res.boom.serverUnavailable("Something went worng please contact admin");
-  }
-};
-
-/**
  * Fetches all arts irrespective of user
  *
  * @param req {Object} - Express request object
@@ -80,7 +62,6 @@ const getSelfArts = async (req, res) => {
 
 module.exports = {
   addArt,
-  updateArt,
   fetchArts,
   getSelfArts,
 };

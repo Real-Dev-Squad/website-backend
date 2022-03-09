@@ -17,20 +17,6 @@ const addArt = async (artData, userId) => {
 };
 
 /**
- * Updates Art
- *
- * @param artData { Object }: art data object to be stored in DB
- */
-const updateArt = async (artData, userId) => {
-  try {
-    await artsModel.update(artData, userId);
-  } catch (err) {
-    logger.error("Error updating art", err);
-    throw err;
-  }
-};
-
-/**
  * Fetch all arts
  *
  * @return {Promise<arts|Array>}
@@ -78,7 +64,6 @@ const fetchUserArts = async (id) => {
 
 module.exports = {
   addArt,
-  updateArt,
   fetchArts,
   fetchUserArts,
 };
