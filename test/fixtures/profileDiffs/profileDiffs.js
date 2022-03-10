@@ -2,7 +2,6 @@ module.exports = () => {
   return [
     {
       approval: "PENDING",
-      username: "ankur",
       timestamp: Date.now(),
       first_name: "Ankur",
       last_name: "Narkhede",
@@ -16,6 +15,7 @@ module.exports = () => {
       twitter_id: "ankur909",
       instagram_id: "",
       website: "",
+      message: "",
     },
   ];
 };

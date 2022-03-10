@@ -1,5 +1,11 @@
 const logsQuery = require("../models/logs");
 
+/**
+ * Fetches logs
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
 const fetch = async (req, res) => {
   try {
     const logs = await logsQuery.fetch(req.query, req.params.type);

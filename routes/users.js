@@ -271,6 +271,6 @@ router.post("/picture", authenticate, upload.single("profile"), users.postUserPi
 
 router.patch("/identityURL", authenticate, userValidator.updateIdentityURL, users.identityURL);
 
-router.patch("/:username", authenticate, authorizeUser("superUser"), users.updateUser);
+router.patch("/:userId", authenticate, authorizeUser("superUser"), users.updateUser);
 
 module.exports = router;

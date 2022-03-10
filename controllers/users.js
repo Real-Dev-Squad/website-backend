@@ -150,19 +150,29 @@ const postUserPicture = async (req, res) => {
 };
 
 /**
- * Updates the user data to the latest diffs
+ * Updates the user data
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
 const updateUser = async (req, res) => {
   try {
-    const { user } = await userQuery.fetchUser({ username: req.params.username });
-    const { id: profileId, ...profileDiff } = req.body;
+    const userId = req.params.userId;
+    const { id: profileDiffId, message, ...profileDiff } = req.body;
 
-    await profileDiffsQuery.update({ approval: "APPROVED" }, profileId);
-    await userQuery.addOrUpdate(profileDiff, user.id);
-    await logsQuery.addProfileLog(user, profileDiff, req.params.username, req.userData.username);
+    const user = await userQuery.fetchUser({ userId });
+    if (!user.userExists) return res.boom.notFound("User doesn't exist");
+
+    const profileResponse = await profileDiffsQuery.update({ approval: "APPROVED" }, profileDiffId);
+    if (profileResponse.notFound) return res.boom.notFound("Profile Diff doesn't exist");
+    await userQuery.addOrUpdate(profileDiff, userId);
+
+    const meta = {
+      approvedBy: req.userData.id,
+      userId: userId,
+    };
+
+    await logsQuery.add("PROFILE_DIFF_APPROVED", meta, { profileDiffId, message });
 
     return res.json({
       message: "Updated user's data successfully!",

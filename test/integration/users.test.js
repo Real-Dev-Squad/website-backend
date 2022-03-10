@@ -5,11 +5,12 @@ const chaiHttp = require("chai-http");
 const app = require("../../server");
 const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
-const addProfileDiffs = require("../utils/addProfileDiffs");
+const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
 
 // Import fixtures
 const userData = require("../fixtures/user/user")();
+const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 
 const config = require("config");
@@ -19,15 +20,13 @@ chai.use(chaiHttp);
 
 describe("Users", function () {
   let jwt;
+  let userId;
   let superUserId;
   let superUserAuthToken;
-  let profileDiffsId;
 
   beforeEach(async function () {
-    const userId = await addUser();
-    profileDiffsId = await addProfileDiffs();
+    userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
-
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
   });
@@ -263,17 +262,21 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /users/:username", function () {
+  describe("PATCH /users/:userId", function () {
+    let profileDiffsId;
+    beforeEach(async function () {
+      profileDiffsId = await profileDiffs.add({ userId, ...profileDiffData[0] });
+    });
     it("Should update the user profile with latest pending profileDiffs, using authorized user (super_user)", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userData[0].username}`)
+        .patch(`/users/${userId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({
           id: `${profileDiffsId}`,
           first_name: "Ankur",
           last_name: "Narkhede",
-          yoe: "0",
+          yoe: 0,
           company: "",
           designation: "AO",
           github_id: "ankur1337",
@@ -281,6 +284,7 @@ describe("Users", function () {
           twitter_id: "ankur909",
           instagram_id: "",
           website: "",
+          message: "",
         })
         .end((err, res) => {
           if (err) {
@@ -296,7 +300,7 @@ describe("Users", function () {
     it("Should return unauthorized error when not authorized", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userData[0].username}`)
+        .patch(`/users/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -313,7 +317,7 @@ describe("Users", function () {
     it("Should return unauthorized error when not logged in", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userData[0].username}`)
+        .patch(`/users/${userId}`)
         .end((err, res) => {
           if (err) {
             return done(err);
