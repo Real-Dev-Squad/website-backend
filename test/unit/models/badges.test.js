@@ -18,7 +18,7 @@ describe("badges", function () {
     await cleanDb();
   });
 
-  describe("getbadges", function () {
+  describe("fetchBadges", function () {
     it("should return all the badges", async function () {
       const response = await badges.fetchBadges({});
       const result = response[0];
@@ -33,18 +33,20 @@ describe("badges", function () {
     });
   });
 
-  describe("getUserBadget", function () {
+  describe("fetchUserBadges", function () {
     it("should return badges to user base on username", async function () {
       const response = await badges.fetchUserBadges(userDataArray[0].username);
 
       expect(response).to.be.a("object");
       expect(response.userExists).to.be.equal(true);
-      expect(response.userBadges).of.length.greaterThan(0);
+      expect(response.userBadges[0]).to.be.deep.equal({
+        title: badgesDataArray[0].title,
+        description: badgesDataArray[0].description,
+      });
     });
 
     it("should return empty badges if username does not exist", async function () {
       const response = await badges.fetchUserBadges("undefined");
-
       expect(response).to.be.a("object");
       expect(response.userExists).to.be.equal(false);
       expect(response.userBadges).of.length(0);
