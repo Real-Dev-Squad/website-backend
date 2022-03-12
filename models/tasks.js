@@ -126,7 +126,7 @@ const fetchSelfTask = async (taskId, userId) => {
  * @return {Promise<tasks|Array>}
  */
 
-const fetchUserTasks = async (username, statuses = []) => {
+const fetchUserTasks = async (username, statuses = [], field, order) => {
   try {
     const userId = await userUtils.getUserId(username);
 
@@ -138,23 +138,35 @@ const fetchUserTasks = async (username, statuses = []) => {
     let featureTasksSnapshot = [];
 
     if (statuses && statuses.length) {
-      groupTasksSnapshot = await tasksModel
-        .where("participants", "array-contains", userId)
-        .where("status", "in", statuses)
-        .orderBy("startedOn", "desc")
-        .get();
-      featureTasksSnapshot = await tasksModel
-        .where("assignee", "==", userId)
-        .where("status", "in", statuses)
-        .orderBy("startedOn", "desc")
-        .get();
+      if (field) {
+        groupTasksSnapshot = await tasksModel
+          .where("participants", "array-contains", userId)
+          .where("status", "in", statuses)
+          .orderBy(field, order)
+          .get();
+        featureTasksSnapshot = await tasksModel
+          .where("assignee", "==", userId)
+          .where("status", "in", statuses)
+          .orderBy(field, order)
+          .get();
+      } else {
+        groupTasksSnapshot = await tasksModel
+          .where("participants", "array-contains", userId)
+          .where("status", "in", statuses)
+          .get();
+        featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).where("status", "in", statuses).get();
+      }
     } else {
-      groupTasksSnapshot = await tasksModel
-        .where("participants", "array-contains", userId)
-        .orderBy("startedOn", "desc")
-        .get();
-
-      featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).orderBy("startedOn", "desc").get();
+      if (field) {
+        groupTasksSnapshot = await tasksModel
+          .where("participants", "array-contains", userId)
+          .orderBy(field, order)
+          .get();
+        featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).orderBy(field, order).get();
+      } else {
+        groupTasksSnapshot = await tasksModel.where("participants", "array-contains", userId).get();
+        featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).get();
+      }
     }
 
     const groupTasks = buildTasks(groupTasksSnapshot);
@@ -175,7 +187,7 @@ const fetchUserTasks = async (username, statuses = []) => {
  * @returns {Promise<tasks>|Array}
  */
 const fetchSelfTasks = async (username) => {
-  return await fetchUserTasks(username);
+  return await fetchUserTasks(username, [], "startedOn", "desc");
 };
 
 /**
