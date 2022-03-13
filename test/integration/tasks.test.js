@@ -11,6 +11,7 @@ const userModel = require("../../models/users");
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
+const tasksfixture = require("../fixtures/tasks/tasks")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
 const { TASK_STATUS_OLD, TASK_STATUS } = require("../../constants/tasks");
@@ -313,7 +314,7 @@ describe("Tasks", function () {
     });
   });
 
-  describe("PATCH /self/:id", function () {
+  describe("PATCH /tasks/self/:id", function () {
     const taskStatusData = {
       status: "currentStatus",
       percentCompleted: 50,
@@ -373,8 +374,52 @@ describe("Tasks", function () {
           expect(res).to.have.status(401);
           expect(res.body.message).to.be.equal("Unauthenticated User");
           return done();
-        })
-        .catch(done());
+        });
+    });
+  });
+
+  describe("GET /tasks/overduetasks", function () {
+    it("Should return all the overdue Tasks", async function (done) {
+      await tasks.updateTask(tasksfixture[0]);
+      await tasks.updateTask(tasksfixture[1]);
+      chai
+        .request(app)
+        .get("/tasks/overduetasks")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.newAvailableTasks).to.be.a("array");
+          res.body.newAvailableTasks.forEach((task) => {
+            const { status, startedOn, endsOn, assignee } = task.unassignedTask;
+            expect(status).to.equal("AVAILABLE");
+            expect(assignee).to.equal(null);
+            expect(startedOn).to.equal(null);
+            expect(endsOn).to.equal(null);
+          });
+          return done();
+        });
+      await cleanDb();
+    });
+
+    it("Should return [] if no overdue task", async function (done) {
+      await tasks.updateTask(tasksfixture[2]);
+      chai
+        .request(app)
+        .get("/tasks/overduetasks")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have(200);
+          expect(res.body.newAvailableTasks).to.have.lengthOf(0);
+          expect(res.body.message).to.be.equal("No overdue tasks");
+          return done();
+        });
+      await cleanDb();
     });
   });
 });

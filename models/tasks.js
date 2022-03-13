@@ -5,7 +5,6 @@ const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tas
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
-const admin = require("firebase-admin");
 /**
  * Adds and Updates tasks
  *
@@ -213,11 +212,11 @@ const overdueTasks = async (overDueTasks) => {
         const { assignee, id } = task;
         await tasksModel.doc(id).update({
           status: TASK_STATUS.AVAILABLE,
-          assignee: admin.firestore.FieldValue.delete(),
-          endsOn: admin.firestore.FieldValue.delete(),
-          startedOn: admin.firestore.FieldValue.delete(),
+          assignee: null,
+          endsOn: null,
+          startedOn: null,
         });
-        const unassignedTask = await fetchTask(id);
+        const { taskData: unassignedTask } = await fetchTask(id);
         return {
           unassignedMember: assignee,
           unassignedTask,

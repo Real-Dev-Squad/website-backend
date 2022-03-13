@@ -170,7 +170,7 @@ const overdueTasks = async (req, res) => {
     );
     const newAvailableTasks = await tasks.overdueTasks(overDueTasks);
     return res.json({
-      message: "Overdue Tasks returned successfully!",
+      message: newAvailableTasks.length ? "Overdue Tasks returned successfully!" : "No overdue tasks found",
       newAvailableTasks,
     });
   } catch (err) {
