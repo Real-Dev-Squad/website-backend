@@ -6,4 +6,10 @@ const ROLES = {
   MEMBER: "member",
   SUPERUSER: "super_user",
 };
-module.exports = { userStatusEnum, ROLES };
+const profileDiffStatus = {
+  APPROVED: "APPROVED",
+  REJECTED: "NOT APPROVED",
+  PENDING: "PENDING",
+};
+
+module.exports = { userStatusEnum, ROLES, profileDiffStatus };

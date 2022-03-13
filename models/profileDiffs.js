@@ -25,7 +25,7 @@ const add = async (profileDiffData) => {
  * @param profileId { String }: Id of the profileDiff
  */
 
-const update = async (profileDiffData, profileId) => {
+const updateProfileDiff = async (profileDiffData, profileId) => {
   try {
     const profileDiff = await profileDiffsModel.doc(profileId).get();
     const data = profileDiff.data();
@@ -45,5 +45,5 @@ const update = async (profileDiffData, profileId) => {
 
 module.exports = {
   add,
-  update,
+  updateProfileDiff,
 };

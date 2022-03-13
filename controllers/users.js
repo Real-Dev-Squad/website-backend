@@ -3,6 +3,7 @@ const userQuery = require("../models/users");
 const profileDiffsQuery = require("../models/profileDiffs");
 const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
+const { profileDiffStatus } = require("../constants/users");
 
 /**
  * Fetches the data about our users
@@ -163,7 +164,11 @@ const updateUser = async (req, res) => {
     const user = await userQuery.fetchUser({ userId });
     if (!user.userExists) return res.boom.notFound("User doesn't exist");
 
-    const profileResponse = await profileDiffsQuery.update({ approval: "APPROVED" }, profileDiffId);
+    const profileResponse = await profileDiffsQuery.updateProfileDiff(
+      { approval: profileDiffStatus.APPROVED },
+      profileDiffId
+    );
+
     if (profileResponse.notFound) return res.boom.notFound("Profile Diff doesn't exist");
     await userQuery.addOrUpdate(profileDiff, userId);
 
