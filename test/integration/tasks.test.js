@@ -403,7 +403,6 @@ describe("Tasks", function () {
             expect(endsOn).to.equal(null);
           });
         });
-      await cleanDb();
     });
 
     it("Should return [] if no overdue task", async function () {
@@ -420,7 +419,6 @@ describe("Tasks", function () {
           expect(res.body.newAvailableTasks).to.have.lengthOf(0);
           expect(res.body.message).to.be.equal("No overdue tasks found");
         });
-      await cleanDb();
     });
   });
 });
