@@ -3,7 +3,8 @@ const userQuery = require("../models/users");
 const profileDiffsQuery = require("../models/profileDiffs");
 const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
-const { profileDiffStatus } = require("../constants/users");
+const { profileDiffStatus } = require("../constants/profileDiff");
+const { logType } = require("../constants/logs");
 
 /**
  * Fetches the data about our users
@@ -177,7 +178,7 @@ const updateUser = async (req, res) => {
       userId: userId,
     };
 
-    await logsQuery.add("PROFILE_DIFF_APPROVED", meta, { profileDiffId, message });
+    await logsQuery.addLog(logType.PROFILE_DIFF_APPROVED, meta, { profileDiffId, message });
 
     return res.json({
       message: "Updated user's data successfully!",

@@ -9,7 +9,7 @@ const admin = require("firebase-admin");
  * @param meta { Object }: Meta data of the log
  * @param body { Object }: Body of the log
  */
-const add = async (type, meta, body) => {
+const addLog = async (type, meta, body) => {
   try {
     const log = {
       type,
@@ -30,7 +30,7 @@ const add = async (type, meta, body) => {
  * @param query { String }: Type of the log
  * @param param { Object }: Fields to filter logs
  */
-const fetch = async (query, param) => {
+const fetchLogs = async (query, param) => {
   try {
     let call = logsModel.where("type", "==", param);
     Object.keys(query).forEach((key) => {
@@ -53,6 +53,6 @@ const fetch = async (query, param) => {
 };
 
 module.exports = {
-  add,
-  fetch,
+  addLog,
+  fetchLogs,
 };

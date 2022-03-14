@@ -6,9 +6,9 @@ const logsQuery = require("../models/logs");
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const fetch = async (req, res) => {
+const fetchLogs = async (req, res) => {
   try {
-    const logs = await logsQuery.fetch(req.query, req.params.type);
+    const logs = await logsQuery.fetchLogs(req.query, req.params.type);
     return res.json({
       message: "Logs returned successfully!",
       logs,
@@ -20,5 +20,5 @@ const fetch = async (req, res) => {
 };
 
 module.exports = {
-  fetch,
+  fetchLogs,
 };
