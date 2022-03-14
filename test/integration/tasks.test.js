@@ -18,15 +18,18 @@ const { TASK_STATUS_OLD, TASK_STATUS } = require("../../constants/tasks");
 chai.use(chaiHttp);
 
 const appOwner = userData[3];
+const superUser = userData[4];
 
-let jwt;
+let jwt, superUserJwt;
 
 describe("Tasks", function () {
   let taskId1, taskId;
 
   before(async function () {
     const userId = await addUser(appOwner);
+    const superUserId = await addUser(superUser);
     jwt = authService.generateAuthToken({ userId });
+    superUserJwt = authService.generateAuthToken({ userId: superUserId });
 
     const taskData = [
       {
@@ -362,7 +365,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.equal("This task is not assigned to you");
     });
 
-    it("Should give error for no cookie", async function (done) {
+    it("Should give error for no cookie", function (done) {
       chai
         .request(app)
         .patch(`/tasks/self/${taskId1}`)
@@ -379,16 +382,16 @@ describe("Tasks", function () {
   });
 
   describe("GET /tasks/overduetasks", function () {
-    it("Should return all the overdue Tasks", async function (done) {
+    it("Should return all the overdue Tasks", async function () {
       await tasks.updateTask(tasksfixture[0]);
       await tasks.updateTask(tasksfixture[1]);
       chai
         .request(app)
         .get("/tasks/overduetasks")
-        .set("cookie", `${cookieName}=${jwt}`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
-            return done();
+            throw err;
           }
           expect(res).to.have.status(200);
           expect(res.body.newAvailableTasks).to.be.a("array");
@@ -399,25 +402,23 @@ describe("Tasks", function () {
             expect(startedOn).to.equal(null);
             expect(endsOn).to.equal(null);
           });
-          return done();
         });
       await cleanDb();
     });
 
-    it("Should return [] if no overdue task", async function (done) {
+    it("Should return [] if no overdue task", async function () {
       await tasks.updateTask(tasksfixture[2]);
       chai
         .request(app)
         .get("/tasks/overduetasks")
-        .set("cookie", `${cookieName}=${jwt}`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
-            return done();
+            throw err;
           }
-          expect(res).to.have(200);
+          expect(res).to.have.status(200);
           expect(res.body.newAvailableTasks).to.have.lengthOf(0);
-          expect(res.body.message).to.be.equal("No overdue tasks");
-          return done();
+          expect(res.body.message).to.be.equal("No overdue tasks found");
         });
       await cleanDb();
     });
