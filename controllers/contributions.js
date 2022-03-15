@@ -1,7 +1,7 @@
-const contributionsService = require('../services/contributions')
-const { fetchUser } = require('../models/users')
+const contributionsService = require("../services/contributions");
+const { fetchUser } = require("../models/users");
 
-const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
+const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
 /**
  * Get the  contributions of the user
@@ -11,19 +11,19 @@ const ERROR_MESSAGE = 'Something went wrong. Please try again or contact admin'
 
 const getUserContributions = async (req, res) => {
   try {
-    const username = req.params.username
-    const result = await fetchUser({ username: req.params.username })
+    const username = req.params.username;
+    const result = await fetchUser({ username: req.params.username });
     if (result.userExists) {
-      const contributions = await contributionsService.getUserContributions(username)
-      return res.json(contributions)
+      const contributions = await contributionsService.getUserContributions(username);
+      return res.json(contributions);
     }
-    return res.boom.notFound('User doesn\'t exist')
+    return res.boom.notFound("User doesn't exist");
   } catch (err) {
-    logger.error(`Error while retriving contributions ${err}`)
-    return res.boom.badImplementation(ERROR_MESSAGE)
+    logger.error(`Error while retriving contributions ${err}`);
+    return res.boom.badImplementation(ERROR_MESSAGE);
   }
-}
+};
 
 module.exports = {
-  getUserContributions
-}
+  getUserContributions,
+};

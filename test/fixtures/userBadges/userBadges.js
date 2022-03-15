@@ -7,17 +7,17 @@
 
 const userFound = {
   userExists: true,
-  userBadges: [{ title: 'badgeTitle', description: 'badgeDescription' }]
-}
+  userBadges: [{ title: "badgeTitle", description: "badgeDescription" }],
+};
 
 const userNotFound = {
   userExists: false,
-  userBadges: []
-}
+  userBadges: [],
+};
 
 const badgesEmpty = {
   userExists: true,
-  userBadges: []
-}
+  userBadges: [],
+};
 
-module.exports = { userFound, userNotFound, badgesEmpty }
+module.exports = { userFound, userNotFound, badgesEmpty };
