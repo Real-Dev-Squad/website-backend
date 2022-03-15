@@ -18,12 +18,12 @@ describe("tasks", function () {
 
   describe("overdueTasks", function () {
     it("Should return overdue tasks", async function () {
-      const task1 = await tasks.updateTask(tasksData[0]);
-      const task2 = await tasks.updateTask(tasksData[1]);
-      const { assignee1 } = task1;
-      const { assignee2 } = task2;
+      const { taskDetails: taskData1 } = await tasks.updateTask(tasksData[0]);
+      const { taskDetails: taskData2 } = await tasks.updateTask(tasksData[1]);
+      const { assignee: assignee1 } = taskData1;
+      const { assignee: assignee2 } = taskData2;
 
-      const newAvailableTasks = await tasks.overdueTasks([task1, task2]);
+      const newAvailableTasks = await tasks.overdueTasks([taskData1, taskData2]);
       newAvailableTasks.forEach((task) => {
         const { assignee, startedOn, endsOn, status, unassignedMember } = task;
         expect(unassignedMember).to.be.oneOf([assignee1, assignee2]);
