@@ -12,7 +12,7 @@ module.exports = () => {
       assignee: "akshay",
       createdBy: "ankush",
       status: "IN_PROGRESS",
-      percentCompleted: 150,
+      percentCompleted: 50,
       endsOn: 1647172800, // 13 march
       startedOn: 1644753600, //  13 feb
     },
@@ -23,7 +23,7 @@ module.exports = () => {
       assignee: "ankur",
       createdBy: "ankush",
       status: "ASSIGNED",
-      percentCompleted: 150,
+      percentCompleted: 50,
       endsOn: 1647172800, // 13 march
       startedOn: 1644753600, //  13 feb
     },
@@ -34,8 +34,19 @@ module.exports = () => {
       assignee: "ankur",
       createdBy: "ankush",
       status: "BLOCKED",
-      percentCompleted: 150,
+      percentCompleted: 50,
       endsOn: 1647172800,
+      startedOn: 1644753600,
+    },
+    {
+      title: "check is task form is working",
+      purpose: "test",
+      type: "feature",
+      assignee: "nikhil",
+      createdBy: "nikhil",
+      status: "AVAILABLE",
+      percentCompleted: 50,
+      endsOn: 1650032259,
       startedOn: 1644753600,
     },
   ];

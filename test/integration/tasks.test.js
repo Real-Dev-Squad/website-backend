@@ -11,7 +11,7 @@ const userModel = require("../../models/users");
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
-const tasksfixture = require("../fixtures/tasks/tasks")();
+const tasksData = require("../fixtures/tasks/tasks")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
 const { TASK_STATUS_OLD, TASK_STATUS } = require("../../constants/tasks");
@@ -383,8 +383,8 @@ describe("Tasks", function () {
 
   describe("GET /tasks/overduetasks", function () {
     it("Should return all the overdue Tasks", async function () {
-      await tasks.updateTask(tasksfixture[0]);
-      await tasks.updateTask(tasksfixture[1]);
+      await tasks.updateTask(tasksData[0]);
+      await tasks.updateTask(tasksData[1]);
       chai
         .request(app)
         .get("/tasks/overduetasks")
@@ -406,7 +406,7 @@ describe("Tasks", function () {
     });
 
     it("Should return [] if no overdue task", async function () {
-      await tasks.updateTask(tasksfixture[2]);
+      await tasks.updateTask(tasksData[2]);
       chai
         .request(app)
         .get("/tasks/overduetasks")
