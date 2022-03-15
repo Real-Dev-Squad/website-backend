@@ -29,12 +29,52 @@ describe("Arts", function () {
     await cleanDb();
   });
 
-  describe("GET /arts/", function () {
+  describe("POST /arts/user/add", function () {
+    it("Should add the art in system", function (done) {
+      chai
+        .request(app)
+        .post("/arts/user/add")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(artData[0])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Art successfully added!");
+
+          return done();
+        });
+    });
+    it("Should return 401, for Unauthenticated User", function (done) {
+      chai
+        .request(app)
+        .post("/arts/user/add")
+        .send(artData[0])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.deep.equal({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+
+          return done();
+        });
+    });
+  });
+
+  describe("GET /arts", function () {
     it("Should get all the arts in system", function (done) {
       chai
         .request(app)
         .get("/arts")
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -45,6 +85,48 @@ describe("Arts", function () {
           expect(res.body.arts).to.be.a("array");
           expect(res.body.arts[0]).to.be.a("object");
           expect(res.body.arts[0].title).to.equal(artData[0].title);
+
+          return done();
+        });
+    });
+  });
+
+  describe("GET /arts/user/self", function () {
+    it("Should get all the arts of the user", function (done) {
+      chai
+        .request(app)
+        .get("/arts/user/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User arts returned successfully!");
+          expect(res.body.arts).to.be.a("array");
+          expect(res.body.arts[0]).to.be.a("object");
+          expect(res.body.arts[0].title).to.equal(artData[0].title);
+
+          return done();
+        });
+    });
+    it("Should return 401, for Unauthenticated User", function (done) {
+      chai
+        .request(app)
+        .get("/arts/user/self")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.deep.equal({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
 
           return done();
         });

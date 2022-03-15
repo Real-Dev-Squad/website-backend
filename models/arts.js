@@ -8,24 +8,10 @@ const artsModel = firestore.collection("arts");
  */
 const addArt = async (artData, userId) => {
   try {
-    const artId = await artsModel.add(artData, userId);
-    return artId.id;
+    const art = await artsModel.add({ ...artData, userId });
+    return art.id;
   } catch (err) {
     logger.error("Error in creating art", err);
-    throw err;
-  }
-};
-
-/**
- * Updates Art
- *
- * @param artData { Object }: art data object to be stored in DB
- */
-const updateArt = async (artData, userId) => {
-  try {
-    await artsModel.update(artData, userId);
-  } catch (err) {
-    logger.error("Error updating art", err);
     throw err;
   }
 };
@@ -78,7 +64,6 @@ const fetchUserArts = async (id) => {
 
 module.exports = {
   addArt,
-  updateArt,
   fetchArts,
   fetchUserArts,
 };
