@@ -18,14 +18,20 @@ describe("tasks", function () {
 
   describe("overdueTasks", function () {
     it("Should return overdue tasks", async function () {
-      const { taskDetails: taskData1 } = await tasks.updateTask(tasksData[0]);
-      const { taskDetails: taskData2 } = await tasks.updateTask(tasksData[1]);
+      const { taskDetails: taskData1, taskId: taskId1 } = await tasks.updateTask(tasksData[0]);
+      const { taskDetails: taskData2, taskId: taskId2 } = await tasks.updateTask(tasksData[1]);
+
       const { assignee: assignee1 } = taskData1;
       const { assignee: assignee2 } = taskData2;
 
-      const newAvailableTasks = await tasks.overdueTasks([taskData1, taskData2]);
+      const newAvailableTasks = await tasks.overdueTasks([
+        { ...taskData1, id: taskId1 },
+        { ...taskData2, id: taskId2 },
+      ]);
+
       newAvailableTasks.forEach((task) => {
-        const { assignee, startedOn, endsOn, status, unassignedMember } = task;
+        const { unassignedMember } = task;
+        const { assignee, startedOn, endsOn, status } = task.unassignedTask;
         expect(unassignedMember).to.be.oneOf([assignee1, assignee2]);
         expect(status).to.equal("AVAILABLE");
         expect(assignee).to.equal(null);
