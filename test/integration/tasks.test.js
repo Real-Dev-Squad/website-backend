@@ -385,40 +385,26 @@ describe("Tasks", function () {
     it("Should return all the overdue Tasks", async function () {
       await tasks.updateTask(tasksData[0]);
       await tasks.updateTask(tasksData[1]);
-      chai
-        .request(app)
-        .get("/tasks/overduetasks")
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .end((err, res) => {
-          if (err) {
-            throw err;
-          }
-          expect(res).to.have.status(200);
-          expect(res.body.newAvailableTasks).to.be.a("array");
-          res.body.newAvailableTasks.forEach((task) => {
-            const { status, startedOn, endsOn, assignee } = task.unassignedTask;
-            expect(status).to.equal("AVAILABLE");
-            expect(assignee).to.equal(null);
-            expect(startedOn).to.equal(null);
-            expect(endsOn).to.equal(null);
-          });
-        });
+      const res = await chai.request(app).get("/tasks/overduetasks").set("cookie", `${cookieName}=${superUserJwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body.newAvailableTasks).to.be.a("array");
+      res.body.newAvailableTasks.forEach((task) => {
+        const { status, startedOn, endsOn, assignee } = task.unassignedTask;
+        expect(status).to.equal("AVAILABLE");
+        expect(assignee).to.equal(null);
+        expect(startedOn).to.equal(null);
+        expect(endsOn).to.equal(null);
+      });
     });
 
     it("Should return [] if no overdue task", async function () {
       await tasks.updateTask(tasksData[2]);
-      chai
-        .request(app)
-        .get("/tasks/overduetasks")
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .end((err, res) => {
-          if (err) {
-            throw err;
-          }
-          expect(res).to.have.status(200);
-          expect(res.body.newAvailableTasks).to.have.lengthOf(0);
-          expect(res.body.message).to.be.equal("No overdue tasks found");
-        });
+      const res = await chai.request(app).get("/tasks/overduetasks").set("cookie", `${cookieName}=${superUserJwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body.newAvailableTasks).to.have.lengthOf(0);
+      expect(res.body.message).to.be.equal("No overdue tasks found");
     });
   });
 });
