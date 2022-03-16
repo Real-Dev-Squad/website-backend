@@ -1,24 +1,35 @@
 const chai = require("chai");
+const sinon = require("sinon");
 const { expect } = chai;
 
 const cleanDb = require("../../utils/cleanDb");
-const auctions = require("../../../models/auctions");
 const firestore = require("../../../utils/firestore");
-const auctionModel = firestore.collection("auctions");
-const { auctionData } = require("../../fixtures/auctions/auctions");
 const addUser = require("../../utils/addUser");
+
+// Import models
+const auctions = require("../../../models/auctions");
+const walletsQuery = require("../../../models/wallets");
+const auctionModel = firestore.collection("auctions");
+const bidModel = firestore.collection("bids");
+
+// Import fixtures
+const { auctionData } = require("../../fixtures/auctions/auctions");
 const user = require("../../fixtures/user/user")();
+const currencies = require("../../fixtures/currencies/currencies");
+
 const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = auctionData;
 
 describe("auctions", function () {
-  let seller, auctionId;
+  let seller, auctionId, bidder;
 
   beforeEach(async function () {
     seller = await addUser();
+    bidder = await addUser(user[1]);
     auctionId = await auctions.createNewAuction({ seller, initialPrice, itemType, endTime, quantity });
   });
   afterEach(async function () {
     await cleanDb();
+    sinon.restore();
   });
 
   describe("createNewAuction", function () {
@@ -77,11 +88,26 @@ describe("auctions", function () {
   });
 
   describe("makeNewBid", function () {
+    it("Should return bid id and make a new bid", async function () {
+      sinon.stub(walletsQuery, "fetchWallet").returns({ currencies, isActive: true, userId: bidder });
+      const bidId = await auctions.makeNewBid({ bidder, auctionId, bid: 300 });
+      const bidData = (await bidModel.doc(bidId).get()).data();
+
+      expect(bidData.bidder).to.be.equal(bidder);
+      expect(bidData.auction_id).to.be.equal(auctionId);
+      expect(bidData.bid).to.be.equal(300);
+    });
     it("Should return auction not found", async function () {
-      const response = await auctions.makeNewBid({ bidder: seller, auctionId: "badAuctionId", bid: 300 });
+      const response = await auctions.makeNewBid({ bidder, auctionId: "badAuctionId", bid: 300 });
 
       expect(response).to.be.a("object");
       expect(response.auctionNotFound).to.be.equal(true);
+    });
+    it("Should return wallet not found", async function () {
+      const response = await auctions.makeNewBid({ bidder, auctionId, bid: 300 });
+
+      expect(response).to.be.a("object");
+      expect(response.noWallet).to.be.equal(true);
     });
   });
 });
