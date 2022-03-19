@@ -60,7 +60,7 @@ describe("auctions", function () {
       expect(response.highest_bidder).to.be.equal(undefined);
     });
     it("Should return not found", async function () {
-      const response = await auctions.fetchAuctionById("undefined");
+      const response = await auctions.fetchAuctionById("invalidAuctionId");
 
       expect(response).to.be.equal(false);
     });
@@ -80,10 +80,18 @@ describe("auctions", function () {
       expect(auction.bidders).to.be.a("array").with.lengthOf(0);
       expect(auction.highest_bidder).to.be.equal(undefined);
     });
-    it("Should return not found", async function () {
-      const response = await auctions.fetchAuctionById("undefined");
+    it("Should return empty array", async function () {
+      await cleanDb();
+      auctionId = await auctions.createNewAuction({
+        seller,
+        initialPrice,
+        itemType,
+        endTime: Date.now() - 60 * 60 * 1000,
+        quantity,
+      });
+      const response = await auctions.fetchAvailableAuctions();
 
-      expect(response).to.be.equal(false);
+      expect(response).to.be.a("array").with.lengthOf(0);
     });
   });
 
@@ -98,7 +106,7 @@ describe("auctions", function () {
       expect(bidData.bid).to.be.equal(300);
     });
     it("Should return auction not found", async function () {
-      const response = await auctions.makeNewBid({ bidder, auctionId: "badAuctionId", bid: 300 });
+      const response = await auctions.makeNewBid({ bidder, auctionId: "invalidAuctionId", bid: 300 });
 
       expect(response).to.be.a("object");
       expect(response.auctionNotFound).to.be.equal(true);
