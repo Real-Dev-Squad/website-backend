@@ -15,7 +15,8 @@ const bidModel = firestore.collection("bids");
 // Import fixtures
 const { auctionData } = require("../../fixtures/auctions/auctions");
 const user = require("../../fixtures/user/user")();
-const currencies = require("../../fixtures/currencies/currencies");
+const currencyDataArray = require("../../fixtures/currencies/currencies")();
+const currencies = currencyDataArray[0];
 
 const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = auctionData;
 
@@ -96,26 +97,41 @@ describe("auctions", function () {
   });
 
   describe("makeNewBid", function () {
+    const highestBid = initialPrice;
     it("Should return bid id and make a new bid", async function () {
       sinon.stub(walletsQuery, "fetchWallet").returns({ currencies, isActive: true, userId: bidder });
-      const bidId = await auctions.makeNewBid({ bidder, auctionId, bid: 300 });
+      const bidId = await auctions.makeNewBid({ bidder, auctionId, bid: highestBid + 50 });
       const bidData = (await bidModel.doc(bidId).get()).data();
 
       expect(bidData.bidder).to.be.equal(bidder);
       expect(bidData.auction_id).to.be.equal(auctionId);
-      expect(bidData.bid).to.be.equal(300);
+      expect(bidData.bid).to.be.equal(highestBid + 50);
     });
     it("Should return auction not found", async function () {
-      const response = await auctions.makeNewBid({ bidder, auctionId: "invalidAuctionId", bid: 300 });
+      const response = await auctions.makeNewBid({ bidder, auctionId: "invalidAuctionId", bid: highestBid + 50 });
 
       expect(response).to.be.a("object");
       expect(response.auctionNotFound).to.be.equal(true);
     });
     it("Should return wallet not found", async function () {
-      const response = await auctions.makeNewBid({ bidder, auctionId, bid: 300 });
+      const response = await auctions.makeNewBid({ bidder, auctionId, bid: highestBid + 50 });
 
       expect(response).to.be.a("object");
       expect(response.noWallet).to.be.equal(true);
+    });
+    it("Should return low bid", async function () {
+      sinon.stub(walletsQuery, "fetchWallet").returns({ currencies, isActive: true, userId: bidder });
+      const response = await auctions.makeNewBid({ bidder, auctionId, bid: highestBid - 50 });
+
+      expect(response).to.be.a("object");
+      expect(response.lowBid).to.be.equal(true);
+    });
+    it("Should return insufficient money", async function () {
+      sinon.stub(walletsQuery, "fetchWallet").returns({ currencies, isActive: true, userId: bidder });
+      const response = await auctions.makeNewBid({ bidder, auctionId, bid: currencies.dinero + 50 });
+
+      expect(response).to.be.a("object");
+      expect(response.insufficientMoney).to.be.equal(true);
     });
   });
 });
