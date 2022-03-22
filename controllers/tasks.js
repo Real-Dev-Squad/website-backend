@@ -137,7 +137,8 @@ const updateTaskStatus = async (req, res) => {
 
     if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
     if (task.notAssignedToYou) return res.boom.forbidden("This task is not assigned to you");
-    if (task.taskData.status === "VERIFIED") return res.boom.forbidden("Can't allow this request");
+    if (task.taskData.status === "VERIFIED")
+      return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
     await tasks.updateTask(req.body, taskId);
     return res.json({ message: "Task updated successfully!" });
