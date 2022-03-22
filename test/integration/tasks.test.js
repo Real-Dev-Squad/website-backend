@@ -370,8 +370,7 @@ describe("Tasks", function () {
           expect(res).to.have.status(401);
           expect(res.body.message).to.be.equal("Unauthenticated User");
           return done();
-        })
-        .catch(done());
+        });
     });
 
     it("Should give 403 if status is already 'VERIFIED' ", async function () {
@@ -389,16 +388,14 @@ describe("Tasks", function () {
         isNoteworthy: true,
       };
       taskId = (await tasks.updateTask(taskData)).taskId;
-      chai
+      const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(taskStatusData)
-        .end((err, res) => {
-          if (err) throw err;
-          expect(res).to.have.status(403);
-          expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
-        });
+        .send(taskStatusData);
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
   });
 });
