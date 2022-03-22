@@ -1,6 +1,6 @@
-const express = require('express')
-const router = express.Router()
-const auth = require('../controllers/auth')
+const express = require("express");
+const router = express.Router();
+const auth = require("../controllers/auth");
 
 /**
  * @swagger
@@ -32,6 +32,6 @@ const auth = require('../controllers/auth')
  *             schema:
  *               $ref: '#/components/schemas/errors/unAuthorized'
  */
-router.get('/github/callback', auth.githubAuth)
+router.get("/github/callback", auth.githubAuth);
 
-module.exports = router
+module.exports = router;

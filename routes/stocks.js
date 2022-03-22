@@ -1,9 +1,9 @@
-const express = require('express')
-const router = express.Router()
-const authenticate = require('../middlewares/authenticate')
-const { authorizeUser } = require('../middlewares/authorization')
-const { addNewStock, fetchStocks, getSelfStocks } = require('../controllers/stocks')
-const { createStock } = require('../middlewares/validators/stocks')
+const express = require("express");
+const router = express.Router();
+const authenticate = require("../middlewares/authenticate");
+const { authorizeUser } = require("../middlewares/authorization");
+const { addNewStock, fetchStocks, getSelfStocks } = require("../controllers/stocks");
+const { createStock } = require("../middlewares/validators/stocks");
 
 /**
  * @swagger
@@ -27,7 +27,7 @@ const { createStock } = require('../middlewares/validators/stocks')
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', fetchStocks)
+router.get("/", fetchStocks);
 
 /**
  * @swagger
@@ -62,7 +62,7 @@ router.get('/', fetchStocks)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/', authenticate, authorizeUser('superUser'), createStock, addNewStock)
+router.post("/", authenticate, authorizeUser("superUser"), createStock, addNewStock);
 
 /**
  * @swagger
@@ -92,6 +92,6 @@ router.post('/', authenticate, authorizeUser('superUser'), createStock, addNewSt
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/user/self', authenticate, getSelfStocks)
+router.get("/user/self", authenticate, getSelfStocks);
 
-module.exports = router
+module.exports = router;
