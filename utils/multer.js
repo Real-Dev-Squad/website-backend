@@ -39,7 +39,8 @@ const isMulterError = (err) => {
 };
 
 module.exports = {
-  upload,
-  multerErrorHandling,
+  fileFilterImagesOnly,
   isMulterError,
+  multerErrorHandling,
+  upload,
 };
