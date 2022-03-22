@@ -358,7 +358,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.equal("This task is not assigned to you");
     });
 
-    it("Should give error for no cookie", async function (done) {
+    it("Should give error for no cookie", function (done) {
       chai
         .request(app)
         .patch(`/tasks/self/${taskId1}`)
@@ -372,6 +372,33 @@ describe("Tasks", function () {
           return done();
         })
         .catch(done());
+    });
+
+    it("Should give 403 if status is already 'VERIFIED' ", async function () {
+      const taskData = {
+        title: "Test task",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "VERIFIED",
+        percentCompleted: 10,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      };
+      taskId = (await tasks.updateTask(taskData)).taskId;
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) throw err;
+          expect(res).to.have.status(403);
+          expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+        });
     });
   });
 });
