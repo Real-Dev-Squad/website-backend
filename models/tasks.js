@@ -16,6 +16,9 @@ const updateTask = async (taskData, taskId = null) => {
     taskData = await toFirestoreData(taskData);
     if (taskId) {
       const task = await tasksModel.doc(taskId).get();
+      if (taskData.status === "VERIFIED") {
+        taskData = { ...taskData, endsOn: Math.floor(Date.now() / 1000) };
+      }
       await tasksModel.doc(taskId).set({
         ...task.data(),
         ...taskData,
