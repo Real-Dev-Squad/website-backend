@@ -1,4 +1,3 @@
-/* eslint-disable security/detect-object-injection */
 const chai = require("chai");
 const { expect } = chai;
 
@@ -15,12 +14,16 @@ const challengeDataArray = require("../../fixtures/challenges/challenges")();
 const challengeData = challengeDataArray[0];
 
 describe("Challenges", function () {
+  let challengeId;
+
+  beforeEach(async function () {
+    challengeId = await challengeQuery.postChallenge(challengeData);
+  });
   afterEach(async function () {
     await cleanDb();
   });
   describe("postChallenge", function () {
     it("should add the challenge", async function () {
-      const challengeId = await challengeQuery.postChallenge(challengeData);
       const data = (await challengeModel.doc(challengeId).get()).data();
 
       expect(data.level).to.be.equal(challengeData.level);
@@ -41,13 +44,13 @@ describe("Challenges", function () {
 
   describe("fetchChallenges", function () {
     it("should return all challenges", async function () {
-      const challengeId = await challengeQuery.postChallenge(challengeData);
       const response = await challengeQuery.fetchChallenges();
 
       expect(response).to.be.a("array").with.lengthOf(1);
       expect(response[0].id).to.be.equal(challengeId);
     });
     it("should return a empty array", async function () {
+      await cleanDb();
       const response = await challengeQuery.fetchChallenges();
 
       expect(response).to.be.a("array").with.lengthOf(0);
@@ -57,7 +60,6 @@ describe("Challenges", function () {
   describe("subscribeUserToChallenge", function () {
     it("should return challenge reference and populate participants", async function () {
       const userId = await addUser();
-      const challengeId = await challengeQuery.postChallenge(challengeData);
 
       const response = await challengeQuery.subscribeUserToChallenge(userId, challengeId);
       const data = response.data();
