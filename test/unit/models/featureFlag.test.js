@@ -6,63 +6,85 @@
 const chai = require("chai");
 const { expect } = chai;
 
-const featureFlags = require("../../../models/featureFlags");
 const addUser = require("../../utils/addUser");
 const cleanDb = require("../../utils/cleanDb");
 const firestore = require("../../../utils/firestore");
+
+const featureFlagQuery = require("../../../models/featureFlags");
 const featureFlagModel = firestore.collection("featureFlags");
+
 const featureFlagData = require("../../fixtures/featureFlag/featureFlag")();
 const userData = require("../../fixtures/user/user")();
-
 const appOwner = userData[5];
-const featureFlag = featureFlagData[0];
+const featureFlagMockData = featureFlagData[0];
 
 describe("FeatureFlag", function () {
+  let featureFlag;
   beforeEach(async function () {
+    featureFlag = await featureFlagQuery.addFeatureFlags(featureFlagMockData, appOwner.username);
     await addUser();
   });
 
-  after(async function () {
+  afterEach(async function () {
     await cleanDb();
   });
 
   describe("addFeatureFlag", function () {
     it("Should add the feature flag data", async function () {
-      featureFlag.created_at = Date.now();
-      featureFlag.updated_at = featureFlag.created_at;
-      featureFlag.owner = appOwner.username;
+      const data = (await featureFlagModel.doc(featureFlag.id).get()).data();
 
-      // Add feature flag data
-      const data = await featureFlags.addFeatureFlags(featureFlag, appOwner.username);
-
-      const featureData = (await featureFlagModel.doc(data.id).get()).data();
-
-      Object.keys(featureFlag).forEach((key) => {
-        expect(featureFlag[key]).to.deep.equal(featureData[key]);
+      Object.keys(featureFlagMockData).forEach((key) => {
+        expect(featureFlagMockData[key]).to.deep.equal(data[key]);
+        expect(featureFlag[key]).to.deep.equal(data[key]);
       });
 
-      expect(data.name).to.be.a("string");
-      expect(data.id).to.be.a("string");
-      expect(data.title).to.be.a("string");
-      expect(data.owner).to.be.a("string");
-      expect(data.created_at).to.be.a("number");
-      expect(data.created_at).to.be.a("number");
-      expect(data.config.enabled).to.be.a("boolean");
+      expect(featureFlag.id).to.be.a("string");
+      expect(featureFlag.created_at).to.be.a("number");
+      expect(featureFlag.updated_at).to.be.a("number");
     });
   });
 
   describe("updateFeatureFlag", function () {
+    const updatedData = {
+      config: {
+        enabled: false,
+      },
+    };
     it("Should update the feature flag", async function () {
-      const data = await featureFlags.addFeatureFlags(featureFlag, appOwner.username);
-
-      const updatedData = {
-        config: {
-          enabled: true,
-        },
-      };
-      const { isUpdated } = await featureFlags.updateFeatureFlags(updatedData, data.id);
+      const { isUpdated } = await featureFlagQuery.updateFeatureFlags(updatedData, featureFlag.id);
 
       expect(isUpdated).to.equal(true);
+    });
+    it("Should return isDeleted to be false", async function () {
+      const { isUpdated } = await featureFlagQuery.updateFeatureFlags(updatedData, "invalid_id");
+
+      expect(isUpdated).to.equal(false);
+    });
+  });
+
+  describe("deleteFeatureFlag", function () {
+    it("Should delete the feature flag", async function () {
+      const { isDeleted } = await featureFlagQuery.deleteFeatureFlag(featureFlag.id);
+      const databaseData = (await featureFlagModel.doc(featureFlag.id).get()).data();
+
+      expect(isDeleted).to.equal(true);
+      expect(databaseData).to.be.equal(undefined);
+    });
+
+    it("Should return isDeleted to be false", async function () {
+      const { isDeleted } = await featureFlagQuery.deleteFeatureFlag("invalid_id");
+
+      expect(isDeleted).to.equal(false);
+    });
+  });
+
+  describe("fetchFeatureFlag", function () {
+    it("Should fetch all feature flag", async function () {
+      await featureFlagQuery.addFeatureFlags(featureFlagMockData, "Pallab");
+
+      const response = await featureFlagQuery.fetchFeatureFlag();
+
+      expect(response).to.be.a("array").with.lengthOf(2);
     });
   });
 });
