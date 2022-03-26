@@ -60,15 +60,15 @@ const getSelfArts = async (req, res) => {
   }
 };
 
-const getUserArts = async (req,res) => {
-  try{
+const getUserArts = async (req, res) => {
+  try {
     const userId = req.params.userId;
     const arts = await artsQuery.fetchUserArts(userId);
     return res.json({
       message: `User Arts of userId ${userId} returned successfully`,
       arts,
     });
-  } catch(err) {
+  } catch (err) {
     logger.error(`Error while getting user arts ${err}`);
     return res.boom.badImplementation("An internal server error occurred");
   }
