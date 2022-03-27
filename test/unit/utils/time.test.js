@@ -1,4 +1,3 @@
-/* eslint-disable security/detect-object-injection */
 const chai = require("chai");
 const { expect } = chai;
 
