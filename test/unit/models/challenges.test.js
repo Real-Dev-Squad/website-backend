@@ -4,7 +4,6 @@ const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const firestore = require("../../../utils/firestore");
 const addUser = require("../../utils/addUser");
-const timeUtils = require("../../../utils/time");
 
 const challengeQuery = require("../../../models/challenges");
 const challengeModel = firestore.collection("challenges");
@@ -32,12 +31,12 @@ describe("Challenges", function () {
       expect(data.participants).to.be.a("array").with.lengthOf(0);
       expect(data.is_active).to.be.equal(true);
 
-      expect(data.start_at).to.be.deep.equal({
-        _seconds: timeUtils.getTimeInSecondAfter({ timestamp: challengeData.start_at }),
+      expect(data.start_date).to.be.deep.equal({
+        _seconds: challengeData.start_date,
         _nanoseconds: 0,
       });
-      expect(data.end_at).to.be.deep.equal({
-        _seconds: timeUtils.getTimeInSecondAfter({ timestamp: challengeData.end_at }),
+      expect(data.end_date).to.be.deep.equal({
+        _seconds: challengeData.end_date,
         _nanoseconds: 0,
       });
     });
