@@ -1,12 +1,12 @@
-const { convertToSeconds } = require("../../../constants/time");
+const timeUtils = require("../../../utils/time");
 
 module.exports = () => {
   return [
     {
       title: "Sherlock and Anagrams",
       level: "Easy",
-      start_date: parseInt(Date.now() / 1000),
-      end_date: parseInt(Date.now() / 1000) + convertToSeconds.DAYS_10, // After 10 days
+      start_at: Date.now(),
+      end_at: Date.now() + timeUtils.convertDaysToMilliseconds(10),
     },
   ];
 };

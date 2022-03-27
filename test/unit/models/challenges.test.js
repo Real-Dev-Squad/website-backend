@@ -4,6 +4,7 @@ const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const firestore = require("../../../utils/firestore");
 const addUser = require("../../utils/addUser");
+const timeUtils = require("../../../utils/time");
 
 const challengeQuery = require("../../../models/challenges");
 const challengeModel = firestore.collection("challenges");
@@ -31,12 +32,12 @@ describe("Challenges", function () {
       expect(data.participants).to.be.a("array").with.lengthOf(0);
       expect(data.is_active).to.be.equal(true);
 
-      expect(data.start_date).to.be.deep.equal({
-        _seconds: challengeData.start_date,
+      expect(data.start_at).to.be.deep.equal({
+        _seconds: timeUtils.getTimeInSecondAfter({ timestamp: challengeData.start_at }),
         _nanoseconds: 0,
       });
-      expect(data.end_date).to.be.deep.equal({
-        _seconds: challengeData.end_date,
+      expect(data.end_at).to.be.deep.equal({
+        _seconds: timeUtils.getTimeInSecondAfter({ timestamp: challengeData.end_at }),
         _nanoseconds: 0,
       });
     });
@@ -59,16 +60,24 @@ describe("Challenges", function () {
 
   describe("subscribeUserToChallenge", function () {
     it("should return challenge reference and populate participants", async function () {
-      const userId = await addUser();
+      const userId1 = await addUser();
+      const userId2 = await addUser(userDataArray[2]);
 
-      const response = await challengeQuery.subscribeUserToChallenge(userId, challengeId);
+      await challengeQuery.subscribeUserToChallenge(userId1, challengeId);
+      const response = await challengeQuery.subscribeUserToChallenge(userId2, challengeId);
       const data = response.data();
 
-      expect(data.level).to.be.equal(challengeData.level);
-      expect(data.title).to.be.equal(challengeData.title);
-      expect(data.participants).to.be.a("array").with.lengthOf(1);
-      expect(data.participants[0]).to.be.equal(userId);
-      expect(data.is_active).to.be.equal(true);
+      expect(data.participants).to.be.a("array").with.lengthOf(2);
+      expect(data.participants[0]).to.be.equal(userId1);
+      expect(data.participants[1]).to.be.equal(userId2);
+    });
+    it("should throw an error on passing invalid userId", async function () {
+      try {
+        await challengeQuery.subscribeUserToChallenge("invalid_user", challengeId);
+      } catch (err) {
+        expect(err).to.be.a("error");
+        expect(err.message).to.be.equal("User does not exist. Please register to participate");
+      }
     });
   });
 

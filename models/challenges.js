@@ -6,6 +6,7 @@
 const Firestore = require("@google-cloud/firestore");
 const firestore = require("../utils/firestore");
 const { fetchUser } = require("./users");
+const { getTimeInSecondAfter } = require("../utils/time");
 
 const challengesModel = firestore.collection("challenges");
 const userModel = firestore.collection("users");
@@ -66,13 +67,13 @@ const fetchParticipantsData = async (participants) => {
 
 const postChallenge = async (challengeData) => {
   try {
-    const { start_date: startDate, end_date: endDate } = challengeData;
-    const startdate = new Firestore.Timestamp(startDate, 0);
-    const enddate = new Firestore.Timestamp(endDate, 0);
+    const { start_at: startAt, end_at: endAt } = challengeData;
+    const startat = new Firestore.Timestamp(getTimeInSecondAfter({ timestamp: startAt }), 0);
+    const endat = new Firestore.Timestamp(getTimeInSecondAfter({ timestamp: endAt }), 0);
     const challengeRef = await challengesModel.add({
       ...challengeData,
-      start_date: startdate,
-      end_date: enddate,
+      start_at: startat,
+      end_at: endat,
       participants: [],
       is_active: true,
     });
