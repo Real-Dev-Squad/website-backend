@@ -381,11 +381,11 @@ describe("Tasks", function () {
     });
   });
 
-  describe("GET /tasks/overduetasks", function () {
+  describe("GET /tasks/overdue", function () {
     it("Should return all the overdue Tasks", async function () {
       await tasks.updateTask(tasksData[0]);
       await tasks.updateTask(tasksData[1]);
-      const res = await chai.request(app).get("/tasks/overduetasks").set("cookie", `${cookieName}=${superUserJwt}`);
+      const res = await chai.request(app).get("/tasks/overdue").set("cookie", `${cookieName}=${superUserJwt}`);
 
       expect(res).to.have.status(200);
       expect(res.body.newAvailableTasks).to.be.a("array");
@@ -400,7 +400,7 @@ describe("Tasks", function () {
 
     it("Should return [] if no overdue task", async function () {
       await tasks.updateTask(tasksData[2]);
-      const res = await chai.request(app).get("/tasks/overduetasks").set("cookie", `${cookieName}=${superUserJwt}`);
+      const res = await chai.request(app).get("/tasks/overdue").set("cookie", `${cookieName}=${superUserJwt}`);
 
       expect(res).to.have.status(200);
       expect(res.body.newAvailableTasks).to.have.lengthOf(0);
