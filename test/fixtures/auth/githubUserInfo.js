@@ -11,7 +11,7 @@ module.exports = () => {
       id: "26190252",
       nodeId: "MDQ6VXNlcjI2MTkwMjUy",
       displayName: "Ankur Narkhede",
-      username: "ankurnarkhede",
+      username: "ankur",
       profileUrl: "https://github.com/ankurnarkhede",
       photos: [
         {
