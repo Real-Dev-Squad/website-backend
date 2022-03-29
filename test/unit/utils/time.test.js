@@ -1,4 +1,5 @@
 const chai = require("chai");
+const sinon = require("sinon");
 const { expect } = chai;
 
 const cleanDb = require("../../utils/cleanDb");
@@ -45,8 +46,12 @@ describe("time", function () {
       }
     });
     it("should return the current time", function () {
+      const currentTime = Date.now();
+      sinon.stub(Date, "now").returns(currentTime);
       const result = timeUtils.getTimeInSecondAfter({});
+
       expect(result).to.be.equal(parseInt(Date.now() / 1000));
+      sinon.restore();
     });
   });
 });
