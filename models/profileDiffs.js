@@ -1,3 +1,4 @@
+const { profileStatus } = require("../constants/users");
 const firestore = require("../utils/firestore");
 const profileDiffsModel = firestore.collection("profileDiffs");
 
@@ -7,7 +8,7 @@ const profileDiffsModel = firestore.collection("profileDiffs");
  */
 const fetchProfileDiffs = async () => {
   try {
-    const snapshot = await profileDiffsModel.where("approval", "==", "PENDING").get();
+    const snapshot = await profileDiffsModel.where("approval", "==", profileStatus.PENDING).get();
     const profileDiffs = [];
     snapshot.forEach((doc) => {
       profileDiffs.push({

@@ -43,6 +43,7 @@ describe("GET /profileDiffs", function () {
 
         expect(response).to.have.status(200);
         expect(response.body.message).to.be.equal("Profile Diffs returned successfully!");
+        expect(response.body.profileDiffs.length).to.be.equal(0);
 
         return done();
       });
