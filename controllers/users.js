@@ -1,29 +1,20 @@
 const chaincodeQuery = require("../models/chaincodes");
 const userQuery = require("../models/users");
 const imageService = require("../services/imageService");
-const fetch = require("node-fetch");
+const { fetch } = require("../utils/fetch");
 
 const verifyUser = async (req, res) => {
+  const userId = req.userData.id;
   try {
-    const userId = req.userData.id;
     if (!req.userData?.identityURL) {
       return res.boom.serverUnavailable("IdentityURL is Missing");
     }
     await userQuery.addOrUpdate({ identityStatus: "PENDING" }, userId);
   } catch (error) {
-    logger.error(`Error while fetching all users: ${error}`);
+    logger.error(`Error while verifying user: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
-  const fetchData = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      username: req.userData.username,
-    }),
-  };
-  fetch(process.env.IDENTITY_SERVICE_URL, fetchData);
+  fetch(process.env.IDENTITY_SERVICE_URL, "POST", null, { userId }, { "Content-Type": "application/json" });
   return res.json({
     message: "Your request has been queued successfully",
   });
