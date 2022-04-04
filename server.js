@@ -38,8 +38,6 @@ server.listen(port);
 server.on("error", onError);
 server.on("listening", onListening);
 
-// @ts-ignore
-
 /**
  * Event listener for HTTP server 'error' event.
  */
