@@ -1,6 +1,6 @@
 const ROLES = {
-  SUPER_USER: 'superUser',
-  APP_OWNER: 'appOwner'
-}
+  SUPER_USER: "superUser",
+  APP_OWNER: "appOwner",
+};
 
-module.exports = ROLES
+module.exports = ROLES;

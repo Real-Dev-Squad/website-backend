@@ -1,4 +1,4 @@
-const { DINERO, NEELAM } = require('../../../constants/wallets')
+const { DINERO, NEELAM } = require("../../../constants/wallets");
 
 /* Import fixtures
  *
@@ -9,7 +9,7 @@ const { DINERO, NEELAM } = require('../../../constants/wallets')
 
 const currencies = {
   [DINERO]: 1000,
-  [NEELAM]: 2
-}
+  [NEELAM]: 2,
+};
 
-module.exports = currencies
+module.exports = currencies;

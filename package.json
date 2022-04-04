@@ -11,7 +11,8 @@
     "validate-setup": "node scripts/validateSetup.js",
     "test-integration": "sh scripts/tests/testIntegration.sh",
     "test-unit": "sh scripts/tests/testUnit.sh",
-    "test": "yarn run lint && yarn run test-integration && yarn run test-unit",
+    "test": "yarn lint && yarn test-unit && yarn test-integration",
+    "tdd:watch": "sh scripts/tests/tdd.sh",
     "generate-api-schema": "node utils/generateAPISchema.js"
   },
   "dependencies": {
@@ -48,11 +49,13 @@
     "chai": "^4.3.4",
     "chai-http": "^4.3.0",
     "cross-env": "^7.0.3",
-    "eslint": "^7.24.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-mocha": "^8.1.0",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-standard": "^4.1.0",
@@ -65,7 +68,8 @@
     "sinon": "^10.0.0",
     "ts-node": "^10.4.0",
     "ts-node-dev": "^1.1.8",
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.4",
+    "prettier": "^2.5.1"
   },
   "engines": {
     "node": "14.x"
