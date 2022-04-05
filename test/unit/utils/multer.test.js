@@ -3,8 +3,12 @@ const { expect } = chai;
 const sinon = require("sinon");
 
 const cleanDb = require("../../utils/cleanDb");
-
 const multer = require("../../../utils/multer");
+
+const errorMessage = require("../../../constants/errorMessages");
+const multerConstant = require("../../../constants/multer");
+const MB_1 = multerConstant.FILE_SIZE_1MB;
+const profileFileSize = multerConstant.PROFILE_FILE_SIZE;
 
 describe("multer", function () {
   afterEach(async function () {
@@ -47,18 +51,22 @@ describe("multer", function () {
     it("should call the entityTooLarge error callback", function () {
       multer.multerErrorHandling(errCode[0], {}, { boom: { entityTooLarge: spy } }, {});
       expect(spy.callCount).to.be.equal(1);
+      expect(spy.calledWith(errorMessage.FILE_TOO_LARGE(profileFileSize / MB_1))).to.be.equal(true);
     });
     it("should call the badData error callback", function () {
       multer.multerErrorHandling(errCode[1], {}, { boom: { badData: spy } }, {});
       expect(spy.callCount).to.be.equal(1);
+      expect(spy.calledWith(errorMessage.ONLY_ONE_FILE_ALLOWED)).to.be.equal(true);
     });
     it("should call the unsupportedMediaType error callback", function () {
       multer.multerErrorHandling(errCode[2], {}, { boom: { unsupportedMediaType: spy } }, {});
       expect(spy.callCount).to.be.equal(1);
+      expect(spy.calledWith(errorMessage.ONLY_IMAGE_SUPPORTED)).to.be.equal(true);
     });
     it("should call the badImplementation error callback", function () {
       multer.multerErrorHandling(errCode[3], {}, { boom: { badImplementation: spy } }, {});
       expect(spy.callCount).to.be.equal(1);
+      expect(spy.calledWith(errorMessage.INTERNAL_SERVER_ERROR)).to.be.equal(true);
     });
   });
 });
