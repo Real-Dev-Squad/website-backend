@@ -141,9 +141,9 @@ describe("Tasks", function () {
   });
 
   describe("GET /tasks/self", function () {
+    const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
+    const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
     it("Should get all the active and blocked tasks of the user", function (done) {
-      const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
-      const { IN_PROGRESS, BLOCKED, SMOKE_TESTING } = TASK_STATUS;
       const taskStatus = [OLD_ACTIVE, OLD_PENDING, OLD_BLOCKED, IN_PROGRESS, BLOCKED, SMOKE_TESTING];
 
       chai
@@ -176,7 +176,7 @@ describe("Tasks", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("array");
-          expect(res.body[0].status).to.equal(TASK_STATUS.COMPLETED);
+          expect(res.body[0].status).to.equal(COMPLETED);
 
           return done();
         });
@@ -391,7 +391,7 @@ describe("Tasks", function () {
       expect(res.body.newAvailableTasks).to.be.a("array");
       res.body.newAvailableTasks.forEach((task) => {
         const { status, startedOn, endsOn, assignee } = task.unassignedTask;
-        expect(status).to.equal("AVAILABLE");
+        expect(status).to.equal(TASK_STATUS.AVAILABLE);
         expect(assignee).to.equal(null);
         expect(startedOn).to.equal(null);
         expect(endsOn).to.equal(null);

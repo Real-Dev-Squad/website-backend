@@ -166,7 +166,7 @@ const fetchUserTasks = async (username, statuses = []) => {
     const promises = tasks.map(async (task) => fromFirestoreData(task));
     const updatedTasks = await Promise.all(promises);
     const taskList = updatedTasks.map((task) => {
-      task.status = TASK_STATUS[task.status.toUpperCase()];
+      task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
       return task;
     });
     return taskList;
