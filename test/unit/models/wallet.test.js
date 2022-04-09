@@ -7,7 +7,7 @@ const addUser = require("../../utils/addUser");
 
 const walletModel = firestore.collection("wallets");
 const walletQuery = require("../../../models/wallets");
-const currencies = require("../../fixtures/currencies/currencies")();
+const currencies = require("../../fixtures/currencies/currencies");
 const userDataArray = require("../../fixtures/user/user")();
 
 describe("wallets", function () {
