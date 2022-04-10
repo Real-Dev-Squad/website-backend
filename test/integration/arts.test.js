@@ -18,11 +18,10 @@ chai.use(chaiHttp);
 
 describe("Arts", function () {
   let jwt;
-  let userid;
+  let userId;
 
   beforeEach(async function () {
-    const userId = await addUser();
-    userid = userId;
+    userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
     await arts.addArt(artData[0], userId);
   });
@@ -97,7 +96,7 @@ describe("Arts", function () {
     it("Should get the art from firestore", function (done) {
       chai
         .request(app)
-        .get(`/arts/user/${userid}`)
+        .get(`/arts/user/${userId}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -105,7 +104,22 @@ describe("Arts", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
           expect(res.body.arts).to.be.an("Array").with.lengthOf(1);
-          expect(res.body.message).to.equal(`User Arts of userId ${userid} returned successfully`);
+          expect(res.body.message).to.equal(`User Arts of userId ${userId} returned successfully`);
+          return done();
+        });
+    });
+    it("Should return empty array when passing invalid user id", function (done) {
+      chai
+        .request(app)
+        .get(`/arts/user/invalidUserId`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.arts).to.be.an("Array").with.lengthOf(0);
+          expect(res.body.message).to.equal(`User Arts of userId invalidUserId returned successfully`);
           return done();
         });
     });
