@@ -18,9 +18,11 @@ chai.use(chaiHttp);
 
 describe("Arts", function () {
   let jwt;
+  let userid;
 
   beforeEach(async function () {
     const userId = await addUser();
+    userid = userId;
     jwt = authService.generateAuthToken({ userId });
     await arts.addArt(artData[0], userId);
   });
@@ -86,6 +88,24 @@ describe("Arts", function () {
           expect(res.body.arts[0]).to.be.a("object");
           expect(res.body.arts[0].title).to.equal(artData[0].title);
 
+          return done();
+        });
+    });
+  });
+
+  describe("GET /arts/user/:userId", function () {
+    it("Should get the art from firestore", function (done) {
+      chai
+        .request(app)
+        .get(`/arts/user/${userid}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.arts).to.be.an("Array").with.lengthOf(1);
+          expect(res.body.message).to.equal(`User Arts of userId ${userid} returned successfully`);
           return done();
         });
     });
