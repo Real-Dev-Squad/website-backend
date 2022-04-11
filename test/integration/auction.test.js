@@ -14,7 +14,7 @@ const { createWallet } = require("../../models/wallets");
 const userData = require("../fixtures/user/user")();
 const { auctionData, auctionKeys, auctionWithIdKeys } = require("../fixtures/auctions/auctions");
 const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = auctionData;
-const currenciesData = require("../fixtures/currencies/currencies")[0];
+const currenciesData = require("../fixtures/currencies/currencies");
 
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
@@ -28,7 +28,7 @@ describe("Auctions", function () {
   beforeEach(async function () {
     const userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
-    await createWallet(userId, currenciesData);
+    await createWallet(userId, currenciesData[0]);
     auctionId = await createNewAuction({ seller: userId, initialPrice, endTime, itemType, quantity });
   });
 
