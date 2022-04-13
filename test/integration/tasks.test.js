@@ -11,20 +11,25 @@ const userModel = require("../../models/users");
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
+const tasksData = require("../fixtures/tasks/tasks")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
+const { TASK_STATUS_OLD, TASK_STATUS } = require("../../constants/tasks");
 chai.use(chaiHttp);
 
 const appOwner = userData[3];
+const superUser = userData[4];
 
-let jwt;
+let jwt, superUserJwt;
 
 describe("Tasks", function () {
   let taskId1, taskId;
 
   before(async function () {
     const userId = await addUser(appOwner);
+    const superUserId = await addUser(superUser);
     jwt = authService.generateAuthToken({ userId });
+    superUserJwt = authService.generateAuthToken({ userId: superUserId });
 
     const taskData = [
       {
@@ -136,8 +141,10 @@ describe("Tasks", function () {
   });
 
   describe("GET /tasks/self", function () {
+    const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
+    const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
     it("Should get all the active and blocked tasks of the user", function (done) {
-      const taskStatus = ["active", "completed"];
+      const taskStatus = [OLD_ACTIVE, OLD_PENDING, OLD_BLOCKED, IN_PROGRESS, BLOCKED, SMOKE_TESTING];
 
       chai
         .request(app)
@@ -169,7 +176,7 @@ describe("Tasks", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("array");
-          expect(res.body[0].status).to.equal("completed");
+          expect(res.body[0].status).to.equal(COMPLETED);
 
           return done();
         });
@@ -310,7 +317,7 @@ describe("Tasks", function () {
     });
   });
 
-  describe("PATCH /self/:id", function () {
+  describe("PATCH /tasks/self/:id", function () {
     const taskStatusData = {
       status: "currentStatus",
       percentCompleted: 50,
@@ -358,7 +365,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.equal("This task is not assigned to you");
     });
 
-    it("Should give error for no cookie", async function (done) {
+    it("Should give error for no cookie", function (done) {
       chai
         .request(app)
         .patch(`/tasks/self/${taskId1}`)
@@ -370,8 +377,34 @@ describe("Tasks", function () {
           expect(res).to.have.status(401);
           expect(res.body.message).to.be.equal("Unauthenticated User");
           return done();
-        })
-        .catch(done());
+        });
+    });
+  });
+
+  describe("GET /tasks/overdue", function () {
+    it("Should return all the overdue Tasks", async function () {
+      await tasks.updateTask(tasksData[0]);
+      await tasks.updateTask(tasksData[1]);
+      const res = await chai.request(app).get("/tasks/overdue").set("cookie", `${cookieName}=${superUserJwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body.newAvailableTasks).to.be.a("array");
+      res.body.newAvailableTasks.forEach((task) => {
+        const { status, startedOn, endsOn, assignee } = task.unassignedTask;
+        expect(status).to.equal(TASK_STATUS.AVAILABLE);
+        expect(assignee).to.equal(null);
+        expect(startedOn).to.equal(null);
+        expect(endsOn).to.equal(null);
+      });
+    });
+
+    it("Should return [] if no overdue task", async function () {
+      await tasks.updateTask(tasksData[2]);
+      const res = await chai.request(app).get("/tasks/overdue").set("cookie", `${cookieName}=${superUserJwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body.newAvailableTasks).to.have.lengthOf(0);
+      expect(res.body.message).to.be.equal("No overdue tasks found");
     });
   });
 });
