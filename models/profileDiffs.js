@@ -3,6 +3,7 @@ const firestore = require("../utils/firestore");
 const profileDiffsModel = firestore.collection("profileDiffs");
 
 /**
+ * Add profileDiff
  * Fetches the pending profile diffs
  * @return {Promise<profileDiffsModel|Array>}
  */
@@ -19,8 +20,9 @@ const fetchProfileDiffs = async () => {
     return profileDiffs;
   } catch (err) {
     logger.error("Error retrieving profile diffs ", err);
+    throw err;
   }
-}
+};
 
 /** Add profileDiff
  *
