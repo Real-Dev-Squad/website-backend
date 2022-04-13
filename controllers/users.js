@@ -5,6 +5,24 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
+const { fetch } = require("../utils/fetch");
+
+const verifyUser = async (req, res) => {
+  const userId = req.userData.id;
+  try {
+    if (!req.userData?.identityURL) {
+      return res.boom.serverUnavailable("IdentityURL is Missing");
+    }
+    await userQuery.addOrUpdate({ identityStatus: "PENDING" }, userId);
+  } catch (error) {
+    logger.error(`Error while verifying user: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+  fetch(process.env.IDENTITY_SERVICE_URL, "POST", null, { userId }, { "Content-Type": "application/json" });
+  return res.json({
+    message: "Your request has been queued successfully",
+  });
+};
 
 /**
  * Fetches the data about our users
@@ -216,6 +234,7 @@ const identityURL = async (req, res) => {
   }
 };
 module.exports = {
+  verifyUser,
   generateChaincode,
   updateSelf,
   getUsers,

@@ -7,6 +7,7 @@ const roles = require("../constants/roles");
 const userValidator = require("../middlewares/validators/user");
 const { upload } = require("../utils/multer");
 
+router.post("/verify", authenticate, users.verifyUser);
 /**
  * @swagger
  * /users/self:
