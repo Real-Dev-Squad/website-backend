@@ -5,10 +5,13 @@ const chaiHttp = require("chai-http");
 const app = require("../../server");
 const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
+const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
 
 // Import fixtures
 const userData = require("../fixtures/user/user")();
+const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
+const superUser = userData[4];
 
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
@@ -17,10 +20,15 @@ chai.use(chaiHttp);
 
 describe("Users", function () {
   let jwt;
+  let userId;
+  let superUserId;
+  let superUserAuthToken;
 
   beforeEach(async function () {
-    const userId = await addUser();
+    userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
+    superUserId = await addUser(superUser);
+    superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
   });
 
   afterEach(async function () {
@@ -254,6 +262,78 @@ describe("Users", function () {
     });
   });
 
+  describe("PATCH /users/:userId", function () {
+    let profileDiffsId;
+    beforeEach(async function () {
+      profileDiffsId = await profileDiffs.add({ userId, ...profileDiffData[0] });
+    });
+    it("Should update the user profile with latest pending profileDiffs, using authorized user (super_user)", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({
+          id: `${profileDiffsId}`,
+          first_name: "Ankur",
+          last_name: "Narkhede",
+          yoe: 0,
+          company: "",
+          designation: "AO",
+          github_id: "ankur1337",
+          linkedin_id: "ankurnarkhede",
+          twitter_id: "ankur909",
+          instagram_id: "",
+          website: "",
+          message: "",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Updated user's data successfully!");
+          return done();
+        });
+    });
+
+    it("Should return unauthorized error when not authorized", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.be.equal("Unauthorized");
+          expect(res.body.message).to.be.equal("You are not authorized for this action.");
+          return done();
+        });
+    });
+
+    it("Should return unauthorized error when not logged in", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+          return done();
+        });
+    });
+  });
+
   describe("GET /users/chaincode", function () {
     it("Should save the username and timestamp in firestore collection and return the document ID as chaincode in response", function (done) {
       chai
@@ -268,7 +348,6 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Chaincode returned successfully");
           expect(res.body.chaincode).to.be.a("string");
-
           return done();
         });
     });
@@ -308,6 +387,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should return 400 for invalid identityURL value", function (done) {
       chai
         .request(app)

@@ -1,6 +1,10 @@
 const chaincodeQuery = require("../models/chaincodes");
 const userQuery = require("../models/users");
+const profileDiffsQuery = require("../models/profileDiffs");
+const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
+const { profileDiffStatus } = require("../constants/profileDiff");
+const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
 
 const verifyUser = async (req, res) => {
@@ -165,6 +169,44 @@ const postUserPicture = async (req, res) => {
   }
 };
 
+/**
+ * Updates the user data
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { id: profileDiffId, message, ...profileDiff } = req.body;
+
+    const user = await userQuery.fetchUser({ userId });
+    if (!user.userExists) return res.boom.notFound("User doesn't exist");
+
+    const profileResponse = await profileDiffsQuery.updateProfileDiff(
+      { approval: profileDiffStatus.APPROVED },
+      profileDiffId
+    );
+
+    if (profileResponse.notFound) return res.boom.notFound("Profile Diff doesn't exist");
+    await userQuery.addOrUpdate(profileDiff, userId);
+
+    const meta = {
+      approvedBy: req.userData.id,
+      userId: userId,
+    };
+
+    await logsQuery.addLog(logType.PROFILE_DIFF_APPROVED, meta, { profileDiffId, message });
+
+    return res.json({
+      message: "Updated user's data successfully!",
+    });
+  } catch (error) {
+    logger.error(`Error while updating user data: ${error}`);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
 const generateChaincode = async (req, res) => {
   try {
     const { username } = req.userData;
@@ -200,5 +242,6 @@ module.exports = {
   getUser,
   getUsernameAvailabilty,
   postUserPicture,
+  updateUser,
   identityURL,
 };
