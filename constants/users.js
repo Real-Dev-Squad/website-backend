@@ -6,4 +6,5 @@ const ROLES = {
   MEMBER: "member",
   SUPERUSER: "super_user",
 };
+
 module.exports = { userStatusEnum, ROLES };
