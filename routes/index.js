@@ -14,6 +14,7 @@ app.use("/stocks", require("./stocks.js"));
 app.use("/tasks", require("./tasks.js"));
 app.use("/trade", require("./trading.js"));
 app.use("/users", require("./users.js"));
+app.use("/profileDiffs", require("./profileDiffs.js"));
 app.use("/wallet", require("./wallets.js"));
 app.use("/featureFlags", require("./featureFlags"));
 
