@@ -369,6 +369,31 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("Should give 403 if status is already 'VERIFIED' ", async function () {
+      const taskData = {
+        title: "Test task",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "VERIFIED",
+        percentCompleted: 10,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      };
+      taskId = (await tasks.updateTask(taskData)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(taskStatusData);
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+    });
   });
 
   describe("GET /tasks/overdue", function () {
