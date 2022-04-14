@@ -126,18 +126,12 @@ const fetchSelfTask = async (taskId, userId) => {
 };
 
 /**
- * Fetch all the active and blocked tasks of the user
- *
- * @return {Promise<tasks|Array>}
- */
-
-/**
  * Fetch all tasks of a user
  *
  * @return {Promise<tasks|Array>}
  */
 
-const fetchUserTasks = async (username, statuses = []) => {
+const fetchUserTasks = async (username, statuses = [], field, order) => {
   try {
     const userId = await userUtils.getUserId(username);
 
@@ -149,15 +143,35 @@ const fetchUserTasks = async (username, statuses = []) => {
     let featureTasksSnapshot = [];
 
     if (statuses && statuses.length) {
-      groupTasksSnapshot = await tasksModel
-        .where("participants", "array-contains", userId)
-        .where("status", "in", statuses)
-        .get();
-      featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).where("status", "in", statuses).get();
+      if (field) {
+        groupTasksSnapshot = await tasksModel
+          .where("participants", "array-contains", userId)
+          .where("status", "in", statuses)
+          .orderBy(field, order)
+          .get();
+        featureTasksSnapshot = await tasksModel
+          .where("assignee", "==", userId)
+          .where("status", "in", statuses)
+          .orderBy(field, order)
+          .get();
+      } else {
+        groupTasksSnapshot = await tasksModel
+          .where("participants", "array-contains", userId)
+          .where("status", "in", statuses)
+          .get();
+        featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).where("status", "in", statuses).get();
+      }
     } else {
-      groupTasksSnapshot = await tasksModel.where("participants", "array-contains", userId).get();
-
-      featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).get();
+      if (field) {
+        groupTasksSnapshot = await tasksModel
+          .where("participants", "array-contains", userId)
+          .orderBy(field, order)
+          .get();
+        featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).orderBy(field, order).get();
+      } else {
+        groupTasksSnapshot = await tasksModel.where("participants", "array-contains", userId).get();
+        featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).get();
+      }
     }
 
     const groupTasks = buildTasks(groupTasksSnapshot);
@@ -176,18 +190,13 @@ const fetchUserTasks = async (username, statuses = []) => {
   }
 };
 
-const fetchUserActiveAndBlockedTasks = async (username) => {
-  return await fetchUserTasks(
-    username,
-    [
-      OLD_ACTIVE,
-      OLD_PENDING,
-      OLD_BLOCKED, // old task workflow
-      IN_PROGRESS,
-      BLOCKED,
-      SMOKE_TESTING,
-    ] // new task workflow
-  );
+/**
+ *
+ * @param username { string } : username which will be used to fetch all self tasks
+ * @returns {Promise<tasks>|Array}
+ */
+const fetchSelfTasks = async (username) => {
+  return await fetchUserTasks(username, [], "startedOn", "desc");
 };
 
 /**
@@ -234,7 +243,7 @@ module.exports = {
   fetchTasks,
   fetchTask,
   fetchUserTasks,
-  fetchUserActiveAndBlockedTasks,
+  fetchSelfTasks,
   fetchUserCompletedTasks,
   fetchActiveTaskMembers,
   fetchSelfTask,
