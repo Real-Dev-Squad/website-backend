@@ -1,10 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
+const { authorizeUser } = require("../middlewares/authorization");
 const users = require("../controllers/users");
+const roles = require("../constants/roles");
 const userValidator = require("../middlewares/validators/user");
 const { upload } = require("../utils/multer");
 
+router.post("/verify", authenticate, users.verifyUser);
 /**
  * @swagger
  * /users/self:
@@ -269,5 +272,7 @@ router.get("/:username", users.getUser);
 router.post("/picture", authenticate, upload.single("profile"), users.postUserPicture);
 
 router.patch("/identityURL", authenticate, userValidator.updateIdentityURL, users.identityURL);
+
+router.patch("/:userId", authenticate, authorizeUser(roles.SUPER_USER), users.updateUser);
 
 module.exports = router;
