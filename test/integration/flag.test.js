@@ -8,10 +8,19 @@ const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 
 const config = require("config");
-const flagData = require("../fixtures/flag/flag");
 const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
 const superUser = userData[4];
+
+const flagData = {
+  title: "dark - mode",
+  enabled: true,
+  roles: ["members", "no_role", "super_user"],
+  users: {
+    "pallab id": "true",
+    "rohit id": "false",
+  },
+};
 
 chai.use(chaiHttp);
 
@@ -33,7 +42,7 @@ describe("flags", function () {
         .request(app)
         .post("/flag/add")
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(flagData[0])
+        .send(flagData)
         .end((err, res) => {
           if (err) {
             throw done(err);
