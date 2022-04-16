@@ -22,13 +22,13 @@ describe("flags", function () {
 
   describe("add feature flag", function () {
     it("Should return flag Id", async function () {
-      const mock = await flagFirestore.doc(flagId).get();
-      const mockData = mock.data();
-      const mockId = mock.id;
+      const fetched = await flagFirestore.doc(flagId).get();
+      const fetchedData = fetched.data();
+      const fetchedId = fetched.id;
       Object.keys(flagData).forEach((key) => {
-        expect(flagData[key]).to.deep.equal(mockData[key]);
+        expect(flagData[key]).to.deep.equal(fetchedData[key]);
       });
-      expect(mockId).to.equal(flagId);
+      expect(fetchedId).to.equal(flagId);
     });
   });
 });
