@@ -10,10 +10,10 @@ const { fetch } = require("../utils/fetch");
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
   try {
-    if (!req.userData?.identityURL) {
-      return res.boom.serverUnavailable("IdentityURL is Missing");
+    if (!req.userData?.profileURL) {
+      return res.boom.serverUnavailable("ProfileURL is Missing");
     }
-    await userQuery.addOrUpdate({ identityStatus: "PENDING" }, userId);
+    await userQuery.addOrUpdate({ profileStatus: "PENDING" }, userId);
   } catch (error) {
     logger.error(`Error while verifying user: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
