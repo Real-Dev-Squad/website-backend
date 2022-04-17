@@ -8,6 +8,8 @@ const userValidator = require("../middlewares/validators/user");
 const { upload } = require("../utils/multer");
 
 router.post("/verify", authenticate, users.verifyUser);
+router.get("/userId/:userId", users.getUserById);
+
 /**
  * @swagger
  * /users/self:
