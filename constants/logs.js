@@ -1,0 +1,3 @@
+const logType = { PROFILE_DIFF_APPROVED: "PROFILE_DIFF_APPROVED", PROFILE_DIFF_REJECTED: "PROFILE_DIFF_REJECTED" };
+
+module.exports = { logType };
