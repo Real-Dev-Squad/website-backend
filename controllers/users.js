@@ -24,6 +24,25 @@ const verifyUser = async (req, res) => {
   });
 };
 
+const getUserById = async (req, res) => {
+  try {
+    const result = await userQuery.fetchUser({ userId: req.params.userId });
+    const { phone, email, ...user } = result.user;
+
+    if (result.userExists) {
+      return res.json({
+        message: "User returned successfully!",
+        user,
+      });
+    }
+
+    return res.boom.notFound("User doesn't exist");
+  } catch (error) {
+    logger.error(`Error while fetching user: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
 /**
  * Fetches the data about our users
  *
@@ -244,4 +263,5 @@ module.exports = {
   postUserPicture,
   updateUser,
   identityURL,
+  getUserById,
 };
