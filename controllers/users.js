@@ -10,10 +10,10 @@ const { fetch } = require("../utils/fetch");
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
   try {
-    if (!req.userData?.identityURL) {
-      return res.boom.serverUnavailable("IdentityURL is Missing");
+    if (!req.userData?.profileURL) {
+      return res.boom.serverUnavailable("ProfileURL is Missing");
     }
-    await userQuery.addOrUpdate({ identityStatus: "PENDING" }, userId);
+    await userQuery.addOrUpdate({ profileStatus: "PENDING" }, userId);
   } catch (error) {
     logger.error(`Error while verifying user: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
@@ -209,8 +209,8 @@ const updateUser = async (req, res) => {
 
 const generateChaincode = async (req, res) => {
   try {
-    const { username } = req.userData;
-    const chaincode = await chaincodeQuery.storeChaincode(username);
+    const { id } = req.userData;
+    const chaincode = await chaincodeQuery.storeChaincode(id);
     return res.json({
       chaincode,
       message: "Chaincode returned successfully",
@@ -221,12 +221,13 @@ const generateChaincode = async (req, res) => {
   }
 };
 
-const identityURL = async (req, res) => {
+const profileURL = async (req, res) => {
   try {
     const userId = req.userData.id;
-    await userQuery.addOrUpdate(req.body, userId);
+    const { profileURL } = req.body;
+    await userQuery.addOrUpdate({ profileURL }, userId);
     return res.json({
-      message: "updated identity URL!!",
+      message: "updated profile URL!!",
     });
   } catch (error) {
     logger.error(`Internal Server Error: ${error}`);
@@ -243,5 +244,5 @@ module.exports = {
   getUsernameAvailabilty,
   postUserPicture,
   updateUser,
-  identityURL,
+  profileURL,
 };
