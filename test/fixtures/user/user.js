@@ -28,7 +28,7 @@ module.exports = () => {
         githubAccessToken: "githubAccessToken",
       },
       status: "active",
-      identityURL: "https://abcde.com",
+      profileURL: "https://abcde.com",
     },
     {
       username: "nikhil",

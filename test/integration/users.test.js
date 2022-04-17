@@ -376,7 +376,7 @@ describe("Users", function () {
   });
 
   describe("GET /users/chaincode", function () {
-    it("Should save the username and timestamp in firestore collection and return the document ID as chaincode in response", function (done) {
+    it("Should save the userId and timestamp in firestore collection and return the document ID as chaincode in response", function (done) {
       chai
         .request(app)
         .get("/users/chaincode")
@@ -409,14 +409,14 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /users/identityURL", function () {
-    it("Should update the identityURL", function (done) {
+  describe("PATCH /users/profileURL", function () {
+    it("Should update the profileURL", function (done) {
       chai
         .request(app)
-        .patch("/users/identityURL")
+        .patch("/users/profileURL")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          identityURL: "http://localhost:3000/healthcheck",
+          profileURL: "http://localhost:3000/healthcheck",
         })
         .end((err, res) => {
           if (err) {
@@ -424,18 +424,17 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("updated identity URL!!");
+          expect(res.body.message).to.equal("updated profile URL!!");
           return done();
         });
     });
-
-    it("Should return 400 for invalid identityURL value", function (done) {
+    it("Should return 400 for invalid profileURL value", function (done) {
       chai
         .request(app)
-        .patch("/users/identityURL")
+        .patch("/users/profileURL")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          identityURL: "random",
+          profileURL: "random",
         })
         .end((err, res) => {
           if (err) {
@@ -447,16 +446,16 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: '"identityURL" must be a valid uri',
+            message: '"profileURL" must be a valid uri',
           });
 
           return done();
         });
     });
-    it("Should return 400 for no identityURL value", function (done) {
+    it("Should return 400 for no profileURL value", function (done) {
       chai
         .request(app)
-        .patch("/users/identityURL")
+        .patch("/users/profileURL")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({})
         .end((err, res) => {
@@ -469,7 +468,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: '"identityURL" is required',
+            message: '"profileURL" is required',
           });
           return done();
         });
