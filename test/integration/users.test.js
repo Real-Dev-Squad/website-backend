@@ -20,9 +20,9 @@ chai.use(chaiHttp);
 
 describe("Users", function () {
   let jwt;
-  let userId;
   let superUserId;
   let superUserAuthToken;
+  let userId = "";
 
   beforeEach(async function () {
     userId = await addUser();
@@ -211,6 +211,47 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users/invalidUser")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User doesn't exist");
+
+          return done();
+        });
+    });
+  });
+
+  describe("GET /users/userId/id", function () {
+    it("Should return one user with given id", function (done) {
+      chai
+        .request(app)
+        .get(`/users/userId/${userId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User returned successfully!");
+          expect(res.body.user).to.be.a("object");
+          expect(res.body.user).to.not.have.property("phone");
+          expect(res.body.user).to.not.have.property("email");
+
+          return done();
+        });
+    });
+
+    it("Should return 404 if there is no user in the system", function (done) {
+      chai
+        .request(app)
+        .get("/users/userId/invalidUserId")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
