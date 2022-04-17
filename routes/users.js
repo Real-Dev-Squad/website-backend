@@ -273,6 +273,8 @@ router.post("/picture", authenticate, upload.single("profile"), users.postUserPi
 
 router.patch("/identityURL", authenticate, userValidator.updateIdentityURL, users.identityURL);
 
+router.patch("/rejectDiff", authenticate, authorizeUser(roles.SUPER_USER), users.rejectProfileDiff);
+
 router.patch("/:userId", authenticate, authorizeUser(roles.SUPER_USER), users.updateUser);
 
 module.exports = router;
