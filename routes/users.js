@@ -271,7 +271,7 @@ router.get("/:username", users.getUser);
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post("/picture", authenticate, upload.single("profile"), users.postUserPicture);
 
-router.patch("/identityURL", authenticate, userValidator.updateIdentityURL, users.identityURL);
+router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);
 
 router.patch("/:userId", authenticate, authorizeUser(roles.SUPER_USER), users.updateUser);
 
