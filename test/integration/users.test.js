@@ -303,6 +303,68 @@ describe("Users", function () {
     });
   });
 
+  describe("PATCH /users/rejectDiff", function () {
+    let profileDiffsId;
+    beforeEach(async function () {
+      profileDiffsId = await profileDiffs.add({ userId, ...profileDiffData[0] });
+    });
+    it("Should update reject the profileDiff specified, using authorized user (super_user)", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/rejectDiff`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({
+          profileDiffId: `${profileDiffsId}`,
+          message: "",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Profile Diff Rejected successfully!");
+          return done();
+        });
+    });
+
+    it("Should return unauthorized error when not authorized", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/rejectDiff`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.be.equal("Unauthorized");
+          expect(res.body.message).to.be.equal("You are not authorized for this action.");
+          return done();
+        });
+    });
+
+    it("Should return unauthorized error when not logged in", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/rejectDiff`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+          return done();
+        });
+    });
+  });
+
   describe("PATCH /users/:userId", function () {
     let profileDiffsId;
     beforeEach(async function () {

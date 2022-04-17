@@ -253,6 +253,33 @@ const profileURL = async (req, res) => {
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
+
+const rejectProfileDiff = async (req, res) => {
+  try {
+    const { profileDiffId, message } = req.body;
+    const profileResponse = await profileDiffsQuery.updateProfileDiff(
+      { approval: profileDiffStatus.REJECTED },
+      profileDiffId
+    );
+
+    if (profileResponse.notFound) return res.boom.notFound("Profile Diff doesn't exist");
+
+    const meta = {
+      rejectedBy: req.userData.id,
+      userId: profileResponse.userId,
+    };
+
+    await logsQuery.addLog(logType.PROFILE_DIFF_REJECTED, meta, { profileDiffId, message });
+
+    return res.json({
+      message: "Profile Diff Rejected successfully!",
+    });
+  } catch (error) {
+    logger.error(`Error while rejecting profile diff: ${error}`);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -263,6 +290,7 @@ module.exports = {
   getUsernameAvailabilty,
   postUserPicture,
   updateUser,
+  rejectProfileDiff,
   getUserById,
   profileURL,
 };

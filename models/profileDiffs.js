@@ -59,7 +59,7 @@ const updateProfileDiff = async (profileDiffData, profileId) => {
       ...profileDiffData,
     });
 
-    return { id: profileDiff.id };
+    return { id: profileDiff.id, userId: data.userId };
   } catch (err) {
     logger.error("Error in updating profile diff", err);
     throw err;
