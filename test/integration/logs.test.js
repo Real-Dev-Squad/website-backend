@@ -28,7 +28,7 @@ describe("logs", function () {
     await cleanDb();
   });
 
-  it("should return unauthorized error", function (done) {
+  it("should return unauthenticated user", function (done) {
     chai
       .request(app)
       .get("/logs/TYPE_1")
@@ -47,7 +47,7 @@ describe("logs", function () {
       });
   });
 
-  it("should return forbidden error", function (done) {
+  it("should return not authorized", function (done) {
     chai
       .request(app)
       .get("/logs/TYPE_1")
@@ -67,7 +67,7 @@ describe("logs", function () {
       });
   });
 
-  it("should return ", function (done) {
+  it("should return logs successfully", function (done) {
     chai
       .request(app)
       .get("/logs/TYPE_1")
