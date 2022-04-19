@@ -18,6 +18,13 @@ const snapshotToArray = (snapshot, initialArray = []) => {
   return initialArray;
 };
 
+/**
+ * Returns document data of given documents ids
+ *
+ * @param {Object[]} [docIds] - Array of documents ids
+ * @param {Object} modelFunc - Callback model function
+ * @returns {Object} - Returns array of document objects with document id included
+ */
 const getDocFromIds = async (docIds, modelFunc) => {
   try {
     if (!Array.isArray(docIds)) {

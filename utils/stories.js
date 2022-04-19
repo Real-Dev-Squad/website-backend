@@ -3,6 +3,12 @@ const { fetchTask } = require("../models/tasks");
 const logger = require("./logger");
 const { getDocFromIds } = require("../utils/firestoreHelper");
 
+/**
+ * Converts userId to username in story object
+ *
+ * @param {Object} story - Firestore snapshot object
+ * @returns {Object} - Returns story object containing usernames
+ */
 const fromFirestoreData = async (story) => {
   try {
     if (!story) {
@@ -30,6 +36,12 @@ const fromFirestoreData = async (story) => {
   }
 };
 
+/**
+ * Converts username to userId in story object
+ *
+ * @param {Object} story - request body object
+ * @returns {Object} - Returns story object containing userIds
+ */
 const toFirestoreData = async (story) => {
   try {
     if (!story) {
