@@ -37,7 +37,7 @@ const fromFirestoreData = async (story) => {
 };
 
 /**
- * Converts username to userId in story object
+ * Converts username to userId in story object and discard invalid taskIds
  *
  * @param {Object} story - request body object
  * @returns {Object} - Returns story object containing userIds
