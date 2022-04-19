@@ -25,6 +25,7 @@ const addNewStory = async (req, res) => {
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
+
 /**
  * Fetches all the stories
  *
@@ -33,26 +34,39 @@ const addNewStory = async (req, res) => {
  */
 const fetchStories = async (req, res) => {
   try {
-    const result = {};
-    if (req.params.id) {
-      const story = await stories.fetchStory(req.params.id);
-      if (!story.storyData) {
-        return res.boom.notFound("Story not found");
-      }
-      result.message = "Story returned successfully!";
-      result.story = story.storyData;
-    } else {
-      const allStories = await stories.fetchStories(req.query);
-      if (!allStories) {
-        logger.error("Error while fetching story: Incorrect query parameters");
-        return res.boom.badRequest("Unable to fetch stories");
-      }
-      result.message = "Stories returned successfully!";
-      result.stories = allStories.length > 0 ? allStories : [];
+    const allStories = await stories.fetchStories(req.query);
+    if (!allStories) {
+      logger.error("Error while fetching story: Incorrect query parameters");
+      return res.boom.badRequest("Unable to fetch stories");
     }
-    return res.json({ ...result });
+    return res.json({
+      message: "Stories returned successfully!",
+      stories: allStories.length > 0 ? allStories : [],
+    });
   } catch (err) {
     logger.error(`Error while fetching stories ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
+/**
+ * Fetch story data for given id
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const fetchStory = async (req, res) => {
+  try {
+    const story = await stories.fetchStory(req.params.id);
+    if (!story.storyData) {
+      return res.boom.notFound("Story not found");
+    }
+    return res.json({
+      message: "Story returned successfully!",
+      story: story.storyData,
+    });
+  } catch (err) {
+    logger.error(`Error while fetching story ${err}`);
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
@@ -86,5 +100,6 @@ const updateStory = async (req, res) => {
 module.exports = {
   addNewStory,
   fetchStories,
+  fetchStory,
   updateStory,
 };
