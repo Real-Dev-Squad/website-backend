@@ -145,8 +145,14 @@ const updateTaskStatus = async (req, res) => {
     const { id: userId } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
 
-    if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
-    if (task.notAssignedToYou) return res.boom.forbidden("This task is not assigned to you");
+    if (task.taskNotFound) {
+      logger.error(`Error while updating taskId ${req.params.id}: Invalid taskId passed`);
+      return res.boom.notFound("Task doesn't exist");
+    }
+    if (task.notAssignedToYou) {
+      logger.error(`Error while updating taskId ${req.params.id}: Forbidden user`);
+      return res.boom.forbidden("This task is not assigned to you");
+    }
 
     const taskData = await toFirestoreData(req.body);
     if (taskData.userNotFound) {
