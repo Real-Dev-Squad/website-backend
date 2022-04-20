@@ -3,7 +3,7 @@ const router = express.Router();
 const members = require("../controllers/members");
 const { authorizeUser } = require("../middlewares/authorization");
 const authenticate = require("../middlewares/authenticate");
-const { addRecruiter } = require("../controllers/recruiters");
+const { addRecruiter, fetchRecruitersInfo } = require("../controllers/recruiters");
 const { validateRecruiter } = require("../middlewares/validators/recruiter");
 const { SUPER_USER } = require("../constants/roles");
 
@@ -86,6 +86,40 @@ router.get("/idle", members.getIdleMembers);
  */
 
 router.post("/intro/:username", validateRecruiter, addRecruiter);
+
+/**
+ * @swagger
+ * /members/intro:
+ *   get:
+ *     summary: Returns all requests for member introduction by recruiter in the system.
+ *     tags:
+ *       - Members
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Details of the recruiter and the member in which recruiter is interested
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/recruiters'
+ *
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *
+ *       500:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+
+router.get("/intro", authenticate, authorizeUser(SUPER_USER), fetchRecruitersInfo);
 
 /**
  * @swagger
