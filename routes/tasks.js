@@ -68,6 +68,41 @@ router.get("/self", authenticate, tasks.getSelfTasks);
 
 /**
  * @swagger
+ * /tasks/overdue:
+ *  get:
+ *    summary: To get the overdue tasks as available
+ *    tags:
+ *      -Tasks
+ *    responses:
+ *      200:
+ *        description: returns all the overdue tasks
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#components/schemas/tasks'
+ *      401:
+ *        description: unAuthorized
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/shcemas/error/unAuthorized'
+ *      403:
+ *        description: forbidden
+ *        content:
+ *           application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/errors/forbidden'
+ *      500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.get("/overdue", authenticate, authorizeUser("superUser"), tasks.overdueTasks);
+
+/**
+ * @swagger
  * /tasks:
  *  post:
  *   summary: Used to create new task

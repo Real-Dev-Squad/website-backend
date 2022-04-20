@@ -11,7 +11,7 @@ const updateUser = async (req, res, next) => {
       username: joi.string().optional(),
       first_name: joi.string().optional(),
       last_name: joi.string().optional(),
-      yoe: joi.number().optional(),
+      yoe: joi.number().min(0).optional(),
       company: joi.string().optional(),
       designation: joi.string().optional(),
       img: joi.string().optional(),
@@ -33,20 +33,20 @@ const updateUser = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
-const updateIdentityURL = async (req, res, next) => {
+const updateProfileURL = async (req, res, next) => {
   const schema = joi.object().strict().keys({
-    identityURL: joi.string().uri().required(),
+    profileURL: joi.string().uri().required(),
   });
 
   try {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
-    logger.error(`Error validating updateIdentityURL payload : ${error}`);
+    logger.error(`Error validating updateProfileURL payload : ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };
 module.exports = {
   updateUser,
-  updateIdentityURL,
+  updateProfileURL,
 };
