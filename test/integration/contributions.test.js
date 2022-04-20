@@ -7,6 +7,7 @@ const chaiHttp = require("chai-http");
 const githubService = require("../../services/githubService");
 const testModel = require("../../models/tasks");
 const userModel = require("../../models/users");
+const { toFirestoreData } = require("../../utils/tasks");
 
 const app = require("../../server");
 
@@ -52,11 +53,11 @@ describe("Contributions", function () {
       lossRate: { gold: 1 },
       isNoteworthy: true,
     };
-    await testModel.updateTask(task);
+    await testModel.updateTask(await toFirestoreData(task));
     // Creating second task
     task.links = ["https://github.com/Real-Dev-Squad/website-backend/pull/83"];
     task.isNoteworthy = false;
-    await testModel.updateTask(task);
+    await testModel.updateTask(await toFirestoreData(task));
   });
   afterEach(function () {
     sinon.restore();

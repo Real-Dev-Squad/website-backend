@@ -11,6 +11,7 @@ const userModel = require("../../models/users");
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
+const { toFirestoreData } = require("../../utils/tasks");
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
 chai.use(chaiHttp);
@@ -59,11 +60,11 @@ describe("Tasks", function () {
     ];
 
     // Add the active task
-    taskId = (await tasks.updateTask(taskData[0])).taskId;
+    taskId = (await tasks.updateTask(await toFirestoreData(taskData[0]))).taskId;
     taskId1 = taskId;
 
     // Add the completed task
-    taskId = (await tasks.updateTask(taskData[1])).taskId;
+    taskId = (await tasks.updateTask(await toFirestoreData(taskData[1]))).taskId;
   });
 
   after(async function () {
@@ -257,7 +258,7 @@ describe("Tasks", function () {
         lossRate: { [DINERO]: 1 },
         isNoteworthy: true,
       };
-      const { taskId } = await tasks.updateTask(assignedTask);
+      const { taskId } = await tasks.updateTask(await toFirestoreData(assignedTask));
       const res = await chai
         .request(app)
         .get("/tasks/self")
