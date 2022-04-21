@@ -125,7 +125,6 @@ describe("Arts", function () {
     });
   });
 
-
   describe("GET /arts/user/self", function () {
     it("Should get all the arts of the user", function (done) {
       chai
