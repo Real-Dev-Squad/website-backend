@@ -15,7 +15,7 @@ const bidModel = firestore.collection("bids");
 // Import fixtures
 const { auctionData } = require("../../fixtures/auctions/auctions");
 const user = require("../../fixtures/user/user")();
-const currencyDataArray = require("../../fixtures/currencies/currencies")();
+const currencyDataArray = require("../../fixtures/currencies/currencies");
 const currencies = currencyDataArray[0];
 
 const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = auctionData;

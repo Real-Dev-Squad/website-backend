@@ -14,7 +14,7 @@ const { createWallet } = require("../../models/wallets");
 const userData = require("../fixtures/user/user")();
 const { auctionData, auctionKeys, auctionWithIdKeys } = require("../fixtures/auctions/auctions");
 const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = auctionData;
-const currencyDataArray = require("../fixtures/currencies/currencies")();
+const currencyDataArray = require("../fixtures/currencies/currencies");
 const currenciesData = currencyDataArray[0];
 
 const config = require("config");

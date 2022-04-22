@@ -7,18 +7,16 @@ const { DINERO, NEELAM } = require("../../../constants/wallets");
  * @return {Object}
  */
 
-module.exports = () => {
-  return [
-    {
-      [DINERO]: 1000,
-      [NEELAM]: 2,
-    },
-    {
-      [DINERO]: 2000,
-      [NEELAM]: 0,
-    },
-    {
-      [DINERO]: 1000,
-    },
-  ];
-};
+module.exports = [
+  {
+    [DINERO]: 1000,
+    [NEELAM]: 2,
+  },
+  {
+    [DINERO]: 2000,
+    [NEELAM]: 0,
+  },
+  {
+    [DINERO]: 1000,
+  },
+];
