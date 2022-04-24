@@ -59,7 +59,7 @@ const getParticipantUsernames = async (participantArray) => {
   }
 };
 /**
- * Converts the usernames entered in the database to corresponding usernames
+ * Converts the particpant usernames to corresponding userIds
  * @param participantArray {array} : participants array to be updated
  * @returns participantUserIds {array} : array of user ids of all participants
  */
