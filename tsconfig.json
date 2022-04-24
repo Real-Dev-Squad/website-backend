@@ -2,16 +2,18 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "lib": ["esnext"],
+    "lib": ["dom", "es6", "es2017", "esnext.asynciterable"],
     "allowJs": true,
-    "outDir": "build",
+    "sourceMap": true,
+    "outDir": "dist",
     "rootDir": "./",
     "strict": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "types": ["node"],
-    "checkJs": false
+    "checkJs": false,
+    "moduleResolution": "node"
+
   },
 
   "exclude": ["node_modules", "dist"],
