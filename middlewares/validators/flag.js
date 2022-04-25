@@ -1,6 +1,6 @@
 const joi = require("joi");
 
-const addFeatureFlagValidator = async (req, res, next) => {
+const addFeatureFlag = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -15,11 +15,11 @@ const addFeatureFlagValidator = async (req, res, next) => {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
-    logger.error(`Error validating createTask payload : ${error}`);
+    logger.error(`Error in validating Feature Flag : ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };
 
 module.exports = {
-  addFeatureFlagValidator,
+  addFeatureFlag,
 };

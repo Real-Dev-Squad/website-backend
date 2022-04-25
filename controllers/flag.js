@@ -1,7 +1,7 @@
 const flagQuery = require("../models/flag");
 
 /**
- * Adds art
+ * Controller function to add feature flag data to firestore
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object

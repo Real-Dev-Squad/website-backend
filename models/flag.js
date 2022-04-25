@@ -2,7 +2,7 @@ const firestore = require("../utils/firestore");
 const flagModel = firestore.collection("featureFlags");
 
 /**
- *
+ * Model function to add flagData in featureFlags collection of linked firestore
  * @param flagData { Object }: flag data object to be stored in DB
  * @returns Flag Id: String
  */

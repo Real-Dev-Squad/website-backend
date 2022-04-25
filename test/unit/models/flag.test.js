@@ -6,7 +6,7 @@ const cleanDb = require("../../utils/cleanDb");
 
 const flagModel = require("../../../models/flag");
 const firestore = require("../../../utils/firestore");
-const flagFirestore = firestore.collection("featureFlags");
+const flagSnapshot = firestore.collection("featureFlags");
 const flagData = require("../../fixtures/flag/flag")();
 
 describe("flags", function () {
@@ -22,7 +22,7 @@ describe("flags", function () {
 
   describe("add feature flag", function () {
     it("Should return flag Id", async function () {
-      const fetched = await flagFirestore.doc(flagId).get();
+      const fetched = await flagSnapshot.doc(flagId).get();
       const fetchedData = fetched.data();
       const fetchedId = fetched.id;
       Object.keys(flagData).forEach((key) => {
