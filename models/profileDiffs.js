@@ -24,6 +24,22 @@ const fetchProfileDiffs = async () => {
   }
 };
 
+/**
+ * Fetches the profileDiff data of the provided profileDiff Id
+ * @param profileDiffId profileDiffId of the diffs need to be fetched
+ * @returns profileDiff Data
+ */
+const fetchProfileDiff = async (profileDiffId) => {
+  try {
+    const Diff = await profileDiffsModel.doc(profileDiffId).get();
+    const profileDiffData = Diff.data();
+    return profileDiffData;
+  } catch (err) {
+    logger.error("Error retrieving profile Diff", err);
+    throw err;
+  }
+};
+
 /** Add profileDiff
  *
  * @param profileDiffData { Object }: Data to be added
@@ -68,6 +84,7 @@ const updateProfileDiff = async (profileDiffData, profileId) => {
 
 module.exports = {
   fetchProfileDiffs,
+  fetchProfileDiff,
   add,
   updateProfileDiff,
 };

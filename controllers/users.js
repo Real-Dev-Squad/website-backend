@@ -196,8 +196,9 @@ const postUserPicture = async (req, res) => {
  */
 const updateUser = async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const { id: profileDiffId, message, ...profileDiff } = req.body;
+    const { id: profileDiffId, message } = req.body;
+
+    const { approval, timestamp, userId, ...profileDiff } = await profileDiffsQuery.fetchProfileDiff(profileDiffId);
 
     const user = await userQuery.fetchUser({ userId });
     if (!user.userExists) return res.boom.notFound("User doesn't exist");
