@@ -36,35 +36,35 @@ describe("multer", function () {
     });
   });
 
-  describe("", function () {
+  describe("multerErrorHandling", function () {
     let spy;
-    const errCode = [
-      { code: "LIMIT_FILE_SIZE" },
-      { code: "LIMIT_UNEXPECTED_FILE" },
-      { code: "TYPE_UNSUPPORTED_FILE" },
-      { code: "TEST" },
-    ];
+    const errCode = {
+      LIMIT_FILE_SIZE: { code: "LIMIT_FILE_SIZE" },
+      LIMIT_UNEXPECTED_FILE: { code: "LIMIT_UNEXPECTED_FILE" },
+      TYPE_UNSUPPORTED_FILE: { code: "TYPE_UNSUPPORTED_FILE" },
+      UNDEFINED_ERROR: { code: "UNDEFINED_ERROR" },
+    };
     beforeEach(async function () {
       spy = sinon.spy();
     });
 
     it("should call the entityTooLarge error callback", function () {
-      multer.multerErrorHandling(errCode[0], {}, { boom: { entityTooLarge: spy } }, {});
+      multer.multerErrorHandling(errCode.LIMIT_FILE_SIZE, {}, { boom: { entityTooLarge: spy } }, {});
       expect(spy.callCount).to.be.equal(1);
       expect(spy.calledWith(errorMessage.FILE_TOO_LARGE(profileFileSize / MB_1))).to.be.equal(true);
     });
     it("should call the badData error callback", function () {
-      multer.multerErrorHandling(errCode[1], {}, { boom: { badData: spy } }, {});
+      multer.multerErrorHandling(errCode.LIMIT_UNEXPECTED_FILE, {}, { boom: { badData: spy } }, {});
       expect(spy.callCount).to.be.equal(1);
       expect(spy.calledWith(errorMessage.ONLY_ONE_FILE_ALLOWED)).to.be.equal(true);
     });
     it("should call the unsupportedMediaType error callback", function () {
-      multer.multerErrorHandling(errCode[2], {}, { boom: { unsupportedMediaType: spy } }, {});
+      multer.multerErrorHandling(errCode.TYPE_UNSUPPORTED_FILE, {}, { boom: { unsupportedMediaType: spy } }, {});
       expect(spy.callCount).to.be.equal(1);
       expect(spy.calledWith(errorMessage.ONLY_IMAGE_SUPPORTED)).to.be.equal(true);
     });
     it("should call the badImplementation error callback", function () {
-      multer.multerErrorHandling(errCode[3], {}, { boom: { badImplementation: spy } }, {});
+      multer.multerErrorHandling(errCode.UNDEFINED_ERROR, {}, { boom: { badImplementation: spy } }, {});
       expect(spy.callCount).to.be.equal(1);
       expect(spy.calledWith(errorMessage.INTERNAL_SERVER_ERROR)).to.be.equal(true);
     });
