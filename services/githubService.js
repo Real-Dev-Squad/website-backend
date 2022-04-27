@@ -1,4 +1,4 @@
-const axios = require("../utils/fetch");
+const utils = require("../utils/fetch");
 const { fetchUser } = require("../models/users");
 /**
  * Extracts only the necessary details required from the object returned by Github API
@@ -84,7 +84,7 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
  * @param url {string} - URL on github to call
  */
 function getFetch(url) {
-  return axios.fetch(url, "get", null, null, null, {
+  return utils.fetch(url, "get", null, null, null, {
     auth: {
       username: config.get("githubOauth.clientId"),
       password: config.get("githubOauth.clientSecret"),
