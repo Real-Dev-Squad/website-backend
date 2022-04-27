@@ -1,12 +1,12 @@
-const VALID_ROLES = ["super_user", "app_owner", "member"];
+const { ROLES } = require("../constants/users");
+
+const VALID_ROLES = [ROLES.SUPERUSER, ROLES.APPOWNER, ROLES.MEMBER];
 
 /**
- * Check if the user has enough authorization based on their role.
- * User would have following roles schema -
- * userRoles = {app_owner: true, super_user: true}
- * @param {Array} requiredRole - Required role level to authorize request.
+ * Check if the user has authorization based on their role.
+ * @param {Array} allowedRoles - Allowed roles for API consumption.
  * @param {Object} userRoles - Roles information of the current user.
- * @returns {Boolean} - Whether the current user is authorized for required role level.
+ * @returns {Boolean} - Whether the current user is authorized or not.
  */
 const userHasPermission = (allowedRoles, userRoles) => {
   let permission = false;
@@ -19,17 +19,20 @@ const userHasPermission = (allowedRoles, userRoles) => {
   return permission;
 };
 
+/**
+ * Check if the user has authorization based on their role.
+ * @param {Array} roles - Authorized roles set for the API.
+ * @returns {Boolean} - Whether all the authorized roles are vaild or not
+ */
 const validateRoles = (roles) => {
   return roles.every((role) => VALID_ROLES.includes(role));
 };
 
 /**
  * Create an authorization middleware for a route based on the required role needed
- * for that route. Currently following roles are supported:
- * - `authorizeUser('superUser')`
- * - `authorizeUser('appOwner')`
+ * for that route.
  * Note: This must be added on routes after the `authenticate` middleware.
- * @param {String} requiredRole - The least role authority required for a route.
+ * @param {Array} allowedRoles - Roles allowed for a route.
  * @returns {Function} - A middleware function that authorizes given role.
  */
 const authorizeRoles = (allowedRoles) => {
