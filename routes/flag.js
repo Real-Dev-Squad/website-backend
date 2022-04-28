@@ -4,8 +4,8 @@ const authenticate = require("../middlewares/authenticate");
 const { authorizeUser } = require("../middlewares/authorization");
 const flagController = require("../controllers/flag");
 const { addFeatureFlag } = require("../middlewares/validators/flag");
-const superUser = "superUser";
+const { SUPER_USER } = require("../constants/roles");
 
-router.post("/add", authenticate, authorizeUser(superUser), addFeatureFlag, flagController.addFlag);
+router.post("/add", authenticate, authorizeUser(SUPER_USER), addFeatureFlag, flagController.addFlag);
 
 module.exports = router;
