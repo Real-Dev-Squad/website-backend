@@ -16,6 +16,25 @@ const addFlag = async (flagData) => {
   }
 };
 
+const fetchFlags = async () => {
+  try {
+    const flag = await flagModel.get();
+    const flags = [];
+    flag.forEach((doc) => {
+      const flagdata = doc.data();
+      flag.push({
+        id: doc.id,
+        ...flagdata,
+      });
+    });
+    return flags;
+  } catch (err) {
+    logger.error("Error retrieving members data", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addFlag,
+  fetchFlags,
 };

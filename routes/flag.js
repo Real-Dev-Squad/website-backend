@@ -7,4 +7,6 @@ const { addFeatureFlagValidator } = require("../middlewares/validators/flag");
 
 router.post("/add", authenticate, authorizeUser("superUser"), addFeatureFlagValidator, flagController.addFlag);
 
+router.get("/flag", authenticate, authorizeUser("superUser"), addFeatureFlagValidator, flagController.fetchFlags);
+
 module.exports = router;
