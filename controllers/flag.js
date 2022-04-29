@@ -20,10 +20,10 @@ const addFlag = async (req, res) => {
 };
 const fetchFlags = async (req, res) => {
   try {
-    const allFlags = await flagQuery.fetchFlags();
+    const flags = await flagQuery.fetchFlags();
     return res.json({
-      message: allFlags.length ? "Flags returned successfully!" : "No flag found",
-      flagQuery: allFlags,
+      message: flags.length ? "Flags returned successfully!" : "No flag found",
+      flagQuery: flags,
     });
   } catch (error) {
     logger.error(`Error while fetching all Flags: ${error}`);

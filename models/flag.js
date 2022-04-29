@@ -22,7 +22,7 @@ const fetchFlags = async () => {
     const flags = [];
     flag.forEach((doc) => {
       const flagdata = doc.data();
-      flag.push({
+      flags.push({
         id: doc.id,
         ...flagdata,
       });
