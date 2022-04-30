@@ -167,7 +167,7 @@ describe("authorizeRoles", function () {
   });
 
   describe("GET /for-invalid", function () {
-    it("should return server error on route with invalid required role", function (done) {
+    it("should return server error for default user on route with invalid required role", function (done) {
       chai
         .request(app)
         .get("/for-invalid")
@@ -185,6 +185,19 @@ describe("authorizeRoles", function () {
         .request(app)
         .get("/for-invalid")
         .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          return done();
+        });
+    });
+    it("should return server error for app owner on route with invalid required role", function (done) {
+      chai
+        .request(app)
+        .get("/for-invalid")
+        .set("cookie", `${cookieName}=${appOwnerJwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);

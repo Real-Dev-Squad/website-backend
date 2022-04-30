@@ -4,7 +4,7 @@ const VALID_ROLES = [ROLES.SUPERUSER, ROLES.APPOWNER, ROLES.MEMBER];
 
 /**
  * Check if the user has authorization based on their role.
- * @param {Array} allowedRoles - Allowed roles for API consumption.
+ * @param {Array.<String>} allowedRoles - Allowed roles for API consumption.
  * @param {Object} userRoles - Roles information of the current user.
  * @returns {Boolean} - Whether the current user is authorized or not.
  */
@@ -20,8 +20,8 @@ const userHasPermission = (allowedRoles, userRoles) => {
 };
 
 /**
- * Check if the user has authorization based on their role.
- * @param {Array} roles - Authorized roles set for the API.
+ * Checks the validations of allowed roles
+ * @param {Array.<String>} roles - Authorized roles set for the API.
  * @returns {Boolean} - Whether all the authorized roles are vaild or not
  */
 const validateRoles = (roles) => {
@@ -32,7 +32,7 @@ const validateRoles = (roles) => {
  * Create an authorization middleware for a route based on the required role needed
  * for that route.
  * Note: This must be added on routes after the `authenticate` middleware.
- * @param {Array} allowedRoles - Roles allowed for a route.
+ * @param {Array.<String>} allowedRoles - Roles allowed for a route.
  * @returns {Function} - A middleware function that authorizes given role.
  */
 const authorizeRoles = (allowedRoles) => {
