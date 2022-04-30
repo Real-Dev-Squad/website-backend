@@ -23,13 +23,13 @@ const fetchFlags = async () => {
     flag.forEach((doc) => {
       const flagdata = doc.data();
       flags.push({
-        id: doc.id,
+        flagId: doc.id,
         ...flagdata,
       });
     });
     return flags;
   } catch (err) {
-    logger.error("Error retrieving members data", err);
+    logger.error("Error retrieving flag data", err);
     throw err;
   }
 };
