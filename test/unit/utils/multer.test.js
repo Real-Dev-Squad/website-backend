@@ -38,7 +38,7 @@ describe("multer", function () {
 
   describe("multerErrorHandling", function () {
     let spy;
-    const errCode = {
+    const err = {
       LIMIT_FILE_SIZE: { code: "LIMIT_FILE_SIZE" },
       LIMIT_UNEXPECTED_FILE: { code: "LIMIT_UNEXPECTED_FILE" },
       TYPE_UNSUPPORTED_FILE: { code: "TYPE_UNSUPPORTED_FILE" },
@@ -49,22 +49,22 @@ describe("multer", function () {
     });
 
     it("should call the entityTooLarge error callback", function () {
-      multer.multerErrorHandling(errCode.LIMIT_FILE_SIZE, {}, { boom: { entityTooLarge: spy } }, {});
+      multer.multerErrorHandling(err.LIMIT_FILE_SIZE, {}, { boom: { entityTooLarge: spy } }, {});
       expect(spy.callCount).to.be.equal(1);
       expect(spy.calledWith(errorMessage.FILE_TOO_LARGE(profileFileSize / MB_1))).to.be.equal(true);
     });
     it("should call the badData error callback", function () {
-      multer.multerErrorHandling(errCode.LIMIT_UNEXPECTED_FILE, {}, { boom: { badData: spy } }, {});
+      multer.multerErrorHandling(err.LIMIT_UNEXPECTED_FILE, {}, { boom: { badData: spy } }, {});
       expect(spy.callCount).to.be.equal(1);
       expect(spy.calledWith(errorMessage.ONLY_ONE_FILE_ALLOWED)).to.be.equal(true);
     });
     it("should call the unsupportedMediaType error callback", function () {
-      multer.multerErrorHandling(errCode.TYPE_UNSUPPORTED_FILE, {}, { boom: { unsupportedMediaType: spy } }, {});
+      multer.multerErrorHandling(err.TYPE_UNSUPPORTED_FILE, {}, { boom: { unsupportedMediaType: spy } }, {});
       expect(spy.callCount).to.be.equal(1);
       expect(spy.calledWith(errorMessage.ONLY_IMAGE_SUPPORTED)).to.be.equal(true);
     });
     it("should call the badImplementation error callback", function () {
-      multer.multerErrorHandling(errCode.UNDEFINED_ERROR, {}, { boom: { badImplementation: spy } }, {});
+      multer.multerErrorHandling(err.UNDEFINED_ERROR, {}, { boom: { badImplementation: spy } }, {});
       expect(spy.callCount).to.be.equal(1);
       expect(spy.calledWith(errorMessage.INTERNAL_SERVER_ERROR)).to.be.equal(true);
     });
