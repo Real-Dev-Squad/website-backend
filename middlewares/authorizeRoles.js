@@ -1,6 +1,8 @@
-const { ROLES } = require("../constants/users");
+const {
+  ROLES: { SUPERUSER, APPOWNER, MEMBER },
+} = require("../constants/users");
 
-const VALID_ROLES = [ROLES.SUPERUSER, ROLES.APPOWNER, ROLES.MEMBER];
+const VALID_ROLES = [SUPERUSER, APPOWNER, MEMBER];
 
 /**
  * Check if the user has authorization based on their role.
@@ -9,14 +11,7 @@ const VALID_ROLES = [ROLES.SUPERUSER, ROLES.APPOWNER, ROLES.MEMBER];
  * @returns {Boolean} - Whether the current user is authorized or not.
  */
 const userHasPermission = (allowedRoles, userRoles) => {
-  let permission = false;
-  Object.keys(userRoles).forEach((role) => {
-    if (userRoles[`${role}`]) {
-      if (allowedRoles.includes(role)) permission = true;
-    }
-  });
-
-  return permission;
+  return allowedRoles.some((role) => userRoles[`${role}`] === true);
 };
 
 /**
