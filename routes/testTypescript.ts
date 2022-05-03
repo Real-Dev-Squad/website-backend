@@ -1,7 +1,7 @@
-const express = require("express");
+import express = require('express');
 const router = express.Router();
-const member = require("../controllers/testTypescript");
+import { testTypescript } from "../controllers/testTypescript";
 
-router.get("/mehul", member.testTypescript);
+router.get("/mehul", testTypescript);
 
-export = router;
+export =  router;
