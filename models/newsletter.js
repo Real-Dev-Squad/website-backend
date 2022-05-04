@@ -27,7 +27,7 @@ const subscribe = async (data) => {
       });
       return "new added";
     }
-    return "already added in the list";
+    return "Email already present in our mailing list.";
   } catch (err) {
     loggers.error(DB_ERROR);
     throw err;
