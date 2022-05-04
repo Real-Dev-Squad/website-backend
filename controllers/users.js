@@ -28,7 +28,10 @@ const getUserById = async (req, res) => {
   try {
     const result = await userQuery.fetchUser({ userId: req.params.userId });
     const { phone, email, ...user } = result.user;
-
+    user.phone =
+      phone.slice(0, 1) + phone.slice(1, phone.length - 1).replace(/\d/g, "*") + phone.slice(phone.length - 1);
+    user.email =
+      email.slice(0, 2) + email.slice(2, email.length - 2).replace(/./g, "*") + email.slice(email.length - 2);
     if (result.userExists) {
       return res.json({
         message: "User returned successfully!",
