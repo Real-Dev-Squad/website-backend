@@ -2,6 +2,8 @@ const { loggers } = require("winston");
 const firestore = require("../utils/firestore");
 const newsletterModel = firestore.collection("newsletter");
 
+const DB_ERROR = "Not able to conenct to DB";
+
 const subscribe = async (data) => {
   try {
     const { email } = data;
@@ -25,9 +27,9 @@ const subscribe = async (data) => {
       });
       return "new added";
     }
-    return "already added";
+    return "already added in the list";
   } catch (err) {
-    loggers.error("hi");
+    loggers.error(DB_ERROR);
     throw err;
   }
 };
@@ -41,7 +43,7 @@ const getMailingList = async () => {
     });
     return response;
   } catch (err) {
-    loggers.error("couldn't access db");
+    loggers.error(DB_ERROR);
     throw err;
   }
 };
@@ -64,7 +66,7 @@ const unsubscribe = async (data) => {
     });
     return exist ? "Successfully Unsubscribed" : "Couldn't find an existing subscription";
   } catch (err) {
-    loggers.error("couldn't access db");
+    loggers.error(DB_ERROR);
     throw err;
   }
 };

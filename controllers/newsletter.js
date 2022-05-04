@@ -2,10 +2,10 @@ const newsletters = require("../models/newsletter");
 
 const addEmail = async (req, res) => {
   try {
-    const a = await newsletters.subscribe(req.body);
+    const response = await newsletters.subscribe(req.body);
     return res.json({
       message: "gotcha",
-      response: a,
+      response: response,
     });
   } catch (err) {
     logger.error("control failed");
@@ -28,10 +28,10 @@ const getMailingList = async (req, res) => {
 
 const removeEmail = async (req, res) => {
   try {
-    const a = await newsletters.unsubscribe(req.body);
+    const response = await newsletters.unsubscribe(req.body);
     return res.json({
       message: "done",
-      response: a,
+      response: response,
     });
   } catch (err) {
     logger.error("couldn't perform operation");
