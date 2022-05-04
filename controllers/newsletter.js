@@ -19,7 +19,7 @@ const getMailingList = async (req, res) => {
   try {
     const list = await newsletters.getMailingList();
     return res.json({
-      message: "Mailing List message from controller",
+      message: "Active mailing List",
       response: list,
     });
   } catch (err) {
