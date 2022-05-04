@@ -25,7 +25,7 @@ const subscribe = async (data) => {
         email: email,
         active: true,
       });
-      return "new added";
+      return "New Email added";
     }
     return "Email already present in our mailing list.";
   } catch (err) {
