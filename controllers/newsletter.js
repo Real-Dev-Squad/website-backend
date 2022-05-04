@@ -6,7 +6,7 @@ const addEmail = async (req, res) => {
   try {
     const response = await newsletters.subscribe(req.body);
     return res.json({
-      message: "gotcha",
+      message: "Email added message from controller.",
       response: response,
     });
   } catch (err) {
@@ -32,7 +32,7 @@ const removeEmail = async (req, res) => {
   try {
     const response = await newsletters.unsubscribe(req.body);
     return res.json({
-      message: "done",
+      message: "Email unsubscribe message from controller.",
       response: response,
     });
   } catch (err) {
