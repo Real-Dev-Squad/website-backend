@@ -9,10 +9,10 @@ const subscribe = async (data) => {
     const { email } = data;
     const check = await newsletterModel.where("email", "==", email).get();
     let exist = false;
-    check.forEach((ch) => {
-      const data = ch.data();
+    check.forEach((entry) => {
+      const data = entry.data();
       if (!data.active) {
-        const res = ch.id;
+        const res = entry.id;
         newsletterModel.doc(res).update({
           active: true,
           email: data.email,
@@ -53,10 +53,10 @@ const unsubscribe = async (data) => {
     const { email } = data;
     let exist = false;
     const check = await newsletterModel.where("email", "==", email).get();
-    check.forEach((ch) => {
-      const data = ch.data();
+    check.forEach((entry) => {
+      const data = entry.data();
       if (data.active) {
-        const res = ch.id;
+        const res = entry.id;
         newsletterModel.doc(res).update({
           active: false,
           email: data.email,
