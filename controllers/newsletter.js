@@ -1,5 +1,7 @@
 const newsletters = require("../models/newsletter");
 
+const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
+
 const addEmail = async (req, res) => {
   try {
     const response = await newsletters.subscribe(req.body);
@@ -8,8 +10,8 @@ const addEmail = async (req, res) => {
       response: response,
     });
   } catch (err) {
-    logger.error("control failed");
-    return res.boom.badImplementation("not working");
+    logger.error("Logging error from addEmail controllers");
+    return res.boom.badImplementation(ERROR_MESSAGE);
   }
 };
 
@@ -21,8 +23,8 @@ const getMailingList = async (req, res) => {
       response: list,
     });
   } catch (err) {
-    logger.error("Error in fetching list");
-    return res.boom.badImplementation("not working");
+    logger.error("Logging error from getMailingList controllers");
+    return res.boom.badImplementation(ERROR_MESSAGE);
   }
 };
 
@@ -34,8 +36,8 @@ const removeEmail = async (req, res) => {
       response: response,
     });
   } catch (err) {
-    logger.error("couldn't perform operation");
-    return res.boom.badImplementation("not working");
+    logger.error("Logging error from removeEmail controllers");
+    return res.boom.badImplementation(ERROR_MESSAGE);
   }
 };
 
