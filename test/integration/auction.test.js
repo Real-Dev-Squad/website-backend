@@ -29,7 +29,7 @@ describe("Auctions", function () {
   beforeEach(async function () {
     const userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
-    await createWallet(userId, currenciesData[0]);
+    await createWallet(userId, currenciesData);
     auctionId = await createNewAuction({ seller: userId, initialPrice, endTime, itemType, quantity });
   });
 
