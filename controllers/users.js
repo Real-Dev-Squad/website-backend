@@ -230,7 +230,7 @@ const generateChaincode = async (req, res) => {
   try {
     const { id } = req.userData;
     const chaincode = await chaincodeQuery.storeChaincode(id);
-    await userQuery.addOrUpdate(chaincode, id);
+    await userQuery.addOrUpdate({ chaincode }, id);
     return res.json({
       chaincode,
       message: "Chaincode returned successfully",
