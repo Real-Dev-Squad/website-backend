@@ -2,8 +2,18 @@ const newsletters = require("../models/newsletter");
 
 const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
+const isEmailValid = (email) => {
+  return email.match(
+    /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+  );
+};
+
 const addEmail = async (req, res) => {
   try {
+    const checkEmailValid = isEmailValid(req.body.email);
+    if (!checkEmailValid) {
+      throw new Error("Email is not valid");
+    }
     const response = await newsletters.subscribe(req.body);
     return res.json({
       message: "Thank you for subscribing RDS Newsletter!",
@@ -30,6 +40,10 @@ const getMailingList = async (req, res) => {
 
 const removeEmail = async (req, res) => {
   try {
+    const checkEmailValid = isEmailValid(req.body.email);
+    if (!checkEmailValid) {
+      throw new Error("Email is not valid");
+    }
     const response = await newsletters.unsubscribe(req.body);
     return res.json({
       message: "Sorry to see you go!",
