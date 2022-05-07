@@ -14,8 +14,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
-    "moduleResolution": "Node"
-    // "resolveJsonModule": true
+    "moduleResolution": "Node",
+    "resolveJsonModule": true
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "**/*.test.ts", "./node_modules", "./node_modules/*"]
