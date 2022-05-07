@@ -198,8 +198,10 @@ const updateUser = async (req, res) => {
   try {
     const { id: profileDiffId, message } = req.body;
 
-    const { approval, timestamp, userId, ...profileDiff } = await profileDiffsQuery.fetchProfileDiff(profileDiffId);
-    if (!profileDiff) return res.boom.notFound("Profile Diff doesn't exist");
+    const profileDiffData = await profileDiffsQuery.fetchProfileDiff(profileDiffId);
+    if (!profileDiffData) return res.boom.notFound("Profile Diff doesn't exist");
+
+    const { approval, timestamp, userId, ...profileDiff } = profileDiffData;
 
     const user = await userQuery.fetchUser({ userId });
     if (!user.userExists) return res.boom.notFound("User doesn't exist");
