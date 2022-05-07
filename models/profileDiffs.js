@@ -31,8 +31,8 @@ const fetchProfileDiffs = async () => {
  */
 const fetchProfileDiff = async (profileDiffId) => {
   try {
-    const Diff = await profileDiffsModel.doc(profileDiffId).get();
-    const profileDiffData = Diff.data();
+    const profileDiff = await profileDiffsModel.doc(profileDiffId).get();
+    const profileDiffData = profileDiff.data();
     return profileDiffData;
   } catch (err) {
     logger.error("Error retrieving profile Diff", err);
