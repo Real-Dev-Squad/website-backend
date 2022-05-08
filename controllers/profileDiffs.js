@@ -9,7 +9,7 @@ const profileDiffsQuery = require("../models/profileDiffs");
 const getProfileDiffs = async (req, res) => {
   try {
     const pendingProfileDiffs = await profileDiffsQuery.fetchProfileDiffs();
-
+    
     return res.json({
       message: "Profile Diffs returned successfully!",
       profileDiffs: pendingProfileDiffs,

@@ -15,6 +15,24 @@ const fetchProfileDiffs = async () => {
       profileDiffs.push({
         id: doc.id,
         ...doc.data(),
+        email:
+          doc.data().email.substring(0, 2) +
+          doc
+            .data()
+            .email.substring(3, doc.data().email.length - 2)
+            .replace(/./g, "*") +
+          doc.data().email.substring(doc.data().email.length - 4),
+
+        phone:
+          doc.data().phone.substring(0, 2) +
+          doc
+            .data()
+            .phone.substring(3, doc.data().phone.length - 1)
+            .replace(/./g, "*") +
+          doc.data().phone.substring(doc.data().phone.length - 2),
+
+        approval: undefined,
+        timestamp: undefined,
       });
     });
     return profileDiffs;
