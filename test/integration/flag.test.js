@@ -42,8 +42,9 @@ describe("flags", function () {
           if (err) {
             throw done(err);
           }
+          expect(res.status).to.equal(200);
           expect(res.body.flagId).to.be.a("string");
-          expect(res.body.message).to.equal("Add feature flag successfully!");
+          expect(res.body.message).to.equal("Added feature flag successfully!");
 
           return done();
         });
@@ -58,6 +59,7 @@ describe("flags", function () {
           if (err) {
             throw done(err);
           }
+
           expect(res.status).to.equal(401);
           expect(res.body.error).to.equal("Unauthorized");
           expect(res.body.message).to.equal("You are not authorized for this action.");

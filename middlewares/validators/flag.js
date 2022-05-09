@@ -1,6 +1,6 @@
 const joi = require("joi");
 
-const addFeatureFlag = async (req, res, next) => {
+const addFeatureFlagValidator = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -21,5 +21,5 @@ const addFeatureFlag = async (req, res, next) => {
 };
 
 module.exports = {
-  addFeatureFlag,
+  addFeatureFlagValidator,
 };

@@ -10,7 +10,7 @@ const addFlag = async (req, res) => {
   try {
     const flagId = await flagQuery.addFlag(req.body);
     return res.json({
-      message: "Add feature flag successfully!",
+      message: "Added feature flag successfully!",
       flagId: flagId,
     });
   } catch (err) {
