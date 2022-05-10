@@ -11,7 +11,7 @@ const authorizeRoles = (allowedRoles) => {
   return (req, res, next) => {
     const { roles = {} } = req.userData;
 
-    const rolesAreValid = roles.every((role) => VALID_ROLES.includes(role));
+    const rolesAreValid = allowedRoles.every((role) => Object.values(VALID_ROLES).includes(role));
     if (!rolesAreValid) {
       return res.boom.badImplementation("Route authorization failed. Please contact admin");
     }
