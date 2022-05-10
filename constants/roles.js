@@ -3,4 +3,6 @@ const ROLES = {
   APP_OWNER: "appOwner",
 };
 
-module.exports = ROLES;
+const VALID_ROLES = { SUPERUSER: "super_user", APPOWNER: "app_owner", MEMBER: "member" };
+
+module.exports = { ROLES, VALID_ROLES };

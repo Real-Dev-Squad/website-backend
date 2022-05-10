@@ -1,27 +1,4 @@
-const {
-  ROLES: { SUPERUSER, APPOWNER, MEMBER },
-} = require("../constants/users");
-
-const VALID_ROLES = [SUPERUSER, APPOWNER, MEMBER];
-
-/**
- * Check if the user has authorization based on their role.
- * @param {Array.<String>} allowedRoles - Allowed roles for API consumption.
- * @param {Object} userRoles - Roles information of the current user.
- * @returns {Boolean} - Whether the current user is authorized or not.
- */
-const userHasPermission = (allowedRoles, userRoles) => {
-  return allowedRoles.some((role) => userRoles[`${role}`] === true);
-};
-
-/**
- * Checks the validations of allowed roles
- * @param {Array.<String>} roles - Authorized roles set for the API.
- * @returns {Boolean} - Whether all the authorized roles are vaild or not
- */
-const validateRoles = (roles) => {
-  return roles.every((role) => VALID_ROLES.includes(role));
-};
+const { VALID_ROLES } = require("../constants/roles");
 
 /**
  * Create an authorization middleware for a route based on the required role needed
@@ -34,10 +11,13 @@ const authorizeRoles = (allowedRoles) => {
   return (req, res, next) => {
     const { roles = {} } = req.userData;
 
-    if (!validateRoles(allowedRoles)) {
+    const rolesAreValid = roles.every((role) => VALID_ROLES.includes(role));
+    if (!rolesAreValid) {
       return res.boom.badImplementation("Route authorization failed. Please contact admin");
     }
-    if (!userHasPermission(allowedRoles, roles)) {
+
+    const userHasPermission = allowedRoles.some((role) => roles[`${role}`]);
+    if (!userHasPermission) {
       return res.boom.unauthorized("You are not authorized for this action.");
     }
 
@@ -45,8 +25,4 @@ const authorizeRoles = (allowedRoles) => {
   };
 };
 
-module.exports = {
-  authorizeRoles,
-  userHasPermission,
-  validateRoles,
-};
+module.exports = authorizeRoles;

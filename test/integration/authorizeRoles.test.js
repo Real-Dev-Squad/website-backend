@@ -1,7 +1,7 @@
 const chai = require("chai");
 const { expect } = chai;
 
-const { authorizeRoles } = require("../../middlewares/authorizeRoles");
+const authorizeRoles = require("../../middlewares/authorizeRoles");
 const authenticate = require("../../middlewares/authenticate");
 const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
@@ -9,6 +9,10 @@ const cleanDb = require("../utils/cleanDb");
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
+
+const {
+  VALID_ROLES: { APPOWNER, SUPERUSER },
+} = require("../../constants/roles");
 
 const defaultUser = userData[0]; // user with no `roles` key
 const appOwner = userData[3];
@@ -23,9 +27,9 @@ const pongHandler = (_, res) => {
   return res.json({ message: "pong" });
 };
 
-router.get("/for-app-owner", authenticate, authorizeRoles(["app_owner"]), pongHandler);
-router.get("/for-super-user", authenticate, authorizeRoles(["super_user"]), pongHandler);
-router.get("/for-super-user-and-app-owner", authenticate, authorizeRoles(["super_user", "app_owner"]), pongHandler);
+router.get("/for-app-owner", authenticate, authorizeRoles([APPOWNER]), pongHandler);
+router.get("/for-super-user", authenticate, authorizeRoles([SUPERUSER]), pongHandler);
+router.get("/for-super-user-and-app-owner", authenticate, authorizeRoles([SUPERUSER, APPOWNER]), pongHandler);
 router.get("/for-invalid", authenticate, authorizeRoles(["invalid"]), pongHandler);
 
 const app = express();
