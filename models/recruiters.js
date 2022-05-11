@@ -26,6 +26,7 @@ const addRecruiterInfo = async (recruiterData, username) => {
       return userExists;
     }
     const userInfo = `${userFirstName} ${userLastName} (${userEmail})`;
+    recruiterData.username = username;
     recruiterData.timestamp = Date.now();
     // Add the recruiter data in DB
     const { id } = await recruiterModel.add(recruiterData);
@@ -43,6 +44,29 @@ const addRecruiterInfo = async (recruiterData, username) => {
   }
 };
 
+/**
+ * Fetch all recruiters
+ *
+ * @return {Promise<recruiters|Array>}
+ */
+const fetchRecruitersInfo = async () => {
+  try {
+    const recruiterSnapshot = await recruiterModel.get();
+    const recruiters = [];
+    recruiterSnapshot.forEach((recruiter) => {
+      recruiters.push({
+        id: recruiter.id,
+        ...recruiter.data(),
+      });
+    });
+    return recruiters;
+  } catch (err) {
+    logger.error("Error while fetching recruiters", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addRecruiterInfo,
+  fetchRecruitersInfo,
 };

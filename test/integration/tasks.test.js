@@ -11,20 +11,25 @@ const userModel = require("../../models/users");
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
+const tasksData = require("../fixtures/tasks/tasks")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
+const { TASK_STATUS } = require("../../constants/tasks");
 chai.use(chaiHttp);
 
 const appOwner = userData[3];
+const superUser = userData[4];
 
-let jwt;
+let jwt, superUserJwt;
 
 describe("Tasks", function () {
   let taskId1, taskId;
 
   before(async function () {
     const userId = await addUser(appOwner);
+    const superUserId = await addUser(superUser);
     jwt = authService.generateAuthToken({ userId });
+    superUserJwt = authService.generateAuthToken({ userId: superUserId });
 
     const taskData = [
       {
@@ -136,29 +141,8 @@ describe("Tasks", function () {
   });
 
   describe("GET /tasks/self", function () {
-    it("Should get all the active and blocked tasks of the user", function (done) {
-      const taskStatus = ["active", "completed"];
-
-      chai
-        .request(app)
-        .get("/tasks/self")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done();
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("array");
-          expect(res.body).to.have.length.above(0);
-          res.body.forEach((task) => {
-            expect(taskStatus).to.include(task.status);
-          });
-
-          return done();
-        });
-    });
-
     it("Should return all the completed tasks of the user when query 'completed' is true", function (done) {
+      const { COMPLETED } = TASK_STATUS;
       chai
         .request(app)
         .get("/tasks/self?completed=true")
@@ -169,41 +153,54 @@ describe("Tasks", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("array");
-          expect(res.body[0].status).to.equal("completed");
+          expect(res.body[0].status).to.equal(COMPLETED);
 
           return done();
         });
     });
 
-    it("Should return assignee task", async function () {
+    it("Should return all assignee task", async function () {
       const { userId: assignedUser } = await userModel.addOrUpdate({
         github_id: "prakashchoudhary07",
         username: "user1",
       });
-      const assignedTask = {
-        title: "Assigned task",
-        purpose: "To Test mocha",
-        featureUrl: "<testUrl>",
-        type: "group",
-        links: ["test1"],
-        endsOn: "<unix timestamp>",
-        startedOn: "<unix timestamp>",
-        status: "active",
-        percentCompleted: 10,
-        dependsOn: ["d12", "d23"],
-        participants: ["user1"],
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-      };
-      const { taskId } = await tasks.updateTask(assignedTask);
+      const assignedTask = [
+        {
+          title: "Test task",
+          type: "feature",
+          endsOn: 1234,
+          startedOn: 4567,
+          status: "IN_PROGRESS",
+          percentCompleted: 10,
+          participants: [],
+          assignee: "user1",
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          isNoteworthy: true,
+        },
+        {
+          title: "Test task",
+          type: "feature",
+          endsOn: 1234,
+          startedOn: 4567,
+          status: "BLOCKED",
+          percentCompleted: 10,
+          participants: [],
+          assignee: "user1",
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          isNoteworthy: true,
+        },
+      ];
+      const { taskId: taskId1 } = await tasks.updateTask(assignedTask[0]);
+      const { taskId: taskId2 } = await tasks.updateTask(assignedTask[1]);
       const res = await chai
         .request(app)
         .get("/tasks/self")
         .set("cookie", `${cookieName}=${authService.generateAuthToken({ userId: assignedUser })}`);
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("array");
-      expect(res.body[0].id).to.equal(taskId);
+      expect([taskId1, taskId2]).to.include(taskId1);
     });
 
     it("Should return 401 if not logged in", function (done) {
@@ -310,7 +307,7 @@ describe("Tasks", function () {
     });
   });
 
-  describe("PATCH /self/:id", function () {
+  describe("PATCH /tasks/self/:id", function () {
     const taskStatusData = {
       status: "currentStatus",
       percentCompleted: 50,
@@ -358,7 +355,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.equal("This task is not assigned to you");
     });
 
-    it("Should give error for no cookie", async function (done) {
+    it("Should give error for no cookie", function (done) {
       chai
         .request(app)
         .patch(`/tasks/self/${taskId1}`)
@@ -370,8 +367,59 @@ describe("Tasks", function () {
           expect(res).to.have.status(401);
           expect(res.body.message).to.be.equal("Unauthenticated User");
           return done();
-        })
-        .catch(done());
+        });
+    });
+
+    it("Should give 403 if status is already 'VERIFIED' ", async function () {
+      const taskData = {
+        title: "Test task",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "VERIFIED",
+        percentCompleted: 10,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      };
+      taskId = (await tasks.updateTask(taskData)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(taskStatusData);
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+    });
+  });
+
+  describe("GET /tasks/overdue", function () {
+    it("Should return all the overdue Tasks", async function () {
+      await tasks.updateTask(tasksData[0]);
+      await tasks.updateTask(tasksData[1]);
+      const res = await chai.request(app).get("/tasks/overdue").set("cookie", `${cookieName}=${superUserJwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body.newAvailableTasks).to.be.a("array");
+      res.body.newAvailableTasks.forEach((task) => {
+        const { status, startedOn, endsOn, assignee } = task.unassignedTask;
+        expect(status).to.equal(TASK_STATUS.AVAILABLE);
+        expect(assignee).to.equal(null);
+        expect(startedOn).to.equal(null);
+        expect(endsOn).to.equal(null);
+      });
+    });
+
+    it("Should return [] if no overdue task", async function () {
+      await tasks.updateTask(tasksData[2]);
+      const res = await chai.request(app).get("/tasks/overdue").set("cookie", `${cookieName}=${superUserJwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body.newAvailableTasks).to.have.lengthOf(0);
+      expect(res.body.message).to.be.equal("No overdue tasks found");
     });
   });
 });
