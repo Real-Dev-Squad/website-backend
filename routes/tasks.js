@@ -9,6 +9,8 @@ router.get("/", tasks.fetchTasks);
 
 router.get("/self", authenticate, tasks.getSelfTasks);
 
+router.get("/overdue", authenticate, authorizeUser("superUser"), tasks.overdueTasks);
+
 router.post("/", authenticate, authorizeUser("appOwner"), createTask, tasks.addNewTask);
 
 router.patch("/:id", authenticate, authorizeUser("appOwner"), updateTask, tasks.updateTask);
