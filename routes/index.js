@@ -9,6 +9,7 @@ app.use("/contributions", require("./contributions.js"));
 app.use("/healthcheck", require("./healthCheck.js"));
 app.use("/members", require("./members.js"));
 app.use("/pullrequests", require("./pullrequests.js"));
+app.use("/profileDiffs", require("./profileDiffs.js"));
 app.use("/stocks", require("./stocks.js"));
 app.use("/tasks", require("./tasks.js"));
 app.use("/trade", require("./trading.js"));

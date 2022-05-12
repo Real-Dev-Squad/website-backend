@@ -37,7 +37,8 @@
     "passport-github2": "^0.1.12",
     "swagger-jsdoc": "^6.1.0",
     "swagger-ui-express": "^4.1.6",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "yarn": "^1.22.17"
   },
   "devDependencies": {
     "chai": "^4.3.4",

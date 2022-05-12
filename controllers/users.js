@@ -21,6 +21,26 @@ const getUsers = async (req, res) => {
   }
 };
 
+// get userId
+const getUserById = async (req, res) => {
+  try {
+    const result = await userQuery.fetchUser({ userId: req.body.userId });
+    const { phone, email, ...user } = result.user;
+
+    if (result.userExists) {
+      return res.json({
+        message: "User returned successfully!",
+        user,
+      });
+    }
+
+    return res.boom.notFound("User doesn't exist");
+  } catch (error) {
+    logger.error(`Error while fetching user: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
 /**
  * Fetches the data about user with given id
  *
@@ -164,4 +184,5 @@ module.exports = {
   getUsernameAvailabilty,
   postUserPicture,
   identityURL,
+  getUserById,
 };
