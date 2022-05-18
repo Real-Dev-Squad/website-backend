@@ -13,6 +13,14 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 12,
   },
+  settings: {
+    "import/resolver": {
+      node: {
+        extensions: [".js", ".jsx", ".d.ts", ".ts", ".tsx"],
+        moduleDirectory: ["node_modules", "."],
+      },
+    },
+  },
   globals: {
     config: "readonly",
     logger: "readonly",
