@@ -6,11 +6,8 @@ const { validateFeatureFlag, updateFeatureFlags } = require("../middlewares/vali
 const featureFlag = require("../controllers/featureFlags");
 
 router.get("/", featureFlag.getFeatureFlags);
-
 router.post("/", authenticate, authorizeUser("appOwner"), validateFeatureFlag, featureFlag.addFeatureFlag);
-
 router.patch("/:id", authenticate, authorizeUser("appOwner"), updateFeatureFlags, featureFlag.updateFeatureFlag);
-
 router.delete("/:id", authenticate, authorizeUser("appOwner"), featureFlag.deleteFeatureFlag);
 
 module.exports = router;

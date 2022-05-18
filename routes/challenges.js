@@ -5,9 +5,7 @@ const challenges = require("../controllers/challenge");
 const { createChallenge } = require("../middlewares/validators/challenges");
 
 router.get("/", authenticate, challenges.fetchChallenges);
-
 router.post("/", authenticate, createChallenge, challenges.createChallenge);
-
 router.post("/subscribe", authenticate, challenges.subscribeToChallenge);
 
 module.exports = router;

@@ -6,9 +6,7 @@ const { addNewStock, fetchStocks, getSelfStocks } = require("../controllers/stoc
 const { createStock } = require("../middlewares/validators/stocks");
 
 router.get("/", fetchStocks);
-
 router.post("/", authenticate, authorizeUser("superUser"), createStock, addNewStock);
-
 router.get("/user/self", authenticate, getSelfStocks);
 
 module.exports = router;
