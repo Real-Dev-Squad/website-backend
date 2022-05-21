@@ -20,7 +20,7 @@ describe("flags", function () {
     await cleanDb();
   });
 
-  describe("add feature flag", function () {
+  describe("add  flag", function () {
     it("Should return flag Id", async function () {
       const fetched = await flagFirestore.doc(flagId).get();
       const fetchedData = fetched.data();
@@ -29,6 +29,16 @@ describe("flags", function () {
         expect(flagData[key]).to.deep.equal(fetchedData[key]);
       });
       expect(fetchedId).to.equal(flagId);
+    });
+  });
+
+  describe("fetch all flag", function () {
+    it("Should return all flags", async function () {
+      const fetched = await flagFirestore.doc(flagId).get();
+      const fetchedData = fetched.data();
+      Object.keys(flagData).forEach((key) => {
+        expect(flagData[key]).to.deep.equal(fetchedData[key]);
+      });
     });
   });
 });

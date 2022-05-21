@@ -30,7 +30,42 @@ describe("flags", function () {
   afterEach(async function () {
     await cleanDb();
   });
+  describe("GET /flag", function () {
+    it("Should return all flags", function (done) {
+      chai
+        .request(app)
+        .get("/flag")
+        .end((res, err) => {
+          if (err) {
+            return done();
+          }
 
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Flags returned successfully!");
+          expect(res.body.featureFlags).to.be.a("array");
+
+          return done();
+        });
+    });
+    it("Should only authenticate superUser", function (done) {
+      chai
+        .request(app)
+        .get("/flag")
+        .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
+        .send(flagData)
+        .end((err, res) => {
+          if (err) {
+            throw done(err);
+          }
+          expect(res.status).to.equal(401);
+          expect(res.body.error).to.equal("Unauthorized");
+          expect(res.body.message).to.equal("You are not authorized for this action.");
+
+          return done();
+        });
+    });
+  });
   describe("POST /flag/add", function () {
     it("Should return flag Id", function (done) {
       chai
