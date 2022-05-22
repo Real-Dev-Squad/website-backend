@@ -15,7 +15,7 @@ describe("wallets", function () {
   let wallet;
   beforeEach(async function () {
     userId = await addUser();
-    wallet = await walletQuery.createWallet(userId, currencies[0]);
+    wallet = await walletQuery.createWallet(userId, currencies.default);
   });
   afterEach(async function () {
     await cleanDb();
@@ -28,11 +28,11 @@ describe("wallets", function () {
       expect(data).to.be.a("Object");
       expect(data.isActive).to.be.equal(true);
       expect(data.userId).to.be.equal(userId);
-      expect(data.currencies).to.deep.equal(currencies[0]);
+      expect(data.currencies).to.deep.equal(currencies.default);
 
       expect(wallet.data.isActive).to.be.equal(true);
       expect(wallet.data.userId).to.be.equal(userId);
-      expect(wallet.data.currencies).to.deep.equal(currencies[0]);
+      expect(wallet.data.currencies).to.deep.equal(currencies.default);
     });
   });
 
@@ -44,7 +44,7 @@ describe("wallets", function () {
       expect(response.id).to.be.equal(wallet.id);
       expect(response.isActive).to.be.equal(true);
       expect(response.userId).to.be.equal(userId);
-      expect(response.currencies).to.deep.equal(currencies[0]);
+      expect(response.currencies).to.deep.equal(currencies.default);
     });
 
     it("should return null when passing invalid userId", async function () {
@@ -56,26 +56,26 @@ describe("wallets", function () {
 
   describe("updateWallet", function () {
     it("should return true and update the user's wallet", async function () {
-      const response = await walletQuery.updateWallet(userId, currencies[1]);
+      const response = await walletQuery.updateWallet(userId, currencies.modified);
       const data = (await walletModel.doc(wallet.id).get()).data();
 
       expect(data).to.be.a("Object");
       expect(data.isActive).to.be.equal(true);
       expect(data.userId).to.be.equal(userId);
-      expect(data.currencies).to.deep.equal(currencies[1]);
+      expect(data.currencies).to.deep.equal(currencies.modified);
       expect(response).to.be.equal(true);
     });
 
     it("should return true and create a wallet when passing new userId", async function () {
       const newUserId = await addUser(userDataArray[2]);
-      const response = await walletQuery.updateWallet(newUserId, currencies[1]);
+      const response = await walletQuery.updateWallet(newUserId, currencies.modified);
       const [walletRef] = (await walletModel.where("userId", "==", newUserId).limit(1).get()).docs;
       const data = walletRef.data();
 
       expect(data).to.be.a("Object");
       expect(data.isActive).to.be.equal(true);
       expect(data.userId).to.be.equal(newUserId);
-      expect(data.currencies).to.deep.equal(currencies[1]);
+      expect(data.currencies).to.deep.equal(currencies.modified);
 
       expect(response).to.be.equal(true);
     });
