@@ -1,8 +1,10 @@
-const ROLES = {
+// Use Legacy Roles with authorizeUsers middleware
+const LEGACY_ROLES = {
   SUPER_USER: "superUser",
   APP_OWNER: "appOwner",
 };
 
-const VALID_ROLES = { SUPERUSER: "super_user", APPOWNER: "app_owner", MEMBER: "member" };
+// Use Roles with authorizeRoles middleware
+const ROLES = { SUPERUSER: "super_user", APPOWNER: "app_owner", MEMBER: "member" };
 
-module.exports = { ROLES, VALID_ROLES };
+module.exports = { LEGACY_ROLES, ROLES };

@@ -11,7 +11,7 @@ const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
 
 const {
-  VALID_ROLES: { APPOWNER, SUPERUSER },
+  ROLES: { APPOWNER, SUPERUSER },
 } = require("../../constants/roles");
 
 const defaultUser = userData[0]; // user with no `roles` key
