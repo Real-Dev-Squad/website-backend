@@ -241,9 +241,6 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User returned successfully!");
           expect(res.body.user).to.be.a("object");
-          // expect(res.body.user).to.not.have.property("phone");
-          // expect(res.body.user).to.not.have.property("email");
-
           return done();
         });
     });
