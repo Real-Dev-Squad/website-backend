@@ -28,24 +28,7 @@ const verifyUser = async (req, res) => {
 const getUserById = async (req, res) => {
   let result;
   try {
-<<<<<<< HEAD
     result = await userQuery.fetchUser({ userId: req.params.userId });
-=======
-    const result = await userQuery.fetchUser({ userId: req.params.userId });
-    const { phone, email, ...user } = result.user;
-    user.phone =
-      phone.slice(0, 1) + phone.slice(1, phone.length - 1).replace(/\d/g, "*") + phone.slice(phone.length - 1);
-    user.email =
-      email.slice(0, 2) + email.slice(2, email.length - 2).replace(/./g, "*") + email.slice(email.length - 2);
-    if (result.userExists) {
-      return res.json({
-        message: "User returned successfully!",
-        user,
-      });
-    }
-
-    return res.boom.notFound("User doesn't exist");
->>>>>>> bdfb2f9d2c6d5e9348432df4711194405f7a92a6
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
