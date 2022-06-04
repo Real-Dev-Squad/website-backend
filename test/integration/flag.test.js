@@ -59,7 +59,6 @@ describe("flags", function () {
           if (err) {
             throw done(err);
           }
-
           expect(res.status).to.equal(401);
           expect(res.body.error).to.equal("Unauthorized");
           expect(res.body.message).to.equal("You are not authorized for this action.");
