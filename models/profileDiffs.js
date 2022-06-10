@@ -12,9 +12,23 @@ const fetchProfileDiffs = async () => {
     const snapshot = await profileDiffsModel.where("approval", "==", profileStatus.PENDING).get();
     const profileDiffs = [];
     snapshot.forEach((doc) => {
+      let { email, phone } = doc.data();
+
+      email =
+        email.substring(0, 2) +
+        email.substring(3, email.length - 2).replace(/./g, "*") +
+        email.substring(email.length - 4);
+
+      phone =
+        phone.substring(0, 2) +
+        phone.substring(3, phone.length - 1).replace(/./g, "*") +
+        phone.substring(phone.length - 2);
+
       profileDiffs.push({
         id: doc.id,
         ...doc.data(),
+        email: email,
+        phone: phone,
       });
     });
     return profileDiffs;
