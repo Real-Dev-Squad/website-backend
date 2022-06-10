@@ -196,18 +196,18 @@ const postUserPicture = async (req, res) => {
  */
 const updateUser = async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const { id: profileDiffId, message, ...profileDiff } = req.body;
+    const { id: profileDiffId, message } = req.body;
+
+    const profileDiffData = await profileDiffsQuery.fetchProfileDiff(profileDiffId);
+    if (!profileDiffData) return res.boom.notFound("Profile Diff doesn't exist");
+
+    const { approval, timestamp, userId, ...profileDiff } = profileDiffData;
 
     const user = await userQuery.fetchUser({ userId });
     if (!user.userExists) return res.boom.notFound("User doesn't exist");
 
-    const profileResponse = await profileDiffsQuery.updateProfileDiff(
-      { approval: profileDiffStatus.APPROVED },
-      profileDiffId
-    );
+    await profileDiffsQuery.updateProfileDiff({ approval: profileDiffStatus.APPROVED }, profileDiffId);
 
-    if (profileResponse.notFound) return res.boom.notFound("Profile Diff doesn't exist");
     await userQuery.addOrUpdate(profileDiff, userId);
 
     const meta = {
