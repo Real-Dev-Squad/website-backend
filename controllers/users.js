@@ -7,6 +7,7 @@ const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
+const obfuscate = require("../utils/obfuscate");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -40,10 +41,8 @@ const getUserById = async (req, res) => {
 
   const { phone, email, ...user } = result.user;
   try {
-    user.phone =
-      phone.slice(0, 1) + phone.slice(1, phone.length - 1).replace(/\d/g, "*") + phone.slice(phone.length - 1);
-    user.email =
-      email.slice(0, 2) + email.slice(2, email.length - 2).replace(/./g, "*") + email.slice(email.length - 2);
+    user.phone = obfuscate.obfuscatePhone(phone);
+    user.email = obfuscate.obfuscateMail(email);
   } catch (error) {
     logger.error(`Error while formatting phone and email: ${error}`);
     res.boom.error("Error while formatting phone and email");
