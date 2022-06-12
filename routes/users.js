@@ -3,7 +3,9 @@ const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
 const { authorizeUser } = require("../middlewares/authorization");
 const users = require("../controllers/users");
-const { ROLES: roles } = require("../constants/roles");
+const {
+  LEGACY_ROLES: { SUPER_USER },
+} = require("../constants/roles");
 const userValidator = require("../middlewares/validators/user");
 const { upload } = require("../utils/multer");
 
@@ -275,8 +277,8 @@ router.post("/picture", authenticate, upload.single("profile"), users.postUserPi
 
 router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);
 
-router.patch("/rejectDiff", authenticate, authorizeUser(roles.SUPER_USER), users.rejectProfileDiff);
+router.patch("/rejectDiff", authenticate, authorizeUser(SUPER_USER), users.rejectProfileDiff);
 
-router.patch("/:userId", authenticate, authorizeUser(roles.SUPER_USER), users.updateUser);
+router.patch("/:userId", authenticate, authorizeUser(SUPER_USER), users.updateUser);
 
 module.exports = router;

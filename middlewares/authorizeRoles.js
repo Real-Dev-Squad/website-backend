@@ -1,4 +1,4 @@
-const { VALID_ROLES } = require("../constants/roles");
+const { ROLES } = require("../constants/roles");
 
 /**
  * Create an authorization middleware for a route based on the required role needed
@@ -11,7 +11,7 @@ const authorizeRoles = (allowedRoles) => {
   return (req, res, next) => {
     const { roles = {} } = req.userData;
 
-    const rolesAreValid = allowedRoles.every((role) => Object.values(VALID_ROLES).includes(role));
+    const rolesAreValid = allowedRoles.every((role) => Object.values(ROLES).includes(role));
     if (!rolesAreValid) {
       return res.boom.badImplementation("Route authorization failed. Please contact admin");
     }

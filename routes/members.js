@@ -6,7 +6,7 @@ const authenticate = require("../middlewares/authenticate");
 const { addRecruiter, fetchRecruitersInfo } = require("../controllers/recruiters");
 const { validateRecruiter } = require("../middlewares/validators/recruiter");
 const {
-  ROLES: { SUPER_USER },
+  LEGACY_ROLES: { SUPER_USER },
 } = require("../constants/roles");
 
 /**
