@@ -1,13 +1,13 @@
-const express = require('express')
-const router = express.Router()
-const members = require('../controllers/members')
-const { authorizeUser } = require('../middlewares/authorization')
-const authenticate = require('../middlewares/authenticate')
-const { addRecruiter, fetchRecruitersInfo } = require('../controllers/recruiters')
-const { validateRecruiter } = require('../middlewares/validators/recruiter')
+const express = require("express");
+const router = express.Router();
+const members = require("../controllers/members");
+const { authorizeUser } = require("../middlewares/authorization");
+const authenticate = require("../middlewares/authenticate");
+const { addRecruiter, fetchRecruitersInfo } = require("../controllers/recruiters");
+const { validateRecruiter } = require("../middlewares/validators/recruiter");
 const {
-  LEGACY_ROLES: { SUPER_USER }
-} = require('../constants/roles')
+  LEGACY_ROLES: { SUPER_USER },
+} = require("../constants/roles");
 
 /**
  * @swagger
@@ -31,7 +31,7 @@ const {
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', members.getMembers)
+router.get("/", members.getMembers);
 
 /**
  * @swagger
@@ -55,7 +55,7 @@ router.get('/', members.getMembers)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/idle', members.getIdleMembers)
+router.get("/idle", members.getIdleMembers);
 
 /**
  * @swagger
@@ -87,9 +87,9 @@ router.get('/idle', members.getIdleMembers)
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.post('/intro/:username', validateRecruiter, addRecruiter)
+router.post("/intro/:username", validateRecruiter, addRecruiter);
 
-router.post('/cache/clear/self', authenticate, members.purgeMembersCache)
+router.post("/cache/clear/self", authenticate, members.purgeMembersCache);
 
 /**
  * @swagger
@@ -123,7 +123,7 @@ router.post('/cache/clear/self', authenticate, members.purgeMembersCache)
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.get('/intro', authenticate, authorizeUser(SUPER_USER), fetchRecruitersInfo)
+router.get("/intro", authenticate, authorizeUser(SUPER_USER), fetchRecruitersInfo);
 
 /**
  * @swagger
@@ -169,7 +169,7 @@ router.get('/intro', authenticate, authorizeUser(SUPER_USER), fetchRecruitersInf
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPER_USER), members.moveToMembers)
+router.patch("/moveToMembers/:username", authenticate, authorizeUser(SUPER_USER), members.moveToMembers);
 /**
  * @swagger
  * /members/member-to-role-migration:
@@ -203,7 +203,7 @@ router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPER_USER)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser'), members.migrateUserRoles)
+router.patch("/member-to-role-migration", authenticate, authorizeUser("superUser"), members.migrateUserRoles);
 
 /**
  * @swagger
@@ -238,7 +238,7 @@ router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), members.deleteIsMember)
+router.patch("/delete-isMember", authenticate, authorizeUser("superUser"), members.deleteIsMember);
 
 /**
  * @swagger
@@ -284,6 +284,6 @@ router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), membe
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.patch('/archiveMembers/:username', authenticate, authorizeUser(SUPER_USER), members.archiveMembers)
+router.patch("/archiveMembers/:username", authenticate, authorizeUser(SUPER_USER), members.archiveMembers);
 
-module.exports = router
+module.exports = router;
