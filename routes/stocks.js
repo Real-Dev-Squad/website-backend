@@ -1,9 +1,9 @@
-const express = require('express')
-const router = express.Router()
-const authenticate = require('../middlewares/authenticate')
-const authorization = require('../middlewares/authorization')
-const { addNewStock, fetchStocks } = require('../controllers/stocks')
-const { createStock } = require('../middlewares/validators/stocks')
+const express = require("express");
+const router = express.Router();
+const authenticate = require("../middlewares/authenticate");
+const { authorizeUser } = require("../middlewares/authorization");
+const { addNewStock, fetchStocks, getSelfStocks } = require("../controllers/stocks");
+const { createStock } = require("../middlewares/validators/stocks");
 
 /**
  * @swagger
@@ -27,7 +27,7 @@ const { createStock } = require('../middlewares/validators/stocks')
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', fetchStocks)
+router.get("/", fetchStocks);
 
 /**
  * @swagger
@@ -62,6 +62,36 @@ router.get('/', fetchStocks)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.post('/', authenticate, authorization, createStock, addNewStock)
+router.post("/", authenticate, authorizeUser("superUser"), createStock, addNewStock);
 
-module.exports = router
+/**
+ * @swagger
+ * /stocks/user/self:
+ *  get:
+ *   summary: Used to get all the stocks of the user
+ *   tags:
+ *     - User Stocks
+ *   responses:
+ *     200:
+ *       description: returns stocks of the user
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/userStocks'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
+ *     500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+
+router.get("/user/self", authenticate, getSelfStocks);
+
+module.exports = router;

@@ -1,92 +1,292 @@
-const chai = require('chai')
-const { expect } = chai
-const chaiHttp = require('chai-http')
+const chai = require("chai");
+const { expect } = chai;
+const chaiHttp = require("chai-http");
 
-const app = require('../../server')
-const addUser = require('../utils/addUser')
-const cleanDb = require('../utils/cleanDb')
+const app = require("../../server");
+const authService = require("../../services/authService");
+const addUser = require("../utils/addUser");
+const cleanDb = require("../utils/cleanDb");
 
-chai.use(chaiHttp)
+// Import fixtures
+const userData = require("../fixtures/user/user")();
 
-describe('Members', function () {
+const config = require("config");
+const cookieName = config.get("userToken.cookieName");
+
+chai.use(chaiHttp);
+
+const superUser = userData[4];
+const userAlreadyMember = userData[0];
+const userToBeMadeMember = userData[1];
+const nonSuperUser = userData[0];
+const userDoesNotExists = userData[1];
+const userToBeArchived = userData[3];
+const userAlreadyArchived = userData[5];
+
+describe("Members", function () {
+  let jwt;
+
   afterEach(async function () {
-    await cleanDb()
-    await addUser()
-  })
+    await addUser();
+  });
 
-  describe('GET /members', function () {
+  after(async function () {
+    await cleanDb();
+  });
+
+  describe("GET /members", function () {
     before(async function () {
-      await cleanDb()
-    })
-    it('Should return empty array if no member is found', function (done) {
+      await cleanDb();
+    });
+    it("Should return empty array if no member is found", function (done) {
       chai
         .request(app)
-        .get('/members')
+        .get("/members")
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) {
+            return done(err);
+          }
 
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('No member found')
-          expect(res.body.members).to.eql([])
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("No member found");
+          expect(res.body.members).to.eql([]);
 
-          return done()
-        })
-    })
+          return done();
+        });
+    });
 
-    it('Get all the members in the database', function (done) {
+    it("Get all the members in the database", function (done) {
       chai
         .request(app)
-        .get('/members')
+        .get("/members")
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) {
+            return done(err);
+          }
 
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('Members returned successfully!')
-          expect(res.body.members).to.be.a('array')
-          expect(res.body.members[0].isMember).to.eql(true)
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Members returned successfully!");
+          expect(res.body.members).to.be.a("array");
+          expect(res.body.members[0].roles.member).to.eql(true);
 
-          return done()
-        })
-    })
-  })
+          return done();
+        });
+    });
+  });
 
-  describe('GET /members/idle', function () {
+  describe("GET /members/idle", function () {
     before(async function () {
-      await cleanDb()
-    })
-    it('Should return empty array if no idle member is found', function (done) {
+      await cleanDb();
+    });
+    it("Should return empty array if no idle member is found", function (done) {
       chai
         .request(app)
-        .get('/members/idle')
+        .get("/members/idle")
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) {
+            return done(err);
+          }
 
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('No idle member found')
-          expect(res.body.idleMemberUserNames).to.eql([])
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("No idle member found");
+          expect(res.body.idleMemberUserNames).to.eql([]);
 
-          return done()
-        })
-    })
+          return done();
+        });
+    });
 
-    it('Get all the idle members in the database', function (done) {
+    it("Get all the idle members in the database", function (done) {
       chai
         .request(app)
-        .get('/members/idle')
+        .get("/members/idle")
         .end((err, res) => {
-          if (err) { return done() }
+          if (err) {
+            return done(err);
+          }
 
-          expect(res).to.have.status(200)
-          expect(res.body).to.be.a('object')
-          expect(res.body.message).to.equal('Idle members returned successfully!')
-          expect(res.body.idleMemberUserNames).to.be.a('array')
-          expect(res.body.idleMemberUserNames[0]).to.be.a('string')
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Idle members returned successfully!");
+          expect(res.body.idleMemberUserNames).to.be.a("array");
+          expect(res.body.idleMemberUserNames[0]).to.be.a("string");
 
-          return done()
-        })
-    })
-  })
-})
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /members/moveToMembers/:username", function () {
+    before(async function () {
+      await cleanDb();
+      const userId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId });
+    });
+
+    it("Should return 404 if user doesn't exist", function (done) {
+      chai
+        .request(app)
+        .patch(`/members/moveToMembers/${userToBeMadeMember.username}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User doesn't exist");
+
+          return done();
+        });
+    });
+
+    it("Should make the user a member", function (done) {
+      addUser(userToBeMadeMember).then(() => {
+        chai
+          .request(app)
+          .patch(`/members/moveToMembers/${userToBeMadeMember.username}`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(204);
+            /* eslint-disable no-unused-expressions */
+            expect(res.body).to.be.a("object").to.be.empty;
+
+            return done();
+          });
+      });
+    });
+
+    it("Should return 400 if user is already a member", function (done) {
+      addUser(userAlreadyMember).then(() => {
+        chai
+          .request(app)
+          .patch(`/members/moveToMembers/${userAlreadyMember.username}`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal("User is already a member");
+
+            return done();
+          });
+      });
+    });
+
+    it("Should return 401 if user is not a super_user", function (done) {
+      addUser(nonSuperUser).then((nonSuperUserId) => {
+        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+        chai
+          .request(app)
+          .patch(`/members/moveToMembers/${nonSuperUser.username}`)
+          .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(401);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal("You are not authorized for this action.");
+
+            return done();
+          });
+      });
+    });
+  });
+
+  describe("PATCH /members/archiveMembers/:username", function () {
+    before(async function () {
+      await cleanDb();
+      const userId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId });
+    });
+
+    it("Should return 404 if user doesn't exist", function (done) {
+      chai
+        .request(app)
+        .patch(`/members/archiveMembers/${userDoesNotExists.username}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User doesn't exist");
+          return done();
+        });
+    });
+
+    it("Should archive the user", function (done) {
+      addUser(userToBeArchived).then(() => {
+        chai
+          .request(app)
+          .patch(`/members/archiveMembers/${userToBeArchived.username}`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(204);
+            /* eslint-disable no-unused-expressions */
+            expect(res.body).to.be.a("object").to.be.empty;
+
+            return done();
+          });
+      });
+    });
+
+    it("Should return 400 if user is already archived", function (done) {
+      addUser(userAlreadyArchived).then(() => {
+        chai
+          .request(app)
+          .patch(`/members/archiveMembers/${userAlreadyArchived.username}`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal("User is already archived");
+
+            return done();
+          });
+      });
+    });
+
+    it("Should return 401 if user is not a super user", function (done) {
+      addUser(nonSuperUser).then((nonSuperUserId) => {
+        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+        chai
+          .request(app)
+          .patch(`/members/moveToMembers/${nonSuperUser.username}`)
+          .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(401);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal("You are not authorized for this action.");
+
+            return done();
+          });
+      });
+    });
+  });
+});

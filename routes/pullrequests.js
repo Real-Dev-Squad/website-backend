@@ -1,6 +1,6 @@
-const express = require('express')
-const router = express.Router()
-const pullRequest = require('../controllers/pullRequests')
+const express = require("express");
+const router = express.Router();
+const pullRequest = require("../controllers/pullRequests");
 
 /**
  * @swagger
@@ -9,6 +9,17 @@ const pullRequest = require('../controllers/pullRequests')
  *     summary: Latest 10 Pull Requests in Real Dev Squad
  *     tags:
  *       - Pull Requests
+ *     parameters:
+ *        - in: query
+ *          name: size
+ *          schema:
+ *             type: integer
+ *          description: Number of pull requests to be returned
+ *        - in: query
+ *          name: page
+ *          schema:
+ *            type: integer
+ *          description: Page number for pagination
  *     responses:
  *       200:
  *         description: Pull Requests
@@ -31,7 +42,7 @@ const pullRequest = require('../controllers/pullRequests')
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/open', pullRequest.getOpenPRs)
+router.get("/open", pullRequest.getOpenPRs);
 
 /**
  * @swagger
@@ -40,6 +51,17 @@ router.get('/open', pullRequest.getOpenPRs)
  *     summary: All open Pull Requests in Real Dev Squad
  *     tags:
  *       - Pull Requests
+ *     parameters:
+ *        - in: query
+ *          name: size
+ *          schema:
+ *             type: integer
+ *          description: Number of pull requests to be returned
+ *        - in: query
+ *          name: page
+ *          schema:
+ *            type: integer
+ *          description: Page number for pagination
  *     responses:
  *       200:
  *         description: Pull Requests
@@ -62,7 +84,7 @@ router.get('/open', pullRequest.getOpenPRs)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/stale', pullRequest.getStalePRs)
+router.get("/stale", pullRequest.getStalePRs);
 
 /**
  * @swagger
@@ -93,6 +115,6 @@ router.get('/stale', pullRequest.getStalePRs)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/user/:username', pullRequest.getUserPRs)
+router.get("/user/:username", pullRequest.getUserPRs);
 
-module.exports = router
+module.exports = router;

@@ -1,7 +1,7 @@
-const joi = require('joi')
+const joi = require("joi");
 
 const validateRecruiter = async (req, res, next) => {
-  const schema = joi.object().keys({
+  const schema = joi.object().strict().keys({
     company: joi.string().required(),
     first_name: joi.string().required(),
     last_name: joi.string().required(),
@@ -9,18 +9,18 @@ const validateRecruiter = async (req, res, next) => {
     reason: joi.string().required(),
     email: joi.string().required(),
     currency: joi.string().required(),
-    package: joi.number().optional()
-  })
+    package: joi.number().optional(),
+  });
 
   try {
-    await schema.validateAsync(req.body)
-    next()
+    await schema.validateAsync(req.body);
+    next();
   } catch (error) {
-    logger.error(`Error in validating recruiter data: ${error}`)
-    res.boom.badRequest(error.details[0].message)
+    logger.error(`Error in validating recruiter data: ${error}`);
+    res.boom.badRequest(error.details[0].message);
   }
-}
+};
 
 module.exports = {
-  validateRecruiter
-}
+  validateRecruiter,
+};

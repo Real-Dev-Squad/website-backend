@@ -1,7 +1,8 @@
-const express = require('express')
-const router = express.Router()
-const authenticate = require('../middlewares/authenticate')
-const challenges = require('../controllers/challenge')
+const express = require("express");
+const router = express.Router();
+const authenticate = require("../middlewares/authenticate");
+const challenges = require("../controllers/challenge");
+const { createChallenge } = require("../middlewares/validators/challenges");
 
 /**
  * @swagger
@@ -29,6 +30,12 @@ const challenges = require('../controllers/challenge')
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+router.get("/", authenticate, challenges.fetchChallenges);
+
+/**
+ * @swagger
+ * /challenges:
  *   post:
  *     summary: Post new challenge
  *     tags:
@@ -53,10 +60,7 @@ const challenges = require('../controllers/challenge')
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
-router
-  .route('/')
-  .get(authenticate, challenges.sendChallengeResponse)
-  .post(authenticate, challenges.sendChallengeResponse)
+router.post("/", authenticate, createChallenge, challenges.createChallenge);
 
 /**
  * @swagger
@@ -88,8 +92,7 @@ router
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/errors/serverUnavailable'
- *
  */
-router.post('/subscribe', authenticate, challenges.subscribeToChallenge)
+router.post("/subscribe", authenticate, challenges.subscribeToChallenge);
 
-module.exports = router
+module.exports = router;

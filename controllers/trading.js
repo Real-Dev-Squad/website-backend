@@ -1,4 +1,4 @@
-const tradeModel = require('../models/trading')
+const tradeService = require("../services/tradingService");
 /**
  * New Trading Request
  *
@@ -7,25 +7,25 @@ const tradeModel = require('../models/trading')
  */
 const trade = async (req, res) => {
   try {
-    const { id: userId, username } = req.userData
+    const { id: userId, username } = req.userData;
     const tradeStockData = {
       ...req.body,
       username,
-      userId
-    }
-    const { canUserTrade, errorMessage, userBalance } = await tradeModel.trade(tradeStockData)
+      userId,
+    };
+    const { canUserTrade, errorMessage, userBalance } = await tradeService.trade(tradeStockData);
 
     if (!canUserTrade) {
-      return res.boom.forbidden(errorMessage)
+      return res.boom.forbidden(errorMessage);
     }
 
-    return res.json({ userBalance })
+    return res.json({ userBalance });
   } catch (err) {
-    logger.error(`Error while updating task: ${err}`)
-    return res.boom.badImplementation('An internal server error occurred')
+    logger.error(`Error during trading: ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
   }
-}
+};
 
 module.exports = {
-  trade
-}
+  trade,
+};

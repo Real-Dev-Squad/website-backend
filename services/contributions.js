@@ -1,79 +1,81 @@
-const githubService = require('../services/githubService')
-const tasks = require('../models/tasks')
-const { fetchUser } = require('../models/users')
-const userUtils = require('../utils/users')
+const githubService = require("../services/githubService");
+const tasks = require("../models/tasks");
+const { fetchUser } = require("../models/users");
+const userUtils = require("../utils/users");
 /**
  * Get the contributions of the user
  * @param {string} username
  */
 
 const getUserContributions = async (username) => {
-  const contributions = {}
-  const { data } = await githubService.fetchPRsByUser(username)
-  const allUserTasks = await tasks.fetchUserTasks(username)
-  const noteworthy = []
-  const all = []
+  const contributions = {};
+  const { data } = await githubService.fetchPRsByUser(username);
+  const allUserTasks = await tasks.fetchUserTasks(username);
+  const noteworthy = [];
+  const all = [];
 
   if (data.total_count) {
-    const allPRsDetails = extractPRdetails(data)
+    const allPRsDetails = extractPRdetails(data);
 
-    const participantsDetailsMap = new Map()
-    const prMaps = new Map()
+    const participantsDetailsMap = new Map();
+    const prMaps = new Map();
 
-    allPRsDetails.forEach(pr => {
-      prMaps.set(pr.url, pr)
-    })
+    allPRsDetails.forEach((pr) => {
+      prMaps.set(pr.url, pr);
+    });
 
     for (const task of allUserTasks) {
-      const noteworthyObject = {}
-      const participantsDetails = []
+      const noteworthyObject = {};
+      const participantsDetails = [];
 
-      noteworthyObject.task = extractTaskdetails(task)
+      noteworthyObject.task = extractTaskdetails(task);
 
-      for (const userId of task.participants) {
-        const username = await userUtils.getUsername(userId)
-        const userDetails = participantsDetailsMap.get(username)
-        if (userDetails) {
-          participantsDetails.push(userDetails)
-        } else {
-          const user = await getUserDetails(username)
-          participantsDetailsMap.set(username, user)
-          participantsDetails.push(user)
+      if (Array.isArray(task.participants)) {
+        for (const userId of task.participants) {
+          const username = await userUtils.getUsername(userId);
+          const userDetails = participantsDetailsMap.get(username);
+          if (userDetails) {
+            participantsDetails.push(userDetails);
+          } else {
+            const user = await getUserDetails(username);
+            participantsDetailsMap.set(username, user);
+            participantsDetails.push(user);
+          }
         }
       }
 
-      noteworthyObject.task.participants = participantsDetails
-      const prList = []
+      noteworthyObject.task.participants = participantsDetails;
+      const prList = [];
 
-      task.links.forEach(link => {
-        const prObject = prMaps.get(link)
+      task.links?.forEach((link) => {
+        const prObject = prMaps.get(link);
         if (prObject) {
-          prList.push(prObject)
-          prMaps.delete(link)
+          prList.push(prObject);
+          prMaps.delete(link);
         }
-      })
+      });
 
-      noteworthyObject.prList = prList
+      noteworthyObject.prList = prList;
 
       if (task.isNoteworthy) {
-        noteworthy.push(noteworthyObject)
+        noteworthy.push(noteworthyObject);
       } else {
-        all.push(noteworthyObject)
+        all.push(noteworthyObject);
       }
     }
 
     for (const prDetails of prMaps.values()) {
       const allObject = {
         prList: [prDetails],
-        task: {}
-      }
-      all.push(allObject)
+        task: {},
+      };
+      all.push(allObject);
     }
   }
-  contributions.noteworthy = noteworthy
-  contributions.all = all
-  return contributions
-}
+  contributions.noteworthy = noteworthy;
+  contributions.all = all;
+  return contributions;
+};
 
 /**
  * Extracts only the necessary details required from the object returned by Github API
@@ -81,7 +83,7 @@ const getUserContributions = async (username) => {
  */
 
 const extractPRdetails = (data) => {
-  const allPRs = []
+  const allPRs = [];
   data.items.forEach(({ title, user, html_url: url, state, created_at: createdAt, updated_at: updatedAt }) => {
     allPRs.push({
       title,
@@ -89,11 +91,11 @@ const extractPRdetails = (data) => {
       createdAt,
       updatedAt,
       url,
-      raisedBy: user.login
-    })
-  })
-  return allPRs
-}
+      raisedBy: user.login,
+    });
+  });
+  return allPRs;
+};
 
 /**
  * Extracts only the necessary details required from the object returned by Task API
@@ -101,7 +103,7 @@ const extractPRdetails = (data) => {
  */
 
 const extractTaskdetails = (data) => {
-  const { title, purpose, endsOn, startedOn, dependsOn, status, participants, featureUrl, isNoteworthy } = data
+  const { title, purpose, endsOn, startedOn, dependsOn, status, participants, featureUrl, isNoteworthy } = data;
   return {
     title,
     purpose,
@@ -111,9 +113,9 @@ const extractTaskdetails = (data) => {
     status,
     participants,
     featureUrl,
-    isNoteworthy
-  }
-}
+    isNoteworthy,
+  };
+};
 
 /**
  * Get the user details
@@ -121,10 +123,10 @@ const extractTaskdetails = (data) => {
  */
 
 const getUserDetails = async (username) => {
-  const { user } = await fetchUser({ username })
-  const userDetails = extractUserDetails(user)
-  return userDetails
-}
+  const { user } = await fetchUser({ username });
+  const userDetails = extractUserDetails(user);
+  return userDetails;
+};
 
 /**
  * Extracts only the necessary details required from the object returned by user API
@@ -132,19 +134,19 @@ const getUserDetails = async (username) => {
  */
 
 const extractUserDetails = (data) => {
-  const { username, firstname, lastname, img } = data
+  const { username, firstname, lastname, img } = data;
   if (!data.incompleteUserDetails) {
     return {
       firstname,
       lastname,
       img,
-      username
-    }
+      username,
+    };
   } else {
-    return { username }
+    return { username };
   }
-}
+};
 
 module.exports = {
-  getUserContributions
-}
+  getUserContributions,
+};

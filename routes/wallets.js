@@ -1,8 +1,8 @@
-const express = require('express')
-const router = express.Router()
-const wallet = require('../controllers/wallets')
-const authenticate = require('../middlewares/authenticate')
-const authorization = require('../middlewares/authorization')
+const express = require("express");
+const router = express.Router();
+const wallet = require("../controllers/wallets");
+const authenticate = require("../middlewares/authenticate");
+const { authorizeUser } = require("../middlewares/authorization");
 
 /**
  * @swagger
@@ -31,7 +31,7 @@ const authorization = require('../middlewares/authorization')
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/', authenticate, wallet.getOwnWallet)
+router.get("/", authenticate, wallet.getOwnWallet);
 
 /**
  * @swagger
@@ -66,6 +66,6 @@ router.get('/', authenticate, wallet.getOwnWallet)
  *             schema:
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
-router.get('/:username', authenticate, authorization, wallet.getUserWallet)
+router.get("/:username", authenticate, authorizeUser("superUser"), wallet.getUserWallet);
 
-module.exports = router
+module.exports = router;

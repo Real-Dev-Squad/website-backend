@@ -1,8 +1,7 @@
-
 # Contributing to Real Dev Squad API
 
 - [Getting Started](#getting-started)
-- [NPM Command Reference](#npm-command-reference)
+- [Yarn Command Reference](#yarn-command-reference)
 - [Project Structure](#project-structure)
 - [Generating Authentication Token](#generating-authentication-token)
 - [Testing Guidelines](#testing-guidelines)
@@ -13,31 +12,34 @@
 
 Instructions for initial setup can be found in the [README](README.md).
 
-## NPM Command Reference
+## Yarn Command Reference
 
-##### `npm install`
+##### `yarn`
 
 Installs all `dependencies` listed in the root `package.json`.
 
-##### `npm run test`
+##### `yarn run test`
 
-The script associated with `npm run test` will run all tests that ensures that your commit does not break anything in the
+The script associated with `yarn run test` will run all tests that ensures that your commit does not break anything in the
 repository. This will run the lint, integration and unit tests.
 
-##### `npm run lint`
+##### `yarn run lint`
+
 Runs the lint checks in the project.
 
-##### `npm run generate-api-schema`
+##### `yarn run generate-api-schema`
+
 Generates the API schema in the file `public/apiSchema.json`.
 
-##### `npm run test-config`
+##### `yarn run validate-setup`
+
 Runs the test for checking local development setup is working properly or not.
 
-
 ## Project Structure
+
 The following project structure should be followed:
 
-``` shell script
+```shell script
 |-- website-backend
     |-- config
     |   |-- custom-environment-variables.js
@@ -89,6 +91,7 @@ The following project structure should be followed:
 ```
 
 ## Generating Authentication Token
+
 - Run the project locally, make sure the server is listening to requests
 - Navigate to `https://github.com/login/oauth/authorize?client_id=<GITHUB_CLIENT_ID>`
 - Authorize the application
@@ -97,8 +100,20 @@ The following project structure should be followed:
 - For non-production environments, authentication is also supported with the `Authorization` header.
 - Authorization header: `Authorization: Bearer <token>`
 
+## Production login:
+https://github.com/login/oauth/authorize?client_id=23c78f66ab7964e5ef97
+
+### Production login - Cookie:
+rds-session
+
+## Staging login:
+https://github.com/login/oauth/authorize?client_id=c4a84431feaf604e89d1
+
+### Staging login - Cookie: 
+rds-session-staging
 
 ## Testing Guidelines
+
 - Libraries used in testing in the project:
   - [mocha](https://mochajs.org/): Test framework
   - [chai](https://www.chaijs.com/): Assertion library
@@ -108,26 +123,33 @@ The following project structure should be followed:
 - Pre-requisites:
   - Node.js version 8.0 or higher.
   - Java version 1.8 or higher.
-  - Firebase CLI: `npm install -g firebase-tools`
 
 ## Using Firebase Emulator Locally
+
 - [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) can be used locally as the DB for the project
 - Pre-requisites:
   - Node.js version 8.0 or higher.
   - Java version 1.8 or higher.
-  - Firebase CLI: `npm install -g firebase-tools`
-- Run: `firebase emulators:start`
-- The emulator will be running on the port: 8080
+- Run: `npx firebase emulators:start`
+- The emulator will run and display the url you can access it on.
 - You can view the emulator UI at: `http://localhost:4000`
+- To run the application with using firebase emulator, run the following command([docs](https://firebase.google.com/docs/emulator-suite/connect_firestore#admin_sdks)):
+
+```shell
+export FIRESTORE_EMULATOR_HOST="localhost:<Firebase emulator PORT>"
+```
 
 ## Running test scripts on Windows
+
 - Git Bash is recommended for running test scripts on Windows.
-- Run `npm run test-integration` for running integration tests.
-- Run `npm run test-unit` for running unit tests.
-- Make sure to close the emulator window after running the tests in order to avoid the blocking of the port for the next tests to run. 
+- Run `yarn run test-integration` for running integration tests.
+- Run `yarn run test-unit` for running unit tests.
+- Make sure the server is not running.
+- Make sure to close the emulator window after running the tests in order to avoid the blocking of the port for the next tests to run.
 - For e.g - After running the integration tests, close the emulator window and then run the command for unit tests.
 
 ## Pull request guidelines
+
 - Ensure that the tests pass locally before raising a PR.
 - All pull requests should have base as the develop branch.
 - Every pull request should have associated issue(s) on our [issue tracker](https://github.com/Real-Dev-Squad/website-backend/issues).

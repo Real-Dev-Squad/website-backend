@@ -1,9 +1,13 @@
 const express = require('express')
 const router = express.Router()
 const members = require('../controllers/members')
-const { addRecruiter } = require('../controllers/recruiters')
-const { validateRecruiter } = require('../middlewares/validators/recruiter')
+const { authorizeUser } = require('../middlewares/authorization')
 const authenticate = require('../middlewares/authenticate')
+const { addRecruiter, fetchRecruitersInfo } = require('../controllers/recruiters')
+const { validateRecruiter } = require('../middlewares/validators/recruiter')
+const {
+  LEGACY_ROLES: { SUPER_USER }
+} = require('../constants/roles')
 
 /**
  * @swagger
@@ -86,5 +90,200 @@ router.get('/idle', members.getIdleMembers)
 router.post('/intro/:username', validateRecruiter, addRecruiter)
 
 router.post('/cache/clear/self', authenticate, members.purgeMembersCache)
+
+/**
+ * @swagger
+ * /members/intro:
+ *   get:
+ *     summary: Returns all requests for member introduction by recruiter in the system.
+ *     tags:
+ *       - Members
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Details of the recruiter and the member in which recruiter is interested
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/recruiters'
+ *
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *
+ *       500:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+
+router.get('/intro', authenticate, authorizeUser(SUPER_USER), fetchRecruitersInfo)
+
+/**
+ * @swagger
+ * /moveToMembers/:username:
+ *   patch:
+ *     summary: Changes the role of a new member(the username provided in params) to member
+ *     tags:
+ *       - Members
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: no content
+ *       400:
+ *         description: badRequest
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: User Already is a member
+ *
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *
+ *       500:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+
+router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPER_USER), members.moveToMembers)
+/**
+ * @swagger
+ * /members/member-to-role-migration:
+ *  patch:
+ *   summary: One time call to update roles of the users
+ *   tags:
+ *     - Members
+ *   responses:
+ *     200:
+ *       description: Details of the users migrated
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/migratedUsers'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
+ *     403:
+ *       description: forbidden
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/forbidden'
+ *     500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser'), members.migrateUserRoles)
+
+/**
+ * @swagger
+ * /members/delete-isMember:
+ *  patch:
+ *   summary: One time call to remove isMember field for all the migrated users
+ *   tags:
+ *     - Members
+ *   responses:
+ *     200:
+ *       description: Details of the users migrated
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/migratedUsers'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
+ *     403:
+ *       description: forbidden
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/forbidden'
+ *     500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), members.deleteIsMember)
+
+/**
+ * @swagger
+ * /archiveMembers/:username:
+ *   patch:
+ *     summary: Changes the role of a old member(the username provided in params) in new members list to archive_member
+ *     tags:
+ *       - Members
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: no content
+ *       400:
+ *         description: badRequest
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: User Already is a member
+ *
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *       404:
+ *         description: notFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/notFound'
+ *
+ *       500:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+
+router.patch('/archiveMembers/:username', authenticate, authorizeUser(SUPER_USER), members.archiveMembers)
 
 module.exports = router
