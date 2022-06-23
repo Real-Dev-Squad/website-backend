@@ -1,13 +1,13 @@
-const axios = require("axios");
 const { ROLES } = require("../constants/users");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
 const { fetchUser } = require("../models/users");
+const { fetch } = require("../utils/fetch");
 
 const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
-const CLOUD_FARE_ZONE_ID = config.get("CLOUD_FARE_ZONE_ID");
-const CLOUD_FARE_PURGE_CACHE_API = `https://api.cloudflare.com/client/v4/zones/${CLOUD_FARE_ZONE_ID}/purge_cache`;
+const CLOUDFLARE_ZONE_ID = config.get("cloudflare.CLOUDFLARE_ZONE_ID");
+const CLOUD_FARE_PURGE_CACHE_API = `https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`;
 
 /**
  * Fetches the data about our members
@@ -26,7 +26,7 @@ const getMembers = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`);
-    return res.boom.badImplementation("Something went wrong. Please contact admin");
+    return res.boom.badImplementation(ERROR_MESSAGE);
   }
 };
 
@@ -50,7 +50,7 @@ const getIdleMembers = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`);
-    return res.boom.badImplementation("Something went wrong. Please contact admin");
+    return res.boom.badImplementation(ERROR_MESSAGE);
   }
 };
 
@@ -95,7 +95,7 @@ const migrateUserRoles = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while migrating user roles: ${error}`);
-    return res.boom.badImplementation("Something went wrong. Please contact admin");
+    return res.boom.badImplementation(ERROR_MESSAGE);
   }
 };
 
@@ -114,7 +114,7 @@ const deleteIsMember = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while deleting isMember: ${error}`);
-    return res.boom.badImplementation("Something went wrong. Please contact admin");
+    return res.boom.badImplementation(ERROR_MESSAGE);
   }
 };
 
@@ -143,24 +143,32 @@ const archiveMembers = async (req, res) => {
   }
 };
 
+/**
+ * Purges the Cache of Members Profile Page
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
 const purgeMembersCache = async (req, res) => {
   try {
-    const { username } = req.userData?.username;
+    const { username } = req.params;
 
     if (!username) {
       return res.boom.badRequest("Username is not valid");
     }
 
-    const rep = await axios.post(
+    const rep = fetch(
       CLOUD_FARE_PURGE_CACHE_API,
+      "POST",
+      null,
       {
         files: [`https://members.realdevsquad.com/${username}`],
       },
       {
         headers: {
-          "X-Auth-Key": config.get("CLOUD_FARE_X_AUTH_KEY"),
-          "X-Auth-Email": config.get("CLOUD_FARE_AUTH_EMAIL"),
-          Authorization: `Bearer ${config.get("CLOUD_FARE_WORDPRESS_AUTHORIZATION_TOKEN")}`,
+          "X-Auth-Key": config.get("cloudflare.CLOUDFLARE_X_AUTH_KEY"),
+          "X-Auth-Email": config.get("cloudflare.CLOUDLARE_X_AUTH_EMAIL"),
+          Authorization: `Bearer ${config.get("cloudflare.CLOUDFLARE_WORDPRESS_AUTHORIZATION_TOKEN")}`,
         },
       }
     );
@@ -168,7 +176,7 @@ const purgeMembersCache = async (req, res) => {
     return res.json(rep.data);
   } catch (error) {
     logger.error(`Error while clearing members cache: ${error}`);
-    return res.boom.badImplementation("Something went wrong. Please contact admin");
+    return res.boom.badImplementation(ERROR_MESSAGE);
   }
 };
 

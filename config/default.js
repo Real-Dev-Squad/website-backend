@@ -67,6 +67,14 @@ module.exports = {
     api_secret: "api_secret_key",
   },
 
+  // Cloudflare
+  cloudflare: {
+    CLOUDFLARE_ZONE_ID: "<Cloudflare_Zone_ID_or_ID>",
+    CLOUDFLARE_X_AUTH_KEY: "<Cloudflare_API_Auth_Key>",
+    CLOUDFLARE_X_AUTH_EMAIL: "<Cloudflare_User_Email>",
+    CLOUDFLARE_WORDPRESS_AUTHORIZATION_TOKEN: "<Word_Press_Authorization_Token>",
+  },
+
   integrations: {
     newrelic: {
       appName: "RDS_API_production",
