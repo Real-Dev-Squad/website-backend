@@ -151,13 +151,13 @@ const archiveMembers = async (req, res) => {
  */
 const purgeMembersCache = async (req, res) => {
   try {
-    const { username } = req.params;
+    const { username } = req.userData;
 
     if (!username) {
       return res.boom.badRequest("Username is not valid");
     }
 
-    const rep = fetch(
+    const response = await fetch(
       CLOUD_FARE_PURGE_CACHE_API,
       "POST",
       null,
@@ -167,13 +167,12 @@ const purgeMembersCache = async (req, res) => {
       {
         headers: {
           "X-Auth-Key": config.get("cloudflare.CLOUDFLARE_X_AUTH_KEY"),
-          "X-Auth-Email": config.get("cloudflare.CLOUDLARE_X_AUTH_EMAIL"),
-          Authorization: `Bearer ${config.get("cloudflare.CLOUDFLARE_WORDPRESS_AUTHORIZATION_TOKEN")}`,
+          "X-Auth-Email": config.get("cloudflare.CLOUDFLARE_X_AUTH_EMAIL"),
         },
       }
     );
 
-    return res.json(rep.data);
+    return res.json(response.data);
   } catch (error) {
     logger.error(`Error while clearing members cache: ${error}`);
     return res.boom.badImplementation(ERROR_MESSAGE);

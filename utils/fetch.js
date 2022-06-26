@@ -18,7 +18,7 @@ const fetch = async (url, method = "get", params = null, data = null, headers = 
       url,
       params,
       data,
-      headers,
+      ...headers,
       ...options,
     });
     return response;
