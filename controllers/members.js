@@ -172,7 +172,7 @@ const purgeMembersCache = async (req, res) => {
       }
     );
 
-    return res.json(response.data);
+    return res.json({ message: "Cache purged successfully", ...response.data });
   } catch (error) {
     logger.error(`Error while clearing members cache: ${error}`);
     return res.boom.badImplementation(ERROR_MESSAGE);
