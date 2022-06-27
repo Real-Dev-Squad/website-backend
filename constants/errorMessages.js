@@ -3,4 +3,5 @@ module.exports = {
   ONLY_IMAGE_SUPPORTED: "Only image/jpeg, image/png supported",
   ONLY_ONE_FILE_ALLOWED: "Only one file allowed",
   FILE_TOO_LARGE: (size) => `File too large, max accepted size is ${size} MB`,
+  SOMETHING_WENT_WRONG: "Something went wrong. Please try again or contact admin",
 };

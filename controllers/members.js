@@ -3,11 +3,11 @@ const members = require("../models/members");
 const tasks = require("../models/tasks");
 const { fetchUser } = require("../models/users");
 const { fetch } = require("../utils/fetch");
-
-const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 const CLOUDFLARE_ZONE_ID = config.get("cloudflare.CLOUDFLARE_ZONE_ID");
-const CLOUD_FARE_PURGE_CACHE_API = `https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`;
+const CLOUDFLARE_PURGE_CACHE_API = `https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`;
+const POST = "POST";
 
 /**
  * Fetches the data about our members
@@ -26,7 +26,7 @@ const getMembers = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -50,7 +50,7 @@ const getIdleMembers = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -75,7 +75,7 @@ const moveToMembers = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while retriving contributions ${err}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -95,7 +95,7 @@ const migrateUserRoles = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while migrating user roles: ${error}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -114,7 +114,7 @@ const deleteIsMember = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while deleting isMember: ${error}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -139,7 +139,7 @@ const archiveMembers = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while retriving contributions ${err}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -158,24 +158,22 @@ const purgeMembersCache = async (req, res) => {
     }
 
     const response = await fetch(
-      CLOUD_FARE_PURGE_CACHE_API,
-      "POST",
+      CLOUDFLARE_PURGE_CACHE_API,
+      POST,
       null,
       {
         files: [`https://members.realdevsquad.com/${username}`],
       },
       {
-        headers: {
-          "X-Auth-Key": config.get("cloudflare.CLOUDFLARE_X_AUTH_KEY"),
-          "X-Auth-Email": config.get("cloudflare.CLOUDFLARE_X_AUTH_EMAIL"),
-        },
+        "X-Auth-Key": config.get("cloudflare.CLOUDFLARE_X_AUTH_KEY"),
+        "X-Auth-Email": config.get("cloudflare.CLOUDFLARE_X_AUTH_EMAIL"),
       }
     );
 
     return res.json({ message: "Cache purged successfully", ...response.data });
   } catch (error) {
     logger.error(`Error while clearing members cache: ${error}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
