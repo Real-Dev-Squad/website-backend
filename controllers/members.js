@@ -153,17 +153,13 @@ const purgeMembersCache = async (req, res) => {
   try {
     const { username } = req.userData;
 
-    if (!username) {
-      return res.boom.badRequest("Username is not valid");
-    }
+    if (!username) return res.boom.badRequest("Username is not valid");
 
     const response = await fetch(
       CLOUDFLARE_PURGE_CACHE_API,
       POST,
       null,
-      {
-        files: [`https://members.realdevsquad.com/${username}`],
-      },
+      { files: [`https://members.realdevsquad.com/${username}`] },
       {
         "X-Auth-Key": config.get("cloudflare.CLOUDFLARE_X_AUTH_KEY"),
         "X-Auth-Email": config.get("cloudflare.CLOUDFLARE_X_AUTH_EMAIL"),
