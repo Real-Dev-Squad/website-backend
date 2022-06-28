@@ -64,8 +64,8 @@ module.exports = {
 
   // Cloudflare
   cloudflare: {
-    CLOUDFLARE_ZONE_ID: "Cloudflare-Zone_ID",
-    CLOUDFLARE_X_AUTH_KEY: "Cloudflare-API-Auth-Key",
-    CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare-User-Email",
+    CLOUDFLARE_ZONE_ID: "321test321test321test",
+    CLOUDFLARE_X_AUTH_KEY: "123123test123123",
+    CLOUDFLARE_X_AUTH_EMAIL: "xyz@test.com",
   },
 };
