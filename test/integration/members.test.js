@@ -289,4 +289,48 @@ describe("Members", function () {
       });
     });
   });
+
+  describe("POST /members/cache/clear/self", function () {
+    it("Should purge the cache of member's profile page", function (done) {
+      chai
+        .request(app)
+        .post("/members/cache/clear/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Cache purged successfully");
+          expect(res.body.success).to.equal(true);
+          expect(res.body.errors).to.equal([]);
+          expect(res.body.messages).to.equal([]);
+          expect(res.body.result).to.be.a("object");
+          expect(res.body.result.id).to.be.a("string");
+
+          return done();
+        });
+    });
+
+    it("Should return unauthorized error when not logged in", function (done) {
+      chai
+        .request(app)
+        .post("/members/cache/clear/self")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+          return done();
+        });
+    });
+  });
 });
