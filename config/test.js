@@ -61,4 +61,11 @@ module.exports = {
       "Zzn584h/xbSIcP9/4SXmEK3wtoueUtMkvS3yKTvk+w==\n" +
       "-----END RSA PRIVATE KEY-----",
   },
+
+  // Cloudflare
+  cloudflare: {
+    CLOUDFLARE_ZONE_ID: "Cloudflare-Zone_ID",
+    CLOUDFLARE_X_AUTH_KEY: "Cloudflare-API-Auth-Key",
+    CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare-User-Email",
+  },
 };
