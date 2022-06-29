@@ -294,12 +294,13 @@ describe("Members", function () {
   });
 
   describe("POST /members/cache/clear/self", function () {
-    afterEach(function () {
-      sinon.restore();
-    });
-
     it("Should purge the cache of member's profile page", function (done) {
-      sinon.stub(members, "purgeMembersCache").returns(purgeCache[0]);
+      before(function () {
+        sinon.stub(members, "purgeMembersCache").returns(purgeCache[0]);
+      });
+      after(function () {
+        sinon.restore();
+      });
       chai
         .request(app)
         .post("/members/cache/clear/self")
