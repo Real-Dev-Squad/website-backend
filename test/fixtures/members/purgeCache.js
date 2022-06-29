@@ -16,5 +16,15 @@ module.exports = () => {
         id: "ba637cab83d148e6935cbba0b197d495",
       },
     },
+    {
+      statusCode: 401,
+      error: "Unauthorized",
+      message: "Unauthenticated User",
+    },
+    {
+      statusCode: 500,
+      error: "Internal Server Error",
+      message: "An internal server error occurred",
+    },
   ];
 };

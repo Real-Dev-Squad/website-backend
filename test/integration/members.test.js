@@ -294,13 +294,12 @@ describe("Members", function () {
   });
 
   describe("POST /members/cache/clear/self", function () {
+    afterEach(function () {
+      sinon.restore();
+    });
+
     it("Should purge the cache of member's profile page", function (done) {
-      before(function () {
-        sinon.stub(members, "purgeMembersCache").returns(purgeCache[0]);
-      });
-      after(function () {
-        sinon.restore();
-      });
+      sinon.stub(members, "purgeMembersCache").returns(purgeCache[0]);
       chai
         .request(app)
         .post("/members/cache/clear/self")
@@ -324,6 +323,7 @@ describe("Members", function () {
     });
 
     it("Should return unauthorized error when not logged in", function (done) {
+      sinon.stub(members, "purgeMembersCache").returns(purgeCache[1]);
       chai
         .request(app)
         .post("/members/cache/clear/self")
@@ -337,6 +337,27 @@ describe("Members", function () {
             statusCode: 401,
             error: "Unauthorized",
             message: "Unauthenticated User",
+          });
+          return done();
+        });
+    });
+
+    it("Should return error when cloudflare service is down", function (done) {
+      sinon.stub(members, "purgeMembersCache").returns(purgeCache[2]);
+      chai
+        .request(app)
+        .post("/members/cache/clear/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(500);
+          expect(res.body).to.eql({
+            statusCode: 500,
+            error: "Internal Server Error",
+            message: "An internal server error occurred",
           });
           return done();
         });
