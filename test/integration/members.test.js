@@ -1,9 +1,11 @@
 const chai = require("chai");
 const { expect } = chai;
+const sinon = require("sinon");
 const chaiHttp = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
+const members = require("../../controllers/members");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 
@@ -77,9 +79,6 @@ describe("Members", function () {
   });
 
   describe("GET /members/idle", function () {
-    before(async function () {
-      await cleanDb();
-    });
     it("Should return empty array if no idle member is found", function (done) {
       chai
         .request(app)
@@ -292,6 +291,18 @@ describe("Members", function () {
 
   describe("POST /members/cache/clear/self", function () {
     it("Should purge the cache of member's profile page", function (done) {
+      const response = {
+        message: "Cache purged successfully",
+        success: true,
+        errors: [],
+        messages: [],
+        result: {
+          id: "ba637cab83d148e6935cbba0b197d495",
+        },
+      };
+
+      sinon.stub(members, "purgeMembersCache").returns(response);
+
       chai
         .request(app)
         .post("/members/cache/clear/self")
@@ -315,6 +326,14 @@ describe("Members", function () {
     });
 
     it("Should return unauthorized error when not logged in", function (done) {
+      const response = {
+        statusCode: 401,
+        error: "Unauthorized",
+        message: "Unauthenticated User",
+      };
+
+      sinon.stub(members, "purgeMembersCache").returns(response);
+
       chai
         .request(app)
         .post("/members/cache/clear/self")
