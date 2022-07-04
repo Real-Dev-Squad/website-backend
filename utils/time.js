@@ -43,9 +43,16 @@ const getTimeInSecondAfter = ({ timestamp = Date.now(), days = 0, hours = 0, min
   return parseInt(timeInMilliseconds / 1000);
 };
 
+const getStartOfToday = (timestamp) => {
+  const currentTime = timestamp.fromDate(new Date());
+  currentTime._seconds -= 24 * 60 * 60;
+  return currentTime;
+};
+
 module.exports = {
   convertDaysToMilliseconds,
   convertHoursToMilliseconds,
   convertMinutesToMilliseconds,
   getTimeInSecondAfter,
+  getStartOfToday,
 };

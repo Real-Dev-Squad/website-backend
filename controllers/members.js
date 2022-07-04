@@ -1,8 +1,10 @@
 const { ROLES } = require("../constants/users");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
+const logsQuery = require("../models/logs");
 const { fetchUser } = require("../models/users");
 const { fetch } = require("../utils/fetch");
+const { logType } = require("../constants/logs");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 const CLOUDFLARE_ZONE_ID = config.get("cloudflare.CLOUDFLARE_ZONE_ID");
@@ -151,9 +153,7 @@ const archiveMembers = async (req, res) => {
  */
 const purgeMembersCache = async (req, res) => {
   try {
-    const { username } = req.userData;
-
-    if (!username) return res.boom.badRequest("Username is not valid");
+    const { id, username } = req.userData;
 
     const response = await fetch(
       CLOUDFLARE_PURGE_CACHE_API,
@@ -165,6 +165,8 @@ const purgeMembersCache = async (req, res) => {
         "X-Auth-Email": config.get("cloudflare.CLOUDFLARE_X_AUTH_EMAIL"),
       }
     );
+
+    await logsQuery.addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Log" });
 
     return res.json({ message: "Cache purged successfully", ...response.data });
   } catch (error) {

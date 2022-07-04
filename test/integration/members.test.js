@@ -353,6 +353,9 @@ describe("Members", function () {
             return done(err);
           }
 
+          // eslint-disable-next-line no-console
+          console.log(res.body);
+
           expect(res).to.have.status(500);
           expect(res.body).to.eql({
             statusCode: 500,
