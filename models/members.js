@@ -159,7 +159,7 @@ const addArchiveRoleToMembers = async (userId) => {
     const userDoc = await userModel.doc(userId).get();
     const user = userDoc.data();
     if (user?.roles?.archivedMember) return { isArchived: true };
-    const roles = { ...user.roles, archivedMember: true };
+    const roles = { ...user.roles, archivedMember: true, member: false };
     await userModel.doc(userId).update({
       roles,
     });
