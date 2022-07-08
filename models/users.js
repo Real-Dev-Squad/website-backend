@@ -59,6 +59,7 @@ const addOrUpdate = async (userData, userId = null) => {
 const fetchUsers = async (query) => {
   try {
     const snapshot = await userModel
+      .where("isMember", "==", true)
       .limit(parseInt(query.size) || 100)
       .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
       .get();

@@ -31,8 +31,6 @@ const {
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get("/", members.getMembers);
-
 /**
  * @swagger
  * /members/idle:

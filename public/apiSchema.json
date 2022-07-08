@@ -740,22 +740,6 @@
         }
       }
     },
-    "/members": {
-      "get": {
-        "summary": "Gets details of all the Real Dev Squad members",
-        "tags": ["Members"],
-        "responses": {
-          "200": {
-            "description": "Details of all the RDS members",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/users" } } }
-          },
-          "500": {
-            "description": "badImplementation",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/errors/badImplementation" } } }
-          }
-        }
-      }
-    },
     "/members/idle": {
       "get": {
         "summary": "Gets details of idle members of the Real Dev Squad",
