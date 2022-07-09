@@ -1,6 +1,8 @@
 const firestore = require("../utils/firestore");
+const { getLast24HourTime } = require("../utils/time");
 const logsModel = firestore.collection("logs");
 const admin = require("firebase-admin");
+const { logType } = require("../constants/logs");
 
 /**
  * Adds log
@@ -52,7 +54,34 @@ const fetchLogs = async (query, param) => {
   }
 };
 
+/**
+ * Fetches member cache Self logs
+ *
+ * @param userId { String }: Unique ID of the User
+ */
+const fetchMemberCacheLogs = async (id) => {
+  try {
+    const call = logsModel
+      .where("type", "==", logType.CLOUDFLARE_CACHE_PURGED)
+      .where("timestamp", ">=", getLast24HourTime(admin.firestore.Timestamp.fromDate(new Date())))
+      .where("meta.userId", "==", id);
+
+    const snapshot = await call.get();
+    const logs = [];
+    snapshot.forEach((doc) => {
+      logs.push({
+        ...doc.data(),
+      });
+    });
+    return logs;
+  } catch (err) {
+    logger.error("Error in adding log", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addLog,
   fetchLogs,
+  fetchMemberCacheLogs,
 };
