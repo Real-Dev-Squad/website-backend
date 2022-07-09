@@ -61,14 +61,14 @@ const fetchLogs = async (query, param) => {
  */
 const fetchMemberCacheLogs = async (id) => {
   try {
-    const call = logsModel
+    const logsSnapshot = await logsModel
       .where("type", "==", logType.CLOUDFLARE_CACHE_PURGED)
       .where("timestamp", ">=", getLast24HourTime(admin.firestore.Timestamp.fromDate(new Date())))
-      .where("meta.userId", "==", id);
+      .where("meta.userId", "==", id)
+      .get();
 
-    const snapshot = await call.get();
     const logs = [];
-    snapshot.forEach((doc) => {
+    logsSnapshot.forEach((doc) => {
       logs.push({
         ...doc.data(),
       });
