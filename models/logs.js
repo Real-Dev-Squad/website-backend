@@ -49,7 +49,7 @@ const fetchLogs = async (query, param) => {
     });
     return logs;
   } catch (err) {
-    logger.error("Error in adding log", err);
+    logger.error("Error in fetching logs", err);
     throw err;
   }
 };
@@ -75,7 +75,7 @@ const fetchMemberCacheLogs = async (id) => {
     });
     return logs;
   } catch (err) {
-    logger.error("Error in adding log", err);
+    logger.error("Error in fetching cache logs", err);
     throw err;
   }
 };
