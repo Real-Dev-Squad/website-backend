@@ -17,10 +17,6 @@ chai.use(chaiHttp);
 describe("Logs", function () {
   let jwt;
 
-  afterEach(async function () {
-    await addUser();
-  });
-
   after(async function () {
     await cleanDb();
   });
