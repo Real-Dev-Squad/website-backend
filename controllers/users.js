@@ -6,6 +6,7 @@ const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
+const logger = require("../utils/logger");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -25,22 +26,33 @@ const verifyUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
+  let result;
   try {
-    const result = await userQuery.fetchUser({ userId: req.params.userId });
-    const { phone, email, ...user } = result.user;
-
-    if (result.userExists) {
-      return res.json({
-        message: "User returned successfully!",
-        user,
-      });
-    }
-
-    return res.boom.notFound("User doesn't exist");
+    result = await userQuery.fetchUser({ userId: req.params.userId });
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
+
+  if (!result.userExists) {
+    return res.boom.notFound("User doesn't exist");
+  }
+
+  const { phone, email, ...user } = result.user;
+  try {
+    user.phone =
+      phone.slice(0, 1) + phone.slice(1, phone.length - 1).replace(/\d/g, "*") + phone.slice(phone.length - 1);
+    user.email =
+      email.slice(0, 2) + email.slice(2, email.length - 2).replace(/./g, "*") + email.slice(email.length - 2);
+  } catch (error) {
+    logger.error(`Error while formatting phone and email: ${error}`);
+    res.boom.error("Error while formatting phone and email");
+  }
+
+  return res.json({
+    message: "User returned successfully!",
+    user,
+  });
 };
 
 /**
@@ -196,18 +208,18 @@ const postUserPicture = async (req, res) => {
  */
 const updateUser = async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const { id: profileDiffId, message, ...profileDiff } = req.body;
+    const { id: profileDiffId, message } = req.body;
+
+    const profileDiffData = await profileDiffsQuery.fetchProfileDiff(profileDiffId);
+    if (!profileDiffData) return res.boom.notFound("Profile Diff doesn't exist");
+
+    const { approval, timestamp, userId, ...profileDiff } = profileDiffData;
 
     const user = await userQuery.fetchUser({ userId });
     if (!user.userExists) return res.boom.notFound("User doesn't exist");
 
-    const profileResponse = await profileDiffsQuery.updateProfileDiff(
-      { approval: profileDiffStatus.APPROVED },
-      profileDiffId
-    );
+    await profileDiffsQuery.updateProfileDiff({ approval: profileDiffStatus.APPROVED }, profileDiffId);
 
-    if (profileResponse.notFound) return res.boom.notFound("Profile Diff doesn't exist");
     await userQuery.addOrUpdate(profileDiff, userId);
 
     const meta = {
@@ -230,6 +242,7 @@ const generateChaincode = async (req, res) => {
   try {
     const { id } = req.userData;
     const chaincode = await chaincodeQuery.storeChaincode(id);
+    await userQuery.addOrUpdate({ chaincode }, id);
     return res.json({
       chaincode,
       message: "Chaincode returned successfully",
