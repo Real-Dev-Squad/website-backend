@@ -7,9 +7,13 @@ const { DINERO, NEELAM } = require("../../../constants/wallets");
  * @return {Object}
  */
 
-const currencies = {
-  [DINERO]: 1000,
-  [NEELAM]: 2,
+module.exports = {
+  default: {
+    [DINERO]: 1000,
+    [NEELAM]: 2,
+  },
+  modified: {
+    [DINERO]: 2000,
+    [NEELAM]: 0,
+  },
 };
-
-module.exports = currencies;
