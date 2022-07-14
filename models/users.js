@@ -58,13 +58,15 @@ const addOrUpdate = async (userData, userId = null) => {
  */
 const fetchUsers = async (query) => {
   try {
-    const snapshot = await userModel
-      .where("isMember", "==", true)
+    let snapshot = await userModel
       .limit(parseInt(query.size) || 100)
       .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
       .get();
 
     const allUsers = [];
+    if (query === "/users?role=members") {
+      snapshot = snapshot.where("isMember", "==", true);
+    }
 
     snapshot.forEach((doc) => {
       allUsers.push({
@@ -75,7 +77,6 @@ const fetchUsers = async (query) => {
         tokens: undefined,
       });
     });
-
     return allUsers;
   } catch (err) {
     logger.error("Error retrieving user data", err);
