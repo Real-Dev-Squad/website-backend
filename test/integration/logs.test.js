@@ -22,6 +22,7 @@ describe("Logs", function () {
 
   after(async function () {
     await cleanDb();
+    sinon.restore();
   });
 
   describe("GET /logs/member/CACHE_SELF", function () {
@@ -45,6 +46,7 @@ describe("Logs", function () {
           expect(response.body).to.be.an("object");
           expect(response.body.message).to.be.a("string");
           expect(response.body.count).to.be.a("number");
+          expect(response.body.count).to.eql(0);
           expect(response.body.logs).to.be.an("array");
           expect(response.body.logs).to.eql([]);
           return done();
