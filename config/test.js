@@ -63,8 +63,8 @@ module.exports = {
   },
 
   cloudflare: {
-    CLOUDFLARE_ZONE_ID: "ba637cab83d148e6935cbba0b197d495",
-    CLOUDFLARE_X_AUTH_KEY: "9042d6ed52ebd0bd13eca37fbcb823fee1621",
-    CLOUDFLARE_X_AUTH_EMAIL: "rajrohan1914@gmail.com",
+    CLOUDFLARE_ZONE_ID: "Cloudflare_Zone_iD",
+    CLOUDFLARE_X_AUTH_KEY: "Cloudflare_Auth_Key",
+    CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare_Auth_Email",
   },
 };
