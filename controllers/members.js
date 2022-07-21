@@ -166,7 +166,18 @@ const purgeMembersCache = async (req, res) => {
       }
     );
 
-    await logsQuery.addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Log" });
+    // eslint-disable-next-line no-console
+    console.log(response);
+
+    if (response.status === 200) {
+      await logsQuery.addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Cache Purged" });
+    } else {
+      await logsQuery.addLog(
+        logType.CLOUDFLARE_CACHE_PURGED,
+        { userId: id },
+        { message: `Error in Purging Cache - ${response}` }
+      );
+    }
 
     return res.json({ message: "Cache purged successfully", ...response.data });
   } catch (error) {
@@ -179,8 +190,8 @@ module.exports = {
   archiveMembers,
   getMembers,
   getIdleMembers,
-  purgeMembersCache,
   moveToMembers,
   migrateUserRoles,
   deleteIsMember,
+  purgeMembersCache,
 };

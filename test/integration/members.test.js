@@ -341,29 +341,5 @@ describe("Members", function () {
           return done();
         });
     });
-
-    it("Should return error when cloudflare service is down", function (done) {
-      sinon.stub(members, "purgeMembersCache").returns(purgeCache[2]);
-      chai
-        .request(app)
-        .post("/members/cache/clear/self")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          // eslint-disable-next-line no-console
-          console.log(res.body);
-
-          expect(res).to.have.status(500);
-          expect(res.body).to.eql({
-            statusCode: 500,
-            error: "Internal Server Error",
-            message: "An internal server error occurred",
-          });
-          return done();
-        });
-    });
   });
 });
