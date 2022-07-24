@@ -59,10 +59,4 @@ module.exports = {
       appName: "RDS_API_development",
     },
   },
-
-  cloudflare: {
-    CLOUDFLARE_ZONE_ID: "Cloudflare_Zone_iD",
-    CLOUDFLARE_X_AUTH_KEY: "Cloudflare_Auth_Key",
-    CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare_Auth_Email",
-  },
 };
