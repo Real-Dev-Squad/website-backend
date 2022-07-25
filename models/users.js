@@ -62,11 +62,15 @@ const fetchUsers = async (query) => {
       .limit(parseInt(query.size) || 100)
       .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
       .get();
+    if (query.role === "members") {
+      snapshot = await userModel
+        .limit(parseInt(query.size) || 100)
+        .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
+        .where("isMember", "==", true)
+        .get();
+    }
 
     const allUsers = [];
-    if (query === "/users?role=members") {
-      snapshot = snapshot.where("isMember", "==", true);
-    }
 
     snapshot.forEach((doc) => {
       allUsers.push({
