@@ -1,7 +1,7 @@
-import express, { Router } from "express";
-const router = Router();
+import express = require('express');
+const router = express.Router();
 import { testTypescript } from "../controllers/testTypescript";
 
 router.get("/mehul", testTypescript);
 
-export { router };
+export =  router;
