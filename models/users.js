@@ -58,18 +58,13 @@ const addOrUpdate = async (userData, userId = null) => {
  */
 const fetchUsers = async (query) => {
   try {
-    let snapshot = await userModel
-      .limit(parseInt(query.size) || 100)
-      .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
-      .get();
-    if (query.role === "members") {
-      snapshot = await userModel
-        .limit(parseInt(query.size) || 100)
-        .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
-        .where("isMember", "==", true)
-        .get();
-    }
+    let user = await userModel;
 
+    user = user.limit(parseInt(query.size) || 100).offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0));
+    if (query.role === "members") {
+      user = user.where("isMember", "==", true);
+    }
+    const snapshot = await user.get();
     const allUsers = [];
 
     snapshot.forEach((doc) => {
