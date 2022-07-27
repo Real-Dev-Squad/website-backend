@@ -1,8 +1,6 @@
 const chai = require("chai");
 const { expect } = chai;
 
-// const firestore = require("../../../utils/firestore");
-// const logsModel = firestore.collection("logs");
 const logsQuery = require("../../../models/logs");
 
 const logData = require("../../fixtures/logs/cacheLogs")();
