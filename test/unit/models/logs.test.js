@@ -14,14 +14,17 @@ describe("Logs", function () {
       await logsQuery.addLog(type, meta, body);
       const data = await logsQuery.fetchMemberCacheLogs(userId);
 
-      expect(data[0].timestamp).to.be.an("object");
-      expect(data[0].timestamp._seconds).to.be.a("number");
-      expect(data[0].timestamp._nanoseconds).to.be.a("number");
-      expect(data[0].type).to.be.a("string");
-      expect(data[0].meta).to.be.an("object");
-      expect(data[0].meta.userId).to.be.a("string");
-      expect(data[0].body).to.be.an("object");
-      expect(data[0].body.message).to.be.a("string");
+      expect(data).to.be.an("object");
+      expect(data.count).to.be.a("number");
+      expect(data.logs).to.be.a("array");
+      expect(data.logs[0].timestamp).to.be.an("object");
+      expect(data.logs[0].timestamp._seconds).to.be.a("number");
+      expect(data.logs[0].timestamp._nanoseconds).to.be.a("number");
+      expect(data.logs[0].type).to.be.a("string");
+      expect(data.logs[0].meta).to.be.an("object");
+      expect(data.logs[0].meta.userId).to.be.a("string");
+      expect(data.logs[0].body).to.be.an("object");
+      expect(data.logs[0].body.message).to.be.a("string");
     });
   });
 });

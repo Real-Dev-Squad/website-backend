@@ -73,7 +73,13 @@ const fetchMemberCacheLogs = async (id) => {
         ...doc.data(),
       });
     });
-    return logs;
+
+    const logData = {
+      logs: logs,
+      count: logs.length,
+    };
+
+    return logData;
   } catch (err) {
     logger.error("Error in fetching cache logs", err);
     throw err;
