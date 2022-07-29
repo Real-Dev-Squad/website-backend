@@ -78,13 +78,6 @@ yarn start
 ```
 Note: These are handled automatically behind the scene when pushing to [Heroku](https://devcenter.heroku.com/)
 
-## API Documentation:
-- View the RDS API documentation: [Real Dev Squad API](https://documenter.getpostman.com/view/2021368/TW6wH8Ns)
-- You can also run the server and navigate to `http://<HOSTNAME>:<PORT>/api-docs` to view the API documentation.
-- You can import the file [API Schema](https://github.com/Real-Dev-Squad/website-backend/blob/develop/public/apiSchema.json) to [Postman](https://www.postman.com/) or [SwaggerHub](https://swagger.io/tools/swaggerhub/).
-- If any API changes have been made:
-    - Write JS Doc on top of your routes using YAML based annotations in OPEN API 3.0 format.
-    - Run `yarn run generate-api-schema` to generate the API schema. A file `public/apiSchema.json` will be created/updated.
 
 Check out our video on how to setup the backend here: [Wiki link](https://github.com/Real-Dev-Squad/website-backend/wiki/Backend-setup-and-understanding-the-flow)
 

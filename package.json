@@ -11,8 +11,7 @@
     "test-integration": "sh scripts/tests/testIntegration.sh",
     "test-unit": "sh scripts/tests/testUnit.sh",
     "test": "yarn lint && yarn test-unit && yarn test-integration",
-    "tdd:watch": "sh scripts/tests/tdd.sh",
-    "generate-api-schema": "node utils/generateAPISchema.js"
+    "tdd:watch": "sh scripts/tests/tdd.sh"
   },
   "dependencies": {
     "axios": "^0.21.2",
@@ -35,8 +34,6 @@
     "newrelic": "^8.6.0",
     "passport": "^0.4.1",
     "passport-github2": "^0.1.12",
-    "swagger-jsdoc": "^6.1.0",
-    "swagger-ui-express": "^4.1.6",
     "winston": "^3.3.3"
   },
   "devDependencies": {
