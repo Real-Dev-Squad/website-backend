@@ -5,7 +5,8 @@ const chaiHttp = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
-const members = require("../../controllers/members");
+// const members = require("../../controllers/members");
+const axios = require("axios");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 
@@ -294,12 +295,15 @@ describe("Members", function () {
   });
 
   describe("POST /members/cache/clear/self", function () {
+    beforeEach(async function () {
+      sinon.stub(axios, "fetch").returns(purgeCache[0]);
+    });
+
     afterEach(function () {
       sinon.restore();
     });
 
     it("Should purge the cache of member's profile page", function (done) {
-      sinon.stub(members, "purgeMembersCache").returns(purgeCache[0]);
       chai
         .request(app)
         .post("/members/cache/clear/self")
@@ -323,7 +327,6 @@ describe("Members", function () {
     });
 
     it("Should return unauthorized error when not logged in", function (done) {
-      sinon.stub(members, "purgeMembersCache").returns(purgeCache[1]);
       chai
         .request(app)
         .post("/members/cache/clear/self")

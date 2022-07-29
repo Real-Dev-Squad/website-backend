@@ -3,13 +3,9 @@ const members = require("../models/members");
 const tasks = require("../models/tasks");
 const logsQuery = require("../models/logs");
 const { fetchUser } = require("../models/users");
-const { fetch } = require("../utils/fetch");
 const { logType } = require("../constants/logs");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-
-const CLOUDFLARE_ZONE_ID = config.get("cloudflare.CLOUDFLARE_ZONE_ID");
-const CLOUDFLARE_PURGE_CACHE_API = `https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`;
-const POST = "POST";
+const { cloudflarePurgeCache } = require("../utils/cloudflare");
 
 /**
  * Fetches the data about our members
@@ -155,16 +151,8 @@ const purgeMembersCache = async (req, res) => {
   try {
     const { id, username } = req.userData;
 
-    const response = await fetch(
-      CLOUDFLARE_PURGE_CACHE_API,
-      POST,
-      null,
-      { files: [`https://members.realdevsquad.com/${username}`] },
-      {
-        "X-Auth-Key": config.get("cloudflare.CLOUDFLARE_X_AUTH_KEY"),
-        "X-Auth-Email": config.get("cloudflare.CLOUDFLARE_X_AUTH_EMAIL"),
-      }
-    );
+    const files = [`https://members.realdevsquad.com/${username}`];
+    const response = await cloudflarePurgeCache(files);
 
     // eslint-disable-next-line no-console
     console.log(response);
