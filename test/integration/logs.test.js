@@ -32,6 +32,10 @@ describe("Logs", function () {
       jwt = authService.generateAuthToken({ userId });
     });
 
+    after(async function () {
+      await cleanDb();
+    });
+
     it("Should return empty array if no cache logs in last 24 hours found", function (done) {
       chai
         .request(app)

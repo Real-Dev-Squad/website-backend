@@ -4,8 +4,9 @@ const tasks = require("../models/tasks");
 const logsQuery = require("../models/logs");
 const { fetchUser } = require("../models/users");
 const { logType } = require("../constants/logs");
+const { MAX_CACHE_PURGE_COUNT } = require("../constants/members");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const { cloudflarePurgeCache } = require("../utils/cloudflare");
+const cloudflare = require("../utils/cloudflare");
 
 /**
  * Fetches the data about our members
@@ -150,24 +151,21 @@ const archiveMembers = async (req, res) => {
 const purgeMembersCache = async (req, res) => {
   try {
     const { id, username } = req.userData;
+    const logs = await logsQuery.fetchMemberCacheLogs(id);
+    const logsCount = logs.length;
 
     const files = [`https://members.realdevsquad.com/${username}`];
-    const response = await cloudflarePurgeCache(files);
 
-    // eslint-disable-next-line no-console
-    console.log(response);
+    if (logsCount < MAX_CACHE_PURGE_COUNT) {
+      const response = await cloudflare.purgeCache(files);
+      if (response.status === 200) {
+        await logsQuery.addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Cache Purged" });
+      }
 
-    if (response.status === 200) {
-      await logsQuery.addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Cache Purged" });
+      return res.json({ message: "Cache purged successfully", ...response.data });
     } else {
-      await logsQuery.addLog(
-        logType.CLOUDFLARE_CACHE_PURGED,
-        { userId: id },
-        { message: `Error in Purging Cache - ${response}` }
-      );
+      return res.json({ message: "Limit Reached for Purging Cache" });
     }
-
-    return res.json({ message: "Cache purged successfully", ...response.data });
   } catch (error) {
     logger.error(`Error while clearing members cache: ${error}`);
     return res.boom.badImplementation(SOMETHING_WENT_WRONG);

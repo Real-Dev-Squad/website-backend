@@ -5,8 +5,7 @@ const chaiHttp = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
-// const members = require("../../controllers/members");
-const axios = require("axios");
+const cloudflare = require("../../utils/cloudflare");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 
@@ -244,7 +243,6 @@ describe("Members", function () {
             }
 
             expect(res).to.have.status(204);
-            /* eslint-disable no-unused-expressions */
             expect(res.body).to.be.a("object").to.be.empty;
 
             return done();
@@ -295,11 +293,17 @@ describe("Members", function () {
   });
 
   describe("POST /members/cache/clear/self", function () {
-    beforeEach(async function () {
-      sinon.stub(axios, "fetch").returns(purgeCache[0]);
+    before(async function () {
+      await cleanDb();
+      const userId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId });
     });
 
-    afterEach(function () {
+    beforeEach(async function () {
+      sinon.stub(cloudflare, "purgeCache").returns(purgeCache[0]);
+    });
+
+    afterEach(async function () {
       sinon.restore();
     });
 

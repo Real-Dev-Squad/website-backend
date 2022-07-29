@@ -8,12 +8,13 @@
 module.exports = () => {
   return [
     {
-      message: "Cache purged successfully",
-      success: true,
-      errors: [],
-      messages: [],
-      result: {
-        id: "ba637cab83d148e6935cbba0b1abcxyz",
+      data: {
+        success: true,
+        errors: [],
+        messages: [],
+        result: {
+          id: "ba637cab83d148e6935cbba0b1abcxqp",
+        },
       },
     },
     {
