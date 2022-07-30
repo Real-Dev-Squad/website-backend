@@ -58,12 +58,13 @@ const addOrUpdate = async (userData, userId = null) => {
  */
 const fetchUsers = async (query) => {
   try {
+
     let user = await userModel;
 
     user = user.limit(parseInt(query.size) || 100).offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0));
 
-    if (query.role === ROLES.MEMBER) {
-      user = user.where("isMember", "==", true);
+    if (query.role === ROLES.MEMBER || query.role === ROLES.SUPERUSER || query.role === ROLES.APPOWNER) {
+      user = user.where(`roles${query.role}`, "==", true);
     }
     const snapshot = await user.get();
     const allUsers = [];
