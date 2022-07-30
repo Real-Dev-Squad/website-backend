@@ -82,6 +82,28 @@ const fetchUsers = async (query) => {
   }
 };
 
+const queryUser = async (query) => {
+  try {
+    let call = userModel;
+    Object.keys(query).forEach((key) => {
+      // eslint-disable-next-line security/detect-object-injection
+      call = call.where(key, "==", query[key]);
+    });
+
+    const snapshot = await call.get();
+    const logs = [];
+    snapshot.forEach((doc) => {
+      logs.push({
+        ...doc.data(),
+      });
+    });
+    return logs;
+  } catch (err) {
+    logger.error("Error retrieving user data", err);
+    throw err;
+  }
+};
+
 /**
  * Fetches the user data from the the provided username or userId
  *
@@ -185,6 +207,7 @@ module.exports = {
   addOrUpdate,
   fetchUsers,
   fetchUser,
+  queryUser,
   setIncompleteUserDetails,
   initializeUser,
   updateUserPicture,

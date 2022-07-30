@@ -1,7 +1,6 @@
-const { ROLES } = require("../constants/users");
 const members = require("../models/members");
+const users = require("../models/users");
 const tasks = require("../models/tasks");
-const { fetchUser } = require("../models/users");
 
 const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
@@ -35,14 +34,13 @@ const getMembers = async (req, res) => {
 
 const getIdleMembers = async (req, res) => {
   try {
-    const onlyMembers = await members.fetchUsersWithRole(ROLES.MEMBER);
+    const allusers = await users.queryUser({ status: "idle" });
     const taskParticipants = await tasks.fetchActiveTaskMembers();
-    const idleMembers = onlyMembers?.filter(({ id }) => !taskParticipants.has(id));
-    const idleMemberUserNames = idleMembers?.map((member) => member.username);
+    const idleMembers = allusers?.filter(({ id }) => !taskParticipants.has(id));
 
     return res.json({
-      message: idleMemberUserNames.length ? "Idle members returned successfully!" : "No idle member found",
-      idleMemberUserNames,
+      message: idleMembers.length ? "Idle members returned successfully!" : "No idle member found",
+      idleMembers,
     });
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`);
@@ -60,7 +58,7 @@ const getIdleMembers = async (req, res) => {
 const moveToMembers = async (req, res) => {
   try {
     const { username } = req.params;
-    const result = await fetchUser({ username });
+    const result = await users.fetchUser({ username });
     if (result.userExists) {
       const successObject = await members.moveToMembers(result.user.id);
       if (successObject.isAlreadyMember) {
@@ -124,7 +122,7 @@ const deleteIsMember = async (req, res) => {
 const archiveMembers = async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await fetchUser({ username });
+    const user = await users.fetchUser({ username });
     if (user?.userExists) {
       const successObject = await members.addArchiveRoleToMembers(user.user.id);
       if (successObject.isArchived) {
