@@ -108,7 +108,7 @@ const fetchTask = async (taskId) => {
  * Fetch assigned self task
  * @param taskId { string }: taskId which will be used to fetch the task
  * @param id { string }: id to check task is assigned to self or not
- * @return {Promsie<taskData|Object>}
+ * @return {Promise<taskData|Object>}
  */
 const fetchSelfTask = async (taskId, userId) => {
   try {
@@ -215,7 +215,7 @@ const fetchUserCompletedTasks = async (username) => {
 /**
  * Fetch all overdue tasks
  * @param overdueTasks <Array>: tasks which are overdue
- * @return {Promsie<Array>}
+ * @return {Promise<Array>}
  */
 const overdueTasks = async (overDueTasks) => {
   try {

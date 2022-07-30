@@ -140,6 +140,48 @@ describe("Tasks", function () {
     });
   });
 
+  describe("GET /task", function () {
+    it("Should get the task for the given taskid", function (done) {
+      chai
+        .request(app)
+        .get("/tasks/" + taskId1)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Task Details returned successfully!");
+          expect(res.body.taskData).to.be.a("array");
+          const taskWithParticipants = res.body.taskData;
+
+          if (taskWithParticipants.type === "group") {
+            expect(taskWithParticipants.participants).to.include(appOwner.username);
+          } else {
+            expect(taskWithParticipants.assignee).to.equal(appOwner.username);
+          }
+
+          return done();
+        });
+    });
+
+    it("Should return 404 if task does not exist", function (done) {
+      chai
+        .request(app)
+        .get("/tasks/taskid")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Task not found");
+
+          return done();
+        });
+    });
+  });
+
   describe("GET /tasks/self", function () {
     it("Should return all the completed tasks of the user when query 'completed' is true", function (done) {
       const { COMPLETED } = TASK_STATUS;
@@ -329,7 +371,7 @@ describe("Tasks", function () {
         });
     });
 
-    it("Should return 404 if task doesnt exist", function (done) {
+    it("Should return 404 if task doesn't exist", function (done) {
       chai
         .request(app)
         .patch("/tasks/self/wrongtaskId")

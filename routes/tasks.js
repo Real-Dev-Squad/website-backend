@@ -28,6 +28,28 @@ const { authorizeUser } = require("../middlewares/authorization");
  */
 
 router.get("/", tasks.fetchTasks);
+/**
+ * @swagger
+ * /tasks:
+ *  get:
+ *   summary: Used to get particular task details
+ *   tags:
+ *     - Tasks
+ *   responses:
+ *     200:
+ *       description: Returns task details
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/tasks'
+ *     500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.get("/:id", tasks.fetchTask);
 
 /**
  * @swagger
@@ -85,7 +107,7 @@ router.get("/self", authenticate, tasks.getSelfTasks);
  *        content:
  *          application/json:
  *            schema:
- *              $ref: '#/components/shcemas/error/unAuthorized'
+ *              $ref: '#/components/schemas/error/unAuthorized'
  *      403:
  *        description: forbidden
  *        content:
@@ -198,7 +220,7 @@ router.get("/:username", tasks.getUserTasks);
  *   tags:
  *     - Tasks
  *   requestBody:
- *     desciption: Task status
+ *     description: Task status
  *     required: true
  *     content:
  *       application/json:
@@ -206,10 +228,10 @@ router.get("/:username", tasks.getUserTasks);
  *           $ref: '#/components/schemas/tasks'
  *   responses:
  *     204:
- *       description: Status of self task udpated
+ *       description: Status of self task updated
  *       content:
  *         application/json:
- *           schma:
+ *           schema:
  *             $ref: '#/components/schemas/tasks'
  *     401:
  *       description: unAuthorized

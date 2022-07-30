@@ -48,6 +48,27 @@ const fetchTasks = async (req, res) => {
 };
 
 /**
+ * Fetch the task details
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const fetchTask = async (req, res) => {
+  try {
+    const { taskData } = await tasks.fetchTask(req.params.id);
+    if (!taskData) {
+      return res.boom.notFound("Task not found");
+    }
+    return res.json({
+      message: "Task Details returned successfully!",
+      taskData,
+    });
+  } catch (err) {
+    logger.error(`Error while fetching task: ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+/**
  * Fetches all the tasks of the requested user
  *
  * @param req {Object} - Express request object
@@ -153,7 +174,7 @@ const updateTaskStatus = async (req, res) => {
     return res.json({ message: "Task updated successfully!" });
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`);
-    return res.boom.badImplementation("An internal server error occured");
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -177,13 +198,14 @@ const overdueTasks = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while fetching overdue tasks : ${err}`);
-    return res.boom.badImplementation("An internal server error occured");
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
 module.exports = {
   addNewTask,
   fetchTasks,
+  fetchTask,
   updateTask,
   getSelfTasks,
   getUserTasks,
