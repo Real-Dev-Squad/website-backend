@@ -58,7 +58,6 @@ const addOrUpdate = async (userData, userId = null) => {
  */
 const fetchUsers = async (query) => {
   try {
-
     let user = await userModel;
 
     user = user.limit(parseInt(query.size) || 100).offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0));
