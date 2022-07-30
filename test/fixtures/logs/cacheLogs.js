@@ -7,7 +7,7 @@ module.exports = () => {
       },
       type: "CLOUDFLARE_CACHE_PURGED",
       meta: {
-        userId: "yqTBc7cLuJ3n9xx31EQD",
+        userId: "TEST_USER_ID",
       },
       body: {
         message: "Log",
