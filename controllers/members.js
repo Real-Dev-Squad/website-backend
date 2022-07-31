@@ -164,7 +164,7 @@ const purgeMembersCache = async (req, res) => {
 
       return res.json({ message: "Cache purged successfully", ...response.data });
     } else {
-      return res.json({ message: "Limit Reached for Purging Cache. Please try again after some time" });
+      return res.json({ message: "Maximum Limit Reached for Purging Cache. Please try again after some time" });
     }
   } catch (error) {
     logger.error(`Error while clearing members cache: ${error}`);
