@@ -44,9 +44,27 @@ const updateTask = async (taskData, taskId = null) => {
  *
  * @return {Promise<tasks|Array>}
  */
-const fetchTasks = async () => {
+const fetchTasks = async (limit, offset) => {
+  let lastDoc;
+
+  //if offset given
+  if (offset) {
+    lastDoc = await tasksModel.doc(offset).get();
+    lastDoc = lastDoc.data();
+  }
+
+  // default case for limit
+  if (!limit) {
+    limit = 20;
+  }
+  limit = Number(limit);
+
   try {
-    const tasksSnapshot = await tasksModel.get();
+    const tasksSnapshot = await tasksModel
+      .orderBy("startedOn", "desc")
+      .startAfter(lastDoc ? lastDoc.startedOn : "")
+      .limit(limit)
+      .get();
     const tasks = buildTasks(tasksSnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
     const updatedTasks = await Promise.all(promises);

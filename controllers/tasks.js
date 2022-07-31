@@ -35,8 +35,10 @@ const addNewTask = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const fetchTasks = async (req, res) => {
+  const { limit, offset } = req.query;
+
   try {
-    const allTasks = await tasks.fetchTasks();
+    const allTasks = await tasks.fetchTasks(limit, offset);
     return res.json({
       message: "Tasks returned successfully!",
       tasks: allTasks.length > 0 ? allTasks : [],
