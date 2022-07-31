@@ -89,35 +89,7 @@ router.get("/idle", members.getIdleMembers);
 
 router.post("/intro/:username", validateRecruiter, addRecruiter);
 
-/**
- * @swagger
- * /cache/clear/self:
- *   post:
- *     summary: Purges the cache of user's member profile page
- *     tags:
- *       - Members
- *     responses:
- *       200:
- *         description: Returns the id of the purge cache request on success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/users'
- *       400:
- *         description: badImplementation
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/errors/badImplementation'
- *       500:
- *         description: serverUnavailable
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/errors/serverUnavailable'
- */
-
-router.post("/cache/clear/self", authenticate, members.purgeMembersCache);
+router.post("/cache", authenticate, members.purgeMembersCache);
 
 /**
  * @swagger

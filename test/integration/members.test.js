@@ -5,7 +5,7 @@ const chaiHttp = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
-const cloudflare = require("../../utils/cloudflare");
+const cloudflare = require("../../services/cloudflareService");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 
@@ -292,7 +292,7 @@ describe("Members", function () {
     });
   });
 
-  describe("POST /members/cache/clear/self", function () {
+  describe("POST /members/cache", function () {
     before(async function () {
       await cleanDb();
       const userId = await addUser(superUser);
@@ -310,7 +310,7 @@ describe("Members", function () {
     it("Should purge the cache of member's profile page", function (done) {
       chai
         .request(app)
-        .post("/members/cache/clear/self")
+        .post("/members/cache")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -333,7 +333,7 @@ describe("Members", function () {
     it("Should return unauthorized error when not logged in", function (done) {
       chai
         .request(app)
-        .post("/members/cache/clear/self")
+        .post("/members/cache")
         .end((err, res) => {
           if (err) {
             return done(err);

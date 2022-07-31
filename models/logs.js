@@ -35,12 +35,9 @@ const addLog = async (type, meta, body) => {
 const fetchLogs = async (query, param) => {
   try {
     let call = logsModel.where("type", "==", param);
-    // .where("timestamp", "", getStartOfToday());
+
     Object.keys(query).forEach((key) => {
-      // eslint-disable-next-line no-console
-      console.log(key, typeof key, query[key], typeof query[key]);
-      // eslint-disable-next-line security/detect-object-injection
-      call = call.where(key, "==", query[key]);
+      call = call.where(key, "==", query[String(key)]);
     });
 
     const snapshot = await call.get();

@@ -6,7 +6,7 @@ const { fetchUser } = require("../models/users");
 const { logType } = require("../constants/logs");
 const { MAX_CACHE_PURGE_COUNT } = require("../constants/members");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const cloudflare = require("../utils/cloudflare");
+const cloudflare = require("../services/cloudflareService");
 
 /**
  * Fetches the data about our members
@@ -164,7 +164,7 @@ const purgeMembersCache = async (req, res) => {
 
       return res.json({ message: "Cache purged successfully", ...response.data });
     } else {
-      return res.json({ message: "Limit Reached for Purging Cache" });
+      return res.json({ message: "Limit Reached for Purging Cache. Please try again after some time" });
     }
   } catch (error) {
     logger.error(`Error while clearing members cache: ${error}`);
