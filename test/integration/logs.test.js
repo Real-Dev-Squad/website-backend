@@ -25,7 +25,7 @@ describe("Logs", function () {
     sinon.restore();
   });
 
-  describe("GET /logs/member/CACHE_SELF", function () {
+  describe("GET /logs/cache", function () {
     before(async function () {
       await cleanDb();
       const userId = await addUser(userData[0]);
@@ -39,7 +39,7 @@ describe("Logs", function () {
     it("Should return empty array if no cache logs in last 24 hours found", function (done) {
       chai
         .request(app)
-        .get("/logs/member/CACHE_SELF")
+        .get("/logs/cache")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((error, response) => {
           if (error) {
@@ -61,7 +61,7 @@ describe("Logs", function () {
       sinon.stub(logsQuery, "fetchMemberCacheLogs").returns(logData);
       chai
         .request(app)
-        .get("/logs/member/CACHE_SELF")
+        .get("/logs/cache")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((error, response) => {
           if (error) {
@@ -85,7 +85,7 @@ describe("Logs", function () {
     it("Should return unauthorized error when not logged in", function (done) {
       chai
         .request(app)
-        .get("/logs/member/CACHE_SELF")
+        .get("/logs/cache")
         .end((err, res) => {
           if (err) {
             return done(err);

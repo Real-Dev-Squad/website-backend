@@ -30,7 +30,7 @@ const fetchMemberCacheLogs = async (req, res) => {
     const { id } = req.userData;
     const logs = await logsQuery.fetchMemberCacheLogs(id);
     return res.json({
-      message: "Member Cache Logs returned successfully!",
+      message: "Cache Logs returned successfully!",
       count: logs.length,
       logs,
     });
