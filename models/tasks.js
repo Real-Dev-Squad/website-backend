@@ -47,7 +47,7 @@ const updateTask = async (taskData, taskId = null) => {
 const fetchTasks = async (limit, offset) => {
   let lastDoc;
 
-  //if offset given
+  // if offset given
   if (offset) {
     lastDoc = await tasksModel.doc(offset).get();
     lastDoc = lastDoc.data();
