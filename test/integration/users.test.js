@@ -122,6 +122,41 @@ describe("Users", function () {
           return done();
         });
     });
+    it("Should return members only", function (done) {
+      chai
+        .request(app)
+        .get("/users?role=member")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users[0].roles.member).to.eql(true);
+
+          return done();
+        });
+    });
+    it("Should return empty array when no members", function (done) {
+      chai
+        .request(app)
+        .get("/users?role=member")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.eql([]);
+
+          return done();
+        });
+    });
   });
 
   describe("GET /users/self", function () {
