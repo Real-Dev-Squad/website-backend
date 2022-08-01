@@ -7,39 +7,6 @@ const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 
 /**
- * Fetches the data about our users
- * @return {Promise<userModel|Array>}
- */
-
-const fetchUsers = async () => {
-  try {
-    const snapshot = await userModel.get();
-
-    const allMembers = [];
-
-    if (!snapshot.empty) {
-      snapshot.forEach((doc) => {
-        const memberData = doc.data();
-        const curatedMemberData = {
-          id: doc.id,
-          ...memberData,
-          tokens: undefined,
-          phone: undefined,
-          email: undefined,
-        };
-        curatedMemberData.isMember = !!(memberData.roles && memberData.roles.member);
-        allMembers.push(curatedMemberData);
-      });
-    }
-
-    return allMembers;
-  } catch (err) {
-    logger.error("Error retrieving members data", err);
-    throw err;
-  }
-};
-
-/**
  * changes the role of a new user to member
  * @param userId { String }: User id of user to be modified
  * @return { Object }: whether moveToMember was successful or not and whether user is already a member or not
@@ -173,7 +140,6 @@ const addArchiveRoleToMembers = async (userId) => {
 module.exports = {
   moveToMembers,
   addArchiveRoleToMembers,
-  fetchUsers,
   migrateUsers,
   deleteIsMemberProperty,
   fetchUsersWithRole,
