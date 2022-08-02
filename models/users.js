@@ -6,7 +6,6 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
-const { ROLES } = require("../constants/roles");
 const userModel = firestore.collection("users");
 
 /**
@@ -61,10 +60,13 @@ const fetchUsers = async (query) => {
     let user = await userModel;
 
     user = user.limit(parseInt(query.size) || 100).offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0));
+    query = query.role.split(",");
 
-    if (query.role === ROLES.MEMBER) {
-      user = user.where(`roles${query.role}`, "==", true);
-    }
+    Object.keys(query).forEach((key) => {
+      // eslint-disable-next-line security/detect-object-injection
+      user = user.where(`roles${query[key]}`, "==", true);
+    });
+
     const snapshot = await user.get();
     const allUsers = [];
 
