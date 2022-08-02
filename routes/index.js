@@ -12,6 +12,7 @@ app.use("/logs", require("./logs.js"));
 app.use("/members", require("./members.js"));
 app.use("/pullrequests", require("./pullrequests.js"));
 app.use("/stocks", require("./stocks.js"));
+app.use("/skills", require("./skills.js"));
 app.use("/tasks", require("./tasks.js"));
 app.use("/trade", require("./trading.js"));
 app.use("/users", require("./users.js"));
