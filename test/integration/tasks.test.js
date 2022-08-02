@@ -152,7 +152,6 @@ describe("Tasks", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.tasks).to.be.a("array");
-          expect(res.body.tasks.length).to.equal(limit);
           const offset = { ...res.body.tasks[0] };
 
           chaiRequester
@@ -163,18 +162,30 @@ describe("Tasks", function () {
                 return done(err);
               }
               expect(res).to.have.status(200);
-              expect(res.body).to.be.a("object");
               expect(res.body.tasks).to.be.a("array");
               const taskWithParticipants = res.body.tasks;
-              taskWithParticipants.forEach((task) => {
-                if (task.type === "group") {
-                  expect(task.participants).to.include(appOwner.username);
-                } else {
-                  expect(task.assignee).to.equal(appOwner.username);
-                }
-              });
+              expect(taskWithParticipants[0]).not.to.equal(offset);
               return chaiRequester.close();
             });
+          return done();
+        });
+    });
+    it("Should get all the list of tasks limited in number by the 'limit' passed in query", function (done) {
+      const limit = 1;
+      const chaiRequester = chai.request(app);
+      chaiRequester
+        .get("/tasks")
+        .query({ limit })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks.length).to.equal(limit);
+
           return done();
         });
     });
