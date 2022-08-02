@@ -18,7 +18,7 @@ const {
  *       - Members
  *     parameters:
  *        - in: query
- *          name: includeArchived
+ *          name: showArchived
  *          schema:
  *             type: boolean
  *          description: If true, the endpoint returns all users (including archived)

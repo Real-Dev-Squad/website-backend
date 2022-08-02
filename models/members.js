@@ -16,14 +16,13 @@ const fetchUsers = async (queryParams = {}) => {
     const snapshot = await userModel.get();
     const allMembers = [];
 
-    let { includeArchived } = queryParams;
-    if (includeArchived === "true") includeArchived = true;
-    else includeArchived = false;
+    let { showArchived } = queryParams;
+    showArchived = showArchived === "true";
 
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
         const memberData = doc.data();
-        if (!includeArchived && memberData?.roles && memberData.roles[ROLES.ARCHIVED] === true) return;
+        if (!showArchived && memberData?.roles && memberData.roles[ROLES.ARCHIVED] === true) return;
         const curatedMemberData = {
           id: doc.id,
           ...memberData,

@@ -95,7 +95,7 @@ describe("Members", function () {
     it("Get all the users in the database (including archived)", function (done) {
       chai
         .request(app)
-        .get("/members?includeArchived=true")
+        .get("/members?showArchived=true")
         .end((err, res) => {
           if (err) {
             return done(err);
