@@ -81,16 +81,13 @@ describe("Members", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Members returned successfully!");
           expect(res.body.members).to.be.a("array");
-          // console.log(res.body.members)
           const memberGithubIds = res.body.members.map((member) => member.github_id);
-          // console.log(`memberGithubIds : ${memberGithubIds}`)
           expect(memberGithubIds.indexOf(userWithoutRolesObject.github_id)).to.greaterThanOrEqual(0);
           expect(memberGithubIds.indexOf(userWithRolesObjectWithoutArchivedProperty.github_id)).to.greaterThanOrEqual(
             0
           );
           expect(memberGithubIds.indexOf(userWithRolesObjectWithArchivedFalse.github_id)).to.greaterThanOrEqual(0);
           expect(memberGithubIds.indexOf(userWithRolesObjectWithArchivedTrue.github_id)).to.equal(-1);
-          // expect(res.body.members[0].roles.member).to.eql(true);
           return done();
         });
     });
@@ -108,16 +105,13 @@ describe("Members", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Members returned successfully!");
           expect(res.body.members).to.be.a("array");
-          // console.log(res.body.members)
           const memberGithubIds = res.body.members.map((member) => member.github_id);
-          // console.log(`memberGithubIds : ${memberGithubIds}`)
           expect(memberGithubIds.indexOf(userWithoutRolesObject.github_id)).to.greaterThanOrEqual(0);
           expect(memberGithubIds.indexOf(userWithRolesObjectWithoutArchivedProperty.github_id)).to.greaterThanOrEqual(
             0
           );
           expect(memberGithubIds.indexOf(userWithRolesObjectWithArchivedTrue.github_id)).to.greaterThanOrEqual(0);
           expect(memberGithubIds.indexOf(userWithRolesObjectWithArchivedFalse.github_id)).to.greaterThanOrEqual(0);
-          // expect(res.body.members[0].roles.member).to.eql(true);
           return done();
         });
     });

@@ -13,12 +13,18 @@ const {
  * @swagger
  * /members:
  *   get:
- *     summary: Gets details of all the Real Dev Squad members
+ *     summary: Gets details of all the unarchived users
  *     tags:
  *       - Members
+ *     parameters:
+ *        - in: query
+ *          name: includeArchived
+ *          schema:
+ *             type: boolean
+ *          description: If true, the endpoint returns all users (including archived)
  *     responses:
  *       200:
- *         description: Details of all the RDS members
+ *         description: Details of all the unarchived users
  *         content:
  *           application/json:
  *             schema:
