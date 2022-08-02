@@ -50,7 +50,7 @@ const fetchTasks = async (limit, offset) => {
     lastDoc = await tasksModel.doc(offset).get();
     lastDoc = lastDoc.data();
   }
-  let limitDocuments = Number(limit);
+  const limitDocuments = Number(limit);
 
   try {
     const tasksSnapshotQuery = tasksModel.orderBy("startedOn", "desc").startAfter(lastDoc ? lastDoc.startedOn : "");
