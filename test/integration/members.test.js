@@ -22,6 +22,10 @@ const nonSuperUser = userData[0];
 const userDoesNotExists = userData[1];
 const userToBeArchived = userData[3];
 const userAlreadyArchived = userData[5];
+const userWithRolesObjectWithoutArchivedProperty = userData[0];
+const userWithoutRolesObject = userData[1];
+const userWithRolesObjectWithArchivedTrue = userData[5];
+const userWithRolesObjectWithArchivedFalse = userData[6];
 
 describe("Members", function () {
   let jwt;
@@ -38,7 +42,15 @@ describe("Members", function () {
     before(async function () {
       await cleanDb();
     });
-    it("Should return empty array if no member is found", function (done) {
+
+    afterEach(async function () {
+      await addUser(userWithoutRolesObject);
+      await addUser(userWithRolesObjectWithoutArchivedProperty);
+      await addUser(userWithRolesObjectWithArchivedTrue);
+      await addUser(userWithRolesObjectWithArchivedFalse);
+    });
+
+    it("Should return empty array if no user is found", function (done) {
       chai
         .request(app)
         .get("/members")
@@ -56,7 +68,7 @@ describe("Members", function () {
         });
     });
 
-    it("Get all the members in the database", function (done) {
+    it("Get all the unarchived users in the database", function (done) {
       chai
         .request(app)
         .get("/members")
@@ -69,8 +81,43 @@ describe("Members", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Members returned successfully!");
           expect(res.body.members).to.be.a("array");
-          expect(res.body.members[0].roles.member).to.eql(true);
+          // console.log(res.body.members)
+          const memberGithubIds = res.body.members.map((member) => member.github_id);
+          // console.log(`memberGithubIds : ${memberGithubIds}`)
+          expect(memberGithubIds.indexOf(userWithoutRolesObject.github_id)).to.greaterThanOrEqual(0);
+          expect(memberGithubIds.indexOf(userWithRolesObjectWithoutArchivedProperty.github_id)).to.greaterThanOrEqual(
+            0
+          );
+          expect(memberGithubIds.indexOf(userWithRolesObjectWithArchivedFalse.github_id)).to.greaterThanOrEqual(0);
+          expect(memberGithubIds.indexOf(userWithRolesObjectWithArchivedTrue.github_id)).to.equal(-1);
+          // expect(res.body.members[0].roles.member).to.eql(true);
+          return done();
+        });
+    });
 
+    it("Get all the users in the database (including archived)", function (done) {
+      chai
+        .request(app)
+        .get("/members?includeArchived=true")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Members returned successfully!");
+          expect(res.body.members).to.be.a("array");
+          // console.log(res.body.members)
+          const memberGithubIds = res.body.members.map((member) => member.github_id);
+          // console.log(`memberGithubIds : ${memberGithubIds}`)
+          expect(memberGithubIds.indexOf(userWithoutRolesObject.github_id)).to.greaterThanOrEqual(0);
+          expect(memberGithubIds.indexOf(userWithRolesObjectWithoutArchivedProperty.github_id)).to.greaterThanOrEqual(
+            0
+          );
+          expect(memberGithubIds.indexOf(userWithRolesObjectWithArchivedTrue.github_id)).to.greaterThanOrEqual(0);
+          expect(memberGithubIds.indexOf(userWithRolesObjectWithArchivedFalse.github_id)).to.greaterThanOrEqual(0);
+          // expect(res.body.members[0].roles.member).to.eql(true);
           return done();
         });
     });

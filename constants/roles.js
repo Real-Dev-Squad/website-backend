@@ -5,6 +5,6 @@ const LEGACY_ROLES = {
 };
 
 // Use Roles with authorizeRoles middleware
-const ROLES = { SUPERUSER: "super_user", APPOWNER: "app_owner", MEMBER: "member" };
+const ROLES = { SUPERUSER: "super_user", APPOWNER: "app_owner", MEMBER: "member", ARCHIVED: "archived" };
 
 module.exports = { LEGACY_ROLES, ROLES };
