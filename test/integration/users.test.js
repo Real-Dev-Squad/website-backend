@@ -13,12 +13,13 @@ const checkChaincode = require("../utils/checkChaincode");
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
+const member = userData[0];
 
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
-
+const should = require("chai").should();
 describe("Users", function () {
   let jwt;
   let superUserId;
@@ -122,7 +123,7 @@ describe("Users", function () {
           return done();
         });
     });
-    it("Should return members only", function (done) {
+    it("Should return empty array if no member is found", function (done) {
       chai
         .request(app)
         .get("/users?role=member")
@@ -131,24 +132,7 @@ describe("Users", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Users returned successfully!");
-          expect(res.body.users).to.be.a("array");
-          expect(res.body.users[0].roles.member).to.eql(true);
 
-          return done();
-        });
-    });
-    it("Should return empty array when no members", function (done) {
-      chai
-        .request(app)
-        .get("/users?role=member")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Users returned successfully!");
@@ -158,7 +142,33 @@ describe("Users", function () {
         });
     });
   });
+  describe("GET /users/role?=member", function () {
+    before(async function () {
+      await cleanDb();
+      const userId = await addUser(member);
+      jwt = authService.generateAuthToken({ userId });
+    });
 
+    it("Get all the members in the database", function (done) {
+      chai
+        .request(app)
+        .get("/users?role=member")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          should.exist(res.body);
+          expect(res.body.users).to.be.a("array");
+
+          return done();
+        });
+    });
+  });
   describe("GET /users/self", function () {
     it("Should return the logged user's details", function (done) {
       chai

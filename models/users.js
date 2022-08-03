@@ -60,8 +60,9 @@ const fetchUsers = async (query) => {
     let user = await userModel;
 
     user = user.limit(parseInt(query.size) || 100).offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0));
-    query = query.role.split(",");
-
+    if (!query) {
+      query = query.role.split(",");
+    }
     Object.keys(query).forEach((key) => {
       // eslint-disable-next-line security/detect-object-injection
       user = user.where(`roles${query[key]}`, "==", true);
