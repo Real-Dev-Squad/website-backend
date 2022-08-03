@@ -5,6 +5,7 @@ const { authorizeUser } = require("../middlewares/authorization");
 const authenticate = require("../middlewares/authenticate");
 const { addRecruiter, fetchRecruitersInfo } = require("../controllers/recruiters");
 const { validateRecruiter } = require("../middlewares/validators/recruiter");
+const { validateGetMembers } = require("../middlewares/validators/members");
 const {
   LEGACY_ROLES: { SUPER_USER },
 } = require("../constants/roles");
@@ -37,7 +38,7 @@ const {
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get("/", members.getMembers);
+router.get("/", validateGetMembers, members.getMembers);
 
 /**
  * @swagger
