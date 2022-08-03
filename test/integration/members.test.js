@@ -68,6 +68,23 @@ describe("Members", function () {
         });
     });
 
+    it("Should return 400 for showArchived query param value other than true/false", function (done) {
+      chai
+        .request(app)
+        .get("/members?showArchived=xyz")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal('"showArchived" must be a boolean');
+
+          return done();
+        });
+    });
+
     it("Get all the unarchived users in the database", function (done) {
       chai
         .request(app)
