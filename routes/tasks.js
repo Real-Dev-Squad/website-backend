@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
 const tasks = require("../controllers/tasks");
-const {  updateTask, updateSelfTask } = require("../middlewares/validators/tasks");
+const { updateTask, updateSelfTask } = require("../middlewares/validators/tasks");
 const { authorizeUser } = require("../middlewares/authorization");
 
 router.get("/", tasks.fetchTasks);
