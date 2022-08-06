@@ -69,9 +69,8 @@ const fetchMemberCacheLogs = async (id) => {
 
     const logs = [];
     logsSnapshot.forEach((doc) => {
-      logs.push({
-        ...doc.data(),
-      });
+      const { type, timestamp } = doc.data();
+      logs.push({ type, timestamp });
     });
     return logs;
   } catch (err) {
