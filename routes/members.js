@@ -3,7 +3,7 @@ const router = express.Router();
 const members = require("../controllers/members");
 const { authorizeUser } = require("../middlewares/authorization");
 const authenticate = require("../middlewares/authenticate");
-const { addRecruiter, fetchRecruitersInfo } = require("../controllers/recruiters");
+const { addRecruiter } = require("../controllers/recruiters");
 const { validateRecruiter } = require("../middlewares/validators/recruiter");
 const {
   LEGACY_ROLES: { SUPER_USER },
