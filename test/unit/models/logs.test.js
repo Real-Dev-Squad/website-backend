@@ -18,10 +18,6 @@ describe("Logs", function () {
       expect(data[0].timestamp._seconds).to.be.a("number");
       expect(data[0].timestamp._nanoseconds).to.be.a("number");
       expect(data[0].type).to.be.a("string");
-      expect(data[0].meta).to.be.an("object");
-      expect(data[0].meta.userId).to.be.a("string");
-      expect(data[0].body).to.be.an("object");
-      expect(data[0].body.message).to.be.a("string");
     });
   });
 });

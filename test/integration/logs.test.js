@@ -71,9 +71,8 @@ describe("Logs", function () {
           expect(response.body.logs).to.be.an("array");
           expect(response.body.logs[0]).to.be.an("object");
           expect(response.body.logs[0].timestamp).to.be.a("object");
-          expect(response.body.logs[0].body).to.be.a("object");
           expect(response.body.logs[0].type).to.be.a("string");
-          expect(response.body.logs[0].meta).to.be.a("object");
+
           return done();
         });
     });
