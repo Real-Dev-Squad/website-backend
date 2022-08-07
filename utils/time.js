@@ -43,9 +43,9 @@ const getTimeInSecondAfter = ({ timestamp = Date.now(), days = 0, hours = 0, min
   return parseInt(timeInMilliseconds / 1000);
 };
 
-const getLast24HourTime = (timestamp) => {
+const getBeforeHourTime = (timestamp, hours) => {
   const currentTime = timestamp;
-  currentTime._seconds -= 24 * 60 * 60;
+  currentTime._seconds -= hours * 60 * 60;
   return currentTime;
 };
 
@@ -54,5 +54,5 @@ module.exports = {
   convertHoursToMilliseconds,
   convertMinutesToMilliseconds,
   getTimeInSecondAfter,
-  getLast24HourTime,
+  getBeforeHourTime,
 };
