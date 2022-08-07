@@ -5,7 +5,6 @@ const authenticate = require("../middlewares/authenticate");
 const { authorizeUser } = require("../middlewares/authorization");
 const { ROLES } = require("../constants/users");
 
-router.get("/cache", authenticate, logs.fetchMemberCacheLogs);
 router.get("/:type", authenticate, authorizeUser(ROLES.SUPER_USER), logs.fetchLogs);
 
 module.exports = router;

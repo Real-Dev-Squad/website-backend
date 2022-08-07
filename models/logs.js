@@ -1,5 +1,5 @@
 const firestore = require("../utils/firestore");
-const { getLast24HourTime } = require("../utils/time");
+const { getBeforeHourTime } = require("../utils/time");
 const logsModel = firestore.collection("logs");
 const admin = require("firebase-admin");
 const { logType } = require("../constants/logs");
@@ -59,19 +59,23 @@ const fetchLogs = async (query, param) => {
  *
  * @param userId { String }: Unique ID of the User
  */
-const fetchMemberCacheLogs = async (id) => {
+const fetchCacheLogs = async (id) => {
   try {
     const logsSnapshot = await logsModel
       .where("type", "==", logType.CLOUDFLARE_CACHE_PURGED)
-      .where("timestamp", ">=", getLast24HourTime(admin.firestore.Timestamp.fromDate(new Date())))
+      .where("timestamp", ">=", getBeforeHourTime(admin.firestore.Timestamp.fromDate(new Date()), 24))
       .where("meta.userId", "==", id)
       .get();
 
     const logs = [];
     logsSnapshot.forEach((doc) => {
-      const { type, timestamp } = doc.data();
-      logs.push({ type, timestamp });
+      const { timestamp } = doc.data();
+      const docId = doc.id;
+      if (logs.length < 3) {
+        logs.push({ docId, timestamp });
+      }
     });
+
     return logs;
   } catch (err) {
     logger.error("Error in fetching cache logs", err);
@@ -79,8 +83,37 @@ const fetchMemberCacheLogs = async (id) => {
   }
 };
 
+/**
+ * Fetches last purged cache log added
+ *
+ * @param userId { String }: Unique ID of the User
+ */
+const fetchLastAddedCacheLog = async (id) => {
+  try {
+    const lastLogSnapshot = await logsModel
+      .where("type", "==", logType.CLOUDFLARE_CACHE_PURGED)
+      .where("meta.userId", "==", id)
+      .limit(1)
+      .orderBy("timestamp", "desc")
+      .get();
+
+    const logs = [];
+    lastLogSnapshot.forEach((doc) => {
+      const { timestamp } = doc.data();
+      const docId = doc.id;
+      logs.push({ docId, timestamp });
+    });
+
+    return logs;
+  } catch (err) {
+    logger.error("Error in fetching purged cache logs", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addLog,
   fetchLogs,
-  fetchMemberCacheLogs,
+  fetchCacheLogs,
+  fetchLastAddedCacheLog,
 };
