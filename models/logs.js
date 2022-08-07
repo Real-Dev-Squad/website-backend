@@ -55,7 +55,7 @@ const fetchLogs = async (query, param) => {
 };
 
 /**
- * Fetches member cache Self logs
+ * Fetches purged cache logs
  *
  * @param userId { String }: Unique ID of the User
  */
