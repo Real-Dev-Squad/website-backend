@@ -151,7 +151,7 @@ const archiveMembers = async (req, res) => {
 const purgeMembersCache = async (req, res) => {
   try {
     const { id, username } = req.userData;
-    const logs = await logsQuery.fetchMemberCacheLogs(id);
+    const logs = await logsQuery.fetchCacheLogs(id);
     const logsCount = logs.length;
 
     const files = [`https://members.realdevsquad.com/${username}`];
