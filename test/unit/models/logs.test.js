@@ -28,7 +28,7 @@ describe("Logs", function () {
 
   describe("Fetch the last added purged cache log", function () {
     it("Should fetch the last added purged cache log", async function () {
-      const { type, meta, body } = cacheData.cacheLogs[1];
+      const { type, meta, body } = cacheData.cacheLogs[0];
       const userId = meta.userId;
 
       await logsQuery.addLog(type, meta, body);
