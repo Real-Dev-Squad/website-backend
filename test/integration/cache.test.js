@@ -33,6 +33,7 @@ describe("Purged Cache Metadata", function () {
     });
 
     it("Should return last purged cache metadata if no cache logs in last 24 hours found", function (done) {
+      sinon.stub(logsQuery, "fetchLastAddedCacheLog").returns(cacheData.cacheModelMetaData);
       chai
         .request(app)
         .get("/cache")
