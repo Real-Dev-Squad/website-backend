@@ -15,9 +15,9 @@ const fetchProfileDiffs = async () => {
     snapshot.forEach((doc) => {
       let { email, phone } = doc.data();
 
-      email = obfuscate.obfuscateMail(email);
+      email = email ? obfuscate.obfuscateMail(email) : "";
 
-      phone = obfuscate.obfuscatePhone(phone);
+      phone = phone ? obfuscate.obfuscatePhone(phone) : "";
 
       profileDiffs.push({
         id: doc.id,
