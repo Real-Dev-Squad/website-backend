@@ -36,7 +36,7 @@ describe("Purged Cache Metadata", function () {
       sinon.stub(logsQuery, "fetchLastAddedCacheLog").returns(cacheData.cacheModelMetaData);
       chai
         .request(app)
-        .get("/cache")
+        .get("/caches")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((error, response) => {
           if (error) {
@@ -57,7 +57,7 @@ describe("Purged Cache Metadata", function () {
       sinon.stub(logsQuery, "fetchCacheLogs").returns(cacheData.cacheModelMetaData);
       chai
         .request(app)
-        .get("/cache")
+        .get("/caches")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((error, response) => {
           if (error) {
@@ -78,7 +78,7 @@ describe("Purged Cache Metadata", function () {
     it("Should return unauthorized error when not logged in", function (done) {
       chai
         .request(app)
-        .get("/cache")
+        .get("/caches ")
         .end((err, res) => {
           if (err) {
             return done(err);

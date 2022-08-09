@@ -9,7 +9,7 @@ app.use("/challenges", require("./challenges.js"));
 app.use("/contributions", require("./contributions.js"));
 app.use("/healthcheck", require("./healthCheck.js"));
 app.use("/logs", require("./logs.js"));
-app.use("/cache", require("./cache.js"));
+app.use("/caches", require("./caches.js"));
 app.use("/members", require("./members.js"));
 app.use("/pullrequests", require("./pullrequests.js"));
 app.use("/stocks", require("./stocks.js"));
