@@ -1,6 +1,7 @@
 const { profileStatus } = require("../constants/users");
 const firestore = require("../utils/firestore");
 const profileDiffsModel = firestore.collection("profileDiffs");
+const obfuscate = require("../utils/obfuscate");
 
 /**
  * Add profileDiff
@@ -12,17 +13,11 @@ const fetchProfileDiffs = async () => {
     const snapshot = await profileDiffsModel.where("approval", "==", profileStatus.PENDING).get();
     const profileDiffs = [];
     snapshot.forEach((doc) => {
-      let { email, phone } = doc.data();
+      let { email = "", phone = "" } = doc.data();
 
-      email =
-        email.substring(0, 2) +
-        email.substring(3, email.length - 2).replace(/./g, "*") +
-        email.substring(email.length - 4);
+      email = obfuscate.obfuscateMail(email);
 
-      phone =
-        phone.substring(0, 2) +
-        phone.substring(3, phone.length - 1).replace(/./g, "*") +
-        phone.substring(phone.length - 2);
+      phone = obfuscate.obfuscatePhone(phone);
 
       profileDiffs.push({
         id: doc.id,
