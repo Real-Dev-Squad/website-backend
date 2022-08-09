@@ -39,13 +39,13 @@ const getUserById = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   }
 
-  const { phone, email, ...user } = result.user;
+  const { phone = "", email = "", ...user } = result.user;
   try {
     user.phone = obfuscate.obfuscatePhone(phone);
     user.email = obfuscate.obfuscateMail(email);
   } catch (error) {
     logger.error(`Error while formatting phone and email: ${error}`);
-    res.boom.error("Error while formatting phone and email");
+    return res.boom.badImplementation("Error while formatting phone and email");
   }
 
   return res.json({
