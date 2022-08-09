@@ -13,11 +13,11 @@ const fetchProfileDiffs = async () => {
     const snapshot = await profileDiffsModel.where("approval", "==", profileStatus.PENDING).get();
     const profileDiffs = [];
     snapshot.forEach((doc) => {
-      let { email, phone } = doc.data();
+      let { email = "", phone = "" } = doc.data();
 
-      email = email ? obfuscate.obfuscateMail(email) : "";
+      email = obfuscate.obfuscateMail(email);
 
-      phone = phone ? obfuscate.obfuscatePhone(phone) : "";
+      phone = obfuscate.obfuscatePhone(phone);
 
       profileDiffs.push({
         id: doc.id,
