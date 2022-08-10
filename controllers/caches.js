@@ -19,7 +19,7 @@ const fetchPurgedCacheMetadata = async (req, res) => {
         count: logs.length,
         timestamp: timestamp._seconds,
       });
-    } else {
+    } else if ((await logsQuery.fetchLastAddedCacheLog(id)).length !== 0) {
       const lastLog = await logsQuery.fetchLastAddedCacheLog(id);
       const { docId, timestamp } = lastLog[0];
       return res.json({
@@ -27,6 +27,12 @@ const fetchPurgedCacheMetadata = async (req, res) => {
         message: "Purged cache metadata returned successfully!",
         count: 0,
         timestamp: timestamp._seconds,
+      });
+    } else {
+      return res.json({
+        id: "0",
+        message: "Cache will cleared for the first time",
+        count: 0,
       });
     }
   } catch (error) {
