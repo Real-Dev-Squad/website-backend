@@ -17,7 +17,7 @@ const fetchUsers = async (queryParams = {}) => {
     const allMembers = [];
 
     const { showArchived } = queryParams;
-    let isArchived = showArchived === "true";
+    const isArchived = showArchived === "true";
 
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
