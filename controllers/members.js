@@ -14,7 +14,7 @@ const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
 const getMembers = async (req, res) => {
   try {
-    const allUsers = await members.fetchUsers();
+    const allUsers = await members.fetchUsers(req.query);
 
     return res.json({
       message: allUsers.length ? "Members returned successfully!" : "No member found",
