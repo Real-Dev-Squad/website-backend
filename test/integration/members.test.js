@@ -22,17 +22,10 @@ const nonSuperUser = userData[0];
 const userDoesNotExists = userData[1];
 const userToBeArchived = userData[3];
 const userAlreadyArchived = userData[5];
-const userWithRolesObjectWithoutArchivedProperty = userData[0];
-const userWithoutRolesObject = userData[1];
-const userWithRolesObjectWithArchivedTrue = userData[5];
-const userWithRolesObjectWithArchivedFalse = userData[6];
+const userArchivedRoleFalse = userData[6];
 
-const archivedUsersGithubIds = [userWithRolesObjectWithArchivedTrue.github_id];
-const unarchivedUsersGithubIds = [
-  userWithoutRolesObject.github_id,
-  userWithRolesObjectWithoutArchivedProperty.github_id,
-  userWithRolesObjectWithArchivedFalse.github_id,
-];
+const archivedUsersGithubIds = [userAlreadyArchived.github_id];
+const unarchivedUsersGithubIds = [userArchivedRoleFalse.github_id];
 
 describe("Members", function () {
   let jwt;
@@ -79,12 +72,7 @@ describe("Members", function () {
 
     describe("When the users collection is not empty", function () {
       beforeEach(async function () {
-        await Promise.all([
-          addUser(userWithoutRolesObject),
-          addUser(userWithRolesObjectWithoutArchivedProperty),
-          addUser(userWithRolesObjectWithArchivedTrue),
-          addUser(userWithRolesObjectWithArchivedFalse),
-        ]);
+        await Promise.all([addUser(userArchivedRoleFalse), addUser(userAlreadyArchived)]);
       });
 
       it("Should return all the unarchived users in the database", function (done) {
@@ -177,6 +165,10 @@ describe("Members", function () {
       jwt = authService.generateAuthToken({ userId: superUserId });
     });
 
+    afterEach(async function () {
+      await addUser();
+    });
+
     it("Should return 404 if user doesn't exist", function (done) {
       chai
         .request(app)
@@ -261,6 +253,10 @@ describe("Members", function () {
     beforeEach(async function () {
       const superUserId = await addUser(superUser);
       jwt = authService.generateAuthToken({ userId: superUserId });
+    });
+
+    afterEach(async function () {
+      await addUser();
     });
 
     it("Should return 404 if user doesn't exist", function (done) {
