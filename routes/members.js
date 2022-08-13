@@ -1,22 +1,31 @@
-const express = require('express')
-const router = express.Router()
-const members = require('../controllers/members')
-const { authorizeUser } = require('../middlewares/authorization')
-const authenticate = require('../middlewares/authenticate')
-const { addRecruiter } = require('../controllers/recruiters')
-const { validateRecruiter } = require('../middlewares/validators/recruiter')
-const { SUPER_USER } = require('../constants/roles')
+const express = require("express");
+const router = express.Router();
+const members = require("../controllers/members");
+const { authorizeUser } = require("../middlewares/authorization");
+const authenticate = require("../middlewares/authenticate");
+const { addRecruiter, fetchRecruitersInfo } = require("../controllers/recruiters");
+const { validateRecruiter } = require("../middlewares/validators/recruiter");
+const { validateGetMembers } = require("../middlewares/validators/members");
+const {
+  LEGACY_ROLES: { SUPER_USER },
+} = require("../constants/roles");
 
 /**
  * @swagger
  * /members:
  *   get:
- *     summary: Gets details of all the Real Dev Squad members
+ *     summary: Gets details of all the unarchived users
  *     tags:
  *       - Members
+ *     parameters:
+ *        - in: query
+ *          name: showArchived
+ *          schema:
+ *             type: boolean
+ *          description: If true, the endpoint returns all users (including archived)
  *     responses:
  *       200:
- *         description: Details of all the RDS members
+ *         description: Details of all the unarchived users
  *         content:
  *           application/json:
  *             schema:
@@ -29,7 +38,7 @@ const { SUPER_USER } = require('../constants/roles')
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/', members.getMembers)
+router.get("/", validateGetMembers, members.getMembers);
 
 /**
  * @swagger
@@ -53,7 +62,7 @@ router.get('/', members.getMembers)
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get('/idle', members.getIdleMembers)
+router.get("/idle", members.getIdleMembers);
 
 /**
  * @swagger
@@ -85,7 +94,41 @@ router.get('/idle', members.getIdleMembers)
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.post('/intro/:username', validateRecruiter, addRecruiter)
+router.post("/intro/:username", validateRecruiter, addRecruiter);
+
+/**
+ * @swagger
+ * /members/intro:
+ *   get:
+ *     summary: Returns all requests for member introduction by recruiter in the system.
+ *     tags:
+ *       - Members
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Details of the recruiter and the member in which recruiter is interested
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/recruiters'
+ *
+ *       401:
+ *         description: unAuthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/unAuthorized'
+ *
+ *       500:
+ *         description: serverUnavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/errors/serverUnavailable'
+ */
+
+router.get("/intro", authenticate, authorizeUser(SUPER_USER), fetchRecruitersInfo);
 
 /**
  * @swagger
@@ -131,7 +174,7 @@ router.post('/intro/:username', validateRecruiter, addRecruiter)
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPER_USER), members.moveToMembers)
+router.patch("/moveToMembers/:username", authenticate, authorizeUser(SUPER_USER), members.moveToMembers);
 /**
  * @swagger
  * /members/member-to-role-migration:
@@ -165,7 +208,7 @@ router.patch('/moveToMembers/:username', authenticate, authorizeUser(SUPER_USER)
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser'), members.migrateUserRoles)
+router.patch("/member-to-role-migration", authenticate, authorizeUser("superUser"), members.migrateUserRoles);
 
 /**
  * @swagger
@@ -200,7 +243,7 @@ router.patch('/member-to-role-migration', authenticate, authorizeUser('superUser
  *           schema:
  *             $ref: '#/components/schemas/errors/badImplementation'
  */
-router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), members.deleteIsMember)
+router.patch("/delete-isMember", authenticate, authorizeUser("superUser"), members.deleteIsMember);
 
 /**
  * @swagger
@@ -246,6 +289,6 @@ router.patch('/delete-isMember', authenticate, authorizeUser('superUser'), membe
  *               $ref: '#/components/schemas/errors/serverUnavailable'
  */
 
-router.patch('/archiveMembers/:username', authenticate, authorizeUser(SUPER_USER), members.archiveMembers)
+router.patch("/archiveMembers/:username", authenticate, authorizeUser(SUPER_USER), members.archiveMembers);
 
-module.exports = router
+module.exports = router;
