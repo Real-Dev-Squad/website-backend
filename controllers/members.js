@@ -1,4 +1,4 @@
-const { ROLES } = require("../constants/users");
+const { ROLES } = require("../constants/roles");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
 const { fetchUser } = require("../models/users");
@@ -14,7 +14,7 @@ const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
 const getMembers = async (req, res) => {
   try {
-    const allUsers = await members.fetchUsers();
+    const allUsers = await members.fetchUsers(req.query);
 
     return res.json({
       message: allUsers.length ? "Members returned successfully!" : "No member found",

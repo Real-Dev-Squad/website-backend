@@ -11,6 +11,7 @@ const {
 } = require("../constants/roles");
 
 router.get("/", validateGetMembers, members.getMembers);
+router.get("/", validateGetMembers, members.getMembers);
 router.get("/idle", members.getIdleMembers);
 router.post("/intro/:username", validateRecruiter, addRecruiter);
 router.get("/intro", authenticate, authorizeUser(SUPER_USER), fetchRecruitersInfo);
