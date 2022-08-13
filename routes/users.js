@@ -21,6 +21,7 @@ router.get("/:username", users.getUser);
 router.post("/picture", authenticate, upload.single("profile"), users.postUserPicture);
 router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);
 router.patch("/rejectDiff", authenticate, authorizeUser(SUPER_USER), users.rejectProfileDiff);
+router.patch("/add-default-archived-role", authenticate, authorizeUser(SUPER_USER), users.addDefaultArchivedRole);
 router.patch("/:userId", authenticate, authorizeUser(SUPER_USER), users.updateUser);
 
 module.exports = router;
