@@ -87,8 +87,7 @@ describe("Contributions", function () {
             "purpose",
             "startedOn",
             "status",
-            "title",
-            "id"
+            "title"
           );
           expect(noteworthyObj.prList[0]).to.have.all.keys(
             "title",
