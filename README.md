@@ -42,6 +42,8 @@ Install all the packages using the following command:
 yarn
 ```
 
+Note: For M1 macs and/or Big sur or later, follow this [link](https://stackoverflow.com/questions/69452504/zlib-error-when-attempting-to-run-npm-install-or-yarn)
+
 #### Confirm correct configuration setup
 
 This command should be successful, before moving to development.
