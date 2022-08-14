@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
-router.post("/", (req, res) => {
-  res.clearCookie("rds-session");
+router.get("/", (req, res) => {
+  const cookie = req.cookies;
+  res.clearCookie(cookie);
   res.redirect("/healthcheck");
 });
 
