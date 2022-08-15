@@ -5,6 +5,7 @@ const { authorizeUser } = require("../middlewares/authorization");
 const authenticate = require("../middlewares/authenticate");
 const { addRecruiter, fetchRecruitersInfo } = require("../controllers/recruiters");
 const { validateRecruiter } = require("../middlewares/validators/recruiter");
+const { validateGetMembers } = require("../middlewares/validators/members");
 const {
   LEGACY_ROLES: { SUPER_USER },
 } = require("../constants/roles");
@@ -13,12 +14,18 @@ const {
  * @swagger
  * /members:
  *   get:
- *     summary: Gets details of all the Real Dev Squad members
+ *     summary: Gets details of all the unarchived users
  *     tags:
  *       - Members
+ *     parameters:
+ *        - in: query
+ *          name: showArchived
+ *          schema:
+ *             type: boolean
+ *          description: If true, the endpoint returns all users (including archived)
  *     responses:
  *       200:
- *         description: Details of all the RDS members
+ *         description: Details of all the unarchived users
  *         content:
  *           application/json:
  *             schema:
@@ -31,7 +38,7 @@ const {
  *               $ref: '#/components/schemas/errors/badImplementation'
  */
 
-router.get("/", members.getMembers);
+router.get("/", validateGetMembers, members.getMembers);
 
 /**
  * @swagger

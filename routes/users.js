@@ -279,6 +279,41 @@ router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.
 
 router.patch("/rejectDiff", authenticate, authorizeUser(SUPER_USER), users.rejectProfileDiff);
 
+/**
+ * @swagger
+ * /members/add-default-archived-role:
+ *  patch:
+ *   summary: One time call to add default archived role for the users only where it does not exists
+ *   tags:
+ *     - Users
+ *   responses:
+ *     200:
+ *       description: Details of the users migrated
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/migratedUsers'
+ *     401:
+ *       description: unAuthorized
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/unAuthorized'
+ *     403:
+ *       description: forbidden
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/forbidden'
+ *     500:
+ *       description: badImplementation
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/errors/badImplementation'
+ */
+router.patch("/add-default-archived-role", authenticate, authorizeUser(SUPER_USER), users.addDefaultArchivedRole);
+
 router.patch("/:userId", authenticate, authorizeUser(SUPER_USER), users.updateUser);
 
 module.exports = router;

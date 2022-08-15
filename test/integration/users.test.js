@@ -13,6 +13,10 @@ const checkChaincode = require("../utils/checkChaincode");
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
+const nonSuperUser = userData[0];
+const userRolesDoesNotExists = userData[1];
+const userArchivedRoleDoesNotExists = userData[0];
+const userAlreadyArchived = userData[5];
 
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
@@ -535,6 +539,7 @@ describe("Users", function () {
         });
     });
   });
+
   describe("POST /users/verify", function () {
     it("Should queue the Request", function (done) {
       chai
@@ -563,6 +568,65 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /users/add-default-archived-role", function () {
+    let nonSuperUserId;
+    beforeEach(async function () {
+      nonSuperUserId = await addUser(nonSuperUser);
+      await addUser(userRolesDoesNotExists);
+      await addUser(userArchivedRoleDoesNotExists);
+      await addUser(userAlreadyArchived);
+    });
+
+    it("Should return 401 if user is not a super user", function (done) {
+      const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+      chai
+        .request(app)
+        .patch(`/users/add-default-archived-role`)
+        .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("You are not authorized for this action.");
+
+          return done();
+        });
+    });
+
+    it("Should add default archived role to user only where it does not exists", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/add-default-archived-role`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.count).to.be.equal(2);
+          expect(res.body.users).to.include.all.members(
+            [userRolesDoesNotExists.username],
+            "Should add default archived role to user without roles object"
+          );
+
+          expect(res.body.users).to.include.all.members(
+            [userArchivedRoleDoesNotExists.username],
+            "Should add default archived role to user with roles object but without archived property"
+          );
+
+          expect(res.body.users).to.not.include.any.members(
+            [userAlreadyArchived.username],
+            "Should not modify archived role's value of user with roles object and with archived property"
+          );
+
           return done();
         });
     });
