@@ -18,7 +18,7 @@ describe("GET /signout", function () {
         expect(res).to.have.status(200);
         expect(res.body).to.be.a("object");
         expect(res.body.message).to.equal("Cookies deleted Succesfully");
-        expect(res.body.deletedCookies).to.be.a("object");
+        expect(res.body.deletedCookies).to.be.a("array");
 
         return done();
       });
