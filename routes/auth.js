@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../controllers/auth");
-const signout = require("../controllers/signout");
 
 router.get("/github/callback", auth.githubAuth);
 
-router.get("/signout", signout.signout);
+router.get("/signout", auth.signout);
 
 module.exports = router;
