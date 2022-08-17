@@ -1,15 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const signout = require("../controllers/signout");
 
-router.get("/", (req, res) => {
-  const cookies = Object.keys(req.cookies);
-  cookies.forEach((cookie) => {
-    res.clearCookie(cookie);
-  });
-  return res.json({
-    message: "Cookies deleted Succesfully",
-    deletedCookies: cookies,
-  });
-});
+router.get("/", signout.signout);
 
 module.exports = router;
