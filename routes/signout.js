@@ -6,7 +6,10 @@ router.get("/", (req, res) => {
   cookies.forEach((cookie) => {
     res.clearCookie(cookie);
   });
-  res.end();
+  return res.json({
+    message: "Cookies deleted Succesfully",
+    deletedCookies: cookies,
+  });
 });
 
 module.exports = router;
