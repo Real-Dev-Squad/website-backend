@@ -22,6 +22,7 @@ const archivedUsernames = [archivedUser.username];
 const unarchivedUsernames = [userRolesDoesNotExists.username, userArchivedRoleDoesNotExists.username];
 
 const config = require("config");
+const deleteRolesObject = require("../utils/deleteRolesObject");
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
@@ -589,7 +590,7 @@ describe("Users", function () {
           1.  user without roles object
           2.  user without archived property in roles object
       */
-      await deleteRoles(userRolesDoesNotExistsId, null, true);
+      await deleteRolesObject(userRolesDoesNotExistsId);
       await deleteRoles(userArchivedRoleDoesNotExistsId, [ROLES.ARCHIVED]);
     });
 
