@@ -53,13 +53,10 @@ const githubAuth = (req, res, next) => {
 };
 
 const signout = (req, res) => {
-  const cookies = Object.keys(req.cookies);
-  cookies.forEach((cookie) => {
-    res.clearCookie(cookie);
-  });
+  const cookie = config.get("userToken.cookieName");
+  res.clearCookie(cookie);
   return res.json({
     message: "Signout succesful",
-    deletedCookies: Object.keys(req.cookies),
   });
 };
 
