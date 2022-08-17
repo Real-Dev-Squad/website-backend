@@ -113,7 +113,6 @@ describe("auth", function () {
         expect(res).to.have.status(200);
         expect(res.body).to.be.a("object");
         expect(res.body.message).to.equal("Signout succesful");
-        expect(res.body.deletedCookies).to.be.a("array");
 
         return done();
       });
