@@ -165,10 +165,6 @@ describe("Members", function () {
       jwt = authService.generateAuthToken({ userId: superUserId });
     });
 
-    afterEach(async function () {
-      await addUser();
-    });
-
     it("Should return 404 if user doesn't exist", function (done) {
       chai
         .request(app)
@@ -253,10 +249,6 @@ describe("Members", function () {
     beforeEach(async function () {
       const superUserId = await addUser(superUser);
       jwt = authService.generateAuthToken({ userId: superUserId });
-    });
-
-    afterEach(async function () {
-      await addUser();
     });
 
     it("Should return 404 if user doesn't exist", function (done) {

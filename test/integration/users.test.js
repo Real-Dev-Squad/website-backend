@@ -10,6 +10,7 @@ const cleanDb = require("../utils/cleanDb");
 const checkChaincode = require("../utils/checkChaincode");
 const { ROLES } = require("../../constants/roles");
 const deleteRoles = require("../utils/deleteRoles");
+const deleteRolesObject = require("../utils/deleteRolesObject");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
@@ -22,7 +23,6 @@ const archivedUsernames = [archivedUser.username];
 const unarchivedUsernames = [userRolesDoesNotExists.username, userArchivedRoleDoesNotExists.username];
 
 const config = require("config");
-const deleteRolesObject = require("../utils/deleteRolesObject");
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
