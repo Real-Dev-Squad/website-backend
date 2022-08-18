@@ -56,7 +56,7 @@ const signout = (req, res) => {
   const cookie = config.get("userToken.cookieName");
   res.clearCookie(cookie);
   return res.json({
-    message: "Signout succesful",
+    message: "Signout successful",
   });
 };
 

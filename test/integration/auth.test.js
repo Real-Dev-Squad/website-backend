@@ -101,7 +101,7 @@ describe("auth", function () {
       });
   });
 
-  it("Should clear the session cookies", function (done) {
+  it("Should clear the rds session cookies", function (done) {
     chai
       .request(app)
       .get("/auth/signout")
@@ -112,8 +112,8 @@ describe("auth", function () {
 
         expect(res).to.have.status(200);
         expect(res.body).to.be.a("object");
-        expect(res.body.message).to.equal("Signout succesful");
-
+        expect(res.body.message).to.equal("Signout successful");
+        expect(res.headers["set-cookie"][0]).to.include(`${config.get("userToken.cookieName")}=;`);
         return done();
       });
   });
