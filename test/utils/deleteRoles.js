@@ -8,12 +8,18 @@ const userCollection = firestore.collection("users");
  * @return {boolean} success - are roles deleted or not
  */
 module.exports = async (userId, rolesToBeDeleted = []) => {
-  if (!userId) return false;
+  if (!userId) {
+    logger.info("User id is required to delete roles");
+    return false;
+  }
 
   try {
     const userDoc = await userCollection.doc(userId).get();
 
-    if (!userDoc.exists) return false;
+    if (!userDoc.exists) {
+      logger.info(`User with id : ${userId} not found`);
+      return false;
+    }
 
     const userData = userDoc.data();
     rolesToBeDeleted.forEach((role) => delete userData.roles[String(role)]);
