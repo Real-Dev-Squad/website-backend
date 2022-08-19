@@ -54,7 +54,9 @@ const githubAuth = (req, res, next) => {
 
 const signout = (req, res) => {
   const cookie = config.get("userToken.cookieName");
-  res.clearCookie(cookie);
+  res.clearCookie(cookie, {
+    domain: ".realdevsquad.com",
+  });
   return res.json({
     message: "Signout successful",
   });
