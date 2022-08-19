@@ -53,8 +53,8 @@ const githubAuth = (req, res, next) => {
 };
 
 const signout = (req, res) => {
-  const cookie = config.get("userToken.cookieName");
-  res.clearCookie(cookie, {
+  const cookieName = config.get("userToken.cookieName");
+  res.clearCookie(cookieName, {
     domain: ".realdevsquad.com",
   });
   return res.json({
