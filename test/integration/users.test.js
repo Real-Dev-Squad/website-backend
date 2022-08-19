@@ -8,7 +8,9 @@ const addUser = require("../utils/addUser");
 const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
 const checkChaincode = require("../utils/checkChaincode");
-
+const { ROLES } = require("../../constants/roles");
+const deleteRoles = require("../utils/deleteRoles");
+const deleteRolesObject = require("../utils/deleteRolesObject");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
@@ -16,7 +18,9 @@ const superUser = userData[4];
 const nonSuperUser = userData[0];
 const userRolesDoesNotExists = userData[1];
 const userArchivedRoleDoesNotExists = userData[0];
-const userAlreadyArchived = userData[5];
+const archivedUser = userData[5];
+const archivedUsernames = [archivedUser.username];
+const unarchivedUsernames = [userRolesDoesNotExists.username, userArchivedRoleDoesNotExists.username];
 
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
@@ -577,9 +581,17 @@ describe("Users", function () {
     let nonSuperUserId;
     beforeEach(async function () {
       nonSuperUserId = await addUser(nonSuperUser);
-      await addUser(userRolesDoesNotExists);
-      await addUser(userArchivedRoleDoesNotExists);
-      await addUser(userAlreadyArchived);
+      const userRolesDoesNotExistsId = await addUser(userRolesDoesNotExists);
+      const userArchivedRoleDoesNotExistsId = await addUser(userArchivedRoleDoesNotExists);
+      await addUser(archivedUser);
+      /*
+        By default, archived = false role is added for all new users.
+        Here we are deleting those roles since we need
+          1.  user without roles object
+          2.  user without archived property in roles object
+      */
+      await deleteRolesObject(userRolesDoesNotExistsId);
+      await deleteRoles(userArchivedRoleDoesNotExistsId, [ROLES.ARCHIVED]);
     });
 
     it("Should return 401 if user is not a super user", function (done) {
@@ -611,19 +623,20 @@ describe("Users", function () {
             return done(err);
           }
           expect(res).to.have.status(200);
-          expect(res.body.count).to.be.equal(2);
-          expect(res.body.users).to.include.all.members(
-            [userRolesDoesNotExists.username],
+          expect(res.body.count).to.be.equal(unarchivedUsernames.length);
+          const migratedUsernames = res.body.users;
+          expect(migratedUsernames).to.include(
+            unarchivedUsernames[0],
             "Should add default archived role to user without roles object"
           );
 
-          expect(res.body.users).to.include.all.members(
-            [userArchivedRoleDoesNotExists.username],
+          expect(migratedUsernames).to.include(
+            unarchivedUsernames[1],
             "Should add default archived role to user with roles object but without archived property"
           );
 
-          expect(res.body.users).to.not.include.any.members(
-            [userAlreadyArchived.username],
+          expect(migratedUsernames).to.not.include.any.members(
+            archivedUsernames,
             "Should not modify archived role's value of user with roles object and with archived property"
           );
 
