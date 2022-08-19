@@ -100,4 +100,21 @@ describe("auth", function () {
         return done();
       });
   });
+
+  it("Should clear the rds session cookies", function (done) {
+    chai
+      .request(app)
+      .get("/auth/signout")
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.a("object");
+        expect(res.body.message).to.equal("Signout successful");
+        expect(res.headers["set-cookie"][0]).to.include(`${config.get("userToken.cookieName")}=;`);
+        return done();
+      });
+  });
 });
