@@ -292,26 +292,6 @@ const rejectProfileDiff = async (req, res) => {
   }
 };
 
-/**
- * Returns the lists of usernames where default archived role was added
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-
-const addDefaultArchivedRole = async (req, res) => {
-  try {
-    const addedDefaultArchivedRoleData = await userQuery.addDefaultArchivedRole();
-    return res.json({
-      message: "Users default archived role added successfully!",
-      ...addedDefaultArchivedRoleData,
-    });
-  } catch (error) {
-    logger.error(`Error adding default archived role: ${error}`);
-    return res.boom.badImplementation("Something went wrong. Please contact admin");
-  }
-};
-
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -325,5 +305,4 @@ module.exports = {
   rejectProfileDiff,
   getUserById,
   profileURL,
-  addDefaultArchivedRole,
 };
