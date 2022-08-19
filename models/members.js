@@ -13,16 +13,17 @@ const { ROLES } = require("../constants/roles");
 
 const fetchUsers = async (queryParams = {}) => {
   try {
-    const snapshot = await userModel.get();
-    const allMembers = [];
-
     const { showArchived } = queryParams;
-    const isArchived = showArchived === "true";
+    const shouldShowArchived = showArchived === "true";
+
+    const query = shouldShowArchived ? userModel : userModel.where(`roles.${ROLES.ARCHIVED}`, "==", false);
+    const snapshot = await query.get();
+
+    const allMembers = [];
 
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
         const memberData = doc.data();
-        if (!isArchived && memberData?.roles && memberData.roles[ROLES.ARCHIVED] === true) return;
         const curatedMemberData = {
           id: doc.id,
           ...memberData,
