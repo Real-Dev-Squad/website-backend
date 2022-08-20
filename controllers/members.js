@@ -76,26 +76,6 @@ const moveToMembers = async (req, res) => {
 };
 
 /**
- * Returns the lists of usernames migrated
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-
-const migrateUserRoles = async (req, res) => {
-  try {
-    const migratedUserData = await members.migrateUsers();
-    return res.json({
-      message: "Users migrated successfully",
-      ...migratedUserData,
-    });
-  } catch (error) {
-    logger.error(`Error while migrating user roles: ${error}`);
-    return res.boom.badImplementation("Something went wrong. Please contact admin");
-  }
-};
-
-/**
  * Archives old member from new members list.
  *
  * @param req {Object} - Express request object
@@ -125,5 +105,4 @@ module.exports = {
   getMembers,
   getIdleMembers,
   moveToMembers,
-  migrateUserRoles,
 };
