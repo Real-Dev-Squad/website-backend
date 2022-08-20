@@ -97,34 +97,6 @@ const migrateUsers = async () => {
 };
 
 /**
- * Deletes isMember property from user object
- * @return {Promise<usersMigrated|Object>}
- */
-const deleteIsMemberProperty = async () => {
-  try {
-    const userSnapShot = await userModel.where("roles", "!=", false).get();
-    const migratedUsers = [];
-
-    const usersArr = [];
-
-    userSnapShot.forEach((doc) => usersArr.push({ id: doc.id, ...doc.data() }));
-
-    for (const user of usersArr) {
-      delete user.isMember;
-
-      await userModel.doc(user.id).set({ ...user });
-
-      migratedUsers.push(user.username);
-    }
-
-    return { count: migratedUsers.length, users: migratedUsers };
-  } catch (err) {
-    logger.error("Error deleting isMember property", err);
-    throw err;
-  }
-};
-
-/**
  * Fetches the data about our users with roles
  * @return {Promise<userModel|Array>}
  */
@@ -179,6 +151,5 @@ module.exports = {
   addArchiveRoleToMembers,
   fetchUsers,
   migrateUsers,
-  deleteIsMemberProperty,
   fetchUsersWithRole,
 };
