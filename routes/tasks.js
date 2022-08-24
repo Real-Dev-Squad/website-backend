@@ -11,8 +11,8 @@ const {
 router.get("/", tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);
 router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasks);
-router.post("/", authenticate, authorizeRoles([APPOWNER]), createTask, tasks.addNewTask);
-router.patch("/:id", authenticate, authorizeRoles([APPOWNER]), updateTask, tasks.updateTask);
+router.post("/", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), createTask, tasks.addNewTask);
+router.patch("/:id", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), updateTask, tasks.updateTask);
 router.get("/:username", tasks.getUserTasks);
 router.patch("/self/:id", authenticate, updateSelfTask, tasks.updateTaskStatus);
 
