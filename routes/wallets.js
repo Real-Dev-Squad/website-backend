@@ -2,9 +2,12 @@ const express = require("express");
 const router = express.Router();
 const wallet = require("../controllers/wallets");
 const authenticate = require("../middlewares/authenticate");
-const { authorizeUser } = require("../middlewares/authorization");
+const authorizeRoles = require("../middlewares/authorizeRoles");
+const {
+  ROLES: { SUPERUSER },
+} = require("../constants/roles");
 
 router.get("/", authenticate, wallet.getOwnWallet);
-router.get("/:username", authenticate, authorizeUser("superUser"), wallet.getUserWallet);
+router.get("/:username", authenticate, authorizeRoles([SUPERUSER]), wallet.getUserWallet);
 
 module.exports = router;
