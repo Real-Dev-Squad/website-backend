@@ -15,8 +15,6 @@ router.get("/idle", members.getIdleMembers);
 router.post("/intro/:username", validateRecruiter, addRecruiter);
 router.get("/intro", authenticate, authorizeUser(SUPER_USER), fetchRecruitersInfo);
 router.patch("/moveToMembers/:username", authenticate, authorizeUser(SUPER_USER), members.moveToMembers);
-router.patch("/member-to-role-migration", authenticate, authorizeUser("superUser"), members.migrateUserRoles);
-router.patch("/delete-isMember", authenticate, authorizeUser("superUser"), members.deleteIsMember);
 router.patch("/archiveMembers/:username", authenticate, authorizeUser(SUPER_USER), members.archiveMembers);
 
 module.exports = router;
