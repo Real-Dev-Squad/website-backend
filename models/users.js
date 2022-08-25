@@ -6,6 +6,7 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
+const { ROLES } = require("../constants/roles");
 const userModel = firestore.collection("users");
 
 /**
@@ -40,7 +41,13 @@ const addOrUpdate = async (userData, userId = null) => {
       return { isNewUser: false, userId: user.docs[0].id };
     }
 
-    // Add user
+    // Add new user
+    /*
+      Adding default archived role enables us to query for only
+      the unarchived users in the /members endpoint
+      For more info : https://github.com/Real-Dev-Squad/website-backend/issues/651
+    */
+    userData.roles = { archived: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
     return { isNewUser: true, userId: userInfo.id };
@@ -186,6 +193,39 @@ const fetchUserImage = async (users) => {
   return images;
 };
 
+/**
+ * Adds default archived role
+ * @return {Promise<usersMigrated|Object>}
+ */
+const addDefaultArchivedRole = async () => {
+  try {
+    const userSnapShot = await userModel.get();
+    const migratedUsers = [];
+    const updateUserPromises = [];
+    const usersArr = [];
+
+    userSnapShot.forEach((doc) => usersArr.push({ id: doc.id, ...doc.data() }));
+    for (const user of usersArr) {
+      const roles = user.roles ? user.roles : {};
+      if (roles[ROLES.ARCHIVED] === undefined) {
+        roles[ROLES.ARCHIVED] = false;
+        updateUserPromises.push(
+          userModel.doc(user.id).set({
+            ...user,
+            roles,
+          })
+        );
+        migratedUsers.push(user.username);
+      }
+    }
+    await Promise.all(updateUserPromises);
+    return { count: migratedUsers.length, users: migratedUsers };
+  } catch (err) {
+    logger.error("Error adding default archived roles", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchUsers,
@@ -194,4 +234,5 @@ module.exports = {
   initializeUser,
   updateUserPicture,
   fetchUserImage,
+  addDefaultArchivedRole,
 };

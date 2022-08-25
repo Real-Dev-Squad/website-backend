@@ -7,6 +7,7 @@ const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
+const obfuscate = require("../utils/obfuscate");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -38,15 +39,13 @@ const getUserById = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   }
 
-  const { phone, email, ...user } = result.user;
+  const { phone = "", email = "", ...user } = result.user;
   try {
-    user.phone =
-      phone.slice(0, 1) + phone.slice(1, phone.length - 1).replace(/\d/g, "*") + phone.slice(phone.length - 1);
-    user.email =
-      email.slice(0, 2) + email.slice(2, email.length - 2).replace(/./g, "*") + email.slice(email.length - 2);
+    user.phone = obfuscate.obfuscatePhone(phone);
+    user.email = obfuscate.obfuscateMail(email);
   } catch (error) {
     logger.error(`Error while formatting phone and email: ${error}`);
-    res.boom.error("Error while formatting phone and email");
+    return res.boom.badImplementation("Error while formatting phone and email");
   }
 
   return res.json({
@@ -293,6 +292,26 @@ const rejectProfileDiff = async (req, res) => {
   }
 };
 
+/**
+ * Returns the lists of usernames where default archived role was added
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const addDefaultArchivedRole = async (req, res) => {
+  try {
+    const addedDefaultArchivedRoleData = await userQuery.addDefaultArchivedRole();
+    return res.json({
+      message: "Users default archived role added successfully!",
+      ...addedDefaultArchivedRoleData,
+    });
+  } catch (error) {
+    logger.error(`Error adding default archived role: ${error}`);
+    return res.boom.badImplementation("Something went wrong. Please contact admin");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -306,4 +325,5 @@ module.exports = {
   rejectProfileDiff,
   getUserById,
   profileURL,
+  addDefaultArchivedRole,
 };

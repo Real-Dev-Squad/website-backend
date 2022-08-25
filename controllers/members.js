@@ -1,4 +1,4 @@
-const { ROLES } = require("../constants/users");
+const { ROLES } = require("../constants/roles");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
 const { fetchUser } = require("../models/users");
@@ -6,6 +6,7 @@ const { fetchUser } = require("../models/users");
 const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
 /**
+>>>>>>> 81cc1d5f9f6b5391f58d691b20669bedd85775ae
  * Returns the usernames of inactive/idle members
  *
  * @param req {Object} - Express request object

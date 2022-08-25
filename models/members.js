@@ -5,8 +5,45 @@
 
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
+const { ROLES } = require("../constants/roles");
+/**
+ * Fetches the data about our users
+ * @return {Promise<userModel|Array>}
+ */
+
+const fetchUsers = async (queryParams = {}) => {
+  try {
+    const snapshot = await userModel.get();
+    const allMembers = [];
+
+    const { showArchived } = queryParams;
+    const isArchived = showArchived === "true";
+
+    if (!snapshot.empty) {
+      snapshot.forEach((doc) => {
+        const memberData = doc.data();
+        if (!isArchived && memberData?.roles && memberData.roles[ROLES.ARCHIVED] === true) return;
+        const curatedMemberData = {
+          id: doc.id,
+          ...memberData,
+          tokens: undefined,
+          phone: undefined,
+          email: undefined,
+        };
+        curatedMemberData.isMember = !!(memberData.roles && memberData.roles.member);
+        allMembers.push(curatedMemberData);
+      });
+    }
+
+    return allMembers;
+  } catch (err) {
+    logger.error("Error retrieving members data", err);
+    throw err;
+  }
+};
 
 /**
+>>>>>>> 81cc1d5f9f6b5391f58d691b20669bedd85775ae
  * changes the role of a new user to member
  * @param userId { String }: User id of user to be modified
  * @return { Object }: whether moveToMember was successful or not and whether user is already a member or not
@@ -125,8 +162,8 @@ const addArchiveRoleToMembers = async (userId) => {
   try {
     const userDoc = await userModel.doc(userId).get();
     const user = userDoc.data();
-    if (user?.roles?.archivedMember) return { isArchived: true };
-    const roles = { ...user.roles, archivedMember: true };
+    if (user?.roles && user.roles[ROLES.ARCHIVED]) return { isArchived: true };
+    const roles = { ...user.roles, [ROLES.ARCHIVED]: true };
     await userModel.doc(userId).update({
       roles,
     });
@@ -140,6 +177,7 @@ const addArchiveRoleToMembers = async (userId) => {
 module.exports = {
   moveToMembers,
   addArchiveRoleToMembers,
+  fetchUsers,
   migrateUsers,
   deleteIsMemberProperty,
   fetchUsersWithRole,
