@@ -17,9 +17,15 @@ module.exports = () => {
       by: "sumit",
       for: "fixing broken social links",
     },
-    {},
     {
-      name: "Testing",
+      name: "CSS Animations",
+      on: "17-12-17",
+      for: "adding animation to welcome site",
+    },
+    {
+      name: "js",
+      by: "ankush",
+      on: "15-15-15",
     },
   ];
 };

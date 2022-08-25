@@ -92,6 +92,9 @@ describe("Skills", function () {
     });
 
     it("Should return 400 if name field is not specified", function (done) {
+      const skillData = skillsData[2];
+      delete skillData.name;
+
       chai
         .request(app)
         .post(`/skills/${userName}`)
@@ -113,6 +116,9 @@ describe("Skills", function () {
     });
 
     it("Should return 400 if by field is not specified", function (done) {
+      const skillData = skillsData[3];
+      delete skillData.by;
+
       chai
         .request(app)
         .post(`/skills/${userName}`)
