@@ -24,5 +24,4 @@ router.patch("/add-default-archived-role", authenticate, authorizeRoles([SUPERUS
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
 
-
 module.exports = router;
