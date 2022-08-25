@@ -6,6 +6,5 @@ const authenticate = require("../middlewares/authenticate");
 router.post("/:username", authenticate, skills.awardSkill);
 router.get("/", skills.fetchSkills);
 router.get("/:username", authenticate, skills.fetchUserSkills);
-router.get("/users/:skill", authenticate, skills.userWithSkill);
 
 module.exports = router;

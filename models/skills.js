@@ -65,38 +65,8 @@ async function fetchUserSkills(userName) {
   }
 }
 
-/**
- * Fetch Users with given Skill
- *
- * @param skill { String }: Get users with given skill
- * @return {Promise<skills|Array>}
- */
-async function userWithSkill(skill) {
-  let userData;
-  let filteredData;
-
-  try {
-    userData = await users.fetchUsers(skill);
-    const newData = userData.map((user) => {
-      const newSkill = user.skills.map((skill) => skill.toLowerCase());
-      user.skills = newSkill;
-      return user;
-    });
-
-    filteredData = newData.filter((user) => {
-      return user.skills.includes(skill.toLowerCase());
-    });
-    if (!filteredData.length) throw Error();
-  } catch (error) {
-    logger.error("Error getting user with given skill", error);
-  }
-
-  return filteredData;
-}
-
 module.exports = {
   fetchSkills,
   awardSkill,
   fetchUserSkills,
-  userWithSkill,
 };

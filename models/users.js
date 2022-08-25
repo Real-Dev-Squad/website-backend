@@ -186,6 +186,34 @@ const fetchUserImage = async (users) => {
   return images;
 };
 
+/**
+ *
+ *
+ * Fetch Users with given Skill
+ *
+ * @param skill { String }: Get users with given skill
+ * @return {Promise<skills|Array>}
+ */
+async function userWithSkill(skill) {
+  try {
+    const userData = await fetchUsers(skill);
+    const newUserData = userData.map((user) => {
+      const newSkill = user.skills.map((skill) => skill.toLowerCase());
+      user.skills = newSkill;
+      return user;
+    });
+
+    const filteredUserData = newUserData.filter((user) => {
+      return user.skills.includes(skill.toLowerCase());
+    });
+    if (!filteredUserData.length) throw Error();
+    return filteredUserData;
+  } catch (error) {
+    logger.error("Error getting user with given skill", error);
+  }
+  return null;
+}
+
 module.exports = {
   addOrUpdate,
   fetchUsers,
@@ -194,4 +222,5 @@ module.exports = {
   initializeUser,
   updateUserPicture,
   fetchUserImage,
+  userWithSkill,
 };

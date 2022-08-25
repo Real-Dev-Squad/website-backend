@@ -292,6 +292,32 @@ const rejectProfileDiff = async (req, res) => {
   }
 };
 
+/**
+ * Fetch users with given skill
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+async function userWithSkill(req, res) {
+  const { skillName } = req.params;
+  const regex = /[-_]/g;
+  const skillWithoutSpecialChar = regex.test(skillName) ? skillName.replace(regex, " ") : skillName;
+
+  try {
+    const filteredData = await userQuery.userWithSkill(skillWithoutSpecialChar);
+
+    if (filteredData.length) {
+      return res.json({
+        message: "Users returned successfully!",
+        data: filteredData,
+      });
+    } else throw new Error();
+  } catch (error) {
+    logger.error("Error fetching user with skill: ", error);
+    return res.boom.notFound("Invalid Skill. Please re-check input data");
+  }
+}
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -305,4 +331,5 @@ module.exports = {
   rejectProfileDiff,
   getUserById,
   profileURL,
+  userWithSkill,
 };
