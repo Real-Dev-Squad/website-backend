@@ -156,9 +156,34 @@ const fetchOpenPRs = async (per_page = 10, page = 1) => {
   }
 };
 
+/**
+ * Fetches the latest N merged PRs
+ */
+const fetchLatestNPRsMerged = (count) => {
+  try {
+    const url = getGithubURL(
+      {
+        is: "merged",
+        type: "pr",
+      },
+      {
+        sort: "created",
+        order: "desc",
+        per_page: count,
+        page: 1,
+      }
+    );
+    return getFetch(url);
+  } catch (err) {
+    logger.error(`Error while fetching pull requests: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
+  fetchLatestNPRsMerged,
   fetchStalePRs,
   getFetch,
   extractPRdetails,
