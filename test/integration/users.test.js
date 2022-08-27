@@ -567,4 +567,38 @@ describe("Users", function () {
         });
     });
   });
+
+  describe("GET /users/skill/:skillName", function () {
+    it("Should return users with given skill", function (done) {
+      chai
+        .request(app)
+        .get("/users/skill/CSS")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((res, err) => {
+          if (err) return done();
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.data).to.be.a("array");
+
+          return done();
+        });
+    });
+
+    it("Should 400 if there are no users with skill", function (done) {
+      chai
+        .request(app)
+        .get("/users/skill/CSS")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((res, err) => {
+          if (err) return done();
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.be.a("Bad Request");
+          expect(res.body.message).to.equal("Invalid Skill. Please re-check input data");
+
+          return done();
+        });
+    });
+  });
 });

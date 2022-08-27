@@ -18,7 +18,7 @@ async function awardSkill(req, res) {
     });
   } catch (error) {
     logger.error("Error posting skill data: ", error);
-    return res.boom.badRequest("User doesn't exist");
+    return res.boom.badRequest(error.message);
   }
 }
 
@@ -59,7 +59,7 @@ async function fetchUserSkills(req, res) {
     });
   } catch (error) {
     logger.error("Error fetching user skills: ", error);
-    return res.boom.notFound("User doesn't exist");
+    return res.boom.notFound(error.message);
   }
 }
 

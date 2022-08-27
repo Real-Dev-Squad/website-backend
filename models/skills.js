@@ -13,8 +13,11 @@ async function awardSkill(skillData, userName) {
   try {
     const skillSnapshot = await skillsCollection.add(skillData);
     const userInfo = await users.fetchUser({ username: userName });
+    if (!userInfo.userExists) throw new Error("User doesn't exist");
 
     const addedData = await skillSnapshot.get();
+    if (!addedData.exists) throw new Error("Failed to add skill");
+
     const { name } = addedData.data();
     const data = userInfo.user.skills?.length ? { skills: [...userInfo.user.skills, name] } : { skills: [name] };
 
@@ -57,7 +60,7 @@ async function fetchUserSkills(userName) {
   try {
     const { user } = await users.fetchUser({ username: userName });
 
-    if (user.id == null) throw Error();
+    if (user.id == null) throw Error("User doesn't exist");
     else return user.skills;
   } catch (error) {
     logger.error("Error getting skills of user", error);

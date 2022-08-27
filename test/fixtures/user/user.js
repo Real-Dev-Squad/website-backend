@@ -21,6 +21,7 @@ module.exports = () => {
       isMember: true,
       phone: "1234567890",
       email: "abc@gmail.com",
+      skills: ["JavaScript", "CSS"],
       roles: {
         member: true,
       },

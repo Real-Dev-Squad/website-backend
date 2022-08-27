@@ -196,20 +196,22 @@ const fetchUserImage = async (users) => {
  */
 async function userWithSkill(skill) {
   try {
-    const userData = await fetchUsers(skill);
-    const newUserData = userData.map((user) => {
-      const newSkill = user.skills.map((skill) => skill.toLowerCase());
+    const userData = await userModel.orderBy("skills", "asc").get();
+    const userSkills = userData.docs.map((doc) => doc.data());
+
+    const newUserData = userSkills.map((user) => {
+      const newSkill = user.skills.map((userSkill) => userSkill.toLowerCase());
       user.skills = newSkill;
       return user;
     });
 
-    const filteredUserData = newUserData.filter((user) => {
+    const filteredUserSkills = newUserData.filter((user) => {
       return user.skills.includes(skill.toLowerCase());
     });
-    if (!filteredUserData.length) throw Error();
-    return filteredUserData;
+    if (!filteredUserSkills.length) throw Error("No users with this skill");
+    return filteredUserSkills;
   } catch (error) {
-    logger.error("Error getting user with given skill", error);
+    logger.error("Error getting user with given skill: ", error);
   }
   return null;
 }

@@ -308,12 +308,12 @@ async function userWithSkill(req, res) {
   try {
     const filteredData = await userQuery.userWithSkill(skillWithoutSpecialChar);
 
-    if (filteredData.length) {
+    if (filteredData) {
       return res.json({
         message: "Users returned successfully!",
         data: filteredData,
       });
-    } else throw new Error();
+    } else throw new Error("No users with this skill");
   } catch (error) {
     logger.error("Error fetching user with skill: ", error);
     return res.boom.badRequest("Invalid Skill. Please re-check input data");

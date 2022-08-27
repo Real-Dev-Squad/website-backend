@@ -156,4 +156,53 @@ describe("Skills", function () {
         });
     });
   });
+
+  describe("GET /skills/:username", function () {
+    it("Should return skills of user", function (done) {
+      chai
+        .request(app)
+        .get(`/skills/${userName}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Skills returned successfully!");
+          expect(res.body.skills).to.be.a("array");
+
+          return done();
+        });
+    });
+
+    it("Should return 404 if user doesn't exist", function (done) {
+      chai
+        .request(app)
+        .get(`/skills/sameer42`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Not Found");
+          expect(res.body.message).to.equal("User doesn't exist");
+
+          return done();
+        });
+    });
+
+    it("Should return 401 if user is unauthenticated", function (done) {
+      chai
+        .request(app)
+        .get(`/skills/${userName}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Unauthorized");
+          expect(res.body.message).to.equal("Unauthenticated User");
+
+          return done();
+        });
+    });
+  });
 });
