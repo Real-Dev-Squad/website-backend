@@ -1,4 +1,4 @@
-const { ROLES } = require("../constants/roles");
+const ROLES = require("../constants/roles");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
 const { fetchUser } = require("../models/users");

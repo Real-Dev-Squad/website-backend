@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
-const { authorizeUser } = require("../middlewares/authorization");
+const authorizeRoles = require("../middlewares/authorizeRoles");
 const users = require("../controllers/users");
-const {
-  LEGACY_ROLES: { SUPER_USER },
-} = require("../constants/roles");
+const { SUPERUSER } = require("../constants/roles");
 const userValidator = require("../middlewares/validators/user");
 const { upload } = require("../utils/multer");
 
@@ -20,7 +18,7 @@ router.get("/:username", users.getUser);
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post("/picture", authenticate, upload.single("profile"), users.postUserPicture);
 router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);
-router.patch("/rejectDiff", authenticate, authorizeUser(SUPER_USER), users.rejectProfileDiff);
-router.patch("/:userId", authenticate, authorizeUser(SUPER_USER), users.updateUser);
+router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
+router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
 
 module.exports = router;
