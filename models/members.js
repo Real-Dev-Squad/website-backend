@@ -5,7 +5,7 @@
 
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
-const { ROLES } = require("../constants/roles");
+const ROLES = require("../constants/roles");
 /**
  * Fetches the data about our users
  * @return {Promise<userModel|Array>}

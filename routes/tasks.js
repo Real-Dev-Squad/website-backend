@@ -4,9 +4,7 @@ const authenticate = require("../middlewares/authenticate");
 const tasks = require("../controllers/tasks");
 const { createTask, updateTask, updateSelfTask } = require("../middlewares/validators/tasks");
 const authorizeRoles = require("../middlewares/authorizeRoles");
-const {
-  ROLES: { APPOWNER, SUPERUSER },
-} = require("../constants/roles");
+const { APPOWNER, SUPERUSER } = require("../constants/roles");
 
 router.get("/", tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);

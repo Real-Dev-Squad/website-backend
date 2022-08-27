@@ -3,9 +3,7 @@ const router = express.Router();
 const logs = require("../controllers/logs");
 const authenticate = require("../middlewares/authenticate");
 const authorizeRoles = require("../middlewares/authorizeRoles");
-const {
-  ROLES: { SUPERUSER },
-} = require("../constants/roles");
+const { SUPERUSER } = require("../constants/roles");
 
 router.get("/:type", authenticate, authorizeRoles([SUPERUSER]), logs.fetchLogs);
 

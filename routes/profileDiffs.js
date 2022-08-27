@@ -3,9 +3,7 @@ const router = express.Router();
 const profileDiffs = require("../controllers/profileDiffs");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const authenticate = require("../middlewares/authenticate");
-const {
-  ROLES: { SUPERUSER },
-} = require("../constants/roles");
+const { SUPERUSER } = require("../constants/roles");
 
 router.get("/", authenticate, authorizeRoles([SUPERUSER]), profileDiffs.getProfileDiffs);
 

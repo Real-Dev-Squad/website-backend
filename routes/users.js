@@ -3,9 +3,7 @@ const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const users = require("../controllers/users");
-const {
-  ROLES: { SUPERUSER },
-} = require("../constants/roles");
+const { SUPERUSER } = require("../constants/roles");
 const userValidator = require("../middlewares/validators/user");
 const { upload } = require("../utils/multer");
 

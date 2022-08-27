@@ -4,9 +4,7 @@ const authenticate = require("../middlewares/authenticate");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const { addNewStock, fetchStocks, getSelfStocks } = require("../controllers/stocks");
 const { createStock } = require("../middlewares/validators/stocks");
-const {
-  ROLES: { SUPERUSER },
-} = require("../constants/roles");
+const { SUPERUSER } = require("../constants/roles");
 
 router.get("/", fetchStocks);
 router.post("/", authenticate, authorizeRoles([SUPERUSER]), createStock, addNewStock);
