@@ -29,10 +29,12 @@ describe("auth", function () {
       return (req, res, next) => {};
     });
 
+    const bufferURL = Buffer.from(authRedirectionUrl).toString("base64");
+
     chai
       .request(app)
       .get("/auth/github/callback")
-      .query({ code: "codeReturnedByGithub" })
+      .query({ code: "codeReturnedByGithub", state: bufferURL })
       .redirects(0)
       .end((err, res) => {
         if (err) {
