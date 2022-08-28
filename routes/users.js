@@ -20,7 +20,6 @@ router.post("/picture", authenticate, upload.single("profile"), users.postUserPi
 router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
-
 router.get("/skill/:skillName", authenticate, users.userWithSkill);
 
 module.exports = router;

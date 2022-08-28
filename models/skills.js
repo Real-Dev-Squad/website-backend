@@ -1,5 +1,5 @@
 const firestore = require("../utils/firestore");
-const skillsModel = firestore.collection("skills");
+const skillsCollection = firestore.collection("skills");
 const users = require("./users");
 
 /**
@@ -11,7 +11,7 @@ const users = require("./users");
  */
 async function awardSkill(skillData, userName) {
   try {
-    const skillSnapshot = await skillsModel.add(skillData);
+    const skillSnapshot = await skillsCollection.add(skillData);
     const userInfo = await users.fetchUser({ username: userName });
 
     const addedData = await skillSnapshot.get();
@@ -33,7 +33,7 @@ async function awardSkill(skillData, userName) {
  */
 async function fetchSkills() {
   try {
-    const skillsSnapshot = await skillsModel.get();
+    const skillsSnapshot = await skillsCollection.get();
     const skills = skillsSnapshot.docs.map((skill) => {
       return {
         id: skill.id,

@@ -8,6 +8,7 @@ const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
+const { checkDashUnderscore } = require("../constants/regex");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -300,8 +301,9 @@ const rejectProfileDiff = async (req, res) => {
  */
 async function userWithSkill(req, res) {
   const { skillName } = req.params;
-  const regex = /[-_]/g;
-  const skillWithoutSpecialChar = regex.test(skillName) ? skillName.replace(regex, " ") : skillName;
+  const skillWithoutSpecialChar = checkDashUnderscore.test(skillName)
+    ? skillName.replace(checkDashUnderscore, " ")
+    : skillName;
 
   try {
     const filteredData = await userQuery.userWithSkill(skillWithoutSpecialChar);
@@ -314,7 +316,7 @@ async function userWithSkill(req, res) {
     } else throw new Error();
   } catch (error) {
     logger.error("Error fetching user with skill: ", error);
-    return res.boom.notFound("Invalid Skill. Please re-check input data");
+    return res.boom.badRequest("Invalid Skill. Please re-check input data");
   }
 }
 

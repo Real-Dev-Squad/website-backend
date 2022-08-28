@@ -13,12 +13,12 @@ async function awardSkill(req, res) {
     const { username } = req.params;
     const addedData = await skills.awardSkill(req.body, username);
     return res.json({
-      message: "Added data successfully!",
-      content: addedData,
+      message: "Added skill for user successfully!",
+      skill: addedData,
     });
   } catch (error) {
     logger.error("Error posting skill data: ", error);
-    return res.boom.notFound("User doesn't exist");
+    return res.boom.badRequest("User doesn't exist");
   }
 }
 
@@ -55,7 +55,7 @@ async function fetchUserSkills(req, res) {
     const userData = await skills.fetchUserSkills(username);
     return res.json({
       message: "Skills returned successfully!",
-      data: userData,
+      skills: userData.length > 0 ? userData : [],
     });
   } catch (error) {
     logger.error("Error fetching user skills: ", error);
