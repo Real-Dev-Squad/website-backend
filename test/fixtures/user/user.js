@@ -92,6 +92,7 @@ module.exports = () => {
       },
       roles: {
         super_user: true,
+        archived: false,
       },
     },
     {
