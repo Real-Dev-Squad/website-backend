@@ -215,9 +215,9 @@ const fetchSkillLevelTasks = async (skill, level) => {
       fetchDbForTask(skill, taskLevel + 2),
     ]);
 
-    for (let i = 0; i < tasks.length; i++) {
-      if (!tasks[i].empty) {
-        tasks[i].forEach((doc) => {
+    for (const task of tasks) {
+      if (!task.empty) {
+        task.forEach((doc) => {
           id = doc.id;
           taskData = doc.data();
         });
@@ -229,6 +229,21 @@ const fetchSkillLevelTasks = async (skill, level) => {
         };
       }
     }
+
+    // for (let i = 0; i < tasks.length; i++) {
+    //   if (!tasks[i].empty) {
+    //     tasks[i].forEach((doc) => {
+    //       id = doc.id;
+    //       taskData = doc.data();
+    //     });
+    //     return {
+    //       task: {
+    //         id,
+    //         ...taskData,
+    //       },
+    //     };
+    //   }
+    // }
 
     return { taskNotFound: true };
   } catch (err) {
