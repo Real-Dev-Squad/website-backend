@@ -13,5 +13,6 @@ router.post("/", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), createTask
 router.patch("/:id", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), updateTask, tasks.updateTask);
 router.get("/:username", tasks.getUserTasks);
 router.patch("/self/:id", authenticate, updateSelfTask, tasks.updateTaskStatus);
+router.get("/:skill/:level", tasks.getSkillTasks);
 
 module.exports = router;

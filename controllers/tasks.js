@@ -112,6 +112,27 @@ const getSelfTasks = async (req, res) => {
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
+
+/**
+ * Fetches task according to the skill and level of the user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getSkillTasks = async (req, res) => {
+  try {
+    const { skill, level } = req.params;
+    const skillTask = await tasks.fetchSkillLevelTasks(skill, level);
+    if (skillTask.taskNotFound) {
+      return res.boom.notFound("Task mpt found");
+    }
+    return res.json(skillTask);
+  } catch (err) {
+    logger.error(`Error while fetching tasks: ${err}`);
+    return res.boom.badImplementation("An internal server error occured");
+  }
+};
 /**
  * Updates the task
  *
@@ -187,6 +208,7 @@ module.exports = {
   updateTask,
   getSelfTasks,
   getUserTasks,
+  getSkillTasks,
   updateTaskStatus,
   overdueTasks,
 };
