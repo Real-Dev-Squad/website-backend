@@ -20,29 +20,24 @@ describe("auth", function () {
   });
 
   it("should redirect the request to the goto page on successful login", function (done) {
-    const authRedirectionUrl = `${config.get("services.rdsUi.baseUrl")}${config.get(
-      "services.rdsUi.routes.authRedirection"
-    )}`;
+    const rdsUiUrl = config.get("services.rdsUi.baseUrl");
 
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
       callback(null, "accessToken", githubUserInfo[0]);
       return (req, res, next) => {};
     });
 
-    const bufferURL = Buffer.from(authRedirectionUrl).toString("base64");
-
     chai
       .request(app)
       .get("/auth/github/callback")
-      .query({ code: "codeReturnedByGithub", state: bufferURL })
+      .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
       .redirects(0)
       .end((err, res) => {
         if (err) {
           return done(err);
         }
-
         expect(res).to.have.status(302);
-        expect(res.headers.location).to.equal(authRedirectionUrl);
+        expect(res.headers.location).to.equal(rdsUiUrl);
 
         return done();
       });
