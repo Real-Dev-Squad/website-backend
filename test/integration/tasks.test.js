@@ -90,7 +90,7 @@ describe("Tasks", function () {
           type: "feature",
           endsOn: 123,
           startedOn: 456,
-          status: "completed",
+          status: "AVAILABLE",
           percentCompleted: 10,
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
@@ -109,6 +109,33 @@ describe("Tasks", function () {
           expect(res.body.task.createdBy).to.equal(appOwner.username);
           expect(res.body.task.assignee).to.equal(appOwner.username);
           expect(res.body.task.participants).to.be.a("array");
+          return done();
+        });
+    });
+    it('Should return fail response after adding the task with a non-acceptable value for the "status" in the task object ', function (done) {
+      chai
+        .request(app)
+        .post("/tasks")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "Test task - Create",
+          type: "feature",
+          endsOn: 123,
+          startedOn: 456,
+          status: "Helloworld",
+          percentCompleted: 10,
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          assignee: appOwner.username,
+          participants: [],
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
           return done();
         });
     });
