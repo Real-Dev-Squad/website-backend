@@ -396,6 +396,44 @@ describe("Tasks", function () {
     });
   });
 
+  describe("GET /tasks/:skill/:level", function () {
+    const skill = "frontend";
+    const level = 2;
+    it("it should return a task based on skill and skill level", async function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${skill}/${level}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.task).to.be.a("object");
+
+          return done();
+        });
+    });
+
+    it("should only return a task which is not assigned", async function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${skill}/${level}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.task).to.be.a("object");
+          expect(res.body.task.assignee).to.equal(false);
+
+          return done();
+        });
+    });
+  });
+
   describe("GET /tasks/overdue", function () {
     it("Should return all the overdue Tasks", async function () {
       await tasks.updateTask(tasksData[0]);
