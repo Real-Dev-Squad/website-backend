@@ -61,6 +61,18 @@ describe("Tasks", function () {
         lossRate: { [DINERO]: 1 },
         isNoteworthy: false,
       },
+      {
+        status: "AVAILABLE",
+        title: "a title",
+        isNoteworthy: true,
+        taskLevel: {
+          level: 4,
+          category: "frontend",
+        },
+        level: 1,
+        assignee: false,
+        purpose: "a purpose",
+      },
     ];
 
     // Add the active task
@@ -399,38 +411,41 @@ describe("Tasks", function () {
   describe("GET /tasks/:skill/:level", function () {
     const skill = "frontend";
     const level = 2;
-    it("it should return a task based on skill and skill level", async function (done) {
-      chai
-        .request(app)
-        .get(`/tasks/${skill}/${level}`)
-        .end((err, res) => {
-          if (err) {
-            return done();
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.task).to.be.a("object");
-
-          return done();
-        });
+    it("it should return a task based on skill and skill level", async function () {
+      const taskdata = {
+        status: "AVAILABLE",
+        title: "a title",
+        isNoteworthy: true,
+        taskLevel: {
+          level: 4,
+          category: "frontend",
+        },
+        level: 1,
+        assignee: false,
+        purpose: "a purpose",
+      };
+      await tasks.updateTask(taskdata);
+      const res = await chai.request(app).get("/tasks/frontend/2").send();
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.task).to.be.a("object");
     });
 
-    it("should only return a task which is not assigned", async function (done) {
-      chai
-        .request(app)
-        .get(`/tasks/${skill}/${level}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
+    it("should only return a task which is not assigned", async function () {
+      const res = await chai.request(app).get(`/tasks/${skill}/${level}`).send();
 
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.task).to.be.a("object");
-          expect(res.body.task.assignee).to.equal(false);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.task).to.be.a("object");
+      expect(res.body.task.status).to.equal("AVAILABLE");
+    });
 
-          return done();
-        });
+    it("Should return task not found if task is not within the range with status 404", async function () {
+      const res = await chai.request(app).get(`/tasks/${skill}/5`).send();
+
+      expect(res).to.have.status(404);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.be.equal("Task not found");
     });
   });
 

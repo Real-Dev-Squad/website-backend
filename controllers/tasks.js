@@ -125,7 +125,7 @@ const getSkillTasks = async (req, res) => {
     const { skill, level } = req.params;
     const skillTask = await tasks.fetchSkillLevelTasks(skill, level);
     if (skillTask.taskNotFound) {
-      return res.boom.notFound("Task mpt found");
+      return res.boom.notFound("Task not found");
     }
     return res.json(skillTask);
   } catch (err) {

@@ -193,12 +193,13 @@ const fetchUserTasks = async (username, statuses = [], field, order) => {
   }
 };
 
-// in case of null we are not able use in to do the query which is required because in some condtion it is going to be null or in some conditon it is going to be false.
 const fetchDbForTask = async (skill, level) => {
   const task = await tasksModel
+    // getting task between range in firebase
     .where("taskLevel.category", "==", skill)
-    .where("taskLevel.level", "==", level)
-    .where("assignee", "==", false)
+    .where("taskLevel.level", ">=", level)
+    .where("taskLevel.level", "<=", level + 2)
+    .where("status", "==", "AVAILABLE")
     .limit(1)
     .get();
   return task;
@@ -209,41 +210,19 @@ const fetchSkillLevelTasks = async (skill, level) => {
     let taskData, id;
     const taskLevel = Number(level);
 
-    const tasks = await Promise.all([
-      fetchDbForTask(skill, taskLevel),
-      fetchDbForTask(skill, taskLevel + 1),
-      fetchDbForTask(skill, taskLevel + 2),
-    ]);
-
-    for (const task of tasks) {
-      if (!task.empty) {
-        task.forEach((doc) => {
-          id = doc.id;
-          taskData = doc.data();
-        });
-        return {
-          task: {
-            id,
-            ...taskData,
-          },
-        };
-      }
+    const task = await fetchDbForTask(skill, taskLevel);
+    if (!task.empty) {
+      task.forEach((doc) => {
+        id = doc.id;
+        taskData = doc.data();
+      });
+      return {
+        task: {
+          id,
+          ...taskData,
+        },
+      };
     }
-
-    // for (let i = 0; i < tasks.length; i++) {
-    //   if (!tasks[i].empty) {
-    //     tasks[i].forEach((doc) => {
-    //       id = doc.id;
-    //       taskData = doc.data();
-    //     });
-    //     return {
-    //       task: {
-    //         id,
-    //         ...taskData,
-    //       },
-    //     };
-    //   }
-    // }
 
     return { taskNotFound: true };
   } catch (err) {
