@@ -2,7 +2,7 @@ const tasks = require("../models/tasks");
 const { toFirestoreData } = require("../utils/tasks");
 const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
+const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED, VERIFIED } = TASK_STATUS;
 /**
  * Creates new task
  *
@@ -161,7 +161,7 @@ const updateTaskStatus = async (req, res) => {
       logger.error(`Error while updating taskId ${req.params.id}: Forbidden user`);
       return res.boom.forbidden("This task is not assigned to you");
     }
-    if (task.taskData.status === "VERIFIED") {
+    if (task.taskData.status === VERIFIED) {
       logger.error(`Error while updating taskId ${req.params.id}: Already verified task`);
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
     }
