@@ -1,3 +1,6 @@
+const { TASK_STATUS } = require("../../../constants/tasks");
+
+const { IN_PROGRESS, ASSIGNED, BLOCKED, AVAILABLE } = TASK_STATUS;
 /**
  * Sample tasks for tests
  * @return  {object}
@@ -11,7 +14,7 @@ module.exports = () => {
       type: "feature",
       assignee: "sagar",
       createdBy: "ankush",
-      status: "IN_PROGRESS",
+      status: IN_PROGRESS,
       percentCompleted: 50,
       endsOn: 1647172800, // 13 march
       startedOn: 1644753600, //  13 feb
@@ -22,7 +25,7 @@ module.exports = () => {
       type: "feature",
       assignee: "sagar",
       createdBy: "ankush",
-      status: "ASSIGNED",
+      status: ASSIGNED,
       percentCompleted: 50,
       endsOn: 1647172800, // 13 march
       startedOn: 1644753600, //  13 feb
@@ -33,7 +36,7 @@ module.exports = () => {
       type: "feature",
       assignee: "sagar",
       createdBy: "ankush",
-      status: "BLOCKED",
+      status: BLOCKED,
       percentCompleted: 50,
       endsOn: 1647172800,
       startedOn: 1644753600,
@@ -44,7 +47,7 @@ module.exports = () => {
       type: "feature",
       assignee: "nikhil",
       createdBy: "nikhil",
-      status: "AVAILABLE",
+      status: AVAILABLE,
       percentCompleted: 50,
       endsOn: 1650032259,
       startedOn: 1644753600,
