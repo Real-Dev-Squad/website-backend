@@ -7,7 +7,7 @@ const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
 const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
-
+const checkChaincode = require("../utils/checkChaincode");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
@@ -241,9 +241,6 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User returned successfully!");
           expect(res.body.user).to.be.a("object");
-          expect(res.body.user).to.not.have.property("phone");
-          expect(res.body.user).to.not.have.property("email");
-
           return done();
         });
     });
@@ -443,7 +440,7 @@ describe("Users", function () {
         .request(app)
         .get("/users/chaincode")
         .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
+        .end(async (err, res) => {
           if (err) {
             return done();
           }
@@ -451,6 +448,7 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Chaincode returned successfully");
           expect(res.body.chaincode).to.be.a("string");
+          expect(await checkChaincode(res.body.chaincode, userId)).to.equal(true);
           return done();
         });
     });
@@ -536,6 +534,7 @@ describe("Users", function () {
         });
     });
   });
+
   describe("POST /users/verify", function () {
     it("Should queue the Request", function (done) {
       chai

@@ -92,6 +92,7 @@ module.exports = () => {
       },
       roles: {
         super_user: true,
+        archived: false,
       },
     },
     {
@@ -112,7 +113,7 @@ module.exports = () => {
       status: "active",
       roles: {
         app_owner: true,
-        archivedMember: true,
+        archived: true,
       },
     },
     {
@@ -132,7 +133,7 @@ module.exports = () => {
       status: "active",
       roles: {
         member: true,
-        archivedMember: true,
+        archived: false,
       },
     },
   ];

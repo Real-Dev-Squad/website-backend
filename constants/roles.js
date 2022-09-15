@@ -1,6 +1,9 @@
+// Use Roles with authorizeRoles middleware
 const ROLES = {
-  SUPER_USER: "superUser",
-  APP_OWNER: "appOwner",
+  SUPERUSER: "super_user",
+  APPOWNER: "app_owner",
+  MEMBER: "member",
+  ARCHIVED: "archived",
 };
 
 module.exports = ROLES;
