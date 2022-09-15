@@ -15,9 +15,11 @@ const { toFirestoreData } = require("../../utils/tasks");
 const tasksData = require("../fixtures/tasks/tasks")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
-const { TASK_STATUS } = require("../../constants/tasks");
+const { TASK_STATUS, TASK_STATUS_OLD } = require("../../constants/tasks");
 chai.use(chaiHttp);
 
+const { AVAILABLE, IN_PROGRESS, BLOCKED, COMPLETED, VERIFIED } = TASK_STATUS;
+const { OLD_ACTIVE, OLD_COMPLETED } = TASK_STATUS_OLD;
 const appOwner = userData[3];
 const superUser = userData[4];
 
@@ -38,7 +40,7 @@ describe("Tasks", function () {
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
-        status: "active",
+        status: OLD_ACTIVE,
         percentCompleted: 10,
         participants: [],
         assignee: appOwner.username,
@@ -54,7 +56,7 @@ describe("Tasks", function () {
         links: ["test1"],
         endsOn: 1234,
         startedOn: 54321,
-        status: "completed",
+        status: OLD_COMPLETED,
         percentCompleted: 10,
         dependsOn: ["d12", "d23"],
         participants: [appOwner.username],
@@ -91,7 +93,7 @@ describe("Tasks", function () {
           type: "feature",
           endsOn: 123,
           startedOn: 456,
-          status: "completed",
+          status: OLD_COMPLETED,
           percentCompleted: 10,
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
@@ -123,7 +125,7 @@ describe("Tasks", function () {
           type: "feature",
           endsOn: 123,
           startedOn: 456,
-          status: "completed",
+          status: OLD_COMPLETED,
           percentCompleted: 10,
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
@@ -150,7 +152,7 @@ describe("Tasks", function () {
           type: "group",
           endsOn: 123,
           startedOn: 456,
-          status: "completed",
+          status: OLD_COMPLETED,
           percentCompleted: 10,
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
@@ -204,7 +206,6 @@ describe("Tasks", function () {
 
   describe("GET /tasks/self", function () {
     it("Should return all the completed tasks of the user when query 'completed' is true", function (done) {
-      const { COMPLETED } = TASK_STATUS;
       chai
         .request(app)
         .get("/tasks/self?completed=true")
@@ -232,7 +233,7 @@ describe("Tasks", function () {
           type: "feature",
           endsOn: 1234,
           startedOn: 4567,
-          status: "IN_PROGRESS",
+          status: IN_PROGRESS,
           percentCompleted: 10,
           participants: [],
           assignee: "user1",
@@ -245,7 +246,7 @@ describe("Tasks", function () {
           type: "feature",
           endsOn: 1234,
           startedOn: 4567,
-          status: "BLOCKED",
+          status: BLOCKED,
           percentCompleted: 10,
           participants: [],
           assignee: "user1",
@@ -351,7 +352,7 @@ describe("Tasks", function () {
     it("Should return 200 when username is valid", function (done) {
       chai
         .request(app)
-        .get(`/tasks/${appOwner.username}?status=active`)
+        .get(`/tasks/${appOwner.username}?status=${OLD_ACTIVE}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -376,7 +377,7 @@ describe("Tasks", function () {
     it("Should return 404 when username is invalid", function (done) {
       chai
         .request(app)
-        .get("/tasks/dummyUser?status=active")
+        .get(`/tasks/dummyUser?status=${OLD_ACTIVE}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -391,7 +392,7 @@ describe("Tasks", function () {
 
   describe("PATCH /tasks/self/:id", function () {
     const taskStatusData = {
-      status: "currentStatus",
+      status: OLD_ACTIVE,
       percentCompleted: 50,
     };
 
@@ -411,10 +412,10 @@ describe("Tasks", function () {
         });
     });
 
-    it("Should return 404 if task doesnt exist", function (done) {
+    it("Should return 404 if task doesn't exist", function (done) {
       chai
         .request(app)
-        .patch("/tasks/self/wrongtaskId")
+        .patch("/tasks/self/invalidTaskId")
         .set("cookie", `${cookieName}=${jwt}`)
         .send(taskStatusData)
         .end((err, res) => {
@@ -458,7 +459,7 @@ describe("Tasks", function () {
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
-        status: "VERIFIED",
+        status: VERIFIED,
         percentCompleted: 10,
         participants: [],
         assignee: appOwner.username,
@@ -488,7 +489,7 @@ describe("Tasks", function () {
       expect(res.body.newAvailableTasks).to.be.a("array");
       res.body.newAvailableTasks.forEach((task) => {
         const { status, startedOn, endsOn, assignee } = task.unassignedTask;
-        expect(status).to.equal(TASK_STATUS.AVAILABLE);
+        expect(status).to.equal(AVAILABLE);
         expect(assignee).to.equal(null);
         expect(startedOn).to.equal(null);
         expect(endsOn).to.equal(null);
