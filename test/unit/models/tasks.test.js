@@ -11,6 +11,7 @@ const cleanDb = require("../../utils/cleanDb");
 const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
 const { toFirestoreData } = require("../../../utils/tasks");
+const { TASK_STATUS } = require("../../../constants/tasks");
 
 describe("tasks", function () {
   afterEach(async function () {
@@ -34,7 +35,7 @@ describe("tasks", function () {
         const { unassignedMember } = task;
         const { assignee, startedOn, endsOn, status } = task.unassignedTask;
         expect(unassignedMember).to.be.oneOf([assignee1, assignee2]);
-        expect(status).to.equal("AVAILABLE");
+        expect(status).to.equal(TASK_STATUS.AVAILABLE);
         expect(assignee).to.equal(null);
         expect(startedOn).to.equal(null);
         expect(endsOn).to.equal(null);
