@@ -5,7 +5,7 @@
 
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
-const { ROLES } = require("../constants/roles");
+const ROLES = require("../constants/roles");
 /**
  * Fetches the data about our users
  * @return {Promise<userModel|Array>}
@@ -13,16 +13,17 @@ const { ROLES } = require("../constants/roles");
 
 const fetchUsers = async (queryParams = {}) => {
   try {
-    const snapshot = await userModel.get();
-    const allMembers = [];
-
     const { showArchived } = queryParams;
-    const isArchived = showArchived === "true";
+    const shouldShowArchived = showArchived === "true";
+
+    const query = shouldShowArchived ? userModel : userModel.where(`roles.${ROLES.ARCHIVED}`, "==", false);
+    const snapshot = await query.get();
+
+    const allMembers = [];
 
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
         const memberData = doc.data();
-        if (!isArchived && memberData?.roles && memberData.roles[ROLES.ARCHIVED] === true) return;
         const curatedMemberData = {
           id: doc.id,
           ...memberData,
@@ -60,65 +61,6 @@ const moveToMembers = async (userId) => {
     return { isAlreadyMember: false, movedToMember: true };
   } catch (err) {
     logger.error("Error updating user", err);
-    throw err;
-  }
-};
-
-/**
- * Migrate user roles
- * @return {Promise<usersMigrated|Object>}
- */
-const migrateUsers = async () => {
-  try {
-    const userSnapShot = await userModel.where("isMember", "==", true).get();
-    const migratedUsers = [];
-
-    const usersArr = [];
-
-    userSnapShot.forEach((doc) => usersArr.push({ id: doc.id, ...doc.data() }));
-
-    for (const user of usersArr) {
-      const roles = { ...user.roles, member: true };
-
-      await userModel.doc(user.id).set({
-        ...user,
-        roles,
-      });
-
-      migratedUsers.push(user.username);
-    }
-
-    return { count: migratedUsers.length, users: migratedUsers };
-  } catch (err) {
-    logger.error("Error migrating user roles", err);
-    throw err;
-  }
-};
-
-/**
- * Deletes isMember property from user object
- * @return {Promise<usersMigrated|Object>}
- */
-const deleteIsMemberProperty = async () => {
-  try {
-    const userSnapShot = await userModel.where("roles", "!=", false).get();
-    const migratedUsers = [];
-
-    const usersArr = [];
-
-    userSnapShot.forEach((doc) => usersArr.push({ id: doc.id, ...doc.data() }));
-
-    for (const user of usersArr) {
-      delete user.isMember;
-
-      await userModel.doc(user.id).set({ ...user });
-
-      migratedUsers.push(user.username);
-    }
-
-    return { count: migratedUsers.length, users: migratedUsers };
-  } catch (err) {
-    logger.error("Error deleting isMember property", err);
     throw err;
   }
 };
@@ -177,7 +119,5 @@ module.exports = {
   moveToMembers,
   addArchiveRoleToMembers,
   fetchUsers,
-  migrateUsers,
-  deleteIsMemberProperty,
   fetchUsersWithRole,
 };
