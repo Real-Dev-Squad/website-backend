@@ -1,4 +1,4 @@
-const { ROLES } = require("../constants/users");
+const ROLES = require("../constants/roles");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
 const { fetchUser } = require("../models/users");
@@ -14,7 +14,7 @@ const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
 const getMembers = async (req, res) => {
   try {
-    const allUsers = await members.fetchUsers();
+    const allUsers = await members.fetchUsers(req.query);
 
     return res.json({
       message: allUsers.length ? "Members returned successfully!" : "No member found",
@@ -76,45 +76,6 @@ const moveToMembers = async (req, res) => {
 };
 
 /**
- * Returns the lists of usernames migrated
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-
-const migrateUserRoles = async (req, res) => {
-  try {
-    const migratedUserData = await members.migrateUsers();
-    return res.json({
-      message: "Users migrated successfully",
-      ...migratedUserData,
-    });
-  } catch (error) {
-    logger.error(`Error while migrating user roles: ${error}`);
-    return res.boom.badImplementation("Something went wrong. Please contact admin");
-  }
-};
-
-/**
- * Returns the lists of usernames whose isMember property was deleted
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-const deleteIsMember = async (req, res) => {
-  try {
-    const deletedIsMemberData = await members.deleteIsMemberProperty();
-    return res.json({
-      message: "Users isMember deleted successfully",
-      ...deletedIsMemberData,
-    });
-  } catch (error) {
-    logger.error(`Error while deleting isMember: ${error}`);
-    return res.boom.badImplementation("Something went wrong. Please contact admin");
-  }
-};
-
-/**
  * Archives old member from new members list.
  *
  * @param req {Object} - Express request object
@@ -144,6 +105,4 @@ module.exports = {
   getMembers,
   getIdleMembers,
   moveToMembers,
-  migrateUserRoles,
-  deleteIsMember,
 };
