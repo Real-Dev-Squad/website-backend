@@ -10,9 +10,7 @@ const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
 
-const {
-  ROLES: { APPOWNER, SUPERUSER },
-} = require("../../constants/roles");
+const { APPOWNER, SUPERUSER } = require("../../constants/roles");
 
 const defaultUser = userData[0]; // user with no `roles` key
 const appOwner = userData[3];

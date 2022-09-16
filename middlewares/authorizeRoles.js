@@ -1,4 +1,4 @@
-const { ROLES } = require("../constants/roles");
+const ROLES = require("../constants/roles");
 
 /**
  * Create an authorization middleware for a route based on the required role needed
