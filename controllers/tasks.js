@@ -138,7 +138,7 @@ const updateTask = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const updateTaskStatus = async (req, res) => {
+const updateTaskStatus = async (req, res, next) => {
   try {
     const taskId = req.params.id;
     const { id: userId } = req.userData;
@@ -150,6 +150,12 @@ const updateTaskStatus = async (req, res) => {
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
     await tasks.updateTask(req.body, taskId);
+    // this can be uncommented when we have skillLevel of the user, currently this middleware will not be called
+
+    // if (req.body.percentCompleted) {
+    //   return next();
+    // }
+
     return res.json({ message: "Task updated successfully!" });
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`);

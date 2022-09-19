@@ -193,6 +193,50 @@ const fetchUserTasks = async (username, statuses = [], field, order) => {
   }
 };
 
+const fetchDbForTask = async (skill, level) => {
+  const task = await tasksModel
+    .where("taskLevel.category", "==", skill)
+    .where("taskLevel.level", ">=", level)
+    .where("taskLevel.level", "<=", level + 2)
+    .where("status", "==", "AVAILABLE")
+    .limit(1)
+    .get();
+  return task;
+};
+
+/**
+ *
+ * @param skill { string } : skill category which will be used
+ * @param level { number } : level of the skill
+ * @returns {Promise<task>|object}
+ */
+
+const fetchSkillLevelTasks = async (skill, level) => {
+  try {
+    let taskData, id;
+    const taskLevel = Number(level);
+
+    const task = await fetchDbForTask(skill, taskLevel);
+    if (!task.empty) {
+      task.forEach((doc) => {
+        id = doc.id;
+        taskData = doc.data();
+      });
+      return {
+        task: {
+          id,
+          ...taskData,
+        },
+      };
+    }
+
+    return { taskNotFound: true };
+  } catch (err) {
+    logger.error("error getting tasks", err);
+    throw err;
+  }
+};
+
 /**
  *
  * @param username { string } : username which will be used to fetch all self tasks
@@ -250,5 +294,6 @@ module.exports = {
   fetchUserCompletedTasks,
   fetchActiveTaskMembers,
   fetchSelfTask,
+  fetchSkillLevelTasks,
   overdueTasks,
 };
