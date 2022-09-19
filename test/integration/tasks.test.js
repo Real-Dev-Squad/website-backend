@@ -394,6 +394,65 @@ describe("Tasks", function () {
       expect(res).to.have.status(403);
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
+
+    it("should give a response message as 'Task updated but another task not found' if we have completed 100% task and there is not task available", async function () {
+      const taskData = {
+        title: "Test task",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "IN_PROGRESS",
+        percentCompleted: 70,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      };
+      taskId = (await tasks.updateTask(taskData)).taskId;
+
+      const dataToSend = { percentCompleted: 100 };
+
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(dataToSend);
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.be.equal("Task updated but another task not found");
+    });
+
+    it("should give a response message 'task updated and another task got assigned' if we have completed the task 100% and another task is assigned to us", async function () {
+      const taskData = {
+        title: "Test task",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "AVAILABLE",
+        percentCompleted: 0,
+        taskLevel: {
+          category: "frontend",
+          level: 3,
+        },
+        participants: [],
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      };
+      await tasks.updateTask(taskData);
+
+      const dataToSend = { percentCompleted: 100 };
+
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(dataToSend);
+
+      expect(res).to.have.a.status(200);
+      expect(res.body.message).to.be.equal("task updated and another task got assigned");
+    });
   });
 
   describe("GET /tasks/overdue", function () {
