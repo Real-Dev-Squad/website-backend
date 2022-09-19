@@ -141,6 +141,7 @@ const updateTask = async (req, res) => {
 const updateTaskStatus = async (req, res, next) => {
   try {
     const taskId = req.params.id;
+    const { dev } = req.query;
     const { id: userId } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
 
@@ -150,11 +151,12 @@ const updateTaskStatus = async (req, res, next) => {
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
     await tasks.updateTask(req.body, taskId);
-    // this can be uncommented when we have skillLevel of the user, currently this middleware will not be called
 
-    // if (req.body.percentCompleted) {
-    //   return next();
-    // }
+    if (dev) {
+      if (req.body.percentCompleted) {
+        return next();
+      }
+    }
 
     return res.json({ message: "Task updated successfully!" });
   } catch (err) {

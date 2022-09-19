@@ -1,7 +1,7 @@
 const { fetchSkillLevelTasks } = require("../models/tasks");
 const db = require("../utils/firestore");
 
-const assignTask = async function (req, res, next) {
+const assignTask = async function (req, res) {
   if (req.body.percentCompleted === 100) {
     const { task } = await fetchSkillLevelTasks("frontend", 1);
     if (task) {
