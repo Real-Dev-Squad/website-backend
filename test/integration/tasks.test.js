@@ -395,7 +395,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
 
-    it("should give a response message as 'Task updated but another task not found' if we have completed 100% task and there is not task available", async function () {
+    it("should give a response message as 'Task updated but another task not found' if we have completed 100% task and a task is not available", async function () {
       const taskData = {
         title: "Test task",
         type: "feature",
