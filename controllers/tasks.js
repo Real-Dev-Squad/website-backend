@@ -153,7 +153,7 @@ const updateTaskStatus = async (req, res, next) => {
     await tasks.updateTask(req.body, taskId);
 
     if (dev) {
-      if (req.body.percentCompleted) {
+      if (req.body.percentCompleted === 100) {
         return next();
       }
     }

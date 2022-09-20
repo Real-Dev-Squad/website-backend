@@ -211,12 +211,11 @@ const fetchDbForTask = async (skill, level) => {
  * @returns {Promise<task>|object}
  */
 
-const fetchSkillLevelTasks = async (skill, level) => {
+const fetchSkillLevelTask = async (skill, level) => {
   try {
     let taskData, id;
-    const taskLevel = Number(level);
 
-    const task = await fetchDbForTask(skill, taskLevel);
+    const task = await fetchDbForTask(skill, level);
     if (!task.empty) {
       task.forEach((doc) => {
         id = doc.id;
@@ -294,6 +293,6 @@ module.exports = {
   fetchUserCompletedTasks,
   fetchActiveTaskMembers,
   fetchSelfTask,
-  fetchSkillLevelTasks,
+  fetchSkillLevelTask,
   overdueTasks,
 };
