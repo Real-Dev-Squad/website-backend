@@ -1,7 +1,13 @@
 const CACHEEXPIRYTIME = 2; // Default cache expriy time in Minutes
+const CACHESIZE = 10; // Default maximum size for cache pool (in Megabytes)
 const minutesToMilliseconds = (minutes) => minutes * 60000; // Converts given minutes into milliseconds
 
-const globalStore = () => {
+/**
+ * Cache pool to get and store API responses
+ * @param {Object} [opt] options for cache pool
+ * @param {number} opt.maximumSize Maximum size of the cache pool in Megabytes (MB)
+ */
+const cachePool = (opt = { maximumSize: CACHESIZE }) => {
   const cacheStore = new Map();
   let hits = 0;
 
@@ -30,8 +36,8 @@ const globalStore = () => {
   };
 
   /**
-   * Add API response to our cacheStore.
-   * @param {string} key {string}
+   * Add API response to cacheStore.
+   * @param {string} key
    * @param {Object} value Value to be stored inside the cache.
    * @param {number} value.priority Priority of the api
    * @param {number} value.expiry Expiry time of api
@@ -50,8 +56,8 @@ const globalStore = () => {
   return { get, set, hits, cacheStore };
 };
 
-// Initialize globalstore to be used.
-const store = globalStore();
+// Initialize cache pool.
+const pool = cachePool();
 
 /**
  * Caching middleware for API resposnes.
@@ -63,7 +69,7 @@ const store = globalStore();
 const cache = (data = { priority: 2, expiry: CACHEEXPIRYTIME }) => {
   return async (req, res, next) => {
     const key = "__cache__" + req.method + req.originalUrl;
-    const dataInCache = store.get(key);
+    const dataInCache = pool.get(key);
 
     if (dataInCache) {
       res.send(dataInCache);
@@ -95,7 +101,7 @@ const cache = (data = { priority: 2, expiry: CACHEEXPIRYTIME }) => {
           size: Buffer.byteLength(apiResponse),
         };
 
-        store.set(key, cacheValue);
+        pool.set(key, cacheValue);
         return oldEnd.apply(res, [chunk, ...args]);
       };
 
