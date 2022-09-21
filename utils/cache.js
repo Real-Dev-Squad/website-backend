@@ -1,13 +1,13 @@
-const CACHEEXPIRYTIME = 2; // Default cache expriy time in Minutes
-const CACHESIZE = 10; // Default maximum size for cache pool (in Megabytes)
-const minutesToMilliseconds = (minutes) => minutes * 60000; // Converts given minutes into milliseconds
+const CACHE_EXPIRY_TIME_MIN = 2;
+const CACHE_SIZE_MB = 10;
+const minutesToMilliseconds = (minutes) => minutes * 60000;
 
 /**
  * Cache pool to get and store API responses
  * @param {Object} [opt] options for cache pool
  * @param {number} opt.maximumSize Maximum size of the cache pool in Megabytes (MB)
  */
-const cachePool = (opt = { maximumSize: CACHESIZE }) => {
+const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
   const cacheStore = new Map();
   let hits = 0;
 
@@ -17,22 +17,22 @@ const cachePool = (opt = { maximumSize: CACHESIZE }) => {
    * @returns {null | object}
    */
   const get = (key) => {
-    const apiData = cacheStore.get(key);
+    const cachedData = cacheStore.get(key);
 
-    if (!apiData) {
+    if (!cachedData) {
       return null;
     }
 
-    const isApiDataExpired = new Date().getTime() > apiData.expiry;
+    const isCacheDataExpired = new Date().getTime() > cachedData.expiry;
 
     // If data is expired remove it from store, time to get a fresh copy.
-    if (isApiDataExpired) {
+    if (isCacheDataExpired) {
       cacheStore.delete(key);
       return null;
     }
 
     hits += 1;
-    return apiData.response;
+    return cachedData.response;
   };
 
   /**
@@ -66,13 +66,13 @@ const pool = cachePool();
  * @param {number} data.expiry Cache expiry time of api in minutes.
  * @returns {function} middleware function to help cache api response.
  */
-const cache = (data = { priority: 2, expiry: CACHEEXPIRYTIME }) => {
+const cache = (data = { priority: 2, expiry: CACHE_EXPIRY_TIME_MIN }) => {
   return async (req, res, next) => {
     const key = "__cache__" + req.method + req.originalUrl;
-    const dataInCache = pool.get(key);
+    const cacheData = pool.get(key);
 
-    if (dataInCache) {
-      res.send(dataInCache);
+    if (cacheData) {
+      res.send(cacheData);
     } else {
       /**
        * As we do not have data in our cache we call the next middleware,
