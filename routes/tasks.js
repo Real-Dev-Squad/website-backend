@@ -13,7 +13,6 @@ router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueT
 router.post("/", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), createTask, tasks.addNewTask);
 router.patch("/:id", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), updateTask, tasks.updateTask);
 router.get("/:username", tasks.getUserTasks);
-router.patch("/self/:id", authenticate, updateSelfTask, tasks.updateTaskStatus);
 router.patch("/self/:id", authenticate, updateSelfTask, tasks.updateTaskStatus, assignTask);
 
 module.exports = router;
