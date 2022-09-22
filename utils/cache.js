@@ -47,9 +47,9 @@ const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
   const set = async (key, value) => {
     try {
       cacheStore.set(key, value);
-      return 200;
+      return true;
     } catch (err) {
-      return 500;
+      return false;
     }
   };
 
