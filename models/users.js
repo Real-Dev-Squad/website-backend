@@ -186,6 +186,37 @@ const fetchUserImage = async (users) => {
   return images;
 };
 
+/**
+ * Adds default archived role
+ * @return {Promise<usersMigrated|Object>}
+ */
+
+const addDefaultColors = async () => {
+  try {
+    const usersSnapshot = await userModel.get();
+    const migratedUsers = [];
+    const updateUserPromises = [];
+    const usersArr = [];
+
+    usersSnapshot.forEach((doc) => usersArr.push({ id: doc.id, ...doc.data() }));
+
+    for (const user of usersArr) {
+      const colors = user.colors ? user.colors : {};
+      if (user.color === undefined) {
+        colors.primary_color = "";
+        colors.secondary_color = "";
+        updateUserPromises.push(userModel.doc(user.id).set({ ...user, colors }));
+        migratedUsers.push(user.username);
+      }
+    }
+    await Promise.all(updateUserPromises);
+    return { count: migratedUsers.length, users: migratedUsers };
+  } catch (err) {
+    logger.error("Error adding default colors to users", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchUsers,
@@ -194,4 +225,5 @@ module.exports = {
   initializeUser,
   updateUserPicture,
   fetchUserImage,
+  addDefaultColors,
 };
