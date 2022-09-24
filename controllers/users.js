@@ -292,6 +292,14 @@ const rejectProfileDiff = async (req, res) => {
   }
 };
 
+const addUserIntro = (req, res) => {
+  return res.send("hello");
+};
+
+const getUserIntro = (req, res) => {
+  return res.send("hello");
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -305,4 +313,6 @@ module.exports = {
   rejectProfileDiff,
   getUserById,
   profileURL,
+  addUserIntro,
+  getUserIntro,
 };
