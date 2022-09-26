@@ -292,12 +292,13 @@ const rejectProfileDiff = async (req, res) => {
   }
 };
 
-const addUserIntro = (req, res) => {
-  return res.send("hello");
+const addUserIntro = async (req, res) => {
+  await userQuery.addJoinData(req.body);
+  return res.json({ message: "User Data Added Succesfully" });
 };
 
 const getUserIntro = (req, res) => {
-  return res.send("hello");
+  return res.send(req.cookies);
 };
 
 module.exports = {

@@ -6,6 +6,8 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
+const db = require("../utils/firestore");
+const logger = require("../utils/logger");
 const userModel = firestore.collection("users");
 
 /**
@@ -52,6 +54,15 @@ const addOrUpdate = async (userData, userId = null) => {
     return { isNewUser: true, userId: userInfo.id };
   } catch (err) {
     logger.error("Error in adding or updating user", err);
+    throw err;
+  }
+};
+
+const addJoinData = async (userData) => {
+  try {
+    await db.collection("joining_data").doc(userData.userName).set(userData);
+  } catch (err) {
+    logger.error("Error in adding data", err);
     throw err;
   }
 };
@@ -194,4 +205,5 @@ module.exports = {
   initializeUser,
   updateUserPicture,
   fetchUserImage,
+  addJoinData,
 };
