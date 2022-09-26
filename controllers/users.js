@@ -297,8 +297,12 @@ const addUserIntro = async (req, res) => {
   return res.json({ message: "User Data Added Succesfully" });
 };
 
-const getUserIntro = (req, res) => {
-  return res.send(req.cookies);
+const getUserIntro = async (req, res) => {
+  const data = await userQuery.getJoinData(req.params.username);
+  return res.json({
+    message: "Got user data",
+    data: data,
+  });
 };
 
 module.exports = {

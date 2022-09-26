@@ -67,6 +67,16 @@ const addJoinData = async (userData) => {
   }
 };
 
+const getJoinData = async (username) => {
+  try {
+    const joinData = await db.collection("joining_data").doc(username).get();
+    return joinData.data();
+  } catch (err) {
+    logger.log("Could not get", err);
+    throw err;
+  }
+};
+
 /**
  * Fetches the data about our users
  * @param query { Object }: Filter for users data
@@ -206,4 +216,5 @@ module.exports = {
   updateUserPicture,
   fetchUserImage,
   addJoinData,
+  getJoinData,
 };
