@@ -293,16 +293,26 @@ const rejectProfileDiff = async (req, res) => {
 };
 
 const addUserIntro = async (req, res) => {
-  await userQuery.addJoinData(req.body);
-  return res.json({ message: "User Data Added Succesfully" });
+  try {
+    await userQuery.addJoinData(req.body);
+    return res.json({ message: "User Data Added Succesfully" });
+  } catch (err) {
+    logger.error("Could not save user data");
+    throw err;
+  }
 };
 
 const getUserIntro = async (req, res) => {
-  const data = await userQuery.getJoinData(req.params.username);
-  return res.json({
-    message: "Got user data",
-    data: data,
-  });
+  try {
+    const data = await userQuery.getJoinData(req.params.username);
+    return res.json({
+      message: "Got user data",
+      data: data,
+    });
+  } catch (err) {
+    logger.error("Could Not Get User Data", err);
+    throw err;
+  }
 };
 
 module.exports = {

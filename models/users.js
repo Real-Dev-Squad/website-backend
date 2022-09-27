@@ -6,9 +6,9 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
-const db = require("../utils/firestore");
 const logger = require("../utils/logger");
 const userModel = firestore.collection("users");
+const joinModel = firestore.collection("joining_data");
 
 /**
  * Adds or updates the user data
@@ -60,7 +60,7 @@ const addOrUpdate = async (userData, userId = null) => {
 
 const addJoinData = async (userData) => {
   try {
-    await db.collection("joining_data").doc(userData.userName).set(userData);
+    await joinModel.doc(userData.userName).set(userData);
   } catch (err) {
     logger.error("Error in adding data", err);
     throw err;
@@ -69,7 +69,7 @@ const addJoinData = async (userData) => {
 
 const getJoinData = async (username) => {
   try {
-    const joinData = await db.collection("joining_data").doc(username).get();
+    const joinData = await joinModel.doc(username).get();
     return joinData.data();
   } catch (err) {
     logger.log("Could not get", err);
