@@ -294,7 +294,7 @@ const rejectProfileDiff = async (req, res) => {
 
 const addUserIntro = async (req, res) => {
   try {
-    await userQuery.addJoinData(req.body);
+    await userQuery.addJoinData(req.body, req.params.username);
     return res.json({ message: "User Data Added Succesfully" });
   } catch (err) {
     logger.error("Could not save user data");

@@ -320,6 +320,24 @@ describe("Users", function () {
     });
   });
 
+  describe("POST /users/:username/intro", function () {
+    it("Should store the info in db", function (done) {
+      chai
+        .request(app)
+        .post(`/users/${userName}/intro`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User Data Added Succesfully");
+          return done();
+        });
+    });
+  });
+
   describe("PATCH /users/rejectDiff", function () {
     let profileDiffsId;
     beforeEach(async function () {

@@ -58,9 +58,9 @@ const addOrUpdate = async (userData, userId = null) => {
   }
 };
 
-const addJoinData = async (userData) => {
+const addJoinData = async (userData, username) => {
   try {
-    await joinModel.doc(userData.userName).set(userData);
+    await joinModel.doc(username).set(userData);
   } catch (err) {
     logger.error("Error in adding data", err);
     throw err;
