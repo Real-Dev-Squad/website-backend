@@ -77,6 +77,7 @@ const fetchUsers = async (query) => {
         phone: undefined,
         email: undefined,
         tokens: undefined,
+        chaincode: undefined,
       });
     });
 
@@ -114,6 +115,7 @@ const fetchUser = async ({ userId = null, username = null }) => {
         id,
         ...userData,
         tokens: undefined,
+        chaincode: undefined,
       },
     };
   } catch (err) {
