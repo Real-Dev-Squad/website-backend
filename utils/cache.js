@@ -32,7 +32,7 @@ const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
     }
 
     hits += 1;
-    return cachedData.response;
+    return JSON.parse(cachedData.response);
   };
 
   /**
@@ -40,6 +40,7 @@ const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
    * @param {string} key
    * @param {Object} value Value to be stored inside the cache.
    * @param {number} value.priority Priority of the api
+   * @param {string} value.response Response from controller
    * @param {number} value.expiry Expiry time of api
    * @param {number} value.size Size of api response in byte
    * @returns {number} : statusCode
@@ -72,6 +73,7 @@ const cache = (data = { priority: 2, expiry: CACHE_EXPIRY_TIME_MIN }) => {
     const cacheData = pool.get(key);
 
     if (cacheData) {
+      console.log(typeof cacheData)
       res.send(cacheData);
     } else {
       /**
