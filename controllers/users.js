@@ -306,7 +306,7 @@ const getUserIntro = async (req, res) => {
   try {
     const data = await userQuery.getJoinData(req.params.username);
     return res.json({
-      message: "Got user data",
+      message: "User data returned",
       data: data,
     });
   } catch (err) {
