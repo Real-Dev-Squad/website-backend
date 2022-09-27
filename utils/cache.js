@@ -73,7 +73,6 @@ const cache = (data = { priority: 2, expiry: CACHE_EXPIRY_TIME_MIN }) => {
     const cacheData = pool.get(key);
 
     if (cacheData) {
-      console.log(typeof cacheData)
       res.send(cacheData);
     } else {
       /**
