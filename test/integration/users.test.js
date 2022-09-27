@@ -23,12 +23,14 @@ describe("Users", function () {
   let superUserId;
   let superUserAuthToken;
   let userId = "";
+  let userName = " ";
 
   beforeEach(async function () {
     userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    userName = await addUser();
   });
 
   afterEach(async function () {
@@ -295,6 +297,24 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.isUsernameAvailable).to.equal(false);
 
+          return done();
+        });
+    });
+  });
+
+  describe("GET /users/:username/intro", function () {
+    it("Should return data of the given username", function (done) {
+      chai
+        .request(app)
+        .get(`/users/${userName}/intro`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User data returned");
           return done();
         });
     });
