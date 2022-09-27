@@ -396,19 +396,7 @@ describe("Tasks", function () {
     });
 
     it("should give a response message as 'Task updated but another task not found' if we have completed 100% task and a task is not available", async function () {
-      const taskData = {
-        title: "Test task",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "IN_PROGRESS",
-        percentCompleted: 70,
-        participants: [],
-        assignee: appOwner.username,
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-      };
+      const taskData = tasksData[3];
       taskId = (await tasks.updateTask(taskData)).taskId;
 
       const dataToSend = { percentCompleted: 100 };
@@ -424,22 +412,7 @@ describe("Tasks", function () {
     });
 
     it("should give a response message 'task updated and another task got assigned' if we have completed the task 100% and another task is assigned to us", async function () {
-      const taskData = {
-        title: "Test task",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "AVAILABLE",
-        percentCompleted: 0,
-        taskLevel: {
-          category: "frontend",
-          level: 3,
-        },
-        participants: [],
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-      };
+      const taskData = tasksData[4];
       await tasks.updateTask(taskData);
 
       const dataToSend = { percentCompleted: 100 };

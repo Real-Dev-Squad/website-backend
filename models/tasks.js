@@ -193,7 +193,7 @@ const fetchUserTasks = async (username, statuses = [], field, order) => {
   }
 };
 
-const fetchDbForTask = async (skill, level) => {
+const getNewTask = async (skill, level) => {
   const task = await tasksModel
     .where("taskLevel.category", "==", skill)
     .where("taskLevel.level", ">=", level)
@@ -201,7 +201,22 @@ const fetchDbForTask = async (skill, level) => {
     .where("status", "==", "AVAILABLE")
     .limit(1)
     .get();
-  return task;
+
+  let taskData, id;
+  if (!task.empty) {
+    task.forEach((doc) => {
+      id = doc.id;
+      taskData = doc.data();
+    });
+    return {
+      task: {
+        id,
+        ...taskData,
+      },
+    };
+  }
+
+  return { taskNotFound: true };
 };
 
 /**
@@ -213,23 +228,8 @@ const fetchDbForTask = async (skill, level) => {
 
 const fetchSkillLevelTask = async (skill, level) => {
   try {
-    let taskData, id;
-
-    const task = await fetchDbForTask(skill, level);
-    if (!task.empty) {
-      task.forEach((doc) => {
-        id = doc.id;
-        taskData = doc.data();
-      });
-      return {
-        task: {
-          id,
-          ...taskData,
-        },
-      };
-    }
-
-    return { taskNotFound: true };
+    const task = await getNewTask(skill, level);
+    return task;
   } catch (err) {
     logger.error("error getting tasks", err);
     throw err;
