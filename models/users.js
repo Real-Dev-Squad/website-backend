@@ -108,6 +108,7 @@ const fetchUser = async ({ userId = null, username = null }) => {
       id = userId;
       userData = user.data();
     }
+
     return {
       userExists: !!userData,
       user: {

@@ -7,6 +7,7 @@ app.use("/auth", require("./auth.js"));
 app.use("/badges", require("./badges.js"));
 app.use("/challenges", require("./challenges.js"));
 app.use("/contributions", require("./contributions.js"));
+app.use("/events", require("./events"));
 app.use("/healthcheck", require("./healthCheck.js"));
 app.use("/logs", require("./logs.js"));
 app.use("/members", require("./members.js"));
