@@ -1,6 +1,8 @@
 const joi = require("joi");
-const { TASK_STATUS_ENUM } = require("../../constants/tasks");
+const { TASK_STATUS } = require("../../constants/tasks");
 const { DINERO, NEELAM } = require("../../constants/wallets");
+
+const TASK_STATUS_ENUM = Object.values(TASK_STATUS);
 
 const createTask = async (req, res, next) => {
   const schema = joi
@@ -60,7 +62,10 @@ const updateTask = async (req, res, next) => {
       links: joi.array().items(joi.string()).optional(),
       endsOn: joi.number().optional(),
       startedOn: joi.number().optional(),
-      status: joi.string().optional(),
+      status: joi
+        .string()
+        .valid(...TASK_STATUS_ENUM)
+        .required(),
       assignee: joi.string().optional(),
       percentCompleted: joi.number().optional(),
       dependsOn: joi.array().items(joi.string()).optional(),
