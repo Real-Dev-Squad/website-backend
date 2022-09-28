@@ -122,7 +122,7 @@ describe("Tasks", function () {
           type: "feature",
           endsOn: 123,
           startedOn: 456,
-          status: "Helloworld",
+          status: "invalidStatus",
           percentCompleted: 10,
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
@@ -260,6 +260,7 @@ describe("Tasks", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
+          status: "AVAILABLE",
         })
         .end((err, res) => {
           if (err) {
@@ -278,6 +279,7 @@ describe("Tasks", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
+          status: "AVAILABLE",
         })
         .end((err, res) => {
           if (err) {
