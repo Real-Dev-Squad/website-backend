@@ -7,7 +7,6 @@ const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
 const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
-const checkChaincode = require("../utils/checkChaincode");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
@@ -448,7 +447,6 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Chaincode returned successfully");
           expect(res.body.chaincode).to.be.a("string");
-          expect(await checkChaincode(res.body.chaincode, userId)).to.equal(true);
           return done();
         });
     });
