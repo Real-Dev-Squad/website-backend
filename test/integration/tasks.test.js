@@ -298,7 +298,7 @@ describe("Tasks", function () {
     it("Should return 200 when username is valid", function (done) {
       chai
         .request(app)
-        .get(`/tasks/${appOwner.username}?status=active`)
+        .get(`/tasks/${appOwner.username}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -306,7 +306,6 @@ describe("Tasks", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Tasks returned successfully!");
-
           const task1 = res.body.tasks[0];
 
           if (task1.type === "group") {
@@ -338,7 +337,7 @@ describe("Tasks", function () {
 
   describe("PATCH /tasks/self/:id", function () {
     const taskStatusData = {
-      status: "currentStatus",
+      status: "AVAILABLE",
       percentCompleted: 50,
     };
 
@@ -354,6 +353,22 @@ describe("Tasks", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.equal("Task updated successfully!");
+          return done();
+        });
+    });
+    it("Should forbid the use non-acceptable values for status in task object", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "invalidStatus" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
           return done();
         });
     });
@@ -419,7 +434,6 @@ describe("Tasks", function () {
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(taskStatusData);
-
       expect(res).to.have.status(403);
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
