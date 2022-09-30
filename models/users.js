@@ -58,19 +58,26 @@ const addOrUpdate = async (userData, userId = null) => {
   }
 };
 
-const addJoinData = async (userData, username) => {
+const addJoinData = async (userData) => {
   try {
-    await joinModel.doc(username).set(userData);
+    await joinModel.add(userData);
   } catch (err) {
     logger.error("Error in adding data", err);
     throw err;
   }
 };
 
-const getJoinData = async (username) => {
+const getJoinData = async (userid) => {
   try {
-    const joinData = await joinModel.doc(username).get();
-    return joinData.data();
+    const userData = [];
+    const joinData = await joinModel.where("userId", "==", userid).limit(1).get();
+    joinData.forEach((data) => {
+      userData.push({
+        id: data.id,
+        ...data.data(),
+      });
+    });
+    return userData;
   } catch (err) {
     logger.log("Could not get", err);
     throw err;

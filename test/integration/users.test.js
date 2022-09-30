@@ -23,14 +23,12 @@ describe("Users", function () {
   let superUserId;
   let superUserAuthToken;
   let userId = "";
-  let userName = " ";
 
   beforeEach(async function () {
     userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-    userName = await addUser();
   });
 
   afterEach(async function () {
@@ -228,7 +226,7 @@ describe("Users", function () {
     });
   });
 
-  describe("GET /users/userId/id", function () {
+  describe("GET /users/:userId/id", function () {
     it("Should return one user with given id", function (done) {
       chai
         .request(app)
@@ -302,11 +300,11 @@ describe("Users", function () {
     });
   });
 
-  describe("GET /users/:username/intro", function () {
+  describe("GET /users/:userId/intro", function () {
     it("Should return data of the given username", function (done) {
       chai
         .request(app)
-        .get(`/users/${userName}/intro`)
+        .get(`/users/${userId}/intro`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -320,11 +318,11 @@ describe("Users", function () {
     });
   });
 
-  describe("POST /users/:username/intro", function () {
+  describe("POST /users/:userId/intro", function () {
     it("Should store the info in db", function (done) {
       chai
         .request(app)
-        .post(`/users/${userName}/intro`)
+        .post(`/users/${userId}/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
