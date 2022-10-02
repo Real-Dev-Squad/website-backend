@@ -324,6 +324,8 @@ describe("Tasks", function () {
             return done(err);
           }
           expect(res).to.have.status(200);
+          expect(res.body.taskLog).to.have.property("type");
+          expect(res.body.taskLog.meta).to.be.a("object");
           expect(res.body.message).to.equal("Task updated successfully!");
           return done();
         });

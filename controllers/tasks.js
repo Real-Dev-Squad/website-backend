@@ -1,5 +1,6 @@
 const tasks = require("../models/tasks");
 const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
+const { addLog } = require("../models/logs");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 /**
@@ -142,7 +143,7 @@ const updateTaskStatus = async (req, res, next) => {
   try {
     const taskId = req.params.id;
     const { dev } = req.query;
-    const { id: userId } = req.userData;
+    const { id: userId, username } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
 
     if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
@@ -152,13 +153,30 @@ const updateTaskStatus = async (req, res, next) => {
 
     await tasks.updateTask(req.body, taskId);
 
+    const taskLog = {
+      type: "task",
+      meta: {
+        userId,
+        taskId,
+        username,
+      },
+    };
+
+    if (req.body.status) {
+      taskLog.body = `${username} changed task status to ${req.body.status}`;
+    } else if (req.body.percentCompleted) {
+      taskLog.body = `${username} changed task percent Completed to ${req.body.percentCompleted}`;
+    }
+
+    await addLog(taskLog.type, taskLog.meta, taskLog.body);
+
     if (dev) {
       if (req.body.percentCompleted === 100) {
         return next();
       }
     }
 
-    return res.json({ message: "Task updated successfully!" });
+    return res.json({ message: "Task updated successfully!", taskLog });
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`);
     return res.boom.badImplementation("An internal server error occured");
