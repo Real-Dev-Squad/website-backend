@@ -168,7 +168,8 @@ const updateTaskStatus = async (req, res, next) => {
       taskLog.body = `${username} changed task percent Completed to ${req.body.percentCompleted}`;
     }
 
-    await addLog(taskLog.type, taskLog.meta, taskLog.body);
+    const { id: taskLogId } = await addLog(taskLog.type, taskLog.meta, taskLog.body);
+    taskLog.id = taskLogId;
 
     if (dev) {
       if (req.body.percentCompleted === 100) {
