@@ -111,4 +111,4 @@ const cache = (data = { priority: 2, expiry: CACHE_EXPIRY_TIME_MIN }) => {
   };
 };
 
-module.exports = cache;
+module.exports = { cache, cachePool, minutesToMilliseconds };

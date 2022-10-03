@@ -6,7 +6,7 @@ const { createTask, updateTask, updateSelfTask } = require("../middlewares/valid
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const { APPOWNER, SUPERUSER } = require("../constants/roles");
 const assignTask = require("../middlewares/assignTask");
-const cache = require("../utils/cache");
+const { cache } = require("../utils/cache");
 
 router.get("/", cache(), tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);
