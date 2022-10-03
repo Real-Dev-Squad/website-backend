@@ -151,8 +151,6 @@ const updateTaskStatus = async (req, res, next) => {
     if (task.taskData.status === "VERIFIED")
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
-    await tasks.updateTask(req.body, taskId);
-
     const taskLog = {
       type: "task",
       meta: {
@@ -168,8 +166,11 @@ const updateTaskStatus = async (req, res, next) => {
       taskLog.body = `${username} changed task percent Completed to ${req.body.percentCompleted}`;
     }
 
-    const { id: taskLogId } = await addLog(taskLog.type, taskLog.meta, taskLog.body);
-    taskLog.id = taskLogId;
+    const [taskResult] = await Promise.all([
+      tasks.updateTask(req.body, taskId),
+      addLog(taskLog.type, taskLog.meta, taskLog.body),
+    ]);
+    taskLog.id = taskResult.taskId;
 
     if (dev) {
       if (req.body.percentCompleted === 100) {
