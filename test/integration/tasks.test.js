@@ -326,6 +326,7 @@ describe("Tasks", function () {
           expect(res).to.have.status(200);
           expect(res.body.taskLog).to.have.property("type");
           expect(res.body.taskLog).to.have.property("id");
+          expect(res.body.taskLog.body).to.be.a("array");
           expect(res.body.taskLog.meta).to.be.a("object");
           expect(res.body.message).to.equal("Task updated successfully!");
           return done();
