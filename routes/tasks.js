@@ -13,6 +13,7 @@ router.get("/self", authenticate, tasks.getSelfTasks);
 router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasks);
 router.post("/", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), createTask, tasks.addNewTask);
 router.patch("/:id", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), updateTask, tasks.updateTask);
+router.get("/details/:id", tasks.getTask);
 router.get("/:username", tasks.getUserTasks);
 router.patch("/self/:id", authenticate, updateSelfTask, tasks.updateTaskStatus, assignTask);
 
