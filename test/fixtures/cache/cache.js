@@ -1,9 +1,10 @@
 const tasksList = require("../tasks/tasks");
 
-const DEFAULT_EXPIRY_TIME_MIN = 2
+const EXPIRY_TIME_IN_MIN = 2;
+const INVALID_KEY = "keyNotPresentInCache";
 
 // Returns a dummy sample value to be stored in cache
-const getDummyResponse = (expiryTime = DEFAULT_EXPIRY_TIME_MIN) => {
+const getDummyResponse = (expiryTime = EXPIRY_TIME_IN_MIN) => {
   const apiResponse = { message: "Tasks returned successfully!", tasks: tasksList() };
   const stringifiedResponse = JSON.stringify(apiResponse);
 
@@ -15,4 +16,4 @@ const getDummyResponse = (expiryTime = DEFAULT_EXPIRY_TIME_MIN) => {
   };
 };
 
-module.exports = { getDummyResponse };
+module.exports = { getDummyResponse, INVALID_KEY };
