@@ -14,6 +14,7 @@ const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 
 const config = require("config");
+const join = require("../fixtures/user/join");
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
@@ -300,30 +301,47 @@ describe("Users", function () {
     });
   });
 
-  describe("GET /users/:userId/intro", function () {
-    it("Should return data of the given username", function (done) {
-      chai
-        .request(app)
-        .get(`/users/${userId}/intro`)
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User data returned");
-          return done();
-        });
-    });
-  });
+  // describe("GET /users/:userId/intro", function () {
+  //   it("Should return data of the given username", function (done) {
+  //     chai
+  //       .request(app)
+  //       .get(`/users/CvUmCEm6vB9pczLBli0O/intro`)
+  //       .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+  //       .end((err, res) => {
+  //         if (err) {
+  //           return done(err);
+  //         }
+  //         expect(res).to.have.status(200);
+  //         expect(res.body).to.be.a("object");
+  //         expect(res.body.message).to.equal("User data returned");
+  //         return done();
+  //       });
+  //   });
+  //   it("Should return 404 if user not Found", function (done) {
+  //     chai
+  //       .request(app)
+  //       .get(`/users/${userId}/intro`)
+  //       .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+  //       .end((err, res) => {
+  //         if (err) {
+  //           return done(err);
+  //         }
+  //         expect(res).to.have.status(404);
+  //         expect(res.body).to.be.a("object");
+  //         return done();
+  //       });
+  //   });
+  // });
 
   describe("POST /users/:userId/intro", function () {
     it("Should store the info in db", function (done) {
+      // console.log(userId);
+      // console.log(userData);
       chai
         .request(app)
-        .post(`/users/${userId}/intro`)
+        .post(`/users/e6y7HxhrLkLpWabosaE1/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
+        .send(join()[0])
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -331,6 +349,23 @@ describe("Users", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User Data Added Succesfully");
+          return done();
+        });
+    });
+
+    it("Should Return 400 for invalid Data", function (done) {
+      chai
+        .request(app)
+        .post(`/users/${userId}/intro`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(join()[1])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal('"userId" is required');
           return done();
         });
     });

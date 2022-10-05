@@ -6,7 +6,6 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
-const logger = require("../utils/logger");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("joining_data");
 
@@ -67,10 +66,10 @@ const addJoinData = async (userData) => {
   }
 };
 
-const getJoinData = async (userid) => {
+const getJoinData = async (userId) => {
   try {
     const userData = [];
-    const joinData = await joinModel.where("userId", "==", userid).limit(1).get();
+    const joinData = await joinModel.where("userId", "==", userId).limit(1).get();
     joinData.forEach((data) => {
       userData.push({
         id: data.id,

@@ -294,7 +294,32 @@ const rejectProfileDiff = async (req, res) => {
 
 const addUserIntro = async (req, res) => {
   try {
-    await userQuery.addJoinData(req.body);
+    const rawData = req.body;
+    const data = {
+      userId: rawData.userId,
+      personalDetails: {
+        firstName: rawData.firstName,
+        lastName: rawData.lastName,
+      },
+      locationDetails: {
+        city: rawData.city,
+        state: rawData.state,
+        country: rawData.country,
+      },
+      professionalDetails: {
+        institution: rawData.college,
+        skills: rawData.skills,
+      },
+      PersonalIntroWithReason: {
+        introduction: rawData.introduction,
+        funFact: rawData.funFact,
+        forFun: rawData.forFun,
+        whyRds: rawData.whyRds,
+      },
+      heardFrom: rawData.heardAbout,
+    };
+    await userQuery.addJoinData(data);
+
     return res.json({ message: "User Data Added Succesfully" });
   } catch (err) {
     logger.error("Could not save user data");
@@ -305,10 +330,16 @@ const addUserIntro = async (req, res) => {
 const getUserIntro = async (req, res) => {
   try {
     const data = await userQuery.getJoinData(req.params.userId);
-    return res.json({
-      message: "User data returned",
-      data: data,
-    });
+    if (data.length) {
+      return res.json({
+        message: "User data returned",
+        data: data,
+      });
+    } else {
+      return res.status(404).json({
+        message: "Data Not Found",
+      });
+    }
   } catch (err) {
     logger.error("Could Not Get User Data", err);
     throw err;
