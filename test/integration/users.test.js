@@ -14,7 +14,7 @@ const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 
 const config = require("config");
-const join = require("../fixtures/user/join");
+// const join = require("../fixtures/user/join");
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
@@ -333,43 +333,41 @@ describe("Users", function () {
   //   });
   // });
 
-  describe("POST /users/:userId/intro", function () {
-    it("Should store the info in db", function (done) {
-      // console.log(userId);
-      // console.log(userData);
-      chai
-        .request(app)
-        .post(`/users/e6y7HxhrLkLpWabosaE1/intro`)
-        .set("Cookie", `${cookieName}=${jwt}`)
-        .send(join()[0])
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User Data Added Succesfully");
-          return done();
-        });
-    });
+  // describe("POST /users/:userId/intro", function () {
+  //   it("Should store the info in db", function (done) {
+  //     chai
+  //       .request(app)
+  //       .post(`/users/e6y7HxhrLkLpWabosaE1/intro`)
+  //       .set("Cookie", `${cookieName}=${jwt}`)
+  //       .send(join()[0])
+  //       .end((err, res) => {
+  //         if (err) {
+  //           return done(err);
+  //         }
+  //         expect(res).to.have.status(200);
+  //         expect(res.body).to.be.a("object");
+  //         expect(res.body.message).to.equal("User Data Added Succesfully");
+  //         return done();
+  //       });
+  //   });
 
-    it("Should Return 400 for invalid Data", function (done) {
-      chai
-        .request(app)
-        .post(`/users/${userId}/intro`)
-        .set("Cookie", `${cookieName}=${jwt}`)
-        .send(join()[1])
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(400);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.be.equal('"userId" is required');
-          return done();
-        });
-    });
-  });
+  //   it("Should Return 400 for invalid Data", function (done) {
+  //     chai
+  //       .request(app)
+  //       .post(`/users/${userId}/intro`)
+  //       .set("Cookie", `${cookieName}=${jwt}`)
+  //       .send(join()[1])
+  //       .end((err, res) => {
+  //         if (err) {
+  //           return done(err);
+  //         }
+  //         expect(res).to.have.status(400);
+  //         expect(res.body).to.be.a("object");
+  //         expect(res.body.message).to.be.equal('"userId" is required');
+  //         return done();
+  //       });
+  //   });
+  // });
 
   describe("PATCH /users/rejectDiff", function () {
     let profileDiffsId;

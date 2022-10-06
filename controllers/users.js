@@ -294,33 +294,37 @@ const rejectProfileDiff = async (req, res) => {
 
 const addUserIntro = async (req, res) => {
   try {
-    const rawData = req.body;
-    const data = {
-      userId: rawData.userId,
-      personalDetails: {
-        firstName: rawData.firstName,
-        lastName: rawData.lastName,
-      },
-      locationDetails: {
-        city: rawData.city,
-        state: rawData.state,
-        country: rawData.country,
-      },
-      professionalDetails: {
-        institution: rawData.college,
-        skills: rawData.skills,
-      },
-      PersonalIntroWithReason: {
-        introduction: rawData.introduction,
-        funFact: rawData.funFact,
-        forFun: rawData.forFun,
-        whyRds: rawData.whyRds,
-      },
-      heardFrom: rawData.heardAbout,
-    };
-    await userQuery.addJoinData(data);
+    if (req.params.userId === req.body.userId) {
+      const rawData = req.body;
+      const data = {
+        userId: rawData.userId,
+        personalDetails: {
+          firstName: rawData.firstName,
+          lastName: rawData.lastName,
+        },
+        locationDetails: {
+          city: rawData.city,
+          state: rawData.state,
+          country: rawData.country,
+        },
+        professionalDetails: {
+          institution: rawData.college,
+          skills: rawData.skills,
+        },
+        PersonalIntroWithReason: {
+          introduction: rawData.introduction,
+          funFact: rawData.funFact,
+          forFun: rawData.forFun,
+          whyRds: rawData.whyRds,
+        },
+        heardFrom: rawData.heardAbout,
+      };
+      await userQuery.addJoinData(data);
 
-    return res.json({ message: "User Data Added Succesfully" });
+      return res.json({ message: "User Data Added Succesfully" });
+    } else {
+      return res.status(401).json({ message: "Unauthorized request" });
+    }
   } catch (err) {
     logger.error("Could not save user data");
     throw err;
