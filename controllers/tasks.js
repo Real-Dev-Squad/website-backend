@@ -1,5 +1,6 @@
 const tasks = require("../models/tasks");
 const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
+const { addLog } = require("../models/logs");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 /**
@@ -125,8 +126,25 @@ const updateTask = async (req, res) => {
       return res.boom.notFound("Task not found");
     }
 
-    await tasks.updateTask(req.body, req.params.id);
-    return res.status(204).send();
+    const newTaskData = req.body;
+
+    const taskLog = {
+      type: "task",
+      meta: { taskId: req.params.id, username: req.userData.username, userId: req.userData.id },
+      body: {
+        subType: "change",
+        new: {},
+      },
+    };
+    Object.keys(newTaskData).forEach((key) => (taskLog.body.new[`${key}`] = newTaskData[`${key}`]));
+
+    const [, taskLogResult] = await Promise.all([
+      tasks.updateTask(newTaskData, req.params.id),
+      addLog(taskLog.type, taskLog.meta, taskLog.body),
+    ]);
+    taskLog.id = taskLogResult.id;
+
+    return res.status(200).json({ message: "Task updated successfully!", taskLog });
   } catch (err) {
     logger.error(`Error while updating task: ${err}`);
     return res.boom.badImplementation("An internal server error occurred");

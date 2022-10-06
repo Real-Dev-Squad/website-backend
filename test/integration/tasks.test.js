@@ -226,19 +226,27 @@ describe("Tasks", function () {
   });
 
   describe("PATCH /tasks", function () {
+    const newData = { title: "new-title", percentCompleted: 50 };
     it("Should update the task for the given taskid", function (done) {
       chai
         .request(app)
         .patch("/tasks/" + taskId1)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          title: "new-title",
-        })
+        .send(newData)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(204);
+          expect(res).to.have.status(200);
+          expect(res.body.taskLog).to.have.property("type");
+          expect(res.body.taskLog).to.have.property("id");
+          expect(res.body.taskLog.body).to.be.a("object");
+          expect(res.body.taskLog.meta).to.be.a("object");
+          expect(res.body.message).to.equal("Task updated successfully!");
+
+          Object.keys(newData).forEach((key) =>
+            expect(res.body.taskLog.body.new[`${key}`]).to.equal(newData[`${key}`])
+          );
 
           return done();
         });
