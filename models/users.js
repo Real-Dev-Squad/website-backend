@@ -207,8 +207,7 @@ const addDefaultColors = async () => {
       const colors = user.colors ? user.colors : {};
       if (user.colors === undefined) {
         const userColorIndex = addColorsProperty(cardColorArray);
-        // eslint-disable-next-line no-console
-        console.log("index:", userColorIndex);
+
         colors.primary_color = cardColorArray[parseInt(userColorIndex)].color_primary;
         colors.secondary_color = cardColorArray[parseInt(userColorIndex)].color_secondary;
         updateUserPromises.push(userModel.doc(user.id).set({ ...user, colors }));
