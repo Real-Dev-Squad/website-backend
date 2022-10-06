@@ -144,7 +144,7 @@ describe("Tasks", function () {
     it("should return the task task with the Id that we provide in the route params", function (done) {
       chai
         .request(app)
-        .get(`/tasks/details/${taskId1}`)
+        .get(`/tasks/${taskId1}/details`)
         .end((err, res) => {
           if (err) {
             return done(err);
