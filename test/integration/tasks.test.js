@@ -330,8 +330,8 @@ describe("Tasks", function () {
           expect(res.body.taskLog.meta).to.be.a("object");
           expect(res.body.message).to.equal("Task updated successfully!");
 
-          expect(res.body.taskLog.body.newStatus).to.equal(taskStatusData.status);
-          expect(res.body.taskLog.body.newPercentCompleted).to.equal(taskStatusData.percentCompleted);
+          expect(res.body.taskLog.body.new.status).to.equal(taskStatusData.status);
+          expect(res.body.taskLog.body.new.percentCompleted).to.equal(taskStatusData.percentCompleted);
 
           return done();
         });
