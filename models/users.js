@@ -7,7 +7,8 @@ const walletConstants = require("../constants/wallets");
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const userModel = firestore.collection("users");
-
+const cardColorArray = require("../constants/cardColorArray");
+const { addColorsProperty } = require("../utils/users");
 /**
  * Adds or updates the user data
  *
@@ -204,9 +205,12 @@ const addDefaultColors = async () => {
 
     for (const user of usersArr) {
       const colors = user.colors ? user.colors : {};
-      if (user.color === undefined) {
-        colors.primary_color = "";
-        colors.secondary_color = "";
+      if (user.colors === undefined) {
+        const userColorIndex = addColorsProperty(cardColorArray);
+        // eslint-disable-next-line no-console
+        console.log("index:", userColorIndex);
+        colors.primary_color = cardColorArray[parseInt(userColorIndex)].color_primary;
+        colors.secondary_color = cardColorArray[parseInt(userColorIndex)].color_secondary;
         updateUserPromises.push(userModel.doc(user.id).set({ ...user, colors }));
         migratedUsers.push(user.username);
       }

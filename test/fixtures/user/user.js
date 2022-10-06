@@ -115,6 +115,10 @@ module.exports = () => {
         app_owner: true,
         archived: true,
       },
+      colors: {
+        primary_color: "#DB1212",
+        secondary_color: "#F88181",
+      },
     },
     {
       username: "mehul",

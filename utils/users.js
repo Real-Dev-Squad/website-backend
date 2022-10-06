@@ -81,9 +81,19 @@ const getParticipantUserIds = async (participantArray) => {
   }
 };
 
+/**
+ * Returns a random object from the array of colors to user
+ * @param cardColorArray {array} : color containing array
+ * @returns userColorIndex number : index between the range 0 to cardColorArray.length
+ */
+const addColorsProperty = (cardColorArray) => {
+  return Math.floor(Math.random() * (cardColorArray.length - 0) + 0);
+};
+
 module.exports = {
   getUserId,
   getUsername,
   getParticipantUserIds,
   getParticipantUsernames,
+  addColorsProperty,
 };

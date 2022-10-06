@@ -19,7 +19,6 @@ router.get("/:username", users.getUser);
 router.post("/picture", authenticate, upload.single("profile"), users.postUserPicture);
 router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
-router.patch("/addDefaultColorProperty", authenticate, authorizeRoles([SUPERUSER]), users.addDefaultColors);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
 
 module.exports = router;
