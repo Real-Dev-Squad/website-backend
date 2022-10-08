@@ -313,6 +313,19 @@ describe("Tasks", function () {
       percentCompleted: 50,
     };
 
+    const taskData = {
+      title: "Test task",
+      type: "feature",
+      endsOn: 1234,
+      startedOn: 4567,
+      status: "VERIFIED",
+      percentCompleted: 10,
+      participants: [],
+      completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+      lossRate: { [DINERO]: 1 },
+      isNoteworthy: true,
+    };
+
     it("Should update the task status for given self taskid", function (done) {
       chai
         .request(app)
@@ -379,20 +392,7 @@ describe("Tasks", function () {
     });
 
     it("Should give 403 if status is already 'VERIFIED' ", async function () {
-      const taskData = {
-        title: "Test task",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "VERIFIED",
-        percentCompleted: 10,
-        participants: [],
-        assignee: appOwner.username,
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-      };
-      taskId = (await tasks.updateTask(taskData)).taskId;
+      taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId}`)
@@ -403,20 +403,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
     it("Should give 403 if new status is 'MERGED' ", async function () {
-      const taskData = {
-        title: "Test task",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "COMPLETED",
-        percentCompleted: 10,
-        participants: [],
-        assignee: appOwner.username,
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-      };
-      taskId = (await tasks.updateTask(taskData)).taskId;
+      taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId}`)
@@ -427,20 +414,7 @@ describe("Tasks", function () {
     });
 
     it("Should give 403 if percentCompleted is not 100 and new status is COMPLETED ", async function () {
-      const taskData = {
-        title: "Test task",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "REVIEW",
-        percentCompleted: 10,
-        participants: [],
-        assignee: appOwner.username,
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-      };
-      taskId = (await tasks.updateTask(taskData)).taskId;
+      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId}`)
