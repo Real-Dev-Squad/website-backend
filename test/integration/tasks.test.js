@@ -140,7 +140,7 @@ describe("Tasks", function () {
     });
   });
 
-  describe("GET /tasks/details/:id", function () {
+  describe("GET /tasks/:id/details", function () {
     it("should return the task task with the Id that we provide in the route params", function (done) {
       chai
         .request(app)
