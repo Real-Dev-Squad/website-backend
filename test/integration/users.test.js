@@ -14,7 +14,7 @@ const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 
 const config = require("config");
-const join = require("../fixtures/user/join");
+const joinData = require("../fixtures/user/join");
 const { addJoinData } = require("../../models/users");
 const cookieName = config.get("userToken.cookieName");
 
@@ -304,7 +304,7 @@ describe("Users", function () {
 
   describe("GET /users/:userId/intro", function () {
     beforeEach(async function () {
-      await addJoinData(join(userId)[0]);
+      await addJoinData(joinData(userId)[0]);
     });
     it("Should return data of the given username", function (done) {
       chai
@@ -357,7 +357,7 @@ describe("Users", function () {
         .request(app)
         .post(`/users/${userId}/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
-        .send(join(userId)[0])
+        .send(joinData(userId)[0])
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -374,7 +374,7 @@ describe("Users", function () {
         .request(app)
         .post(`/users/${userId}/intro`)
         .set("cookie", `${cookieName} = ${jwt}`)
-        .send(join()[0])
+        .send(joinData()[0])
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -391,7 +391,7 @@ describe("Users", function () {
         .request(app)
         .post(`/users/${userId}/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
-        .send(join()[1])
+        .send(joinData()[1])
         .end((err, res) => {
           if (err) {
             return done(err);
