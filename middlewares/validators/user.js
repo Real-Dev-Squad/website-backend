@@ -33,6 +33,7 @@ const updateUser = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
+
 const updateProfileURL = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     profileURL: joi.string().uri().required(),
@@ -46,6 +47,7 @@ const updateProfileURL = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
+
 const validateJoinData = async (req, res, next) => {
   const schema = joi
     .object()

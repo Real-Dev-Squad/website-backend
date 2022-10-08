@@ -294,7 +294,7 @@ const rejectProfileDiff = async (req, res) => {
 
 const addUserIntro = async (req, res) => {
   try {
-    if (req.params.userId === req.body.userId) {
+    if (req.userData.id === req.body.userId) {
       const rawData = req.body;
       const data = {
         userId: rawData.userId,
