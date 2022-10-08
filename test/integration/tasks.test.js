@@ -167,6 +167,25 @@ describe("Tasks", function () {
     });
   });
 
+  describe("GET /tasks/:id/details", function () {
+    it("should return the task task with the Id that we provide in the route params", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("task returned successfully");
+          expect(res.body.taskData).to.be.a("object");
+          return done();
+        });
+    });
+  });
+
   describe("GET /tasks/self", function () {
     it("Should return all the completed tasks of the user when query 'completed' is true", function (done) {
       const { COMPLETED } = TASK_STATUS;
