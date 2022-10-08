@@ -327,7 +327,7 @@ const addUserIntro = async (req, res) => {
     }
   } catch (err) {
     logger.error("Could not save user data");
-    throw err;
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -346,7 +346,7 @@ const getUserIntro = async (req, res) => {
     }
   } catch (err) {
     logger.error("Could Not Get User Data", err);
-    throw err;
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
