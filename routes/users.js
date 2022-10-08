@@ -4,9 +4,8 @@ const authenticate = require("../middlewares/authenticate");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const users = require("../controllers/users");
 const { SUPERUSER } = require("../constants/roles");
-const userValidator = require("../middlewares/validators/user");
+const { userValidator, validateJoinData } = require("../middlewares/validators/user");
 const { upload } = require("../utils/multer");
-const { validateJoinData } = require("../middlewares/validators/join");
 
 router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
