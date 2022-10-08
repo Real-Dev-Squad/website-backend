@@ -402,6 +402,79 @@ describe("Tasks", function () {
       expect(res).to.have.status(403);
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
+    it("Should give 403 if new status is 'MERGED' ", async function () {
+      const taskData = {
+        title: "Test task",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "COMPLETED",
+        percentCompleted: 10,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      };
+      taskId = (await tasks.updateTask(taskData)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "MERGED" });
+
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+    });
+
+    it("Should give 403 if percentCompleted is not 100 and new status is COMPLETED ", async function () {
+      const taskData = {
+        title: "Test task",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "REVIEW",
+        percentCompleted: 10,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      };
+      taskId = (await tasks.updateTask(taskData)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "COMPLETED" });
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
+    });
+
+    it("Should give 403 if status is COMPLETED and newpercent is less than 100", async function () {
+      const taskData = {
+        title: "Test task",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "COMPLETED",
+        percentCompleted: 100,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      };
+      taskId = (await tasks.updateTask(taskData)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ percentCompleted: 80 });
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
+    });
 
     it("should give a response message as 'Task updated but another task not found' if we have completed 100% task and a task is not available", async function () {
       const taskData = tasksData[3];
