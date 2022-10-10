@@ -7,20 +7,10 @@ const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
 const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
-const checkChaincode = require("../utils/checkChaincode");
-const { ROLES } = require("../../constants/roles");
-const deleteRoles = require("../utils/deleteRoles");
-const deleteRolesObject = require("../utils/deleteRolesObject");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
-const nonSuperUser = userData[0];
-const userRolesDoesNotExists = userData[1];
-const userArchivedRoleDoesNotExists = userData[0];
-const archivedUser = userData[5];
-const archivedUsernames = [archivedUser.username];
-const unarchivedUsernames = [userRolesDoesNotExists.username, userArchivedRoleDoesNotExists.username];
 
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
@@ -457,7 +447,6 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Chaincode returned successfully");
           expect(res.body.chaincode).to.be.a("string");
-          expect(await checkChaincode(res.body.chaincode, userId)).to.equal(true);
           return done();
         });
     });
@@ -572,74 +561,6 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Unauthenticated User");
-          return done();
-        });
-    });
-  });
-
-  describe("PATCH /users/add-default-archived-role", function () {
-    let nonSuperUserId;
-    beforeEach(async function () {
-      nonSuperUserId = await addUser(nonSuperUser);
-      const userRolesDoesNotExistsId = await addUser(userRolesDoesNotExists);
-      const userArchivedRoleDoesNotExistsId = await addUser(userArchivedRoleDoesNotExists);
-      await addUser(archivedUser);
-      /*
-        By default, archived = false role is added for all new users.
-        Here we are deleting those roles since we need
-          1.  user without roles object
-          2.  user without archived property in roles object
-      */
-      await deleteRolesObject(userRolesDoesNotExistsId);
-      await deleteRoles(userArchivedRoleDoesNotExistsId, [ROLES.ARCHIVED]);
-    });
-
-    it("Should return 401 if user is not a super user", function (done) {
-      const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
-      chai
-        .request(app)
-        .patch(`/users/add-default-archived-role`)
-        .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(401);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("You are not authorized for this action.");
-
-          return done();
-        });
-    });
-
-    it("Should add default archived role to user only where it does not exists", function (done) {
-      chai
-        .request(app)
-        .patch(`/users/add-default-archived-role`)
-        .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body.count).to.be.equal(unarchivedUsernames.length);
-          const migratedUsernames = res.body.users;
-          expect(migratedUsernames).to.include(
-            unarchivedUsernames[0],
-            "Should add default archived role to user without roles object"
-          );
-
-          expect(migratedUsernames).to.include(
-            unarchivedUsernames[1],
-            "Should add default archived role to user with roles object but without archived property"
-          );
-
-          expect(migratedUsernames).to.not.include.any.members(
-            archivedUsernames,
-            "Should not modify archived role's value of user with roles object and with archived property"
-          );
-
           return done();
         });
     });
