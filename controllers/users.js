@@ -8,6 +8,7 @@ const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
+const tasks = require("../models/tasks");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -71,6 +72,30 @@ const getUsers = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
+/**
+ * Returns the usernames of inactive/idle users
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+
+const getIdleUsers = async (req, res) => {
+  try {
+    const allUsers = await userQuery.fetchUsers(req.query);
+    const taskParticipants = await tasks.fetchActiveTaskMembers();
+    const idleUsers = allUsers.filter(({ id }) => !taskParticipants.has(id));
+    const idleUserUserNames = idleUsers?.map((_user) => _user.username);
+
+    return res.json({
+      message: idleUserUserNames.length ? "Idle users returned successfully!" : "No idle user found",
+      idleUserUserNames,
+    });
+  } catch (error) {
+    logger.error(`Error while fetching idle users: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
 };
@@ -297,6 +322,7 @@ module.exports = {
   generateChaincode,
   updateSelf,
   getUsers,
+  getIdleUsers,
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,

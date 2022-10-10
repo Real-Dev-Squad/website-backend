@@ -11,6 +11,7 @@ router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
 router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
 router.get("/", authenticate, users.getUsers);
+router.get("/idle", users.getIdleUsers);
 router.get("/self", authenticate, users.getSelfDetails);
 router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
 router.get("/chaincode", authenticate, users.generateChaincode);
