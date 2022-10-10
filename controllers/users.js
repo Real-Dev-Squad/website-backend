@@ -9,6 +9,8 @@ const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const tasks = require("../models/tasks");
+const members = require("../models/members");
+const ROLES = require("../constants/roles");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -77,7 +79,7 @@ const getUsers = async (req, res) => {
 };
 
 /**
- * Returns the usernames of inactive/idle users
+ * Returns the usernames of inactive/idle users/members
  *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
@@ -86,9 +88,21 @@ const getUsers = async (req, res) => {
 const getIdleUsers = async (req, res) => {
   try {
     const allUsers = await userQuery.fetchUsers(req.query);
+    const onlyMembers = await members.fetchUsersWithRole(ROLES.MEMBER);
     const taskParticipants = await tasks.fetchActiveTaskMembers();
-    const idleUsers = allUsers.filter(({ id }) => !taskParticipants.has(id));
+    const idleUsers = allUsers?.filter(({ id }) => !taskParticipants.has(id));
     const idleUserUserNames = idleUsers?.map((_user) => _user.username);
+    const membersOnly = req.query["members-only"];
+
+    if (membersOnly === "true") {
+      const idleMembers = onlyMembers?.filter(({ id }) => !taskParticipants.has(id));
+      const idleMemberUserNames = idleMembers?.map((_member) => _member.username);
+
+      return res.json({
+        message: idleMemberUserNames.length ? "Idle members returned successfully!" : "No idle member found",
+        idleMemberUserNames,
+      });
+    }
 
     return res.json({
       message: idleUserUserNames.length ? "Idle users returned successfully!" : "No idle user found",
