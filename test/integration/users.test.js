@@ -356,7 +356,7 @@ describe("Users", function () {
         .request(app)
         .post(`/users/self/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
-        .send(joinData()[0])
+        .send(joinData()[2])
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -373,7 +373,7 @@ describe("Users", function () {
         .request(app)
         .post(`/users/self/intro`)
         .set("Cookie", `${cookieName}=""`)
-        .send(joinData()[0])
+        .send(joinData()[2])
         .end((err, res) => {
           if (err) {
             return done(err);
