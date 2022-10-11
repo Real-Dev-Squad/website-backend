@@ -122,6 +122,46 @@ describe("Users", function () {
     });
   });
 
+  describe("GET /users/idle", function () {
+    it("Should get the idle users", function (done) {
+      chai
+        .request(app)
+        .get("/users/idle")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Idle users returned successfully!");
+          expect(res.body.idleUserUserNames).to.be.a("array");
+          expect(res.body.idleUserUserNames[0]).to.be.a("string");
+
+          return done();
+        });
+    });
+
+    it("Should get the idle members", function (done) {
+      chai
+        .request(app)
+        .get("/users/idle?members-only=true")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Idle members returned successfully!");
+          expect(res.body.idleMemberUserNames).to.be.a("array");
+          expect(res.body.idleMemberUserNames[0]).to.be.a("string");
+
+          return done();
+        });
+    });
+  });
+
   describe("GET /users/self", function () {
     it("Should return the logged user's details", function (done) {
       chai
