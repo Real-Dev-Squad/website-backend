@@ -112,6 +112,20 @@ const getSelfTasks = async (req, res) => {
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
+
+const getTask = async (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const { taskData } = await tasks.fetchTask(taskId);
+
+    if (!taskData) {
+      return res.boom.notFound("Task not found");
+    }
+    return res.json({ message: "task returned successfully", taskData });
+  } catch (err) {
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
 /**
  * Updates the task
  *
@@ -138,9 +152,10 @@ const updateTask = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const updateTaskStatus = async (req, res) => {
+const updateTaskStatus = async (req, res, next) => {
   try {
     const taskId = req.params.id;
+    const { dev } = req.query;
     const { id: userId } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
 
@@ -150,6 +165,13 @@ const updateTaskStatus = async (req, res) => {
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
     await tasks.updateTask(req.body, taskId);
+
+    if (dev) {
+      if (req.body.percentCompleted === 100) {
+        return next();
+      }
+    }
+
     return res.json({ message: "Task updated successfully!" });
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`);
@@ -187,6 +209,7 @@ module.exports = {
   updateTask,
   getSelfTasks,
   getUserTasks,
+  getTask,
   updateTaskStatus,
   overdueTasks,
 };

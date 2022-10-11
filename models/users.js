@@ -43,10 +43,10 @@ const addOrUpdate = async (userData, userId = null) => {
 
     // Add new user
     /*
-      Adding default archived role enables us to query for only
-      the unarchived users in the /members endpoint
-      For more info : https://github.com/Real-Dev-Squad/website-backend/issues/651
-    */
+       Adding default archived role enables us to query for only
+       the unarchived users in the /members endpoint
+       For more info : https://github.com/Real-Dev-Squad/website-backend/issues/651
+     */
     userData.roles = { archived: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
@@ -104,6 +104,7 @@ const fetchUsers = async (query) => {
         phone: undefined,
         email: undefined,
         tokens: undefined,
+        chaincode: undefined,
       });
     });
 
@@ -141,6 +142,7 @@ const fetchUser = async ({ userId = null, username = null }) => {
         id,
         ...userData,
         tokens: undefined,
+        chaincode: undefined,
       },
     };
   } catch (err) {
