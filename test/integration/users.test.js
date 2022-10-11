@@ -351,11 +351,11 @@ describe("Users", function () {
     });
   });
 
-  describe("POST /users/:userId/intro", function () {
+  describe("POST /users/intro", function () {
     it("Should store the info in db", function (done) {
       chai
         .request(app)
-        .post(`/users/${userId}/intro`)
+        .post(`/users/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(joinData(userId)[0])
         .end((err, res) => {
@@ -369,27 +369,10 @@ describe("Users", function () {
         });
     });
 
-    it("Should return 401 for adding data of other user", function (done) {
-      chai
-        .request(app)
-        .post(`/users/${userId}/intro`)
-        .set("cookie", `${cookieName} = ${jwt}`)
-        .send(joinData()[0])
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(401);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.be.equal("Unauthorized request");
-          return done();
-        });
-    });
-
     it("Should return 400 for invalid Data", function (done) {
       chai
         .request(app)
-        .post(`/users/${userId}/intro`)
+        .post(`/users/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(joinData()[1])
         .end((err, res) => {
