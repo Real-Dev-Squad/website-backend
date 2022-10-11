@@ -53,7 +53,7 @@ const validateJoinData = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      userId: joi.string().required(),
+      userId: joi.string().optional(),
       firstName: joi.string().required(),
       lastName: joi.string().required(),
       college: joi.string().min(5).required(),

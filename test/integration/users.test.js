@@ -351,13 +351,13 @@ describe("Users", function () {
     });
   });
 
-  describe("POST /users/intro", function () {
+  describe("POST /users/self/intro", function () {
     it("Should store the info in db", function (done) {
       chai
         .request(app)
-        .post(`/users/intro`)
+        .post(`/users/self/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
-        .send(joinData(userId)[0])
+        .send(joinData()[0])
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -369,10 +369,26 @@ describe("Users", function () {
         });
     });
 
+    it("Should return 401 for unauthorized request", function (done) {
+      chai
+        .request(app)
+        .post(`/users/self/intro`)
+        .set("Cookie", `${cookieName}=""`)
+        .send(joinData()[0])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          return done();
+        });
+    });
+
     it("Should return 400 for invalid Data", function (done) {
       chai
         .request(app)
-        .post(`/users/intro`)
+        .post(`/users/self/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(joinData()[1])
         .end((err, res) => {
@@ -381,7 +397,7 @@ describe("Users", function () {
           }
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.be.equal('"userId" is required');
+          expect(res.body.message).to.be.equal('"firstName" is required');
           return done();
         });
     });
