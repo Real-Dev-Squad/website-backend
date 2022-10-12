@@ -7,13 +7,14 @@ const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
 const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
-const checkChaincode = require("../utils/checkChaincode");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 
 const config = require("config");
+const joinData = require("../fixtures/user/join");
+const { addJoinData } = require("../../models/users");
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
@@ -300,6 +301,107 @@ describe("Users", function () {
     });
   });
 
+  describe("GET /users/:userId/intro", function () {
+    beforeEach(async function () {
+      await addJoinData(joinData(userId)[0]);
+    });
+    it("Should return data of the given username", function (done) {
+      chai
+        .request(app)
+        .get(`/users/${userId}/intro`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User data returned");
+          return done();
+        });
+    });
+    it("Should return 404 if user not Found", function (done) {
+      chai
+        .request(app)
+        .get(`/users/ritiksuserId/intro`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          return done();
+        });
+    });
+    it("Should return 401 is not Logged In", function (done) {
+      chai
+        .request(app)
+        .get(`/users/${userId}/intro`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("POST /users/self/intro", function () {
+    it("Should store the info in db", function (done) {
+      chai
+        .request(app)
+        .post(`/users/self/intro`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(joinData()[2])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User Data Added Succesfully");
+          return done();
+        });
+    });
+
+    it("Should return 401 for unauthorized request", function (done) {
+      chai
+        .request(app)
+        .post(`/users/self/intro`)
+        .set("Cookie", `${cookieName}=""`)
+        .send(joinData()[2])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid Data", function (done) {
+      chai
+        .request(app)
+        .post(`/users/self/intro`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(joinData()[1])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal('"firstName" is required');
+          return done();
+        });
+    });
+  });
+
   describe("PATCH /users/rejectDiff", function () {
     let profileDiffsId;
     beforeEach(async function () {
@@ -448,7 +550,6 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Chaincode returned successfully");
           expect(res.body.chaincode).to.be.a("string");
-          expect(await checkChaincode(res.body.chaincode, userId)).to.equal(true);
           return done();
         });
     });
