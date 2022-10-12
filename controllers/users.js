@@ -90,8 +90,6 @@ const getIdleUsers = async (req, res) => {
     const allUsers = await userQuery.fetchUsers(req.query);
     const onlyMembers = await members.fetchUsersWithRole(ROLES.MEMBER);
     const taskParticipants = await tasks.fetchActiveTaskMembers();
-    const idleUsers = allUsers?.filter(({ id }) => !taskParticipants.has(id));
-    const idleUserUserNames = idleUsers?.map((_user) => _user.username);
     const membersOnly = req.query["members-only"];
 
     if (membersOnly === "true") {
@@ -103,6 +101,9 @@ const getIdleUsers = async (req, res) => {
         idleMemberUserNames,
       });
     }
+
+    const idleUsers = allUsers?.filter(({ id }) => !taskParticipants.has(id));
+    const idleUserUserNames = idleUsers?.map((_user) => _user.username);
 
     return res.json({
       message: idleUserUserNames.length ? "Idle users returned successfully!" : "No idle user found",
