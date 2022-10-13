@@ -566,49 +566,4 @@ describe("Users", function () {
         });
     });
   });
-
-  // describe("PATCH /migrations/addDefaultColorProperty", function () {
-  //   it("Should return 401 if user is not a super user", function (done) {
-  //     const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
-  //     chai
-  //       .request(app)
-  //       .patch(`/migrations/addDefaultColorProperty`)
-  //       .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
-  //       .end((err, res) => {
-  //         if (err) {
-  //           return done(err);
-  //         }
-  //         expect(res).to.have.status(401);
-  //         expect(res.body).to.be.a("object");
-  //         expect(res.body.message).to.equal("You are not authorized for this action.");
-  //         return done();
-  //       });
-  //   });
-  //   it("Should add default color property to all users,using authorized user (super_user)", function (done) {
-  //     chai
-  //       .request(app)
-  //       .patch(`/migrations/addDefaultColorProperty`)
-  //       .set("cookie", `${cookieName}=${superUserAuthToken}`)
-  //       .end((err, res) => {
-  //         if (err) {
-  //           return done(err);
-  //         }
-
-  //         expect(res).to.have.status(200);
-  //         expect(res.body.count).to.be.equal(colorBearingUsernames.length);
-  //         const migratedUsernames = res.body.users;
-
-  //         expect(migratedUsernames).to.include(
-  //           colorBearingUsernames[0],
-  //           "Should add default color property to user without color property"
-  //         );
-
-  //         expect(migratedUsernames).to.not.include.any.members(
-  //           userWithColorProperty,
-  //           "Should not modify color property of user with color object"
-  //         );
-  //         return done();
-  //       });
-  //   });
-  // });
 });
