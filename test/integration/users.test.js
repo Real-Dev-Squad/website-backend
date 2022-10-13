@@ -164,6 +164,41 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should fail with unauthenticated error for unauthenticated user", function (done) {
+      chai
+        .request(app)
+        .get("/users/idle")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Unauthenticated User");
+
+          return done();
+        });
+    });
+
+    it("Should fail with unauthorized error for non super user", function (done) {
+      chai
+        .request(app)
+        .get("/users/idle")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("You are not authorized for this action.");
+
+          return done();
+        });
+    });
   });
 
   describe("GET /users/self", function () {
