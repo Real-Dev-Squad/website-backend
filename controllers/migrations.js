@@ -1,4 +1,4 @@
-const userQuery = require("../models/users");
+const userQuery = require("../models/migrations");
 const logger = require("../utils/logger");
 
 /**
