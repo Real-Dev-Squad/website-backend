@@ -129,6 +129,7 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users/idle")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -148,6 +149,7 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users/idle?members-only=true")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
             return done(err);
