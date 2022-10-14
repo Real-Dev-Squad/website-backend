@@ -88,27 +88,34 @@ const getUsers = async (req, res) => {
 const getIdleUsers = async (req, res) => {
   try {
     const allUsers = await userQuery.fetchUsers(req.query);
-    const onlyMembers = await members.fetchUsersWithRole(ROLES.MEMBER);
-    const taskParticipants = await tasks.fetchActiveTaskMembers();
+    const allMembers = await members.fetchUsersWithRole(ROLES.MEMBER);
+    const activeMembers = await tasks.fetchActiveTaskMembers();
     const membersOnly = req.query["members-only"];
+    let responseObj;
+
+    const getIdleParticipantsUserNames = (participants, activeMembers) => {
+      const idleParticipants = participants?.filter(({ id }) => !activeMembers.has(id));
+      const idleParticipantsUserNames = idleParticipants?.map((_participant) => _participant.username);
+      return idleParticipantsUserNames;
+    };
 
     if (membersOnly === "true") {
-      const idleMembers = onlyMembers?.filter(({ id }) => !taskParticipants.has(id));
-      const idleMemberUserNames = idleMembers?.map((_member) => _member.username);
+      const idleMemberUserNames = getIdleParticipantsUserNames(allMembers, activeMembers);
 
-      return res.json({
+      responseObj = {
         message: idleMemberUserNames.length ? "Idle members returned successfully!" : "No idle member found",
         idleMemberUserNames,
-      });
+      };
+    } else {
+      const idleUserUserNames = getIdleParticipantsUserNames(allUsers, activeMembers);
+
+      responseObj = {
+        message: idleUserUserNames.length ? "Idle users returned successfully!" : "No idle user found",
+        idleUserUserNames,
+      };
     }
 
-    const idleUsers = allUsers?.filter(({ id }) => !taskParticipants.has(id));
-    const idleUserUserNames = idleUsers?.map((_user) => _user.username);
-
-    return res.json({
-      message: idleUserUserNames.length ? "Idle users returned successfully!" : "No idle user found",
-      idleUserUserNames,
-    });
+    return res.json(responseObj);
   } catch (error) {
     logger.error(`Error while fetching idle users: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
