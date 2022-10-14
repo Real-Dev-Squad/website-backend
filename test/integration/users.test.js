@@ -129,7 +129,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users/idle")
-        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -149,7 +148,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users/idle?members-only=true")
-        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -160,41 +158,6 @@ describe("Users", function () {
           expect(res.body.message).to.equal("Idle members returned successfully!");
           expect(res.body.idleMemberUserNames).to.be.a("array");
           expect(res.body.idleMemberUserNames[0]).to.be.a("string");
-
-          return done();
-        });
-    });
-
-    it("Should fail with unauthenticated error for unauthenticated user", function (done) {
-      chai
-        .request(app)
-        .get("/users/idle")
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(401);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Unauthenticated User");
-
-          return done();
-        });
-    });
-
-    it("Should fail with unauthorized error for non super user", function (done) {
-      chai
-        .request(app)
-        .get("/users/idle")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(401);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("You are not authorized for this action.");
 
           return done();
         });
