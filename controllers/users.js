@@ -91,7 +91,7 @@ const getIdleUsers = async (req, res) => {
     const allMembers = await members.fetchUsersWithRole(ROLES.MEMBER);
     const activeMembers = await tasks.fetchActiveTaskMembers();
     const membersOnly = req.query["members-only"];
-    let responseObj;
+    let idleUserUserNames = [];
 
     const getIdleParticipantsUserNames = (participants, activeMembers) => {
       const idleParticipants = participants?.filter(({ id }) => !activeMembers.has(id));
@@ -100,22 +100,15 @@ const getIdleUsers = async (req, res) => {
     };
 
     if (membersOnly === "true") {
-      const idleMemberUserNames = getIdleParticipantsUserNames(allMembers, activeMembers);
-
-      responseObj = {
-        message: idleMemberUserNames.length ? "Idle members returned successfully!" : "No idle member found",
-        idleMemberUserNames,
-      };
+      idleUserUserNames = getIdleParticipantsUserNames(allMembers, activeMembers);
     } else {
-      const idleUserUserNames = getIdleParticipantsUserNames(allUsers, activeMembers);
-
-      responseObj = {
-        message: idleUserUserNames.length ? "Idle users returned successfully!" : "No idle user found",
-        idleUserUserNames,
-      };
+      idleUserUserNames = getIdleParticipantsUserNames(allUsers, activeMembers);
     }
 
-    return res.json(responseObj);
+    return res.json({
+      message: "Idle users returned successfully!",
+      idleUserUserNames,
+    });
   } catch (error) {
     logger.error(`Error while fetching idle users: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
