@@ -21,8 +21,7 @@ const addDefaultColors = async () => {
       if (user.colors === undefined) {
         const userColorIndex = getRandomIndex(cardColorArray);
 
-        colors.primary_color = cardColorArray[parseInt(userColorIndex)].COLOR_PRIMARY;
-        colors.secondary_color = cardColorArray[parseInt(userColorIndex)].COLOR_SECONDARY;
+        colors.color_id = cardColorArray[parseInt(userColorIndex)].COLOR_ID;
         updateUserPromises.push(userModel.doc(user.id).set({ ...user, colors }));
         migratedUsers.push(user.username);
       }
