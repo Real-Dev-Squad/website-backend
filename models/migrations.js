@@ -1,7 +1,7 @@
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
-const cardColorArray = require("../constants/cardColorArray");
-const { getRandomIndex } = require("../utils/users");
+const cardColorIdArray = require("../constants/cardColorIdArray");
+const { getRandomIndex } = require("../utils/helpers");
 /**
  * Adds default colors property
  * @return {Promise<usersMigrated|Object>}
@@ -19,9 +19,9 @@ const addDefaultColors = async () => {
     for (const user of usersArr) {
       const colors = user.colors ? user.colors : {};
       if (user.colors === undefined) {
-        const userColorIndex = getRandomIndex(cardColorArray);
+        const userColorIndex = getRandomIndex(cardColorIdArray);
 
-        colors.color_id = cardColorArray[parseInt(userColorIndex)].COLOR_ID;
+        colors.color_id = cardColorIdArray[parseInt(userColorIndex)].COLOR_ID;
         updateUserPromises.push(userModel.doc(user.id).set({ ...user, colors }));
         migratedUsers.push(user.username);
       }
