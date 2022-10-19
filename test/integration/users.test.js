@@ -125,6 +125,11 @@ describe("Users", function () {
   });
 
   describe("GET /users/idle", function () {
+    beforeEach(async function () {
+      await addUser(userData[3]); // idle user
+      await addUser(userData[0]); // active member
+      await addUser(userData[6]); // idle member
+    });
     it("Should get the idle users", function (done) {
       chai
         .request(app)
@@ -139,6 +144,27 @@ describe("Users", function () {
           expect(res.body.message).to.equal("Idle users returned successfully!");
           expect(res.body.idleUserUserNames).to.be.a("array");
           expect(res.body.idleUserUserNames[0]).to.be.a("string");
+          expect(res.body.idleUserUserNames).to.include.members(["sagar", "mehul"]);
+
+          return done();
+        });
+    });
+
+    it("Should get the idle members", function (done) {
+      chai
+        .request(app)
+        .get("/users/idle?members=true")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Idle users returned successfully!");
+          expect(res.body.idleUserUserNames).to.be.a("array");
+          expect(res.body.idleUserUserNames[0]).to.be.a("string");
+          expect(res.body.idleUserUserNames).to.eql(["mehul"]);
 
           return done();
         });
