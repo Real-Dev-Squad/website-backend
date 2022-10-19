@@ -8,9 +8,6 @@ const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
-const tasks = require("../models/tasks");
-const members = require("../models/members");
-const ROLES = require("../constants/roles");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -88,21 +85,18 @@ const getUsers = async (req, res) => {
 const getIdleUsers = async (req, res) => {
   try {
     const allUsers = await userQuery.fetchUsers(req.query);
-    const allMembers = await members.fetchUsersWithRole(ROLES.MEMBER);
-    const activeMembers = await tasks.fetchActiveTaskMembers();
-    const membersOnly = req.query["members-only"];
+    const allMembers = allUsers?.filter((_user) => _user.roles.member);
+    const { members } = req.query;
     let idleUserUserNames = [];
 
-    const getIdleParticipantsUserNames = (participants, activeMembers) => {
-      const idleParticipants = participants?.filter(({ id }) => !activeMembers.has(id));
-      const idleParticipantsUserNames = idleParticipants?.map((_participant) => _participant.username);
-      return idleParticipantsUserNames;
+    const getIdleUserUserNames = (users) => {
+      return users?.filter(({ status }) => status === "idle" || !status).map((_user) => _user.username);
     };
 
-    if (membersOnly === "true") {
-      idleUserUserNames = getIdleParticipantsUserNames(allMembers, activeMembers);
+    if (members === "true") {
+      idleUserUserNames = getIdleUserUserNames(allMembers);
     } else {
-      idleUserUserNames = getIdleParticipantsUserNames(allUsers, activeMembers);
+      idleUserUserNames = getIdleUserUserNames(allUsers);
     }
 
     return res.json({
