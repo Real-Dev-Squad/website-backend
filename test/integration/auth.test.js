@@ -19,6 +19,8 @@ describe("auth", function () {
     sinon.restore();
   });
 
+  // TODO: write tests for mobile response
+
   it("should redirect the request to the goto page on successful login", function (done) {
     const rdsUiUrl = config.get("services.rdsUi.baseUrl");
 
@@ -30,7 +32,7 @@ describe("auth", function () {
     chai
       .request(app)
       .get("/auth/github/callback")
-      .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
+      .query({ code: "codeReturnedByGithub", redirectURL: rdsUiUrl })
       .redirects(0)
       .end((err, res) => {
         if (err) {

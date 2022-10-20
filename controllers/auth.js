@@ -1,6 +1,7 @@
 const passport = require("passport");
 const users = require("../models/users");
 const authService = require("../services/authService");
+const logger = require("../utils/logger");
 
 /**
  * Fetches the user info from GitHub and authenticates User
@@ -12,38 +13,62 @@ const authService = require("../services/authService");
 const githubAuth = (req, res, next) => {
   let userData;
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
-  const authRedirectionUrl = req.query.state ?? rdsUiUrl;
+
+  const state = req.query.state; // state is being set from passport
+
+  let redirectURL = req.query.redirectURL;
+  let isMobile = req.query.mobile === "true";
+
+  if (state) {
+    try {
+      const stateObject = JSON.parse(req.query.state);
+      redirectURL = stateObject?.redirectURL;
+      isMobile = stateObject?.isMobile;
+    } catch (err) {
+      logger.error(err);
+    }
+  }
+
+  const authRedirectionUrl = redirectURL ?? rdsUiUrl;
 
   try {
-    return passport.authenticate("github", { session: false }, async (err, accessToken, user) => {
-      if (err) {
-        logger.error(err);
-        return res.boom.unauthorized("User cannot be authenticated");
+    return passport.authenticate(
+      "github",
+      { session: false, state: JSON.stringify({ redirectURL, isMobile }) },
+      async (err, accessToken, user) => {
+        if (err) {
+          logger.error(err);
+          return res.boom.unauthorized("User cannot be authenticated");
+        }
+
+        userData = {
+          github_id: user.username,
+          github_display_name: user.displayName,
+          tokens: {
+            githubAccessToken: accessToken,
+          },
+        };
+
+        const { userId } = await users.addOrUpdate(userData);
+
+        const token = authService.generateAuthToken({ userId });
+
+        // respond with a cookie
+        res.cookie(config.get("userToken.cookieName"), token, {
+          domain: rdsUiUrl.hostname,
+          expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
+          httpOnly: true,
+          secure: true,
+          sameSite: "lax",
+        });
+
+        if (isMobile) {
+          return res.status(200).send();
+        }
+
+        return res.redirect(authRedirectionUrl);
       }
-
-      userData = {
-        github_id: user.username,
-        github_display_name: user.displayName,
-        tokens: {
-          githubAccessToken: accessToken,
-        },
-      };
-
-      const { userId } = await users.addOrUpdate(userData);
-
-      const token = authService.generateAuthToken({ userId });
-
-      // respond with a cookie
-      res.cookie(config.get("userToken.cookieName"), token, {
-        domain: rdsUiUrl.hostname,
-        expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-      });
-
-      return res.redirect(authRedirectionUrl);
-    })(req, res, next);
+    )(req, res, next);
   } catch (err) {
     logger.error(err);
     return res.boom.unauthorized("User cannot be authenticated");
