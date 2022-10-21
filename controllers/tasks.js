@@ -112,6 +112,20 @@ const getSelfTasks = async (req, res) => {
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
+
+const getTask = async (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const { taskData } = await tasks.fetchTask(taskId);
+
+    if (!taskData) {
+      return res.boom.notFound("Task not found");
+    }
+    return res.json({ message: "task returned successfully", taskData });
+  } catch (err) {
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
 /**
  * Updates the task
  *
@@ -195,6 +209,7 @@ module.exports = {
   updateTask,
   getSelfTasks,
   getUserTasks,
+  getTask,
   updateTaskStatus,
   overdueTasks,
 };
