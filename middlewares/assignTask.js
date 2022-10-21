@@ -4,7 +4,7 @@ const tasks = firestore.collection("tasks");
 
 const assignTask = async function (req, res) {
   try {
-    const { task } = await fetchSkillLevelTask("frontend", 1);
+    const { task } = await fetchSkillLevelTask("FRONTEND", 1);
     if (!task) return res.json({ message: "Task updated but another task not found" });
 
     const docId = task.id;
