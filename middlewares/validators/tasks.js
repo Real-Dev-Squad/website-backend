@@ -31,13 +31,6 @@ const createTask = async (req, res, next) => {
           [NEELAM]: joi.number().optional(),
         })
         .optional(),
-      taskLevel: joi
-        .object()
-        .keys({
-          category: joi.string().optional(),
-          level: joi.number().optional(),
-        })
-        .optional(),
       lossRate: joi
         .object()
         .keys({
@@ -82,13 +75,6 @@ const updateTask = async (req, res, next) => {
         .keys({
           [DINERO]: joi.number().optional(),
           [NEELAM]: joi.number().optional(),
-        })
-        .optional(),
-      taskLevel: joi
-        .object()
-        .keys({
-          category: joi.string().optional(),
-          level: joi.number().optional(),
         })
         .optional(),
       lossRate: joi
