@@ -1,5 +1,8 @@
 const joi = require("joi");
 const { DINERO, NEELAM } = require("../../constants/wallets");
+const { TASK_STATUS, TASK_STATUS_OLD } = require("../../constants/tasks");
+
+const TASK_STATUS_ENUM = Object.values(TASK_STATUS);
 
 const createTask = async (req, res, next) => {
   const schema = joi
@@ -13,7 +16,10 @@ const createTask = async (req, res, next) => {
       links: joi.array().items(joi.string()).optional(),
       startedOn: joi.number().optional(),
       endsOn: joi.number().optional(),
-      status: joi.string().required(),
+      status: joi
+        .string()
+        .valid(...TASK_STATUS_ENUM)
+        .required(),
       assignee: joi.string().optional(),
       percentCompleted: joi.number().required(),
       dependsOn: joi.array().items(joi.string()).optional(),
@@ -63,7 +69,10 @@ const updateTask = async (req, res, next) => {
       links: joi.array().items(joi.string()).optional(),
       endsOn: joi.number().optional(),
       startedOn: joi.number().optional(),
-      status: joi.string().optional(),
+      status: joi
+        .string()
+        .valid(...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD))
+        .optional(),
       assignee: joi.string().optional(),
       percentCompleted: joi.number().optional(),
       dependsOn: joi.array().items(joi.string()).optional(),
@@ -101,10 +110,16 @@ const updateTask = async (req, res, next) => {
 };
 
 const updateSelfTask = async (req, res, next) => {
-  const schema = joi.object().strict().keys({
-    status: joi.string().optional(),
-    percentCompleted: joi.number().optional(),
-  });
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      status: joi
+        .string()
+        .valid(...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD))
+        .optional(),
+      percentCompleted: joi.number().optional(),
+    });
   try {
     await schema.validateAsync(req.body);
     next();

@@ -11,10 +11,8 @@ const authService = require("../services/authService");
  */
 const githubAuth = (req, res, next) => {
   let userData;
-  const authRedirectionUrl = `${config.get("services.rdsUi.baseUrl")}${config.get(
-    "services.rdsUi.routes.authRedirection"
-  )}`;
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+  const authRedirectionUrl = req.query.state ?? rdsUiUrl;
 
   try {
     return passport.authenticate("github", { session: false }, async (err, accessToken, user) => {

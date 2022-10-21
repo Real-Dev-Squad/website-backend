@@ -90,7 +90,7 @@ describe("Tasks", function () {
           type: "feature",
           endsOn: 123,
           startedOn: 456,
-          status: "completed",
+          status: "AVAILABLE",
           percentCompleted: 10,
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
@@ -109,6 +109,33 @@ describe("Tasks", function () {
           expect(res.body.task.createdBy).to.equal(appOwner.username);
           expect(res.body.task.assignee).to.equal(appOwner.username);
           expect(res.body.task.participants).to.be.a("array");
+          return done();
+        });
+    });
+    it("should return fail response if task has a non-acceptable status value", function (done) {
+      chai
+        .request(app)
+        .post("/tasks")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "Test task - Create",
+          type: "feature",
+          endsOn: 123,
+          startedOn: 456,
+          status: "invalidStatus",
+          percentCompleted: 10,
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          assignee: appOwner.username,
+          participants: [],
+        })
+        .end((err, res) => {
+          if (err) return done(err);
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+
           return done();
         });
     });
@@ -135,6 +162,25 @@ describe("Tasks", function () {
             expect(taskWithParticipants.assignee).to.equal(appOwner.username);
           }
 
+          return done();
+        });
+    });
+  });
+
+  describe("GET /tasks/:id/details", function () {
+    it("should return the task task with the Id that we provide in the route params", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("task returned successfully");
+          expect(res.body.taskData).to.be.a("object");
           return done();
         });
     });
@@ -243,6 +289,25 @@ describe("Tasks", function () {
           return done();
         });
     });
+    it("Should return fail response if task data has a non-acceptable status value to update the task for the given taskid", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/" + taskId1)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "new-title",
+          status: "invalidStatus",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          return done();
+        });
+    });
 
     it("Should return 404 if task does not exist", function (done) {
       chai
@@ -309,7 +374,7 @@ describe("Tasks", function () {
 
   describe("PATCH /tasks/self/:id", function () {
     const taskStatusData = {
-      status: "currentStatus",
+      status: "AVAILABLE",
       percentCompleted: 50,
     };
 
@@ -325,6 +390,22 @@ describe("Tasks", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.equal("Task updated successfully!");
+          return done();
+        });
+    });
+    it("Should return fail response if task data has non-acceptable status value to update the task status for given self taskid", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "invalidStatus" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
           return done();
         });
     });
