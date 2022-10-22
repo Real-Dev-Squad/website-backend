@@ -198,7 +198,7 @@ const getNewTask = async (skill, level) => {
     .where("category", "==", skill)
     .where("level", ">=", level)
     .where("level", "<=", level + 2)
-    .where("status", "==", "AVAILABLE")
+    .where("status", "==", TASK_STATUS.AVAILABLE)
     .limit(1)
     .get();
 
