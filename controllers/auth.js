@@ -17,7 +17,7 @@ const githubAuth = (req, res, next) => {
   const state = req.query.state; // state is being set from passport
 
   let redirectURL = req.query.redirectURL;
-  let isMobile = req.query.mobile === "true";
+  let isMobile = req.query.mobile?.toLowerCase() === "true";
 
   if (state) {
     try {
