@@ -195,7 +195,6 @@ const fetchUserTasks = async (username, statuses = [], field, order) => {
 
 const getNewTask = async (skill, level) => {
   const task = await tasksModel
-
     .where("category", "==", skill)
     .where("level", ">=", level)
     .where("level", "<=", level + 2)
