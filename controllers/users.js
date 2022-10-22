@@ -89,11 +89,9 @@ const getIdleUsers = async (req, res) => {
     const { members } = req.query;
     const areOnlyMembers = members === "true";
     const selectedUsers = areOnlyMembers ? allMembers : allUsers;
-    const idleUserUsernames = getIdleUserUsernames(selectedUsers) || [];
-
-    function getIdleUserUsernames(users) {
-      return users?.filter(({ status }) => status === "idle" || !status).map((_user) => _user.username);
-    }
+    const idleUserUsernames = selectedUsers
+      ?.filter(({ status }) => status === "idle" || !status)
+      .map((_user) => _user.username);
 
     return res.json({
       message: "Idle users returned successfully!",
