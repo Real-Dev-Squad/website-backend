@@ -87,8 +87,8 @@ const getIdleUsers = async (req, res) => {
     const allUsers = await userQuery.fetchUsers(req.query);
     const allMembers = allUsers?.filter((_user) => _user.roles.member);
     const { members } = req.query;
-    const areOnlyMember = members === "true";
-    const selectedUsers = areOnlyMember ? allMembers : allUsers;
+    const areOnlyMembers = members === "true";
+    const selectedUsers = areOnlyMembers ? allMembers : allUsers;
     const idleUserUsernames = getIdleUserUsernames(selectedUsers) || [];
 
     function getIdleUserUsernames(users) {
