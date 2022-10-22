@@ -142,9 +142,9 @@ describe("Users", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Idle users returned successfully!");
-          expect(res.body.idleUserUserNames).to.be.a("array");
-          expect(res.body.idleUserUserNames[0]).to.be.a("string");
-          expect(res.body.idleUserUserNames).to.include.members(["sagar", "mehul"]);
+          expect(res.body.idleUserUsernames).to.be.a("array");
+          expect(res.body.idleUserUsernames[0]).to.be.a("string");
+          expect(res.body.idleUserUsernames).to.include.members(["sagar", "mehul"]);
 
           return done();
         });
@@ -162,9 +162,9 @@ describe("Users", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Idle users returned successfully!");
-          expect(res.body.idleUserUserNames).to.be.a("array");
-          expect(res.body.idleUserUserNames[0]).to.be.a("string");
-          expect(res.body.idleUserUserNames).to.eql(["mehul"]);
+          expect(res.body.idleUserUsernames).to.be.a("array");
+          expect(res.body.idleUserUsernames[0]).to.be.a("string");
+          expect(res.body.idleUserUsernames).to.eql(["mehul"]);
 
           return done();
         });
