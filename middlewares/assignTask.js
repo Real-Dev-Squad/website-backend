@@ -4,6 +4,7 @@ const tasks = firestore.collection("tasks");
 
 const assignTask = async function (req, res) {
   try {
+    // this hardcoded value will be removed once we have user skill
     const { task } = await fetchSkillLevelTask("FRONTEND", 1);
     if (!task) return res.json({ message: "Task updated but another task not found" });
 
