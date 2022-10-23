@@ -25,7 +25,7 @@ module.exports = (userId = " ") => {
     },
     {
       college: "I work at Tata Consultancy Services",
-      heardAbout: "Twitter",
+      foundFrom: "Twitter",
       state: "Karnataka",
       firstName: "Ritik",
       lastName: "Jaiswal",

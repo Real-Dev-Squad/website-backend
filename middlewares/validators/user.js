@@ -61,7 +61,7 @@ const validateJoinData = async (req, res, next) => {
       city: joi.string().required(),
       state: joi.string().required(),
       country: joi.string().required(),
-      heardAbout: joi.string().required(),
+      foundFrom: joi.string().required(),
       introduction: joi.string().required(),
       forFun: joi.string().min(100).required(),
       funFact: joi.string().min(100).required(),
