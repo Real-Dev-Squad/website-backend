@@ -307,10 +307,10 @@ const addUserIntro = async (req, res) => {
         country: rawData.country,
       },
       professionalDetails: {
-        institution: rawData.college,
+        companyOrCollege: rawData.college,
         skills: rawData.skills,
       },
-      PersonalIntroWithReason: {
+      personalIntroWithReason: {
         introduction: rawData.introduction,
         funFact: rawData.funFact,
         forFun: rawData.forFun,
