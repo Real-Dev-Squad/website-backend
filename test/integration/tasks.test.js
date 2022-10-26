@@ -345,6 +345,7 @@ describe("Tasks", function () {
 
           expect(res.body.taskLog.body.new.status).to.equal(taskStatusData.status);
           expect(res.body.taskLog.body.new.percentCompleted).to.equal(taskStatusData.percentCompleted);
+          expect(res.body.taskLog.body.messages.length).to.equal(Object.keys(taskStatusData).length);
 
           return done();
         });

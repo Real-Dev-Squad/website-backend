@@ -173,14 +173,17 @@ const updateTaskStatus = async (req, res, next) => {
       body: {
         subType: "update",
         new: {},
+        messages: [],
       },
     };
 
     if (req.body.status) {
       taskLog.body.new.status = req.body.status;
+      taskLog.body.messages.push(`${username} changed status to ${req.body.status}`);
     }
     if (req.body.percentCompleted) {
       taskLog.body.new.percentCompleted = req.body.percentCompleted;
+      taskLog.body.messages.push(`${username} changed percentCompleted to ${req.body.percentCompleted}`);
     }
 
     const [, taskLogResult] = await Promise.all([
