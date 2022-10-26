@@ -49,7 +49,7 @@ module.exports = {
   },
 
   cors: {
-    allowedOrigins: /\.realdevsquad\.com$/,
+    allowedOrigins: /https:\/\/(.*\.)*realdevsquad\.com$/,
   },
 
   userToken: {
