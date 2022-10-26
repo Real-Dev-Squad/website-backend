@@ -4,7 +4,7 @@
  * @returns random Index number : index between the range 0 to array.length
  */
 const getRandomIndex = (array = []) => {
-  return Math.floor(Math.random() * (array.length - 0) + 0);
+  return Math.floor(Math.random() * array.length);
 };
 
 module.exports = {
