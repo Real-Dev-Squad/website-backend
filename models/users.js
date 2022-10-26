@@ -229,8 +229,7 @@ const addDefaultStatus = async () => {
 
     for (const user of users) {
       if (user.status === undefined) {
-        const userDoc = userModel.doc(user.id);
-        await userDoc.update({
+        await userModel.doc(user.id).update({
           status: "idle",
         });
         addedDefaultStatusUsers.push(user.username);
