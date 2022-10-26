@@ -92,6 +92,7 @@ describe("Tasks", function () {
           startedOn: 456,
           status: "AVAILABLE",
           percentCompleted: 10,
+          priority: "HIGH",
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
           assignee: appOwner.username,
