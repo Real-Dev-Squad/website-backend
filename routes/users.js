@@ -18,6 +18,9 @@ router.get("/:username", users.getUser);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
 router.post("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);
 
+// one-time-use endpoint
+router.patch("/add-default-status", authenticate, authorizeRoles([SUPERUSER]), users.addDefaultStatus);
+
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post("/picture", authenticate, upload.single("profile"), users.postUserPicture);
 router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);

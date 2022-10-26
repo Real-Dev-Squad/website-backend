@@ -215,6 +215,35 @@ const fetchUserImage = async (users) => {
   return images;
 };
 
+/**
+ * Add default status
+ * @returns {Promise<string[]>}
+ */
+const addDefaultStatus = async () => {
+  try {
+    const usersSnapshot = await userModel.get();
+    const users = [];
+    const addedDefaultStatusUsers = [];
+
+    usersSnapshot.forEach((doc) => users.push({ id: doc.id, ...doc.data() }));
+
+    for (const user of users) {
+      if (user.status === undefined) {
+        const userDoc = userModel.doc(user.id);
+        await userDoc.update({
+          status: "idle",
+        });
+        addedDefaultStatusUsers.push(user.username);
+      }
+    }
+
+    return addedDefaultStatusUsers;
+  } catch (error) {
+    logger.error("Error adding default status to user", error);
+    throw error;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchUsers,
@@ -225,4 +254,5 @@ module.exports = {
   fetchUserImage,
   addJoinData,
   getJoinData,
+  addDefaultStatus,
 };

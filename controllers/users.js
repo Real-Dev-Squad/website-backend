@@ -366,6 +366,26 @@ const addDefaultArchivedRole = async (req, res) => {
   }
 };
 
+/**
+ * Add default status to users where it does not exists
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns usernames of users for which default status is added
+ */
+const addDefaultStatus = async (req, res) => {
+  try {
+    const addedDefaultStatusUsers = await userQuery.addDefaultStatus();
+    return res.json({
+      message: "Default status added to users successfully!",
+      addedDefaultStatusUsers,
+    });
+  } catch (error) {
+    logger.error(`Error adding default status: ${error}`);
+    return res.boom.badImplementation("Something went wrong. Please contact admin");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -382,4 +402,5 @@ module.exports = {
   addUserIntro,
   getUserIntro,
   addDefaultArchivedRole,
+  addDefaultStatus,
 };
