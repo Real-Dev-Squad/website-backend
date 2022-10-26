@@ -186,6 +186,68 @@ describe("Users", function () {
     });
   });
 
+  describe("PATCH /add-default-status", function (done) {
+    beforeEach(async function () {
+      await addUser(userData[1]); // status does not exists user
+      await addUser(userData[0]); // status active user
+    });
+
+    it("Should add default status to user where status does not exists", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/add-default-status`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Default status added to users successfully!");
+          expect(res.body.addedDefaultStatusUsers).to.include.members(["nikhil"]);
+          expect(res.body.addedDefaultStatusUsers).to.not.include.members(["ankur"]);
+
+          return done();
+        });
+    });
+
+    it("Should return authorization error if user is non super user", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/add-default-status`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("You are not authorized for this action.");
+
+          return done();
+        });
+    });
+
+    it("Should return authenticated error when user is not logged in", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/add-default-status`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Unauthenticated User");
+
+          return done();
+        });
+    });
+  });
+
   describe("GET /users/id", function () {
     it("Should return one user with given id", function (done) {
       chai
