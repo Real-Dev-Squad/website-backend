@@ -371,7 +371,7 @@ const addDefaultArchivedRole = async (req, res) => {
  *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @returns usernames of users for which default status is added
+ * @returns count and usernames of users for which default status is added
  */
 const addDefaultStatus = async (req, res) => {
   try {
