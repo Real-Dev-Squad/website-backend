@@ -223,20 +223,25 @@ const addDefaultStatus = async () => {
   try {
     const usersSnapshot = await userModel.get();
     const users = [];
-    const addedDefaultStatusUsers = [];
+    const promisesToUpdateStatus = [];
+    const updatedUsers = [];
 
     usersSnapshot.forEach((doc) => users.push({ id: doc.id, ...doc.data() }));
 
     for (const user of users) {
       if (user.status === undefined) {
-        await userModel.doc(user.id).update({
-          status: "idle",
-        });
-        addedDefaultStatusUsers.push(user.username);
+        promisesToUpdateStatus.push(
+          userModel.doc(user.id).update({
+            status: "idle",
+          })
+        );
+        updatedUsers.push(user.username);
       }
     }
 
-    return addedDefaultStatusUsers;
+    await Promise.all(promisesToUpdateStatus);
+
+    return { count: updatedUsers.length, updatedUsers };
   } catch (error) {
     logger.error("Error adding default status to user", error);
     throw error;

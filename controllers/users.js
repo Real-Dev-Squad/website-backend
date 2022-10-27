@@ -375,10 +375,10 @@ const addDefaultArchivedRole = async (req, res) => {
  */
 const addDefaultStatus = async (req, res) => {
   try {
-    const addedDefaultStatusUsers = await userQuery.addDefaultStatus();
+    const updatedUsersData = await userQuery.addDefaultStatus();
     return res.json({
       message: "Default status added to users successfully!",
-      addedDefaultStatusUsers,
+      ...updatedUsersData,
     });
   } catch (error) {
     logger.error(`Error adding default status: ${error}`);
