@@ -205,7 +205,7 @@ const overdueTasks = async (req, res) => {
 
 const assignTask = async (req, res) => {
   // we will fetch the skilltag leveltag of that particular user here once we have the skill with his userId
-  // we can check here the all the level and which ever is smallest we can make the request with taht particular category for now value is hardcoded
+  // we can check here the all the level, and whichever is the smallest we can make the request with that particular category, for now value is hardcoded
   // I am putting the names of the skills but we are going to get id
   try {
     const { status, username } = req.userData;
