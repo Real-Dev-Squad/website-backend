@@ -217,7 +217,7 @@ const fetchUserImage = async (users) => {
 
 /**
  * Add default status
- * @returns {Promise<string[]>}
+ * @returns {Promise<{ count: number , updatedUsers: string[]}>}
  */
 const addDefaultStatus = async () => {
   try {
