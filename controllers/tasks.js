@@ -203,6 +203,27 @@ const overdueTasks = async (req, res) => {
   }
 };
 
+const assignTask = async (req, res) => {
+  // we will fetch the skilltag leveltag of that particular user here once we have the skill with his userId
+  // we can check here the all the level and which ever is smallest we can make the request with taht particular category for now value is hardcoded
+  // I am putting the names of the skills but we are going to get id
+  try {
+    const { status, username } = req.userData;
+
+    if (status !== "idle") {
+      return res.json({ message: "Task cannot be assigned to users with active or OOO status" });
+    }
+
+    const { task } = await tasks.fetchSkillLevelTask("FRONTEND", 1);
+    if (!task) return res.json({ message: "Task not found" });
+
+    await tasks.updateTask({ assignee: username, status: TASK_STATUS.ASSIGNED }, task.id);
+    return res.json({ message: "Task assigned" });
+  } catch {
+    return res.boom.badImplementation("Something went wrong!");
+  }
+};
+
 module.exports = {
   addNewTask,
   fetchTasks,
@@ -212,4 +233,5 @@ module.exports = {
   getTask,
   updateTaskStatus,
   overdueTasks,
+  assignTask,
 };
