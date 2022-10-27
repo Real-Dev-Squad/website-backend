@@ -190,8 +190,8 @@ describe("Users", function () {
 
   describe("PATCH /defaultStatus", function (done) {
     beforeEach(async function () {
-      await addUser(statusDoesNotExistsUser);
-      await addUser(activeUser);
+      await addUser(userWithoutStatusField);
+      await addUser(userWithActiveStatus);
     });
 
     it("Should add default status to user where status does not exists", function (done) {
@@ -208,8 +208,8 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Default status added to users successfully!");
           expect(res.body.count).to.equal(1);
-          expect(res.body.updatedUsers).to.include.members([statusDoesNotExistsUser.username]);
-          expect(res.body.updatedUsers).to.not.include.members([activeUser.username]);
+          expect(res.body.updatedUsers).to.include.members([userWithoutStatusField.username]);
+          expect(res.body.updatedUsers).to.not.include.members([userWithActiveStatus.username]);
 
           return done();
         });

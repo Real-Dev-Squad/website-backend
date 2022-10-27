@@ -230,7 +230,7 @@ const addDefaultStatus = async () => {
 
     for (const user of users) {
       if (user.status === undefined) {
-        promisesToUpdateStatus.push(
+        updateStatusPromises.push(
           userModel.doc(user.id).update({
             status: "idle",
           })
@@ -239,7 +239,7 @@ const addDefaultStatus = async () => {
       }
     }
 
-    await Promise.all(promisesToUpdateStatus);
+    await Promise.all(updateStatusPromises);
 
     return { count: updatedUsers.length, updatedUsers };
   } catch (error) {
