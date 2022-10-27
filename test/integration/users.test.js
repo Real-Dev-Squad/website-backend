@@ -11,8 +11,8 @@ const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
-const statusDoesNotExistsUser = userData[1];
-const activeUser = userData[0];
+const userWithoutStatusField = userData[1];
+const userWithActiveStatus = userData[0];
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");

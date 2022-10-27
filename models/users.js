@@ -223,7 +223,7 @@ const addDefaultStatus = async () => {
   try {
     const usersSnapshot = await userModel.get();
     const users = [];
-    const promisesToUpdateStatus = [];
+    const updateStatusPromises = [];
     const updatedUsers = [];
 
     usersSnapshot.forEach((doc) => users.push({ id: doc.id, ...doc.data() }));
