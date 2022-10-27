@@ -188,7 +188,7 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /add-default-status", function (done) {
+  describe("PATCH /defaultStatus", function (done) {
     beforeEach(async function () {
       await addUser(statusDoesNotExistsUser);
       await addUser(activeUser);
@@ -197,7 +197,7 @@ describe("Users", function () {
     it("Should add default status to user where status does not exists", function (done) {
       chai
         .request(app)
-        .patch(`/users/add-default-status`)
+        .patch(`/users/defaultStatus`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -207,8 +207,9 @@ describe("Users", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Default status added to users successfully!");
-          expect(res.body.addedDefaultStatusUsers).to.include.members([statusDoesNotExistsUser.username]);
-          expect(res.body.addedDefaultStatusUsers).to.not.include.members([activeUser.username]);
+          expect(res.body.count).to.equal(1);
+          expect(res.body.updatedUsers).to.include.members([statusDoesNotExistsUser.username]);
+          expect(res.body.updatedUsers).to.not.include.members([activeUser.username]);
 
           return done();
         });
@@ -217,7 +218,7 @@ describe("Users", function () {
     it("Should return authorization error if user is non super user", function (done) {
       chai
         .request(app)
-        .patch(`/users/add-default-status`)
+        .patch(`/users/defaultStatus`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -235,7 +236,7 @@ describe("Users", function () {
     it("Should return authenticated error when user is not logged in", function (done) {
       chai
         .request(app)
-        .patch(`/users/add-default-status`)
+        .patch(`/users/defaultStatus`)
         .end((err, res) => {
           if (err) {
             return done(err);

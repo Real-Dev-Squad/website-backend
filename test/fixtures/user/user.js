@@ -90,6 +90,7 @@ module.exports = () => {
       tokens: {
         githubAccessToken: "githubAccessToken",
       },
+      status: "idle",
       roles: {
         super_user: true,
         archived: false,
