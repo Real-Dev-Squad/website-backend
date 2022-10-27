@@ -30,6 +30,7 @@ describe("Tasks", function () {
     const superUserId = await addUser(superUser);
     jwt = authService.generateAuthToken({ userId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
+    
     const taskData = [
       {
         title: "Test task",
