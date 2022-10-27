@@ -4,4 +4,9 @@ const profileStatus = {
   APPROVED: "APPROVED",
   NOT_APPROVED: "NOT APPROVED",
 };
-module.exports = { userStatusEnum, profileStatus };
+const userStatus = {
+  OOO: "ooo",
+  IDLE: "idle",
+  ACTIVE: "active",
+};
+module.exports = { userStatusEnum, profileStatus, userStatus };
