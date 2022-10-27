@@ -11,6 +11,8 @@ const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
+const statusDoesNotExistsUser = userData[1];
+const activeUser = userData[0];
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
@@ -188,8 +190,8 @@ describe("Users", function () {
 
   describe("PATCH /add-default-status", function (done) {
     beforeEach(async function () {
-      await addUser(userData[1]); // status does not exists user
-      await addUser(userData[0]); // status active user
+      await addUser(statusDoesNotExistsUser);
+      await addUser(activeUser);
     });
 
     it("Should add default status to user where status does not exists", function (done) {
@@ -205,8 +207,8 @@ describe("Users", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Default status added to users successfully!");
-          expect(res.body.addedDefaultStatusUsers).to.include.members(["nikhil"]);
-          expect(res.body.addedDefaultStatusUsers).to.not.include.members(["ankur"]);
+          expect(res.body.addedDefaultStatusUsers).to.include.members([statusDoesNotExistsUser.username]);
+          expect(res.body.addedDefaultStatusUsers).to.not.include.members([activeUser.username]);
 
           return done();
         });
