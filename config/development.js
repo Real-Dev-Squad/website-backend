@@ -26,7 +26,7 @@ module.exports = {
   },
 
   cors: {
-    allowedOrigins: /(https:\/\/(.*\.)*realdevsquad\.com$)|(localhost)/, // Allow *.realdevsquad.com and localhost for non-production envs
+    allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)|(localhost)/, // Allow realdevsquad. *.realdevsquad.com and localhost for non-production envs
   },
 
   userToken: {

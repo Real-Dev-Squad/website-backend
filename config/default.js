@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * Default config to be used if environment specific config for the specific key is absent
  * Every config key to be added to `default.js` to keep a track of all config keys used in the project.
@@ -49,7 +50,7 @@ module.exports = {
   },
 
   cors: {
-    allowedOrigins: /https:\/\/(.*\.)*realdevsquad\.com$/,
+    allowedOrigins: /https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$/,
   },
 
   userToken: {
