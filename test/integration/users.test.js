@@ -17,6 +17,7 @@ const userWithActiveStatus = userData[0];
 const config = require("config");
 const joinData = require("../fixtures/user/join");
 const { addJoinData } = require("../../models/users");
+const deleteStatus = require("../utils/deleteStatus");
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
@@ -188,9 +189,15 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /defaultStatus", function (done) {
+  describe("PATCH /defaultStatus", function () {
     beforeEach(async function () {
-      await addUser(userWithoutStatusField);
+      const userId = await addUser(userWithoutStatusField);
+      /**
+       * As a part of this issue https://github.com/Real-Dev-Squad/website-backend/issues/766
+       * Default status will be added to new user
+       * To test the scenario of adding the status to user where it does not exists I am deleting the status
+       */
+      await deleteStatus(userId);
       await addUser(userWithActiveStatus);
     });
 
