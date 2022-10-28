@@ -1,5 +1,6 @@
 const tasks = require("../models/tasks");
 const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
+const { userStatusEnum } = require("../constants/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 /**
@@ -210,7 +211,7 @@ const assignTask = async (req, res) => {
   try {
     const { status, username } = req.userData;
 
-    if (status !== "idle") {
+    if (status !== userStatusEnum[1]) {
       return res.json({ message: "Task cannot be assigned to users with active or OOO status" });
     }
 
