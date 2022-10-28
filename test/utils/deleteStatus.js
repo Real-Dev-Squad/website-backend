@@ -2,7 +2,7 @@ const firestore = require("../../utils/firestore");
 const userModal = firestore.collection("users");
 
 /**
- * Deling the status for user
+ * Deleting the status of a user
  * @param {String} userId
  * @returns {boolean} success - is the status deleted or not
  */
