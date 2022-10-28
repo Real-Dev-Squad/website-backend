@@ -179,11 +179,17 @@ const updateTaskStatus = async (req, res, next) => {
 
     if (req.body.status) {
       taskLog.body.new.status = req.body.status;
-      taskLog.body.messages.push(`${username} changed status to ${req.body.status}`);
+      taskLog.body.messages.push(`changed status to ${req.body.status}`);
     }
     if (req.body.percentCompleted) {
       taskLog.body.new.percentCompleted = req.body.percentCompleted;
-      taskLog.body.messages.push(`${username} changed percentCompleted to ${req.body.percentCompleted}`);
+      taskLog.body.messages.push(`changed percentCompleted to ${req.body.percentCompleted}`);
+    }
+
+    if (req.body.percentCompleted === 100 && req.body.status === TASK_STATUS.COMPLETED) {
+      taskLog.body.messages = [
+        `changed percentCompleted to ${req.body.percentCompleted} and status was changed to COMPLETED`,
+      ];
     }
 
     const [, taskLogResult] = await Promise.all([
