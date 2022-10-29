@@ -4,10 +4,10 @@ const profileStatus = {
   NOT_APPROVED: "NOT APPROVED",
 };
 
-const userStatus = {
+const USER_STATUS = {
   OOO: "ooo",
   IDLE: "idle",
   ACTIVE: "active",
 };
 
-module.exports = { profileStatus, userStatus };
+module.exports = { profileStatus, USER_STATUS };
