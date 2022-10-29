@@ -536,4 +536,30 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("No overdue tasks found");
     });
   });
+
+  describe("PATCH /tasks/assign/self", function () {
+    it("should not assign a task to the user if they do not have status idle", async function () {
+      const taskData = tasksData[4];
+      await tasks.updateTask(taskData);
+
+      const res = await chai.request(app).patch(`/tasks/assign/self`).set("cookie", `${cookieName}=${jwt}`).send();
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.be.equal("Task cannot be assigned to users with active or OOO status");
+    });
+
+    it("should assign task to the user if their status is idle and task is available", async function () {
+      const taskData = tasksData[4];
+      await tasks.updateTask(taskData);
+
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/assign/self`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.be.equal("Task assigned");
+    });
+  });
 });
