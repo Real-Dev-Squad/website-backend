@@ -3,6 +3,7 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 const walletConstants = require("../constants/wallets");
+const { USER_STATUS } = require("../constants/users");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
@@ -49,6 +50,17 @@ const addOrUpdate = async (userData, userId = null) => {
      */
     userData.roles = { archived: false };
     userData.incompleteUserDetails = true;
+    /**
+     * Adding default status to user enable to query for idle user
+     * This can be used in /users/idle
+     * https://github.com/Real-Dev-Squad/website-backend/issues/635
+     * The reason I am checking whether status exists or not before adding
+     * 1. If we are adding the user with some status it will not get override
+     * 2. Some tests are depends on the status of user, We are adding the user before each tests, those will consider as new user only and the status will be override if we don't check
+     */
+    if (userData.status === undefined) {
+      userData.status = USER_STATUS.IDLE;
+    }
     const userInfo = await userModel.add(userData);
     return { isNewUser: true, userId: userInfo.id };
   } catch (err) {
