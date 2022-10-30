@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 /**
  * Set the environment specific config in this file.
  * Defaults set from default.js
@@ -26,7 +25,7 @@ module.exports = {
   },
 
   cors: {
-    allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)|(localhost)/, // Allow realdevsquad. *.realdevsquad.com and localhost for non-production envs
+    allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)|(localhost)/, // Allow realdevsquad.com, *.realdevsquad.com and localhost for non-production envs
   },
 
   userToken: {
