@@ -3,7 +3,7 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 const walletConstants = require("../constants/wallets");
-const { userStatus } = require("../constants/users");
+const { USER_STATUS } = require("../constants/users");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
@@ -233,7 +233,7 @@ const addDefaultStatus = async () => {
       if (user.status === undefined) {
         updateStatusPromises.push(
           userModel.doc(user.id).update({
-            status: userStatus.IDLE,
+            status: USER_STATUS.IDLE,
           })
         );
         updatedUsers.push(user.username);
