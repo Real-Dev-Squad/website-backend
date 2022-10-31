@@ -21,6 +21,7 @@ const createTask = async (req, res, next) => {
         .valid(...TASK_STATUS_ENUM)
         .required(),
       assignee: joi.string().optional(),
+      priority: joi.string().required(),
       percentCompleted: joi.number().required(),
       dependsOn: joi.array().items(joi.string()).optional(),
       participants: joi.array().items(joi.string()).optional(),

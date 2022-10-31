@@ -323,26 +323,26 @@ const addUserIntro = async (req, res) => {
     const rawData = req.body;
     const data = {
       userId: req.userData.id,
-      personalDetails: {
+      biodata: {
         firstName: rawData.firstName,
         lastName: rawData.lastName,
       },
-      locationDetails: {
+      location: {
         city: rawData.city,
         state: rawData.state,
         country: rawData.country,
       },
-      professionalDetails: {
+      professional: {
         institution: rawData.college,
         skills: rawData.skills,
       },
-      PersonalIntroWithReason: {
+      intro: {
         introduction: rawData.introduction,
         funFact: rawData.funFact,
         forFun: rawData.forFun,
         whyRds: rawData.whyRds,
       },
-      heardFrom: rawData.heardAbout,
+      foundFrom: rawData.foundFrom,
     };
     await userQuery.addJoinData(data);
 
