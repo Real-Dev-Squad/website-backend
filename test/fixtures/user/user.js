@@ -68,7 +68,7 @@ module.exports = () => {
       github_display_name: "Sagar Bajpai",
       phone: "1234567890",
       email: "abc@gmail.com",
-      status: "idle",
+      status: "active",
       tokens: {
         githubAccessToken: "githubAccessToken",
       },
@@ -88,6 +88,7 @@ module.exports = () => {
       github_display_name: "Ankush Dharkar",
       phone: "1234567890",
       email: "ad@amazon.com",
+      status: "idle",
       tokens: {
         githubAccessToken: "githubAccessToken",
       },
