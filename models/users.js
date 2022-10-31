@@ -116,6 +116,30 @@ const fetchUsers = async (query) => {
 };
 
 /**
+ * Fetches the data about idle users
+ *
+ * @return {Promise<userModel|Array>}
+ */
+const fetchIdleUsers = async () => {
+  try {
+    const idleUsersSnapshot = await userModel.where("status", "==", "idle").get();
+    const idleUsers = [];
+
+    idleUsersSnapshot.forEach((doc) => {
+      idleUsers.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    return idleUsers;
+  } catch (error) {
+    logger.error("Error retrieving idle user data", error);
+    throw error;
+  }
+};
+
+/**
  * Fetches the user data from the the provided username or userId
  *
  * @param { Object }: Object with username and userId, any of the two can be used
@@ -218,6 +242,7 @@ const fetchUserImage = async (users) => {
 module.exports = {
   addOrUpdate,
   fetchUsers,
+  fetchIdleUsers,
   fetchUser,
   setIncompleteUserDetails,
   initializeUser,

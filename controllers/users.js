@@ -84,14 +84,12 @@ const getUsers = async (req, res) => {
 
 const getIdleUsers = async (req, res) => {
   try {
-    const allUsers = await userQuery.fetchUsers(req.query);
-    const allMembers = allUsers?.filter((_user) => _user.roles.member);
+    const idleUsers = await userQuery.fetchIdleUsers();
+    const idleMembers = idleUsers?.filter((_user) => _user.roles.member);
     const { members } = req.query;
     const areOnlyMembers = members === "true";
-    const selectedUsers = areOnlyMembers ? allMembers : allUsers;
-    const idleUserUsernames = selectedUsers
-      ?.filter(({ status }) => status === "idle" || !status)
-      .map((_user) => _user.username);
+    const selectedUsers = areOnlyMembers ? idleMembers : idleUsers;
+    const idleUserUsernames = selectedUsers.map((_user) => _user.username);
 
     return res.json({
       message: "Idle users returned successfully!",
