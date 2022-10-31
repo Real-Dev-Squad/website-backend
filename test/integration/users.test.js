@@ -11,6 +11,9 @@ const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
+const idleUser = userData[1];
+const activeMember = userData[0];
+const idleMember = userData[6];
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
@@ -126,9 +129,9 @@ describe("Users", function () {
 
   describe("GET /users/idle", function () {
     beforeEach(async function () {
-      await addUser(userData[3]); // idle user
-      await addUser(userData[0]); // active member
-      await addUser(userData[6]); // idle member
+      await addUser(idleUser);
+      await addUser(activeMember);
+      await addUser(idleMember);
     });
     it("Should get the idle users", function (done) {
       chai
@@ -144,7 +147,7 @@ describe("Users", function () {
           expect(res.body.message).to.equal("Idle users returned successfully!");
           expect(res.body.idleUserUsernames).to.be.a("array");
           expect(res.body.idleUserUsernames[0]).to.be.a("string");
-          expect(res.body.idleUserUsernames).to.include.members(["sagar", "mehul"]);
+          expect(res.body.idleUserUsernames).to.include.members([idleUser.username, idleMember.username]);
 
           return done();
         });
@@ -164,7 +167,7 @@ describe("Users", function () {
           expect(res.body.message).to.equal("Idle users returned successfully!");
           expect(res.body.idleUserUsernames).to.be.a("array");
           expect(res.body.idleUserUsernames[0]).to.be.a("string");
-          expect(res.body.idleUserUsernames).to.eql(["mehul"]);
+          expect(res.body.idleUserUsernames).to.eql([idleMember.username]);
 
           return done();
         });

@@ -41,6 +41,7 @@ module.exports = () => {
       twitter_id: "whatifi",
       phone: "1234567891",
       email: "abc1@gmail.com",
+      status: "idle",
     },
     {
       username: "pranavg",
