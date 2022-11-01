@@ -25,7 +25,7 @@
     "express-boom": "^3.0.0",
     "firebase-admin": "^9.6.0",
     "helmet": "^4.4.1",
-    "http-errors": "~1.8.0",
+    "http-errors": "~2.0.0",
     "joi": "^17.4.0",
     "jsdoc": "^3.6.7",
     "jsonwebtoken": "^8.5.1",
