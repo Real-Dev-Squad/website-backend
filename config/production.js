@@ -5,5 +5,5 @@
 module.exports = {
   userToken: {
     cookieName: "rds-session",
-  }
+  },
 };
