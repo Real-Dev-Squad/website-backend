@@ -57,7 +57,7 @@
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
     "prettier": "^2.5.1",
-    "sinon": "^10.0.0"
+    "sinon": "^14.0.0"
   },
   "engines": {
     "node": "14.x"
