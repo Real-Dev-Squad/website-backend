@@ -15,6 +15,7 @@ const tasksData = require("../fixtures/tasks/tasks")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
 const { TASK_STATUS } = require("../../constants/tasks");
+const { USER_STATUS } = require("../../constants/users");
 chai.use(chaiHttp);
 
 const appOwner = userData[3];
@@ -30,6 +31,8 @@ describe("Tasks", function () {
     const superUserId = await addUser(superUser);
     jwt = authService.generateAuthToken({ userId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
+    // Adding status to active user as while adding the user it will be consider as new user (for new user default status is idle)
+    await userModel.addOrUpdate({ status: USER_STATUS.ACTIVE }, userId);
 
     const taskData = [
       {
