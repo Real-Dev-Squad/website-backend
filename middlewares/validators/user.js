@@ -1,5 +1,5 @@
 const joi = require("joi");
-const { userStatusEnum } = require("../../constants/users");
+const { USER_STATUS } = require("../../constants/users");
 
 const updateUser = async (req, res, next) => {
   const schema = joi
@@ -21,7 +21,7 @@ const updateUser = async (req, res, next) => {
       website: joi.string().optional(),
       status: joi
         .any()
-        .valid(...userStatusEnum)
+        .valid(...Object.values(USER_STATUS))
         .optional(),
     });
 
@@ -61,7 +61,7 @@ const validateJoinData = async (req, res, next) => {
       city: joi.string().required(),
       state: joi.string().required(),
       country: joi.string().required(),
-      heardAbout: joi.string().required(),
+      foundFrom: joi.string().required(),
       introduction: joi.string().required(),
       forFun: joi.string().min(100).required(),
       funFact: joi.string().min(100).required(),
