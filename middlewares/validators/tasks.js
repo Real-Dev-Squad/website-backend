@@ -21,9 +21,12 @@ const createTask = async (req, res, next) => {
         .valid(...TASK_STATUS_ENUM)
         .required(),
       assignee: joi.string().optional(),
+      priority: joi.string().required(),
       percentCompleted: joi.number().required(),
       dependsOn: joi.array().items(joi.string()).optional(),
       participants: joi.array().items(joi.string()).optional(),
+      category: joi.string().optional(),
+      level: joi.number().optional(),
       completionAward: joi
         .object()
         .keys({
@@ -62,6 +65,8 @@ const updateTask = async (req, res, next) => {
       links: joi.array().items(joi.string()).optional(),
       endsOn: joi.number().optional(),
       startedOn: joi.number().optional(),
+      category: joi.string().optional(),
+      level: joi.number().optional(),
       status: joi
         .string()
         .valid(...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD))

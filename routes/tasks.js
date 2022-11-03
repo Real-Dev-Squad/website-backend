@@ -16,5 +16,6 @@ router.patch("/:id", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), update
 router.get("/:id/details", tasks.getTask);
 router.get("/:username", tasks.getUserTasks);
 router.patch("/self/:id", authenticate, updateSelfTask, tasks.updateTaskStatus, assignTask);
+router.patch("/assign/self", authenticate, tasks.assignTask);
 
 module.exports = router;
