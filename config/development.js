@@ -24,10 +24,6 @@ module.exports = {
     },
   },
 
-  cors: {
-    allowedOrigins: /(\.realdevsquad\.com$)|(localhost)/, // Allow *.realdevsquad.com and localhost for non-production envs
-  },
-
   userToken: {
     publicKey:
       "-----BEGIN PUBLIC KEY-----\n" +
