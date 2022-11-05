@@ -26,7 +26,6 @@ const addDefaultColors = async (req, res) => {
     }
 
     await Promise.all(updateUserPromises);
-    // eslint-disable-next-line no-console
 
     return res.json({
       message: "User colors updated successfully!",
