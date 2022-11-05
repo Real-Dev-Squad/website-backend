@@ -3,7 +3,7 @@ const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const { SUPERUSER } = require("../constants/roles");
-const migrations = require("../controllers/migrations");
+const migrations = require("../controllers/userMigrations");
 
 router.patch("/addDefaultColorProperty", authenticate, authorizeRoles([SUPERUSER]), migrations.addDefaultColors);
 

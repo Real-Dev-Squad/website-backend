@@ -17,6 +17,6 @@ app.use("/trade", require("./trading.js"));
 app.use("/users", require("./users.js"));
 app.use("/profileDiffs", require("./profileDiffs.js"));
 app.use("/wallet", require("./wallets.js"));
-app.use("/migrations", require("./migrations.js"));
+app.use("/migrations", require("./userMigrations.js"));
 
 module.exports = app;
