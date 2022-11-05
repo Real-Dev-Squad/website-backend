@@ -62,8 +62,8 @@ describe("userColorMigrations", function () {
           }
 
           expect(res).to.have.status(200);
-          expect(res.body.count).to.be.equal(colorBearingUsernames.length);
-          const migratedUsernames = res.body.users;
+          expect(res.body.usersDetails.count).to.be.equal(colorBearingUsernames.length);
+          const migratedUsernames = res.body.usersDetails.users;
 
           expect(migratedUsernames).to.include(
             colorBearingUsernames[0],
