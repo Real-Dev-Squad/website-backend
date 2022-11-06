@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const { TYPES } = require("../../constants/tags");
 
-const createTag = async (req, res, next) => {
+const validTagBody = async (req, res, next) => {
   const schema = Joi.object({
     name: Joi.string().trim().required(),
     type: Joi.string()
@@ -26,5 +26,5 @@ const createTag = async (req, res, next) => {
 };
 
 module.exports = {
-  createTag,
+  validTagBody,
 };

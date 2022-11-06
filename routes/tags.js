@@ -1,11 +1,11 @@
 const express = require("express");
 
 const { addTag, deleteTag, getAllTags } = require("../controllers/tags");
-const { createTag } = require("../middlewares/validators/tags");
+const { validTagBody } = require("../middlewares/validators/tags");
 
 const router = express.Router();
 
-router.post("/", createTag, addTag);
+router.post("/", validTagBody, addTag);
 router.delete("/:tagid", deleteTag);
 router.get("/", getAllTags);
 
