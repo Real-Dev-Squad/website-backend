@@ -9,9 +9,9 @@ const LevelModel = require("../models/levels");
 
 const addLevel = async (req, res) => {
   try {
-    const { id, levelData } = await LevelModel.addLevel(req.body);
+    const { id, levelData, wasCreated } = await LevelModel.addLevel(req.body);
     return res.json({
-      message: "Level created successfully!",
+      message: wasCreated ? "Level created successfully!" : "Level already exists!",
       level: levelData,
       id,
     });
