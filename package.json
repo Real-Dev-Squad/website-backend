@@ -27,7 +27,7 @@
     "helmet": "^6.0.0",
     "http-errors": "~2.0.0",
     "joi": "^17.4.0",
-    "jsdoc": "^3.6.7",
+    "jsdoc": "^4.0.0",
     "jsonwebtoken": "^8.5.1",
     "morgan": "~1.10.0",
     "multer": "^1.4.2",
@@ -40,7 +40,7 @@
     "chai": "^4.3.4",
     "chai-http": "^4.3.0",
     "cross-env": "^7.0.3",
-    "eslint": "^7.32.0",
+    "eslint": "^8.0.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
@@ -66,7 +66,7 @@
     "lint"
   ],
   "volta": {
-    "node": "14.21.0",
+    "node": "14.21.1",
     "yarn": "1.22.19"
   }
 }
