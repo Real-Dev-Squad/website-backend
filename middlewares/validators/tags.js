@@ -11,7 +11,7 @@ const tagValidationSchema = Joi.object({
     }),
 
   createdBy: Joi.string().required(),
-  date: Joi.string().required(),
+  date: Joi.date().required(),
   reason: Joi.string().exist(),
 });
 
