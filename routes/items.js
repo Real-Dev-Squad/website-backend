@@ -8,11 +8,11 @@ const {
   getItemsBasedOnitemId,
   getItemsBasedOnTagType,
 } = require("../controllers/items");
-const { createItem } = require("../middlewares/validators/items");
+const { validateItemsPayload } = require("../middlewares/validators/items");
 
 const router = express.Router();
 
-router.post("/", createItem, addTagsToItem);
+router.post("/", validateItemsPayload, addTagsToItem);
 router.delete("/", removeTagsFromItem);
 router.get("/bytype/:type", getItemsBasedOnType);
 router.get("/bytag/:tagid", getItemsBasedOnTagId);

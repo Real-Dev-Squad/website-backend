@@ -2,7 +2,7 @@ const Joi = require("joi");
 
 const { TYPES } = require("../../constants/items");
 
-const createItem = async (req, res, next) => {
+const validateItemsPayload = async (req, res, next) => {
   const schema = Joi.object({
     itemid: Joi.string().trim().required(),
     itemType: Joi.string()
@@ -24,11 +24,11 @@ const createItem = async (req, res, next) => {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
-    logger.error(`Error validating createItem payload : ${error}`);
+    logger.error(`Error validating adding tags payload : ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };
 
 module.exports = {
-  createItem,
+  validateItemsPayload,
 };
