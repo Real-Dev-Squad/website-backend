@@ -9,12 +9,9 @@ const tagModel = firestore.collection("tags");
 
 const addTag = async (tagData) => {
   try {
-    const alreadyIsTag = await tagModel.where("name", "==", tagData.name).where("type", "==", tagData.type).get();
-    if (alreadyIsTag) {
-      return { id: "", tagData, wasCreated: false };
-    }
+    tagData.type = tagData.type.toUpperCase();
     const { id } = await tagModel.add(tagData);
-    return { id, tagData, wasCreated: true };
+    return { id, tagData };
   } catch (err) {
     logger.error("Error in creating Tag", err);
     throw err;

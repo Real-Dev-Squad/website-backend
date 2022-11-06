@@ -9,10 +9,10 @@ const TagModel = require("../models/tags");
 
 const addTag = async (req, res) => {
   try {
-    const { id, tagData, wasCreated } = await TagModel.addTag(req.body);
+    const { id, tagData } = await TagModel.addTag(req.body);
 
     return res.status(400).json({
-      message: wasCreated ? "Tag created successfully!" : "Tag already exists!",
+      message: "Tag created successfully!",
       stock: tagData,
       id,
     });
