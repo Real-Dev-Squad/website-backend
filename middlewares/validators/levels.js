@@ -11,7 +11,7 @@ const createLevel = async (req, res, next) => {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
-    logger.error(`Error validating createChallenge payload : ${error}`);
+    logger.error(`Error validating createLevel payload : ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };
