@@ -67,7 +67,7 @@ const removeTagsFromItem = async (itemData) => {
 
 const getItemsBasedOnType = async (itemtype) => {
   try {
-    const data = await itemModel.where("itemType", "==", itemtype.toUpperCase()).get();
+    const data = await itemModel.where("itemtype", "==", itemtype.toUpperCase()).get();
     const itemsWithType = [];
     data.forEach((doc) => {
       const item = {
