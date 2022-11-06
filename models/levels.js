@@ -9,12 +9,8 @@ const levelModel = firestore.collection("levels");
 
 const addLevel = async (levelData) => {
   try {
-    const alreadyIsTag = await levelModel.where("name", "==", levelData.name).get();
-    if (alreadyIsTag) {
-      return { id: "", levelData, wasCreated: false };
-    }
     const { id } = await levelModel.add(levelData);
-    return { id, levelData, wasCreated: true };
+    return { id, levelData };
   } catch (err) {
     logger.error("Error in creating Level", err);
     throw err;
