@@ -11,7 +11,7 @@ const addTag = async (req, res) => {
   try {
     const { id, tagData } = await TagModel.addTag(req.body);
 
-    return res.status(400).json({
+    return res.json({
       message: "Tag created successfully!",
       stock: tagData,
       id,
