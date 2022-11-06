@@ -1,6 +1,6 @@
 const express = require("express");
 const { createValidator } = require("express-joi-validation");
-const { addLevel, deleteLevel, getAllLevels } = require("../controllers/level-controller");
+const { addLevel, deleteLevel, getAllLevels } = require("../controllers/levels");
 const { levelSchema } = require("../middlewares/validators/levels");
 
 const router = express.Router();
