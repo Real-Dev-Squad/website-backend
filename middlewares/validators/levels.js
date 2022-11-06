@@ -1,6 +1,6 @@
 const Joi = require("joi");
 
-const createLevel = async (req, res, next) => {
+const validateLevelBody = async (req, res, next) => {
   const schema = Joi.object({
     name: Joi.string().trim().required(),
     createdBy: Joi.string().required(),
@@ -17,5 +17,5 @@ const createLevel = async (req, res, next) => {
 };
 
 module.exports = {
-  createLevel,
+  validateLevelBody,
 };

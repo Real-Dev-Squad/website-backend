@@ -1,10 +1,10 @@
 const express = require("express");
 const { addLevel, deleteLevel, getAllLevels } = require("../controllers/levels");
-const { createLevel } = require("../middlewares/validators/levels");
+const { validateLevelBody } = require("../middlewares/validators/levels");
 
 const router = express.Router();
 
-router.post("/", createLevel, addLevel);
+router.post("/", validateLevelBody, addLevel);
 router.delete("/:levelid", deleteLevel);
 router.get("/", getAllLevels);
 
