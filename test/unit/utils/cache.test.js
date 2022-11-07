@@ -14,7 +14,7 @@ describe("cache pool", function () {
   });
 
   describe("minutesToMilliSeconds", function () {
-    it("should convert minutes and return in milliseconds", function () {
+    it("should convert given minutes into milliseconds", function () {
       timeData.minutesToMilliseconds.forEach((time) => {
         const result = minutesToMilliseconds(time.param);
         expect(result).to.be.equal(time.result);
@@ -23,7 +23,7 @@ describe("cache pool", function () {
   });
 
   describe("cachePool.set", function () {
-    it("should add an item to cache pool and return value `true`", async function () {
+    it("should add an item to the cache pool and return value `true`", async function () {
       const response = await pool.set(testKey, getDummyResponse());
       expect(response).to.be.equal(true);
     });
@@ -35,7 +35,8 @@ describe("cache pool", function () {
       expect(value).to.be.equal(null);
     });
 
-    it("successfully read from cache pool", function () {
+    it("should successfully read from cache pool if a key is present in cache", function () {
+      pool.set(testKey, getDummyResponse());
       const value = pool.get(testKey);
 
       expect(value).to.have.all.keys("message", "tasks");
