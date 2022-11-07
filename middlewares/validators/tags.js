@@ -10,8 +10,6 @@ const validTagBody = async (req, res, next) => {
         if (!TYPES.includes(value)) return helper.message("Not a valid type");
         return value;
       }),
-
-    createdBy: Joi.string().required(),
     date: Joi.date().required(),
     reason: Joi.string().exist(),
   });
