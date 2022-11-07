@@ -55,7 +55,7 @@ const getAllTags = async (req, res) => {
       allTags,
     });
   } catch (err) {
-    logger.error(`Error while creating new tag: ${err}`);
+	    logger.error(`Error while fetching all the tag: ${err}`);
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
