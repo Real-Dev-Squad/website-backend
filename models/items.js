@@ -84,7 +84,7 @@ const getItemsBasedOnType = async (itemtype) => {
     });
     return itemsWithType;
   } catch (err) {
-    logger.error("Error in deleting Item", err);
+    logger.error("Error in getting Item based on item type", err);
     throw err;
   }
 };
@@ -114,7 +114,7 @@ const getItemsBasedOnTagId = async (tagid) => {
     });
     return itemsWithTag;
   } catch (err) {
-    logger.error("Error in deleting Item", err);
+    logger.error("Error in getting Item based on tag id", err);
     throw err;
   }
 };
@@ -144,7 +144,7 @@ const getItemsBasedOnItemId = async (itemid) => {
     });
     return itemsWithItemId;
   } catch (err) {
-    logger.error("Error in deleting Item", err);
+    logger.error("Error in getting Item based on item id", err);
     throw err;
   }
 };
@@ -174,7 +174,7 @@ const getItemsBasedOnTagType = async (tagtype) => {
     });
     return itemsWithItemId;
   } catch (err) {
-    logger.error("Error in deleting Item", err);
+    logger.error("Error in getting Item based on tag type", err);
     throw err;
   }
 };
@@ -194,7 +194,7 @@ const getAllItems = async () => {
         itemid: doc.data().itemid,
         tagid: doc.data().tagid,
         tagname: doc.data().tagname,
-        itemType: doc.data().itemType,
+        tagtype: doc.data().tagtype,
         levelid: doc.data().levelid,
         levelname: doc.data().levelname,
         itemtype: doc.data().itemtype,
@@ -203,7 +203,7 @@ const getAllItems = async () => {
     });
     return allItems;
   } catch (err) {
-    logger.error("Error in deleting Item", err);
+    logger.error("Error in getting Items", err);
     throw err;
   }
 };
