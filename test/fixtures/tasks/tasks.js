@@ -59,10 +59,8 @@ module.exports = () => {
       startedOn: 4567,
       status: "AVAILABLE",
       percentCompleted: 0,
-      taskLevel: {
-        category: "frontend",
-        level: 3,
-      },
+      category: "FRONTEND",
+      level: 3,
       participants: [],
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
       lossRate: { [DINERO]: 1 },
