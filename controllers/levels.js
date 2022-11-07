@@ -31,7 +31,7 @@ const addLevel = async (req, res) => {
 
 const deleteLevel = async (req, res) => {
   try {
-    const { id } = await LevelModel.deleteLevel(req.body);
+    const { id } = await LevelModel.deleteLevel(req.params.levelid);
     return res.json({
       message: "Level Deleted successfully!",
       id,
