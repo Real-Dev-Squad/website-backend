@@ -13,7 +13,7 @@ const addTag = async (req, res) => {
 
     return res.json({
       message: "Tag created successfully!",
-      stock: tagData,
+      data: tagData,
       id,
     });
   } catch (err) {
