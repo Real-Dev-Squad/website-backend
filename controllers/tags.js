@@ -37,7 +37,7 @@ const deleteTag = async (req, res) => {
       id,
     });
   } catch (err) {
-	    logger.error(`Error while deleting the tag: ${err}`);
+    logger.error(`Error while deleting the tag: ${err}`);
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
@@ -55,7 +55,7 @@ const getAllTags = async (req, res) => {
       allTags,
     });
   } catch (err) {
-	    logger.error(`Error while fetching all the tag: ${err}`);
+    logger.error(`Error while fetching all the tag: ${err}`);
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
