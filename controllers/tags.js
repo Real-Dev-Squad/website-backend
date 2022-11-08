@@ -9,8 +9,7 @@ const TagModel = require("../models/tags");
 
 const addTag = async (req, res) => {
   try {
-    req.body.createdby = req.userData.id;
-    const { id, tagData } = await TagModel.addTag(req.body);
+    const { id, tagData } = await TagModel.addTag({ ...req.body, createdby: req.userData.id });
 
     return res.json({
       message: "Tag created successfully!",

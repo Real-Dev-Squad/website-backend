@@ -47,7 +47,7 @@ const getAllTags = async () => {
       id: doc.id,
       name: doc.data().name,
       type: doc.data().type,
-      createdBy: doc.data().createdBy,
+      createdby: doc.data().createdby,
       date: doc.data().date,
       reason: doc.data().reason,
     };
