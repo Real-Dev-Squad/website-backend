@@ -45,7 +45,7 @@ const getAllLevels = async () => {
     const Level = {
       id: doc.id,
       name: doc.data().name,
-      createdBy: doc.data().createdBy,
+      createdby: doc.data().createdby,
       date: doc.data().date,
     };
     allLevels.push(Level);
