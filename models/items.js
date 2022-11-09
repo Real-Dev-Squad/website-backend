@@ -13,17 +13,17 @@ const levelModel = firestore.collection("levels");
 const addTagsToItem = async (itemData) => {
   try {
     const { itemid, itemType, tagPayload } = itemData;
-    const batch = await firestore.batch();
+    const batch = firestore.batch();
     for (const tag of tagPayload) {
-      const tagData = await tagModel.doc(tag[0]).get();
-      const levelData = await levelModel.doc(tag[1]).get();
+      const tagData = await tagModel.doc(tag.tagid).get();
+      const levelData = await levelModel.doc(tag.levelid).get();
       const itemTag = {
         itemid,
         itemtype: itemType.toUpperCase(),
-        tagid: tag[0],
+        tagid: tag.tagid,
         tagname: tagData.data().name,
         tagtype: tagData.data().type,
-        levelid: tag[1],
+        levelid: tag.levelid,
         levelname: levelData.data().name,
       };
       const docid = itemModel.doc();

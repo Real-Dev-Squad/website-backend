@@ -12,12 +12,12 @@ const validateItemsPayload = async (req, res, next) => {
         return value;
       }),
 
-    tagPayload: Joi.array().custom((values, helper) => {
-      for (const val of values) {
-        if (val.length !== 2) return helper.message("tag payload is not valid");
-      }
-      return values;
-    }),
+    tagPayload: Joi.array().items(
+      Joi.object({
+        tagid: Joi.string().required(),
+        levelid: Joi.string().required(),
+      })
+    ),
   });
 
   try {
