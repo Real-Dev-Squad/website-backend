@@ -1,7 +1,7 @@
 const userQuery = require("../models/userMigrations");
 const logger = require("../utils/logger");
-const cardColorIdArray = require("../constants/cardColorIdArray");
 const { getRandomIndex } = require("../utils/helpers");
+const userColors = 10;
 /**
  * Returns the lists of usernames where default colors were added
  *
@@ -18,7 +18,7 @@ const addDefaultColors = async (req, res) => {
     for (const user of usersArr) {
       const colors = user.colors ? user.colors : {};
       if (user.colors === undefined) {
-        const userColorIndex = getRandomIndex(cardColorIdArray.length);
+        const userColorIndex = getRandomIndex(userColors);
         colors.color_id = userColorIndex;
         updateUserPromises.push(userModel.doc(user.id).set({ ...user, colors }));
         migratedUsers.push(user.username);
