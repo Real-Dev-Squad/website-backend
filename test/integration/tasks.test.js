@@ -345,9 +345,6 @@ describe("Tasks", function () {
 
           expect(res.body.taskLog.body.new.status).to.equal(taskStatusData.status);
           expect(res.body.taskLog.body.new.percentCompleted).to.equal(taskStatusData.percentCompleted);
-          expect(res.body.taskLog.body.message).that.contains(taskStatusData.percentCompleted);
-          expect(res.body.taskLog.body.message).that.contains(taskStatusData.status);
-          expect(res.body.taskLog.body.message).that.contains(`@${appOwner.username}`);
           return done();
         });
     });
