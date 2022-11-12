@@ -1,5 +1,6 @@
 const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
+const ItemModel = firestore.collection("items");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
@@ -194,11 +195,20 @@ const fetchUserTasks = async (username, statuses = [], field, order) => {
 };
 
 const getNewTask = async (skill, level) => {
-  const task = await tasksModel
-    .where("category", "==", skill)
-    .where("level", ">=", level)
-    .where("level", "<=", level + 2)
-    .where("status", "==", TASK_STATUS.AVAILABLE)
+  const call = await ItemModel.where("tagname", "==", skill)
+    .where("levelname", ">=", level)
+    .where("levelname", "<=", level + 2)
+    .get();
+
+  const idArray = [];
+
+  if (!call.empty) {
+    call.forEach((item) => idArray.push(item.data().itemid));
+  }
+
+  const task = await ItemModel.where("tagtype", "==", "STATUS")
+    .where("tagname", "==", "AVAILABLE")
+    .where("itemid", "in", idArray)
     .limit(1)
     .get();
 

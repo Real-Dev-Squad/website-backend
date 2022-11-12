@@ -215,11 +215,11 @@ const assignTask = async (req, res) => {
       return res.json({ message: "Task cannot be assigned to users with active or OOO status" });
     }
 
-    const { task } = await tasks.fetchSkillLevelTask("FRONTEND", 1);
+    const { task } = await tasks.fetchSkillLevelTask("REACT", 2);
     if (!task) return res.json({ message: "Task not found" });
 
-    await tasks.updateTask({ assignee: username, status: TASK_STATUS.ASSIGNED }, task.id);
-    return res.json({ message: "Task assigned" });
+    await tasks.updateTask({ assignee: username, status: TASK_STATUS.ASSIGNED }, task.itemid);
+    return res.json({ message: "Task assigned", Id: task.itemid });
   } catch {
     return res.boom.badImplementation("Something went wrong!");
   }
