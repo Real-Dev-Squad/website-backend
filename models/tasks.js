@@ -203,6 +203,7 @@ const getNewTask = async (skill, level) => {
     availableTasks.forEach((item) => idArray.push(item.id));
 
     task = await ItemModel.where("tagname", "==", skill)
+      .where("itemtype", "==", "TASK")
       .where("itemid", "in", idArray)
       .where("levelname", ">=", level)
       .where("levelname", "<=", level + 2)

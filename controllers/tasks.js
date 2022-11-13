@@ -221,6 +221,7 @@ const assignTask = async (req, res) => {
 
     const { taskId } = await tasks.updateTask({ assignee: username, status: TASK_STATUS.ASSIGNED }, task.itemid);
     if (taskId) {
+      // this will change once we start storing status in different collection
       await addOrUpdate({ status: "active" }, userId);
     }
     return res.json({ message: "Task assigned", Id: task.itemid });
