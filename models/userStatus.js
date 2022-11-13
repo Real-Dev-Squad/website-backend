@@ -1,3 +1,4 @@
+const { userState } = require("../constants/userStatus");
 const firestore = require("../utils/firestore");
 const userStatusModel = firestore.collection("userStatus");
 /**
@@ -73,7 +74,7 @@ const getAllUserStaus = async () => {
       allUserStatus.push(currentUserStatus);
     });
   } catch (error) {
-    logger.error(`error in fetching the User Status of all Users. Reason - ${error}`);
+    logger.error(`error in fetching the User Status of all Users. ${error}`);
   }
   return { allUserStatus };
 };
@@ -93,10 +94,10 @@ const updateUserStatus = async (userId, updatedData) => {
         id = docData.id;
       });
       if (Object.keys(updatedData).includes("currentStatus")) {
-        if (["IDLE", "ACTIVE"].includes(updatedData.currentStatus.state)) {
+        if ([userState.IDLE, userState.ACTIVE].includes(updatedData.currentStatus.state)) {
           updatedData.currentStatus.until = "";
         }
-        if (["ACTIVE"].includes(updatedData.currentStatus.state)) {
+        if ([userState.ACTIVE].includes(updatedData.currentStatus.state)) {
           updatedData.currentStatus.message = "";
         }
       }
@@ -106,7 +107,7 @@ const updateUserStatus = async (userId, updatedData) => {
       return { userId };
     }
   } catch (error) {
-    logger.error(`error in deleting User Status Document . ${error}`);
+    logger.error(`error in deleting User Status Document ${error}`);
   }
   return { userId, message: `user Status not found for ${userId}` };
 };

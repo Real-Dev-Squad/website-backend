@@ -1,16 +1,19 @@
 const joi = require("joi");
+const { userState } = require("../../constants/userStatus");
 
 const validateUserStatus = async (req, res, next) => {
   const schema = joi.object().keys({
     userId: joi.string().trim().required(),
     currentStatus: joi.object().keys({
-      state: joi.string().trim().valid("ACTIVE", "IDLE", "OOO"),
+      state: joi.string().trim().valid(userState.IDLE, userState.ACTIVE, userState.OOO),
       updatedAt: joi.number().required(),
       from: joi.number().required(),
-      until: joi.any().when("state", { is: "OOO", then: joi.number().required(), otherwise: joi.optional() }),
-      message: joi
-        .any()
-        .when("state", { is: ["IDLE", "OOO"], then: joi.string().required(), otherwise: joi.optional() }),
+      until: joi.any().when("state", { is: userState.OOO, then: joi.number().required(), otherwise: joi.optional() }),
+      message: joi.any().when("state", {
+        is: [userState.IDLE, userState.OOO],
+        then: joi.string().required(),
+        otherwise: joi.optional(),
+      }),
     }),
     monthlyHours: joi.object().keys({
       committed: joi.number().required(),
@@ -31,13 +34,15 @@ const validateUpdatedUserStatus = async (req, res, next) => {
   const schema = joi
     .object({
       currentStatus: joi.object().keys({
-        state: joi.string().trim().valid("ACTIVE", "IDLE", "OOO"),
+        state: joi.string().trim().valid(userState.IDLE, userState.ACTIVE, userState.OOO),
         updatedAt: joi.number().required(),
         from: joi.number().required(),
-        until: joi.any().when("state", { is: "OOO", then: joi.number().required(), otherwise: joi.optional() }),
-        message: joi
-          .any()
-          .when("state", { is: ["IDLE", "OOO"], then: joi.string().required(), otherwise: joi.optional() }),
+        until: joi.any().when("state", { is: userState.OOO, then: joi.number().required(), otherwise: joi.optional() }),
+        message: joi.any().when("state", {
+          is: [userState.IDLE, userState.OOO],
+          then: joi.string().required(),
+          otherwise: joi.optional(),
+        }),
       }),
       monthlyHours: joi.object().keys({
         committed: joi.number().required(),
