@@ -60,8 +60,22 @@ const getAllTags = async (req, res) => {
   }
 };
 
+const getTagsByType = async (req, res) => {
+  try {
+    const type = req.params.type.toUpperCase();
+    const { tags } = await TagModel.getTagByType(type);
+    return res.json({
+      tags,
+    });
+  } catch (err) {
+    logger.error(`Error while fetching the tags: ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
 module.exports = {
   addTag,
   deleteTag,
   getAllTags,
+  getTagsByType,
 };

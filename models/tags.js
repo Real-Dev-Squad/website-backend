@@ -56,8 +56,32 @@ const getAllTags = async () => {
   return { allTags };
 };
 
+const getTagByType = async (type) => {
+  try {
+    const data = await tagModel.where("type", "==", type).get();
+    const tags = [];
+    data.forEach((doc) => {
+      const tag = {
+        id: doc.id,
+        name: doc.data().name,
+        type: doc.data().type,
+        createdby: doc.data().createdby,
+        date: doc.data().date,
+        reason: doc.data().reason,
+      };
+      tags.push(tag);
+    });
+
+    return { tags };
+  } catch (err) {
+    logger.error("error getting tags", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addTag,
   deleteTag,
   getAllTags,
+  getTagByType,
 };
