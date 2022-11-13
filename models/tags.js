@@ -10,6 +10,7 @@ const tagModel = firestore.collection("tags");
 const addTag = async (tagData) => {
   try {
     tagData.type = tagData.type.toUpperCase();
+    tagData.name = tagData.name.toUpperCase();
     const { id } = await tagModel.add(tagData);
     return { id, tagData };
   } catch (err) {
