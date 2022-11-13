@@ -9,7 +9,7 @@ const LevelModel = require("../models/levels");
 
 const addLevel = async (req, res) => {
   try {
-    const { id, levelData } = await LevelModel.addLevel({ ...req.body, createdby: req.userData.id });
+    const { id, levelData } = await LevelModel.addLevel({ ...req.body, createdby: req.userData.id, date: new Date() });
     return res.json({
       message: "Level created successfully!",
       level: levelData,

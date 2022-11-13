@@ -8,7 +8,7 @@ const { SUPERUSER } = require("../constants/roles");
 const router = express.Router();
 
 router.post("/", authenticate, authorizeRoles([SUPERUSER]), validateLevelBody, addLevel);
-router.delete("/:levelid", authenticate, deleteLevel);
-router.get("/", authenticate, getAllLevels);
+router.delete("/:levelid", authenticate, authorizeRoles([SUPERUSER]), deleteLevel);
+router.get("/", getAllLevels);
 
 module.exports = router;
