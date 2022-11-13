@@ -1,15 +1,16 @@
 const joi = require("joi");
-const userStatusModel = require("../../models/userStatus");
 
 const validateUserStatus = async (req, res, next) => {
   const schema = joi.object().keys({
     userId: joi.string().trim().required(),
     currentStatus: joi.object().keys({
-      state: joi.string().trim().valid("ACTIVE", "IDLE", "OOO").required(),
+      state: joi.string().trim().valid("ACTIVE", "IDLE", "OOO"),
       updatedAt: joi.number().required(),
       from: joi.number().required(),
-      until: joi.number().optional(),
-      message: joi.string().trim().required(),
+      until: joi.any().when("state", { is: "OOO", then: joi.number().required(), otherwise: joi.optional() }),
+      message: joi
+        .any()
+        .when("state", { is: ["IDLE", "OOO"], then: joi.string().required(), otherwise: joi.optional() }),
     }),
     monthlyHours: joi.object().keys({
       committed: joi.number().required(),
@@ -21,19 +22,40 @@ const validateUserStatus = async (req, res, next) => {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
-    logger.error(`Error validating UserStatus payload : ${error}`);
+    logger.error(`Error validating UserStatus ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };
 
-const validatePartialUserStatus = async (req, res, next) => {
-  const dataToUpdate = req.body;
-  const originalData = await userStatusModel.getUserStaus(req.params.userId);
-  req.body = { ...originalData, ...dataToUpdate };
-  next();
+const validateUpdatedUserStatus = async (req, res, next) => {
+  const schema = joi
+    .object({
+      currentStatus: joi.object().keys({
+        state: joi.string().trim().valid("ACTIVE", "IDLE", "OOO"),
+        updatedAt: joi.number().required(),
+        from: joi.number().required(),
+        until: joi.any().when("state", { is: "OOO", then: joi.number().required(), otherwise: joi.optional() }),
+        message: joi
+          .any()
+          .when("state", { is: ["IDLE", "OOO"], then: joi.string().required(), otherwise: joi.optional() }),
+      }),
+      monthlyHours: joi.object().keys({
+        committed: joi.number().required(),
+        updatedAt: joi.number().required(),
+      }),
+    })
+    .or("currentStatus", "monthlyHours");
+
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error(`Error validating UserStatus ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
 };
 
 module.exports = {
   validateUserStatus,
-  validatePartialUserStatus,
+  validateUpdatedUserStatus,
 };

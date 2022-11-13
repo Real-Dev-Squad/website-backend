@@ -92,13 +92,21 @@ const updateUserStatus = async (userId, updatedData) => {
       docs.forEach((docData) => {
         id = docData.id;
       });
+      if (Object.keys(updatedData).includes("currentStatus")) {
+        if (["IDLE", "ACTIVE"].includes(updatedData.currentStatus.state)) {
+          updatedData.currentStatus.until = "";
+        }
+        if (["ACTIVE"].includes(updatedData.currentStatus.state)) {
+          updatedData.currentStatus.message = "";
+        }
+      }
       await userStatusModel.doc(id).update({
         ...updatedData,
       });
       return { userId };
     }
   } catch (error) {
-    logger.error(`error in deleting User Status Document . Reason - ${error}`);
+    logger.error(`error in deleting User Status Document . ${error}`);
   }
   return { userId, message: `user Status not found for ${userId}` };
 };
