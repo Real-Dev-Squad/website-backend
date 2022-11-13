@@ -195,22 +195,20 @@ const fetchUserTasks = async (username, statuses = [], field, order) => {
 };
 
 const getNewTask = async (skill, level) => {
-  const call = await ItemModel.where("tagname", "==", skill)
-    .where("levelname", ">=", level)
-    .where("levelname", "<=", level + 2)
-    .get();
-
+  const availableTasks = await tasksModel.where("status", "==", TASK_STATUS.AVAILABLE).get();
   const idArray = [];
+  let task;
 
-  if (!call.empty) {
-    call.forEach((item) => idArray.push(item.data().itemid));
+  if (!availableTasks.empty) {
+    availableTasks.forEach((item) => idArray.push(item.id));
+
+    task = await ItemModel.where("tagname", "==", skill)
+      .where("itemid", "in", idArray)
+      .where("levelname", ">=", level)
+      .where("levelname", "<=", level + 2)
+      .limit(1)
+      .get();
   }
-
-  const task = await ItemModel.where("tagtype", "==", "STATUS")
-    .where("tagname", "==", "AVAILABLE")
-    .where("itemid", "in", idArray)
-    .limit(1)
-    .get();
 
   let taskData, id;
   if (!task.empty) {
