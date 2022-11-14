@@ -25,6 +25,7 @@ const addTagsToItem = async (itemData) => {
         tagtype: tagData.data().type,
         levelid: tag.levelid,
         levelname: levelData.data().name,
+        levelrank: levelData.data().rank,
       };
       const docid = itemModel.doc();
       batch.set(docid, itemTag);
@@ -79,6 +80,7 @@ const getItemsBasedOnType = async (itemtype) => {
         levelid: doc.data().levelid,
         tagtype: doc.data().tagtype,
         levelname: doc.data().levelname,
+        levelrank: doc.data().levelrank,
       };
       itemsWithType.push(item);
     });
@@ -109,6 +111,7 @@ const getItemsBasedOnTagId = async (tagid) => {
         levelname: doc.data().levelname,
         tagtype: doc.data().tagtype,
         itemtype: doc.data().itemtype,
+        levelrank: doc.data().levelrank,
       };
       itemsWithTag.push(item);
     });
@@ -139,6 +142,7 @@ const getItemsBasedOnItemId = async (itemid) => {
         tagtype: doc.data().tagtype,
         levelname: doc.data().levelname,
         itemtype: doc.data().itemtype,
+        levelrank: doc.data().levelrank,
       };
       itemsWithItemId.push(item);
     });
@@ -169,6 +173,7 @@ const getItemsBasedOnTagType = async (tagtype) => {
         levelid: doc.data().levelid,
         levelname: doc.data().levelname,
         itemtype: doc.data().itemtype,
+        levelrank: doc.data().levelrank,
       };
       itemsWithItemId.push(item);
     });
@@ -198,6 +203,7 @@ const getAllItems = async () => {
         levelid: doc.data().levelid,
         levelname: doc.data().levelname,
         itemtype: doc.data().itemtype,
+        levelrank: doc.data().rank,
       };
       allItems.push(item);
     });
