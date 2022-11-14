@@ -9,6 +9,7 @@ const levelModel = firestore.collection("levels");
 
 const addLevel = async (levelData) => {
   try {
+    levelData.rank = parseInt(levelData.rank);
     const { id } = await levelModel.add(levelData);
     return { id, levelData };
   } catch (err) {
@@ -45,6 +46,7 @@ const getAllLevels = async () => {
     const Level = {
       id: doc.id,
       name: doc.data().name,
+      rank: doc.data().rank,
       createdby: doc.data().createdby,
       date: doc.data().date,
     };
