@@ -8,6 +8,7 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
+const itemModel = firestore.collection("items");
 
 /**
  * Adds or updates the user data
@@ -79,6 +80,35 @@ const getJoinData = async (userId) => {
     return userData;
   } catch (err) {
     logger.log("Could not get", err);
+    throw err;
+  }
+};
+
+const getSuggestedUsers = async (skill) => {
+  try {
+    const data = await itemModel.where("itemtype", "==", "USER").where("tagid", "==", skill).get();
+    const usersId = [];
+
+    if (!data.empty) {
+      data.forEach((doc) => {
+        usersId.push(doc.data().itemid);
+      });
+    }
+    const Promises = usersId.map((userId) => fetchUser({ userId }));
+    const resolved = await Promise.all(Promises);
+    const set = new Set();
+    const users = [];
+
+    resolved.forEach((resolve) => {
+      if (!set.has(resolve.user.id)) {
+        set.add(resolve.user.id);
+        users.push(resolve);
+      }
+    });
+
+    return { users };
+  } catch (err) {
+    logger.error("Error in getting suggeted", err);
     throw err;
   }
 };
@@ -225,4 +255,5 @@ module.exports = {
   fetchUserImage,
   addJoinData,
   getJoinData,
+  getSuggestedUsers,
 };

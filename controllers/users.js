@@ -101,6 +101,20 @@ const getUser = async (req, res) => {
   }
 };
 
+const getSuggestedUsers = async (req, res) => {
+  try {
+    const { users } = await userQuery.getSuggestedUsers(req.params.skillId);
+
+    return res.json({
+      message: "Users returned successfully!",
+      users,
+    });
+  } catch (err) {
+    logger.error(`Error while fetching suggested users: ${err}`);
+    return res.boom.badImplementation("Something went wrong!");
+  }
+};
+
 /**
  * checks whether a given username is available
  *
@@ -374,6 +388,7 @@ module.exports = {
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
+  getSuggestedUsers,
   postUserPicture,
   updateUser,
   rejectProfileDiff,
