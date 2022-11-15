@@ -29,13 +29,14 @@ const addUserStatus = async (req, res) => {
 
 const deleteUserStatus = async (req, res) => {
   try {
-    const deletedUserStatus = await userStatusModel.deleteUserStatus(req.params.userId);
+    const { userId } = req.params;
+    const deletedUserStatus = await userStatusModel.deleteUserStatus(userId);
     return res.status(201).json({
       message: "UserStatus Deleted successfully!",
       ...deletedUserStatus,
     });
   } catch (error) {
-    logger.error(`Error while creating new User Status: ${error}`);
+    logger.error(`Error while deleting User Status: ${error}`);
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
@@ -48,7 +49,8 @@ const deleteUserStatus = async (req, res) => {
  */
 const getUserStatus = async (req, res) => {
   try {
-    const userData = await userStatusModel.getUserStaus(req.params.userId);
+    const { userId } = req.params;
+    const userData = await userStatusModel.getUserStaus(userId);
     return res.json({ message: "user Status found successfully", ...userData });
   } catch (err) {
     // can return 404 error as well
