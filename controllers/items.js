@@ -130,7 +130,7 @@ const getItemsBasedOnTagType = async (req, res) => {
 
 const getAllItems = async (req, res) => {
   try {
-    const { allItems } = await ItemModel.getAllItems();
+    const allItems = await ItemModel.getAllItems();
     return res.json({
       allItems,
     });
