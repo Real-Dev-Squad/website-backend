@@ -10,7 +10,7 @@ const addUserStatus = async (req, res) => {
   try {
     const { id, userStatusData } = await userStatusModel.addUserStatus({ ...req.body });
     return res.status(201).json({
-      message: "Status created successfully",
+      message: "User Status created successfully",
       id,
       ...userStatusData,
     });
@@ -32,7 +32,7 @@ const deleteUserStatus = async (req, res) => {
     const { userId } = req.params;
     const deletedUserStatus = await userStatusModel.deleteUserStatus(userId);
     return res.status(201).json({
-      message: "UserStatus Deleted successfully!",
+      message: "UserStatus Deleted successfully.",
       ...deletedUserStatus,
     });
   } catch (error) {
@@ -51,7 +51,7 @@ const getUserStatus = async (req, res) => {
   try {
     const { userId } = req.params;
     const userData = await userStatusModel.getUserStaus(userId);
-    return res.json({ message: "user Status found successfully", ...userData });
+    return res.json({ message: "User Status found successfully", ...userData });
   } catch (err) {
     // can return 404 error as well
     logger.error(`Error while fetching the User Status: ${err}`);
@@ -69,6 +69,7 @@ const getAllUserStatus = async (req, res) => {
   try {
     const { allUserStatus } = await userStatusModel.getAllUserStaus();
     return res.json({
+      message: "All User Status found successfully",
       allUserStatus,
     });
   } catch (err) {
