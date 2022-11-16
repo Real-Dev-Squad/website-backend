@@ -95,23 +95,23 @@ const getSuggestedUsers = async (skill) => {
   try {
     const data = await itemModel.where("itemtype", "==", "USER").where("tagid", "==", skill).get();
     const usersId = [];
+    const users = [];
 
     if (!data.empty) {
       data.forEach((doc) => {
         usersId.push(doc.data().itemid);
       });
-    }
-    const usersArray = usersId.map((userId) => fetchUser({ userId }));
-    const userDuplicate = await Promise.all(usersArray);
-    const userSet = new Set();
-    const users = [];
+      const usersArray = usersId.map((userId) => fetchUser({ userId }));
+      const userDuplicate = await Promise.all(usersArray);
+      const userSet = new Set();
 
-    userDuplicate.forEach((userObj) => {
-      if (!userSet.has(userObj.user.id)) {
-        userSet.add(userObj.user.id);
-        users.push(userObj);
-      }
-    });
+      userDuplicate.forEach((userObj) => {
+        if (!userSet.has(userObj.user.id)) {
+          userSet.add(userObj.user.id);
+          users.push(userObj);
+        }
+      });
+    }
 
     return { users };
   } catch (err) {
