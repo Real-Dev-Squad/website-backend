@@ -103,12 +103,12 @@ const getSuggestedUsers = async (skill) => {
     }
     const usersArray = usersId.map((userId) => fetchUser({ userId }));
     const userDuplicate = await Promise.all(usersArray);
-    const set = new Set();
+    const userSet = new Set();
     const users = [];
 
     userDuplicate.forEach((userObj) => {
-      if (!set.has(userObj.user.id)) {
-        set.add(userObj.user.id);
+      if (!userSet.has(userObj.user.id)) {
+        userSet.add(userObj.user.id);
         users.push(userObj);
       }
     });
