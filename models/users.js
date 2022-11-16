@@ -84,6 +84,13 @@ const getJoinData = async (userId) => {
   }
 };
 
+/**
+ * Fetches users with the given skill
+ *
+ * @param skill { string }: Skill
+ * @return @return {Promise<users>}
+ */
+
 const getSuggestedUsers = async (skill) => {
   try {
     const data = await itemModel.where("itemtype", "==", "USER").where("tagid", "==", skill).get();
@@ -94,15 +101,15 @@ const getSuggestedUsers = async (skill) => {
         usersId.push(doc.data().itemid);
       });
     }
-    const Promises = usersId.map((userId) => fetchUser({ userId }));
-    const resolved = await Promise.all(Promises);
+    const usersArray = usersId.map((userId) => fetchUser({ userId }));
+    const userDuplicate = await Promise.all(usersArray);
     const set = new Set();
     const users = [];
 
-    resolved.forEach((resolve) => {
-      if (!set.has(resolve.user.id)) {
-        set.add(resolve.user.id);
-        users.push(resolve);
+    userDuplicate.forEach((userObj) => {
+      if (!set.has(userObj.user.id)) {
+        set.add(userObj.user.id);
+        users.push(userObj);
       }
     });
 

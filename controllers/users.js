@@ -101,6 +101,13 @@ const getUser = async (req, res) => {
   }
 };
 
+/**
+ * Fetches users based on given skill
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
 const getSuggestedUsers = async (req, res) => {
   try {
     const { users } = await userQuery.getSuggestedUsers(req.params.skillId);
