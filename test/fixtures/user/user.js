@@ -10,6 +10,7 @@ const githubUserInfo = require("../auth/githubUserInfo")();
 module.exports = () => {
   return [
     {
+      id: "0P9CRc27Hzo8iptwCNHV",
       username: "ankur",
       first_name: "Ankur",
       last_name: "Narkhede",
