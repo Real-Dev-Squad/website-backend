@@ -31,7 +31,7 @@ const deleteUserStatus = async (req, res) => {
   try {
     const { userId } = req.params;
     const deletedUserStatus = await userStatusModel.deleteUserStatus(userId);
-    return res.status(201).json({
+    return res.status(200).json({
       message: "UserStatus Deleted successfully.",
       ...deletedUserStatus,
     });
@@ -89,7 +89,7 @@ const updateUserStatus = async (req, res) => {
     const { userId } = req.params;
     const dataToUpdate = req.body;
     const data = await userStatusModel.updateUserStatus(userId, dataToUpdate);
-    return res.json({
+    return res.status(204).json({
       message: "userStatus updated successfully",
       ...data,
     });
