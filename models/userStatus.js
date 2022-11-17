@@ -102,7 +102,7 @@ const updateUserStatus = async (userId, updatedData) => {
         if ([userState.IDLE, userState.ACTIVE].includes(updatedData.currentStatus.state)) {
           updatedData.currentStatus.until = "";
         }
-        if ([userState.ACTIVE].includes(updatedData.currentStatus.state)) {
+        if (updatedData.currentStatus.state === userState.ACTIVE) {
           updatedData.currentStatus.message = "";
         }
       }
