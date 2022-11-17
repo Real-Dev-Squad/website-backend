@@ -17,8 +17,10 @@ const addLevel = async (req, res) => {
     });
     return res.json({
       message: "Level created successfully!",
-      level: levelData,
-      id,
+      data: {
+        level: levelData,
+        id,
+      },
     });
   } catch (err) {
     logger.error(`Error while creating new level: ${err}`);
@@ -56,7 +58,8 @@ const getAllLevels = async (req, res) => {
   try {
     const { allLevels } = await LevelModel.getAllLevels();
     return res.json({
-      allLevels,
+      message: "Levels returned Successfully",
+      levels: allLevels,
     });
   } catch (err) {
     logger.error(`Error while creating new Level: ${err}`);

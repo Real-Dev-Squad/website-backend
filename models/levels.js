@@ -40,19 +40,24 @@ const deleteLevel = async (id) => {
  */
 
 const getAllLevels = async () => {
-  const data = await levelModel.get();
-  const allLevels = [];
-  data.forEach((doc) => {
-    const Level = {
-      id: doc.id,
-      name: doc.data().name,
-      levelnumber: doc.data().levelnumber,
-      createdby: doc.data().createdby,
-      date: doc.data().date,
-    };
-    allLevels.push(Level);
-  });
-  return { allLevels };
+  try {
+    const data = await levelModel.get();
+    const allLevels = [];
+    data.forEach((doc) => {
+      const Level = {
+        id: doc.id,
+        name: doc.data().name,
+        levelnumber: doc.data().levelnumber,
+        createdby: doc.data().createdby,
+        date: doc.data().date,
+      };
+      allLevels.push(Level);
+    });
+    return { allLevels };
+  } catch (err) {
+    logger.error("Error in deleting Level", err);
+    throw err;
+  }
 };
 
 module.exports = {
