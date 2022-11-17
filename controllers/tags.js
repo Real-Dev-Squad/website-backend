@@ -1,4 +1,5 @@
 const TagModel = require("../models/tags");
+const admin = require("firebase-admin");
 
 /**
  * Creates a new tag
@@ -9,13 +10,22 @@ const TagModel = require("../models/tags");
 
 const addTag = async (req, res) => {
   try {
-    const { id, tagData } = await TagModel.addTag({ ...req.body, createdby: req.userData.id, date: new Date() });
-
-    return res.json({
-      message: "Tag created successfully!",
-      data: tagData,
-      id,
+    const { id, tagData } = await TagModel.addTag({
+      ...req.body,
+      createdby: req.userData.id,
+      date: admin.firestore.Timestamp.fromDate(new Date()),
     });
+    return id
+      ? res.json({
+          message: "Tag created successfully!",
+          data: tagData,
+          id,
+        })
+      : res.status(400).json({
+          message: "Tag already exists!",
+          data: tagData,
+          id,
+        });
   } catch (err) {
     logger.error(`Error while creating new tag: ${err}`);
     return res.boom.badImplementation("An internal server error occurred");
