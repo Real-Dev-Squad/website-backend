@@ -99,7 +99,8 @@ const updateUserStatus = async (userId, updatedData) => {
         id = docData.id;
       });
       if (Object.keys(updatedData).includes("currentStatus")) {
-        if ([userState.IDLE, userState.ACTIVE].includes(updatedData.currentStatus.state)) {
+        const isUserOOO = updatedData.currentStatus.state === userState.OOO;
+        if (!isUserOOO) {
           updatedData.currentStatus.until = "";
         }
         if (updatedData.currentStatus.state === userState.ACTIVE) {
