@@ -60,10 +60,15 @@ const getUserStaus = async (userId) => {
 /**
  * @returns {Promise<userStatusModel|Array>} : returns an array of all the userStatus
  */
-const getAllUserStaus = async () => {
+const getAllUserStaus = async (query) => {
   const allUserStatus = [];
   try {
-    const data = await userStatusModel.get();
+    let data;
+    if (!query.state) {
+      data = await userStatusModel.get();
+    } else {
+      data = await userStatusModel.where("currentStatus.state", "==", query.state).get();
+    }
     data.forEach((doc) => {
       const currentUserStatus = {
         id: doc.id,

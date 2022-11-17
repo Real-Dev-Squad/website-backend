@@ -9,7 +9,12 @@ const cleanDb = require("../utils/cleanDb");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
 const superUser = userData[4];
-const userStatusData = require("../fixtures/userStatus/userStatus")();
+const {
+  userStsDataForOooState,
+  invalidUserStsDataforPost,
+  validUserStsDataforUpdate,
+  invalidUserStsDataforUpdate,
+} = require("../fixtures/userStatus/userStatus");
 
 const config = require("config");
 const { addUserStatus } = require("../../models/userStatus");
@@ -28,7 +33,7 @@ describe("UserStatus", function () {
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-    await addUserStatus(userStatusData[0]);
+    await addUserStatus(userStsDataForOooState(userId));
   });
 
   afterEach(async function () {
@@ -45,7 +50,6 @@ describe("UserStatus", function () {
           if (err) {
             return done(err);
           }
-
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("All User Status found successfully");
@@ -59,7 +63,7 @@ describe("UserStatus", function () {
     it("Should return one User Status with the given id", function (done) {
       chai
         .request(app)
-        .get(`/userStatus/${userData[0].id}`)
+        .get(`/userStatus/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -76,12 +80,24 @@ describe("UserStatus", function () {
   });
 
   describe("POST /userStatus/:userid", function () {
+    let testUserJwt;
+    let testUserId;
+
+    beforeEach(async function () {
+      testUserId = await addUser();
+      testUserJwt = authService.generateAuthToken({ userId: testUserId });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
     it("Should store the User Status in the collection", function (done) {
       chai
         .request(app)
-        .post(`/userStatus/${userStatusData[1].userId}`)
-        .set("Cookie", `${cookieName}=${jwt}`)
-        .send(userStatusData[1])
+        .post(`/userStatus/${testUserId}`)
+        .set("Cookie", `${cookieName}=${testUserJwt}`)
+        .send(userStsDataForOooState(testUserId))
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -96,9 +112,9 @@ describe("UserStatus", function () {
     it("Should return 401 for unauthorized request", function (done) {
       chai
         .request(app)
-        .post(`/userStatus/${userStatusData[1].userId}`)
+        .post(`/userStatus/${testUserId}`)
         .set("Cookie", `${cookieName}=""`)
-        .send(userStatusData[1])
+        .send(userStsDataForOooState(testUserId))
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -113,9 +129,9 @@ describe("UserStatus", function () {
     it("Should return 400 for invalid Data", function (done) {
       chai
         .request(app)
-        .post(`/userStatus/${userData[0].id}`)
+        .post(`/userStatus/${testUserId}`)
         .set("Cookie", `${cookieName}=${jwt}`)
-        .send(userStatusData[2])
+        .send(invalidUserStsDataforPost(testUserId))
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -134,9 +150,9 @@ describe("UserStatus", function () {
     it("Should update the User Status", function (done) {
       chai
         .request(app)
-        .patch(`/userStatus/${userData[0].id}}`)
+        .patch(`/userStatus/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(userStatusData[3])
+        .send(validUserStsDataforUpdate)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -149,14 +165,13 @@ describe("UserStatus", function () {
     it("Should return 400 for invalid status value", function (done) {
       chai
         .request(app)
-        .patch(`/userStatus/${userData[0].id}}`)
+        .patch(`/userStatus/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(userStatusData[4])
+        .send(invalidUserStsDataforUpdate)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
-
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
           expect(res.body).to.eql({
@@ -173,7 +188,7 @@ describe("UserStatus", function () {
     it("Should return 401 for UnAuthorized User", function (done) {
       chai
         .request(app)
-        .delete(`/userStatus/${userData[0].id}}`)
+        .delete(`/userStatus/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -192,7 +207,7 @@ describe("UserStatus", function () {
     it("Should return 200 for deletion by Super User", function (done) {
       chai
         .request(app)
-        .delete(`/userStatus/${userData[0].id}`)
+        .delete(`/userStatus/${userId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {

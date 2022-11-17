@@ -67,7 +67,7 @@ const getUserStatus = async (req, res) => {
  */
 const getAllUserStatus = async (req, res) => {
   try {
-    const { allUserStatus } = await userStatusModel.getAllUserStaus();
+    const { allUserStatus } = await userStatusModel.getAllUserStaus(req.query);
     return res.json({
       message: "All User Status found successfully",
       allUserStatus,

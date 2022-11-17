@@ -1,6 +1,6 @@
-module.exports = () => [
-  {
-    userId: "0P9CRc27Hzo8iptwCNHV",
+const userStsDataForOooState = (userId) => {
+  return {
+    userId,
     currentStatus: {
       until: "1669256009000",
       message: "Bad Health",
@@ -12,9 +12,12 @@ module.exports = () => [
       updatedAt: "1668215609000",
       committed: "40",
     },
-  },
-  {
-    userId: "0P9CRc27Hzo8iptaHDKD",
+  };
+};
+
+const invalidUserStsDataforPost = (userId) => {
+  return {
+    userId,
     currentStatus: {
       until: "",
       message: "",
@@ -22,37 +25,32 @@ module.exports = () => [
       updatedAt: "1668215609000",
       from: "1668215609000",
     },
-    monthlyHours: {
-      updatedAt: "1668215609000",
-      committed: "100",
-    },
+  };
+};
+
+const validUserStsDataforUpdate = {
+  currentStatus: {
+    until: "",
+    message: "",
+    state: "ACTIVE",
+    updatedAt: "1668215609000",
+    from: "1668215609000",
   },
-  {
-    userId: "0P9CRc27Hzo8iptwCNHV",
-    currentStatus: {
-      until: "",
-      message: "",
-      state: "ACTIVE",
-      updatedAt: "1668215609000",
-      from: "1668215609000",
-    },
+};
+
+const invalidUserStsDataforUpdate = {
+  currentStatus: {
+    until: "",
+    message: "",
+    state: "IN_OFFICE",
+    updatedAt: "1668215609000",
+    from: "1668215609000",
   },
-  {
-    currentStatus: {
-      until: "",
-      message: "",
-      state: "ACTIVE",
-      updatedAt: "1668215609000",
-      from: "1668215609000",
-    },
-  },
-  {
-    currentStatus: {
-      until: "",
-      message: "",
-      state: "IN_OFFICE",
-      updatedAt: "1668215609000",
-      from: "1668215609000",
-    },
-  },
-];
+};
+
+module.exports = {
+  userStsDataForOooState,
+  invalidUserStsDataforPost,
+  validUserStsDataforUpdate,
+  invalidUserStsDataforUpdate,
+};
