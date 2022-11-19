@@ -41,14 +41,14 @@ const fetchLogs = async (query, param) => {
     });
 
     const { limit, lastDocId } = query;
-    let lastDoc;
+    let lastDoc = "";
     const limitDocuments = Number(limit);
 
     if (lastDocId) {
       lastDoc = await logsModel.doc(lastDocId).get();
     }
 
-    const logsSnapshotQuery = call.orderBy("timestamp", "desc").startAfter(lastDoc ? lastDoc : "");
+    const logsSnapshotQuery = call.orderBy("timestamp", "desc").startAfter(lastDoc);
     const snapshot = limit ? await logsSnapshotQuery.limit(limitDocuments).get() : await logsSnapshotQuery.get();
 
     const logs = [];
