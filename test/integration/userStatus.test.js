@@ -84,6 +84,7 @@ describe("UserStatus", function () {
     let testUserId;
 
     beforeEach(async function () {
+      await cleanDb();
       testUserId = await addUser();
       testUserJwt = authService.generateAuthToken({ userId: testUserId });
     });
@@ -105,6 +106,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(201);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User Status created successfully");
+          expect(res.body.currentStatus.state).to.equal("OOO");
           return done();
         });
     });
@@ -185,7 +187,7 @@ describe("UserStatus", function () {
   });
 
   describe("DELETE userStatus/:userid", function () {
-    it("Should return 401 for UnAuthorized User", function (done) {
+    it("Should return 401 for Unauthorized User", function (done) {
       chai
         .request(app)
         .delete(`/userStatus/${userId}`)
