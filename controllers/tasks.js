@@ -206,9 +206,6 @@ const overdueTasks = async (req, res) => {
 };
 
 const assignTask = async (req, res) => {
-  // we will fetch the skilltag leveltag of that particular user here once we have the skill with his userId
-  // we can check here the all the level, and whichever is the smallest we can make the request with that particular category, for now value is hardcoded
-  // I am putting the names of the skills but we are going to get id
   try {
     const { status, username, id: userId } = req.userData;
 
@@ -216,7 +213,7 @@ const assignTask = async (req, res) => {
       return res.json({ message: "Task cannot be assigned to users with active or OOO status" });
     }
 
-    const { task } = await tasks.fetchSkillLevelTask("REACT", 2);
+    const { task } = await tasks.fetchSkillLevelTask(userId);
     if (!task) return res.json({ message: "Task not found" });
 
     const { taskId } = await tasks.updateTask({ assignee: username, status: TASK_STATUS.ASSIGNED }, task.itemid);

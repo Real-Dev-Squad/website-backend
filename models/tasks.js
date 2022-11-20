@@ -202,13 +202,21 @@ const getNewTask = async (skill, level) => {
   if (!availableTasks.empty) {
     availableTasks.forEach((item) => idArray.push(item.id));
 
-    task = await ItemModel.where("tagname", "==", skill)
-      .where("itemtype", "==", "TASK")
-      .where("itemid", "in", idArray)
-      .where("levelname", ">=", level)
-      .where("levelname", "<=", level + 2)
-      .limit(1)
-      .get();
+    if (!skill) {
+      task = await ItemModel.where("itemtype", "==", "TASK")
+        .where("itemid", "in", idArray)
+        .where("levelnumber", ">=", 2)
+        .limit(1)
+        .get();
+    } else {
+      task = await ItemModel.where("tagname", "==", skill)
+        .where("itemtype", "==", "TASK")
+        .where("itemid", "in", idArray)
+        .where("levelnumber", ">=", level)
+        .where("levelnumber", "<=", level + 2)
+        .limit(1)
+        .get();
+    }
   }
 
   let taskData, id;
@@ -235,9 +243,18 @@ const getNewTask = async (skill, level) => {
  * @returns {Promise<task>|object}
  */
 
-const fetchSkillLevelTask = async (skill, level) => {
+const fetchSkillLevelTask = async (userId) => {
   try {
-    const task = await getNewTask(skill, level);
+    let task;
+    const data = await ItemModel.where("itemid", "==", userId).where("tagtype", "==", "SKILL").limit(10).get();
+
+    if (data.empty) {
+      task = await getNewTask();
+    } else {
+      const { skill, level } = userUtils.getLowestLevelSkill();
+      task = await getNewTask(skill, level);
+    }
+
     return task;
   } catch (err) {
     logger.error("error getting tasks", err);
