@@ -82,14 +82,14 @@ const getParticipantUserIds = async (participantArray) => {
 };
 
 function getLowestLevelSkill(skills) {
-  let minLevel = skills[0].levelnumber;
+  let minLevel = skills[0].level;
   let skill;
   let level;
   for (const skillfield of skills) {
-    if (skillfield.levelnumber < minLevel) {
-      minLevel = skillfield.levelnumber;
-      skill = skillfield.tagname;
-      level = skillfield.levelnumber;
+    if (skillfield.level < minLevel) {
+      minLevel = skillfield.level;
+      skill = skillfield.skill;
+      level = skillfield.level;
     }
   }
   return { skill, level };

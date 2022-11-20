@@ -247,11 +247,17 @@ const fetchSkillLevelTask = async (userId) => {
   try {
     let task;
     const data = await ItemModel.where("itemid", "==", userId).where("tagtype", "==", "SKILL").limit(10).get();
+    const userSkills = [];
 
     if (data.empty) {
       task = await getNewTask();
     } else {
-      const { skill, level } = userUtils.getLowestLevelSkill();
+      data.forEach((doc) => {
+        const skill = doc.data().tagname;
+        const level = doc.data().levelnumber;
+        userSkills.push({ skill, level });
+      });
+      const { skill, level } = userUtils.getLowestLevelSkill(userSkills);
       task = await getNewTask(skill, level);
     }
 
