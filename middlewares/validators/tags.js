@@ -7,7 +7,9 @@ const validTagBody = async (req, res, next) => {
     type: Joi.string()
       .uppercase()
       .custom((value, helper) => {
-        if (!TYPES.includes(value)) return helper.message("Not a valid type");
+        if (!TYPES.includes(value)) {
+          return helper.message("Not a valid type");
+        }
         return value;
       }),
     reason: Joi.string().exist(),

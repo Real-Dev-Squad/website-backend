@@ -14,11 +14,13 @@ const addTag = async (tagData) => {
 
     const alreadyIsTag = await tagModel.where("name", "==", tagData.name).limit(1).get();
     if (!alreadyIsTag.empty) {
-      return { id: "", tagData };
+      const oldTag = [];
+      alreadyIsTag.forEach((tag) => oldTag.push(tag.data()));
+      return { tagData: oldTag, message: "Tag already exists!" };
     }
 
     const { id } = await tagModel.add(tagData);
-    return { id, tagData };
+    return { id, tagData, message: "Tag created successfully!" };
   } catch (err) {
     logger.error("Error in creating Tag", err);
     throw err;
@@ -47,20 +49,25 @@ const deleteTag = async (tagid) => {
  */
 
 const getAllTags = async () => {
-  const data = await tagModel.get();
-  const allTags = [];
-  data.forEach((doc) => {
-    const tag = {
-      id: doc.id,
-      name: doc.data().name,
-      type: doc.data().type,
-      createdby: doc.data().createdby,
-      date: doc.data().date,
-      reason: doc.data().reason,
-    };
-    allTags.push(tag);
-  });
-  return { allTags };
+  try {
+    const data = await tagModel.get();
+    const allTags = [];
+    data.forEach((doc) => {
+      const tag = {
+        id: doc.id,
+        name: doc.data().name,
+        type: doc.data().type,
+        createdby: doc.data().createdby,
+        date: doc.data().date,
+        reason: doc.data().reason,
+      };
+      allTags.push(tag);
+    });
+    return { allTags };
+  } catch (err) {
+    logger.error("error getting tags", err);
+    throw err;
+  }
 };
 
 const getTagByType = async (type) => {

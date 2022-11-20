@@ -10,22 +10,22 @@ const admin = require("firebase-admin");
 
 const addTag = async (req, res) => {
   try {
-    const { id, tagData } = await TagModel.addTag({
+    const { id, tagData, message } = await TagModel.addTag({
       ...req.body,
       createdby: req.userData.id,
       date: admin.firestore.Timestamp.fromDate(new Date()),
     });
-    return id
-      ? res.json({
-          message: "Tag created successfully!",
-          data: tagData,
-          id,
-        })
-      : res.status(400).json({
-          message: "Tag already exists!",
-          data: tagData,
-          id,
-        });
+    if (id) {
+      return res.json({
+        message,
+        data: { tag: tagData, id },
+      });
+    } else {
+      return res.status(400).json({
+        message,
+        data: { tag: tagData },
+      });
+    }
   } catch (err) {
     logger.error(`Error while creating new tag: ${err}`);
     return res.boom.badImplementation("An internal server error occurred");
@@ -62,7 +62,8 @@ const getAllTags = async (req, res) => {
   try {
     const { allTags } = await TagModel.getAllTags();
     return res.json({
-      allTags,
+      message: "Tags returned successfully",
+      tags: allTags,
     });
   } catch (err) {
     logger.error(`Error while fetching all the tag: ${err}`);
@@ -75,6 +76,7 @@ const getTagsByType = async (req, res) => {
     const type = req.params.type.toUpperCase();
     const { tags } = await TagModel.getTagByType(type);
     return res.json({
+      message: `Tags of type: ${type} returned successfully`,
       tags,
     });
   } catch (err) {
