@@ -73,14 +73,7 @@ const getItemsBasedOnType = async (itemtype) => {
     data.forEach((doc) => {
       const item = {
         id: doc.id,
-        itemtype: itemtype.toUpperCase(),
-        itemid: doc.data().itemid,
-        tagid: doc.data().tagid,
-        tagname: doc.data().tagname,
-        levelid: doc.data().levelid,
-        tagtype: doc.data().tagtype,
-        levelname: doc.data().levelname,
-        levelnumber: doc.data().levelnumber,
+        ...doc.data(),
       };
       itemsWithType.push(item);
     });
@@ -104,14 +97,7 @@ const getItemsBasedOnTagId = async (tagid) => {
     data.forEach((doc) => {
       const item = {
         id: doc.id,
-        itemid: doc.data().itemid,
-        tagid,
-        tagname: doc.data().tagname,
-        levelid: doc.data().levelid,
-        levelname: doc.data().levelname,
-        tagtype: doc.data().tagtype,
-        itemtype: doc.data().itemtype,
-        levelnumber: doc.data().levelnumber,
+        ...doc.data(),
       };
       itemsWithTag.push(item);
     });
@@ -135,14 +121,7 @@ const getItemsBasedOnItemId = async (itemid) => {
     data.forEach((doc) => {
       const item = {
         id: doc.id,
-        tagid: doc.data().tagid,
-        itemid,
-        tagname: doc.data().tagname,
-        levelid: doc.data().levelid,
-        tagtype: doc.data().tagtype,
-        levelname: doc.data().levelname,
-        itemtype: doc.data().itemtype,
-        levelnumber: doc.data().levelnumber,
+        ...doc.data(),
       };
       itemsWithItemId.push(item);
     });
@@ -166,14 +145,7 @@ const getItemsBasedOnTagType = async (tagtype) => {
     data.forEach((doc) => {
       const item = {
         id: doc.id,
-        tagid: doc.data().tagid,
-        itemid: doc.data().itemid,
-        tagname: doc.data().tagname,
-        tagtype: tagtype.toUpperCase(),
-        levelid: doc.data().levelid,
-        levelname: doc.data().levelname,
-        itemtype: doc.data().itemtype,
-        levelnumber: doc.data().levelnumber,
+        ...doc.data(),
       };
       itemsWithItemId.push(item);
     });
@@ -196,14 +168,7 @@ const getAllItems = async () => {
     data.forEach((doc) => {
       const item = {
         id: doc.id,
-        itemid: doc.data().itemid,
-        tagid: doc.data().tagid,
-        tagname: doc.data().tagname,
-        tagtype: doc.data().tagtype,
-        levelid: doc.data().levelid,
-        levelname: doc.data().levelname,
-        itemtype: doc.data().itemtype,
-        levelnumber: doc.data().levelnumber,
+        ...doc.data(),
       };
       allItems.push(item);
     });
