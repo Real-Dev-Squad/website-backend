@@ -101,6 +101,21 @@ const getUser = async (req, res) => {
   }
 };
 
+const getUserSkills = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { skills } = await userQuery.fetchUserSkills(id);
+
+    return res.json({
+      message: "Skills returned successfully",
+      skills,
+    });
+  } catch (err) {
+    logger.error(`Error fetching skills ${err}`);
+    return res.boom.badImplementation("Internal server error");
+  }
+};
+
 /**
  * checks whether a given username is available
  *
@@ -382,4 +397,5 @@ module.exports = {
   addUserIntro,
   getUserIntro,
   addDefaultArchivedRole,
+  getUserSkills,
 };

@@ -8,6 +8,7 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
+const itemModel = firestore.collection("items");
 
 /**
  * Adds or updates the user data
@@ -215,6 +216,23 @@ const fetchUserImage = async (users) => {
   return images;
 };
 
+const fetchUserSkills = async (id) => {
+  try {
+    const data = await itemModel.where("itemid", "==", id).where("tagtype", "==", "SKILL").get();
+    const skills = [];
+
+    if (!data.empty) {
+      data.forEach((doc) => {
+        skills.push({ id: doc.id, ...doc.data() });
+      });
+    }
+    return { skills };
+  } catch (err) {
+    logger.error("Error fetching skills in model", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchUsers,
@@ -225,4 +243,5 @@ module.exports = {
   fetchUserImage,
   addJoinData,
   getJoinData,
+  fetchUserSkills,
 };
