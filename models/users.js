@@ -102,10 +102,10 @@ const getSuggestedUsers = async (skill) => {
         usersId.push(doc.data().itemid);
       });
       const usersArray = usersId.map((userId) => fetchUser({ userId }));
-      const userDuplicate = await Promise.all(usersArray);
+      const userData = await Promise.all(usersArray);
       const userSet = new Set();
 
-      userDuplicate.forEach((userObj) => {
+      userData.forEach((userObj) => {
         if (!userSet.has(userObj.user.id)) {
           userSet.add(userObj.user.id);
           users.push(userObj);
