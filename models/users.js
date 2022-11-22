@@ -112,7 +112,7 @@ const getSuggestedUsers = async (skill) => {
 
     return { users };
   } catch (err) {
-    logger.error("Error in getting suggeted", err);
+    logger.error("Error in getting suggested user", err);
     throw err;
   }
 };
