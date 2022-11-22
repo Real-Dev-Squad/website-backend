@@ -7,9 +7,11 @@ const validateUserStatus = async (req, res, next) => {
       userId: joi.string().trim().required(),
       currentStatus: joi.object().keys({
         state: joi.string().trim().valid(userState.IDLE, userState.ACTIVE, userState.OOO),
-        updatedAt: joi.number().required(),
-        from: joi.number().required(),
-        until: joi.any().when("state", { is: userState.OOO, then: joi.number().required(), otherwise: joi.optional() }),
+        updatedAt: joi.number().required().strict(),
+        from: joi.number().required().strict(),
+        until: joi
+          .any()
+          .when("state", { is: userState.OOO, then: joi.number().required().strict(), otherwise: joi.optional() }),
         message: joi.any().when("state", {
           is: [userState.IDLE, userState.OOO],
           then: joi.string().required(),
@@ -17,8 +19,8 @@ const validateUserStatus = async (req, res, next) => {
         }),
       }),
       monthlyHours: joi.object().keys({
-        committed: joi.number().required(),
-        updatedAt: joi.number().required(),
+        committed: joi.number().required().strict(),
+        updatedAt: joi.number().required().strict(),
       }),
     })
     .and("currentStatus", "monthlyHours");
@@ -37,9 +39,11 @@ const validateUpdatedUserStatus = async (req, res, next) => {
     .object({
       currentStatus: joi.object().keys({
         state: joi.string().trim().valid(userState.IDLE, userState.ACTIVE, userState.OOO),
-        updatedAt: joi.number().required(),
-        from: joi.number().required(),
-        until: joi.any().when("state", { is: userState.OOO, then: joi.number().required(), otherwise: joi.optional() }),
+        updatedAt: joi.number().required().strict(),
+        from: joi.number().required().strict(),
+        until: joi
+          .any()
+          .when("state", { is: userState.OOO, then: joi.number().required().strict(), otherwise: joi.optional() }),
         message: joi.any().when("state", {
           is: [userState.IDLE, userState.OOO],
           then: joi.string().required(),
@@ -47,8 +51,8 @@ const validateUpdatedUserStatus = async (req, res, next) => {
         }),
       }),
       monthlyHours: joi.object().keys({
-        committed: joi.number().required(),
-        updatedAt: joi.number().required(),
+        committed: joi.number().required().strict(),
+        updatedAt: joi.number().required().strict(),
       }),
     })
     .or("currentStatus", "monthlyHours");

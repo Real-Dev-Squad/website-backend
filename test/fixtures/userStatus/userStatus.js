@@ -2,15 +2,15 @@ const userStsDataForOooState = (userId) => {
   return {
     userId,
     currentStatus: {
-      until: "1669256009000",
+      until: 1669256009000,
       message: "Bad Health",
       state: "OOO",
-      updatedAt: "1668215609000",
-      from: "1668215609000",
+      updatedAt: 1668215609000,
+      from: 1668215609000,
     },
     monthlyHours: {
-      updatedAt: "1668215609000",
-      committed: "40",
+      updatedAt: 1668215609000,
+      committed: 40,
     },
   };
 };
@@ -22,8 +22,8 @@ const invalidUserStsDataforPost = (userId) => {
       until: "",
       message: "",
       state: "ACTIVE",
-      updatedAt: "1668215609000",
-      from: "1668215609000",
+      updatedAt: 1668215609000,
+      from: 1668215609000,
     },
   };
 };
@@ -33,8 +33,8 @@ const validUserStsDataforUpdate = {
     until: "",
     message: "",
     state: "ACTIVE",
-    updatedAt: "1668215609000",
-    from: "1668215609000",
+    updatedAt: 1668215609000,
+    from: 1668215609000,
   },
 };
 
@@ -43,8 +43,8 @@ const invalidUserStsDataforUpdate = {
     until: "",
     message: "",
     state: "IN_OFFICE",
-    updatedAt: "1668215609000",
-    from: "1668215609000",
+    updatedAt: 1668215609000,
+    from: 1668215609000,
   },
 };
 
