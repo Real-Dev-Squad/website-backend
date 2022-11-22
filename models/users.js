@@ -85,6 +85,39 @@ const getJoinData = async (userId) => {
 };
 
 /**
+ * Fetches users with the given skill
+ *
+ * @param skill { string }: Skill
+ * @return @return {Promise<users>}
+ */
+
+const getSuggestedUsers = async (skill) => {
+  try {
+    const data = await itemModel.where("itemtype", "==", "USER").where("tagid", "==", skill).get();
+    let users = [];
+
+    const dataSet = new Set();
+
+    if (!data.empty) {
+      data.forEach((doc) => {
+        const docUserId = doc.data().itemid;
+        if (!dataSet.has(docUserId)) {
+          dataSet.add(docUserId);
+        }
+      });
+      const usersId = Array.from(dataSet);
+      const usersArray = usersId.map((userId) => fetchUser({ userId }));
+      users = await Promise.all(usersArray);
+    }
+
+    return { users };
+  } catch (err) {
+    logger.error("Error in getting suggested user", err);
+    throw err;
+  }
+};
+
+/**
  * Fetches the data about our users
  * @param query { Object }: Filter for users data
  * @return {Promise<userModel|Array>}
@@ -243,5 +276,6 @@ module.exports = {
   fetchUserImage,
   addJoinData,
   getJoinData,
+  getSuggestedUsers,
   fetchUserSkills,
 };
