@@ -94,18 +94,18 @@ const getJoinData = async (userId) => {
 const getSuggestedUsers = async (skill) => {
   try {
     const data = await itemModel.where("itemtype", "==", "USER").where("tagid", "==", skill).get();
-    const usersId = [];
     let users = [];
 
     const dataSet = new Set();
 
     if (!data.empty) {
       data.forEach((doc) => {
-        if (!dataSet.has(doc.data().itemid)) {
-          dataSet.add(doc.data().itemid);
-          usersId.push(doc.data().itemid);
+        const docUserId = doc.data().itemid;
+        if (!dataSet.has(docUserId)) {
+          dataSet.add(docUserId);
         }
       });
+      const usersId = Array.from(dataSet);
       const usersArray = usersId.map((userId) => fetchUser({ userId }));
       users = await Promise.all(usersArray);
     }
