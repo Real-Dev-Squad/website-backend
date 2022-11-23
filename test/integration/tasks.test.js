@@ -110,6 +110,7 @@ describe("Tasks", function () {
           expect(res.body.task.createdBy).to.equal(appOwner.username);
           expect(res.body.task.assignee).to.equal(appOwner.username);
           expect(res.body.task.participants).to.be.a("array");
+          expect(res.body.task.taskNo).to.be(3);
           return done();
         });
     });
