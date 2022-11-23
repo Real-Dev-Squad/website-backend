@@ -101,6 +101,42 @@ const getUser = async (req, res) => {
   }
 };
 
+const getUserSkills = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { skills } = await userQuery.fetchUserSkills(id);
+
+    return res.json({
+      message: "Skills returned successfully",
+      skills,
+    });
+  } catch (err) {
+    logger.error(`Error fetching skills ${err}`);
+    return res.boom.badImplementation("Internal server error");
+  }
+};
+
+/**
+ * Fetches users based on given skill
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getSuggestedUsers = async (req, res) => {
+  try {
+    const { users } = await userQuery.getSuggestedUsers(req.params.skillId);
+
+    return res.json({
+      message: "Users returned successfully!",
+      users,
+    });
+  } catch (err) {
+    logger.error(`Error while fetching suggested users: ${err}`);
+    return res.boom.badImplementation("Something went wrong!");
+  }
+};
+
 /**
  * checks whether a given username is available
  *
@@ -374,6 +410,7 @@ module.exports = {
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
+  getSuggestedUsers,
   postUserPicture,
   updateUser,
   rejectProfileDiff,
@@ -382,4 +419,5 @@ module.exports = {
   addUserIntro,
   getUserIntro,
   addDefaultArchivedRole,
+  getUserSkills,
 };
