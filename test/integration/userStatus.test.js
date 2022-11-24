@@ -161,6 +161,7 @@ describe("UserStatus", function () {
             return done(err);
           }
           expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("userStatus updated successfully");
           return done();
         });
     });

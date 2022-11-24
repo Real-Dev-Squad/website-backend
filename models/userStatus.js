@@ -60,7 +60,7 @@ const getUserStaus = async (userId) => {
 /**
  * @returns {Promise<userStatusModel|Array>} : returns an array of all the userStatus
  */
-const getAllUserStaus = async (query) => {
+const getAllUserStatus = async (query) => {
   const allUserStatus = [];
   try {
     let data;
@@ -121,4 +121,4 @@ const updateUserStatus = async (userId, updatedData) => {
   return { userStatusExists: false, userStatusUpdated: false };
 };
 
-module.exports = { addUserStatus, deleteUserStatus, getUserStaus, getAllUserStaus, updateUserStatus };
+module.exports = { addUserStatus, deleteUserStatus, getUserStaus, getAllUserStatus, updateUserStatus };
