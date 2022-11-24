@@ -73,6 +73,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User Status found successfully");
+          expect(res.body.userId).to.equal(userId);
           expect(res.body).to.have.property("monthlyHours");
           expect(res.body).to.have.property("currentStatus");
           return done();
@@ -88,10 +89,6 @@ describe("UserStatus", function () {
       await cleanDb();
       testUserId = await addUser();
       testUserJwt = authService.generateAuthToken({ userId: testUserId });
-    });
-
-    afterEach(async function () {
-      await cleanDb();
     });
 
     it("Should store the User Status in the collection", function (done) {

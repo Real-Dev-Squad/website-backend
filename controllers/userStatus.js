@@ -40,7 +40,7 @@ const deleteUserStatus = async (req, res) => {
     } else {
       return res.status(404).json({
         userId,
-        message: "UserStatus to delete could not be found.",
+        message: "Could not find the user status linked to the user for deletion.",
       });
     }
   } catch (error) {
