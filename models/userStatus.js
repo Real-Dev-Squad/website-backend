@@ -29,12 +29,12 @@ const deleteUserStatus = async (userId) => {
         docId = docData.id;
       });
       await userStatusModel.doc(docId).delete();
-      return { userId };
+      return { userStatusExisted: true, userStatusDeleted: true };
     }
   } catch (error) {
     logger.error(`error in deleting User Status Document . Reason - ${error}`);
   }
-  return { message: `No UserStatus for ${userId} found.` };
+  return { userStatusExisted: false, userStatusDeleted: false };
 };
 
 /**
@@ -49,12 +49,12 @@ const getUserStaus = async (userId) => {
       docs.forEach((docData) => {
         data = docData.data();
       });
-      return { userId, ...data };
+      return { userId, ...data, userStatusExists: true };
     }
   } catch (error) {
     logger.error(`error in fetching the User Status Document. Reason - ${error}`);
   }
-  return { message: "User not found", userId, data: null };
+  return { userId, userStatusExists: false };
 };
 
 /**
@@ -113,12 +113,12 @@ const updateUserStatus = async (userId, updatedData) => {
       await userStatusModel.doc(id).update({
         ...updatedData,
       });
-      return { userId };
+      return { userStatusExists: true, userStatusUpdated: true };
     }
   } catch (error) {
     logger.error(`error in deleting User Status Document ${error}`);
   }
-  return { userId, message: `user Status not found for ${userId}` };
+  return { userStatusExists: false, userStatusUpdated: false };
 };
 
 module.exports = { addUserStatus, deleteUserStatus, getUserStaus, getAllUserStaus, updateUserStatus };

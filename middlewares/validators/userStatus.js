@@ -4,7 +4,6 @@ const { userState } = require("../../constants/userStatus");
 const validateUserStatus = async (req, res, next) => {
   const schema = joi
     .object({
-      userId: joi.string().trim().required(),
       currentStatus: joi.object().keys({
         state: joi.string().trim().valid(userState.IDLE, userState.ACTIVE, userState.OOO),
         updatedAt: joi.number().required().strict(),

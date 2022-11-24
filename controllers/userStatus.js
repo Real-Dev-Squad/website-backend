@@ -8,7 +8,8 @@ const userStatusModel = require("../models/userStatus");
 
 const addUserStatus = async (req, res) => {
   try {
-    const { id, userStatusData } = await userStatusModel.addUserStatus({ ...req.body });
+    const { userId } = req.params;
+    const { id, userStatusData } = await userStatusModel.addUserStatus({ ...req.body, userId });
     return res.status(201).json({
       message: "User Status created successfully",
       id,
@@ -31,10 +32,17 @@ const deleteUserStatus = async (req, res) => {
   try {
     const { userId } = req.params;
     const deletedUserStatus = await userStatusModel.deleteUserStatus(userId);
-    return res.status(200).json({
-      message: "UserStatus Deleted successfully.",
-      ...deletedUserStatus,
-    });
+    if (deletedUserStatus.userStatusExisted) {
+      return res.status(200).json({
+        userId,
+        message: "UserStatus Deleted successfully.",
+      });
+    } else {
+      return res.status(404).json({
+        userId,
+        message: "UserStatus to delete could not be found.",
+      });
+    }
   } catch (error) {
     logger.error(`Error while deleting User Status: ${error}`);
     return res.boom.badImplementation("An internal server error occurred");
@@ -51,11 +59,14 @@ const getUserStatus = async (req, res) => {
   try {
     const { userId } = req.params;
     const userData = await userStatusModel.getUserStaus(userId);
-    return res.json({ message: "User Status found successfully", ...userData });
+    if (userData.userStatusExists) {
+      return res.json({ message: "User Status found successfully", ...userData });
+    } else {
+      return res.status(404).json({ message: "User Status could not be found", ...userData });
+    }
   } catch (err) {
-    // can return 404 error as well
     logger.error(`Error while fetching the User Status: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.notFound("The user Status could not be found as an internal server error occurred.");
   }
 };
 
@@ -88,11 +99,18 @@ const updateUserStatus = async (req, res) => {
   try {
     const { userId } = req.params;
     const dataToUpdate = req.body;
-    const data = await userStatusModel.updateUserStatus(userId, dataToUpdate);
-    return res.status(204).json({
-      message: "userStatus updated successfully",
-      ...data,
-    });
+    const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
+    if (updateStatus.userStatusUpdated) {
+      return res.json({
+        userId,
+        message: "userStatus updated successfully",
+      });
+    } else {
+      return res.status(404).json({
+        userId,
+        message: "userStatus could not be updated as the userId is invalid.",
+      });
+    }
   } catch (err) {
     logger.error(`Error while updating the User Data: ${err}`);
     return res.boom.badImplementation("An internal server error occurred");

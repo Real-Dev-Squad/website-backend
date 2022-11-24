@@ -10,6 +10,7 @@ const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
 const superUser = userData[4];
 const {
+  userStsDataForNewUser,
   userStsDataForOooState,
   invalidUserStsDataforPost,
   validUserStsDataforUpdate,
@@ -33,7 +34,7 @@ describe("UserStatus", function () {
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-    await addUserStatus(userStsDataForOooState(userId));
+    await addUserStatus(userStsDataForNewUser(userId));
   });
 
   afterEach(async function () {
@@ -98,7 +99,7 @@ describe("UserStatus", function () {
         .request(app)
         .post(`/userStatus/${testUserId}`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(userStsDataForOooState(testUserId))
+        .send(userStsDataForOooState)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -116,7 +117,7 @@ describe("UserStatus", function () {
         .request(app)
         .post(`/userStatus/${testUserId}`)
         .set("Cookie", `${cookieName}=""`)
-        .send(userStsDataForOooState(testUserId))
+        .send(userStsDataForOooState)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -133,7 +134,7 @@ describe("UserStatus", function () {
         .request(app)
         .post(`/userStatus/${testUserId}`)
         .set("Cookie", `${cookieName}=${jwt}`)
-        .send(invalidUserStsDataforPost(testUserId))
+        .send(invalidUserStsDataforPost)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -159,7 +160,7 @@ describe("UserStatus", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(204);
+          expect(res).to.have.status(200);
           return done();
         });
     });
