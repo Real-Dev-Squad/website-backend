@@ -8,6 +8,7 @@ const axios = require("../../../utils/fetch");
 
 const githubService = require("../../../services/githubService");
 const githubUserInfo = require("../../fixtures/auth/githubUserInfo")();
+const REPO = "website-backend";
 
 describe("githubService", function () {
   beforeEach(async function () {
@@ -42,6 +43,13 @@ describe("githubService", function () {
       expect(response).to.be.equal(
         `https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Apr+author%3A${githubUserInfo[0].username}`
       );
+    });
+  });
+
+  describe("fetchIssues", function () {
+    it("Should generate the correct url", async function () {
+      const response = await githubService.fetchIssues(REPO);
+      expect(response).to.be.equal(`https://api.github.com/repos/Real-Dev-Squad/website-backend/issues`);
     });
   });
 });
