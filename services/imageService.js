@@ -32,6 +32,30 @@ const uploadProfilePicture = async ({ file, userId, coordinates }) => {
   }
 };
 
+/**
+ * upload badge image to cloudinary
+ *
+ * @param file { Object }: multipart file data
+ * @param badgeName { string }: Badge name
+ */
+ const uploadBadgeImage = async ({ file, badgeName }) => {
+  try {
+    const parser = new DatauriParser();
+    const imageDataUri = parser.format(file.originalname, file.buffer);
+    const imageDataInBase64 = imageDataUri.content;
+    const uploadResponse = await upload(imageDataInBase64, {
+      folder: `${cloudinaryMetaData.BADGE.FOLDER}/${badgeName}`,
+      tags: cloudinaryMetaData.BADGE.TAGS,
+    });
+    const { public_id: publicId, secure_url: url } = uploadResponse;
+    return { publicId, url };
+  } catch (err) {
+    logger.error(`Error while uploading profile picture ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   uploadProfilePicture,
+  uploadBadgeImage,
 };
