@@ -9,8 +9,8 @@ const tagModel = firestore.collection("tags");
 
 const addTag = async (tagData) => {
   try {
-    tagData.type = tagData.type.toUpperCase();
-    tagData.name = tagData.name.toUpperCase();
+    tagData.type = tagData.type.toUpperCase().trim();
+    tagData.name = tagData.name.toUpperCase().trim();
 
     const alreadyIsTag = await tagModel.where("name", "==", tagData.name).limit(1).get();
     if (!alreadyIsTag.empty) {
@@ -55,11 +55,7 @@ const getAllTags = async () => {
     data.forEach((doc) => {
       const tag = {
         id: doc.id,
-        name: doc.data().name,
-        type: doc.data().type,
-        createdby: doc.data().createdby,
-        date: doc.data().date,
-        reason: doc.data().reason,
+        ...doc.data()
       };
       allTags.push(tag);
     });
@@ -77,11 +73,7 @@ const getTagByType = async (type) => {
     data.forEach((doc) => {
       const tag = {
         id: doc.id,
-        name: doc.data().name,
-        type: doc.data().type,
-        createdby: doc.data().createdby,
-        date: doc.data().date,
-        reason: doc.data().reason,
+        ...doc.data()
       };
       tags.push(tag);
     });
