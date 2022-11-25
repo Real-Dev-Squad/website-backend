@@ -1,26 +1,6 @@
 const userStatusModel = require("../models/userStatus");
 
 /**
- * Creates a new User Status
- * @param req {object} - Express Request Object
- * @param res {object} - Express Response Object
- */
-
-const addUserStatus = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { id, userStatusData } = await userStatusModel.addUserStatus({ ...req.body, userId });
-    return res.status(201).json({
-      message: "User Status created successfully",
-      id,
-      ...userStatusData,
-    });
-  } catch (error) {
-    logger.error(`Error while creating new User Status: ${error}`);
-    return res.boom.badImplementation("An internal server error occurred");
-  }
-};
-/**
  * Deletes a new User Status
  *
  * @param req {object} - Express Request Object
@@ -34,11 +14,13 @@ const deleteUserStatus = async (req, res) => {
     const deletedUserStatus = await userStatusModel.deleteUserStatus(userId);
     if (deletedUserStatus.userStatusExisted) {
       return res.status(200).json({
+        id: deletedUserStatus.id,
         userId,
         message: "UserStatus Deleted successfully.",
       });
     } else {
       return res.status(404).json({
+        id: deletedUserStatus.id,
         userId,
         message: "Could not find the user status linked to the user for deletion.",
       });
@@ -58,7 +40,7 @@ const deleteUserStatus = async (req, res) => {
 const getUserStatus = async (req, res) => {
   try {
     const { userId } = req.params;
-    const userData = await userStatusModel.getUserStaus(userId);
+    const userData = await userStatusModel.getUserStatus(userId);
     if (userData.userStatusExists) {
       return res.json({ message: "User Status found successfully", ...userData });
     } else {
@@ -100,21 +82,40 @@ const updateUserStatus = async (req, res) => {
     const { userId } = req.params;
     const dataToUpdate = req.body;
     const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
-    if (updateStatus.userStatusUpdated) {
-      return res.json({
-        userId,
-        message: "userStatus updated successfully",
-      });
+    if (updateStatus.userStatusExists) {
+      if (updateStatus.userStatusUpdated) {
+        return res.status(200).json({
+          id: updateStatus.id,
+          userId,
+          message: "userStatus updated successfully",
+          ...dataToUpdate,
+        });
+      }
     } else {
-      return res.status(404).json({
-        userId,
-        message: "userStatus could not be updated as the userId is invalid.",
-      });
+      if (updateStatus.userStatusUpdated) {
+        return res.status(201).json({
+          id: updateStatus.id,
+          userId,
+          message: "User Status created successfully",
+          ...dataToUpdate,
+        });
+      } else {
+        return res.status(400).json({
+          id: updateStatus.id,
+          userId,
+          message: "User Status couldn't be created as the request body is incomplete.",
+        });
+      }
     }
   } catch (err) {
     logger.error(`Error while updating the User Data: ${err}`);
     return res.boom.badImplementation("An internal server error occurred");
   }
+  return res.status(400).json({
+    id: undefined,
+    userId: req.params.userId,
+    message: "userStatus could not be updated.",
+  });
 };
 
-module.exports = { addUserStatus, deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus };
+module.exports = { deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus };

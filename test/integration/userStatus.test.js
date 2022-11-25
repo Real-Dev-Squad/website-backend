@@ -18,7 +18,7 @@ const {
 } = require("../fixtures/userStatus/userStatus");
 
 const config = require("config");
-const { addUserStatus } = require("../../models/userStatus");
+const { updateUserStatus } = require("../../models/userStatus");
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
@@ -34,18 +34,18 @@ describe("UserStatus", function () {
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-    await addUserStatus(userStsDataForNewUser(userId));
+    await updateUserStatus(userId, userStsDataForNewUser);
   });
 
   afterEach(async function () {
     await cleanDb();
   });
 
-  describe("GET /userStatus", function () {
+  describe("GET /user-status", function () {
     it("Should get all the userStatus in system", function (done) {
       chai
         .request(app)
-        .get("/userStatus")
+        .get("/user-status")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -60,11 +60,11 @@ describe("UserStatus", function () {
     });
   });
 
-  describe("GET /userStatus/:userid", function () {
+  describe("GET /user-status/:userid", function () {
     it("Should return one User Status with the given id", function (done) {
       chai
         .request(app)
-        .get(`/userStatus/${userId}`)
+        .get(`/user-status/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -81,20 +81,19 @@ describe("UserStatus", function () {
     });
   });
 
-  describe("POST /userStatus/:userid", function () {
-    let testUserJwt;
+  describe("PATCH user-status/:userid", function () {
     let testUserId;
+    let testUserJwt;
 
     beforeEach(async function () {
-      await cleanDb();
-      testUserId = await addUser();
+      testUserId = await addUser(userData[1]);
       testUserJwt = authService.generateAuthToken({ userId: testUserId });
     });
 
     it("Should store the User Status in the collection", function (done) {
       chai
         .request(app)
-        .post(`/userStatus/${testUserId}`)
+        .patch(`/user-status/${testUserId}`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(userStsDataForOooState)
         .end((err, res) => {
@@ -109,10 +108,26 @@ describe("UserStatus", function () {
         });
     });
 
+    it("Should update the User Status", function (done) {
+      chai
+        .request(app)
+        .patch(`/user-status/${userId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(validUserStsDataforUpdate)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("userStatus updated successfully");
+          return done();
+        });
+    });
+
     it("Should return 401 for unauthorized request", function (done) {
       chai
         .request(app)
-        .post(`/userStatus/${testUserId}`)
+        .patch(`/user-status/${testUserId}`)
         .set("Cookie", `${cookieName}=""`)
         .send(userStsDataForOooState)
         .end((err, res) => {
@@ -126,10 +141,10 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should return 400 for invalid Data", function (done) {
+    it("Should return 400 for invalid Data for a new User Status", function (done) {
       chai
         .request(app)
-        .post(`/userStatus/${testUserId}`)
+        .patch(`/user-status/${testUserId}`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(invalidUserStsDataforPost)
         .end((err, res) => {
@@ -138,35 +153,15 @@ describe("UserStatus", function () {
           }
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.be.equal(
-            '"value" contains [currentStatus] without its required peers [monthlyHours]'
-          );
-          return done();
-        });
-    });
-  });
-
-  describe("PATCH userStatus/:userid", function () {
-    it("Should update the User Status", function (done) {
-      chai
-        .request(app)
-        .patch(`/userStatus/${userId}`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send(validUserStsDataforUpdate)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body.message).to.equal("userStatus updated successfully");
+          expect(res.body.message).to.be.equal("User Status couldn't be created as the request body is incomplete.");
           return done();
         });
     });
 
-    it("Should return 400 for invalid status value", function (done) {
+    it("Should return 400 for incorrect state value", function (done) {
       chai
         .request(app)
-        .patch(`/userStatus/${userId}`)
+        .patch(`/user-status/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(invalidUserStsDataforUpdate)
         .end((err, res) => {
@@ -185,11 +180,11 @@ describe("UserStatus", function () {
     });
   });
 
-  describe("DELETE userStatus/:userid", function () {
+  describe("DELETE user-status/:userid", function () {
     it("Should return 401 for Unauthorized User", function (done) {
       chai
         .request(app)
-        .delete(`/userStatus/${userId}`)
+        .delete(`/user-status/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -208,7 +203,7 @@ describe("UserStatus", function () {
     it("Should return 200 for deletion by Super User", function (done) {
       chai
         .request(app)
-        .delete(`/userStatus/${userId}`)
+        .delete(`/user-status/${userId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
