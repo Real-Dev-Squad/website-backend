@@ -1,11 +1,14 @@
 const express = require("express");
 const router = express.Router();
+const authenticate = require("../middlewares/authenticate");
+const badgeValidator = require("../middelwares/validators/badges");
+const { upload } = require("../utils/multer");
 const badge = require("../controllers/badge.js");
 
 router.get("/", badge.getBadges);
-router.post("/", badge.postBadge);
 router.get("/:username", badge.getUserBadges);
-router.post("/:username", badge.postUserBadge);
-router.delete("/:username", badge.deleteUserBadge);
+router.post("/", authenticate, upload.single("badge"), badgeValidator.createBadge, badge.postBadge);
+router.post("/:username", authenticate, badge.postUserBadge);
+router.delete("/:username", authenticate, badge.deleteUserBadge);
 
 module.exports = router;

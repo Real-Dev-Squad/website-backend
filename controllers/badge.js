@@ -1,4 +1,5 @@
 const badgeQuery = require("../models/badges");
+const imageService = require("../services/imageService");
 
 /**
  * Get badges data
@@ -37,7 +38,53 @@ const getUserBadges = async (req, res) => {
   }
 };
 
+/**
+ * Create new badge
+ * 
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ * @returns {Object} - Returns badge object if formdata is valid
+ */
+async function postBadge(req, res) {
+  try {
+    const {file} = req;
+    const {name, description, createdBy} = req.body;
+    const {url} = await imageService.uploadBadgeImage({file, name});
+    const {createdAt} = await badgeQuery.addBadge({name, description, createdBy, url});
+    return res.json({
+      message: 'Badge created successfully!!',
+      url,
+      name,
+      description,
+      createdBy,
+      createdAt
+    })
+  } catch (error) {
+    logger.error(`Error while creating badge: ${error}`);
+    return res.boom.badRequest("An internal server error occurred");
+  }
+}
+
+async function postUserBadge(req, res) {
+  try {
+    // add code here
+  } catch (error) {
+    logger.error(`Error while assigning badge: ${error}`);
+  }
+}
+
+async function deleteUserBadge(req, res) {
+  try {
+    // add code here
+  } catch (error) {
+    logger.error(`Error while unassigning badge: ${error}`);
+  }
+}
+
 module.exports = {
   getBadges,
   getUserBadges,
+  postBadge,
+  postUserBadge,
+  deleteUserBadge,
 };
