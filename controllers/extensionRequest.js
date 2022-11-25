@@ -37,6 +37,28 @@ const createETAExtension = async (req, res) => {
   }
 };
 
+/**
+ * Fetches all the Extension Requests
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const fetchExtensionRequests = async (req, res) => {
+  try {
+    const { status, taskId } = req.query;
+    const allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({ id: taskId, status });
+
+    return res.json({
+      message: "Extension Requests returned successfully!",
+      extensionRequests: allExtensionRequests.length > 0 ? allExtensionRequests : [],
+    });
+  } catch (err) {
+    logger.error(`Error while fetching Extension Requests ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
 module.exports = {
   createETAExtension,
+  fetchExtensionRequests,
 };
