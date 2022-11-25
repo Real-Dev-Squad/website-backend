@@ -55,7 +55,7 @@ const getAllTags = async () => {
     data.forEach((doc) => {
       const tag = {
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       };
       allTags.push(tag);
     });
@@ -73,7 +73,7 @@ const getTagByType = async (type) => {
     data.forEach((doc) => {
       const tag = {
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       };
       tags.push(tag);
     });
