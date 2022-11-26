@@ -290,6 +290,7 @@ const generateTaskNumber = async () => {
     const snapshot = await tasksModel.count().get();
     return snapshot.data().count + 1;
   } catch (err) {
+    logger.error("Couldn't generate task number", err);
     throw err;
   }
 };
