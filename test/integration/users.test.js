@@ -363,7 +363,7 @@ describe("Users", function () {
           }
           expect(res).to.have.status(201);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User Data Added Successfully");
+          expect(res.body.message).to.equal("User data added successfully");
           return done();
         });
     });
