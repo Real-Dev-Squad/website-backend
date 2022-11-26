@@ -16,7 +16,7 @@ router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvai
 router.get("/chaincode", authenticate, users.generateChaincode);
 router.get("/:username", users.getUser);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
-router.post("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);
+router.put("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);
 router.get("/:id/skills", users.getUserSkills);
 
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
