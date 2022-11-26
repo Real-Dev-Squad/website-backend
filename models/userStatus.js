@@ -14,11 +14,13 @@ const deleteUserStatus = async (userId) => {
       const docId = userStatusDoc.id;
       await userStatusModel.doc(docId).delete();
       return { id: userStatusDoc.id, userStatusExisted: true, userStatusDeleted: true };
+    } else {
+      return { id: null, userStatusExisted: false, userStatusDeleted: false };
     }
   } catch (error) {
     logger.error(`error in deleting User Status Document . Reason - ${error}`);
+    throw error;
   }
-  return { userStatusExisted: false, userStatusDeleted: false };
 };
 
 /**
@@ -32,20 +34,22 @@ const getUserStatus = async (userId) => {
     if (userStatusDoc) {
       const id = userStatusDoc.id;
       const data = userStatusDoc.data();
-      return { id, userId, ...data, userStatusExists: true };
+      return { id, data, userStatusExists: true };
+    } else {
+      return { id: null, data: null, userStatusExists: false };
     }
   } catch (error) {
-    logger.error(`error in fetching the User Status Document. Reason - ${error}`);
+    logger.error(`Error in fetching the User Status Document. Reason - ${error}`);
+    throw error;
   }
-  return { id: undefined, userId, userStatusExists: false };
 };
 
 /**
  * @returns {Promise<userStatusModel|Array>} : returns an array of all the userStatus
  */
 const getAllUserStatus = async (query) => {
-  const allUserStatus = [];
   try {
+    const allUserStatus = [];
     let data;
     if (!query.state) {
       data = await userStatusModel.get();
@@ -61,10 +65,11 @@ const getAllUserStatus = async (query) => {
       };
       allUserStatus.push(currentUserStatus);
     });
+    return { allUserStatus };
   } catch (error) {
     logger.error(`error in fetching the User Status of all Users. ${error}`);
+    throw error;
   }
-  return { allUserStatus };
 };
 
 /**
@@ -92,20 +97,20 @@ const updateUserStatus = async (userId, updatedData) => {
         }
       }
       await userStatusModel.doc(docId).update(updatedData);
-      return { id: docId, userStatusExists: true, userStatusUpdated: true, ...updatedData };
+      return { id: docId, userStatusExists: true, userStatusUpdated: true, data: updatedData };
     } else {
       // the user doc doesnt exist meaning we need to create one
       if ("currentStatus" in updatedData && "monthlyHours" in updatedData) {
         const { id } = await userStatusModel.add({ userId, ...updatedData });
-        return { id, userId, userStatusExists: false, userStatusUpdated: true, ...updatedData };
+        return { id, userStatusExists: false, userStatusUpdated: true, data: updatedData };
       } else {
-        return { id: undefined, userStatusExists: false, userStatusUpdated: false };
+        return { id: null, userStatusExists: false, userStatusUpdated: false, data: null };
       }
     }
   } catch (error) {
     logger.error(`error in updating User Status Document ${error}`);
+    throw error;
   }
-  return { id: undefined, userStatusExists: false, userStatusUpdated: false };
 };
 
 module.exports = { deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus };
