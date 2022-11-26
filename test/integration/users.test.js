@@ -350,7 +350,7 @@ describe("Users", function () {
     });
   });
 
-  describe("POST /users/self/intro", function () {
+  describe("PUT /users/self/intro", function () {
     it("Should store the info in db", function (done) {
       chai
         .request(app)
@@ -371,7 +371,7 @@ describe("Users", function () {
     it("Should return 401 for unauthorized request", function (done) {
       chai
         .request(app)
-        .post(`/users/self/intro`)
+        .put(`/users/self/intro`)
         .set("Cookie", `${cookieName}=""`)
         .send(joinData()[2])
         .end((err, res) => {
@@ -387,7 +387,7 @@ describe("Users", function () {
     it("Should return 400 for invalid Data", function (done) {
       chai
         .request(app)
-        .post(`/users/self/intro`)
+        .put(`/users/self/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(joinData()[1])
         .end((err, res) => {
