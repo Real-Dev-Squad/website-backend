@@ -34,11 +34,11 @@ const uploadProfilePicture = async ({ file, userId, coordinates }) => {
 
 /**
  * upload badge image to cloudinary
- *
  * @param file { Object }: multipart file data
  * @param badgeName { string }: Badge name
+ * @return image { Object }: public-url and public-id
  */
- const uploadBadgeImage = async ({ file, badgeName }) => {
+async function uploadBadgeImage({ file, badgeName }) {
   try {
     const parser = new DatauriParser();
     const imageDataUri = parser.format(file.originalname, file.buffer);
@@ -53,7 +53,7 @@ const uploadProfilePicture = async ({ file, userId, coordinates }) => {
     logger.error(`Error while uploading profile picture ${err}`);
     throw err;
   }
-};
+}
 
 module.exports = {
   uploadProfilePicture,

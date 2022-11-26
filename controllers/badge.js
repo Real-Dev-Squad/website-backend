@@ -3,11 +3,10 @@ const imageService = require("../services/imageService");
 
 /**
  * Get badges data
- *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
+ * @returns {Array} - Return badges
  */
-
 const getBadges = async (req, res) => {
   try {
     const allBadges = await badgeQuery.fetchBadges(req.query);
@@ -40,25 +39,25 @@ const getUserBadges = async (req, res) => {
 
 /**
  * Create new badge
- * 
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
- * @returns {Object} - Returns badge object if formdata is valid
+ * @returns {Object} - Return badge object if formdata is valid
  */
 async function postBadge(req, res) {
   try {
-    const {file} = req;
-    const {name, description, createdBy} = req.body;
-    const {url} = await imageService.uploadBadgeImage({file, name});
-    const {createdAt} = await badgeQuery.addBadge({name, description, createdBy, url});
+    const { file } = req;
+    const { name, description, createdBy } = req.body;
+    const { url } = await imageService.uploadBadgeImage({ file, name });
+    const { id, createdAt } = await badgeQuery.addBadge({ name, description, createdBy, imageUrl: url });
     return res.json({
-      message: 'Badge created successfully!!',
+      message: "Badge created successfully.",
+      id,
       url,
       name,
       description,
       createdBy,
-      createdAt
-    })
+      createdAt,
+    });
   } catch (error) {
     logger.error(`Error while creating badge: ${error}`);
     return res.boom.badRequest("An internal server error occurred");

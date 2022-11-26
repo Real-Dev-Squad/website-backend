@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
-const badgeValidator = require("../middelwares/validators/badges");
+const badgeValidator = require("../middlewares/validators/badge");
 const { upload } = require("../utils/multer");
 const badge = require("../controllers/badge.js");
 

@@ -12,7 +12,7 @@ module.exports = {
     },
   },
   BADGE: {
-    FOLDER : "/badge/",
+    FOLDER: "/badge/",
     TAGS: ["badge", "badges"],
-  }
+  },
 };

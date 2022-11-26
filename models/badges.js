@@ -1,6 +1,8 @@
+const admin = require("firebase-admin");
 const firestore = require("../utils/firestore");
 const badgeModel = firestore.collection("badges");
 const { fetchUser } = require("../models/users");
+const { convertFirebaseTimestampToDateTime } = require("../utils/badge");
 
 /**
  * Fetches the data about our badges
@@ -13,12 +15,24 @@ const fetchBadges = async ({ size = 100, page = 0 }) => {
       .limit(parseInt(size))
       .offset(parseInt(size) * parseInt(page))
       .get();
-
-    const allBadges = [];
-    snapshot.forEach((doc) => {
-      allBadges.push(doc.data());
+    // INFO: timestamp to date time logic surfaced fro
+    // https://stackoverflow.com/a/66292255
+    return snapshot.docs.map((doc) => {
+      const id = doc.id;
+      const { createdAt, createdBy, name, description, imageUrl } = doc.data();
+      const { date, time } = convertFirebaseTimestampToDateTime(createdAt);
+      return {
+        id,
+        name,
+        description,
+        imageUrl,
+        createdBy,
+        createdAt: {
+          date,
+          time,
+        },
+      };
     });
-    return allBadges;
   } catch (err) {
     logger.error("Error retrieving badges", err);
     return err;
@@ -56,7 +70,31 @@ const fetchUserBadges = async (username) => {
   }
 };
 
+/**
+ * Add badge to firestore
+ * @param badgeData { Object }: badge data object to be stored in DB
+ * @return {Promise<{id: string, createdAt: {date: string, time: string}}|Object>}
+ */
+async function addBadge({ name, description, imageUrl, createdBy }) {
+  try {
+    const createdAt = admin.firestore.Timestamp.now();
+    const docRef = await badgeModel.add({
+      name,
+      description,
+      imageUrl,
+      createdBy,
+      createdAt,
+    });
+    const { date, time } = convertFirebaseTimestampToDateTime(createdAt);
+    return { id: docRef.id, createdAt: { date, time } };
+  } catch (err) {
+    logger.error("Error creating badge", err);
+    return err;
+  }
+}
+
 module.exports = {
   fetchBadges,
   fetchUserBadges,
+  addBadge,
 };
