@@ -356,8 +356,7 @@ const addUserIntro = async (req, res) => {
     };
     await userQuery.addJoinData(data);
 
-    return res.json({
-      status: 200,
+    return res.status(201).json({
       message: "User Data Added Successfully",
     });
   } catch (err) {

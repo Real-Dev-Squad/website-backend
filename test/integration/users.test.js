@@ -354,16 +354,16 @@ describe("Users", function () {
     it("Should store the info in db", function (done) {
       chai
         .request(app)
-        .post(`/users/self/intro`)
+        .put(`/users/self/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(joinData()[2])
         .end((err, res) => {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(200);
+          expect(res).to.have.status(201);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User Data Added Succesfully");
+          expect(res.body.message).to.equal("User Data Added Successfully");
           return done();
         });
     });
