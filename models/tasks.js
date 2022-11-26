@@ -285,9 +285,13 @@ const overdueTasks = async (overDueTasks) => {
   }
 };
 
-const generateTaskNo = async () => {
-  const snapshot = await tasksModel.count().get();
-  return snapshot.data().count + 1;
+const generateTaskNumber = async () => {
+  try {
+    const snapshot = await tasksModel.count().get();
+    return snapshot.data().count + 1;
+  } catch (err) {
+    throw err;
+  }
 };
 
 module.exports = {
@@ -301,5 +305,5 @@ module.exports = {
   fetchSelfTask,
   fetchSkillLevelTask,
   overdueTasks,
-  generateTaskNo,
+  generateTaskNumber,
 };

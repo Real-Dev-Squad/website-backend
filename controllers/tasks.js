@@ -16,7 +16,7 @@ const addNewTask = async (req, res) => {
     const body = {
       ...req.body,
       createdBy,
-      taskNo: await tasks.generateTaskNo(),
+      taskNumber: await tasks.generateTaskNumber(),
     };
     const task = await tasks.updateTask(body);
 
