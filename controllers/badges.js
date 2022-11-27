@@ -84,11 +84,29 @@ async function postUserBadges(req, res) {
   }
 }
 
-async function deleteUserBadge(req, res) {
+/**
+ * Unassign badges
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ * @returns {message} - badges unassigned
+ */
+async function deleteUserBadges(req, res) {
   try {
-    // add code here
+    const { username } = req.params;
+    const { badgeIds } = req.body;
+    const result = await fetchUser({ username });
+    if (!result.userExists) {
+      throw new Error("Failed to assign badges, user does not exsit");
+    }
+    const userId = result.user.id;
+    // TODO: add badgeId validation
+    await badgeQuery.unAssignBadges({ userId, badgeIds });
+    return res.json({
+      message: "Badges un-assigned successfully.",
+    });
   } catch (error) {
     logger.error(`Error while unassigning badge: ${error}`);
+    return res.boom.badRequest("An internal server error occurred");
   }
 }
 
@@ -97,5 +115,5 @@ module.exports = {
   getUserBadgeIds,
   postBadge,
   postUserBadges,
-  deleteUserBadge,
+  deleteUserBadges,
 };

@@ -30,7 +30,7 @@ async function createBadge(req, res, next) {
 }
 
 /**
- * Validates param uername and payload badgeIds
+ * Validates param username and payload badgeIds
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  * @param next {function} - Express middelware
@@ -41,12 +41,7 @@ async function assignOrUnassignBadges(req, res, next) {
     .strict()
     .keys({
       username: joi.string().required(),
-      badgeIds: joi
-        .array()
-        .min(1)
-        .items(joi.string().min(1))
-        .required()
-        .unique((a, b) => a !== b),
+      badgeIds: joi.array().min(1).items(joi.string().required()).unique().required(),
     });
   try {
     const { username } = req.params;
