@@ -109,9 +109,32 @@ async function assignBadges({ userId, badgeIds }) {
   }
 }
 
+/**
+ * unassign badges from user
+ * @param query { Object }: userId and badgeIds Array
+ * @return {Promise<{docIds: Array<string>}|Object>}
+ */
+async function unAssignBadges({ userId, badgeIds }) {
+  try {
+    const docIds = [];
+    const snapshot = await userBadgeModel.where("userId", "==", userId).where("badgeId", "in", badgeIds).get();
+    const batch = firestore.batch();
+    snapshot.forEach((doc) => {
+      docIds.push(doc.id);
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+    return { docIds };
+  } catch (err) {
+    logger.error("Error unassigning badges", err);
+    return err;
+  }
+}
+
 module.exports = {
   fetchBadges,
   fetchUserBadgeIds,
   addBadge,
   assignBadges,
+  unAssignBadges,
 };
