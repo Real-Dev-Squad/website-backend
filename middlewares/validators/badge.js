@@ -29,6 +29,37 @@ async function createBadge(req, res, next) {
   }
 }
 
+/**
+ * Validates param uername and payload badgeIds
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ * @param next {function} - Express middelware
+ */
+async function assignOrUnassignBadges(req, res, next) {
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      username: joi.string().required(),
+      badgeIds: joi
+        .array()
+        .min(1)
+        .items(joi.string().min(1))
+        .required()
+        .unique((a, b) => a !== b),
+    });
+  try {
+    const { username } = req.params;
+    const { badgeIds } = req.body;
+    await schema.validateAsync({ username, badgeIds });
+    next();
+  } catch (error) {
+    logger.error(`Error validating assign or unassign badges payload: ${error}`);
+    res.boom.badRequest(`API payload failed validation, ${error.details?.[0]?.message}`);
+  }
+}
+
 module.exports = {
   createBadge,
+  assignOrUnassignBadges,
 };

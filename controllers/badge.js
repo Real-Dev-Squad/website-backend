@@ -1,4 +1,5 @@
 const badgeQuery = require("../models/badges");
+const { fetchUser } = require("../models/users");
 const imageService = require("../services/imageService");
 
 /**
@@ -20,14 +21,13 @@ const getBadges = async (req, res) => {
   }
 };
 
-const getUserBadges = async (req, res) => {
+const getUserBadgeIds = async (req, res) => {
   try {
-    const result = await badgeQuery.fetchUserBadges(req.params.username);
+    const { userExists, badgeIds } = await badgeQuery.fetchUserBadgeIds(req.params.username);
     let responseMsg = "";
-    if (result.userExists) {
-      responseMsg =
-        result.userBadges.length !== 0 ? "User badges returned successfully!" : "This user does not have any badges";
-      return res.json({ message: responseMsg, userBadges: result.userBadges });
+    if (userExists) {
+      responseMsg = badgeIds.length !== 0 ? "User badges returned successfully!" : "This user does not have any badges";
+      return res.json({ message: responseMsg, badgeIds });
     } else {
       return res.boom.notFound("The user does not exist");
     }
@@ -47,7 +47,7 @@ async function postBadge(req, res) {
   try {
     const { file } = req;
     const { name, description, createdBy } = req.body;
-    const { url } = await imageService.uploadBadgeImage({ file, name });
+    const { url } = await imageService.uploadBadgeImage({ file, badgeName: name });
     const { id, createdAt } = await badgeQuery.addBadge({ name, description, createdBy, imageUrl: url });
     return res.json({
       message: "Badge created successfully.",
@@ -64,11 +64,23 @@ async function postBadge(req, res) {
   }
 }
 
-async function postUserBadge(req, res) {
+async function postUserBadges(req, res) {
   try {
-    // add code here
+    const { username } = req.params;
+    const { badgeIds } = req.body;
+    const result = await fetchUser({ username });
+    if (!result.userExists) {
+      throw new Error("Failed to assign badges, user does not exsit");
+    }
+    const userId = result.user.id;
+    // TODO: add badgeId validation
+    await badgeQuery.assignBadges({ userId, badgeIds });
+    return res.json({
+      message: "Badges assigned successfully.",
+    });
   } catch (error) {
     logger.error(`Error while assigning badge: ${error}`);
+    return res.boom.badRequest("An internal server error occurred");
   }
 }
 
@@ -82,8 +94,8 @@ async function deleteUserBadge(req, res) {
 
 module.exports = {
   getBadges,
-  getUserBadges,
+  getUserBadgeIds,
   postBadge,
-  postUserBadge,
+  postUserBadges,
   deleteUserBadge,
 };
