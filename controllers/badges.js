@@ -48,7 +48,7 @@ async function postBadge(req, res) {
     const { file } = req;
     const { name, description, createdBy } = req.body;
     const { url } = await imageService.uploadBadgeImage({ file, badgeName: name });
-    const { id, createdAt } = await badgeQuery.addBadge({ name, description, createdBy, imageUrl: url });
+    const { id, createdAt } = await badgeQuery.createBadge({ name, description, createdBy, imageUrl: url });
     return res.json({
       message: "Badge created successfully.",
       id,
@@ -60,10 +60,16 @@ async function postBadge(req, res) {
     });
   } catch (error) {
     logger.error(`Error while creating badge: ${error}`);
-    return res.boom.badRequest("An internal server error occurred");
+    return res.boom.badRequest(`Failed to create badge: ${error?.message}`);
   }
 }
 
+/**
+ * Assign badges
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ * @returns {message} - badges assigned
+ */
 async function postUserBadges(req, res) {
   try {
     const { username } = req.params;
@@ -73,14 +79,13 @@ async function postUserBadges(req, res) {
       throw new Error("Failed to assign badges, user does not exsit");
     }
     const userId = result.user.id;
-    // TODO: add badgeId validation
     await badgeQuery.assignBadges({ userId, badgeIds });
     return res.json({
       message: "Badges assigned successfully.",
     });
   } catch (error) {
     logger.error(`Error while assigning badge: ${error}`);
-    return res.boom.badRequest("An internal server error occurred");
+    return res.boom.badRequest(`Failed to assign badges: ${error?.message}`);
   }
 }
 
@@ -99,14 +104,13 @@ async function deleteUserBadges(req, res) {
       throw new Error("Failed to assign badges, user does not exsit");
     }
     const userId = result.user.id;
-    // TODO: add badgeId validation
     await badgeQuery.unAssignBadges({ userId, badgeIds });
     return res.json({
       message: "Badges un-assigned successfully.",
     });
   } catch (error) {
     logger.error(`Error while unassigning badge: ${error}`);
-    return res.boom.badRequest("An internal server error occurred");
+    return res.boom.badRequest(`Failed to unassign badges: ${error?.message}`);
   }
 }
 

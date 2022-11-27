@@ -42,7 +42,7 @@ const fetchBadges = async ({ size = 100, page = 0 }) => {
 
 /**
  * Fetches the data about user badges
- * @param query { Object }: Filter for badges data
+ * @param query { string }: Filter for badgeIds
  * @return {Promise<userBadgeModel|Array>}
  */
 const fetchUserBadgeIds = async (username) => {
@@ -65,10 +65,10 @@ const fetchUserBadgeIds = async (username) => {
 
 /**
  * Add badge to firestore
- * @param badgeData { Object }: badge data object to be stored in DB
+ * @param  { Object }: badge name, to be stored in DB
  * @return {Promise<{id: string, createdAt: {date: string, time: string}}|Object>}
  */
-async function addBadge({ name, description, imageUrl, createdBy }) {
+async function createBadge({ name, description, imageUrl, createdBy }) {
   try {
     const createdAt = admin.firestore.Timestamp.now();
     const docRef = await badgeModel.add({
@@ -88,30 +88,30 @@ async function addBadge({ name, description, imageUrl, createdBy }) {
 
 /**
  * assign badges to user
- * @param query { Object }: userId and badgeIds Array
+ * @param { Object }: userId: string and badgeIds: Array<string>
  * @return {Promise<{docIds: Array<string>}|Object>}
  */
 async function assignBadges({ userId, badgeIds }) {
   try {
-    const docs = await Promise.all(
-      badgeIds.map((badgeId) => {
-        return userBadgeModel.add({
-          userId,
-          badgeId,
-        });
-      })
-    );
-    const docIds = docs.map((doc) => doc.id);
+    const docIds = [];
+    const batch = firestore.batch();
+    badgeIds.forEach((badgeId) => {
+      const ref = userBadgeModel.doc();
+      const id = ref.id;
+      batch.create(ref, { userId, badgeId });
+      docIds.push(id);
+    });
+    await batch.commit();
     return { docIds };
   } catch (err) {
-    logger.error("Error creating badge", err);
+    logger.error("Error assigning badges", err);
     return err;
   }
 }
 
 /**
  * unassign badges from user
- * @param query { Object }: userId and badgeIds Array
+ * @param { Object }: userId: string and badgeIds: Array<string>
  * @return {Promise<{docIds: Array<string>}|Object>}
  */
 async function unAssignBadges({ userId, badgeIds }) {
@@ -126,7 +126,7 @@ async function unAssignBadges({ userId, badgeIds }) {
     await batch.commit();
     return { docIds };
   } catch (err) {
-    logger.error("Error unassigning badges", err);
+    logger.error("Error un-assigning badges", err);
     return err;
   }
 }
@@ -134,7 +134,7 @@ async function unAssignBadges({ userId, badgeIds }) {
 module.exports = {
   fetchBadges,
   fetchUserBadgeIds,
-  addBadge,
+  createBadge,
   assignBadges,
   unAssignBadges,
 };
