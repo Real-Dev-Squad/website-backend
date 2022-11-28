@@ -194,7 +194,7 @@ const fetchUserTasks = async (username, statuses = [], field, order) => {
   }
 };
 
-const getNewTask = async (skill, level) => {
+const getNewTask = async (skill = undefined, level = undefined) => {
   const availableTasks = await tasksModel.where("status", "==", TASK_STATUS.AVAILABLE).get();
   const idArray = [];
   let task;
@@ -203,28 +203,25 @@ const getNewTask = async (skill, level) => {
     availableTasks.forEach((item) => idArray.push(item.id));
 
     if (!skill) {
-      task = await ItemModel.where("itemtype", "==", "TASK")
-        .where("itemid", "in", idArray)
-        .where("levelnumber", ">=", 2)
-        .limit(1)
-        .get();
+      task = await ItemModel.where("itemtype", "==", "TASK").where("levelnumber", ">=", 2).get();
     } else {
       task = await ItemModel.where("tagname", "==", skill)
         .where("itemtype", "==", "TASK")
-        .where("itemid", "in", idArray)
         .where("levelnumber", ">=", level)
         .where("levelnumber", "<=", level + 2)
-        .limit(1)
         .get();
     }
   }
 
-  let taskData, id;
   if (!task.empty) {
-    task.forEach((doc) => {
-      id = doc.id;
-      taskData = doc.data();
-    });
+    let taskData, id;
+    for (const doc of task.docs) {
+      if (idArray.includes(doc.data().itemid)) {
+        id = doc.id;
+        taskData = doc.data();
+        break;
+      }
+    }
     return {
       task: {
         id,
@@ -232,7 +229,6 @@ const getNewTask = async (skill, level) => {
       },
     };
   }
-
   return { taskNotFound: true };
 };
 
