@@ -1,6 +1,7 @@
 const tasks = require("../models/tasks");
 const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
 const { addLog } = require("../models/logs");
+const { USER_STATUS } = require("../constants/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 /**
@@ -110,6 +111,20 @@ const getSelfTasks = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
+const getTask = async (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const { taskData } = await tasks.fetchTask(taskId);
+
+    if (!taskData) {
+      return res.boom.notFound("Task not found");
+    }
+    return res.json({ message: "task returned successfully", taskData });
+  } catch (err) {
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
@@ -230,12 +245,35 @@ const overdueTasks = async (req, res) => {
   }
 };
 
+const assignTask = async (req, res) => {
+  // we will fetch the skilltag leveltag of that particular user here once we have the skill with his userId
+  // we can check here the all the level, and whichever is the smallest we can make the request with that particular category, for now value is hardcoded
+  // I am putting the names of the skills but we are going to get id
+  try {
+    const { status, username } = req.userData;
+
+    if (status !== USER_STATUS.IDLE) {
+      return res.json({ message: "Task cannot be assigned to users with active or OOO status" });
+    }
+
+    const { task } = await tasks.fetchSkillLevelTask("FRONTEND", 1);
+    if (!task) return res.json({ message: "Task not found" });
+
+    await tasks.updateTask({ assignee: username, status: TASK_STATUS.ASSIGNED }, task.id);
+    return res.json({ message: "Task assigned" });
+  } catch {
+    return res.boom.badImplementation("Something went wrong!");
+  }
+};
+
 module.exports = {
   addNewTask,
   fetchTasks,
   updateTask,
   getSelfTasks,
   getUserTasks,
+  getTask,
   updateTaskStatus,
   overdueTasks,
+  assignTask,
 };
