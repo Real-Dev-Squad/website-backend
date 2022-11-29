@@ -19,4 +19,6 @@ app.use("/profileDiffs", require("./profileDiffs.js"));
 app.use("/wallet", require("./wallets.js"));
 app.use("/user-status", require("./userStatus.js"));
 
+app.use("/levels", require("./levels.js"));
+
 module.exports = app;
