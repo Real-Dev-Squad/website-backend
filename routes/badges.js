@@ -8,7 +8,7 @@ const authorizeRoles = require("../middlewares/authorizeRoles");
 const { SUPERUSER } = require("../constants/roles");
 
 router.get("/", badge.getBadges);
-router.get("/:username", badge.getUserBadgeIds);
+router.get("/:username", badge.getUserBadges);
 router.post(
   "/",
   authenticate,

@@ -3,7 +3,7 @@ const firestore = require("../utils/firestore");
 const badgeModel = firestore.collection("badges");
 const userBadgeModel = firestore.collection("userBadges");
 const { fetchUser } = require("../models/users");
-const { convertFirebaseTimestampToDateTime } = require("../utils/badge");
+const { convertFirebaseTimestampToDateTime, convertFirebaseDocumentToBadgeDocument } = require("../utils/badges");
 
 /**
  * Fetches the data about our badges
@@ -18,22 +18,7 @@ const fetchBadges = async ({ size = 100, page = 0 }) => {
       .get();
     // INFO: timestamp to date time logic surfaced fro
     // https://stackoverflow.com/a/66292255
-    return snapshot.docs.map((doc) => {
-      const id = doc.id;
-      const { createdAt, createdBy, name, description, imageUrl } = doc.data();
-      const { date, time } = convertFirebaseTimestampToDateTime(createdAt);
-      return {
-        id,
-        name,
-        description,
-        imageUrl,
-        createdBy,
-        createdAt: {
-          date,
-          time,
-        },
-      };
-    });
+    return snapshot.docs.map((doc) => convertFirebaseDocumentToBadgeDocument(doc.id, doc.data()));
   } catch (err) {
     logger.error("Error retrieving badges", err);
     return err;
@@ -43,25 +28,30 @@ const fetchBadges = async ({ size = 100, page = 0 }) => {
 /**
  * Fetches the data about user badges
  * @param query { string }: Filter for badgeIds
- * @return {Promise<userBadgeModel|Array>}
+ * @return {Promise<{badges: Array}>}
  */
-const fetchUserBadgeIds = async (username) => {
+async function fetchUserBadges(username) {
   try {
-    let badgeIds = [];
-    let userExists = false;
+    let badges = [];
     const result = await fetchUser({ username });
-    if (result.userExists) {
-      userExists = true;
-      const userId = result.user.id;
-      const snapshot = await userBadgeModel.where("userId", "==", userId).get();
-      badgeIds = snapshot.docs.map((doc) => doc.get("badgeId"));
+    if (!result.userExists) {
+      return { userExists: false, badges };
     }
-    return { userExists, badgeIds };
+    const userId = result.user.id;
+    const badgeIdsSnapshot = await userBadgeModel.where("userId", "==", userId).get();
+    const badgeDocReferences = badgeIdsSnapshot.docs.map((doc) => {
+      const badgeId = doc.get("badgeId");
+      return firestore.doc(`badges/${badgeId}`);
+    });
+    // INFO: getAll accepts unpacked array
+    const badgesSnapshot = await firestore.getAll(...badgeDocReferences);
+    badges = badgesSnapshot.map((doc) => convertFirebaseDocumentToBadgeDocument(doc.id, doc.data()));
+    return { userExists: true, badges };
   } catch (err) {
     logger.error("Error retrieving user badges", err);
     return err;
   }
-};
+}
 
 /**
  * Add badge to firestore
@@ -133,7 +123,7 @@ async function unAssignBadges({ userId, badgeIds }) {
 
 module.exports = {
   fetchBadges,
-  fetchUserBadgeIds,
+  fetchUserBadges,
   createBadge,
   assignBadges,
   unAssignBadges,

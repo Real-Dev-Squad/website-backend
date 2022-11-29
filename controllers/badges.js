@@ -21,21 +21,18 @@ const getBadges = async (req, res) => {
   }
 };
 
-const getUserBadgeIds = async (req, res) => {
+async function getUserBadges(req, res) {
   try {
-    const { userExists, badgeIds } = await badgeQuery.fetchUserBadgeIds(req.params.username);
-    let responseMsg = "";
-    if (userExists) {
-      responseMsg = badgeIds.length !== 0 ? "User badges returned successfully!" : "This user does not have any badges";
-      return res.json({ message: responseMsg, badgeIds });
-    } else {
+    const { userExists, badges } = await badgeQuery.fetchUserBadges(req.params.username);
+    if (!userExists) {
       return res.boom.notFound("The user does not exist");
     }
+    return res.json({ message: "Badges returned succesfully", badges });
   } catch (error) {
     logger.error(`Error while fetching all user badges: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
-};
+}
 
 /**
  * Create new badge
@@ -116,7 +113,7 @@ async function deleteUserBadges(req, res) {
 
 module.exports = {
   getBadges,
-  getUserBadgeIds,
+  getUserBadges,
   postBadge,
   postUserBadges,
   deleteUserBadges,
