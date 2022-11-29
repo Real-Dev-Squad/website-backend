@@ -158,7 +158,7 @@ const updateTaskStatus = async (req, res, next) => {
   try {
     const taskId = req.params.id;
     const { dev } = req.query;
-    const { id: userId } = req.userData;
+    const { id: userId, username } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
 
     if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
@@ -183,6 +183,7 @@ const updateTaskStatus = async (req, res, next) => {
       meta: {
         userId,
         taskId,
+        username,
       },
       body: {
         subType: "update",
