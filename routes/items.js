@@ -17,7 +17,7 @@ const router = express.Router();
 
 router.post("/", authenticate, authorizeRoles([SUPERUSER]), validateItemsPayload, addTagsToItem);
 router.delete("/", authenticate, authorizeRoles([SUPERUSER]), removeTagsFromItem);
-router.get("/byType/:type", authenticate, getItemsBasedOnType);
+router.get("/byType/:itemType", authenticate, getItemsBasedOnType);
 router.get("/byTag/:tagId", authenticate, getItemsBasedOnTagId);
 router.get("/byItem/:itemId", authenticate, getItemsBasedOnitemId);
 router.get("/byTagType/:tagType", authenticate, getItemsBasedOnTagType);

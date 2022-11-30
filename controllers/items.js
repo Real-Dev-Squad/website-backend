@@ -50,7 +50,8 @@ const removeTagsFromItem = async (req, res) => {
 
 const getItemsBasedOnType = async (req, res) => {
   try {
-    const items = await ItemModel.getItemsBasedOnType(req.params.type);
+    const itemType = req.params.itemType.toUpperCase();
+    const items = await ItemModel.getItemBasedOnFilter({ itemType });
     return res.json({
       message: "Items fetched Successfully",
       data: items,
@@ -70,7 +71,8 @@ const getItemsBasedOnType = async (req, res) => {
 
 const getItemsBasedOnTagId = async (req, res) => {
   try {
-    const items = await ItemModel.getItemsBasedOnTagId(req.params.tagId);
+    const tagId = req.params.tagId;
+    const items = await ItemModel.getItemBasedOnFilter({ tagId });
     return res.json({
       message: "Items fetched Successfully",
       data: items,
@@ -90,7 +92,8 @@ const getItemsBasedOnTagId = async (req, res) => {
 
 const getItemsBasedOnitemId = async (req, res) => {
   try {
-    const items = await ItemModel.getItemsBasedOnItemId(req.params.itemId);
+    const itemId = req.params.itemId;
+    const items = await ItemModel.getItemBasedOnFilter({ itemId });
     return res.json({
       message: "Item fetched Successfully",
       data: items,
@@ -110,7 +113,8 @@ const getItemsBasedOnitemId = async (req, res) => {
 
 const getItemsBasedOnTagType = async (req, res) => {
   try {
-    const items = await ItemModel.getItemsBasedOnTagType(req.params.tagType);
+    const tagType = req.params.tagType.toUpperCase();
+    const items = await ItemModel.getItemBasedOnFilter({ tagType });
     return res.json({
       message: "Item fetched Successfully",
       data: items,

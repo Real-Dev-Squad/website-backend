@@ -62,96 +62,27 @@ const removeTagsFromItem = async (itemData) => {
 
 /**
  *
- * @param itemType { String }: type of the item
+ * @param filter { Object }: filter for the tag
  * @returns {Promise<tagModel|Array>}
  */
 
-const getItemsBasedOnType = async (itemType) => {
+const getItemBasedOnFilter = async (filter) => {
   try {
-    const data = await itemModel.where("itemType", "==", itemType.toUpperCase()).get();
-    const itemsWithType = [];
+    const filterKey = Object.keys(filter)[0];
+    const data = await itemModel.where(filterKey, "==", filter[filterKey]).get();
+    const items = [];
+
     data.forEach((doc) => {
       const item = {
         id: doc.id,
         ...doc.data(),
       };
-      itemsWithType.push(item);
+      items.push(item);
     });
-    return itemsWithType;
+
+    return items;
   } catch (err) {
-    logger.error("Error in getting Item based on item type", err);
-    throw err;
-  }
-};
-
-/**
- *
- * @param tagId { String }: tagid of the tag
- * @returns {Promise<tagModel|Array>}
- */
-
-const getItemsBasedOnTagId = async (tagId) => {
-  try {
-    const data = await itemModel.where("tagId", "==", tagId).get();
-    const itemsWithTag = [];
-    data.forEach((doc) => {
-      const item = {
-        id: doc.id,
-        ...doc.data(),
-      };
-      itemsWithTag.push(item);
-    });
-    return itemsWithTag;
-  } catch (err) {
-    logger.error("Error in getting Item based on tag id", err);
-    throw err;
-  }
-};
-
-/**
- *
- * @param itemId { String }: itemid of the item
- * @returns {Promise<tagModel|Array>}
- */
-
-const getItemsBasedOnItemId = async (itemId) => {
-  try {
-    const data = await itemModel.where("itemId", "==", itemId).get();
-    const itemsWithItemId = [];
-    data.forEach((doc) => {
-      const item = {
-        id: doc.id,
-        ...doc.data(),
-      };
-      itemsWithItemId.push(item);
-    });
-    return itemsWithItemId;
-  } catch (err) {
-    logger.error("Error in getting Item based on item id", err);
-    throw err;
-  }
-};
-
-/**
- *
- * @param tagType { String }: type of the tag
- * @returns {Promise<tagModel|Object>}
- */
-
-const getItemsBasedOnTagType = async (tagType) => {
-  try {
-    const data = await itemModel.where("tagType", "==", tagType.toUpperCase()).get();
-    const itemsWithItemId = [];
-    data.forEach((doc) => {
-      const item = {
-        id: doc.id,
-        ...doc.data(),
-      };
-      itemsWithItemId.push(item);
-    });
-    return itemsWithItemId;
-  } catch (err) {
-    logger.error("Error in getting Item based on tag type", err);
+    logger.error("Error in getting Item based on filter", err);
     throw err;
   }
 };
@@ -182,9 +113,6 @@ const getAllItems = async () => {
 module.exports = {
   addTagsToItem,
   removeTagsFromItem,
-  getItemsBasedOnType,
-  getItemsBasedOnTagId,
-  getItemsBasedOnItemId,
-  getItemsBasedOnTagType,
   getAllItems,
+  getItemBasedOnFilter,
 };
