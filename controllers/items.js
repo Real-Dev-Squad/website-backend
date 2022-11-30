@@ -9,10 +9,10 @@ const ItemModel = require("../models/items");
 
 const addTagsToItem = async (req, res) => {
   try {
-    const { itemid } = await ItemModel.addTagsToItem(req.body);
+    const { itemId } = await ItemModel.addTagsToItem(req.body);
     return res.json({
       message: "Tags added successfully!",
-      itemid,
+      itemId,
     });
   } catch (err) {
     logger.error(`Error while creating new item: ${err}`);
@@ -29,11 +29,11 @@ const addTagsToItem = async (req, res) => {
 
 const removeTagsFromItem = async (req, res) => {
   try {
-    const { itemid, tagid } = await ItemModel.removeTagsFromItem(req.body);
+    const { itemId, tagId } = await ItemModel.removeTagsFromItem(req.body);
     return res.json({
       message: "Tags removed successfully!",
-      itemid,
-      tagid,
+      itemId,
+      tagId,
     });
   } catch (err) {
     logger.error(`Error while creating new item: ${err}`);
@@ -70,7 +70,7 @@ const getItemsBasedOnType = async (req, res) => {
 
 const getItemsBasedOnTagId = async (req, res) => {
   try {
-    const items = await ItemModel.getItemsBasedOnTagId(req.params.tagid);
+    const items = await ItemModel.getItemsBasedOnTagId(req.params.tagId);
     return res.json({
       message: "Items fetched Successfully",
       data: items,
@@ -90,7 +90,7 @@ const getItemsBasedOnTagId = async (req, res) => {
 
 const getItemsBasedOnitemId = async (req, res) => {
   try {
-    const items = await ItemModel.getItemsBasedOnItemId(req.params.itemid);
+    const items = await ItemModel.getItemsBasedOnItemId(req.params.itemId);
     return res.json({
       message: "Item fetched Successfully",
       data: items,
@@ -110,7 +110,7 @@ const getItemsBasedOnitemId = async (req, res) => {
 
 const getItemsBasedOnTagType = async (req, res) => {
   try {
-    const items = await ItemModel.getItemsBasedOnTagType(req.params.tagtype);
+    const items = await ItemModel.getItemsBasedOnTagType(req.params.tagType);
     return res.json({
       message: "Item fetched Successfully",
       data: items,

@@ -4,7 +4,7 @@ const { TYPES } = require("../../constants/items");
 
 const validateItemsPayload = async (req, res, next) => {
   const schema = Joi.object({
-    itemid: Joi.string().trim().required(),
+    itemId: Joi.string().trim().required(),
     itemType: Joi.string()
       .uppercase()
       .custom((value, helper) => {
@@ -14,8 +14,8 @@ const validateItemsPayload = async (req, res, next) => {
 
     tagPayload: Joi.array().items(
       Joi.object({
-        tagid: Joi.string().required(),
-        levelid: Joi.string().required(),
+        tagId: Joi.string().required(),
+        levelId: Joi.string().required(),
       })
     ),
   });

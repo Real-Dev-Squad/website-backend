@@ -12,26 +12,26 @@ const levelModel = firestore.collection("levels");
 
 const addTagsToItem = async (itemData) => {
   try {
-    const { itemid, itemType, tagPayload } = itemData;
+    const { itemId, itemType, tagPayload } = itemData;
     const batch = firestore.batch();
     for (const tag of tagPayload) {
-      const tagData = await tagModel.doc(tag.tagid).get();
-      const levelData = await levelModel.doc(tag.levelid).get();
+      const tagData = await tagModel.doc(tag.tagId).get();
+      const levelData = await levelModel.doc(tag.levelId).get();
       const itemTag = {
-        itemid,
-        itemtype: itemType.toUpperCase(),
-        tagid: tag.tagid,
-        tagname: tagData.data().name,
-        tagtype: tagData.data().type,
-        levelid: tag.levelid,
-        levelname: levelData.data().name,
-        levelnumber: levelData.data().levelnumber,
+        itemId,
+        itemType: itemType.toUpperCase(),
+        tagId: tag.tagId,
+        tagName: tagData.data().name,
+        tagType: tagData.data().type,
+        levelId: tag.levelId,
+        levelName: levelData.data().name,
+        levelNumber: levelData.data().levelNumber,
       };
       const docid = itemModel.doc();
       batch.set(docid, itemTag);
     }
     await batch.commit();
-    return { itemid };
+    return { itemId };
   } catch (err) {
     logger.error("Error in creating Item", err);
     throw err;
@@ -46,14 +46,14 @@ const addTagsToItem = async (itemData) => {
 
 const removeTagsFromItem = async (itemData) => {
   try {
-    const { itemid, tagid } = itemData;
-    const query = itemModel.where("tagid", "==", tagid).where("itemid", "==", itemid);
+    const { itemId, tagId } = itemData;
+    const query = itemModel.where("tagId", "==", tagId).where("itemId", "==", itemId);
     query.get().then(function (querySnapshot) {
       querySnapshot.forEach(function (doc) {
         doc.ref.delete();
       });
     });
-    return { itemid, tagid };
+    return { itemId, tagId };
   } catch (err) {
     logger.error("Error in deleting Item", err);
     throw err;
@@ -62,13 +62,13 @@ const removeTagsFromItem = async (itemData) => {
 
 /**
  *
- * @param itemtype { String }: type of the item
+ * @param itemType { String }: type of the item
  * @returns {Promise<tagModel|Array>}
  */
 
-const getItemsBasedOnType = async (itemtype) => {
+const getItemsBasedOnType = async (itemType) => {
   try {
-    const data = await itemModel.where("itemtype", "==", itemtype.toUpperCase()).get();
+    const data = await itemModel.where("itemType", "==", itemType.toUpperCase()).get();
     const itemsWithType = [];
     data.forEach((doc) => {
       const item = {
@@ -86,13 +86,13 @@ const getItemsBasedOnType = async (itemtype) => {
 
 /**
  *
- * @param tagid { String }: tagid of the tag
+ * @param tagId { String }: tagid of the tag
  * @returns {Promise<tagModel|Array>}
  */
 
-const getItemsBasedOnTagId = async (tagid) => {
+const getItemsBasedOnTagId = async (tagId) => {
   try {
-    const data = await itemModel.where("tagid", "==", tagid).get();
+    const data = await itemModel.where("tagId", "==", tagId).get();
     const itemsWithTag = [];
     data.forEach((doc) => {
       const item = {
@@ -110,13 +110,13 @@ const getItemsBasedOnTagId = async (tagid) => {
 
 /**
  *
- * @param itemid { String }: itemid of the item
+ * @param itemId { String }: itemid of the item
  * @returns {Promise<tagModel|Array>}
  */
 
-const getItemsBasedOnItemId = async (itemid) => {
+const getItemsBasedOnItemId = async (itemId) => {
   try {
-    const data = await itemModel.where("itemid", "==", itemid).get();
+    const data = await itemModel.where("itemId", "==", itemId).get();
     const itemsWithItemId = [];
     data.forEach((doc) => {
       const item = {
@@ -134,13 +134,13 @@ const getItemsBasedOnItemId = async (itemid) => {
 
 /**
  *
- * @param tagtype { String }: type of the tag
+ * @param tagType { String }: type of the tag
  * @returns {Promise<tagModel|Object>}
  */
 
-const getItemsBasedOnTagType = async (tagtype) => {
+const getItemsBasedOnTagType = async (tagType) => {
   try {
-    const data = await itemModel.where("tagtype", "==", tagtype.toUpperCase()).get();
+    const data = await itemModel.where("tagType", "==", tagType.toUpperCase()).get();
     const itemsWithItemId = [];
     data.forEach((doc) => {
       const item = {

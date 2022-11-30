@@ -17,10 +17,10 @@ const router = express.Router();
 
 router.post("/", authenticate, authorizeRoles([SUPERUSER]), validateItemsPayload, addTagsToItem);
 router.delete("/", authenticate, authorizeRoles([SUPERUSER]), removeTagsFromItem);
-router.get("/bytype/:type", authenticate, getItemsBasedOnType);
-router.get("/bytag/:tagid", authenticate, getItemsBasedOnTagId);
-router.get("/byitem/:itemid", authenticate, getItemsBasedOnitemId);
-router.get("/bytagtype/:tagtype", authenticate, getItemsBasedOnTagType);
+router.get("/byType/:type", authenticate, getItemsBasedOnType);
+router.get("/byTag/:tagId", authenticate, getItemsBasedOnTagId);
+router.get("/byItem/:itemId", authenticate, getItemsBasedOnitemId);
+router.get("/byTagType/:tagType", authenticate, getItemsBasedOnTagType);
 router.get("/", authenticate, getAllItems);
 
 module.exports = router;
