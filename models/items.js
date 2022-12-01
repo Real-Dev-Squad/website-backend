@@ -69,7 +69,7 @@ const removeTagsFromItem = async (itemData) => {
 const getItemBasedOnFilter = async (filter) => {
   try {
     const filterKey = Object.keys(filter)[0];
-    const data = await itemModel.where(filterKey, "==", filter[filterKey]).get();
+    const data = await itemModel.where(filterKey, "==", filter[`${filterKey}`]).get();
     const items = [];
 
     data.forEach((doc) => {
