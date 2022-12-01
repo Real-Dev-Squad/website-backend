@@ -61,6 +61,45 @@ const getUserStatus = async (req, res) => {
 };
 
 /**
+ * Returns sorted user status on the basis of how long they have had that status for and updates user's from field
+ *
+ * @param req {Object} - All user object
+ */
+
+const getSortedUsers = (allUsers) => {
+  const sorted = allUsers.sort((a, b) => a.currentStatus.from - b.currentStatus.from);
+  const today = new Date();
+  sorted.forEach((data) => {
+    const idleSincedate = new Date(data.currentStatus.from);
+    const dateArray = idleSincedate.toISOString().split("-");
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    const yy = parseInt(dateArray[0]);
+    const mm = parseInt(dateArray[1]);
+    const dd = parseInt(dateArray[2]);
+    let years, months;
+    // months
+    months = month - mm;
+    if (day < dd) {
+      months = months - 1;
+    }
+    // years
+    years = year - yy;
+    if (month * 100 + day < mm * 100 + dd) {
+      years = years - 1;
+      months = months + 12;
+    }
+    // days
+    const days = Math.floor(
+      (today.getTime() - new Date(yy + years, mm + months - 1, dd).getTime()) / (24 * 60 * 60 * 1000)
+    );
+    //
+    data.currentStatus.from = `${years} years , ${months} months , ${days} days`;
+  });
+};
+
+/**
  * Collects all User Status
  *
  * @param req {Object} - Express request object
@@ -69,6 +108,9 @@ const getUserStatus = async (req, res) => {
 const getAllUserStatus = async (req, res) => {
   try {
     const { allUserStatus } = await userStatusModel.getAllUserStatus(req.query);
+    if (req.query.sorted) {
+      getSortedUsers(allUserStatus);
+    }
     return res.json({
       message: "All User Status found successfully.",
       totalUserStatus: allUserStatus.length,
