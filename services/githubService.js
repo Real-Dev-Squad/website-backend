@@ -1,5 +1,6 @@
 const utils = require("../utils/fetch");
 const { fetchUser } = require("../models/users");
+const ORG = "Real-Dev-Squad";
 /**
  * Extracts only the necessary details required from the object returned by Github API
  * @param data {Object} - Object returned by Github API
@@ -156,10 +157,28 @@ const fetchOpenPRs = async (perPage = 10, page = 1) => {
   }
 };
 
+/**
+ * Fetches the issues of the ORG with requested repo param
+ */
+const fetchIssues = async (repo) => {
+  try {
+    const baseURL = config.get("githubApi.baseUrl");
+    const issues = "/issues";
+    const urlObj = new URL(baseURL);
+    urlObj.pathname = "repos" + "/" + ORG + "/" + repo + issues;
+    const createdURL = urlObj.href;
+    return getFetch(createdURL);
+  } catch (err) {
+    logger.error(`Error while fetching issues: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
   fetchStalePRs,
   getFetch,
   extractPRdetails,
+  fetchIssues,
 };
