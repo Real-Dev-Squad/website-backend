@@ -100,7 +100,7 @@ const getSuggestedUsers = async (skill) => {
 
     if (!data.empty) {
       data.forEach((doc) => {
-        const docUserId = doc.data().itemid;
+        const docUserId = doc.data().itemId;
         if (!dataSet.has(docUserId)) {
           dataSet.add(docUserId);
         }
