@@ -93,7 +93,7 @@ const getJoinData = async (userId) => {
 
 const getSuggestedUsers = async (skill) => {
   try {
-    const data = await itemModel.where("itemtype", "==", "USER").where("tagid", "==", skill).get();
+    const data = await itemModel.where("itemType", "==", "USER").where("tagId", "==", skill).get();
     let users = [];
 
     const dataSet = new Set();
@@ -251,7 +251,7 @@ const fetchUserImage = async (users) => {
 
 const fetchUserSkills = async (id) => {
   try {
-    const data = await itemModel.where("itemid", "==", id).where("tagtype", "==", "SKILL").get();
+    const data = await itemModel.where("itemId", "==", id).where("tagType", "==", "SKILL").get();
     const skills = [];
 
     if (!data.empty) {
