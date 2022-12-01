@@ -1,3 +1,5 @@
+const { getUsername } = require("./users");
+
 const buildExtensionRequests = (extensionRequests, initialArray = []) => {
   if (!extensionRequests.empty) {
     extensionRequests.forEach((extensionRequests) => {
@@ -11,6 +13,19 @@ const buildExtensionRequests = (extensionRequests, initialArray = []) => {
   return initialArray;
 };
 
+const formatExtensionRequest = async (request) => {
+  if (!request) return request;
+
+  let { timestamp, id, assignee, ...body } = request;
+
+  if (assignee) {
+    assignee = await getUsername(assignee);
+  }
+
+  return { ...body, id, timestamp, assignee };
+};
+
 module.exports = {
   buildExtensionRequests,
+  formatExtensionRequest,
 };

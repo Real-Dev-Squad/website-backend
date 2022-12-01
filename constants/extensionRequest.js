@@ -1,6 +1,6 @@
 const ETA_EXTENSION_REQUEST_STATUS = {
-  PENDING: "pending",
-  APPROVED: "approved",
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
   DENIED: "DENIED",
 };
 
