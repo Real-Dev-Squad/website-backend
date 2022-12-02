@@ -66,11 +66,15 @@ const removeTagsFromItem = async (itemData) => {
  * @returns {Promise<tagModel|Array>}
  */
 
-const getItemBasedOnFilter = async (filter) => {
+const getItemBasedOnFilter = async (query) => {
   try {
-    const filterKey = Object.keys(filter)[0];
-    const data = await itemModel.where(filterKey, "==", filter[`${filterKey}`]).get();
+    let call = itemModel;
+    Object.keys(query).forEach((key) => {
+      // eslint-disable-next-line security/detect-object-injection
+      call = call.where(key, "==", query[key]);
+    });
     const items = [];
+    const data = await call.get();
 
     data.forEach((doc) => {
       const item = {

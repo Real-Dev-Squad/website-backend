@@ -42,104 +42,21 @@ const removeTagsFromItem = async (req, res) => {
 };
 
 /**
- * Collects and returns items based on a particular item type
+ * returns item based on filter
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
 
-const getItemsBasedOnType = async (req, res) => {
+const getItemBasedOnFilter = async (req, res) => {
   try {
-    const itemType = req.params.itemType.toUpperCase();
-    const items = await ItemModel.getItemBasedOnFilter({ itemType });
+    const items = await ItemModel.getItemBasedOnFilter(req.query);
     return res.json({
       message: "Items fetched Successfully",
       data: items,
     });
   } catch (err) {
     logger.error(`Error while creating new item: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
-  }
-};
-
-/**
- * Collects and returns items based on a particular tag id
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-
-const getItemsBasedOnTagId = async (req, res) => {
-  try {
-    const tagId = req.params.tagId;
-    const items = await ItemModel.getItemBasedOnFilter({ tagId });
-    return res.json({
-      message: "Items fetched Successfully",
-      data: items,
-    });
-  } catch (err) {
-    logger.error(`Error while creating new item: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
-  }
-};
-
-/**
- * Collects and returns items with its tags and levels data based on a particular itemid
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-
-const getItemsBasedOnitemId = async (req, res) => {
-  try {
-    const itemId = req.params.itemId;
-    const items = await ItemModel.getItemBasedOnFilter({ itemId });
-    return res.json({
-      message: "Item fetched Successfully",
-      data: items,
-    });
-  } catch (err) {
-    logger.error(`Error while creating new item: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
-  }
-};
-
-/**
- * Collects and returns items based on a particular tag type
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-
-const getItemsBasedOnTagType = async (req, res) => {
-  try {
-    const tagType = req.params.tagType.toUpperCase();
-    const items = await ItemModel.getItemBasedOnFilter({ tagType });
-    return res.json({
-      message: "Item fetched Successfully",
-      data: items,
-    });
-  } catch (err) {
-    logger.error(`Error while creating new item: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
-  }
-};
-
-/**
- * Collects and returns all items with some tag and level
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-
-const getAllItems = async (req, res) => {
-  try {
-    const allItems = await ItemModel.getAllItems();
-    return res.json({
-      allItems,
-    });
-  } catch (err) {
-    logger.error(`Error while creating new Level: ${err}`);
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
@@ -147,9 +64,5 @@ const getAllItems = async (req, res) => {
 module.exports = {
   addTagsToItem,
   removeTagsFromItem,
-  getItemsBasedOnType,
-  getItemsBasedOnTagId,
-  getItemsBasedOnitemId,
-  getItemsBasedOnTagType,
-  getAllItems,
+  getItemBasedOnFilter,
 };
