@@ -9,7 +9,7 @@ const { getUsername } = require("../utils/users");
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const createETAExtension = async (req, res) => {
+const createTaskExtensionRequest = async (req, res) => {
   try {
     const extensionBody = req.body;
 
@@ -52,6 +52,7 @@ const createETAExtension = async (req, res) => {
         extensionRequestId: extensionRequest.id,
         oldEndsOn: task.endsOn,
         newEndsOn: extensionBody.newEndsOn,
+        assignee: extensionBody.assignee,
       },
     };
 
@@ -80,7 +81,7 @@ const fetchExtensionRequests = async (req, res) => {
 
     return res.json({
       message: "Extension Requests returned successfully!",
-      extensionRequestData: allExtensionRequests.length > 0 ? allExtensionRequests : [],
+      extensionRequestData: allExtensionRequests.length ? allExtensionRequests : [],
     });
   } catch (err) {
     logger.error(`Error while fetching Extension Requests ${err}`);
@@ -94,16 +95,17 @@ const getExtensionRequest = async (req, res) => {
     const { extensionRequestData } = await extensionRequestsQuery.fetchExtensionRequest(extensionRequestId);
 
     if (!extensionRequestData) {
-      return res.boom.notFound("extension request not found");
+      return res.boom.notFound("Extension Request not found");
     }
-    return res.json({ message: "extension request returned successfully", extensionRequestData });
+    extensionRequestData.id = extensionRequestId;
+    return res.json({ message: "Extension Requests returned successfully!", extensionRequestData });
   } catch (err) {
     return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
 module.exports = {
-  createETAExtension,
+  createTaskExtensionRequest,
   fetchExtensionRequests,
   getExtensionRequest,
 };

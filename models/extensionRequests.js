@@ -1,6 +1,6 @@
 const firestore = require("../utils/firestore");
 const extensionRequestsModel = firestore.collection("extensionRequests");
-const { buildExtensionRequests, formatExtensionRequest } = require("../utils/extensionRequest");
+const { buildExtensionRequests, formatExtensionRequest } = require("../utils/extensionRequests");
 
 /**
  * Create Extension Request
