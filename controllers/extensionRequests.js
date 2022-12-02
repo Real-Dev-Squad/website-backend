@@ -1,4 +1,4 @@
-const extensionRequestsQuery = require("../models/extensionRequest");
+const extensionRequestsQuery = require("../models/extensionRequests");
 const { addLog } = require("../models/logs");
 const tasks = require("../models/tasks");
 const { getUsername } = require("../utils/users");

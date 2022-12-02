@@ -1,5 +1,5 @@
 const joi = require("joi");
-const { ETA_EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequest");
+const { ETA_EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests");
 
 const ETA_EXTENSION_REQUEST_STATUS_ENUM = Object.values(ETA_EXTENSION_REQUEST_STATUS);
 
