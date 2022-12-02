@@ -91,32 +91,8 @@ const getItemBasedOnFilter = async (query) => {
   }
 };
 
-/**
- *
- * @returns {Promise<tagModel|Array>}
- */
-
-const getAllItems = async () => {
-  try {
-    const data = await itemModel.get();
-    const allItems = [];
-    data.forEach((doc) => {
-      const item = {
-        id: doc.id,
-        ...doc.data(),
-      };
-      allItems.push(item);
-    });
-    return allItems;
-  } catch (err) {
-    logger.error("Error in getting Items", err);
-    throw err;
-  }
-};
-
 module.exports = {
   addTagsToItem,
   removeTagsFromItem,
-  getAllItems,
   getItemBasedOnFilter,
 };
