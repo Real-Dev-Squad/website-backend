@@ -12,7 +12,7 @@ const addLevel = async (req, res) => {
   try {
     const { id, levelData } = await LevelModel.addLevel({
       ...req.body,
-      createdby: req.userData.id,
+      createdBy: req.userData.id,
       date: admin.firestore.Timestamp.fromDate(new Date()),
     });
     return res.json({
