@@ -197,18 +197,19 @@ const fetchUserTasks = async (username, statuses = [], field, order) => {
 const getNewTask = async (skill = undefined, level = undefined) => {
   const availableTasks = await tasksModel.where("status", "==", TASK_STATUS.AVAILABLE).get();
   const idArray = [];
+
   let task;
 
   if (!availableTasks.empty) {
     availableTasks.forEach((item) => idArray.push(item.id));
 
     if (!skill) {
-      task = await ItemModel.where("itemtype", "==", "TASK").where("levelnumber", ">=", 2).get();
+      task = await ItemModel.where("itemType", "==", "TASK").where("levelNumber", "<=", 2).get();
     } else {
-      task = await ItemModel.where("tagname", "==", skill)
-        .where("itemtype", "==", "TASK")
-        .where("levelnumber", ">=", level)
-        .where("levelnumber", "<=", level + 2)
+      task = await ItemModel.where("tagName", "==", skill)
+        .where("itemType", "==", "TASK")
+        .where("levelNumber", ">=", level)
+        .where("levelNumber", "<=", level + 2)
         .get();
     }
   }
@@ -216,18 +217,21 @@ const getNewTask = async (skill = undefined, level = undefined) => {
   if (!task.empty) {
     let taskData, id;
     for (const doc of task.docs) {
-      if (idArray.includes(doc.data().itemid)) {
+      if (idArray.includes(doc.data().itemId)) {
         id = doc.id;
         taskData = doc.data();
         break;
       }
     }
-    return {
-      task: {
-        id,
-        ...taskData,
-      },
-    };
+    if (taskData) {
+      return {
+        task: {
+          id,
+          ...taskData,
+        },
+      };
+    }
+    return { taskNotFound: true };
   }
   return { taskNotFound: true };
 };
@@ -242,15 +246,15 @@ const getNewTask = async (skill = undefined, level = undefined) => {
 const fetchSkillLevelTask = async (userId) => {
   try {
     let task;
-    const data = await ItemModel.where("itemid", "==", userId).where("tagtype", "==", "SKILL").limit(10).get();
+    const data = await ItemModel.where("itemId", "==", userId).where("tagType", "==", "SKILL").limit(10).get();
     const userSkills = [];
 
     if (data.empty) {
       task = await getNewTask();
     } else {
       data.forEach((doc) => {
-        const skill = doc.data().tagname;
-        const level = doc.data().levelnumber;
+        const skill = doc.data().tagName;
+        const level = doc.data().levelNumber;
         userSkills.push({ skill, level });
       });
       const { skill, level } = userUtils.getLowestLevelSkill(userSkills);

@@ -216,12 +216,12 @@ const assignTask = async (req, res) => {
     const { task } = await tasks.fetchSkillLevelTask(userId);
     if (!task) return res.json({ message: "Task not found" });
 
-    const { taskId } = await tasks.updateTask({ assignee: username, status: TASK_STATUS.ASSIGNED }, task.itemid);
+    const { taskId } = await tasks.updateTask({ assignee: username, status: TASK_STATUS.ASSIGNED }, task.itemId);
     if (taskId) {
       // this will change once we start storing status in different collection
       await addOrUpdate({ status: "active" }, userId);
     }
-    return res.json({ message: "Task assigned", Id: task.itemid });
+    return res.json({ message: "Task assigned", Id: task.itemId });
   } catch {
     return res.boom.badImplementation("Something went wrong!");
   }
