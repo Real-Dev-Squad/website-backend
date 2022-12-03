@@ -1,6 +1,6 @@
 const firestore = require("../utils/firestore");
 
-const itemModel = firestore.collection("items");
+const itemTagsModel = firestore.collection("itemTags");
 const tagModel = firestore.collection("tags");
 const levelModel = firestore.collection("levels");
 
@@ -24,10 +24,10 @@ const addTagsToItem = async (itemData) => {
         tagName: tagData.data().name,
         tagType: tagData.data().type,
         levelId: tag.levelId,
-        levelName: levelData.data().name,
-        levelNumber: levelData.data().levelNumber,
+        name: levelData.data().name,
+        level: levelData.data().level,
       };
-      const docid = itemModel.doc();
+      const docid = itemTagsModel.doc();
       batch.set(docid, itemTag);
     }
     await batch.commit();
@@ -47,7 +47,7 @@ const addTagsToItem = async (itemData) => {
 const removeTagsFromItem = async (itemData) => {
   try {
     const { itemId, tagId } = itemData;
-    const query = itemModel.where("tagId", "==", tagId).where("itemId", "==", itemId);
+    const query = itemTagsModel.where("tagId", "==", tagId).where("itemId", "==", itemId);
     query.get().then(function (querySnapshot) {
       querySnapshot.forEach(function (doc) {
         doc.ref.delete();
@@ -68,7 +68,7 @@ const removeTagsFromItem = async (itemData) => {
 
 const getItemBasedOnFilter = async (query) => {
   try {
-    let call = itemModel;
+    let call = itemTagsModel;
     Object.keys(query).forEach((key) => {
       // eslint-disable-next-line security/detect-object-injection
       call = call.where(key, "==", query[key]);

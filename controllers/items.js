@@ -1,4 +1,4 @@
-const ItemModel = require("../models/items");
+const ItemTagsModel = require("../models/items");
 
 /**
  * Adds a tag to an item with its corresponding a level
@@ -9,7 +9,7 @@ const ItemModel = require("../models/items");
 
 const addTagsToItem = async (req, res) => {
   try {
-    const { itemId } = await ItemModel.addTagsToItem(req.body);
+    const { itemId } = await ItemTagsModel.addTagsToItem(req.body);
     return res.json({
       message: "Tags added successfully!",
       itemId,
@@ -29,7 +29,7 @@ const addTagsToItem = async (req, res) => {
 
 const removeTagsFromItem = async (req, res) => {
   try {
-    const { itemId, tagId } = await ItemModel.removeTagsFromItem(req.body);
+    const { itemId, tagId } = await ItemTagsModel.removeTagsFromItem(req.body);
     return res.json({
       message: "Tags removed successfully!",
       itemId,
@@ -53,7 +53,7 @@ const getItemBasedOnFilter = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    const items = await ItemModel.getItemBasedOnFilter(req.query);
+    const items = await ItemTagsModel.getItemBasedOnFilter(req.query);
     return res.json({
       message: "Items fetched Successfully",
       data: items,

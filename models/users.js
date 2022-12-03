@@ -8,7 +8,7 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
-const itemModel = firestore.collection("items");
+const itemModel = firestore.collection("itemTags");
 
 /**
  * Adds or updates the user data

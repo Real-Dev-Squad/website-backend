@@ -1,6 +1,6 @@
 const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
-const ItemModel = firestore.collection("items");
+const ItemModel = firestore.collection("itemTags");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
@@ -204,12 +204,12 @@ const getNewTask = async (skill = undefined, level = undefined) => {
     availableTasks.forEach((item) => idArray.push(item.id));
 
     if (!skill) {
-      task = await ItemModel.where("itemType", "==", "TASK").where("levelNumber", "<=", 2).get();
+      task = await ItemModel.where("itemType", "==", "TASK").where("level", "<=", 2).get();
     } else {
       task = await ItemModel.where("tagName", "==", skill)
         .where("itemType", "==", "TASK")
-        .where("levelNumber", ">=", level)
-        .where("levelNumber", "<=", level + 2)
+        .where("level", ">=", level)
+        .where("level", "<=", level + 2)
         .get();
     }
   }
@@ -253,7 +253,7 @@ const fetchSkillLevelTask = async (userId) => {
     } else {
       data.forEach((doc) => {
         const skill = doc.data().tagName;
-        const level = doc.data().levelNumber;
+        const level = doc.data().level;
         userSkills.push({ skill, level });
       });
       const { skill, level } = userUtils.getLowestLevelSkill(userSkills);
