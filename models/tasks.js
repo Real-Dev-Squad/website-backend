@@ -231,7 +231,6 @@ const getNewTask = async (skill = undefined, level = undefined) => {
         },
       };
     }
-    return { taskNotFound: true };
   }
   return { taskNotFound: true };
 };
