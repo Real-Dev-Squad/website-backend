@@ -21,4 +21,6 @@ app.use("/tags", require("./tags.js"));
 app.use("/user-status", require("./userStatus.js"));
 app.use("/levels", require("./levels.js"));
 
+app.use("/items", require("./items.js"));
+
 module.exports = app;

@@ -3,7 +3,7 @@ const Joi = require("joi");
 const validateLevelBody = async (req, res, next) => {
   const schema = Joi.object({
     name: Joi.string().trim().required(),
-    levelNumber: Joi.number().integer().min(0).required(),
+    level: Joi.number().integer().min(0).required(),
   });
 
   try {
