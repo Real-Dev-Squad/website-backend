@@ -9,7 +9,7 @@ const levelModel = firestore.collection("levels");
 
 const addLevel = async (levelData) => {
   try {
-    levelData.levelnumber = parseInt(levelData.levelnumber);
+    levelData.levelNumber = parseInt(levelData.levelNumber);
     const { id } = await levelModel.add(levelData);
     return { id, levelData };
   } catch (err) {
