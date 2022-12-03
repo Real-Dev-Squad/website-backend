@@ -81,9 +81,22 @@ const getParticipantUserIds = async (participantArray) => {
   }
 };
 
+function getLowestLevelSkill(skills) {
+  let level = skills[0].level;
+  let skill = skills[0].skill;
+  for (const skillfield of skills) {
+    if (skillfield.level < level) {
+      level = skillfield.level;
+      skill = skillfield.skill;
+    }
+  }
+  return { skill, level };
+}
+
 module.exports = {
   getUserId,
   getUsername,
   getParticipantUserIds,
   getParticipantUsernames,
+  getLowestLevelSkill,
 };

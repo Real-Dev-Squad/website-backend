@@ -530,38 +530,6 @@ describe("Tasks", function () {
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
     });
-
-    it("should give a response message as 'Task updated but another task not found' if we have completed 100% task and a task is not available", async function () {
-      const taskData = tasksData[3];
-      taskId = (await tasks.updateTask(taskData)).taskId;
-
-      const dataToSend = { percentCompleted: 100 };
-
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}?dev=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send(dataToSend);
-
-      expect(res).to.have.status(200);
-      expect(res.body.message).to.be.equal("Task updated but another task not found");
-    });
-
-    it("should give a response message 'task updated and another task got assigned' if we have completed the task 100% and another task is assigned to us", async function () {
-      const taskData = tasksData[4];
-      await tasks.updateTask(taskData);
-
-      const dataToSend = { percentCompleted: 100 };
-
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}?dev=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send(dataToSend);
-
-      expect(res).to.have.a.status(200);
-      expect(res.body.message).to.be.equal("task updated and another task got assigned");
-    });
   });
 
   describe("GET /tasks/overdue", function () {
@@ -588,32 +556,6 @@ describe("Tasks", function () {
       expect(res).to.have.status(200);
       expect(res.body.newAvailableTasks).to.have.lengthOf(0);
       expect(res.body.message).to.be.equal("No overdue tasks found");
-    });
-  });
-
-  describe("PATCH /tasks/assign/self", function () {
-    it("should not assign a task to the user if they do not have status idle", async function () {
-      const taskData = tasksData[4];
-      await tasks.updateTask(taskData);
-
-      const res = await chai.request(app).patch(`/tasks/assign/self`).set("cookie", `${cookieName}=${jwt}`).send();
-
-      expect(res).to.have.status(200);
-      expect(res.body.message).to.be.equal("Task cannot be assigned to users with active or OOO status");
-    });
-
-    it("should assign task to the user if their status is idle and task is available", async function () {
-      const taskData = tasksData[4];
-      await tasks.updateTask(taskData);
-
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/assign/self`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send();
-
-      expect(res).to.have.status(200);
-      expect(res.body.message).to.be.equal("Task assigned");
     });
   });
 });
