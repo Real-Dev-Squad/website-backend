@@ -1,5 +1,6 @@
 const tasks = require("../models/tasks");
 const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
+const { addLog } = require("../models/logs");
 const { USER_STATUS } = require("../constants/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
@@ -157,15 +158,56 @@ const updateTaskStatus = async (req, res, next) => {
   try {
     const taskId = req.params.id;
     const { dev } = req.query;
-    const { id: userId } = req.userData;
+    const { id: userId, username } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
 
     if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
     if (task.notAssignedToYou) return res.boom.forbidden("This task is not assigned to you");
-    if (task.taskData.status === "VERIFIED")
+    if (task.taskData.status === TASK_STATUS.VERIFIED || req.body.status === TASK_STATUS.MERGED)
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
-    await tasks.updateTask(req.body, taskId);
+    if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
+      if (req.body.status === TASK_STATUS.COMPLETED || !req.body.status) {
+        return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
+      }
+    }
+
+    if (req.body.status === TASK_STATUS.COMPLETED && task.taskData.percentCompleted !== 100) {
+      if (req.body.percentCompleted !== 100) {
+        return res.boom.badRequest("Status cannot be updated. Task is not completed yet");
+      }
+    }
+
+    const taskLog = {
+      type: "task",
+      meta: {
+        userId,
+        taskId,
+        username,
+      },
+      body: {
+        subType: "update",
+        new: {},
+      },
+    };
+
+    if (req.body.status && !req.body.percentCompleted) {
+      taskLog.body.new.status = req.body.status;
+    }
+    if (req.body.percentCompleted && !req.body.status) {
+      taskLog.body.new.percentCompleted = req.body.percentCompleted;
+    }
+
+    if (req.body.percentCompleted && req.body.status) {
+      taskLog.body.new.percentCompleted = req.body.percentCompleted;
+      taskLog.body.new.status = req.body.status;
+    }
+
+    const [, taskLogResult] = await Promise.all([
+      tasks.updateTask(req.body, taskId),
+      addLog(taskLog.type, taskLog.meta, taskLog.body),
+    ]);
+    taskLog.id = taskLogResult.id;
 
     if (dev) {
       if (req.body.percentCompleted === 100) {
@@ -173,7 +215,7 @@ const updateTaskStatus = async (req, res, next) => {
       }
     }
 
-    return res.json({ message: "Task updated successfully!" });
+    return res.json({ message: "Task updated successfully!", taskLog });
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`);
     return res.boom.badImplementation("An internal server error occured");

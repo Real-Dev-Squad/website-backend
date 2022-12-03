@@ -379,6 +379,19 @@ describe("Tasks", function () {
       percentCompleted: 50,
     };
 
+    const taskData = {
+      title: "Test task",
+      type: "feature",
+      endsOn: 1234,
+      startedOn: 4567,
+      status: "VERIFIED",
+      percentCompleted: 10,
+      participants: [],
+      completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+      lossRate: { [DINERO]: 1 },
+      isNoteworthy: true,
+    };
+
     it("Should update the task status for given self taskid", function (done) {
       chai
         .request(app)
@@ -390,7 +403,14 @@ describe("Tasks", function () {
             return done(err);
           }
           expect(res).to.have.status(200);
+          expect(res.body.taskLog).to.have.property("type");
+          expect(res.body.taskLog).to.have.property("id");
+          expect(res.body.taskLog.body).to.be.a("object");
+          expect(res.body.taskLog.meta).to.be.a("object");
           expect(res.body.message).to.equal("Task updated successfully!");
+
+          expect(res.body.taskLog.body.new.status).to.equal(taskStatusData.status);
+          expect(res.body.taskLog.body.new.percentCompleted).to.equal(taskStatusData.percentCompleted);
           return done();
         });
     });
@@ -453,13 +473,47 @@ describe("Tasks", function () {
     });
 
     it("Should give 403 if status is already 'VERIFIED' ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(taskStatusData);
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+    });
+    it("Should give 403 if new status is 'MERGED' ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "MERGED" });
+
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+    });
+
+    it("Should give 400 if percentCompleted is not 100 and new status is COMPLETED ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "COMPLETED" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
+    });
+
+    it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {
       const taskData = {
         title: "Test task",
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
-        status: "VERIFIED",
-        percentCompleted: 10,
+        status: "COMPLETED",
+        percentCompleted: 100,
         participants: [],
         assignee: appOwner.username,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
@@ -471,10 +525,10 @@ describe("Tasks", function () {
         .request(app)
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(taskStatusData);
+        .send({ percentCompleted: 80 });
 
-      expect(res).to.have.status(403);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
     });
 
     it("should give a response message as 'Task updated but another task not found' if we have completed 100% task and a task is not available", async function () {
