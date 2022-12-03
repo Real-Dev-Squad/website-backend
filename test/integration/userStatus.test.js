@@ -41,11 +41,11 @@ describe("UserStatus", function () {
     await cleanDb();
   });
 
-  describe("GET /user-status", function () {
+  describe("GET /users/status", function () {
     it("Should get all the userStatus in system", function (done) {
       chai
         .request(app)
-        .get("/user-status")
+        .get("/users/status")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -62,10 +62,27 @@ describe("UserStatus", function () {
   });
 
   describe("GET /user-status/:userid", function () {
-    it("Should return one User Status with the given id", function (done) {
+    it("Should return the User Status Document with the given id", function (done) {
       chai
         .request(app)
-        .get(`/user-status/${userId}`)
+        .get(`/users/status/${userId}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User Status found successfully.");
+          expect(res.body.userId).to.equal(userId);
+          expect(res.body).to.have.property("monthlyHours");
+          expect(res.body).to.have.property("currentStatus");
+          return done();
+        });
+    });
+    it("Should return the User Status Document of the user requesting it", function (done) {
+      chai
+        .request(app)
+        .get(`/users/status/self`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -82,7 +99,7 @@ describe("UserStatus", function () {
     });
   });
 
-  describe("PATCH user-status/:userid", function () {
+  describe("PATCH /users/status/:userid", function () {
     let testUserId;
     let testUserJwt;
 
@@ -94,8 +111,26 @@ describe("UserStatus", function () {
     it("Should store the User Status in the collection", function (done) {
       chai
         .request(app)
-        .patch(`/user-status/${testUserId}`)
+        .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
+        .send(userStsDataForOooState)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(201);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User Status created successfully.");
+          expect(res.body.currentStatus.state).to.equal("OOO");
+          return done();
+        });
+    });
+
+    it("Should store the User Status in the collection when requested by Super User", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/status/${testUserId}`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .send(userStsDataForOooState)
         .end((err, res) => {
           if (err) {
@@ -112,8 +147,24 @@ describe("UserStatus", function () {
     it("Should update the User Status", function (done) {
       chai
         .request(app)
-        .patch(`/user-status/${userId}`)
+        .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${jwt}`)
+        .send(validUserStsDataforUpdate)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("User Status updated successfully.");
+          return done();
+        });
+    });
+
+    it("Should update the User Status when requested by Super User", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/status/${userId}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send(validUserStsDataforUpdate)
         .end((err, res) => {
           if (err) {
@@ -128,7 +179,7 @@ describe("UserStatus", function () {
     it("Should return 401 for unauthorized request", function (done) {
       chai
         .request(app)
-        .patch(`/user-status/${testUserId}`)
+        .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=""`)
         .send(userStsDataForOooState)
         .end((err, res) => {
@@ -145,8 +196,8 @@ describe("UserStatus", function () {
     it("Should return 400 for invalid Data for a new User Status", function (done) {
       chai
         .request(app)
-        .patch(`/user-status/${testUserId}`)
-        .set("Cookie", `${cookieName}=${jwt}`)
+        .patch(`/users/status/self`)
+        .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(invalidUserStsDataforPost)
         .end((err, res) => {
           if (err) {
@@ -162,8 +213,8 @@ describe("UserStatus", function () {
     it("Should return 400 for incorrect state value", function (done) {
       chai
         .request(app)
-        .patch(`/user-status/${userId}`)
-        .set("cookie", `${cookieName}=${jwt}`)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${testUserJwt}`)
         .send(invalidUserStsDataforUpdate)
         .end((err, res) => {
           if (err) {
@@ -185,7 +236,7 @@ describe("UserStatus", function () {
     it("Should return 401 for Unauthorized User", function (done) {
       chai
         .request(app)
-        .delete(`/user-status/${userId}`)
+        .delete(`/users/status/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -204,7 +255,7 @@ describe("UserStatus", function () {
     it("Should return 200 for deletion by Super User", function (done) {
       chai
         .request(app)
-        .delete(`/user-status/${userId}`)
+        .delete(`/users/status/${userId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {

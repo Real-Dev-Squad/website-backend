@@ -36,20 +36,28 @@ const deleteUserStatus = async (req, res) => {
  */
 const getUserStatus = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const userData = await userStatusModel.getUserStatus(userId);
-    const { userStatusExists, id, data } = userData;
-    let responseObject = { id, userId };
-    if (data) responseObject = { ...responseObject, ...data };
-    let statusCode;
-    if (userStatusExists) {
-      statusCode = 200;
-      responseObject.message = "User Status found successfully.";
+    let userId;
+    if (req.route.path === "/self") {
+      userId = req.userData.id;
     } else {
-      responseObject.message = "User Status couldn't be found.";
-      statusCode = 404;
+      userId = req.params.userId;
     }
-    return res.status(statusCode).json(responseObject);
+    if (userId) {
+      const userData = await userStatusModel.getUserStatus(userId);
+      const { userStatusExists, id, data } = userData;
+      let responseObject = { id, userId };
+      if (data) responseObject = { ...responseObject, ...data };
+      let statusCode;
+      if (userStatusExists) {
+        statusCode = 200;
+        responseObject.message = "User Status found successfully.";
+      } else {
+        responseObject.message = "User Status couldn't be found.";
+        statusCode = 404;
+      }
+      return res.status(statusCode).json(responseObject);
+    }
+    return res.boom.notFound("User Status doesn't exist.");
   } catch (err) {
     logger.error(`Error while fetching the User Status: ${err}`);
     return res.boom.notFound("The User Status could not be found as an internal server error occurred.");
@@ -84,28 +92,36 @@ const getAllUserStatus = async (req, res) => {
  */
 const updateUserStatus = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const dataToUpdate = req.body;
-    const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
-    const { userStatusExists, userStatusUpdated, id, data } = updateStatus;
-    let responseObject = { id, userId };
-    let statusCode;
-    if (data) {
-      responseObject = { ...responseObject, ...data };
-    }
-    if (userStatusExists) {
-      responseObject.message = "User Status updated successfully.";
-      statusCode = 200;
+    let userId;
+    if (req.route.path === "/self") {
+      userId = req.userData.id;
     } else {
-      if (userStatusUpdated) {
-        responseObject.message = "User Status created successfully.";
-        statusCode = 201;
-      } else {
-        responseObject.message = "User Status couldn't be created due to incomplete request body.";
-        statusCode = 400;
-      }
+      userId = req.params.userId;
     }
-    return res.status(statusCode).json(responseObject);
+    if (userId) {
+      const dataToUpdate = req.body;
+      const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
+      const { userStatusExists, userStatusUpdated, id, data } = updateStatus;
+      let responseObject = { id, userId };
+      let statusCode;
+      if (data) {
+        responseObject = { ...responseObject, ...data };
+      }
+      if (userStatusExists) {
+        responseObject.message = "User Status updated successfully.";
+        statusCode = 200;
+      } else {
+        if (userStatusUpdated) {
+          responseObject.message = "User Status created successfully.";
+          statusCode = 201;
+        } else {
+          responseObject.message = "User Status couldn't be created due to incomplete request body.";
+          statusCode = 400;
+        }
+      }
+      return res.status(statusCode).json(responseObject);
+    }
+    return res.boom.badImplementation("The User doesn't exist.");
   } catch (err) {
     logger.error(`Error while updating the User Data: ${err}`);
     return res.boom.badImplementation("An internal server error occurred");

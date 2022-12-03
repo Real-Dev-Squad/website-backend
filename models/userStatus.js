@@ -1,6 +1,6 @@
 const { userState } = require("../constants/userStatus");
 const firestore = require("../utils/firestore");
-const userStatusModel = firestore.collection("userStatus");
+const userStatusModel = firestore.collection("usersStatus");
 
 /**
  * @param userId {string} : id of the user
