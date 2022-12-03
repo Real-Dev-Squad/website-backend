@@ -50,6 +50,9 @@ const removeTagsFromItem = async (req, res) => {
 
 const getItemBasedOnFilter = async (req, res) => {
   try {
+    if (!Object.keys(req.query).length) {
+      return res.boom.badRequest("filter for item not provided");
+    }
     const items = await ItemModel.getItemBasedOnFilter(req.query);
     return res.json({
       message: "Items fetched Successfully",
