@@ -1,4 +1,5 @@
 const userStatusModel = require("../models/userStatus");
+const { getUserIdBasedOnRoute } = require("../utils/userStatus");
 
 /**
  * Deletes a new User Status
@@ -36,12 +37,7 @@ const deleteUserStatus = async (req, res) => {
  */
 const getUserStatus = async (req, res) => {
   try {
-    let userId;
-    if (req.route.path === "/self") {
-      userId = req.userData.id;
-    } else {
-      userId = req.params.userId;
-    }
+    const userId = getUserIdBasedOnRoute(req);
     if (userId) {
       const userData = await userStatusModel.getUserStatus(userId);
       const { userStatusExists, id, data } = userData;
@@ -92,12 +88,7 @@ const getAllUserStatus = async (req, res) => {
  */
 const updateUserStatus = async (req, res) => {
   try {
-    let userId;
-    if (req.route.path === "/self") {
-      userId = req.userData.id;
-    } else {
-      userId = req.params.userId;
-    }
+    const userId = getUserIdBasedOnRoute(req);
     if (userId) {
       const dataToUpdate = req.body;
       const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
