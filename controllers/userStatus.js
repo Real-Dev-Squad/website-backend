@@ -41,15 +41,15 @@ const getUserStatus = async (req, res) => {
     if (userId) {
       const userData = await userStatusModel.getUserStatus(userId);
       const { userStatusExists, id, data } = userData;
-      let responseObject = { id, userId };
-      if (data) responseObject = { ...responseObject, ...data };
+      let responseObject = { id, userId, data: null };
+      if (data) responseObject = { ...responseObject, data };
       let statusCode;
       if (userStatusExists) {
         statusCode = 200;
         responseObject.message = "User Status found successfully.";
       } else {
-        responseObject.message = "User Status couldn't be found.";
         statusCode = 404;
+        responseObject.message = "User Status couldn't be found.";
       }
       return res.status(statusCode).json(responseObject);
     }
@@ -93,10 +93,10 @@ const updateUserStatus = async (req, res) => {
       const dataToUpdate = req.body;
       const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
       const { userStatusExists, userStatusUpdated, id, data } = updateStatus;
-      let responseObject = { id, userId };
+      let responseObject = { id, userId, data: null };
       let statusCode;
       if (data) {
-        responseObject = { ...responseObject, ...data };
+        responseObject = { ...responseObject, data };
       }
       if (userStatusExists) {
         responseObject.message = "User Status updated successfully.";

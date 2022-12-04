@@ -73,9 +73,9 @@ describe("UserStatus", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User Status found successfully.");
-          expect(res.body.userId).to.equal(userId);
-          expect(res.body).to.have.property("monthlyHours");
-          expect(res.body).to.have.property("currentStatus");
+          expect(res.body.data.userId).to.equal(userId);
+          expect(res.body.data).to.have.property("monthlyHours");
+          expect(res.body.data).to.have.property("currentStatus");
           return done();
         });
     });
@@ -92,8 +92,8 @@ describe("UserStatus", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User Status found successfully.");
           expect(res.body.userId).to.equal(userId);
-          expect(res.body).to.have.property("monthlyHours");
-          expect(res.body).to.have.property("currentStatus");
+          expect(res.body.data).to.have.property("monthlyHours");
+          expect(res.body.data).to.have.property("currentStatus");
           return done();
         });
     });
@@ -121,7 +121,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(201);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User Status created successfully.");
-          expect(res.body.currentStatus.state).to.equal("OOO");
+          expect(res.body.data.currentStatus.state).to.equal("OOO");
           return done();
         });
     });
@@ -139,7 +139,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(201);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User Status created successfully.");
-          expect(res.body.currentStatus.state).to.equal("OOO");
+          expect(res.body.data.currentStatus.state).to.equal("OOO");
           return done();
         });
     });
