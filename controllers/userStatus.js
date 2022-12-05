@@ -41,7 +41,7 @@ const getUserStatus = async (req, res) => {
     if (userId) {
       const userData = await userStatusModel.getUserStatus(userId);
       const { userStatusExists, id, data } = userData;
-      const responseObject = { id, userId, data: null, message: null };
+      const responseObject = { id, userId, data: null, message: "" };
       if (data) responseObject.data = data;
       let statusCode;
       if (userStatusExists) {
@@ -93,7 +93,7 @@ const updateUserStatus = async (req, res) => {
       const dataToUpdate = req.body;
       const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
       const { userStatusExists, userStatusUpdated, id, data } = updateStatus;
-      const responseObject = { id, userId, data: null, message: null };
+      const responseObject = { id, userId, data: null, message: "" };
       let statusCode;
       if (data) responseObject.data = data;
       if (userStatusExists) {
