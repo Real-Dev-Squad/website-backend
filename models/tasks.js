@@ -204,12 +204,12 @@ const getNewTask = async (skill = undefined, level = undefined) => {
     availableTasks.forEach((item) => idArray.push(item.id));
 
     if (!skill) {
-      task = await ItemModel.where("itemType", "==", "TASK").where("level", "<=", 2).get();
+      task = await ItemModel.where("itemType", "==", "TASK").where("levelValue", "<=", 2).get();
     } else {
       task = await ItemModel.where("tagName", "==", skill)
         .where("itemType", "==", "TASK")
-        .where("level", ">=", level)
-        .where("level", "<=", level + 2)
+        .where("levelValue", ">=", level)
+        .where("levelValue", "<=", level + 2)
         .get();
     }
   }
@@ -253,7 +253,7 @@ const fetchSkillLevelTask = async (userId) => {
     } else {
       data.forEach((doc) => {
         const skill = doc.data().tagName;
-        const level = doc.data().level;
+        const level = doc.data().levelValue;
         userSkills.push({ skill, level });
       });
       const { skill, level } = userUtils.getLowestLevelSkill(userSkills);
