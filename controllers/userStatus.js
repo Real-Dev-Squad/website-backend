@@ -41,8 +41,8 @@ const getUserStatus = async (req, res) => {
     if (userId) {
       const userData = await userStatusModel.getUserStatus(userId);
       const { userStatusExists, id, data } = userData;
-      let responseObject = { id, userId, data: null };
-      if (data) responseObject = { ...responseObject, data };
+      const responseObject = { id, userId, data: null, message: null };
+      if (data) responseObject.data = data;
       let statusCode;
       if (userStatusExists) {
         statusCode = 200;
@@ -93,21 +93,19 @@ const updateUserStatus = async (req, res) => {
       const dataToUpdate = req.body;
       const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
       const { userStatusExists, userStatusUpdated, id, data } = updateStatus;
-      let responseObject = { id, userId, data: null };
+      const responseObject = { id, userId, data: null, message: null };
       let statusCode;
-      if (data) {
-        responseObject = { ...responseObject, data };
-      }
+      if (data) responseObject.data = data;
       if (userStatusExists) {
         responseObject.message = "User Status updated successfully.";
         statusCode = 200;
       } else {
         if (userStatusUpdated) {
-          responseObject.message = "User Status created successfully.";
           statusCode = 201;
+          responseObject.message = "User Status created successfully.";
         } else {
-          responseObject.message = "User Status couldn't be created due to incomplete request body.";
           statusCode = 400;
+          responseObject.message = "User Status couldn't be created due to incomplete request body.";
         }
       }
       return res.status(statusCode).json(responseObject);
