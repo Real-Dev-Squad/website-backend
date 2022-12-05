@@ -124,11 +124,16 @@ const getSuggestedUsers = async (skill) => {
  */
 const fetchUsers = async (query) => {
   try {
-    const snapshot = await userModel
+    let dbQuery = userModel
       .limit(parseInt(query.size) || 100)
-      .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
-      .get();
-
+      .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0));
+    if (query.search) {
+      dbQuery = dbQuery
+        .orderBy("username")
+        .startAt(query.search)
+        .endAt(query.search + "\uf8ff");
+    }
+    const snapshot = await dbQuery.get();
     const allUsers = [];
 
     snapshot.forEach((doc) => {
@@ -160,7 +165,6 @@ const fetchUser = async ({ userId = null, username = null }) => {
     let userData, id;
     if (username) {
       const user = await userModel.where("username", "==", username).limit(1).get();
-
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
