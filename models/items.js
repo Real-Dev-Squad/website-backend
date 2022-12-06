@@ -24,8 +24,8 @@ const addTagsToItem = async (itemData) => {
         tagName: tagData.data().name,
         tagType: tagData.data().type,
         levelId: tag.levelId,
-        name: levelData.data().name,
-        level: levelData.data().level,
+        levelName: levelData.data().name,
+        levelValue: levelData.data().value,
       };
       const docid = itemTagsModel.doc();
       batch.set(docid, itemTag);
