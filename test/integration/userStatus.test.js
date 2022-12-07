@@ -12,7 +12,6 @@ const superUser = userData[4];
 const {
   userStsDataForNewUser,
   userStsDataForOooState,
-  invalidUserStsDataforPost,
   validUserStsDataforUpdate,
   invalidUserStsDataforUpdate,
 } = require("../fixtures/userStatus/userStatus");
@@ -73,7 +72,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User Status found successfully.");
-          expect(res.body.data.userId).to.equal(userId);
+          expect(res.body.userId).to.equal(userId);
           expect(res.body.data).to.have.property("monthlyHours");
           expect(res.body.data).to.have.property("currentStatus");
           return done();
@@ -189,23 +188,6 @@ describe("UserStatus", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Unauthenticated User");
-          return done();
-        });
-    });
-
-    it("Should return 400 for invalid Data for a new User Status", function (done) {
-      chai
-        .request(app)
-        .patch(`/users/status/self`)
-        .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(invalidUserStsDataforPost)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(400);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.be.equal("User Status couldn't be created due to incomplete request body.");
           return done();
         });
     });
