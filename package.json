@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
+    "startbuild": "node dist/bundle.js",
     "dev": "cross-env NODE_ENV=development nodemon server.js",
+    "build": "webpack",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "validate-setup": "node scripts/validateSetup.js",
@@ -34,6 +36,9 @@
     "newrelic": "^9.0.0",
     "passport": "^0.6.0",
     "passport-github2": "^0.1.12",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-node-externals": "^3.0.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {
