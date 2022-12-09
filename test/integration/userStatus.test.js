@@ -215,7 +215,25 @@ describe("UserStatus", function () {
   });
 
   describe("DELETE user-status/:userid", function () {
-    it("Should return 401 for Unauthorized User", function (done) {
+    it("Shouldn't delete User Status when the user is Unauthorized", function (done) {
+      chai
+        .request(app)
+        .delete(`/users/status/${userId}`)
+        .set("cookie", `${cookieName}=""`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+          return done();
+        });
+    });
+    it("Shouldn't delete User Status if the user doesnt have a superuser role", function (done) {
       chai
         .request(app)
         .delete(`/users/status/${userId}`)
@@ -234,7 +252,7 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should return 200 for deletion by Super User", function (done) {
+    it("Should delete the User Staus if the user has a Super User Role", function (done) {
       chai
         .request(app)
         .delete(`/users/status/${userId}`)
