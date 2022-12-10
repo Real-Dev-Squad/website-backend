@@ -26,16 +26,6 @@ const userStsDataForOooState = {
   },
 };
 
-const invalidUserStsDataforPost = {
-  currentStatus: {
-    until: "",
-    message: "",
-    state: "ACTIVE",
-    updatedAt: 1668215609000,
-    from: 1668215609000,
-  },
-};
-
 const validUserStsDataforUpdate = {
   currentStatus: {
     until: "",
@@ -59,7 +49,6 @@ const invalidUserStsDataforUpdate = {
 module.exports = {
   userStsDataForNewUser,
   userStsDataForOooState,
-  invalidUserStsDataforPost,
   validUserStsDataforUpdate,
   invalidUserStsDataforUpdate,
 };
