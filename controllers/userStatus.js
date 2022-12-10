@@ -92,7 +92,7 @@ const updateUserStatus = async (req, res) => {
     if (userId) {
       const dataToUpdate = req.body;
       const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
-      const { userStatusExists, userStatusUpdated, id, data } = updateStatus;
+      const { userStatusExists, id, data } = updateStatus;
       const responseObject = { id, userId, data: null, message: "" };
       let statusCode;
       if (data) responseObject.data = data;
@@ -100,13 +100,8 @@ const updateUserStatus = async (req, res) => {
         responseObject.message = "User Status updated successfully.";
         statusCode = 200;
       } else {
-        if (userStatusUpdated) {
-          statusCode = 201;
-          responseObject.message = "User Status created successfully.";
-        } else {
-          statusCode = 400;
-          responseObject.message = "User Status couldn't be created due to incomplete request body.";
-        }
+        statusCode = 201;
+        responseObject.message = "User Status created successfully.";
       }
       return res.status(statusCode).json(responseObject);
     }
