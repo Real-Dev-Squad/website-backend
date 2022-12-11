@@ -12,7 +12,7 @@ const addTag = async (req, res) => {
   try {
     const { id, tagData, message } = await TagModel.addTag({
       ...req.body,
-      createdby: req.userData.id,
+      createdBy: req.userData.id,
       date: admin.firestore.Timestamp.fromDate(new Date()),
     });
     if (id) {
