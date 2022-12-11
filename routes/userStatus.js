@@ -7,8 +7,10 @@ const { SUPERUSER } = require("../constants/roles");
 const { validateUpdatedUserStatus } = require("../middlewares/validators/userStatus");
 
 router.get("/", getAllUserStatus);
-router.get("/:userId", authenticate, getUserStatus);
-router.patch("/:userId", authenticate, validateUpdatedUserStatus, updateUserStatus);
+router.get("/self", authenticate, getUserStatus);
+router.get("/:userId", getUserStatus);
+router.patch("/self", authenticate, validateUpdatedUserStatus, updateUserStatus);
+router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), validateUpdatedUserStatus, updateUserStatus);
 router.delete("/:userId", authenticate, authorizeRoles([SUPERUSER]), deleteUserStatus);
 
 module.exports = router;
