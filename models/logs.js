@@ -49,7 +49,9 @@ const fetchLogs = async (query, param) => {
     }
 
     const logsSnapshotQuery = call.orderBy("timestamp", "desc").startAfter(lastDoc ?? "");
-    const snapshot = limit ? await logsSnapshotQuery.limit(limitDocuments).get() : await logsSnapshotQuery.get();
+    const snapshot = limit
+      ? await logsSnapshotQuery.limit(limitDocuments).get()
+      : await logsSnapshotQuery.limit(10).get();
 
     const logs = [];
     snapshot.forEach((doc) => {
