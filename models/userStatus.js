@@ -55,7 +55,10 @@ const getAllUserStatus = async (query) => {
     if (!query.state) {
       data = await userStatusModel.get();
     } else {
-      data = await userStatusModel.where("currentStatus.state", "==", query.state).get();
+      data = await userStatusModel
+        .where("currentStatus.state", "==", query.state)
+        .orderBy("currentStatus.from", "asc")
+        .get();
     }
     data.forEach((doc) => {
       const currentUserStatus = {
