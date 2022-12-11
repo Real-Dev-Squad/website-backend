@@ -61,17 +61,6 @@ const getUserStatus = async (req, res) => {
 };
 
 /**
- * Returns sorted user status on the basis of how long they have had that status for and updates user's from field
- *
- * @param req {Object} - All user object
- */
-
-const getSortedUsers = (allUsers) => {
-  const sorted = allUsers.sort((a, b) => a.currentStatus.from - b.currentStatus.from);
-  return sorted;
-};
-
-/**
  * Collects all User Status
  *
  * @param req {Object} - Express request object
@@ -80,9 +69,6 @@ const getSortedUsers = (allUsers) => {
 const getAllUserStatus = async (req, res) => {
   try {
     const { allUserStatus } = await userStatusModel.getAllUserStatus(req.query);
-    if (req.query.sorted) {
-      getSortedUsers(allUserStatus);
-    }
     return res.json({
       message: "All User Status found successfully.",
       totalUserStatus: allUserStatus.length,
