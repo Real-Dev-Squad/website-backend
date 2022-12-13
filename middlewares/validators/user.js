@@ -92,7 +92,7 @@ async function getUsers(req, res, next) {
     .keys({
       size: joi
         .string()
-        .required()
+        .optional()
         .pattern(/^[1-9]\d?$|^100$/)
         .messages({
           "string.base": "size should be a type of string",
