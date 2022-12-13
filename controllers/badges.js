@@ -98,7 +98,7 @@ async function deleteUserBadges(req, res) {
     const { badgeIds } = req.body;
     const result = await fetchUser({ username });
     if (!result.userExists) {
-      throw new Error("Failed to assign badges, user does not exsit");
+      throw new Error("Failed to delete badges, user does not exsit");
     }
     const userId = result.user.id;
     await badgeQuery.unAssignBadges({ userId, badgeIds });
