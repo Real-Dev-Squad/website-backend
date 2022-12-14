@@ -124,10 +124,18 @@ const getSuggestedUsers = async (skill) => {
  */
 const fetchUsers = async (query) => {
   try {
-    const snapshot = await userModel
-      .limit(parseInt(query.size) || 100)
-      .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
-      .get();
+    let user = await userModel;
+
+    user = user.limit(parseInt(query.size) || 100).offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0));
+    if (!query) {
+      query = query.role.split(",");
+    }
+    Object.keys(query).forEach((key) => {
+      // eslint-disable-next-line security/detect-object-injection
+      user = user.where(`roles${query[key]}`, "==", true);
+    });
+
+    const snapshot = await user.get();
 
     const allUsers = [];
 
