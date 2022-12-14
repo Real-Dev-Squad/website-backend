@@ -1,6 +1,6 @@
 const { userState } = require("../constants/userStatus");
 const firestore = require("../utils/firestore");
-const userStatusModel = firestore.collection("userStatus");
+const userStatusModel = firestore.collection("usersStatus");
 
 /**
  * @param userId {string} : id of the user
@@ -34,6 +34,7 @@ const getUserStatus = async (userId) => {
     if (userStatusDoc) {
       const id = userStatusDoc.id;
       const data = userStatusDoc.data();
+      delete data.userId;
       return { id, data, userStatusExists: true };
     } else {
       return { id: null, data: null, userStatusExists: false };
@@ -54,7 +55,10 @@ const getAllUserStatus = async (query) => {
     if (!query.state) {
       data = await userStatusModel.get();
     } else {
-      data = await userStatusModel.where("currentStatus.state", "==", query.state).get();
+      data = await userStatusModel
+        .where("currentStatus.state", "==", query.state)
+        .orderBy("currentStatus.from", "asc")
+        .get();
     }
     data.forEach((doc) => {
       const currentUserStatus = {
@@ -97,15 +101,11 @@ const updateUserStatus = async (userId, updatedData) => {
         }
       }
       await userStatusModel.doc(docId).update(updatedData);
-      return { id: docId, userStatusExists: true, userStatusUpdated: true, data: updatedData };
+      return { id: docId, userStatusExists: true, data: updatedData };
     } else {
       // the user doc doesnt exist meaning we need to create one
-      if ("currentStatus" in updatedData && "monthlyHours" in updatedData) {
-        const { id } = await userStatusModel.add({ userId, ...updatedData });
-        return { id, userStatusExists: false, userStatusUpdated: true, data: updatedData };
-      } else {
-        return { id: null, userStatusExists: false, userStatusUpdated: false, data: null };
-      }
+      const { id } = await userStatusModel.add({ userId, ...updatedData });
+      return { id, userStatusExists: false, data: updatedData };
     }
   } catch (error) {
     logger.error(`error in updating User Status Document ${error}`);
