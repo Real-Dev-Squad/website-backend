@@ -22,100 +22,12 @@ const nonSuperUser = userData[0];
 const userDoesNotExists = userData[1];
 const userToBeArchived = userData[3];
 const userAlreadyArchived = userData[5];
-const userArchivedRoleFalse = userData[6];
-
-const archivedUsersGithubIds = [userAlreadyArchived.github_id];
-const unarchivedUsersGithubIds = [userArchivedRoleFalse.github_id];
 
 describe("Members", function () {
   let jwt;
 
   beforeEach(async function () {
     await cleanDb();
-  });
-
-  describe("GET /members", function () {
-    it("Should return an empty array if no user is found", function (done) {
-      chai
-        .request(app)
-        .get("/members")
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("No member found");
-          expect(res.body.members).to.eql([]);
-
-          return done();
-        });
-    });
-
-    it("Should return 400 for showArchived query param value other than true/false", function (done) {
-      chai
-        .request(app)
-        .get("/members?showArchived=xyz")
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(400);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal('"showArchived" must be a boolean');
-
-          return done();
-        });
-    });
-
-    describe("When the users collection is not empty", function () {
-      beforeEach(async function () {
-        await Promise.all([addUser(userArchivedRoleFalse), addUser(userAlreadyArchived)]);
-      });
-
-      it("Should return all the unarchived users in the database", function (done) {
-        chai
-          .request(app)
-          .get("/members")
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.message).to.equal("Members returned successfully!");
-            expect(res.body.members).to.be.a("array");
-            expect(res.body.members.length).to.be.equal(unarchivedUsersGithubIds.length);
-            const memberGithubIds = res.body.members.map((member) => member.github_id);
-            expect(memberGithubIds).to.include.all.members(unarchivedUsersGithubIds);
-            expect(memberGithubIds).to.not.include.any.members(archivedUsersGithubIds);
-            return done();
-          });
-      });
-
-      it("Should return all the users in the database (including archived)", function (done) {
-        chai
-          .request(app)
-          .get("/members?showArchived=true")
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            const totalUsersCount = unarchivedUsersGithubIds.length + archivedUsersGithubIds.length;
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.message).to.equal("Members returned successfully!");
-            expect(res.body.members).to.be.a("array");
-            expect(res.body.members.length).to.be.equal(totalUsersCount);
-            const memberGithubIds = res.body.members.map((member) => member.github_id);
-            expect(memberGithubIds).to.include.all.members([...unarchivedUsersGithubIds, ...archivedUsersGithubIds]);
-            return done();
-          });
-      });
-    });
   });
 
   describe("GET /members/idle", function () {

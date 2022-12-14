@@ -6,42 +6,6 @@
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 const ROLES = require("../constants/roles");
-/**
- * Fetches the data about our users
- * @return {Promise<userModel|Array>}
- */
-
-const fetchUsers = async (queryParams = {}) => {
-  try {
-    const { showArchived } = queryParams;
-    const shouldShowArchived = showArchived === "true";
-
-    const query = shouldShowArchived ? userModel : userModel.where(`roles.${ROLES.ARCHIVED}`, "==", false);
-    const snapshot = await query.get();
-
-    const allMembers = [];
-
-    if (!snapshot.empty) {
-      snapshot.forEach((doc) => {
-        const memberData = doc.data();
-        const curatedMemberData = {
-          id: doc.id,
-          ...memberData,
-          tokens: undefined,
-          phone: undefined,
-          email: undefined,
-        };
-        curatedMemberData.isMember = !!(memberData.roles && memberData.roles.member);
-        allMembers.push(curatedMemberData);
-      });
-    }
-
-    return allMembers;
-  } catch (err) {
-    logger.error("Error retrieving members data", err);
-    throw err;
-  }
-};
 
 /**
  * changes the role of a new user to member
@@ -118,6 +82,5 @@ const addArchiveRoleToMembers = async (userId) => {
 module.exports = {
   moveToMembers,
   addArchiveRoleToMembers,
-  fetchUsers,
   fetchUsersWithRole,
 };
