@@ -9,11 +9,11 @@
     "rootDir": "./",
     "strict": true,
     "noImplicitAny": true,
-    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": false,
     "resolveJsonModule": true,
     "checkJs": false,
     "moduleResolution": "node"
   },
   "exclude": ["node_modules", "dist"],
-  "typeRoots": ["./node_modules/@types", "./types"]
 }
