@@ -29,6 +29,10 @@ module.exports = () => {
       },
       status: "active",
       profileURL: "https://abcde.com",
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
     },
     {
       username: "nikhil",
@@ -41,6 +45,10 @@ module.exports = () => {
       twitter_id: "whatifi",
       phone: "1234567891",
       email: "abc1@gmail.com",
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
     },
     {
       username: "pranavg",
@@ -55,6 +63,10 @@ module.exports = () => {
       email: "pgajjewar@gmail.com",
       roles: {
         restricted: true,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
     },
     {
@@ -76,6 +88,10 @@ module.exports = () => {
         restricted: false,
         app_owner: true,
       },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
     },
     {
       username: "ankush",
@@ -95,6 +111,10 @@ module.exports = () => {
       roles: {
         super_user: true,
         archived: false,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
     },
     {
@@ -117,6 +137,10 @@ module.exports = () => {
         app_owner: true,
         archived: true,
       },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
     },
     {
       username: "mehul",
@@ -136,6 +160,10 @@ module.exports = () => {
       roles: {
         member: true,
         archived: false,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
     },
   ];
