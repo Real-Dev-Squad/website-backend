@@ -69,6 +69,7 @@ const getAllUserStatus = async (query) => {
       };
       allUserStatus.push(currentUserStatus);
     });
+
     return { allUserStatus };
   } catch (error) {
     logger.error(`error in fetching the User Status of all Users. ${error}`);
