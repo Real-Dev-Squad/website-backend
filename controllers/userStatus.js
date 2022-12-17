@@ -71,7 +71,7 @@ const getAllUserStatus = async (req, res) => {
   try {
     const { allUserStatus } = await userStatusModel.getAllUserStatus(req.query);
     for (const doc of allUserStatus) {
-      //  fetching users from users collection by id in userStatus collection
+      //  fetching users from users collection by userID in userStatus collection
       const result = await fetchUser({ userId: doc.userId });
       doc.full_name = `${result.user.first_name} ${result.user.last_name}`;
       doc.picture = result.user.picture;
