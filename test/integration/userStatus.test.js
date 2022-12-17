@@ -14,6 +14,7 @@ const {
   userStsDataForOooState,
   validUserStsDataforUpdate,
   invalidUserStsDataforUpdate,
+  userStsDataForOooStateForShortDuration,
 } = require("../fixtures/userStatus/userStatus");
 
 const config = require("config");
@@ -153,6 +154,22 @@ describe("UserStatus", function () {
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(validUserStsDataforUpdate)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("User Status updated successfully.");
+          return done();
+        });
+    });
+
+    it("Should update the User Status without reason for short duration", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(userStsDataForOooStateForShortDuration)
         .end((err, res) => {
           if (err) {
             return done(err);
