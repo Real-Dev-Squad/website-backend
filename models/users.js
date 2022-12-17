@@ -7,6 +7,8 @@ const walletConstants = require("../constants/wallets");
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const userModel = firestore.collection("users");
+const joinModel = firestore.collection("applicants");
+const itemModel = firestore.collection("itemTags");
 
 /**
  * Adds or updates the user data
@@ -42,16 +44,75 @@ const addOrUpdate = async (userData, userId = null) => {
 
     // Add new user
     /*
-      Adding default archived role enables us to query for only
-      the unarchived users in the /members endpoint
-      For more info : https://github.com/Real-Dev-Squad/website-backend/issues/651
-    */
+       Adding default archived role enables us to query for only
+       the unarchived users in the /members endpoint
+       For more info : https://github.com/Real-Dev-Squad/website-backend/issues/651
+     */
     userData.roles = { archived: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
     return { isNewUser: true, userId: userInfo.id };
   } catch (err) {
     logger.error("Error in adding or updating user", err);
+    throw err;
+  }
+};
+
+const addJoinData = async (userData) => {
+  try {
+    await joinModel.add(userData);
+  } catch (err) {
+    logger.error("Error in adding data", err);
+    throw err;
+  }
+};
+
+const getJoinData = async (userId) => {
+  try {
+    const userData = [];
+    const joinData = await joinModel.where("userId", "==", userId).limit(1).get();
+    joinData.forEach((data) => {
+      userData.push({
+        id: data.id,
+        ...data.data(),
+      });
+    });
+    return userData;
+  } catch (err) {
+    logger.log("Could not get", err);
+    throw err;
+  }
+};
+
+/**
+ * Fetches users with the given skill
+ *
+ * @param skill { string }: Skill
+ * @return @return {Promise<users>}
+ */
+
+const getSuggestedUsers = async (skill) => {
+  try {
+    const data = await itemModel.where("itemType", "==", "USER").where("tagId", "==", skill).get();
+    let users = [];
+
+    const dataSet = new Set();
+
+    if (!data.empty) {
+      data.forEach((doc) => {
+        const docUserId = doc.data().itemId;
+        if (!dataSet.has(docUserId)) {
+          dataSet.add(docUserId);
+        }
+      });
+      const usersId = Array.from(dataSet);
+      const usersArray = usersId.map((userId) => fetchUser({ userId }));
+      users = await Promise.all(usersArray);
+    }
+
+    return { users };
+  } catch (err) {
+    logger.error("Error in getting suggested user", err);
     throw err;
   }
 };
@@ -188,6 +249,23 @@ const fetchUserImage = async (users) => {
   return images;
 };
 
+const fetchUserSkills = async (id) => {
+  try {
+    const data = await itemModel.where("itemId", "==", id).where("tagType", "==", "SKILL").get();
+    const skills = [];
+
+    if (!data.empty) {
+      data.forEach((doc) => {
+        skills.push({ id: doc.id, ...doc.data() });
+      });
+    }
+    return { skills };
+  } catch (err) {
+    logger.error("Error fetching skills in model", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchUsers,
@@ -196,4 +274,8 @@ module.exports = {
   initializeUser,
   updateUserPicture,
   fetchUserImage,
+  addJoinData,
+  getJoinData,
+  getSuggestedUsers,
+  fetchUserSkills,
 };

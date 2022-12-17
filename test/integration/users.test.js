@@ -13,6 +13,8 @@ const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 
 const config = require("config");
+const joinData = require("../fixtures/user/join");
+const { addJoinData } = require("../../models/users");
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
@@ -294,6 +296,107 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.isUsernameAvailable).to.equal(false);
 
+          return done();
+        });
+    });
+  });
+
+  describe("GET /users/:userId/intro", function () {
+    beforeEach(async function () {
+      await addJoinData(joinData(userId)[0]);
+    });
+    it("Should return data of the given username", function (done) {
+      chai
+        .request(app)
+        .get(`/users/${userId}/intro`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User data returned");
+          return done();
+        });
+    });
+    it("Should return 404 if user not Found", function (done) {
+      chai
+        .request(app)
+        .get(`/users/ritiksuserId/intro`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          return done();
+        });
+    });
+    it("Should return 401 is not Logged In", function (done) {
+      chai
+        .request(app)
+        .get(`/users/${userId}/intro`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("PUT /users/self/intro", function () {
+    it("Should store the info in db", function (done) {
+      chai
+        .request(app)
+        .put(`/users/self/intro`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(joinData()[2])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(201);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User data added successfully");
+          return done();
+        });
+    });
+
+    it("Should return 401 for unauthorized request", function (done) {
+      chai
+        .request(app)
+        .put(`/users/self/intro`)
+        .set("Cookie", `${cookieName}=""`)
+        .send(joinData()[2])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid Data", function (done) {
+      chai
+        .request(app)
+        .put(`/users/self/intro`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(joinData()[1])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal('"firstName" is required');
           return done();
         });
     });
