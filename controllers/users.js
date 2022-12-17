@@ -7,6 +7,7 @@ const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
+const obfuscate = require("../utils/obfuscate");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -38,15 +39,13 @@ const getUserById = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   }
 
-  const { phone, email, ...user } = result.user;
+  const { phone = "", email = "", ...user } = result.user;
   try {
-    user.phone =
-      phone.slice(0, 1) + phone.slice(1, phone.length - 1).replace(/\d/g, "*") + phone.slice(phone.length - 1);
-    user.email =
-      email.slice(0, 2) + email.slice(2, email.length - 2).replace(/./g, "*") + email.slice(email.length - 2);
+    user.phone = obfuscate.obfuscatePhone(phone);
+    user.email = obfuscate.obfuscateMail(email);
   } catch (error) {
     logger.error(`Error while formatting phone and email: ${error}`);
-    res.boom.error("Error while formatting phone and email");
+    return res.boom.badImplementation("Error while formatting phone and email");
   }
 
   return res.json({
@@ -99,6 +98,42 @@ const getUser = async (req, res) => {
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
+const getUserSkills = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { skills } = await userQuery.fetchUserSkills(id);
+
+    return res.json({
+      message: "Skills returned successfully",
+      skills,
+    });
+  } catch (err) {
+    logger.error(`Error fetching skills ${err}`);
+    return res.boom.badImplementation("Internal server error");
+  }
+};
+
+/**
+ * Fetches users based on given skill
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getSuggestedUsers = async (req, res) => {
+  try {
+    const { users } = await userQuery.getSuggestedUsers(req.params.skillId);
+
+    return res.json({
+      message: "Users returned successfully!",
+      users,
+    });
+  } catch (err) {
+    logger.error(`Error while fetching suggested users: ${err}`);
+    return res.boom.badImplementation("Something went wrong!");
   }
 };
 
@@ -293,6 +328,82 @@ const rejectProfileDiff = async (req, res) => {
   }
 };
 
+const addUserIntro = async (req, res) => {
+  try {
+    const rawData = req.body;
+    const data = {
+      userId: req.userData.id,
+      biodata: {
+        firstName: rawData.firstName,
+        lastName: rawData.lastName,
+      },
+      location: {
+        city: rawData.city,
+        state: rawData.state,
+        country: rawData.country,
+      },
+      professional: {
+        institution: rawData.college,
+        skills: rawData.skills,
+      },
+      intro: {
+        introduction: rawData.introduction,
+        funFact: rawData.funFact,
+        forFun: rawData.forFun,
+        whyRds: rawData.whyRds,
+      },
+      foundFrom: rawData.foundFrom,
+    };
+    await userQuery.addJoinData(data);
+
+    return res.status(201).json({
+      message: "User data added successfully",
+    });
+  } catch (err) {
+    logger.error("Could not save user data");
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
+const getUserIntro = async (req, res) => {
+  try {
+    const data = await userQuery.getJoinData(req.params.userId);
+    if (data.length) {
+      return res.json({
+        message: "User data returned",
+        data: data,
+      });
+    } else {
+      return res.status(404).json({
+        message: "Data Not Found",
+      });
+    }
+  } catch (err) {
+    logger.error("Could Not Get User Data", err);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
+/**
+ * Returns the lists of usernames where default archived role was added
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const addDefaultArchivedRole = async (req, res) => {
+  try {
+    const addedDefaultArchivedRoleData = await userQuery.addDefaultArchivedRole();
+    return res.json({
+      message: "Users default archived role added successfully!",
+      ...addedDefaultArchivedRoleData,
+    });
+  } catch (error) {
+    logger.error(`Error adding default archived role: ${error}`);
+    return res.boom.badImplementation("Something went wrong. Please contact admin");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -301,9 +412,14 @@ module.exports = {
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
+  getSuggestedUsers,
   postUserPicture,
   updateUser,
   rejectProfileDiff,
   getUserById,
   profileURL,
+  addUserIntro,
+  getUserIntro,
+  addDefaultArchivedRole,
+  getUserSkills,
 };

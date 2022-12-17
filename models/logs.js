@@ -19,7 +19,7 @@ const addLog = async (type, meta, body) => {
       meta,
       body,
     };
-    await logsModel.add(log);
+    return await logsModel.add(log);
   } catch (err) {
     logger.error("Error in adding log", err);
     throw err;

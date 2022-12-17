@@ -11,10 +11,8 @@ const authService = require("../services/authService");
  */
 const githubAuth = (req, res, next) => {
   let userData;
-  const authRedirectionUrl = `${config.get("services.rdsUi.baseUrl")}${config.get(
-    "services.rdsUi.routes.authRedirection"
-  )}`;
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+  const authRedirectionUrl = req.query.state ?? rdsUiUrl;
 
   try {
     return passport.authenticate("github", { session: false }, async (err, accessToken, user) => {
@@ -52,6 +50,21 @@ const githubAuth = (req, res, next) => {
   }
 };
 
+const signout = (req, res) => {
+  const cookieName = config.get("userToken.cookieName");
+  const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+  res.clearCookie(cookieName, {
+    domain: rdsUiUrl.hostname,
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+  });
+  return res.json({
+    message: "Signout successful",
+  });
+};
+
 module.exports = {
   githubAuth,
+  signout,
 };

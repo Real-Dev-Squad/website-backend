@@ -1,5 +1,6 @@
 const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
+const ItemModel = firestore.collection("itemTags");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
@@ -193,6 +194,79 @@ const fetchUserTasks = async (username, statuses = [], field, order) => {
   }
 };
 
+const getNewTask = async (skill = undefined, level = undefined) => {
+  const availableTasks = await tasksModel.where("status", "==", TASK_STATUS.AVAILABLE).get();
+  const idArray = [];
+
+  let task;
+
+  if (!availableTasks.empty) {
+    availableTasks.forEach((item) => idArray.push(item.id));
+
+    if (!skill) {
+      task = await ItemModel.where("itemType", "==", "TASK").where("levelValue", "<=", 2).get();
+    } else {
+      task = await ItemModel.where("tagName", "==", skill)
+        .where("itemType", "==", "TASK")
+        .where("levelValue", ">=", level)
+        .where("levelValue", "<=", level + 2)
+        .get();
+    }
+  }
+
+  if (!task.empty) {
+    let taskData, id;
+    for (const doc of task.docs) {
+      if (idArray.includes(doc.data().itemId)) {
+        id = doc.id;
+        taskData = doc.data();
+        break;
+      }
+    }
+    if (taskData) {
+      return {
+        task: {
+          id,
+          ...taskData,
+        },
+      };
+    }
+  }
+  return { taskNotFound: true };
+};
+
+/**
+ *
+ * @param skill { string } : skill category which will be used
+ * @param level { number } : level of the skill
+ * @returns {Promise<task>|object}
+ */
+
+const fetchSkillLevelTask = async (userId) => {
+  try {
+    let task;
+    const data = await ItemModel.where("itemId", "==", userId).where("tagType", "==", "SKILL").limit(10).get();
+    const userSkills = [];
+
+    if (data.empty) {
+      task = await getNewTask();
+    } else {
+      data.forEach((doc) => {
+        const skill = doc.data().tagName;
+        const level = doc.data().levelValue;
+        userSkills.push({ skill, level });
+      });
+      const { skill, level } = userUtils.getLowestLevelSkill(userSkills);
+      task = await getNewTask(skill, level);
+    }
+
+    return task;
+  } catch (err) {
+    logger.error("error getting tasks", err);
+    throw err;
+  }
+};
+
 /**
  *
  * @param username { string } : username which will be used to fetch all self tasks
@@ -250,5 +324,6 @@ module.exports = {
   fetchUserCompletedTasks,
   fetchActiveTaskMembers,
   fetchSelfTask,
+  fetchSkillLevelTask,
   overdueTasks,
 };

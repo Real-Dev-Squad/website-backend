@@ -68,6 +68,7 @@ module.exports = () => {
       github_display_name: "Sagar Bajpai",
       phone: "1234567890",
       email: "abc@gmail.com",
+      status: "active",
       tokens: {
         githubAccessToken: "githubAccessToken",
       },
@@ -87,11 +88,13 @@ module.exports = () => {
       github_display_name: "Ankush Dharkar",
       phone: "1234567890",
       email: "ad@amazon.com",
+      status: "idle",
       tokens: {
         githubAccessToken: "githubAccessToken",
       },
       roles: {
         super_user: true,
+        archived: false,
       },
     },
     {
@@ -112,7 +115,7 @@ module.exports = () => {
       status: "active",
       roles: {
         app_owner: true,
-        archivedMember: true,
+        archived: true,
       },
     },
     {
@@ -132,7 +135,7 @@ module.exports = () => {
       status: "active",
       roles: {
         member: true,
-        archivedMember: true,
+        archived: false,
       },
     },
   ];

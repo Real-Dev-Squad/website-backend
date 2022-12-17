@@ -1,3 +1,6 @@
+const { DINERO, NEELAM } = require("../../../constants/wallets");
+const userData = require("../fixtures/../user/user")();
+const adminuser = userData[3];
 /**
  * Sample tasks for tests
  * @return  {object}
@@ -42,12 +45,27 @@ module.exports = () => {
       title: "check is task form is working",
       purpose: "test",
       type: "feature",
-      assignee: "nikhil",
+      assignee: adminuser.username,
       createdBy: "nikhil",
       status: "AVAILABLE",
       percentCompleted: 50,
       endsOn: 1650032259,
       startedOn: 1644753600,
+    },
+    {
+      title: "Test task",
+      type: "feature",
+      endsOn: 1234,
+      startedOn: 4567,
+      status: "AVAILABLE",
+      percentCompleted: 0,
+      category: "FRONTEND",
+      level: 3,
+      participants: [],
+      completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+      lossRate: { [DINERO]: 1 },
+
+      isNoteworthy: true,
     },
   ];
 };

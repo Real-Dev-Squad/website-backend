@@ -1,4 +1,4 @@
-const { ROLES } = require("../constants/users");
+const ROLES = require("../constants/roles");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
 const logsQuery = require("../models/logs");
@@ -17,7 +17,7 @@ const cloudflare = require("../services/cloudflareService");
 
 const getMembers = async (req, res) => {
   try {
-    const allUsers = await members.fetchUsers();
+    const allUsers = await members.fetchUsers(req.query);
 
     return res.json({
       message: allUsers.length ? "Members returned successfully!" : "No member found",
@@ -74,45 +74,6 @@ const moveToMembers = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while retriving contributions ${err}`);
-    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
-  }
-};
-
-/**
- * Returns the lists of usernames migrated
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-
-const migrateUserRoles = async (req, res) => {
-  try {
-    const migratedUserData = await members.migrateUsers();
-    return res.json({
-      message: "Users migrated successfully",
-      ...migratedUserData,
-    });
-  } catch (error) {
-    logger.error(`Error while migrating user roles: ${error}`);
-    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
-  }
-};
-
-/**
- * Returns the lists of usernames whose isMember property was deleted
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-const deleteIsMember = async (req, res) => {
-  try {
-    const deletedIsMemberData = await members.deleteIsMemberProperty();
-    return res.json({
-      message: "Users isMember deleted successfully",
-      ...deletedIsMemberData,
-    });
-  } catch (error) {
-    logger.error(`Error while deleting isMember: ${error}`);
     return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
@@ -177,7 +138,5 @@ module.exports = {
   getMembers,
   getIdleMembers,
   moveToMembers,
-  migrateUserRoles,
-  deleteIsMember,
   purgeMembersCache,
 };

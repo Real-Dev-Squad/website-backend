@@ -20,9 +20,7 @@ describe("auth", function () {
   });
 
   it("should redirect the request to the goto page on successful login", function (done) {
-    const authRedirectionUrl = `${config.get("services.rdsUi.baseUrl")}${config.get(
-      "services.rdsUi.routes.authRedirection"
-    )}`;
+    const rdsUiUrl = config.get("services.rdsUi.baseUrl");
 
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
       callback(null, "accessToken", githubUserInfo[0]);
@@ -32,15 +30,14 @@ describe("auth", function () {
     chai
       .request(app)
       .get("/auth/github/callback")
-      .query({ code: "codeReturnedByGithub" })
+      .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
       .redirects(0)
       .end((err, res) => {
         if (err) {
           return done(err);
         }
-
         expect(res).to.have.status(302);
-        expect(res.headers.location).to.equal(authRedirectionUrl);
+        expect(res.headers.location).to.equal(rdsUiUrl);
 
         return done();
       });
@@ -97,6 +94,23 @@ describe("auth", function () {
           message: "User cannot be authenticated",
         });
 
+        return done();
+      });
+  });
+
+  it("Should clear the rds session cookies", function (done) {
+    chai
+      .request(app)
+      .get("/auth/signout")
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.a("object");
+        expect(res.body.message).to.equal("Signout successful");
+        expect(res.headers["set-cookie"][0]).to.include(`${config.get("userToken.cookieName")}=;`);
         return done();
       });
   });
