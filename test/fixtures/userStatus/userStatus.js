@@ -12,6 +12,19 @@ const userStsDataForNewUser = {
   },
 };
 
+const userStsDataForOooStateForShortDuration = {
+  currentStatus: {
+    message: "",
+    state: "OOO",
+    updatedAt: 1673893800000,
+    from: 1673893800000,
+    until: 1674066600000,
+  },
+  monthlyHours: {
+    updatedAt: 1668215609000,
+    committed: 40,
+  },
+};
 const userStsDataForOooState = {
   currentStatus: {
     until: 1669256009000,
@@ -49,6 +62,7 @@ const invalidUserStsDataforUpdate = {
 module.exports = {
   userStsDataForNewUser,
   userStsDataForOooState,
+  userStsDataForOooStateForShortDuration,
   validUserStsDataforUpdate,
   invalidUserStsDataforUpdate,
 };
