@@ -20,82 +20,6 @@ const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
-const userSearchParamsData = [
-  {
-    username: "ankur",
-    first_name: "Ankur",
-    last_name: "Narkhede",
-    yoe: 0,
-    img: "./img.png",
-    linkedin_id: "ankurnarkhede",
-    github_id: "ankur1234",
-    github_display_name: "ankur-xyz",
-    phone: "1234567890",
-    email: "abc@gmail.com",
-  },
-  {
-    username: "23ankur",
-    first_name: "Ankur",
-    last_name: "Narkhede",
-    yoe: 0,
-    img: "./img.png",
-    linkedin_id: "ankurnarkhede",
-    github_id: "ankur1234",
-    github_display_name: "ankur-xyz",
-    phone: "1234567890",
-    email: "abc@gmail.com",
-  },
-];
-
-searchParamValues.forEach(function (item, i) {
-  describe("GET /users?search", function () {
-    let jwt;
-    let userId = "";
-
-    before(async function () {
-      userId = await addUser();
-      jwt = authService.generateAuthToken({ userId });
-
-      await addOrUpdate(userSearchParamsData[0]);
-      await addOrUpdate(userSearchParamsData[1]);
-    });
-
-    after(async function () {
-      await cleanDb();
-    });
-
-    it(`Test Scenario ${i}: ${item.desc}`, function (done) {
-      chai
-        .request(app)
-        .get("/users")
-        .query({ search: item.value })
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          if (item.value === "mu") {
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.message).to.equal("No users are present");
-          } else if (
-            item.value === "an" ||
-            item.value === "AN" ||
-            typeof item.value === "number" ||
-            item.value === ""
-          ) {
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.message).to.equal("Users returned successfully!");
-            expect(res.body.users).to.be.a("array");
-          }
-
-          return done();
-        });
-    });
-  });
-});
-
 describe("Users", function () {
   let jwt;
   let superUserId;
@@ -188,7 +112,6 @@ describe("Users", function () {
           if (err) {
             return done(err);
           }
-
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Users returned successfully!");
@@ -422,6 +345,134 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("GET /users?search", function () {
+    const userSearchParamsData = [
+      {
+        username: "ankur",
+        first_name: "Ankur",
+        last_name: "Narkhede",
+        yoe: 0,
+        img: "./img.png",
+        linkedin_id: "ankurnarkhede",
+        github_id: "ankur1234",
+        github_display_name: "ankur-xyz",
+        phone: "1234567890",
+        email: "abc@gmail.com",
+      },
+      {
+        username: "23ankur",
+        first_name: "Ankur",
+        last_name: "Narkhede",
+        yoe: 0,
+        img: "./img.png",
+        linkedin_id: "ankurnarkhede",
+        github_id: "ankur1234",
+        github_display_name: "ankur-xyz",
+        phone: "1234567890",
+        email: "abc@gmail.com",
+      },
+    ];
+
+    beforeEach(async function () {
+      await addOrUpdate(userSearchParamsData[0]);
+      await addOrUpdate(userSearchParamsData[1]);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it(`${searchParamValues[0].desc}`, function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues[0].value })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+
+          return done();
+        });
+    });
+    it(`${searchParamValues[1].desc}`, function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues[1].value })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+
+          return done();
+        });
+    });
+    it(`${searchParamValues[2].desc}`, function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues[2].value })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+
+          return done();
+        });
+    });
+    it(`${searchParamValues[3].desc}`, function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues[3].value })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+
+          return done();
+        });
+    });
+    it(`${searchParamValues[4].desc}`, function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues[4].value })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User doesn't exist");
+
           return done();
         });
     });

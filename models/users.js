@@ -119,19 +119,24 @@ const getSuggestedUsers = async (skill) => {
 
 /**
  * Fetches the data about our users
- * @param query { search }: Filter for users data
+ * @param query { Object }: Filter for users
  * @return {Promise<userModel|Array>}
  */
 const fetchUsers = async (query) => {
+  const addSearchDbQuery = (dbQuery) => {
+    return dbQuery
+      .orderBy("username")
+      .startAt(query.search.toLowerCase().trim())
+      .endAt(query.search.toLowerCase().trim() + "\uf8ff");
+  };
   try {
     let dbQuery = userModel
       .limit(parseInt(query.size) || 100)
       .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0));
     if (Object.keys(query).length) {
-      dbQuery = dbQuery
-        .orderBy("username")
-        .startAt(query.search.toLowerCase().trim())
-        .endAt(query.search.toLowerCase().trim() + "\uf8ff");
+      if (query.search) {
+        dbQuery = addSearchDbQuery(dbQuery);
+      }
     }
     const snapshot = await dbQuery.get();
     const allUsers = [];

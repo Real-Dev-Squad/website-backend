@@ -65,10 +65,7 @@ const getUsers = async (req, res) => {
   try {
     const allUsers = await userQuery.fetchUsers(req.query);
     if (!allUsers.length) {
-      return res.json({
-        message: "No users are present",
-        users: allUsers,
-      });
+      return res.boom.notFound("User doesn't exist");
     }
     return res.json({
       message: "Users returned successfully!",
