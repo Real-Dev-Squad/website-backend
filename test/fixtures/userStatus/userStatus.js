@@ -12,7 +12,7 @@ const userStsDataForNewUser = {
   },
 };
 
-const userStsDataForOooStateForShortDuration = {
+const oooUserStsDataForShortDuration = {
   currentStatus: {
     message: "",
     state: "OOO",
@@ -62,7 +62,7 @@ const invalidUserStsDataforUpdate = {
 module.exports = {
   userStsDataForNewUser,
   userStsDataForOooState,
-  userStsDataForOooStateForShortDuration,
+  oooUserStsDataForShortDuration,
   validUserStsDataforUpdate,
   invalidUserStsDataforUpdate,
 };

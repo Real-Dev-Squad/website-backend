@@ -14,7 +14,7 @@ const {
   userStsDataForOooState,
   validUserStsDataforUpdate,
   invalidUserStsDataforUpdate,
-  userStsDataForOooStateForShortDuration,
+  oooUserStsDataForShortDuration,
 } = require("../fixtures/userStatus/userStatus");
 
 const config = require("config");
@@ -169,7 +169,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(userStsDataForOooStateForShortDuration)
+        .send(oooUserStsDataForShortDuration)
         .end((err, res) => {
           if (err) {
             return done(err);
