@@ -55,6 +55,10 @@ describe("UserStatus", function () {
           expect(res.body.totalUserStatus).to.be.a("number");
           expect(res.body.message).to.equal("All User Status found successfully.");
           expect(res.body.allUserStatus).to.be.a("array");
+          res.body.allUserStatus.forEach((status) => {
+            expect(status).to.have.property("full_name");
+            expect(status).to.have.property("picture");
+          });
           return done();
         });
     });
