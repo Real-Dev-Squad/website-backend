@@ -6,14 +6,14 @@
     "allowJs": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./",
     "strict": true,
     "noImplicitAny": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": false,
+    "esModuleInterop": true,
     "resolveJsonModule": true,
     "checkJs": false,
-    "moduleResolution": "node"
+    "skipLibCheck": true
   },
   "exclude": ["node_modules", "dist"],
+  "typeRoots": ["@types", "./node_modules/@types"]
 }
