@@ -1,4 +1,6 @@
-{
+{ "ts-node": {
+  "transpileOnly": true
+  },
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
