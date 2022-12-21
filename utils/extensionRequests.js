@@ -13,10 +13,10 @@ const buildExtensionRequests = (extensionRequests, initialArray = []) => {
   return initialArray;
 };
 
-const formatExtensionRequest = async (request) => {
-  if (!request) return request;
+const formatExtensionRequest = async (extensionRequest) => {
+  if (!extensionRequest) return extensionRequest;
 
-  let { timestamp, id, assignee, ...body } = request;
+  let { timestamp, id, assignee, ...body } = extensionRequest;
 
   if (assignee) {
     assignee = await getUsername(assignee);

@@ -102,7 +102,7 @@ describe("Extension Requests", function () {
       reason: "family event",
       status: "PENDING",
     };
-    extensionRequestId = (await extensionRequests.createETAExtension(extensionRequest)).id;
+    extensionRequestId = (await extensionRequests.createExtensionRequest(extensionRequest)).id;
   });
 
   after(async function () {

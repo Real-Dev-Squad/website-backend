@@ -40,7 +40,7 @@ const createTaskExtensionRequest = async (req, res) => {
       return res.boom.forbidden("An extension request for this task already exists.");
     }
 
-    const extensionRequest = await extensionRequestsQuery.createETAExtension(extensionBody);
+    const extensionRequest = await extensionRequestsQuery.createExtensionRequest(extensionBody);
 
     const extensionLog = {
       type: "extensionRequest",
@@ -104,8 +104,53 @@ const getExtensionRequest = async (req, res) => {
   }
 };
 
+/**
+ * Fetches all the extension requests of the logged in user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const getSelfExtensionRequests = async (req, res) => {
+  try {
+    const { id: userId } = req.userData;
+    const { taskId, status } = req.query;
+
+    if (userId) {
+      const allExtensionRequests = await extensionRequestsQuery.fetchUserExtensionRequests(userId, status, taskId);
+      return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
+    }
+    return res.boom.notFound("User doesn't exist");
+  } catch (error) {
+    logger.error(`Error while fetching extension requests: ${error}`);
+    return res.boom.badImplementation("An internal server error occured");
+  }
+};
+
+/**
+ * Updates the Extension Request
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const updateExtensionRequest = async (req, res) => {
+  try {
+    const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
+    if (!extensionRequest.extensionRequestData) {
+      return res.boom.notFound("Extension Request not found");
+    }
+
+    await extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id);
+    return res.status(204).send();
+  } catch (err) {
+    logger.error(`Error while updating extension request: ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
 module.exports = {
   createTaskExtensionRequest,
   fetchExtensionRequests,
   getExtensionRequest,
+  getSelfExtensionRequests,
+  updateExtensionRequest,
 };

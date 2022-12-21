@@ -4,17 +4,38 @@ const { buildExtensionRequests, formatExtensionRequest } = require("../utils/ext
 
 /**
  * Create Extension Request
- * @param body { Object }: Body of the extension request
+ * @param extensionRequestData { Object }: Body of the extension request
  */
-const createETAExtension = async (body) => {
+const createExtensionRequest = async (extensionRequestData) => {
   try {
     const request = {
       timestamp: (new Date().getTime() / 1000).toFixed(0),
-      ...body,
+      ...extensionRequestData,
     };
     return await extensionRequestsModel.add(request);
   } catch (err) {
     logger.error("Error in adding extension requests", err);
+    throw err;
+  }
+};
+
+/**
+ * Updates Extension Request
+ *
+ * @param extensionRequestData { Object }: extension request data object to be stored in DB
+ * @param extensionRequestId { string }: extensionRequestId which will be used to update the task in DB
+ * @return {extensionRequestResult : Object}
+ */
+const updateExtensionRequest = async (extensionRequestData, extensionRequestId) => {
+  try {
+    const extensionRequest = await extensionRequestsModel.doc(extensionRequestId).get();
+    await extensionRequestsModel.doc(extensionRequestId).set({
+      ...extensionRequest.data(),
+      ...extensionRequestData,
+    });
+    return extensionRequestId;
+  } catch (err) {
+    logger.error("Error in updating task", err);
     throw err;
   }
 };
@@ -56,8 +77,48 @@ const fetchExtensionRequest = async (extensionRequestId) => {
   }
 };
 
+/**
+ * Fetch all Extension Requests of a user
+ *
+ * @return {Array<extensionRequests>}
+ */
+
+const fetchUserExtensionRequests = async (userId, status, taskId) => {
+  try {
+    if (!userId) {
+      return { userNotFound: true };
+    }
+
+    let extensionRequestsSnapshot = [];
+
+    let extensionRequestQuery = extensionRequestsModel.where("assignee", "==", userId);
+
+    if (taskId) {
+      extensionRequestQuery = extensionRequestQuery.where("taskId", "==", taskId);
+    }
+
+    if (status) {
+      extensionRequestQuery = extensionRequestQuery.where("status", "==", status);
+    }
+
+    extensionRequestsSnapshot = await extensionRequestQuery.get();
+
+    const extensionRequests = buildExtensionRequests(extensionRequestsSnapshot);
+
+    const promises = extensionRequests.map(async (extensionRequest) => formatExtensionRequest(extensionRequest));
+    const extensionRequestList = await Promise.all(promises);
+
+    return extensionRequestList;
+  } catch (error) {
+    logger.error("error getting extension requests", error);
+    throw error;
+  }
+};
+
 module.exports = {
-  createETAExtension,
+  createExtensionRequest,
   fetchExtensionRequests,
   fetchExtensionRequest,
+  fetchUserExtensionRequests,
+  updateExtensionRequest,
 };
