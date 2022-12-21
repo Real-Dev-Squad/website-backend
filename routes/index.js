@@ -19,4 +19,5 @@ app.use("/users", require("./users.js"));
 app.use("/profileDiffs", require("./profileDiffs.js"));
 app.use("/wallet", require("./wallets.js"));
 
+app.use("/payload", require("./tasks.js"));
 module.exports = app;

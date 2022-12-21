@@ -105,6 +105,32 @@ const fetchTask = async (taskId) => {
 };
 
 /**
+ * Fetch a task against the IssueId
+ * @param taskId { string }: taskid which will be used to fetch the task
+ * @return {Promise<taskData|Object>}
+ */
+const fetchTaskByIssueId = async (issueId) => {
+  try {
+    const task = await tasksModel.where("issueId", "==", issueId).get();
+    const [taskDummy] = task.docs;
+    let dummy;
+    if (taskDummy) {
+      dummy = { id: taskDummy.id, ...taskDummy.data() };
+    }
+    const taskData = await fromFirestoreData(dummy);
+
+    if (taskData?.status) {
+      taskData.status = TASK_STATUS[taskData.status.toUpperCase()] || task.status;
+    }
+
+    return { taskData };
+  } catch (err) {
+    logger.error("Error retrieving task data", err);
+    throw err;
+  }
+};
+
+/**
  * Fetch assigned self task
  * @param taskId { string }: taskId which will be used to fetch the task
  * @param id { string }: id to check task is assigned to self or not
@@ -295,4 +321,5 @@ module.exports = {
   fetchSelfTask,
   fetchSkillLevelTask,
   overdueTasks,
+  fetchTaskByIssueId,
 };

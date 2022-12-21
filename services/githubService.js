@@ -1,6 +1,7 @@
 const utils = require("../utils/fetch");
 const { fetchUser } = require("../models/users");
-const ORG = "Real-Dev-Squad";
+const ORG = "bhatiaPankaj";
+
 /**
  * Extracts only the necessary details required from the object returned by Github API
  * @param data {Object} - Object returned by Github API

@@ -1,4 +1,5 @@
 const issuesService = require("../services/issuesService");
+const tasks = require("../models/tasks");
 
 const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 /**
@@ -11,10 +12,16 @@ const getIssues = async (req, res) => {
   try {
     const repo = req.params.repo;
     const issues = await issuesService.getRepoIssues(repo);
-
+    let issuesData = issues.data.length > 0 ? issues.data : [];
+    issuesData = issuesData.map(async (issue) => {
+      const taskData = await tasks.fetchTaskByIssueId(issue.id);
+      issue.taskData = taskData;
+      return issue;
+    });
+    const updatedIsuees = await Promise.all(issuesData);
     return res.json({
       message: "Issues returned successfully!",
-      issues: issues.data.length > 0 ? issues.data : [],
+      issues: updatedIsuees,
     });
   } catch (err) {
     logger.error(`Error while retriving issues ${err}`);

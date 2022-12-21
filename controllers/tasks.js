@@ -225,6 +225,23 @@ const assignTask = async (req, res) => {
   }
 };
 
+const updateTaskFromHook = async (req, res) => {
+  if (req.body.action !== "edited") return res.json({ message: "Issue not updated !" });
+  try {
+    const issueId = req.body.issue.id;
+    const task = await tasks.fetchTaskByIssueId(issueId);
+
+    if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
+
+    await tasks.updateTask({ title: req.body.issue.title }, task.taskData.id);
+
+    return res.json({ message: "Task updated successfully!" });
+  } catch (err) {
+    logger.error(`Error while updating task status : ${err}`);
+    return res.boom.badImplementation("An internal server error occured");
+  }
+};
+
 module.exports = {
   addNewTask,
   fetchTasks,
@@ -235,4 +252,5 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
+  updateTaskFromHook,
 };
