@@ -378,6 +378,24 @@ describe("UserStatus", function () {
         });
     });
 
+    it("Should return error when trying to change OOO without reason for more than 3 days period", function (done) {
+      // marking OOO from 18 Nov 2022 (1668709800000) to 23 Nov 2022 (1669141800000)
+      chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${testUserJwt}`)
+        .send(generateUserStatusData("OOO", 1668191400000, 1668709800000, 1669141800000, ""))
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.equal(`Bad Request`);
+          expect(res.body.message).to.equal(`"currentStatus.message" is not allowed to be empty`);
+          return done();
+        });
+    });
+
     it("should replace old future OOO Status with new future OOO Status", async function () {
       // creating Active Status from 12th Nov 2022
       const response1 = await chai
