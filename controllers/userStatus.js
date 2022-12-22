@@ -120,4 +120,22 @@ const updateUserStatus = async (req, res) => {
   }
 };
 
-module.exports = { deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus };
+/**
+ * Update All Users Status
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const updateAllUserStatus = async (req, res) => {
+  try {
+    await userStatusModel.updateAllUserStatus();
+    return res.status(200).json({
+      message: "All User Status updated successfully.",
+    });
+  } catch (err) {
+    logger.error(`Error while updating the User Data: ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
+module.exports = { deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus, updateAllUserStatus };
