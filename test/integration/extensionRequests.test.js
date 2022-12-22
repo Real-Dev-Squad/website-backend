@@ -24,7 +24,7 @@ const superUser = userData[4];
 let appOwnerjwt, superUserJwt, jwt;
 
 describe("Extension Requests", function () {
-  let taskId1, taskId2, taskId3, extensionRequestId, taskId;
+  let taskId1, taskId2, taskId3, extensionRequestId1, extensionRequestId2, taskId;
 
   before(async function () {
     const userId = await addUser(user);
@@ -103,7 +103,17 @@ describe("Extension Requests", function () {
       reason: "family event",
       status: "PENDING",
     };
-    extensionRequestId = (await extensionRequests.createExtensionRequest(extensionRequest)).id;
+    const extensionRequest1 = {
+      taskId: taskId2,
+      title: "change ETA",
+      assignee: appOwner.id,
+      oldEndsOn: 1234,
+      newEndsOn: 1235,
+      reason: "family event",
+      status: "APPROVED",
+    };
+    extensionRequestId1 = (await extensionRequests.createExtensionRequest(extensionRequest)).id;
+    extensionRequestId2 = (await extensionRequests.createExtensionRequest(extensionRequest1)).id;
   });
 
   after(async function () {
@@ -112,6 +122,71 @@ describe("Extension Requests", function () {
 
   afterEach(async function () {
     sinon.restore();
+  });
+
+  describe("GET /extensionRequest/self", function () {
+    it("should return success response and extension request of the authenticated user", function (done) {
+      chai
+        .request(app)
+        .get(`/extensionRequests/self`)
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
+          expect(res.body.allExtensionRequests).to.be.a("array");
+          expect(res.body.allExtensionRequests[0].assignee).to.equal(appOwner.username);
+          expect([extensionRequestId1, extensionRequestId2]).contains(res.body.allExtensionRequests[0].id);
+          expect([extensionRequestId1, extensionRequestId2]).contains(res.body.allExtensionRequests[1].id);
+          expect(res.body.allExtensionRequests[1].assignee).to.equal(appOwner.username);
+          return done();
+        });
+    });
+    it("should return success response and all extension requests with query params", function (done) {
+      chai
+        .request(app)
+        .get(`/extensionRequests/self`)
+        .query({ taskId: taskId2, status: "APPROVED" })
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
+          expect(res.body.allExtensionRequests).to.be.a("array");
+          expect(res.body.allExtensionRequests[0].assignee).to.equal(appOwner.username);
+          expect(res.body.allExtensionRequests[0].id).to.equal(extensionRequestId2);
+          return done();
+        });
+    });
+
+    it("Should return 401 if not logged in", function (done) {
+      chai
+        .request(app)
+        .get("/extensionRequests/self")
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+
+          return done();
+        });
+    });
   });
 
   describe("POST /extensionRequest - creates a new extension requests", function () {
@@ -136,9 +211,9 @@ describe("Extension Requests", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Extension Request created successfully!");
-          expect(res.body.extensionRequestData).to.be.a("object");
-          expect(res.body.extensionRequestData.assignee).to.equal(appOwner.id);
-          expect(res.body.extensionRequestData.status).to.equal(ETA_EXTENSION_REQUEST_STATUS.PENDING);
+          expect(res.body.extensionRequest).to.be.a("object");
+          expect(res.body.extensionRequest.assignee).to.equal(appOwner.id);
+          expect(res.body.extensionRequest.status).to.equal(ETA_EXTENSION_REQUEST_STATUS.PENDING);
           return done();
         });
     });
@@ -287,7 +362,7 @@ describe("Extension Requests", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Extension Request created successfully!");
-          const extensionRequestId = res.body.extensionRequestData.id;
+          const extensionRequestId1 = res.body.extensionRequest.id;
           chai
             .request(app)
             .get(`/logs/extensionRequest/?body.assignee=${user.id}&meta.taskId=${taskId2}`)
@@ -300,7 +375,7 @@ describe("Extension Requests", function () {
               expect(res.body).to.be.a("object");
               expect(res.body.message).to.equal("Logs returned successfully!");
               expect(res.body.logs).to.be.a("array");
-              expect(res.body.logs[0].body.extensionRequestId).to.equal(extensionRequestId);
+              expect(res.body.logs[0].body.extensionRequestId).to.equal(extensionRequestId1);
               expect(res.body.logs[0].body.assignee).to.equal(user.id);
               expect(res.body.logs[0].meta.taskId).to.equal(taskId2);
               return done();
@@ -315,7 +390,7 @@ describe("Extension Requests", function () {
     it("should return success response and extension request with the id that is provided", function (done) {
       chai
         .request(app)
-        .get(`/extensionRequests/${extensionRequestId}`)
+        .get(`/extensionRequests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
@@ -324,9 +399,9 @@ describe("Extension Requests", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
-          expect(res.body.extensionRequestData).to.be.a("object");
-          expect(res.body.extensionRequestData.assignee).to.equal(appOwner.username);
-          expect(res.body.extensionRequestData.id).to.equal(extensionRequestId);
+          expect(res.body.extensionRequest).to.be.a("object");
+          expect(res.body.extensionRequest.assignee).to.equal(appOwner.username);
+          expect(res.body.extensionRequest.id).to.equal(extensionRequestId1);
           return done();
         });
     });
@@ -360,9 +435,9 @@ describe("Extension Requests", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
-          expect(res.body.extensionRequestData).to.be.a("array");
-          expect(res.body.extensionRequestData[0]).to.have.property("assignee");
-          expect(res.body.extensionRequestData[0]).to.have.property("id");
+          expect(res.body.allExtensionRequests).to.be.a("array");
+          expect(res.body.allExtensionRequests[0]).to.have.property("assignee");
+          expect(res.body.allExtensionRequests[0]).to.have.property("id");
           return done();
         });
     });
@@ -380,51 +455,9 @@ describe("Extension Requests", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
-          expect(res.body.extensionRequestData).to.be.a("array");
-          expect(res.body.extensionRequestData[0].assignee).to.equal(appOwner.username);
-          expect(res.body.extensionRequestData[0].id).to.equal(extensionRequestId);
-          return done();
-        });
-    });
-  });
-
-  describe("GET /extensionRequest/self", function () {
-    it("should return success response and extension request of the authenticated user", function (done) {
-      chai
-        .request(app)
-        .get(`/extensionRequests/${extensionRequestId}`)
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
-          expect(res.body.extensionRequestData).to.be.a("object");
-          expect(res.body.extensionRequestData.assignee).to.equal(appOwner.username);
-          expect(res.body.extensionRequestData.id).to.equal(extensionRequestId);
-          return done();
-        });
-    });
-
-    it("Should return 401 if not logged in", function (done) {
-      chai
-        .request(app)
-        .get("/extensionRequests/self")
-        .end((err, res) => {
-          if (err) {
-            return done();
-          }
-
-          expect(res).to.have.status(401);
-          expect(res.body).to.be.an("object");
-          expect(res.body).to.eql({
-            statusCode: 401,
-            error: "Unauthorized",
-            message: "Unauthenticated User",
-          });
-
+          expect(res.body.allExtensionRequests).to.be.a("array");
+          expect(res.body.allExtensionRequests[0].assignee).to.equal(appOwner.username);
+          expect(res.body.allExtensionRequests[0].id).to.equal(extensionRequestId1);
           return done();
         });
     });
@@ -434,7 +467,7 @@ describe("Extension Requests", function () {
     it("Should return 401 if someone other than superuser logged in", function (done) {
       chai
         .request(app)
-        .patch(`/extensionRequests/${extensionRequestId}`)
+        .patch(`/extensionRequests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -456,7 +489,7 @@ describe("Extension Requests", function () {
     it("Should update the extensionRequest for the given extensionRequestId", function (done) {
       chai
         .request(app)
-        .patch(`/extensionRequests/${extensionRequestId}`)
+        .patch(`/extensionRequests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           title: "new-title",

@@ -60,7 +60,7 @@ const createTaskExtensionRequest = async (req, res) => {
 
     return res.json({
       message: "Extension Request created successfully!",
-      extensionRequestData: { ...extensionBody, id: extensionRequest.id },
+      extensionRequest: { ...extensionBody, id: extensionRequest.id },
     });
   } catch (err) {
     logger.error(`Error while creating new extension request: ${err}`);
@@ -81,7 +81,7 @@ const fetchExtensionRequests = async (req, res) => {
 
     return res.json({
       message: "Extension Requests returned successfully!",
-      extensionRequestData: allExtensionRequests.length ? allExtensionRequests : [],
+      allExtensionRequests: allExtensionRequests.length ? allExtensionRequests : [],
     });
   } catch (err) {
     logger.error(`Error while fetching Extension Requests ${err}`);
@@ -98,7 +98,7 @@ const getExtensionRequest = async (req, res) => {
       return res.boom.notFound("Extension Request not found");
     }
     extensionRequestData.id = extensionRequestId;
-    return res.json({ message: "Extension Requests returned successfully!", extensionRequestData });
+    return res.json({ message: "Extension Requests returned successfully!", extensionRequest: extensionRequestData });
   } catch (err) {
     return res.boom.badImplementation("An internal server error occurred");
   }
@@ -116,7 +116,7 @@ const getSelfExtensionRequests = async (req, res) => {
     const { taskId, status } = req.query;
 
     if (userId) {
-      const allExtensionRequests = await extensionRequestsQuery.fetchUserExtensionRequests(userId, status, taskId);
+      const allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({ status, taskId }, userId);
       return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
     }
     return res.boom.notFound("User doesn't exist");

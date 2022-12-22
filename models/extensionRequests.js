@@ -45,9 +45,13 @@ const updateExtensionRequest = async (extensionRequestData, extensionRequestId) 
  * @param extensionRequestquery { Object }: Body of the extension request
  * @return {Promise<ExtensionRequest|Array>}
  */
-const fetchExtensionRequests = async (extensionRequestquery) => {
+const fetchExtensionRequests = async (extensionRequestquery, userId = null) => {
   try {
     let extensionRequestsSnapshot = extensionRequestsModel;
+
+    if (userId) {
+      extensionRequestsSnapshot = extensionRequestsModel.where("assignee", "==", userId);
+    }
 
     Object.entries(extensionRequestquery).forEach(([key, value]) => {
       if (value) extensionRequestsSnapshot = extensionRequestsSnapshot.where(key, "==", value);
@@ -77,48 +81,9 @@ const fetchExtensionRequest = async (extensionRequestId) => {
   }
 };
 
-/**
- * Fetch all Extension Requests of a user
- *
- * @return {Array<extensionRequests>}
- */
-
-const fetchUserExtensionRequests = async (userId, status, taskId) => {
-  try {
-    if (!userId) {
-      return { userNotFound: true };
-    }
-
-    let extensionRequestsSnapshot = [];
-
-    let extensionRequestQuery = extensionRequestsModel.where("assignee", "==", userId);
-
-    if (taskId) {
-      extensionRequestQuery = extensionRequestQuery.where("taskId", "==", taskId);
-    }
-
-    if (status) {
-      extensionRequestQuery = extensionRequestQuery.where("status", "==", status);
-    }
-
-    extensionRequestsSnapshot = await extensionRequestQuery.get();
-
-    const extensionRequests = buildExtensionRequests(extensionRequestsSnapshot);
-
-    const promises = extensionRequests.map(async (extensionRequest) => formatExtensionRequest(extensionRequest));
-    const extensionRequestList = await Promise.all(promises);
-
-    return extensionRequestList;
-  } catch (error) {
-    logger.error("error getting extension requests", error);
-    throw error;
-  }
-};
-
 module.exports = {
   createExtensionRequest,
   fetchExtensionRequests,
   fetchExtensionRequest,
-  fetchUserExtensionRequests,
   updateExtensionRequest,
 };
