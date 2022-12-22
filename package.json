@@ -28,7 +28,7 @@
     "http-errors": "~2.0.0",
     "joi": "^17.4.0",
     "jsdoc": "^4.0.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "morgan": "~1.10.0",
     "multer": "^1.4.2",
     "newrelic": "^9.0.0",
