@@ -13,9 +13,8 @@ const superUser = userData[4];
 const {
   userStsDataForNewUser,
   userStsDataForOooState,
-  validUserStsDataforUpdate,
-  invalidUserStsDataforUpdate,
   oooUserStsDataForShortDuration,
+  generateUserStatusData,
 } = require("../fixtures/userStatus/userStatus");
 
 const config = require("config");
@@ -122,12 +121,12 @@ describe("UserStatus", function () {
     });
 
     it("Should update the User Status based on the future dates", async function () {
-      // creating Active Status from 12th Nov 2022
+      // creating Active Status from 12th Nov 2022 (1669401000000)
       const response1 = await chai
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(initialDataForFutureStatus);
+        .send(generateUserStatusData("ACTIVE", 1669401000000, 1669401000000));
       expect(response1).to.have.status(201);
       expect(response1.body.data.currentStatus.state).to.equal("ACTIVE");
 
@@ -136,7 +135,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(finalDataForFutureStatus);
+        .send(generateUserStatusData("OOO", 1668215609000, 1669228200000, 1669573800000, "Vacation Trip"));
       expect(response2).to.have.status(200);
       expect(response2.body.message).to.equal("User Status updated successfully.");
       expect(response2.body.data).to.have.own.property("futureStatus");
@@ -188,7 +187,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(initialDataForFutureStatus);
+        .send(generateUserStatusData("ACTIVE", 1669401000000, 1669401000000));
       expect(response1).to.have.status(201);
       expect(response1.body.data.currentStatus.state).to.equal("ACTIVE");
 
@@ -197,7 +196,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(finalDataForFutureStatus);
+        .send(generateUserStatusData("OOO", 1668215609000, 1669228200000, 1669573800000, "Vacation Trip"));
       expect(response2).to.have.status(200);
       expect(response2.body.message).to.equal("User Status updated successfully.");
       expect(response2.body.data).to.have.own.property("futureStatus");
@@ -230,7 +229,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(activeStatusDataFromToday);
+        .send(generateUserStatusData("ACTIVE", 1669401000000, 1669401000000));
       expect(response5).to.have.status(200);
       expect(response5.body.message).to.equal("User Status updated successfully.");
       expect(response5.body.data).to.have.own.property("currentStatus");
@@ -298,7 +297,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(validUserStsDataforUpdate)
+        .send(generateUserStatusData("ACTIVE", 1668215609000, 1668215609000))
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -330,7 +329,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/${userId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .send(validUserStsDataforUpdate)
+        .send(generateUserStatusData("ACTIVE", 1668215609000, 1668215609000))
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -363,7 +362,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
-        .send(invalidUserStsDataforUpdate)
+        .send(generateUserStatusData("IN_OFFICE", 1668215609000, 1668215609000))
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -385,7 +384,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(initialDataForFutureStatus);
+        .send(generateUserStatusData("ACTIVE", 1668215609000, 1668215609000));
       expect(response1).to.have.status(201);
       expect(response1.body.data.currentStatus.state).to.equal("ACTIVE");
 
@@ -394,7 +393,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(finalDataForFutureStatus);
+        .send(generateUserStatusData("OOO", 1668215609000, 1669228200000, 1669573800000, "Vacation Trip"));
       expect(response2).to.have.status(200);
       expect(response2.body.message).to.equal("User Status updated successfully.");
       expect(response2.body.data).to.have.own.property("futureStatus");
@@ -407,7 +406,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(updatedOooDataForFutureStatus);
+        .send(generateUserStatusData("OOO", 1668215609000, 1669833000000, 1670178600000, "New plan for vacation Trip"));
       expect(response3).to.have.status(200);
       expect(response3.body.message).to.equal("User Status updated successfully.");
       expect(response3.body.data).to.have.own.property("futureStatus");
@@ -434,7 +433,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(finalDataForFutureStatus);
+        .send(generateUserStatusData("OOO", 1668215609000, 1669228200000, 1669573800000, "Vacation Trip"));
       expect(response1).to.have.status(201);
       expect(response1.body.message).to.equal("User Status created successfully.");
       expect(response1.body.data).to.have.own.property("futureStatus");
@@ -447,7 +446,9 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(oooStatusDataFromToday);
+        .send(
+          generateUserStatusData("OOO", 1668191400000, 1668191400000, 1668623400000, "Changed plan for vacation Trip")
+        );
       expect(response2).to.have.status(200);
       expect(response2.body.message).to.equal("User Status updated successfully.");
       expect(response2.body.data).to.have.own.property("currentStatus");
