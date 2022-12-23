@@ -49,7 +49,7 @@ module.exports = {
   },
 
   cors: {
-    allowedOrigins: "http://localhost:3000", // Allow realdevsquad.com, *.realdevsquad.com
+    allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)/, // Allow realdevsquad.com, *.realdevsquad.com
   },
 
   userToken: {
