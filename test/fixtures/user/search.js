@@ -4,5 +4,5 @@
  */
 
 module.exports = () => {
-  return ["an", "AN", 23, "", "mu"];
+  return ["an", "AN", "", "mu"];
 };

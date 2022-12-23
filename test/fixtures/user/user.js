@@ -166,17 +166,5 @@ module.exports = () => {
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
     },
-    {
-      username: "23ankur",
-      first_name: "Ankur",
-      last_name: "Narkhede",
-      yoe: 0,
-      img: "./img.png",
-      linkedin_id: "ankurnarkhede",
-      github_id: "ankur1234",
-      github_display_name: "ankur-xyz",
-      phone: "1234567890",
-      email: "abc@gmail.com",
-    },
   ];
 };

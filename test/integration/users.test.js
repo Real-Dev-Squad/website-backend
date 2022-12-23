@@ -112,6 +112,7 @@ describe("Users", function () {
           if (err) {
             return done(err);
           }
+
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Users returned successfully!");
@@ -396,7 +397,7 @@ describe("Users", function () {
           return done();
         });
     });
-    it("Should search for string value of number in username prefix and return successfully", function (done) {
+    it("Should return all users for empty value of search param", function (done) {
       chai
         .request(app)
         .get("/users")
@@ -414,29 +415,11 @@ describe("Users", function () {
           return done();
         });
     });
-    it("Should return all users for empty value of search param", function (done) {
-      chai
-        .request(app)
-        .get("/users")
-        .query({ search: searchParamValues[3] })
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Users returned successfully!");
-          expect(res.body.users).to.be.a("array");
-
-          return done();
-        });
-    });
     it("Should return an empty array with response status code 200", function (done) {
       chai
         .request(app)
         .get("/users")
-        .query({ search: searchParamValues[4] })
+        .query({ search: searchParamValues[3] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
