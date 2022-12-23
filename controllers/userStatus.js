@@ -75,6 +75,7 @@ const getAllUserStatus = async (req, res) => {
       const result = await fetchUser({ userId: status.userId });
       status.full_name = `${result.user.first_name} ${result.user.last_name}`;
       status.picture = result.user.picture;
+      status.username = result.user.username;
     }
     return res.json({
       message: "All User Status found successfully.",
