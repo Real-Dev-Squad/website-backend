@@ -93,10 +93,18 @@ function getLowestLevelSkill(skills) {
   return { skill, level };
 }
 
+const addSearchDbQuery = (dbQuery, requestQuery) => {
+  return dbQuery
+    .orderBy("username")
+    .startAt(requestQuery.search.toLowerCase().trim())
+    .endAt(requestQuery.search.toLowerCase().trim() + "\uf8ff");
+};
+
 module.exports = {
   getUserId,
   getUsername,
   getParticipantUserIds,
   getParticipantUsernames,
   getLowestLevelSkill,
+  addSearchDbQuery,
 };

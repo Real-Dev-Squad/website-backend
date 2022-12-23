@@ -351,47 +351,20 @@ describe("Users", function () {
   });
 
   describe("GET /users?search", function () {
-    const userSearchParamsData = [
-      {
-        username: "ankur",
-        first_name: "Ankur",
-        last_name: "Narkhede",
-        yoe: 0,
-        img: "./img.png",
-        linkedin_id: "ankurnarkhede",
-        github_id: "ankur1234",
-        github_display_name: "ankur-xyz",
-        phone: "1234567890",
-        email: "abc@gmail.com",
-      },
-      {
-        username: "23ankur",
-        first_name: "Ankur",
-        last_name: "Narkhede",
-        yoe: 0,
-        img: "./img.png",
-        linkedin_id: "ankurnarkhede",
-        github_id: "ankur1234",
-        github_display_name: "ankur-xyz",
-        phone: "1234567890",
-        email: "abc@gmail.com",
-      },
-    ];
-
     beforeEach(async function () {
-      await addOrUpdate(userSearchParamsData[0]);
-      await addOrUpdate(userSearchParamsData[1]);
+      await addOrUpdate(userData[0]);
+      await addOrUpdate(userData[7]);
     });
 
     afterEach(async function () {
       await cleanDb();
     });
 
-    it(`${searchParamValues[0].desc}`, function (done) {
+    it("Should return users successfully", function (done) {
       chai
         .request(app)
         .get("/users")
-        .query({ search: searchParamValues[0].value })
+        .query({ search: searchParamValues[0] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -405,11 +378,11 @@ describe("Users", function () {
           return done();
         });
     });
-    it(`${searchParamValues[1].desc}`, function (done) {
+    it("Should return users successfully converting search param value to small case", function (done) {
       chai
         .request(app)
         .get("/users")
-        .query({ search: searchParamValues[1].value })
+        .query({ search: searchParamValues[1] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -423,11 +396,11 @@ describe("Users", function () {
           return done();
         });
     });
-    it(`${searchParamValues[2].desc}`, function (done) {
+    it("Should search for string value of number in username prefix and return successfully", function (done) {
       chai
         .request(app)
         .get("/users")
-        .query({ search: searchParamValues[2].value })
+        .query({ search: searchParamValues[2] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -441,11 +414,11 @@ describe("Users", function () {
           return done();
         });
     });
-    it(`${searchParamValues[3].desc}`, function (done) {
+    it("Should return all users for empty value of search param", function (done) {
       chai
         .request(app)
         .get("/users")
-        .query({ search: searchParamValues[3].value })
+        .query({ search: searchParamValues[3] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -459,19 +432,19 @@ describe("Users", function () {
           return done();
         });
     });
-    it(`${searchParamValues[4].desc}`, function (done) {
+    it("Should return an empty array with response status code 200", function (done) {
       chai
         .request(app)
         .get("/users")
-        .query({ search: searchParamValues[4].value })
+        .query({ search: searchParamValues[4] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(404);
+          expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User doesn't exist");
+          expect(res.body.message).to.equal("Users returned successfully!");
 
           return done();
         });
