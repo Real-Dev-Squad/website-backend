@@ -79,74 +79,74 @@ const getAllUserStatus = async (query) => {
 
 /**
  * @param userId { String }: Id of the User
- * @param updatedData { Object }: Data to be Updated
+ * @param newStatusData { Object }: Data to be Updated
  * @returns Promise<userStatusModel|Object>
  */
 
-const updateUserStatus = async (userId, updatedData) => {
+const updateUserStatus = async (userId, newStatusData) => {
   try {
     const userStatusDocs = await userStatusModel.where("userId", "==", userId).limit(1).get();
     const [userStatusDoc] = userStatusDocs.docs;
     if (userStatusDoc) {
       const docId = userStatusDoc.id;
-      const userData = userStatusDoc.data();
-      if (Object.keys(updatedData).includes("currentStatus")) {
-        const updatedUserState = updatedData.currentStatus.state;
-        const isUserOOO = updatedUserState === userState.OOO;
-        const isUserActive = updatedUserState === userState.ACTIVE;
-        const isUserIdle = updatedUserState === userState.IDLE;
-        const isUserCurrentlyOOO = userData.currentStatus?.state === userState.OOO;
+      const userStatusData = userStatusDoc.data();
+      if (Object.keys(newStatusData).includes("currentStatus")) {
+        const newUserState = newStatusData.currentStatus.state;
+        const isNewStateOOO = newUserState === userState.OOO;
+        const isNewStateActive = newUserState === userState.ACTIVE;
+        const isNewStateIdle = newUserState === userState.IDLE;
+        const isCurrentStateOOO = userStatusData.currentStatus?.state === userState.OOO;
+        const isFutureStateActiveOrIdle =
+          userStatusData.futureStatus?.state === userState.ACTIVE ||
+          userStatusData.futureStatus?.state === userState.IDLE;
 
-        const doesUserHasFutureActiveOrIdleStatus =
-          userData.futureStatus?.state === userState.ACTIVE || userData.futureStatus?.state === userState.IDLE;
-        if (isUserCurrentlyOOO && doesUserHasFutureActiveOrIdleStatus) {
-          if (isUserActive || isUserIdle) {
-            updatedData.futureStatus = {};
+        if (isCurrentStateOOO && isFutureStateActiveOrIdle) {
+          if (isNewStateActive || isNewStateIdle) {
+            newStatusData.futureStatus = {};
           }
         }
 
-        if (!isUserOOO) {
-          updatedData.currentStatus.until = "";
+        if (!isNewStateOOO) {
+          newStatusData.currentStatus.until = "";
         }
-        if (isUserActive) {
-          updatedData.currentStatus.message = "";
+        if (isNewStateActive) {
+          newStatusData.currentStatus.message = "";
         }
-        if (isUserOOO) {
+        if (isNewStateOOO) {
           const tommorow = getTommorowTimeStamp();
-          if (updatedData.currentStatus.from >= tommorow) {
-            const futureStatus = { ...updatedData.currentStatus };
-            delete updatedData.currentStatus;
-            updatedData.futureStatus = futureStatus;
+          if (newStatusData.currentStatus.from >= tommorow) {
+            newStatusData.futureStatus = { ...newStatusData.currentStatus };
+            delete newStatusData.currentStatus;
           } else {
-            updatedData.futureStatus = {};
+            newStatusData.futureStatus = {};
           }
         }
       }
-      await userStatusModel.doc(docId).update(updatedData);
-      return { id: docId, userStatusExists: true, data: updatedData };
+      await userStatusModel.doc(docId).update(newStatusData);
+      return { id: docId, userStatusExists: true, data: newStatusData };
     } else {
       // the user doc doesnt exist meaning we need to create one
-      if (Object.keys(updatedData).includes("currentStatus")) {
-        const updatedUserState = updatedData.currentStatus.state;
-        const isUserOOO = updatedUserState === userState.OOO;
-        const isUserActive = updatedUserState === userState.ACTIVE;
-        if (!isUserOOO) {
-          updatedData.currentStatus.until = "";
+      if (Object.keys(newStatusData).includes("currentStatus")) {
+        const newUserState = newStatusData.currentStatus.state;
+        const isNewStateOOO = newUserState === userState.OOO;
+        const isNewStateActive = newUserState === userState.ACTIVE;
+        if (!isNewStateOOO) {
+          newStatusData.currentStatus.until = "";
         }
-        if (isUserActive) {
-          updatedData.currentStatus.message = "";
+        if (isNewStateActive) {
+          newStatusData.currentStatus.message = "";
         }
-        if (isUserOOO) {
+        if (isNewStateOOO) {
           const tommorow = getTommorowTimeStamp();
-          if (updatedData.currentStatus.from >= tommorow) {
-            const futureStatus = { ...updatedData.currentStatus };
-            delete updatedData.currentStatus;
-            updatedData.futureStatus = futureStatus;
+          if (newStatusData.currentStatus.from >= tommorow) {
+            const futureStatus = { ...newStatusData.currentStatus };
+            delete newStatusData.currentStatus;
+            newStatusData.futureStatus = futureStatus;
           }
         }
       }
-      const { id } = await userStatusModel.add({ userId, ...updatedData });
-      return { id, userStatusExists: false, data: updatedData };
+      const { id } = await userStatusModel.add({ userId, ...newStatusData });
+      return { id, userStatusExists: false, data: newStatusData };
     }
   } catch (error) {
     logger.error(`error in updating User Status Document ${error}`);
@@ -156,7 +156,7 @@ const updateUserStatus = async (userId, updatedData) => {
 
 /**
  * @param userId { String }: Id of the User
- * @param updatedData { Object }: Data to be Updated
+ * @param newStatusData { Object }: Data to be Updated
  * @returns Promise<userStatusModel|Object>
  */
 
@@ -168,19 +168,19 @@ const updateAllUserStatus = async () => {
     userStatusDocs.forEach(async (document) => {
       const doc = document.data();
       const docRef = document.ref;
-      const updatedData = { ...doc };
+      const newStatusData = { ...doc };
       let toUpdate = false;
       const { futureStatus, currentStatus } = doc;
       const { state: futureState } = futureStatus;
       if (futureState === "ACTIVE" || futureState === "IDLE") {
         if (today >= futureStatus.from) {
-          updatedData.currentStatus = { ...futureStatus, until: "", updatedAt: today };
-          updatedData.futureStatus = {};
+          newStatusData.currentStatus = { ...futureStatus, until: "", updatedAt: today };
+          newStatusData.futureStatus = {};
           toUpdate = !toUpdate;
         }
       } else {
         if (today > futureStatus.until) {
-          updatedData.futureStatus = {};
+          newStatusData.futureStatus = {};
           toUpdate = !toUpdate;
         } else if (today <= doc.futureStatus.until && today >= doc.futureStatus.from) {
           let newCurrentStatus = {};
@@ -189,20 +189,25 @@ const updateAllUserStatus = async () => {
           if (currentStatus?.state) {
             newFutureStatus = { ...currentStatus, from: futureStatus.until, updatedAt: today };
           }
-          updatedData.currentStatus = newCurrentStatus;
-          updatedData.futureStatus = newFutureStatus;
+          newStatusData.currentStatus = newCurrentStatus;
+          newStatusData.futureStatus = newFutureStatus;
           toUpdate = !toUpdate;
         }
       }
       if (toUpdate) {
-        batch.set(docRef, updatedData);
+        batch.set(docRef, newStatusData);
       }
     });
+    if (batch._ops.length > 100) {
+      logger.info(
+        `Warning: More than 100 User Status documents to update. The max limit permissible is 500. Refer https://github.com/Real-Dev-Squad/website-backend/issues/890 for more details.`
+      );
+    }
     await batch.commit();
-    return { status: "All User Documents updated Successfully." };
+    return { status: 204, message: "User Status updated Successfully." };
   } catch (error) {
     logger.error(`error in updating User Status Documents ${error}`);
-    throw error;
+    return { status: 500, message: "User Status couldn't be updated Successfully." };
   }
 };
 

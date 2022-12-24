@@ -13,7 +13,7 @@ const superUser = userData[4];
 const {
   userStsDataForNewUser,
   userStsDataForOooState,
-  oooUserStsDataForShortDuration,
+  oooStsDataForShortDuration,
   generateUserStatusData,
 } = require("../fixtures/userStatus/userStatus");
 
@@ -313,7 +313,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(oooUserStsDataForShortDuration)
+        .send(oooStsDataForShortDuration)
         .end((err, res) => {
           if (err) {
             return done(err);
