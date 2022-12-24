@@ -230,7 +230,6 @@ describe("UserStatus", function () {
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("ACTIVE", 1669401000000, 1669401000000));
-      console.log({response5});
       expect(response5).to.have.status(200);
       expect(response5.body.message).to.equal("User Status updated successfully.");
       expect(response5.body.data).to.have.own.property("currentStatus");
@@ -468,7 +467,6 @@ describe("UserStatus", function () {
         .send(
           generateUserStatusData("OOO", 1668191400000, 1668191400000, 1668623400000, "Changed plan for vacation Trip")
         );
-        console.log({response2});
       expect(response2).to.have.status(200);
       expect(response2.body.message).to.equal("User Status updated successfully.");
       expect(response2.body.data).to.have.own.property("currentStatus");
