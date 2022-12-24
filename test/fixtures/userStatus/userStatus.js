@@ -12,7 +12,7 @@ const userStsDataForNewUser = {
   },
 };
 
-const userStsDataForOooStateForShortDuration = {
+const oooStsDataForShortDuration = {
   currentStatus: {
     message: "",
     state: "OOO",
@@ -54,6 +54,6 @@ const generateUserStatusData = (state, updatedAt, from, until = "", message = ""
 module.exports = {
   userStsDataForNewUser,
   userStsDataForOooState,
-  userStsDataForOooStateForShortDuration,
+  oooStsDataForShortDuration,
   generateUserStatusData,
 };
