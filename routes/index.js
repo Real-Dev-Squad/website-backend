@@ -20,7 +20,7 @@ app.use("/profileDiffs", require("./profileDiffs.js"));
 app.use("/wallet", require("./wallets.js"));
 app.use("/tags", require("./tags.js"));
 app.use("/levels", require("./levels.js"));
-
 app.use("/items", require("./items.js"));
+app.use("/cache", require("./cloudflareCache.js"));
 
 module.exports = app;

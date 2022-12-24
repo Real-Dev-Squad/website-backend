@@ -43,9 +43,22 @@ const getTimeInSecondAfter = ({ timestamp = Date.now(), days = 0, hours = 0, min
   return parseInt(timeInMilliseconds / 1000);
 };
 
+/**
+ * Returns time in seconds of timestamp before given duration
+ * @param timestamp {integer} : base time in milliseconds
+ * @param hours {integer} : before hours
+ * @returns {integer} : in seconds
+ */
+const getBeforeHourTime = (timestamp, hours = 0) => {
+  const currentTime = timestamp;
+  currentTime._seconds -= hours * 60 * 60;
+  return currentTime;
+};
+
 module.exports = {
   convertDaysToMilliseconds,
   convertHoursToMilliseconds,
   convertMinutesToMilliseconds,
   getTimeInSecondAfter,
+  getBeforeHourTime,
 };

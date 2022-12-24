@@ -1,6 +1,8 @@
 const firestore = require("../utils/firestore");
+const { getBeforeHourTime } = require("../utils/time");
 const logsModel = firestore.collection("logs");
 const admin = require("firebase-admin");
+const { logType } = require("../constants/logs");
 
 /**
  * Adds log
@@ -66,7 +68,64 @@ const fetchLogs = async (query, param) => {
   }
 };
 
+/**
+ * Fetches purged cache logs
+ *
+ * @param userId { String }: Unique ID of the User
+ */
+const fetchCacheLogs = async (id) => {
+  try {
+    const logsSnapshot = await logsModel
+      .where("type", "==", logType.CLOUDFLARE_CACHE_PURGED)
+      .where("timestamp", ">=", getBeforeHourTime(admin.firestore.Timestamp.fromDate(new Date()), 24))
+      .where("meta.userId", "==", id)
+      .get();
+
+    const logs = [];
+    logsSnapshot.forEach((doc) => {
+      const { timestamp } = doc.data();
+      if (logs.length < 3) {
+        logs.push({ timestamp });
+      }
+    });
+
+    return logs;
+  } catch (err) {
+    logger.error("Error in fetching cache logs", err);
+    throw err;
+  }
+};
+
+/**
+ * Fetches last purged cache log added
+ *
+ * @param userId { String }: Unique ID of the User
+ */
+const fetchLastAddedCacheLog = async (id) => {
+  try {
+    const lastLogSnapshot = await logsModel
+      .where("type", "==", logType.CLOUDFLARE_CACHE_PURGED)
+      .where("meta.userId", "==", id)
+      .limit(1)
+      .orderBy("timestamp", "desc")
+      .get();
+
+    const logs = [];
+    lastLogSnapshot.forEach((doc) => {
+      const { timestamp } = doc.data();
+      logs.push({ timestamp });
+    });
+
+    return logs;
+  } catch (err) {
+    logger.error("Error in fetching purged cache logs", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addLog,
   fetchLogs,
+  fetchCacheLogs,
+  fetchLastAddedCacheLog,
 };
