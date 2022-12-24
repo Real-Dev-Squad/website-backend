@@ -1,18 +1,16 @@
 const Joi = require("joi");
 const { userState } = require("../../constants/userStatus");
-const { getTodayTimeStamp } = require("../../utils/userStatus");
 const threeDaysInMilliseconds = 172800000;
 
 const validateUpdatedUserStatus = async (req, res, next) => {
-  const todayTimeStamp = getTodayTimeStamp();
   const schema = Joi.object({
     currentStatus: Joi.object().keys({
       state: Joi.string().trim().valid(userState.IDLE, userState.ACTIVE, userState.OOO),
       updatedAt: Joi.number().required(),
-      from: Joi.number().min(todayTimeStamp).required(),
+      from: Joi.number().required(),
       until: Joi.any().when("state", {
         is: userState.OOO,
-        then: Joi.number().min(todayTimeStamp).required(),
+        then: Joi.number().required(),
         otherwise: Joi.optional(),
       }),
       message: Joi.when("state", {
