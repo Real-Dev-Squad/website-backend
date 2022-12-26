@@ -24,22 +24,32 @@ const createExtensionRequest = async (req, res, next) => {
   }
 };
 
-const updateExtensionRequest = async (req, res, next) => {
+const updateExtensionRequestStatus = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
     .keys({
-      taskId: joi.string().optional(),
-      title: joi.string().optional(),
-      assignee: joi.string().optional(),
-      oldEndsOn: joi.number().optional(),
-      newEndsOn: joi.number().optional(),
-      reason: joi.string().optional(),
-      status: joi
-        .string()
-        .valid(...Object.values(ETA_EXTENSION_REQUEST_STATUS))
-        .optional(),
+      status: joi.string().valid(ETA_EXTENSION_REQUEST_STATUS.APPROVED, ETA_EXTENSION_REQUEST_STATUS.DENIED).required(),
     });
+
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error(`Error validating updateExtensionRequest payload : ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
+const updateExtensionRequest = async (req, res, next) => {
+  const schema = joi.object().strict().keys({
+    taskId: joi.string().optional(),
+    title: joi.string().optional(),
+    assignee: joi.string().optional(),
+    oldEndsOn: joi.number().optional(),
+    newEndsOn: joi.number().optional(),
+    reason: joi.string().optional(),
+  });
 
   try {
     await schema.validateAsync(req.body);
@@ -53,4 +63,5 @@ const updateExtensionRequest = async (req, res, next) => {
 module.exports = {
   createExtensionRequest,
   updateExtensionRequest,
+  updateExtensionRequestStatus,
 };

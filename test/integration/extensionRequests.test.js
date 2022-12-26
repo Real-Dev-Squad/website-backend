@@ -463,7 +463,91 @@ describe("Extension Requests", function () {
     });
   });
 
-  describe("PATCH /extensionRequest", function () {
+  describe("PATCH /extensionRequest/:id/status", function () {
+    it("Should return 401 if someone other than superuser logged in", function (done) {
+      chai
+        .request(app)
+        .patch(`/extensionRequests/${extensionRequestId1}/status`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "You are not authorized for this action.",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should update the extensionRequest status for the given extensionRequestId", function (done) {
+      chai
+        .request(app)
+        .patch(`/extensionRequests/${extensionRequestId1}/status`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "APPROVED",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Extension request APPROVED succesfully");
+          expect(res.body.extensionLog.type).to.equal("extensionRequest");
+          expect(res.body.extensionLog.body.subType).to.equal("update");
+          expect(res.body.extensionLog.body.new.status).to.equal("APPROVED");
+
+          chai
+            .request(app)
+            .get(`/tasks/${taskId3}/details`)
+            .set("cookie", `${cookieName}=${superUserJwt}`)
+            .end((err, res) => {
+              if (err) {
+                return done(err);
+              }
+              expect(res).to.have.status(200);
+              expect(res.body).to.be.a("object");
+              expect(res.body.message).to.equal("task returned successfully");
+              expect(res.body.taskData.endsOn).to.equal(1235);
+
+              return done();
+            });
+
+          return null;
+        });
+    });
+
+    it('Should return 400 if payload has anything other than "status" to update extensionRequest', function (done) {
+      chai
+        .request(app)
+        .patch(`/extensionRequests/${extensionRequestId1}/status`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          title: "Hello World",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal('"status" is required');
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /extensionRequest/:id", function () {
     it("Should return 401 if someone other than superuser logged in", function (done) {
       chai
         .request(app)
@@ -500,6 +584,46 @@ describe("Extension Requests", function () {
           }
 
           expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("Should return 400 if assignee of the extensionrequest is upated with a different user", function (done) {
+      chai
+        .request(app)
+        .patch(`/extensionRequests/${extensionRequestId1}`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          assignee: user.id,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("This task is assigned to some different user");
+          return done();
+        });
+    });
+
+    it('Should return 400 if payload has "status" to update extensionRequest', function (done) {
+      chai
+        .request(app)
+        .patch(`/extensionRequests/${extensionRequestId1}`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "APPROVED",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal('"status" is not allowed');
           return done();
         });
     });

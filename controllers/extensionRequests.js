@@ -2,6 +2,7 @@ const extensionRequestsQuery = require("../models/extensionRequests");
 const { addLog } = require("../models/logs");
 const tasks = require("../models/tasks");
 const { getUsername } = require("../utils/users");
+const { ETA_EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
 
 /**
  * Create ETA extension Request
@@ -139,8 +140,83 @@ const updateExtensionRequest = async (req, res) => {
       return res.boom.notFound("Extension Request not found");
     }
 
+    if (req.body.assignee) {
+      const { taskData: task } = await tasks.fetchTask(extensionRequest.extensionRequestData.taskId);
+      if (task.assignee !== (await getUsername(req.body.assignee))) {
+        return res.boom.badRequest("This task is assigned to some different user");
+      }
+    }
+
     await extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id);
     return res.status(204).send();
+  } catch (err) {
+    logger.error(`Error while updating extension request: ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
+/**
+ * Updates the Extension Request
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const updateExtensionRequestStatus = async (req, res) => {
+  try {
+    const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
+    if (!extensionRequest.extensionRequestData) {
+      return res.boom.notFound("Extension Request not found");
+    }
+    const { status: extensionStatus } = req.body;
+
+    const extensionLog = {
+      type: "extensionRequest",
+      meta: {
+        taskId: extensionRequest.extensionRequestData.taskId,
+        username: req.userData.username,
+        userId: req.userData.id,
+      },
+      body: {
+        subType: "update",
+        new: {
+          status: extensionStatus,
+        },
+      },
+    };
+
+    const promises = [
+      extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id),
+      addLog(extensionLog.type, extensionLog.meta, extensionLog.body),
+    ];
+
+    if (extensionStatus === ETA_EXTENSION_REQUEST_STATUS.APPROVED) {
+      const taskLog = {
+        type: "task",
+        meta: {
+          taskId: extensionRequest.extensionRequestData.taskId,
+          username: req.userData.username,
+          userId: req.userData.id,
+        },
+        body: {
+          subType: "update",
+          new: {
+            endsOn: extensionRequest.extensionRequestData.newEndsOn,
+          },
+        },
+      };
+      promises.push(
+        tasks.updateTask(
+          { endsOn: extensionRequest.extensionRequestData.newEndsOn },
+          extensionRequest.extensionRequestData.taskId
+        )
+      );
+      promises.push(addLog(taskLog.type, taskLog.meta, taskLog.body));
+    }
+
+    const [, extensionLogResult] = await Promise.all(promises);
+    extensionLog.id = extensionLogResult.id;
+
+    return res.json({ message: `Extension request ${extensionStatus} succesfully`, extensionLog });
   } catch (err) {
     logger.error(`Error while updating extension request: ${err}`);
     return res.boom.badImplementation("An internal server error occurred");
@@ -153,4 +229,5 @@ module.exports = {
   getExtensionRequest,
   getSelfExtensionRequests,
   updateExtensionRequest,
+  updateExtensionRequestStatus,
 };
