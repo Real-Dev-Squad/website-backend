@@ -11,9 +11,9 @@ const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
 const superUser = userData[4];
 const {
-  userStsDataForNewUser,
-  userStsDataForOooState,
-  oooStsDataForShortDuration,
+  userStatusDataForNewUser,
+  userStatusDataForOooState,
+  oooStatusDataForShortDuration,
   generateUserStatusData,
 } = require("../fixtures/userStatus/userStatus");
 
@@ -34,7 +34,7 @@ describe("UserStatus", function () {
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-    await updateUserStatus(userId, userStsDataForNewUser);
+    await updateUserStatus(userId, userStatusDataForNewUser);
   });
 
   afterEach(async function () {
@@ -261,7 +261,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(userStsDataForOooState)
+        .send(userStatusDataForOooState)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -279,7 +279,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
-        .send(userStsDataForOooState)
+        .send(userStatusDataForOooState)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -313,7 +313,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(oooStsDataForShortDuration)
+        .send(oooStatusDataForShortDuration)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -345,7 +345,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=""`)
-        .send(userStsDataForOooState)
+        .send(userStatusDataForOooState)
         .end((err, res) => {
           if (err) {
             return done(err);

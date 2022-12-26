@@ -1,4 +1,4 @@
-const userStsDataForNewUser = {
+const userStatusDataForNewUser = {
   currentStatus: {
     until: 1669256009000,
     message: "Bad Health",
@@ -12,7 +12,7 @@ const userStsDataForNewUser = {
   },
 };
 
-const oooStsDataForShortDuration = {
+const oooStatusDataForShortDuration = {
   currentStatus: {
     message: "",
     state: "OOO",
@@ -25,7 +25,7 @@ const oooStsDataForShortDuration = {
     committed: 40,
   },
 };
-const userStsDataForOooState = {
+const userStatusDataForOooState = {
   currentStatus: {
     until: 1669256009000,
     message: "Bad Health",
@@ -52,8 +52,8 @@ const generateUserStatusData = (state, updatedAt, from, until = "", message = ""
 };
 
 module.exports = {
-  userStsDataForNewUser,
-  userStsDataForOooState,
-  oooStsDataForShortDuration,
+  userStatusDataForNewUser,
+  userStatusDataForOooState,
+  oooStatusDataForShortDuration,
   generateUserStatusData,
 };
