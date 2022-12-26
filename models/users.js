@@ -8,7 +8,7 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
-const itemModel = firestore.collection("items");
+const itemModel = firestore.collection("itemTags");
 
 /**
  * Adds or updates the user data
@@ -80,6 +80,39 @@ const getJoinData = async (userId) => {
     return userData;
   } catch (err) {
     logger.log("Could not get", err);
+    throw err;
+  }
+};
+
+/**
+ * Fetches users with the given skill
+ *
+ * @param skill { string }: Skill
+ * @return @return {Promise<users>}
+ */
+
+const getSuggestedUsers = async (skill) => {
+  try {
+    const data = await itemModel.where("itemType", "==", "USER").where("tagId", "==", skill).get();
+    let users = [];
+
+    const dataSet = new Set();
+
+    if (!data.empty) {
+      data.forEach((doc) => {
+        const docUserId = doc.data().itemId;
+        if (!dataSet.has(docUserId)) {
+          dataSet.add(docUserId);
+        }
+      });
+      const usersId = Array.from(dataSet);
+      const usersArray = usersId.map((userId) => fetchUser({ userId }));
+      users = await Promise.all(usersArray);
+    }
+
+    return { users };
+  } catch (err) {
+    logger.error("Error in getting suggested user", err);
     throw err;
   }
 };
@@ -218,7 +251,7 @@ const fetchUserImage = async (users) => {
 
 const fetchUserSkills = async (id) => {
   try {
-    const data = await itemModel.where("itemid", "==", id).where("tagtype", "==", "SKILL").get();
+    const data = await itemModel.where("itemId", "==", id).where("tagType", "==", "SKILL").get();
     const skills = [];
 
     if (!data.empty) {
@@ -243,5 +276,6 @@ module.exports = {
   fetchUserImage,
   addJoinData,
   getJoinData,
+  getSuggestedUsers,
   fetchUserSkills,
 };

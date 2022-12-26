@@ -35,10 +35,24 @@ const fetchLogs = async (query, param) => {
     let call = logsModel.where("type", "==", param);
     Object.keys(query).forEach((key) => {
       // eslint-disable-next-line security/detect-object-injection
-      call = call.where(key, "==", query[key]);
+      if (key !== "limit" && key !== "lastDocId") {
+        call = call.where(key, "==", query[key]);
+      }
     });
 
-    const snapshot = await call.get();
+    const { limit, lastDocId } = query;
+    let lastDoc;
+    const limitDocuments = Number(limit);
+
+    if (lastDocId) {
+      lastDoc = await logsModel.doc(lastDocId).get();
+    }
+
+    const logsSnapshotQuery = call.orderBy("timestamp", "desc").startAfter(lastDoc ?? "");
+    const snapshot = limit
+      ? await logsSnapshotQuery.limit(limitDocuments).get()
+      : await logsSnapshotQuery.limit(10).get();
+
     const logs = [];
     snapshot.forEach((doc) => {
       logs.push({
