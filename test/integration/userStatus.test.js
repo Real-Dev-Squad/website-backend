@@ -140,6 +140,10 @@ describe("UserStatus", function () {
       expect(response2.body.message).to.equal("User Status updated successfully.");
       expect(response2.body.data).to.have.own.property("futureStatus");
       expect(response2.body.data.futureStatus.state).to.equal("OOO");
+      expect(response2.body.data.futureStatus.message).to.equal("Vacation Trip");
+      expect(response2.body.data.futureStatus.from).to.equal(1669228200000);
+      expect(response2.body.data.futureStatus.until).to.equal(1669573800000);
+      expect(response2.body.data.futureStatus.updatedAt).to.equal(1668215609000);
 
       // Mocking date to be 26th Nov 2022
       clock.setSystemTime(new Date(2022, 10, 26).getTime());
