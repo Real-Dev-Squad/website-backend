@@ -135,7 +135,15 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("OOO", 1668215609000, 1669228200000, 1669573800000, "Vacation Trip"));
+        .send(
+          generateUserStatusData(
+            "OOO",
+            new Date(2022, 10, 12).getTime(),
+            new Date(2022, 10, 24).getTime(),
+            new Date(2022, 10, 28).getTime(),
+            "Vacation Trip"
+          )
+        );
       expect(response2).to.have.status(200);
       expect(response2.body.message).to.equal("User Status updated successfully.");
       expect(response2.body.data).to.have.own.property("futureStatus");
@@ -143,7 +151,7 @@ describe("UserStatus", function () {
       expect(response2.body.data.futureStatus.message).to.equal("Vacation Trip");
       expect(response2.body.data.futureStatus.from).to.equal(1669228200000);
       expect(response2.body.data.futureStatus.until).to.equal(1669573800000);
-      expect(response2.body.data.futureStatus.updatedAt).to.equal(1668215609000);
+      expect(response2.body.data.futureStatus.updatedAt).to.equal(1668191400000);
 
       // Mocking date to be 26th Nov 2022
       clock.setSystemTime(new Date(2022, 10, 26).getTime());
