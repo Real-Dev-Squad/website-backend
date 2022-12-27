@@ -462,7 +462,7 @@ describe("Extension Requests", function () {
     it("Should return 401 if someone other than superuser logged in", function (done) {
       chai
         .request(app)
-        .patch(`/extensionRequests/${extensionRequestId1}`)
+        .get(`/extensionRequests`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
