@@ -2,7 +2,7 @@ const extensionRequestsQuery = require("../models/extensionRequests");
 const { addLog } = require("../models/logs");
 const tasks = require("../models/tasks");
 const { getUsername } = require("../utils/users");
-const { ETA_EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
+const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
 
 /**
  * Create ETA extension Request
@@ -21,7 +21,7 @@ const createTaskExtensionRequest = async (req, res) => {
     const assigneeUsername = await getUsername(extensionBody.assignee);
     const { taskData: task } = await tasks.fetchTask(extensionBody.taskId);
     if (!task) {
-      return res.boom.badRequest("Task with taskId doesn't exist");
+      return res.boom.badRequest("Task with this id or taskid doesn't exist.");
     }
     if (task.assignee !== assigneeUsername) {
       return res.boom.badRequest("This task is assigned to some different user");
@@ -189,7 +189,7 @@ const updateExtensionRequestStatus = async (req, res) => {
       addLog(extensionLog.type, extensionLog.meta, extensionLog.body),
     ];
 
-    if (extensionStatus === ETA_EXTENSION_REQUEST_STATUS.APPROVED) {
+    if (extensionStatus === EXTENSION_REQUEST_STATUS.APPROVED) {
       const taskLog = {
         type: "task",
         meta: {

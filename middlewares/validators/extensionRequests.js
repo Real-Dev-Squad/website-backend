@@ -1,5 +1,5 @@
 const joi = require("joi");
-const { ETA_EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests");
+const { EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests");
 
 const createExtensionRequest = async (req, res, next) => {
   const schema = joi
@@ -12,7 +12,7 @@ const createExtensionRequest = async (req, res, next) => {
       oldEndsOn: joi.number().required(),
       newEndsOn: joi.number().required(),
       reason: joi.string().required(),
-      status: joi.string().valid(ETA_EXTENSION_REQUEST_STATUS.PENDING).required(),
+      status: joi.string().valid(EXTENSION_REQUEST_STATUS.PENDING).required(),
     });
 
   try {
@@ -29,7 +29,7 @@ const updateExtensionRequestStatus = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      status: joi.string().valid(ETA_EXTENSION_REQUEST_STATUS.APPROVED, ETA_EXTENSION_REQUEST_STATUS.DENIED).required(),
+      status: joi.string().valid(EXTENSION_REQUEST_STATUS.APPROVED, EXTENSION_REQUEST_STATUS.DENIED).required(),
     });
 
   try {

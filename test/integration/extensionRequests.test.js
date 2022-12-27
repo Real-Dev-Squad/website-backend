@@ -13,7 +13,7 @@ const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
-const { ETA_EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests");
+const { EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests");
 
 chai.use(chaiHttp);
 
@@ -24,7 +24,7 @@ const superUser = userData[4];
 let appOwnerjwt, superUserJwt, jwt;
 
 describe("Extension Requests", function () {
-  let taskId1, taskId2, taskId3, extensionRequestId1, extensionRequestId2, taskId;
+  let taskId1, taskId2, taskId3, extensionRequestId1, extensionRequestId2;
 
   before(async function () {
     const userId = await addUser(user);
@@ -83,16 +83,13 @@ describe("Extension Requests", function () {
     ];
 
     // Add the active task
-    taskId = (await tasks.updateTask(taskData[0])).taskId;
-    taskId1 = taskId;
+    taskId1 = (await tasks.updateTask(taskData[0])).taskId;
 
     // Add the completed task
-    taskId = (await tasks.updateTask(taskData[1])).taskId;
-    taskId2 = taskId;
+    taskId2 = (await tasks.updateTask(taskData[1])).taskId;
 
     // Add the completed task
-    taskId = (await tasks.updateTask(taskData[2])).taskId;
-    taskId3 = taskId;
+    taskId3 = (await tasks.updateTask(taskData[2])).taskId;
 
     const extensionRequest = {
       taskId: taskId3,
@@ -213,7 +210,7 @@ describe("Extension Requests", function () {
           expect(res.body.message).to.equal("Extension Request created successfully!");
           expect(res.body.extensionRequest).to.be.a("object");
           expect(res.body.extensionRequest.assignee).to.equal(appOwner.id);
-          expect(res.body.extensionRequest.status).to.equal(ETA_EXTENSION_REQUEST_STATUS.PENDING);
+          expect(res.body.extensionRequest.status).to.equal(EXTENSION_REQUEST_STATUS.PENDING);
           return done();
         });
     });
@@ -263,7 +260,7 @@ describe("Extension Requests", function () {
 
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Task with taskId doesn't exist");
+          expect(res.body.message).to.equal("Task with this id or taskid doesn't exist.");
           return done();
         });
     });
@@ -292,7 +289,7 @@ describe("Extension Requests", function () {
           return done();
         });
     });
-    it("Should return fail response if the new ETA is invalid", function (done) {
+    it("Should return fail response if the new ETA falls before old ETA", function (done) {
       chai
         .request(app)
         .post("/extensionRequests")
@@ -461,6 +458,28 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+
+    it("Should return 401 if someone other than superuser logged in", function (done) {
+      chai
+        .request(app)
+        .patch(`/extensionRequests/${extensionRequestId1}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "You are not authorized for this action.",
+          });
+
+          return done();
+        });
+    });
   });
 
   describe("PATCH /extensionRequest/:id/status", function () {
@@ -527,6 +546,27 @@ describe("Extension Requests", function () {
     });
 
     it('Should return 400 if payload has anything other than "status" to update extensionRequest', function (done) {
+      chai
+        .request(app)
+        .patch(`/extensionRequests/${extensionRequestId1}/status`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          title: "Hello World",
+          status: "APPROVED",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal('"title" is not allowed');
+          return done();
+        });
+    });
+
+    it('Should return 400 if payload doesn\'t have "status" to update extensionRequest', function (done) {
       chai
         .request(app)
         .patch(`/extensionRequests/${extensionRequestId1}/status`)
