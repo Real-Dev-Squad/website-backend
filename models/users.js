@@ -9,6 +9,7 @@ const { fetchWallet, createWallet } = require("../models/wallets");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
+
 /**
  * Adds or updates the user data
  *
@@ -169,6 +170,7 @@ const fetchUser = async ({ userId = null, username = null }) => {
     let userData, id;
     if (username) {
       const user = await userModel.where("username", "==", username).limit(1).get();
+
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
