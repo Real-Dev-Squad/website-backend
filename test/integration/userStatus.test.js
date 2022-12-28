@@ -14,6 +14,7 @@ const {
   userStsDataForOooState,
   validUserStsDataforUpdate,
   invalidUserStsDataforUpdate,
+  oooUserStsDataForShortDuration,
 } = require("../fixtures/userStatus/userStatus");
 
 const config = require("config");
@@ -55,6 +56,10 @@ describe("UserStatus", function () {
           expect(res.body.totalUserStatus).to.be.a("number");
           expect(res.body.message).to.equal("All User Status found successfully.");
           expect(res.body.allUserStatus).to.be.a("array");
+          res.body.allUserStatus.forEach((status) => {
+            expect(status).to.have.property("full_name");
+            expect(status).to.have.property("picture");
+          });
           return done();
         });
     });
@@ -149,6 +154,22 @@ describe("UserStatus", function () {
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(validUserStsDataforUpdate)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("User Status updated successfully.");
+          return done();
+        });
+    });
+
+    it("Should update the User Status without reason for short duration", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(oooUserStsDataForShortDuration)
         .end((err, res) => {
           if (err) {
             return done(err);
