@@ -122,18 +122,19 @@ describe("UserStatus", function () {
 
     it("Should update the User Status based on the future dates", async function () {
       // creating Active Status from 12th Nov 2022 (1669401000000)
+      const updatedAtDate = Date.now(); // 12th Nov 2022
+      const fromDate = updatedAtDate + 12 * 24 * 60 * 60 * 1000; // 24th Nov 2022
+      const untilDate = updatedAtDate + 16 * 24 * 60 * 60 * 1000; // 28th Nov 2022
+
       const response1 = await chai
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("ACTIVE", 1669401000000, 1669401000000));
+        .send(generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate));
       expect(response1).to.have.status(201);
       expect(response1.body.data.currentStatus.state).to.equal("ACTIVE");
 
       // Marking OOO Status from 24th Nov 2022 to 28th Nov 2022
-      const updatedAtDate = Date.now(); // 12th Nov 2022
-      const fromDate = updatedAtDate + 12 * 24 * 60 * 60 * 1000; // 24th Nov 2022
-      const untilDate = updatedAtDate + 16 * 24 * 60 * 60 * 1000; // 28th Nov 2022
       const response2 = await chai
         .request(app)
         .patch(`/users/status/self`)
@@ -190,11 +191,15 @@ describe("UserStatus", function () {
 
     it("Should clear the future active/idle Status if during ooo period user mark themselves idle/active", async function () {
       // creating Active Status from 12th Nov 2022
+      const updatedAtDate = Date.now(); // 12th Nov 2022
+      const fromDate = updatedAtDate + 12 * 24 * 60 * 60 * 1000; // 24th Nov 2022
+      const untilDate = updatedAtDate + 16 * 24 * 60 * 60 * 1000; // 28th Nov 2022
+
       const response1 = await chai
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("ACTIVE", 1669401000000, 1669401000000));
+        .send(generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate));
       expect(response1).to.have.status(201);
       expect(response1.body.data.currentStatus.state).to.equal("ACTIVE");
 
@@ -203,7 +208,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("OOO", 1668215609000, 1669228200000, 1669573800000, "Vacation Trip"));
+        .send(generateUserStatusData("OOO", updatedAtDate, fromDate, untilDate, "Vacation Trip"));
       expect(response2).to.have.status(200);
       expect(response2.body.message).to.equal("User Status updated successfully.");
       expect(response2.body.data).to.have.own.property("futureStatus");
@@ -236,7 +241,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("ACTIVE", 1669401000000, 1669401000000));
+        .send(generateUserStatusData("ACTIVE", Date.now(), Date.now()));
       expect(response5).to.have.status(200);
       expect(response5.body.message).to.equal("User Status updated successfully.");
       expect(response5.body.data).to.have.own.property("currentStatus");
@@ -304,7 +309,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(generateUserStatusData("ACTIVE", 1668215609000, 1668215609000))
+        .send(generateUserStatusData("ACTIVE", Date.now(), Date.now()))
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -336,7 +341,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/${userId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .send(generateUserStatusData("ACTIVE", 1668215609000, 1668215609000))
+        .send(generateUserStatusData("ACTIVE", Date.now(), Date.now()))
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -369,7 +374,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("IN_OFFICE", 1668215609000, 1668215609000))
+        .send(generateUserStatusData("IN_OFFICE", Date.now(), Date.now()))
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -387,11 +392,12 @@ describe("UserStatus", function () {
 
     it("Should return error when trying to change OOO without reason for more than 3 days period", function (done) {
       // marking OOO from 18 Nov 2022 (1668709800000) to 23 Nov 2022 (1669141800000)
+      const untilDate = Date.now() + 4 * 24 * 60 * 60 * 1000;
       chai
         .request(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("OOO", 1668191400000, 1668709800000, 1669141800000, ""))
+        .send(generateUserStatusData("OOO", Date.now(), Date.now(), untilDate, ""))
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -409,35 +415,39 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("ACTIVE", 1668215609000, 1668215609000));
+        .send(generateUserStatusData("ACTIVE", Date.now(), Date.now()));
       expect(response1).to.have.status(201);
       expect(response1.body.data.currentStatus.state).to.equal("ACTIVE");
 
       // Initially Marking OOO Status from 24th Nov 2022 to 28th Nov 2022
+      let fromDate = new Date(2022, 10, 24).getTime();
+      let untilDate = new Date(2022, 10, 28).getTime();
       const response2 = await chai
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("OOO", 1668215609000, 1669228200000, 1669573800000, "Vacation Trip"));
+        .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "Vacation Trip"));
       expect(response2).to.have.status(200);
       expect(response2.body.message).to.equal("User Status updated successfully.");
       expect(response2.body.data).to.have.own.property("futureStatus");
       expect(response2.body.data.futureStatus.state).to.equal("OOO");
-      expect(response2.body.data.futureStatus.from).to.equal(1669228200000); // 24th Nov 2022
-      expect(response2.body.data.futureStatus.until).to.equal(1669573800000); // 28th Nov 2022
+      expect(response2.body.data.futureStatus.from).to.equal(fromDate); // 24th Nov 2022
+      expect(response2.body.data.futureStatus.until).to.equal(untilDate); // 28th Nov 2022
 
       // Changing OOO status again from 1st Dec 2022 to 5th Dec 2022
+      fromDate = new Date(2022, 11, 1).getTime();
+      untilDate = new Date(2022, 11, 5).getTime();
       const response3 = await chai
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("OOO", 1668215609000, 1669833000000, 1670178600000, "New plan for vacation Trip"));
+        .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "New plan for vacation Trip"));
       expect(response3).to.have.status(200);
       expect(response3.body.message).to.equal("User Status updated successfully.");
       expect(response3.body.data).to.have.own.property("futureStatus");
       expect(response3.body.data.futureStatus.state).to.equal("OOO");
-      expect(response3.body.data.futureStatus.from).to.equal(1669833000000); // 1st Dec 2022
-      expect(response3.body.data.futureStatus.until).to.equal(1670178600000); // 5th Dec 2022
+      expect(response3.body.data.futureStatus.from).to.equal(fromDate); // 1st Dec 2022
+      expect(response3.body.data.futureStatus.until).to.equal(untilDate); // 5th Dec 2022
 
       // Checking the current status
       const response4 = await chai.request(app).get(`/users/status/self`).set("Cookie", `${cookieName}=${testUserJwt}`);
@@ -448,38 +458,40 @@ describe("UserStatus", function () {
       expect(response4.body.data.currentStatus.state).to.equal("ACTIVE");
       expect(response4.body.data).to.have.property("futureStatus");
       expect(response4.body.data.futureStatus.state).to.equal("OOO");
-      expect(response3.body.data.futureStatus.from).to.equal(1669833000000); // 1st Dec 2022
-      expect(response3.body.data.futureStatus.until).to.equal(1670178600000); // 5th Dec 2022
+      expect(response3.body.data.futureStatus.from).to.equal(fromDate); // 1st Dec 2022
+      expect(response3.body.data.futureStatus.until).to.equal(untilDate); // 5th Dec 2022
     });
 
     it("should clear future OOO Status if current Status is marked as OOO", async function () {
-      // Initially Marking OOO Status from 24th Nov 2022 to 28th Nov 2022. And today is 12th Nov 2022
+      // Initially Marking OOO Status from 24th Nov 2022 to 28th Nov 2022.
+      let fromDate = new Date(2022, 10, 24).getTime(); // 24th Nov 2022
+      let untilDate = new Date(2022, 10, 28).getTime(); // 28th Nov 2022
       const response1 = await chai
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("OOO", 1668215609000, 1669228200000, 1669573800000, "Vacation Trip"));
+        .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "Vacation Trip"));
       expect(response1).to.have.status(201);
       expect(response1.body.message).to.equal("User Status created successfully.");
       expect(response1.body.data).to.have.own.property("futureStatus");
       expect(response1.body.data.futureStatus.state).to.equal("OOO");
-      expect(response1.body.data.futureStatus.from).to.equal(1669228200000); // 24th Nov 2022
-      expect(response1.body.data.futureStatus.until).to.equal(1669573800000); // 28th Nov 2022
+      expect(response1.body.data.futureStatus.from).to.equal(fromDate); // 24th Nov 2022
+      expect(response1.body.data.futureStatus.until).to.equal(untilDate); // 28th Nov 2022
 
       // Changing OOO status from today
+      fromDate = new Date(2022, 10, 12).getTime(); // 17th Nov 2022
+      untilDate = new Date(2022, 10, 17).getTime(); // 17th Nov 2022
       const response2 = await chai
         .request(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(
-          generateUserStatusData("OOO", 1668191400000, 1668191400000, 1668623400000, "Changed plan for vacation Trip")
-        );
+        .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "Changed plan for vacation Trip"));
       expect(response2).to.have.status(200);
       expect(response2.body.message).to.equal("User Status updated successfully.");
       expect(response2.body.data).to.have.own.property("currentStatus");
       expect(response2.body.data.currentStatus.state).to.equal("OOO");
-      expect(response2.body.data.currentStatus.from).to.equal(1668191400000); // 12 Nov 2022
-      expect(response2.body.data.currentStatus.until).to.equal(1668623400000); // 17 Nov 2022
+      expect(response2.body.data.currentStatus.from).to.equal(fromDate); // 12 Nov 2022
+      expect(response2.body.data.currentStatus.until).to.equal(untilDate); // 17 Nov 2022
       expect(response2.body.data.futureStatus.state).to.equal(undefined);
     });
   });
