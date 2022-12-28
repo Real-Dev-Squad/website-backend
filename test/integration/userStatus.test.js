@@ -131,15 +131,9 @@ describe("UserStatus", function () {
       expect(response1.body.data.currentStatus.state).to.equal("ACTIVE");
 
       // Marking OOO Status from 24th Nov 2022 to 28th Nov 2022
-      let fromDate = new Date(2022, 10, 24);
-      fromDate.setHours(0, 0, 0, 0);
-      fromDate = fromDate.getTime();
-      let untilDate = new Date(2022, 10, 28);
-      untilDate.setHours(0, 0, 0, 0);
-      untilDate = untilDate.getTime();
-      let updatedAtDate = new Date(2022, 10, 12);
-      updatedAtDate.setHours(0, 0, 0, 0);
-      updatedAtDate = updatedAtDate.getTime();
+      const updatedAtDate = Date.now();
+      const fromDate = updatedAtDate + 12 * 24 * 60 * 60 * 1000;
+      const untilDate = updatedAtDate + 16 * 24 * 60 * 60 * 1000;
       const response2 = await chai
         .request(app)
         .patch(`/users/status/self`)
