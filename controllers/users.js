@@ -64,9 +64,7 @@ const getUserById = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const allUsers = await userQuery.fetchUsers(req.query);
-    if (!allUsers.length) {
-      return res.boom.notFound("User doesn't exist");
-    }
+
     return res.json({
       message: "Users returned successfully!",
       users: allUsers,

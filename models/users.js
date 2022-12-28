@@ -9,7 +9,6 @@ const { fetchWallet, createWallet } = require("../models/wallets");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
-
 /**
  * Adds or updates the user data
  *
@@ -123,7 +122,7 @@ const getSuggestedUsers = async (skill) => {
  * @return {Promise<userModel|Array>}
  */
 const fetchUsers = async (query) => {
-  const addSearchDbQuery = (dbQuery) => {
+  const appendUsernamePrefixQuery = (dbQuery) => {
     return dbQuery
       .orderBy("username")
       .startAt(query.search.toLowerCase().trim())
@@ -135,7 +134,7 @@ const fetchUsers = async (query) => {
       .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0));
     if (Object.keys(query).length) {
       if (query.search) {
-        dbQuery = addSearchDbQuery(dbQuery);
+        dbQuery = appendUsernamePrefixQuery(dbQuery);
       }
     }
     const snapshot = await dbQuery.get();
