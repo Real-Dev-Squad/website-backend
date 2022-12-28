@@ -138,9 +138,9 @@ describe("UserStatus", function () {
         .send(
           generateUserStatusData(
             "OOO",
-            new Date(2022, 10, 12).getTime(),
-            new Date(2022, 10, 24).getTime(),
-            new Date(2022, 10, 28).getTime(),
+            new Date(2022, 10, 12).setHours(0, 0, 0, 0),
+            new Date(2022, 10, 24).setHours(0, 0, 0, 0),
+            new Date(2022, 10, 28).setHours(0, 0, 0, 0),
             "Vacation Trip"
           )
         );
