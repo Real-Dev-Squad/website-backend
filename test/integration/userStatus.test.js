@@ -131,9 +131,9 @@ describe("UserStatus", function () {
       expect(response1.body.data.currentStatus.state).to.equal("ACTIVE");
 
       // Marking OOO Status from 24th Nov 2022 to 28th Nov 2022
-      const updatedAtDate = Date.now();
-      const fromDate = updatedAtDate + 12 * 24 * 60 * 60 * 1000;
-      const untilDate = updatedAtDate + 16 * 24 * 60 * 60 * 1000;
+      const updatedAtDate = Date.now(); // 12th Nov 2022
+      const fromDate = updatedAtDate + 12 * 24 * 60 * 60 * 1000; // 24th Nov 2022
+      const untilDate = updatedAtDate + 16 * 24 * 60 * 60 * 1000; // 28th Nov 2022
       const response2 = await chai
         .request(app)
         .patch(`/users/status/self`)
@@ -144,9 +144,9 @@ describe("UserStatus", function () {
       expect(response2.body.data).to.have.own.property("futureStatus");
       expect(response2.body.data.futureStatus.state).to.equal("OOO");
       expect(response2.body.data.futureStatus.message).to.equal("Vacation Trip");
-      expect(response2.body.data.futureStatus.from).to.equal(1669228200000);
-      expect(response2.body.data.futureStatus.until).to.equal(1669573800000);
-      expect(response2.body.data.futureStatus.updatedAt).to.equal(1668191400000);
+      expect(response2.body.data.futureStatus.from).to.equal(fromDate);
+      expect(response2.body.data.futureStatus.until).to.equal(untilDate);
+      expect(response2.body.data.futureStatus.updatedAt).to.equal(updatedAtDate);
 
       // Mocking date to be 26th Nov 2022
       clock.setSystemTime(new Date(2022, 10, 26).getTime());
