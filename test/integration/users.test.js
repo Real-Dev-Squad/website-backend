@@ -17,7 +17,6 @@ const config = require("config");
 const joinData = require("../fixtures/user/join");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const cookieName = config.get("userToken.cookieName");
-
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -457,6 +456,24 @@ describe("Users", function () {
   });
 
   describe("PUT /users/self/intro", function () {
+    it("should return 409 if the data already present", function (done) {
+      chai
+        .request(app)
+        .put(`/users/self/intro`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          if (joinData()[1].length === 1) {
+            expect(res).to.have.status(409);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal("User data is already present!");
+          }
+          return done();
+        });
+    });
+
     it("Should store the info in db", function (done) {
       chai
         .request(app)
