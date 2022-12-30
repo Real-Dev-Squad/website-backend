@@ -1,4 +1,4 @@
-const userStsDataForNewUser = {
+const userStatusDataForNewUser = {
   currentStatus: {
     until: 1669256009000,
     message: "Bad Health",
@@ -12,7 +12,7 @@ const userStsDataForNewUser = {
   },
 };
 
-const oooUserStsDataForShortDuration = {
+const oooStatusDataForShortDuration = {
   currentStatus: {
     message: "",
     state: "OOO",
@@ -25,7 +25,7 @@ const oooUserStsDataForShortDuration = {
     committed: 40,
   },
 };
-const userStsDataForOooState = {
+const userStatusDataForOooState = {
   currentStatus: {
     until: 1669256009000,
     message: "Bad Health",
@@ -39,30 +39,21 @@ const userStsDataForOooState = {
   },
 };
 
-const validUserStsDataforUpdate = {
-  currentStatus: {
-    until: "",
-    message: "",
-    state: "ACTIVE",
-    updatedAt: 1668215609000,
-    from: 1668215609000,
-  },
-};
-
-const invalidUserStsDataforUpdate = {
-  currentStatus: {
-    until: "",
-    message: "",
-    state: "IN_OFFICE",
-    updatedAt: 1668215609000,
-    from: 1668215609000,
-  },
+const generateUserStatusData = (state, updatedAt, from, until = "", message = "") => {
+  return {
+    currentStatus: {
+      state,
+      message,
+      from,
+      until,
+      updatedAt,
+    },
+  };
 };
 
 module.exports = {
-  userStsDataForNewUser,
-  userStsDataForOooState,
-  oooUserStsDataForShortDuration,
-  validUserStsDataforUpdate,
-  invalidUserStsDataforUpdate,
+  userStatusDataForNewUser,
+  userStatusDataForOooState,
+  oooStatusDataForShortDuration,
+  generateUserStatusData,
 };
