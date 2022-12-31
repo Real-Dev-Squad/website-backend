@@ -44,7 +44,7 @@ const getTimeInSecondAfter = ({ timestamp = Date.now(), days = 0, hours = 0, min
 };
 
 /**
- * Returns time in seconds of timestamp before given duration
+ * Returns time in terms of firestore timestamp before given duration
  * @param timestamp {integer} : base time in milliseconds
  * @param hours {integer} : before hours
  * @returns {integer} : in seconds

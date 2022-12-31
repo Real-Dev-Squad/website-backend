@@ -1,7 +1,5 @@
 const { fetch } = require("../utils/fetch");
-
-const CLOUDFLARE_ZONE_ID = config.get("cloudflare.CLOUDFLARE_ZONE_ID");
-const CLOUDFLARE_PURGE_CACHE_API = `https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`;
+const { CLOUDFLARE_PURGE_CACHE_API } = require("../constants/cloudflareCache");
 
 async function purgeCache(files) {
   const response = await fetch(
