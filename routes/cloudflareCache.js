@@ -4,6 +4,6 @@ const cloudflareCache = require("../controllers/cloudflareCache");
 const authenticate = require("../middlewares/authenticate");
 
 router.get("/", authenticate, cloudflareCache.fetchPurgedCacheMetadata);
-router.post("/", authenticate, cloudflareCache.purgeMembersCache);
+router.post("/", authenticate, cloudflareCache.purgeCacheByUserOrSuperUser);
 
 module.exports = router;

@@ -10,24 +10,38 @@ const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const purgeMembersCache = async (req, res) => {
+const purgeCacheByUserOrSuperUser = async (req, res) => {
   try {
-    const { id, username } = req.userData;
+    const { id, username, roles } = req.userData;
     const logs = await logsQuery.fetchCacheLogs(id);
     const logsCount = logs.length;
 
-    const files = [`https://members.realdevsquad.com/${username}`];
-
+    // Cache purged by a superuser without rate limits
+    if (roles.super_user) {
+      const { user } = req.body;
+      const files = [`https://members.realdevsquad.com/${user}`];
+      return purgeCache(res, id, files);
+    }
+    // Cache purged by a user with rate limits
     if (logsCount < MAX_CACHE_PURGE_COUNT) {
-      const response = await cloudflare.purgeCache(files);
-      if (response.status === 200) {
-        await logsQuery.addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Cache Purged" });
-      }
-
-      return res.json({ message: "Cache purged successfully", ...response.data });
+      const files = [`https://members.realdevsquad.com/${username}`];
+      return purgeCache(res, id, files);
     } else {
       return res.json({ message: "Maximum Limit Reached for Purging Cache. Please try again after some time" });
     }
+  } catch (error) {
+    logger.error(`Error while clearing members cache: ${error}`);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+  }
+};
+
+const purgeCache = async (res, id, files) => {
+  try {
+    const response = await cloudflare.purgeCache(files);
+    if (response.status === 200) {
+      await logsQuery.addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Cache Purged" });
+    }
+    return res.json({ message: "Cache purged successfully", ...response.data });
   } catch (error) {
     logger.error(`Error while clearing members cache: ${error}`);
     return res.boom.badImplementation(SOMETHING_WENT_WRONG);
@@ -73,6 +87,6 @@ const fetchPurgedCacheMetadata = async (req, res) => {
 };
 
 module.exports = {
-  purgeMembersCache,
+  purgeCacheByUserOrSuperUser,
   fetchPurgedCacheMetadata,
 };
