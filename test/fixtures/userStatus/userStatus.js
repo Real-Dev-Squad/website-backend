@@ -27,11 +27,11 @@ const oooStatusDataForShortDuration = {
 };
 const userStatusDataForOooState = {
   currentStatus: {
-    until: 1669256009000,
-    message: "Bad Health",
     state: "OOO",
-    updatedAt: 1668215609000,
-    from: 1668215609000,
+    message: "Bad Health",
+    updatedAt: 1668211200000,
+    from: 1668211200000,
+    until: 1668709800000,
   },
   monthlyHours: {
     updatedAt: 1668215609000,
