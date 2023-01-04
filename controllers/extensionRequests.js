@@ -54,6 +54,7 @@ const createTaskExtensionRequest = async (req, res) => {
         oldEndsOn: task.endsOn,
         newEndsOn: extensionBody.newEndsOn,
         assignee: extensionBody.assignee,
+        status: EXTENSION_REQUEST_STATUS.PENDING,
       },
     };
 
@@ -117,7 +118,11 @@ const getSelfExtensionRequests = async (req, res) => {
     const { taskId, status } = req.query;
 
     if (userId) {
-      const allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({ status, taskId }, userId);
+      const allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
+        status,
+        taskId,
+        assignee: userId,
+      });
       return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
     }
     return res.boom.notFound("User doesn't exist");
@@ -177,10 +182,7 @@ const updateExtensionRequestStatus = async (req, res) => {
         userId: req.userData.id,
       },
       body: {
-        subType: "update",
-        new: {
-          status: extensionStatus,
-        },
+        status: extensionStatus,
       },
     };
 

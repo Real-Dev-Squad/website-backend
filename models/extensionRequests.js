@@ -42,18 +42,17 @@ const updateExtensionRequest = async (extensionRequestData, extensionRequestId) 
 
 /**
  * Fetch all Extension Requests
- * @param extensionRequestquery { Object }: Body of the extension request
- * @return {Promise<ExtensionRequest|Array>}
+ * @param extensionRequestQuery { Object }: Body of the extension request
+ * @param extensionRequestQuery.status {string} : STATUS of the extension request
+ * @param extensionRequestQuery.assignee {string} : assignee of the extension request
+ * @param extensionRequestQuery.taskId {string} : taskId of the extension request
+ * @return Array of Extension Requests {Promise<ExtensionRequestsArray|Array>}
  */
-const fetchExtensionRequests = async (extensionRequestquery, userId = null) => {
+const fetchExtensionRequests = async (extensionRequestQuery) => {
   try {
     let extensionRequestsSnapshot = extensionRequestsModel;
 
-    if (userId) {
-      extensionRequestsSnapshot = extensionRequestsModel.where("assignee", "==", userId);
-    }
-
-    Object.entries(extensionRequestquery).forEach(([key, value]) => {
+    Object.entries(extensionRequestQuery).forEach(([key, value]) => {
       if (value) extensionRequestsSnapshot = extensionRequestsSnapshot.where(key, "==", value);
     });
 

@@ -374,6 +374,7 @@ describe("Extension Requests", function () {
               expect(res.body.logs).to.be.a("array");
               expect(res.body.logs[0].body.extensionRequestId).to.equal(extensionRequestId1);
               expect(res.body.logs[0].body.assignee).to.equal(user.id);
+              expect(res.body.logs[0].body.status).to.equal(EXTENSION_REQUEST_STATUS.PENDING);
               expect(res.body.logs[0].meta.taskId).to.equal(taskId2);
               return done();
             });
@@ -522,8 +523,7 @@ describe("Extension Requests", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Extension request APPROVED succesfully");
           expect(res.body.extensionLog.type).to.equal("extensionRequest");
-          expect(res.body.extensionLog.body.subType).to.equal("update");
-          expect(res.body.extensionLog.body.new.status).to.equal("APPROVED");
+          expect(res.body.extensionLog.body.status).to.equal("APPROVED");
 
           chai
             .request(app)
