@@ -1,4 +1,5 @@
 const logsQuery = require("../models/logs");
+const userQuery = require("../models/users");
 const cloudflare = require("../services/cloudflareService");
 const { logType } = require("../constants/logs");
 const { MAX_CACHE_PURGE_COUNT } = require("../constants/cloudflareCache");
@@ -17,17 +18,27 @@ const purgeCacheByUserOrSuperUser = async (req, res) => {
     const logsCount = logs.length;
 
     // Cache purged by a superuser without rate limits
-    if (roles.super_user) {
-      const { user } = req.body;
-      const files = [`https://members.realdevsquad.com/${user}`];
-      return purgeCache(res, id, files);
+    if (req.body.user) {
+      if (roles.super_user) {
+        const { user } = req.body;
+        const result = await userQuery.fetchUser({ username: user });
+        if (!result.userExists) {
+          return res.boom.badRequest("Please provide a valid username");
+        }
+        const files = [`https://members.realdevsquad.com/${user}`];
+        return purgeCache(res, id, files);
+      } else {
+        return res.boom.unauthorized("You are not authorized to perform this action");
+      }
     }
     // Cache purged by a user with rate limits
-    if (logsCount < MAX_CACHE_PURGE_COUNT) {
-      const files = [`https://members.realdevsquad.com/${username}`];
-      return purgeCache(res, id, files);
-    } else {
-      return res.json({ message: "Maximum Limit Reached for Purging Cache. Please try again after some time" });
+    else {
+      if (logsCount < MAX_CACHE_PURGE_COUNT) {
+        const files = [`https://members.realdevsquad.com/${username}`];
+        return purgeCache(res, id, files);
+      } else {
+        return res.json({ message: "Maximum Limit Reached for Purging Cache. Please try again after some time" });
+      }
     }
   } catch (error) {
     logger.error(`Error while clearing members cache: ${error}`);
