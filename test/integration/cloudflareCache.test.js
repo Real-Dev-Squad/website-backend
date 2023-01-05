@@ -149,6 +149,7 @@ describe("Purged Cache Metadata", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Cache purged successfully");
+          expect(res.body.purgedFor).to.be.a("string");
           expect(res.body.success).to.equal(true);
           expect(res.body.errors).to.deep.equal([]);
           expect(res.body.messages).to.deep.equal([]);
