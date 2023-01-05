@@ -99,6 +99,7 @@ describe("Purged Cache Metadata", function () {
   describe("POST /cache", function () {
     before(async function () {
       await cleanDb();
+      await addUser(userData[0]);
       const userId = await addUser(superUser);
       jwt = authService.generateAuthToken({ userId });
     });
@@ -139,7 +140,7 @@ describe("Purged Cache Metadata", function () {
         .request(app)
         .post("/cache")
         .set("cookie", `${cookieName}=${jwt}`)
-        .send({ user: "username" })
+        .send({ user: userData[0].username })
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -153,6 +154,26 @@ describe("Purged Cache Metadata", function () {
           expect(res.body.messages).to.deep.equal([]);
           expect(res.body.result).to.be.a("object");
           expect(res.body.result.id).to.be.a("string");
+
+          return done();
+        });
+    });
+
+    it("Should return username does not exist provided by superUser", function (done) {
+      chai
+        .request(app)
+        .post("/cache")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ user: "username" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          expect(res.body.message).to.equal("Please provide a valid username");
 
           return done();
         });
