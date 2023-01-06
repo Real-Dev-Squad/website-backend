@@ -124,10 +124,11 @@ const getSuggestedUsers = async (skill) => {
  */
 const fetchUsers = async (query) => {
   try {
-    const snapshot = await userModel
-      .limit(parseInt(query.size) || 100)
-      .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
-      .get();
+    // INFO: default user size cannot be max-size i.e. 100
+    // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1049782404
+    const size = parseInt(query.size) || 10;
+    const page = size * (parseInt(query.page) || 0);
+    const snapshot = await userModel.limit(size).offset(page).get();
 
     const allUsers = [];
 

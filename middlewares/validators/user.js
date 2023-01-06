@@ -95,19 +95,16 @@ async function getUsers(req, res, next) {
         .optional()
         .pattern(/^[1-9]\d?$|^100$/)
         .messages({
-          "string.base": "size should be a type of string",
           "string.empty": "size must contain value in range 1-100",
           "string.pattern.base": "size must be in range 1-100",
-          "any.required": "size is required",
         }),
       page: joi
         .string()
         .optional()
-        .pattern(/^\d$|^[1-9]\d?/)
+        .pattern(/^0$|^[1-9]\d*$/)
         .messages({
-          "string.base": "page should be a type of string",
-          "string.empty": "page must contain value in range 0-99",
-          "string.pattern.base": "page must be in range 0-99",
+          "string.empty": "page must contain a positive number or zero",
+          "string.pattern.base": "page value either be a positive number or zero",
         }),
     });
   try {
