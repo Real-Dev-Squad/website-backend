@@ -107,7 +107,7 @@ https://github.com/login/oauth/authorize?client_id=23c78f66ab7964e5ef97
 rds-session
 
 ## Staging login:
-https://github.com/login/oauth/authorize?client_id=c4a84431feaf604e89d1
+https://github.com/login/oauth/authorize?client_id=ebb301661e883a85bf9a
 
 ### Staging login - Cookie: 
 rds-session-staging

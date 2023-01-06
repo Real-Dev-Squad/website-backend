@@ -119,17 +119,29 @@ const getSuggestedUsers = async (skill) => {
 
 /**
  * Fetches the data about our users
- * @param query { Object }: Filter for users data
+ * @param query { Object }: Filter for users
  * @return {Promise<userModel|Array>}
  */
 const fetchUsers = async (query) => {
+  const appendUsernamePrefixQuery = (dbQuery) => {
+    return dbQuery
+      .orderBy("username")
+      .startAt(query.search.toLowerCase().trim())
+      .endAt(query.search.toLowerCase().trim() + "\uf8ff");
+  };
   try {
     // INFO: default user size cannot be max-size i.e. 100
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1049782404
     const size = parseInt(query.size) || 10;
     const page = size * (parseInt(query.page) || 0);
-    const snapshot = await userModel.limit(size).offset(page).get();
 
+    let dbQuery = userModel.limit(size).offset(page);
+    if (Object.keys(query).length) {
+      if (query.search) {
+        dbQuery = appendUsernamePrefixQuery(dbQuery);
+      }
+    }
+    const snapshot = await dbQuery.get();
     const allUsers = [];
 
     snapshot.forEach((doc) => {

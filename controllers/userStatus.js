@@ -1,3 +1,4 @@
+const { fetchUser } = require("../models/users");
 const userStatusModel = require("../models/userStatus");
 const { getUserIdBasedOnRoute } = require("../utils/userStatus");
 
@@ -69,6 +70,13 @@ const getUserStatus = async (req, res) => {
 const getAllUserStatus = async (req, res) => {
   try {
     const { allUserStatus } = await userStatusModel.getAllUserStatus(req.query);
+    for (const status of allUserStatus) {
+      //  fetching users from users collection by userID in userStatus collection
+      const result = await fetchUser({ userId: status.userId });
+      status.full_name = `${result.user.first_name} ${result.user.last_name}`;
+      status.picture = result.user.picture;
+      status.username = result.user.username;
+    }
     return res.json({
       message: "All User Status found successfully.",
       totalUserStatus: allUserStatus.length,
@@ -112,4 +120,22 @@ const updateUserStatus = async (req, res) => {
   }
 };
 
-module.exports = { deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus };
+/**
+ * Update All Users Status
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const updateAllUserStatus = async (req, res) => {
+  try {
+    await userStatusModel.updateAllUserStatus();
+    return res.status(200).json({
+      message: "All User Status updated successfully.",
+    });
+  } catch (err) {
+    logger.error(`Error while updating the User Data: ${err}`);
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
+module.exports = { deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus, updateAllUserStatus };
