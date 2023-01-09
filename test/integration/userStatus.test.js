@@ -381,11 +381,8 @@ describe("UserStatus", function () {
           }
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
-          expect(res.body).to.eql({
-            statusCode: 400,
-            error: "Bad Request",
-            message: `Invalid State. State must be either IDLE, ACTIVE or OOO`,
-          });
+          expect(res.body.error).to.equal(`Bad Request`);
+          expect(res.body.message).to.equal(`Invalid State. State must be either IDLE, ACTIVE or OOO`);
           return done();
         });
     });
@@ -426,7 +423,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal(`Bad Request`);
           expect(res.body.message).to.equal(
-            `The value for the 'from' field must be a date that is after the today's date.`
+            `The 'from' field must have a value that is either today or a date that follows today.`
           );
           return done();
         });
@@ -448,7 +445,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal(`Bad Request`);
           expect(res.body.message).to.equal(
-            `The value for the 'until' field must be a date that is after the 'from' date.`
+            `The 'until' field must have a value that is either 'from' date or a date that comes after 'from' day.`
           );
           return done();
         });

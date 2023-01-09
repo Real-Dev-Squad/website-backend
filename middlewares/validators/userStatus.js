@@ -13,13 +13,17 @@ const validateUserStatusData = async (todaysTime, req, res, next) => {
       from: Joi.number()
         .min(todaysTime)
         .required()
-        .error(new Error(`The value for the 'from' field must be a date that is after the today's date.`)),
+        .error(new Error(`The 'from' field must have a value that is either today or a date that follows today.`)),
       until: Joi.any().when("state", {
         is: userState.OOO,
         then: Joi.number()
           .min(Joi.ref("from"))
           .required()
-          .error(new Error(`The value for the 'until' field must be a date that is after the 'from' date.`)),
+          .error(
+            new Error(
+              `The 'until' field must have a value that is either 'from' date or a date that comes after 'from' day.`
+            )
+          ),
         otherwise: Joi.optional(),
       }),
       message: Joi.when("state", {
