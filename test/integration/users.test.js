@@ -142,6 +142,7 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Users returned successfully!");
           expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(1);
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
 
