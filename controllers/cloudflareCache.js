@@ -23,7 +23,7 @@ const purgeCache = async (req, res) => {
         const { user } = req.body;
         const userDetails = await userQuery.fetchUser({ username: user });
         if (!userDetails.userExists) {
-          return res.boom.badRequest("");
+          return res.boom.badRequest();
         }
         return purge(res, id, user, true, userDetails);
       } else {
