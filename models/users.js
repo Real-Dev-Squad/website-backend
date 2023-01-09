@@ -132,7 +132,7 @@ const fetchUsers = async (query) => {
   try {
     // INFO: default user size cannot be max-size i.e. 100
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1049782404
-    const size = parseInt(query.size) || 10;
+    const size = parseInt(query.size) || 100;
     const page = size * (parseInt(query.page) || 0);
 
     let dbQuery = userModel.limit(size).offset(page);
