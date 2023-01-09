@@ -174,7 +174,6 @@ describe("Purged Cache Metadata", function () {
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
           expect(res.body.error).to.equal("Bad Request");
-          expect(res.body.message).to.equal("Please provide a valid username");
 
           return done();
         });

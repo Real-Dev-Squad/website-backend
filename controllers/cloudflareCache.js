@@ -23,18 +23,9 @@ const purgeCache = async (req, res) => {
         const { user } = req.body;
         const userDetails = await userQuery.fetchUser({ username: user });
         if (!userDetails.userExists) {
-          return res.boom.badRequest("Please provide a valid username");
+          return res.boom.badRequest("");
         }
-        const files = [`https://members.realdevsquad.com/${user}`];
-        const response = await cloudflare.purgeCache(files);
-        if (response.status === 200) {
-          await logsQuery.addLog(
-            logType.CLOUDFLARE_CACHE_PURGED,
-            { userId: id, purgedFor: userDetails.user.id },
-            { message: "Cache Purged" }
-          );
-        }
-        return res.json({ message: "Cache purged successfully", purgedFor: userDetails.user.id, ...response.data });
+        return purge(res, id, user, true, userDetails);
       } else {
         return res.boom.unauthorized("You are not authorized to perform this action");
       }
@@ -42,16 +33,33 @@ const purgeCache = async (req, res) => {
     // Cache purged by a user with rate limits
     else {
       if (logsCount < MAX_CACHE_PURGE_COUNT) {
-        const files = [`https://members.realdevsquad.com/${username}`];
-        const response = await cloudflare.purgeCache(files);
-        if (response.status === 200) {
-          await logsQuery.addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Cache Purged" });
-        }
-        return res.json({ message: "Cache purged successfully", ...response.data });
+        return purge(res, id, username, false);
       } else {
         return res.json({ message: "Maximum Limit Reached for Purging Cache. Please try again after some time" });
       }
     }
+  } catch (error) {
+    logger.error(`Error while clearing members cache: ${error}`);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+  }
+};
+
+const purge = async (res, id, username, isSuperUser, userDetails) => {
+  try {
+    const files = [`https://members.realdevsquad.com/${username}`];
+    const response = await cloudflare.purgeCache(files);
+    if (response.status === 200) {
+      if (isSuperUser) {
+        await logsQuery.addLog(
+          logType.CLOUDFLARE_CACHE_PURGED,
+          { userId: id, purgedFor: userDetails.user.id },
+          { message: "Cache Purged" }
+        );
+      } else {
+        await logsQuery.addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Cache Purged" });
+      }
+    }
+    return res.json({ message: "Cache purged successfully", ...response.data });
   } catch (error) {
     logger.error(`Error while clearing members cache: ${error}`);
     return res.boom.badImplementation(SOMETHING_WENT_WRONG);
