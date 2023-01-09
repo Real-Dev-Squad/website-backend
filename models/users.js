@@ -130,8 +130,8 @@ const fetchUsers = async (query) => {
       .endAt(query.search.toLowerCase().trim() + "\uf8ff");
   };
   try {
-    // INFO: default user size cannot be max-size i.e. 100
-    // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1049782404
+    // INFO: default user size set to 100
+    // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
     const size = parseInt(query.size) || 100;
     const page = size * (parseInt(query.page) || 0);
 
