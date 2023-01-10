@@ -9,7 +9,7 @@ const { buildExtensionRequests, formatExtensionRequest } = require("../utils/ext
 const createExtensionRequest = async (extensionRequestData) => {
   try {
     const request = {
-      timestamp: (new Date().getTime() / 1000).toFixed(0),
+      timestamp: Number((new Date().getTime() / 1000).toFixed(0)),
       ...extensionRequestData,
     };
     return await extensionRequestsModel.add(request);
