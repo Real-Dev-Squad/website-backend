@@ -39,4 +39,5 @@ function convertFirebaseDocumentToBadgeDocument(id, data) {
 
 module.exports = {
   convertFirebaseDocumentToBadgeDocument,
+  convertFirebaseTimestampToDateTime,
 };

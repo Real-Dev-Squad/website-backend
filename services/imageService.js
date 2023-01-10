@@ -34,9 +34,9 @@ const uploadProfilePicture = async ({ file, userId, coordinates }) => {
 
 /**
  * upload badge image to cloudinary
- * @param file { Object }: multipart file data
+ * @param file { Object }: File object
  * @param badgeName { string }: Badge name
- * @return image { Object }: public-url and public-id
+ * @return image { Object }: id and imageUrl
  */
 async function uploadBadgeImage({ file, badgeName }) {
   try {
@@ -47,8 +47,8 @@ async function uploadBadgeImage({ file, badgeName }) {
       folder: `${cloudinaryMetaData.BADGE.FOLDER}/${badgeName}`,
       tags: cloudinaryMetaData.BADGE.TAGS,
     });
-    const { public_id: publicId, secure_url: url } = uploadResponse;
-    return { publicId, url };
+    const { public_id: id, secure_url: imageUrl } = uploadResponse;
+    return { id, imageUrl };
   } catch (err) {
     logger.error(`Error while uploading profile picture ${err}`);
     throw err;

@@ -21,6 +21,12 @@ const getBadges = async (req, res) => {
   }
 };
 
+/**
+ * Get user badges
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ * @returns {Array} - Return user badges
+ */
 async function getUserBadges(req, res) {
   try {
     const { userExists, badges } = await badgeQuery.fetchUserBadges(req.params.username);
@@ -30,7 +36,7 @@ async function getUserBadges(req, res) {
     return res.json({ message: "Badges returned succesfully", badges });
   } catch (error) {
     logger.error(`Error while fetching all user badges: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.badRequest("Failed to get user badges.");
   }
 }
 
@@ -43,17 +49,14 @@ async function getUserBadges(req, res) {
 async function postBadge(req, res) {
   try {
     const { file } = req;
-    const { name, description, createdBy } = req.body;
-    const { url } = await imageService.uploadBadgeImage({ file, badgeName: name });
-    const { id, createdAt } = await badgeQuery.createBadge({ name, description, createdBy, imageUrl: url });
+    const { imageUrl } = await imageService.uploadBadgeImage({ file, badgeName: req.body.name });
+    const badge = await badgeQuery.createBadge({
+      ...req.body,
+      imageUrl,
+    });
     return res.json({
       message: "Badge created successfully.",
-      id,
-      url,
-      name,
-      description,
-      createdBy,
-      createdAt,
+      badge,
     });
   } catch (error) {
     logger.error(`Error while creating badge: ${error}`);
@@ -69,6 +72,7 @@ async function postBadge(req, res) {
  */
 async function postUserBadges(req, res) {
   try {
+    // INFO: badgeIds are not validated
     const { username } = req.params;
     const { badgeIds } = req.body;
     const result = await fetchUser({ username });
@@ -94,6 +98,7 @@ async function postUserBadges(req, res) {
  */
 async function deleteUserBadges(req, res) {
   try {
+    // INFO: badgeIds are not validated
     const { username } = req.params;
     const { badgeIds } = req.body;
     const result = await fetchUser({ username });

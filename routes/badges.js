@@ -9,11 +9,12 @@ const { SUPERUSER } = require("../constants/roles");
 
 router.get("/", badge.getBadges);
 router.get("/:username", badge.getUserBadges);
+// INFO: upload(muter-middelware) looks for form-data key named file
 router.post(
   "/",
   authenticate,
   authorizeRoles([SUPERUSER]),
-  upload.single("badge"),
+  upload.single("file"),
   badgeValidator.createBadge,
   badge.postBadge
 );

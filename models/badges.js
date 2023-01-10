@@ -16,7 +16,7 @@ const fetchBadges = async ({ size = 100, page = 0 }) => {
       .limit(parseInt(size))
       .offset(parseInt(size) * parseInt(page))
       .get();
-    // INFO: timestamp to date time logic surfaced fro
+    // INFO: timestamp to date time logic surfaced from
     // https://stackoverflow.com/a/66292255
     return snapshot.docs.map((doc) => convertFirebaseDocumentToBadgeDocument(doc.id, doc.data()));
   } catch (err) {
@@ -27,7 +27,7 @@ const fetchBadges = async ({ size = 100, page = 0 }) => {
 
 /**
  * Fetches the data about user badges
- * @param query { string }: Filter for badgeIds
+ * @param username { string }: Filter for badges data
  * @return {Promise<{badges: Array}>}
  */
 async function fetchUserBadges(username) {
@@ -55,21 +55,23 @@ async function fetchUserBadges(username) {
 
 /**
  * Add badge to firestore
- * @param  { Object }: badge name, to be stored in DB
+ * @param  badgeInfo { Object }: has badge name, description, imageUrl and createdBy
  * @return {Promise<{id: string, createdAt: {date: string, time: string}}|Object>}
  */
-async function createBadge({ name, description, imageUrl, createdBy }) {
+async function createBadge(badgeInfo) {
   try {
     const createdAt = admin.firestore.Timestamp.now();
+    // INFO: check if description is missing
+    const description = badgeInfo.description ?? "";
     const docRef = await badgeModel.add({
-      name,
+      ...badgeInfo,
       description,
-      imageUrl,
-      createdBy,
       createdAt,
     });
     const { date, time } = convertFirebaseTimestampToDateTime(createdAt);
-    return { id: docRef.id, createdAt: { date, time } };
+    const snapshot = await docRef.get();
+    const data = snapshot.data();
+    return { id: docRef.id, ...data, createdAt: { date, time } };
   } catch (err) {
     logger.error("Error creating badge", err);
     return err;
