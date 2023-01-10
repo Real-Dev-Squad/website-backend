@@ -119,26 +119,36 @@ const getSuggestedUsers = async (skill) => {
 
 /**
  * Fetches the data about our users
- * @param query { Object }: Filter for users
+ * @param query { search, next, prev(previous), size }: Filter for users
  * @return {Promise<userModel|Array>}
  */
 const fetchUsers = async (query) => {
-  const appendUsernamePrefixQuery = (dbQuery) => {
-    return dbQuery
-      .orderBy("username")
-      .startAt(query.search.toLowerCase().trim())
-      .endAt(query.search.toLowerCase().trim() + "\uf8ff");
-  };
   try {
-    let dbQuery = userModel
-      .limit(parseInt(query.size) || 100)
-      .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0));
+    let dbQuery = userModel;
     if (Object.keys(query).length) {
+      dbQuery = dbQuery.orderBy("username");
       if (query.search) {
-        dbQuery = appendUsernamePrefixQuery(dbQuery);
+        dbQuery = dbQuery
+          .startAt(query.search.toLowerCase().trim())
+          .endAt(query.search.toLowerCase().trim() + "\uf8ff");
+      }
+      if (query.next && !query.prev) {
+        const doc = await userModel.doc(query.next).get();
+        dbQuery = dbQuery.startAfter(doc);
+      }
+      if (query.prev && !query.next) {
+        const doc = await userModel.doc(query.prev).get();
+        dbQuery = dbQuery.endBefore(doc).limitToLast(parseInt(query.size) || 100);
+      }
+      if (!query.prev) {
+        dbQuery = dbQuery.limit(parseInt(query.size) || 100);
       }
     }
+
     const snapshot = await dbQuery.get();
+    const firstDoc = snapshot.docs[0]; // sending the id of the first doc of current batch, for client accessing previous batch/page
+    const lastDoc = snapshot.docs[snapshot.docs.length - 1]; // sending the id of the last doc of current batch, for client accessing next batch/page
+
     const allUsers = [];
 
     snapshot.forEach((doc) => {
@@ -152,7 +162,11 @@ const fetchUsers = async (query) => {
       });
     });
 
-    return allUsers;
+    return {
+      allUsers,
+      next: lastDoc ? lastDoc.id : "",
+      prev: firstDoc ? firstDoc.id : "",
+    };
   } catch (err) {
     logger.error("Error retrieving user data", err);
     throw err;
