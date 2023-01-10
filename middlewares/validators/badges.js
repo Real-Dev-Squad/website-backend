@@ -13,7 +13,7 @@ async function createBadge(req, res, next) {
     .strict()
     .keys({
       name: joi.string().min(3).max(30).required(),
-      description: joi.string().min(3).max(130).required(),
+      description: joi.string().min(3).max(130).optional(),
       createdBy: joi.string().min(1).required(),
     });
   try {
