@@ -64,7 +64,7 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should not get the idle userStatus for archived users", async function () {
+    it("Should not get the idle userStatus for archived user", async function () {
       const archivedUserId = await addUser(userData[5]); // User with role archived true
       await updateUserStatus(archivedUserId, generateUserStatusData("IDLE", new Date(), new Date()));
       const response = await chai.request(app).get("/users/status?state=IDLE");
@@ -77,8 +77,22 @@ describe("UserStatus", function () {
     });
 
     it("Should get the idle userStatus for active user or non archived user", async function () {
-      const archivedUserId = await addUser(userData[6]); // User with role archived false
+      const nonArchivedUserId = await addUser(userData[6]); // User with role archived false
+      await updateUserStatus(nonArchivedUserId, generateUserStatusData("IDLE", new Date(), new Date()));
+      const response = await chai.request(app).get("/users/status?state=IDLE");
+      expect(response).to.have.status(200);
+      expect(response.body.message).to.equal("All User Status found successfully.");
+      expect(response.body.totalUserStatus).to.be.a("number");
+      expect(response.body.totalUserStatus).to.equal(1);
+      expect(response.body.allUserStatus).to.be.a("array");
+      expect(response.body.allUserStatus.length).to.equal(1);
+    });
+
+    it("Should only get the idle userStatus only for active user when both archived and active users are there in DB", async function () {
+      const archivedUserId = await addUser(userData[5]); // User with role archived true
       await updateUserStatus(archivedUserId, generateUserStatusData("IDLE", new Date(), new Date()));
+      const nonArchivedUserId = await addUser(userData[6]); // User with role archived false
+      await updateUserStatus(nonArchivedUserId, generateUserStatusData("IDLE", new Date(), new Date()));
       const response = await chai.request(app).get("/users/status?state=IDLE");
       expect(response).to.have.status(200);
       expect(response.body.message).to.equal("All User Status found successfully.");
