@@ -35,7 +35,7 @@ describe("Purged Cache Metadata", function () {
       jwt = authService.generateAuthToken({ userId });
     });
 
-    it("Should return last purged cache metadata if no cache logs in last 24 hours found", function (done) {
+    it("Should return no cache is cleared yet if no cache logs found in last 24 hours", function (done) {
       chai
         .request(app)
         .get("/cache")
