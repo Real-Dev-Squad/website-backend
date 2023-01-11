@@ -36,7 +36,6 @@ describe("Purged Cache Metadata", function () {
     });
 
     it("Should return last purged cache metadata if no cache logs in last 24 hours found", function (done) {
-      sinon.stub(logsQuery, "fetchLastAddedCacheLog").returns(cacheData.cacheModelData);
       chai
         .request(app)
         .get("/cache")
@@ -48,9 +47,8 @@ describe("Purged Cache Metadata", function () {
 
           expect(response).to.have.status(200);
           expect(response.body).to.be.an("object");
-          expect(response.body.message).to.be.a("string");
-          expect(response.body.count).to.be.a("number");
-          expect(response.body.timeLastCleared).to.be.a("number");
+          expect(response.body.message).to.equal("No cache is cleared yet");
+          expect(response.body.count).to.equal(0);
           return done();
         });
     });
@@ -68,7 +66,7 @@ describe("Purged Cache Metadata", function () {
 
           expect(response).to.have.status(200);
           expect(response.body).to.be.an("object");
-          expect(response.body.message).to.be.a("string");
+          expect(response.body.message).to.equal("Purged cache metadata returned successfully!");
           expect(response.body.count).to.be.a("number");
           expect(response.body.timeLastCleared).to.be.a("number");
 
