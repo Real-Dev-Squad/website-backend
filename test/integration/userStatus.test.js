@@ -63,6 +63,30 @@ describe("UserStatus", function () {
           return done();
         });
     });
+
+    it("Should not get the idle userStatus for archived users", async function () {
+      const archivedUserId = await addUser(userData[5]); // User with role archived true
+      await updateUserStatus(archivedUserId, generateUserStatusData("IDLE", new Date(), new Date()));
+      const response = await chai.request(app).get("/users/status?state=IDLE");
+      expect(response).to.have.status(200);
+      expect(response.body.message).to.equal("All User Status found successfully.");
+      expect(response.body.totalUserStatus).to.be.a("number");
+      expect(response.body.totalUserStatus).to.equal(0);
+      expect(response.body.allUserStatus).to.be.a("array");
+      expect(response.body.allUserStatus.length).to.equal(0);
+    });
+
+    it("Should get the idle userStatus for active user or non archived user", async function () {
+      const archivedUserId = await addUser(userData[6]); // User with role archived false
+      await updateUserStatus(archivedUserId, generateUserStatusData("IDLE", new Date(), new Date()));
+      const response = await chai.request(app).get("/users/status?state=IDLE");
+      expect(response).to.have.status(200);
+      expect(response.body.message).to.equal("All User Status found successfully.");
+      expect(response.body.totalUserStatus).to.be.a("number");
+      expect(response.body.totalUserStatus).to.equal(1);
+      expect(response.body.allUserStatus).to.be.a("array");
+      expect(response.body.allUserStatus.length).to.equal(1);
+    });
   });
 
   describe("GET /users/status/:userid", function () {
