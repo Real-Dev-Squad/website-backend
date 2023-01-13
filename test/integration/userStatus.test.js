@@ -88,7 +88,7 @@ describe("UserStatus", function () {
       expect(response.body.allUserStatus.length).to.equal(1);
     });
 
-    it("Should only get the idle userStatus only for active user when both archived and active users are there in DB", async function () {
+    it("Should return only non-archived idle user status when both archived and non archived users are present in DB", async function () {
       const archivedUserId = await addUser(userData[5]); // User with role archived true
       await updateUserStatus(archivedUserId, generateUserStatusData("IDLE", new Date(), new Date()));
       const nonArchivedUserId = await addUser(userData[6]); // User with role archived false
