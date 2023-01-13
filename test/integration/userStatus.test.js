@@ -65,11 +65,11 @@ describe("UserStatus", function () {
     });
 
     it("Should return only non-archived idle user status when both archived and non archived users are present in DB", async function () {
-      const archivedIdleUserId = await addUser(userData[5]); // User with role archived true
+      const archivedIdleUserId = await addUser(userData[5]);
       await updateUserStatus(archivedIdleUserId, generateUserStatusData("IDLE", new Date(), new Date()));
-      const nonArchivedIdleUserId = await addUser(userData[6]); // User with role archived false
+      const nonArchivedIdleUserId = await addUser(userData[6]);
       await updateUserStatus(nonArchivedIdleUserId, generateUserStatusData("IDLE", new Date(), new Date()));
-      const nonArchivedActiveUserId = await addUser(userData[8]); // User with role archived false
+      const nonArchivedActiveUserId = await addUser(userData[8]);
       await updateUserStatus(nonArchivedActiveUserId, generateUserStatusData("ACTIVE", new Date(), new Date()));
       const response = await chai.request(app).get("/users/status?state=IDLE");
       expect(response).to.have.status(200);
