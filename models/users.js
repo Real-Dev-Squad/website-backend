@@ -122,7 +122,9 @@ const getSuggestedUsers = async (skill) => {
  * @param query { search, next, prev(previous), size }: Filter for users
  * @return {Promise<userModel|Array>}
  */
-const fetchUsers = async (query) => {
+const fetchUsers = async (query, pageState) => {
+  const page = parseInt(query.page);
+  let cookie = {};
   try {
     let dbQuery = userModel;
     if (Object.keys(query).length) {
@@ -132,22 +134,31 @@ const fetchUsers = async (query) => {
           .startAt(query.search.toLowerCase().trim())
           .endAt(query.search.toLowerCase().trim() + "\uf8ff");
       }
-      if (query.next && !query.prev) {
-        const doc = await userModel.doc(query.next).get();
-        dbQuery = dbQuery.startAfter(doc);
+      if (page && pageState && pageState[page]) {
+        const doc = pageState[page].id && (await userModel.doc(pageState[page].id).get());
+        if (pageState[page].type === "current" && doc) {
+          dbQuery = dbQuery.startAt(doc).limit(parseInt(query.size) || 100);
+        } else if (pageState[page].type === "previous" && doc) {
+          dbQuery = dbQuery.endBefore(doc).limitToLast(parseInt(query.size) || 100);
+        } else if (pageState[page].type === "next" && doc) {
+          dbQuery = dbQuery.startAfter(doc).limit(parseInt(query.size) || 100);
+        }
       }
-      if (query.prev && !query.next) {
-        const doc = await userModel.doc(query.prev).get();
-        dbQuery = dbQuery.endBefore(doc).limitToLast(parseInt(query.size) || 100);
-      }
-      if (!query.prev) {
+
+      if (query.size && ((pageState && !pageState[page] && !pageState[page].id) || !pageState)) {
         dbQuery = dbQuery.limit(parseInt(query.size) || 100);
       }
     }
-
     const snapshot = await dbQuery.get();
-    const firstDoc = snapshot.docs[0]; // sending the id of the first doc of current batch, for client accessing previous batch/page
-    const lastDoc = snapshot.docs[snapshot.docs.length - 1]; // sending the id of the last doc of current batch, for client accessing next batch/page
+
+    if (page) {
+      const firstDoc = snapshot.docs[0]; // sending the id of the first doc of current batch, for client accessing previous batch/page
+      const lastDoc = snapshot.docs[snapshot.docs.length - 1]; // sending the id of the last doc of current batch, for client accessing next batch/page
+      const current = { [page]: { id: firstDoc ? firstDoc.id : "", type: "current" } };
+      const next = { [page + 1]: { id: lastDoc ? lastDoc.id : "", type: "next" } };
+      const prev = page > 1 ? { [page - 1]: { id: firstDoc ? firstDoc.id : "", type: "previous" } } : {};
+      cookie = { ...prev, ...current, ...next };
+    }
 
     const allUsers = [];
 
@@ -161,11 +172,9 @@ const fetchUsers = async (query) => {
         chaincode: undefined,
       });
     });
-
     return {
       allUsers,
-      next: lastDoc ? lastDoc.id : "",
-      prev: firstDoc ? firstDoc.id : "",
+      cookie,
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
