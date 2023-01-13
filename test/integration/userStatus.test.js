@@ -381,11 +381,8 @@ describe("UserStatus", function () {
           }
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
-          expect(res.body).to.eql({
-            statusCode: 400,
-            error: "Bad Request",
-            message: '"currentStatus.state" must be one of [IDLE, ACTIVE, OOO]',
-          });
+          expect(res.body.error).to.equal(`Bad Request`);
+          expect(res.body.message).to.equal(`Invalid State. State must be either IDLE, ACTIVE or OOO`);
           return done();
         });
     });
@@ -404,7 +401,52 @@ describe("UserStatus", function () {
           }
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal(`Bad Request`);
-          expect(res.body.message).to.equal(`"currentStatus.message" is not allowed to be empty`);
+          expect(res.body.message).to.equal(
+            `The value for the 'message' field is mandatory when State is OOO for more than three days.`
+          );
+          return done();
+        });
+    });
+
+    it("Should return error when trying to update status for a past date", function (done) {
+      // marking ACTIVE from last 4 days
+      const fromDate = Date.now() - 4 * 24 * 60 * 60 * 1000;
+      chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${testUserJwt}`)
+        .send(generateUserStatusData("OOO", Date.now(), fromDate, "", ""))
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.equal(`Bad Request`);
+          expect(res.body.message).to.equal(
+            `The 'from' field must have a value that is either today or a date that follows today.`
+          );
+          return done();
+        });
+    });
+
+    it("Should return error when trying to mark 000 with until field having value less then from field", function (done) {
+      // marking ACTIVE from last 4 days
+      const fromDate = Date.now() + 10 * 24 * 60 * 60 * 1000;
+      const untilDate = Date.now() + 5 * 24 * 60 * 60 * 1000;
+      chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${testUserJwt}`)
+        .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "Semester Exams"))
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.equal(`Bad Request`);
+          expect(res.body.message).to.equal(
+            `The 'until' field must have a value that is either 'from' date or a date that comes after 'from' day.`
+          );
           return done();
         });
     });
