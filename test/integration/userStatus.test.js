@@ -64,35 +64,13 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should not get the idle userStatus for archived user", async function () {
-      const archivedUserId = await addUser(userData[5]); // User with role archived true
-      await updateUserStatus(archivedUserId, generateUserStatusData("IDLE", new Date(), new Date()));
-      const response = await chai.request(app).get("/users/status?state=IDLE");
-      expect(response).to.have.status(200);
-      expect(response.body.message).to.equal("All User Status found successfully.");
-      expect(response.body.totalUserStatus).to.be.a("number");
-      expect(response.body.totalUserStatus).to.equal(0);
-      expect(response.body.allUserStatus).to.be.a("array");
-      expect(response.body.allUserStatus.length).to.equal(0);
-    });
-
-    it("Should get the idle userStatus for active user or non archived user", async function () {
-      const nonArchivedUserId = await addUser(userData[6]); // User with role archived false
-      await updateUserStatus(nonArchivedUserId, generateUserStatusData("IDLE", new Date(), new Date()));
-      const response = await chai.request(app).get("/users/status?state=IDLE");
-      expect(response).to.have.status(200);
-      expect(response.body.message).to.equal("All User Status found successfully.");
-      expect(response.body.totalUserStatus).to.be.a("number");
-      expect(response.body.totalUserStatus).to.equal(1);
-      expect(response.body.allUserStatus).to.be.a("array");
-      expect(response.body.allUserStatus.length).to.equal(1);
-    });
-
     it("Should return only non-archived idle user status when both archived and non archived users are present in DB", async function () {
-      const archivedUserId = await addUser(userData[5]); // User with role archived true
-      await updateUserStatus(archivedUserId, generateUserStatusData("IDLE", new Date(), new Date()));
-      const nonArchivedUserId = await addUser(userData[6]); // User with role archived false
-      await updateUserStatus(nonArchivedUserId, generateUserStatusData("IDLE", new Date(), new Date()));
+      const archivedIdleUserId = await addUser(userData[5]); // User with role archived true
+      await updateUserStatus(archivedIdleUserId, generateUserStatusData("IDLE", new Date(), new Date()));
+      const nonArchivedIdleUserId = await addUser(userData[6]); // User with role archived false
+      await updateUserStatus(nonArchivedIdleUserId, generateUserStatusData("IDLE", new Date(), new Date()));
+      const nonArchivedActiveUserId = await addUser(userData[8]); // User with role archived false
+      await updateUserStatus(nonArchivedActiveUserId, generateUserStatusData("ACTIVE", new Date(), new Date()));
       const response = await chai.request(app).get("/users/status?state=IDLE");
       expect(response).to.have.status(200);
       expect(response.body.message).to.equal("All User Status found successfully.");
