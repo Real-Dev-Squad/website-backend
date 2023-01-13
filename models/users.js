@@ -119,16 +119,26 @@ const getSuggestedUsers = async (skill) => {
 
 /**
  * Fetches the data about our users
- * @param query { Object }: Filter for users data
+ * @param query { Object }: Filter for users
  * @return {Promise<userModel|Array>}
  */
 const fetchUsers = async (query) => {
+  const appendUsernamePrefixQuery = (dbQuery) => {
+    return dbQuery
+      .orderBy("username")
+      .startAt(query.search.toLowerCase().trim())
+      .endAt(query.search.toLowerCase().trim() + "\uf8ff");
+  };
   try {
-    const snapshot = await userModel
+    let dbQuery = userModel
       .limit(parseInt(query.size) || 100)
-      .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
-      .get();
-
+      .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0));
+    if (Object.keys(query).length) {
+      if (query.search) {
+        dbQuery = appendUsernamePrefixQuery(dbQuery);
+      }
+    }
+    const snapshot = await dbQuery.get();
     const allUsers = [];
 
     snapshot.forEach((doc) => {

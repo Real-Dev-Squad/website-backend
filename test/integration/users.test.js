@@ -11,10 +11,11 @@ const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
+const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
-const { addJoinData } = require("../../models/users");
+const { addJoinData, addOrUpdate } = require("../../models/users");
 const cookieName = config.get("userToken.cookieName");
 chai.use(chaiHttp);
 
@@ -344,6 +345,111 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("GET /users?search", function () {
+    beforeEach(async function () {
+      await addOrUpdate(userData[0]);
+      await addOrUpdate(userData[7]);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("Should return users successfully", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues.an })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+
+          return done();
+        });
+    });
+    it("Should return users successfully converting search param value to small case", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues.AN })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          res.body.users.forEach((user) => {
+            expect(user.username.slice(0, 2)).to.equal(searchParamValues.AN.toLowerCase());
+          });
+          return done();
+        });
+    });
+    it("Should return all users for empty value of search param", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues.null })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+
+          return done();
+        });
+    });
+    it("Should return users of username starting with '23' with response status code 200", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues.number23 })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          res.body.users.forEach((user) => {
+            expect(user.username.slice(0, 2)).to.equal(`${searchParamValues.number23}`);
+          });
+          return done();
+        });
+    });
+    it("Should return an empty array with response status code 200", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues.mu })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+
           return done();
         });
     });

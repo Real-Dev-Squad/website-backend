@@ -6,11 +6,11 @@ const validateUpdatedUserStatus = async (req, res, next) => {
   const schema = Joi.object({
     currentStatus: Joi.object().keys({
       state: Joi.string().trim().valid(userState.IDLE, userState.ACTIVE, userState.OOO),
-      updatedAt: Joi.number().required().strict(),
-      from: Joi.number().required().strict(),
+      updatedAt: Joi.number().required(),
+      from: Joi.number().required(),
       until: Joi.any().when("state", {
         is: userState.OOO,
-        then: Joi.number().required().strict(),
+        then: Joi.number().required(),
         otherwise: Joi.optional(),
       }),
       message: Joi.when("state", {
@@ -32,8 +32,8 @@ const validateUpdatedUserStatus = async (req, res, next) => {
       }),
     }),
     monthlyHours: Joi.object().keys({
-      committed: Joi.number().required().strict(),
-      updatedAt: Joi.number().required().strict(),
+      committed: Joi.number().required(),
+      updatedAt: Joi.number().required(),
     }),
   }).or("currentStatus", "monthlyHours");
 
