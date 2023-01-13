@@ -63,6 +63,22 @@ describe("UserStatus", function () {
           return done();
         });
     });
+
+    it("Should return only non-archived idle user status when both archived and non archived users are present in DB", async function () {
+      const archivedIdleUserId = await addUser(userData[5]);
+      await updateUserStatus(archivedIdleUserId, generateUserStatusData("IDLE", new Date(), new Date()));
+      const nonArchivedIdleUserId = await addUser(userData[6]);
+      await updateUserStatus(nonArchivedIdleUserId, generateUserStatusData("IDLE", new Date(), new Date()));
+      const nonArchivedActiveUserId = await addUser(userData[8]);
+      await updateUserStatus(nonArchivedActiveUserId, generateUserStatusData("ACTIVE", new Date(), new Date()));
+      const response = await chai.request(app).get("/users/status?state=IDLE");
+      expect(response).to.have.status(200);
+      expect(response.body.message).to.equal("All User Status found successfully.");
+      expect(response.body.totalUserStatus).to.be.a("number");
+      expect(response.body.totalUserStatus).to.equal(1);
+      expect(response.body.allUserStatus).to.be.a("array");
+      expect(response.body.allUserStatus.length).to.equal(1);
+    });
   });
 
   describe("GET /users/status/:userid", function () {
