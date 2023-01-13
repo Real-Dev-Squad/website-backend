@@ -457,19 +457,19 @@ describe("Users", function () {
 
   describe("PUT /users/self/intro", function () {
     it("should return 409 if the data already present", function (done) {
+      addJoinData(joinData(userId)[3]);
       chai
         .request(app)
         .put(`/users/self/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
+        .send(joinData(userId)[3])
         .end((err, res) => {
           if (err) {
             return done(err);
           }
-          if (joinData()[1].length === 1) {
-            expect(res).to.have.status(409);
-            expect(res.body).to.be.a("object");
-            expect(res.body.message).to.equal("User data is already present!");
-          }
+          expect(res).to.have.status(409);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User data is already present!");
           return done();
         });
     });
