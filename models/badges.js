@@ -2,7 +2,6 @@ const admin = require("firebase-admin");
 const firestore = require("../utils/firestore");
 const badgeModel = firestore.collection("badges");
 const userBadgeModel = firestore.collection("userBadges");
-const { fetchUser } = require("../models/users");
 const {
   convertFirebaseTimestampToDateTime,
   convertFirebaseDocumentToBadgeDocument,
@@ -34,17 +33,11 @@ const fetchBadges = async ({ size = 100, page = 0 }) => {
 
 /**
  * Fetches the data about user badges
- * @param username { string }: Filter for badges data
+ * @param userId <string>: Filter for badges data
  * @return {Promise}: <{badges: Array<badge>, userExists: boolean}> returns badges array and userExists boolean
  */
-async function fetchUserBadges(username) {
+async function fetchUserBadges(userId) {
   try {
-    let badges = [];
-    const result = await fetchUser({ username });
-    if (!result.userExists) {
-      return { userExists: false, badges };
-    }
-    const userId = result.user.id;
     const badgeIdsSnapshot = await userBadgeModel.where("userId", "==", userId).get();
     const badgeDocReferences = badgeIdsSnapshot.docs.map((doc) => {
       const badgeId = doc.get("badgeId");
@@ -53,8 +46,8 @@ async function fetchUserBadges(username) {
     // INFO: getAll accepts unpacked array
     // TODO: check getAll limitiations
     const badgesSnapshot = await firestore.getAll(...badgeDocReferences);
-    badges = badgesSnapshot.map((doc) => convertFirebaseDocumentToBadgeDocument(doc.id, doc.data()));
-    return { userExists: true, badges };
+    const badges = badgesSnapshot.map((doc) => convertFirebaseDocumentToBadgeDocument(doc.id, doc.data()));
+    return { badges };
   } catch (err) {
     logger.error(MODEL_ERROR_MESSAGES.fetchUserBadges, err);
     throw Error(err?.message ?? MODEL_ERROR_MESSAGES.fetchUserBadges);
@@ -69,7 +62,7 @@ async function fetchUserBadges(username) {
 async function createBadge(badgeInfo) {
   try {
     const createdAt = admin.firestore.Timestamp.now();
-    // INFO: check if description is missing
+    // INFO: description is optional
     const description = badgeInfo.description ?? "";
     const docRef = await badgeModel.add({
       ...badgeInfo,

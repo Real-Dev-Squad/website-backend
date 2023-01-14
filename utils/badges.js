@@ -1,3 +1,5 @@
+const { ERROR_MESSAGES } = require("../constants/badges");
+const { fetchUser } = require("../models/users");
 const firestore = require("./firestore");
 const userBadgeModel = firestore.collection("userBadges");
 
@@ -65,8 +67,22 @@ async function assignUnassignBadgesInBulk({ userId, array, isUnassign = false })
   return await bulkWriter.close();
 }
 
+/**
+ * Checks is user-exists, if exists return userId else throw error
+ * @param  username {string}
+ * @return {Promise}: <Promise<string>> returns userId
+ */
+async function getUserId(username) {
+  const userInfo = fetchUser({ username });
+  if (!userInfo.userExists) {
+    throw Error(ERROR_MESSAGES.misc.userDoesNotExist);
+  }
+  return userInfo.user.id;
+}
+
 module.exports = {
   convertFirebaseDocumentToBadgeDocument,
   convertFirebaseTimestampToDateTime,
   assignUnassignBadgesInBulk,
+  getUserId,
 };

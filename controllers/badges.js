@@ -1,9 +1,9 @@
 const { ERROR_MESSAGES, SUCCESS_MESSAGES } = require("../constants/badges");
-const { controllers: CONTROLLERS_ERROR_MESSAGES, misc: MISC_ERROR_MESSAGES } = ERROR_MESSAGES;
+const { controllers: CONTROLLERS_ERROR_MESSAGES } = ERROR_MESSAGES;
 const { controllers: CONTROLLERS_SUCCESS_MESSAGES } = SUCCESS_MESSAGES;
 const badgeQuery = require("../models/badges");
-const { fetchUser } = require("../models/users");
 const imageService = require("../services/imageService");
+const { getUserId } = require("../utils/badges");
 
 /**
  * Get badges data
@@ -32,10 +32,8 @@ const getBadges = async (req, res) => {
  */
 async function getUserBadges(req, res) {
   try {
-    const { userExists, badges } = await badgeQuery.fetchUserBadges(req.params.username);
-    if (!userExists) {
-      return res.boom.notFound(MISC_ERROR_MESSAGES.userDoesNotExist);
-    }
+    const userId = getUserId(req.params.username);
+    const { badges } = await badgeQuery.fetchUserBadges(userId);
     return res.json({ message: CONTROLLERS_SUCCESS_MESSAGES.getUserBadges, badges });
   } catch (error) {
     logger.error(`${CONTROLLERS_ERROR_MESSAGES.getUserBadges}: ${error}`);
@@ -73,16 +71,13 @@ async function postBadge(req, res) {
  * @param res {Object} - Express response object
  * @returns {Object}: <message: string> - badges assigned
  */
+// INFO: badgeIds are not validated, hence user can be assigned same badge multiple times
+// TODO: add check for isBadgeIdExsist
 async function postUserBadges(req, res) {
   try {
-    // INFO: badgeIds are not validated
     const { username } = req.params;
     const { badgeIds } = req.body;
-    const result = await fetchUser({ username });
-    if (!result.userExists) {
-      throw new Error(MISC_ERROR_MESSAGES.userDoesNotExist);
-    }
-    const userId = result.user.id;
+    const userId = getUserId(username);
     await badgeQuery.assignBadges({ userId, badgeIds });
     return res.json({
       message: CONTROLLERS_SUCCESS_MESSAGES.postUserBadges,
@@ -103,11 +98,7 @@ async function deleteUserBadges(req, res) {
   try {
     const { username } = req.params;
     const { badgeIds } = req.body;
-    const result = await fetchUser({ username });
-    if (!result.userExists) {
-      throw new Error(MISC_ERROR_MESSAGES.userDoesNotExist);
-    }
-    const userId = result.user.id;
+    const userId = getUserId(username);
     await badgeQuery.unAssignBadges({ userId, badgeIds });
     return res.json({
       message: CONTROLLERS_SUCCESS_MESSAGES.deleteUserBadges,
