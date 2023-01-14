@@ -73,7 +73,7 @@ async function assignUnassignBadgesInBulk({ userId, array, isUnassign = false })
  * @return {Promise}: <Promise<string>> returns userId
  */
 async function getUserId(username) {
-  const userInfo = fetchUser({ username });
+  const userInfo = await fetchUser({ username });
   if (!userInfo.userExists) {
     throw Error(ERROR_MESSAGES.misc.userDoesNotExist);
   }

@@ -20,7 +20,7 @@ const ERROR_MESSAGES = {
   },
   validators: {
     createBadge: {
-      fileisMissing: "Badge image, File is missing",
+      fileisMissing: "Badge image file is missing",
       validatonFailed: "Error validating createBadge payload",
     },
     assignOrUnassignBadges: {

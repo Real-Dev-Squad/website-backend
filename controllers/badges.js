@@ -32,7 +32,7 @@ const getBadges = async (req, res) => {
  */
 async function getUserBadges(req, res) {
   try {
-    const userId = getUserId(req.params.username);
+    const userId = await getUserId(req.params.username);
     const { badges } = await badgeQuery.fetchUserBadges(userId);
     return res.json({ message: CONTROLLERS_SUCCESS_MESSAGES.getUserBadges, badges });
   } catch (error) {
@@ -77,7 +77,7 @@ async function postUserBadges(req, res) {
   try {
     const { username } = req.params;
     const { badgeIds } = req.body;
-    const userId = getUserId(username);
+    const userId = await getUserId(username);
     await badgeQuery.assignBadges({ userId, badgeIds });
     return res.json({
       message: CONTROLLERS_SUCCESS_MESSAGES.postUserBadges,
@@ -98,7 +98,7 @@ async function deleteUserBadges(req, res) {
   try {
     const { username } = req.params;
     const { badgeIds } = req.body;
-    const userId = getUserId(username);
+    const userId = await getUserId(username);
     await badgeQuery.unAssignBadges({ userId, badgeIds });
     return res.json({
       message: CONTROLLERS_SUCCESS_MESSAGES.deleteUserBadges,
