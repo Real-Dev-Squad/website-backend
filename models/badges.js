@@ -3,7 +3,16 @@ const firestore = require("../utils/firestore");
 const badgeModel = firestore.collection("badges");
 const userBadgeModel = firestore.collection("userBadges");
 const { fetchUser } = require("../models/users");
-const { convertFirebaseTimestampToDateTime, convertFirebaseDocumentToBadgeDocument } = require("../utils/badges");
+const {
+  convertFirebaseTimestampToDateTime,
+  convertFirebaseDocumentToBadgeDocument,
+  assignUnassignBadgesInBulk,
+} = require("../utils/badges");
+const { chunks } = require("../utils/array");
+const { DOCUMENT_WRITE_SIZE } = require("../constants/badges");
+
+// TODO: throw error
+// TODO: use constants for literal/raw strings
 
 /**
  * Fetches the data about our badges
@@ -81,20 +90,13 @@ async function createBadge(badgeInfo) {
 /**
  * assign badges to user
  * @param { Object }: userId: string and badgeIds: Array<string>
- * @return {Promise<{docIds: Array<string>}|Object>}
+ * @return { Promise<void> }
  */
 async function assignBadges({ userId, badgeIds }) {
   try {
-    const docIds = [];
-    const batch = firestore.batch();
-    badgeIds.forEach((badgeId) => {
-      const ref = userBadgeModel.doc();
-      const id = ref.id;
-      batch.create(ref, { userId, badgeId });
-      docIds.push(id);
-    });
-    await batch.commit();
-    return { docIds };
+    const badgeIdsChunks = chunks(badgeIds, DOCUMENT_WRITE_SIZE);
+    const bulkWriterBatches = badgeIdsChunks.map((value) => assignUnassignBadgesInBulk({ userId, array: value }));
+    return await Promise.all(bulkWriterBatches);
   } catch (err) {
     logger.error("Error assigning badges", err);
     return err;
@@ -104,19 +106,18 @@ async function assignBadges({ userId, badgeIds }) {
 /**
  * unassign badges from user
  * @param { Object }: userId: string and badgeIds: Array<string>
- * @return {Promise<{docIds: Array<string>}|Object>}
+ * @return {Promise<void>}
  */
 async function unAssignBadges({ userId, badgeIds }) {
   try {
-    const docIds = [];
     const snapshot = await userBadgeModel.where("userId", "==", userId).where("badgeId", "in", badgeIds).get();
-    const batch = firestore.batch();
-    snapshot.forEach((doc) => {
-      docIds.push(doc.id);
-      batch.delete(doc.ref);
-    });
-    await batch.commit();
-    return { docIds };
+    // TODO: handle snapshot empty
+    const documentRefferences = snapshot.docs.map((doc) => doc.ref);
+    const documentsRefferencesChunks = chunks(documentRefferences, DOCUMENT_WRITE_SIZE);
+    const bulkWriterBatches = documentsRefferencesChunks.map((value) =>
+      assignUnassignBadgesInBulk({ userId, array: value, isUnassign: true })
+    );
+    return await Promise.all(bulkWriterBatches);
   } catch (err) {
     logger.error("Error un-assigning badges", err);
     return err;
