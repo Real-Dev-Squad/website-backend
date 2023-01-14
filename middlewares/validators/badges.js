@@ -1,4 +1,6 @@
 const joi = require("joi");
+const { ERROR_MESSAGES } = require("../../constants/badges");
+const { validators: VALIDATORS_ERROR_MESSAGES } = ERROR_MESSAGES;
 const logger = require("../../utils/logger");
 
 /**
@@ -19,13 +21,15 @@ async function createBadge(req, res, next) {
   try {
     // TODO: add strong file check
     if (!req.file) {
-      throw new Error("file is required");
+      throw new Error(VALIDATORS_ERROR_MESSAGES.createBadge.fileisMissing);
     }
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
-    logger.error(`Error validating createBadge payload: ${error}`);
-    res.boom.badRequest(`API payload failed validation, ${error.details?.[0]?.message ?? error?.message}`);
+    logger.error(`${VALIDATORS_ERROR_MESSAGES.createBadge.validatonFailed}: ${error}`);
+    res.boom.badRequest(
+      `${VALIDATORS_ERROR_MESSAGES.apiPayloadValidationFailed}, ${error.details?.[0]?.message ?? error?.message}`
+    );
   }
 }
 
@@ -49,8 +53,8 @@ async function assignOrUnassignBadges(req, res, next) {
     await schema.validateAsync({ username, badgeIds });
     next();
   } catch (error) {
-    logger.error(`Error validating assign or unassign badges payload: ${error}`);
-    res.boom.badRequest(`API payload failed validation, ${error.details?.[0]?.message}`);
+    logger.error(`${VALIDATORS_ERROR_MESSAGES.assignOrUnassignBadges.validatonFailed}: ${error}`);
+    res.boom.badRequest(`${VALIDATORS_ERROR_MESSAGES.apiPayloadValidationFailed}, ${error.details?.[0]?.message}`);
   }
 }
 

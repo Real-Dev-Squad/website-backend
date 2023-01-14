@@ -1,3 +1,6 @@
+const { ERROR_MESSAGES, SUCCESS_MESSAGES } = require("../constants/badges");
+const { controllers: CONTROLLERS_ERROR_MESSAGES, misc: MISC_ERROR_MESSAGES } = ERROR_MESSAGES;
+const { controllers: CONTROLLERS_SUCCESS_MESSAGES } = SUCCESS_MESSAGES;
 const badgeQuery = require("../models/badges");
 const { fetchUser } = require("../models/users");
 const imageService = require("../services/imageService");
@@ -6,18 +9,18 @@ const imageService = require("../services/imageService");
  * Get badges data
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
- * @returns {Array} - Return badges
+ * @returns {Object}: <badges: Array<badge>, message: string> - Returns badges
  */
 const getBadges = async (req, res) => {
   try {
     const allBadges = await badgeQuery.fetchBadges(req.query);
     return res.json({
-      message: "Badges returned successfully!",
+      message: CONTROLLERS_SUCCESS_MESSAGES.getBadges,
       badges: allBadges,
     });
   } catch (error) {
-    logger.error(`Error while fetching all badges: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    logger.error(`${CONTROLLERS_ERROR_MESSAGES.getBadges}: ${error}`);
+    return res.boom.badRequest(CONTROLLERS_ERROR_MESSAGES.getBadges);
   }
 };
 
@@ -25,18 +28,18 @@ const getBadges = async (req, res) => {
  * Get user badges
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
- * @returns {Array} - Return user badges
+ * @returns {Object}: <badges: Array<badge>, message: string> - Return user badges
  */
 async function getUserBadges(req, res) {
   try {
     const { userExists, badges } = await badgeQuery.fetchUserBadges(req.params.username);
     if (!userExists) {
-      return res.boom.notFound("The user does not exist");
+      return res.boom.notFound(MISC_ERROR_MESSAGES.userDoesNotExist);
     }
-    return res.json({ message: "Badges returned succesfully", badges });
+    return res.json({ message: CONTROLLERS_SUCCESS_MESSAGES.getUserBadges, badges });
   } catch (error) {
-    logger.error(`Error while fetching all user badges: ${error}`);
-    return res.boom.badRequest("Failed to get user badges.");
+    logger.error(`${CONTROLLERS_ERROR_MESSAGES.getUserBadges}: ${error}`);
+    return res.boom.badRequest(`${CONTROLLERS_ERROR_MESSAGES.getUserBadges}: ${error?.message}`);
   }
 }
 
@@ -44,7 +47,7 @@ async function getUserBadges(req, res) {
  * Create new badge
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
- * @returns {Object} - Return badge object if formdata is valid
+ * @returns {Object}: <badge, message: string> - Return badge object
  */
 async function postBadge(req, res) {
   try {
@@ -55,12 +58,12 @@ async function postBadge(req, res) {
       imageUrl,
     });
     return res.json({
-      message: "Badge created successfully.",
+      message: CONTROLLERS_SUCCESS_MESSAGES.postBadge,
       badge,
     });
   } catch (error) {
-    logger.error(`Error while creating badge: ${error}`);
-    return res.boom.badRequest(`Failed to create badge: ${error?.message}`);
+    logger.error(`${CONTROLLERS_ERROR_MESSAGES.postBadge}: ${error}`);
+    return res.boom.badRequest(`${CONTROLLERS_ERROR_MESSAGES.postBadge}: ${error?.message}`);
   }
 }
 
@@ -68,7 +71,7 @@ async function postBadge(req, res) {
  * Assign badges
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
- * @returns {message} - badges assigned
+ * @returns {Object}: <message: string> - badges assigned
  */
 async function postUserBadges(req, res) {
   try {
@@ -77,16 +80,16 @@ async function postUserBadges(req, res) {
     const { badgeIds } = req.body;
     const result = await fetchUser({ username });
     if (!result.userExists) {
-      throw new Error("Failed to assign badges, user does not exsit");
+      throw new Error(MISC_ERROR_MESSAGES.userDoesNotExist);
     }
     const userId = result.user.id;
     await badgeQuery.assignBadges({ userId, badgeIds });
     return res.json({
-      message: "Badges assigned successfully.",
+      message: CONTROLLERS_SUCCESS_MESSAGES.postUserBadges,
     });
   } catch (error) {
-    logger.error(`Error while assigning badge: ${error}`);
-    return res.boom.badRequest(`Failed to assign badges: ${error?.message}`);
+    logger.error(`${CONTROLLERS_ERROR_MESSAGES.postUserBadges}: ${error}`);
+    return res.boom.badRequest(`${CONTROLLERS_ERROR_MESSAGES.postUserBadges}: ${error?.message}`);
   }
 }
 
@@ -94,25 +97,24 @@ async function postUserBadges(req, res) {
  * Unassign badges
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
- * @returns {message} - badges unassigned
+ * @returns {Object}: <message: string> - badges unassigned
  */
 async function deleteUserBadges(req, res) {
   try {
-    // INFO: badgeIds are not validated
     const { username } = req.params;
     const { badgeIds } = req.body;
     const result = await fetchUser({ username });
     if (!result.userExists) {
-      throw new Error("Failed to delete badges, user does not exsit");
+      throw new Error(MISC_ERROR_MESSAGES.userDoesNotExist);
     }
     const userId = result.user.id;
     await badgeQuery.unAssignBadges({ userId, badgeIds });
     return res.json({
-      message: "Badges un-assigned successfully.",
+      message: CONTROLLERS_SUCCESS_MESSAGES.deleteUserBadges,
     });
   } catch (error) {
-    logger.error(`Error while unassigning badge: ${error}`);
-    return res.boom.badRequest(`Failed to unassign badges: ${error?.message}`);
+    logger.error(`${CONTROLLERS_ERROR_MESSAGES.deleteUserBadges}: ${error}`);
+    return res.boom.badRequest(`${CONTROLLERS_ERROR_MESSAGES.deleteUserBadges}: ${error?.message}`);
   }
 }
 
