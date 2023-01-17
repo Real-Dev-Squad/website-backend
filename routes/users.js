@@ -6,6 +6,7 @@ const users = require("../controllers/users");
 const { SUPERUSER } = require("../constants/roles");
 const userValidator = require("../middlewares/validators/user");
 const { upload } = require("../utils/multer");
+const { getUserBadges } = require("../controllers/badges");
 
 router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
@@ -18,6 +19,7 @@ router.get("/:username", users.getUser);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
 router.post("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);
 router.get("/:id/skills", users.getUserSkills);
+router.get("/:id/badges", getUserBadges);
 
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post("/picture", authenticate, upload.single("profile"), users.postUserPicture);
