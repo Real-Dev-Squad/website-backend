@@ -1,42 +1,42 @@
 const DOCUMENT_WRITE_SIZE = 500;
 
 const ERROR_MESSAGES = {
-  models: {
-    unassignBadges: "Error un-assigning badges",
-    assignBadges: "Error assigning badges",
-    createBadge: "Error creating badge",
-    fetchUserBadges: "Error fetching all user badges",
-    fetchBadges: "Error fetching badges",
+  MODELS: {
+    UNASSIGN_BADGES: "Error un-assigning badges",
+    ASSIGN_BADGES: "Error assigning badges",
+    CREATE_BADGE: "Error creating badge",
+    FETCH_USER_BADGES: "Error fetching all user badges",
+    FETCH_BADGES: "Error fetching badges",
   },
-  controllers: {
-    deleteUserBadges: "Failed to unassign badges",
-    postUserBadges: "Failed to assign badges",
-    postBadge: "Failed to create badge",
-    getUserBadges: "Failed to get user badges",
-    getBadges: "Failed to get all badges.",
+  CONTROLLERS: {
+    DELETE_USER_BADGES: "Failed to unassign badges",
+    POST_USER_BADGES: "Failed to assign badges",
+    POST_BADGE: "Failed to create badge",
+    GET_USER_BADGES: "Failed to get user badges",
+    GET_BADGES: "Failed to get all badges.",
   },
-  misc: {
-    userDoesNotExist: "The User does not exsit",
+  MISC: {
+    USER_ID_DOES_NOT_EXIST: "The User-Id does not exsit",
   },
-  validators: {
-    createBadge: {
-      fileisMissing: "Badge image file is missing",
-      validatonFailed: "Error validating createBadge payload",
+  VALIDATORS: {
+    CREATE_BADGE: {
+      FILE_IS_MISSING: "Badge image file is missing",
+      VALIDATON_FAILED: "Error validating createBadge payload",
     },
-    assignOrUnassignBadges: {
-      validatonFailed: "Error validating assign or unassign badges payload",
+    ASSIGN_OR_UNASSIGN_BADGES: {
+      VALIDATON_FAILED: "Error validating assign or unassign badges payload",
     },
-    apiPayloadValidationFailed: "API payload failed validation",
+    API_PAYLOAD_VALIDATION_FAILED: "API payload failed validation",
   },
 };
 
 const SUCCESS_MESSAGES = {
-  controllers: {
-    deleteUserBadges: "Badges un-assigned successfully",
-    postUserBadges: "Badges assigned successfully",
-    postBadge: "Badge created successfully",
-    getUserBadges: "User Badges returned succesfully",
-    getBadges: "Badges returned successfully",
+  CONTROLLERS: {
+    DELETE_USER_BADGES: "Badges un-assigned successfully",
+    POST_USER_BADGES: "Badges assigned successfully",
+    POST_BADGE: "Badge created successfully",
+    GET_USER_BADGES: "User Badges returned succesfully",
+    GET_BADGES: "Badges returned successfully",
   },
 };
 
