@@ -1,9 +1,9 @@
 const { ERROR_MESSAGES, SUCCESS_MESSAGES } = require("../constants/badges");
-const { controllers: CONTROLLERS_ERROR_MESSAGES } = ERROR_MESSAGES;
-const { controllers: CONTROLLERS_SUCCESS_MESSAGES } = SUCCESS_MESSAGES;
+const { CONTROLLERS: CONTROLLERS_ERROR_MESSAGES } = ERROR_MESSAGES;
+const { CONTROLLERS: CONTROLLERS_SUCCESS_MESSAGES } = SUCCESS_MESSAGES;
 const badgeQuery = require("../models/badges");
+const { fetchUser } = require("../models/users");
 const imageService = require("../services/imageService");
-const { getUserId } = require("../utils/badges");
 
 /**
  * Get badges data
@@ -15,12 +15,12 @@ const getBadges = async (req, res) => {
   try {
     const allBadges = await badgeQuery.fetchBadges(req.query);
     return res.json({
-      message: CONTROLLERS_SUCCESS_MESSAGES.getBadges,
+      message: CONTROLLERS_SUCCESS_MESSAGES.GET_BADGES,
       badges: allBadges,
     });
   } catch (error) {
-    logger.error(`${CONTROLLERS_ERROR_MESSAGES.getBadges}: ${error}`);
-    return res.boom.badRequest(CONTROLLERS_ERROR_MESSAGES.getBadges);
+    logger.error(`${CONTROLLERS_ERROR_MESSAGES.GET_BADGES}: ${error}`);
+    return res.boom.badRequest(CONTROLLERS_ERROR_MESSAGES.GET_BADGES);
   }
 };
 
@@ -32,12 +32,12 @@ const getBadges = async (req, res) => {
  */
 async function getUserBadges(req, res) {
   try {
-    const userId = await getUserId(req.params.username);
+    const userId = req.params.id;
     const { badges } = await badgeQuery.fetchUserBadges(userId);
-    return res.json({ message: CONTROLLERS_SUCCESS_MESSAGES.getUserBadges, badges });
+    return res.json({ message: CONTROLLERS_SUCCESS_MESSAGES.GET_USER_BADGES, badges });
   } catch (error) {
-    logger.error(`${CONTROLLERS_ERROR_MESSAGES.getUserBadges}: ${error}`);
-    return res.boom.badRequest(`${CONTROLLERS_ERROR_MESSAGES.getUserBadges}: ${error?.message}`);
+    logger.error(`${CONTROLLERS_ERROR_MESSAGES.GET_USER_BADGES}: ${error}`);
+    return res.boom.badRequest(`${CONTROLLERS_ERROR_MESSAGES.GET_USER_BADGES}: ${error?.message}`);
   }
 }
 
@@ -56,12 +56,12 @@ async function postBadge(req, res) {
       imageUrl,
     });
     return res.json({
-      message: CONTROLLERS_SUCCESS_MESSAGES.postBadge,
+      message: CONTROLLERS_SUCCESS_MESSAGES.POST_BADGE,
       badge,
     });
   } catch (error) {
-    logger.error(`${CONTROLLERS_ERROR_MESSAGES.postBadge}: ${error}`);
-    return res.boom.badRequest(`${CONTROLLERS_ERROR_MESSAGES.postBadge}: ${error?.message}`);
+    logger.error(`${CONTROLLERS_ERROR_MESSAGES.POST_BADGE}: ${error}`);
+    return res.boom.badRequest(`${CONTROLLERS_ERROR_MESSAGES.POST_BADGE}: ${error?.message}`);
   }
 }
 
@@ -75,16 +75,18 @@ async function postBadge(req, res) {
 // TODO: add check for isBadgeIdExsist
 async function postUserBadges(req, res) {
   try {
-    const { username } = req.params;
-    const { badgeIds } = req.body;
-    const userId = await getUserId(username);
+    const { badgeIds, userId } = req.body;
+    const { userExists } = await fetchUser({ userId });
+    if (!userExists) {
+      throw Error(ERROR_MESSAGES.misc.userIdDoesNotExist);
+    }
     await badgeQuery.assignBadges({ userId, badgeIds });
     return res.json({
-      message: CONTROLLERS_SUCCESS_MESSAGES.postUserBadges,
+      message: CONTROLLERS_SUCCESS_MESSAGES.POST_USER_BADGES,
     });
   } catch (error) {
-    logger.error(`${CONTROLLERS_ERROR_MESSAGES.postUserBadges}: ${error}`);
-    return res.boom.badRequest(`${CONTROLLERS_ERROR_MESSAGES.postUserBadges}: ${error?.message}`);
+    logger.error(`${CONTROLLERS_ERROR_MESSAGES.POST_USER_BADGES}: ${error}`);
+    return res.boom.badRequest(`${CONTROLLERS_ERROR_MESSAGES.POST_USER_BADGES}: ${error?.message}`);
   }
 }
 
@@ -96,16 +98,14 @@ async function postUserBadges(req, res) {
  */
 async function deleteUserBadges(req, res) {
   try {
-    const { username } = req.params;
-    const { badgeIds } = req.body;
-    const userId = await getUserId(username);
+    const { badgeIds, userId } = req.body;
     await badgeQuery.unAssignBadges({ userId, badgeIds });
     return res.json({
-      message: CONTROLLERS_SUCCESS_MESSAGES.deleteUserBadges,
+      message: CONTROLLERS_SUCCESS_MESSAGES.DELETE_USER_BADGES,
     });
   } catch (error) {
-    logger.error(`${CONTROLLERS_ERROR_MESSAGES.deleteUserBadges}: ${error}`);
-    return res.boom.badRequest(`${CONTROLLERS_ERROR_MESSAGES.deleteUserBadges}: ${error?.message}`);
+    logger.error(`${CONTROLLERS_ERROR_MESSAGES.DELETE_USER_BADGES}: ${error}`);
+    return res.boom.badRequest(`${CONTROLLERS_ERROR_MESSAGES.DELETE_USER_BADGES}: ${error?.message}`);
   }
 }
 

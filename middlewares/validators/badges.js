@@ -1,6 +1,8 @@
 const joi = require("joi");
 const { ERROR_MESSAGES } = require("../../constants/badges");
-const { validators: VALIDATORS_ERROR_MESSAGES } = ERROR_MESSAGES;
+const {
+  VALIDATORS: { CREATE_BADGE, ASSIGN_OR_UNASSIGN_BADGES, API_PAYLOAD_VALIDATION_FAILED },
+} = ERROR_MESSAGES;
 const logger = require("../../utils/logger");
 
 /**
@@ -21,15 +23,13 @@ async function createBadge(req, res, next) {
   try {
     // TODO: add strong file check
     if (!req.file) {
-      throw new Error(VALIDATORS_ERROR_MESSAGES.createBadge.fileisMissing);
+      throw new Error(CREATE_BADGE.FILE_IS_MISSING);
     }
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
-    logger.error(`${VALIDATORS_ERROR_MESSAGES.createBadge.validatonFailed}: ${error}`);
-    res.boom.badRequest(
-      `${VALIDATORS_ERROR_MESSAGES.apiPayloadValidationFailed}, ${error.details?.[0]?.message ?? error?.message}`
-    );
+    logger.error(`${CREATE_BADGE.VALIDATON_FAILED}: ${error}`);
+    res.boom.badRequest(`${API_PAYLOAD_VALIDATION_FAILED}, ${error.details?.[0]?.message ?? error?.message}`);
   }
 }
 
@@ -44,17 +44,16 @@ async function assignOrUnassignBadges(req, res, next) {
     .object()
     .strict()
     .keys({
-      username: joi.string().required(),
+      userId: joi.string().required(),
       badgeIds: joi.array().min(1).items(joi.string().required()).unique().required(),
     });
   try {
-    const { username } = req.params;
-    const { badgeIds } = req.body;
-    await schema.validateAsync({ username, badgeIds });
+    const { badgeIds, userId } = req.body;
+    await schema.validateAsync({ userId, badgeIds });
     next();
   } catch (error) {
-    logger.error(`${VALIDATORS_ERROR_MESSAGES.assignOrUnassignBadges.validatonFailed}: ${error}`);
-    res.boom.badRequest(`${VALIDATORS_ERROR_MESSAGES.apiPayloadValidationFailed}, ${error.details?.[0]?.message}`);
+    logger.error(`${ASSIGN_OR_UNASSIGN_BADGES.VALIDATON_FAILED}: ${error}`);
+    res.boom.badRequest(`${API_PAYLOAD_VALIDATION_FAILED}, ${error.details?.[0]?.message}`);
   }
 }
 

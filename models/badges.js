@@ -9,7 +9,7 @@ const {
 } = require("../utils/badges");
 const { chunks } = require("../utils/array");
 const { DOCUMENT_WRITE_SIZE, ERROR_MESSAGES } = require("../constants/badges");
-const MODEL_ERROR_MESSAGES = ERROR_MESSAGES.models;
+const MODEL_ERROR_MESSAGES = ERROR_MESSAGES.MODELS;
 
 /**
  * Fetches the data about our badges
@@ -26,19 +26,23 @@ const fetchBadges = async ({ size = 100, page = 0 }) => {
     // https://stackoverflow.com/a/66292255
     return snapshot.docs.map((doc) => convertFirebaseDocumentToBadgeDocument(doc.id, doc.data()));
   } catch (err) {
-    logger.error(MODEL_ERROR_MESSAGES.fetchBadges, err);
-    throw Error(err?.message ?? MODEL_ERROR_MESSAGES.fetchBadges);
+    logger.error(MODEL_ERROR_MESSAGES.FETCH_BADGES, err);
+    throw Error(err?.message ?? MODEL_ERROR_MESSAGES.FETCH_BADGES);
   }
 };
 
 /**
  * Fetches the data about user badges
  * @param userId <string>: Filter for badges data
- * @return {Promise}: <{badges: Array<badge>, userExists: boolean}> returns badges array and userExists boolean
+ * @return {Promise}: <{badges: Array<badge>} returns badges array
  */
 async function fetchUserBadges(userId) {
   try {
     const badgeIdsSnapshot = await userBadgeModel.where("userId", "==", userId).get();
+    // INFO: if userId is incorrect it returns success response
+    if (badgeIdsSnapshot.empty) {
+      return { badges: [] };
+    }
     const badgeDocReferences = badgeIdsSnapshot.docs.map((doc) => {
       const badgeId = doc.get("badgeId");
       return firestore.doc(`badges/${badgeId}`);
@@ -49,8 +53,8 @@ async function fetchUserBadges(userId) {
     const badges = badgesSnapshot.map((doc) => convertFirebaseDocumentToBadgeDocument(doc.id, doc.data()));
     return { badges };
   } catch (err) {
-    logger.error(MODEL_ERROR_MESSAGES.fetchUserBadges, err);
-    throw Error(err?.message ?? MODEL_ERROR_MESSAGES.fetchUserBadges);
+    logger.error(MODEL_ERROR_MESSAGES.FETCH_USER_BADGES, err);
+    throw Error(err?.message ?? MODEL_ERROR_MESSAGES.FETCH_USER_BADGES);
   }
 }
 
@@ -74,8 +78,8 @@ async function createBadge(badgeInfo) {
     const data = snapshot.data();
     return { id: docRef.id, ...data, createdAt: { date, time } };
   } catch (err) {
-    logger.error(MODEL_ERROR_MESSAGES.createBadge, err);
-    throw Error(err?.message ?? MODEL_ERROR_MESSAGES.createBadge);
+    logger.error(MODEL_ERROR_MESSAGES.CREATE_BADGE, err);
+    throw Error(err?.message ?? MODEL_ERROR_MESSAGES.CREATE_BADGE);
   }
 }
 
@@ -90,8 +94,8 @@ async function assignBadges({ userId, badgeIds }) {
     const bulkWriterBatches = badgeIdsChunks.map((value) => assignUnassignBadgesInBulk({ userId, array: value }));
     return await Promise.all(bulkWriterBatches);
   } catch (err) {
-    logger.error(MODEL_ERROR_MESSAGES.assignBadges, err);
-    throw Error(err?.message ?? MODEL_ERROR_MESSAGES.assignBadges);
+    logger.error(MODEL_ERROR_MESSAGES.ASSIGN_BADGES, err);
+    throw Error(err?.message ?? MODEL_ERROR_MESSAGES.ASSIGN_BADGES);
   }
 }
 
@@ -103,7 +107,10 @@ async function assignBadges({ userId, badgeIds }) {
 async function unAssignBadges({ userId, badgeIds }) {
   try {
     const snapshot = await userBadgeModel.where("userId", "==", userId).where("badgeId", "in", badgeIds).get();
-    // TODO: handle snapshot empty early-return
+    // INFO[Promise.resolve]: trick to silent eslint: consistent-return
+    if (snapshot.empty) {
+      return Promise.resolve();
+    }
     const documentRefferences = snapshot.docs.map((doc) => doc.ref);
     const documentsRefferencesChunks = chunks(documentRefferences, DOCUMENT_WRITE_SIZE);
     const bulkWriterBatches = documentsRefferencesChunks.map((value) =>
@@ -111,8 +118,8 @@ async function unAssignBadges({ userId, badgeIds }) {
     );
     return await Promise.all(bulkWriterBatches);
   } catch (err) {
-    logger.error(MODEL_ERROR_MESSAGES.unassignBadges, err);
-    throw Error(err?.message ?? MODEL_ERROR_MESSAGES.unassignBadges);
+    logger.error(MODEL_ERROR_MESSAGES.UNASSIGN_BADGES, err);
+    throw Error(err?.message ?? MODEL_ERROR_MESSAGES.UNASSIGN_BADGES);
   }
 }
 
