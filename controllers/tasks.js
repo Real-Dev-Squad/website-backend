@@ -4,7 +4,7 @@ const { addLog } = require("../models/logs");
 const { USER_STATUS } = require("../constants/users");
 const { addOrUpdate } = require("../models/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
+const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED, MERGED, COMPLETED, RELEASED, VERIFIED } = TASK_STATUS;
 /**
  * Creates new task
  *
@@ -247,6 +247,23 @@ const overdueTasks = async (req, res) => {
   }
 };
 
+const overdueTasksAll = async (req, res) => {
+  try {
+    const overdueTasks = await tasks.overdueTasksAll();
+    const overdueTasksFiltered = overdueTasks.filter(
+      (task) =>
+        task.status !== MERGED || task.status !== COMPLETED || task.status !== RELEASED || task.status !== VERIFIED
+    );
+    return res.json({
+      message: "Overdue Tasks returned successfully!",
+      overdueTasks: overdueTasksFiltered,
+    });
+  } catch (err) {
+    logger.error(`Error while fetching overdue tasks : ${err}`);
+    return res.boom.badImplementation("An internal server error occured");
+  }
+};
+
 const assignTask = async (req, res) => {
   try {
     const { status, username, id: userId } = req.userData;
@@ -279,4 +296,5 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
+  overdueTasksAll,
 };
