@@ -7,8 +7,8 @@ const BADGES = [
     description: "badge 1",
     createdBy: "shmbajaj",
     createdAt: {
-      date: "27 Nov 2022",
-      time: "14:44:20",
+      _seconds: "1234567890",
+      _nanoseconds: "1234567890",
     },
   },
   {
@@ -19,8 +19,8 @@ const BADGES = [
     description: "badge 2",
     createdBy: "shmbajaj",
     createdAt: {
-      date: "27 Nov 2022",
-      time: "14:44:20",
+      _seconds: "1234567890",
+      _nanoseconds: "1234567890",
     },
   },
   {
@@ -31,15 +31,27 @@ const BADGES = [
     description: "badge 3",
     createdBy: "shmbajaj",
     createdAt: {
-      date: "27 Nov 2022",
-      time: "14:44:20",
+      _seconds: "1234567890",
+      _nanoseconds: "1234567890",
     },
   },
 ];
 
+const SOME_RANDOM_USER_ID = "some-random-user-id";
 const CLOUNDINARY_IMAGE_URL = "https://imageUrl.cloudinary.com/badges/something.jpg";
 const LOCAL_IMAGE_FILE_PATH = "/Users/satparkash/Desktop/simple.png";
 const INVALID_USER_ID = "gebbrishUsserID_293";
+
+const ASSIGNED_BADGES = [
+  {
+    userId: SOME_RANDOM_USER_ID,
+    badgeId: "1",
+  },
+  {
+    userId: SOME_RANDOM_USER_ID,
+    badgeId: "2",
+  },
+];
 
 const EXPECTED_BADGE_OBJECT = {
   id: "some-random-badge-id",
@@ -61,4 +73,6 @@ module.exports = {
   CLOUNDINARY_BADGE_IMAGE_UPLOAD_RESPONSE,
   INVALID_USER_ID,
   LOCAL_IMAGE_FILE_PATH,
+  ASSIGNED_BADGES,
+  SOME_RANDOM_USER_ID,
 };

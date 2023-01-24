@@ -29,12 +29,12 @@ const file = fs.readFileSync(fixture.LOCAL_IMAGE_FILE_PATH);
 chai.use(chaiHttp);
 
 describe("Badges", function () {
-  beforeEach(async function () {
+  before(async function () {
     userId = await addUser(superUser);
     jwt = authService.generateAuthToken({ userId });
   });
 
-  afterEach(async function () {
+  after(async function () {
     await cleanDb();
   });
 
@@ -86,7 +86,6 @@ describe("Badges", function () {
           if (error) {
             return done();
           }
-
           expect(response).to.have.status(400);
           expect(response.body.message).to.contains(ERROR_MESSAGES_VALIDATORS.CREATE_BADGE.FILE_IS_MISSING);
           expect(response.body.error).to.equal("Bad Request");
@@ -120,7 +119,7 @@ describe("Badges", function () {
         });
     });
 
-    it("Should return success message, Badge created succesfully and badge-object", function (done) {
+    it("Should return success message, and badge-object", function (done) {
       sinon.stub(imageService, "uploadBadgeImage").returns(fixture.CLOUNDINARY_BADGE_IMAGE_UPLOAD_RESPONSE);
       sinon.stub(model, "createBadge").returns(fixture.EXPECTED_BADGE_OBJECT);
       chai
@@ -172,7 +171,7 @@ describe("Badges", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           userId,
-          badgeIds: ["badgeId1", "badgeId2", "badgeID3"],
+          badgeIds: ["1", "2", "3"],
         })
         .end(function (error, response) {
           if (error) {
@@ -180,6 +179,27 @@ describe("Badges", function () {
           }
           expect(response).to.have.status(200);
           expect(response.body.message).to.equal(SUCCESS_MESSAGES.CONTROLLERS.POST_USER_BADGES);
+          return done();
+        });
+    });
+  });
+
+  describe("DELETE /badges/unassign", function () {
+    it("Should unassign user badges", function (done) {
+      chai
+        .request(app)
+        .delete("/badges/unassign")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          userId: "a-random-user-id",
+          badgeIds: ["1", "2", "3"],
+        })
+        .end(function (error, response) {
+          if (error) {
+            done();
+          }
+          expect(response).to.have.status(200);
+          expect(response.body.message).to.equal(SUCCESS_MESSAGES.CONTROLLERS.DELETE_USER_BADGES);
           return done();
         });
     });
