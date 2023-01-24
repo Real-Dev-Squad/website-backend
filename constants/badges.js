@@ -17,6 +17,7 @@ const ERROR_MESSAGES = {
   },
   MISC: {
     USER_ID_DOES_NOT_EXIST: "The User-Id does not exsit",
+    UNAUTHENTICATED_USER: "Unauthenticated User",
   },
   VALIDATORS: {
     CREATE_BADGE: {
