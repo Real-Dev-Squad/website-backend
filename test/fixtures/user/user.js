@@ -178,5 +178,29 @@ module.exports = () => {
       phone: "1234567890",
       email: "abc@gmail.com",
     },
+    {
+      username: "ritvik",
+      github_id: "RitvikJamwal75",
+      first_name: "Ritvik",
+      yoe: 1,
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
+      incompleteUserDetails: false,
+      status: "active",
+      last_name: "Jamwal",
+      github_display_name: "Ritvik Jamwal",
+      website: "RitvikJamwal75.github.io/portfolio",
+      designation: "Sw Engineer",
+      company: "Goldman Sacks",
+      instagram_id: "ritvikjmwal",
+      roles: {
+        archived: false,
+        member: true,
+      },
+      twitter_id: "RitvikJamwal4u",
+      linkedin_id: "ritvik-jamwal4u",
+    },
   ];
 };

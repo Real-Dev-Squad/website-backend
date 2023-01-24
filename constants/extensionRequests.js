@@ -1,0 +1,9 @@
+const EXTENSION_REQUEST_STATUS = {
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  DENIED: "DENIED",
+};
+
+module.exports = {
+  EXTENSION_REQUEST_STATUS,
+};

@@ -2,20 +2,35 @@ const Joi = require("joi");
 const { userState } = require("../../constants/userStatus");
 const threeDaysInMilliseconds = 172800000;
 
-const validateUpdatedUserStatus = async (req, res, next) => {
+const validateUserStatusData = async (todaysTime, req, res, next) => {
   const schema = Joi.object({
     currentStatus: Joi.object().keys({
-      state: Joi.string().trim().valid(userState.IDLE, userState.ACTIVE, userState.OOO),
+      state: Joi.string()
+        .trim()
+        .valid(userState.IDLE, userState.ACTIVE, userState.OOO)
+        .error(new Error(`Invalid State. State must be either IDLE, ACTIVE or OOO`)),
       updatedAt: Joi.number().required(),
-      from: Joi.number().required(),
+      from: Joi.number()
+        .min(todaysTime)
+        .required()
+        .error(new Error(`The 'from' field must have a value that is either today or a date that follows today.`)),
       until: Joi.any().when("state", {
         is: userState.OOO,
-        then: Joi.number().required(),
+        then: Joi.number()
+          .min(Joi.ref("from"))
+          .required()
+          .error(
+            new Error(
+              `The 'until' field must have a value that is either 'from' date or a date that comes after 'from' day.`
+            )
+          ),
         otherwise: Joi.optional(),
       }),
       message: Joi.when("state", {
         is: userState.IDLE,
-        then: Joi.string().required(),
+        then: Joi.string()
+          .required()
+          .error(new Error(`The value for the 'message' field is mandatory for IDLE State.`)),
         otherwise: Joi.when(Joi.ref("state"), {
           is: userState.OOO,
           then: Joi.when(Joi.ref("until"), {
@@ -24,7 +39,11 @@ const validateUpdatedUserStatus = async (req, res, next) => {
                 adjust: (value) => value + threeDaysInMilliseconds,
               })
             ),
-            then: Joi.string().optional(),
+            then: Joi.string()
+              .optional()
+              .error(
+                new Error(`The value for the 'message' field is mandatory when State is OOO for more than three days.`)
+              ),
             otherwise: Joi.required(),
           }),
           otherwise: Joi.optional(),
@@ -42,10 +61,17 @@ const validateUpdatedUserStatus = async (req, res, next) => {
     next();
   } catch (error) {
     logger.error(`Error validating UserStatus ${error}`);
-    res.boom.badRequest(error.details[0].message);
+    res.boom.badRequest(error);
   }
 };
 
+const validateUserStatus = (req, res, next) => {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const todaysTime = today.getTime();
+  validateUserStatusData(todaysTime, req, res, next);
+};
+
 module.exports = {
-  validateUpdatedUserStatus,
+  validateUserStatus,
 };

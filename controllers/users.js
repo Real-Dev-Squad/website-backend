@@ -331,6 +331,14 @@ const rejectProfileDiff = async (req, res) => {
 const addUserIntro = async (req, res) => {
   try {
     const rawData = req.body;
+    const joinData = await userQuery.getJoinData(req.userData.id);
+
+    if (joinData.length === 1) {
+      return res.status(409).json({
+        message: "User data is already present!",
+      });
+    }
+
     const data = {
       userId: req.userData.id,
       biodata: {
