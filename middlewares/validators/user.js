@@ -23,6 +23,7 @@ const updateUser = async (req, res, next) => {
         .any()
         .valid(...Object.values(USER_STATUS))
         .optional(),
+      discordId: joi.string().optional(),
     });
 
   try {
