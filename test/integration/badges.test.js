@@ -145,4 +145,43 @@ describe("Badges", function () {
         });
     });
   });
+
+  describe("POST /badges/assign", function () {
+    it(`Should return error message ${ERROR_MESSAGES_VALIDATORS.API_PAYLOAD_VALIDATION_FAILED}, userId is missing`, function (done) {
+      chai
+        .request(app)
+        .post("/badges/assign")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end(function (error, response) {
+          if (error) {
+            done();
+          }
+          expect(response).to.have.status(400);
+          expect(response.body.error).to.equal("Bad Request");
+          expect(response.body.message).to.equal(
+            `${ERROR_MESSAGES_VALIDATORS.API_PAYLOAD_VALIDATION_FAILED}, "userId" is required`
+          );
+          return done();
+        });
+    });
+
+    it(`Should validate badgeIds array and assign badges`, function (done) {
+      chai
+        .request(app)
+        .post("/badges/assign")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          userId,
+          badgeIds: ["badgeId1", "badgeId2", "badgeID3"],
+        })
+        .end(function (error, response) {
+          if (error) {
+            done();
+          }
+          expect(response).to.have.status(200);
+          expect(response.body.message).to.equal(SUCCESS_MESSAGES.CONTROLLERS.POST_USER_BADGES);
+          return done();
+        });
+    });
+  });
 });

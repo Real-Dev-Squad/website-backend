@@ -78,7 +78,7 @@ async function postUserBadges(req, res) {
     const { badgeIds, userId } = req.body;
     const { userExists } = await fetchUser({ userId });
     if (!userExists) {
-      throw Error(ERROR_MESSAGES.misc.userIdDoesNotExist);
+      throw Error(ERROR_MESSAGES.MISC.USER_ID_DOES_NOT_EXIST);
     }
     await badgeQuery.assignBadges({ userId, badgeIds });
     return res.json({

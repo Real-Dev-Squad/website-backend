@@ -1,5 +1,6 @@
 const BADGES = [
   {
+    id: 1,
     name: "badge unknown-1",
     imageUrl:
       "https://res.cloudinary.com/dvi5qujxs/image/upload/v1673989588/badge/badge%20unknown-201/dvnc0jhrqojvaznvaevq.webp",
@@ -11,6 +12,7 @@ const BADGES = [
     },
   },
   {
+    id: 2,
     name: "badge unknown-2",
     imageUrl:
       "https://res.cloudinary.com/dvi5qujxs/image/upload/v1673989588/badge/badge%20unknown-201/dvnc0jhrqojvaznvaevq.webp",
@@ -22,6 +24,7 @@ const BADGES = [
     },
   },
   {
+    id: 3,
     name: "badge unknown-3",
     imageUrl:
       "https://res.cloudinary.com/dvi5qujxs/image/upload/v1673989588/badge/badge%20unknown-201/dvnc0jhrqojvaznvaevq.webp",
