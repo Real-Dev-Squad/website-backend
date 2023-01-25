@@ -5,6 +5,7 @@ const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const discordData = require("../fixtures/discord/discord")();
 const botVerifcation = require("../../services/botVerificationService");
+const { BAD_TOKEN } = require("../../constants/bot");
 
 chai.use(chaiHttp);
 
@@ -24,7 +25,7 @@ describe("Discord", function () {
       chai
         .request(app)
         .put("/discord")
-        .set("Authorization", `Bot ${jwtToken}`)
+        .set("Authorization", `Bearer ${jwtToken}`)
         .send(discordData[0])
         .end((err, res) => {
           if (err) {
@@ -42,7 +43,7 @@ describe("Discord", function () {
       chai
         .request(app)
         .put("/discord")
-        .set("Authorization", `Bot ${jwtToken}`)
+        .set("Authorization", `Bearer ${jwtToken}`)
         .send(discordData[1])
         .end((err, res) => {
           if (err) {
@@ -83,7 +84,7 @@ describe("Discord", function () {
       chai
         .request(app)
         .put("/discord")
-        .set("Authorization", "Bot BAD.JWT.TOKEN")
+        .set("Authorization", `Bearer ${BAD_TOKEN}`)
         .send(discordData[0])
         .end((err, res) => {
           if (err) {

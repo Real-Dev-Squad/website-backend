@@ -2,11 +2,12 @@ const authorizeBot = require("../../../middlewares/authorizeBot");
 const sinon = require("sinon");
 const expect = require("chai").expect;
 const botVerifcation = require("../../../services/botVerificationService");
+const { BAD_TOKEN } = require("../../../constants/bot");
 
 describe("Check authorization of bot", function (done) {
   it("return false when token is invalid", function () {
     const request = {
-      headers: "Bot BAD.JWT.TOKEN",
+      headers: `Bearer ${BAD_TOKEN}`,
     };
 
     const response = {
@@ -39,7 +40,7 @@ describe("Check authorization of bot", function (done) {
 
     const request = {
       headers: {
-        authorization: `Bot ${jwtToken}`,
+        authorization: `Bearer ${jwtToken}`,
       },
     };
 

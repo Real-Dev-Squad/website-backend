@@ -1,8 +1,8 @@
-const discordQuery = require("../models/discord");
+const discordModel = require("../models/discord");
 
 const addDiscordData = async (req, res) => {
   try {
-    await discordQuery.addDiscordData(req.body);
+    await discordModel.addDiscordData(req.body);
 
     return res.status(201).json({ message: "Added discord data successfully" });
   } catch (error) {
