@@ -122,6 +122,77 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should get all the users in system when query params are valid", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .query({
+          size: 1,
+          page: 0,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(1);
+          expect(res.body.users[0]).to.not.have.property("phone");
+          expect(res.body.users[0]).to.not.have.property("email");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 bad request when query params are invalid", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .query({
+          size: -1,
+          page: -1,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("size must be in range 1-100");
+          expect(res.body.error).to.equal("Bad Request");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 bad request when query param size is invalid", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .query({
+          size: 101,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("size must be in range 1-100");
+          expect(res.body.error).to.equal("Bad Request");
+
+          return done();
+        });
+    });
   });
 
   describe("GET /users/self", function () {

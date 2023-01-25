@@ -77,8 +77,48 @@ const validateJoinData = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
+
+/**
+ * Validates getting users query
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ * @param next {Object} - Express middelware function
+ */
+async function getUsers(req, res, next) {
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      size: joi
+        .string()
+        .optional()
+        .pattern(/^[1-9]\d?$|^100$/)
+        .messages({
+          "string.empty": "size must contain value in range 1-100",
+          "string.pattern.base": "size must be in range 1-100",
+        }),
+      page: joi
+        .string()
+        .optional()
+        .pattern(/^0$|^[1-9]\d*$/)
+        .messages({
+          "string.empty": "page must contain a positive number or zero",
+          "string.pattern.base": "page value either be a positive number or zero",
+        }),
+    });
+  try {
+    await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    logger.error(`Error in getting users: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+}
+
 module.exports = {
   updateUser,
   updateProfileURL,
   validateJoinData,
+  getUsers,
 };

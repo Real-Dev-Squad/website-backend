@@ -130,9 +130,12 @@ const fetchUsers = async (query) => {
       .endAt(query.search.toLowerCase().trim() + "\uf8ff");
   };
   try {
-    let dbQuery = userModel
-      .limit(parseInt(query.size) || 100)
-      .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0));
+    // INFO: default user size set to 100
+    // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
+    const size = parseInt(query.size) || 100;
+    const page = size * (parseInt(query.page) || 0);
+
+    let dbQuery = userModel.limit(size).offset(page);
     if (Object.keys(query).length) {
       if (query.search) {
         dbQuery = appendUsernamePrefixQuery(dbQuery);
