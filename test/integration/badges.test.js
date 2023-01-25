@@ -2,7 +2,7 @@ const app = require("../../server");
 const chai = require("chai");
 const chaiHttp = require("chai-http");
 const sinon = require("sinon");
-const fs = require("node:fs");
+const { Buffer } = require("node:buffer");
 
 const fixture = require("../fixtures/badges/badges");
 const userData = require("../fixtures/user/user")();
@@ -24,7 +24,6 @@ let userId;
 
 const superUser = userData[4];
 const cookieName = config.get("userToken.cookieName");
-const file = fs.readFileSync(fixture.LOCAL_IMAGE_FILE_PATH);
 
 chai.use(chaiHttp);
 
@@ -39,6 +38,7 @@ describe("Badges", function () {
   });
 
   describe("GET /badges", function () {
+    // TODO: write a more strong test
     it("Should get all the list of badges", function (done) {
       sinon.stub(model, "fetchBadges").returns(fixture.BADGES);
       chai
@@ -95,12 +95,13 @@ describe("Badges", function () {
     });
 
     it("Should return API payload failed validation, createdBy is required", function (done) {
+      // TODO: write a more strong test
       chai
         .request(app)
         .post("/badges")
         .type("form")
         .set("cookie", `${cookieName}=${jwt}`)
-        .attach("file", file, "simple.png")
+        .attach("file", Buffer.from("something", "utf-8"), "simple.png")
         .field({
           name: "badgexRandom",
         })
@@ -108,7 +109,6 @@ describe("Badges", function () {
           if (error) {
             return done();
           }
-
           expect(response).to.have.status(400);
           expect(response.body.message).to.equal(
             `${ERROR_MESSAGES_VALIDATORS.API_PAYLOAD_VALIDATION_FAILED}, "createdBy" is required`
@@ -120,6 +120,7 @@ describe("Badges", function () {
     });
 
     it("Should return success message, and badge-object", function (done) {
+      // TODO: write a more strong test
       sinon.stub(imageService, "uploadBadgeImage").returns(fixture.CLOUNDINARY_BADGE_IMAGE_UPLOAD_RESPONSE);
       sinon.stub(model, "createBadge").returns(fixture.EXPECTED_BADGE_OBJECT);
       chai
@@ -127,7 +128,7 @@ describe("Badges", function () {
         .post("/badges")
         .type("form")
         .set("cookie", `${cookieName}=${jwt}`)
-        .attach("file", file, "simple.png")
+        .attach("file", Buffer.from("something", "utf-8"), "simple.png")
         .field({
           name: "badgeXrandom",
           createdBy: "shmbajaj",

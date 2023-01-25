@@ -37,21 +37,7 @@ const BADGES = [
   },
 ];
 
-const SOME_RANDOM_USER_ID = "some-random-user-id";
 const CLOUNDINARY_IMAGE_URL = "https://imageUrl.cloudinary.com/badges/something.jpg";
-const LOCAL_IMAGE_FILE_PATH = "/Users/satparkash/Desktop/simple.png";
-const INVALID_USER_ID = "gebbrishUsserID_293";
-
-const ASSIGNED_BADGES = [
-  {
-    userId: SOME_RANDOM_USER_ID,
-    badgeId: "1",
-  },
-  {
-    userId: SOME_RANDOM_USER_ID,
-    badgeId: "2",
-  },
-];
 
 const EXPECTED_BADGE_OBJECT = {
   id: "some-random-badge-id",
@@ -71,8 +57,4 @@ module.exports = {
   BADGES,
   EXPECTED_BADGE_OBJECT,
   CLOUNDINARY_BADGE_IMAGE_UPLOAD_RESPONSE,
-  INVALID_USER_ID,
-  LOCAL_IMAGE_FILE_PATH,
-  ASSIGNED_BADGES,
-  SOME_RANDOM_USER_ID,
 };
