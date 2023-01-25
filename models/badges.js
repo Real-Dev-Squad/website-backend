@@ -5,7 +5,7 @@ const userBadgeModel = firestore.collection("userBadges");
 const {
   convertFirebaseTimestampToDateTime,
   convertFirebaseDocumentToBadgeDocument,
-  assignUnassignBadgesInBulk,
+  assignOrRemoveBadgesInBulk,
 } = require("../utils/badges");
 const { chunks } = require("../utils/array");
 const { DOCUMENT_WRITE_SIZE, ERROR_MESSAGES } = require("../constants/badges");
@@ -84,14 +84,14 @@ async function createBadge(badgeInfo) {
 }
 
 /**
- * assign badges to user
+ * assign badges to a user
  * @param { Object }: userId: string and badgeIds: Array<string>
  * @return {Promise}: <Promise<void>> returns void promise
  */
 async function assignBadges({ userId, badgeIds }) {
   try {
     const badgeIdsChunks = chunks(badgeIds, DOCUMENT_WRITE_SIZE);
-    const bulkWriterBatches = badgeIdsChunks.map((value) => assignUnassignBadgesInBulk({ userId, array: value }));
+    const bulkWriterBatches = badgeIdsChunks.map((value) => assignOrRemoveBadgesInBulk({ userId, array: value }));
     return await Promise.all(bulkWriterBatches);
   } catch (err) {
     logger.error(MODEL_ERROR_MESSAGES.ASSIGN_BADGES, err);
@@ -100,11 +100,11 @@ async function assignBadges({ userId, badgeIds }) {
 }
 
 /**
- * unassign badges from user
+ * remove assigned badges from a user
  * @param { Object }: userId: string and badgeIds: Array<string>
  * @return {Promise}: <Promise<void>> returns void promise
  */
-async function unAssignBadges({ userId, badgeIds }) {
+async function removeBadges({ userId, badgeIds }) {
   try {
     const snapshot = await userBadgeModel.where("userId", "==", userId).where("badgeId", "in", badgeIds).get();
     // INFO[Promise.resolve]: trick to silent eslint: consistent-return
@@ -114,12 +114,12 @@ async function unAssignBadges({ userId, badgeIds }) {
     const documentRefferences = snapshot.docs.map((doc) => doc.ref);
     const documentsRefferencesChunks = chunks(documentRefferences, DOCUMENT_WRITE_SIZE);
     const bulkWriterBatches = documentsRefferencesChunks.map((value) =>
-      assignUnassignBadgesInBulk({ userId, array: value, isUnassign: true })
+      assignOrRemoveBadgesInBulk({ userId, array: value, isRemove: true })
     );
     return await Promise.all(bulkWriterBatches);
   } catch (err) {
-    logger.error(MODEL_ERROR_MESSAGES.UNASSIGN_BADGES, err);
-    throw Error(err?.message ?? MODEL_ERROR_MESSAGES.UNASSIGN_BADGES);
+    logger.error(MODEL_ERROR_MESSAGES.REMOVE_BADGES, err);
+    throw Error(err?.message ?? MODEL_ERROR_MESSAGES.REMOVE_BADGES);
   }
 }
 
@@ -128,5 +128,5 @@ module.exports = {
   fetchUserBadges,
   createBadge,
   assignBadges,
-  unAssignBadges,
+  removeBadges,
 };

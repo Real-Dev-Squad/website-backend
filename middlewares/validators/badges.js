@@ -1,7 +1,7 @@
 const joi = require("joi");
 const { ERROR_MESSAGES } = require("../../constants/badges");
 const {
-  VALIDATORS: { CREATE_BADGE, ASSIGN_OR_UNASSIGN_BADGES, API_PAYLOAD_VALIDATION_FAILED },
+  VALIDATORS: { CREATE_BADGE, ASSIGN_OR_REMOVE_BADGES, API_PAYLOAD_VALIDATION_FAILED },
 } = ERROR_MESSAGES;
 const logger = require("../../utils/logger");
 
@@ -39,7 +39,7 @@ async function createBadge(req, res, next) {
  * @param res {Object} - Express response object
  * @param next {function} - Express middelware
  */
-async function assignOrUnassignBadges(req, res, next) {
+async function assignOrRemoveBadges(req, res, next) {
   const schema = joi
     .object()
     .strict()
@@ -52,12 +52,12 @@ async function assignOrUnassignBadges(req, res, next) {
     await schema.validateAsync({ userId, badgeIds });
     next();
   } catch (error) {
-    logger.error(`${ASSIGN_OR_UNASSIGN_BADGES.VALIDATON_FAILED}: ${error}`);
+    logger.error(`${ASSIGN_OR_REMOVE_BADGES.VALIDATON_FAILED}: ${error}`);
     res.boom.badRequest(`${API_PAYLOAD_VALIDATION_FAILED}, ${error.details?.[0]?.message}`);
   }
 }
 
 module.exports = {
   createBadge,
-  assignOrUnassignBadges,
+  assignOrRemoveBadges,
 };

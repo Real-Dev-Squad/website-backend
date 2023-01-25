@@ -1,35 +1,35 @@
 const express = require("express");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
-const badgeValidator = require("../middlewares/validators/badges");
+const badgesValidator = require("../middlewares/validators/badges");
 const { upload } = require("../utils/multer");
-const badge = require("../controllers/badges");
+const badgesController = require("../controllers/badges");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const { SUPERUSER } = require("../constants/roles");
 
-router.get("/", badge.getBadges);
+router.get("/", badgesController.getBadges);
 // INFO: upload(muter-middelware) looks for form-data key named file
 router.post(
   "/",
   authenticate,
   authorizeRoles([SUPERUSER]),
   upload.single("file"),
-  badgeValidator.createBadge,
-  badge.postBadge
+  badgesValidator.createBadge,
+  badgesController.postBadge
 );
 router.post(
   "/assign",
   authenticate,
   authorizeRoles([SUPERUSER]),
-  badgeValidator.assignOrUnassignBadges,
-  badge.postUserBadges
+  badgesValidator.assignOrRemoveBadges,
+  badgesController.postUserBadges
 );
 router.delete(
-  "/unassign",
+  "/remove",
   authenticate,
   authorizeRoles([SUPERUSER]),
-  badgeValidator.assignOrUnassignBadges,
-  badge.deleteUserBadges
+  badgesValidator.assignOrRemoveBadges,
+  badgesController.deleteUserBadges
 );
 
 module.exports = router;

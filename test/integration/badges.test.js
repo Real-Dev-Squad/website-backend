@@ -184,11 +184,11 @@ describe("Badges", function () {
     });
   });
 
-  describe("DELETE /badges/unassign", function () {
-    it("Should unassign user badges", function (done) {
+  describe("DELETE /badges/remove", function () {
+    it("Should remove assigned badges from a user", function (done) {
       chai
         .request(app)
-        .delete("/badges/unassign")
+        .delete("/badges/remove")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           userId: "a-random-user-id",

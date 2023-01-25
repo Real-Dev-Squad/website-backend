@@ -91,15 +91,15 @@ async function postUserBadges(req, res) {
 }
 
 /**
- * Unassign badges
+ * remove badges
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
- * @returns {Object}: <message: string> - badges unassigned
+ * @returns {Object}: <message: string> - badges removed
  */
 async function deleteUserBadges(req, res) {
   try {
     const { badgeIds, userId } = req.body;
-    await badgeQuery.unAssignBadges({ userId, badgeIds });
+    await badgeQuery.removeBadges({ userId, badgeIds });
     return res.json({
       message: CONTROLLERS_SUCCESS_MESSAGES.DELETE_USER_BADGES,
     });

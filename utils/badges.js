@@ -42,7 +42,7 @@ function convertFirebaseDocumentToBadgeDocument(id, data) {
 
 /**
  * Creates or Deletes bulk document in batch
- * @param { Object<userId: string, array: Array<badgeId|docReferrence>, isUnassign: boolean> } user-id to assign or unassign badges, array: badgeIds or documentReferrences and isUnassign boolean flag to unassign badges(defualt value is `false`).
+ * @param { Object<userId: string, array: Array<badgeId|docReferrence>, isRemove: boolean> } user-id to assign or remove badges, array: badgeIds or documentReferrences and isRemove boolean flag to remove badges(defualt value is `false`).
  * @return { Promise<void> }
  */
 /**
@@ -53,10 +53,10 @@ function convertFirebaseDocumentToBadgeDocument(id, data) {
  * [5]: https://firebase.google.com/docs/firestore/manage-data/transactions#security_rules_limits
  */
 // TODO: write generic function
-async function assignUnassignBadgesInBulk({ userId, array, isUnassign = false }) {
+async function assignOrRemoveBadgesInBulk({ userId, array, isRemove = false }) {
   const bulkWriter = firestore.bulkWriter();
   array.forEach((value) => {
-    if (isUnassign) {
+    if (isRemove) {
       bulkWriter.delete(value);
       return;
     }
@@ -68,5 +68,5 @@ async function assignUnassignBadgesInBulk({ userId, array, isUnassign = false })
 module.exports = {
   convertFirebaseDocumentToBadgeDocument,
   convertFirebaseTimestampToDateTime,
-  assignUnassignBadgesInBulk,
+  assignOrRemoveBadgesInBulk,
 };
