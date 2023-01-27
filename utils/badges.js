@@ -45,14 +45,6 @@ function convertFirebaseDocumentToBadgeDocument(id, data) {
  * @param { Object<userId: string, array: Array<badgeId|docReferrence>, isRemove: boolean> } user-id to assign or remove badges, array: badgeIds or documentReferrences and isRemove boolean flag to remove badges(defualt value is `false`).
  * @return { Promise<void> }
  */
-/**
- * [1]: https://github.com/FrangSierra/firestore-cloud-functions-typescript/blob/master/functions/src/atomic-operations/index.ts#L52
- * [2]: https://stackoverflow.com/questions/49121877/upload-more-than-500-documents-to-firestore-database-from-cloud-function (last-answer)
- * [3]: https://firebase.google.com/docs/firestore/quotas#writes_and_transactions
- * [4]: https://firebase.google.com/docs/firestore/quotas#security_rules
- * [5]: https://firebase.google.com/docs/firestore/manage-data/transactions#security_rules_limits
- */
-// TODO: write generic function
 async function assignOrRemoveBadgesInBulk({ userId, array, isRemove = false }) {
   const bulkWriter = firestore.bulkWriter();
   array.forEach((value) => {

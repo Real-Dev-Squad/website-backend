@@ -48,7 +48,6 @@ async function fetchUserBadges(userId) {
       return firestore.doc(`badges/${badgeId}`);
     });
     // INFO: getAll accepts unpacked array
-    // TODO: check getAll limitiations
     const badgesSnapshot = await firestore.getAll(...badgeDocReferences);
     const badges = badgesSnapshot.map((doc) => convertFirebaseDocumentToBadgeDocument(doc.id, doc.data()));
     return { badges };

@@ -21,7 +21,6 @@ async function createBadge(req, res, next) {
       createdBy: joi.string().min(1).required(),
     });
   try {
-    // TODO: add strong file check
     if (!req.file) {
       throw new Error(CREATE_BADGE.FILE_IS_MISSING);
     }

@@ -38,7 +38,6 @@ describe("Badges", function () {
   });
 
   describe("GET /badges", function () {
-    // TODO: write a more strong test
     it("Should get all the list of badges", function (done) {
       sinon.stub(model, "fetchBadges").returns(fixture.BADGES);
       chai
@@ -95,7 +94,6 @@ describe("Badges", function () {
     });
 
     it("Should return API payload failed validation, createdBy is required", function (done) {
-      // TODO: write a more strong test
       chai
         .request(app)
         .post("/badges")
@@ -120,7 +118,6 @@ describe("Badges", function () {
     });
 
     it("Should return success message, and badge-object", function (done) {
-      // TODO: write a more strong test
       sinon.stub(imageService, "uploadBadgeImage").returns(fixture.CLOUNDINARY_BADGE_IMAGE_UPLOAD_RESPONSE);
       sinon.stub(model, "createBadge").returns(fixture.EXPECTED_BADGE_OBJECT);
       chai
