@@ -1,6 +1,6 @@
 const { userState } = require("../constants/userStatus");
 const firestore = require("../utils/firestore");
-const { getTommorowTimeStamp } = require("../utils/userStatus");
+const { getTommorowTimeStamp, filterStatusData } = require("../utils/userStatus");
 const userStatusModel = firestore.collection("usersStatus");
 
 /**
@@ -87,33 +87,24 @@ const updateUserStatus = async (userId, newStatusData) => {
   try {
     const userStatusDocs = await userStatusModel.where("userId", "==", userId).limit(1).get();
     const [userStatusDoc] = userStatusDocs.docs;
+    const tommorow = getTommorowTimeStamp();
     if (userStatusDoc) {
       const docId = userStatusDoc.id;
       const userStatusData = userStatusDoc.data();
       if (Object.keys(newStatusData).includes("currentStatus")) {
         const newUserState = newStatusData.currentStatus.state;
-        const isNewStateOOO = newUserState === userState.OOO;
-        const isNewStateActive = newUserState === userState.ACTIVE;
-        const isNewStateIdle = newUserState === userState.IDLE;
-        const isCurrentStateOOO = userStatusData.currentStatus?.state === userState.OOO;
-        const isFutureStateActiveOrIdle =
+        const isNewStateOoo = newUserState === userState.OOO;
+        const isNewStateNotOoo = newUserState === userState.ACTIVE || newUserState === userState.IDLE;
+        const isCurrentStateOoo = userStatusData.currentStatus?.state === userState.OOO;
+        const isFutureStateNotOoo =
           userStatusData.futureStatus?.state === userState.ACTIVE ||
           userStatusData.futureStatus?.state === userState.IDLE;
 
-        if (isCurrentStateOOO && isFutureStateActiveOrIdle) {
-          if (isNewStateActive || isNewStateIdle) {
-            newStatusData.futureStatus = {};
-          }
+        filterStatusData(newStatusData);
+        if (isCurrentStateOoo && isFutureStateNotOoo && isNewStateNotOoo) {
+          newStatusData.futureStatus = {};
         }
-
-        if (!isNewStateOOO) {
-          newStatusData.currentStatus.until = "";
-        }
-        if (isNewStateActive) {
-          newStatusData.currentStatus.message = "";
-        }
-        if (isNewStateOOO) {
-          const tommorow = getTommorowTimeStamp();
+        if (isNewStateOoo) {
           if (newStatusData.currentStatus.from >= tommorow) {
             newStatusData.futureStatus = { ...newStatusData.currentStatus };
             delete newStatusData.currentStatus;
@@ -127,21 +118,12 @@ const updateUserStatus = async (userId, newStatusData) => {
     } else {
       // the user doc doesnt exist meaning we need to create one
       if (Object.keys(newStatusData).includes("currentStatus")) {
-        const newUserState = newStatusData.currentStatus.state;
-        const isNewStateOOO = newUserState === userState.OOO;
-        const isNewStateActive = newUserState === userState.ACTIVE;
-        if (!isNewStateOOO) {
-          newStatusData.currentStatus.until = "";
-        }
-        if (isNewStateActive) {
-          newStatusData.currentStatus.message = "";
-        }
+        filterStatusData(newStatusData);
+        const isNewStateOOO = newStatusData.currentStatus.state === userState.OOO;
         if (isNewStateOOO) {
-          const tommorow = getTommorowTimeStamp();
           if (newStatusData.currentStatus.from >= tommorow) {
-            const futureStatus = { ...newStatusData.currentStatus };
+            newStatusData.futureStatus = { ...newStatusData.currentStatus };
             delete newStatusData.currentStatus;
-            newStatusData.futureStatus = futureStatus;
           }
         }
       }
