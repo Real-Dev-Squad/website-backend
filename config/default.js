@@ -62,7 +62,6 @@ module.exports = {
 
   botToken: {
     publicKey: "<publicKey>",
-    privateKey: "<privateKey>",
   },
 
   // Cloudinary keys

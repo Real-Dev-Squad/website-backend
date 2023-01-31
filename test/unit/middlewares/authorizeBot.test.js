@@ -1,8 +1,8 @@
 const authorizeBot = require("../../../middlewares/authorizeBot");
 const sinon = require("sinon");
 const expect = require("chai").expect;
-const botVerifcation = require("../../../services/botVerificationService");
-const { BAD_TOKEN } = require("../../../constants/bot");
+const bot = require("../../utils/generateBotToken");
+const { BAD_TOKEN, CLOUDFLARE_WORKER } = require("../../../constants/bot");
 
 describe("Check authorization of bot", function (done) {
   it("return false when token is invalid", function () {
@@ -36,7 +36,7 @@ describe("Check authorization of bot", function (done) {
   });
 
   it("return true when token is valid", function () {
-    const jwtToken = botVerifcation.generateToken();
+    const jwtToken = bot.generateToken({ name: CLOUDFLARE_WORKER });
 
     const request = {
       headers: {

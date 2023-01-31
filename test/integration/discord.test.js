@@ -4,8 +4,8 @@ const chaiHttp = require("chai-http");
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const discordData = require("../fixtures/discord/discord")();
-const botVerifcation = require("../../services/botVerificationService");
-const { BAD_TOKEN } = require("../../constants/bot");
+const bot = require("../utils/generateBotToken");
+const { BAD_TOKEN, CLOUDFLARE_WORKER } = require("../../constants/bot");
 
 chai.use(chaiHttp);
 
@@ -13,7 +13,7 @@ describe("Discord", function () {
   let jwtToken;
 
   beforeEach(async function () {
-    jwtToken = botVerifcation.generateToken();
+    jwtToken = bot.generateToken({ name: CLOUDFLARE_WORKER });
   });
 
   afterEach(async function () {
