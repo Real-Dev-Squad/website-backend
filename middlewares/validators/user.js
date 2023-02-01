@@ -106,6 +106,9 @@ async function getUsers(req, res, next) {
           "string.empty": "page must contain a positive number or zero",
           "string.pattern.base": "page value either be a positive number or zero",
         }),
+      search: joi.string().optional().messages({
+        "string.empty": "search value must not be empty",
+      }),
     });
   try {
     await schema.validateAsync(req.query);

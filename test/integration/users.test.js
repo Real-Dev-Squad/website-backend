@@ -469,7 +469,7 @@ describe("Users", function () {
           return done();
         });
     });
-    it("Should return all users for empty value of search param", function (done) {
+    it("Should return 400 for empty value of search param", function (done) {
       chai
         .request(app)
         .get("/users")
@@ -479,10 +479,7 @@ describe("Users", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Users returned successfully!");
-          expect(res.body.users).to.be.a("array");
+          expect(res).to.have.status(400);
 
           return done();
         });
