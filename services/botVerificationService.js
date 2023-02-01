@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
  * @return {Object} - Decode value of JWT
  */
 const verifyToken = (token) => {
-  return jwt.verify(token, config.get("botToken.publicKey"), { algorithms: ["RS256"] });
+  return jwt.verify(token, config.get("botToken.botPublicKey"), { algorithms: ["RS256"] });
 };
 
 module.exports = { verifyToken };

@@ -63,7 +63,7 @@ module.exports = {
   },
 
   botToken: {
-    publicKey:
+    botPublicKey:
       "-----BEGIN PUBLIC KEY-----\n" +
       "MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQBK3CkprcpAYxme7vtdjpWO\n" +
       "gFFjoYsqU3OmhMEty/s1gnW5tgbK4ief4xk+cU+mu3YvjzWudT/SV17tAWxL4Y+G\n" +
@@ -73,7 +73,7 @@ module.exports = {
       "N+nS7Sqo3RJ04+KlNRUclzINOC7JBYkKtG7YQ0U9nNLkRrRlON+O6tY4OT86T1O1\n" +
       "AgMBAAE=\n" +
       "-----END PUBLIC KEY-----",
-    privateKey:
+    botPrivateKey:
       "-----BEGIN RSA PRIVATE KEY-----\n" +
       "MIIEoQIBAAKCAQBK3CkprcpAYxme7vtdjpWOgFFjoYsqU3OmhMEty/s1gnW5tgbK\n" +
       "4ief4xk+cU+mu3YvjzWudT/SV17tAWxL4Y+GincJwL5gpQwlnw9qOAdRGkpBriQL\n" +

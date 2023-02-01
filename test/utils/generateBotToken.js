@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
  * @return {String} - Generated JWT
  */
 const generateToken = (data) => {
-  return jwt.sign(data, config.get("botToken.privateKey"), {
+  return jwt.sign(data, config.get("botToken.botPrivateKey"), {
     algorithm: "RS256",
     expiresIn: "1m",
   });

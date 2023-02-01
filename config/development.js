@@ -51,7 +51,7 @@ module.exports = {
   },
 
   botToken: {
-    publicKey:
+    botPublicKey:
       "-----BEGIN PUBLIC KEY-----\n" +
       "MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQBK3CkprcpAYxme7vtdjpWO\n" +
       "gFFjoYsqU3OmhMEty/s1gnW5tgbK4ief4xk+cU+mu3YvjzWudT/SV17tAWxL4Y+G\n" +
