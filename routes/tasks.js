@@ -11,7 +11,7 @@ const cache = require("../utils/cache");
 router.get("/", cache(), tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);
 router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasks);
-router.get("/overdue/all", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasksAll);
+router.get("/overdue/all", authenticate, authorizeRoles([SUPERUSER]), tasks.allOverdueTasks);
 router.post("/", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), createTask, tasks.addNewTask);
 router.patch("/:id", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), updateTask, tasks.updateTask);
 router.get("/:id/details", tasks.getTask);
