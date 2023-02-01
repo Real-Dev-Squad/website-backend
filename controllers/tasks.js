@@ -247,9 +247,9 @@ const overdueTasks = async (req, res) => {
   }
 };
 
-const overdueTasksAll = async (req, res) => {
+const allOverdueTasks = async (req, res) => {
   try {
-    const overdueTasks = await tasks.overdueTasksAll();
+    const overdueTasks = await tasks.getAllOverDueTasks();
     const overdueTasksFiltered = overdueTasks.filter(
       (task) =>
         task.status !== MERGED || task.status !== COMPLETED || task.status !== RELEASED || task.status !== VERIFIED
@@ -296,5 +296,5 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
-  overdueTasksAll,
+  allOverdueTasks,
 };
