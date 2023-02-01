@@ -20,11 +20,11 @@ describe("Discord", function () {
     await cleanDb();
   });
 
-  describe("PUT /discord", function () {
+  describe("POST /discord", function () {
     it("Should create a new discord data in firestore", function (done) {
       chai
         .request(app)
-        .put("/discord")
+        .post("/discord")
         .set("Authorization", `Bearer ${jwtToken}`)
         .send(discordData[0])
         .end((err, res) => {
@@ -42,7 +42,7 @@ describe("Discord", function () {
     it("Should return 400 when adding incorrect discord data in firestore", function (done) {
       chai
         .request(app)
-        .put("/discord")
+        .post("/discord")
         .set("Authorization", `Bearer ${jwtToken}`)
         .send(discordData[1])
         .end((err, res) => {
@@ -63,7 +63,7 @@ describe("Discord", function () {
     it("Should return 400 when authorization header is not present", function (done) {
       chai
         .request(app)
-        .put("/discord")
+        .post("/discord")
         .send(discordData[0])
         .end((err, res) => {
           if (err) {
@@ -83,7 +83,7 @@ describe("Discord", function () {
     it("Should return 401 when authorization header is incorrect", function (done) {
       chai
         .request(app)
-        .put("/discord")
+        .post("/discord")
         .set("Authorization", `Bearer ${BAD_TOKEN}`)
         .send(discordData[0])
         .end((err, res) => {

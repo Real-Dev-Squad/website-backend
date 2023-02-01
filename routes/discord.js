@@ -4,6 +4,6 @@ const authorizeBot = require("../middlewares/authorizeBot");
 const validator = require("../middlewares/validators/discord");
 const discord = require("../controllers/discord");
 
-router.put("/", validator.discordData, authorizeBot, discord.addDiscordData);
+router.post("/", validator.discordData, authorizeBot, discord.addDiscordData);
 
 module.exports = router;
