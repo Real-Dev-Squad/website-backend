@@ -109,6 +109,17 @@ async function getUsers(req, res, next) {
       search: joi.string().optional().messages({
         "string.empty": "search value must not be empty",
       }),
+      next: joi.string().optional().when("page", { is: joi.exist(), then: joi.forbidden() }).messages({
+        "string.empty": "next value cannot be empty",
+      }),
+      prev: joi
+        .string()
+        .optional()
+        .when("next", { is: joi.exist(), then: joi.forbidden() })
+        .concat(joi.string().when("page", { is: joi.exist(), then: joi.forbidden() }))
+        .messages({
+          "string.empty": "prev value cannot be empty",
+        }),
     });
   try {
     await schema.validateAsync(req.query);

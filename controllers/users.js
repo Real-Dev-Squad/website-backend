@@ -62,23 +62,16 @@ const getUserById = async (req, res) => {
  */
 
 const getUsers = async (req, res) => {
-  const cookies = req.cookies;
   try {
-    const { allUsers, cookie } = await userQuery.fetchUsers(req.query, cookies["user-pagination"]);
-    if (req.query.page) {
-      const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
-
-      res.cookie("user-pagination", cookie, {
-        domain: rdsUiUrl.hostname,
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-      });
-    }
+    const { allUsers, next, prev } = await userQuery.fetchUsers(req.query);
 
     return res.json({
       message: "Users returned successfully!",
       users: allUsers,
+      links: {
+        next: `/users?next=${next}&size=${req.query.size || 100}`,
+        prev: `/users?prev=${prev}&size=${req.query.size || 100}`,
+      },
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
