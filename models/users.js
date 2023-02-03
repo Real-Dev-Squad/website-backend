@@ -119,7 +119,7 @@ const getSuggestedUsers = async (skill) => {
 
 /**
  * Fetches the data about our users
- * @param query { search, next, prev, size }: Filter for users
+ * @param query { search, next, prev, size, page }: Filter for users
  * @return {Promise<userModel|Array>}
  */
 const fetchUsers = async (query) => {
