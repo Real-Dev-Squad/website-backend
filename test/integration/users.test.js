@@ -102,6 +102,17 @@ describe("Users", function () {
   });
 
   describe("GET /users", function () {
+    beforeEach(async function () {
+      await addOrUpdate(userData[0]);
+      await addOrUpdate(userData[1]);
+      await addOrUpdate(userData[2]);
+      await addOrUpdate(userData[3]);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
     it("Should get all the users in system", function (done) {
       chai
         .request(app)
@@ -189,6 +200,75 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("size must be in range 1-100");
           expect(res.body.error).to.equal("Bad Request");
+
+          return done();
+        });
+    });
+
+    it("Should return next and prev links", function (done) {
+      chai
+        .request(app)
+        .get("/users?size=2")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body).to.have.property("links");
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 when both next and prev passed as query param", function (done) {
+      chai
+        .request(app)
+        .get(`/users?next=${userId}&prev=${userId}&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+
+          return done();
+        });
+    });
+
+    it("Should return 400 when both next and page passed as query param", function (done) {
+      chai
+        .request(app)
+        .get(`/users?next=${userId}&page=1&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+
+          return done();
+        });
+    });
+
+    it("Should return 400 when both page and prev passed as query param", function (done) {
+      chai
+        .request(app)
+        .get(`/users?page=1&prev=${userId}&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
 
           return done();
         });
