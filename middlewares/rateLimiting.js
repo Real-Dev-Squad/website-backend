@@ -16,6 +16,7 @@ const rateLimiterSlowBruteByIP = new RateLimiterMemory(RATE_LIMITER_SLOW_BRUTE_B
  *  - `resolved`  with next middelware function call `next()`
  *  - `resolved`  with response status set to 429 and message `Too Many Requests`  */
 // TODO: check use of async middelware
+// TODO: refactor @utils
 async function authorizationLimiter(req, res, next) {
   // TODO: check for proxy
   const ipAddress = req.ip;
@@ -32,22 +33,24 @@ async function authorizationLimiter(req, res, next) {
       retrySeconds = Math.round(responseRateLimiterFastBruteByIP.msBeforeNext / 1000) || 1;
     } else if (
       responseRateLimiterSlowBruteByIP &&
-      responseRateLimiterSlowBruteByIP.consumedPoints > RATE_LIMITER_FAST_BRUTE_BY_IP_OPTIONS.points
+      responseRateLimiterSlowBruteByIP.consumedPoints > RATE_LIMITER_SLOW_BRUTE_BY_IP_OPTIONS.points
     ) {
       retrySeconds = Math.round(responseRateLimiterSlowBruteByIP.msBeforeNext / 1000) || 1;
     }
     if (retrySeconds > 0) {
-      throw Error(TOO_MANY_REQUESTS);
+      // INFO: sending raw seconds in response,
+      // for letting API user decide how to represent this number.
+      throw Error(`Retry After ${retrySeconds} seconds, requests limit reached`);
     }
+    // TODO: get retrySeconds after consume response
     await Promise.all([rateLimiterFastBruteByIP.consume(ipAddress), rateLimiterSlowBruteByIP.consume(ipAddress)]);
     return next();
   } catch (error) {
-    // TODO: add a method to send rateLimit limit, remaining, and reset
-    // TODO: check for use of response-boom here
+    // TODO: get retrySeconds from error
     res.set({
       "Retry-After": `${retrySeconds}`,
     });
-    return res.status(429).json({ message: TOO_MANY_REQUESTS });
+    return res.status(429).json({ message: error?.message ?? TOO_MANY_REQUESTS });
   }
 }
 
