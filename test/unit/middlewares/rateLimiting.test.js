@@ -1,7 +1,10 @@
 const chai = require("chai");
+const chaiHttp = require("chai-http");
 const sinon = require("sinon");
 const { authorizationLimiter } = require("../../../middlewares/rateLimiting");
 const expect = chai.expect;
+
+chai.use(chaiHttp);
 
 describe("Rate Limting Middelware", function () {
   let req;
@@ -32,7 +35,7 @@ describe("Rate Limting Middelware", function () {
     expect(res).to.have.status(429);
   });
 
-  it("Should reset the request count after duration has passed ", function (done) {
+  it("Should reset the request count after duration has passed", function (done) {
     for (let index = 0; index < 11; ++index) {
       authorizationLimiter(req, 10, next);
     }
