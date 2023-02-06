@@ -1,8 +1,21 @@
-export const MAX_WRONG_ATTEMPTS_BY_IP_PER_MINUTE = 5;
-export const MAX_WRONG_ATTEMPTS_BY_IP_PER_DAY = 100;
-export const MAX_REQUEST_WINDOW_BY_IP_PER_MINUTE = 30;
-export const MAX_REQUEST_WINDOW_BY_IP_PER_HOUR = 60 * 60 * 24;
-export const BLOCK_DURATION_WINDOW_BY_IP_PER_MINUTE = 60 * 10;
-export const BLOCK_DURATION_WINDOW_BY_IP_PER_HOUR = 60 * 60 * 24;
-export const MAX_WRONG_ATTEMPTS_BY_IP_PER_MINUTE_KEY_PREFIX = "login_fail_by_ip_per_minute";
-export const MAX_WRONG_ATTEMPTS_BY_IP_PER_DAY_KEY_PREFIX = "login_fail_by_ip_per_day";
+const RATE_LIMITER_SLOW_BRUTE_BY_IP_OPTIONS = {
+  points: 100,
+  duration: 60 * 60 * 24,
+  blockDuration: 60 * 60 * 24,
+  keyPrefix: "login_fail_by_ip_per_day",
+};
+
+const RATE_LIMITER_FAST_BRUTE_BY_IP_OPTIONS = {
+  keyPrefix: "login_fail_by_ip_per_minute",
+  points: 5,
+  duration: 30,
+  blockDuration: 60 * 10,
+};
+
+const TOO_MANY_REQUESTS = "Too Many Requests";
+
+module.exports = {
+  RATE_LIMITER_FAST_BRUTE_BY_IP_OPTIONS,
+  RATE_LIMITER_SLOW_BRUTE_BY_IP_OPTIONS,
+  TOO_MANY_REQUESTS,
+};
