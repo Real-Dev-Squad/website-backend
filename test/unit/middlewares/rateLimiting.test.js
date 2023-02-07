@@ -5,30 +5,41 @@ const {
 } = require("../../../constants/rateLimtingMiddelware");
 const { authorizationLimiter } = require("../../../middlewares/rateLimiting");
 
+function mockRequest(ipAddress) {
+  return {
+    headers: {
+      "x-forwarded-for": ipAddress,
+    },
+    socket: {
+      remoteAddress: ipAddress,
+    },
+  };
+}
+
+function mockResponse(sandbox) {
+  const res = {};
+  res.status = sandbox.stub().returns(res);
+  res.json = sandbox.stub().returns(res);
+  res.set = sandbox.stub().returns(res);
+  return res;
+}
+
 describe("Rate Limting Middelware", function () {
   let req;
   let res;
   let next;
-  let resStatusSpy;
+  let sandbox;
 
   beforeEach(function () {
-    req = {
-      ip: "148.56.7764.4",
-    };
-    res = {
-      status() {
-        return this;
-      },
-      set() {
-        return this;
-      },
-      json() {
-        return this;
-      },
-    };
-    resStatusSpy = sinon.spy(res, "status");
-    next = sinon.stub();
+    sandbox = sinon.createSandbox();
+    req = mockRequest("127.0.0.1");
+    res = mockResponse(sandbox);
+    next = sandbox.stub();
     RATE_LIMITER_FAST_BRUTE_BY_IP_OPTIONS.blockDuration = 1 * 10;
+  });
+
+  afterEach(function () {
+    sandbox.restore();
   });
 
   it("Should call the next middelware if the request count is under the limit", async function () {
@@ -43,7 +54,7 @@ describe("Rate Limting Middelware", function () {
       promises.push(promise);
     }
     await Promise.all(promises);
-    sinon.assert.calledWithMatch(resStatusSpy, TOO_MANY_REQUESTS.STATUS_CODE);
+    sinon.assert.calledWithMatch(res.status, TOO_MANY_REQUESTS.STATUS_CODE);
   });
 
   it("Should reset the request count after duration has passed", async function () {
@@ -53,7 +64,7 @@ describe("Rate Limting Middelware", function () {
       promises.push(promise);
     }
     await Promise.all(promises);
-    sinon.assert.calledWithMatch(resStatusSpy, TOO_MANY_REQUESTS.STATUS_CODE);
+    sinon.assert.calledWithMatch(res.status, TOO_MANY_REQUESTS.STATUS_CODE);
 
     /**
      INFO[no-reasoning-only-assumption]:
@@ -63,7 +74,7 @@ describe("Rate Limting Middelware", function () {
      */
     setTimeout(async () => {
       await authorizationLimiter(req, res, next);
-      sinon.assert.neverCalledWithMatch(resStatusSpy, TOO_MANY_REQUESTS.STATUS_CODE);
+      sinon.assert.neverCalledWithMatch(res.status, TOO_MANY_REQUESTS.STATUS_CODE);
       sinon.assert.calledOnce(next);
     }, RATE_LIMITER_FAST_BRUTE_BY_IP_OPTIONS.blockDuration * 1000);
   });
