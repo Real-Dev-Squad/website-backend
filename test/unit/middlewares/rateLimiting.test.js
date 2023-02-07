@@ -15,7 +15,6 @@ describe("Rate Limting Middelware", function () {
     req = {
       ip: "148.56.7764.4",
     };
-    // TODO: use a strong/better way for using spies
     res = {
       status() {
         return this;
@@ -58,7 +57,7 @@ describe("Rate Limting Middelware", function () {
 
     /**
      INFO[no-reasoning-only-assumption]:
-     using setTimeout not sinon.FakeTimers,
+     using setTimeout instead of sinon.FakeTimers,
      because clock was ticking for expected duration but
      key was not getting deleted from middelware store
      */
