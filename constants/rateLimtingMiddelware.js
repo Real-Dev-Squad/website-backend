@@ -11,8 +11,10 @@ const RATE_LIMITER_FAST_BRUTE_BY_IP_OPTIONS = {
   duration: 30,
   blockDuration: 60 * 10,
 };
-
-const TOO_MANY_REQUESTS = "Too Many Requests";
+const TOO_MANY_REQUESTS = {
+  ERROR_TYPE: "Too Many Requests",
+  STATUS_CODE: 429,
+};
 
 module.exports = {
   RATE_LIMITER_FAST_BRUTE_BY_IP_OPTIONS,
