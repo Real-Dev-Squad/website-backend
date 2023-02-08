@@ -4,7 +4,7 @@ const discordData = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     token: joi.string().required(),
     discordId: joi.string().required(),
-    generationTime: joi.number().required(),
+    timestamp: joi.number().required(),
     expiry: joi.number().required(),
     linkStatus: joi.boolean().required(),
   });
