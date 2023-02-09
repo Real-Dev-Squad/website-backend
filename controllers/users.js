@@ -69,8 +69,8 @@ const getUsers = async (req, res) => {
       message: "Users returned successfully!",
       users: allUsers,
       links: {
-        next: next ? `/users?next=${next}&size=${req.query.size || 100}` : "",
-        prev: prev ? `/users?prev=${prev}&size=${req.query.size || 100}` : "",
+        next: next ? `/users?next=${next}&size=${req.query?.size || 100}` : "",
+        prev: prev ? `/users?prev=${prev}&size=${req.query?.size || 100}` : "",
       },
     });
   } catch (error) {

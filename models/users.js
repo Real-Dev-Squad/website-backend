@@ -129,21 +129,18 @@ const fetchUsers = async (query) => {
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
     let dbQuery = query.prev ? userModel.limitToLast(size) : userModel.limit(size);
+    dbQuery = dbQuery.orderBy("username");
     if (Object.keys(query).length) {
-      dbQuery = dbQuery.orderBy("username");
       if (query.search) {
         dbQuery = dbQuery
           .startAt(query.search.toLowerCase().trim())
           .endAt(query.search.toLowerCase().trim() + "\uf8ff");
-      }
-      if (query.page) {
+      } else if (query.page) {
         const offsetValue = size * parseInt(query.page);
         dbQuery = dbQuery.offset(offsetValue);
-      }
-      if (query.next) {
+      } else if (query.next) {
         dbQuery = dbQuery.startAfter(doc);
-      }
-      if (query.prev) {
+      } else if (query.prev) {
         dbQuery = dbQuery.endBefore(doc);
       }
     }
