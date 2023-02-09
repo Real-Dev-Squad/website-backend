@@ -93,10 +93,34 @@ function getLowestLevelSkill(skills) {
   return { skill, level };
 }
 
+/**
+ * Creates pagination link for next and previous pages
+ *
+ * @param query {Object} - request query params
+ * @param cursor {string} - next | prev
+ * @param documentId {string} - firestore document Id
+ */
+
+function getPaginationLink(query, cursor, documentId) {
+  let baseUrl = "/users?";
+  if (Object.keys(query).length) {
+    for (const [key, value] of Object.entries(query)) {
+      if (key === "next" || key === "prev") continue;
+      if (key === "page") continue;
+      baseUrl = baseUrl.concat(`${key}=${value}&`);
+    }
+  }
+  if (!query.size) {
+    baseUrl = baseUrl.concat("size=100&");
+  }
+  return `${baseUrl}${cursor}=${documentId}`;
+}
+
 module.exports = {
   getUserId,
   getUsername,
   getParticipantUserIds,
   getParticipantUsernames,
   getLowestLevelSkill,
+  getPaginationLink,
 };

@@ -273,6 +273,54 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should include all search params in the response links that are passed by the request", function (done) {
+      chai
+        .request(app)
+        .get(`/users?search=an&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body).to.have.property("links");
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+          expect(res.body.links.next).includes("search");
+          expect(res.body.links.next).includes("size");
+          expect(res.body.links.prev).includes("search");
+          expect(res.body.links.prev).includes("size");
+
+          return done();
+        });
+    });
+
+    it("Should not have page param in the response links if passed by the request", function (done) {
+      chai
+        .request(app)
+        .get(`/users?page=1&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body).to.have.property("links");
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+          expect(res.body.links.next).to.not.includes("page");
+          expect(res.body.links.prev).to.not.includes("page");
+
+          return done();
+        });
+    });
   });
 
   describe("GET /users/self", function () {
