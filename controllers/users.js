@@ -64,14 +64,14 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const { allUsers, next, prev } = await userQuery.fetchUsers(req.query);
+    const { allUsers, nextId, prevId } = await userQuery.fetchUsers(req.query);
 
     return res.json({
       message: "Users returned successfully!",
       users: allUsers,
       links: {
-        next: next ? getPaginationLink(req.query, "next", next) : "",
-        prev: prev ? getPaginationLink(req.query, "prev", prev) : "",
+        next: nextId ? getPaginationLink(req.query, "next", nextId) : "",
+        prev: prevId ? getPaginationLink(req.query, "prev", prevId) : "",
       },
     });
   } catch (error) {

@@ -128,8 +128,7 @@ const fetchUsers = async (query) => {
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
-    let dbQuery = query.prev ? userModel.limitToLast(size) : userModel.limit(size);
-    dbQuery = dbQuery.orderBy("username");
+    let dbQuery = (query.prev ? userModel.limitToLast(size) : userModel.limit(size)).orderBy("username");
     if (Object.keys(query).length) {
       if (query.search) {
         dbQuery = dbQuery
@@ -139,11 +138,9 @@ const fetchUsers = async (query) => {
       if (query.page) {
         const offsetValue = size * parseInt(query.page);
         dbQuery = dbQuery.offset(offsetValue);
-      }
-      if (query.next) {
+      } else if (query.next) {
         dbQuery = dbQuery.startAfter(doc);
-      }
-      if (query.prev) {
+      } else if (query.prev) {
         dbQuery = dbQuery.endBefore(doc);
       }
     }
@@ -165,8 +162,8 @@ const fetchUsers = async (query) => {
     });
     return {
       allUsers,
-      next: lastDoc ? lastDoc.id : "",
-      prev: firstDoc ? firstDoc.id : "",
+      nextId: lastDoc?.id ?? "",
+      prevId: firstDoc?.id ?? "",
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);

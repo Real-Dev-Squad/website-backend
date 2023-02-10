@@ -274,7 +274,7 @@ describe("Users", function () {
         });
     });
 
-    it("Should include all search params in the response links that are passed by the request", function (done) {
+    it("Should include all query params in the response links that are passed by the request", function (done) {
       chai
         .request(app)
         .get(`/users?search=an&size=2`)

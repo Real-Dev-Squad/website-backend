@@ -98,22 +98,23 @@ function getLowestLevelSkill(skills) {
  *
  * @param query {Object} - request query params
  * @param cursor {string} - next | prev
- * @param documentId {string} - firestore document Id
+ * @param documentId {string} - DB document Id
  */
 
 function getPaginationLink(query, cursor, documentId) {
   let baseUrl = "/users?";
-  if (Object.keys(query).length) {
-    for (const [key, value] of Object.entries(query)) {
-      if (key === "next" || key === "prev") continue;
-      if (key === "page") continue;
-      baseUrl = baseUrl.concat(`${key}=${value}&`);
-    }
+  let i = 0;
+  const keysToExclude = ["next", "prev", "page"]; // next, prev needs to be updated with new document Id and page is not required in the links
+  for (const [key, value] of Object.entries(query)) {
+    if (keysToExclude.includes(key)) continue;
+    baseUrl = baseUrl.concat(`${key}=${value}`);
+    baseUrl = i !== Object.entries(query).length - 1 ? baseUrl.concat("&") : baseUrl; // ampersand adding at the end for subsequent query param to append, skipping the last query param in the loop .
+    i++;
   }
   if (!query.size) {
-    baseUrl = baseUrl.concat("size=100&");
+    baseUrl = baseUrl.concat("&size=100");
   }
-  return `${baseUrl}${cursor}=${documentId}`;
+  return `${baseUrl}&${cursor}=${documentId}`; // finally adding the cursor and new document Id
 }
 
 module.exports = {
