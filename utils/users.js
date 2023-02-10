@@ -104,17 +104,16 @@ function getLowestLevelSkill(skills) {
 function getPaginationLink(query, cursor, documentId) {
   let baseUrl = "/users?";
   let i = 0;
-  const keysToExclude = ["next", "prev", "page"]; // next, prev needs to be updated with new document Id and page is not required in the links
+  const keysToExclude = ["next", "prev", "page"]; // next, prev needs to be updated with new document Id and page is not required in the links.
   for (const [key, value] of Object.entries(query)) {
     if (keysToExclude.includes(key)) continue;
     baseUrl = baseUrl.concat(`${key}=${value}`);
-    baseUrl = i !== Object.entries(query).length - 1 ? baseUrl.concat("&") : baseUrl; // ampersand adding at the end for subsequent query param to append, skipping the last query param in the loop .
-    i++;
+    baseUrl = ++i !== Object.entries(query).length - 1 ? baseUrl.concat("&") : baseUrl; // ampersand adding at the end for subsequent query param to append, skipping the last query param in the loop.
   }
   if (!query.size) {
     baseUrl = baseUrl.concat("&size=100");
   }
-  return `${baseUrl}&${cursor}=${documentId}`; // finally adding the cursor and new document Id
+  return `${baseUrl}&${cursor}=${documentId}`; // finally adding the cursor and new document Id.
 }
 
 module.exports = {
