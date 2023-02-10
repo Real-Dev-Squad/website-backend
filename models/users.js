@@ -39,7 +39,11 @@ const addOrUpdate = async (userData, userId = null) => {
     if (!user.empty) {
       await userModel.doc(user.docs[0].id).set(userData, { merge: true });
 
-      return { isNewUser: false, userId: user.docs[0].id };
+      return {
+        isNewUser: false,
+        userId: user.docs[0].id,
+        incompleteUserDetails: user.docs[0].data().incompleteUserDetails,
+      };
     }
 
     // Add new user
