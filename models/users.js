@@ -135,12 +135,15 @@ const fetchUsers = async (query) => {
         dbQuery = dbQuery
           .startAt(query.search.toLowerCase().trim())
           .endAt(query.search.toLowerCase().trim() + "\uf8ff");
-      } else if (query.page) {
+      }
+      if (query.page) {
         const offsetValue = size * parseInt(query.page);
         dbQuery = dbQuery.offset(offsetValue);
-      } else if (query.next) {
+      }
+      if (query.next) {
         dbQuery = dbQuery.startAfter(doc);
-      } else if (query.prev) {
+      }
+      if (query.prev) {
         dbQuery = dbQuery.endBefore(doc);
       }
     }
