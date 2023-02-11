@@ -226,7 +226,7 @@ describe("Users", function () {
         });
     });
 
-    it("Should return 400 when both next and prev passed as query param", function (done) {
+    it("Should return 400 when both prev and next passed as query param", function (done) {
       chai
         .request(app)
         .get(`/users?next=${userId}&prev=${userId}&size=2`)
@@ -237,12 +237,13 @@ describe("Users", function () {
           }
 
           expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Both prev and next can't be passed");
 
           return done();
         });
     });
 
-    it("Should return 400 when both next and page passed as query param", function (done) {
+    it("Should return 400 when both page and next passed as query param", function (done) {
       chai
         .request(app)
         .get(`/users?next=${userId}&page=1&size=2`)
@@ -253,6 +254,7 @@ describe("Users", function () {
           }
 
           expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Both page and next can't be passed");
 
           return done();
         });
@@ -269,6 +271,7 @@ describe("Users", function () {
           }
 
           expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Both page and prev can't be passed");
 
           return done();
         });
