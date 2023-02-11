@@ -325,65 +325,37 @@ describe("Users", function () {
         });
     });
 
-    it("Should get next and previous page results based upon the links in the response", function (done) {
-      chai
-        .request(app)
-        .get(`/users?size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
+    it("Should get next and previous page results based upon the links in the response", async function () {
+      const response = await chai.request(app).get(`/users?size=2`).set("cookie", `${cookieName}=${jwt}`);
 
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Users returned successfully!");
-          expect(res.body).to.have.property("links");
-          expect(res.body.links).to.have.property("next");
-          expect(res.body.links).to.have.property("prev");
+      expect(response).to.have.status(200);
+      expect(response.body).to.be.a("object");
+      expect(response.body.message).to.equal("Users returned successfully!");
+      expect(response.body).to.have.property("links");
+      expect(response.body.links).to.have.property("next");
+      expect(response.body.links).to.have.property("prev");
 
-          const nextPageLink = res.body.links.next;
-          chai
-            .request(app)
-            .get(nextPageLink)
-            .set("cookie", `${cookieName}=${jwt}`)
-            .end((err, res) => {
-              if (err) {
-                return done(err);
-              }
-              expect(res).to.have.status(200);
-              expect(res.body).to.be.a("object");
-              expect(res.body.message).to.equal("Users returned successfully!");
-              expect(res.body).to.have.property("links");
-              expect(res.body.links).to.have.property("next");
-              expect(res.body.links).to.have.property("prev");
-              expect(res.body.users).to.have.length(2);
+      const nextPageLink = response.body.links.next;
+      const nextPageResponse = await chai.request(app).get(nextPageLink).set("cookie", `${cookieName}=${jwt}`);
 
-              const prevPageLink = res.body.links.prev;
-              chai
-                .request(app)
-                .get(prevPageLink)
-                .set("cookie", `${cookieName}=${jwt}`)
-                .end((err, res) => {
-                  if (err) {
-                    return done(err);
-                  }
-                  expect(res).to.have.status(200);
-                  expect(res.body).to.be.a("object");
-                  expect(res.body.message).to.equal("Users returned successfully!");
-                  expect(res.body).to.have.property("links");
-                  expect(res.body.links).to.have.property("next");
-                  expect(res.body.links).to.have.property("prev");
-                  expect(res.body.users).to.have.length(2);
+      expect(nextPageResponse).to.have.status(200);
+      expect(nextPageResponse.body).to.be.a("object");
+      expect(nextPageResponse.body.message).to.equal("Users returned successfully!");
+      expect(nextPageResponse.body).to.have.property("links");
+      expect(nextPageResponse.body.links).to.have.property("next");
+      expect(nextPageResponse.body.links).to.have.property("prev");
+      expect(nextPageResponse.body.users).to.have.length(2);
 
-                  return done();
-                });
-              // eslint-disable-next-line
-              return;
-            });
-          // eslint-disable-next-line
-          return;
-        });
+      const prevPageLink = nextPageResponse.body.links.prev;
+      const previousPageResponse = await chai.request(app).get(prevPageLink).set("cookie", `${cookieName}=${jwt}`);
+
+      expect(previousPageResponse).to.have.status(200);
+      expect(previousPageResponse.body).to.be.a("object");
+      expect(previousPageResponse.body.message).to.equal("Users returned successfully!");
+      expect(previousPageResponse.body).to.have.property("links");
+      expect(previousPageResponse.body.links).to.have.property("next");
+      expect(previousPageResponse.body.links).to.have.property("prev");
+      expect(previousPageResponse.body.users).to.have.length(2);
     });
   });
 
