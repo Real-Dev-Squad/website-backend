@@ -274,7 +274,7 @@ describe("Users", function () {
         });
     });
 
-    it("Should include all query params in the response links that are passed by the request", function (done) {
+    it("Should include search and size query params in the response links that are passed by the request", function (done) {
       chai
         .request(app)
         .get(`/users?search=an&size=2`)
@@ -319,6 +319,67 @@ describe("Users", function () {
           expect(res.body.links.prev).to.not.includes("page");
 
           return done();
+        });
+    });
+
+    it("Should get next and previous page results based upon the links in the response", function (done) {
+      chai
+        .request(app)
+        .get(`/users?size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body).to.have.property("links");
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+
+          const nextPageLink = res.body.links.next;
+          chai
+            .request(app)
+            .get(nextPageLink)
+            .set("cookie", `${cookieName}=${jwt}`)
+            .end((err, res) => {
+              if (err) {
+                return done(err);
+              }
+              expect(res).to.have.status(200);
+              expect(res.body).to.be.a("object");
+              expect(res.body.message).to.equal("Users returned successfully!");
+              expect(res.body).to.have.property("links");
+              expect(res.body.links).to.have.property("next");
+              expect(res.body.links).to.have.property("prev");
+              expect(res.body.users).to.have.length(2);
+
+              const prevPageLink = res.body.links.prev;
+              chai
+                .request(app)
+                .get(prevPageLink)
+                .set("cookie", `${cookieName}=${jwt}`)
+                .end((err, res) => {
+                  if (err) {
+                    return done(err);
+                  }
+                  expect(res).to.have.status(200);
+                  expect(res.body).to.be.a("object");
+                  expect(res.body.message).to.equal("Users returned successfully!");
+                  expect(res.body).to.have.property("links");
+                  expect(res.body.links).to.have.property("next");
+                  expect(res.body.links).to.have.property("prev");
+                  expect(res.body.users).to.have.length(2);
+
+                  return done();
+                });
+              // eslint-disable-next-line
+              return;
+            });
+          // eslint-disable-next-line
+          return;
         });
     });
   });
