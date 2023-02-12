@@ -44,7 +44,7 @@ const createTaskExtensionRequest = async (req, res) => {
     const extensionRequest = await extensionRequestsQuery.createExtensionRequest(extensionBody);
 
     const extensionLog = {
-      type: "extensionRequest",
+      type: "extensionRequests",
       meta: {
         taskId: extensionBody.taskId,
         createdBy: req.userData.id,
@@ -175,7 +175,7 @@ const updateExtensionRequestStatus = async (req, res) => {
     const { status: extensionStatus } = req.body;
 
     const extensionLog = {
-      type: "extensionRequest",
+      type: "extensionRequests",
       meta: {
         taskId: extensionRequest.extensionRequestData.taskId,
         username: req.userData.username,
