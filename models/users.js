@@ -123,29 +123,35 @@ const getSuggestedUsers = async (skill) => {
 
 /**
  * Fetches the data about our users
- * @param query { Object }: Filter for users
+ * @param query { search, next, prev, size, page }: Filter for users
  * @return {Promise<userModel|Array>}
  */
 const fetchUsers = async (query) => {
-  const appendUsernamePrefixQuery = (dbQuery) => {
-    return dbQuery
-      .orderBy("username")
-      .startAt(query.search.toLowerCase().trim())
-      .endAt(query.search.toLowerCase().trim() + "\uf8ff");
-  };
   try {
     // INFO: default user size set to 100
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
     const size = parseInt(query.size) || 100;
-    const page = size * (parseInt(query.page) || 0);
-
-    let dbQuery = userModel.limit(size).offset(page);
+    const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
+    let dbQuery = (query.prev ? userModel.limitToLast(size) : userModel.limit(size)).orderBy("username");
     if (Object.keys(query).length) {
       if (query.search) {
-        dbQuery = appendUsernamePrefixQuery(dbQuery);
+        dbQuery = dbQuery
+          .startAt(query.search.toLowerCase().trim())
+          .endAt(query.search.toLowerCase().trim() + "\uf8ff");
+      }
+      if (query.page) {
+        const offsetValue = size * parseInt(query.page);
+        dbQuery = dbQuery.offset(offsetValue);
+      } else if (query.next) {
+        dbQuery = dbQuery.startAfter(doc);
+      } else if (query.prev) {
+        dbQuery = dbQuery.endBefore(doc);
       }
     }
     const snapshot = await dbQuery.get();
+    const firstDoc = snapshot.docs[0];
+    const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+
     const allUsers = [];
 
     snapshot.forEach((doc) => {
@@ -158,8 +164,11 @@ const fetchUsers = async (query) => {
         chaincode: undefined,
       });
     });
-
-    return allUsers;
+    return {
+      allUsers,
+      nextId: lastDoc?.id ?? "",
+      prevId: firstDoc?.id ?? "",
+    };
   } catch (err) {
     logger.error("Error retrieving user data", err);
     throw err;

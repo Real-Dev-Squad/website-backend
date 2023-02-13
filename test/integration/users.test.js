@@ -102,6 +102,17 @@ describe("Users", function () {
   });
 
   describe("GET /users", function () {
+    beforeEach(async function () {
+      await addOrUpdate(userData[0]);
+      await addOrUpdate(userData[1]);
+      await addOrUpdate(userData[2]);
+      await addOrUpdate(userData[3]);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
     it("Should get all the users in system", function (done) {
       chai
         .request(app)
@@ -192,6 +203,159 @@ describe("Users", function () {
 
           return done();
         });
+    });
+
+    it("Should return next and prev links", function (done) {
+      chai
+        .request(app)
+        .get("/users?size=2")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body).to.have.property("links");
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 when both prev and next passed as query param", function (done) {
+      chai
+        .request(app)
+        .get(`/users?next=${userId}&prev=${userId}&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Both prev and next can't be passed");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 when both page and next passed as query param", function (done) {
+      chai
+        .request(app)
+        .get(`/users?next=${userId}&page=1&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Both page and next can't be passed");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 when both page and prev passed as query param", function (done) {
+      chai
+        .request(app)
+        .get(`/users?page=1&prev=${userId}&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Both page and prev can't be passed");
+
+          return done();
+        });
+    });
+
+    it("Should include search and size query params in the response links that are passed by the request", function (done) {
+      chai
+        .request(app)
+        .get(`/users?search=an&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body).to.have.property("links");
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+          expect(res.body.links.next).includes("search");
+          expect(res.body.links.next).includes("size");
+          expect(res.body.links.prev).includes("search");
+          expect(res.body.links.prev).includes("size");
+
+          return done();
+        });
+    });
+
+    it("Should not have page param in the response links if passed by the request", function (done) {
+      chai
+        .request(app)
+        .get(`/users?page=1&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body).to.have.property("links");
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+          expect(res.body.links.next).to.not.includes("page");
+          expect(res.body.links.prev).to.not.includes("page");
+
+          return done();
+        });
+    });
+
+    it("Should get next and previous page results based upon the links in the response", async function () {
+      const response = await chai.request(app).get(`/users?size=2`).set("cookie", `${cookieName}=${jwt}`);
+
+      expect(response).to.have.status(200);
+      expect(response.body).to.be.a("object");
+      expect(response.body.message).to.equal("Users returned successfully!");
+      expect(response.body).to.have.property("links");
+      expect(response.body.links).to.have.property("next");
+      expect(response.body.links).to.have.property("prev");
+
+      const nextPageLink = response.body.links.next;
+      const nextPageResponse = await chai.request(app).get(nextPageLink).set("cookie", `${cookieName}=${jwt}`);
+
+      expect(nextPageResponse).to.have.status(200);
+      expect(nextPageResponse.body).to.be.a("object");
+      expect(nextPageResponse.body.message).to.equal("Users returned successfully!");
+      expect(nextPageResponse.body).to.have.property("links");
+      expect(nextPageResponse.body.links).to.have.property("next");
+      expect(nextPageResponse.body.links).to.have.property("prev");
+      expect(nextPageResponse.body.users).to.have.length(2);
+
+      const prevPageLink = nextPageResponse.body.links.prev;
+      const previousPageResponse = await chai.request(app).get(prevPageLink).set("cookie", `${cookieName}=${jwt}`);
+
+      expect(previousPageResponse).to.have.status(200);
+      expect(previousPageResponse.body).to.be.a("object");
+      expect(previousPageResponse.body.message).to.equal("Users returned successfully!");
+      expect(previousPageResponse.body).to.have.property("links");
+      expect(previousPageResponse.body.links).to.have.property("next");
+      expect(previousPageResponse.body.links).to.have.property("prev");
+      expect(previousPageResponse.body.users).to.have.length(2);
     });
   });
 
