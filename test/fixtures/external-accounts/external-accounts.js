@@ -3,7 +3,6 @@ module.exports = () => {
     {
       type: "discord",
       token: "<TOKEN>",
-      createdOn: 1674041400,
       attributes: {
         discordId: "<DISCORD_ID>",
         expiry: 1674041460,
@@ -12,7 +11,6 @@ module.exports = () => {
     {
       type: "discord",
       token: 123,
-      createdOn: 1674041400,
       attributes: {
         discordId: "<DISCORD_ID>",
         expiry: 1674041460,

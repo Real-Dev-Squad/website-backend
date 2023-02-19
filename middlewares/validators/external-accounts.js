@@ -4,7 +4,6 @@ const externalAccountData = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     type: joi.string().required(),
     token: joi.string().required(),
-    createdOn: joi.number().required(),
     attributes: joi.object().strict().required(),
   });
 
