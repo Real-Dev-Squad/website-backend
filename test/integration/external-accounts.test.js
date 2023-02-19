@@ -33,7 +33,7 @@ describe("External Accounts", function () {
           }
           expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("Added external accounts data successfully");
+          expect(res.body.message).to.equal("Added external account data successfully");
 
           return done();
         });
