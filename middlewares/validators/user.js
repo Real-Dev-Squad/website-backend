@@ -110,6 +110,32 @@ async function getUsers(req, res, next) {
       search: joi.string().optional().messages({
         "string.empty": "search value must not be empty",
       }),
+      next: joi
+        .string()
+        .optional()
+        .when("page", {
+          is: joi.exist(),
+          then: joi.custom((_, helpers) => helpers.message("Both page and next can't be passed")),
+        })
+        .messages({
+          "string.empty": "next value cannot be empty",
+        }),
+      prev: joi
+        .string()
+        .optional()
+        .when("next", {
+          is: joi.exist(),
+          then: joi.custom((_, helpers) => helpers.message("Both prev and next can't be passed")),
+        })
+        .concat(
+          joi.string().when("page", {
+            is: joi.exist(),
+            then: joi.custom((_, helpers) => helpers.message("Both page and prev can't be passed")),
+          })
+        )
+        .messages({
+          "string.empty": "prev value cannot be empty",
+        }),
     });
   try {
     await schema.validateAsync(req.query);

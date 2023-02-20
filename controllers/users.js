@@ -8,6 +8,7 @@ const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
+const { getPaginationLink } = require("../utils/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -63,11 +64,15 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const allUsers = await userQuery.fetchUsers(req.query);
+    const { allUsers, nextId, prevId } = await userQuery.fetchUsers(req.query);
 
     return res.json({
       message: "Users returned successfully!",
       users: allUsers,
+      links: {
+        next: nextId ? getPaginationLink(req.query, "next", nextId) : "",
+        prev: prevId ? getPaginationLink(req.query, "prev", prevId) : "",
+      },
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
