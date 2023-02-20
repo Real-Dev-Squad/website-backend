@@ -23,6 +23,6 @@ app.use("/tags", require("./tags.js"));
 app.use("/levels", require("./levels.js"));
 app.use("/items", require("./items.js"));
 app.use("/cache", require("./cloudflareCache.js"));
-app.use("/discord", require("./discord.js"));
+app.use("/external-accounts", require("./external-accounts.js"));
 
 module.exports = app;
