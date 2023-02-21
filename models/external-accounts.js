@@ -17,13 +17,11 @@ const fetchExternalAccountData = async (query, param) => {
     let externalAccountData;
 
     externalAccountData = externalAccountsModel.where("token", "==", param);
-
     if (query && query?.type) {
       externalAccountData = externalAccountData.where("type", "==", query?.type);
     }
 
     const querySnapshot = await externalAccountData.limit(1).get();
-
     if (querySnapshot.empty) {
       return userExternalAccountData;
     }

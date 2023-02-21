@@ -22,7 +22,6 @@ const getExternalAccountData = async (req, res) => {
     }
 
     const attributes = externalAccountData[0].attributes;
-
     if (attributes.expiry && attributes.expiry < Date.now()) {
       return res.status(498).json({ message: "Token Expired. Please generate it again" });
     }
