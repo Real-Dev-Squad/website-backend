@@ -13,26 +13,26 @@ const addExternalAccountData = async (data) => {
 
 const fetchExternalAccountData = async (query, param) => {
   try {
-    const userExternalAccountData = [];
-    let externalAccountData;
+    let externalAccountQuery;
+    let data, id;
 
-    externalAccountData = externalAccountsModel.where("token", "==", param);
+    externalAccountQuery = externalAccountsModel.where("token", "==", param);
     if (query && query?.type) {
-      externalAccountData = externalAccountData.where("type", "==", query?.type);
+      externalAccountQuery = externalAccountQuery.where("type", "==", query?.type);
     }
 
-    const querySnapshot = await externalAccountData.limit(1).get();
-    if (querySnapshot.empty) {
-      return userExternalAccountData;
+    const querySnapshot = await externalAccountQuery.limit(1).get();
+
+    const doc = querySnapshot.docs[0];
+    if (doc) {
+      id = doc.id;
+      data = doc.data();
     }
 
-    const data = querySnapshot.docs[0];
-    userExternalAccountData.push({
-      id: data.id,
-      ...data.data(),
-    });
-
-    return userExternalAccountData;
+    return {
+      id: id,
+      ...data,
+    };
   } catch (err) {
     logger.error("Error in fetching external account data", err);
     throw err;

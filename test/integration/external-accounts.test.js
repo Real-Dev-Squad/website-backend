@@ -156,7 +156,7 @@ describe("External Accounts", function () {
         });
     });
 
-    it("Should return 498 when token is expired", function (done) {
+    it("Should return 401 when token is expired", function (done) {
       chai
         .request(app)
         .get("/external-accounts/<TOKEN_1>")
@@ -165,9 +165,13 @@ describe("External Accounts", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(498);
-          expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("Token Expired. Please generate it again");
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Token Expired. Please generate it again",
+          });
 
           return done();
         });

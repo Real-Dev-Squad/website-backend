@@ -22,8 +22,7 @@ describe("External Accounts", function () {
   describe("fetchDiscordData", function () {
     it("should return discord data having given token", async function () {
       await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
-      const data = await externalAccountsModel.fetchExternalAccountData("", externalAccountData[2].token);
-      const response = data[0];
+      const response = await externalAccountsModel.fetchExternalAccountData("", externalAccountData[2].token);
 
       expect(response).to.be.an("object");
       expect(response).to.have.property("id");
@@ -38,11 +37,11 @@ describe("External Accounts", function () {
       });
     });
 
-    it("should return empty array when no data found", async function () {
+    it("should return undefined id when no data found", async function () {
       const response = await externalAccountsModel.fetchExternalAccountData("", externalAccountData[0].token);
 
-      expect(response).to.be.an("array");
-      expect(response).to.have.length(0);
+      expect(response).to.be.an("object");
+      expect(response.id).to.be.equal(undefined);
     });
   });
 });

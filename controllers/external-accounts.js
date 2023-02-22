@@ -17,13 +17,13 @@ const addExternalAccountData = async (req, res) => {
 const getExternalAccountData = async (req, res) => {
   try {
     const externalAccountData = await externalAccountsModel.fetchExternalAccountData(req.query, req.params.token);
-    if (externalAccountData.length === 0) {
-      return res.status(404).json({ message: "No data found" });
+    if (!externalAccountData.id) {
+      return res.boom.notFound("No data found");
     }
 
-    const attributes = externalAccountData[0].attributes;
+    const attributes = externalAccountData.attributes;
     if (attributes.expiry && attributes.expiry < Date.now()) {
-      return res.status(498).json({ message: "Token Expired. Please generate it again" });
+      return res.boom.unauthorized("Token Expired. Please generate it again");
     }
 
     return res.status(200).json({ message: "Data returned successfully", attributes: attributes });
