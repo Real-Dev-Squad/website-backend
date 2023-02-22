@@ -103,6 +103,29 @@ describe("External Accounts", function () {
           return done();
         });
     });
+
+    it("Should return 409 when token already exists", function (done) {
+      externalAccountsModel.addExternalAccountData(externalAccountData[0]);
+      chai
+        .request(app)
+        .post("/external-accounts")
+        .set("Authorization", `Bearer ${jwtToken}`)
+        .send(externalAccountData[0])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(409);
+          expect(res.body).to.be.eql({
+            statusCode: 409,
+            error: "Conflict",
+            message: "Token already exists",
+          });
+
+          return done();
+        });
+    });
   });
 
   describe("GET /external-accounts/:token", function () {

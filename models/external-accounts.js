@@ -22,7 +22,6 @@ const fetchExternalAccountData = async (query, param) => {
     }
 
     const querySnapshot = await externalAccountQuery.limit(1).get();
-
     const doc = querySnapshot.docs[0];
     if (doc) {
       id = doc.id;

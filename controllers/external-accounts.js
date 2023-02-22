@@ -5,6 +5,13 @@ const addExternalAccountData = async (req, res) => {
 
   try {
     const data = { ...req.body, createdOn };
+
+    // Check if token already exists
+    const dataFound = await externalAccountsModel.fetchExternalAccountData("", data.token);
+    if (dataFound.token && dataFound.token === data.token) {
+      return res.boom.conflict("Token already exists");
+    }
+
     await externalAccountsModel.addExternalAccountData(data);
 
     return res.status(201).json({ message: "Added external account data successfully" });
