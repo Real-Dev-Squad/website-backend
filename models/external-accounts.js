@@ -11,4 +11,31 @@ const addExternalAccountData = async (data) => {
   }
 };
 
-module.exports = { addExternalAccountData };
+const fetchExternalAccountData = async (query, param) => {
+  try {
+    let externalAccountQuery;
+    let data, id;
+
+    externalAccountQuery = externalAccountsModel.where("token", "==", param);
+    if (query && query?.type) {
+      externalAccountQuery = externalAccountQuery.where("type", "==", query?.type);
+    }
+
+    const querySnapshot = await externalAccountQuery.limit(1).get();
+    const doc = querySnapshot.docs[0];
+    if (doc) {
+      id = doc.id;
+      data = doc.data();
+    }
+
+    return {
+      id: id,
+      ...data,
+    };
+  } catch (err) {
+    logger.error("Error in fetching external account data", err);
+    throw err;
+  }
+};
+
+module.exports = { addExternalAccountData, fetchExternalAccountData };
