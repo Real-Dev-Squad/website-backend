@@ -1,11 +1,19 @@
 const joi = require("joi");
 
 const externalAccountData = async (req, res, next) => {
-  const schema = joi.object().strict().keys({
-    type: joi.string().required(),
-    token: joi.string().required(),
-    attributes: joi.object().strict().required(),
-  });
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      type: joi.string().required(),
+      token: joi.string().required(),
+      attributes: joi.object().strict().required().keys({
+        discordId: joi.number().optional(),
+        username: joi.string().optional(),
+        picture: joi.string().optional(),
+        expiry: joi.number().optional(),
+      }),
+    });
 
   try {
     await schema.validateAsync(req.body);
