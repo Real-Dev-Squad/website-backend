@@ -7,7 +7,7 @@ const externalAccountData = async (req, res, next) => {
     .keys({
       type: joi.string().required(),
       token: joi.string().required(),
-      attributes: joi.object().strict().required().keys({
+      attributes: joi.object().required().keys({
         discordId: joi.number().optional(),
         username: joi.string().optional(),
         picture: joi.string().optional(),

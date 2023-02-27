@@ -157,7 +157,7 @@ describe("External Accounts", function () {
           expect(res.body).to.have.property("attributes");
           expect(res.body.attributes).to.have.property("discordId");
           expect(res.body.attributes).to.have.property("expiry");
-          expect(res.body.attributes.discordId).to.equal("<DISCORD_ID>");
+          expect(res.body.attributes.discordId).to.equal(externalAccountData[2].attributes.discordId);
           return done();
         });
     });
