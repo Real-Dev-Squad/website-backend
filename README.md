@@ -54,7 +54,7 @@ yarn validate-setup
 
 Head over to [TDD Tests Files List](scripts/tests/tdd-files-list.txt), and add the list of your new (or old) test files.
 
-> You can use wildcard '\*' in the filepaths
+> You can use wildcard '*' in the filepaths
 
 Run TDD in watch mode. Exiting this command will print the coverage report. Try to achieve 100% coverage.
 
