@@ -14,6 +14,23 @@ const fetchTaskRequests = async (_, res) => {
   }
 };
 
+const createTaskRequest = async (req, res) => {
+  try {
+    const { taskId, userId } = req.requestData;
+
+    const taskRequest = await taskRequestsModel.createTaskRequest({ taskId, userId });
+
+    return res.json({
+      message: "Task Request created successfully",
+      taskRequest,
+    });
+  } catch (err) {
+    logger.error("Error while creating task request");
+    throw err;
+  }
+};
+
 module.exports = {
   fetchTaskRequests,
+  createTaskRequest,
 };
