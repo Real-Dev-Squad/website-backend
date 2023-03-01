@@ -7,7 +7,8 @@ module.exports = () => {
         discordId: 121201,
         expiry: 1674041460211,
         username: "test",
-        picture: "https://cdn.discordapp.com/avatars/123/123.png",
+        discriminator: "1234",
+        avatar: "https://cdn.discordapp.com/avatars/123/123.png",
       },
     },
     {
