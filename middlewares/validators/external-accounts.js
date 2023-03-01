@@ -7,12 +7,17 @@ const externalAccountData = async (req, res, next) => {
     .keys({
       type: joi.string().required(),
       token: joi.string().required(),
-      attributes: joi.object().required().keys({
-        discordId: joi.number().optional(),
-        username: joi.string().optional(),
-        picture: joi.string().optional(),
-        expiry: joi.number().optional(),
-      }),
+      attributes: joi
+        .object()
+        .required()
+        .keys({
+          discordId: joi.number().optional(),
+          username: joi.string().optional(),
+          avatar: joi.string().optional(),
+          discriminator: joi.string().optional(),
+          expiry: joi.number().optional(),
+        })
+        .min(1),
     });
 
   try {
