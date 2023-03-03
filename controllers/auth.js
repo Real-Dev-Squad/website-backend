@@ -1,6 +1,22 @@
 const passport = require("passport");
 const users = require("../models/users");
 const authService = require("../services/authService");
+const REALDEVSQUAD_HOSTNAME = config.get("services.hostName");
+
+/**
+ * Makes authentication call to GitHub statergy
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ * @param next {Function} - Express middleware function
+ */
+const githubAuthLogin = (req, res, next) => {
+  const redirectURL = req.query.redirectURL;
+  return passport.authenticate("github", {
+    scope: ["user:email"],
+    state: redirectURL,
+  })(req, res, next);
+};
 
 /**
  * Fetches the user info from GitHub and authenticates User
@@ -9,11 +25,22 @@ const authService = require("../services/authService");
  * @param res {Object} - Express response object
  * @param next {Function} - Express middleware function
  */
-const githubAuth = (req, res, next) => {
+const githubAuthCallback = (req, res, next) => {
   let userData;
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
-  let authRedirectionUrl = req.query.state ?? rdsUiUrl;
-
+  let authRedirectionUrl = rdsUiUrl;
+  if ("state" in req.query) {
+    try {
+      const redirectUrl = new URL(req.query.state);
+      if (redirectUrl.hostname.endsWith(REALDEVSQUAD_HOSTNAME)) {
+        authRedirectionUrl = redirectUrl;
+      } else {
+        logger.error(`Malicious redirect URL provided URL: ${redirectUrl}, Will redirect to RDS`);
+      }
+    } catch (error) {
+      logger.error("Invalid redirect URL provided", error);
+    }
+  }
   try {
     return passport.authenticate("github", { session: false }, async (err, accessToken, user) => {
       if (err) {
@@ -67,6 +94,7 @@ const signout = (req, res) => {
 };
 
 module.exports = {
-  githubAuth,
+  githubAuthLogin,
+  githubAuthCallback,
   signout,
 };

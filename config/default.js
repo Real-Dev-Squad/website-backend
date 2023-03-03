@@ -36,6 +36,7 @@ module.exports = {
   }`,
 
   services: {
+    hostName: "realdevsquad.com",
     rdsApi: {
       baseUrl: "https://api.realdevsquad.com",
     },
