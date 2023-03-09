@@ -261,7 +261,7 @@ const assignTask = async (req, res) => {
     // before:
     // const { taskId } = await tasks.updateTask({ assignee: username, status: TASK_STATUS.ASSIGNED }, task.itemId);
     // after:
-    const taskRequest = await taskRequestModel({ taskId: task.itemId, userId });
+    const taskRequest = await taskRequestModel.create({ taskId: task.itemId, userId });
     return res.json({ message: "Task request created", taskRequest });
   } catch {
     return res.boom.badImplementation("Something went wrong!");
