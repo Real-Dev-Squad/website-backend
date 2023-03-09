@@ -1,18 +1,25 @@
 const firestore = require("../utils/firestore");
-// const userStatusModel = firestore.collection("userStatus");
+const userModel = firestore.collection("user");
 const taskRequestsModel = firestore.collection("taskRequests");
 
 const fetchTaskRequests = async () => {
   try {
-    const taskRequestsSnapshot = await taskRequestsModel().get();
-    const tasksRequests = [];
+    const taskRequests = await taskRequestsModel.get();
 
-    taskRequestsSnapshot.forEach((taskRequest) => {
-      tasksRequests.push(taskRequest);
-    });
-    return tasksRequests;
+    return taskRequests.data();
   } catch (err) {
     logger.error("error fetching tasks", err);
+    throw err;
+  }
+};
+
+const fetchTaskRequestsByUserId = async (userId) => {
+  try {
+    const taskRequests = await taskRequestsModel.doc(userId).get();
+
+    return taskRequests.data();
+  } catch (err) {
+    logger.error("Error retrieving task data", err);
     throw err;
   }
 };
@@ -20,15 +27,23 @@ const fetchTaskRequests = async () => {
 const createTaskRequest = async (requestInfo) => {
   try {
     const { taskId, userId } = requestInfo;
-    const taskRequest = taskRequestsModel.doc(taskId).get();
+
+    const taskRequest = await taskRequestsModel.doc(taskId).get();
+    const user = await userModel.doc(userId).get();
 
     if (taskRequest) {
-      throw new Error("Task request with same task id already exists");
+      const requestedBy = await taskRequest.data().requestedBy;
+      const isUserExisting = requestedBy.find((user) => user.id === userId);
+
+      if (isUserExisting) {
+        return taskRequest;
+      }
+
+      await taskRequest.update({ requestedBy: [...requestedBy, user] });
+      return taskRequest.data();
     }
 
     const taskRequestData = {
-      // contains data according to task request schema
-      userId,
       taskId,
     };
     const taskRequestInfo = await taskRequestsModel.add(taskRequestData);
@@ -40,7 +55,27 @@ const createTaskRequest = async (requestInfo) => {
   }
 };
 
+const approveTask = async (taskRequestId, userId) => {
+  try {
+    const taskRequest = await taskRequestsModel.doc({ id: taskRequestId }).get();
+    const user = await userModel.doc({ id: userId }).get();
+
+    if (user) {
+      taskRequest.update({ approvedTo: userId });
+      // TODO: Update tasks
+      // TODO: update user status
+    }
+
+    return { user };
+  } catch (err) {
+    logger.error("Error in approving task", err);
+    throw err;
+  }
+};
+
 module.exports = {
   fetchTaskRequests,
+  fetchTaskRequestsByUserId,
   createTaskRequest,
+  approveTask,
 };
