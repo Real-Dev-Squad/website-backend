@@ -1,10 +1,12 @@
 const firestore = require("../utils/firestore");
-const userModel = firestore.collection("user");
-const taskRequestsModel = firestore.collection("taskRequests");
+const { toFirestoreData } = require("../utils/taskRequests");
+const usersCollection = firestore.collection("users");
+const taskRequestsCollection = firestore.collection("taskRequests");
+const tasksCollection = firestore.collection("tasks");
 
 const fetchTaskRequests = async () => {
   try {
-    const taskRequests = await taskRequestsModel.get();
+    const taskRequests = await taskRequestsCollection.doc().get();
 
     return taskRequests.data();
   } catch (err) {
@@ -13,60 +15,75 @@ const fetchTaskRequests = async () => {
   }
 };
 
-const fetchTaskRequestsByUserId = async (userId) => {
+/**
+ * Creates a task request
+ *
+ * @param taskId { string }: id of task request
+ * @param userId { string }: userId of user whose creating the task request
+ * @return {Promise<{taskRequest: Object}>}
+ */
+const createTaskRequest = async (taskId, userId) => {
   try {
-    const taskRequests = await taskRequestsModel.doc(userId).get();
+    const taskRequest = await taskRequestsCollection.doc(taskId).get();
+    const user = await usersCollection.doc(userId).get();
+    const task = (await tasksCollection.doc(taskId).get()).data();
 
-    return taskRequests.data();
-  } catch (err) {
-    logger.error("Error retrieving task data", err);
-    throw err;
-  }
-};
-
-const createTaskRequest = async (requestInfo) => {
-  try {
-    const { taskId, userId } = requestInfo;
-
-    const taskRequest = await taskRequestsModel.doc(taskId).get();
-    const user = await userModel.doc(userId).get();
-
-    if (taskRequest) {
+    if (taskRequest.data()) {
       const requestedBy = await taskRequest.data().requestedBy;
-      const isUserExisting = requestedBy.find((user) => user.id === userId);
+      const isUserAlreadyRequesting = requestedBy.find((id) => id === userId);
 
-      if (isUserExisting) {
-        return taskRequest;
+      if (isUserAlreadyRequesting) {
+        return { message: "User already exists" };
       }
 
-      await taskRequest.update({ requestedBy: [...requestedBy, user] });
-      return taskRequest.data();
+      await taskRequest.doc(taskId).set({ requestedBy: [...requestedBy, user] });
+      return {
+        message: "Task request updated successfully",
+        taskRequest: taskRequest.data(),
+      };
     }
 
-    const taskRequestData = {
-      taskId,
+    const payload = {
+      requestedBy: [userId],
+      title: task.title,
+      purpose: task.purpose,
+      priority: task.priority,
+      isNoteworthy: task.isNoteworthy,
+      type: task.type,
     };
-    const taskRequestInfo = await taskRequestsModel.add(taskRequestData);
+    const taskRequestDocument = toFirestoreData(payload);
 
-    return taskRequestInfo;
+    await taskRequestsCollection.doc(taskId).set(taskRequestDocument);
+
+    return {
+      message: "Task request created successfully",
+      taskRequest: { ...taskRequestDocument },
+    };
   } catch (err) {
     logger.error("Error in updating task", err);
     throw err;
   }
 };
 
-const approveTask = async (taskRequestId, userId) => {
+/**
+ * Approves task request to user
+ *
+ * @param taskRequestId { string }: id of task request
+ * @param userId { string }: id of user whose being approved
+ * @return {Promise<{taskId: string}>}
+ */
+const approveTaskRequest = async (taskRequestId, userId) => {
   try {
-    const taskRequest = await taskRequestsModel.doc({ id: taskRequestId }).get();
-    const user = await userModel.doc({ id: userId }).get();
+    const taskRequest = await taskRequestsCollection.doc({ id: taskRequestId }).get();
+    const user = await usersCollection.doc({ id: userId }).get();
 
     if (user) {
-      taskRequest.update({ approvedTo: userId });
+      await taskRequest.update({ approvedTo: userId });
       // TODO: Update tasks
       // TODO: update user status
     }
 
-    return { user };
+    return { taskRequest, user };
   } catch (err) {
     logger.error("Error in approving task", err);
     throw err;
@@ -75,7 +92,6 @@ const approveTask = async (taskRequestId, userId) => {
 
 module.exports = {
   fetchTaskRequests,
-  fetchTaskRequestsByUserId,
   createTaskRequest,
-  approveTask,
+  approveTaskRequest,
 };
