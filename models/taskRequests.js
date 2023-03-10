@@ -4,11 +4,20 @@ const usersCollection = firestore.collection("users");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const tasksCollection = firestore.collection("tasks");
 
+/**
+ * Fetch all task requests
+ *
+ * @return {Object}
+ */
 const fetchTaskRequests = async () => {
   try {
-    const taskRequests = await taskRequestsCollection.doc().get();
+    const taskRequests = await taskRequestsCollection.get();
 
-    return taskRequests.data();
+    const taskRequestsData = [];
+
+    taskRequests.forEach((taskRequest) => taskRequestsData.push({ id: taskRequest.id, ...taskRequest.data() }));
+
+    return taskRequestsData;
   } catch (err) {
     logger.error("error fetching tasks", err);
     throw err;

@@ -4,21 +4,16 @@ const fetchTaskRequests = async (_, res) => {
   try {
     const taskRequests = await taskRequestsModel.fetchTaskRequests();
 
-    return res.json({
-      message: "Task Requests returned successfully!",
-      taskRequests,
+    if (taskRequests && taskRequests.length > 0) {
+      return res.status(200).json({
+        message: "Task Requests returned successfully!",
+        taskRequests,
+      });
+    }
+
+    return res.status(400).json({
+      message: "Unable to fetch task requests",
     });
-  } catch (err) {
-    logger.error("Error while fetching task requests", err);
-    throw err;
-  }
-};
-
-const fetchUserTaskRequests = async (req, res) => {
-  try {
-    const taskRequests = await taskRequestsModel.fetchTaskRequests(req.params.id);
-
-    return res.json("Task Requests returned successfully", taskRequests);
   } catch (err) {
     logger.error("Error while fetching task requests", err);
     throw err;
@@ -61,7 +56,6 @@ const approveTaskRequest = async (req, res) => {
 
 module.exports = {
   fetchTaskRequests,
-  fetchUserTaskRequests,
   createTaskRequest,
   approveTaskRequest,
 };
