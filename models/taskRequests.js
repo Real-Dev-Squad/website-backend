@@ -1,8 +1,11 @@
+const { TASK_STATUS } = require("../constants/tasks");
+const { USER_STATUS } = require("../constants/users");
 const firestore = require("../utils/firestore");
 const { toFirestoreData } = require("../utils/taskRequests");
 const usersCollection = firestore.collection("users");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const tasksCollection = firestore.collection("tasks");
+const tasksModel = require("./tasks");
 
 /**
  * Fetch all task requests
@@ -83,16 +86,31 @@ const createTaskRequest = async (taskId, userId) => {
  */
 const approveTaskRequest = async (taskRequestId, userId) => {
   try {
-    const taskRequest = await taskRequestsCollection.doc({ id: taskRequestId }).get();
-    const user = await usersCollection.doc({ id: userId }).get();
+    const taskRequest = await taskRequestsCollection.doc(taskRequestId).get();
+    const user = (await usersCollection.doc(userId).get()).data();
 
-    if (user) {
-      await taskRequest.update({ approvedTo: userId });
-      // TODO: Update tasks
-      // TODO: update user status
+    if (!user) {
+      return {
+        error: "User does not exists",
+      };
     }
 
-    return { taskRequest, user };
+    if (user.status === USER_STATUS.OOO || user.status === USER_STATUS.ACTIVE) {
+      return {
+        error: "User is unavailable",
+      };
+    }
+
+    await taskRequestsCollection.doc(taskRequestId).set({
+      ...taskRequest.data(),
+      approvedTo: user.username,
+    });
+    await tasksModel.updateTask({ assignee: user.username, status: TASK_STATUS.ASSIGNED }, taskRequestId);
+
+    return {
+      message: "Task assinged to user",
+      user: user,
+    };
   } catch (err) {
     logger.error("Error in approving task", err);
     throw err;

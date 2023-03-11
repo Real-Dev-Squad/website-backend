@@ -44,10 +44,9 @@ const createTaskRequest = async (req, res) => {
 const approveTaskRequest = async (req, res) => {
   try {
     const { taskRequestId, userId } = req.body;
-    const { user } = await taskRequestsModel.approveTaskRequest(taskRequestId, userId);
+    const response = await taskRequestsModel.approveTaskRequest(taskRequestId, userId);
 
-    res.status(204);
-    return res.json({ message: `Task successfully approved to ${user.userName}` });
+    return res.status(204).json(response);
   } catch (err) {
     logger.error("Error while approving task request", err);
     throw err;
