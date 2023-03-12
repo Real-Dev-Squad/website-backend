@@ -9,6 +9,7 @@ const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const { getPaginationLink } = require("../utils/users");
+const githubService = require("../services/githubService");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -64,6 +65,53 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
+    const combinations = req.query.q.split(" "); // split the query string by whites-pace
+    const qualifiers = {};
+    let allPRs;
+
+    // iterate through the combinations and parse the qualifiers
+    combinations.forEach((combination) => {
+      const [qualifier, value] = combination.split(":");
+      qualifiers[qualifier] = value;
+    });
+
+    if (qualifiers.filterBy) {
+      const { sortBy = "RECENT_FIRST", filterBy } = qualifiers;
+      const order = sortBy === "RECENT_FIRST" ? "desc" : "asc";
+      if (filterBy === "OPEN_PRS") {
+        const { data } = await githubService.fetchOpenPRs(200, 1, order);
+        allPRs = githubService.extractPRdetails(data);
+
+        const { allUsers } = await userQuery.fetchUsers({ size: 200 });
+
+        const uniqueUsersInOrder = [];
+
+        allPRs.pullRequests.forEach((element) => {
+          if (!uniqueUsersInOrder.includes(element.username)) {
+            uniqueUsersInOrder.push(element.username);
+          }
+        });
+
+        const usersWithDetails = [];
+
+        uniqueUsersInOrder.forEach((username) => {
+          const userDetails = allUsers.find((user) => user.github_id === username);
+
+          if (userDetails) {
+            usersWithDetails.push(userDetails);
+          }
+        });
+
+        return res.json({
+          message: "Users returned successfully!",
+          users: usersWithDetails,
+          // links: {
+          //   next: nextId ? getPaginationLink(req.query, "next", nextId) : "",
+          //   prev: prevId ? getPaginationLink(req.query, "prev", prevId) : "",
+          // },
+        });
+      }
+    }
     const { allUsers, nextId, prevId } = await userQuery.fetchUsers(req.query);
 
     return res.json({

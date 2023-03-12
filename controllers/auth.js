@@ -42,7 +42,7 @@ const githubAuth = (req, res, next) => {
         sameSite: "lax",
       });
 
-      if (incompleteUserDetails) authRedirectionUrl = "https://my.realdevsquad.com/new-signup";
+      // if (incompleteUserDetails) authRedirectionUrl = "https://my.realdevsquad.com/new-signup";
 
       return res.redirect(authRedirectionUrl);
     })(req, res, next);
