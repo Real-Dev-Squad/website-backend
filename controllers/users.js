@@ -81,33 +81,41 @@ const getUsers = async (req, res) => {
       if (filterBy === "OPEN_PRS") {
         const { data } = await githubService.fetchOpenPRs(200, 1, order);
         allPRs = githubService.extractPRdetails(data);
+      }
+      if (filterBy === "CLOSED_PRS") {
+        const { data } = await githubService.fetchClosedPRs();
 
-        const { allUsers } = await userQuery.fetchFilteredUsers();
-
-        const uniqueUsersInOrder = [];
-
-        allPRs.forEach((element) => {
-          if (!uniqueUsersInOrder.includes(element.username)) {
-            uniqueUsersInOrder.push(element.username);
-          }
-        });
-
-        const usersWithDetails = [];
-
-        uniqueUsersInOrder.forEach((username) => {
-          const userDetails = allUsers.find((user) => user.github_id === username);
-
-          if (userDetails) {
-            usersWithDetails.push(userDetails);
-          }
-        });
-
-        return res.json({
-          message: "Users returned successfully!",
-          users: usersWithDetails,
+        allPRs = githubService.extractPRdetails(data).filter((pr) => {
+          return pr.mergedAt !== null;
         });
       }
+
+      const { allUsers } = await userQuery.fetchFilteredUsers();
+
+      const uniqueUsersInOrder = [];
+
+      allPRs.forEach((element) => {
+        if (!uniqueUsersInOrder.includes(element.username)) {
+          uniqueUsersInOrder.push(element.username);
+        }
+      });
+
+      const usersWithDetails = [];
+
+      uniqueUsersInOrder.forEach((username) => {
+        const userDetails = allUsers.find((user) => user.github_id === username);
+
+        if (userDetails) {
+          usersWithDetails.push(userDetails);
+        }
+      });
+
+      return res.json({
+        message: "Users returned successfully!",
+        users: usersWithDetails,
+      });
     }
+
     const { allUsers, nextId, prevId } = await userQuery.fetchUsers(req.query);
 
     return res.json({

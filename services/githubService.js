@@ -18,11 +18,13 @@ const extractPRdetails = (data) => {
       repository_url: repositoryUrl,
       labels,
       assignees,
+      pull_request: pullRequest,
     }) => {
       const allAssignees = assignees.map((object) => object.login);
       const allLabels = labels.map((object) => object.name);
       const repositoryUrlSplit = repositoryUrl.split("/");
       const repository = repositoryUrlSplit[repositoryUrlSplit.length - 1];
+      const mergedAt = pullRequest.merged_at;
       allPRs.push({
         title,
         username: user.login,
@@ -33,6 +35,7 @@ const extractPRdetails = (data) => {
         url,
         labels: allLabels,
         assignees: allAssignees,
+        mergedAt,
       });
     }
   );
@@ -137,9 +140,30 @@ const fetchOpenPRs = async (perPage = 10, page = 1, order = "desc") => {
   }
 };
 
+const fetchClosedPRs = async () => {
+  try {
+    const url = getGithubURL(
+      {
+        is: "closed",
+      },
+      {
+        sort: "updated",
+        order: "desc",
+        per_page: 100,
+        page: 1,
+      }
+    );
+    return getFetch(url);
+  } catch (err) {
+    logger.error(`Error while fetching pull requests: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
+  fetchClosedPRs,
   getFetch,
   extractPRdetails,
 };
