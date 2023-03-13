@@ -111,30 +111,11 @@ const fetchPRsByUser = async (username) => {
 };
 
 /**
- * Fetches the oldest open `per_page` requests
- */
-// const fetchStalePRs = async (perPage = 10, page = 1) => {
-//   try {
-//     const url = getGithubURL(
-//       {
-//         is: "open",
-//       },
-//       {
-//         sort: "created",
-//         order: "asc",
-//         per_page: perPage,
-//         page,
-//       }
-//     );
-//     return getFetch(url);
-//   } catch (err) {
-//     logger.error(`Error while fetching pull requests: ${err}`);
-//     throw err;
-//   }
-// };
-
-/**
  * Fetches the latest `per_page` open PRs
+ *
+ * Order by default is desc, which will fetch latest open PRs,
+ * to fetch stale PRs just change pass order as asc
+ *
  */
 const fetchOpenPRs = async (perPage = 10, page = 1, order = "desc") => {
   try {
@@ -144,7 +125,7 @@ const fetchOpenPRs = async (perPage = 10, page = 1, order = "desc") => {
       },
       {
         sort: "created",
-        order: "desc",
+        order: order,
         per_page: perPage,
         page,
       }

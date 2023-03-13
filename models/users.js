@@ -175,6 +175,33 @@ const fetchUsers = async (query) => {
   }
 };
 
+const fetchFilteredUsers = async () => {
+  try {
+    const dbQuery = userModel;
+
+    const snapshot = await dbQuery.get();
+
+    const allUsers = [];
+
+    snapshot.forEach((doc) => {
+      allUsers.push({
+        id: doc.id,
+        ...doc.data(),
+        phone: undefined,
+        email: undefined,
+        tokens: undefined,
+        chaincode: undefined,
+      });
+    });
+    return {
+      allUsers,
+    };
+  } catch (err) {
+    logger.error("Error retrieving user data", err);
+    throw err;
+  }
+};
+
 /**
  * Fetches the user data from the the provided username or userId
  *
@@ -304,4 +331,5 @@ module.exports = {
   getJoinData,
   getSuggestedUsers,
   fetchUserSkills,
+  fetchFilteredUsers,
 };

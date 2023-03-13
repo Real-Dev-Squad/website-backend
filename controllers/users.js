@@ -8,8 +8,8 @@ const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
-const { getPaginationLink } = require("../utils/users");
 const githubService = require("../services/githubService");
+const { getPaginationLink } = require("../utils/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -82,11 +82,11 @@ const getUsers = async (req, res) => {
         const { data } = await githubService.fetchOpenPRs(200, 1, order);
         allPRs = githubService.extractPRdetails(data);
 
-        const { allUsers } = await userQuery.fetchUsers({ size: 200 });
+        const { allUsers } = await userQuery.fetchFilteredUsers();
 
         const uniqueUsersInOrder = [];
 
-        allPRs.pullRequests.forEach((element) => {
+        allPRs.forEach((element) => {
           if (!uniqueUsersInOrder.includes(element.username)) {
             uniqueUsersInOrder.push(element.username);
           }
@@ -105,10 +105,6 @@ const getUsers = async (req, res) => {
         return res.json({
           message: "Users returned successfully!",
           users: usersWithDetails,
-          // links: {
-          //   next: nextId ? getPaginationLink(req.query, "next", nextId) : "",
-          //   prev: prevId ? getPaginationLink(req.query, "prev", prevId) : "",
-          // },
         });
       }
     }
@@ -123,6 +119,7 @@ const getUsers = async (req, res) => {
       },
     });
   } catch (error) {
+    console.log(error);
     logger.error(`Error while fetching all users: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
