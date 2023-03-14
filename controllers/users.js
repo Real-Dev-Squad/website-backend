@@ -79,18 +79,19 @@ const getUsers = async (req, res) => {
       const { sortBy = "RECENT_FIRST", filterBy } = qualifiers;
       const order = sortBy === "RECENT_FIRST" ? "desc" : "asc";
       if (filterBy === "OPEN_PRS") {
-        const { data } = await githubService.fetchOpenPRs(200, 1, order);
+        const { data } = await githubService.fetchOpenPRs(order);
+
         allPRs = githubService.extractPRdetails(data);
       }
       if (filterBy === "CLOSED_PRS") {
-        const { data } = await githubService.fetchClosedPRs();
+        const { data } = await githubService.fetchClosedPRs(order);
 
         allPRs = githubService.extractPRdetails(data).filter((pr) => {
           return pr.mergedAt !== null;
         });
       }
 
-      const { allUsers } = await userQuery.fetchFilteredUsers();
+      const { allUsers } = await userQuery.fetchAllUsers();
 
       const uniqueUsersInOrder = [];
 
@@ -116,7 +117,7 @@ const getUsers = async (req, res) => {
       });
     }
 
-    const { allUsers, nextId, prevId } = await userQuery.fetchUsers(req.query);
+    const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(req.query);
 
     return res.json({
       message: "Users returned successfully!",

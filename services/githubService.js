@@ -120,7 +120,7 @@ const fetchPRsByUser = async (username) => {
  * to fetch stale PRs just change pass order as asc
  *
  */
-const fetchOpenPRs = async (perPage = 10, page = 1, order = "desc") => {
+const fetchOpenPRs = async (order = "desc", perPage = 100, page = 1) => {
   try {
     const url = getGithubURL(
       {
@@ -128,8 +128,8 @@ const fetchOpenPRs = async (perPage = 10, page = 1, order = "desc") => {
       },
       {
         sort: "created",
-        order: order,
         per_page: perPage,
+        order: order,
         page,
       }
     );
@@ -140,7 +140,7 @@ const fetchOpenPRs = async (perPage = 10, page = 1, order = "desc") => {
   }
 };
 
-const fetchClosedPRs = async () => {
+const fetchClosedPRs = async (order = "desc", perPage = 100, page = 1) => {
   try {
     const url = getGithubURL(
       {
@@ -148,9 +148,9 @@ const fetchClosedPRs = async () => {
       },
       {
         sort: "updated",
-        order: "desc",
-        per_page: 100,
-        page: 1,
+        per_page: perPage,
+        order,
+        page,
       }
     );
     return getFetch(url);

@@ -126,7 +126,7 @@ const getSuggestedUsers = async (skill) => {
  * @param query { search, next, prev, size, page }: Filter for users
  * @return {Promise<userModel|Array>}
  */
-const fetchUsers = async (query) => {
+const fetchPaginatedUsers = async (query) => {
   try {
     // INFO: default user size set to 100
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
@@ -175,7 +175,7 @@ const fetchUsers = async (query) => {
   }
 };
 
-const fetchFilteredUsers = async () => {
+const fetchAllUsers = async () => {
   try {
     const dbQuery = userModel;
 
@@ -321,7 +321,7 @@ const fetchUserSkills = async (id) => {
 
 module.exports = {
   addOrUpdate,
-  fetchUsers,
+  fetchPaginatedUsers,
   fetchUser,
   setIncompleteUserDetails,
   initializeUser,
@@ -331,5 +331,5 @@ module.exports = {
   getJoinData,
   getSuggestedUsers,
   fetchUserSkills,
-  fetchFilteredUsers,
+  fetchAllUsers,
 };
