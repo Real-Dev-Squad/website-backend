@@ -202,5 +202,51 @@ module.exports = () => {
       twitter_id: "RitvikJamwal4u",
       linkedin_id: "ritvik-jamwal4u",
     },
+    {
+      username: "Tanishq",
+      first_name: "Tanishq",
+      last_name: "Singla",
+      yoe: 1,
+      img: "./img.png",
+      linkedin_id: "tanishqsingla",
+      github_id: "tanishqsingla",
+      github_display_name: "Tanishq Singla",
+      phone: "1234567890",
+      email: "ts@gmail.com",
+      status: "idle",
+      tokens: {
+        githubAccessToken: "githubAccessToken",
+      },
+      roles: {
+        member: true,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
+    },
+    {
+      username: "darthvader",
+      first_name: "Darth",
+      last_name: "Vader",
+      yoe: 1,
+      img: "./img.png",
+      linkedin_id: "darthvader",
+      github_id: "darthvader",
+      github_display_name: "Darth Vader",
+      phone: "1234567890",
+      email: "dv@gmail.com",
+      status: "idle",
+      tokens: {
+        githubAccessToken: "githubAccessToken",
+      },
+      roles: {
+        member: true,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
+    },
   ];
 };
