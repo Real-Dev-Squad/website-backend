@@ -48,7 +48,8 @@ const createTaskRequest = async (taskId, userId) => {
         return { message: "User already exists" };
       }
 
-      await taskRequest.doc(taskId).set({ requestedBy: [...requestedBy, user] });
+      const updatedRequestedBy = [...requestedBy, user.id];
+      await taskRequestsCollection.doc(taskId).update({ requestedBy: updatedRequestedBy });
       return {
         message: "Task request updated successfully",
         taskRequest: taskRequest.data(),
