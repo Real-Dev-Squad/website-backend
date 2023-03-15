@@ -21,7 +21,7 @@ let taskId;
 
 const member = userData[9];
 const member2 = userData[10];
-// const superUser = userData[4];
+const superUser = userData[4];
 
 describe("Task Requests", function () {
   let userId, userId2;
@@ -33,7 +33,59 @@ describe("Task Requests", function () {
     sinon.restore();
   });
 
-  describe("PUT /taskRequests/create - creates a new task", function () {
+  describe("GET / - gets tasks requests", function () {
+    describe("When the user is super user", function () {
+      before(async function () {
+        userId = await addUser(member);
+        const superUserId = await addUser(superUser);
+        jwt = authService.generateAuthToken({ userId: superUserId });
+
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+        await taskRequestsModel.createTaskRequest(taskId, userId);
+      });
+
+      it("should fetch taskRequests", function (done) {
+        chai
+          .request(app)
+          .get("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            return done();
+          });
+      });
+    });
+
+    describe("When the user is not a super user", function () {
+      before(async function () {
+        userId = await addUser(member);
+        jwt = authService.generateAuthToken({ userId });
+
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+        await taskRequestsModel.createTaskRequest(taskId, userId);
+      });
+      it("should return unauthorized user response", function (done) {
+        chai
+          .request(app)
+          .get("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(401);
+            return done();
+          });
+      });
+    });
+  });
+
+  describe("PUT /taskRequests/create - creates a new task request", function () {
     describe("When a new task requested is created", function () {
       before(async function () {
         userId = await addUser(member);
