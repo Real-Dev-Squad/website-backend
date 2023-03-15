@@ -1,3 +1,4 @@
+const { TASK_REQUEST_STATUS } = require("../constants/taskRequests");
 const { TASK_STATUS } = require("../constants/tasks");
 const { USER_STATUS } = require("../constants/users");
 const firestore = require("../utils/firestore");
@@ -56,15 +57,16 @@ const createTaskRequest = async (taskId, userId) => {
       };
     }
 
-    const payload = {
+    const newTaskRequest = {
       requestedBy: [userId],
       title: task.title,
       purpose: task.purpose,
       priority: task.priority,
       isNoteworthy: task.isNoteworthy,
       type: task.type,
+      status: TASK_REQUEST_STATUS.WAITING,
     };
-    const taskRequestDocument = toFirestoreData(payload);
+    const taskRequestDocument = toFirestoreData(newTaskRequest);
 
     await taskRequestsCollection.doc(taskId).set(taskRequestDocument);
 
@@ -105,12 +107,12 @@ const approveTaskRequest = async (taskRequestId, userId) => {
     await taskRequestsCollection.doc(taskRequestId).set({
       ...taskRequest.data(),
       approvedTo: user.username,
+      status: TASK_REQUEST_STATUS.APPROVED,
     });
     await tasksModel.updateTask({ assignee: user.username, status: TASK_STATUS.ASSIGNED }, taskRequestId);
 
     return {
-      message: "Task assinged to user",
-      user: user,
+      message: `Task assigned to user ${user.username}`,
     };
   } catch (err) {
     logger.error("Error in approving task", err);

@@ -14,6 +14,7 @@ const taskData = require("../fixtures/tasks/tasks")();
 chai.use(chaiHttp);
 
 const config = require("config");
+const { TASK_REQUEST_STATUS } = require("../../constants/taskRequests");
 const cookieName = config.get("userToken.cookieName");
 
 let jwt;
@@ -22,6 +23,7 @@ let taskId;
 const member = userData[9];
 const member2 = userData[10];
 const superUser = userData[4];
+const activeMember = userData[0];
 
 describe("Task Requests", function () {
   let userId, userId2;
@@ -115,6 +117,10 @@ describe("Task Requests", function () {
             expect(res.body).to.be.a("object");
             expect(res.body.message).to.equal("Task request created successfully");
             expect(res.body.taskRequest).to.be.a("object");
+            expect(res.body.taskRequest.status).to.equal(TASK_REQUEST_STATUS.WAITING);
+            expect(res.body.taskRequest.title).to.equal(taskData[4].title);
+            expect(res.body.taskRequest.priority).to.equal(taskData[4].priority);
+            expect(res.body.taskRequest.requestedBy).to.eql([userId]);
             return done();
           });
       });
@@ -195,13 +201,16 @@ describe("Task Requests", function () {
   });
 
   describe("PATCH /approve - approves task request", function () {
+    let activeUserId;
     before(async function () {
       userId = await addUser(member);
+      activeUserId = await addUser(activeMember);
       const superUserId = await addUser(superUser);
       jwt = authService.generateAuthToken({ userId: superUserId });
 
       taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       await taskRequestsModel.createTaskRequest(taskId, userId);
+      await taskRequestsModel.createTaskRequest(taskId, activeUserId);
     });
 
     describe("When the user is super user", function () {
@@ -221,6 +230,26 @@ describe("Task Requests", function () {
 
             expect(res).to.have.status(200);
             expect(res.body.message).to.equal(`Task assigned to user ${member.username}`);
+            return done();
+          });
+      });
+
+      it("should match response when the user being approved is idle or ooo", function (done) {
+        chai
+          .request(app)
+          .patch("/taskRequests/approve")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({
+            taskRequestId: taskId,
+            userId: activeUserId,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.error).to.equal("User is unavailable");
             return done();
           });
       });
