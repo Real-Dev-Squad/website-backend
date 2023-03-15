@@ -55,6 +55,9 @@ describe("Task Requests", function () {
             }
 
             expect(res).to.have.status(200);
+            expect(res.body.message).to.equal("Task requests returned successfully");
+            expect(res.body.taskRequests).to.be.a("Array");
+            expect(res.body.taskRequests.length).to.equal(1);
             return done();
           });
       });
@@ -185,6 +188,67 @@ describe("Task Requests", function () {
             expect(res).to.have.status(400);
             expect(res.body).to.be.a("object");
             expect(res.body.message).to.equal("User already exists");
+            return done();
+          });
+      });
+    });
+  });
+
+  describe("PATCH /approve - approves task request", function () {
+    before(async function () {
+      userId = await addUser(member);
+      const superUserId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId: superUserId });
+
+      taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+      await taskRequestsModel.createTaskRequest(taskId, userId);
+    });
+
+    describe("When the user is super user", function () {
+      it("should match response for successfull approval", function (done) {
+        chai
+          .request(app)
+          .patch("/taskRequests/approve")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({
+            taskRequestId: taskId,
+            userId,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.equal(`Task assigned to user ${member.username}`);
+            return done();
+          });
+      });
+    });
+    describe("When the user is not super user", function () {
+      before(async function () {
+        userId = await addUser(member);
+        jwt = authService.generateAuthToken({ userId });
+
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+        await taskRequestsModel.createTaskRequest(taskId, userId);
+      });
+
+      it("should return unauthorized user response", function (done) {
+        chai
+          .request(app)
+          .patch("/taskRequests/approve")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({
+            taskRequestId: taskId,
+            userId,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(401);
             return done();
           });
       });

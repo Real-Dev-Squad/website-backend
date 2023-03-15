@@ -6,7 +6,7 @@ const fetchTaskRequests = async (_, res) => {
 
     if (taskRequests && taskRequests.length > 0) {
       return res.status(200).json({
-        message: "Task Requests returned successfully!",
+        message: "Task requests returned successfully",
         taskRequests,
       });
     }
@@ -46,7 +46,7 @@ const approveTaskRequest = async (req, res) => {
     const { taskRequestId, userId } = req.body;
     const response = await taskRequestsModel.approveTaskRequest(taskRequestId, userId);
 
-    return res.status(204).json(response);
+    return res.status(200).json(response);
   } catch (err) {
     logger.error("Error while approving task request", err);
     throw err;
