@@ -16,7 +16,7 @@ const fetchTaskRequests = async (_, res) => {
     });
   } catch (err) {
     logger.error("Error while fetching task requests", err);
-    throw err;
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -37,7 +37,7 @@ const createTaskRequest = async (req, res) => {
     return res.status(400).json({ message: taskRequestResponse.message });
   } catch (err) {
     logger.error("Error while creating task request");
-    throw err;
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -49,7 +49,7 @@ const approveTaskRequest = async (req, res) => {
     return res.status(200).json(response);
   } catch (err) {
     logger.error("Error while approving task request", err);
-    throw err;
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
