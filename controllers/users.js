@@ -91,6 +91,18 @@ const getUsers = async (req, res) => {
         });
       }
 
+      if (filterBy === "OPEN_ISSUES") {
+        const { data } = await githubService.fetchOpenIssues(order);
+
+        allPRs = githubService.extractPRdetails(data);
+      }
+
+      if (filterBy === "CLOSED_ISSUES") {
+        const { data } = await githubService.fetchClosedIssues(order);
+
+        allPRs = githubService.extractPRdetails(data);
+      }
+
       const { allUsers } = await userQuery.fetchAllUsers();
 
       const uniqueUsersInOrder = [];
@@ -128,7 +140,6 @@ const getUsers = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
     logger.error(`Error while fetching all users: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
   }

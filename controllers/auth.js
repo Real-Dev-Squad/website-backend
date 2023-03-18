@@ -29,7 +29,7 @@ const githubAuth = (req, res, next) => {
         },
       };
 
-      const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);
+      const { userId } = await users.addOrUpdate(userData);
 
       const token = authService.generateAuthToken({ userId });
 

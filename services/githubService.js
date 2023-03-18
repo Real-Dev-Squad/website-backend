@@ -24,7 +24,7 @@ const extractPRdetails = (data) => {
       const allLabels = labels.map((object) => object.name);
       const repositoryUrlSplit = repositoryUrl.split("/");
       const repository = repositoryUrlSplit[repositoryUrlSplit.length - 1];
-      const mergedAt = pullRequest.merged_at;
+      const mergedAt = pullRequest?.merged_at;
       allPRs.push({
         title,
         username: user.login,
@@ -59,7 +59,7 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
 
   const defaultParams = {
     org: config.get("githubApi.org"),
-    type: "pr",
+    // type: "pr",
   };
 
   const finalSearchParams = Object.assign({}, defaultParams, searchParams);
@@ -105,6 +105,7 @@ const fetchPRsByUser = async (username) => {
     const { user } = await fetchUser({ username });
     const url = getGithubURL({
       author: user.github_id,
+      type: "pr",
     });
     return getFetch(url);
   } catch (err) {
@@ -125,6 +126,7 @@ const fetchOpenPRs = async (order = "desc", perPage = 100, page = 1) => {
     const url = getGithubURL(
       {
         is: "open",
+        type: "pr",
       },
       {
         sort: "created",
@@ -145,6 +147,49 @@ const fetchClosedPRs = async (order = "desc", perPage = 100, page = 1) => {
     const url = getGithubURL(
       {
         is: "closed",
+        type: "pr",
+      },
+      {
+        sort: "updated",
+        per_page: perPage,
+        order,
+        page,
+      }
+    );
+    return getFetch(url);
+  } catch (err) {
+    logger.error(`Error while fetching pull requests: ${err}`);
+    throw err;
+  }
+};
+
+const fetchOpenIssues = async (order = "desc", perPage = 100, page = 1) => {
+  try {
+    const url = getGithubURL(
+      {
+        is: "open",
+        type: "issue",
+      },
+      {
+        sort: "created",
+        per_page: perPage,
+        order,
+        page,
+      }
+    );
+    return getFetch(url);
+  } catch (err) {
+    logger.error(`Error while fetching pull requests: ${err}`);
+    throw err;
+  }
+};
+
+const fetchClosedIssues = async (order = "desc", perPage = 100, page = 1) => {
+  try {
+    const url = getGithubURL(
+      {
+        is: "closed",
+        type: "issue",
       },
       {
         sort: "updated",
@@ -166,4 +211,6 @@ module.exports = {
   fetchClosedPRs,
   getFetch,
   extractPRdetails,
+  fetchOpenIssues,
+  fetchClosedIssues,
 };
