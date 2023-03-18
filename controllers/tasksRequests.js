@@ -41,6 +41,21 @@ const createTaskRequest = async (req, res) => {
   }
 };
 
+const updateTaskRequest = async (req, res) => {
+  try {
+    const { taskId, userId } = req.body;
+
+    const taskRequestResponse = await taskRequestsModel.updateTaskRequest(taskId, userId);
+
+    return res.status(200).json({
+      message: "Task updated successfully",
+      taskRequestResponse,
+    });
+  } catch (err) {
+    return res.boom.badImplementation("An internal server error occurred");
+  }
+};
+
 const approveTaskRequest = async (req, res) => {
   try {
     const { taskRequestId, userId } = req.body;
@@ -54,7 +69,8 @@ const approveTaskRequest = async (req, res) => {
 };
 
 module.exports = {
-  fetchTaskRequests,
-  createTaskRequest,
   approveTaskRequest,
+  createTaskRequest,
+  fetchTaskRequests,
+  updateTaskRequest,
 };

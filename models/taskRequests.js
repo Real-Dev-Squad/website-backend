@@ -80,6 +80,44 @@ const createTaskRequest = async (taskId, userId) => {
   }
 };
 
+const updateTaskRequest = async (taskId, userId) => {
+  try {
+    const user = usersCollection.doc(userId).get();
+    const task = tasksCollection.doc(taskId).get();
+    const taskRequest = taskRequestsCollection.doc(taskId).get();
+
+    if (taskRequest.data()) {
+      const requestedBy = await taskRequest.data().requestedBy;
+      const isUserAlreadyRequesting = requestedBy.find((id) => id === userId);
+
+      if (isUserAlreadyRequesting) {
+        return { message: "User already exists" };
+      }
+
+      const updatedRequestedBy = [...requestedBy, user.id];
+      await taskRequestsCollection.doc(taskId).update({ requestedBy: updatedRequestedBy });
+    }
+
+    const updatedTaskRequest = {
+      isNoteworthy: task.isNoteworthy,
+      priority: task.priority,
+      purpose: task.purpose,
+      requestedBy: [userId],
+      status: TASK_REQUEST_STATUS.WAITING,
+      title: task.title,
+      type: task.type,
+    };
+    const taskRequestDocument = toFirestoreData(updatedTaskRequest);
+
+    await taskRequestsCollection.doc(taskId).update(taskRequestDocument);
+
+    return { taskRequest: taskRequestDocument };
+  } catch (err) {
+    logger.error("Error in updating task", err);
+    throw err;
+  }
+};
+
 /**
  * Approves task request to user
  *
@@ -124,4 +162,5 @@ module.exports = {
   fetchTaskRequests,
   createTaskRequest,
   approveTaskRequest,
+  updateTaskRequest,
 };
