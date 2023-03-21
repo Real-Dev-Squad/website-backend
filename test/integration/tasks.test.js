@@ -166,6 +166,41 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("Should get all tasks except IN_PROGRESS tasks", function (done) {
+      chai
+        .request(app)
+        .get("/tasks/q=filter%3AIN_PROGRESS")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks.filter((task) => task.status === TASK_STATUS.IN_PROGRESS).length).to.be.eql(0);
+          return done();
+        });
+    });
+
+    it("Should only get the IN_PROGRESS tasks", function (done) {
+      chai
+        .request(app)
+        .get("/tasks/q=type%3AIN_PROGRESS")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks.some((task) => task.status !== TASK_STATUS.IN_PROGRESS)).to.be.eql(false);
+          expect(res.body.tasks.length).to.be.eql(3);
+          return done();
+        });
+    });
   });
 
   describe("GET /tasks/:id/details", function () {
