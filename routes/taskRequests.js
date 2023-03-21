@@ -8,7 +8,7 @@ const cache = require("../utils/cache");
 
 router.get("/", authenticate, authorizeRoles([SUPERUSER]), cache(), taskRequests.fetchTaskRequests);
 router.put("/create", authenticate, authorizeRoles([SUPERUSER, APPOWNER]), taskRequests.createTaskRequest);
-router.patch("/update", authenticate, taskRequests.updateTaskRequest);
+router.patch("/addRequestor", authenticate, taskRequests.addRequestor);
 router.patch("/approve", authenticate, authorizeRoles([SUPERUSER]), taskRequests.approveTaskRequest);
 
 module.exports = router;

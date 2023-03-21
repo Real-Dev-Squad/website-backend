@@ -1,3 +1,5 @@
+const { userState } = require("../../../constants/userStatus");
+
 const userStatusDataForNewUser = {
   currentStatus: {
     until: 1669256009000,
@@ -39,6 +41,29 @@ const userStatusDataForOooState = {
   },
 };
 
+const idleStatus = {
+  currentStatus: {
+    message: "",
+    state: userState.IDLE,
+    updatedAt: 1673893800000,
+  },
+  monthlyHours: {
+    updatedAt: 1668215609000,
+    committed: 40,
+  },
+};
+const activeStatus = {
+  currentStatus: {
+    message: "",
+    state: userState.ACTIVE,
+    updatedAt: 1673893800000,
+  },
+  monthlyHours: {
+    updatedAt: 1668215609000,
+    committed: 40,
+  },
+};
+
 const generateUserStatusData = (state, updatedAt, from, until = "", message = "") => {
   return {
     currentStatus: {
@@ -56,4 +81,6 @@ module.exports = {
   userStatusDataForOooState,
   oooStatusDataForShortDuration,
   generateUserStatusData,
+  idleStatus,
+  activeStatus,
 };

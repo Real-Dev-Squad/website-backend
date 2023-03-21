@@ -1,70 +1,103 @@
+const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const taskRequestsModel = require("../models/taskRequests");
 
 const fetchTaskRequests = async (_, res) => {
   try {
     const taskRequests = await taskRequestsModel.fetchTaskRequests();
 
-    if (taskRequests && taskRequests.length > 0) {
-      return res.status(200).json({
-        message: "Task requests returned successfully",
-        taskRequests,
-      });
-    }
-
-    return res.status(400).json({
-      message: "Unable to fetch task requests",
+    return res.status(200).json({
+      message: "Task requests returned successfully",
+      taskRequests,
     });
   } catch (err) {
     logger.error("Error while fetching task requests", err);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
 const createTaskRequest = async (req, res) => {
   try {
-    const { taskId, userId } = req.body;
+    const { taskId } = req.body;
 
-    const taskRequestResponse = await taskRequestsModel.createTaskRequest(taskId, userId);
-
-    if (taskRequestResponse.message.includes("updated")) {
-      return res.status(200).json(taskRequestResponse);
+    if (!taskId) {
+      return res.boom.badRequest("taskId not provided");
     }
 
-    if (taskRequestResponse.message.includes("created")) {
-      return res.status(201).json(taskRequestResponse);
+    const taskRequestResponse = await taskRequestsModel.createTaskRequest(taskId);
+
+    if (taskRequestResponse.taskRequestExists) {
+      return res.boom.conflict("Task request already exist");
     }
 
-    return res.status(400).json({ message: taskRequestResponse.message });
+    return res.status(201).json({
+      message: "Task request created successfully",
+      taskRequest: taskRequestResponse,
+    });
   } catch (err) {
     logger.error("Error while creating task request");
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
-const updateTaskRequest = async (req, res) => {
+const addRequestor = async (req, res) => {
   try {
     const { taskId, userId } = req.body;
 
-    const taskRequestResponse = await taskRequestsModel.updateTaskRequest(taskId, userId);
+    if (!taskId || !userId) {
+      return res.boom.badRequest("Invalid request body");
+    }
 
-    return res.status(200).json({
-      message: "Task updated successfully",
-      taskRequestResponse,
-    });
+    const taskRequestResponse = await taskRequestsModel.addRequestor(taskId, userId);
+
+    if (taskRequestResponse.userDoesNotexists) {
+      res.boom.conflict("User does not exists");
+    }
+
+    if (taskRequestResponse.userRequestExists) {
+      res.boom.conflict("User request already exists");
+    }
+
+    if (taskRequestResponse.taskRequestMissing) {
+      res.boom.conflict("Task request does not exist");
+    }
+
+    return res.status(204);
   } catch (err) {
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
 const approveTaskRequest = async (req, res) => {
   try {
     const { taskRequestId, userId } = req.body;
+
+    if (!taskRequestId || !userId) {
+      return res.boom.badRequest("Invalid request body");
+    }
+
     const response = await taskRequestsModel.approveTaskRequest(taskRequestId, userId);
 
-    return res.status(200).json(response);
+    if (response.userDoesNotExists) {
+      return res.boom.conflict("User does not exists");
+    }
+    if (response.userStatusDoesNotExists) {
+      return res.boom.conflict("User status does not exists");
+    }
+
+    if (response.isUserOOO) {
+      return res.boom.conflict("User is currently OOO");
+    }
+    if (response.isUserActive) {
+      return res.boom.conflict("User is currently active on another task");
+    }
+
+    return res.status(200).json({
+      message: `Task successfully assigned to user ${response.approvedTo}`,
+      taskRequest: response.taskRequest,
+    });
   } catch (err) {
     logger.error("Error while approving task request", err);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -72,5 +105,5 @@ module.exports = {
   approveTaskRequest,
   createTaskRequest,
   fetchTaskRequests,
-  updateTaskRequest,
+  addRequestor,
 };

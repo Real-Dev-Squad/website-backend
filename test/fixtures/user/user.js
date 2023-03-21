@@ -236,7 +236,6 @@ module.exports = () => {
       github_display_name: "Darth Vader",
       phone: "1234567890",
       email: "dv@gmail.com",
-      status: "idle",
       tokens: {
         githubAccessToken: "githubAccessToken",
       },

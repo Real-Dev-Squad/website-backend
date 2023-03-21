@@ -1,12 +1,12 @@
 const { TASK_REQUEST_STATUS } = require("../constants/taskRequests");
 const { TASK_STATUS } = require("../constants/tasks");
-const { USER_STATUS } = require("../constants/users");
+const { userState } = require("../constants/userStatus");
 const firestore = require("../utils/firestore");
 const { toFirestoreData } = require("../utils/taskRequests");
-const usersCollection = firestore.collection("users");
 const taskRequestsCollection = firestore.collection("taskRequests");
-const tasksCollection = firestore.collection("tasks");
 const tasksModel = require("./tasks");
+const userModel = require("./users");
+const userStatusModel = require("./userStatus");
 
 /**
  * Fetch all task requests
@@ -32,86 +32,70 @@ const fetchTaskRequests = async () => {
  * Creates a task request
  *
  * @param taskId { string }: id of task request
- * @param userId { string }: userId of user whose creating the task request
  * @return {Promise<{taskRequest: Object}>}
  */
-const createTaskRequest = async (taskId, userId) => {
+const createTaskRequest = async (taskId) => {
   try {
     const taskRequest = await taskRequestsCollection.doc(taskId).get();
-    const user = await usersCollection.doc(userId).get();
-    const task = (await tasksCollection.doc(taskId).get()).data();
+    const { taskData } = await tasksModel.fetchTask(taskId);
+
+    if (!taskData) {
+      return { taskDoesNotExist: true };
+    }
 
     if (taskRequest.data()) {
-      const requestedBy = await taskRequest.data().requestedBy;
-      const isUserAlreadyRequesting = requestedBy.find((id) => id === userId);
-
-      if (isUserAlreadyRequesting) {
-        return { message: "User already exists" };
-      }
-
-      const updatedRequestedBy = [...requestedBy, user.id];
-      await taskRequestsCollection.doc(taskId).update({ requestedBy: updatedRequestedBy });
       return {
-        message: "Task request updated successfully",
-        taskRequest: taskRequest.data(),
+        taskRequestExists: true,
       };
     }
 
     const newTaskRequest = {
-      requestedBy: [userId],
-      title: task.title,
-      purpose: task.purpose,
-      priority: task.priority,
-      isNoteworthy: task.isNoteworthy,
-      type: task.type,
+      isNoteworthy: taskData.isNoteworthy,
+      priority: taskData.priority,
+      purpose: taskData.purpose,
       status: TASK_REQUEST_STATUS.WAITING,
+      title: taskData.title,
+      type: taskData.type,
     };
     const taskRequestDocument = toFirestoreData(newTaskRequest);
 
     await taskRequestsCollection.doc(taskId).set(taskRequestDocument);
 
-    return {
-      message: "Task request created successfully",
-      taskRequest: { ...taskRequestDocument },
-    };
+    return taskRequestDocument;
   } catch (err) {
     logger.error("Error in updating task", err);
     throw err;
   }
 };
 
-const updateTaskRequest = async (taskId, userId) => {
+/** Updates task request
+ * @param taskId {string}: task id of task the user want to create request
+ * @param userId {string}: user id of user requesting the task
+ * @returns taskRequestObject {Object}: updated task request object
+ */
+const addRequestor = async (taskId, userId) => {
   try {
-    const user = usersCollection.doc(userId).get();
-    const task = tasksCollection.doc(taskId).get();
-    const taskRequest = taskRequestsCollection.doc(taskId).get();
+    const { userExists, user } = await userModel.fetchUser({ userId });
 
-    if (taskRequest.data()) {
-      const requestedBy = await taskRequest.data().requestedBy;
-      const isUserAlreadyRequesting = requestedBy.find((id) => id === userId);
-
-      if (isUserAlreadyRequesting) {
-        return { message: "User already exists" };
-      }
-
-      const updatedRequestedBy = [...requestedBy, user.id];
-      await taskRequestsCollection.doc(taskId).update({ requestedBy: updatedRequestedBy });
+    if (!userExists) {
+      return { userDoesNotexists: true };
     }
 
-    const updatedTaskRequest = {
-      isNoteworthy: task.isNoteworthy,
-      priority: task.priority,
-      purpose: task.purpose,
-      requestedBy: [userId],
-      status: TASK_REQUEST_STATUS.WAITING,
-      title: task.title,
-      type: task.type,
-    };
-    const taskRequestDocument = toFirestoreData(updatedTaskRequest);
+    const taskRequest = (await taskRequestsCollection.doc(taskId).get()).data();
 
-    await taskRequestsCollection.doc(taskId).update(taskRequestDocument);
+    if (!taskRequest) {
+      return { taskRequestMissing: true };
+    }
 
-    return { taskRequest: taskRequestDocument };
+    const requestedBy = taskRequest.requestedBy || [];
+    const userRequestExists = requestedBy.find((id) => id === userId);
+
+    if (userRequestExists) {
+      return { userRequestExists };
+    }
+
+    const updatedRequestedBy = [...requestedBy, user.id];
+    return await taskRequestsCollection.doc(taskId).update({ requestedBy: updatedRequestedBy });
   } catch (err) {
     logger.error("Error in updating task", err);
     throw err;
@@ -123,34 +107,40 @@ const updateTaskRequest = async (taskId, userId) => {
  *
  * @param taskRequestId { string }: id of task request
  * @param userId { string }: id of user whose being approved
- * @return {Promise<{taskId: string}>}
+ * @return {Promise<{approvedTo: string, taskRequest: Object}>}
  */
 const approveTaskRequest = async (taskRequestId, userId) => {
   try {
     const taskRequest = await taskRequestsCollection.doc(taskRequestId).get();
-    const user = (await usersCollection.doc(userId).get()).data();
+    const { user, userExists } = await userModel.fetchUser({ userId });
+    const { data: userStatus, userExists: userStatusExists } = await userStatusModel.getUserStatus(userId);
 
-    if (!user) {
-      return {
-        error: "User does not exists",
-      };
+    if (!userExists) {
+      return { userDoesNotExists: true };
+    }
+    if (userStatusExists) {
+      return { userStatusDoesNotExists: true };
     }
 
-    if (user.status === USER_STATUS.OOO || user.status === USER_STATUS.ACTIVE) {
-      return {
-        error: "User is unavailable",
-      };
+    if (userStatus.currentStatus.state === userState.OOO) {
+      return { isUserOOO: true };
+    }
+    if (userStatus.currentStatus.state === userState.ACTIVE) {
+      return { isUserActive: true };
     }
 
-    await taskRequestsCollection.doc(taskRequestId).set({
+    const updatedTaskRequest = {
       ...taskRequest.data(),
       approvedTo: user.username,
       status: TASK_REQUEST_STATUS.APPROVED,
-    });
+    };
+
+    await taskRequestsCollection.doc(taskRequestId).set(updatedTaskRequest);
     await tasksModel.updateTask({ assignee: user.username, status: TASK_STATUS.ASSIGNED }, taskRequestId);
 
     return {
-      message: `Task assigned to user ${user.username}`,
+      approvedTo: user.username,
+      taskRequest: updatedTaskRequest,
     };
   } catch (err) {
     logger.error("Error in approving task", err);
@@ -162,5 +152,5 @@ module.exports = {
   fetchTaskRequests,
   createTaskRequest,
   approveTaskRequest,
-  updateTaskRequest,
+  addRequestor,
 };
