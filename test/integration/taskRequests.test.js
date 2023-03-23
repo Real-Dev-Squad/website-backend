@@ -34,6 +34,9 @@ const oooUserStatus = userStatusData.userStatusDataForOooState;
 
 describe("Task Requests", function () {
   let userId, superUserId;
+
+  const mockVerify = (id) => sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: id }));
+
   after(async function () {
     await cleanDb();
   });
@@ -42,18 +45,20 @@ describe("Task Requests", function () {
     sinon.restore();
   });
 
+  beforeEach(async function () {
+    sinon.stub(authService, "generateAuthToken").callsFake(() => "valid_token");
+  });
+
   describe("GET / - gets tasks requests", function () {
     describe("When the user is super user", function () {
       before(async function () {
-        sinon.stub(authService, "generateAuthToken").callsFake(() => "valid_token");
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
-
         userId = await addUser(member);
-        const superUserId = await addUser(superUser);
+        superUserId = await addUser(superUser);
+        mockVerify(superUserId);
         jwt = authService.generateAuthToken({ userId: superUserId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-        await taskRequestsModel.createTaskRequest(taskId, userId);
+        await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
       it("should fetch taskRequests", function (done) {
@@ -78,10 +83,11 @@ describe("Task Requests", function () {
     describe("When the user is not a super user", function () {
       before(async function () {
         userId = await addUser(member);
+        mockVerify(userId);
         jwt = authService.generateAuthToken({ userId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-        await taskRequestsModel.createTaskRequest(taskId);
+        await taskRequestsModel.addOrUpdate(taskId);
       });
 
       it("should return 401 unauthorized user response", function (done) {
@@ -101,11 +107,12 @@ describe("Task Requests", function () {
     });
   });
 
-  describe("POST /taskRequests/create - creates a new task request", function () {
+  describe("POST /taskRequests/addOrUpdate - add or updates a task request", function () {
     describe("When a new task requested is created", function () {
       before(async function () {
         userId = await addUser(member);
-        jwt = authService.generateAuthToken({ userId: superUserId });
+        mockVerify(userId);
+        jwt = authService.generateAuthToken({ userId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
@@ -113,7 +120,7 @@ describe("Task Requests", function () {
       it("should match response on success", function (done) {
         chai
           .request(app)
-          .post("/taskRequests/create")
+          .post("/taskRequests/addOrUpdate")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
             taskId,
@@ -138,7 +145,7 @@ describe("Task Requests", function () {
       it("should match response on bad request", function (done) {
         chai
           .request(app)
-          .post("/taskRequests/create")
+          .post("/taskRequests/addOrUpdate")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
             taksId: taskId, // task key is mispelled intentionally
@@ -158,7 +165,7 @@ describe("Task Requests", function () {
       it("should match response when user id is not provided", function (done) {
         chai
           .request(app)
-          .post("/taskRequests/create")
+          .post("/taskRequests/addOrUpdate")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({ taskId })
           .end((err, res) => {
@@ -178,16 +185,17 @@ describe("Task Requests", function () {
       before(async function () {
         userId = await addUser(member);
         userId2 = await addUser(member2);
+        mockVerify(userId2);
         jwt = authService.generateAuthToken({ userId: userId2 });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-        await taskRequestsModel.createTaskRequest(taskId, userId);
+        await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
       it("should update the requestor when a new user is requesting", function (done) {
         chai
           .request(app)
-          .post("/taskRequests/create")
+          .post("/taskRequests/addOrUpdate")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
             taskId,
@@ -207,7 +215,7 @@ describe("Task Requests", function () {
       it("should throw 409 error when requestor already exists", function (done) {
         chai
           .request(app)
-          .post("/taskRequests/create")
+          .post("/taskRequests/addOrUpdate")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
             taskId,
@@ -234,11 +242,11 @@ describe("Task Requests", function () {
         userId = await addUser(member);
         activeUserId = await addUser(activeMember);
         oooUserId = await addUser(member2);
-        const superUserId = await addUser(superUser);
+        superUserId = await addUser(superUser);
         jwt = authService.generateAuthToken({ userId: superUserId });
-
+        mockVerify(superUserId);
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-        await taskRequestsModel.createTaskRequest(taskId, userId);
+        await taskRequestsModel.addOrUpdate(taskId, userId);
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
         await userStatusModel.updateUserStatus(activeUserId, activeUserStatus);
         await userStatusModel.updateUserStatus(oooUserId, oooUserStatus);
@@ -359,9 +367,10 @@ describe("Task Requests", function () {
       before(async function () {
         userId = await addUser(member);
         jwt = authService.generateAuthToken({ userId });
+        mockVerify(userId);
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-        await taskRequestsModel.createTaskRequest(taskId);
+        await taskRequestsModel.addOrUpdate(taskId);
       });
 
       it("should return unauthorized user response", function (done) {

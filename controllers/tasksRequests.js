@@ -15,7 +15,7 @@ const fetchTaskRequests = async (_, res) => {
   }
 };
 
-const createTaskRequest = async (req, res) => {
+const addOrUpdate = async (req, res) => {
   try {
     const { taskId, userId } = req.body;
 
@@ -26,7 +26,7 @@ const createTaskRequest = async (req, res) => {
       return res.boom.badRequest("userId not provided");
     }
 
-    const response = await taskRequestsModel.createTaskRequest(taskId, userId);
+    const response = await taskRequestsModel.addOrUpdate(taskId, userId);
     if (response.userDoesNotExists) {
       return res.boom.conflict("User does not exist");
     }
@@ -90,6 +90,6 @@ const approveTaskRequest = async (req, res) => {
 
 module.exports = {
   approveTaskRequest,
-  createTaskRequest,
+  addOrUpdate,
   fetchTaskRequests,
 };
