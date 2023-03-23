@@ -39,7 +39,7 @@ const addNewTask = async (req, res) => {
  */
 const fetchTasks = async (req, res) => {
   try {
-    const allTasks = await tasks.fetchTasks();
+    const allTasks = await tasks.fetchTasks(req.query);
     return res.json({
       message: "Tasks returned successfully!",
       tasks: allTasks.length > 0 ? allTasks : [],

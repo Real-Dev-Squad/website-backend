@@ -2,7 +2,7 @@ const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
 const ItemModel = firestore.collection("itemTags");
 const userUtils = require("../utils/users");
-const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
+const { fromFirestoreData, toFirestoreData, buildTasks, getFetchTasksQuery } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
@@ -42,12 +42,13 @@ const updateTask = async (taskData, taskId = null) => {
 
 /**
  * Fetch all tasks
- *
+ * @param queryParams: Record<string, string> contains parameters for building fetch tasks query
  * @return {Promise<tasks|Array>}
  */
-const fetchTasks = async () => {
+const fetchTasks = async (queryParams) => {
   try {
-    const tasksSnapshot = await tasksModel.get();
+    const query = getFetchTasksQuery(queryParams);
+    const tasksSnapshot = await query;
     const tasks = buildTasks(tasksSnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
     const updatedTasks = await Promise.all(promises);
