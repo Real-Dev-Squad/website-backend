@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-skipped-tests */
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
@@ -170,7 +171,7 @@ describe("Tasks", function () {
     it("Should get all tasks except IN_PROGRESS tasks", function (done) {
       chai
         .request(app)
-        .get("/tasks/q=filter%3AIN_PROGRESS")
+        .get("/tasks/?q=filter%3AIN_PROGRESS")
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -187,7 +188,7 @@ describe("Tasks", function () {
     it("Should only get the IN_PROGRESS tasks", function (done) {
       chai
         .request(app)
-        .get("/tasks/q=type%3AIN_PROGRESS")
+        .get("/tasks/?q=type%3AIN_PROGRESS")
         .end((err, res) => {
           if (err) {
             return done(err);
