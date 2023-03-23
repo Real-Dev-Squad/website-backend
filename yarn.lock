@@ -2977,10 +2977,10 @@ firebase-admin@^11.0.0:
     "@google-cloud/firestore" "^6.4.0"
     "@google-cloud/storage" "^6.5.2"
 
-firebase-tools@^11.24.1:
-  version "11.24.1"
-  resolved "https://registry.yarnpkg.com/firebase-tools/-/firebase-tools-11.24.1.tgz#bc0f23f75f6950f8e68326692502dbee883f04ff"
-  integrity sha512-X9p15dZLaR3jbMKvtQgj364khq9EEeC3+PXK0Bo8lwe0XasFmq3d5XsD7XS+a5iziCC7sqzhIiuiUfn5yjYgAg==
+firebase-tools@^11.0.0:
+  version "11.25.1"
+  resolved "https://registry.yarnpkg.com/firebase-tools/-/firebase-tools-11.25.1.tgz#a4991434be6e57b7dc82bfbcd524c20a5091029f"
+  integrity sha512-RfJOxU7VnOnM8oKHfY321Ll0XrzLdi5rWTK/caAuuQRrb8y/2Y8kjkOsCiIscc6OdkzthhW6VKNERWSLiFor/Q==
   dependencies:
     "@google-cloud/pubsub" "^3.0.1"
     abort-controller "^3.0.0"
@@ -3020,6 +3020,7 @@ firebase-tools@^11.24.1:
     node-fetch "^2.6.7"
     open "^6.3.0"
     ora "^5.4.1"
+    p-limit "^3.0.1"
     portfinder "^1.0.32"
     progress "^2.0.3"
     proxy-agent "^5.0.0"
