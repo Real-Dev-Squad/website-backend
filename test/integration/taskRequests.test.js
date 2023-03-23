@@ -35,8 +35,6 @@ const oooUserStatus = userStatusData.userStatusDataForOooState;
 describe("Task Requests", function () {
   let userId, superUserId;
 
-  const mockVerify = (id) => sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: id }));
-
   after(async function () {
     await cleanDb();
   });
@@ -54,7 +52,7 @@ describe("Task Requests", function () {
       before(async function () {
         userId = await addUser(member);
         superUserId = await addUser(superUser);
-        mockVerify(superUserId);
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
         jwt = authService.generateAuthToken({ userId: superUserId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
@@ -83,7 +81,7 @@ describe("Task Requests", function () {
     describe("When the user is not a super user", function () {
       before(async function () {
         userId = await addUser(member);
-        mockVerify(userId);
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
         jwt = authService.generateAuthToken({ userId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
@@ -111,7 +109,7 @@ describe("Task Requests", function () {
     describe("When a new task requested is created", function () {
       before(async function () {
         userId = await addUser(member);
-        mockVerify(userId);
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
         jwt = authService.generateAuthToken({ userId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
@@ -185,7 +183,7 @@ describe("Task Requests", function () {
       before(async function () {
         userId = await addUser(member);
         userId2 = await addUser(member2);
-        mockVerify(userId2);
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: userId2 }));
         jwt = authService.generateAuthToken({ userId: userId2 });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
@@ -244,7 +242,7 @@ describe("Task Requests", function () {
         oooUserId = await addUser(member2);
         superUserId = await addUser(superUser);
         jwt = authService.generateAuthToken({ userId: superUserId });
-        mockVerify(superUserId);
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
         await taskRequestsModel.addOrUpdate(taskId, userId);
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
@@ -367,7 +365,7 @@ describe("Task Requests", function () {
       before(async function () {
         userId = await addUser(member);
         jwt = authService.generateAuthToken({ userId });
-        mockVerify(userId);
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
         await taskRequestsModel.addOrUpdate(taskId);
