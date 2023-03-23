@@ -25,7 +25,6 @@ let taskId;
 
 const member = userData[9];
 const member2 = userData[10];
-const appOwner = userData[3];
 const superUser = userData[4];
 const activeMember = userData[0];
 
@@ -34,7 +33,7 @@ const activeUserStatus = userStatusData.activeStatus;
 const oooUserStatus = userStatusData.userStatusDataForOooState;
 
 describe("Task Requests", function () {
-  let userId, superUserId, appOwnerId;
+  let userId, superUserId;
   after(async function () {
     await cleanDb();
   });
@@ -46,12 +45,15 @@ describe("Task Requests", function () {
   describe("GET / - gets tasks requests", function () {
     describe("When the user is super user", function () {
       before(async function () {
+        sinon.stub(authService, "generateAuthToken").callsFake(() => "valid_token");
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
+
         userId = await addUser(member);
         const superUserId = await addUser(superUser);
         jwt = authService.generateAuthToken({ userId: superUserId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-        await taskRequestsModel.createTaskRequest(taskId);
+        await taskRequestsModel.createTaskRequest(taskId, userId);
       });
 
       it("should fetch taskRequests", function (done) {
@@ -82,7 +84,7 @@ describe("Task Requests", function () {
         await taskRequestsModel.createTaskRequest(taskId);
       });
 
-      it("should return unauthorized user response", function (done) {
+      it("should return 401 unauthorized user response", function (done) {
         chai
           .request(app)
           .get("/taskRequests")
@@ -99,195 +101,125 @@ describe("Task Requests", function () {
     });
   });
 
-  describe("PUT /taskRequests/create - creates a new task request", function () {
-    describe("When the user is super user", function () {
-      describe("When a new task requested is created", function () {
-        before(async function () {
-          superUserId = await addUser(superUser);
-          jwt = authService.generateAuthToken({ userId: superUserId });
-
-          taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-        });
-
-        it("should match response on success", function (done) {
-          chai
-            .request(app)
-            .put("/taskRequests/create")
-            .set("cookie", `${cookieName}=${jwt}`)
-            .send({
-              taskId,
-            })
-            .end((err, res) => {
-              if (err) {
-                return done(err);
-              }
-
-              expect(res).to.have.status(201);
-              expect(res.body).to.be.a("object");
-              expect(res.body.message).to.equal("Task request created successfully");
-              expect(res.body.taskRequest).to.be.a("object");
-              expect(res.body.taskRequest.status).to.equal(TASK_REQUEST_STATUS.WAITING);
-              expect(res.body.taskRequest.title).to.equal(taskData[4].title);
-              expect(res.body.taskRequest.priority).to.equal(taskData[4].priority);
-              return done();
-            });
-        });
-
-        it("should match response on bad request", function (done) {
-          chai
-            .request(app)
-            .put("/taskRequests/create")
-            .set("cookie", `${cookieName}=${jwt}`)
-            .send({
-              taksId: taskId, // task key is mispelled intentionally
-            })
-            .end((err, res) => {
-              if (err) {
-                return done(err);
-              }
-
-              expect(res).to.have.status(400);
-              expect(res.body.message).to.equal("taskId not provided");
-              return done();
-            });
-        });
-      });
-
-      describe("When task request already exists", function () {
-        before(async function () {
-          superUserId = await addUser(superUser);
-          jwt = authService.generateAuthToken({ userId: superUserId });
-
-          taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-          await taskRequestsModel.createTaskRequest(taskId);
-        });
-
-        it("should return 409 bad request error", function (done) {
-          chai
-            .request(app)
-            .put("/taskRequests/create")
-            .set("cookie", `${cookieName}=${jwt}`)
-            .send({
-              taskId,
-            })
-            .end((err, res) => {
-              if (err) {
-                return done(err);
-              }
-
-              expect(res).to.have.status(409);
-              expect(res.body).to.be.a("object");
-              expect(res.body.message).to.equal("Task request already exist");
-              return done();
-            });
-        });
-      });
-    });
-
-    describe("When the user is app owner", function () {
-      describe("When a new task requested is created", function () {
-        before(async function () {
-          appOwnerId = await addUser(appOwner);
-          jwt = authService.generateAuthToken({ userId: appOwnerId });
-
-          taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-        });
-
-        it("should match response on success", function (done) {
-          chai
-            .request(app)
-            .put("/taskRequests/create")
-            .set("cookie", `${cookieName}=${jwt}`)
-            .send({
-              taskId,
-            })
-            .end((err, res) => {
-              if (err) {
-                return done(err);
-              }
-
-              expect(res).to.have.status(201);
-              expect(res.body).to.be.a("object");
-              expect(res.body.message).to.equal("Task request created successfully");
-              expect(res.body.taskRequest).to.be.a("object");
-              expect(res.body.taskRequest.status).to.equal(TASK_REQUEST_STATUS.WAITING);
-              expect(res.body.taskRequest.title).to.equal(taskData[4].title);
-              expect(res.body.taskRequest.priority).to.equal(taskData[4].priority);
-              return done();
-            });
-        });
-
-        it("should match response on bad request", function (done) {
-          chai
-            .request(app)
-            .put("/taskRequests/create")
-            .set("cookie", `${cookieName}=${jwt}`)
-            .send({
-              taksId: taskId, // task key is mispelled intentionally
-            })
-            .end((err, res) => {
-              if (err) {
-                return done(err);
-              }
-
-              expect(res).to.have.status(400);
-              expect(res.body.message).to.equal("taskId not provided");
-              return done();
-            });
-        });
-      });
-
-      describe("When task request already exists", function () {
-        before(async function () {
-          superUserId = await addUser(superUser);
-          jwt = authService.generateAuthToken({ userId: superUserId });
-
-          taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-          await taskRequestsModel.createTaskRequest(taskId);
-        });
-
-        it("should return 409 bad request error", function (done) {
-          chai
-            .request(app)
-            .put("/taskRequests/create")
-            .set("cookie", `${cookieName}=${jwt}`)
-            .send({
-              taskId,
-            })
-            .end((err, res) => {
-              if (err) {
-                return done(err);
-              }
-
-              expect(res).to.have.status(409);
-              expect(res.body).to.be.a("object");
-              expect(res.body.message).to.equal("Task request already exist");
-              return done();
-            });
-        });
-      });
-    });
-
-    describe("When the user is not super user or app owner", function () {
+  describe("POST /taskRequests/create - creates a new task request", function () {
+    describe("When a new task requested is created", function () {
       before(async function () {
+        userId = await addUser(member);
+        jwt = authService.generateAuthToken({ userId: superUserId });
+
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
 
-      it("should return 401 unauthorized user error", function (done) {
+      it("should match response on success", function (done) {
         chai
           .request(app)
-          .put("/taskRequests/create")
+          .post("/taskRequests/create")
+          .set("cookie", `${cookieName}=${jwt}`)
           .send({
             taskId,
+            userId,
           })
           .end((err, res) => {
             if (err) {
               return done(err);
             }
 
-            expect(res).to.have.status(401);
+            expect(res).to.have.status(201);
             expect(res.body).to.be.a("object");
-            expect(res.body.message).to.equal("Unauthenticated User");
+            expect(res.body.message).to.equal("Task request successfully created");
+            expect(res.body.taskRequest).to.be.a("object");
+            expect(res.body.taskRequest.status).to.equal(TASK_REQUEST_STATUS.WAITING);
+            expect(res.body.taskRequest.title).to.equal(taskData[4].title);
+            expect(res.body.taskRequest.priority).to.equal(taskData[4].priority);
+            return done();
+          });
+      });
+
+      it("should match response on bad request", function (done) {
+        chai
+          .request(app)
+          .post("/taskRequests/create")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({
+            taksId: taskId, // task key is mispelled intentionally
+            userId,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body.message).to.equal("taskId not provided");
+            return done();
+          });
+      });
+
+      it("should match response when user id is not provided", function (done) {
+        chai
+          .request(app)
+          .post("/taskRequests/create")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({ taskId })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body.message).to.equal("userId not provided");
+            return done();
+          });
+      });
+    });
+
+    describe("When task request already exists", function () {
+      let userId2;
+      before(async function () {
+        userId = await addUser(member);
+        userId2 = await addUser(member2);
+        jwt = authService.generateAuthToken({ userId: userId2 });
+
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+        await taskRequestsModel.createTaskRequest(taskId, userId);
+      });
+
+      it("should update the requestor when a new user is requesting", function (done) {
+        chai
+          .request(app)
+          .post("/taskRequests/create")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({
+            taskId,
+            userId: userId2,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.equal("Task request successfully updated");
+            return done();
+          });
+      });
+
+      it("should throw 409 error when requestor already exists", function (done) {
+        chai
+          .request(app)
+          .post("/taskRequests/create")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({
+            taskId,
+            userId,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.equal("User is already requesting for the task");
             return done();
           });
       });
@@ -306,9 +238,7 @@ describe("Task Requests", function () {
         jwt = authService.generateAuthToken({ userId: superUserId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-        await taskRequestsModel.createTaskRequest(taskId);
-        await taskRequestsModel.addRequestor(taskId, userId);
-        await taskRequestsModel.addRequestor(taskId, userId);
+        await taskRequestsModel.createTaskRequest(taskId, userId);
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
         await userStatusModel.updateUserStatus(activeUserId, activeUserStatus);
         await userStatusModel.updateUserStatus(oooUserId, oooUserStatus);

@@ -2,7 +2,6 @@ const { TASK_REQUEST_STATUS } = require("../constants/taskRequests");
 const { TASK_STATUS } = require("../constants/tasks");
 const { userState } = require("../constants/userStatus");
 const firestore = require("../utils/firestore");
-const { toFirestoreData } = require("../utils/taskRequests");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const tasksModel = require("./tasks");
 const userModel = require("./users");
@@ -34,68 +33,56 @@ const fetchTaskRequests = async () => {
  * @param taskId { string }: id of task request
  * @return {Promise<{taskRequest: Object}>}
  */
-const createTaskRequest = async (taskId) => {
+const createTaskRequest = async (taskId, userId) => {
   try {
     const taskRequest = await taskRequestsCollection.doc(taskId).get();
-    const { taskData } = await tasksModel.fetchTask(taskId);
+    const taskRequestData = taskRequest.data();
 
-    if (!taskData) {
-      return { taskDoesNotExist: true };
+    const { userExists, user } = await userModel.fetchUser({ userId });
+
+    if (!userExists) {
+      return { userDoesNotExists: true };
     }
 
-    if (taskRequest.data()) {
-      return {
-        taskRequestExists: true,
-      };
+    if (taskRequestData) {
+      const currentRequestors = taskRequestData.requestors;
+      if (currentRequestors.length >= 1) {
+        const requestorExists = !!currentRequestors.find((requestor) => requestor === user.id);
+        if (requestorExists) {
+          return { requestorExists };
+        }
+
+        const updatedRequestors = [...currentRequestors, user.id];
+        await taskRequestsCollection.doc(taskId).update({ requestors: updatedRequestors });
+
+        return {
+          isUpdate: true,
+          requestors: updatedRequestors,
+        };
+      }
+    }
+
+    const { taskData } = await tasksModel.fetchTask(taskId);
+    if (!taskData) {
+      return { taskDoesNotExist: true };
     }
 
     const newTaskRequest = {
       isNoteworthy: taskData.isNoteworthy,
       priority: taskData.priority,
-      purpose: taskData.purpose,
+      purpose: taskData.purpose || "",
+      requestors: [userId],
       status: TASK_REQUEST_STATUS.WAITING,
       title: taskData.title,
       type: taskData.type,
     };
-    const taskRequestDocument = toFirestoreData(newTaskRequest);
 
-    await taskRequestsCollection.doc(taskId).set(taskRequestDocument);
+    await taskRequestsCollection.doc(taskId).set(newTaskRequest);
 
-    return taskRequestDocument;
-  } catch (err) {
-    logger.error("Error in updating task", err);
-    throw err;
-  }
-};
-
-/** Updates task request
- * @param taskId {string}: task id of task the user want to create request
- * @param userId {string}: user id of user requesting the task
- * @returns taskRequestObject {Object}: updated task request object
- */
-const addRequestor = async (taskId, userId) => {
-  try {
-    const { userExists, user } = await userModel.fetchUser({ userId });
-
-    if (!userExists) {
-      return { userDoesNotexists: true };
-    }
-
-    const taskRequest = (await taskRequestsCollection.doc(taskId).get()).data();
-
-    if (!taskRequest) {
-      return { taskRequestMissing: true };
-    }
-
-    const requestedBy = taskRequest.requestedBy || [];
-    const userRequestExists = requestedBy.find((id) => id === userId);
-
-    if (userRequestExists) {
-      return { userRequestExists };
-    }
-
-    const updatedRequestedBy = [...requestedBy, user.id];
-    return await taskRequestsCollection.doc(taskId).update({ requestedBy: updatedRequestedBy });
+    return {
+      isCreate: true,
+      taskRequest: newTaskRequest,
+    };
   } catch (err) {
     logger.error("Error in updating task", err);
     throw err;
@@ -152,5 +139,4 @@ module.exports = {
   fetchTaskRequests,
   createTaskRequest,
   approveTaskRequest,
-  addRequestor,
 };
