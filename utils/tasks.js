@@ -1,5 +1,5 @@
 const { getUsername, getUserId, getParticipantUsernames, getParticipantUserIds } = require("./users");
-const { TASK_TYPE } = require("../constants/tasks");
+const { TASK_TYPE, TASK_STATUS } = require("../constants/tasks");
 
 const fromFirestoreData = async (task) => {
   if (!task) {
@@ -73,30 +73,49 @@ function getFetchTasksQueryParameters(query) {
 
 // TODO: simplify meaning of returns
 // TODO: simplify the function logic
+// TODO: add check if filter or type is missing
 /**
  * @param tasksModel: CollectionReference<DocumentData> it contains tasksModel collection refference
  * @param requestQueryParams: Record<filter|type|next_curosr, string> of query parameters for building query with filtering logic, using`in` and `not-in` query operators.
  * @returns query for fetch tasks which may or may not have filtering logic/operators
  */
 function getFetchTasksQuery(tasksModel, requestQueryParams) {
-  const queryParams = getFetchTasksQueryParameters(requestQueryParams);
-  if (isEmpty(queryParams)) return tasksModel.get();
-  const { filter, type, next_cursor: nextCursor } = queryParams;
-  if ((filter && nextCursor) || (filter && type) || nextCursor) return tasksModel.get();
-  if (filter) {
-    const status = filter.toLowerCase();
-    return tasksModel.where("status", "not-in", [status]).get();
+  // TODO: use constant for error messages
+  if (isEmpty(tasksModel)) {
+    throw Error("TasksModel is Empty");
   }
-  const status = type.toLowerCase();
-  return tasksModel.where("status", "in", [status]).get();
+  const queryParams = getFetchTasksQueryParameters(requestQueryParams);
+  if (isEmpty(queryParams)) return tasksModel;
+  const { filter, type, next_cursor: nextCursor } = queryParams;
+  if ((filter && nextCursor) || (filter && type) || nextCursor) return tasksModel;
+  const status = filter ?? type;
+  const possibleEntries = Object.entries(TASK_STATUS).filter(([_, value]) => value === status);
+  const possibleKeys = possibleEntries.map(([key, _]) => key.toLowerCase());
+  // TODO: add support for mutliple filters
+  if (filter) {
+    return tasksModel.where("status", "not-in", possibleKeys);
+  }
+  return tasksModel.where("status", "in", possibleKeys);
 }
 
 // TODO: make it global util function
 // TODO: write complete logic for all types
 // TODO: move it to it's right place
 function isEmpty(value) {
+  if (Number.isNaN(value)) {
+    return true;
+  }
+  if (typeof value === "undefined" || value === null) {
+    return true;
+  }
+  if (typeof value === "object") {
+    return Object.keys(value).length === 0;
+  }
   if (typeof value === "string") {
     return value.trim().length === 0 || value.length === 0;
+  }
+  if (Array.isArray(value)) {
+    return value.length === 0;
   }
   return false;
 }

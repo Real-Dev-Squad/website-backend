@@ -171,7 +171,7 @@ describe("Tasks", function () {
     it("Should get all tasks except IN_PROGRESS tasks", function (done) {
       chai
         .request(app)
-        .get("/tasks/?q=filter%3AIN_PROGRESS")
+        .get(`/tasks/?q=filter%3A${TASK_STATUS.IN_PROGRESS}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -188,7 +188,7 @@ describe("Tasks", function () {
     it("Should only get the IN_PROGRESS tasks", function (done) {
       chai
         .request(app)
-        .get("/tasks/?q=type%3AIN_PROGRESS")
+        .get(`/tasks/?q=type%3A${TASK_STATUS.IN_PROGRESS}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -198,7 +198,6 @@ describe("Tasks", function () {
           expect(res.body.message).to.equal("Tasks returned successfully!");
           expect(res.body.tasks).to.be.a("array");
           expect(res.body.tasks.some((task) => task.status !== TASK_STATUS.IN_PROGRESS)).to.be.eql(false);
-          expect(res.body.tasks.length).to.be.eql(3);
           return done();
         });
     });

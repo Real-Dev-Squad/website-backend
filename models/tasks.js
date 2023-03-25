@@ -47,8 +47,8 @@ const updateTask = async (taskData, taskId = null) => {
  */
 const fetchTasks = async (queryParams) => {
   try {
-    const query = getFetchTasksQuery(queryParams);
-    const tasksSnapshot = await query;
+    const query = getFetchTasksQuery(tasksModel, queryParams);
+    const tasksSnapshot = await query.get();
     const tasks = buildTasks(tasksSnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
     const updatedTasks = await Promise.all(promises);
