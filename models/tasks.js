@@ -3,7 +3,13 @@ const tasksModel = firestore.collection("tasks");
 const ItemModel = firestore.collection("itemTags");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks, getFetchTasksQuery } = require("../utils/tasks");
-const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
+const {
+  TASK_TYPE,
+  TASK_STATUS,
+  TASK_STATUS_OLD,
+  INITIAL_TASKS_TYPE_LIMIT,
+  SHOW_MORE_TASKS_TYPE_LIMIT,
+} = require("../constants/tasks");
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 /**
@@ -42,12 +48,25 @@ const updateTask = async (taskData, taskId = null) => {
 
 /**
  * Fetch all tasks
- * @param queryParams: Record<string, string> contains parameters for building fetch tasks query
+ * @param params: Record<string, string> contains parameters for building fetch tasks query
  * @return {Promise<tasks|Array>}
  */
-const fetchTasks = async (queryParams) => {
+const fetchTasks = async (params) => {
   try {
-    const query = getFetchTasksQuery(tasksModel, queryParams);
+    const queryParams = getFetchTasksQuery(params);
+    const hasTypeParam = queryParams.whereFilterOp === "in";
+    let query = tasksModel;
+
+    if (queryParams.whereFilterOp && queryParams.status) {
+      query = query.where("status", queryParams.whereFilterOp, queryParams.status);
+    }
+    if (hasTypeParam && queryParams.cursor) {
+      const doc = await tasksModel.doc(queryParams.cursor).get();
+      query = query.startAfter(doc).limit(SHOW_MORE_TASKS_TYPE_LIMIT);
+    } else if (hasTypeParam) {
+      query = query.limit(INITIAL_TASKS_TYPE_LIMIT);
+    }
+
     const tasksSnapshot = await query.get();
     const tasks = buildTasks(tasksSnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
@@ -56,7 +75,8 @@ const fetchTasks = async (queryParams) => {
       task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
       return task;
     });
-    return taskList;
+    const cursor = taskList[taskList.length - 1]?.id;
+    return { taskList, ...(hasTypeParam && cursor ? { cursor } : {}) };
   } catch (err) {
     logger.error("error getting tasks", err);
     throw err;

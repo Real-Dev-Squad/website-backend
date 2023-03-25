@@ -58,45 +58,48 @@ const buildTasks = (tasks, initialTaskArray = []) => {
   return initialTaskArray;
 };
 
-// TODO: simplify meaning of returns
 /**
  * @param query: Record<string, string>
- * @returns Record<filter|type|next_curosr, string> of query parameters for building query with filtering logic, using`in` and `not-in` query operators.
+ * @returns Record<filter|type|next_curosr, string> which returns
+ * - `{filter: <string>}` if query only contains key `filter`
+ * - `{type: <string>}` if query only contains key `type`
+ * - `{type: <string>, next_cursor: <string>} if query contains key `type` and `next_cursor`
+ * - `{ [filter|type|next_curosr]: <string>}` combination of any other pattern having these keys
  */
 function getFetchTasksQueryParameters(query) {
   const q = query.q;
-  if (!q || isEmpty(q) || typeof q !== "string") return {};
+  if (isEmpty(q) || typeof q !== "string") return {};
   return q.split(" ").reduce((acc, item) => {
     const [key, value] = item.split(":");
     return { ...acc, [key]: value };
   }, {});
 }
 
-// TODO: simplify meaning of returns
-// TODO: simplify the function logic
-// TODO: add check if filter or type is missing
 /**
  * @param tasksModel: CollectionReference<DocumentData> it contains tasksModel collection refference
- * @param requestQueryParams: Record<filter|type|next_curosr, string> of query parameters for building query with filtering logic, using`in` and `not-in` query operators.
- * @returns query for fetch tasks which may or may not have filtering logic/operators
+ * @param params: Record<filter|type|cursor, string> of query parameters for building query with filtering logic, using`in` and `not-in` query operators.
+ * @returns which returns
+ * - `{whereFilterOp: <string>, status: Array<TASK_STATUS>} `if query is not paginated query
+ * - `{whereFilterOp: <string>, status: Array<TASK_STATUS>, cursor: string}` if query is paginated query
  */
-function getFetchTasksQuery(tasksModel, requestQueryParams) {
-  // TODO: use constant for error messages
-  if (isEmpty(tasksModel)) {
-    throw Error("TasksModel is Empty");
+function getFetchTasksQuery(params) {
+  if (isEmpty(params)) {
+    return {};
   }
-  const queryParams = getFetchTasksQueryParameters(requestQueryParams);
-  if (isEmpty(queryParams)) return tasksModel;
-  const { filter, type, next_cursor: nextCursor } = queryParams;
-  if ((filter && nextCursor) || (filter && type) || nextCursor) return tasksModel;
-  const status = filter ?? type;
-  const possibleEntries = Object.entries(TASK_STATUS).filter(([_, value]) => value === status);
-  const possibleKeys = possibleEntries.map(([key, _]) => key.toLowerCase());
-  // TODO: add support for mutliple filters
-  if (filter) {
-    return tasksModel.where("status", "not-in", possibleKeys);
-  }
-  return tasksModel.where("status", "in", possibleKeys);
+  const queryParams = getFetchTasksQueryParameters(params);
+  if (isEmpty(queryParams)) return {};
+  const { filter, type, cursor } = queryParams;
+  if ((filter && cursor) || (filter && type) || (cursor && !type)) return {};
+  const statuses = filter ? filter.split(",") : [type.split(",")[0]];
+  const taskStatusKeys = Object.entries(TASK_STATUS)
+    .filter(([_, value]) => statuses.includes(value))
+    .map(([key, _]) => key.toLowerCase());
+  const whereFilterOp = filter ? "not-in" : "in";
+  return {
+    whereFilterOp,
+    status: taskStatusKeys,
+    ...(!isEmpty(cursor) ? { cursor } : {}),
+  };
 }
 
 module.exports = {

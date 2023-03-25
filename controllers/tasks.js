@@ -3,6 +3,7 @@ const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
 const { addLog } = require("../models/logs");
 const { USER_STATUS } = require("../constants/users");
 const { addOrUpdate } = require("../models/users");
+const { isEmpty } = require("../utils/helpers");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 /**
@@ -39,10 +40,11 @@ const addNewTask = async (req, res) => {
  */
 const fetchTasks = async (req, res) => {
   try {
-    const allTasks = await tasks.fetchTasks(req.query);
+    const { taskList, ...rest } = await tasks.fetchTasks(req.query);
     return res.json({
       message: "Tasks returned successfully!",
-      tasks: allTasks.length > 0 ? allTasks : [],
+      tasks: !isEmpty(taskList) ? taskList : [],
+      ...rest,
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);
