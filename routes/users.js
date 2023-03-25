@@ -14,6 +14,7 @@ router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
 router.get("/", authenticate, userValidator.getUsers, users.getUsers);
 router.get("/self", authenticate, users.getSelfDetails);
 router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
+router.get("/chaincode", authenticate, users.generateChaincode);
 router.get("/users/:username", users.getUser);
 router.get("/users/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
 router.put("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);
