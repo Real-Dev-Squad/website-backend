@@ -28,7 +28,12 @@ module.exports = {
     "mocha/no-exclusive-tests": "error",
 
     // Prettier for formatting
-    "prettier/prettier": "error",
+    "prettier/prettier": [
+      "error",
+      {
+        endOfLine: "auto",
+      },
+    ],
   },
   ignorePatterns: ["public/*"],
 };

@@ -60,13 +60,13 @@
     "sinon": "^15.0.0"
   },
   "engines": {
-    "node": "14.x"
+    "node": "18.x"
   },
   "pre-commit": [
     "lint"
   ],
   "volta": {
-    "node": "14.21.1",
+    "node": "18.15.0",
     "yarn": "1.22.19"
   }
 }
