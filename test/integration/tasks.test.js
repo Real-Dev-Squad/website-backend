@@ -233,7 +233,7 @@ describe("Tasks", function () {
           expect(
             res.body.tasks.filter((task) => [TASK_STATUS.IN_PROGRESS, TASK_STATUS.BLOCKED].includes(task.status)).length
           ).to.be.eql(0);
-          expect(res.body.tasks.length).to.be.eq(1);
+          expect(res.body.tasks.length).to.be.eq(2);
           return done();
         });
     });
