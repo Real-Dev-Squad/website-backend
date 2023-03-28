@@ -1,4 +1,3 @@
-/* eslint-disable mocha/no-skipped-tests */
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;

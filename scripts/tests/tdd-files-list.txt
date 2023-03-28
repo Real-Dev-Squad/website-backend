@@ -1,1 +1,5 @@
-test/integration/tasks.test.js
+test/integration/<replace>.test.js
+test/integration/<replace>>.test.js
+test/unit/<replace>/<replace>.test.js
+test/unit/<replace>/<replace>.test.js
+test/unit/<replace>/<replace>.test.js
