@@ -78,13 +78,17 @@ const getUsers = async (req, res) => {
     if (qualifiers.filterBy) {
       const { sortBy = "RECENT_FIRST", filterBy } = qualifiers;
       const order = sortBy === "RECENT_FIRST" ? "desc" : "asc";
+
+      const since = qualifiers?.sinceDate;
+      const until = qualifiers?.untilDate;
+
       if (filterBy === "OPEN_PRS") {
-        const { data } = await githubService.fetchOpenPRs(order);
+        const { data } = await githubService.fetchOpenPRs({ order, since, until });
 
         allPRs = githubService.extractPRdetails(data);
       }
       if (filterBy === "CLOSED_PRS") {
-        const { data } = await githubService.fetchClosedPRs(order);
+        const { data } = await githubService.fetchClosedPRs({ order, since, until });
 
         allPRs = githubService.extractPRdetails(data).filter((pr) => {
           return pr.mergedAt !== null;
@@ -92,13 +96,13 @@ const getUsers = async (req, res) => {
       }
 
       if (filterBy === "OPEN_ISSUES") {
-        const { data } = await githubService.fetchOpenIssues(order);
+        const { data } = await githubService.fetchOpenIssues({ order, since, until });
 
         allPRs = githubService.extractPRdetails(data);
       }
 
       if (filterBy === "CLOSED_ISSUES") {
-        const { data } = await githubService.fetchClosedIssues(order);
+        const { data } = await githubService.fetchClosedIssues({ order, since, until });
 
         allPRs = githubService.extractPRdetails(data);
       }

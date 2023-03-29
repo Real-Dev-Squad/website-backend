@@ -121,7 +121,7 @@ const fetchPRsByUser = async (username) => {
  * to fetch stale PRs just change pass order as asc
  *
  */
-const fetchOpenPRs = async (order = "desc", perPage = 100, page = 1) => {
+const fetchOpenPRs = async (extraParams = {}, perPage = 100, page = 1) => {
   try {
     const url = getGithubURL(
       {
@@ -131,8 +131,8 @@ const fetchOpenPRs = async (order = "desc", perPage = 100, page = 1) => {
       {
         sort: "created",
         per_page: perPage,
-        order: order,
         page,
+        ...extraParams,
       }
     );
     return getFetch(url);
@@ -142,7 +142,7 @@ const fetchOpenPRs = async (order = "desc", perPage = 100, page = 1) => {
   }
 };
 
-const fetchClosedPRs = async (order = "desc", perPage = 100, page = 1) => {
+const fetchClosedPRs = async (extraParams = {}, perPage = 100, page = 1) => {
   try {
     const url = getGithubURL(
       {
@@ -152,8 +152,8 @@ const fetchClosedPRs = async (order = "desc", perPage = 100, page = 1) => {
       {
         sort: "updated",
         per_page: perPage,
-        order,
         page,
+        ...extraParams,
       }
     );
     return getFetch(url);
@@ -163,7 +163,7 @@ const fetchClosedPRs = async (order = "desc", perPage = 100, page = 1) => {
   }
 };
 
-const fetchOpenIssues = async (order = "desc", perPage = 100, page = 1) => {
+const fetchOpenIssues = async (extraParams = {}, perPage = 100, page = 1) => {
   try {
     const url = getGithubURL(
       {
@@ -173,8 +173,8 @@ const fetchOpenIssues = async (order = "desc", perPage = 100, page = 1) => {
       {
         sort: "created",
         per_page: perPage,
-        order,
         page,
+        ...extraParams,
       }
     );
     return getFetch(url);
@@ -184,7 +184,7 @@ const fetchOpenIssues = async (order = "desc", perPage = 100, page = 1) => {
   }
 };
 
-const fetchClosedIssues = async (order = "desc", perPage = 100, page = 1) => {
+const fetchClosedIssues = async (extraParams = {}, perPage = 100, page = 1) => {
   try {
     const url = getGithubURL(
       {
@@ -194,8 +194,8 @@ const fetchClosedIssues = async (order = "desc", perPage = 100, page = 1) => {
       {
         sort: "updated",
         per_page: perPage,
-        order,
         page,
+        ...extraParams,
       }
     );
     return getFetch(url);
