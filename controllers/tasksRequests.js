@@ -33,8 +33,8 @@ const addOrUpdate = async (req, res) => {
     if (response.requestorExists) {
       return res.boom.conflict("User is already requesting for the task");
     }
-    if (response.taskRequestDoesNotExist) {
-      return res.boom.conflict("Task request already exist");
+    if (response.taskDoesNotExist) {
+      return res.boom.conflict("Task does not exist");
     }
 
     if (response.isUpdate) {
