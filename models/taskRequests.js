@@ -33,7 +33,7 @@ const fetchTaskRequests = async () => {
  * @param taskId { string }: id of task request
  * @return {Promise<{taskRequest: Object}>}
  */
-const createTaskRequest = async (taskId, userId) => {
+const addOrUpdate = async (taskId, userId) => {
   try {
     const taskRequest = await taskRequestsCollection.doc(taskId).get();
     const taskRequestData = taskRequest.data();
@@ -137,6 +137,6 @@ const approveTaskRequest = async (taskRequestId, userId) => {
 
 module.exports = {
   fetchTaskRequests,
-  createTaskRequest,
+  addOrUpdate,
   approveTaskRequest,
 };
