@@ -10,6 +10,7 @@ const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const githubService = require("../services/githubService");
 const { getPaginationLink } = require("../utils/users");
+const { getQualifiers } = require("../utils/helper");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -65,15 +66,9 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const combinations = req.query.q.split(" "); // split the query string by whites-pace
-    const qualifiers = {};
     let allPRs;
-
-    // iterate through the combinations and parse the qualifiers
-    combinations.forEach((combination) => {
-      const [qualifier, value] = combination.split(":");
-      qualifiers[qualifier] = value;
-    });
+    const query = req.query.q;
+    const qualifiers = getQualifiers(query);
 
     if (qualifiers.filterBy) {
       const { sortBy = "RECENT_FIRST", filterBy } = qualifiers;
