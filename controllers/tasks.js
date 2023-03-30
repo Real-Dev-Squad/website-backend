@@ -44,7 +44,7 @@ const fetchTasks = async (req, res) => {
     return res.json({
       message: "Tasks returned successfully!",
       tasks: !isEmpty(taskList) ? taskList : [],
-      ...rest,
+      ...(!isEmpty(rest) ? rest : {}),
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);
