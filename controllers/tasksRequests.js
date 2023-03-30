@@ -50,7 +50,7 @@ const addOrUpdate = async (req, res) => {
     });
   } catch (err) {
     logger.error("Error while creating task request");
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -84,7 +84,7 @@ const approveTaskRequest = async (req, res) => {
     });
   } catch (err) {
     logger.error("Error while approving task request", err);
-    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 

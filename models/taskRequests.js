@@ -16,11 +16,7 @@ const fetchTaskRequests = async () => {
   try {
     const taskRequests = await taskRequestsCollection.get();
 
-    const taskRequestsData = [];
-
-    taskRequests.forEach((taskRequest) => taskRequestsData.push({ id: taskRequest.id, ...taskRequest.data() }));
-
-    return taskRequestsData;
+    return taskRequests.docs.map((taskRequest) => ({ id: taskRequest.id, ...taskRequest.data() }));
   } catch (err) {
     logger.error("error fetching tasks", err);
     throw err;
