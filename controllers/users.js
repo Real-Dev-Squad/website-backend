@@ -364,7 +364,7 @@ const addUserIntro = async (req, res) => {
         funFact: rawData.funFact,
         forFun: rawData.forFun,
         whyRds: rawData.whyRds,
-        numberOfHours: parseInt(rawData.numberOfHours),
+        numberOfHours: rawData.numberOfHours,
       },
       foundFrom: rawData.foundFrom,
     };

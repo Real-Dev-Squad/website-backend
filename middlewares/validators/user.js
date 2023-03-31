@@ -72,7 +72,7 @@ const validateJoinData = async (req, res, next) => {
     });
 
   try {
-    await schema.validateAsync({ ...req.body, numberOfHours: parseInt(req.body.numberOfHours) });
+    await schema.validateAsync(req.body);
     next();
   } catch (error) {
     logger.error(`Error in validating recruiter data: ${error}`);
