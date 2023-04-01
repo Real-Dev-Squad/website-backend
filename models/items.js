@@ -70,14 +70,8 @@ const getItemBasedOnFilter = async (query) => {
   try {
     let call = itemTagsModel;
     Object.keys(query).forEach((key) => {
-      const value = query[key];
-      if (Array.isArray(value)) {
-        // eslint-disable-next-line security/detect-object-injection
-        call = call.where(key, "in", value);
-      } else {
-        // eslint-disable-next-line security/detect-object-injection
-        call = call.where(key, "==", value);
-      }
+      // eslint-disable-next-line security/detect-object-injection
+      call = call.where(key, "==", query[key]);
     });
     const items = [];
     const data = await call.get();

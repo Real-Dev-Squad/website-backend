@@ -55,11 +55,6 @@ const getAllUserStatus = async (query) => {
     let data;
     if (!query.state) {
       data = await userStatusModel.get();
-    } else if (Array.isArray(query.state)) {
-      data = await userStatusModel
-        .where("currentStatus.state", "in", query.state)
-        .orderBy("currentStatus.from", "asc")
-        .get();
     } else {
       data = await userStatusModel
         .where("currentStatus.state", "==", query.state)
