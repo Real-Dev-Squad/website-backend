@@ -37,8 +37,9 @@ const getUserPRs = async (req, res) => {
  */
 const getStalePRs = async (req, res) => {
   try {
+    const order = "asc";
     const { size, page } = req.query;
-    const { data } = await githubService.fetchOpenPRs("asc", size, page);
+    const { data } = await githubService.fetchOpenPRs(size, page, { order });
 
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data);
@@ -66,8 +67,9 @@ const getStalePRs = async (req, res) => {
  */
 const getOpenPRs = async (req, res) => {
   try {
+    const order = "desc";
     const { size, page } = req.query;
-    const { data } = await githubService.fetchOpenPRs("desc", size, page);
+    const { data } = await githubService.fetchOpenPRs(size, page, { order });
 
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data);

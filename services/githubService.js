@@ -121,7 +121,7 @@ const fetchPRsByUser = async (username) => {
  * to fetch stale PRs just change pass order as asc
  *
  */
-const fetchOpenPRs = async (extraParams = {}, perPage = 100, page = 1) => {
+const fetchOpenPRs = async (perPage = 100, page = 1, extraParams = {}) => {
   try {
     const url = getGithubURL(
       {
@@ -137,12 +137,12 @@ const fetchOpenPRs = async (extraParams = {}, perPage = 100, page = 1) => {
     );
     return getFetch(url);
   } catch (err) {
-    logger.error(`Error while fetching pull requests: ${err}`);
+    logger.error(`Error while fetching open pull requests: ${err}`);
     throw err;
   }
 };
 
-const fetchClosedPRs = async (extraParams = {}, perPage = 100, page = 1) => {
+const fetchClosedPRs = async (perPage = 100, page = 1, extraParams = {}) => {
   try {
     const url = getGithubURL(
       {
@@ -158,12 +158,12 @@ const fetchClosedPRs = async (extraParams = {}, perPage = 100, page = 1) => {
     );
     return getFetch(url);
   } catch (err) {
-    logger.error(`Error while fetching pull requests: ${err}`);
+    logger.error(`Error while fetching closed pull requests: ${err}`);
     throw err;
   }
 };
 
-const fetchOpenIssues = async (extraParams = {}, perPage = 100, page = 1) => {
+const fetchOpenIssues = async (perPage = 100, page = 1, extraParams = {}) => {
   try {
     const url = getGithubURL(
       {
@@ -179,12 +179,12 @@ const fetchOpenIssues = async (extraParams = {}, perPage = 100, page = 1) => {
     );
     return getFetch(url);
   } catch (err) {
-    logger.error(`Error while fetching pull requests: ${err}`);
+    logger.error(`Error while fetching open issues: ${err}`);
     throw err;
   }
 };
 
-const fetchClosedIssues = async (extraParams = {}, perPage = 100, page = 1) => {
+const fetchClosedIssues = async (perPage = 100, page = 1, extraParams = {}) => {
   try {
     const url = getGithubURL(
       {
@@ -200,7 +200,7 @@ const fetchClosedIssues = async (extraParams = {}, perPage = 100, page = 1) => {
     );
     return getFetch(url);
   } catch (err) {
-    logger.error(`Error while fetching pull requests: ${err}`);
+    logger.error(`Error while fetching closed issues: ${err}`);
     throw err;
   }
 };
