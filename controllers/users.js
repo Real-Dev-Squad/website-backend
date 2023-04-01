@@ -429,12 +429,12 @@ const filterUserBasedOnQuery = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    // const { allUsers } = await userQuery.getUsersBasedOnFilter(req.query);
     const allUsers = await userQuery.getUsersBasedOnFilter(req.query);
 
     return res.json({
       message: "Users found successfully!",
       users: allUsers,
+      count: allUsers.length,
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);

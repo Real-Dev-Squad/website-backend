@@ -6,6 +6,7 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
+const { arraysHaveCommonItem } = require("../utils/users");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
@@ -293,116 +294,65 @@ const fetchUserSkills = async (id) => {
   }
 };
 
+/**
+ * Fetches user data based on the filter query
+ *
+ * @param {Object} query - Object with query parameters
+ * @param {Array} query.levelId - Array of levelIds to filter the users on
+ * @param {Array} query.levelName - Array of levelNames to filter the users on
+ * @param {Array} query.levelNumber - Array of levelNumbers to filter the users on
+ * @param {Array} query.tagId - Array of tagIds to filter the users on
+ * @param {Array} query.state - Array of states to filter the users on
+ * @return {Promise<Array>} - Array of user documents that match the filter criteria
+ */
+
 const getUsersBasedOnFilter = async (query) => {
-  const itemTagsKeys = ["levelId", "levelName", "levelNumber", "tagId", "itemType", "tagType"];
+  const itemTagsKeys = ["levelId", "levelName", "levelNumber", "tagId"];
   const userStateKeys = ["state"];
   const allQueryKeys = Object.keys(query);
   const doesTagQueryExist = arraysHaveCommonItem(itemTagsKeys, allQueryKeys);
   const doesStateQueryExist = arraysHaveCommonItem(userStateKeys, allQueryKeys);
 
-  try {
-    let callForItem = itemModel;
-    let callForState = userStatusModel;
-    Object.keys(query).forEach((key) => {
-      const value = query[key];
-      if (itemTagsKeys.includes(key)) {
-        if (Array.isArray(value)) {
-          callForItem = callForItem.where(key, "in", value);
-        } else {
-          callForItem = callForItem.where(key, "==", value);
-        }
-      } else if (userStateKeys.includes(key)) {
-        if (Array.isArray(value)) {
-          callForState = callForState.where("currentStatus.state", "in", value);
-        } else {
-          callForState = callForState.where("currentStatus.state", "==", value);
-        }
-      }
-    });
+  const calls = {
+    item: itemModel,
+    state: userStatusModel,
+  };
+  calls.item = calls.item.where("itemType", "==", "USER").where("tagType", "==", "SKILL");
 
-    const items = [];
-    if (doesTagQueryExist) {
-      const data = await callForItem.get();
-      data.forEach((doc) => {
-        const item = {
-          id: doc.id,
-          ...doc.data(),
-        };
-        items.push(item);
-      });
+  Object.entries(query).forEach(([key, value]) => {
+    const isTagKey = itemTagsKeys.includes(key);
+    const isStateKey = userStateKeys.includes(key);
+    const isValueArray = Array.isArray(value);
+
+    if (isTagKey) {
+      calls.item = isValueArray ? calls.item.where(key, "in", value) : calls.item.where(key, "==", value);
+    } else if (isStateKey) {
+      calls.state = isValueArray
+        ? calls.state.where("currentStatus.state", "in", value)
+        : calls.state.where("currentStatus.state", "==", value);
     }
+  });
 
-    const stateItems = [];
-    if (doesStateQueryExist) {
-      const stateData = await callForState.get();
-      stateData.forEach((doc) => {
-        const item = {
-          id: doc.id,
-          ...doc.data(),
-        };
-        stateItems.push(item);
-      });
-    }
+  const tagItems = doesTagQueryExist ? (await calls.item.get()).docs.map((doc) => ({ id: doc.id, ...doc.data() })) : [];
+  const stateItems = doesStateQueryExist
+    ? (await calls.state.get()).docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+    : [];
+  let finalItems = [];
 
-    let finalItems = [];
-
-    if (doesTagQueryExist && doesStateQueryExist) {
-      if (items.length && stateItems.length) {
-        items.forEach((item) => {
-          stateItems.forEach((stateItem) => {
-            if (item.itemId === stateItem.userId) {
-              finalItems.push(item.itemId);
-            }
-          });
-        });
-      }
-    } else if (doesStateQueryExist && stateItems.length) {
-      finalItems = stateItems.map((state) => state.userId);
-    } else if (doesTagQueryExist && items.length) {
-      finalItems = items.map((item) => item.itemId);
-    }
-
-    finalItems = [...new Set(finalItems)];
-    const userDocs = [];
-
-    const batchedItems = [];
-    for (let i = 0; i < finalItems.length; i += 10) {
-      const batch = finalItems.slice(i, i + 10);
-      batchedItems.push(batch);
-    }
-
-    const userPromises = [];
-    for (const batch of batchedItems) {
-      const batchRefs = batch.map((itemId) => userModel.doc(itemId));
-      userPromises.push(firestore.getAll(...batchRefs));
-    }
-
-    const userSnapshotsArray = await Promise.all(userPromises);
-
-    userSnapshotsArray.forEach((userSnapshots) => {
-      userSnapshots.forEach((userSnapshot) => {
-        const data = userSnapshot.data();
-        data.id = userSnapshot.id;
-        userDocs.push(data);
-      });
-    });
-    return userDocs;
-  } catch (err) {
-    logger.error("Error in getting Item based on filter", err);
-    throw err;
+  if (doesTagQueryExist && doesStateQueryExist) {
+    const stateItemIds = new Set(stateItems.map((item) => item.userId));
+    finalItems = tagItems.filter((item) => stateItemIds.has(item.itemId)).map((item) => item.itemId);
+  } else if (doesStateQueryExist) {
+    finalItems = stateItems.map((item) => item.userId);
+  } else if (doesTagQueryExist) {
+    finalItems = tagItems.map((item) => item.itemId);
   }
+
+  finalItems = [...new Set(finalItems)];
+  const userRefs = finalItems.map((itemId) => userModel.doc(itemId));
+  const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
+  return userDocs;
 };
-
-function arraysHaveCommonItem(array1, array2) {
-  for (let i = 0; i < array1.length; i++) {
-    for (let j = 0; j < array2.length; j++) {
-      if (array1[i] === array2[j]) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
 
 module.exports = {
   addOrUpdate,
