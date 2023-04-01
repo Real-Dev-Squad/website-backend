@@ -365,27 +365,27 @@ const getUsersBasedOnFilter = async (query) => {
     finalItems = [...new Set(finalItems)];
     const userDocs = [];
 
-    for (const item of finalItems) {
-      const userInfo = await userModel.doc(item).get();
-      const data = userInfo.data();
-      data.id = item;
-      userDocs.push(data);
+    const batchedItems = [];
+    for (let i = 0; i < finalItems.length; i += 10) {
+      const batch = finalItems.slice(i, i + 10);
+      batchedItems.push(batch);
     }
 
-    // const batch = firestore.batch();
-    // finalItems.forEach((itemId) => {
-    //   const docRef = userModel.doc(itemId);
-    //   batch.get(docRef);
-    // });
-    // const snapshot = await batch.commit();
-    // snapshot.forEach((docSnapshot) => {
-    //   if (docSnapshot.exists) {
-    //     const userData = docSnapshot.data();
-    //     userData.id = docSnapshot.id;
-    //     userDocs.push(userData);
-    //   }
-    // });
+    const userPromises = [];
+    for (const batch of batchedItems) {
+      const batchRefs = batch.map((itemId) => userModel.doc(itemId));
+      userPromises.push(firestore.getAll(...batchRefs));
+    }
 
+    const userSnapshotsArray = await Promise.all(userPromises);
+
+    userSnapshotsArray.forEach((userSnapshots) => {
+      userSnapshots.forEach((userSnapshot) => {
+        const data = userSnapshot.data();
+        data.id = userSnapshot.id;
+        userDocs.push(data);
+      });
+    });
     return userDocs;
   } catch (err) {
     logger.error("Error in getting Item based on filter", err);
