@@ -39,7 +39,7 @@ const getStalePRs = async (req, res) => {
   try {
     const order = "asc";
     const { size, page } = req.query;
-    const { data } = await githubService.fetchOpenPRs(size, page, { order });
+    const { data } = await githubService.fetchOpenPRs({ perPage: size, page, order });
 
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data);
@@ -69,7 +69,7 @@ const getOpenPRs = async (req, res) => {
   try {
     const order = "desc";
     const { size, page } = req.query;
-    const { data } = await githubService.fetchOpenPRs(size, page, { order });
+    const { data } = await githubService.fetchOpenPRs({ perPage: size, page, order });
 
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data);

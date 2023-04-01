@@ -121,7 +121,9 @@ const fetchPRsByUser = async (username) => {
  * to fetch stale PRs just change pass order as asc
  *
  */
-const fetchOpenPRs = async (perPage = 100, page = 1, extraParams = {}) => {
+const fetchOpenPRs = async (params = {}) => {
+  const { perPage = 100, page = 1, extraParams = {} } = params;
+
   try {
     const url = getGithubURL(
       {
@@ -142,7 +144,9 @@ const fetchOpenPRs = async (perPage = 100, page = 1, extraParams = {}) => {
   }
 };
 
-const fetchClosedPRs = async (perPage = 100, page = 1, extraParams = {}) => {
+const fetchClosedPRs = async (params = {}) => {
+  const { perPage = 100, page = 1, extraParams = {} } = params;
+
   try {
     const url = getGithubURL(
       {
@@ -163,7 +167,9 @@ const fetchClosedPRs = async (perPage = 100, page = 1, extraParams = {}) => {
   }
 };
 
-const fetchOpenIssues = async (perPage = 100, page = 1, extraParams = {}) => {
+const fetchOpenIssues = async (params = {}) => {
+  const { perPage = 100, page = 1, extraParams = {} } = params;
+
   try {
     const url = getGithubURL(
       {
@@ -184,7 +190,9 @@ const fetchOpenIssues = async (perPage = 100, page = 1, extraParams = {}) => {
   }
 };
 
-const fetchClosedIssues = async (perPage = 100, page = 1, extraParams = {}) => {
+const fetchClosedIssues = async (params = {}) => {
+  const { perPage = 100, page = 1, extraParams = {} } = params;
+
   try {
     const url = getGithubURL(
       {

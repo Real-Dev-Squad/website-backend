@@ -77,13 +77,15 @@ const getUsers = async (req, res) => {
       const since = qualifiers?.sinceDate;
       const until = qualifiers?.untilDate;
 
+      const extraParams = { order, since, until };
+
       if (filterBy === "OPEN_PRS") {
-        const { data } = await githubService.fetchOpenPRs({ order, since, until });
+        const { data } = await githubService.fetchOpenPRs({ extraParams });
 
         allPRs = githubService.extractPRdetails(data);
       }
       if (filterBy === "CLOSED_PRS") {
-        const { data } = await githubService.fetchClosedPRs({ order, since, until });
+        const { data } = await githubService.fetchClosedPRs({ extraParams });
 
         allPRs = githubService.extractPRdetails(data).filter((pr) => {
           return pr.mergedAt !== null;
@@ -91,13 +93,13 @@ const getUsers = async (req, res) => {
       }
 
       if (filterBy === "OPEN_ISSUES") {
-        const { data } = await githubService.fetchOpenIssues({ order, since, until });
+        const { data } = await githubService.fetchOpenIssues({ extraParams });
 
         allPRs = githubService.extractPRdetails(data);
       }
 
       if (filterBy === "CLOSED_ISSUES") {
-        const { data } = await githubService.fetchClosedIssues({ order, since, until });
+        const { data } = await githubService.fetchClosedIssues({ extraParams });
 
         allPRs = githubService.extractPRdetails(data);
       }
