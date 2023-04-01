@@ -9,6 +9,7 @@ const { fetchWallet, createWallet } = require("../models/wallets");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
+const userStatusModel = firestore.collection("usersStatus");
 
 /**
  * Adds or updates the user data
@@ -292,6 +293,117 @@ const fetchUserSkills = async (id) => {
   }
 };
 
+const getUsersBasedOnFilter = async (query) => {
+  const itemTagsKeys = ["levelId", "levelName", "levelNumber", "tagId", "itemType", "tagType"];
+  const userStateKeys = ["state"];
+  const allQueryKeys = Object.keys(query);
+  const doesTagQueryExist = arraysHaveCommonItem(itemTagsKeys, allQueryKeys);
+  const doesStateQueryExist = arraysHaveCommonItem(userStateKeys, allQueryKeys);
+
+  try {
+    let callForItem = itemModel;
+    let callForState = userStatusModel;
+    Object.keys(query).forEach((key) => {
+      const value = query[key];
+      if (itemTagsKeys.includes(key)) {
+        if (Array.isArray(value)) {
+          callForItem = callForItem.where(key, "in", value);
+        } else {
+          callForItem = callForItem.where(key, "==", value);
+        }
+      } else if (userStateKeys.includes(key)) {
+        if (Array.isArray(value)) {
+          callForState = callForState.where("currentStatus.state", "in", value);
+        } else {
+          callForState = callForState.where("currentStatus.state", "==", value);
+        }
+      }
+    });
+
+    const items = [];
+    if (doesTagQueryExist) {
+      const data = await callForItem.get();
+      data.forEach((doc) => {
+        const item = {
+          id: doc.id,
+          ...doc.data(),
+        };
+        items.push(item);
+      });
+    }
+
+    const stateItems = [];
+    if (doesStateQueryExist) {
+      const stateData = await callForState.get();
+      stateData.forEach((doc) => {
+        const item = {
+          id: doc.id,
+          ...doc.data(),
+        };
+        stateItems.push(item);
+      });
+    }
+
+    let finalItems = [];
+
+    if (doesTagQueryExist && doesStateQueryExist) {
+      if (items.length && stateItems.length) {
+        items.forEach((item) => {
+          stateItems.forEach((stateItem) => {
+            if (item.itemId === stateItem.userId) {
+              finalItems.push(item.itemId);
+            }
+          });
+        });
+      }
+    } else if (doesStateQueryExist && stateItems.length) {
+      finalItems = stateItems.map((state) => state.userId);
+    } else if (doesTagQueryExist && items.length) {
+      finalItems = items.map((item) => item.itemId);
+    }
+
+    finalItems = [...new Set(finalItems)];
+    const userDocs = [];
+
+    for (const item of finalItems) {
+      const userInfo = await userModel.doc(item).get();
+      const data = userInfo.data();
+      data.id = item;
+      userDocs.push(data);
+    }
+
+    // const batch = firestore.batch();
+    // finalItems.forEach((itemId) => {
+    //   const docRef = userModel.doc(itemId);
+    //   batch.get(docRef);
+    // });
+    // const snapshot = await batch.commit();
+    // snapshot.forEach((docSnapshot) => {
+    //   if (docSnapshot.exists) {
+    //     const userData = docSnapshot.data();
+    //     userData.id = docSnapshot.id;
+    //     userDocs.push(userData);
+    //   }
+    // });
+
+    return userDocs;
+  } catch (err) {
+    logger.error("Error in getting Item based on filter", err);
+    throw err;
+  }
+};
+
+function arraysHaveCommonItem(array1, array2) {
+  for (let i = 0; i < array1.length; i++) {
+    for (let j = 0; j < array2.length; j++) {
+      if (array1[i] === array2[j]) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 module.exports = {
   addOrUpdate,
   fetchUsers,
@@ -304,4 +416,5 @@ module.exports = {
   getJoinData,
   getSuggestedUsers,
   fetchUserSkills,
+  getUsersBasedOnFilter,
 };

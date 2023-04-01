@@ -30,15 +30,18 @@ const validateItemsPayload = async (req, res, next) => {
 };
 
 const validateItemQuery = async (req, res, next) => {
-  const schema = Joi.object().strict().keys({
-    itemType: Joi.string().uppercase().optional(),
-    itemId: Joi.string().optional(),
-    levelId: Joi.string().optional(),
-    levelName: Joi.string().optional(),
-    levelNumber: Joi.number().optional(),
-    tagId: Joi.string().optional,
-    tagType: Joi.string().uppercase().optional(),
-  });
+  const schema = Joi.object()
+    .strict()
+    .min(1)
+    .keys({
+      itemType: Joi.string().uppercase().optional(),
+      itemId: Joi.string().optional(),
+      levelId: Joi.array().items(Joi.string()).single().optional(),
+      levelName: Joi.array().items(Joi.string()).single().optional(),
+      levelNumber: Joi.array().items(Joi.number()).single().optional(),
+      tagId: Joi.array().items(Joi.string()).single().optional(),
+      tagType: Joi.string().uppercase().optional(),
+    });
 
   try {
     await schema.validateAsync(req.query);

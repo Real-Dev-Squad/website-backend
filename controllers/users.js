@@ -417,6 +417,31 @@ const addDefaultArchivedRole = async (req, res) => {
   }
 };
 
+/**
+ * Returns the lists of users who match the specified query params
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const filterUserBasedOnQuery = async (req, res) => {
+  try {
+    if (!Object.keys(req.query).length) {
+      return res.boom.badRequest("filter for item not provided");
+    }
+    // const { allUsers } = await userQuery.getUsersBasedOnFilter(req.query);
+    const allUsers = await userQuery.getUsersBasedOnFilter(req.query);
+
+    return res.json({
+      message: "Users found successfully!",
+      users: allUsers,
+    });
+  } catch (error) {
+    logger.error(`Error while fetching all users: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -435,4 +460,5 @@ module.exports = {
   getUserIntro,
   addDefaultArchivedRole,
   getUserSkills,
+  filterUserBasedOnQuery,
 };
