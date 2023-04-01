@@ -15,6 +15,7 @@ const { updateUserStatus } = require("../../models/userStatus");
 const { addTag } = require("../../models/tags");
 const { addLevel } = require("../../models/levels");
 const { addTagsToItem } = require("../../models/items");
+const { assertUserIds } = require("../utils/userHelperFunctions");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -37,9 +38,12 @@ describe("UserManagement Filters", function () {
     userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
     oooUser = await addUser(userData[0]);
-    await updateUserStatus(oooUser, generateUserStatusData("OOO", updatedAtDate, untilDate));
+    await updateUserStatus(
+      oooUser,
+      generateUserStatusData("OOO", updatedAtDate, updatedAtDate, untilDate, "Bad Health")
+    );
     idleUser = await addUser(userData[1]);
-    await updateUserStatus(idleUser, generateUserStatusData("IDLE", updatedAtDate, updatedAtDate));
+    await updateUserStatus(idleUser, generateUserStatusData("IDLE", updatedAtDate, updatedAtDate, untilDate, "CSS"));
     activeUser = await addUser(userData[8]);
     await updateUserStatus(activeUser, generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate));
 
@@ -50,25 +54,25 @@ describe("UserManagement Filters", function () {
       reason: "Web Dev FE",
     });
     tagIdFE = id1;
-    const { id2 } = await addTag({
+    const { id: id2 } = await addTag({
       name: "Node JS",
       type: "SKILL",
       reason: "Web Dev BE",
     });
     tagIdBE = id2;
-    const { id3 } = await addLevel({
+    const { id: id3 } = await addLevel({
       name: "level 1",
       value: 1,
     });
     levelId1 = id3;
-    const { id4 } = await addLevel({
+    const { id: id4 } = await addLevel({
       name: "level 2",
       value: 2,
     });
     levelId2 = id4;
 
     // creating items
-    addTagsToItem({
+    await addTagsToItem({
       itemId: oooUser,
       itemType: "USER",
       tagPayload: [
@@ -82,7 +86,7 @@ describe("UserManagement Filters", function () {
         },
       ],
     });
-    addTagsToItem({
+    await addTagsToItem({
       itemId: idleUser,
       itemType: "USER",
       tagPayload: [
@@ -96,7 +100,7 @@ describe("UserManagement Filters", function () {
         },
       ],
     });
-    addTagsToItem({
+    await addTagsToItem({
       itemId: activeUser,
       itemType: "USER",
       tagPayload: [
@@ -121,7 +125,8 @@ describe("UserManagement Filters", function () {
     it("Should filter users based on state", function (done) {
       chai
         .request(app)
-        .get("/users/filter?state=OOO")
+        .get("/users/filter")
+        .query({ state: "OOO" })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -130,10 +135,10 @@ describe("UserManagement Filters", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.count).to.be.a("number");
-          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.message).to.equal("Users found successfully!");
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(1);
-          expect(res.body.users).to.deep.include({
+          expect(res.body.users[0]).to.deep.include({
             id: oooUser,
           });
           return done();
@@ -143,7 +148,8 @@ describe("UserManagement Filters", function () {
     it("Should filter users based on Tag", function (done) {
       chai
         .request(app)
-        .get("/users/filter?tagId=tagIdFE")
+        .get("/users/filter")
+        .query({ tagId: tagIdFE })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -152,15 +158,10 @@ describe("UserManagement Filters", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.count).to.be.a("number");
-          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.message).to.equal("Users found successfully!");
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(2);
-          expect(res.body.users).to.deep.include({
-            id: oooUser,
-          });
-          expect(res.body.users).to.deep.include({
-            id: activeUser,
-          });
+          assertUserIds(res.body.users, [activeUser, oooUser]);
           return done();
         });
     });
@@ -168,7 +169,8 @@ describe("UserManagement Filters", function () {
     it("Should filter users based on multiple Tags", function (done) {
       chai
         .request(app)
-        .get("/users/filter?tagId=tagIdFE&tagId=tagIdBE")
+        .get("/users/filter")
+        .query({ tagId: [tagIdFE, tagIdBE] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -177,18 +179,10 @@ describe("UserManagement Filters", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.count).to.be.a("number");
-          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.message).to.equal("Users found successfully!");
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(3);
-          expect(res.body.users).to.deep.include({
-            id: idleUser,
-          });
-          expect(res.body.users).to.deep.include({
-            id: activeUser,
-          });
-          expect(res.body.users).to.deep.include({
-            id: oooUser,
-          });
+          assertUserIds(res.body.users, [activeUser, oooUser, idleUser]);
           return done();
         });
     });
@@ -196,7 +190,8 @@ describe("UserManagement Filters", function () {
     it("Should filter users based on multiple states", function (done) {
       chai
         .request(app)
-        .get("/users/filter?state=OOO&state=IDLE")
+        .get("/users/filter")
+        .query({ state: ["OOO", "IDLE"] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -205,15 +200,10 @@ describe("UserManagement Filters", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.count).to.be.a("number");
-          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.message).to.equal("Users found successfully!");
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(2);
-          expect(res.body.users).to.deep.include({
-            id: idleUser,
-          });
-          expect(res.body.users).to.deep.include({
-            id: oooUser,
-          });
+          assertUserIds(res.body.users, [activeUser, oooUser, idleUser]);
           return done();
         });
     });
@@ -221,7 +211,8 @@ describe("UserManagement Filters", function () {
     it("Should filter users based on single tag and single state", function (done) {
       chai
         .request(app)
-        .get("/users/filter?state=OOO&tagId=tagIdFE")
+        .get("/users/filter")
+        .query({ state: "OOO", tagId: tagIdFE })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -230,12 +221,10 @@ describe("UserManagement Filters", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.count).to.be.a("number");
-          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.message).to.equal("Users found successfully!");
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(1);
-          expect(res.body.users).to.deep.include({
-            id: oooUser,
-          });
+          assertUserIds(res.body.users, [oooUser]);
           return done();
         });
     });
@@ -243,7 +232,8 @@ describe("UserManagement Filters", function () {
     it("Should filter users based on single tag and multiple state", function (done) {
       chai
         .request(app)
-        .get("/users/filter?state=OOO&state=ACTIVE&tagId=tagIdFE")
+        .get("/users/filter")
+        .query({ state: ["OOO", "ACTIVE"], tagId: tagIdFE })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -252,15 +242,10 @@ describe("UserManagement Filters", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.count).to.be.a("number");
-          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.message).to.equal("Users found successfully!");
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(2);
-          expect(res.body.users).to.deep.include({
-            id: oooUser,
-          });
-          expect(res.body.users).to.deep.include({
-            id: activeUser,
-          });
+          assertUserIds(res.body.users, [activeUser, oooUser]);
           return done();
         });
     });
@@ -268,7 +253,8 @@ describe("UserManagement Filters", function () {
     it("Should filter users based on multiple tag and single state", function (done) {
       chai
         .request(app)
-        .get("/users/filter?state=OOO&tagId=tagIdFE&tagId=tagIdBE")
+        .get("/users/filter")
+        .query({ state: "OOO", tagId: [tagIdFE, tagIdBE] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -277,12 +263,11 @@ describe("UserManagement Filters", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.count).to.be.a("number");
-          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.message).to.equal("Users found successfully!");
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(1);
-          expect(res.body.users).to.deep.include({
-            id: oooUser,
-          });
+          assertUserIds(res.body.users, [oooUser]);
+
           return done();
         });
     });
@@ -290,7 +275,8 @@ describe("UserManagement Filters", function () {
     it("Should filter users based on multiple tag and multiple states", function (done) {
       chai
         .request(app)
-        .get("/users/filter?state=OOO&state=ACTIVE&tagId=tagIdFE&tagId=tagIdBE")
+        .get("/users/filter")
+        .query({ state: ["OOO", "ACTIVE"], tagId: [tagIdFE, tagIdBE] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -299,15 +285,10 @@ describe("UserManagement Filters", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.count).to.be.a("number");
-          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.message).to.equal("Users found successfully!");
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(2);
-          expect(res.body.users).to.deep.include({
-            id: oooUser,
-          });
-          expect(res.body.users).to.deep.include({
-            id: activeUser,
-          });
+          assertUserIds(res.body.users, [activeUser, oooUser]);
           return done();
         });
     });
