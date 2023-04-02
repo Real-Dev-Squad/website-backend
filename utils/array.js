@@ -18,6 +18,30 @@ function chunks(array, size = 1) {
   return result;
 }
 
+/**
+ * Checks if two arrays have any common items
+ * @param array1 {Array} - first array
+ * @param array2 {Array} - second array
+ * @returns {boolean} - true if the arrays have at least one common item, false otherwise
+ */
+
+function arraysHaveCommonItem(array1, array2) {
+  if (!Array.isArray(array1) || !Array.isArray(array2) || array1.length > 100 || array2.length > 100) {
+    return false;
+  }
+
+  for (let i = 0; i < array1.length; i++) {
+    for (let j = 0; j < array2.length; j++) {
+      /* eslint-disable security/detect-object-injection */
+      if (array1[i] === array2[j]) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 module.exports = {
   chunks,
+  arraysHaveCommonItem,
 };

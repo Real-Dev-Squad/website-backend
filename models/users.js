@@ -6,7 +6,7 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
-const { arraysHaveCommonItem } = require("../utils/users");
+const { arraysHaveCommonItem } = require("../utils/array");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
