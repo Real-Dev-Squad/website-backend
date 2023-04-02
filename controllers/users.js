@@ -10,7 +10,7 @@ const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const githubService = require("../services/githubService");
 const { getPaginationLink } = require("../utils/users");
-const { getQualifiers } = require("../utils/helper");
+const { getQualifiers, getDateTimeRangeForPRs } = require("../utils/helper");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -74,32 +74,45 @@ const getUsers = async (req, res) => {
       const { sortBy = "RECENT_FIRST", filterBy } = qualifiers;
       const order = sortBy === "RECENT_FIRST" ? "desc" : "asc";
 
-      const since = qualifiers?.sinceDate;
-      const until = qualifiers?.untilDate;
+      const startDate = req.query?.startDate;
+      const endDate = req.query?.endDate;
+      const dateTime = getDateTimeRangeForPRs(startDate, endDate);
 
-      const extraParams = { order, since, until };
+      const searchParams = {}; // searchParams used to create list of params to create github API URL
+      const resultOptions = { order }; // resultOptions is used for ordering, searching within date-time range and pagination of results
 
       if (filterBy === "OPEN_PRS") {
-        const { data } = await githubService.fetchOpenPRs({ extraParams });
+        if (dateTime) {
+          searchParams.created = dateTime;
+        }
+        const { data } = await githubService.fetchOpenPRs({ searchParams, resultOptions });
 
         allPRs = githubService.extractPRdetails(data);
       }
-      if (filterBy === "CLOSED_PRS") {
-        const { data } = await githubService.fetchClosedPRs({ extraParams });
+      if (filterBy === "MERGED_PRS") {
+        if (dateTime) {
+          searchParams.merged = dateTime;
+        }
 
-        allPRs = githubService.extractPRdetails(data).filter((pr) => {
-          return pr.mergedAt !== null;
-        });
+        const { data } = await githubService.fetchMergedPRs({ searchParams, resultOptions });
+
+        allPRs = githubService.extractPRdetails(data);
       }
 
       if (filterBy === "OPEN_ISSUES") {
-        const { data } = await githubService.fetchOpenIssues({ extraParams });
+        if (dateTime) {
+          searchParams.created = dateTime;
+        }
+        const { data } = await githubService.fetchOpenIssues({ searchParams, resultOptions });
 
         allPRs = githubService.extractPRdetails(data);
       }
 
       if (filterBy === "CLOSED_ISSUES") {
-        const { data } = await githubService.fetchClosedIssues({ extraParams });
+        if (dateTime) {
+          searchParams.closed = dateTime;
+        }
+        const { data } = await githubService.fetchClosedIssues({ searchParams, resultOptions });
 
         allPRs = githubService.extractPRdetails(data);
       }

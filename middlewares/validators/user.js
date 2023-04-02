@@ -137,6 +137,8 @@ async function getUsers(req, res, next) {
           "string.empty": "prev value cannot be empty",
         }),
       q: joi.string().optional(),
+      startDate: joi.string().optional(),
+      endDate: joi.string().optional(),
     });
   try {
     await schema.validateAsync(req.query);

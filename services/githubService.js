@@ -24,7 +24,6 @@ const extractPRdetails = (data) => {
       const allLabels = labels.map((object) => object.name);
       const repositoryUrlSplit = repositoryUrl.split("/");
       const repository = repositoryUrlSplit[repositoryUrlSplit.length - 1];
-      const mergedAt = pullRequest?.merged_at;
       allPRs.push({
         title,
         username: user.login,
@@ -35,7 +34,6 @@ const extractPRdetails = (data) => {
         url,
         labels: allLabels,
         assignees: allAssignees,
-        mergedAt,
       });
     }
   );
@@ -59,7 +57,6 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
 
   const defaultParams = {
     org: config.get("githubApi.org"),
-    // type: "pr",
   };
 
   const finalSearchParams = Object.assign({}, defaultParams, searchParams);
@@ -122,19 +119,20 @@ const fetchPRsByUser = async (username) => {
  *
  */
 const fetchOpenPRs = async (params = {}) => {
-  const { perPage = 100, page = 1, extraParams = {} } = params;
+  const { perPage = 100, page = 1, searchParams = {}, resultsOptions = {} } = params;
 
   try {
     const url = getGithubURL(
       {
         is: "open",
         type: "pr",
+        ...searchParams,
       },
       {
         sort: "created",
         per_page: perPage,
         page,
-        ...extraParams,
+        ...resultsOptions,
       }
     );
     return getFetch(url);
@@ -144,22 +142,24 @@ const fetchOpenPRs = async (params = {}) => {
   }
 };
 
-const fetchClosedPRs = async (params = {}) => {
-  const { perPage = 100, page = 1, extraParams = {} } = params;
+const fetchMergedPRs = async (params = {}) => {
+  const { perPage = 100, page = 1, searchParams = {}, resultsOptions = {} } = params;
 
   try {
     const url = getGithubURL(
       {
-        is: "closed",
+        is: "merged",
         type: "pr",
+        ...searchParams,
       },
       {
         sort: "updated",
         per_page: perPage,
         page,
-        ...extraParams,
+        ...resultsOptions,
       }
     );
+
     return getFetch(url);
   } catch (err) {
     logger.error(`Error while fetching closed pull requests: ${err}`);
@@ -168,19 +168,20 @@ const fetchClosedPRs = async (params = {}) => {
 };
 
 const fetchOpenIssues = async (params = {}) => {
-  const { perPage = 100, page = 1, extraParams = {} } = params;
+  const { perPage = 100, page = 1, searchParams = {}, resultsOptions = {} } = params;
 
   try {
     const url = getGithubURL(
       {
         is: "open",
         type: "issue",
+        ...searchParams,
       },
       {
         sort: "created",
         per_page: perPage,
         page,
-        ...extraParams,
+        ...resultsOptions,
       }
     );
     return getFetch(url);
@@ -191,19 +192,20 @@ const fetchOpenIssues = async (params = {}) => {
 };
 
 const fetchClosedIssues = async (params = {}) => {
-  const { perPage = 100, page = 1, extraParams = {} } = params;
+  const { perPage = 100, page = 1, searchParams = {}, resultsOptions = {} } = params;
 
   try {
     const url = getGithubURL(
       {
         is: "closed",
         type: "issue",
+        ...searchParams,
       },
       {
         sort: "updated",
         per_page: perPage,
         page,
-        ...extraParams,
+        ...resultsOptions,
       }
     );
     return getFetch(url);
@@ -216,7 +218,7 @@ const fetchClosedIssues = async (params = {}) => {
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
-  fetchClosedPRs,
+  fetchMergedPRs,
   getFetch,
   extractPRdetails,
   fetchOpenIssues,
