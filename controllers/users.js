@@ -66,7 +66,7 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    let allPRs;
+    let allPRs = [];
     const query = req.query.q;
     const qualifiers = getQualifiers(query);
 
@@ -97,6 +97,18 @@ const getUsers = async (req, res) => {
         const { data } = await githubService.fetchMergedPRs({ searchParams, resultOptions });
 
         allPRs = githubService.extractPRdetails(data);
+        console.log("ALL PRS>>>>", allPRs.length);
+
+        let page = 2;
+        while (allPRs.length === 100) {
+          const { data } = await githubService.fetchMergedPRs({ page, searchParams, resultOptions });
+          console.log("ALL PRS>>>>", githubService.extractPRdetails(data).length);
+          const nextPRs = githubService.extractPRdetails(data);
+
+          allPRs.push(...nextPRs);
+          page++;
+        }
+        console.log("ALL PRS>>>>", allPRs.length);
       }
 
       if (filterBy === "OPEN_ISSUES") {
@@ -119,12 +131,12 @@ const getUsers = async (req, res) => {
 
       const { allUsers } = await userQuery.fetchAllUsers();
 
-      const uniqueUsersInOrder = [];
+      const uniqueUsersInOrder = new Set();
+
+      console.log("ALL PRS LEGNTH>>>", allPRs.length);
 
       allPRs.forEach((element) => {
-        if (!uniqueUsersInOrder.includes(element.username)) {
-          uniqueUsersInOrder.push(element.username);
-        }
+        uniqueUsersInOrder.add(element.username);
       });
 
       const usersWithDetails = [];
