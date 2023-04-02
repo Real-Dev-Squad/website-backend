@@ -15,23 +15,21 @@ const getQualifiers = (query) => {
  * @param startDate, endDate
  */
 const getDateTimeRangeForPRs = (startDate, endDate) => {
-  let dateTime = "";
-
   // if startDate and endDate both are received in the params then we specify the range separated by ..
   if (startDate && endDate) {
-    dateTime = `${startDate}..${endDate}`;
+    return `${startDate}..${endDate}`;
   }
 
   // if only startDate is received in the params then we return results starting from the given start date
   if (startDate) {
-    dateTime = `>=${startDate}`;
+    return `>=${startDate}`;
   }
 
   // if only endDate is received in the params then we return results until the given end date
   if (endDate) {
-    dateTime = `<=${endDate}`;
+    return `<=${endDate}`;
   }
-  return dateTime;
+  return "";
 };
 
 module.exports = {
