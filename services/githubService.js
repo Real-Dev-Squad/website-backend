@@ -1,5 +1,7 @@
 const utils = require("../utils/fetch");
 const { fetchUser } = require("../models/users");
+const ORG = "Real-Dev-Squad";
+
 /**
  * Extracts only the necessary details required from the object returned by Github API
  * @param data {Object} - Object returned by Github API
@@ -83,15 +85,20 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
  * @access private
  * @param url {string} - URL on github to call
  */
-function getFetch(url) {
-  return utils.fetch(url, "get", null, null, null, {
-    auth: {
-      username: config.get("githubOauth.clientId"),
-      password: config.get("githubOauth.clientSecret"),
-    },
-  });
+function getFetch(url, params = null, data = null, headers = null) {
+  return utils.fetch(url, "get", params, data, headers);
 }
 
+/**
+ * Create fetch call for GitHub APIs as an authenticated user
+ * @param {*} url - url to fetch from
+ * @param {*} params - query params to pass
+ * @param {*} headers - requested headers
+ * @returns response object
+ */
+function getFetchWithAuthToken(url, params = null, headers = null) {
+  return utils.fetch(url, "get", params, null, headers);
+}
 /**
  * Fetches the pull requests in Real-Dev-Squad by user using GitHub API
  * @param username {string} - Username String
@@ -156,10 +163,39 @@ const fetchOpenPRs = async (perPage = 10, page = 1) => {
   }
 };
 
+/**
+ * Fetches issues across all repositories in the ORG
+ */
+const fetchIssues = async () => {
+  try {
+    const baseURL = config.get("githubApi.baseUrl");
+    const issues = "/issues";
+    const urlObj = new URL(baseURL);
+    urlObj.pathname = "orgs" + "/" + ORG + issues;
+    const createdURL = urlObj.href;
+    const res = await getFetchWithAuthToken(
+      createdURL,
+      {
+        filter: "all",
+      },
+      {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer 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`,
+        org: "Real-Dev-Squad",
+      }
+    );
+    return res;
+  } catch (err) {
+    logger.error(`Error while fetching issues: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
   fetchStalePRs,
   getFetch,
   extractPRdetails,
+  fetchIssues,
 };
