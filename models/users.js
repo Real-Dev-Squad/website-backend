@@ -7,7 +7,7 @@ const walletConstants = require("../constants/wallets");
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { arraysHaveCommonItem } = require("../utils/array");
-const { allowedFilterParams } = require("../constants/users");
+const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
@@ -309,8 +309,8 @@ const fetchUserSkills = async (id) => {
 
 const getUsersBasedOnFilter = async (query) => {
   const allQueryKeys = Object.keys(query);
-  const doesTagQueryExist = arraysHaveCommonItem(allowedFilterParams.itemTag, allQueryKeys);
-  const doesStateQueryExist = arraysHaveCommonItem(allowedFilterParams.userState, allQueryKeys);
+  const doesTagQueryExist = arraysHaveCommonItem(ALLOWED_FILTER_PARAMS.itemTag, allQueryKeys);
+  const doesStateQueryExist = arraysHaveCommonItem(ALLOWED_FILTER_PARAMS.userState, allQueryKeys);
 
   const calls = {
     item: itemModel,
@@ -319,8 +319,8 @@ const getUsersBasedOnFilter = async (query) => {
   calls.item = calls.item.where("itemType", "==", "USER").where("tagType", "==", "SKILL");
 
   Object.entries(query).forEach(([key, value]) => {
-    const isTagKey = allowedFilterParams.itemTag.includes(key);
-    const isStateKey = allowedFilterParams.userState.includes(key);
+    const isTagKey = ALLOWED_FILTER_PARAMS.itemTag.includes(key);
+    const isStateKey = ALLOWED_FILTER_PARAMS.userState.includes(key);
     const isValueArray = Array.isArray(value);
 
     if (isTagKey) {
