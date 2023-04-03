@@ -15,7 +15,7 @@ const { updateUserStatus } = require("../../models/userStatus");
 const { addTag } = require("../../models/tags");
 const { addLevel } = require("../../models/levels");
 const { addTagsToItem } = require("../../models/items");
-const { assertUserIds } = require("../utils/userHelperFunctions");
+const { assertUserIds } = require("../utils/user");
 
 const cookieName = config.get("userToken.cookieName");
 
