@@ -308,9 +308,10 @@ const fetchUserSkills = async (id) => {
  */
 
 const getUsersBasedOnFilter = async (query) => {
+  const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
   const allQueryKeys = Object.keys(query);
-  const doesTagQueryExist = arraysHaveCommonItem(ALLOWED_FILTER_PARAMS.itemTag, allQueryKeys);
-  const doesStateQueryExist = arraysHaveCommonItem(ALLOWED_FILTER_PARAMS.userState, allQueryKeys);
+  const doesTagQueryExist = arraysHaveCommonItem(ITEM_TAG, allQueryKeys);
+  const doesStateQueryExist = arraysHaveCommonItem(USER_STATE, allQueryKeys);
 
   const calls = {
     item: itemModel,
@@ -319,8 +320,8 @@ const getUsersBasedOnFilter = async (query) => {
   calls.item = calls.item.where("itemType", "==", "USER").where("tagType", "==", "SKILL");
 
   Object.entries(query).forEach(([key, value]) => {
-    const isTagKey = ALLOWED_FILTER_PARAMS.itemTag.includes(key);
-    const isStateKey = ALLOWED_FILTER_PARAMS.userState.includes(key);
+    const isTagKey = ITEM_TAG.includes(key);
+    const isStateKey = USER_STATE.includes(key);
     const isValueArray = Array.isArray(value);
 
     if (isTagKey) {

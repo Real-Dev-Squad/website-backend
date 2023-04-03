@@ -11,8 +11,8 @@ const USER_STATUS = {
 };
 
 const ALLOWED_FILTER_PARAMS = {
-  itemTag: ["levelId", "levelName", "levelNumber", "tagId"],
-  userState: ["state"],
+  ITEM_TAG: ["levelId", "levelName", "levelNumber", "tagId"],
+  USER_STATE: ["state"],
 };
 
 module.exports = { profileStatus, USER_STATUS, ALLOWED_FILTER_PARAMS };
