@@ -12,6 +12,7 @@ const addTagsToItem = async (itemData) => {
   try {
     const { itemId, itemType, tagPayload } = itemData;
     const batch = firestore.batch();
+    let isNewtag = false;
     for (const tag of tagPayload) {
       const itemData = await itemTagsModel
         .where("itemId", "==", itemId)
@@ -19,6 +20,7 @@ const addTagsToItem = async (itemData) => {
         .where("levelId", "==", tag.levelId)
         .get();
       if (!itemData.empty) continue;
+      isNewtag = true;
       const itemTag = {
         itemId,
         itemType: itemType.toUpperCase(),
@@ -29,7 +31,7 @@ const addTagsToItem = async (itemData) => {
       batch.set(docid, itemTag);
     }
     await batch.commit();
-    return { itemId };
+    return { itemId, isNewtag };
   } catch (err) {
     logger.error("Error in creating Item", err);
     throw err;

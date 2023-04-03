@@ -9,9 +9,9 @@ const ItemTagsModel = require("../models/items");
 
 const addTagsToItem = async (req, res) => {
   try {
-    const { itemId } = await ItemTagsModel.addTagsToItem(req.body);
-    return res.json({
-      message: "Tags added successfully!",
+    const { itemId, isNewTag } = await ItemTagsModel.addTagsToItem(req.body);
+    return res.status(isNewTag ? 201 : 400).json({
+      message: isNewTag ? "Tags added successfully!" : "Tags already exists!",
       itemId,
     });
   } catch (err) {
