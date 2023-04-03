@@ -10,4 +10,9 @@ const USER_STATUS = {
   ACTIVE: "active",
 };
 
-module.exports = { profileStatus, USER_STATUS };
+const allowedFilterParams = {
+  itemTag: ["levelId", "levelName", "levelNumber", "tagId"],
+  userState: ["state"],
+};
+
+module.exports = { profileStatus, USER_STATUS, allowedFilterParams };
