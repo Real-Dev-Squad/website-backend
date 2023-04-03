@@ -2,7 +2,7 @@ const tasks = require("../models/tasks");
 const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
 const { addLog } = require("../models/logs");
 const { USER_STATUS } = require("../constants/users");
-const { addOrUpdate } = require("../models/users");
+const { addOrUpdate, fetchUser } = require("../models/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 /**
@@ -19,6 +19,19 @@ const addNewTask = async (req, res) => {
       ...req.body,
       createdBy,
     };
+
+    // Retrieve the issue assignee's RDS user info
+    if (Object.keys(body).includes("github")) {
+      if (Object.keys(body.github.issue).includes("assignee")) {
+        const { user } = await fetchUser({ githubUsername: body.github.issue.assignee });
+        body.github.issue.assigneeRdsInfo = {
+          username: user.username ?? "",
+          firstName: user.first_name ?? "",
+          lastName: user.last_name ?? "",
+        };
+      }
+    }
+
     const task = await tasks.updateTask(body);
 
     return res.json({
