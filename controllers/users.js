@@ -11,6 +11,7 @@ const obfuscate = require("../utils/obfuscate");
 const githubService = require("../services/githubService");
 const { getPaginationLink } = require("../utils/users");
 const { getQualifiers, getDateTimeRangeForPRs } = require("../utils/helper");
+const { fetchMultiplePageResults } = require("../utils/fetchMultiplePageResults");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -85,55 +86,48 @@ const getUsers = async (req, res) => {
         if (dateTime) {
           searchParams.created = dateTime;
         }
-        const { data } = await githubService.fetchOpenPRs({ searchParams, resultOptions });
 
-        allPRs = githubService.extractPRdetails(data);
+        allPRs = await fetchMultiplePageResults(githubService.fetchOpenPRs, {
+          searchParams,
+          resultOptions,
+        });
       }
       if (filterBy === "MERGED_PRS") {
         if (dateTime) {
           searchParams.merged = dateTime;
         }
 
-        const { data } = await githubService.fetchMergedPRs({ searchParams, resultOptions });
-
-        allPRs = githubService.extractPRdetails(data);
-        console.log("ALL PRS>>>>", allPRs.length);
-
-        let page = 2;
-        while (allPRs.length === 100) {
-          const { data } = await githubService.fetchMergedPRs({ page, searchParams, resultOptions });
-          console.log("ALL PRS>>>>", githubService.extractPRdetails(data).length);
-          const nextPRs = githubService.extractPRdetails(data);
-
-          allPRs.push(...nextPRs);
-          page++;
-        }
-        console.log("ALL PRS>>>>", allPRs.length);
+        allPRs = await fetchMultiplePageResults(githubService.fetchMergedPRs, {
+          searchParams,
+          resultOptions,
+        });
       }
 
       if (filterBy === "OPEN_ISSUES") {
         if (dateTime) {
           searchParams.created = dateTime;
         }
-        const { data } = await githubService.fetchOpenIssues({ searchParams, resultOptions });
 
-        allPRs = githubService.extractPRdetails(data);
+        allPRs = await fetchMultiplePageResults(githubService.fetchOpenIssues, {
+          searchParams,
+          resultOptions,
+        });
       }
 
       if (filterBy === "CLOSED_ISSUES") {
         if (dateTime) {
           searchParams.closed = dateTime;
         }
-        const { data } = await githubService.fetchClosedIssues({ searchParams, resultOptions });
 
-        allPRs = githubService.extractPRdetails(data);
+        allPRs = await fetchMultiplePageResults(githubService.fetchClosedIssues, {
+          searchParams,
+          resultOptions,
+        });
       }
 
       const { allUsers } = await userQuery.fetchAllUsers();
 
       const uniqueUsersInOrder = new Set();
-
-      console.log("ALL PRS LEGNTH>>>", allPRs.length);
 
       allPRs.forEach((element) => {
         uniqueUsersInOrder.add(element.username);
