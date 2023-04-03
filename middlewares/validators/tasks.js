@@ -42,6 +42,25 @@ const createTask = async (req, res, next) => {
         })
         .optional(),
       isNoteworthy: joi.bool().optional(),
+      github: joi
+        .object()
+        .keys({
+          issue: joi.object().keys({
+            status: joi.string().optional(),
+            assignee: joi.string().optional(),
+            id: joi.number().optional(),
+            closedAt: joi.string().optional(),
+            assigneeRdsInfo: joi
+              .object()
+              .keys({
+                firstName: joi.string(),
+                lastName: joi.string(),
+                username: joi.string(),
+              })
+              .optional(),
+          }),
+        })
+        .optional(),
     });
 
   try {
