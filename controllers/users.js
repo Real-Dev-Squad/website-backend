@@ -424,7 +424,7 @@ const addDefaultArchivedRole = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const filterUserBasedOnQuery = async (req, res) => {
+const filterUsers = async (req, res) => {
   try {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
@@ -460,5 +460,5 @@ module.exports = {
   getUserIntro,
   addDefaultArchivedRole,
   getUserSkills,
-  filterUserBasedOnQuery,
+  filterUsers,
 };

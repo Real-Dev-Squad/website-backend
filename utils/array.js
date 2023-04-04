@@ -26,19 +26,10 @@ function chunks(array, size = 1) {
  */
 
 function arraysHaveCommonItem(array1, array2) {
-  if (!Array.isArray(array1) || !Array.isArray(array2) || array1.length > 100 || array2.length > 100) {
+  if (!Array.isArray(array1) || !Array.isArray(array2) || !array1.length || !array2.length) {
     return false;
   }
-
-  for (let i = 0; i < array1.length; i++) {
-    for (let j = 0; j < array2.length; j++) {
-      /* eslint-disable security/detect-object-injection */
-      if (array1[i] === array2[j]) {
-        return true;
-      }
-    }
-  }
-  return false;
+  return array1.some((value) => array2.includes(value));
 }
 
 module.exports = {

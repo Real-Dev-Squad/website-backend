@@ -161,7 +161,7 @@ async function validateUserQueryParams(req, res, next) {
     .keys({
       levelId: joi.array().items(joi.string()).single().optional(),
       levelName: joi.array().items(joi.string()).single().optional(),
-      levelNumber: joi.array().items(joi.number()).single().optional(),
+      levelValue: joi.array().items(joi.number()).single().optional(),
       tagId: joi.array().items(joi.string()).single().optional(),
       state: joi
         .alternatives()

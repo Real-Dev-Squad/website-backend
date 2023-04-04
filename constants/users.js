@@ -11,7 +11,7 @@ const USER_STATUS = {
 };
 
 const ALLOWED_FILTER_PARAMS = {
-  ITEM_TAG: ["levelId", "levelName", "levelNumber", "tagId"],
+  ITEM_TAG: ["levelId", "levelName", "levelValue", "tagId"],
   USER_STATE: ["state"],
 };
 
