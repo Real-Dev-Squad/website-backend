@@ -21,23 +21,6 @@ const appOwner = userData[3];
 const superUser = userData[4];
 
 let jwt, superUserJwt;
-// INFO: hack to support legacy test case
-let taskIdOfFirstInProgressTask, taskIdOfLastInProgressTask;
-
-// INFO: task object for type pagination test
-const someTaskWithTitle3InIt = {
-  title: "Some Task 3",
-  type: "feature",
-  endsOn: 1234,
-  startedOn: 4567,
-  status: "active",
-  percentCompleted: 10,
-  participants: [],
-  assignee: appOwner.username,
-  completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-  lossRate: { [DINERO]: 1 },
-  isNoteworthy: true,
-};
 
 describe("Tasks", function () {
   let taskId1, taskId;
@@ -78,15 +61,28 @@ describe("Tasks", function () {
         lossRate: { [DINERO]: 1 },
         isNoteworthy: false,
       },
+      {
+        title: "Some Task 3",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "active",
+        percentCompleted: 10,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      },
     ];
 
     // Add the active task
     taskId = (await tasks.updateTask(taskData[0])).taskId;
     taskId1 = taskId;
-    taskIdOfFirstInProgressTask = taskId;
 
     // Add the completed task
     taskId = (await tasks.updateTask(taskData[1])).taskId;
+    await tasks.updateTask(taskData[2]);
   });
 
   after(async function () {
@@ -239,28 +235,27 @@ describe("Tasks", function () {
         });
     });
 
-    describe("Should only get the IN_PROGRESS tasks after cursor", function () {
-      before(async function () {
-        const task = await tasks.updateTask(someTaskWithTitle3InIt);
-        taskIdOfLastInProgressTask = task.taskId;
-      });
-      it(`Should only get the ${TASK_STATUS.IN_PROGRESS} which startsAfter cursor:${taskIdOfFirstInProgressTask} tasks`, function (done) {
-        chai
-          .request(app)
-          .get(`/tasks/?q=type%3A${TASK_STATUS.IN_PROGRESS}+cursor%3A${taskIdOfFirstInProgressTask}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.message).to.equal("Tasks returned successfully!");
-            expect(res.body.tasks).to.be.a("array");
-            expect(res.body.tasks.length).to.be.greaterThanOrEqual(1);
-            expect(res.body.tasks[0].id).to.be.eq(taskIdOfLastInProgressTask);
-            return done();
-          });
-      });
+    it(`Should only get the ${TASK_STATUS.IN_PROGRESS} which startsAfter cursor:${taskId1} tasks`, async function () {
+      const response = await chai.request(app).get(`/tasks/?q=type%3A${TASK_STATUS.IN_PROGRESS}`);
+
+      expect(response).to.have.status(200);
+      expect(response.body).to.be.a("object");
+      expect(response.body.message).to.equal("Tasks returned successfully!");
+      expect(response.body.tasks).to.be.a("array");
+      expect(response.body.tasks.length).to.be.eq(2);
+
+      const firstTaskId = response.body.tasks[0].id;
+      const nextTaskId = response.body.tasks[1].id;
+      const nextResponse = await chai
+        .request(app)
+        .get(`/tasks/?q=type%3A${TASK_STATUS.IN_PROGRESS}+cursor%3A${firstTaskId}`);
+
+      expect(nextResponse).to.have.status(200);
+      expect(nextResponse.body).to.be.a("object");
+      expect(nextResponse.body.message).to.equal("Tasks returned successfully!");
+      expect(nextResponse.body.tasks).to.be.a("array");
+      expect(nextResponse.body.tasks.length).to.be.eq(1);
+      expect(nextResponse.body.tasks[0].id).to.be.eq(nextTaskId);
     });
   });
 
