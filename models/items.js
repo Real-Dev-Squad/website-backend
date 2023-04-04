@@ -1,6 +1,8 @@
 const firestore = require("../utils/firestore");
 
 const itemTagsModel = firestore.collection("items");
+const tagsModel = firestore.collection("tags");
+const levelsModel = firestore.collection("levels");
 
 /**
  *
@@ -76,13 +78,27 @@ const getItemBasedOnFilter = async (query) => {
     const items = [];
     const data = await call.get();
 
-    data.forEach((doc) => {
+    for (const doc of data.docs) {
       const item = {
         id: doc.id,
         ...doc.data(),
       };
+      await tagsModel
+        .doc(item.tagId)
+        .get()
+        .then((doc) => {
+          item.tagName = doc.data().name;
+          item.tagType = doc.data().type;
+        });
+      await levelsModel
+        .doc(item.levelId)
+        .get()
+        .then((doc) => {
+          item.levelName = doc.data().name;
+          item.levelValue = doc.data().value;
+        });
       items.push(item);
-    });
+    }
 
     return items;
   } catch (err) {
