@@ -12,7 +12,7 @@ const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
 const userStatusModel = firestore.collection("usersStatus");
-
+const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 /**
  * Adds or updates the user data
  *
@@ -308,7 +308,6 @@ const fetchUserSkills = async (id) => {
  */
 
 const getUsersBasedOnFilter = async (query) => {
-  const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
   const allQueryKeys = Object.keys(query);
   const doesTagQueryExist = arraysHaveCommonItem(ITEM_TAG, allQueryKeys);
   const doesStateQueryExist = arraysHaveCommonItem(USER_STATE, allQueryKeys);

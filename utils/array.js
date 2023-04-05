@@ -20,8 +20,8 @@ function chunks(array, size = 1) {
 
 /**
  * Checks if two arrays have any common items
- * @param array1 {Array} - first array
- * @param array2 {Array} - second array
+ * @param array1 {Array<string, number>} - first array
+ * @param array2 {Array<string, number>} - second array
  * @returns {boolean} - true if the arrays have at least one common item, false otherwise
  */
 
