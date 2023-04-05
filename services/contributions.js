@@ -12,6 +12,7 @@ const getUserContributions = async (username) => {
   const { data } = await githubService.fetchPRsByUser(username);
   const allUserTasks = await tasks.fetchUserTasks(username);
   const noteworthy = [];
+  const collapsed = [];
   const all = [];
 
   if (data.total_count) {
@@ -26,9 +27,11 @@ const getUserContributions = async (username) => {
 
     for (const task of allUserTasks) {
       const noteworthyObject = {};
+      const collapsedTaskObject = {};
       const participantsDetails = [];
 
       noteworthyObject.task = extractTaskdetails(task);
+      collapsedTaskObject.task = extractTaskdetails(task);
 
       if (Array.isArray(task.participants)) {
         for (const userId of task.participants) {
@@ -45,6 +48,7 @@ const getUserContributions = async (username) => {
       }
 
       noteworthyObject.task.participants = participantsDetails;
+      collapsedTaskObject.task.participants = participantsDetails;
       const prList = [];
 
       task.links?.forEach((link) => {
@@ -62,6 +66,10 @@ const getUserContributions = async (username) => {
       } else {
         all.push(noteworthyObject);
       }
+
+      collapsedTaskObject.prList = prList;
+
+      task.isCollapsed ? collapsed.push(collapsedTaskObject) : all.push(collapsedTaskObject);
     }
 
     for (const prDetails of prMaps.values()) {
@@ -73,6 +81,7 @@ const getUserContributions = async (username) => {
     }
   }
   contributions.noteworthy = noteworthy;
+  contributions.collapsed = collapsed;
   contributions.all = all;
   return contributions;
 };
@@ -103,7 +112,19 @@ const extractPRdetails = (data) => {
  */
 
 const extractTaskdetails = (data) => {
-  const { id, title, purpose, endsOn, startedOn, dependsOn, status, participants, featureUrl, isNoteworthy } = data;
+  const {
+    id,
+    title,
+    purpose,
+    endsOn,
+    startedOn,
+    dependsOn,
+    status,
+    participants,
+    featureUrl,
+    isNoteworthy,
+    isCollapsed,
+  } = data;
   return {
     id,
     title,
@@ -115,6 +136,7 @@ const extractTaskdetails = (data) => {
     participants,
     featureUrl,
     isNoteworthy,
+    isCollapsed,
   };
 };
 
