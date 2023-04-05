@@ -68,6 +68,7 @@ const validateJoinData = async (req, res, next) => {
       funFact: joi.string().min(100).required(),
       whyRds: joi.string().min(100).required(),
       flowState: joi.string().optional(),
+      numberOfHours: joi.number().min(1).max(100).required(),
     });
 
   try {
