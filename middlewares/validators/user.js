@@ -23,6 +23,7 @@ const updateUser = async (req, res, next) => {
         .any()
         .valid(...Object.values(USER_STATUS))
         .optional(),
+      discordId: joi.string().optional(),
     });
 
   try {
@@ -67,6 +68,7 @@ const validateJoinData = async (req, res, next) => {
       funFact: joi.string().min(100).required(),
       whyRds: joi.string().min(100).required(),
       flowState: joi.string().optional(),
+      numberOfHours: joi.number().min(1).max(100).required(),
     });
 
   try {
@@ -77,8 +79,77 @@ const validateJoinData = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
+
+/**
+ * Validates getting users query
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ * @param next {Object} - Express middelware function
+ */
+async function getUsers(req, res, next) {
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      size: joi
+        .string()
+        .optional()
+        .pattern(/^[1-9]\d?$|^100$/)
+        .messages({
+          "string.empty": "size must contain value in range 1-100",
+          "string.pattern.base": "size must be in range 1-100",
+        }),
+      page: joi
+        .string()
+        .optional()
+        .pattern(/^0$|^[1-9]\d*$/)
+        .messages({
+          "string.empty": "page must contain a positive number or zero",
+          "string.pattern.base": "page value either be a positive number or zero",
+        }),
+      search: joi.string().optional().messages({
+        "string.empty": "search value must not be empty",
+      }),
+      next: joi
+        .string()
+        .optional()
+        .when("page", {
+          is: joi.exist(),
+          then: joi.custom((_, helpers) => helpers.message("Both page and next can't be passed")),
+        })
+        .messages({
+          "string.empty": "next value cannot be empty",
+        }),
+      prev: joi
+        .string()
+        .optional()
+        .when("next", {
+          is: joi.exist(),
+          then: joi.custom((_, helpers) => helpers.message("Both prev and next can't be passed")),
+        })
+        .concat(
+          joi.string().when("page", {
+            is: joi.exist(),
+            then: joi.custom((_, helpers) => helpers.message("Both page and prev can't be passed")),
+          })
+        )
+        .messages({
+          "string.empty": "prev value cannot be empty",
+        }),
+    });
+  try {
+    await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    logger.error(`Error in getting users: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+}
+
 module.exports = {
   updateUser,
   updateProfileURL,
   validateJoinData,
+  getUsers,
 };

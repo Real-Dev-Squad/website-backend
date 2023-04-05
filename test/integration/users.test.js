@@ -11,12 +11,12 @@ const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
+const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
-const { addJoinData } = require("../../models/users");
+const { addJoinData, addOrUpdate } = require("../../models/users");
 const cookieName = config.get("userToken.cookieName");
-
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -102,6 +102,17 @@ describe("Users", function () {
   });
 
   describe("GET /users", function () {
+    beforeEach(async function () {
+      await addOrUpdate(userData[0]);
+      await addOrUpdate(userData[1]);
+      await addOrUpdate(userData[2]);
+      await addOrUpdate(userData[3]);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
     it("Should get all the users in system", function (done) {
       chai
         .request(app)
@@ -121,6 +132,230 @@ describe("Users", function () {
 
           return done();
         });
+    });
+
+    it("Should get all the users in system when query params are valid", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .query({
+          size: 1,
+          page: 0,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(1);
+          expect(res.body.users[0]).to.not.have.property("phone");
+          expect(res.body.users[0]).to.not.have.property("email");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 bad request when query params are invalid", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .query({
+          size: -1,
+          page: -1,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("size must be in range 1-100");
+          expect(res.body.error).to.equal("Bad Request");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 bad request when query param size is invalid", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .query({
+          size: 101,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("size must be in range 1-100");
+          expect(res.body.error).to.equal("Bad Request");
+
+          return done();
+        });
+    });
+
+    it("Should return next and prev links", function (done) {
+      chai
+        .request(app)
+        .get("/users?size=2")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body).to.have.property("links");
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 when both prev and next passed as query param", function (done) {
+      chai
+        .request(app)
+        .get(`/users?next=${userId}&prev=${userId}&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Both prev and next can't be passed");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 when both page and next passed as query param", function (done) {
+      chai
+        .request(app)
+        .get(`/users?next=${userId}&page=1&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Both page and next can't be passed");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 when both page and prev passed as query param", function (done) {
+      chai
+        .request(app)
+        .get(`/users?page=1&prev=${userId}&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Both page and prev can't be passed");
+
+          return done();
+        });
+    });
+
+    it("Should include search and size query params in the response links that are passed by the request", function (done) {
+      chai
+        .request(app)
+        .get(`/users?search=an&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body).to.have.property("links");
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+          expect(res.body.links.next).includes("search");
+          expect(res.body.links.next).includes("size");
+          expect(res.body.links.prev).includes("search");
+          expect(res.body.links.prev).includes("size");
+
+          return done();
+        });
+    });
+
+    it("Should not have page param in the response links if passed by the request", function (done) {
+      chai
+        .request(app)
+        .get(`/users?page=1&size=2`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body).to.have.property("links");
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+          expect(res.body.links.next).to.not.includes("page");
+          expect(res.body.links.prev).to.not.includes("page");
+
+          return done();
+        });
+    });
+
+    it("Should get next and previous page results based upon the links in the response", async function () {
+      const response = await chai.request(app).get(`/users?size=2`).set("cookie", `${cookieName}=${jwt}`);
+
+      expect(response).to.have.status(200);
+      expect(response.body).to.be.a("object");
+      expect(response.body.message).to.equal("Users returned successfully!");
+      expect(response.body).to.have.property("links");
+      expect(response.body.links).to.have.property("next");
+      expect(response.body.links).to.have.property("prev");
+
+      const nextPageLink = response.body.links.next;
+      const nextPageResponse = await chai.request(app).get(nextPageLink).set("cookie", `${cookieName}=${jwt}`);
+
+      expect(nextPageResponse).to.have.status(200);
+      expect(nextPageResponse.body).to.be.a("object");
+      expect(nextPageResponse.body.message).to.equal("Users returned successfully!");
+      expect(nextPageResponse.body).to.have.property("links");
+      expect(nextPageResponse.body.links).to.have.property("next");
+      expect(nextPageResponse.body.links).to.have.property("prev");
+      expect(nextPageResponse.body.users).to.have.length(2);
+
+      const prevPageLink = nextPageResponse.body.links.prev;
+      const previousPageResponse = await chai.request(app).get(prevPageLink).set("cookie", `${cookieName}=${jwt}`);
+
+      expect(previousPageResponse).to.have.status(200);
+      expect(previousPageResponse.body).to.be.a("object");
+      expect(previousPageResponse.body.message).to.equal("Users returned successfully!");
+      expect(previousPageResponse.body).to.have.property("links");
+      expect(previousPageResponse.body.links).to.have.property("next");
+      expect(previousPageResponse.body.links).to.have.property("prev");
+      expect(previousPageResponse.body.users).to.have.length(2);
     });
   });
 
@@ -350,7 +585,127 @@ describe("Users", function () {
     });
   });
 
+  describe("GET /users?search", function () {
+    beforeEach(async function () {
+      await addOrUpdate(userData[0]);
+      await addOrUpdate(userData[7]);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("Should return users successfully", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues.an })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+
+          return done();
+        });
+    });
+    it("Should return users successfully converting search param value to small case", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues.AN })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          res.body.users.forEach((user) => {
+            expect(user.username.slice(0, 2)).to.equal(searchParamValues.AN.toLowerCase());
+          });
+          return done();
+        });
+    });
+    it("Should return 400 for empty value of search param", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues.null })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+
+          return done();
+        });
+    });
+    it("Should return users of username starting with '23' with response status code 200", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues.number23 })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          res.body.users.forEach((user) => {
+            expect(user.username.slice(0, 2)).to.equal(`${searchParamValues.number23}`);
+          });
+          return done();
+        });
+    });
+    it("Should return an empty array with response status code 200", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues.mu })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+
+          return done();
+        });
+    });
+  });
+
   describe("PUT /users/self/intro", function () {
+    it("should return 409 if the data already present", function (done) {
+      addJoinData(joinData(userId)[3]);
+      chai
+        .request(app)
+        .put(`/users/self/intro`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(joinData(userId)[3])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(409);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User data is already present!");
+          return done();
+        });
+    });
+
     it("Should store the info in db", function (done) {
       chai
         .request(app)

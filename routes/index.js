@@ -14,11 +14,15 @@ app.use("/pullrequests", require("./pullrequests.js"));
 app.use("/stocks", require("./stocks.js"));
 app.use("/tasks", require("./tasks.js"));
 app.use("/trade", require("./trading.js"));
+app.use("/users/status", require("./userStatus.js"));
 app.use("/users", require("./users.js"));
 app.use("/profileDiffs", require("./profileDiffs.js"));
 app.use("/wallet", require("./wallets.js"));
+app.use("/extension-requests", require("./extensionRequests"));
 app.use("/tags", require("./tags.js"));
-app.use("/user-status", require("./userStatus.js"));
 app.use("/levels", require("./levels.js"));
+app.use("/items", require("./items.js"));
+app.use("/cache", require("./cloudflareCache.js"));
+app.use("/external-accounts", require("./external-accounts.js"));
 
 module.exports = app;

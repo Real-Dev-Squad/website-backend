@@ -60,11 +60,22 @@ module.exports = {
     privateKey: "<privateKey>",
   },
 
+  botToken: {
+    botPublicKey: "<botpublicKey>",
+  },
+
   // Cloudinary keys
   cloudinary: {
     cloud_name: "Cloud_name",
     api_key: "API_KEY",
     api_secret: "api_secret_key",
+  },
+
+  // Cloudflare
+  cloudflare: {
+    CLOUDFLARE_ZONE_ID: "Cloudflare_Zone_ID_or_ID",
+    CLOUDFLARE_X_AUTH_KEY: "Cloudflare_API_Auth_Key",
+    CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare_User_Email",
   },
 
   integrations: {

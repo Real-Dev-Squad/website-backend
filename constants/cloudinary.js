@@ -11,4 +11,8 @@ module.exports = {
       ],
     },
   },
+  BADGE: {
+    FOLDER: "/badge/",
+    TAGS: ["badge", "badges"],
+  },
 };

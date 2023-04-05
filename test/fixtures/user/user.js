@@ -29,6 +29,10 @@ module.exports = () => {
       },
       status: "active",
       profileURL: "https://abcde.com",
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
     },
     {
       username: "nikhil",
@@ -41,6 +45,10 @@ module.exports = () => {
       twitter_id: "whatifi",
       phone: "1234567891",
       email: "abc1@gmail.com",
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
     },
     {
       username: "pranavg",
@@ -55,6 +63,10 @@ module.exports = () => {
       email: "pgajjewar@gmail.com",
       roles: {
         restricted: true,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
     },
     {
@@ -76,6 +88,10 @@ module.exports = () => {
         restricted: false,
         app_owner: true,
       },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
     },
     {
       username: "ankush",
@@ -95,6 +111,10 @@ module.exports = () => {
       roles: {
         super_user: true,
         archived: false,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
     },
     {
@@ -117,6 +137,10 @@ module.exports = () => {
         app_owner: true,
         archived: true,
       },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
     },
     {
       username: "mehul",
@@ -137,6 +161,46 @@ module.exports = () => {
         member: true,
         archived: false,
       },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
+    },
+    {
+      username: "23ankur",
+      first_name: "Ankur",
+      last_name: "Narkhede",
+      yoe: 0,
+      img: "./img.png",
+      linkedin_id: "ankurnarkhede",
+      github_id: "ankur1234",
+      github_display_name: "ankur-xyz",
+      phone: "1234567890",
+      email: "abc@gmail.com",
+    },
+    {
+      username: "ritvik",
+      github_id: "RitvikJamwal75",
+      first_name: "Ritvik",
+      yoe: 1,
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
+      incompleteUserDetails: false,
+      status: "active",
+      last_name: "Jamwal",
+      github_display_name: "Ritvik Jamwal",
+      website: "RitvikJamwal75.github.io/portfolio",
+      designation: "Sw Engineer",
+      company: "Goldman Sacks",
+      instagram_id: "ritvikjmwal",
+      roles: {
+        archived: false,
+        member: true,
+      },
+      twitter_id: "RitvikJamwal4u",
+      linkedin_id: "ritvik-jamwal4u",
     },
   ];
 };

@@ -8,7 +8,7 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
-const itemModel = firestore.collection("items");
+const itemModel = firestore.collection("itemTags");
 
 /**
  * Adds or updates the user data
@@ -39,7 +39,11 @@ const addOrUpdate = async (userData, userId = null) => {
     if (!user.empty) {
       await userModel.doc(user.docs[0].id).set(userData, { merge: true });
 
-      return { isNewUser: false, userId: user.docs[0].id };
+      return {
+        isNewUser: false,
+        userId: user.docs[0].id,
+        incompleteUserDetails: user.docs[0].data().incompleteUserDetails,
+      };
     }
 
     // Add new user
@@ -93,14 +97,14 @@ const getJoinData = async (userId) => {
 
 const getSuggestedUsers = async (skill) => {
   try {
-    const data = await itemModel.where("itemtype", "==", "USER").where("tagid", "==", skill).get();
+    const data = await itemModel.where("itemType", "==", "USER").where("tagId", "==", skill).get();
     let users = [];
 
     const dataSet = new Set();
 
     if (!data.empty) {
       data.forEach((doc) => {
-        const docUserId = doc.data().itemid;
+        const docUserId = doc.data().itemId;
         if (!dataSet.has(docUserId)) {
           dataSet.add(docUserId);
         }
@@ -119,15 +123,34 @@ const getSuggestedUsers = async (skill) => {
 
 /**
  * Fetches the data about our users
- * @param query { Object }: Filter for users data
+ * @param query { search, next, prev, size, page }: Filter for users
  * @return {Promise<userModel|Array>}
  */
 const fetchUsers = async (query) => {
   try {
-    const snapshot = await userModel
-      .limit(parseInt(query.size) || 100)
-      .offset((parseInt(query.size) || 100) * (parseInt(query.page) || 0))
-      .get();
+    // INFO: default user size set to 100
+    // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
+    const size = parseInt(query.size) || 100;
+    const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
+    let dbQuery = (query.prev ? userModel.limitToLast(size) : userModel.limit(size)).orderBy("username");
+    if (Object.keys(query).length) {
+      if (query.search) {
+        dbQuery = dbQuery
+          .startAt(query.search.toLowerCase().trim())
+          .endAt(query.search.toLowerCase().trim() + "\uf8ff");
+      }
+      if (query.page) {
+        const offsetValue = size * parseInt(query.page);
+        dbQuery = dbQuery.offset(offsetValue);
+      } else if (query.next) {
+        dbQuery = dbQuery.startAfter(doc);
+      } else if (query.prev) {
+        dbQuery = dbQuery.endBefore(doc);
+      }
+    }
+    const snapshot = await dbQuery.get();
+    const firstDoc = snapshot.docs[0];
+    const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
     const allUsers = [];
 
@@ -141,8 +164,11 @@ const fetchUsers = async (query) => {
         chaincode: undefined,
       });
     });
-
-    return allUsers;
+    return {
+      allUsers,
+      nextId: lastDoc?.id ?? "",
+      prevId: firstDoc?.id ?? "",
+    };
   } catch (err) {
     logger.error("Error retrieving user data", err);
     throw err;
@@ -251,7 +277,7 @@ const fetchUserImage = async (users) => {
 
 const fetchUserSkills = async (id) => {
   try {
-    const data = await itemModel.where("itemid", "==", id).where("tagtype", "==", "SKILL").get();
+    const data = await itemModel.where("itemId", "==", id).where("tagType", "==", "SKILL").get();
     const skills = [];
 
     if (!data.empty) {

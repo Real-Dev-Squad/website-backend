@@ -1,5 +1,6 @@
 const LevelModel = require("../models/levels");
 const admin = require("firebase-admin");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Creates a level
@@ -12,7 +13,7 @@ const addLevel = async (req, res) => {
   try {
     const { id, levelData } = await LevelModel.addLevel({
       ...req.body,
-      createdby: req.userData.id,
+      createdBy: req.userData.id,
       date: admin.firestore.Timestamp.fromDate(new Date()),
     });
     return res.json({
@@ -24,7 +25,7 @@ const addLevel = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while creating new level: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -43,7 +44,7 @@ const deleteLevel = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while creating new Level: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -62,7 +63,7 @@ const getAllLevels = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while creating new Level: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
