@@ -34,10 +34,7 @@ const validateItemQuery = async (req, res, next) => {
     itemType: Joi.string().uppercase().optional(),
     itemId: Joi.string().optional(),
     levelId: Joi.string().optional(),
-    levelName: Joi.string().optional(),
-    levelNumber: Joi.number().optional(),
     tagId: Joi.string().optional(),
-    tagType: Joi.string().uppercase().optional(),
   });
 
   try {
