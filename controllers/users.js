@@ -9,7 +9,6 @@ const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const { getPaginationLink } = require("../utils/users");
-const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -20,7 +19,7 @@ const verifyUser = async (req, res) => {
     await userQuery.addOrUpdate({ profileStatus: "PENDING" }, userId);
   } catch (error) {
     logger.error(`Error while verifying user: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
   fetch(process.env.IDENTITY_SERVICE_URL, "POST", null, { userId }, { "Content-Type": "application/json" });
   return res.json({
@@ -31,10 +30,10 @@ const verifyUser = async (req, res) => {
 const getUserById = async (req, res) => {
   let result;
   try {
-    result = await userQuery.fetchUser({ userId: req.params.userId });
+    result = await userQuery.fetchUser({ userId: req.query.id });
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
 
   if (!result.userExists) {
@@ -77,7 +76,7 @@ const getUsers = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
 };
 
@@ -103,7 +102,7 @@ const getUser = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
 };
 
@@ -139,7 +138,7 @@ const getSuggestedUsers = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while fetching suggested users: ${err}`);
-    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+    return res.boom.badImplementation("Something went wrong!");
   }
 };
 
@@ -158,7 +157,7 @@ const getUsernameAvailabilty = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while checking user: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
 };
 
@@ -181,7 +180,7 @@ const getSelfDetails = (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -214,7 +213,7 @@ const updateSelf = async (req, res) => {
     return res.boom.notFound("User not found");
   } catch (error) {
     logger.error(`Error while updating user: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
 };
 
@@ -237,7 +236,7 @@ const postUserPicture = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while adding profile picture of user: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -275,7 +274,7 @@ const updateUser = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while updating user data: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -290,7 +289,7 @@ const generateChaincode = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while generating chaincode: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -304,7 +303,7 @@ const profileURL = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Internal Server Error: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -330,7 +329,7 @@ const rejectProfileDiff = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while rejecting profile diff: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -365,7 +364,6 @@ const addUserIntro = async (req, res) => {
         funFact: rawData.funFact,
         forFun: rawData.forFun,
         whyRds: rawData.whyRds,
-        numberOfHours: rawData.numberOfHours,
       },
       foundFrom: rawData.foundFrom,
     };
@@ -376,7 +374,7 @@ const addUserIntro = async (req, res) => {
     });
   } catch (err) {
     logger.error("Could not save user data");
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -395,7 +393,7 @@ const getUserIntro = async (req, res) => {
     }
   } catch (err) {
     logger.error("Could Not Get User Data", err);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    return res.boom.badImplementation("An internal server error occurred");
   }
 };
 
@@ -415,7 +413,7 @@ const addDefaultArchivedRole = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error adding default archived role: ${error}`);
-    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+    return res.boom.badImplementation("Something went wrong. Please contact admin");
   }
 };
 
