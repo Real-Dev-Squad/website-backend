@@ -26,7 +26,7 @@ function chunks(array, size = 1) {
  */
 
 function arraysHaveCommonItem(array1, array2) {
-  if (!Array.isArray(array1) || !Array.isArray(array2) || !array1.length || !array2.length) {
+  if (!array1?.length || !array2?.length) {
     return false;
   }
   return array1.some((value) => array2.includes(value));
