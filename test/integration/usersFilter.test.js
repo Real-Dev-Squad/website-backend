@@ -21,7 +21,7 @@ const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
-describe("UserManagement Filters", function () {
+describe("Filter Users", function () {
   let jwt;
   let userId = "";
   let oooUser;
@@ -121,11 +121,11 @@ describe("UserManagement Filters", function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("GET /users/filter", function () {
-    it("Should filter users based on state", function (done) {
+  describe.skip("GET /users/search", function () {
+    it("Should search users based on state", function (done) {
       chai
         .request(app)
-        .get("/users/filter")
+        .get("/users/search")
         .query({ state: "OOO" })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -145,10 +145,10 @@ describe("UserManagement Filters", function () {
         });
     });
 
-    it("Should filter users based on Tag", function (done) {
+    it("Should search users based on Tag", function (done) {
       chai
         .request(app)
-        .get("/users/filter")
+        .get("/users/search")
         .query({ tagId: tagIdFE })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -166,10 +166,10 @@ describe("UserManagement Filters", function () {
         });
     });
 
-    it("Should filter users based on multiple Tags", function (done) {
+    it("Should search users based on multiple Tags", function (done) {
       chai
         .request(app)
-        .get("/users/filter")
+        .get("/users/search")
         .query({ tagId: [tagIdFE, tagIdBE] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -187,10 +187,10 @@ describe("UserManagement Filters", function () {
         });
     });
 
-    it("Should filter users based on multiple states", function (done) {
+    it("Should search users based on multiple states", function (done) {
       chai
         .request(app)
-        .get("/users/filter")
+        .get("/users/search")
         .query({ state: ["OOO", "IDLE"] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -208,10 +208,10 @@ describe("UserManagement Filters", function () {
         });
     });
 
-    it("Should filter users based on single tag and single state", function (done) {
+    it("Should search users based on single tag and single state", function (done) {
       chai
         .request(app)
-        .get("/users/filter")
+        .get("/users/search")
         .query({ state: "OOO", tagId: tagIdFE })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -229,10 +229,10 @@ describe("UserManagement Filters", function () {
         });
     });
 
-    it("Should filter users based on single tag and multiple state", function (done) {
+    it("Should search users based on single tag and multiple state", function (done) {
       chai
         .request(app)
-        .get("/users/filter")
+        .get("/users/search")
         .query({ state: ["OOO", "ACTIVE"], tagId: tagIdFE })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -250,10 +250,10 @@ describe("UserManagement Filters", function () {
         });
     });
 
-    it("Should filter users based on multiple tag and single state", function (done) {
+    it("Should search users based on multiple tag and single state", function (done) {
       chai
         .request(app)
-        .get("/users/filter")
+        .get("/users/search")
         .query({ state: "OOO", tagId: [tagIdFE, tagIdBE] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -272,10 +272,10 @@ describe("UserManagement Filters", function () {
         });
     });
 
-    it("Should filter users based on multiple tag and multiple states", function (done) {
+    it("Should search users based on multiple tag and multiple states", function (done) {
       chai
         .request(app)
-        .get("/users/filter")
+        .get("/users/search")
         .query({ state: ["OOO", "ACTIVE"], tagId: [tagIdFE, tagIdBE] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
