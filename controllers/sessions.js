@@ -5,6 +5,16 @@ const logger = require("../utils/logger");
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
 
+/**
+ * Retrieves sessions with optional filters and returns JSON response
+ *
+ * @async
+ * @function
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response containing session data or error message
+ * @throws {Object} - Error object if session retrieval fails
+ */
 const getAllSessions = async (req, res) => {
   const { enabled, hits, offset } = req.query;
   try {
@@ -20,6 +30,16 @@ const getAllSessions = async (req, res) => {
   }
 };
 
+/**
+ * Retrieves session data for a session with the given ID and returns JSON response
+ *
+ * @async
+ * @function
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response containing session data or error message
+ * @throws {Object} - Error object if session retrieval fails
+ */
 const getSessionById = async (req, res) => {
   const sessionId = req.params.id;
   try {
