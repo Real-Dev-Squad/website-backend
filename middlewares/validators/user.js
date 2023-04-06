@@ -110,6 +110,7 @@ async function getUsers(req, res, next) {
       search: joi.string().optional().messages({
         "string.empty": "search value must not be empty",
       }),
+      member: joi.string().optional(),
       next: joi
         .string()
         .optional()

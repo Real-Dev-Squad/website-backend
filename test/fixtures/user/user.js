@@ -111,6 +111,7 @@ module.exports = () => {
       roles: {
         super_user: true,
         archived: false,
+        member: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",

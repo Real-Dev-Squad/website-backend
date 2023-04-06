@@ -65,7 +65,6 @@ const getUserById = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const { allUsers, nextId, prevId } = await userQuery.fetchUsers(req.query);
-
     return res.json({
       message: "Users returned successfully!",
       users: allUsers,
