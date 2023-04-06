@@ -180,7 +180,7 @@ const fetchIssues = async () => {
       {
         Accept: "application/vnd.github+json",
         Authorization: `Bearer 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`,
-        org: "Real-Dev-Squad",
+        org: config.get("githubApi.org"),
       }
     );
     return res;
