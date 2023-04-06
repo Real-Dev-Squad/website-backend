@@ -462,7 +462,7 @@ describe("Users", function () {
     });
   });
 
-  describe.only("GET /users/?id", function () {
+  describe("GET /users/?id", function () {
     it("Should return one user with given id", function (done) {
       chai
         .request(app)
