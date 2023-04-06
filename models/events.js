@@ -3,6 +3,14 @@ const logger = require("../utils/logger");
 
 const eventModel = firestore.collection("events");
 
+/**
+ * Creates a new room document in Firestore and returns the data for the created document.
+ * @async
+ * @function
+ * @param {Object} roomData - The data to be added to the room document in Firestore.
+ * @returns {Promise<Object>} - The data for the created room document.
+ * @throws {Error} - Throws an error if there was a problem adding data to Firestore.
+ */
 const createRoom = async (roomData) => {
   try {
     const docRef = eventModel.doc(roomData.id);
@@ -16,6 +24,13 @@ const createRoom = async (roomData) => {
   }
 };
 
+/**
+ * Retrieves all the rooms from the Firestore database.
+ * @async
+ * @function
+ * @returns {Promise<Array<object>>} An array containing the data of all the retrieved rooms.
+ * @throws {Error} If an error occurs while retrieving the rooms.
+ */
 const getAllRooms = async () => {
   try {
     const retrievedRooms = [];
@@ -32,6 +47,13 @@ const getAllRooms = async () => {
   }
 };
 
+/**
+ * Updates an existing room document in the Firestore database with the given room data.
+ * @async
+ * @function
+ * @param {object} roomData - The data for the room to be updated.
+ * @throws {Error} If an error occurs while updating the room document.
+ */
 const updateRoom = async (roomData) => {
   try {
     const docRef = eventModel.doc(roomData.id);
@@ -42,6 +64,16 @@ const updateRoom = async (roomData) => {
   }
 };
 
+/**
+ * Ends an active room in the Firestore database with the given data.
+ * @async
+ * @function
+ * @param {object} data - The data for the room to be ended.
+ * @param {string} data.id - The unique identifier for the room to be ended.
+ * @param {string} data.reason - The reason for ending the room.
+ * @param {boolean} data.lock - Whether the room should be locked after it's ended.
+ * @throws {Error} If an error occurs while updating the room document.
+ */
 const endActiveRoom = async ({ id, reason, lock }) => {
   try {
     const docRef = eventModel.doc(id);

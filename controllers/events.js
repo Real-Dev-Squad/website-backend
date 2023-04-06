@@ -6,6 +6,15 @@ const logger = require("../utils/logger");
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
 
+/**
+ * Creates a new room document in the Firestore database with the data provided in the HTTP request body.
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Object} The saved room data in JSON format.
+ * @throws {Error} If an error occurs while creating the room document.
+ */
 const createRoom = async (req, res) => {
   const payload = {
     name: req.body.name,
@@ -25,12 +34,20 @@ const createRoom = async (req, res) => {
   }
 };
 
+/**
+ * Retrieves all rooms that match the query parameters provided in the HTTP request query string.
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Object} The rooms data in JSON format.
+ * @throws {Error} If an error occurs while retrieving the rooms data.
+ */
 const getAllRooms = async (req, res) => {
   const { enabled, hits, offset } = req.query;
   try {
     const start = offset || "";
     const roomsData = await apiService.get(`/rooms?limit=${hits}&enabled=${enabled}&start=${start}`);
-    // const roomsData = await eventQuery.getAllRooms();
     return res.status(200).json(roomsData);
   } catch (error) {
     logger.error({ error });
@@ -41,6 +58,15 @@ const getAllRooms = async (req, res) => {
   }
 };
 
+/**
+ * Generates a token for the specified room and user information.
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Object} An object containing the generated token and a success message in JSON format.
+ * @throws {Error} If an error occurs while generating the token.
+ */
 const joinRoom = async (req, res) => {
   try {
     const token = tokenService.getAuthToken({
@@ -59,6 +85,16 @@ const joinRoom = async (req, res) => {
   }
 };
 
+/**
+ * Retrieves room details by ID and returns JSON response
+ *
+ * @async
+ * @function
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response containing room details or error message
+ * @throws {Object} - The JSON response with an error message if an error occurred if room retrieval fails.
+ */
 const getRoomById = async (req, res) => {
   const roomId = req.params.id;
   const enabled = req.body.enabled;
@@ -80,6 +116,16 @@ const getRoomById = async (req, res) => {
   }
 };
 
+/**
+ * Updates a room with the given ID and enables/disables it
+ *
+ * @async
+ * @function
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response containing updated room data and success message or error message
+ * @throws {Object} - If an error occurs while updating the room
+ */
 const updateRoom = async (req, res) => {
   const payload = {
     enabled: req.body.enabled,
@@ -98,6 +144,16 @@ const updateRoom = async (req, res) => {
   }
 };
 
+/**
+ * Ends an active room session.
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with a message indicating the session has ended.
+ * @throws {Object} The JSON response with an error message if an error occurred while ending the room.
+ */
 const endActiveRoom = async (req, res) => {
   const payload = {
     reason: req.body.reason,
