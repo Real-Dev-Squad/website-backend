@@ -1,6 +1,5 @@
 const utils = require("../utils/fetch");
 const { fetchUser } = require("../models/users");
-const ORG = "Real-Dev-Squad";
 
 /**
  * Extracts only the necessary details required from the object returned by Github API
@@ -171,7 +170,7 @@ const fetchIssues = async () => {
     const baseURL = config.get("githubApi.baseUrl");
     const issues = "/issues";
     const urlObj = new URL(baseURL);
-    urlObj.pathname = "orgs" + "/" + ORG + issues;
+    urlObj.pathname = "orgs" + "/" + config.get("githubApi.org") + issues;
     const createdURL = urlObj.href;
     const res = await getFetchWithAuthToken(
       createdURL,
