@@ -11,8 +11,9 @@ const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
 const getIssues = async (req, res) => {
   try {
-    const issues = await issuesService.getRepoIssues();
+    const issues = await issuesService.getOrgIssues();
     let issuesData = issues.data.length > 0 ? issues.data : [];
+    issuesData = issuesData.filter((issue) => !Object.keys(issue).includes("pull_request"));
     issuesData = issuesData.map(async (issue) => {
       const taskData = await tasks.fetchTaskByIssueId(issue.id);
       if (taskData) {
