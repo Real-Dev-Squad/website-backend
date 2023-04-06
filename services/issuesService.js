@@ -4,11 +4,11 @@ const githubService = require("./githubService");
  * @param {string} username
  */
 
-const getRepoIssues = async () => {
+const getOrgIssues = async () => {
   const data = await githubService.fetchIssues();
   return data;
 };
 
 module.exports = {
-  getRepoIssues,
+  getOrgIssues,
 };
