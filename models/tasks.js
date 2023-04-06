@@ -107,7 +107,7 @@ const fetchTask = async (taskId) => {
 
 /**
  * Fetch a task against the IssueId
- * @param taskId { string }: taskid which will be used to fetch the task
+ * @param taskId { string }: issueId which will be used to fetch the task
  * @return {Promise<taskData|Object>}
  */
 const fetchTaskByIssueId = async (issueId) => {
