@@ -4,8 +4,8 @@ const githubService = require("./githubService");
  * @param {string} username
  */
 
-const getRepoIssues = async (repo) => {
-  const data = await githubService.fetchIssues(repo);
+const getRepoIssues = async () => {
+  const data = await githubService.fetchIssues();
   return data;
 };
 
