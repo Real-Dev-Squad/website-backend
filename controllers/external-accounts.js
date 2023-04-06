@@ -1,4 +1,5 @@
 const externalAccountsModel = require("../models/external-accounts");
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 const addExternalAccountData = async (req, res) => {
   const createdOn = Date.now();
@@ -17,7 +18,7 @@ const addExternalAccountData = async (req, res) => {
     return res.status(201).json({ message: "Added external account data successfully" });
   } catch (error) {
     logger.error(`Error adding data: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -36,7 +37,7 @@ const getExternalAccountData = async (req, res) => {
     return res.status(200).json({ message: "Data returned successfully", attributes: attributes });
   } catch (error) {
     logger.error(`Error getting external account data: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 

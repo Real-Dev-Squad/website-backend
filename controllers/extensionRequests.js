@@ -3,7 +3,7 @@ const { addLog } = require("../models/logs");
 const tasks = require("../models/tasks");
 const { getUsername } = require("../utils/users");
 const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
-
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 /**
  * Create ETA extension Request
  *
@@ -66,7 +66,7 @@ const createTaskExtensionRequest = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while creating new extension request: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -87,7 +87,7 @@ const fetchExtensionRequests = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while fetching Extension Requests ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -102,7 +102,7 @@ const getExtensionRequest = async (req, res) => {
     extensionRequestData.id = extensionRequestId;
     return res.json({ message: "Extension Requests returned successfully!", extensionRequest: extensionRequestData });
   } catch (err) {
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -128,7 +128,7 @@ const getSelfExtensionRequests = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
     logger.error(`Error while fetching extension requests: ${error}`);
-    return res.boom.badImplementation("An internal server error occured");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -156,7 +156,7 @@ const updateExtensionRequest = async (req, res) => {
     return res.status(204).send();
   } catch (err) {
     logger.error(`Error while updating extension request: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -221,7 +221,7 @@ const updateExtensionRequestStatus = async (req, res) => {
     return res.json({ message: `Extension request ${extensionStatus} succesfully`, extensionLog });
   } catch (err) {
     logger.error(`Error while updating extension request: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
