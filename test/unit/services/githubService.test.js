@@ -44,4 +44,31 @@ describe("githubService", function () {
       );
     });
   });
+
+  describe("fetchMergedPRs", function () {
+    it("Should generate the correct url", async function () {
+      const response = await githubService.fetchMergedPRs();
+      expect(response).to.be.equal(
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Apr+is%3Amerged&sort=created&order=desc&per_page=10&page=1"
+      );
+    });
+  });
+
+  describe("fetchOpenIssues", function () {
+    it("Should generate the correct url", async function () {
+      const response = await githubService.fetchOpenIssues();
+      expect(response).to.be.equal(
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Aissue+is%3Aopen&sort=created&order=desc&per_page=10&page=1"
+      );
+    });
+  });
+
+  describe("fetchClosedIssues", function () {
+    it("Should generate the correct url", async function () {
+      const response = await githubService.fetchClosedIssues();
+      expect(response).to.be.equal(
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Aissue+is%3Aclosed&sort=created&order=desc&per_page=10&page=1"
+      );
+    });
+  });
 });
