@@ -6,10 +6,13 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
+const { arraysHaveCommonItem } = require("../utils/array");
+const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
-
+const userStatusModel = firestore.collection("usersStatus");
+const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 /**
  * Adds or updates the user data
  *
@@ -319,6 +322,64 @@ const fetchUserSkills = async (id) => {
   }
 };
 
+/**
+ * Fetches user data based on the filter query
+ *
+ * @param {Object} query - Object with query parameters
+ * @param {Array} query.levelId - Array of levelIds to filter the users on
+ * @param {Array} query.levelName - Array of levelNames to filter the users on
+ * @param {Array} query.levelNumber - Array of levelNumbers to filter the users on
+ * @param {Array} query.tagId - Array of tagIds to filter the users on
+ * @param {Array} query.state - Array of states to filter the users on
+ * @return {Promise<Array>} - Array of user documents that match the filter criteria
+ */
+
+const getUsersBasedOnFilter = async (query) => {
+  const allQueryKeys = Object.keys(query);
+  const doesTagQueryExist = arraysHaveCommonItem(ITEM_TAG, allQueryKeys);
+  const doesStateQueryExist = arraysHaveCommonItem(USER_STATE, allQueryKeys);
+
+  const calls = {
+    item: itemModel,
+    state: userStatusModel,
+  };
+  calls.item = calls.item.where("itemType", "==", "USER").where("tagType", "==", "SKILL");
+
+  Object.entries(query).forEach(([key, value]) => {
+    const isTagKey = ITEM_TAG.includes(key);
+    const isStateKey = USER_STATE.includes(key);
+    const isValueArray = Array.isArray(value);
+
+    if (isTagKey) {
+      calls.item = isValueArray ? calls.item.where(key, "in", value) : calls.item.where(key, "==", value);
+    } else if (isStateKey) {
+      calls.state = isValueArray
+        ? calls.state.where("currentStatus.state", "in", value)
+        : calls.state.where("currentStatus.state", "==", value);
+    }
+  });
+
+  const tagItems = doesTagQueryExist ? (await calls.item.get()).docs.map((doc) => ({ id: doc.id, ...doc.data() })) : [];
+  const stateItems = doesStateQueryExist
+    ? (await calls.state.get()).docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+    : [];
+  let finalItems = [];
+
+  if (doesTagQueryExist && doesStateQueryExist) {
+    const stateItemIds = new Set(stateItems.map((item) => item.userId));
+    finalItems = tagItems.filter((item) => stateItemIds.has(item.itemId)).map((item) => item.itemId);
+  } else if (doesStateQueryExist) {
+    finalItems = stateItems.map((item) => item.userId);
+  } else if (doesTagQueryExist) {
+    finalItems = tagItems.map((item) => item.itemId);
+  }
+
+  finalItems = [...new Set(finalItems)];
+  const userRefs = finalItems.map((itemId) => userModel.doc(itemId));
+  const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
+  return userDocs;
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -332,4 +393,5 @@ module.exports = {
   getSuggestedUsers,
   fetchUserSkills,
   fetchAllUsers,
+  getUsersBasedOnFilter,
 };

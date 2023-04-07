@@ -124,8 +124,8 @@ const fetchOpenPRs = async (params = {}) => {
   try {
     const url = getGithubURL(
       {
-        is: "open",
         type: "pr",
+        is: "open",
         ...searchParams,
       },
       {
@@ -148,8 +148,8 @@ const fetchMergedPRs = async (params = {}) => {
   try {
     const url = getGithubURL(
       {
-        is: "merged",
         type: "pr",
+        is: "merged",
         ...searchParams,
       },
       {
@@ -173,8 +173,8 @@ const fetchOpenIssues = async (params = {}) => {
   try {
     const url = getGithubURL(
       {
-        is: "open",
         type: "issue",
+        is: "open",
         ...searchParams,
       },
       {
@@ -197,8 +197,8 @@ const fetchClosedIssues = async (params = {}) => {
   try {
     const url = getGithubURL(
       {
-        is: "closed",
         type: "issue",
+        is: "closed",
         ...searchParams,
       },
       {
