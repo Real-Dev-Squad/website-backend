@@ -1,4 +1,6 @@
 const profileDiffsQuery = require("../models/profileDiffs");
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+
 /**
  * Fetches the pending profile diffs
  *
@@ -16,7 +18,7 @@ const getProfileDiffs = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while fetching profile diffs: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 

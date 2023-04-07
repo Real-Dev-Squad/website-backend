@@ -1,4 +1,5 @@
 const ItemTagsModel = require("../models/items");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Adds a tag to an item with its corresponding a level
@@ -16,7 +17,7 @@ const addTagsToItem = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while creating new item: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -37,7 +38,7 @@ const removeTagsFromItem = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while creating new item: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -60,7 +61,7 @@ const getItemBasedOnFilter = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while creating new item: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 

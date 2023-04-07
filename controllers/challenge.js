@@ -1,6 +1,5 @@
 const challengeQuery = require("../models/challenges");
-
-const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 /**
  * Get the challenges
@@ -19,7 +18,7 @@ const fetchChallenges = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while retrieving challenges ${err}`);
-    return res.boom.serverUnavailable(ERROR_MESSAGE);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -41,7 +40,7 @@ const createChallenge = async (req, res) => {
     }
   } catch (err) {
     logger.error(`Error while adding challenge ${err}`);
-    return res.boom.serverUnavailable(ERROR_MESSAGE);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -79,7 +78,7 @@ const subscribeToChallenge = async (req, res) => {
     }
   } catch (err) {
     logger.error(`Error while retrieving challenges ${err}`);
-    return res.boom.serverUnavailable(ERROR_MESSAGE);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
