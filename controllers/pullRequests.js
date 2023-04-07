@@ -1,4 +1,5 @@
 const githubService = require("../services/githubService");
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 /**
  * Collects all pull requests and sends only required data for each pull request
@@ -24,7 +25,7 @@ const getUserPRs = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while processing pull requests: ${err}`);
-    return res.boom.badImplementation("Something went wrong please contact admin");
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -54,7 +55,7 @@ const getStalePRs = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while processing pull requests: ${err}`);
-    return res.boom.badImplementation("Something went wrong please contact admin");
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -84,7 +85,7 @@ const getOpenPRs = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while processing pull requests: ${err}`);
-    return res.boom.badImplementation("Something went wrong please contact admin");
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
