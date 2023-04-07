@@ -1,6 +1,6 @@
 const firestore = require("../utils/firestore");
 
-const itemTagsModel = firestore.collection("items");
+const itemTagsModel = firestore.collection("itemTags");
 const tagsModel = firestore.collection("tags");
 const levelsModel = firestore.collection("levels");
 
@@ -14,26 +14,41 @@ const addTagsToItem = async (itemData) => {
   try {
     const { itemId, itemType, tagPayload } = itemData;
     const batch = firestore.batch();
-    let isNewtag = false;
+    const hasItemTagsPromises = [];
+    const isNewTag = {};
     for (const tag of tagPayload) {
-      const itemData = await itemTagsModel
-        .where("itemId", "==", itemId)
-        .where("tagId", "==", tag.tagId)
-        .where("levelId", "==", tag.levelId)
-        .get();
-      if (!itemData.empty) continue;
-      isNewtag = true;
-      const itemTag = {
-        itemId,
-        itemType: itemType.toUpperCase(),
-        tagId: tag.tagId,
-        levelId: tag.levelId,
-      };
-      const docid = itemTagsModel.doc();
-      batch.set(docid, itemTag);
+      hasItemTagsPromises.push(
+        itemTagsModel
+          .where("itemId", "==", itemId)
+          .where("tagId", "==", tag.tagId)
+          .where("levelId", "==", tag.levelId)
+          .get()
+          .then((doc) => {
+            isNewTag[tag.tagId] = doc.empty;
+          })
+      );
     }
+
+    await Promise.all(hasItemTagsPromises);
+    const wasSuccess = Object.values(isNewTag).some((value) => value === true);
+
+    if (!wasSuccess) return { itemId, wasSuccess };
+
+    tagPayload.forEach((tag) => {
+      if (isNewTag[tag.tagId]) {
+        const itemTag = {
+          itemId,
+          itemType: itemType.toUpperCase(),
+          tagId: tag.tagId,
+          levelId: tag.levelId,
+        };
+        const docid = itemTagsModel.doc();
+        batch.set(docid, itemTag);
+      }
+    });
+
     await batch.commit();
-    return { itemId, isNewtag };
+    return { itemId, wasSuccess };
   } catch (err) {
     logger.error("Error in creating Item", err);
     throw err;
@@ -78,28 +93,33 @@ const getItemBasedOnFilter = async (query) => {
     const items = [];
     const data = await call.get();
 
+    const addTagsAndLevelsData = [];
     for (const doc of data.docs) {
       const item = {
         id: doc.id,
         ...doc.data(),
       };
-      await tagsModel
-        .doc(item.tagId)
-        .get()
-        .then((doc) => {
-          item.tagName = doc.data().name;
-          item.tagType = doc.data().type;
-        });
-      await levelsModel
-        .doc(item.levelId)
-        .get()
-        .then((doc) => {
-          item.levelName = doc.data().name;
-          item.levelValue = doc.data().value;
-        });
+      addTagsAndLevelsData.push(
+        tagsModel
+          .doc(item.tagId)
+          .get()
+          .then((doc) => {
+            item.tagName = doc.data().name;
+            item.tagType = doc.data().type;
+          })
+      );
+      addTagsAndLevelsData.push(
+        levelsModel
+          .doc(item.levelId)
+          .get()
+          .then((doc) => {
+            item.levelName = doc.data().name;
+            item.levelValue = doc.data().value;
+          })
+      );
       items.push(item);
     }
-
+    await Promise.all(addTagsAndLevelsData);
     return items;
   } catch (err) {
     logger.error("Error in getting Item based on filter", err);
