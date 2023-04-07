@@ -392,9 +392,6 @@ module.exports = {
   getJoinData,
   getSuggestedUsers,
   fetchUserSkills,
-<<<<<<< HEAD
   fetchAllUsers,
-=======
   getUsersBasedOnFilter,
->>>>>>> develop
 };
