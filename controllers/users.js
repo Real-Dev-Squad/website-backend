@@ -10,12 +10,9 @@ const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const githubService = require("../services/githubService");
 const { getPaginationLink } = require("../utils/users");
-<<<<<<< HEAD
 const { getQualifiers, getDateTimeRangeForPRs } = require("../utils/helper");
 const { fetchMultiplePageResults } = require("../utils/fetchMultiplePageResults");
-=======
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
->>>>>>> develop
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -79,8 +76,8 @@ const getUsers = async (req, res) => {
       const { sortBy = "RECENT_FIRST", filterBy } = qualifiers;
       const order = sortBy === "RECENT_FIRST" ? "desc" : "asc";
 
-      const startDate = req.query?.startDate;
-      const endDate = req.query?.endDate;
+      const startDate = qualifiers?.startDate;
+      const endDate = qualifiers?.endDate;
       const dateTime = getDateTimeRangeForPRs(startDate, endDate);
 
       const searchParams = {}; // searchParams used to create list of params to create github API URL
