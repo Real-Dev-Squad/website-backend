@@ -12,7 +12,7 @@ const authService = require("../services/authService");
 const githubAuth = (req, res, next) => {
   let userData;
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
-  const authRedirectionUrl = req.query.state ?? rdsUiUrl;
+  let authRedirectionUrl = req.query.state ?? rdsUiUrl;
 
   try {
     return passport.authenticate("github", { session: false }, async (err, accessToken, user) => {
@@ -29,7 +29,7 @@ const githubAuth = (req, res, next) => {
         },
       };
 
-      const { userId } = await users.addOrUpdate(userData);
+      const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);
 
       const token = authService.generateAuthToken({ userId });
 
@@ -42,7 +42,7 @@ const githubAuth = (req, res, next) => {
         sameSite: "lax",
       });
 
-      // if (incompleteUserDetails) authRedirectionUrl = "https://my.realdevsquad.com/new-signup";
+      if (incompleteUserDetails) authRedirectionUrl = "https://my.realdevsquad.com/new-signup";
 
       return res.redirect(authRedirectionUrl);
     })(req, res, next);
