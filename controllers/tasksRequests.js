@@ -3,11 +3,11 @@ const taskRequestsModel = require("../models/taskRequests");
 
 const fetchTaskRequests = async (_, res) => {
   try {
-    const taskRequests = await taskRequestsModel.fetchTaskRequests();
+    const data = await taskRequestsModel.fetchTaskRequests();
 
     return res.status(200).json({
       message: "Task requests returned successfully",
-      taskRequests,
+      data,
     });
   } catch (err) {
     logger.error("Error while fetching task requests", err);

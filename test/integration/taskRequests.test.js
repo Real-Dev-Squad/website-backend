@@ -71,8 +71,11 @@ describe("Task Requests", function () {
 
             expect(res).to.have.status(200);
             expect(res.body.message).to.equal("Task requests returned successfully");
-            expect(res.body.taskRequests).to.be.a("Array");
-            expect(res.body.taskRequests.length).to.equal(1);
+            expect(res.body.data).to.be.a("object");
+            expect(res.body.data.taskRequests).to.be.a("Array");
+            expect(res.body.data.taskRequests.length).to.equal(1);
+            expect(res.body.data.users).to.be.a("Array");
+            expect(res.body.data.users.length).to.equal(1);
             return done();
           });
       });
@@ -85,7 +88,7 @@ describe("Task Requests", function () {
         jwt = authService.generateAuthToken({ userId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-        await taskRequestsModel.addOrUpdate(taskId);
+        await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
       it("should return 401 unauthorized user response", function (done) {

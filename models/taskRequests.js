@@ -14,9 +14,38 @@ const userStatusModel = require("./userStatus");
  */
 const fetchTaskRequests = async () => {
   try {
-    const taskRequests = await taskRequestsCollection.get();
+    const taskRequestsSnapshot = await taskRequestsCollection.get();
 
-    return taskRequests.docs.map((taskRequest) => ({ id: taskRequest.id, ...taskRequest.data() }));
+    const taskRequests = [];
+
+    const visitedUsers = new Set();
+    const userSnapshot = [];
+    const users = [];
+
+    taskRequestsSnapshot.forEach((taskRequest) => {
+      const taskRequestData = taskRequest.data();
+      const requestors = taskRequestData.requestors;
+
+      requestors.forEach((requestor) => {
+        if (!visitedUsers.has(requestor)) {
+          visitedUsers.add(requestor);
+
+          userSnapshot.push(userModel.fetchUser({ userId: requestor }));
+        }
+      });
+
+      taskRequests.push({ id: taskRequest.id, ...taskRequestData });
+    });
+
+    const usersData = await Promise.all(userSnapshot);
+    usersData.forEach((user) => {
+      users.push(user.user);
+    });
+
+    return {
+      taskRequests,
+      users,
+    };
   } catch (err) {
     logger.error("error fetching tasks", err);
     throw err;
