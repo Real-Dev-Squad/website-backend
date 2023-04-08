@@ -2,7 +2,7 @@ const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
 const ItemModel = firestore.collection("itemTags");
 const userUtils = require("../utils/users");
-const { fromFirestoreData, toFirestoreData, buildTasks, getFetchTasksQuery } = require("../utils/tasks");
+const { fromFirestoreData, toFirestoreData, buildTasks, getFetchTasksQueryParameters } = require("../utils/tasks");
 const {
   TASK_TYPE,
   TASK_STATUS,
@@ -10,6 +10,7 @@ const {
   INITIAL_TASKS_TYPE_LIMIT,
   SHOW_MORE_TASKS_TYPE_LIMIT,
 } = require("../constants/tasks");
+const { isEmpty } = require("../utils/helpers");
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 /**
@@ -53,14 +54,15 @@ const updateTask = async (taskData, taskId = null) => {
  */
 const fetchTasks = async (params) => {
   try {
-    const queryParams = getFetchTasksQuery(params);
-    const hasTypeParam = queryParams.whereFilterOp === "in";
+    const queryParams = !isEmpty(params) ? getFetchTasksQueryParameters(params) : {};
+    const hasTypeParam = queryParams?.whereFilterOp === "in";
     let query = tasksModel;
 
-    if (queryParams.whereFilterOp && queryParams.status) {
+    if (queryParams?.whereFilterOp && queryParams?.status) {
       query = query.where("status", queryParams.whereFilterOp, queryParams.status);
     }
-    if (hasTypeParam && queryParams.cursor) {
+
+    if (hasTypeParam && queryParams?.cursor) {
       const doc = await tasksModel.doc(queryParams.cursor).get();
       query = query.startAfter(doc).limit(SHOW_MORE_TASKS_TYPE_LIMIT);
     } else if (hasTypeParam) {

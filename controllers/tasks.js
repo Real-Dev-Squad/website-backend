@@ -233,9 +233,9 @@ const updateTaskStatus = async (req, res, next) => {
  */
 const overdueTasks = async (req, res) => {
   try {
-    const allTasks = await tasks.fetchTasks();
+    const { taskList } = await tasks.fetchTasks();
     const now = Math.floor(Date.now() / 1000);
-    const overDueTasks = allTasks.filter(
+    const overDueTasks = taskList.filter(
       (task) => (task.status === ASSIGNED || task.status === IN_PROGRESS) && task.endsOn < now
     );
     const newAvailableTasks = await tasks.overdueTasks(overDueTasks);

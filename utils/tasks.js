@@ -66,7 +66,7 @@ const buildTasks = (tasks, initialTaskArray = []) => {
  * - `{type: <string>, next_cursor: <string>} if query contains key `type` and `next_cursor`
  * - `{ [filter|type|next_curosr]: <string>}` combination of any other pattern having these keys
  */
-function getFetchTasksQueryParameters(query) {
+function convertParamsToFetchTasksQueryParams(query) {
   const q = query.q;
   if (isEmpty(q) || typeof q !== "string") return {};
   return q.split(" ").reduce((acc, item) => {
@@ -82,11 +82,11 @@ function getFetchTasksQueryParameters(query) {
  * - `{whereFilterOp: <string>, status: Array<TASK_STATUS>} `if query is not paginated query
  * - `{whereFilterOp: <string>, status: Array<TASK_STATUS>, cursor: string}` if query is paginated query
  */
-function getFetchTasksQuery(params) {
+function getFetchTasksQueryParameters(params) {
   if (isEmpty(params)) {
     return {};
   }
-  const queryParams = getFetchTasksQueryParameters(params);
+  const queryParams = convertParamsToFetchTasksQueryParams(params);
   if (isEmpty(queryParams)) return {};
   const { filter, type, cursor } = queryParams;
   if ((filter && cursor) || (filter && type) || (cursor && !type)) return {};
@@ -106,5 +106,5 @@ module.exports = {
   fromFirestoreData,
   toFirestoreData,
   buildTasks,
-  getFetchTasksQuery,
+  getFetchTasksQueryParameters,
 };
