@@ -1,3 +1,13 @@
+/**
+ * Returns an object containing key value pairs of qualifiers with their values
+ * @param query {string}
+ * example
+ * @input "filterBy:OPEN_PRS sortBy:RECENT_FIRST"
+ * @output {
+ * filterBy: "OPEN_PRS",
+ * sortBy: "RECENT_FIRST"
+ * }d
+ */
 const getQualifiers = (query) => {
   const combinations = query.split(" "); // split the query string by white-space
   const qualifiers = {};
@@ -12,7 +22,8 @@ const getQualifiers = (query) => {
 
 /**
  * Returns the date-time range value used for searching PRs and Issues
- * @param startDate, endDate
+ * @param startDate {string}
+ * @param endDate {string}
  */
 const getDateTimeRangeForPRs = (startDate, endDate) => {
   // if startDate and endDate both are received in the params then we specify the range separated by ..
