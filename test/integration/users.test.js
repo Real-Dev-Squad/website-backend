@@ -107,6 +107,7 @@ describe("Users", function () {
       await addOrUpdate(userData[1]);
       await addOrUpdate(userData[2]);
       await addOrUpdate(userData[3]);
+      await addOrUpdate(userData[4]);
     });
 
     afterEach(async function () {
@@ -356,6 +357,20 @@ describe("Users", function () {
       expect(previousPageResponse.body.links).to.have.property("next");
       expect(previousPageResponse.body.links).to.have.property("prev");
       expect(previousPageResponse.body.users).to.have.length(2);
+    });
+
+    it("should return all the user who are member and not archieved if members=true is sent in the query", async function () {
+      const response = await chai.request(app).get(`/users?member=true`).set("cookie", `${cookieName}=${jwt}`);
+
+      expect(response).to.have.status(200);
+      expect(response.body).to.be.a("object");
+      expect(response.body.message).to.equal("Users returned successfully!");
+      expect(response.body).to.have.property("links");
+      expect(response.body.links).to.have.property("next");
+      expect(response.body.links).to.have.property("prev");
+
+      expect(response.body.users[0].roles.member).to.be.equal(true);
+      expect(response.body.users[0].roles.archived).to.be.equal(false);
     });
   });
 

@@ -133,6 +133,25 @@ const fetchUsers = async (query) => {
   try {
     // INFO: default user size set to 100
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
+    if (query.member === "true") {
+      const membersArray = [];
+      const snapshot = await userModel.where("roles.member", "==", true).where("roles.archived", "==", false).get();
+      if (!snapshot.empty) {
+        snapshot.forEach((doc) => {
+          membersArray.push({
+            id: doc.id,
+            ...doc.data(),
+            phone: undefined,
+            email: undefined,
+            tokens: undefined,
+            chaincode: undefined,
+          });
+        });
+      }
+      return {
+        allUsers: membersArray,
+      };
+    }
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
     let dbQuery = (query.prev ? userModel.limitToLast(size) : userModel.limit(size)).orderBy("username");
