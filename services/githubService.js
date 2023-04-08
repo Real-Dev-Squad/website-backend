@@ -119,7 +119,7 @@ const fetchPRsByUser = async (username) => {
  *
  */
 const fetchOpenPRs = async (params = {}) => {
-  const { perPage = 100, page = 1, searchParams = {}, resultsOptions = {} } = params;
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {} } = params;
 
   try {
     const url = getGithubURL(
@@ -132,7 +132,7 @@ const fetchOpenPRs = async (params = {}) => {
         sort: "created",
         per_page: perPage,
         page,
-        ...resultsOptions,
+        ...resultOptions,
       }
     );
     return getFetch(url);
@@ -143,7 +143,7 @@ const fetchOpenPRs = async (params = {}) => {
 };
 
 const fetchMergedPRs = async (params = {}) => {
-  const { perPage = 100, page = 1, searchParams = {}, resultsOptions = {} } = params;
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {} } = params;
 
   try {
     const url = getGithubURL(
@@ -154,9 +154,9 @@ const fetchMergedPRs = async (params = {}) => {
       },
       {
         sort: "updated",
+        ...resultOptions,
         per_page: perPage,
         page,
-        ...resultsOptions,
       }
     );
 
@@ -168,7 +168,7 @@ const fetchMergedPRs = async (params = {}) => {
 };
 
 const fetchOpenIssues = async (params = {}) => {
-  const { perPage = 100, page = 1, searchParams = {}, resultsOptions = {} } = params;
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {} } = params;
 
   try {
     const url = getGithubURL(
@@ -181,7 +181,7 @@ const fetchOpenIssues = async (params = {}) => {
         sort: "created",
         per_page: perPage,
         page,
-        ...resultsOptions,
+        ...resultOptions,
       }
     );
     return getFetch(url);
@@ -192,7 +192,7 @@ const fetchOpenIssues = async (params = {}) => {
 };
 
 const fetchClosedIssues = async (params = {}) => {
-  const { perPage = 100, page = 1, searchParams = {}, resultsOptions = {} } = params;
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {} } = params;
 
   try {
     const url = getGithubURL(
@@ -205,7 +205,7 @@ const fetchClosedIssues = async (params = {}) => {
         sort: "updated",
         per_page: perPage,
         page,
-        ...resultsOptions,
+        ...resultOptions,
       }
     );
     return getFetch(url);
