@@ -49,7 +49,7 @@ describe("githubService", function () {
     it("Should generate the correct url", async function () {
       const response = await githubService.fetchMergedPRs();
       expect(response).to.be.equal(
-        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Apr+is%3Amerged&sort=created&order=desc&per_page=10&page=1"
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Apr+is%3Amerged&sort=updated&order=desc&per_page=10&page=1"
       );
     });
   });
@@ -67,7 +67,7 @@ describe("githubService", function () {
     it("Should generate the correct url", async function () {
       const response = await githubService.fetchClosedIssues();
       expect(response).to.be.equal(
-        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Aissue+is%3Aclosed&sort=created&order=desc&per_page=10&page=1"
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Aissue+is%3Aclosed&sort=updated&order=desc&per_page=10&page=1"
       );
     });
   });
