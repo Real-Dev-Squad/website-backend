@@ -67,7 +67,7 @@ describe("githubService", function () {
     it("Should generate the correct url to fetch merged Prs", async function () {
       const params = {
         searchParams: {
-          updated: "<=2023-01-01",
+          merged: "<=2023-01-01",
         },
         resultOptions: {
           order: "asc",
