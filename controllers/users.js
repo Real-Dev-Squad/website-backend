@@ -9,7 +9,7 @@ const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const githubService = require("../services/githubService");
-const { getPaginationLink } = require("../utils/users");
+const { getPaginationLink, getFilteredUsers } = require("../utils/users");
 const { getQualifiers, getDateTimeRangeForPRs } = require("../utils/helper");
 const { fetchMultiplePageResults } = require("../utils/fetchMultiplePageResults");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
@@ -128,25 +128,11 @@ const getUsers = async (req, res) => {
 
       const { allUsers } = await userQuery.fetchAllUsers();
 
-      const uniqueUsersInOrder = new Set();
-
-      allPRs.forEach((element) => {
-        uniqueUsersInOrder.add(element.username);
-      });
-
-      const usersWithDetails = [];
-
-      uniqueUsersInOrder.forEach((username) => {
-        const userDetails = allUsers.find((user) => user.github_id === username);
-
-        if (userDetails) {
-          usersWithDetails.push(userDetails);
-        }
-      });
+      const filteredUsers = getFilteredUsers(allPRs, allUsers);
 
       return res.json({
         message: "Users returned successfully!",
-        users: usersWithDetails,
+        users: filteredUsers,
       });
     }
 
