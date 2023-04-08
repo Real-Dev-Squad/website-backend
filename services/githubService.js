@@ -130,9 +130,9 @@ const fetchOpenPRs = async (params = {}) => {
       },
       {
         sort: "created",
+        ...resultOptions,
         per_page: perPage,
         page,
-        ...resultOptions,
       }
     );
     return getFetch(url);
@@ -179,9 +179,9 @@ const fetchOpenIssues = async (params = {}) => {
       },
       {
         sort: "created",
+        ...resultOptions,
         per_page: perPage,
         page,
-        ...resultOptions,
       }
     );
     return getFetch(url);
@@ -203,9 +203,9 @@ const fetchClosedIssues = async (params = {}) => {
       },
       {
         sort: "updated",
+        ...resultOptions,
         per_page: perPage,
         page,
-        ...resultOptions,
       }
     );
     return getFetch(url);
