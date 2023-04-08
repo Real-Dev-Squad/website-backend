@@ -72,7 +72,7 @@ const getUsers = async (req, res) => {
     const query = req.query.q;
     const qualifiers = getQualifiers(query);
 
-    if (qualifiers.filterBy) {
+    if (qualifiers?.filterBy) {
       const { sortBy = "RECENT_FIRST", filterBy } = qualifiers;
       const order = sortBy === "RECENT_FIRST" ? "desc" : "asc";
 
