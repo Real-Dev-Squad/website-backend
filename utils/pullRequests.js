@@ -5,7 +5,7 @@ const githubService = require("../services/githubService");
 const getFilteredPRsOrIssues = async (qualifiers) => {
   let allPRs = [];
   const { sortBy = "RECENT_FIRST", filterBy } = qualifiers;
-  const order = sortBy === "RECENT_FIRST" ? "desc" : "asc";
+  const order = sortBy === "RECENT_FIRST" ? ORDER_TYPE.DESC : ORDER_TYPE.ASC;
 
   const startDate = qualifiers?.startDate;
   const endDate = qualifiers?.endDate;
@@ -60,6 +60,12 @@ const getFilteredPRsOrIssues = async (qualifiers) => {
   return allPRs;
 };
 
+const ORDER_TYPE = {
+  ASC: "asc",
+  DESC: "desc",
+};
+
 module.exports = {
   getFilteredPRsOrIssues,
+  ORDER_TYPE,
 };
