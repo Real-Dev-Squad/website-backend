@@ -6,23 +6,23 @@
  * Documentation: https://github.com/lorenwest/node-config/wiki/Configuration-Files
  */
 
-const NODE_ENV = process.env.NODE_ENV;
-module.exports = {
-  port: 3000,
-  enableFileLogs: true,
-  enableConsoleLogs: false,
+ const NODE_ENV = process.env.NODE_ENV;
+ module.exports = {
+   port: 3000,
+   enableFileLogs: true,
+   enableConsoleLogs: false,
 
-  githubApi: {
-    baseUrl: "https://api.github.com",
-    org: "Real-Dev-Squad",
-  },
+   githubApi: {
+     baseUrl: "https://api.github.com",
+     org: "Real-Dev-Squad",
+   },
 
-  githubOauth: {
-    clientId: "<clientId>",
-    clientSecret: "<clientSecret>",
-  },
+   githubOauth: {
+     clientId: "<clientId>",
+     clientSecret: "<clientSecret>",
+   },
 
-  firestore: `{
+   firestore: `{
      "type": "service_account",
      "project_id": "<project-name>",
      "private_key_id": "<private-key>",
@@ -35,57 +35,57 @@ module.exports = {
      "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-hqc2v%40dev-rds.iam.gserviceaccount.com"
    }`,
 
-  services: {
-    rdsApi: {
-      baseUrl: "https://api.realdevsquad.com",
-    },
+   services: {
+     rdsApi: {
+       baseUrl: "https://api.realdevsquad.com",
+     },
 
-    rdsUi: {
-      baseUrl: "https://realdevsquad.com",
-      routes: {
-        authRedirection: "/goto",
-      },
-    },
-  },
+     rdsUi: {
+       baseUrl: "https://realdevsquad.com",
+       routes: {
+         authRedirection: "/goto",
+       },
+     },
+   },
 
-  cors: {
-    allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)/, // Allow realdevsquad.com, *.realdevsquad.com
-  },
+   cors: {
+     allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)/, // Allow realdevsquad.com, *.realdevsquad.com
+   },
 
-  userToken: {
-    cookieName: `rds-session-${NODE_ENV}`,
-    ttl: 30 * 24 * 60 * 60, // in seconds
-    refreshTtl: 180 * 24 * 60 * 60, // in seconds
-    publicKey: "<publicKey>",
-    privateKey: "<privateKey>",
-  },
+   userToken: {
+     cookieName: `rds-session-${NODE_ENV}`,
+     ttl: 30 * 24 * 60 * 60, // in seconds
+     refreshTtl: 180 * 24 * 60 * 60, // in seconds
+     publicKey: "<publicKey>",
+     privateKey: "<privateKey>",
+   },
 
-  botToken: {
-    botPublicKey: "<botpublicKey>",
-  },
+   botToken: {
+     botPublicKey: "<botpublicKey>",
+   },
 
-  // Cloudinary keys
-  cloudinary: {
-    cloud_name: "Cloud_name",
-    api_key: "API_KEY",
-    api_secret: "api_secret_key",
-  },
+   // Cloudinary keys
+   cloudinary: {
+     cloud_name: "Cloud_name",
+     api_key: "API_KEY",
+     api_secret: "api_secret_key",
+   },
 
-  // Cloudflare
-  cloudflare: {
-    CLOUDFLARE_ZONE_ID: "Cloudflare_Zone_ID_or_ID",
-    CLOUDFLARE_X_AUTH_KEY: "Cloudflare_API_Auth_Key",
-    CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare_User_Email",
-  },
+   // Cloudflare
+   cloudflare: {
+     CLOUDFLARE_ZONE_ID: "Cloudflare_Zone_ID_or_ID",
+     CLOUDFLARE_X_AUTH_KEY: "Cloudflare_API_Auth_Key",
+     CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare_User_Email",
+   },
 
-  integrations: {
-    newrelic: {
-      appName: "RDS_API_production",
-      licenseKey: "<newrelicLicenseKey>",
-    },
-  },
+   integrations: {
+     newrelic: {
+       appName: "RDS_API_production",
+       licenseKey: "<newrelicLicenseKey>",
+     },
+   },
 
-  routesCacheTTL: {
-    "/members": 900,
-  },
-};
+   routesCacheTTL: {
+     "/members": 900,
+   },
+ };
