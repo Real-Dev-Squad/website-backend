@@ -11,7 +11,7 @@ const obfuscate = require("../utils/obfuscate");
 const { getPaginationLink, getFilteredUsers } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { getFilteredPRsOrIssues } = require("../utils/github");
+const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -67,7 +67,7 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const query = req.query.q;
+    const query = req.query?.query ?? "";
     const qualifiers = getQualifiers(query);
 
     if (qualifiers?.filterBy) {
