@@ -18,7 +18,6 @@ const extractPRdetails = (data) => {
       repository_url: repositoryUrl,
       labels,
       assignees,
-      pull_request: pullRequest,
     }) => {
       const allAssignees = assignees.map((object) => object.login);
       const allLabels = labels.map((object) => object.name);
