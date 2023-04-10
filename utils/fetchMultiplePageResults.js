@@ -2,17 +2,14 @@ const githubService = require("../services/githubService");
 
 const fetchMultiplePageResults = async (callbackFn, params) => {
   let page = 1;
-  const { data } = await callbackFn({ page, ...params });
+  const allPRs = [];
 
-  const allPRs = githubService.extractPRdetails(data);
-  page++;
-
-  while (allPRs.length === 100) {
+  do {
     const { data } = await callbackFn({ page, ...params });
-    const nextPRs = githubService.extractPRdetails(data);
-    allPRs.push(...nextPRs);
+    const currentPRs = githubService.extractPRdetails(data);
+    allPRs.push(...currentPRs);
     page++;
-  }
+  } while (allPRs.length === 100 && allPRs.length > 0);
 
   return allPRs;
 };

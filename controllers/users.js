@@ -67,7 +67,7 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const query = req.query.q;
+    const query = req.query.query;
     const qualifiers = getQualifiers(query);
 
     if (qualifiers?.filterBy) {

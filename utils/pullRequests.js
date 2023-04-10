@@ -4,6 +4,7 @@ const githubService = require("../services/githubService");
 
 const getFilteredPRsOrIssues = async (qualifiers) => {
   let allPRs = [];
+  let githubServiceCallback = () => {};
   const { sortBy = "RECENT_FIRST", filterBy } = qualifiers;
   const order = sortBy === "RECENT_FIRST" ? ORDER_TYPE.DESC : ORDER_TYPE.ASC;
 
@@ -19,20 +20,14 @@ const getFilteredPRsOrIssues = async (qualifiers) => {
       searchParams.created = dateTime;
     }
 
-    allPRs = await fetchMultiplePageResults(githubService.fetchOpenPRs, {
-      searchParams,
-      resultOptions,
-    });
+    githubServiceCallback = githubService.fetchOpenPRs;
   }
   if (filterBy === "MERGED_PRS") {
     if (dateTime) {
       searchParams.merged = dateTime;
     }
 
-    allPRs = await fetchMultiplePageResults(githubService.fetchMergedPRs, {
-      searchParams,
-      resultOptions,
-    });
+    githubServiceCallback = githubService.fetchMergedPRs;
   }
 
   if (filterBy === "OPEN_ISSUES") {
@@ -40,10 +35,7 @@ const getFilteredPRsOrIssues = async (qualifiers) => {
       searchParams.created = dateTime;
     }
 
-    allPRs = await fetchMultiplePageResults(githubService.fetchOpenIssues, {
-      searchParams,
-      resultOptions,
-    });
+    githubServiceCallback = githubService.fetchOpenIssues;
   }
 
   if (filterBy === "CLOSED_ISSUES") {
@@ -51,11 +43,13 @@ const getFilteredPRsOrIssues = async (qualifiers) => {
       searchParams.closed = dateTime;
     }
 
-    allPRs = await fetchMultiplePageResults(githubService.fetchClosedIssues, {
-      searchParams,
-      resultOptions,
-    });
+    githubServiceCallback = githubService.fetchClosedIssues;
   }
+
+  allPRs = await fetchMultiplePageResults(githubServiceCallback, {
+    searchParams,
+    resultOptions,
+  });
 
   return allPRs;
 };
