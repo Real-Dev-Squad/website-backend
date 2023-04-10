@@ -137,6 +137,7 @@ async function getUsers(req, res, next) {
         .messages({
           "string.empty": "prev value cannot be empty",
         }),
+      query: joi.string().optional(),
     });
   try {
     await schema.validateAsync(req.query);

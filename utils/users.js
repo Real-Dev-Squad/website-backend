@@ -114,6 +114,33 @@ function getPaginationLink(query, cursor, documentId) {
   return endpoint;
 }
 
+/**
+ * Returns an array of unique users from the filtered PRs/Issues response
+ *
+ * @param allPRs {Array} - list of all PRs/Issues from the respective github service
+ * @param allUsers {Array} - list of total users from firebase
+ *
+ */
+function getFilteredUsers(allPRs, allUsers) {
+  const uniqueUsersInOrder = new Set();
+
+  allPRs?.forEach((element) => {
+    uniqueUsersInOrder.add(element.username);
+  });
+
+  const usersWithDetails = [];
+
+  uniqueUsersInOrder.forEach((username) => {
+    const userDetails = allUsers.find((user) => user.github_id === username);
+
+    if (userDetails) {
+      usersWithDetails.push(userDetails);
+    }
+  });
+
+  return usersWithDetails;
+}
+
 module.exports = {
   getUserId,
   getUsername,
@@ -121,4 +148,5 @@ module.exports = {
   getParticipantUsernames,
   getLowestLevelSkill,
   getPaginationLink,
+  getFilteredUsers,
 };

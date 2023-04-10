@@ -129,7 +129,7 @@ const getSuggestedUsers = async (skill) => {
  * @param query { search, next, prev, size, page }: Filter for users
  * @return {Promise<userModel|Array>}
  */
-const fetchUsers = async (query) => {
+const fetchPaginatedUsers = async (query) => {
   try {
     // INFO: default user size set to 100
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
@@ -171,6 +171,33 @@ const fetchUsers = async (query) => {
       allUsers,
       nextId: lastDoc?.id ?? "",
       prevId: firstDoc?.id ?? "",
+    };
+  } catch (err) {
+    logger.error("Error retrieving user data", err);
+    throw err;
+  }
+};
+
+const fetchAllUsers = async () => {
+  try {
+    const dbQuery = userModel;
+
+    const snapshot = await dbQuery.get();
+
+    const allUsers = [];
+
+    snapshot.forEach((doc) => {
+      allUsers.push({
+        id: doc.id,
+        ...doc.data(),
+        phone: undefined,
+        email: undefined,
+        tokens: undefined,
+        chaincode: undefined,
+      });
+    });
+    return {
+      allUsers,
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
@@ -355,7 +382,7 @@ const getUsersBasedOnFilter = async (query) => {
 
 module.exports = {
   addOrUpdate,
-  fetchUsers,
+  fetchPaginatedUsers,
   fetchUser,
   setIncompleteUserDetails,
   initializeUser,
@@ -365,5 +392,6 @@ module.exports = {
   getJoinData,
   getSuggestedUsers,
   fetchUserSkills,
+  fetchAllUsers,
   getUsersBasedOnFilter,
 };
