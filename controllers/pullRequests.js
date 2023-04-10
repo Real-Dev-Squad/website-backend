@@ -1,5 +1,6 @@
 const githubService = require("../services/githubService");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const { ORDER_TYPE } = require("../utils/pullRequests");
 
 /**
  * Collects all pull requests and sends only required data for each pull request
@@ -38,8 +39,9 @@ const getUserPRs = async (req, res) => {
  */
 const getStalePRs = async (req, res) => {
   try {
+    const order = ORDER_TYPE.ASC;
     const { size, page } = req.query;
-    const { data } = await githubService.fetchStalePRs(size, page);
+    const { data } = await githubService.fetchOpenPRs({ perPage: size, page, resultOptions: { order } });
 
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data);
@@ -67,8 +69,9 @@ const getStalePRs = async (req, res) => {
  */
 const getOpenPRs = async (req, res) => {
   try {
+    const order = ORDER_TYPE.DESC;
     const { size, page } = req.query;
-    const { data } = await githubService.fetchOpenPRs(size, page);
+    const { data } = await githubService.fetchOpenPRs({ perPage: size, page, resultOptions: { order } });
 
     if (data.total_count) {
       const allPRs = githubService.extractPRdetails(data);
