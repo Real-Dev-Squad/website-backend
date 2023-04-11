@@ -16,11 +16,8 @@ const apiService = new EventAPIService(tokenService);
  * @throws {Error} If an error occurs while creating the room document.
  */
 const createRoom = async (req, res) => {
-  const payload = {
-    name: req.body.name,
-    description: req.body.description,
-    region: req.body.region,
-  };
+  const { name, description, region } = req.body;
+  const payload = { name, description, region };
   try {
     const roomData = await apiService.post("/rooms", payload);
     const savedRoomData = await eventQuery.createRoom(roomData);
@@ -68,12 +65,10 @@ const getAllRooms = async (req, res) => {
  * @throws {Error} If an error occurs while generating the token.
  */
 const joinRoom = async (req, res) => {
+  const { roomId, userId, role } = req.body;
+  const payload = { room_id: roomId, user_id: userId, role };
   try {
-    const token = tokenService.getAuthToken({
-      room_id: req.body.roomId,
-      user_id: req.body.userId,
-      role: req.body.role,
-    });
+    const token = tokenService.getAuthToken(payload);
     res.status(200).json({
       token: token,
       msg: "Token generated successfully!",
