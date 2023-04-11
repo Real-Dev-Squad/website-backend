@@ -181,21 +181,34 @@ const fetchPaginatedUsers = async (query) => {
 const fetchFilteredUsers = async (usernames = []) => {
   try {
     const dbQuery = userModel;
-
-    const snapshot = await dbQuery.where("github_id", "in", usernames).get();
-
     const filterdUsersWithDetails = [];
 
-    snapshot.forEach((doc) => {
-      filterdUsersWithDetails.push({
-        id: doc.id,
-        ...doc.data(),
-        phone: undefined,
-        email: undefined,
-        tokens: undefined,
-        chaincode: undefined,
+    const groups = [];
+    const batchSize = 30; // since only 30 comparisons are allowed with the 'in' clause
+    for (let i = 0; i < usernames.length; i += batchSize) {
+      groups.push(usernames.slice(i, i + batchSize));
+    }
+
+    // For each group, write a separate query
+    const promises = groups.map((group) => {
+      return dbQuery.where("github_id", "in", group).get();
+    });
+
+    const snapshots = await Promise.all(promises);
+
+    snapshots.forEach((snapshot) => {
+      snapshot.forEach((doc) => {
+        filterdUsersWithDetails.push({
+          id: doc.id,
+          ...doc.data(),
+          phone: undefined,
+          email: undefined,
+          tokens: undefined,
+          chaincode: undefined,
+        });
       });
     });
+
     return {
       filterdUsersWithDetails,
     };
