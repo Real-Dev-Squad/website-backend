@@ -178,16 +178,16 @@ const fetchPaginatedUsers = async (query) => {
   }
 };
 
-const fetchAllUsers = async () => {
+const fetchFilteredUsers = async (usernames = []) => {
   try {
     const dbQuery = userModel;
 
-    const snapshot = await dbQuery.get();
+    const snapshot = await dbQuery.where("github_id", "in", usernames).get();
 
-    const allUsers = [];
+    const filterdUsersWithDetails = [];
 
     snapshot.forEach((doc) => {
-      allUsers.push({
+      filterdUsersWithDetails.push({
         id: doc.id,
         ...doc.data(),
         phone: undefined,
@@ -197,7 +197,7 @@ const fetchAllUsers = async () => {
       });
     });
     return {
-      allUsers,
+      filterdUsersWithDetails,
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
@@ -392,6 +392,6 @@ module.exports = {
   getJoinData,
   getSuggestedUsers,
   fetchUserSkills,
-  fetchAllUsers,
+  fetchFilteredUsers,
   getUsersBasedOnFilter,
 };
