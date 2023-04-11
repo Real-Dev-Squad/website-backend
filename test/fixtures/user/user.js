@@ -213,7 +213,6 @@ module.exports = () => {
       github_display_name: "Tanishq Singla",
       phone: "1234567890",
       email: "ts@gmail.com",
-      status: "idle",
       tokens: {
         githubAccessToken: "githubAccessToken",
       },

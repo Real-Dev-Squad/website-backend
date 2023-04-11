@@ -28,9 +28,11 @@ const member2 = userData[10];
 const superUser = userData[4];
 const activeMember = userData[0];
 
-const idleUserStatus = userStatusData.idleStatus;
-const activeUserStatus = userStatusData.activeStatus;
-const oooUserStatus = userStatusData.userStatusDataForOooState;
+const {
+  idleStatus: idleUserStatus,
+  activeStatus: activeUserStatus,
+  userStatusDataForOooState: oooUserStatus,
+} = userStatusData;
 
 describe("Task Requests", function () {
   let userId, superUserId;
@@ -56,6 +58,7 @@ describe("Task Requests", function () {
         jwt = authService.generateAuthToken({ userId: superUserId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+        await userStatusModel.updateUserStatus(userId, idleUserStatus);
         await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
@@ -88,6 +91,8 @@ describe("Task Requests", function () {
         jwt = authService.generateAuthToken({ userId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+
+        await userStatusModel.updateUserStatus(userId, idleUserStatus);
         await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
@@ -190,6 +195,8 @@ describe("Task Requests", function () {
         jwt = authService.generateAuthToken({ userId: userId2 });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+        await userStatusModel.updateUserStatus(userId, idleUserStatus);
+        await userStatusModel.updateUserStatus(userId2, idleUserStatus);
         await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
@@ -244,13 +251,16 @@ describe("Task Requests", function () {
         activeUserId = await addUser(activeMember);
         oooUserId = await addUser(member2);
         superUserId = await addUser(superUser);
+
         jwt = authService.generateAuthToken({ userId: superUserId });
         sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
+
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-        await taskRequestsModel.addOrUpdate(taskId, userId);
+
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
         await userStatusModel.updateUserStatus(activeUserId, activeUserStatus);
-        await userStatusModel.updateUserStatus(oooUserId, oooUserStatus);
+        await userStatusModel.updateUserStatus(oooUserId, { ...oooUserStatus });
+        await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
       it("should match response for successfull approval", function (done) {
@@ -371,7 +381,8 @@ describe("Task Requests", function () {
         sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-        await taskRequestsModel.addOrUpdate(taskId);
+        await userStatusModel.updateUserStatus(userId, idleUserStatus);
+        await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
       it("should return unauthorized user response", function (done) {

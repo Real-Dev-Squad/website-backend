@@ -64,9 +64,13 @@ const addOrUpdate = async (taskId, userId) => {
     const taskRequestData = taskRequest.data();
 
     const { userExists, user } = await userModel.fetchUser({ userId });
+    const { userStatusExists } = await userStatusModel.getUserStatus(userId);
 
     if (!userExists) {
       return { userDoesNotExists: true };
+    }
+    if (!userStatusExists) {
+      return { userStatusDoesNotExist: true };
     }
 
     if (taskRequestData) {
@@ -125,12 +129,12 @@ const approveTaskRequest = async (taskRequestId, userId) => {
   try {
     const taskRequest = await taskRequestsCollection.doc(taskRequestId).get();
     const { user, userExists } = await userModel.fetchUser({ userId });
-    const { data: userStatus, userExists: userStatusExists } = await userStatusModel.getUserStatus(userId);
+    const { data: userStatus, userStatusExists } = await userStatusModel.getUserStatus(userId);
 
     if (!userExists) {
       return { userDoesNotExists: true };
     }
-    if (userStatusExists) {
+    if (!userStatusExists) {
       return { userStatusDoesNotExists: true };
     }
 
