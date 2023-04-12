@@ -121,19 +121,24 @@ function getPaginationLink(query, cursor, documentId) {
  * @param allUsers {Array} - list of total users from firebase
  *
  */
-function getUsernamesFromPRs(allPRs) {
-  const uniqueUsernamesSet = new Set();
-  const usernames = [];
+function getFilteredUsers(allPRs, allUsers) {
+  const uniqueUsersInOrder = new Set();
 
-  allPRs?.forEach((pr) => {
-    const username = pr?.username;
-    if (!uniqueUsernamesSet.has(username)) {
-      uniqueUsernamesSet.add(username);
-      usernames.push(username);
+  allPRs?.forEach((element) => {
+    uniqueUsersInOrder.add(element.username);
+  });
+
+  const usersWithDetails = [];
+
+  uniqueUsersInOrder.forEach((username) => {
+    const userDetails = allUsers.find((user) => user.github_id === username);
+
+    if (userDetails) {
+      usersWithDetails.push(userDetails);
     }
   });
 
-  return usernames;
+  return usersWithDetails;
 }
 
 module.exports = {
@@ -143,5 +148,5 @@ module.exports = {
   getParticipantUsernames,
   getLowestLevelSkill,
   getPaginationLink,
-  getUsernamesFromPRs,
+  getFilteredUsers,
 };

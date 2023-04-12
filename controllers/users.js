@@ -8,7 +8,7 @@ const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
-const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
+const { getPaginationLink, getFilteredUsers } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
@@ -73,13 +73,13 @@ const getUsers = async (req, res) => {
     if (qualifiers?.filterBy) {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);
 
-      const filteredUsernames = getUsernamesFromPRs(allPRs);
+      const { allUsers } = await userQuery.fetchAllUsers();
 
-      const { filterdUsersWithDetails } = await userQuery.fetchUsers(filteredUsernames);
+      const filteredUsers = getFilteredUsers(allPRs, allUsers);
 
       return res.json({
         message: "Users returned successfully!",
-        users: filterdUsersWithDetails,
+        users: filteredUsers,
       });
     }
 
