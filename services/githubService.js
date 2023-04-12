@@ -56,7 +56,6 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
 
   const defaultParams = {
     org: config.get("githubApi.org"),
-    type: "pr",
   };
 
   const finalSearchParams = Object.assign({}, defaultParams, searchParams);
@@ -102,6 +101,7 @@ const fetchPRsByUser = async (username) => {
     const { user } = await fetchUser({ username });
     const url = getGithubURL({
       author: user.github_id,
+      type: "pr",
     });
     return getFetch(url);
   } catch (err) {
@@ -111,47 +111,105 @@ const fetchPRsByUser = async (username) => {
 };
 
 /**
- * Fetches the oldest open `per_page` requests
+ * Fetches the latest `per_page` open PRs
+ *
+ * Order by default is desc, which will fetch latest open PRs,
+ * to fetch stale PRs just change pass order as asc
+ *
  */
-const fetchStalePRs = async (perPage = 10, page = 1) => {
+const fetchOpenPRs = async (params = {}) => {
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {} } = params;
+
   try {
     const url = getGithubURL(
       {
+        type: "pr",
         is: "open",
+        ...searchParams,
       },
       {
         sort: "created",
-        order: "asc",
+        ...resultOptions,
         per_page: perPage,
         page,
       }
     );
     return getFetch(url);
   } catch (err) {
-    logger.error(`Error while fetching pull requests: ${err}`);
+    logger.error(`Error while fetching open pull requests: ${err}`);
     throw err;
   }
 };
 
-/**
- * Fetches the latest `per_page` open PRs
- */
-const fetchOpenPRs = async (perPage = 10, page = 1) => {
+const fetchMergedPRs = async (params = {}) => {
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {} } = params;
+
   try {
     const url = getGithubURL(
       {
+        type: "pr",
+        is: "merged",
+        ...searchParams,
+      },
+      {
+        sort: "updated",
+        ...resultOptions,
+        per_page: perPage,
+        page,
+      }
+    );
+
+    return getFetch(url);
+  } catch (err) {
+    logger.error(`Error while fetching closed pull requests: ${err}`);
+    throw err;
+  }
+};
+
+const fetchOpenIssues = async (params = {}) => {
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {} } = params;
+
+  try {
+    const url = getGithubURL(
+      {
+        type: "issue",
         is: "open",
+        ...searchParams,
       },
       {
         sort: "created",
-        order: "desc",
+        ...resultOptions,
         per_page: perPage,
         page,
       }
     );
     return getFetch(url);
   } catch (err) {
-    logger.error(`Error while fetching pull requests: ${err}`);
+    logger.error(`Error while fetching open issues: ${err}`);
+    throw err;
+  }
+};
+
+const fetchClosedIssues = async (params = {}) => {
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {} } = params;
+
+  try {
+    const url = getGithubURL(
+      {
+        type: "issue",
+        is: "closed",
+        ...searchParams,
+      },
+      {
+        sort: "updated",
+        ...resultOptions,
+        per_page: perPage,
+        page,
+      }
+    );
+    return getFetch(url);
+  } catch (err) {
+    logger.error(`Error while fetching closed issues: ${err}`);
     throw err;
   }
 };
@@ -159,7 +217,9 @@ const fetchOpenPRs = async (perPage = 10, page = 1) => {
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
-  fetchStalePRs,
+  fetchMergedPRs,
   getFetch,
   extractPRdetails,
+  fetchOpenIssues,
+  fetchClosedIssues,
 };

@@ -8,8 +8,10 @@ const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
-const { getPaginationLink } = require("../utils/users");
+const { getPaginationLink, getFilteredUsers } = require("../utils/users");
+const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -65,7 +67,23 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const { allUsers, nextId, prevId } = await userQuery.fetchUsers(req.query);
+    const query = req.query?.query ?? "";
+    const qualifiers = getQualifiers(query);
+
+    if (qualifiers?.filterBy) {
+      const allPRs = await getFilteredPRsOrIssues(qualifiers);
+
+      const { allUsers } = await userQuery.fetchAllUsers();
+
+      const filteredUsers = getFilteredUsers(allPRs, allUsers);
+
+      return res.json({
+        message: "Users returned successfully!",
+        users: filteredUsers,
+      });
+    }
+
+    const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(req.query);
 
     return res.json({
       message: "Users returned successfully!",
@@ -419,6 +437,31 @@ const addDefaultArchivedRole = async (req, res) => {
   }
 };
 
+/**
+ * Returns the lists of users who match the specified query params
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const filterUsers = async (req, res) => {
+  try {
+    if (!Object.keys(req.query).length) {
+      return res.boom.badRequest("filter for item not provided");
+    }
+    const allUsers = await userQuery.getUsersBasedOnFilter(req.query);
+
+    return res.json({
+      message: "Users found successfully!",
+      users: allUsers,
+      count: allUsers.length,
+    });
+  } catch (error) {
+    logger.error(`Error while fetching all users: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -437,4 +480,5 @@ module.exports = {
   getUserIntro,
   addDefaultArchivedRole,
   getUserSkills,
+  filterUsers,
 };
