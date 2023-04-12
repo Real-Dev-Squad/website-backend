@@ -323,7 +323,7 @@ describe("Task Requests", function () {
           });
       });
 
-      it("should throw 400 error when userId is missing", function (done) {
+      it("should throw 400 error when taskRequestId is missing", function (done) {
         chai
           .request(app)
           .patch("/taskRequests/approve")
@@ -335,24 +335,24 @@ describe("Task Requests", function () {
             }
 
             expect(res).to.have.status(400);
-            expect(res.body.message).to.equal("Invalid request body");
+            expect(res.body.message).to.equal("taskRequestId not provided");
             return done();
           });
       });
 
-      it("should throw 400 error when taskId is missing", function (done) {
+      it("should throw 400 error when userId is missing", function (done) {
         chai
           .request(app)
           .patch("/taskRequests/approve")
           .set("cookie", `${cookieName}=${jwt}`)
-          .send({ taskId })
+          .send({ taskRequestId: taskId })
           .end((err, res) => {
             if (err) {
               return done(err);
             }
 
             expect(res).to.have.status(400);
-            expect(res.body.message).to.equal("Invalid request body");
+            expect(res.body.message).to.equal("userId not provided");
             return done();
           });
       });
@@ -368,7 +368,7 @@ describe("Task Requests", function () {
             }
 
             expect(res).to.have.status(400);
-            expect(res.body.message).to.equal("Invalid request body");
+            expect(res.body.message).to.equal("taskRequestId not provided");
             return done();
           });
       });

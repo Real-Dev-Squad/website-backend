@@ -61,8 +61,11 @@ const approveTaskRequest = async (req, res) => {
   try {
     const { taskRequestId, userId } = req.body;
 
-    if (!taskRequestId || !userId) {
-      return res.boom.badRequest("Invalid request body");
+    if (!taskRequestId) {
+      return res.boom.badRequest("taskRequestId not provided");
+    }
+    if (!userId) {
+      return res.boom.badRequest("userId not provided");
     }
 
     const response = await taskRequestsModel.approveTaskRequest(taskRequestId, userId);

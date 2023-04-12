@@ -60,8 +60,9 @@ const fetchTaskRequests = async () => {
  */
 const addOrUpdate = async (taskId, userId) => {
   try {
-    const taskRequest = await taskRequestsCollection.doc(taskId).get();
-    const taskRequestData = taskRequest.data();
+    const taskRequestsSnapshot = await taskRequestsCollection.where("taskId", "==", taskId).limit(1).get();
+    const [taskRequestRef] = taskRequestsSnapshot.docs;
+    const taskRequestData = taskRequestRef?.data();
 
     const { userExists, user } = await userModel.fetchUser({ userId });
     const { userStatusExists } = await userStatusModel.getUserStatus(userId);
@@ -76,13 +77,13 @@ const addOrUpdate = async (taskId, userId) => {
     if (taskRequestData) {
       const currentRequestors = taskRequestData.requestors;
       if (currentRequestors.length >= 1) {
-        const requestorExists = !!currentRequestors.find((requestor) => requestor === user.id);
+        const requestorExists = currentRequestors.some((requestor) => requestor === user.id);
         if (requestorExists) {
           return { requestorExists };
         }
 
         const updatedRequestors = [...currentRequestors, user.id];
-        await taskRequestsCollection.doc(taskId).update({ requestors: updatedRequestors });
+        await taskRequestsCollection.doc(taskRequestRef.id).update({ requestors: updatedRequestors });
 
         return {
           isUpdate: true,
@@ -102,11 +103,12 @@ const addOrUpdate = async (taskId, userId) => {
       purpose: taskData.purpose || "",
       requestors: [userId],
       status: TASK_REQUEST_STATUS.WAITING,
+      taskId,
       title: taskData.title,
       type: taskData.type,
     };
 
-    await taskRequestsCollection.doc(taskId).set(newTaskRequest);
+    await taskRequestsCollection.add(newTaskRequest);
 
     return {
       isCreate: true,
