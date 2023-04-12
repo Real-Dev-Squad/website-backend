@@ -75,7 +75,7 @@ const getUsers = async (req, res) => {
 
       const filteredUsernames = getFilteredUsernames(allPRs);
 
-      const { filterdUsersWithDetails } = await userQuery.fetchFilteredUsers(filteredUsernames);
+      const { filterdUsersWithDetails } = await userQuery.fetchUsers(filteredUsernames);
 
       return res.json({
         message: "Users returned successfully!",

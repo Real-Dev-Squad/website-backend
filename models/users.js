@@ -179,7 +179,7 @@ const fetchPaginatedUsers = async (query) => {
   }
 };
 
-const fetchFilteredUsers = async (usernames = []) => {
+const fetchUsers = async (usernames = []) => {
   try {
     const dbQuery = userModel;
     const filterdUsersWithDetails = [];
@@ -405,6 +405,6 @@ module.exports = {
   getJoinData,
   getSuggestedUsers,
   fetchUserSkills,
-  fetchFilteredUsers,
+  fetchUsers,
   getUsersBasedOnFilter,
 };
