@@ -8,6 +8,7 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { arraysHaveCommonItem } = require("../utils/array");
 const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
+const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
@@ -184,9 +185,8 @@ const fetchFilteredUsers = async (usernames = []) => {
     const filterdUsersWithDetails = [];
 
     const groups = [];
-    const batchSize = 30; // since only 30 comparisons are allowed with the 'in' clause
-    for (let i = 0; i < usernames.length; i += batchSize) {
-      groups.push(usernames.slice(i, i + batchSize));
+    for (let i = 0; i < usernames.length; i += BATCH_SIZE_IN_CLAUSE) {
+      groups.push(usernames.slice(i, i + BATCH_SIZE_IN_CLAUSE));
     }
 
     // For each group, write a separate query
