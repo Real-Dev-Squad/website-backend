@@ -126,9 +126,10 @@ function getUsernamesFromPRs(allPRs) {
   const usernames = [];
 
   allPRs?.forEach((pr) => {
-    if (!uniqueUsernamesSet.has(pr.username)) {
-      uniqueUsernamesSet.add(pr.username);
-      usernames.push(pr.username);
+    const username = pr?.username;
+    if (!uniqueUsernamesSet.has(username)) {
+      uniqueUsernamesSet.add(username);
+      usernames.push(username);
     }
   });
 
