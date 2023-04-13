@@ -60,7 +60,7 @@ const fetchTaskRequests = async () => {
  */
 const addOrUpdate = async (taskId, userId) => {
   try {
-    const taskRequestsSnapshot = await taskRequestsCollection.where("taskId", "==", taskId).limit(1).get();
+    const taskRequestsSnapshot = await taskRequestsCollection.where("taskId", "==", taskId).get();
     const [taskRequestRef] = taskRequestsSnapshot.docs;
     const taskRequestData = taskRequestRef?.data();
 
@@ -81,20 +81,18 @@ const addOrUpdate = async (taskId, userId) => {
     }
     if (taskRequestData) {
       const currentRequestors = taskRequestData.requestors;
-      if (currentRequestors.length >= 1) {
-        const alreadyRequesting = currentRequestors.some((requestor) => requestor === user.id);
-        if (alreadyRequesting) {
-          return { alreadyRequesting };
-        }
-
-        const updatedRequestors = [...currentRequestors, user.id];
-        await taskRequestsCollection.doc(taskRequestRef.id).update({ requestors: updatedRequestors });
-
-        return {
-          isUpdate: true,
-          requestors: updatedRequestors,
-        };
+      const alreadyRequesting = currentRequestors.some((requestor) => requestor === user.id);
+      if (alreadyRequesting) {
+        return { alreadyRequesting };
       }
+
+      const updatedRequestors = [...currentRequestors, user.id];
+      await taskRequestsCollection.doc(taskRequestRef.id).update({ requestors: updatedRequestors });
+
+      return {
+        isUpdate: true,
+        requestors: updatedRequestors,
+      };
     }
 
     const { taskData } = await tasksModel.fetchTask(taskId);
