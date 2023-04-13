@@ -240,6 +240,92 @@ describe("Task Requests", function () {
           });
       });
     });
+
+    describe("When user status does not exist", function () {
+      before(async function () {
+        userId = await addUser(member);
+        sinon.stub(userStatusModel, "getUserStatus").callsFake(() => ({ userStatusExists: false }));
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
+        jwt = authService.generateAuthToken({ userId });
+
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+      });
+
+      it("should match response", function (done) {
+        chai
+          .request(app)
+          .post("/taskRequests/addOrUpdate")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({
+            taskId,
+            userId,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.equal("User status does not exist");
+            return done();
+          });
+      });
+    });
+
+    describe("When the user status is not idle", function () {
+      before(async function () {
+        userId = await addUser(member);
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
+        jwt = authService.generateAuthToken({ userId });
+
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+      });
+
+      it("should match response when the user is OOO", function (done) {
+        sinon.stub(userStatusModel, "getUserStatus").callsFake(() => ({ userStatusExists: true, data: oooUserStatus }));
+        chai
+          .request(app)
+          .post("/taskRequests/addOrUpdate")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({
+            taskId,
+            userId,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.equal("User is currently OOO");
+            return done();
+          });
+      });
+
+      it("should match response when the user is active on another task", function (done) {
+        sinon
+          .stub(userStatusModel, "getUserStatus")
+          .callsFake(() => ({ userStatusExists: true, data: activeUserStatus }));
+
+        chai
+          .request(app)
+          .post("/taskRequests/addOrUpdate")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({
+            taskId,
+            userId,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.equal("User is currently active on another task");
+            return done();
+          });
+      });
+    });
   });
 
   describe("PATCH /taskRequests/approve - approves task request", function () {

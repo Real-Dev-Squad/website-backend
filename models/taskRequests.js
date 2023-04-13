@@ -65,7 +65,7 @@ const addOrUpdate = async (taskId, userId) => {
     const taskRequestData = taskRequestRef?.data();
 
     const { userExists, user } = await userModel.fetchUser({ userId });
-    const { userStatusExists } = await userStatusModel.getUserStatus(userId);
+    const { userStatusExists, data: userStatus } = await userStatusModel.getUserStatus(userId);
 
     if (!userExists) {
       return { userDoesNotExists: true };
@@ -73,13 +73,18 @@ const addOrUpdate = async (taskId, userId) => {
     if (!userStatusExists) {
       return { userStatusDoesNotExist: true };
     }
-
+    if (userStatus.currentStatus.state === userState.OOO) {
+      return { isUserOOO: true };
+    }
+    if (userStatus.currentStatus.state === userState.ACTIVE) {
+      return { isUserActive: true };
+    }
     if (taskRequestData) {
       const currentRequestors = taskRequestData.requestors;
       if (currentRequestors.length >= 1) {
-        const requestorExists = currentRequestors.some((requestor) => requestor === user.id);
-        if (requestorExists) {
-          return { requestorExists };
+        const alreadyRequesting = currentRequestors.some((requestor) => requestor === user.id);
+        if (alreadyRequesting) {
+          return { alreadyRequesting };
         }
 
         const updatedRequestors = [...currentRequestors, user.id];

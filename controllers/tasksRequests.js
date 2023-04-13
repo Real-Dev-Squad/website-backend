@@ -27,14 +27,21 @@ const addOrUpdate = async (req, res) => {
     }
 
     const response = await taskRequestsModel.addOrUpdate(taskId, userId);
+
     if (response.userDoesNotExist) {
       return res.boom.conflict("User does not exist");
     }
-    if (response.userStatusDoesNotExists) {
-      return res.boom.conflict("User status does not exists");
+    if (response.userStatusDoesNotExist) {
+      return res.boom.conflict("User status does not exist");
     }
-    if (response.requestorExists) {
+    if (response.alreadyRequesting) {
       return res.boom.conflict("User is already requesting for the task");
+    }
+    if (response.isUserOOO) {
+      return res.boom.conflict("User is currently OOO");
+    }
+    if (response.isUserActive) {
+      return res.boom.conflict("User is currently active on another task");
     }
     if (response.taskDoesNotExist) {
       return res.boom.conflict("Task does not exist");
