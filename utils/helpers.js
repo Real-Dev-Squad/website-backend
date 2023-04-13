@@ -9,7 +9,7 @@ function isEmpty(valueToCheck) {
     case "undefined":
       return true;
     case "string":
-      return valueToCheck.trim().length === 0 || valueToCheck.length === 0;
+      return valueToCheck.length === 0 || valueToCheck.trim().length === 0;
     case "object":
       if (valueToCheck === null) {
         return true;
