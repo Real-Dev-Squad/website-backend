@@ -84,8 +84,13 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
  * @access private
  * @param url {string} - URL on github to call
  */
-function getFetch(url, params = null, data = null, headers = null) {
-  return utils.fetch(url, "get", params, data, headers);
+function getFetch(url) {
+  return utils.fetch(url, "get", null, null, null, {
+    auth: {
+      username: config.get("githubOauth.clientId"),
+      password: config.get("githubOauth.clientSecret"),
+    },
+  });
 }
 
 /**
