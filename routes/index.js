@@ -24,5 +24,7 @@ app.use("/levels", require("./levels.js"));
 app.use("/items", require("./items.js"));
 app.use("/cache", require("./cloudflareCache.js"));
 app.use("/external-accounts", require("./external-accounts.js"));
+app.use("/rooms", require("./events.js"));
+app.use("/sessions", require("./sessions.js"));
 
 module.exports = app;
