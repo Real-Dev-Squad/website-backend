@@ -25,29 +25,6 @@ const createRoom = async (roomData) => {
 };
 
 /**
- * Retrieves all the rooms from the Firestore database.
- * @async
- * @function
- * @returns {Promise<Array<object>>} An array containing the data of all the retrieved rooms.
- * @throws {Error} If an error occurs while retrieving the rooms.
- */
-const getAllRooms = async () => {
-  try {
-    const retrievedRooms = [];
-    const rooms = await eventModel.get();
-    if (rooms.docs.length > 0) {
-      for (const room of rooms.docs) {
-        retrievedRooms.push(room.data());
-      }
-    }
-    return retrievedRooms;
-  } catch (error) {
-    logger.error("Error in adding data", error);
-    throw error;
-  }
-};
-
-/**
  * Updates an existing room document in the Firestore database with the given room data.
  * @async
  * @function
@@ -90,7 +67,6 @@ const endActiveRoom = async ({ id, reason, lock }) => {
 
 module.exports = {
   createRoom,
-  getAllRooms,
   updateRoom,
   endActiveRoom,
 };
