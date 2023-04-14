@@ -47,12 +47,6 @@ const getSessionById = async (req, res) => {
     return res.status(200).json(sessionData);
   } catch (error) {
     logger.error({ error });
-    if (error.status === 404) {
-      return res.status(404).json({
-        error: error.code,
-        message: "Session not found",
-      });
-    }
     return res.status(500).json({
       error: error.code,
       message: "Unable to retrieve session details",
