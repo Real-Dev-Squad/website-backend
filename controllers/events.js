@@ -98,12 +98,6 @@ const getRoomById = async (req, res) => {
     return res.status(200).json(roomData);
   } catch (error) {
     logger.error({ error });
-    if (error.status === 404) {
-      return res.status(404).json({
-        error: error.code,
-        message: "Room not found",
-      });
-    }
     return res.status(500).json({
       error: error.code,
       message: "Unable to retrieve room details",
