@@ -1,8 +1,8 @@
 const issuesService = require("../services/issuesService");
 const tasks = require("../models/tasks");
 const { getIssueAssigneeRdsInfo } = require("../models/users");
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
-const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 /**
  * Get the  issues of the repo
  * @param {Object} req - Express request object
@@ -29,7 +29,7 @@ const getIssues = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while retriving issues ${err}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -91,7 +91,7 @@ const issueUpdates = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while retriving issues ${err}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
