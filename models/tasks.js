@@ -121,7 +121,7 @@ const fetchTaskByIssueId = async (issueId) => {
     const taskData = await fromFirestoreData(updatedTaskData);
 
     if (taskData?.status) {
-      taskData.status = TASK_STATUS[taskData.status.toUpperCase()] || task.status;
+      taskData.status = TASK_STATUS[taskData.status.toUpperCase()];
     }
 
     return taskData;
