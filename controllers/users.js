@@ -8,8 +8,10 @@ const { logType } = require("../constants/logs");
 const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
-const { getPaginationLink } = require("../utils/users");
+const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
+const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -65,7 +67,23 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const { allUsers, nextId, prevId } = await userQuery.fetchUsers(req.query);
+    const query = req.query?.query ?? "";
+    const qualifiers = getQualifiers(query);
+
+    if (qualifiers?.filterBy) {
+      const allPRs = await getFilteredPRsOrIssues(qualifiers);
+
+      const filteredUsernames = getUsernamesFromPRs(allPRs);
+
+      const { filterdUsersWithDetails } = await userQuery.fetchUsers(filteredUsernames);
+
+      return res.json({
+        message: "Users returned successfully!",
+        users: filterdUsersWithDetails,
+      });
+    }
+
+    const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(req.query);
 
     return res.json({
       message: "Users returned successfully!",
