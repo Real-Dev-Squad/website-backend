@@ -171,6 +171,7 @@ export FIRESTORE_EMULATOR_HOST="localhost:<Firebase emulator PORT>"
 
 - add '--project=< your firestore app name>' flag to both the test scripts.
   find test scripts inside : scripts/tests/testIntegration.sh , scripts/tests/testUnit.sh
+  add this flag @ line 7 in both the test scripts at the end with a single space.
 - Java version above 11 is needed for firebase tool version >= 11
 - Either manually kill the java process after unit tests are done or run both the tests separately by running the test commands.
 - for this error refer this : https://github.com/Real-Dev-Squad/website-backend/issues/918
