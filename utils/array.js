@@ -18,6 +18,21 @@ function chunks(array, size = 1) {
   return result;
 }
 
+/**
+ * Checks if two arrays have any common items
+ * @param array1 {Array<string, number>} - first array
+ * @param array2 {Array<string, number>} - second array
+ * @returns {boolean} - true if the arrays have at least one common item, false otherwise
+ */
+
+function arraysHaveCommonItem(array1, array2) {
+  if (!array1?.length || !array2?.length) {
+    return false;
+  }
+  return array1.some((value) => array2.includes(value));
+}
+
 module.exports = {
   chunks,
+  arraysHaveCommonItem,
 };
