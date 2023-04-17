@@ -3,6 +3,7 @@ const { getBeforeHourTime } = require("../utils/time");
 const logsModel = firestore.collection("logs");
 const admin = require("firebase-admin");
 const { logType } = require("../constants/logs");
+const { logMessageBuilder } = require("../services/logMessageBuilder");
 
 /**
  * Adds log
@@ -56,11 +57,13 @@ const fetchLogs = async (query, param) => {
       : await logsSnapshotQuery.limit(10).get();
 
     const logs = [];
-    snapshot.forEach((doc) => {
-      logs.push({
-        ...doc.data(),
-      });
-    });
+    await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const logData = doc.data();
+        const message = await logMessageBuilder(logData);
+        logs.push({ ...logData, message });
+      })
+    );
     return logs;
   } catch (err) {
     logger.error("Error in adding log", err);
