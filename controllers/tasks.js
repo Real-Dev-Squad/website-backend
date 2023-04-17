@@ -5,6 +5,7 @@ const { USER_STATUS } = require("../constants/users");
 const { addOrUpdate, fetchUser } = require("../models/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
+const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 /**
  * Creates new task
  *
@@ -41,7 +42,7 @@ const addNewTask = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while creating new task: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 /**
@@ -59,7 +60,7 @@ const fetchTasks = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -99,7 +100,7 @@ const getUserTasks = async (req, res) => {
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`);
 
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -125,7 +126,7 @@ const getSelfTasks = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -139,7 +140,7 @@ const getTask = async (req, res) => {
     }
     return res.json({ message: "task returned successfully", taskData });
   } catch (err) {
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 /**
@@ -159,7 +160,7 @@ const updateTask = async (req, res) => {
     return res.status(204).send();
   } catch (err) {
     logger.error(`Error while updating task: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -232,7 +233,7 @@ const updateTaskStatus = async (req, res, next) => {
     return res.json({ message: "Task updated successfully!", taskLog });
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`);
-    return res.boom.badImplementation("An internal server error occured");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -256,7 +257,7 @@ const overdueTasks = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while fetching overdue tasks : ${err}`);
-    return res.boom.badImplementation("An internal server error occured");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -278,7 +279,7 @@ const assignTask = async (req, res) => {
     }
     return res.json({ message: "Task assigned", Id: task.itemId });
   } catch {
-    return res.boom.badImplementation("Something went wrong!");
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
