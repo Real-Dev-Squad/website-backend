@@ -21,7 +21,7 @@ const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
  * @param userId { String }: User Id String to be used to update the user
  * @return {Promise<{isNewUser: boolean, userId: string}|{isNewUser: boolean, userId: string}>}
  */
-const addOrUpdate = async (userData, data, userId = null) => {
+const addOrUpdate = async (userData, userId = null) => {
   try {
     // userId exists Update user
     if (userId !== null) {
