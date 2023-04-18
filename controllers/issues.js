@@ -4,7 +4,7 @@ const { getIssueAssigneeRdsInfo } = require("../models/users");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 /**
- * Get the  issues of the repo
+ * Get the issues of the repo
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */

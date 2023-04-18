@@ -126,7 +126,7 @@ const fetchTaskByIssueId = async (issueId) => {
 
     return taskData;
   } catch (err) {
-    logger.error("Error retrieving task data", err);
+    logger.error("Error retrieving task data from issue Id", err);
     throw err;
   }
 };
