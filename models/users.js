@@ -55,7 +55,7 @@ const addOrUpdate = async (userData, userId = null) => {
     userData.roles = { archived: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
-    return { isNewUser: true, userId: userInfo.id };
+    return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true };
   } catch (err) {
     logger.error("Error in adding or updating user", err);
     throw err;
