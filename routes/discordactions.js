@@ -4,7 +4,7 @@ const { createRole } = require("../controllers/discordactions");
 
 const router = express.Router();
 
-router.post("/create/role", authenticate, createRole);
-router.get("/get/roles", authenticate, () => {});
+router.post("/create-role", authenticate, createRole);
+router.get("/get-roles", authenticate, () => {});
 
 module.exports = router;

@@ -1,9 +1,7 @@
-const DiscordActionsModel = require("../models/discordactions");
-const admin = require("firebase-admin");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
- * Creates a level
+ * Creates a role
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
@@ -11,17 +9,20 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 const createRole = async (req, res) => {
   try {
-    const { id, roleData } = await DiscordActionsModel.addLevel({
-      ...req.body,
-      createdBy: req.userData.id,
-      date: admin.firestore.Timestamp.fromDate(new Date()),
-    });
+    const postData = {
+      rolename: req.newrole,
+      permissions: req.permissions,
+    };
+    const BASE_URL = "dummy";
+    // Make a POST request to ServerB
+    const res = await fetch(`${BASE_URL}/create-guild-role`, {
+      method: "POST",
+      body: JSON.stringify(postData),
+      headers: { "Content-Type": "application/json" },
+    }).then((response) => response.json());
     return res.json({
       message: "Role created successfully!",
-      data: {
-        level: roleData,
-        id,
-      },
+      res,
     });
   } catch (err) {
     logger.error(`Error while creating new level: ${err}`);
