@@ -1,6 +1,6 @@
 const issuesService = require("../services/issuesService");
 const tasks = require("../models/tasks");
-const { getIssueAssigneeRdsInfo } = require("../models/users");
+const { getRdsUserInfoByGitHubUsername } = require("../models/users");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 /**
@@ -60,7 +60,7 @@ const issueUpdates = async (req, res) => {
         if (issue.assignee) {
           // If there are no previous assignees or the task was not assigned before
           if (!updatedTaskData.github.issue.assignee || !updatedTaskData.assignee) {
-            const user = await getIssueAssigneeRdsInfo(issue.assignee.login);
+            const user = await getRdsUserInfoByGitHubUsername(issue.assignee.login);
 
             updatedTaskData.github.issue.assignee = issue.assignee.login;
             updatedTaskData.github.issue.assigneeRdsInfo = user;

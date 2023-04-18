@@ -341,7 +341,7 @@ const fetchUserSkills = async (id) => {
   }
 };
 
-const getIssueAssigneeRdsInfo = async (githubUsername) => {
+const getRdsUserInfoByGitHubUsername = async (githubUsername) => {
   const { user } = await fetchUser({ githubUsername });
 
   return {
@@ -421,7 +421,7 @@ module.exports = {
   getJoinData,
   getSuggestedUsers,
   fetchUserSkills,
-  getIssueAssigneeRdsInfo,
+  getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
 };
