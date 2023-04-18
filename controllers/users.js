@@ -221,12 +221,7 @@ const updateSelf = async (req, res) => {
       await userQuery.setIncompleteUserDetails(userId);
     }
 
-    const data = {
-      status: "ACTIVE",
-      numberOfHours: 0
-    }
-
-    const user = await userQuery.addOrUpdate(req.body, data, userId);
+    const user = await userQuery.addOrUpdate(req.body, userId);
 
     if (!user.isNewUser) {
       // Success criteria, user finished the sign up process.
