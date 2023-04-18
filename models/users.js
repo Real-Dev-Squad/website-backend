@@ -349,7 +349,7 @@ const getIssueAssigneeRdsInfo = async (githubUsername) => {
     lastName: user.last_name,
     username: user.username,
   };
-}
+};
 
 /**
  * Fetches user data based on the filter query
