@@ -2,8 +2,7 @@ const ROLES = require("../constants/roles");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
 const { fetchUser } = require("../models/users");
-
-const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 /**
  * Fetches the data about our members
@@ -22,7 +21,7 @@ const getMembers = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`);
-    return res.boom.badImplementation("Something went wrong. Please contact admin");
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -46,7 +45,7 @@ const getIdleMembers = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`);
-    return res.boom.badImplementation("Something went wrong. Please contact admin");
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -71,7 +70,7 @@ const moveToMembers = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while retriving contributions ${err}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -96,7 +95,7 @@ const archiveMembers = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while retriving contributions ${err}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
