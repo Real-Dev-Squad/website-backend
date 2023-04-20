@@ -11,7 +11,7 @@ const USER_STATUS = {
 };
 
 const initialData = {
-  status: "ACTIVE",
+  status: "ONBOARDING",
   numberOfHours: 0,
 };
 
