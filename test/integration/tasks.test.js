@@ -61,6 +61,32 @@ describe("Tasks", function () {
         lossRate: { [DINERO]: 1 },
         isNoteworthy: false,
       },
+      {
+        title: "Some Task 3",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "active",
+        percentCompleted: 10,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      },
+      {
+        title: "Some Task 4",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "active",
+        percentCompleted: 10,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      },
     ];
 
     // Add the active task
@@ -69,6 +95,8 @@ describe("Tasks", function () {
 
     // Add the completed task
     taskId = (await tasks.updateTask(taskData[1])).taskId;
+    await tasks.updateTask(taskData[2]);
+    await tasks.updateTask(taskData[3]);
   });
 
   after(async function () {
@@ -165,6 +193,83 @@ describe("Tasks", function () {
 
           return done();
         });
+    });
+
+    it(`Should get all tasks except ${TASK_STATUS.IN_PROGRESS} tasks`, function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/?q=exclude%3A${TASK_STATUS.IN_PROGRESS}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks.filter((task) => task.status === TASK_STATUS.IN_PROGRESS).length).to.be.eql(0);
+          return done();
+        });
+    });
+
+    it(`Should only get the ${TASK_STATUS.IN_PROGRESS} tasks`, function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/?q=type%3A${TASK_STATUS.IN_PROGRESS}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks.some((task) => task.status !== TASK_STATUS.IN_PROGRESS)).to.be.eql(false);
+          return done();
+        });
+    });
+
+    it(`Should get all tasks except ${TASK_STATUS.IN_PROGRESS}, ${TASK_STATUS.BLOCKED} tasks`, function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/?q=exclude%3A${TASK_STATUS.IN_PROGRESS}%2C${TASK_STATUS.BLOCKED}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(
+            res.body.tasks.filter((task) => [TASK_STATUS.IN_PROGRESS, TASK_STATUS.BLOCKED].includes(task.status)).length
+          ).to.be.eql(0);
+          expect(res.body.tasks.length).to.be.eq(2);
+          return done();
+        });
+    });
+
+    it(`Should only get the ${TASK_STATUS.IN_PROGRESS} which startsAfter cursor:${taskId1} tasks`, async function () {
+      const response = await chai.request(app).get(`/tasks/?q=type%3A${TASK_STATUS.IN_PROGRESS}`);
+
+      expect(response).to.have.status(200);
+      expect(response.body).to.be.a("object");
+      expect(response.body.message).to.equal("Tasks returned successfully!");
+      expect(response.body.tasks).to.be.a("array");
+      expect(response.body.tasks.length).to.be.eq(3);
+
+      const firstTaskId = response.body.tasks[1].id;
+      const nextTaskId = response.body.tasks[2].id;
+      const nextResponse = await chai
+        .request(app)
+        .get(`/tasks/?q=type%3A${TASK_STATUS.IN_PROGRESS}+cursor%3A${firstTaskId}`);
+
+      expect(nextResponse).to.have.status(200);
+      expect(nextResponse.body).to.be.a("object");
+      expect(nextResponse.body.message).to.equal("Tasks returned successfully!");
+      expect(nextResponse.body.tasks).to.be.a("array");
+      expect(nextResponse.body.tasks.length).to.be.eq(1);
+      expect(nextResponse.body.tasks[0].id).to.be.eq(nextTaskId);
     });
   });
 

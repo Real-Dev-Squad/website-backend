@@ -3,6 +3,8 @@ const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
 const { addLog } = require("../models/logs");
 const { USER_STATUS } = require("../constants/users");
 const { addOrUpdate } = require("../models/users");
+const { isEmpty } = require("../utils/helpers");
+const { getFetchTasksQueryParameters } = require("../utils/tasks");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
@@ -40,10 +42,12 @@ const addNewTask = async (req, res) => {
  */
 const fetchTasks = async (req, res) => {
   try {
-    const allTasks = await tasks.fetchTasks();
+    const queryParams = getFetchTasksQueryParameters(req.query);
+    const { taskList, ...rest } = await tasks.fetchTasks(queryParams);
     return res.json({
       message: "Tasks returned successfully!",
-      tasks: allTasks.length > 0 ? allTasks : [],
+      tasks: !isEmpty(taskList) ? taskList : [],
+      ...(!isEmpty(rest) ? rest : {}),
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);
@@ -232,9 +236,9 @@ const updateTaskStatus = async (req, res, next) => {
  */
 const overdueTasks = async (req, res) => {
   try {
-    const allTasks = await tasks.fetchTasks();
+    const { taskList } = await tasks.fetchTasks();
     const now = Math.floor(Date.now() / 1000);
-    const overDueTasks = allTasks.filter(
+    const overDueTasks = taskList.filter(
       (task) => (task.status === ASSIGNED || task.status === IN_PROGRESS) && task.endsOn < now
     );
     const newAvailableTasks = await tasks.overdueTasks(overDueTasks);
