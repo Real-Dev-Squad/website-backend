@@ -1,4 +1,14 @@
 const { fetchUser } = require("../models/users");
+const firestore = require("../utils/firestore");
+const userModel = firestore.collection("users");
+
+const addUserToDBForTest = async (userData) => {
+  try {
+    await userModel.add(userData);
+  } catch (err) {
+    // console.log(err);
+  }
+};
 
 /**
  * Used for receiving userId when providing username
@@ -6,6 +16,7 @@ const { fetchUser } = require("../models/users");
  * @param username {String} - username of the User.
  * @returns id {String} - userId of the same user
  */
+
 const getUserId = async (username) => {
   try {
     const {
@@ -137,6 +148,7 @@ function getUsernamesFromPRs(allPRs) {
 }
 
 module.exports = {
+  addUserToDBForTest,
   getUserId,
   getUsername,
   getParticipantUserIds,
