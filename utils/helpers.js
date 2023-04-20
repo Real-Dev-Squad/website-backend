@@ -4,22 +4,22 @@
  * - `true` if value is empty or falsy
  * - `false`  if value is not empty or truthy
  */
-function isEmpty(valueToCheck) {
-  switch (typeof valueToCheck) {
+function isEmpty(value) {
+  switch (typeof value) {
     case "undefined":
       return true;
     case "string":
-      return valueToCheck.length === 0 || valueToCheck.trim().length === 0;
+      return value.trim().length === 0;
     case "object":
-      if (valueToCheck === null) {
+      if (value === null) {
         return true;
-      } else if (Array.isArray(valueToCheck)) {
-        return valueToCheck.length === 0;
+      } else if (Array.isArray(value)) {
+        return value.length === 0;
       } else {
-        return Object.keys(valueToCheck).length === 0;
+        return Object.keys(value).length === 0;
       }
     case "number":
-      return Number.isNaN(valueToCheck);
+      return Number.isNaN(value);
     default:
       return false;
   }

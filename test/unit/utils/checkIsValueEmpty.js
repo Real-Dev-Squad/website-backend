@@ -2,7 +2,7 @@
 const sinon = require("sinon");
 const chai = require("chai");
 const expect = chai.expect;
-const isEmpty = require("../../utils/helpers").isEmpty;
+const isEmpty = require("../../../utils/helpers").isEmpty;
 
 let keysSpy;
 
