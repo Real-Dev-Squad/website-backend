@@ -312,6 +312,24 @@ const updateUserPicture = async (image, userId) => {
 };
 
 /**
+ * Sets the numberOfHours field of passed UserId to userNumberOfHours
+ *
+ * @param userNumberOfHours { integer }: numberOfHours
+ * @param userId { string }: User id
+ */
+
+const updateNumberOfHours = async (userNumberOfHours, userId) =>{
+  const userRef = userModel.doc(userId);
+  const doc = await userRef.get();
+  if (doc.exists) {
+    return userRef.update({
+      numberOfHours: userNumberOfHours,
+    });
+  }
+  return {};
+}
+
+/**
  * fetch the users image by passing array of users
  *
  * @param users {array}
@@ -421,6 +439,7 @@ module.exports = {
   fetchPaginatedUsers,
   fetchUser,
   setIncompleteUserDetails,
+  updateNumberOfHours,
   initializeUser,
   updateUserPicture,
   fetchUserImage,
