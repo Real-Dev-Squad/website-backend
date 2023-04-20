@@ -318,7 +318,7 @@ const updateUserPicture = async (image, userId) => {
  * @param userId { string }: User id
  */
 
-const updateNumberOfHours = async (userNumberOfHours, userId) =>{
+const updateNumberOfHours = async (userNumberOfHours, userId) => {
   const userRef = userModel.doc(userId);
   const doc = await userRef.get();
   if (doc.exists) {
@@ -327,7 +327,7 @@ const updateNumberOfHours = async (userNumberOfHours, userId) =>{
     });
   }
   return {};
-}
+};
 
 /**
  * fetch the users image by passing array of users
