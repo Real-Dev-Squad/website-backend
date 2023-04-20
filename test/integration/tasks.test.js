@@ -74,6 +74,19 @@ describe("Tasks", function () {
         lossRate: { [DINERO]: 1 },
         isNoteworthy: true,
       },
+      {
+        title: "Some Task 4",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "active",
+        percentCompleted: 10,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      },
     ];
 
     // Add the active task
@@ -83,6 +96,7 @@ describe("Tasks", function () {
     // Add the completed task
     taskId = (await tasks.updateTask(taskData[1])).taskId;
     await tasks.updateTask(taskData[2]);
+    await tasks.updateTask(taskData[3]);
   });
 
   after(async function () {
@@ -184,7 +198,7 @@ describe("Tasks", function () {
     it(`Should get all tasks except ${TASK_STATUS.IN_PROGRESS} tasks`, function (done) {
       chai
         .request(app)
-        .get(`/tasks/?q=filter%3A${TASK_STATUS.IN_PROGRESS}`)
+        .get(`/tasks/?q=exclude%3A${TASK_STATUS.IN_PROGRESS}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -218,7 +232,7 @@ describe("Tasks", function () {
     it(`Should get all tasks except ${TASK_STATUS.IN_PROGRESS}, ${TASK_STATUS.BLOCKED} tasks`, function (done) {
       chai
         .request(app)
-        .get(`/tasks/?q=filter%3A${TASK_STATUS.IN_PROGRESS}%2C${TASK_STATUS.BLOCKED}`)
+        .get(`/tasks/?q=exclude%3A${TASK_STATUS.IN_PROGRESS}%2C${TASK_STATUS.BLOCKED}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -242,10 +256,10 @@ describe("Tasks", function () {
       expect(response.body).to.be.a("object");
       expect(response.body.message).to.equal("Tasks returned successfully!");
       expect(response.body.tasks).to.be.a("array");
-      expect(response.body.tasks.length).to.be.eq(2);
+      expect(response.body.tasks.length).to.be.eq(3);
 
-      const firstTaskId = response.body.tasks[0].id;
-      const nextTaskId = response.body.tasks[1].id;
+      const firstTaskId = response.body.tasks[1].id;
+      const nextTaskId = response.body.tasks[2].id;
       const nextResponse = await chai
         .request(app)
         .get(`/tasks/?q=type%3A${TASK_STATUS.IN_PROGRESS}+cursor%3A${firstTaskId}`);
