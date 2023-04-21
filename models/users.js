@@ -7,7 +7,7 @@ const walletConstants = require("../constants/wallets");
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { arraysHaveCommonItem } = require("../utils/array");
-const { ALLOWED_FILTER_PARAMS, initialData } = require("../constants/users");
+const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
@@ -32,7 +32,6 @@ const addOrUpdate = async (userData, userId = null) => {
         await userModel.doc(userId).set({
           ...user.data(),
           ...userData,
-          ...initialData,
         });
       }
 
@@ -312,24 +311,6 @@ const updateUserPicture = async (image, userId) => {
 };
 
 /**
- * Sets the numberOfHours field of passed UserId to userNumberOfHours
- *
- * @param userNumberOfHours { integer }: numberOfHours
- * @param userId { string }: User id
- */
-
-const updateNumberOfHours = async (userNumberOfHours, userId) => {
-  const userRef = userModel.doc(userId);
-  const doc = await userRef.get();
-  if (doc.exists) {
-    return userRef.update({
-      numberOfHours: userNumberOfHours,
-    });
-  }
-  return {};
-};
-
-/**
  * fetch the users image by passing array of users
  *
  * @param users {array}
@@ -439,7 +420,6 @@ module.exports = {
   fetchPaginatedUsers,
   fetchUser,
   setIncompleteUserDetails,
-  updateNumberOfHours,
   initializeUser,
   updateUserPicture,
   fetchUserImage,
