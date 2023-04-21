@@ -61,9 +61,8 @@ const createGroupRole = async (req, res) => {
 };
 
 /**
- * Creates a role
+ * Gets all group-roles
  *
- * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
 
@@ -71,7 +70,7 @@ const getAllGroupRoles = async (req, res) => {
   try {
     const { groups } = await discordRolesModel.getAllGroupRoles();
     return res.json({
-      message: "Role fetched successfully!",
+      message: "Roles fetched successfully!",
       groups,
     });
   } catch (err) {

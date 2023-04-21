@@ -23,6 +23,11 @@ const addNewRole = async (roleData) => {
   }
 };
 
+/**
+ *
+ * @param roleData { Object }: Data of the new role
+ * @returns {Promise<discordRoleModel|Object>}
+ */
 const getAllGroupRoles = async () => {
   try {
     const data = await discordRoleModel.get();
