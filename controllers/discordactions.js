@@ -1,5 +1,6 @@
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-
+const config = require("config");
+const jwt = require("jsonwebtoken");
 /**
  * Creates a role
  *
@@ -10,22 +11,25 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const createRole = async (req, res) => {
   try {
     const postData = {
-      rolename: req.newrole,
-      permissions: req.permissions,
+      rolename: `group-${req.body.rolename}`,
+      mentionable: true,
     };
-    const BASE_URL = "dummy";
-    // Make a POST request to ServerB
-    const res = await fetch(`${BASE_URL}/create-guild-role`, {
-      method: "POST",
+    const authToken = jwt.sign({}, config.get("botToken.botPrivateKey"), {
+      algorithm: "RS256",
+      expiresIn: config.get("userToken.ttl"),
+    });
+    const BASE_URL = "CLOUDFLARE_WORKERS_URLS";
+    const responseForCreatedRole = await fetch(`${BASE_URL}/create-guild-role`, {
+      method: "PUT",
       body: JSON.stringify(postData),
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
     }).then((response) => response.json());
     return res.json({
       message: "Role created successfully!",
-      res,
+      responseForCreatedRole,
     });
   } catch (err) {
-    logger.error(`Error while creating new level: ${err}`);
+    logger.error(`Error while creating new Role: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
