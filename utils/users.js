@@ -3,11 +3,7 @@ const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 
 const addUserToDBForTest = async (userData) => {
-  try {
-    await userModel.add(userData);
-  } catch (err) {
-    // console.log(err);
-  }
+  await userModel.add(userData);
 };
 
 /**
