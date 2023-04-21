@@ -10,14 +10,9 @@ const USER_STATUS = {
   ACTIVE: "active",
 };
 
-const initialData = {
-  status: "ONBOARDING",
-  numberOfHours: 0,
-};
-
 const ALLOWED_FILTER_PARAMS = {
   ITEM_TAG: ["levelId", "levelName", "levelValue", "tagId"],
   USER_STATE: ["state"],
 };
 
-module.exports = { profileStatus, USER_STATUS, initialData, ALLOWED_FILTER_PARAMS };
+module.exports = { profileStatus, USER_STATUS, ALLOWED_FILTER_PARAMS };

@@ -387,11 +387,6 @@ const addUserIntro = async (req, res) => {
       },
       foundFrom: rawData.foundFrom,
     };
-
-    if (rawData.numberOfHours) {
-      await userQuery.updateNumberOfHours(rawData.numberOfHours, req.userData.id);
-    }
-
     await userQuery.addJoinData(data);
 
     return res.status(201).json({
