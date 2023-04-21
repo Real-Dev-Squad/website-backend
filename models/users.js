@@ -8,6 +8,7 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { arraysHaveCommonItem } = require("../utils/array");
 const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
+const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
@@ -129,7 +130,7 @@ const getSuggestedUsers = async (skill) => {
  * @param query { search, next, prev, size, page }: Filter for users
  * @return {Promise<userModel|Array>}
  */
-const fetchUsers = async (query) => {
+const fetchPaginatedUsers = async (query) => {
   try {
     // INFO: default user size set to 100
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
@@ -171,6 +172,45 @@ const fetchUsers = async (query) => {
       allUsers,
       nextId: lastDoc?.id ?? "",
       prevId: firstDoc?.id ?? "",
+    };
+  } catch (err) {
+    logger.error("Error retrieving user data", err);
+    throw err;
+  }
+};
+
+const fetchUsers = async (usernames = []) => {
+  try {
+    const dbQuery = userModel;
+    const filterdUsersWithDetails = [];
+
+    const groups = [];
+    for (let i = 0; i < usernames.length; i += BATCH_SIZE_IN_CLAUSE) {
+      groups.push(usernames.slice(i, i + BATCH_SIZE_IN_CLAUSE));
+    }
+
+    // For each group, write a separate query
+    const promises = groups.map((group) => {
+      return dbQuery.where("github_id", "in", group).get();
+    });
+
+    const snapshots = await Promise.all(promises);
+
+    snapshots.forEach((snapshot) => {
+      snapshot.forEach((doc) => {
+        filterdUsersWithDetails.push({
+          id: doc.id,
+          ...doc.data(),
+          phone: undefined,
+          email: undefined,
+          tokens: undefined,
+          chaincode: undefined,
+        });
+      });
+    });
+
+    return {
+      filterdUsersWithDetails,
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
@@ -355,7 +395,7 @@ const getUsersBasedOnFilter = async (query) => {
 
 module.exports = {
   addOrUpdate,
-  fetchUsers,
+  fetchPaginatedUsers,
   fetchUser,
   setIncompleteUserDetails,
   initializeUser,
@@ -365,5 +405,6 @@ module.exports = {
   getJoinData,
   getSuggestedUsers,
   fetchUserSkills,
+  fetchUsers,
   getUsersBasedOnFilter,
 };
