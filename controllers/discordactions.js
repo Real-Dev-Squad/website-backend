@@ -11,14 +11,24 @@ const discordRolesModel = require("../models/discordactions");
  * @param res {Object} - Express response object
  */
 
+const DISCORD_BASE_URL = "https://11ed-103-75-161-223.ngrok.io";
+
 const createGroupRole = async (req, res) => {
   try {
     const rolename = `group-${req.body.rolename}`;
+
+    const { wasSuccess } = await discordRolesModel.isGroupRoleExists(rolename);
+
+    if (!wasSuccess) {
+      return res.status(400).json({
+        message: "Role already exists!",
+      });
+    }
     const dataForDiscord = {
       rolename,
       mentionable: true,
     };
-    const dataForModel = {
+    const groupRoleData = {
       rolename,
       createdBy: req.userData.id,
       date: admin.firestore.Timestamp.fromDate(new Date()),
@@ -28,24 +38,15 @@ const createGroupRole = async (req, res) => {
       expiresIn: config.get("userToken.ttl"),
     });
 
-    const { id, roleData, wasSuccess } = await discordRolesModel.addNewRole(dataForModel);
-
-    if (!wasSuccess) {
-      return res.json({
-        message: "Role already exists!",
-        data: {
-          ...roleData,
-        },
-      });
-    }
-
-    const BASE_URL = "https://94b6-103-75-161-222.ngrok.io";
-    const responseForCreatedRole = await fetch(`${BASE_URL}/create-guild-role`, {
+    const responseForCreatedRole = await fetch(`${DISCORD_BASE_URL}/create-guild-role`, {
       method: "PUT",
       body: JSON.stringify(dataForDiscord),
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
     }).then((response) => response.json());
 
+    groupRoleData.roleid = responseForCreatedRole.id;
+
+    const { id, roleData } = await discordRolesModel.createNewRole(groupRoleData);
     return res.json({
       message: "Role created successfully!",
       responseForCreatedRole,
@@ -79,7 +80,59 @@ const getAllGroupRoles = async (req, res) => {
   }
 };
 
+/**
+ * Gets all group-roles
+ *
+ * @param res {Object} - Express response object
+ */
+
+const addGroupRoleToMember = async (req, res) => {
+  try {
+    const memberGroupRole = {
+      ...req.body,
+      date: admin.firestore.Timestamp.fromDate(new Date()),
+    };
+
+    const { id, roleData, wasSuccess } = await discordRolesModel.addGroupRoleToMember(memberGroupRole);
+
+    if (!wasSuccess) {
+      return res.status(400).json({
+        message: "Role already exists!",
+        data: {
+          ...roleData,
+        },
+      });
+    }
+    const dataForDiscord = {
+      ...req.body,
+    };
+    const authToken = jwt.sign({}, config.get("botToken.botPrivateKey"), {
+      algorithm: "RS256",
+      expiresIn: config.get("userToken.ttl"),
+    });
+
+    const responseForAddingRole = await fetch(`${DISCORD_BASE_URL}/add-member-role`, {
+      method: "PUT",
+      body: JSON.stringify(dataForDiscord),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+    }).then((response) => response.json());
+
+    return res.json({
+      message: "Role added successfully!",
+      responseForAddingRole,
+      data: {
+        id,
+        ...roleData,
+      },
+    });
+  } catch (err) {
+    logger.error(`Error while adding new Role: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   createGroupRole,
   getAllGroupRoles,
+  addGroupRoleToMember,
 };
