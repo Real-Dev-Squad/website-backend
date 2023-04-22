@@ -345,9 +345,9 @@ const getRdsUserInfoByGitHubUsername = async (githubUsername) => {
   const { user } = await fetchUser({ githubUsername });
 
   return {
-    firstName: user.first_name,
-    lastName: user.last_name,
-    username: user.username,
+    firstName: user.first_name ?? "",
+    lastName: user.last_name ?? "",
+    username: user.username ?? "",
   };
 };
 
