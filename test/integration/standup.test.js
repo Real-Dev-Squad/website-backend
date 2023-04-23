@@ -31,7 +31,7 @@ describe.skip("Test standup api", function () {
     it("Superuser can mark a user as monitored", function (done) {
       chai
         .request(app)
-        .post("/standup/:id")
+        .post(`/standup/${userId}`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -46,7 +46,7 @@ describe.skip("Test standup api", function () {
     it("Should return 401 for other/un-authenticated users", function (done) {
       chai
         .request(app)
-        .post("/standup/:id")
+        .post(`/standup/${userId}`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
