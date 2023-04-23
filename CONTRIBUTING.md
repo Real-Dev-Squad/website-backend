@@ -162,16 +162,12 @@ export FIRESTORE_EMULATOR_HOST="localhost:<Firebase emulator PORT>"
 
 ## Certain issues you may face while running the tests:
 
-- Firestore emulator is not starting
 - Java version is not above 11
 - When we run yarn test, it runs both the unit and integration tests (in this order). So after the unit tests are done, the java process is not killed automatically and when our integration test run it gives error.
 - Error: connect ECONNREFUSED ::1:8081
 
 ## Possible solutions for above issues (in particular order):
 
-- add '--project=< your firestore app name>' flag to both the test scripts.
-  find test scripts inside : scripts/tests/testIntegration.sh , scripts/tests/testUnit.sh
-  add this flag @ line 7 in both the test scripts at the end with a single space.
 - Java version above 11 is needed for firebase tool version >= 11
 - Either manually kill the java process after unit tests are done or run both the tests separately by running the test commands.
 - for this error refer this : https://github.com/Real-Dev-Squad/website-backend/issues/918
