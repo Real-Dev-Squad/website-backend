@@ -1,6 +1,5 @@
 const issuesService = require("../services/issuesService");
 const tasks = require("../models/tasks");
-const { getRdsUserInfoByGitHubUsername } = require("../models/users");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 /**
@@ -60,16 +59,12 @@ const issueUpdates = async (req, res) => {
         if (issue.assignee) {
           // If there are no previous assignees or the task was not assigned before
           if (!updatedTaskData.github.issue.assignee || !updatedTaskData.assignee) {
-            const user = await getRdsUserInfoByGitHubUsername(issue.assignee.login);
-
             updatedTaskData.github.issue.assignee = issue.assignee.login;
-            updatedTaskData.github.issue.assigneeRdsInfo = user;
           }
         }
         // If the issue assignee was removed and task was not assigned
         else if (updatedTaskData.github.issue.assignee && !updatedTaskData.assignee) {
           delete updatedTaskData.github.issue.assignee;
-          delete updatedTaskData.github.issue.assigneeRdsInfo;
         }
 
         if (issue.state === "closed") {

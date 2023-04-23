@@ -50,14 +50,6 @@ const createTask = async (req, res, next) => {
             assignee: joi.string().optional(),
             id: joi.number().optional(),
             closedAt: joi.string().optional(),
-            assigneeRdsInfo: joi
-              .object()
-              .keys({
-                firstName: joi.string(),
-                lastName: joi.string(),
-                username: joi.string(),
-              })
-              .optional(),
           }),
         })
         .optional(),
