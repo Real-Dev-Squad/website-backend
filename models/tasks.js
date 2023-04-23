@@ -4,7 +4,6 @@ const ItemModel = firestore.collection("itemTags");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
-const { getRdsUserInfoByGitHubUsername } = require("./users");
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 /**
@@ -52,27 +51,7 @@ const fetchTasks = async () => {
     const tasks = buildTasks(tasksSnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
     const updatedTasks = await Promise.all(promises);
-    const fetchTasksWithRdsAssigneeInfo = updatedTasks.map(async (task) => {
-      if (Object.keys(task).includes("github")) {
-        if (Object.keys(task.github.issue).includes("assignee")) {
-          return {
-            ...task,
-            github: {
-              ...task.github,
-              issue: {
-                ...task.github.issue,
-                assigneeRdsInfo: await getRdsUserInfoByGitHubUsername(task.github.issue.assignee),
-              },
-            },
-          };
-        }
-      }
-      return task;
-    });
-
-    const tasksWithRdsAssigneeInfo = await Promise.all(fetchTasksWithRdsAssigneeInfo);
-
-    const taskList = tasksWithRdsAssigneeInfo.map((task) => {
+    const taskList = updatedTasks.map((task) => {
       task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
       return task;
     });

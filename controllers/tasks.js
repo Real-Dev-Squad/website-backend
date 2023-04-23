@@ -21,14 +21,6 @@ const addNewTask = async (req, res) => {
       createdBy,
     };
 
-    // Retrieve the issue assignee's RDS user info
-    if (Object.keys(body).includes("github")) {
-      if (Object.keys(body.github.issue).includes("assignee")) {
-        const user = await getRdsUserInfoByGitHubUsername(body.github.issue.assignee);
-        body.github.issue.assigneeRdsInfo = user;
-      }
-    }
-
     const task = await tasks.updateTask(body);
 
     return res.json({
@@ -50,9 +42,32 @@ const addNewTask = async (req, res) => {
 const fetchTasks = async (req, res) => {
   try {
     const allTasks = await tasks.fetchTasks();
+    const fetchTasksWithRdsAssigneeInfo = allTasks.map(async (task) => {
+      /*
+       If the issue has a "github.issue" inner object and a property "assignee",
+       then fetch the RDS user information with GitHub username in "assignee"
+      */
+      if (Object.keys(task).includes("github")) {
+        if (Object.keys(task.github.issue).includes("assignee")) {
+          return {
+            ...task,
+            github: {
+              ...task.github,
+              issue: {
+                ...task.github.issue,
+                assigneeRdsInfo: await getRdsUserInfoByGitHubUsername(task.github.issue.assignee),
+              },
+            },
+          };
+        }
+      }
+      return task;
+    });
+
+    const tasksWithRdsAssigneeInfo = await Promise.all(fetchTasksWithRdsAssigneeInfo);
     return res.json({
       message: "Tasks returned successfully!",
-      tasks: allTasks.length > 0 ? allTasks : [],
+      tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);
