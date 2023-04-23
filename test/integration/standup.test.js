@@ -61,7 +61,7 @@ describe.skip("Test standup api", function () {
     it("Should return 404 for invalid user id", function (done) {
       chai
         .request(app)
-        .post("/standup/:id")
+        .post(`/standup/${userId}`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
