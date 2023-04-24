@@ -2934,7 +2934,7 @@ firebase-admin@^11.0.0:
     "@google-cloud/firestore" "^6.4.0"
     "@google-cloud/storage" "^6.5.2"
 
-firebase-tools@^11.0.0:
+firebase-tools@^11.28.0:
   version "11.28.0"
   resolved "https://registry.yarnpkg.com/firebase-tools/-/firebase-tools-11.28.0.tgz#f69e01b323853adebc12154a900a4479dc56b802"
   integrity sha512-rDRzByyUD9RKZ4xPmvOCYsy1qvUIl/c+KPfO1i1a616lEnAlxoReb9GT6GIDujKcJa0CpgR9iDxqLfkxYfRE5A==
