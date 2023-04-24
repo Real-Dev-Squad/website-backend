@@ -290,8 +290,7 @@ const initializeUser = async (userId) => {
   if (!userWallet) {
     await createWallet(userId, walletConstants.INITIAL_WALLET);
   }
-  await updateUserStatus(userId, { "currentStatus": { "state": userState.ONBOARDING }, "monthlyHours": { "committed": 0 } });
-  
+  await updateUserStatus(userId, { currentStatus: { state: userState.ONBOARDING }, monthlyHours: { committed: 0 } });
   return true;
 };
 
@@ -326,9 +325,9 @@ const updateMonthlyHours = async (userNumberOfHours, userId) => {
   if (userStatusDoc) {
     const docId = userStatusDoc.id;
     return userStatusModel.doc(docId).update({
-      monthlyHours:{
-        committed: 4*userNumberOfHours,
-      }
+      monthlyHours: {
+        committed: 4 * userNumberOfHours,
+      },
     });
   }
   return {};

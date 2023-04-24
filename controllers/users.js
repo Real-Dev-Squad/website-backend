@@ -390,7 +390,7 @@ const addUserIntro = async (req, res) => {
 
     if (rawData.numberOfHours) {
       await userQuery.updateMonthlyHours(rawData.numberOfHours, req.userData.id);
-    };
+    }
 
     await userQuery.addJoinData(data);
 
