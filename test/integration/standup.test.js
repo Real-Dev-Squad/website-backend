@@ -4,7 +4,7 @@ const { expect } = chai;
 
 const app = require("../../server");
 const addUser = require("../utils/addUser");
-const userQuery = require("../models/users");
+const userQuery = require("../../models/users");
 const userData = require("../fixtures/user/user")();
 const authService = require("../../services/authService");
 const cleanDb = require("../utils/cleanDb");
