@@ -1,11 +1,14 @@
 const chai = require("chai");
+const { object } = require("joi");
+const { expect } = chai;
+
 const app = require("../../server");
 const addUser = require("../utils/addUser");
+const userQuery = require("../models/users");
 const userData = require("../fixtures/user/user")();
 const authService = require("../../services/authService");
 const cleanDb = require("../utils/cleanDb");
-const { object } = require("joi");
-const { expect } = chai;
+const standupData = require("../fixtures/standup/standup");
 
 const cookieName = config.get("userToken.cookieName");
 const superUser = userData[4];
@@ -28,18 +31,24 @@ describe.skip("Test standup api", function () {
   });
 
   describe("Test the mark api", function () {
-    it("Superuser can mark a user as monitored", function (done) {
+    it("Checks superuser can mark a user as monitored", function (done) {
       chai
         .request(app)
         .post(`/standup/${userId}`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({
+          monitor: true,
+        })
         .end((err, res) => {
           if (err) {
             return done(err);
           }
+          const userData = userQuery.fetchUser({ userId: userId });
           expect(res).to.have.status(200);
           expect(res.body).to.be.a(object);
           expect(res.body.message).to.equal("User marked for standup successfully.");
+          expect(userData.roles).to.have.property("monitored");
+          expect(userData.roles.monitored).to.be.equal(true);
           return done();
         });
     });
@@ -48,6 +57,9 @@ describe.skip("Test standup api", function () {
         .request(app)
         .post(`/standup/${userId}`)
         .set("Cookie", `${cookieName}=${jwt}`)
+        .send({
+          monitor: true,
+        })
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -69,6 +81,94 @@ describe.skip("Test standup api", function () {
           }
           expect(res).to.have.status(404);
           expect(res.body).to.be.a(object);
+          return done();
+        });
+    });
+  });
+
+  describe("Test the get standup Api", function () {
+    it("should return the standup of specified user", function (done) {
+      chai
+        .request(app)
+        .get(`/standup/${userId}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a(object);
+          expect(res.body).to.have.property("yesterday");
+          expect(res.body).to.have.property("today");
+          expect(res.body).to.have.property("blockers");
+          expect(res.body).to.have.property("timestamp");
+          return done();
+        });
+    });
+
+    it("should return 404 for user not found", function (done) {
+      chai
+        .request(app)
+        .get("/standup/123")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a(object);
+          return done();
+        });
+    });
+  });
+
+  describe("The save standup API", function () {
+    it("Should save standup of the signed in user", function (done) {
+      chai
+        .request(app)
+        .post("/standup")
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(standupData()[0])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a(object);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.be.equal("Standup data stored successfully.");
+          return done();
+        });
+    });
+
+    it("Should return 400 or invalid body", function (done) {
+      chai
+        .request(app)
+        .post("/standup")
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(standupData()[1])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a(object);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.be.equal(`"timestamp" is required`);
+          return done();
+        });
+    });
+
+    it("Should return 401 for not logged in user", function (done) {
+      chai
+        .request(app)
+        .post("/standup")
+        .send(standupData[0])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a(object);
+          expect(res.body.message).to.equal("Unauthenticated User");
           return done();
         });
     });
