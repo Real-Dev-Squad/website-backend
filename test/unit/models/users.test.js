@@ -72,5 +72,20 @@ describe("users", function () {
       expect(isNewUser).to.equal(true);
       expect(updatedIsNewUserFlag).to.equal(false);
     });
+
+    it("should return the user information when github username is passed", async function () {
+      const userData = userDataArray[0];
+      await users.addOrUpdate(userData);
+      const githubUsername = "ankur";
+      const { user, userExists } = await users.fetchUser({ githubUsername });
+      expect(user).to.haveOwnProperty("id");
+      expect(user).to.haveOwnProperty("username");
+      expect(user).to.haveOwnProperty("first_name");
+      expect(user).to.haveOwnProperty("last_name");
+
+      expect(user.first_name).to.equal(userData.first_name);
+      expect(user.last_name).to.equal(userData.last_name);
+      expect(userExists).to.equal(true);
+    });
   });
 });
