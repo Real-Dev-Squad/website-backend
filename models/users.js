@@ -40,6 +40,7 @@ const addOrUpdate = async (userData, userId = null) => {
 
     // userId is null, Add or Update user
     const user = await userModel.where("github_user_id", "==", userData.github_user_id).limit(1).get();
+
     if (!user.empty) {
       await userModel.doc(user.docs[0].id).set(userData, { merge: true });
 
@@ -90,8 +91,6 @@ const getJoinData = async (userId) => {
     throw err;
   }
 };
-
-
 
 /**
  * Fetches users with the given skill
