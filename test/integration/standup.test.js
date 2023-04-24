@@ -52,6 +52,27 @@ describe.skip("Test standup api", function () {
           return done();
         });
     });
+    it("Checks superuser can un-mark a user from monitoring", function (done) {
+      chai
+        .request(app)
+        .post(`/standup/${userId}`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({
+          monitor: false,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          const userData = userQuery.fetchUser({ userId: userId });
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a(object);
+          expect(res.body.message).to.equal("User marked for standup successfully.");
+          expect(userData.roles).to.have.property("monitored");
+          expect(userData.roles.monitored).to.be.equal(false);
+          return done();
+        });
+    });
     it("Should return 401 for other/un-authenticated users", function (done) {
       chai
         .request(app)
