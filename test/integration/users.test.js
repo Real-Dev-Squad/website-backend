@@ -425,7 +425,7 @@ describe("Users", function () {
     it("Should return one user with given id", function (done) {
       chai
         .request(app)
-        .get(`/users/${userData[0].username}`)
+        .get(`/users/?id=${userData[0].username}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -446,7 +446,7 @@ describe("Users", function () {
     it("Should return 404 if there is no user in the system", function (done) {
       chai
         .request(app)
-        .get("/users/invalidUser")
+        .get("/users/?id=invalidUser")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -462,11 +462,11 @@ describe("Users", function () {
     });
   });
 
-  describe("GET /users/userId/id", function () {
+  describe("GET /users/?id", function () {
     it("Should return one user with given id", function (done) {
       chai
         .request(app)
-        .get(`/users/userId/${userId}`)
+        .get(`/users/?id=${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -484,7 +484,7 @@ describe("Users", function () {
     it("Should return 404 if there is no user in the system", function (done) {
       chai
         .request(app)
-        .get("/users/userId/invalidUserId")
+        .get("/users/?id=invalidUserId")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
