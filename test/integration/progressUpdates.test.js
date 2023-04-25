@@ -1,4 +1,5 @@
 const chai = require("chai");
+const Joi = require("joi");
 
 const app = require("../../server");
 
@@ -15,7 +16,7 @@ const progressData = require("../fixtures/progressUpdates/progressUpdates")();
 
 const cookieName = config.get("userToken.cookieName");
 const superUser = userData[4];
-const { object } = require("joi");
+const { object } = Joi;
 const { expect } = chai;
 
 // eslint-disable-next-line mocha/no-skipped-tests
