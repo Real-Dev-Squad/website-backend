@@ -3,11 +3,15 @@ const { object } = require("joi");
 const { expect } = chai;
 
 const app = require("../../server");
-const addUser = require("../utils/addUser");
-const userQuery = require("../../models/users");
-const userData = require("../fixtures/user/user")();
+
 const authService = require("../../services/authService");
+
+const userQuery = require("../../models/users");
+
+const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
+
+const userData = require("../fixtures/user/user")();
 const standupData = require("../fixtures/standup/standup");
 
 const cookieName = config.get("userToken.cookieName");
@@ -61,9 +65,7 @@ describe.skip("Test standup api", function () {
           monitor: false,
         })
         .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
+          if (err) return done(err);
           const userData = userQuery.fetchUser({ userId: userId });
           expect(res).to.have.status(200);
           expect(res.body).to.be.a(object);
@@ -82,9 +84,7 @@ describe.skip("Test standup api", function () {
           monitor: true,
         })
         .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
+          if (err) return done(err);
           expect(res).to.have.status(401);
           expect(res.body).to.be.a(object);
           expect(res.body.message).to.equal("Unauthenticated User");
@@ -97,9 +97,7 @@ describe.skip("Test standup api", function () {
         .post(`/standup/123`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
+          if (err) return done(err);
           expect(res).to.have.status(404);
           expect(res.body).to.be.a(object);
           expect(res.body.message).to.equal("UserId not found");
@@ -114,9 +112,7 @@ describe.skip("Test standup api", function () {
         .request(app)
         .get(`/standup/${userId}`)
         .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
+          if (err) return done(err);
           expect(res).to.have.status(200);
           expect(res.body).to.be.a(object);
           expect(res.body).to.include.keys(["yesterday", "today", "blockers", "timestamp"]);
@@ -129,9 +125,7 @@ describe.skip("Test standup api", function () {
         .request(app)
         .get("/standup/123")
         .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
+          if (err) return done(err);
           expect(res).to.have.status(404);
           expect(res.body).to.be.a(object);
           expect(res.body.message).to.equal("UserId not found");
@@ -148,9 +142,7 @@ describe.skip("Test standup api", function () {
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(standupData()[0])
         .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
+          if (err) return done(err);
           expect(res).to.have.status(200);
           expect(res.body).to.be.a(object);
           expect(res.body).to.have.property("message");
@@ -166,9 +158,7 @@ describe.skip("Test standup api", function () {
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(standupData()[1])
         .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
+          if (err) return done(err);
           expect(res).to.have.status(400);
           expect(res.body).to.be.a(object);
           expect(res.body).to.have.property("message");
@@ -183,9 +173,7 @@ describe.skip("Test standup api", function () {
         .post("/standup")
         .send(standupData[0])
         .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
+          if (err) return done(err);
           expect(res).to.have.status(401);
           expect(res.body).to.be.a(object);
           expect(res.body.message).to.equal("Unauthenticated User");
