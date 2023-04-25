@@ -67,5 +67,17 @@ module.exports = () => {
 
       isNoteworthy: true,
     },
+    {
+      title: "check is task form is working",
+      purpose: "test",
+      type: "feature",
+      assignee: adminuser.username,
+      createdBy: "nikhil",
+      status: "AVAILABLE",
+      percentCompleted: 50,
+      endsOn: 1650032259,
+      startedOn: 1644753600,
+      monitored: true,
+    },
   ];
 };
