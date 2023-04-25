@@ -33,7 +33,7 @@ const verifyUser = async (req, res) => {
 const getUserById = async (req, res) => {
   let result;
   try {
-    result = await userQuery.fetchUser({ userId: req.params.userId });
+    result = await userQuery.fetchUser({ userId: req.query.id });
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
