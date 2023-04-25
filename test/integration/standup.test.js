@@ -67,7 +67,7 @@ describe.skip("Test standup api", function () {
           const userData = userQuery.fetchUser({ userId: userId });
           expect(res).to.have.status(200);
           expect(res.body).to.be.a(object);
-          expect(res.body.message).to.equal("User marked for standup successfully.");
+          expect(res.body.message).to.equal("User unmarked for standup successfully.");
           expect(userData.roles).to.have.property("monitored");
           expect(userData.roles.monitored).to.be.equal(false);
           return done();
@@ -95,13 +95,14 @@ describe.skip("Test standup api", function () {
       chai
         .request(app)
         .post(`/standup/123`)
-        .set("Cookie", `${cookieName}=${jwt}`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
           expect(res).to.have.status(404);
           expect(res.body).to.be.a(object);
+          expect(res.body.message).to.equal("UserId not found");
           return done();
         });
     });
@@ -118,10 +119,7 @@ describe.skip("Test standup api", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.a(object);
-          expect(res.body).to.have.property("yesterday");
-          expect(res.body).to.have.property("today");
-          expect(res.body).to.have.property("blockers");
-          expect(res.body).to.have.property("timestamp");
+          expect(res.body).to.include.keys(["yesterday", "today", "blockers", "timestamp"]);
           return done();
         });
     });
@@ -136,6 +134,7 @@ describe.skip("Test standup api", function () {
           }
           expect(res).to.have.status(404);
           expect(res.body).to.be.a(object);
+          expect(res.body.message).to.equal("UserId not found");
           return done();
         });
     });
