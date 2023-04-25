@@ -73,13 +73,13 @@ const getUsers = async (req, res) => {
     if (qualifiers?.filterBy) {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);
 
-      const filteredUsernames = getUsernamesFromPRs(allPRs);
+      const usernames = getUsernamesFromPRs(allPRs);
 
-      const { filterdUsersWithDetails } = await userQuery.fetchUsers(filteredUsernames);
+      const { users } = await userQuery.fetchUsers(usernames);
 
       return res.json({
         message: "Users returned successfully!",
-        users: filterdUsersWithDetails,
+        users,
       });
     }
 

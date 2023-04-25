@@ -182,7 +182,7 @@ const fetchPaginatedUsers = async (query) => {
 const fetchUsers = async (usernames = []) => {
   try {
     const dbQuery = userModel;
-    const filterdUsersWithDetails = [];
+    const users = [];
 
     const groups = [];
     for (let i = 0; i < usernames.length; i += BATCH_SIZE_IN_CLAUSE) {
@@ -198,7 +198,7 @@ const fetchUsers = async (usernames = []) => {
 
     snapshots.forEach((snapshot) => {
       snapshot.forEach((doc) => {
-        filterdUsersWithDetails.push({
+        users.push({
           id: doc.id,
           ...doc.data(),
           phone: undefined,
@@ -210,7 +210,7 @@ const fetchUsers = async (usernames = []) => {
     });
 
     return {
-      filterdUsersWithDetails,
+      users,
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
