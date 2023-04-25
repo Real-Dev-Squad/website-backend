@@ -1,6 +1,4 @@
 const chai = require("chai");
-const { object } = require("joi");
-const { expect } = chai;
 
 const app = require("../../server");
 
@@ -16,6 +14,8 @@ const standupData = require("../fixtures/standup/standup");
 
 const cookieName = config.get("userToken.cookieName");
 const superUser = userData[4];
+const { object } = require("joi");
+const { expect } = chai;
 
 // eslint-disable-next-line mocha/no-skipped-tests
 describe.skip("Test standup api", function () {
