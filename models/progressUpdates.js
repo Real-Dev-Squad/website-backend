@@ -16,9 +16,9 @@ const getLatestProgress = async (type, id) => {
   try {
     let progressUpdatesDocs;
     if (type === "TASK") {
-      progressUpdatesDocs = await progressUpdatesModel.where("taskId", "==", id).limit(1).get();
+      progressUpdatesDocs = await progressUpdatesModel.where("task_id", "==", id).limit(1).get();
     } else if (type === "USER") {
-      progressUpdatesDocs = await progressUpdatesModel.where("UserId", "==", id).limit(1).get();
+      progressUpdatesDocs = await progressUpdatesModel.where("user_id", "==", id).limit(1).get();
     } else {
       return { id: null, data: null };
     }
