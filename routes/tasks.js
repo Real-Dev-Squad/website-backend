@@ -7,15 +7,25 @@ const authorizeRoles = require("../middlewares/authorizeRoles");
 const { APPOWNER, SUPERUSER } = require("../constants/roles");
 const assignTask = require("../middlewares/assignTask");
 const cache = require("../utils/cache");
+// const { validateDependencyBody } = require("../middlewares/validators/Dependency");
 
 router.get("/", cache(), tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);
 router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasks);
-router.post("/", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), createTask, tasks.addNewTask);
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles([APPOWNER, SUPERUSER]),
+  createTask,
+  tasks.addNewTask,
+  tasks.addDependency
+);
 router.patch("/:id", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), updateTask, tasks.updateTask);
 router.get("/:id/details", tasks.getTask);
 router.get("/:username", tasks.getUserTasks);
 router.patch("/self/:id", authenticate, updateSelfTask, tasks.updateTaskStatus, assignTask);
 router.patch("/assign/self", authenticate, tasks.assignTask);
+// router.get("/dependency", authenticate, authorizeRoles([APPOWNER, SUPERUSER]));
+// router.post("/dependency", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), validateDependencyBody);
 
 module.exports = router;

@@ -6,6 +6,7 @@ const { addOrUpdate } = require("../models/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const DependencyModel = require("../models/tasks");
 /**
  * Creates new task
  *
@@ -13,22 +14,41 @@ const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/er
  * @param req.body {Object} - Task object
  * @param res {Object} - Express response object
  */
-const addNewTask = async (req, res) => {
+const addNewTask = async (req, res, next) => {
   try {
     const { id: createdBy } = req.userData;
-    const body = {
+    const updatedBody = {
       ...req.body,
       createdBy,
     };
-    const task = await tasks.updateTask(body);
-
+    // console.log("hii");
+    delete updatedBody.dependsOn;
+    const task = await tasks.updateTask(updatedBody);
+    // console.log("hiii");
+    // console.log(next);
+    req.task = task;
+    return next();
+  } catch (err) {
+    logger.error(`Error while creating new task: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+const addDependency = async (req, res) => {
+  const task = req.task;
+  // console.log("hiiii");
+  // console.log(task);
+  try {
+    const body = [...req.body.dependsOn];
+    // console.log(body);
+    const dependsOns = await DependencyModel.addDependency(body);
     return res.json({
       message: "Task created successfully!",
       task: task.taskDetails,
       id: task.taskId,
+      dependsOns,
     });
   } catch (err) {
-    logger.error(`Error while creating new task: ${err}`);
+    logger.error(`Error while creating new task dependency: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
@@ -280,4 +300,5 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
+  addDependency,
 };
