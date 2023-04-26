@@ -87,5 +87,62 @@ describe("users", function () {
       expect(user.last_name).to.equal(userData.last_name);
       expect(userExists).to.equal(true);
     });
+
+    it("should add the github_user_id to the user collection", async function () {
+      const userData = userDataArray[0];
+      userData.github_user_id = "123456789";
+
+      const { isNewUser, userId } = await users.addOrUpdate(userData);
+
+      const data = (await userModel.doc(userId).get()).data();
+
+      expect(data.github_user_id).to.equal(userData.github_user_id);
+      expect(isNewUser).to.equal(true);
+    });
+
+    it("should update the github_user_id in the user collection", async function () {
+      const userData = userDataArray[0];
+      userData.github_user_id = "123456789";
+
+      // Add the user the first time
+      const { userId } = await users.addOrUpdate(userData);
+
+      // Update the user with same data and new github_user_id
+      userData.github_user_id = "987654321";
+      await users.addOrUpdate(userData, userId);
+
+      const data = (await userModel.doc(userId).get()).data();
+
+      expect(data.github_user_id).to.equal(userData.github_user_id);
+    });
+
+    it("should be a string", async function () {
+      const userData = { ...userDataArray[0], github_id: 123 };
+
+      try {
+        await users.addOrUpdate(userData);
+      } catch (error) {
+        expect(error.message).to.equal("Validation error: github_id must be a string");
+      }
+    });
+
+    it("should have a maximum length of 50 characters", async function () {
+      const userData = { ...userDataArray[0], github_id: "a".repeat(51) };
+
+      try {
+        await users.addOrUpdate(userData);
+      } catch (error) {
+        expect(error.message).to.equal("Validation error: github_id exceeds maximum length of 50 characters");
+      }
+    });
+
+    it("should be stored correctly in the database", async function () {
+      const userData = { ...userDataArray[0], github_id: "my_github_id" };
+
+      const { userId } = await users.addOrUpdate(userData);
+      const data = (await userModel.doc(userId).get()).data();
+
+      expect(data.github_id).to.equal("my_github_id");
+    });
   });
 });
