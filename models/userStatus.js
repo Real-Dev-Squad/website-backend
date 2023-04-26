@@ -137,6 +137,27 @@ const updateUserStatus = async (userId, newStatusData) => {
 };
 
 /**
+ * Sets the monthlyHours field of passed UserId to numberOfHours
+ *
+ * @param monthlyHours { integer }: numberOfHours
+ * @param userId { string }: User id
+ */
+
+const updateMonthlyHours = async (numberOfHours, userId) => {
+  const userStatusDocs = await userStatusModel.where("userId", "==", userId).limit(1).get();
+  const [userStatusDoc] = userStatusDocs.docs;
+  if (userStatusDoc) {
+    const docId = userStatusDoc.id;
+    return userStatusModel.doc(docId).update({
+      monthlyHours: {
+        committed: numberOfHours,
+      },
+    });
+  }
+  return {};
+};
+
+/**
  * @param userId { String }: Id of the User
  * @param newStatusData { Object }: Data to be Updated
  * @returns Promise<userStatusModel|Object>
@@ -193,4 +214,11 @@ const updateAllUserStatus = async () => {
   }
 };
 
-module.exports = { deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus, updateAllUserStatus };
+module.exports = {
+  deleteUserStatus,
+  getUserStatus,
+  getAllUserStatus,
+  updateUserStatus,
+  updateMonthlyHours,
+  updateAllUserStatus,
+};

@@ -313,27 +313,6 @@ const updateUserPicture = async (image, userId) => {
 };
 
 /**
- * Sets the monthlyHours field of passed UserId to userNumberOfHours
- *
- * @param monthlyHours { integer }: userNumberOfHours
- * @param userId { string }: User id
- */
-
-const updateMonthlyHours = async (userNumberOfHours, userId) => {
-  const userStatusDocs = await userStatusModel.where("userId", "==", userId).limit(1).get();
-  const [userStatusDoc] = userStatusDocs.docs;
-  if (userStatusDoc) {
-    const docId = userStatusDoc.id;
-    return userStatusModel.doc(docId).update({
-      monthlyHours: {
-        committed: 4 * userNumberOfHours,
-      },
-    });
-  }
-  return {};
-};
-
-/**
  * fetch the users image by passing array of users
  *
  * @param users {array}
@@ -445,7 +424,6 @@ module.exports = {
   setIncompleteUserDetails,
   initializeUser,
   updateUserPicture,
-  updateMonthlyHours,
   fetchUserImage,
   addJoinData,
   getJoinData,
