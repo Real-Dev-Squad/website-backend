@@ -8,7 +8,6 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { arraysHaveCommonItem } = require("../utils/array");
 const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
-const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
@@ -179,38 +178,26 @@ const fetchPaginatedUsers = async (query) => {
   }
 };
 
-const fetchUsers = async (usernames = []) => {
+const fetchAllUsers = async () => {
   try {
     const dbQuery = userModel;
-    const filterdUsersWithDetails = [];
 
-    const groups = [];
-    for (let i = 0; i < usernames.length; i += BATCH_SIZE_IN_CLAUSE) {
-      groups.push(usernames.slice(i, i + BATCH_SIZE_IN_CLAUSE));
-    }
+    const snapshot = await dbQuery.get();
 
-    // For each group, write a separate query
-    const promises = groups.map((group) => {
-      return dbQuery.where("github_id", "in", group).get();
-    });
+    const allUsers = [];
 
-    const snapshots = await Promise.all(promises);
-
-    snapshots.forEach((snapshot) => {
-      snapshot.forEach((doc) => {
-        filterdUsersWithDetails.push({
-          id: doc.id,
-          ...doc.data(),
-          phone: undefined,
-          email: undefined,
-          tokens: undefined,
-          chaincode: undefined,
-        });
+    snapshot.forEach((doc) => {
+      allUsers.push({
+        id: doc.id,
+        ...doc.data(),
+        phone: undefined,
+        email: undefined,
+        tokens: undefined,
+        chaincode: undefined,
       });
     });
-
     return {
-      filterdUsersWithDetails,
+      allUsers,
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
@@ -422,6 +409,6 @@ module.exports = {
   getSuggestedUsers,
   fetchUserSkills,
   getRdsUserInfoByGitHubUsername,
-  fetchUsers,
+  fetchAllUsers,
   getUsersBasedOnFilter,
 };
