@@ -1,15 +1,15 @@
+/* eslint-disable mocha/no-skipped-tests */
+/* eslint-disable no-undef */
 /* eslint-disable security/detect-object-injection */
 const cleanDb = require("../../utils/cleanDb");
 
 const firestore = require("../../../utils/firestore");
 
-const progressUpdates = require("../../../models/progressUpdates");
+// const progressUpdates = require("../../../models/progressUpdates");
 
 const progressUpdatesData = require("../../fixtures/progressUpdates/progressUpdates")();
 const progressUpdatesModel = firestore.collection("progressUpdates");
 const { expect } = require("chai");
-
-// eslint-disable-next-line mocha/no-skipped-tests
 describe.skip("progress Updates", function () {
   afterEach(async function () {
     await cleanDb();
