@@ -49,7 +49,7 @@ describe("auth", function () {
     const res = await chai
       .request(app)
       .get("/auth/github/callback")
-      .query({ code: "codeReturnedByGithub", state: rdsUiUrl, shouldConsole: true })
+      .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
       .redirects(0);
     expect(res).to.have.status(302);
     expect(res.headers.location).to.equal(rdsUiUrl);
