@@ -291,6 +291,7 @@ const initializeUser = async (userId) => {
     await createWallet(userId, walletConstants.INITIAL_WALLET);
   }
   await updateUserStatus(userId, { currentStatus: { state: userState.ONBOARDING }, monthlyHours: { committed: 0 } });
+
   return true;
 };
 
@@ -310,27 +311,6 @@ const updateUserPicture = async (image, userId) => {
     logger.error("Error updating user picture data", err);
     throw err;
   }
-};
-
-/**
- * Sets the monthlyHours field of passed UserId to userNumberOfHours
- *
- * @param monthlyHours { integer }: userNumberOfHours
- * @param userId { string }: User id
- */
-
-const updateMonthlyHours = async (userNumberOfHours, userId) => {
-  const userStatusDocs = await userStatusModel.where("userId", "==", userId).limit(1).get();
-  const [userStatusDoc] = userStatusDocs.docs;
-  if (userStatusDoc) {
-    const docId = userStatusDoc.id;
-    return userStatusModel.doc(docId).update({
-      monthlyHours: {
-        committed: 4 * userNumberOfHours,
-      },
-    });
-  }
-  return {};
 };
 
 /**
@@ -439,7 +419,6 @@ module.exports = {
   setIncompleteUserDetails,
   initializeUser,
   updateUserPicture,
-  updateMonthlyHours,
   fetchUserImage,
   addJoinData,
   getJoinData,

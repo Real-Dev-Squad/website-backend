@@ -1,5 +1,6 @@
 const chaincodeQuery = require("../models/chaincodes");
 const userQuery = require("../models/users");
+const userStatusModel = require("../models/userStatus");
 const profileDiffsQuery = require("../models/profileDiffs");
 const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
@@ -389,7 +390,7 @@ const addUserIntro = async (req, res) => {
     };
 
     if (rawData.numberOfHours) {
-      await userQuery.updateMonthlyHours(rawData.numberOfHours, req.userData.id);
+      await userStatusModel.updateMonthlyHours(4 * rawData.numberOfHours, req.userData.id);
     }
 
     await userQuery.addJoinData(data);
