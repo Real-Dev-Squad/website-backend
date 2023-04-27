@@ -4,4 +4,4 @@
 export NODE_ENV='test'
 
 echo 'Start firestore emulator and run integration tests:'
-firebase emulators:exec 'nyc mocha test/integration/**' --project='<your firestore app name>'
+firebase emulators:exec 'nyc mocha test/integration/**' 
