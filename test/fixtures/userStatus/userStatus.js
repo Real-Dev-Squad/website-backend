@@ -51,18 +51,18 @@ const generateUserStatusData = (state, updatedAt, from, until = "", message = ""
   };
 };
 
-const generateMonthlyHours = (committed=0) =>{
+const generateMonthlyHours = (committed = 0) => {
   return {
     monthlyHours: {
       committed,
     },
   };
-}
+};
 
 module.exports = {
   userStatusDataForNewUser,
   userStatusDataForOooState,
   oooStatusDataForShortDuration,
   generateUserStatusData,
-  generateMonthlyHours
+  generateMonthlyHours,
 };
