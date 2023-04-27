@@ -15,7 +15,9 @@ const {
   userStatusDataForOooState,
   oooStatusDataForShortDuration,
   generateUserStatusData,
+  generateMonthlyHours,
 } = require("../fixtures/userStatus/userStatus");
+const joinData = require("../fixtures/user/join");
 
 const config = require("config");
 const { updateUserStatus } = require("../../models/userStatus");
@@ -364,6 +366,20 @@ describe("UserStatus", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.equal("User Status updated successfully.");
+          return done();
+        });
+    });
+
+    it("Should update the Monthly Hours", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(generateMonthlyHours(joinData()[2].numberOfHours))
+        .end((err) => {
+          if (err) {
+            return done(err);
+          }
           return done();
         });
     });
