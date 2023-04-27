@@ -131,4 +131,11 @@ describe("githubService", function () {
       );
     });
   });
+
+  describe("fetchIssues", function () {
+    it("Should generate the correct url", async function () {
+      const response = await githubService.fetchIssues();
+      expect(response).to.be.equal(`https://api.github.com/orgs/Real-Dev-Squad/issues`);
+    });
+  });
 });

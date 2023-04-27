@@ -1,5 +1,6 @@
 const utils = require("../utils/fetch");
 const { fetchUser } = require("../models/users");
+
 /**
  * Extracts only the necessary details required from the object returned by Github API
  * @param data {Object} - Object returned by Github API
@@ -91,6 +92,16 @@ function getFetch(url) {
   });
 }
 
+/**
+ * Create fetch call for GitHub APIs as an authenticated user
+ * @param {*} url - url to fetch from
+ * @param {*} params - query params to pass
+ * @param {*} headers - requested headers
+ * @returns response object
+ */
+function getFetchWithAuthToken(url, params = null, headers = null) {
+  return utils.fetch(url, "get", params, null, headers);
+}
 /**
  * Fetches the pull requests in Real-Dev-Squad by user using GitHub API
  * @param username {string} - Username String
@@ -214,12 +225,42 @@ const fetchClosedIssues = async (params = {}) => {
   }
 };
 
+/**
+ * Fetches issues across all repositories in the ORG
+ */
+const fetchIssues = async () => {
+  try {
+    const baseURL = config.get("githubApi.baseUrl");
+    const issues = "/issues";
+    const urlObj = new URL(baseURL);
+    urlObj.pathname = "orgs" + "/" + config.get("githubApi.org") + issues;
+    const createdURL = urlObj.href;
+    const res = await getFetchWithAuthToken(
+      createdURL,
+      {
+        filter: "all",
+      },
+      {
+        Accept: "application/vnd.github+json",
+        // TODO: replace <AUTH-TOKEN> with RDS org PAT
+        Authorization: `Bearer <AUTH-TOKEN>`,
+        org: config.get("githubApi.org"),
+      }
+    );
+    return res;
+  } catch (err) {
+    logger.error(`Error while fetching issues: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
   fetchMergedPRs,
   getFetch,
   extractPRdetails,
+  fetchIssues,
   fetchOpenIssues,
   fetchClosedIssues,
 };
