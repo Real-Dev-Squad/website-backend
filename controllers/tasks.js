@@ -14,41 +14,29 @@ const DependencyModel = require("../models/tasks");
  * @param req.body {Object} - Task object
  * @param res {Object} - Express response object
  */
-const addNewTask = async (req, res, next) => {
+const addNewTask = async (req, res) => {
   try {
     const { id: createdBy } = req.userData;
-    const updatedBody = {
+    const dependsOn = req.body.dependsOn;
+    const body = {
       ...req.body,
       createdBy,
     };
-    // console.log("hii");
-    delete updatedBody.dependsOn;
-    const task = await tasks.updateTask(updatedBody);
-    // console.log("hiii");
-    // console.log(next);
-    req.task = task;
-    return next();
-  } catch (err) {
-    logger.error(`Error while creating new task: ${err}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-  }
-};
-const addDependency = async (req, res) => {
-  const task = req.task;
-  // console.log("hiiii");
-  // console.log(task);
-  try {
-    const body = [...req.body.dependsOn];
-    // console.log(body);
-    const dependsOns = await DependencyModel.addDependency(body);
+    // console.log("hii", dependsOn);
+    const { taskId, taskDetails } = await tasks.updateTask(body);
+    const data = {
+      taskId,
+      dependsOn,
+    };
+    const taskDependency = await DependencyModel.addDependency(data);
     return res.json({
       message: "Task created successfully!",
-      task: task.taskDetails,
-      id: task.taskId,
-      dependsOns,
+      task: taskDetails,
+      id: taskId,
+      dependsOn: taskDependency,
     });
   } catch (err) {
-    logger.error(`Error while creating new task dependency: ${err}`);
+    logger.error(`Error while creating new task: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
@@ -300,5 +288,4 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
-  addDependency,
 };
