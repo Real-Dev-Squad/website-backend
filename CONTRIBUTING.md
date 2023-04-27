@@ -102,7 +102,7 @@ The following project structure should be followed:
 
 ## Production login:
 
-https://github.com/login/oauth/authorize?client_id=23c78f66ab7964e5ef97
+https://api.realdevsquad.com/auth/github/login
 
 ### Production login - Cookie:
 
@@ -110,7 +110,7 @@ rds-session
 
 ## Staging login:
 
-https://github.com/login/oauth/authorize?client_id=ebb301661e883a85bf9a
+https://api.realdevsquad.com/auth/github/login
 
 ### Staging login - Cookie:
 
