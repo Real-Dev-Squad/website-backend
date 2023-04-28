@@ -8,6 +8,6 @@ const { SUPERUSER } = require("../constants/roles");
 
 router.get("/", fetchStocks);
 router.post("/", authenticate, authorizeRoles([SUPERUSER]), createStock, addNewStock);
-router.get("/user/self", authenticate, getSelfStocks);
+router.get("/self", authenticate, getSelfStocks);
 
 module.exports = router;
