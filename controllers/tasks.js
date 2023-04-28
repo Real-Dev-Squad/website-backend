@@ -6,7 +6,7 @@ const { addOrUpdate } = require("../models/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const DependencyModel = require("../models/tasks");
+const dependencyModel = require("../models/tasks");
 /**
  * Creates new task
  *
@@ -22,13 +22,15 @@ const addNewTask = async (req, res) => {
       ...req.body,
       createdBy,
     };
+    // console.log(body);
+    delete body.dependsOn;
     // console.log("hii", dependsOn);
     const { taskId, taskDetails } = await tasks.updateTask(body);
     const data = {
       taskId,
       dependsOn,
     };
-    const taskDependency = await DependencyModel.addDependency(data);
+    const taskDependency = await dependencyModel.addDependency(data);
     return res.json({
       message: "Task created successfully!",
       task: taskDetails,

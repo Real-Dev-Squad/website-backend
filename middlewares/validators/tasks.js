@@ -23,7 +23,7 @@ const createTask = async (req, res, next) => {
       assignee: joi.string().optional(),
       priority: joi.string().required(),
       percentCompleted: joi.number().required(),
-      dependsOn: joi.array().items(joi.string()).optional(),
+      dependsOn: joi.array().items().optional(),
       participants: joi.array().items(joi.string()).optional(),
       category: joi.string().optional(),
       level: joi.number().optional(),
@@ -73,7 +73,7 @@ const updateTask = async (req, res, next) => {
         .optional(),
       assignee: joi.string().optional(),
       percentCompleted: joi.number().optional(),
-      dependsOn: joi.array().items(joi.string()).optional(),
+      dependsOn: joi.array().items().optional(),
       participants: joi.array().items(joi.string()).optional(),
       completionAward: joi
         .object()

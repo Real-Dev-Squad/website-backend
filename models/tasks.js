@@ -2,7 +2,7 @@ const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
 const ItemModel = firestore.collection("itemTags");
 const userUtils = require("../utils/users");
-const DependencyModel = firestore.collection("TaskDependencies");
+const dependencyModel = firestore.collection("TaskDependencies");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
@@ -42,13 +42,25 @@ const updateTask = async (taskData, taskId = null) => {
 const addDependency = async (data) => {
   try {
     const { taskId, dependsOn } = data;
+    const batch = firestore.batch();
+    // console.log("data", taskId, dependsOn);
+    for (const dependsId of dependsOn) {
+      const taskDependOn = {
+        taskId,
+        dependsId,
+      };
+      const docid = dependencyModel.doc();
+      // console.log(docid);
+      // console.log("taskdepends", taskDependOn);
+      batch.set(docid, taskDependOn);
+    }
+    await batch.commit();
     // console.log(dependsOn, taskId);
-    const result = await DependencyModel.add({
-      taskId,
-      dependsOn,
-    });
-    // console.log(result);
-    return result;
+    // const result = await DependencyModel.add({
+    //   taskId,
+    //   dependsOn,
+    // });
+    return data;
   } catch (err) {
     logger.error("Error in creating dependency");
     throw err;
