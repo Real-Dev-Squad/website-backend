@@ -110,7 +110,7 @@ rds-session
 
 ## Staging login:
 
-https://stagin/auth/github/login
+https://staging-api/auth/github/login
 
 ### Staging login - Cookie:
 
