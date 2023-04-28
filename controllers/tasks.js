@@ -2,7 +2,7 @@ const tasks = require("../models/tasks");
 const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
 const { addLog } = require("../models/logs");
 const { USER_STATUS } = require("../constants/users");
-const { addOrUpdate } = require("../models/users");
+const { addOrUpdate, getRdsUserInfoByGitHubUsername } = require("../models/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
@@ -20,6 +20,7 @@ const addNewTask = async (req, res) => {
       ...req.body,
       createdBy,
     };
+
     const task = await tasks.updateTask(body);
 
     return res.json({
@@ -41,9 +42,32 @@ const addNewTask = async (req, res) => {
 const fetchTasks = async (req, res) => {
   try {
     const allTasks = await tasks.fetchTasks();
+    const fetchTasksWithRdsAssigneeInfo = allTasks.map(async (task) => {
+      /*
+       If the issue has a "github.issue" inner object and a property "assignee",
+       then fetch the RDS user information with GitHub username in "assignee"
+      */
+      if (Object.keys(task).includes("github")) {
+        if (Object.keys(task.github.issue).includes("assignee")) {
+          return {
+            ...task,
+            github: {
+              ...task.github,
+              issue: {
+                ...task.github.issue,
+                assigneeRdsInfo: await getRdsUserInfoByGitHubUsername(task.github.issue.assignee),
+              },
+            },
+          };
+        }
+      }
+      return task;
+    });
+
+    const tasksWithRdsAssigneeInfo = await Promise.all(fetchTasksWithRdsAssigneeInfo);
     return res.json({
       message: "Tasks returned successfully!",
-      tasks: allTasks.length > 0 ? allTasks : [],
+      tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);
