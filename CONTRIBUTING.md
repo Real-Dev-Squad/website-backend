@@ -110,7 +110,7 @@ rds-session
 
 ## Staging login:
 
-https://api.realdevsquad.com/auth/github/login
+https://stagin/auth/github/login
 
 ### Staging login - Cookie:
 
@@ -170,4 +170,5 @@ export FIRESTORE_EMULATOR_HOST="localhost:<Firebase emulator PORT>"
 
 - Java version above 11 is needed for firebase tool version >= 11
 - Either manually kill the java process after unit tests are done or run both the tests separately by running the test commands.
-- for this error refer this : https://github.com/Real-Dev-Squad/website-backend/issues/918
+- Add 'host : 0.0.0.0' to both firestore and ui object in firebase.json file if it is not added.
+  for more info refer this : https://github.com/Real-Dev-Squad/website-backend/issues/918
