@@ -12,7 +12,7 @@ const addNewStock = async (req, res) => {
     const { id, stockData } = await stocks.addStock(req.body);
     return res.json({
       message: "Stock created successfully!",
-      stock: stockData,
+      data: stockData,
       id,
     });
   } catch (err) {
@@ -50,7 +50,7 @@ const getSelfStocks = async (req, res) => {
     const userStocks = await stocks.fetchUserStocks(userId);
     return res.json({
       message: userStocks.length > 0 ? "User stocks returned successfully!" : "No stocks found",
-      userStocks,
+      data: userStocks,
     });
   } catch (err) {
     logger.error(`Error while getting user stocks ${err}`);
