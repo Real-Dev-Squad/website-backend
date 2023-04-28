@@ -409,6 +409,30 @@ const getUsersBasedOnFilter = async (query) => {
   return userDocs;
 };
 
+const fetchUsersWithRole = async (role) => {
+  try {
+    // console.log(role);
+    const snapshot = await userModel.where(`roles.${role}`, "==", true).get();
+    const onlyMembers = [];
+
+    if (!snapshot.empty) {
+      snapshot.forEach((doc) => {
+        onlyMembers.push({
+          id: doc.id,
+          ...doc.data(),
+          phone: undefined,
+          email: undefined,
+          tokens: undefined,
+        });
+      });
+    }
+    return onlyMembers;
+  } catch (err) {
+    logger.error("Error retrieving users data with roles of inDiscord", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -424,4 +448,5 @@ module.exports = {
   getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
+  fetchUsersWithRole,
 };

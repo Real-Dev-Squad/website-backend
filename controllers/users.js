@@ -12,6 +12,7 @@ const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+const { IN_DISCORD } = require("../constants/roles");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -107,6 +108,7 @@ const getUsers = async (req, res) => {
  */
 
 const getUser = async (req, res) => {
+  console.log(req.params.username);
   try {
     const result = await userQuery.fetchUser({ username: req.params.username });
     const { phone, email, ...user } = result.user;
@@ -462,6 +464,29 @@ const filterUsers = async (req, res) => {
   }
 };
 
+// const syncInDiscordRole = async (req, res) => {
+//   try {
+//   } catch (error) {
+//   logger.error(`Error while fetching all users: ${error}`);
+//   return res.boom.serverUnavailable("Something went wrong please contact admin");
+// }
+// };
+
+const fetchInDiscordUsers = async (req, res) => {
+  try {
+    const allUsers = await userQuery.fetchUsersWithRole(IN_DISCORD);
+
+    return res.json({
+      message: "Users found successfully!",
+      users: allUsers,
+      count: allUsers.length,
+    });
+  } catch (error) {
+    logger.error(`Error while fetching all users: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -481,4 +506,5 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
+  fetchInDiscordUsers,
 };
