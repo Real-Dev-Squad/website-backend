@@ -46,7 +46,7 @@ const createGroupRole = async (req, res) => {
 
     groupRoleData.roleid = responseForCreatedRole.id;
 
-    const { id, roleData } = await discordRolesModel.createNewRole(groupRoleData);
+    await discordRolesModel.createNewRole(groupRoleData);
     return res.json({
       message: "Role created successfully!",
     });
@@ -88,7 +88,7 @@ const addGroupRoleToMember = async (req, res) => {
       date: admin.firestore.Timestamp.fromDate(new Date()),
     };
 
-    const { id, roleData, wasSuccess } = await discordRolesModel.addGroupRoleToMember(memberGroupRole);
+    const { roleData, wasSuccess } = await discordRolesModel.addGroupRoleToMember(memberGroupRole);
 
     if (!wasSuccess) {
       return res.status(400).json({
@@ -106,7 +106,7 @@ const addGroupRoleToMember = async (req, res) => {
       expiresIn: config.get("userToken.ttl"),
     });
 
-    const responseForAddingRole = await fetch(`${DISCORD_BASE_URL}/roles/add`, {
+    await fetch(`${DISCORD_BASE_URL}/roles/add`, {
       method: "PUT",
       body: JSON.stringify(dataForDiscord),
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
