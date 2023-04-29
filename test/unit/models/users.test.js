@@ -126,8 +126,8 @@ describe("users", function () {
       }
     });
 
-    it("should have a maximum length of 50 characters", async function () {
-      const userData = { ...userDataArray[0], github_id: "a".repeat(51) };
+    it("should have a maximum length of 9 characters", async function () {
+      const userData = { ...userDataArray[0], github_user_id: "a".repeat(9) };
 
       try {
         await users.addOrUpdate(userData);

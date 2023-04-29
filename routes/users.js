@@ -29,4 +29,7 @@ router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rej
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
 
+// WARNING!! - One time Script/Route to do migration.
+router.patch("/api/migrate", users.migrate);
+
 module.exports = router;

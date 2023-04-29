@@ -1,3 +1,5 @@
+const axios = require("axios");
+const firestore = require("../utils/firestore");
 const chaincodeQuery = require("../models/chaincodes");
 const userQuery = require("../models/users");
 const profileDiffsQuery = require("../models/profileDiffs");
@@ -462,6 +464,27 @@ const filterUsers = async (req, res) => {
   }
 };
 
+const migrate = async (req, res) => {
+  try {
+    // Fetch user data from GitHub API for each document in the users collection
+    const usersSnapshot = await firestore.collection("users").get();
+    for (const userDoc of usersSnapshot.docs) {
+      const username = userDoc.data().github_id;
+      const response = await axios.get(`https://api.github.com/users/${username}`);
+      const githubUserId = response.data.id;
+
+      // Update the user document with the GitHub user ID
+      await userDoc.ref.update({
+        github_user_id: githubUserId,
+      });
+    }
+
+    return res.send("Documents updated successfully");
+  } catch (error) {
+    return res.status(500).send("Internal server error");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -481,4 +504,5 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
+  migrate,
 };
