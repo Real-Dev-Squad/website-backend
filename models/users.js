@@ -40,7 +40,7 @@ const addOrUpdate = async (userData, userId = null) => {
 
     // userId is null, Add or Update user
     const user = await userModel.where("github_user_id", "==", userData.github_user_id).limit(1).get();
-
+    const user1 = await userModel.where("github_id", "==", userData.github_id).limit(1).get();
     if (!user.empty) {
       await userModel.doc(user.docs[0].id).set(userData, { merge: true });
 
@@ -48,6 +48,14 @@ const addOrUpdate = async (userData, userId = null) => {
         isNewUser: false,
         userId: user.docs[0].id,
         incompleteUserDetails: user.docs[0].data().incompleteUserDetails,
+      };
+    } else if (!user1.empty) {
+      await userModel.doc(user1.docs[0].id).set(userData, { merge: true });
+
+      return {
+        isNewUser: false,
+        userId: user1.docs[0].id,
+        incompleteUserDetails: user1.docs[0].data().incompleteUserDetails,
       };
     }
 
@@ -66,7 +74,6 @@ const addOrUpdate = async (userData, userId = null) => {
     throw err;
   }
 };
-
 const addJoinData = async (userData) => {
   try {
     await joinModel.add(userData);
