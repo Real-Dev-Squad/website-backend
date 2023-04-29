@@ -11,7 +11,7 @@ const discordRolesModel = require("../models/discordactions");
  * @param res {Object} - Express response object
  */
 
-const DISCORD_BASE_URL = "https://11ed-103-75-161-223.ngrok.io";
+const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
 const createGroupRole = async (req, res) => {
   try {
@@ -38,7 +38,7 @@ const createGroupRole = async (req, res) => {
       expiresIn: config.get("userToken.ttl"),
     });
 
-    const responseForCreatedRole = await fetch(`${DISCORD_BASE_URL}/create-guild-role`, {
+    const responseForCreatedRole = await fetch(`${DISCORD_BASE_URL}/roles/create`, {
       method: "PUT",
       body: JSON.stringify(dataForDiscord),
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
@@ -49,11 +49,6 @@ const createGroupRole = async (req, res) => {
     const { id, roleData } = await discordRolesModel.createNewRole(groupRoleData);
     return res.json({
       message: "Role created successfully!",
-      responseForCreatedRole,
-      data: {
-        id,
-        ...roleData,
-      },
     });
   } catch (err) {
     logger.error(`Error while creating new Role: ${err}`);
@@ -111,7 +106,7 @@ const addGroupRoleToMember = async (req, res) => {
       expiresIn: config.get("userToken.ttl"),
     });
 
-    const responseForAddingRole = await fetch(`${DISCORD_BASE_URL}/add-member-role`, {
+    const responseForAddingRole = await fetch(`${DISCORD_BASE_URL}/roles/add`, {
       method: "PUT",
       body: JSON.stringify(dataForDiscord),
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
@@ -119,11 +114,6 @@ const addGroupRoleToMember = async (req, res) => {
 
     return res.json({
       message: "Role added successfully!",
-      responseForAddingRole,
-      data: {
-        id,
-        ...roleData,
-      },
     });
   } catch (err) {
     logger.error(`Error while adding new Role: ${err}`);
