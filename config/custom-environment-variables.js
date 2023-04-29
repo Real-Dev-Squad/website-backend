@@ -42,6 +42,10 @@ module.exports = {
         authRedirection: "SERVICES_RDSUI_ROUTES_AUTH_REDIRECTION",
       },
     },
+
+    discordBot: {
+      baseUrl: "DISCORD_BASE_URL",
+    },
   },
 
   userToken: {
@@ -60,6 +64,7 @@ module.exports = {
 
   botToken: {
     botPublicKey: "BOT_PUBLIC_KEY",
+    botPrivateKey: "BOT_PRIVATE_KEY",
   },
 
   cloudinary: {
