@@ -117,7 +117,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -138,7 +137,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .set("cookie", `${cookieName}=${jwt}`)
         .query({
           size: 1,
           page: 0,
@@ -164,7 +162,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .set("cookie", `${cookieName}=${jwt}`)
         .query({
           size: -1,
           page: -1,
@@ -187,7 +184,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .set("cookie", `${cookieName}=${jwt}`)
         .query({
           size: 101,
         })
@@ -209,7 +205,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users?size=2")
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -230,7 +225,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?next=${userId}&prev=${userId}&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -247,7 +241,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?next=${userId}&page=1&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -264,7 +257,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?page=1&prev=${userId}&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -281,7 +273,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?search=an&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -306,7 +297,7 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?page=1&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
+
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -326,8 +317,7 @@ describe("Users", function () {
     });
 
     it("Should get next and previous page results based upon the links in the response", async function () {
-      const response = await chai.request(app).get(`/users?size=2`).set("cookie", `${cookieName}=${jwt}`);
-
+      const response = await chai.request(app).get(`/users?size=2`);
       expect(response).to.have.status(200);
       expect(response.body).to.be.a("object");
       expect(response.body.message).to.equal("Users returned successfully!");
@@ -336,7 +326,7 @@ describe("Users", function () {
       expect(response.body.links).to.have.property("prev");
 
       const nextPageLink = response.body.links.next;
-      const nextPageResponse = await chai.request(app).get(nextPageLink).set("cookie", `${cookieName}=${jwt}`);
+      const nextPageResponse = await chai.request(app).get(nextPageLink);
 
       expect(nextPageResponse).to.have.status(200);
       expect(nextPageResponse.body).to.be.a("object");
@@ -347,7 +337,7 @@ describe("Users", function () {
       expect(nextPageResponse.body.users).to.have.length(2);
 
       const prevPageLink = nextPageResponse.body.links.prev;
-      const previousPageResponse = await chai.request(app).get(prevPageLink).set("cookie", `${cookieName}=${jwt}`);
+      const previousPageResponse = await chai.request(app).get(prevPageLink);
 
       expect(previousPageResponse).to.have.status(200);
       expect(previousPageResponse.body).to.be.a("object");
@@ -580,6 +570,39 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("GET /users/?id", function () {
+    beforeEach(async function () {
+      await addJoinData(joinData(userId)[0]);
+    });
+    it("Should return given user by id", function (done) {
+      chai
+        .request(app)
+        .get(`/users/?id`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User returned");
+          return done();
+        });
+    });
+    it("Should return 404 if user not Found", function (done) {
+      chai
+        .request(app)
+        .get(`/users/?id=ritiksuserId/`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
           return done();
         });
     });

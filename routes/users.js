@@ -9,10 +9,10 @@ const { upload } = require("../utils/multer");
 const { getUserBadges } = require("../controllers/badges");
 
 router.post("/verify", authenticate, users.verifyUser);
-// router.get("/userId/:userId", users.getUserById);
+router.get("/userId/:userId", users.getUserById);
 router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
 // router.get("/", authenticate, userValidator.getUsers, users.getUsers);
-router.get("/", users.getUsers);
+router.get("/", userValidator.getUsers, users.getUsers);
 router.get("/self", authenticate, users.getSelfDetails);
 router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
 router.get("/chaincode", authenticate, users.generateChaincode);

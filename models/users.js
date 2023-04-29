@@ -136,14 +136,13 @@ const fetchPaginatedUsers = async (query) => {
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
-    // console.log(doc);
+
     let dbQuery = (query.prev ? userModel.limitToLast(size) : userModel.limit(size)).orderBy("username");
     if (Object.keys(query).length) {
       if (query.search) {
         dbQuery = dbQuery
           .startAt(query.search.toLowerCase().trim())
           .endAt(query.search.toLowerCase().trim() + "\uf8ff");
-          // console.log(query.search)
       }
       if (query.page) {
         const offsetValue = size * parseInt(query.page);
