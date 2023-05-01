@@ -28,11 +28,21 @@ const addTagsToItem = async (itemData) => {
           })
       );
     }
+    /**
+     * In the above code, we are looping across every tag that is to be set and creating an Object that will
+     * finally be used to check if atleast ONE of the tags is a new tag. Because if every tag is an existing
+     * tag, it is unnecessary to proceed any further. The `isNewTag` Object will look like
+     * {
+     *    some_tag_id_1: false,
+     *    some_tag_id_2: true
+     * }
+     * `some_tag_id_2:true` represent a new tag and false in the vice-versa.
+     */
 
     await Promise.all(hasItemTagsPromises);
-    const wasSuccess = Object.values(isNewTag).some((value) => value === true);
+    const wasSuccess = Object.values(isNewTag).some((value) => value === true); // Atleast one new tag
 
-    if (!wasSuccess) return { itemId, wasSuccess };
+    if (!wasSuccess) return { itemId, wasSuccess }; // Returns if none of the tags are new
 
     tagPayload.forEach((tag) => {
       if (isNewTag[tag.tagId]) {
@@ -119,6 +129,10 @@ const getItemBasedOnFilter = async (query) => {
       );
       items.push(item);
     }
+    /**
+     * We are adding tags and levels actual to individual items as items object only has
+     * primary keys i.e. `tagId` and `levelId`
+     */
     await Promise.all(addTagsAndLevelsData);
     return items;
   } catch (err) {
