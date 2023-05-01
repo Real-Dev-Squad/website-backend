@@ -210,6 +210,7 @@ describe("Tasks", function () {
       const { userId: assignedUser } = await userModel.addOrUpdate({
         github_id: "prakashchoudhary07",
         username: "user1",
+        github_user_id: "12345678",
       });
       const assignedTask = [
         {

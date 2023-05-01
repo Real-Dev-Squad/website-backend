@@ -23,6 +23,7 @@ describe("Contributions", function () {
       yoe: 0,
       img: "./img.png",
       github_id: "prakashchoudhary07",
+      github_user_id: "12345678",
       username: "prakash",
     };
     // Adding user
@@ -30,10 +31,12 @@ describe("Contributions", function () {
     // Creating second user
     user.username = "userWithNoPrs";
     user.github_id = "userWithNoPrs";
+    user.github_user_id = "userWithNoPrs";
     await userModel.addOrUpdate(user);
     // Creating second user
     user.username = "userNoTask";
     user.github_id = "userNoTask";
+    user.github_user_id = "userWithNoPrs";
     await userModel.addOrUpdate(user);
     //  Creating task for user
     const task = {
