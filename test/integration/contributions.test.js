@@ -36,7 +36,7 @@ describe("Contributions", function () {
     // Creating second user
     user.username = "userNoTask";
     user.github_id = "userNoTask";
-    user.github_user_id = "userWithNoPrs";
+    user.github_user_id = "userNoTask";
     await userModel.addOrUpdate(user);
     //  Creating task for user
     const task = {
