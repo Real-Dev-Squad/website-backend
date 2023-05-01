@@ -2,8 +2,6 @@ const jwt = require("jsonwebtoken");
 const uuid4 = require("uuid4");
 
 // A service class for Token generation and management
-logger.info(config.get("Event100ms.APP_ACCESS_KEY"));
-
 class EventTokenService {
   static #app_access_key = config.get("Event100ms.APP_ACCESS_KEY");
   static #app_secret = config.get("Event100ms.APP_SECRET");

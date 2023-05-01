@@ -6,7 +6,6 @@ class EventAPIService {
   #tokenServiceInstance;
   constructor(tokenService) {
     // Set Axios baseURL to 100ms API BaseURI
-    logger.info({ axios });
     this.#axiosInstance = axios.create({
       baseURL: "https://api.100ms.live/v2",
       timeout: 3 * 60000,
@@ -63,7 +62,6 @@ class EventAPIService {
 
   // A method for POST requests using the configured Axios instance
   async post(path, payload) {
-    logger.info({ path, payload });
     const res = await this.#axiosInstance.post(path, payload || {});
     logger.info(`post call to path - ${path}, status code - ${res.status}`);
     return res.data;
