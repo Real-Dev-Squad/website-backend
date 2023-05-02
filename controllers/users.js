@@ -476,7 +476,7 @@ const migrate = async (req, res) => {
 
       // Update the user document with the GitHub user ID
       await userDoc.ref.update({
-        github_user_id: githubUserId,
+        github_user_id: `${githubUserId}`,
       });
     }
 
