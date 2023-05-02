@@ -142,6 +142,29 @@ function getUsernamesFromPRs(allPRs) {
 
   return usernames;
 }
+function mapDiscordMembersDataAndSyncRole(allUsers, discordMembers) {
+  try {
+    allUsers.forEach((doc) => {
+      const user = doc.data();
+
+      if (user.roles.archived) {
+        const roles = user.roles ? { ...user.roles, inDiscord: false } : { inDiscord: false };
+        doc.ref.update({ roles });
+      } else if (user.discordId) {
+        const discordUserData = discordMembers.find((item) => item.user.id === user.discordId);
+        if (discordUserData) {
+          const roles = user.roles ? { ...user.roles, inDiscord: true } : { inDiscord: true };
+          doc.ref.update({ roles, joined_RDS: discordUserData.joined_at });
+        } else {
+          const roles = user.roles ? { ...user.roles, inDiscord: false } : { inDiscord: false };
+          doc.ref.update({ roles });
+        }
+      }
+    });
+  } catch (err) {
+    logger.error(err);
+  }
+}
 
 module.exports = {
   addUserToDBForTest,
@@ -152,4 +175,5 @@ module.exports = {
   getLowestLevelSkill,
   getPaginationLink,
   getUsernamesFromPRs,
+  mapDiscordMembersDataAndSyncRole,
 };

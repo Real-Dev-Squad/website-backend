@@ -408,7 +408,15 @@ const getUsersBasedOnFilter = async (query) => {
   const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
   return userDocs;
 };
-
+const getAllUsers = async () => {
+  try {
+    const usersRef = await userModel.get();
+    return usersRef;
+  } catch (err) {
+    logger.error("Error retrieving users data with roles of inDiscord", err);
+    throw err;
+  }
+};
 const fetchUsersWithRole = async (role) => {
   try {
     // console.log(role);
@@ -426,7 +434,31 @@ const fetchUsersWithRole = async (role) => {
         });
       });
     }
+
     return onlyMembers;
+  } catch (err) {
+    logger.error("Error retrieving users data with roles of inDiscord", err);
+    throw err;
+  }
+};
+const fetchUsersWhereFieldNotNull = async (field) => {
+  try {
+    const snapshot = await userModel.where(field, "!=", null).get();
+    const users = [];
+
+    if (!snapshot.empty) {
+      snapshot.forEach((doc) => {
+        users.push({
+          id: doc.id,
+          ...doc.data(),
+          phone: undefined,
+          email: undefined,
+          tokens: undefined,
+        });
+      });
+    }
+
+    return users;
   } catch (err) {
     logger.error("Error retrieving users data with roles of inDiscord", err);
     throw err;
@@ -449,4 +481,6 @@ module.exports = {
   fetchUsers,
   getUsersBasedOnFilter,
   fetchUsersWithRole,
+  fetchUsersWhereFieldNotNull,
+  getAllUsers,
 };
