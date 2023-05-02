@@ -464,13 +464,14 @@ const filterUsers = async (req, res) => {
   }
 };
 
+// one time script function to perform the migration - adding github_user_id field to the document
 const migrate = async (req, res) => {
   try {
     // Fetch user data from GitHub API for each document in the users collection
     const usersSnapshot = await firestore.collection("users").get();
     for (const userDoc of usersSnapshot.docs) {
-      const username = userDoc.data().github_id;
-      const response = await axios.get(`https://api.github.com/users/${username}`);
+      const githubUsername = userDoc.data().github_id;
+      const response = await axios.get(`https://api.github.com/users/${githubUsername}`);
       const githubUserId = response.data.id;
 
       // Update the user document with the GitHub user ID

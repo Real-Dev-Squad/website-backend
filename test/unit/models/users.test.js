@@ -90,7 +90,7 @@ describe("users", function () {
 
     it("should add the github_user_id to the user collection", async function () {
       const userData = userDataArray[0];
-      userData.github_user_id = "123456789";
+      userData.github_user_id = "12345678";
 
       const { isNewUser, userId } = await users.addOrUpdate(userData);
 
@@ -102,13 +102,13 @@ describe("users", function () {
 
     it("should update the github_user_id in the user collection", async function () {
       const userData = userDataArray[0];
-      userData.github_user_id = "123456789";
+      userData.github_user_id = "12345678";
 
       // Add the user the first time
       const { userId } = await users.addOrUpdate(userData);
 
       // Update the user with same data and new github_user_id
-      userData.github_user_id = "987654321";
+      userData.github_user_id = "87654321";
       await users.addOrUpdate(userData, userId);
 
       const data = (await userModel.doc(userId).get()).data();
@@ -116,7 +116,7 @@ describe("users", function () {
       expect(data.github_user_id).to.equal(userData.github_user_id);
     });
 
-    it("should be a string", async function () {
+    it("should have a type of string", async function () {
       const userData = { ...userDataArray[0], github_id: 123 };
 
       try {
@@ -126,13 +126,13 @@ describe("users", function () {
       }
     });
 
-    it("should have a maximum length of 9 characters", async function () {
-      const userData = { ...userDataArray[0], github_user_id: "a".repeat(9) };
+    it("should have a maximum length of 8 characters", async function () {
+      const userData = { ...userDataArray[0], github_user_id: "a".repeat(8) };
 
       try {
         await users.addOrUpdate(userData);
       } catch (error) {
-        expect(error.message).to.equal("Validation error: github_id exceeds maximum length of 50 characters");
+        expect(error.message).to.equal("Validation error: github_id exceeds maximum length of 8 characters");
       }
     });
 
