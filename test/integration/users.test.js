@@ -586,6 +586,7 @@ describe("Users", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User returned successfully!");
+          expect(res.body.user).to.be.a("object");
           return done();
         });
     });
