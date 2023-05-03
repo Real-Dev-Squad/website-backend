@@ -151,7 +151,8 @@ describe("githubService", function () {
       const path = "search/issues";
       const searchParams = `org%3A${org}+type%3Aissue+is%3Aopen&sort=created&per_page=100&page=1`;
 
-      expect(response).to.be.equal(`${baseURL}/${path}?q=${searchString}+${searchParams}`);
+      const url = `${baseURL}/${path}?q=${searchString}+${searchParams}`;
+      expect(response).to.be.equal(url);
     });
   });
 });
