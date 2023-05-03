@@ -145,7 +145,7 @@ describe("githubService", function () {
         searchString: "website",
       });
       expect(response).to.be.equal(
-        "https://api.github.com/search/issues?q=website+org%3AReal-Dev-Squad+type%3Aissue+is%3Aopen+created%3A%3E%3D2023-01-01&sort=created&order=desc&per_page=100&page=1"
+        "https://api.github.com/search/issues?q=website+org%3AReal-Dev-Squad+type%3Aissue+is%3Aopen&sort=created&per_page=100&page=1"
       );
     });
   });
