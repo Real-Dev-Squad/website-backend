@@ -33,7 +33,7 @@ const createGroupRole = async (req, res) => {
       createdBy: req.userData.id,
       date: admin.firestore.Timestamp.fromDate(new Date()),
     };
-    const authToken = jwt.sign({}, config.get("botToken.botPrivateKey"), {
+    const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
       algorithm: "RS256",
       expiresIn: config.get("userToken.ttl"),
     });
@@ -101,7 +101,7 @@ const addGroupRoleToMember = async (req, res) => {
     const dataForDiscord = {
       ...req.body,
     };
-    const authToken = jwt.sign({}, config.get("botToken.botPrivateKey"), {
+    const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
       algorithm: "RS256",
       expiresIn: config.get("userToken.ttl"),
     });

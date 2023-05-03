@@ -64,7 +64,10 @@ module.exports = {
 
   botToken: {
     botPublicKey: "BOT_PUBLIC_KEY",
-    botPrivateKey: "BOT_PRIVATE_KEY",
+  },
+
+  rdsServerlessBot: {
+    rdsServerLessPrivateKey: "RDS_SERVERLESS_PRIVATE_KEY",
   },
 
   cloudinary: {
