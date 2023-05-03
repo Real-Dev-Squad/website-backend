@@ -99,7 +99,6 @@ const getUsers = async (req, res) => {
         user,
       });
     }
-    // till here
 
     if (qualifiers?.filterBy) {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);

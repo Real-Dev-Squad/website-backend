@@ -576,33 +576,31 @@ describe("Users", function () {
   });
 
   describe("GET /users/?id", function () {
-    beforeEach(async function () {
-      await addJoinData(joinData(userId)[0]);
-    });
     it("Should return given user by id", function (done) {
       chai
         .request(app)
-        .get(`/users/?id`)
+        .get(`/users/?id=${userId}`)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User returned");
+          expect(res.body.message).to.equal("User returned successfully!");
           return done();
         });
     });
     it("Should return 404 if user not Found", function (done) {
       chai
         .request(app)
-        .get(`/users/?id=ritiksuserId/`)
+        .get(`/users/?id=ritiksuserId`)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
           expect(res).to.have.status(404);
           expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User doesn't exist");
           return done();
         });
     });
