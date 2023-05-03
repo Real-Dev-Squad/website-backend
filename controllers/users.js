@@ -85,10 +85,8 @@ const getUsers = async (req, res) => {
         return res.boom.notFound("User doesn't exist");
       }
 
-      const { phone = "", email = "", ...user } = result.user;
+      const { user } = result.user;
       try {
-        user.phone = obfuscate.obfuscatePhone(phone);
-        user.email = obfuscate.obfuscateMail(email);
         delete user.phone;
         delete user.email;
       } catch (error) {
