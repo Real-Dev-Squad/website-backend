@@ -297,7 +297,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?page=1&size=2`)
-
         .end((err, res) => {
           if (err) {
             return done(err);
