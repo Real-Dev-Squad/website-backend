@@ -89,6 +89,8 @@ const getUsers = async (req, res) => {
       try {
         user.phone = obfuscate.obfuscatePhone(phone);
         user.email = obfuscate.obfuscateMail(email);
+        delete user.phone;
+        delete user.email;
       } catch (error) {
         logger.error(`Error while formatting phone and email: ${error}`);
         return res.boom.badImplementation("Error while formatting phone and email");
