@@ -141,12 +141,17 @@ describe("githubService", function () {
 
   describe("fetchOpenIssues with search query param", function () {
     it("Should generate the correct url to fetch open issues with search param", async function () {
+      const searchString = "website";
       const response = await githubService.fetchOpenIssues({
-        searchString: "website",
+        searchString,
       });
-      expect(response).to.be.equal(
-        "https://api.github.com/search/issues?q=website+org%3AReal-Dev-Squad+type%3Aissue+is%3Aopen&sort=created&per_page=100&page=1"
-      );
+
+      const baseURL = config.get("githubApi.baseUrl");
+      const org = config.get("githubApi.org");
+      const path = "search/issues";
+      const searchParams = `org%3A${org}+type%3Aissue+is%3Aopen&sort=created&per_page=100&page=1`;
+
+      expect(response).to.be.equal(`${baseURL}/${path}?q=${searchString}+${searchParams}`);
     });
   });
 });
