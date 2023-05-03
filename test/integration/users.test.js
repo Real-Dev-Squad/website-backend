@@ -587,16 +587,16 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User returned successfully!");
           expect(res.body.user).to.be.a("object");
-          expect(res.body.user).to.have.property("username");
-          expect(res.body.user).to.have.property("first_name");
-          expect(res.body.user).to.have.property("last_name");
-          expect(res.body.user).to.have.property("yoe");
-          expect(res.body.user).to.have.property("linkedin_id");
-          expect(res.body.user).to.have.property("github_id");
-          expect(res.body.user).to.have.property("isMember");
-          expect(res.body.user).to.have.property("roles");
-          expect(res.body.user).to.not.have.property("phone");
-          expect(res.body.user).to.not.have.property("email");
+          expect(res.body.user).to.have.all.keys(
+            "username",
+            "first_name",
+            "last_name",
+            "yoe",
+            "linkedin_id",
+            "github_id",
+            "isMember",
+            "roles"
+          );
           return done();
         });
     });
