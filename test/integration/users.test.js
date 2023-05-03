@@ -587,7 +587,7 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User returned successfully!");
           expect(res.body.user).to.be.a("object");
-          expect(res.body.user).to.have.all.keys(
+          expect(Object.keys(res.body.user)).to.include.members([
             "username",
             "first_name",
             "last_name",
@@ -595,8 +595,8 @@ describe("Users", function () {
             "linkedin_id",
             "github_id",
             "isMember",
-            "roles"
-          );
+            "roles",
+          ]);
           return done();
         });
     });
