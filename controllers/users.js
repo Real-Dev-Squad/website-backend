@@ -85,7 +85,7 @@ const getUsers = async (req, res) => {
         return res.boom.notFound("User doesn't exist");
       }
 
-      const { ...user } = result.user;
+      const user = { ...result.user };
       try {
         delete user.phone;
         delete user.email;
