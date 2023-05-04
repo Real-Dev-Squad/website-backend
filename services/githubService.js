@@ -48,7 +48,7 @@ const extractPRdetails = (data) => {
  * @param searchParams {Object} - List of params to create github API URL
  * @param resultsOptions {Object} - Ordering and pagination of results
  */
-const getGithubURL = (searchParams, resultsOptions = {}) => {
+const getGithubURL = (searchParams, resultsOptions = {}, searchString) => {
   const baseURL = config.get("githubApi.baseUrl");
   const issuesAndPRsPath = "/search/issues";
 
@@ -65,7 +65,11 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
   const paramsStrArr = paramsObjArr.map(([key, value]) => `${key}:${value}`);
 
   // The string that can be entrered as text on Github website for simple search
-  const prsSearchText = paramsStrArr.join(" ");
+  let prsSearchText = paramsStrArr.join(" ");
+
+  if (searchString) {
+    prsSearchText = `${searchString} ${prsSearchText}`;
+  }
 
   urlObj.searchParams.append("q", prsSearchText);
 
@@ -178,7 +182,7 @@ const fetchMergedPRs = async (params = {}) => {
 };
 
 const fetchOpenIssues = async (params = {}) => {
-  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {} } = params;
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {}, searchString = "" } = params;
 
   try {
     const url = getGithubURL(
@@ -192,7 +196,8 @@ const fetchOpenIssues = async (params = {}) => {
         ...resultOptions,
         per_page: perPage,
         page,
-      }
+      },
+      searchString
     );
     return getFetch(url);
   } catch (err) {
@@ -239,6 +244,7 @@ const fetchIssues = async () => {
       createdURL,
       {
         filter: "all",
+        state: "open",
       },
       {
         Accept: "application/vnd.github+json",

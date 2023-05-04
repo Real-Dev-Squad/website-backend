@@ -9,6 +9,15 @@ const getOrgIssues = async () => {
   return data;
 };
 
+const searchOrgIssues = async (searchString) => {
+  const data = await githubService.fetchOpenIssues({
+    searchString,
+  });
+
+  return data;
+};
+
 module.exports = {
   getOrgIssues,
+  searchOrgIssues,
 };
