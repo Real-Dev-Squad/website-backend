@@ -469,16 +469,53 @@ const migrate = async (req, res) => {
   try {
     // Fetch user data from GitHub API for each document in the users collection
     const usersSnapshot = await firestore.collection("users").get();
-    for (const userDoc of usersSnapshot.docs) {
-      const githubUsername = userDoc.data().github_id;
-      const response = await axios.get(`https://api.github.com/users/${githubUsername}`);
-      const githubUserId = response.data.id;
+    const batchSize = Math.ceil(usersSnapshot.docs.length / 2);
+    const batch1 = usersSnapshot.docs.slice(0, batchSize);
+    const batch2 = usersSnapshot.docs.slice(batchSize);
+    const batchWrites = [];
 
-      // Update the user document with the GitHub user ID
-      await userDoc.ref.update({
-        github_user_id: `${githubUserId}`,
-      });
+    // Create batch write operations for the first batch of documents
+    const batch1Write = firestore.batch();
+    for (const userDoc of batch1) {
+      const githubUsername = userDoc.data().github_id;
+      batch1Write.update(userDoc.ref, { github_user_id: null });
+      batchWrites.push(
+        axios
+          .get(`https://api.github.com/users/${githubUsername}`)
+          .then((response) => {
+            const githubUserId = response.data.id;
+            batch1Write.update(userDoc.ref, { github_user_id: `${githubUserId}` });
+          })
+          .catch((error) => {
+            res.send(error);
+          })
+      );
     }
+
+    // Create batch write operations for the second batch of documents
+    const batch2Write = firestore.batch();
+    for (const userDoc of batch2) {
+      const githubUsername = userDoc.data().github_id;
+      batch2Write.update(userDoc.ref, { github_user_id: null });
+      batchWrites.push(
+        axios
+          .get(`https://api.github.com/users/${githubUsername}`)
+          .then((response) => {
+            const githubUserId = response.data.id;
+            batch2Write.update(userDoc.ref, { github_user_id: `${githubUserId}` });
+          })
+          .catch((error) => {
+            res.send(error);
+          })
+      );
+    }
+
+    // Execute both batch writes in parallel
+    await Promise.all(batchWrites);
+
+    // Commit both batch writes to update the Firestore documents
+    await batch1Write.commit();
+    await batch2Write.commit();
 
     return res.send("Documents updated successfully");
   } catch (error) {

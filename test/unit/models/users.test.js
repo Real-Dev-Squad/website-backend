@@ -100,23 +100,23 @@ describe("users", function () {
       expect(isNewUser).to.equal(true);
     });
 
-    it("should update the github_user_id in the user collection", async function () {
+    it("should update the github_id in the user collection", async function () {
       const userData = userDataArray[0];
-      userData.github_user_id = "12345678";
+      userData.github_user_id = "Yash Sinha";
 
       // Add the user the first time
       const { userId } = await users.addOrUpdate(userData);
 
       // Update the user with same data and new github_user_id
-      userData.github_user_id = "87654321";
+      userData.github_id = "Ankush Dharkar";
       await users.addOrUpdate(userData, userId);
 
       const data = (await userModel.doc(userId).get()).data();
 
-      expect(data.github_user_id).to.equal(userData.github_user_id);
+      expect(data.github_id).to.equal(userData.github_id);
     });
 
-    it("should have a type of string", async function () {
+    it("verifies the error text message", async function () {
       const userData = { ...userDataArray[0], github_id: 123 };
 
       try {
@@ -127,7 +127,7 @@ describe("users", function () {
     });
 
     it("should have a maximum length of 8 characters", async function () {
-      const userData = { ...userDataArray[0], github_user_id: "a".repeat(8) };
+      const userData = { ...userDataArray[0], github_user_id: "a".repeat(9) };
 
       try {
         await users.addOrUpdate(userData);
