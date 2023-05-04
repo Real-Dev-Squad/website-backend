@@ -10,7 +10,15 @@ const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 const getIssues = async (req, res) => {
   try {
-    const issues = await issuesService.getOrgIssues();
+    const { q: queryString } = req.query;
+    let issues = {};
+    if (queryString) {
+      const searchedIssues = await issuesService.searchOrgIssues(queryString);
+      issues.data = searchedIssues?.data?.items ?? [];
+    } else {
+      issues = await issuesService.getOrgIssues();
+    }
+
     let issuesData = issues.data.length > 0 ? issues.data : [];
     issuesData = issuesData.filter((issue) => !Object.keys(issue).includes("pull_request"));
     issuesData = issuesData.map(async (issue) => {
