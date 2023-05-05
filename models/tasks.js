@@ -43,23 +43,15 @@ const addDependency = async (data) => {
   try {
     const { taskId, dependsOn } = data;
     const batch = firestore.batch();
-    // console.log("data", taskId, dependsOn);
     for (const dependsId of dependsOn) {
       const taskDependOn = {
         taskId,
         dependsId,
       };
       const docid = dependencyModel.doc();
-      // console.log(docid);
-      // console.log("taskdepends", taskDependOn);
       batch.set(docid, taskDependOn);
     }
     await batch.commit();
-    // console.log(dependsOn, taskId);
-    // const result = await DependencyModel.add({
-    //   taskId,
-    //   dependsOn,
-    // });
     return data;
   } catch (err) {
     logger.error("Error in creating dependency");

@@ -19,14 +19,3 @@ router.patch("/self/:id", authenticate, updateSelfTask, tasks.updateTaskStatus, 
 router.patch("/assign/self", authenticate, tasks.assignTask);
 
 module.exports = router;
-// for (const dependId of dependsOn) {
-//   batch.set(DependencyModel, {
-//     taskid,//     dependId,
-//   });
-// }
-// await batch.commit();
-// taskData = await toFirestoreData(taskData);
-//   const taskId = requestData.taskId;
-//   for(let dependId of dependsOn){
-//   createDocument({taskId, dependId})
-//        }
