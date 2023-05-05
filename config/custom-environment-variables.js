@@ -68,6 +68,7 @@ module.exports = {
 
   rdsServerlessBot: {
     rdsServerLessPrivateKey: "RDS_SERVERLESS_PRIVATE_KEY",
+    ttl: "RDS_SERVERLESS",
   },
 
   cloudinary: {

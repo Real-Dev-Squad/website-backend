@@ -78,6 +78,11 @@ module.exports = {
     CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare_User_Email",
   },
 
+  rdsServerlessBot: {
+    rdsServerLessPrivateKey: "RDS_SERVERLESS_PRIVATE_KEY",
+    ttl: "RDS_SERVERLESS",
+  },
+
   integrations: {
     newrelic: {
       appName: "RDS_API_production",

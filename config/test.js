@@ -145,5 +145,6 @@ module.exports = {
       "PZLea6NmAwZZE+dNU/EC9wVhexzqVU14J5gccBKilP9+a22QN1ES4MaOkTKlgffM\n" +
       "aYGCT7Q+yV3Yju9dZ3hAyVZxdGQSL0Q1sVr/kleaUacw1ztKBeHCgQ==\n" +
       "-----END RSA PRIVATE KEY-----",
+    ttl: 60,
   },
 };

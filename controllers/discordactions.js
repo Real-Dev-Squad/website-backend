@@ -46,9 +46,10 @@ const createGroupRole = async (req, res) => {
 
     groupRoleData.roleid = responseForCreatedRole.id;
 
-    await discordRolesModel.createNewRole(groupRoleData);
-    return res.json({
+    const { id } = await discordRolesModel.createNewRole(groupRoleData);
+    return res.status(201).json({
       message: "Role created successfully!",
+      id,
     });
   } catch (err) {
     logger.error(`Error while creating new Role: ${err}`);
@@ -112,7 +113,7 @@ const addGroupRoleToMember = async (req, res) => {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
     }).then((response) => response.json());
 
-    return res.json({
+    return res.status(201).json({
       message: "Role added successfully!",
     });
   } catch (err) {
