@@ -22,9 +22,7 @@ const addNewTask = async (req, res) => {
       ...req.body,
       createdBy,
     };
-    // console.log(body);
     delete body.dependsOn;
-    // console.log("hii", dependsOn);
     const { taskId, taskDetails } = await tasks.updateTask(body);
     const data = {
       taskId,
