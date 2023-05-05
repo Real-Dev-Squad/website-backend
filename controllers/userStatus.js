@@ -1,4 +1,4 @@
-const { fetchUser } = require("../models/users");
+const { fetchUser, getJoinData } = require("../models/users");
 const userStatusModel = require("../models/userStatus");
 const { getUserIdBasedOnRoute } = require("../utils/userStatus");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
@@ -103,7 +103,8 @@ const updateUserStatus = async (req, res) => {
   try {
     const userId = getUserIdBasedOnRoute(req);
     if (userId) {
-      const dataToUpdate = req.body;
+      const result = await getJoinData(userId);
+      const dataToUpdate = { ...req.body, monthlyHours: { committed: 4 * result[0].intro.numberOfHours } };
       const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
       const { userStatusExists, id, data } = updateStatus;
       const responseObject = { id, userId, data: null, message: "" };

@@ -15,9 +15,7 @@ const {
   userStatusDataForOooState,
   oooStatusDataForShortDuration,
   generateUserStatusData,
-  generateMonthlyHours,
 } = require("../fixtures/userStatus/userStatus");
-const joinData = require("../fixtures/user/join");
 
 const config = require("config");
 const { updateUserStatus } = require("../../models/userStatus");
@@ -370,20 +368,6 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should update the Monthly Hours", function (done) {
-      chai
-        .request(app)
-        .patch(`/users/status/self`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send(generateMonthlyHours(joinData()[2].numberOfHours))
-        .end((err) => {
-          if (err) {
-            return done(err);
-          }
-          return done();
-        });
-    });
-
     it("Should return 401 for unauthorized request", function (done) {
       chai
         .request(app)
@@ -414,7 +398,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
           expect(res.body.error).to.equal(`Bad Request`);
-          expect(res.body.message).to.equal(`Invalid State. State must be either IDLE, ACTIVE, OOO, or ONBOARDING`);
+          expect(res.body.message).to.equal(`Invalid State. State must be either IDLE, ACTIVE or OOO`);
           return done();
         });
     });
