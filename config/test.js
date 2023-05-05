@@ -107,44 +107,8 @@ module.exports = {
   },
 
   rdsServerlessBot: {
-    rdsServerLessPublicKey:
-      "-----BEGIN PUBLIC KEY-----\n" +
-      "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTun7LqrEAU+iiC5KkjB\n" +
-      "JMFECm9ICl3cam2RwagJnMgihU/odFov74eflSrRPiGazSrf8plddwU3TA3cZ842\n" +
-      "MOChC1PRTNhHhnkWS6B5/siAsE69UbXzBZEgrxW6FpvAVW7z7IeKkSiHUAKDmuPM\n" +
-      "k4UnPMUstSVzPEY6GKsyJx16ubPfv6+lU3lIfu4ogH8/joq1249vF13e0N+h+fep\n" +
-      "i5spjjd/xNy5yn8vzM+fX5nHuFMsW2kNfH0WdzYiim+V92JPmEoF+SpKL1jd4hTt\n" +
-      "9Obaa3DHQKetirsr/R+Zv9esB/RNUC25ipATiXoDFGb7aGtHpICaQo/K+xX88VF8\n" +
-      "7QIDAQAB\n" +
-      "-----END PUBLIC KEY-----",
-    rdsServerLessPrivateKey:
-      "-----BEGIN RSA PRIVATE KEY-----\n" +
-      "MIIEpAIBAAKCAQEAwTun7LqrEAU+iiC5KkjBJMFECm9ICl3cam2RwagJnMgihU/o\n" +
-      "dFov74eflSrRPiGazSrf8plddwU3TA3cZ842MOChC1PRTNhHhnkWS6B5/siAsE69\n" +
-      "UbXzBZEgrxW6FpvAVW7z7IeKkSiHUAKDmuPMk4UnPMUstSVzPEY6GKsyJx16ubPf\n" +
-      "v6+lU3lIfu4ogH8/joq1249vF13e0N+h+fepi5spjjd/xNy5yn8vzM+fX5nHuFMs\n" +
-      "W2kNfH0WdzYiim+V92JPmEoF+SpKL1jd4hTt9Obaa3DHQKetirsr/R+Zv9esB/RN\n" +
-      "UC25ipATiXoDFGb7aGtHpICaQo/K+xX88VF87QIDAQABAoIBAQCPvkD86R+3my8a\n" +
-      "sZ0Mx3JmVR64ZG/Cxm/g/AEhfk8oQfjsErVpWG2wUcN0w5VEEtuFJA/T+CJ/F3I7\n" +
-      "MVR0JAJL+c3TD1bzQzBx6EGdoJMf5SdWADz1O9S8n2kg1ZjImLRK2W661VlPAkcm\n" +
-      "Tbh40FyuoK6/li3b0zAV9mfhUfjM/uQmRgPimgAAbF5j3mKUbf9bcnIDtq+9PKGb\n" +
-      "kZG2ov+n5WqFv6BBJaG2NfYMeGdRXb/ne/FtUpyXFkZIJxEgtggBlkdtwd4Ts6ap\n" +
-      "ItqwQvRxlyVit0XZJ5pkZnkRD2pyXyyrOkFeUhczu/QRCgiSNSZElvCF1/gGFBUa\n" +
-      "dRZe4EBBAoGBAPfIti1XX1ryBbIyugU7p8+6wEVscbgHMnZQ43fV29J890lzTBBB\n" +
-      "Z7xA8DqBsCmSYcUa0dgbMjId6ntq1rE/ietXkOVwfyfcSMaP4HEHVAIc7nDJYyd7\n" +
-      "V8bwGCSGllGR8MRevgLb00m6VopYpj98/YryGQW1+zcJrYzEQ+zzGElzAoGBAMej\n" +
-      "5NvIWzL4HPjDsV+UEQ16TZppBWqAxYBm2ORHn4u4fvquEHSibap3XtYGvbp57meT\n" +
-      "h2ph98rEYuXU73ureqrAl/vR4NFloXBQ3U9DnoiYegOrJQUX1IuM8ACIuTH9SiJV\n" +
-      "lCfg4pl0i6njoCCIuInzxgGXb01jVTQjx3jTVwgfAoGAfqlWHvVj5ByFtuLhXl1x\n" +
-      "WenP8W0O8JCVRg/xR0fF9+IzkpNilYipm3zikDXNNGMEoXolPMAiN6Y9P9uMZczi\n" +
-      "FrCLfA22okyj0wSnKYAifHYHmRYJHpyZcTM4VCuMWaQtnGQF43Y1mqGrLUtFqHyf\n" +
-      "KtC448dz5F2JHsURJ+XYS2sCgYAfaaJxEq2G75NfcStPprSoMj5TtYKsp2ZsNcKa\n" +
-      "6Mop6fXQ6+Ka95PZ5r59XsIrvVPN6GC+VHvw48XL9B1akDjU9Uj0zqlZSWyFh7PK\n" +
-      "7RDc3WEVgrBohL9k1eBNtTWur/QiQuT1AWWmT7hKGw7vD5Q54KmfRny06JRXh+mz\n" +
-      "EU34cQKBgQCjqsKMWI92BNYHvJG2oVxJT/vxA4bB+1fmfEIQsFEo66H4/6uiQI1r\n" +
-      "PZLea6NmAwZZE+dNU/EC9wVhexzqVU14J5gccBKilP9+a22QN1ES4MaOkTKlgffM\n" +
-      "aYGCT7Q+yV3Yju9dZ3hAyVZxdGQSL0Q1sVr/kleaUacw1ztKBeHCgQ==\n" +
-      "-----END RSA PRIVATE KEY-----",
+    rdsServerLessPublicKey: "RSA PUBLIC KEY",
+    rdsServerLessPrivateKey: "RSA PRIVATE KEY",
     ttl: 60,
   },
 };
