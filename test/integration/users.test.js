@@ -603,7 +603,7 @@ describe("Users", function () {
     it("Should return 404 if user not Found", function (done) {
       chai
         .request(app)
-        .get(`/users/?id=ritiksuserId`)
+        .get(`/users/?id=anyRandomuserId`)
         .end((err, res) => {
           if (err) {
             return done(err);
