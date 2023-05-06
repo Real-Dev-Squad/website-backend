@@ -131,4 +131,28 @@ describe("githubService", function () {
       );
     });
   });
+
+  describe("fetchIssues", function () {
+    it("Should generate the correct url", async function () {
+      const response = await githubService.fetchIssues();
+      expect(response).to.be.equal(`https://api.github.com/orgs/Real-Dev-Squad/issues`);
+    });
+  });
+
+  describe("fetchOpenIssues with search query param", function () {
+    it("Should generate the correct url to fetch open issues with search param", async function () {
+      const searchString = "website";
+      const response = await githubService.fetchOpenIssues({
+        searchString,
+      });
+
+      const baseURL = config.get("githubApi.baseUrl");
+      const org = config.get("githubApi.org");
+      const path = "search/issues";
+      const searchParams = `org%3A${org}+type%3Aissue+is%3Aopen&sort=created&per_page=100&page=1`;
+
+      const url = `${baseURL}/${path}?q=${searchString}+${searchParams}`;
+      expect(response).to.be.equal(url);
+    });
+  });
 });

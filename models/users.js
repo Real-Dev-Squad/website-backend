@@ -59,7 +59,7 @@ const addOrUpdate = async (userData, userId = null) => {
     userData.roles = { archived: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
-    return { isNewUser: true, userId: userInfo.id };
+    return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true };
   } catch (err) {
     logger.error("Error in adding or updating user", err);
     throw err;
@@ -224,7 +224,7 @@ const fetchUsers = async (usernames = []) => {
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const fetchUser = async ({ userId = null, username = null }) => {
+const fetchUser = async ({ userId = null, username = null, githubUsername = null }) => {
   try {
     let userData, id;
     if (username) {
@@ -238,6 +238,12 @@ const fetchUser = async ({ userId = null, username = null }) => {
       const user = await userModel.doc(userId).get();
       id = userId;
       userData = user.data();
+    } else if (githubUsername) {
+      const user = await userModel.where("github_id", "==", githubUsername).limit(1).get();
+      user.forEach((doc) => {
+        id = doc.id;
+        userData = doc.data();
+      });
     }
     return {
       userExists: !!userData,
@@ -335,6 +341,16 @@ const fetchUserSkills = async (id) => {
   }
 };
 
+const getRdsUserInfoByGitHubUsername = async (githubUsername) => {
+  const { user } = await fetchUser({ githubUsername });
+
+  return {
+    firstName: user.first_name ?? "",
+    lastName: user.last_name ?? "",
+    username: user.username ?? "",
+  };
+};
+
 /**
  * Fetches user data based on the filter query
  *
@@ -379,18 +395,24 @@ const getUsersBasedOnFilter = async (query) => {
   let finalItems = [];
 
   if (doesTagQueryExist && doesStateQueryExist) {
-    const stateItemIds = new Set(stateItems.map((item) => item.userId));
-    finalItems = tagItems.filter((item) => stateItemIds.has(item.itemId)).map((item) => item.itemId);
+    if (stateItems.length && tagItems.length) {
+      const stateItemIds = new Set(stateItems.map((item) => item.userId));
+      finalItems = tagItems.filter((item) => stateItemIds.has(item.itemId)).map((item) => item.itemId);
+    }
   } else if (doesStateQueryExist) {
     finalItems = stateItems.map((item) => item.userId);
   } else if (doesTagQueryExist) {
     finalItems = tagItems.map((item) => item.itemId);
   }
 
-  finalItems = [...new Set(finalItems)];
-  const userRefs = finalItems.map((itemId) => userModel.doc(itemId));
-  const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
-  return userDocs;
+  if (finalItems.length) {
+    finalItems = [...new Set(finalItems)];
+    const userRefs = finalItems.map((itemId) => userModel.doc(itemId));
+    const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
+    const filteredUserDocs = userDocs.filter((doc) => !doc.roles?.archived);
+    return filteredUserDocs;
+  }
+  return [];
 };
 
 module.exports = {
@@ -405,6 +427,7 @@ module.exports = {
   getJoinData,
   getSuggestedUsers,
   fetchUserSkills,
+  getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
 };
