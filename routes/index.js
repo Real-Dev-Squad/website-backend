@@ -25,5 +25,6 @@ app.use("/items", require("./items.js"));
 app.use("/cache", require("./cloudflareCache.js"));
 app.use("/external-accounts", require("./external-accounts.js"));
 app.use("/issues", require("./issues.js"));
+app.use("/progresses", require("./progresses.js"));
 
 module.exports = app;
