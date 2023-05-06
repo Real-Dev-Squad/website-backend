@@ -471,12 +471,11 @@ const migrate = async (req, res) => {
     // divided by 500 because firestore api guarantee that we can process in batch of 500.
     const usersSnapshot = await firestore.collection("users").get();
     const batchCount = Math.ceil(usersSnapshot.docs.length / 500);
-    const batchWrites = [];
-
     // Create batch write operations for each batch of documents
     for (let i = 0; i < batchCount; i++) {
       const batchDocs = usersSnapshot.docs.slice(i * 500, (i + 1) * 500);
       const batchWrite = firestore.batch();
+      const batchWrites = [];
       for (const userDoc of batchDocs) {
         const githubUsername = userDoc.data().github_id;
         batchWrite.update(userDoc.ref, { github_user_id: null });
@@ -496,7 +495,10 @@ const migrate = async (req, res) => {
       await batchWrite.commit();
     }
 
-    return res.send("Documents updated successfully");
+    return res.send({
+      statusCode: 201,
+      message: "All Users github_user_id added successfully",
+    });
   } catch (error) {
     return res.status(500).send("Internal server error");
   }

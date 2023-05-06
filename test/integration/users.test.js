@@ -1,7 +1,6 @@
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
-
 const app = require("../../server");
 const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
@@ -9,6 +8,7 @@ const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
+
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
@@ -1019,6 +1019,63 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("POST /users/migrate", function () {
+    beforeEach(async function () {
+      superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("Should return 401 when user is unauthorize", function (done) {
+      chai
+        .request(app)
+        .post("/users/migrate")
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(401);
+          expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+    it("Should update the user", async function () {
+      const response1 = await chai
+        .request(app)
+        .post(`/users/migrate`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`);
+      expect(response1).to.have.status(200);
+      expect(response1.body).to.eql({
+        statusCode: 201,
+        message: `All Users github_user_id added successfully`,
+      });
+      const response2 = await chai.request(app).get(`/users`).set("cookie", `${cookieName}=${superUserAuthToken}`);
+      expect(response2).to.have.status(200);
+      response2.body.users.forEach((document) => {
+        expect(document).to.have.property(`github_user_id`);
+      });
+    });
+    it("Should return unauthorized error when not logged in", function (done) {
+      chai
+        .request(app)
+        .post(`/users/migrate`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
           return done();
         });
     });
