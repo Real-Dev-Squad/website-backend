@@ -16,6 +16,8 @@ const {
   oooStatusDataForShortDuration,
   generateUserStatusData,
 } = require("../fixtures/userStatus/userStatus");
+const { addJoinData } = require("../../models/users");
+const joinData = require("../fixtures/user/join");
 
 const config = require("config");
 const { updateUserStatus } = require("../../models/userStatus");
@@ -34,6 +36,7 @@ describe("UserStatus", function () {
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    await addJoinData(joinData(userId)[0]);
     await updateUserStatus(userId, userStatusDataForNewUser);
   });
 
@@ -129,6 +132,7 @@ describe("UserStatus", function () {
         toFake: ["Date"],
       });
       testUserId = await addUser(userData[1]);
+      await addJoinData(joinData(testUserId)[0]);
       testUserJwt = authService.generateAuthToken({ userId: testUserId });
     });
 
@@ -277,6 +281,7 @@ describe("UserStatus", function () {
         toFake: ["Date"],
       });
       testUserId = await addUser(userData[1]);
+      await addJoinData(joinData(testUserId)[0]);
       testUserJwt = authService.generateAuthToken({ userId: testUserId });
     });
 
@@ -398,7 +403,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
           expect(res.body.error).to.equal(`Bad Request`);
-          expect(res.body.message).to.equal(`Invalid State. State must be either IDLE, ACTIVE , OOO, or ONBOARDING`);
+          expect(res.body.message).to.equal(`Invalid State. State must be either IDLE, ACTIVE, OOO, or ONBOARDING`);
           return done();
         });
     });
