@@ -15,7 +15,6 @@ module.exports = () => {
       yoe: 0,
       img: "./img.png",
       linkedin_id: "ankurnarkhede",
-      github_user_id: githubUserInfo[0].id,
       github_id: githubUserInfo[0].username,
       github_display_name: githubUserInfo[0].displayName,
       isMember: true,
