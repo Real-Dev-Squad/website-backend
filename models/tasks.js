@@ -52,7 +52,7 @@ const addDependency = async (data) => {
       batch.set(docid, taskDependOn);
     }
     await batch.commit();
-    return data;
+    return data.dependsOn;
   } catch (err) {
     logger.error("Error in creating dependency");
     throw err;
