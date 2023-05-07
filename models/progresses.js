@@ -41,4 +41,24 @@ const createProgressDocument = async (progressData) => {
   return { ...progressDocument, id };
 };
 
-module.exports = { createProgressDocument };
+const getProgressDocument = async (reqBody) => {
+  const { type, userId, taskId } = reqBody;
+  let query;
+  if (type) {
+    query = progressesCollection.where("type", "==", type);
+  } else {
+    if (userId) {
+      query = progressesCollection.where("type", "==", "user").where("userId", "==", userId);
+    } else if (taskId) {
+      query = progressesCollection.where("type", "==", "task").where("taskId", "==", taskId);
+    }
+  }
+  const progressesDocs = await query.get();
+  const docsData = [];
+  progressesDocs.forEach((doc) => {
+    docsData.push(doc.data());
+  });
+  return docsData;
+};
+
+module.exports = { createProgressDocument, getProgressDocument };
