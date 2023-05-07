@@ -22,4 +22,16 @@ const createProgress = async (req, res) => {
   }
 };
 
-module.exports = { createProgress };
+/**
+ * Add Progresses Document
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const getProgress = async (req, res) => {
+  return res.json({
+    message: `Progress document retrieved successfully.`,
+  });
+};
+
+module.exports = { createProgress, getProgress };

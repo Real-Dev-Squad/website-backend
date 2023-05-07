@@ -41,6 +41,33 @@ const validateProgresses = async (req, res, next) => {
   }
 };
 
+const validateGetProgressesQueryParams = async (req, res, next) => {
+  const schema = joi
+    .object({
+      type: joi.string().valid("user", "task").optional().messages({
+        "any.only": "Type field is restricted to either 'user' or 'task'.",
+      }),
+      userId: joi.string().optional().allow("").messages({
+        "string.base": "userId must be a string",
+      }),
+      taskId: joi.string().optional().allow("").messages({
+        "string.base": "taskId must be a string",
+      }),
+    })
+    .xor("type", "userId", "taskId")
+    .messages({
+      "object.unknown": "Invalid field provided.",
+      "object.xor": "Only one of type, userId, or taskId should be present",
+    });
+  try {
+    await schema.validateAsync(req.body, { abortEarly: false });
+    next();
+  } catch (error) {
+    logger.error(`Error validating payload: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
 module.exports = {
   validateProgresses,
+  validateGetProgressesQueryParams,
 };
