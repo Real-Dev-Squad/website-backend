@@ -41,6 +41,11 @@ const createProgressDocument = async (progressData) => {
   return { ...progressDocument, id };
 };
 
+/**
+ * This function retrieves the progress document for a specific user or task, or for all users or all tasks if no specific user or task is provided.
+ * @param progressData {object} The data to be added. It should be an object containing key-value pairs of the fields to be added, including a "type" field set to either "user" or "task".
+ * @returns {Promise<object>} A Promise that resolves with the progress document objects.
+ **/
 const getProgressDocument = async (reqBody) => {
   const { type, userId, taskId } = reqBody;
   let query;
