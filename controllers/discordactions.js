@@ -78,7 +78,7 @@ const getAllGroupRoles = async (req, res) => {
 
 /**
  * Gets all group-roles
- *
+ * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
 
