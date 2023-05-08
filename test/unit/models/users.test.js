@@ -126,7 +126,7 @@ describe("users", function () {
       }
     });
 
-    it("should have a maximum length of 8 characters", async function () {
+    it("github_user_id field should have a maximum length of 8 characters", async function () {
       const userData = { ...userDataArray[0], github_user_id: "a".repeat(9) };
 
       try {
