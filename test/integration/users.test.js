@@ -8,17 +8,14 @@ const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
-
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
-
 const config = require("config");
 const joinData = require("../fixtures/user/join");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const cookieName = config.get("userToken.cookieName");
 chai.use(chaiHttp);
-
 describe("Users", function () {
   let jwt;
   let superUserId;
