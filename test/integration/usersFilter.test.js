@@ -121,7 +121,7 @@ describe("Filter Users", function () {
   });
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("GET /users/search", function () {
+  describe("GET /users/search", function () {
     it("Should search users based on state", function (done) {
       chai
         .request(app)
@@ -203,7 +203,7 @@ describe("Filter Users", function () {
           expect(res.body.message).to.equal("Users found successfully!");
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(2);
-          assertUserIds(res.body.users, [activeUser, oooUser, idleUser]);
+          assertUserIds(res.body.users, [oooUser, idleUser]);
           return done();
         });
     });

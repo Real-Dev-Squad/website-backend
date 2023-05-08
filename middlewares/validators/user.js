@@ -172,6 +172,9 @@ async function validateUserQueryParams(req, res, next) {
           joi.array().items(joi.string().valid("IDLE", "OOO", "ACTIVE"))
         )
         .optional(),
+    })
+    .messages({
+      "object.min": "Please provide at least one filter criteria",
     });
 
   try {
@@ -179,7 +182,7 @@ async function validateUserQueryParams(req, res, next) {
     next();
   } catch (error) {
     logger.error(`Error validating query params : ${error}`);
-    res.boom.badRequest(error.details[0].message);
+    res.boom.badRequest(error);
   }
 }
 
