@@ -1,4 +1,4 @@
-const { createProgressDocument, getProgressDocument } = require("../models/progresses");
+const { createProgressDocument, getProgressDocument, getRangeProgressData } = require("../models/progresses");
 
 /**
  * Add Progresses Document
@@ -29,7 +29,7 @@ const createProgress = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const getProgress = async (req, res) => {
-  const data = await getProgressDocument(req.body);
+  const data = await getProgressDocument(req.query);
   const count = data.length;
   return res.json({
     message: count ? `Progress document retrieved successfully.` : `No Progress document found.`,
@@ -38,4 +38,18 @@ const getProgress = async (req, res) => {
   });
 };
 
-module.exports = { createProgress, getProgress };
+/**
+ * Add Progresses Document
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const getProgressRangeData = async (req, res) => {
+  const data = await getRangeProgressData(req.query);
+  return res.json({
+    message: `Progress document retrieved successfully.`,
+    data,
+  });
+};
+
+module.exports = { createProgress, getProgress, getProgressRangeData };

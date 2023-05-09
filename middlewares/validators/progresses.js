@@ -60,7 +60,32 @@ const validateGetProgressesQueryParams = async (req, res, next) => {
       "object.xor": "Only one of type, userId, or taskId should be present",
     });
   try {
-    await schema.validateAsync(req.body, { abortEarly: false });
+    await schema.validateAsync(req.query, { abortEarly: false });
+    next();
+  } catch (error) {
+    logger.error(`Error validating payload: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
+const validateGetRangeProgressesQueryParams = async (req, res, next) => {
+  const schema = joi
+    .object({
+      userId: joi.string().optional(),
+      taskId: joi.string().optional(),
+      startDate: joi.date().iso().required(),
+      endDate: joi.date().iso().min(joi.ref("startDate")).required(),
+    })
+    .xor("userId", "taskId")
+    .messages({
+      "object.unknown": "Invalid field provided.",
+      "object.missing": "Either userId or taskId is required.",
+      "object.xor": "Only one of userId or taskId should be present",
+      "any.required": "Start date and End date is mandatory.",
+      "date.min": "EndDate must be on or after startDate",
+    });
+  try {
+    await schema.validateAsync(req.query, { abortEarly: false });
     next();
   } catch (error) {
     logger.error(`Error validating payload: ${error}`);
@@ -70,4 +95,5 @@ const validateGetProgressesQueryParams = async (req, res, next) => {
 module.exports = {
   validateProgresses,
   validateGetProgressesQueryParams,
+  validateGetRangeProgressesQueryParams,
 };
