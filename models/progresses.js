@@ -68,28 +68,27 @@ const getProgressDocument = async (reqQuery) => {
 
 const getRangeProgressData = async (queryParams) => {
   const { userId, taskId, startDate, endDate } = queryParams;
-  let query;
-  if (userId) {
-    query = progressesCollection.where("userId", "==", userId);
-  } else if (taskId) {
-    query = progressesCollection.where("taskId", "==", taskId);
-  } else {
+  if (!userId && !taskId) {
     throw new Error("Either userId or taskId is required.");
   }
   const startDateTimestamp = Date.parse(startDate);
   const endDateTimestamp = Date.parse(endDate);
+
+  let query = progressesCollection;
+  if (userId) {
+    query = query.where("userId", "==", userId);
+  } else {
+    query = query.where("taskId", "==", taskId);
+  }
   query = query.where("date", ">=", startDateTimestamp).where("date", "<=", endDateTimestamp);
 
-  const progressesDocs = await query.get();
-  const progressDocs = [];
-  progressesDocs.forEach((doc) => {
-    progressDocs.push(doc.data());
-  });
+  const progressesDocs = (await query.get()).docs;
   const docsData = {};
-  progressDocs.forEach((doc) => {
-    const date = new Date(doc.date).toISOString().slice(0, 10);
+  progressesDocs.forEach((doc) => {
+    const date = new Date(doc.data().date).toISOString().slice(0, 10);
     docsData[date] = true;
   });
+
   const progressRecords = {};
   const currentDate = new Date(startDate);
   while (currentDate <= new Date(endDate)) {
@@ -97,6 +96,7 @@ const getRangeProgressData = async (queryParams) => {
     progressRecords[date] = Boolean(docsData[date]);
     currentDate.setDate(currentDate.getDate() + 1);
   }
+
   return {
     startDate,
     endDate,
