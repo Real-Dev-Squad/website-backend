@@ -2,9 +2,15 @@ const { Conflict } = require("http-errors");
 const fireStore = require("../utils/firestore");
 const progressesCollection = fireStore.collection("progresses");
 const { fetchTask } = require("./tasks");
-const { fetchUser } = require("./users");
 const { MILLISECONDS_IN_DAY, RESPONSE_MESSAGES } = require("../constants/progresses");
-const { assertUserExist, assertTaskExist, buildQuery, getProgressDocs } = require("../utils/progresses");
+const {
+  assertUserExists,
+  assertTaskExists,
+  buildQuery,
+  getProgressDocs,
+  buildRangeProgressQuery,
+  getProgressRecords,
+} = require("../utils/progresses");
 const { PROGRESS_ALREADY_CREATED } = RESPONSE_MESSAGES;
 
 /**
@@ -54,9 +60,9 @@ const createProgressDocument = async (progressData) => {
 const getProgressDocument = async (queryParams) => {
   const { userId, taskId } = queryParams;
   if (userId) {
-    await assertUserExist(userId);
+    await assertUserExists(userId);
   } else if (taskId) {
-    await assertTaskExist(taskId);
+    await assertTaskExists(taskId);
   }
   const query = buildQuery(queryParams);
   const progressDocs = await getProgressDocs(query);
@@ -74,44 +80,13 @@ const getRangeProgressData = async (queryParams) => {
   if (!userId && !taskId) {
     throw new Error("Either userId or taskId is required.");
   }
-  const startDateTimestamp = Date.parse(startDate);
-  const endDateTimestamp = Date.parse(endDate);
-
   if (userId) {
-    const { userExists } = await fetchUser({ userId });
-    if (!userExists) {
-      throw new Error(`User with id ${userId} does not exist`);
-    }
-  } else {
-    const { taskData } = await fetchTask(taskId);
-    if (!taskData) {
-      throw new Error(`Task with id ${taskId} does not exist`);
-    }
+    await assertUserExists(userId);
+  } else if (taskId) {
+    await assertTaskExists(taskId);
   }
-
-  let query = progressesCollection;
-  if (userId) {
-    query = query.where("userId", "==", userId);
-  } else {
-    query = query.where("taskId", "==", taskId);
-  }
-  query = query.where("date", ">=", startDateTimestamp).where("date", "<=", endDateTimestamp);
-
-  const progressesDocs = (await query.get()).docs;
-  const docsData = {};
-  progressesDocs.forEach((doc) => {
-    const date = new Date(doc.data().date).toISOString().slice(0, 10);
-    docsData[date] = true;
-  });
-
-  const progressRecords = {};
-  const currentDate = new Date(startDate);
-  while (currentDate <= new Date(endDate)) {
-    const date = currentDate.toISOString().slice(0, 10);
-    progressRecords[date] = Boolean(docsData[date]);
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-
+  const query = buildRangeProgressQuery(queryParams);
+  const progressRecords = await getProgressRecords(query, queryParams);
   return {
     startDate,
     endDate,
