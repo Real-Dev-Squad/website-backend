@@ -1,6 +1,7 @@
-const firestore = require("../utils/firestore");
-const progressesCollection = firestore.collection("progresses");
+const fireStore = require("../utils/firestore");
+const progressesCollection = fireStore.collection("progresses");
 const { fetchTask } = require("./tasks");
+const { fetchUser } = require("./users");
 
 /**
  * Adds a new progress document for the given user or task, with a limit of one progress document per day.
@@ -8,7 +9,6 @@ const { fetchTask } = require("./tasks");
  * @returns {Promise<object>} A Promise that resolves with the added progress document object, or rejects with an error object if the add operation fails.
  * @throws {Error} If a progress document has already been created for the given user or task on the current day.
  **/
-
 const createProgressDocument = async (progressData) => {
   const { type, userId, taskId } = progressData;
   const createdAtTimestamp = new Date().getTime();
@@ -43,11 +43,23 @@ const createProgressDocument = async (progressData) => {
 
 /**
  * This function retrieves the progress document for a specific user or task, or for all users or all tasks if no specific user or task is provided.
- * @param progressData {object} The data to be added. It should be an object containing key-value pairs of the fields to be added, including a "type" field set to either "user" or "task".
+ * @param queryParams {object} This is the data that will be used for querying. It should be an object that includes key-value pairs for the fields - type, userId, taskId.
  * @returns {Promise<object>} A Promise that resolves with the progress document objects.
+ * @throws {Error} If the userId or taskId is invalid or does not exist.
  **/
-const getProgressDocument = async (reqQuery) => {
-  const { type, userId, taskId } = reqQuery;
+const getProgressDocument = async (queryParams) => {
+  const { type, userId, taskId } = queryParams;
+  if (userId) {
+    const { userExists } = await fetchUser({ userId });
+    if (!userExists) {
+      throw new Error(`User with id ${userId} does not exist`);
+    }
+  } else if (taskId) {
+    const { taskData } = await fetchTask(taskId);
+    if (!taskData) {
+      throw new Error(`Task with id ${taskId} does not exist`);
+    }
+  }
   let query;
   if (type) {
     query = progressesCollection.where("type", "==", type);
@@ -66,6 +78,12 @@ const getProgressDocument = async (reqQuery) => {
   return docsData;
 };
 
+/**
+ * This function fetches the progress records for a particular user or task within the specified date range, from start to end date.
+ * @param queryParams {object} This is the data that will be used for querying. It should be an object that includes key-value pairs for the fields - userId, taskId, startDate, and endDate.
+ * @returns {Promise<object>} A Promise that resolves with the progress records of the queried user or task.
+ * @throws {Error} If the userId or taskId is invalid or does not exist.
+ **/
 const getRangeProgressData = async (queryParams) => {
   const { userId, taskId, startDate, endDate } = queryParams;
   if (!userId && !taskId) {
@@ -73,6 +91,18 @@ const getRangeProgressData = async (queryParams) => {
   }
   const startDateTimestamp = Date.parse(startDate);
   const endDateTimestamp = Date.parse(endDate);
+
+  if (userId) {
+    const { userExists } = await fetchUser({ userId });
+    if (!userExists) {
+      throw new Error(`User with id ${userId} does not exist`);
+    }
+  } else {
+    const { taskData } = await fetchTask(taskId);
+    if (!taskData) {
+      throw new Error(`Task with id ${taskId} does not exist`);
+    }
+  }
 
   let query = progressesCollection;
   if (userId) {

@@ -29,13 +29,19 @@ const createProgress = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const getProgress = async (req, res) => {
-  const data = await getProgressDocument(req.query);
-  const count = data.length;
-  return res.json({
-    message: count ? `Progress document retrieved successfully.` : `No Progress document found.`,
-    count,
-    data,
-  });
+  try {
+    const data = await getProgressDocument(req.query);
+    const count = data.length;
+    return res.json({
+      message: count ? `Progress document retrieved successfully.` : `No Progress document found.`,
+      count,
+      data,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
 };
 
 /**
@@ -45,11 +51,17 @@ const getProgress = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const getProgressRangeData = async (req, res) => {
-  const data = await getRangeProgressData(req.query);
-  return res.json({
-    message: `Progress document retrieved successfully.`,
-    data,
-  });
+  try {
+    const data = await getRangeProgressData(req.query);
+    return res.json({
+      message: `Progress document retrieved successfully.`,
+      data,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
 };
 
 module.exports = { createProgress, getProgress, getProgressRangeData };
