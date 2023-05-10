@@ -2,7 +2,7 @@ const { Conflict } = require("http-errors");
 const { createProgressDocument, getProgressDocument, getRangeProgressData } = require("../models/progresses");
 
 /**
- * Add Progresses Document
+ * Adds Progresses Document
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
@@ -29,7 +29,7 @@ const createProgress = async (req, res) => {
 };
 
 /**
- * Add Progresses Document
+ * Gets Progresses Document
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
@@ -51,7 +51,7 @@ const getProgress = async (req, res) => {
 };
 
 /**
- * Add Progresses Document
+ * Gets Progresses Records within the specified date range,
  *
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
