@@ -1,5 +1,8 @@
 const { Conflict } = require("http-errors");
 const { createProgressDocument, getProgressDocument, getRangeProgressData } = require("../models/progresses");
+const { RESPONSE_MESSAGES } = require("../constants/progresses");
+const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_NOT_FOUND, PROGRESS_DOCUMENT_CREATED_SUCCEEDED } =
+  RESPONSE_MESSAGES;
 
 /**
  * Adds Progress Document
@@ -8,13 +11,14 @@ const { createProgressDocument, getProgressDocument, getRangeProgressData } = re
  * @param res {Object} - Express response object
  */
 const createProgress = async (req, res) => {
+  const {
+    body: { type },
+  } = req;
   try {
     const data = await createProgressDocument({ ...req.body, userId: req.userData.id });
     return res.status(201).json({
       data,
-      message: `${
-        req.body.type.charAt(0).toUpperCase() + req.body.type.slice(1)
-      } Progress document created successfully.`,
+      message: `${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_DOCUMENT_CREATED_SUCCEEDED}`,
     });
   } catch (error) {
     if (error instanceof Conflict) {
@@ -39,7 +43,7 @@ const getProgress = async (req, res) => {
     const data = await getProgressDocument(req.query);
     const count = data.length;
     return res.json({
-      message: count ? `Progress document retrieved successfully.` : `No Progress document found.`,
+      message: count ? PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED : PROGRESS_DOCUMENT_NOT_FOUND,
       count,
       data,
     });
@@ -60,7 +64,7 @@ const getProgressRangeData = async (req, res) => {
   try {
     const data = await getRangeProgressData(req.query);
     return res.json({
-      message: `Progress document retrieved successfully.`,
+      message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
       data,
     });
   } catch (error) {

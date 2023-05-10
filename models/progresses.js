@@ -3,6 +3,8 @@ const fireStore = require("../utils/firestore");
 const progressesCollection = fireStore.collection("progresses");
 const { fetchTask } = require("./tasks");
 const { fetchUser } = require("./users");
+const { MILLISECONDS_IN_DAY, RESPONSE_MESSAGES } = require("../constants/progresses");
+const { PROGRESS_ALREADY_CREATED } = RESPONSE_MESSAGES;
 
 /**
  * Adds a new progress document for the given user or task, with a limit of one progress document per day.
@@ -16,7 +18,7 @@ const createProgressDocument = async (progressData) => {
   const currentHourIST = new Date().getUTCHours() + 5.5; // IST offset is UTC+5:30
   const isBefore6amIST = currentHourIST < 6;
   const progressDateTimestamp = isBefore6amIST
-    ? new Date().setUTCHours(0, 0, 0, 0) - 24 * 60 * 60 * 1000
+    ? new Date().setUTCHours(0, 0, 0, 0) - MILLISECONDS_IN_DAY
     : new Date().setUTCHours(0, 0, 0, 0);
 
   if (type === "task") {
@@ -34,7 +36,7 @@ const createProgressDocument = async (progressData) => {
   const existingDocumentSnapshot = await query.where("date", "==", progressDateTimestamp).get();
 
   if (!existingDocumentSnapshot.empty) {
-    throw new Conflict(`${type.charAt(0).toUpperCase() + type.slice(1)} Progress for the day has already been created`);
+    throw new Conflict(`${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_ALREADY_CREATED}`);
   }
 
   const progressDocument = { ...progressData, createdAt: createdAtTimestamp, date: progressDateTimestamp };
