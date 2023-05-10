@@ -1,3 +1,4 @@
+const { Conflict } = require("http-errors");
 const { createProgressDocument, getProgressDocument, getRangeProgressData } = require("../models/progresses");
 
 /**
@@ -16,6 +17,11 @@ const createProgress = async (req, res) => {
       } Progress document created successfully.`,
     });
   } catch (error) {
+    if (error instanceof Conflict) {
+      return res.status(409).json({
+        message: error.message,
+      });
+    }
     return res.status(400).json({
       message: error.message,
     });

@@ -1,3 +1,4 @@
+const { Conflict } = require("http-errors");
 const fireStore = require("../utils/firestore");
 const progressesCollection = fireStore.collection("progresses");
 const { fetchTask } = require("./tasks");
@@ -33,7 +34,7 @@ const createProgressDocument = async (progressData) => {
   const existingDocumentSnapshot = await query.where("date", "==", progressDateTimestamp).get();
 
   if (!existingDocumentSnapshot.empty) {
-    throw new Error(`${type.charAt(0).toUpperCase() + type.slice(1)} Progress for the day has already been created`);
+    throw new Conflict(`${type.charAt(0).toUpperCase() + type.slice(1)} Progress for the day has already been created`);
   }
 
   const progressDocument = { ...progressData, createdAt: createdAtTimestamp, date: progressDateTimestamp };
