@@ -1,8 +1,8 @@
 const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
 const ItemModel = firestore.collection("itemTags");
+const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
-const dependencyModel = firestore.collection("TaskDependencies");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
@@ -67,7 +67,8 @@ const addDependency = async (data) => {
 const fetchTasks = async () => {
   try {
     const tasksSnapshot = await tasksModel.get();
-    const tasks = buildTasks(tasksSnapshot);
+    const dependencySnapshot = await dependencyModel.get();
+    const tasks = buildTasks(tasksSnapshot, dependencySnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
     const updatedTasks = await Promise.all(promises);
     const taskList = updatedTasks.map((task) => {

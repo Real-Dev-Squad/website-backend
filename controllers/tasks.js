@@ -29,11 +29,14 @@ const addNewTask = async (req, res) => {
       dependsOn,
     };
     const taskDependency = await dependencyModel.addDependency(data);
+    const task = {
+      ...taskDetails,
+      dependsOn: taskDependency,
+      id: taskId,
+    };
     return res.json({
       message: "Task created successfully!",
-      task: taskDetails,
-      id: taskId,
-      dependsOn: taskDependency,
+      task,
     });
   } catch (err) {
     logger.error(`Error while creating new task: ${err}`);
