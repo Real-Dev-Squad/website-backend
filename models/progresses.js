@@ -4,6 +4,7 @@ const progressesCollection = fireStore.collection("progresses");
 const { fetchTask } = require("./tasks");
 const { fetchUser } = require("./users");
 const { MILLISECONDS_IN_DAY, RESPONSE_MESSAGES } = require("../constants/progresses");
+const { assertUserExist, assertTaskExist, buildQuery, getProgressDocs } = require("../utils/progresses");
 const { PROGRESS_ALREADY_CREATED } = RESPONSE_MESSAGES;
 
 /**
@@ -51,34 +52,15 @@ const createProgressDocument = async (progressData) => {
  * @throws {Error} If the userId or taskId is invalid or does not exist.
  **/
 const getProgressDocument = async (queryParams) => {
-  const { type, userId, taskId } = queryParams;
+  const { userId, taskId } = queryParams;
   if (userId) {
-    const { userExists } = await fetchUser({ userId });
-    if (!userExists) {
-      throw new Error(`User with id ${userId} does not exist`);
-    }
+    await assertUserExist(userId);
   } else if (taskId) {
-    const { taskData } = await fetchTask(taskId);
-    if (!taskData) {
-      throw new Error(`Task with id ${taskId} does not exist`);
-    }
+    await assertTaskExist(taskId);
   }
-  let query;
-  if (type) {
-    query = progressesCollection.where("type", "==", type);
-  } else {
-    if (userId) {
-      query = progressesCollection.where("type", "==", "user").where("userId", "==", userId);
-    } else if (taskId) {
-      query = progressesCollection.where("type", "==", "task").where("taskId", "==", taskId);
-    }
-  }
-  const progressesDocs = await query.get();
-  const docsData = [];
-  progressesDocs.forEach((doc) => {
-    docsData.push(doc.data());
-  });
-  return docsData;
+  const query = buildQuery(queryParams);
+  const progressDocs = await getProgressDocs(query);
+  return progressDocs;
 };
 
 /**
