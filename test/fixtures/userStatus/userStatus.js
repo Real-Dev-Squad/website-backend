@@ -12,7 +12,7 @@ const userStatusDataForNewUser = {
   },
 };
 
-const userStatusDataForNewUser2 = {
+const userStatusDataAfterSignup = {
   currentStatus: { state: "ONBOARDING", until: "" },
   monthlyHours: { committed: 0 },
 };
@@ -58,7 +58,7 @@ const generateUserStatusData = (state, updatedAt, from, until = "", message = ""
 
 module.exports = {
   userStatusDataForNewUser,
-  userStatusDataForNewUser2,
+  userStatusDataAfterSignup,
   userStatusDataForOooState,
   oooStatusDataForShortDuration,
   generateUserStatusData,

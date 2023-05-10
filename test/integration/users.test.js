@@ -15,7 +15,7 @@ const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
-const { userStatusDataForNewUser2 } = require("../fixtures/userStatus/userStatus");
+const { userStatusDataAfterSignup } = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const { updateUserStatus } = require("../../models/userStatus");
 
@@ -709,8 +709,8 @@ describe("Users", function () {
         });
     });
 
-    it("Should store the info in db", function (done) {
-      updateUserStatus(userId, userStatusDataForNewUser2);
+    it.only("Should store the info in db", function (done) {
+      updateUserStatus(userId, userStatusDataAfterSignup);
       chai
         .request(app)
         .put(`/users/self/intro`)
