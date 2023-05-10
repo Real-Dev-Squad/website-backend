@@ -67,8 +67,7 @@ const addDependency = async (data) => {
 const fetchTasks = async () => {
   try {
     const tasksSnapshot = await tasksModel.get();
-    const dependencySnapshot = await dependencyModel.get();
-    const tasks = buildTasks(tasksSnapshot, dependencySnapshot);
+    const tasks = buildTasks(tasksSnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
     const updatedTasks = await Promise.all(promises);
     const taskList = updatedTasks.map((task) => {
