@@ -9,7 +9,7 @@ const { createProgressDocument, getProgressDocument, getRangeProgressData } = re
 const createProgress = async (req, res) => {
   try {
     const data = await createProgressDocument({ ...req.body, userId: req.userData.id });
-    return res.json({
+    return res.status(201).json({
       data,
       message: `${
         req.body.type.charAt(0).toUpperCase() + req.body.type.slice(1)
