@@ -709,7 +709,7 @@ describe("Users", function () {
         });
     });
 
-    it.only("Should store the info in db", function (done) {
+    it("Should store the info in db", function (done) {
       updateUserStatus(userId, userStatusDataAfterSignup);
       chai
         .request(app)
