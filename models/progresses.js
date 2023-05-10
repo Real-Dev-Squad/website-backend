@@ -4,12 +4,11 @@ const progressesCollection = fireStore.collection("progresses");
 const { fetchTask } = require("./tasks");
 const { MILLISECONDS_IN_DAY, RESPONSE_MESSAGES } = require("../constants/progresses");
 const {
-  assertUserExists,
-  assertTaskExists,
   buildQuery,
   getProgressDocs,
   buildRangeProgressQuery,
   getProgressRecords,
+  assertUserOrTaskExists,
 } = require("../utils/progresses");
 const { PROGRESS_ALREADY_CREATED } = RESPONSE_MESSAGES;
 
@@ -58,12 +57,7 @@ const createProgressDocument = async (progressData) => {
  * @throws {Error} If the userId or taskId is invalid or does not exist.
  **/
 const getProgressDocument = async (queryParams) => {
-  const { userId, taskId } = queryParams;
-  if (userId) {
-    await assertUserExists(userId);
-  } else if (taskId) {
-    await assertTaskExists(taskId);
-  }
+  await assertUserOrTaskExists(queryParams);
   const query = buildQuery(queryParams);
   const progressDocs = await getProgressDocs(query);
   return progressDocs;
@@ -76,15 +70,8 @@ const getProgressDocument = async (queryParams) => {
  * @throws {Error} If the userId or taskId is invalid or does not exist.
  **/
 const getRangeProgressData = async (queryParams) => {
-  const { userId, taskId, startDate, endDate } = queryParams;
-  if (!userId && !taskId) {
-    throw new Error("Either userId or taskId is required.");
-  }
-  if (userId) {
-    await assertUserExists(userId);
-  } else if (taskId) {
-    await assertTaskExists(taskId);
-  }
+  const { startDate, endDate } = queryParams;
+  await assertUserOrTaskExists(queryParams);
   const query = buildRangeProgressQuery(queryParams);
   const progressRecords = await getProgressRecords(query, queryParams);
   return {

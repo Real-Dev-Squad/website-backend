@@ -17,6 +17,14 @@ const assertTaskExists = async (taskId) => {
   }
 };
 
+const assertUserOrTaskExists = async (queryParams) => {
+  const { userId, taskId } = queryParams;
+  if (userId) {
+    await assertUserExists(userId);
+  } else if (taskId) {
+    await assertTaskExists(taskId);
+  }
+};
 const buildQuery = (queryParams) => {
   const { type, userId, taskId } = queryParams;
   let query;
@@ -79,6 +87,7 @@ const getProgressRecords = async (query, queryParams) => {
 module.exports = {
   assertUserExists,
   assertTaskExists,
+  assertUserOrTaskExists,
   buildQuery,
   getProgressDocs,
   buildRangeProgressQuery,
