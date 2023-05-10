@@ -15,7 +15,10 @@ const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
+const { userStatusDataForNewUser2 } = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
+const { updateUserStatus } = require("../../models/userStatus");
+
 const cookieName = config.get("userToken.cookieName");
 chai.use(chaiHttp);
 
@@ -707,6 +710,7 @@ describe("Users", function () {
     });
 
     it("Should store the info in db", function (done) {
+      updateUserStatus(userId, userStatusDataForNewUser2);
       chai
         .request(app)
         .put(`/users/self/intro`)
@@ -718,7 +722,7 @@ describe("Users", function () {
           }
           expect(res).to.have.status(201);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User data added successfully");
+          expect(res.body.message).to.equal("User join data and newstatus data added and updated successfully");
           return done();
         });
     });

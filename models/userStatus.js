@@ -193,10 +193,4 @@ const updateAllUserStatus = async () => {
   }
 };
 
-module.exports = {
-  deleteUserStatus,
-  getUserStatus,
-  getAllUserStatus,
-  updateUserStatus,
-  updateAllUserStatus,
-};
+module.exports = { deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus, updateAllUserStatus };
