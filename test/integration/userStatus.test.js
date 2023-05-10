@@ -16,8 +16,6 @@ const {
   oooStatusDataForShortDuration,
   generateUserStatusData,
 } = require("../fixtures/userStatus/userStatus");
-const { addJoinData } = require("../../models/users");
-const joinData = require("../fixtures/user/join");
 
 const config = require("config");
 const { updateUserStatus } = require("../../models/userStatus");
@@ -36,7 +34,6 @@ describe("UserStatus", function () {
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-    await addJoinData(joinData(userId)[0]);
     await updateUserStatus(userId, userStatusDataForNewUser);
   });
 
@@ -132,7 +129,6 @@ describe("UserStatus", function () {
         toFake: ["Date"],
       });
       testUserId = await addUser(userData[1]);
-      await addJoinData(joinData(testUserId)[0]);
       testUserJwt = authService.generateAuthToken({ userId: testUserId });
     });
 
@@ -281,7 +277,6 @@ describe("UserStatus", function () {
         toFake: ["Date"],
       });
       testUserId = await addUser(userData[1]);
-      await addJoinData(joinData(testUserId)[0]);
       testUserJwt = authService.generateAuthToken({ userId: testUserId });
     });
 
