@@ -1,6 +1,6 @@
 const joi = require("joi");
 
-const validateProgresses = async (req, res, next) => {
+const validateCreateProgressRecords = async (req, res, next) => {
   const baseSchema = joi
     .object()
     .strict()
@@ -41,7 +41,7 @@ const validateProgresses = async (req, res, next) => {
   }
 };
 
-const validateGetProgressesQueryParams = async (req, res, next) => {
+const validateGetProgressRecordsQuery = async (req, res, next) => {
   const schema = joi
     .object({
       type: joi.string().valid("user", "task").optional().messages({
@@ -68,7 +68,7 @@ const validateGetProgressesQueryParams = async (req, res, next) => {
   }
 };
 
-const validateGetRangeProgressesQueryParams = async (req, res, next) => {
+const validateGetRangeProgressRecordsParams = async (req, res, next) => {
   const schema = joi
     .object({
       userId: joi.string().optional(),
@@ -93,7 +93,7 @@ const validateGetRangeProgressesQueryParams = async (req, res, next) => {
   }
 };
 module.exports = {
-  validateProgresses,
-  validateGetProgressesQueryParams,
-  validateGetRangeProgressesQueryParams,
+  validateCreateProgressRecords,
+  validateGetProgressRecordsQuery,
+  validateGetRangeProgressRecordsParams,
 };
