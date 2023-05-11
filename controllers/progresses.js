@@ -1,8 +1,7 @@
-const { Conflict } = require("http-errors");
+const { Conflict, NotFound } = require("http-errors");
 const { createProgressDocument, getProgressDocument, getRangeProgressData } = require("../models/progresses");
 const { RESPONSE_MESSAGES } = require("../constants/progresses");
-const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_NOT_FOUND, PROGRESS_DOCUMENT_CREATED_SUCCEEDED } =
-  RESPONSE_MESSAGES;
+const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEEDED } = RESPONSE_MESSAGES;
 
 /**
  * Adds Progress Document
@@ -41,13 +40,17 @@ const createProgress = async (req, res) => {
 const getProgress = async (req, res) => {
   try {
     const data = await getProgressDocument(req.query);
-    const count = data.length;
     return res.json({
-      message: count ? PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED : PROGRESS_DOCUMENT_NOT_FOUND,
-      count,
+      message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
+      count: data.length,
       data,
     });
   } catch (error) {
+    if (error instanceof NotFound) {
+      return res.status(404).json({
+        message: error.message,
+      });
+    }
     return res.status(400).json({
       message: error.message,
     });
@@ -68,6 +71,11 @@ const getProgressRangeData = async (req, res) => {
       data,
     });
   } catch (error) {
+    if (error instanceof NotFound) {
+      return res.status(404).json({
+        message: error.message,
+      });
+    }
     return res.status(400).json({
       message: error.message,
     });

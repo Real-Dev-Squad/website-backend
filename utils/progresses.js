@@ -1,6 +1,10 @@
+const { NotFound } = require("http-errors");
 const { fetchTask } = require("../models/tasks");
 const { fetchUser } = require("../models/users");
 const fireStore = require("../utils/firestore");
+const {
+  RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
+} = require("../constants/progresses");
 const progressesCollection = fireStore.collection("progresses");
 
 const buildQueryForPostingProgress = ({ type, userId, taskId }) => {
@@ -13,14 +17,14 @@ const buildQueryForPostingProgress = ({ type, userId, taskId }) => {
 const assertUserExists = async (userId) => {
   const { userExists } = await fetchUser({ userId });
   if (!userExists) {
-    throw new Error(`User with id ${userId} does not exist`);
+    throw new NotFound(`User with id ${userId} does not exist.`);
   }
 };
 
 const assertTaskExists = async (taskId) => {
   const { taskData } = await fetchTask(taskId);
   if (!taskData) {
-    throw new Error(`Task with id ${taskId} does not exist`);
+    throw new NotFound(`Task with id ${taskId} does not exist.`);
   }
 };
 
@@ -49,6 +53,9 @@ const buildQueryToFetchDocs = (queryParams) => {
 
 const getProgressDocs = async (query) => {
   const progressesDocs = await query.get();
+  if (!progressesDocs.size) {
+    throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
+  }
   const docsData = [];
   progressesDocs.forEach((doc) => {
     docsData.push({ id: doc.id, ...doc.data() });
@@ -76,6 +83,9 @@ const getProgressRecords = async (query, queryParams) => {
   const { startDate, endDate } = queryParams;
   const docsData = {};
   const progressesDocs = (await query.get()).docs;
+  if (!progressesDocs.size) {
+    throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
+  }
   progressesDocs.forEach((doc) => {
     const date = new Date(doc.data().date).toISOString().slice(0, 10);
     docsData[date] = true;
