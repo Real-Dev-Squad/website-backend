@@ -16,7 +16,10 @@ const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
-const { userStatusDataAfterSignup, userStatusDataAfterFillJoin } = require("../fixtures/userStatus/userStatus");
+const {
+  userStatusDataAfterSignup,
+  userStatusDataAfterFillingJoinSection,
+} = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
 
@@ -695,7 +698,7 @@ describe("Users", function () {
     let userStatusData;
     beforeEach(async function () {
       await userStatusModel.updateUserStatus(userId, userStatusDataAfterSignup);
-      const updateStatus = await userStatusModel.updateUserStatus(userId, userStatusDataAfterFillJoin);
+      const updateStatus = await userStatusModel.updateUserStatus(userId, userStatusDataAfterFillingJoinSection);
       userStatusData = (await firestore.collection("usersStatus").doc(updateStatus.id).get()).data();
     });
     it("should return 409 if the data already present", function (done) {

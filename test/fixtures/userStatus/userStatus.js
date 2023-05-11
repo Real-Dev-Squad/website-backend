@@ -13,12 +13,12 @@ const userStatusDataForNewUser = {
 };
 
 const userStatusDataAfterSignup = {
-  currentStatus: { state: "ONBOARDING", until: "" },
+  currentStatus: { state: "ONBOARDING" },
   monthlyHours: { committed: 0 },
 };
 
-const userStatusDataAfterFillJoin = {
-  currentStatus: { state: "ONBOARDING", until: "" },
+const userStatusDataAfterFillingJoinSection = {
+  currentStatus: { state: "ONBOARDING" },
   monthlyHours: { committed: 40 },
 };
 
@@ -64,7 +64,7 @@ const generateUserStatusData = (state, updatedAt, from, until = "", message = ""
 module.exports = {
   userStatusDataForNewUser,
   userStatusDataAfterSignup,
-  userStatusDataAfterFillJoin,
+  userStatusDataAfterFillingJoinSection,
   userStatusDataForOooState,
   oooStatusDataForShortDuration,
   generateUserStatusData,
