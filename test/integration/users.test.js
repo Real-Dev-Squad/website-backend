@@ -17,8 +17,7 @@ const config = require("config");
 const joinData = require("../fixtures/user/join");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const cookieName = config.get("userToken.cookieName");
-
-const userQuery = require("../../models/users");
+const users = require("../../models/users");
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -577,14 +576,16 @@ describe("Users", function () {
   });
 
   describe("GET /users/?id", function () {
+    let testUser;
     beforeEach(async function () {
-      await addOrUpdate(userData, userId);
-      await userQuery.fetchUser({ userId });
+      await addOrUpdate(userData[0], userId);
+      const { user } = await users.fetchUser({ userId });
+      testUser = user;
     });
     it("Should return given user by id", function (done) {
       chai
         .request(app)
-        .get(`/users/?id=${userId}`)
+        .get(`/users/?id=${testUser.id}`)
         .end((err, res) => {
           if (err) {
             return done(err);
