@@ -29,7 +29,7 @@ const createProgressDocument = async (progressData) => {
     ? new Date().setUTCHours(0, 0, 0, 0) - MILLISECONDS_IN_DAY
     : new Date().setUTCHours(0, 0, 0, 0);
 
-  assertTaskExists(taskId);
+  await assertTaskExists(taskId);
   const query = buildQueryForPostingProgress(progressData);
   const existingDocumentSnapshot = await query.where("date", "==", progressDateTimestamp).get();
   if (!existingDocumentSnapshot.empty) {

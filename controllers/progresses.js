@@ -24,6 +24,10 @@ const createProgress = async (req, res) => {
       return res.status(409).json({
         message: error.message,
       });
+    } else if (error instanceof NotFound) {
+      return res.status(404).json({
+        message: error.message,
+      });
     }
     return res.status(400).json({
       message: error.message,
