@@ -44,7 +44,7 @@ const getProgressDocs = async (query) => {
   const progressesDocs = await query.get();
   const docsData = [];
   progressesDocs.forEach((doc) => {
-    docsData.push(doc.data());
+    docsData.push({ id: doc.id, ...doc.data() });
   });
   return docsData;
 };
