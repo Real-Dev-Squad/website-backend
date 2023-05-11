@@ -86,13 +86,8 @@ const getUsers = async (req, res) => {
       }
 
       const user = { ...result.user };
-      try {
-        delete user.phone;
-        delete user.email;
-      } catch (error) {
-        logger.error(`Error while formatting phone and email: ${error}`);
-        return res.boom.badImplementation("Error while formatting phone and email");
-      }
+      delete user.phone;
+      delete user.email;
 
       return res.json({
         message: "User returned successfully!",

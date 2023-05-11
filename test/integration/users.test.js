@@ -582,6 +582,11 @@ describe("Users", function () {
       const { user } = await users.fetchUser({ userId });
       testUser = user;
     });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
     it("Should return given user by id", function (done) {
       chai
         .request(app)
@@ -604,6 +609,7 @@ describe("Users", function () {
             "isMember",
             "roles",
           ]);
+          expect(res.body.user.id).to.equal(testUser.id);
           return done();
         });
     });
