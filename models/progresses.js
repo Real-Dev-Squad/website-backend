@@ -20,6 +20,7 @@ const { PROGRESS_ALREADY_CREATED } = RESPONSE_MESSAGES;
  **/
 const createProgressDocument = async (progressData) => {
   const { type, userId, taskId } = progressData;
+  // Currently, we are primarily catering to Indian users for our apps, which is why we have implemented support for the IST (Indian Standard Time) timezone for progress updates.
   const createdAtTimestamp = new Date().getTime();
   const currentHourIST = new Date().getUTCHours() + 5.5; // IST offset is UTC+5:30
   const isBefore6amIST = currentHourIST < 6;
