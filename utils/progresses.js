@@ -3,6 +3,13 @@ const { fetchUser } = require("../models/users");
 const fireStore = require("../utils/firestore");
 const progressesCollection = fireStore.collection("progresses");
 
+const buildQueryForPostingProgress = ({ type, userId, taskId }) => {
+  const query =
+    type === "user"
+      ? progressesCollection.where("userId", "==", userId)
+      : progressesCollection.where("taskId", "==", taskId);
+  return query;
+};
 const assertUserExists = async (userId) => {
   const { userExists } = await fetchUser({ userId });
   if (!userExists) {
@@ -25,7 +32,7 @@ const assertUserOrTaskExists = async (queryParams) => {
     await assertTaskExists(taskId);
   }
 };
-const buildQuery = (queryParams) => {
+const buildQueryToFetchDocs = (queryParams) => {
   const { type, userId, taskId } = queryParams;
   let query;
   if (type) {
@@ -85,10 +92,11 @@ const getProgressRecords = async (query, queryParams) => {
 };
 
 module.exports = {
+  buildQueryForPostingProgress,
   assertUserExists,
   assertTaskExists,
   assertUserOrTaskExists,
-  buildQuery,
+  buildQueryToFetchDocs,
   getProgressDocs,
   buildRangeProgressQuery,
   getProgressRecords,
