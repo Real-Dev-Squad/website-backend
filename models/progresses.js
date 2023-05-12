@@ -1,14 +1,15 @@
 const { Conflict } = require("http-errors");
 const fireStore = require("../utils/firestore");
 const progressesCollection = fireStore.collection("progresses");
-const { fetchTask } = require("./tasks");
 const { MILLISECONDS_IN_DAY, RESPONSE_MESSAGES } = require("../constants/progresses");
 const {
-  buildQuery,
+  buildQueryToFetchDocs,
   getProgressDocs,
   buildRangeProgressQuery,
   getProgressRecords,
   assertUserOrTaskExists,
+  buildQueryForPostingProgress,
+  assertTaskExists,
 } = require("../utils/progresses");
 const { PROGRESS_ALREADY_CREATED } = RESPONSE_MESSAGES;
 
@@ -19,35 +20,26 @@ const { PROGRESS_ALREADY_CREATED } = RESPONSE_MESSAGES;
  * @throws {Error} If a progress document has already been created for the given user or task on the current day.
  **/
 const createProgressDocument = async (progressData) => {
-  const { type, userId, taskId } = progressData;
+  const { type, taskId } = progressData;
+  // Currently, we are primarily catering to Indian users for our apps, which is why we have implemented support for the IST (Indian Standard Time) timezone for progress updates.
   const createdAtTimestamp = new Date().getTime();
   const currentHourIST = new Date().getUTCHours() + 5.5; // IST offset is UTC+5:30
   const isBefore6amIST = currentHourIST < 6;
   const progressDateTimestamp = isBefore6amIST
     ? new Date().setUTCHours(0, 0, 0, 0) - MILLISECONDS_IN_DAY
     : new Date().setUTCHours(0, 0, 0, 0);
-
-  if (type === "task") {
-    const { taskData } = await fetchTask(taskId);
-    if (!taskData) {
-      throw new Error(`Task with id ${taskId} does not exist`);
-    }
+  if (taskId) {
+    await assertTaskExists(taskId);
   }
-
-  const query =
-    type === "user"
-      ? progressesCollection.where("userId", "==", userId)
-      : progressesCollection.where("taskId", "==", taskId);
-
+  const query = buildQueryForPostingProgress(progressData);
   const existingDocumentSnapshot = await query.where("date", "==", progressDateTimestamp).get();
-
   if (!existingDocumentSnapshot.empty) {
     throw new Conflict(`${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_ALREADY_CREATED}`);
   }
 
-  const progressDocument = { ...progressData, createdAt: createdAtTimestamp, date: progressDateTimestamp };
-  const { id } = await progressesCollection.add(progressDocument);
-  return { ...progressDocument, id };
+  const progressDocumentData = { ...progressData, createdAt: createdAtTimestamp, date: progressDateTimestamp };
+  const { id } = await progressesCollection.add(progressDocumentData);
+  return { id, ...progressDocumentData };
 };
 
 /**
@@ -58,7 +50,7 @@ const createProgressDocument = async (progressData) => {
  **/
 const getProgressDocument = async (queryParams) => {
   await assertUserOrTaskExists(queryParams);
-  const query = buildQuery(queryParams);
+  const query = buildQueryToFetchDocs(queryParams);
   const progressDocs = await getProgressDocs(query);
   return progressDocs;
 };
