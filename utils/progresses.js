@@ -83,17 +83,13 @@ const assertUserOrTaskExists = async (queryParams) => {
  */
 const buildQueryToFetchDocs = (queryParams) => {
   const { type, userId, taskId } = queryParams;
-  let query;
   if (type) {
-    query = progressesCollection.where("type", "==", type);
+    return progressesCollection.where("type", "==", type);
+  } else if (userId) {
+    return progressesCollection.where("type", "==", "user").where("userId", "==", userId);
   } else {
-    if (userId) {
-      query = progressesCollection.where("type", "==", "user").where("userId", "==", userId);
-    } else if (taskId) {
-      query = progressesCollection.where("type", "==", "task").where("taskId", "==", taskId);
-    }
+    return progressesCollection.where("type", "==", "task").where("taskId", "==", taskId);
   }
-  return query;
 };
 
 /**
