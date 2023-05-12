@@ -290,6 +290,23 @@ describe("Tasks", function () {
           return done();
         });
     });
+    it("Should update the task status collapsed for the given taskid", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/" + taskId1)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          isCollapsed: true,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(204);
+
+          return done();
+        });
+    });
     it("Should return fail response if task data has a non-acceptable status value to update the task for the given taskid", function (done) {
       chai
         .request(app)
