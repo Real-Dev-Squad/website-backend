@@ -149,10 +149,11 @@ const buildRangeProgressQuery = (queryParams) => {
 const getProgressRecords = async (query, queryParams) => {
   const { startDate, endDate } = queryParams;
   const docsData = {};
-  const progressesDocs = (await query.get()).docs;
-  if (!progressesDocs.size) {
+  const queryResult = await query.get();
+  if (!queryResult.size) {
     throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
   }
+  const progressesDocs = queryResult.docs;
   progressesDocs.forEach((doc) => {
     const date = new Date(doc.data().date).toISOString().slice(0, 10);
     docsData[date] = true;
