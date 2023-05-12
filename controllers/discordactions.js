@@ -35,7 +35,7 @@ const createGroupRole = async (req, res) => {
     };
     const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
       algorithm: "RS256",
-      expiresIn: config.get("userToken.ttl"),
+      expiresIn: config.get("rdsServerlessBot.ttl"),
     });
 
     const responseForCreatedRole = await fetch(`${DISCORD_BASE_URL}/roles/create`, {
@@ -104,7 +104,7 @@ const addGroupRoleToMember = async (req, res) => {
     };
     const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
       algorithm: "RS256",
-      expiresIn: config.get("userToken.ttl"),
+      expiresIn: config.get("rdsServerlessBot.ttl"),
     });
 
     await fetch(`${DISCORD_BASE_URL}/roles/add`, {
