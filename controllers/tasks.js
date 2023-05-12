@@ -28,16 +28,25 @@ const addNewTask = async (req, res) => {
       taskId,
       dependsOn,
     };
-    const taskDependency = await dependencyModel.addDependency(data);
-    const task = {
-      ...taskDetails,
-      dependsOn: taskDependency,
-      id: taskId,
-    };
-    return res.json({
-      message: "Task created successfully!",
-      task,
-    });
+    if (data.dependsOn) {
+      const taskDependency = await dependencyModel.addDependency(data);
+      return res.json({
+        message: "Task created successfully!",
+        task: {
+          ...taskDetails,
+          dependsOn: taskDependency,
+          id: taskId,
+        },
+      });
+    } else {
+      return res.json({
+        message: "Task created successfully!",
+        task: {
+          ...taskDetails,
+          id: taskId,
+        },
+      });
+    }
   } catch (err) {
     logger.error(`Error while creating new task: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
