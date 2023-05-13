@@ -211,7 +211,7 @@ describe("Test Progress Updates API for Users", function () {
         });
     });
 
-    it("Returns 404 if the progress document doesn't exist", function (done) {
+    it("Returns 404 if the progress document doesn't exist for the users", function (done) {
       chai
         .request(app)
         .get(`/progresses?userId=${userId3}`)
@@ -224,7 +224,7 @@ describe("Test Progress Updates API for Users", function () {
     });
   });
 
-  describe("Verify the date range progress records", function () {
+  describe("Verify the GET date range progress records", function () {
     let userId;
     let userId2;
     beforeEach(async function () {

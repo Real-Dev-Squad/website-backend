@@ -128,18 +128,16 @@ const incompleteTaskProgress = (taskId) => [
 ];
 
 const stubbedModelTaskProgressData = (userId, taskId, createdAt, date) => {
-  return [
-    {
-      userId,
-      taskId,
-      createdAt,
-      date,
-      type: "task",
-      completed: "Implemented caching mechanism for frequent API requests",
-      planned: "Refactor code to follow coding best practices",
-      blockers: "Waiting for feedback from the code review",
-    },
-  ];
+  return {
+    userId,
+    taskId,
+    createdAt,
+    date,
+    type: "task",
+    completed: "Implemented caching mechanism for frequent API requests",
+    planned: "Refactor code to follow coding best practices",
+    blockers: "Waiting for feedback from the code review",
+  };
 };
 
 module.exports = {
