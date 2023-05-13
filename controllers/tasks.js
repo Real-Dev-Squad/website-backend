@@ -4,7 +4,7 @@ const { addLog } = require("../models/logs");
 const { USER_STATUS } = require("../constants/users");
 const { addOrUpdate, getRdsUserInfoByGitHubUsername } = require("../models/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED, MERGED, COMPLETED, RELEASED, VERIFIED } = TASK_STATUS;
+const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED, MERGED, COMPLETED, RELEASED, VERIFIED, AVAILABLE } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 /**
  * Creates new task
@@ -297,7 +297,7 @@ const assignTask = async (req, res) => {
 const currentOverdueTasks = async (req, res) => {
   try {
     const overdueTasks = await tasks.getAllOverDueTasks();
-    const overdueTasksStatus = [MERGED, COMPLETED, RELEASED, VERIFIED];
+    const overdueTasksStatus = [MERGED, COMPLETED, RELEASED, VERIFIED, AVAILABLE];
     const overdueTasksFiltered = overdueTasks.filter((task) => !overdueTasksStatus.includes(task.status));
     return res.json({
       message: "Overdue Tasks returned successfully!",
