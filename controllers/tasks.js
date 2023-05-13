@@ -427,10 +427,8 @@ const assignTask = async (req, res) => {
 const currentOverdueTasks = async (req, res) => {
   try {
     const overdueTasks = await tasks.getAllOverDueTasks();
-    const overdueTasksFiltered = overdueTasks.filter(
-      (task) =>
-        task.status !== MERGED || task.status !== COMPLETED || task.status !== RELEASED || task.status !== VERIFIED
-    );
+    const overdueTasksStatus = [MERGED, COMPLETED, RELEASED, VERIFIED];
+    const overdueTasksFiltered = overdueTasks.filter((task) => !overdueTasksStatus.includes(task.status));
     return res.json({
       message: "Overdue Tasks returned successfully!",
       overdueTasks: overdueTasksFiltered,
