@@ -80,6 +80,46 @@ describe("Tasks", function () {
     sinon.restore();
   });
 
+  describe("GET /tasks/overdue/current", function () {
+    it("Should return all the current overdue Tasks", function (done) {
+      chai
+        .request(app)
+        .get("/tasks/overdue/current")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Overdue Tasks returned successfully!");
+          expect(res.body.overdueTasks[0].id).to.be.oneOf([taskId, taskId1]);
+          expect(res.body.overdueTasks[1].id).to.be.oneOf([taskId, taskId1]);
+          return done();
+        });
+    });
+    it("Should return 401 if someone other than superuser logged in", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/overdue/current`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "You are not authorized for this action.",
+          });
+
+          return done();
+        });
+    });
+  });
+
   describe("POST /tasks - creates a new task", function () {
     it("Should return success response after adding the task", function (done) {
       chai
