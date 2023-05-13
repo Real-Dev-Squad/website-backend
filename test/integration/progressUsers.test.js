@@ -128,12 +128,14 @@ describe("Test Progress Updates API for Users", function () {
   describe("Verify GET Request Functionality", function () {
     let userId1;
     let userId2;
+    let userId3;
 
     beforeEach(async function () {
-      userId1 = await addUser(userData[1]);
+      userId1 = await addUser(userData[0]);
       userId2 = await addUser(userData[1]);
-      const progressData1 = stubbedModelProgressData(userId1, Date.now(), new Date().setUTCHours(0, 0, 0, 0));
-      const progressData2 = stubbedModelProgressData(userId2, Date.now(), new Date().setUTCHours(0, 0, 0, 0));
+      userId3 = await addUser(userData[2]);
+      const progressData1 = stubbedModelProgressData(userId1, 1683957764140, 1683936000000);
+      const progressData2 = stubbedModelProgressData(userId2, 1683957764140, 1683936000000);
       await firestore.collection("progresses").doc("progressDoc1").set(progressData1);
       await firestore.collection("progresses").doc("progressDoc2").set(progressData2);
     });
@@ -190,6 +192,18 @@ describe("Test Progress Updates API for Users", function () {
         });
     });
 
+    it("Returns 400 for bad request", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.be.equal('"value" must contain at least one of [type, userId, taskId]');
+          return done();
+        });
+    });
+
     it("Returns 404 for invalid user id", function (done) {
       chai
         .request(app)
@@ -201,42 +215,48 @@ describe("Test Progress Updates API for Users", function () {
           return done();
         });
     });
+
+    it("Returns 404 if the progress document doesn't exist", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?userId=${userId3}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("No progress records found.");
+          return done();
+        });
+    });
   });
 
   describe("Verify the missed StandUps", function () {
-    let clock;
     let userId;
     beforeEach(async function () {
-      const initialTimeStamp = new Date(2023, 5, 2, 6, 30).getTime();
-      clock = sinon.useFakeTimers({
-        now: initialTimeStamp,
-        toFake: ["Date"],
-      });
       userId = await addUser(userData[1]);
-      const progressData = stubbedModelProgressData(userId, initialTimeStamp, initialTimeStamp);
-      await firestore.collection("progresses").doc("testProgressDocument").set(progressData);
+      const progressData1 = stubbedModelProgressData(userId, 1683626400000, 1683590400000); // 2023-05-09
+      const progressData2 = stubbedModelProgressData(userId, 1683885600000, 1683849600000); // 2023-05-12
+      await firestore.collection("progresses").doc("progressDoc1").set(progressData1);
+      await firestore.collection("progresses").doc("progressDoc2").set(progressData2);
     });
 
-    afterEach(function () {
-      clock.restore();
-    });
-
-    it("verifies the missed standup w.r.t the last update", async function (done) {
-      // user misses the update for 2023, 5, 3
-      clock.setSystemTime(new Date(2022, 5, 4, 6, 30).getTime());
-      await chai
+    it("verifies the missed standup w.r.t the last update", function (done) {
+      chai
         .request(app)
-        .get(`progresses/missed?userId=${userId}`)
+        .get(`/progresses/range?userId=${userId}&startDate=2023-05-09&endDate=2023-05-12`)
         .end((err, res) => {
           if (err) return done(err);
           expect(res).to.have.status(200);
-          expect(res.body).to.have.keys(["message", "data"]);
           expect(res.body.data).to.be.an("object");
-          expect(res.body.message).to.be.equal("Missed updates retrieved successfully");
-          expect(res.body.data.noOfDays).to.be.equal(1);
-          expect(res.body.data.missedDays).to.be.an("array");
-          expect(res.body.data.missedDays).to.have.lengthOf(1);
-          expect(res.body.data.missedDays[0]).to.be.equal(1683052200000); // missed for 3rd May 2023
+          expect(res.body).to.have.keys(["message", "data"]);
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.data).to.have.keys(["startDate", "endDate", "progressRecords"]);
+          expect(res.body.data.startDate).to.be.equal("2023-05-09");
+          expect(res.body.data.endDate).to.be.equal("2023-05-12");
+          expect(res.body.data.progressRecords).to.have.key(["2023-05-09", "2023-05-10", "2023-05-11", "2023-05-12"]);
+          expect(res.body.data.progressRecords["2023-05-09"]).to.be.equal(true);
+          expect(res.body.data.progressRecords["2023-05-10"]).to.be.equal(false);
+          expect(res.body.data.progressRecords["2023-05-11"]).to.be.equal(false);
+          expect(res.body.data.progressRecords["2023-05-12"]).to.be.equal(true);
           return done();
         });
     });
