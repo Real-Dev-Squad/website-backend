@@ -182,7 +182,7 @@ const fetchPaginatedUsers = async (query) => {
 const fetchUsers = async (usernames = []) => {
   try {
     const dbQuery = userModel;
-    const filterdUsersWithDetails = [];
+    const users = [];
 
     const groups = [];
     for (let i = 0; i < usernames.length; i += BATCH_SIZE_IN_CLAUSE) {
@@ -198,7 +198,7 @@ const fetchUsers = async (usernames = []) => {
 
     snapshots.forEach((snapshot) => {
       snapshot.forEach((doc) => {
-        filterdUsersWithDetails.push({
+        users.push({
           id: doc.id,
           ...doc.data(),
           phone: undefined,
@@ -210,7 +210,7 @@ const fetchUsers = async (usernames = []) => {
     });
 
     return {
-      filterdUsersWithDetails,
+      users,
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
@@ -395,18 +395,24 @@ const getUsersBasedOnFilter = async (query) => {
   let finalItems = [];
 
   if (doesTagQueryExist && doesStateQueryExist) {
-    const stateItemIds = new Set(stateItems.map((item) => item.userId));
-    finalItems = tagItems.filter((item) => stateItemIds.has(item.itemId)).map((item) => item.itemId);
+    if (stateItems.length && tagItems.length) {
+      const stateItemIds = new Set(stateItems.map((item) => item.userId));
+      finalItems = tagItems.filter((item) => stateItemIds.has(item.itemId)).map((item) => item.itemId);
+    }
   } else if (doesStateQueryExist) {
     finalItems = stateItems.map((item) => item.userId);
   } else if (doesTagQueryExist) {
     finalItems = tagItems.map((item) => item.itemId);
   }
 
-  finalItems = [...new Set(finalItems)];
-  const userRefs = finalItems.map((itemId) => userModel.doc(itemId));
-  const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
-  return userDocs;
+  if (finalItems.length) {
+    finalItems = [...new Set(finalItems)];
+    const userRefs = finalItems.map((itemId) => userModel.doc(itemId));
+    const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
+    const filteredUserDocs = userDocs.filter((doc) => !doc.roles?.archived);
+    return filteredUserDocs;
+  }
+  return [];
 };
 
 module.exports = {
