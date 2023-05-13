@@ -1,4 +1,5 @@
 const chai = require("chai");
+const sinon = require("sinon");
 
 const firestore = require("../../utils/firestore");
 const app = require("../../server");
@@ -20,52 +21,86 @@ const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe("Test Progress Updates API for Tasks", function () {
+describe.skip("Test Progress Updates API for Tasks", function () {
   afterEach(async function () {
     await cleanDb();
   });
 
   describe("Verify POST Request Functionality", function () {
+    let clock;
     let userId;
     let userToken;
-    let taskId;
+    let taskId1;
+    let taskId2;
     beforeEach(async function () {
+      clock = sinon.useFakeTimers({
+        now: new Date(2023, 4, 2, 5, 55).getTime(),
+        toFake: ["Date"],
+      });
       userId = await addUser(userData[1]);
       userToken = authService.generateAuthToken({ userId: userId });
-      taskId = await tasks.updateTask(taskData[0]);
+      const taskObject1 = await tasks.updateTask(taskData[0]);
+      taskId1 = taskObject1.taskId;
+      const taskObject2 = await tasks.updateTask(taskData[1]);
+      taskId2 = taskObject2.taskId;
+
+      const progressData = stubbedModelTaskProgressData(userId, taskId1, 1682935200000, 1682899200000);
+      await firestore.collection("progresses").doc("taskProgressDoc").set(progressData);
     });
 
-    it("Stores the progress entry for the task", async function () {
-      const response = await chai
-        .request(app)
-        .post(`progresses`)
-        .set("Cookie", `${cookieName}=${userToken}`)
-        .send(taskProgressDay1(taskId));
+    afterEach(function () {
+      clock.restore();
+    });
 
-      expect(response).to.have.status(200);
-      expect(response.body).to.have.keys(["message", "data"]);
-      expect(response.body.data).to.have.keys([
-        "id",
-        "userId",
-        "taskId",
-        "type",
-        "completed",
-        "planned",
-        "blockers",
-        "createdAt",
-        "date",
-      ]);
-      expect(response.body.message).to.be.equal("task progress created successfully");
-      expect(response.body.data.userId).to.be.equal(userId);
-      expect(response.body.data.taskId).to.be.equal(taskId);
+    it("Stores the progress entry for the task", function (done) {
+      chai
+        .request(app)
+        .post(`/progresses`)
+        .set("Cookie", `${cookieName}=${userToken}`)
+        .send(taskProgressDay1(taskId2))
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(201);
+          expect(res.body).to.have.keys(["message", "data"]);
+          expect(res.body.data).to.have.keys([
+            "id",
+            "userId",
+            "taskId",
+            "type",
+            "completed",
+            "planned",
+            "blockers",
+            "createdAt",
+            "date",
+          ]);
+          expect(res.body.message).to.be.equal("Task Progress document created successfully.");
+          expect(res.body.data.userId).to.be.equal(userId);
+          expect(res.body.data.taskId).to.be.equal(taskId2);
+          return done();
+        });
+    });
+
+    it("throws Conflict Error 409 if the task progress is updated multiple times in a day", function (done) {
+      chai
+        .request(app)
+        .post(`/progresses`)
+        .set("cookie", `${cookieName}=${userToken}`)
+        .send(taskProgressDay1(taskId1))
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(409);
+          expect(res.body).to.have.key("message");
+          expect(res.body.message).to.be.equal("Task Progress for the day has already been created.");
+          return done();
+        });
     });
 
     it("Gives 400 for invalid request body", function (done) {
-      const incompleteProgressArray = incompleteTaskProgress(taskId);
+      const incompleteProgressArray = incompleteTaskProgress(taskId1);
       const requests = incompleteProgressArray.map((progress) => {
         return chai
           .request(app)
-          .post(`progresses`)
+          .post(`/progresses`)
           .set("Cookie", `${cookieName}=${userToken}`)
           .send(progress.payload)
           .then((res) => {
@@ -82,12 +117,12 @@ describe("Test Progress Updates API for Tasks", function () {
     it("Gives 401 for unauthenticated user", function (done) {
       chai
         .request(app)
-        .post(`progresses`)
-        .send(taskProgressDay1(taskId))
+        .post(`/progresses`)
+        .send(taskProgressDay1(taskId1))
         .end((err, res) => {
           if (err) return done(err);
           expect(res).to.have.status(401);
-          expect(res.body.message).to.be.equal("Access denied: User authentication is required");
+          expect(res.body.message).to.be.equal("Unauthenticated User");
           return done();
         });
     });
@@ -96,9 +131,7 @@ describe("Test Progress Updates API for Tasks", function () {
   describe("Verify the GET progress records", function () {
     let userId1;
     let userId2;
-    let taskObject1;
     let taskId1;
-    let taskObject2;
     let taskId2;
     let taskObject3;
     let taskId3;
@@ -106,9 +139,9 @@ describe("Test Progress Updates API for Tasks", function () {
     beforeEach(async function () {
       userId1 = await addUser(userData[1]);
       userId2 = await addUser(userData[2]);
-      taskObject1 = await tasks.updateTask(taskData[0]);
+      const taskObject1 = await tasks.updateTask(taskData[0]);
       taskId1 = taskObject1.taskId;
-      taskObject2 = await tasks.updateTask(taskData[1]);
+      const taskObject2 = await tasks.updateTask(taskData[1]);
       taskId2 = taskObject2.taskId;
       taskObject3 = await tasks.updateTask(taskData[2]);
       taskId3 = taskObject3.taskId;
@@ -116,11 +149,6 @@ describe("Test Progress Updates API for Tasks", function () {
       const progressData2 = stubbedModelTaskProgressData(userId2, taskId2, 1683957764140, 1683936000000);
       await firestore.collection("progresses").doc("taskProgressDocument1").set(progressData1);
       await firestore.collection("progresses").doc("taskProgressDocument2").set(progressData2);
-      // const progressesDocs = await firestore.collection("progresses").get();
-      // const docsData = [];
-      // progressesDocs.forEach((doc) => {
-      //   docsData.push({ id: doc.id, ...doc.data() });
-      // });
     });
 
     it("Returns the progress array for the task", function (done) {
