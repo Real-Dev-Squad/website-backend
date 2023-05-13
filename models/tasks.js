@@ -43,6 +43,9 @@ const addDependency = async (data) => {
   try {
     const { taskId, dependsOn } = data;
     const batch = firestore.batch();
+    if (dependsOn.length > 500) {
+      throw new Error("Error cannot add more than 500 taskId");
+    }
     for (const dependsId of dependsOn) {
       const taskDependOn = {
         taskId,

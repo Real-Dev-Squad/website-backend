@@ -106,8 +106,8 @@ describe("Tasks", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Task created successfully!");
-          expect(res.body.task.id).to.be.a("string");
           expect(res.body.task).to.be.a("object");
+          expect(res.body.task.id).to.be.a("string");
           expect(res.body.task.createdBy).to.equal(appOwner.username);
           expect(res.body.task.assignee).to.equal(appOwner.username);
           expect(res.body.task.participants).to.be.a("array");
