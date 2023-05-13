@@ -576,43 +576,32 @@ describe("Users", function () {
   });
 
   describe("GET /users/?id", function () {
-    let testUser;
-    beforeEach(async function () {
-      await addOrUpdate(userData[0], userId);
-      const { user } = await users.fetchUser({ userId });
-      testUser = user;
-    });
-
     afterEach(async function () {
       await cleanDb();
     });
 
-    it("Should return given user by id", function (done) {
-      chai
-        .request(app)
-        .get(`/users/?id=${testUser.id}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User returned successfully!");
-          expect(res.body.user).to.be.a("object");
-          expect(Object.keys(res.body.user)).to.include.members([
-            "username",
-            "first_name",
-            "last_name",
-            "yoe",
-            "linkedin_id",
-            "github_id",
-            "isMember",
-            "roles",
-          ]);
-          expect(res.body.user.id).to.equal(testUser.id);
-          return done();
-        });
+    it("Should return given user by id", async function () {
+      await addOrUpdate(userData[0], userId);
+      const { user: testUser } = await users.fetchUser({ userId });
+
+      const res = await chai.request(app).get(`/users/?id=${testUser.id}`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("User returned successfully!");
+      expect(res.body.user).to.be.a("object");
+      expect(Object.keys(res.body.user)).to.include.members([
+        "username",
+        "first_name",
+        "last_name",
+        "yoe",
+        "linkedin_id",
+        "github_id",
+        "isMember",
+        "roles",
+      ]);
+      expect(res.body.user.id).to.equal(testUser.id);
     });
+
     it("Should return 404 if user not Found", function (done) {
       chai
         .request(app)
