@@ -48,17 +48,15 @@ const incompleteProgress = [
 ];
 
 const stubbedModelProgressData = (userId, createdAt, date) => {
-  return [
-    {
-      userId,
-      createdAt,
-      date,
-      type: "user",
-      completed: "Implemented caching mechanism for frequent API requests",
-      planned: "Refactor code to follow coding best practices",
-      blockers: "Waiting for feedback from the code review",
-    },
-  ];
+  return {
+    userId,
+    createdAt,
+    date,
+    type: "user",
+    completed: "Implemented caching mechanism for frequent API requests",
+    planned: "Refactor code to follow coding best practices",
+    blockers: "Waiting for feedback from the code review",
+  };
 };
 
 const taskProgressDay1 = (taskId) => {
