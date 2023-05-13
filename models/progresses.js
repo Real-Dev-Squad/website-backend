@@ -1,7 +1,7 @@
 const { Conflict } = require("http-errors");
 const fireStore = require("../utils/firestore");
 const progressesCollection = fireStore.collection("progresses");
-const { MILLISECONDS_IN_DAY, RESPONSE_MESSAGES } = require("../constants/progresses");
+const { RESPONSE_MESSAGES } = require("../constants/progresses");
 const {
   buildQueryToFetchDocs,
   getProgressDocs,
@@ -10,6 +10,7 @@ const {
   assertUserOrTaskExists,
   buildQueryForPostingProgress,
   assertTaskExists,
+  getProgressDateTimestamp,
 } = require("../utils/progresses");
 const { PROGRESS_ALREADY_CREATED } = RESPONSE_MESSAGES;
 
@@ -21,13 +22,8 @@ const { PROGRESS_ALREADY_CREATED } = RESPONSE_MESSAGES;
  **/
 const createProgressDocument = async (progressData) => {
   const { type, taskId } = progressData;
-  // Currently, we are primarily catering to Indian users for our apps, which is why we have implemented support for the IST (Indian Standard Time) timezone for progress updates.
   const createdAtTimestamp = new Date().getTime();
-  const currentHourIST = new Date().getUTCHours() + 5.5; // IST offset is UTC+5:30
-  const isBefore6amIST = currentHourIST < 6;
-  const progressDateTimestamp = isBefore6amIST
-    ? new Date().setUTCHours(0, 0, 0, 0) - MILLISECONDS_IN_DAY
-    : new Date().setUTCHours(0, 0, 0, 0);
+  const progressDateTimestamp = getProgressDateTimestamp();
   if (taskId) {
     await assertTaskExists(taskId);
   }
@@ -36,7 +32,6 @@ const createProgressDocument = async (progressData) => {
   if (!existingDocumentSnapshot.empty) {
     throw new Conflict(`${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_ALREADY_CREATED}`);
   }
-
   const progressDocumentData = { ...progressData, createdAt: createdAtTimestamp, date: progressDateTimestamp };
   const { id } = await progressesCollection.add(progressDocumentData);
   return { id, ...progressDocumentData };

@@ -4,8 +4,21 @@ const { fetchUser } = require("../models/users");
 const fireStore = require("../utils/firestore");
 const {
   RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
+  MILLISECONDS_IN_DAY,
 } = require("../constants/progresses");
 const progressesCollection = fireStore.collection("progresses");
+
+/**
+ * Returns the progress date timestamp
+ *
+ * @returns {Date} A date object representing the current time in IST Timezone
+ */
+const getProgressDateTimestamp = () => {
+  // Currently, we are primarily catering to Indian users for our apps, which is why we have implemented support for the IST (Indian Standard Time) timezone for progress updates.
+  const currentHourIST = new Date().getUTCHours() + 5.5; // IST offset is UTC+5:30;
+  const isBefore6amIST = currentHourIST < 6;
+  return isBefore6amIST ? new Date().setUTCHours(0, 0, 0, 0) - MILLISECONDS_IN_DAY : new Date().setUTCHours(0, 0, 0, 0);
+};
 
 /**
  * Builds a Firestore query for posting progress documents based on the given parameters.
@@ -166,6 +179,7 @@ const getProgressRecords = async (query, queryParams) => {
 };
 
 module.exports = {
+  getProgressDateTimestamp,
   buildQueryForPostingProgress,
   assertUserExists,
   assertTaskExists,
