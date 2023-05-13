@@ -83,7 +83,7 @@ const updateTask = async (req, res, next) => {
         .string()
         .valid(...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD))
         .optional(),
-      assignee: joi.string().optional(),
+      assignee: joi.alternatives().try(joi.string().optional(), joi.valid(null)),
       percentCompleted: joi.number().optional(),
       dependsOn: joi.array().items(joi.string()).optional(),
       participants: joi.array().items(joi.string()).optional(),
