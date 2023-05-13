@@ -93,7 +93,7 @@ describe("Test Progress Updates API for Tasks", function () {
     });
   });
 
-  describe("Verify GET Request Functionality", function () {
+  describe("Verify the GET progress records", function () {
     let userId1;
     let userId2;
     let taskObject1;
@@ -206,6 +206,83 @@ describe("Test Progress Updates API for Tasks", function () {
       chai
         .request(app)
         .get(`/progresses?taskId=${taskId3}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("No progress records found.");
+          return done();
+        });
+    });
+  });
+
+  describe("Verify the GET date range progress records", function () {
+    let userId;
+    let taskObject1;
+    let taskId1;
+    let taskObject2;
+    let taskId2;
+    beforeEach(async function () {
+      userId = await addUser(userData[1]);
+      taskObject1 = await tasks.updateTask(taskData[0]);
+      taskId1 = taskObject1.taskId;
+      taskObject2 = await tasks.updateTask(taskData[1]);
+      taskId2 = taskObject2.taskId;
+      const progressData1 = stubbedModelTaskProgressData(userId, taskId1, 1683626400000, 1683590400000); // 2023-05-09
+      const progressData2 = stubbedModelTaskProgressData(userId, taskId1, 1683885600000, 1683849600000); // 2023-05-12
+      await firestore.collection("progresses").doc("taskProgressDocument1").set(progressData1);
+      await firestore.collection("progresses").doc("taskProgressDocument2").set(progressData2);
+    });
+
+    it("Verifies the progress records for a task within the specified date range.", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/range?taskId=${taskId1}&startDate=2023-05-09&endDate=2023-05-12`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body.data).to.be.an("object");
+          expect(res.body).to.have.keys(["message", "data"]);
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.data).to.have.keys(["startDate", "endDate", "progressRecords"]);
+          expect(res.body.data.startDate).to.be.equal("2023-05-09");
+          expect(res.body.data.endDate).to.be.equal("2023-05-12");
+          expect(res.body.data.progressRecords).to.have.key(["2023-05-09", "2023-05-10", "2023-05-11", "2023-05-12"]);
+          expect(res.body.data.progressRecords["2023-05-09"]).to.be.equal(true);
+          expect(res.body.data.progressRecords["2023-05-10"]).to.be.equal(false);
+          expect(res.body.data.progressRecords["2023-05-11"]).to.be.equal(false);
+          expect(res.body.data.progressRecords["2023-05-12"]).to.be.equal(true);
+          return done();
+        });
+    });
+
+    it("Returns 400 for bad request", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/range?taskId=${taskId1}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.be.equal("Start date and End date is mandatory.");
+          return done();
+        });
+    });
+
+    it("Returns 404 for invalid task id", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/range?taskId=invalidTaskId&startDate=2023-05-09&endDate=2023-05-12`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("Task with id invalidTaskId does not exist.");
+          return done();
+        });
+    });
+
+    it("Returns 404 if the progress document doesn't exist", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/range?taskId=${taskId2}&startDate=2023-05-09&endDate=2023-05-12`)
         .end((err, res) => {
           if (err) return done(err);
           expect(res).to.have.status(404);

@@ -236,7 +236,7 @@ describe("Test Progress Updates API for Users", function () {
       await firestore.collection("progresses").doc("progressDoc2").set(progressData2);
     });
 
-    it("verifies the missed standup w.r.t the last update", function (done) {
+    it("Verifies the progress records for a user within the specified date range.", function (done) {
       chai
         .request(app)
         .get(`/progresses/range?userId=${userId}&startDate=2023-05-09&endDate=2023-05-12`)
