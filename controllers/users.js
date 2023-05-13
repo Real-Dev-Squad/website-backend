@@ -473,7 +473,7 @@ const syncInDiscordRole = async (req, res) => {
     const authToken = jwt.sign({}, config.get("botToken.botPrivateKey"), {
       algorithm: "RS256",
     });
-    // console.log(authToken);
+
     const response = await fetch(`${DISCORD_BASE_URL}/discord-members`, {
       headers: {
         "Content-Type": "application/json",

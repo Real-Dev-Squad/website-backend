@@ -154,7 +154,7 @@ function mapDiscordMembersDataAndSyncRole(allUsers, discordMembers) {
         const discordUserData = discordMembers.find((item) => item.user.id === user.discordId);
         if (discordUserData) {
           const roles = user.roles ? { ...user.roles, inDiscord: true } : { inDiscord: true };
-          doc.ref.update({ roles, joined_RDS: discordUserData.joined_at });
+          doc.ref.update({ roles, joined_discord: discordUserData.joined_at });
         } else {
           const roles = user.roles ? { ...user.roles, inDiscord: false } : { inDiscord: false };
           doc.ref.update({ roles });

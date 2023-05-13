@@ -172,6 +172,11 @@ async function validateUserQueryParams(req, res, next) {
           joi.array().items(joi.string().valid("IDLE", "OOO", "ACTIVE"))
         )
         .optional(),
+      role: joi
+        .alternatives()
+        .try(joi.string().valid("in_discord", "member"), joi.array().items(joi.string().valid("in_discord", "member")))
+        .optional(),
+      verified: joi.string().optional(),
     })
     .messages({
       "object.min": "Please provide at least one filter criteria",
