@@ -5,13 +5,6 @@ const standupProgressDay1 = {
   blockers: "Waiting for database access credentials",
 };
 
-const standupProgressDay2 = {
-  type: "user",
-  completed: "Completed API integration for user authentication",
-  planned: "Optimize database queries for improved performance",
-  blockers: "None",
-};
-
 const incompleteProgress = [
   {
     missingField: "type",
@@ -48,17 +41,15 @@ const incompleteProgress = [
 ];
 
 const stubbedModelProgressData = (userId, createdAt, date) => {
-  return [
-    {
-      userId,
-      createdAt,
-      date,
-      type: "user",
-      completed: "Implemented caching mechanism for frequent API requests",
-      planned: "Refactor code to follow coding best practices",
-      blockers: "Waiting for feedback from the code review",
-    },
-  ];
+  return {
+    userId,
+    createdAt,
+    date,
+    type: "user",
+    completed: "Implemented caching mechanism for frequent API requests",
+    planned: "Refactor code to follow coding best practices",
+    blockers: "Waiting for feedback from the code review",
+  };
 };
 
 const taskProgressDay1 = (taskId) => {
@@ -68,16 +59,6 @@ const taskProgressDay1 = (taskId) => {
     completed: "Working on a backend Go Task",
     planned: "Implement error handling for API endpoints",
     blockers: "Waiting for database access credentials",
-  };
-};
-
-const taskProgressDay2 = (taskId) => {
-  return {
-    taskId,
-    type: "task",
-    completed: "Completed API integration for user authentication",
-    planned: "Optimize database queries for improved performance",
-    blockers: "None",
   };
 };
 
@@ -130,27 +111,23 @@ const incompleteTaskProgress = (taskId) => [
 ];
 
 const stubbedModelTaskProgressData = (userId, taskId, createdAt, date) => {
-  return [
-    {
-      userId,
-      taskId,
-      createdAt,
-      date,
-      type: "task",
-      completed: "Implemented caching mechanism for frequent API requests",
-      planned: "Refactor code to follow coding best practices",
-      blockers: "Waiting for feedback from the code review",
-    },
-  ];
+  return {
+    userId,
+    taskId,
+    createdAt,
+    date,
+    type: "task",
+    completed: "Implemented caching mechanism for frequent API requests",
+    planned: "Refactor code to follow coding best practices",
+    blockers: "Waiting for feedback from the code review",
+  };
 };
 
 module.exports = {
   standupProgressDay1,
-  standupProgressDay2,
   incompleteProgress,
   stubbedModelProgressData,
   taskProgressDay1,
-  taskProgressDay2,
   incompleteTaskProgress,
   stubbedModelTaskProgressData,
 };
