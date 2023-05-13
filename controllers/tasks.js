@@ -4,7 +4,7 @@ const { addLog } = require("../models/logs");
 const { USER_STATUS } = require("../constants/users");
 const { addOrUpdate, getRdsUserInfoByGitHubUsername } = require("../models/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
+const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED, MERGED, COMPLETED, RELEASED, VERIFIED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
 const { transformQuery } = require("../utils/tasks");
@@ -424,6 +424,23 @@ const assignTask = async (req, res) => {
   }
 };
 
+const currentOverdueTasks = async (req, res) => {
+  try {
+    const overdueTasks = await tasks.getAllOverDueTasks();
+    const overdueTasksFiltered = overdueTasks.filter(
+      (task) =>
+        task.status !== MERGED || task.status !== COMPLETED || task.status !== RELEASED || task.status !== VERIFIED
+    );
+    return res.json({
+      message: "Overdue Tasks returned successfully!",
+      overdueTasks: overdueTasksFiltered,
+    });
+  } catch (err) {
+    logger.error(`Error while fetching overdue tasks : ${err}`);
+    return res.boom.badImplementation("An internal server error occured");
+  }
+};
+
 module.exports = {
   addNewTask,
   fetchTasks,
@@ -434,4 +451,5 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
+  currentOverdueTasks,
 };

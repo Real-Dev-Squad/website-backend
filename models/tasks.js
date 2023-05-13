@@ -474,6 +474,26 @@ const overdueTasks = async (overDueTasks) => {
     throw err;
   }
 };
+
+/**
+ * Fetch all overdue tasks objects
+ * @param overdueTasks <Array>: tasks which are overdue
+ * @return {Promsie<Array>}
+ */
+const getAllOverDueTasks = async () => {
+  try {
+    const currentTime = Math.floor(Date.now() / 1000);
+    const overdueTasksSnapshot = await tasksModel.where("endsOn", "<", currentTime).get();
+    const tasks = buildTasks(overdueTasksSnapshot);
+    const promises = tasks.map((task) => fromFirestoreData(task));
+    const overDueTasks = await Promise.all(promises);
+    return overDueTasks;
+  } catch (err) {
+    logger.error("error getting all overdue tasks", err);
+    throw err;
+  }
+};
+
 module.exports = {
   updateTask,
   fetchTasks,
