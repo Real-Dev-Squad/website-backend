@@ -24,7 +24,7 @@ describe("Test Progress Updates API for Users", function () {
     await cleanDb();
   });
 
-  describe("Verify POST Request Functionality", function () {
+  describe("Verify the POST progress records", function () {
     let clock;
     let userId;
     let userToken;
@@ -41,11 +41,6 @@ describe("Test Progress Updates API for Users", function () {
       anotherUserToken = authService.generateAuthToken({ userId: anotherUserId });
       const progressData = stubbedModelProgressData(anotherUserId, Date.now(), 1685577600000);
       await firestore.collection("progresses").doc("anotherUserProgressDocument").set(progressData);
-      // const progressesDocs = await firestore.collection("progresses").get()
-      // const docsData = [];
-      // progressesDocs.forEach((doc) => {
-      //   docsData.push({ ...doc.data(), id: doc.id });
-      // });
     });
 
     afterEach(function () {
@@ -125,7 +120,7 @@ describe("Test Progress Updates API for Users", function () {
     });
   });
 
-  describe("Verify GET Request Functionality", function () {
+  describe("Verify the GET progress records", function () {
     let userId1;
     let userId2;
     let userId3;
@@ -229,10 +224,12 @@ describe("Test Progress Updates API for Users", function () {
     });
   });
 
-  describe("Verify the missed StandUps", function () {
+  describe("Verify the date range progress records", function () {
     let userId;
+    let userId2;
     beforeEach(async function () {
       userId = await addUser(userData[1]);
+      userId2 = await addUser(userData[2]);
       const progressData1 = stubbedModelProgressData(userId, 1683626400000, 1683590400000); // 2023-05-09
       const progressData2 = stubbedModelProgressData(userId, 1683885600000, 1683849600000); // 2023-05-12
       await firestore.collection("progresses").doc("progressDoc1").set(progressData1);
@@ -257,6 +254,42 @@ describe("Test Progress Updates API for Users", function () {
           expect(res.body.data.progressRecords["2023-05-10"]).to.be.equal(false);
           expect(res.body.data.progressRecords["2023-05-11"]).to.be.equal(false);
           expect(res.body.data.progressRecords["2023-05-12"]).to.be.equal(true);
+          return done();
+        });
+    });
+
+    it("Returns 400 for bad request", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/range?userId=${userId}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.be.equal("Start date and End date is mandatory.");
+          return done();
+        });
+    });
+
+    it("Returns 404 for invalid user id", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/range?userId=invalidUserId&startDate=2023-05-09&endDate=2023-05-12`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("User with id invalidUserId does not exist.");
+          return done();
+        });
+    });
+
+    it("Returns 404 if the progress document doesn't exist", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/range?userId=${userId2}&startDate=2023-05-09&endDate=2023-05-12`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("No progress records found.");
           return done();
         });
     });
