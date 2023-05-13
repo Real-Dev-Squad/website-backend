@@ -44,6 +44,7 @@ describe("Tasks", function () {
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
         isNoteworthy: true,
+        isCollapsed: true,
       },
       {
         title: "Test task",
@@ -182,6 +183,19 @@ describe("Tasks", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("task returned successfully");
           expect(res.body.taskData).to.be.a("object");
+          return done();
+        });
+    });
+    it("Should return isCollapsed property in response", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.body.taskData).to.have.property("isCollapsed");
           return done();
         });
     });
