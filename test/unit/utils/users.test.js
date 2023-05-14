@@ -1,8 +1,6 @@
 const chai = require("chai");
 const { expect } = chai;
 
-const sinon = require("sinon");
-
 const usersUtils = require("../../../utils/users");
 const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
@@ -65,62 +63,6 @@ describe("users", function () {
       const participantArray = taskData.participants;
       const participantUserId = await usersUtils.getParticipantUserIds(participantArray);
       expect(participantUserId).to.include(userId);
-    });
-  });
-
-  describe("mapDiscordMembersDataAndSyncRole", function () {
-    it("should update roles and joined_discord fields for users with matching Discord IDs", function () {
-      const allUsers = [
-        {
-          data: () => ({ roles: { archived: false }, discordId: "123" }),
-          ref: { update: sinon.spy() },
-        },
-      ];
-      const discordMembers = [
-        {
-          user: { id: "123" },
-          joined_at: "2022-05-01T00:00:00.000Z",
-        },
-      ];
-
-      usersUtils.mapDiscordMembersDataAndSyncRole(allUsers, discordMembers);
-
-      sinon.assert.calledWithExactly(allUsers[0].ref.update, {
-        roles: { archived: false, inDiscord: true },
-        joined_discord: discordMembers[0].joined_at,
-      });
-    });
-
-    it("should update roles field to inDiscord: false for users with no matching Discord ID", function () {
-      const allUsers = [
-        {
-          data: () => ({ roles: { archived: false }, discordId: "123" }),
-          ref: { update: sinon.spy() },
-        },
-      ];
-      const discordMembers = [];
-
-      usersUtils.mapDiscordMembersDataAndSyncRole(allUsers, discordMembers);
-
-      sinon.assert.calledWithExactly(allUsers[0].ref.update, {
-        roles: { archived: false, inDiscord: false },
-      });
-    });
-
-    it("should update roles field to inDiscord: false for users with archived roles", function () {
-      const allUsers = [
-        {
-          data: () => ({ roles: { archived: true }, discordId: "123" }),
-          ref: { update: () => sinon.spy() },
-        },
-      ];
-      const discordMembers = [];
-
-      usersUtils.mapDiscordMembersDataAndSyncRole(allUsers, discordMembers);
-
-      expect(allUsers[0].ref.update).to.have.been.calledWith({
-        roles: { archived: true, inDiscord: false },
-      });
     });
   });
 });

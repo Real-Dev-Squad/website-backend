@@ -414,22 +414,6 @@ const getUsersBasedOnFilter = async (query) => {
     const filteredUserDocs = userDocs.filter((doc) => !doc.roles?.archived);
     return filteredUserDocs;
   }
-  return [];
-};
-const getAllUsers = async () => {
-  try {
-    const usersRef = await userModel.get();
-    return usersRef;
-  } catch (err) {
-    logger.error("Error retrieving users data with roles of inDiscord", err);
-    throw err;
-  }
-};
-const fetchUsersWithRole = async (role) => {
-  try {
-    // console.log(role);
-    const snapshot = await userModel.where(`roles.${role}`, "==", true).get();
-    const onlyMembers = [];
 
   const roleQuery = query.role;
   const verifiedQuery = query.verified;
@@ -447,7 +431,6 @@ const fetchUsersWithRole = async (role) => {
     return filteredUsers;
   }
   if (verifiedQuery) {
-    console.log(typeof verifiedQuery);
     const filteredUsers = [];
     const snapshot = await userModel.orderBy("discordId").get();
     snapshot.forEach((doc) => {
@@ -477,7 +460,4 @@ module.exports = {
   getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
-  fetchUsersWithRole,
-  fetchUsersWhereFieldNotNull,
-  getAllUsers,
 };

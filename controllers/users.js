@@ -8,12 +8,10 @@ const { logType } = require("../constants/logs");
 
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
-const { getPaginationLink, getUsernamesFromPRs, mapDiscordMembersDataAndSyncRole } = require("../utils/users");
+const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
-const { IN_DISCORD } = require("../constants/roles");
-const jwt = require("jsonwebtoken");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -467,55 +465,6 @@ const filterUsers = async (req, res) => {
     return res.boom.serverUnavailable("Something went wrong please contact admin");
   }
 };
-const DISCORD_BASE_URL = "https://89d4-49-36-233-201.ngrok.io";
-const syncInDiscordRole = async (req, res) => {
-  try {
-    const authToken = jwt.sign({}, config.get("botToken.botPrivateKey"), {
-      algorithm: "RS256",
-    });
-
-    const response = await fetch(`${DISCORD_BASE_URL}/discord-members`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
-      },
-    });
-    const discordMembers = await response.json();
-
-    const allUsers = await userQuery.getAllUsers();
-    mapDiscordMembersDataAndSyncRole(allUsers, discordMembers);
-
-    return res.json({ message: "Synced with discord members " });
-  } catch (error) {
-    logger.error(`Error while fetching all users: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
-  }
-};
-
-const fetchVerifiedUsers = async (req, res) => {
-  try {
-    const verifiedUsers = await userQuery.fetchUsersWhereFieldNotNull("discordId");
-    return res.json(verifiedUsers);
-  } catch (error) {
-    logger.error(`Error while fetching all users: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
-  }
-};
-
-const fetchInDiscordUsers = async (req, res) => {
-  try {
-    const usersInDiscord = await userQuery.fetchUsersWithRole(IN_DISCORD);
-
-    return res.json({
-      message: "Users found successfully!",
-      users: usersInDiscord,
-      count: usersInDiscord.length,
-    });
-  } catch (error) {
-    logger.error(`Error while fetching all users: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
-  }
-};
 
 module.exports = {
   verifyUser,
@@ -536,7 +485,4 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
-  fetchInDiscordUsers,
-  syncInDiscordRole,
-  fetchVerifiedUsers,
 };
