@@ -360,6 +360,8 @@ const getRdsUserInfoByGitHubUsername = async (githubUsername) => {
  * @param {Array} query.levelNumber - Array of levelNumbers to filter the users on
  * @param {Array} query.tagId - Array of tagIds to filter the users on
  * @param {Array} query.state - Array of states to filter the users on
+ * @param {String} query.role - filter the users on
+ * @param {String} query.verified - filter the users on
  * @return {Promise<Array>} - Array of user documents that match the filter criteria
  */
 
@@ -429,46 +431,35 @@ const fetchUsersWithRole = async (role) => {
     const snapshot = await userModel.where(`roles.${role}`, "==", true).get();
     const onlyMembers = [];
 
-    if (!snapshot.empty) {
-      snapshot.forEach((doc) => {
-        onlyMembers.push({
-          id: doc.id,
-          ...doc.data(),
-          phone: undefined,
-          email: undefined,
-          tokens: undefined,
-        });
+  const roleQuery = query.role;
+  const verifiedQuery = query.verified;
+
+  if (roleQuery) {
+    const filteredUsers = [];
+    const snapshot = await userModel.where(`roles.${roleQuery}`, "==", true).get();
+    snapshot.forEach((doc) => {
+      filteredUsers.push({
+        id: doc.id,
+        ...doc.data(),
       });
-    }
+    });
 
-    return onlyMembers;
-  } catch (err) {
-    logger.error("Error retrieving users data with roles of inDiscord", err);
-    throw err;
+    return filteredUsers;
   }
-};
-const fetchUsersWhereFieldNotNull = async (field) => {
-  try {
-    const snapshot = await userModel.where(field, "!=", null).get();
-    const users = [];
-
-    if (!snapshot.empty) {
-      snapshot.forEach((doc) => {
-        users.push({
-          id: doc.id,
-          ...doc.data(),
-          phone: undefined,
-          email: undefined,
-          tokens: undefined,
-        });
+  if (verifiedQuery) {
+    console.log(typeof verifiedQuery);
+    const filteredUsers = [];
+    const snapshot = await userModel.orderBy("discordId").get();
+    snapshot.forEach((doc) => {
+      filteredUsers.push({
+        id: doc.id,
+        ...doc.data(),
       });
-    }
+    });
 
-    return users;
-  } catch (err) {
-    logger.error("Error retrieving users data with roles of inDiscord", err);
-    throw err;
+    return filteredUsers;
   }
+  return [];
 };
 
 module.exports = {
