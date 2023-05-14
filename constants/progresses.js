@@ -11,4 +11,9 @@ const RESPONSE_MESSAGES = {
   PROGRESS_ALREADY_CREATED,
 };
 
-module.exports = { RESPONSE_MESSAGES, MILLISECONDS_IN_DAY };
+const TYPE_MAP = {
+  user: "userId",
+  task: "taskId",
+};
+
+module.exports = { RESPONSE_MESSAGES, MILLISECONDS_IN_DAY, TYPE_MAP };

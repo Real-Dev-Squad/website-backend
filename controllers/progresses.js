@@ -1,5 +1,10 @@
 const { Conflict, NotFound } = require("http-errors");
-const { createProgressDocument, getProgressDocument, getRangeProgressData } = require("../models/progresses");
+const {
+  createProgressDocument,
+  getProgressDocument,
+  getRangeProgressData,
+  getProgressByDate,
+} = require("../models/progresses");
 const { RESPONSE_MESSAGES } = require("../constants/progresses");
 const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEEDED } = RESPONSE_MESSAGES;
 
@@ -171,4 +176,57 @@ const getProgressRangeData = async (req, res) => {
   }
 };
 
-module.exports = { createProgress, getProgress, getProgressRangeData };
+/**
+ * @typedef {Object} progressPathParams
+ * @property {string} type - The type of progress document user or task.
+ * @property {string} typeId - The ID of the type.
+ * @property {string} date - The iso format date of the query.
+ */
+
+/**
+ * @typedef {Object} ProgressDocument
+ * @property {string} id - The id of the progress document.
+ * @property {string} type - The type of progress document.
+ * @property {string} completed - The completed progress.
+ * @property {string} planned - The planned progress.
+ * @property {string} blockers - The blockers.
+ * @property {string} userId - The User ID
+ * @property {string} [taskId] - The task ID (optional).
+ * @property {number} createdAt - The timestamp when the progress document was created.
+ * @property {number} date - The timestamp for the day the progress document was created.
+ */
+
+/**
+ * @typedef {Object} GetProgressByDateResponse
+ * @property {string} message - The success message.
+ * @property {ProgressDocument} data - An array of progress documents
+ */
+
+/**
+ * Retrieves the progress documents based on provided query parameters.
+ * @param {Object} req - The HTTP request object.
+ * @param {progressPathParams} req.params - The query parameters
+ * @param {Object} res - The HTTP response object.
+ * @returns {Promise<void>} A Promise that resolves when the response is sent.
+ */
+
+const getProgressBydDateController = async (req, res) => {
+  try {
+    const data = await getProgressByDate(req.params);
+    return res.json({
+      message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
+      data,
+    });
+  } catch (error) {
+    if (error instanceof NotFound) {
+      return res.status(404).json({
+        message: error.message,
+      });
+    }
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
+module.exports = { createProgress, getProgress, getProgressRangeData, getProgressBydDateController };

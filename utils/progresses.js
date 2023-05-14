@@ -178,6 +178,27 @@ const getProgressRecords = async (query, queryParams) => {
   return progressRecords;
 };
 
+/**
+ * Retrieves progress records for a given date range.
+ * @param {Object} pathParamsObject - An object containing the type , typeId and date.
+ * @param {string} pathParamsObject.type - The type of the record i.e user or task.
+ * @param {string} pathParamsObject.typeId - The id of the type i.e user or task.
+ * @param {string} pathParamsObject.date - The date of the record
+ * @returns {Query} A Firestore query object that filters progress documents based on the given parameters.
+ *
+ */
+const buildQueryToSearchProgressByDay = (pathParams) => {
+  const { userId, taskId, date } = pathParams;
+  let query = progressesCollection;
+  if (userId) {
+    query = query.where("userId", "==", userId);
+  } else {
+    query = query.where("taskId", "==", taskId);
+  }
+  const dateTimeStamp = new Date(date).setUTCHours(0, 0, 0, 0);
+  query = query.where("date", "==", dateTimeStamp).limit(1);
+  return query;
+};
 module.exports = {
   getProgressDateTimestamp,
   buildQueryForPostingProgress,
@@ -188,4 +209,5 @@ module.exports = {
   getProgressDocs,
   buildRangeProgressQuery,
   getProgressRecords,
+  buildQueryToSearchProgressByDay,
 };

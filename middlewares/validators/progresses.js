@@ -92,8 +92,26 @@ const validateGetRangeProgressRecordsParams = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
+
+const validateGetDayProgressParams = async (req, res, next) => {
+  const schema = joi.object({
+    type: joi.string().valid("user", "task").required().messages({
+      "any.only": "Type field is restricted to either 'user' or 'task'.",
+    }),
+    typeId: joi.string().required(),
+    date: joi.date().iso().required(),
+  });
+  try {
+    await schema.validateAsync(req.params, { abortEarly: false });
+    next();
+  } catch (error) {
+    logger.error(`Error validating payload: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
 module.exports = {
   validateCreateProgressRecords,
   validateGetProgressRecordsQuery,
   validateGetRangeProgressRecordsParams,
+  validateGetDayProgressParams,
 };
