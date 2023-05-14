@@ -18,8 +18,7 @@ const userData = require("../fixtures/user/user")();
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
-// eslint-disable-next-line mocha/no-skipped-tests
-describe.skip("Test Progress Updates API for Users", function () {
+describe("Test Progress Updates API for Users", function () {
   afterEach(async function () {
     await cleanDb();
   });
