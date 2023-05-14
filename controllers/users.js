@@ -487,7 +487,7 @@ const migrate = async (req, res) => {
               batchWrite.update(userDoc.ref, { github_user_id: `${githubUserId}` });
             })
             .catch((error) => {
-              res.send(error);
+              logger.error(error);
             })
         );
       }
