@@ -24,6 +24,8 @@ const createProgressDocument = async (progressData) => {
   const { type, taskId } = progressData;
   const createdAtTimestamp = new Date().getTime();
   const progressDateTimestamp = getProgressDateTimestamp();
+  // eslint-disable-next-line no-console
+  console.log("🚀✨ ~ file: progresses.js:27 ~ createProgressDocument ~ progressDateTimestamp:", progressDateTimestamp);
   if (taskId) {
     await assertTaskExists(taskId);
   }
