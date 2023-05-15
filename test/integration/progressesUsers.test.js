@@ -74,10 +74,6 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("throws Conflict Error 409 if the user tries to update progress multiple times in a single day", function (done) {
-      const timezoneOffset = new Date().getTimezoneOffset();
-      const timeNow = new Date().getTime();
-      // eslint-disable-next-line no-console
-      console.log({ timezoneOffset, timeNow });
       chai
         .request(app)
         .post(`/progresses`)
