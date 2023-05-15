@@ -330,6 +330,20 @@ describe("Test Progress Updates API for Users", function () {
         });
     });
 
+    it("Should return 404 No progress records found if the document doesn't exist", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/user/${userId}/date/2023-05-03`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.have.key("message");
+          expect(res.body.message).to.be.equal("No progress records found.");
+          return done();
+        });
+    });
+
     it("Returns 400 for bad request", function (done) {
       chai
         .request(app)
