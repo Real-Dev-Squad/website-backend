@@ -32,7 +32,7 @@ describe("Test Progress Updates API for Users", function () {
     let anotherUserToken;
     beforeEach(async function () {
       clock = sinon.useFakeTimers({
-        now: new Date(2023, 4, 2, 5, 55).getTime(),
+        now: new Date(Date.UTC(2023, 4, 2, 0, 25)).getTime(), // UTC time equivalent to 5:55 AM IST
         toFake: ["Date"],
       });
       userId = await addUser(userData[1]);
