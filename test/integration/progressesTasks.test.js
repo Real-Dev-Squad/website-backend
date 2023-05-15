@@ -319,4 +319,81 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
   });
+
+  describe("Verify the GET endpoint for retrieving progress document for the user on a particular date", function () {
+    let userId;
+    let taskId;
+    let anotherTaskId;
+
+    beforeEach(async function () {
+      userId = await addUser(userData[0]);
+      const taskObject = await tasks.updateTask(taskData[0]);
+      taskId = taskObject.taskId;
+      const anotherTaskObject = await tasks.updateTask(taskData[0]);
+      anotherTaskId = anotherTaskObject.taskId;
+      const progressData = stubbedModelTaskProgressData(userId, taskId, 1683072000000, 1682985600000);
+      await firestore.collection("progresses").doc("progressDoc").set(progressData);
+    });
+
+    it("Returns the progress data for a specific task", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/task/${taskId}/date/2023-05-02`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data"]);
+          expect(res.body.data).to.be.an("object");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.data).to.have.keys([
+            "id",
+            "type",
+            "completed",
+            "planned",
+            "blockers",
+            "userId",
+            "taskId",
+            "createdAt",
+            "date",
+          ]);
+          return done();
+        });
+    });
+
+    it("Returns 400 for bad request", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/task/${taskId}/date/2023-05-33`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.be.equal('"date" must be in ISO 8601 date format');
+          return done();
+        });
+    });
+
+    it("Returns 404 for invalid task id", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/task/invalidTaskId/date/2023-05-02`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("Task with id invalidTaskId does not exist.");
+          return done();
+        });
+    });
+
+    it("Returns 404 if the progress document doesn't exist for the task", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/task/${anotherTaskId}/date/2023-05-02`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("No progress records found.");
+          return done();
+        });
+    });
+  });
 });

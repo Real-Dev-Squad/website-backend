@@ -354,7 +354,7 @@ describe("Test Progress Updates API for Users", function () {
         });
     });
 
-    it("Returns 404 if the progress document doesn't exist for the users", function (done) {
+    it("Returns 404 if the progress document doesn't exist for the user", function (done) {
       chai
         .request(app)
         .get(`/progresses/user/${anotherUserId}/date/2023-05-02`)
