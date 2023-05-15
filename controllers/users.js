@@ -12,6 +12,7 @@ const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+// const getDiscordMemberDetails = require("../services/discordMembersService");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -247,6 +248,7 @@ const postUserPicture = async (req, res) => {
     const { file } = req;
     const { id: userId } = req.userData;
     const { coordinates } = req.body;
+    // const discordUserData = await getDiscordMemberDetails(discordId);
     const coordinatesObject = coordinates && JSON.parse(coordinates);
     const imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
     return res.json({
