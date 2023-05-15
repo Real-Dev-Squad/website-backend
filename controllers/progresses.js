@@ -1,6 +1,6 @@
 const { Conflict, NotFound } = require("http-errors");
 const { createProgressDocument, getProgressDocument, getRangeProgressData } = require("../models/progresses");
-const { RESPONSE_MESSAGES } = require("../constants/progresses");
+const { RESPONSE_MESSAGES, INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
 const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEEDED } = RESPONSE_MESSAGES;
 
 /**
@@ -58,8 +58,9 @@ const createProgress = async (req, res) => {
         message: error.message,
       });
     }
-    return res.status(400).json({
-      message: error.message,
+    logger.error(error.message);
+    return res.status(500).json({
+      message: INTERNAL_SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -112,8 +113,9 @@ const getProgress = async (req, res) => {
         message: error.message,
       });
     }
-    return res.status(400).json({
-      message: error.message,
+    logger.error(error.message);
+    return res.status(500).json({
+      message: INTERNAL_SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -165,8 +167,9 @@ const getProgressRangeData = async (req, res) => {
         message: error.message,
       });
     }
-    return res.status(400).json({
-      message: error.message,
+    logger.error(error.message);
+    return res.status(500).json({
+      message: INTERNAL_SERVER_ERROR_MESSAGE,
     });
   }
 };
