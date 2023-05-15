@@ -6,8 +6,10 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
+const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem } = require("../utils/array");
 const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
+const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
@@ -68,6 +70,10 @@ const addOrUpdate = async (userData, userId = null) => {
 const addJoinData = async (userData) => {
   try {
     await joinModel.add(userData);
+    await updateUserStatus(userData.userId, {
+      currentStatus: { state: userState.ONBOARDING },
+      monthlyHours: { committed: 4 * userData.intro.numberOfHours },
+    });
   } catch (err) {
     logger.error("Error in adding data", err);
     throw err;
@@ -180,7 +186,7 @@ const fetchPaginatedUsers = async (query) => {
 const fetchUsers = async (usernames = []) => {
   try {
     const dbQuery = userModel;
-    const filterdUsersWithDetails = [];
+    const users = [];
 
     const groups = [];
     for (let i = 0; i < usernames.length; i += BATCH_SIZE_IN_CLAUSE) {
@@ -196,7 +202,7 @@ const fetchUsers = async (usernames = []) => {
 
     snapshots.forEach((snapshot) => {
       snapshot.forEach((doc) => {
-        filterdUsersWithDetails.push({
+        users.push({
           id: doc.id,
           ...doc.data(),
           phone: undefined,
@@ -208,7 +214,7 @@ const fetchUsers = async (usernames = []) => {
     });
 
     return {
-      filterdUsersWithDetails,
+      users,
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
@@ -286,7 +292,7 @@ const initializeUser = async (userId) => {
   if (!userWallet) {
     await createWallet(userId, walletConstants.INITIAL_WALLET);
   }
-
+  await updateUserStatus(userId, { currentStatus: { state: userState.ONBOARDING }, monthlyHours: { committed: 0 } });
   return true;
 };
 
