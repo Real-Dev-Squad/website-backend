@@ -398,7 +398,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
           expect(res.body.error).to.equal(`Bad Request`);
-          expect(res.body.message).to.equal(`Invalid State. State must be either IDLE, ACTIVE or OOO`);
+          expect(res.body.message).to.equal(`Invalid State. State must be either IDLE, ACTIVE, OOO, or ONBOARDING`);
           return done();
         });
     });
