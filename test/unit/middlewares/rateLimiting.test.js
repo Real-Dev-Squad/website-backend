@@ -1,5 +1,6 @@
 const sinon = require("sinon");
 const { TOO_MANY_REQUESTS } = require("../../../constants/rateLimiting");
+const { commonRateLimiter } = require("../../../middlewares/rateLimiting");
 
 function mockRequest(ipAddress) {
   return {
