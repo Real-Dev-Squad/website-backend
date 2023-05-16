@@ -47,7 +47,7 @@ describe("Test Progress Updates API for Users", function () {
       clock.restore();
     });
 
-    it("stores the user progress document for the first time", function (done) {
+    it("stores the user progress document", function (done) {
       chai
         .request(app)
         .post(`/progresses`)
@@ -69,6 +69,36 @@ describe("Test Progress Updates API for Users", function () {
           ]);
           expect(res.body.message).to.be.equal("User Progress document created successfully.");
           expect(res.body.data.userId).to.be.equal(userId);
+          return done();
+        });
+    });
+
+    it("stores the user progress document for the previous day if the update is sent before 6am IST", function (done) {
+      clock.setSystemTime(new Date(Date.UTC(2023, 4, 2, 0, 29)).getTime()); // 2nd May 2023 05:59 am IST
+      chai
+        .request(app)
+        .post(`/progresses`)
+        .set("cookie", `${cookieName}=${userToken}`)
+        .send(standupProgressDay1)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(201);
+          expect(res.body.data.date).to.be.equal(1682899200000); // 1st May 2023
+          return done();
+        });
+    });
+
+    it("stores the user progress document for the current day if the update is sent after 6am IST", function (done) {
+      clock.setSystemTime(new Date(Date.UTC(2023, 4, 2, 0, 31)).getTime()); // 2nd May 2023 06:01 am IST
+      chai
+        .request(app)
+        .post(`/progresses`)
+        .set("cookie", `${cookieName}=${userToken}`)
+        .send(standupProgressDay1)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(201);
+          expect(res.body.data.date).to.be.equal(1682985600000); // 2nd May 2023
           return done();
         });
     });
