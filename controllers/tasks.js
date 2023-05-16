@@ -167,8 +167,25 @@ const updateTask = async (req, res) => {
       return res.boom.notFound("Task not found");
     }
 
-    await tasks.updateTask(req.body, req.params.id);
-    return res.status(204).send();
+    const newTaskData = req.body;
+
+    const taskLog = {
+      type: "task",
+      meta: { taskId: req.params.id, username: req.userData.username, userId: req.userData.id },
+      body: {
+        subType: "change",
+        new: {},
+      },
+    };
+    Object.keys(newTaskData).forEach((key) => (taskLog.body.new[`${key}`] = newTaskData[`${key}`]));
+
+    const [, taskLogResult] = await Promise.all([
+      tasks.updateTask(newTaskData, req.params.id),
+      addLog(taskLog.type, taskLog.meta, taskLog.body),
+    ]);
+    taskLog.id = taskLogResult.id;
+
+    return res.status(200).json({ message: "Task updated successfully!", taskLog });
   } catch (err) {
     logger.error(`Error while updating task: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
