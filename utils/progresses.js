@@ -16,7 +16,7 @@ const progressesCollection = fireStore.collection("progresses");
 const getProgressDateTimestamp = () => {
   // Currently, we are primarily catering to Indian users for our apps, which is why we have implemented support for the IST (Indian Standard Time) timezone for progress updates.
   const currentHourIST = new Date().getUTCHours() + 5.5; // IST offset is UTC+5:30;
-  const isBefore6amIST = currentHourIST < 6;
+  const isBefore6amIST = currentHourIST === 5.5 && new Date().getUTCMinutes() <= 30;
   return isBefore6amIST ? new Date().setUTCHours(0, 0, 0, 0) - MILLISECONDS_IN_DAY : new Date().setUTCHours(0, 0, 0, 0);
 };
 
