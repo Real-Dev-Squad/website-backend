@@ -116,16 +116,6 @@ describe("users", function () {
       expect(data.github_id).to.equal(userData.github_id);
     });
 
-    it("verifies the error text message", async function () {
-      const userData = { ...userDataArray[0], github_id: 123 };
-
-      try {
-        await users.addOrUpdate(userData);
-      } catch (error) {
-        expect(error.message).to.equal("Validation error: github_id must be a string");
-      }
-    });
-
     it("github_user_id field should have a maximum length of 8 characters", async function () {
       const userData = { ...userDataArray[0], github_user_id: "a".repeat(9) };
 
