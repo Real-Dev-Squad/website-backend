@@ -122,8 +122,34 @@ const addGroupRoleToMember = async (req, res) => {
   }
 };
 
+const migrateDiscordRole = async (req, res) => {
+  try {
+    const data = await discordRolesModel.migrateDiscordRole();
+    return res.status(data.status).json({
+      message: data.message,
+    });
+  } catch (err) {
+    logger.error(`Error while updating the Discord role: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const migrateGroupRoleToMember = async (req, res) => {
+  try {
+    const data = await discordRolesModel.migrateGroupRoleToMember();
+    return res.status(data.status).json({
+      message: data.message,
+    });
+  } catch (err) {
+    logger.error(`Error while updating the role member: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   createGroupRole,
   getAllGroupRoles,
   addGroupRoleToMember,
+  migrateDiscordRole,
+  migrateGroupRoleToMember,
 };
