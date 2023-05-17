@@ -154,15 +154,15 @@ function mapDiscordMembersDataAndSyncRole(allUsers, discordMembers) {
       const user = doc.data();
 
       if (user.roles.archived) {
-        const roles = user.roles ? { ...user.roles, inDiscord: false } : { inDiscord: false };
+        const roles = user.roles ? { ...user.roles, in_discord: false } : { in_discord: false };
         doc.ref.update({ roles });
       } else if (user.discordId) {
         const discordUserData = discordMembers.find((item) => item.user.id === user.discordId);
         if (discordUserData) {
-          const roles = user.roles ? { ...user.roles, inDiscord: true } : { inDiscord: true };
+          const roles = user.roles ? { ...user.roles, in_discord: true } : { in_discord: true };
           doc.ref.update({ roles, joined_discord: discordUserData.joined_at });
         } else {
-          const roles = user.roles ? { ...user.roles, inDiscord: false } : { inDiscord: false };
+          const roles = user.roles ? { ...user.roles, in_discord: false } : { in_discord: false };
           doc.ref.update({ roles });
         }
       }
