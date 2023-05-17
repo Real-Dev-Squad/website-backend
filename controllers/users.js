@@ -5,13 +5,13 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
-const { fetch } = require("../utils/fetch");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
-const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
+const { getPaginationLink, getUsernamesFromPRs, mapDiscordMembersDataAndSyncRole } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+const jwt = require("jsonwebtoken");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -462,6 +462,38 @@ const filterUsers = async (req, res) => {
   }
 };
 
+/*
+ * R
+ *
+ *
+ */
+const DISCORD_BASE_URL = "https://553e-49-36-233-201.ngrok.io";
+// config.get("services.discordBot.baseUrl");
+
+const syncInDiscordRole = async (req, res) => {
+  try {
+    const authToken = jwt.sign({}, config.get("botToken.botPrivateKey"), {
+      algorithm: "RS256",
+    });
+
+    const response = await fetch(`${DISCORD_BASE_URL}/discord-members`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    const discordMembers = await response.json();
+
+    const allUsers = await userQuery.getAllUsers();
+    mapDiscordMembersDataAndSyncRole(allUsers, discordMembers);
+
+    return res.json({ message: "Synced with discord members " });
+  } catch (error) {
+    logger.error(`Error while fetching all users: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -481,4 +513,5 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
+  syncInDiscordRole,
 };

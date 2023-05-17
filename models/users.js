@@ -421,6 +421,22 @@ const getUsersBasedOnFilter = async (query) => {
   return [];
 };
 
+/**
+ * Fetch all users
+ *
+ * @return @return {Promise<users>}
+ */
+
+const getAllUsers = async () => {
+  try {
+    const usersRef = await userModel.get();
+    return usersRef;
+  } catch (err) {
+    logger.error("Error retrieving users data with roles of inDiscord", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -436,4 +452,5 @@ module.exports = {
   getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
+  getAllUsers,
 };

@@ -11,7 +11,8 @@ const discordRolesModel = require("../models/discordactions");
  * @param res {Object} - Express response object
  */
 
-const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
+const DISCORD_BASE_URL = "";
+// config.get("services.discordBot.baseUrl");
 
 const createGroupRole = async (req, res) => {
   try {
