@@ -1039,15 +1039,6 @@ describe("Users", function () {
   });
 
   describe("POST /users/migrate", function () {
-    beforeEach(async function () {
-      superUserId = await addUser(superUser);
-      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-    });
-
-    afterEach(async function () {
-      await cleanDb();
-    });
-
     it("Should return 401 when user is unauthorize", function (done) {
       chai
         .request(app)
