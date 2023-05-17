@@ -20,7 +20,6 @@ const taskData = require("../fixtures/tasks/tasks")();
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
-// eslint-disable-next-line mocha/no-skipped-tests
 describe("Test Progress Updates API for Tasks", function () {
   afterEach(async function () {
     await cleanDb();
