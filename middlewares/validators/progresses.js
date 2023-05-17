@@ -50,9 +50,13 @@ const validateCreateProgressRecords = async (req, res, next) => {
 const validateGetProgressRecordsQuery = async (req, res, next) => {
   const schema = joi
     .object({
-      type: joi.string().valid("user", "task").optional().messages({
-        "any.only": "Type field is restricted to either 'user' or 'task'.",
-      }),
+      type: joi
+        .string()
+        .valid(...VALID_PROGRESS_TYPES)
+        .optional()
+        .messages({
+          "any.only": "Type field is restricted to either 'user' or 'task'.",
+        }),
       userId: joi.string().optional().allow("").messages({
         "string.base": "userId must be a string",
       }),
@@ -101,9 +105,13 @@ const validateGetRangeProgressRecordsParams = async (req, res, next) => {
 
 const validateGetDayProgressParams = async (req, res, next) => {
   const schema = joi.object({
-    type: joi.string().valid("user", "task").required().messages({
-      "any.only": "Type field is restricted to either 'user' or 'task'.",
-    }),
+    type: joi
+      .string()
+      .valid(...VALID_PROGRESS_TYPES)
+      .required()
+      .messages({
+        "any.only": "Type field is restricted to either 'user' or 'task'.",
+      }),
     typeId: joi.string().required(),
     date: joi.date().iso().required(),
   });
