@@ -102,7 +102,7 @@ describe("users", function () {
 
     it("should update the github_id in the user collection", async function () {
       const userData = userDataArray[0];
-      userData.github_user_id = "Yash Sinha";
+      userData.github_id = "Yash Sinha";
 
       // Add the user the first time
       const { userId } = await users.addOrUpdate(userData);

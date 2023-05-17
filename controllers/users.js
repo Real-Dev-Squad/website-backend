@@ -495,12 +495,14 @@ const migrate = async (req, res) => {
       await batchWrite.commit();
     }
 
-    return res.send({
-      statusCode: 201,
+    return res.staus(200).json({
+      statusCode: 200,
       message: "All Users github_user_id added successfully",
     });
   } catch (error) {
-    return res.status(500).send("Internal server error");
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
   }
 };
 
