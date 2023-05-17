@@ -87,9 +87,78 @@ const addGroupRoleToMember = async (roleData) => {
   }
 };
 
+const migrateGroupRoleToMember = async () => {
+  try {
+    const batch = firestore.batch();
+    const model = await memberRoleModel.get();
+    model.forEach((doc) => {
+      const data = doc.data();
+
+      if (data.roleid !== undefined && data.userid !== undefined) {
+        const updatedData = {
+          date: data.date,
+          roleId: data.roleid,
+          userId: data.userid,
+        };
+        batch.set(doc.ref, updatedData);
+      }
+    });
+    await batch.commit();
+
+    if (batch._ops.length === 0) {
+      return { status: 204, message: "No documents were updated." };
+    } else if (batch._ops.length > 100) {
+      logger.info(
+        `Warning: More than 100 Member group roles documents to update. The max limit permissible is 500. Refer https://github.com/Real-Dev-Squad/website-backend/issues/890 for more details.`
+      );
+    }
+    return { status: 200, message: "Member group roles updated Successfully." };
+  } catch (err) {
+    logger.error("Error in updating Member group roles", err);
+    return { status: 500, message: "Member group roles couldn't be updated Successfully." };
+  }
+};
+
+const migrateDiscordRole = async () => {
+  try {
+    const batch = firestore.batch();
+    const model = await discordRoleModel.get();
+
+    model.forEach((doc) => {
+      const data = doc.data();
+
+      if (data.roleid !== undefined && data.rolename !== undefined) {
+        const updatedData = {
+          createdBy: data.createdBy,
+          date: data.date,
+          roleId: data.roleid,
+          roleName: data.rolename,
+        };
+        batch.set(doc.ref, updatedData);
+      }
+    });
+
+    await batch.commit();
+
+    if (batch._ops.length === 0) {
+      return { status: 204, message: "No documents were updated." };
+    } else if (batch._ops.length > 100) {
+      logger.info(
+        `Warning: More than 100 Discord roles documents to update. The max limit permissible is 500. Refer https://github.com/Real-Dev-Squad/website-backend/issues/890 for more details.`
+      );
+    }
+    return { status: 200, message: "Discord roles updated Successfully." };
+  } catch (err) {
+    logger.error("Error in updating Discord roles", err);
+    return { status: 500, message: "Discord roles couldn't be updated Successfully." };
+  }
+};
+
 module.exports = {
   createNewRole,
   getAllGroupRoles,
   addGroupRoleToMember,
   isGroupRoleExists,
+  migrateDiscordRole,
+  migrateGroupRoleToMember,
 };
