@@ -67,6 +67,7 @@ const addOrUpdate = async (userData, userId = null) => {
     throw err;
   }
 };
+
 const addJoinData = async (userData) => {
   try {
     await joinModel.add(userData);
@@ -79,6 +80,7 @@ const addJoinData = async (userData) => {
     throw err;
   }
 };
+
 const getJoinData = async (userId) => {
   try {
     const userData = [];

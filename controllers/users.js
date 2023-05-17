@@ -467,7 +467,8 @@ const filterUsers = async (req, res) => {
 // one time script function to perform the migration - adding github_user_id field to the document
 const migrate = async (req, res) => {
   const authToken = `${config.get("githubOauth.clientId")}:${config.get("githubOauth.clientSecret")}`;
-  const base64 = Buffer.from(`${authToken}`, "binary").toString("base64");
+  // converting the `authToken` string into Base64 format
+  const encodedToken = Buffer.from(`${authToken}`, "binary").toString("base64");
   try {
     // Fetch user data from GitHub API for each document in the users collection
     // divided by 500 because firestore api guarantee that we can process in batch of 500.
@@ -486,7 +487,7 @@ const migrate = async (req, res) => {
             .get(`https://api.github.com/users/${githubUsername}`, {
               headers: {
                 "Content-Type": "application/json",
-                auth: `Bearer ${base64}`,
+                auth: `Bearer ${encodedToken}`,
               },
             })
             .then((response) => {
