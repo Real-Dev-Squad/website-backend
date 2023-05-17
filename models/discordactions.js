@@ -47,9 +47,9 @@ const getAllGroupRoles = async () => {
  * @returns {Promise<discordRoleModel|Object>}
  */
 
-const isGroupRoleExists = async (rolename) => {
+const isGroupRoleExists = async (roleName) => {
   try {
-    const alreadyIsRole = await discordRoleModel.where("rolename", "==", rolename).limit(1).get();
+    const alreadyIsRole = await discordRoleModel.where("roleName", "==", roleName).limit(1).get();
     if (!alreadyIsRole.empty) {
       const oldRole = [];
       alreadyIsRole.forEach((role) => oldRole.push(role.data()));
@@ -70,8 +70,8 @@ const isGroupRoleExists = async (rolename) => {
 const addGroupRoleToMember = async (roleData) => {
   try {
     const alreadyHasRole = await memberRoleModel
-      .where("roleid", "==", roleData.roleid)
-      .where("userid", "==", roleData.userid)
+      .where("roleId", "==", roleData.roleId)
+      .where("userId", "==", roleData.userId)
       .limit(1)
       .get();
     if (!alreadyHasRole.empty) {

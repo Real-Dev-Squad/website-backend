@@ -87,11 +87,11 @@ describe("discordactions", function () {
     it("should return true if role doesn't exist in the database", async function () {
       const result = await isGroupRoleExists("Test Role");
       expect(result.wasSuccess).to.equal(true);
-      expect(getStub.calledOnceWith("rolename", "==", "Test Role")).to.equal(false);
+      expect(getStub.calledOnceWith("roleName", "==", "Test Role")).to.equal(false);
     });
 
     it("should return false if role already exists in the database", async function () {
-      const existingRole = { rolename: "Test Role" };
+      const existingRole = { roleName: "Test Role" };
       const callbackFunction = (role) => {
         const roleData = role.data();
         existingRole.push(roleData);
@@ -107,7 +107,7 @@ describe("discordactions", function () {
       const errorCallback = sinon.stub();
       const result = await isGroupRoleExists("Test Role");
       expect(result.wasSuccess).to.equal(true);
-      expect(getStub.calledOnceWith("rolename", "==", "Test Role")).to.equal(false);
+      expect(getStub.calledOnceWith("roleName", "==", "Test Role")).to.equal(false);
       expect(errorCallback.calledOnce).to.equal(false);
     });
 

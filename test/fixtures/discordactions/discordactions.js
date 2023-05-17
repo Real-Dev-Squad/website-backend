@@ -5,12 +5,12 @@ const groupData = [
 ];
 
 const roleData = {
-  roleid: "test-role-id",
-  userid: "test-user-id",
+  roleId: "test-role-id",
+  userId: "test-user-id",
 };
 
 const existingRole = {
-  roleData: { roleid: "test-role-id", userid: "test-user-id" },
+  roleData: { roleId: "test-role-id", userId: "test-user-id" },
   wasSuccess: false,
 };
 

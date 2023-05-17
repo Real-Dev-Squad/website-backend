@@ -15,9 +15,9 @@ const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
 const createGroupRole = async (req, res) => {
   try {
-    const rolename = `group-${req.body.rolename}`;
+    const roleName = `group-${req.body.roleName}`;
 
-    const { wasSuccess } = await discordRolesModel.isGroupRoleExists(rolename);
+    const { wasSuccess } = await discordRolesModel.isGroupRoleExists(roleName);
 
     if (!wasSuccess) {
       return res.status(400).json({
@@ -25,11 +25,11 @@ const createGroupRole = async (req, res) => {
       });
     }
     const dataForDiscord = {
-      rolename,
+      roleName,
       mentionable: true,
     };
     const groupRoleData = {
-      rolename,
+      roleName,
       createdBy: req.userData.id,
       date: admin.firestore.Timestamp.fromDate(new Date()),
     };
@@ -44,7 +44,7 @@ const createGroupRole = async (req, res) => {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
     }).then((response) => response.json());
 
-    groupRoleData.roleid = responseForCreatedRole.id;
+    groupRoleData.roleId = responseForCreatedRole.id;
 
     const { id } = await discordRolesModel.createNewRole(groupRoleData);
     return res.status(201).json({

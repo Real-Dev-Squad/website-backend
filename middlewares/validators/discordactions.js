@@ -2,7 +2,7 @@ const Joi = require("joi");
 
 const validateGroupRoleBody = async (req, res, next) => {
   const schema = Joi.object({
-    rolename: Joi.string().trim().required(),
+    roleName: Joi.string().trim().required(),
   });
 
   try {
@@ -15,8 +15,8 @@ const validateGroupRoleBody = async (req, res, next) => {
 };
 const validateMemberRoleBody = async (req, res, next) => {
   const schema = Joi.object({
-    userid: Joi.string().trim().required(),
-    roleid: Joi.string().trim().required(),
+    userId: Joi.string().trim().required(),
+    roleId: Joi.string().trim().required(),
   });
 
   try {
