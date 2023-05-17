@@ -428,11 +428,11 @@ const getUsersBasedOnFilter = async (query) => {
       });
     });
 
-    return filteredUsers;
+    return filteredUsers.filter((user) => !user.roles?.archived);
   }
-  if (verifiedQuery) {
+  if (verifiedQuery === "true") {
     const filteredUsers = [];
-    const snapshot = await userModel.orderBy("discordId").get();
+    const snapshot = await userModel.where("discordId", "!=", null).get();
     snapshot.forEach((doc) => {
       filteredUsers.push({
         id: doc.id,
@@ -440,7 +440,7 @@ const getUsersBasedOnFilter = async (query) => {
       });
     });
 
-    return filteredUsers;
+    return filteredUsers.filter((user) => !user.roles?.archived);
   }
   return [];
 };
