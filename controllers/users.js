@@ -495,7 +495,12 @@ const migrate = async (req, res) => {
               batchWrite.update(userDoc.ref, { github_user_id: `${githubUserId}` });
             })
             .catch((error) => {
-              logger.error(error);
+              if (error.response && error.response.status === 404) {
+                logger.error(`Error: github_user_id not found for ${githubUsername}`);
+              } else {
+                // Other error occurred
+                logger.error("An error occurred at axios.get:", error);
+              }
             })
         );
       }
