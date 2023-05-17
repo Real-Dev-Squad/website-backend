@@ -495,8 +495,7 @@ const migrate = async (req, res) => {
       await batchWrite.commit();
     }
 
-    return res.staus(200).json({
-      statusCode: 200,
+    return res.status(200).json({
       message: "All Users github_user_id added successfully",
     });
   } catch (error) {
