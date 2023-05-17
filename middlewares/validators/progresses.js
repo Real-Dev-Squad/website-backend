@@ -1,14 +1,20 @@
 const joi = require("joi");
+const { VALID_PROGRESS_TYPES } = require("../../constants/progresses");
 
 const validateCreateProgressRecords = async (req, res, next) => {
   const baseSchema = joi
     .object()
     .strict()
     .keys({
-      type: joi.string().trim().valid("user", "task").required().messages({
-        "any.required": "Required field 'type' is missing.",
-        "any.only": "Type field is restricted to either 'user' or 'task'.",
-      }),
+      type: joi
+        .string()
+        .trim()
+        .valid(...VALID_PROGRESS_TYPES)
+        .required()
+        .messages({
+          "any.required": "Required field 'type' is missing.",
+          "any.only": "Type field is restricted to either 'user' or 'task'.",
+        }),
       completed: joi.string().trim().required().messages({
         "any.required": "Required field 'completed' is missing.",
         "string.trim": "completed must not have leading or trailing whitespace",
