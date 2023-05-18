@@ -1,7 +1,7 @@
 const fireStore = require("../utils/firestore");
 const trackedProgressesCollection = fireStore.collection("trackedProgresses");
 
-const buildQueryForPostingTrackedProgress = (reqBodyParams) => {
+const buildQueryToCheckIfDocExists = (reqBodyParams) => {
   const { userId, taskId } = reqBodyParams;
   if (userId) {
     return trackedProgressesCollection.where("userId", "==", userId);
@@ -10,4 +10,4 @@ const buildQueryForPostingTrackedProgress = (reqBodyParams) => {
   }
 };
 
-module.exports = { buildQueryForPostingTrackedProgress };
+module.exports = { buildQueryToCheckIfDocExists };
