@@ -122,6 +122,10 @@ const addGroupRoleToMember = async (req, res) => {
   }
 };
 
+/**
+ * changes the schema of the documents - member-group-roles
+ * @param res {Object} - Express response object
+ */
 const migrateDiscordRole = async (req, res) => {
   try {
     const data = await discordRolesModel.migrateDiscordRole();
@@ -134,6 +138,10 @@ const migrateDiscordRole = async (req, res) => {
   }
 };
 
+/**
+ * changes the schema of the documents - discord-roles
+ * @param res {Object} - Express response object
+ */
 const migrateGroupRoleToMember = async (req, res) => {
   try {
     const data = await discordRolesModel.migrateGroupRoleToMember();

@@ -87,6 +87,10 @@ const addGroupRoleToMember = async (roleData) => {
   }
 };
 
+/**
+ *
+ * @returns {Promise<Object>}
+ */
 const migrateGroupRoleToMember = async () => {
   try {
     const batch = firestore.batch();
@@ -119,6 +123,10 @@ const migrateGroupRoleToMember = async () => {
   }
 };
 
+/**
+ *
+ * @returns {Promise<Object>}
+ */
 const migrateDiscordRole = async () => {
   try {
     const batch = firestore.batch();
