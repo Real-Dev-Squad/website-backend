@@ -43,6 +43,7 @@ describe("Members", function () {
           if (err) {
             return done(err);
           }
+
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("No member found");
