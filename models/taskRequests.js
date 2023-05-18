@@ -101,14 +101,9 @@ const addOrUpdate = async (taskId, userId) => {
     }
 
     const newTaskRequest = {
-      isNoteworthy: taskData.isNoteworthy,
-      priority: taskData.priority,
-      purpose: taskData.purpose || "",
       requestors: [userId],
       status: TASK_REQUEST_STATUS.WAITING,
       taskId,
-      title: taskData.title,
-      type: taskData.type,
     };
 
     await taskRequestsCollection.add(newTaskRequest);
@@ -152,7 +147,7 @@ const approveTaskRequest = async (taskRequestId, userId) => {
 
     const updatedTaskRequest = {
       ...taskRequest.data(),
-      approvedTo: user.username,
+      approvedTo: user.id,
       status: TASK_REQUEST_STATUS.APPROVED,
     };
 

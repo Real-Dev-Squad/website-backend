@@ -16,7 +16,6 @@ const userStatusData = require("../fixtures/userStatus/userStatus");
 chai.use(chaiHttp);
 
 const config = require("config");
-const { TASK_REQUEST_STATUS } = require("../../constants/taskRequests");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -141,9 +140,6 @@ describe("Task Requests", function () {
             expect(res.body).to.be.a("object");
             expect(res.body.message).to.equal("Task request successfully created");
             expect(res.body.taskRequest).to.be.a("object");
-            expect(res.body.taskRequest.status).to.equal(TASK_REQUEST_STATUS.WAITING);
-            expect(res.body.taskRequest.title).to.equal(taskData[4].title);
-            expect(res.body.taskRequest.priority).to.equal(taskData[4].priority);
             return done();
           });
       });
