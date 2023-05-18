@@ -1,14 +1,20 @@
 const joi = require("joi");
+const { VALID_PROGRESS_TYPES } = require("../../constants/progresses");
 
 const validateCreateProgressRecords = async (req, res, next) => {
   const baseSchema = joi
     .object()
     .strict()
     .keys({
-      type: joi.string().trim().valid("user", "task").required().messages({
-        "any.required": "Required field 'type' is missing.",
-        "any.only": "Type field is restricted to either 'user' or 'task'.",
-      }),
+      type: joi
+        .string()
+        .trim()
+        .valid(...VALID_PROGRESS_TYPES)
+        .required()
+        .messages({
+          "any.required": "Required field 'type' is missing.",
+          "any.only": "Type field is restricted to either 'user' or 'task'.",
+        }),
       completed: joi.string().trim().required().messages({
         "any.required": "Required field 'completed' is missing.",
         "string.trim": "completed must not have leading or trailing whitespace",
@@ -44,9 +50,13 @@ const validateCreateProgressRecords = async (req, res, next) => {
 const validateGetProgressRecordsQuery = async (req, res, next) => {
   const schema = joi
     .object({
-      type: joi.string().valid("user", "task").optional().messages({
-        "any.only": "Type field is restricted to either 'user' or 'task'.",
-      }),
+      type: joi
+        .string()
+        .valid(...VALID_PROGRESS_TYPES)
+        .optional()
+        .messages({
+          "any.only": "Type field is restricted to either 'user' or 'task'.",
+        }),
       userId: joi.string().optional().allow("").messages({
         "string.base": "userId must be a string",
       }),
@@ -92,8 +102,30 @@ const validateGetRangeProgressRecordsParams = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
+
+const validateGetDayProgressParams = async (req, res, next) => {
+  const schema = joi.object({
+    type: joi
+      .string()
+      .valid(...VALID_PROGRESS_TYPES)
+      .required()
+      .messages({
+        "any.only": "Type field is restricted to either 'user' or 'task'.",
+      }),
+    typeId: joi.string().required(),
+    date: joi.date().iso().required(),
+  });
+  try {
+    await schema.validateAsync(req.params, { abortEarly: false });
+    next();
+  } catch (error) {
+    logger.error(`Error validating payload: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
 module.exports = {
   validateCreateProgressRecords,
   validateGetProgressRecordsQuery,
   validateGetRangeProgressRecordsParams,
+  validateGetDayProgressParams,
 };
