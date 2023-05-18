@@ -1,5 +1,6 @@
 const joi = require("joi");
 const { USER_STATUS } = require("../../constants/users");
+const ROLES = require("../../constants/roles");
 
 const updateUser = async (req, res, next) => {
   const schema = joi
@@ -172,7 +173,7 @@ async function validateUserQueryParams(req, res, next) {
           joi.array().items(joi.string().valid("IDLE", "OOO", "ACTIVE"))
         )
         .optional(),
-      role: joi.string().valid("in_discord", "member").optional(),
+      role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD).optional(),
       verified: joi.string().optional(),
     })
     .messages({
