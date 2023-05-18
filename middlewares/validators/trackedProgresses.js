@@ -1,14 +1,20 @@
 const joi = require("joi");
+const { VALID_PROGRESS_TYPES } = require("../../constants/progresses");
 
 const validateCreateTrackedProgressRecords = async (req, res, next) => {
   const baseSchema = joi
     .object()
     .strict()
     .keys({
-      type: joi.string().trim().valid("user", "task").required().messages({
-        "any.required": "Required field 'type' is missing.",
-        "any.only": "Type field is restricted to either 'user' or 'task'.",
-      }),
+      type: joi
+        .string()
+        .trim()
+        .valid()
+        .required(...VALID_PROGRESS_TYPES)
+        .messages({
+          "any.required": "Required field 'type' is missing.",
+          "any.only": "Type field is restricted to either 'user' or 'task'.",
+        }),
       currentlyTracked: joi.boolean().required().messages({
         "any.required": "Required field 'currentlyTracked' is missing.",
         "boolean.base": "currentlyTracked field must be a boolean value.",
