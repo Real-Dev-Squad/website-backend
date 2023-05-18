@@ -360,8 +360,8 @@ const getRdsUserInfoByGitHubUsername = async (githubUsername) => {
  * @param {Array} query.levelNumber - Array of levelNumbers to filter the users on
  * @param {Array} query.tagId - Array of tagIds to filter the users on
  * @param {Array} query.state - Array of states to filter the users on
- * @param {String} query.role - filter the users on
- * @param {String} query.verified - filter the users on
+ * @param {String} query.role - filter the users on role
+ * @param {String} query.verified - filter the users on verified i.e, discordId data
  * @return {Promise<Array>} - Array of user documents that match the filter criteria
  */
 
@@ -415,8 +415,7 @@ const getUsersBasedOnFilter = async (query) => {
     return filteredUserDocs;
   }
 
-  const roleQuery = query.role;
-  const verifiedQuery = query.verified;
+  const { role: roleQuery, verified: verifiedQuery } = query;
 
   if (roleQuery) {
     const filteredUsers = [];
