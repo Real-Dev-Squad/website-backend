@@ -184,7 +184,9 @@ describe("Tasks", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("task returned successfully");
-          expect(res.body.taskData).to.be.a("object");
+          expect(res.body.task).to.be.a("object");
+          expect(res.body.task.dependsOn).to.be.a("array");
+
           return done();
         });
     });
@@ -197,7 +199,7 @@ describe("Tasks", function () {
             return done(err);
           }
 
-          expect(res.body.taskData).to.have.property("isCollapsed");
+          expect(res.body.task).to.have.property("isCollapsed");
           return done();
         });
     });
