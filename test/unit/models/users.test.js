@@ -89,7 +89,7 @@ describe("users", function () {
     });
   });
 
-  describe("brew install redis", function () {
+  describe(" search users API: getUsersBasedOnFilter", function () {
     it("should return an empty array if no query is provided", async function () {
       const result = await users.getUsersBasedOnFilter({});
       expect(result).to.deep.equal([]);
