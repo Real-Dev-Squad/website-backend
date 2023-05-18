@@ -94,8 +94,8 @@ const addGroupRoleToMember = async (roleData) => {
 const migrateGroupRoleToMember = async () => {
   try {
     const batch = firestore.batch();
-    const model = await memberRoleModel.get();
-    model.forEach((doc) => {
+    const documentList = await memberRoleModel.get();
+    documentList.forEach((doc) => {
       const data = doc.data();
 
       if (data.roleid !== undefined && data.userid !== undefined) {
@@ -130,9 +130,8 @@ const migrateGroupRoleToMember = async () => {
 const migrateDiscordRole = async () => {
   try {
     const batch = firestore.batch();
-    const model = await discordRoleModel.get();
-
-    model.forEach((doc) => {
+    const documentList = await discordRoleModel.get();
+    documentList.forEach((doc) => {
       const data = doc.data();
 
       if (data.roleid !== undefined && data.rolename !== undefined) {
