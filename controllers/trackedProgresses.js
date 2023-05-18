@@ -25,4 +25,10 @@ const createTrackedProgressController = async (req, res) => {
   }
 };
 
-module.exports = { createTrackedProgressController };
+const updateTrackedProgressController = async (req, res) => {
+  return res.status(200).json({
+    message: "Update tracked progress successfully.",
+  });
+};
+
+module.exports = { createTrackedProgressController, updateTrackedProgressController };
