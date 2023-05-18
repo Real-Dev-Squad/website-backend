@@ -13,12 +13,23 @@ const validateCreateTrackedProgressRecords = async (req, res, next) => {
         "any.required": "Required field 'currentlyTracked' is missing.",
         "boolean.base": "currentlyTracked field must be a boolean value.",
       }),
-      frequency: joi.number().integer().positive().required().messages({
-        "any.required": "Required field 'frequency' is missing.",
-        "number.base": "'frequency' field must be a number",
-        "number.integer": "'frequency' field must be an integer",
-        "number.positive": "'frequency' field must be a positive integer",
-      }),
+      frequency: joi
+        .number()
+        .integer()
+        .positive()
+        .when("type", {
+          is: "user",
+          then: joi.number().equal(1).messages({
+            "number.equal": "'frequency' field must be equal to 1",
+          }),
+          otherwise: joi.optional(),
+        })
+        .messages({
+          "number.base": "'frequency' field must be a number",
+          "number.integer": "'frequency' field must be an integer",
+          "number.positive": "'frequency' field must be a positive integer",
+          "any.only": "'frequency' field must be equal to 1 for type 'user'",
+        }),
       ...(req.body.type === "task"
         ? {
             taskId: joi.string().trim().required().messages({
