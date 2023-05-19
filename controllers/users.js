@@ -11,7 +11,9 @@ const { getPaginationLink, getUsernamesFromPRs, mapDiscordMembersDataAndSyncRole
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
-const jwt = require("jsonwebtoken");
+// const jwt = require("jsonwebtoken");
+const Queue = require("bull");
+const { REDIS_PORT, REDIS_URI } = require("../redisCredentials");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -467,24 +469,37 @@ const filterUsers = async (req, res) => {
  *
  *
  */
-const DISCORD_BASE_URL = "https://553e-49-36-233-201.ngrok.io";
+// const DISCORD_BASE_URL = "https://553e-49-36-233-201.ngrok.io";
 // config.get("services.discordBot.baseUrl");
+
+const syncQueue = new Queue("syncQueue", {
+  redis: {
+    port: REDIS_PORT,
+    host: REDIS_URI,
+  },
+});
 
 const syncInDiscordRole = async (req, res) => {
   try {
-    const authToken = jwt.sign({}, config.get("botToken.botPrivateKey"), {
-      algorithm: "RS256",
-    });
+    // const authToken = jwt.sign({}, config.get("botToken.botPrivateKey"), {
+    //   algorithm: "RS256",
+    // });
 
-    const response = await fetch(`${DISCORD_BASE_URL}/discord-members`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
-      },
-    });
-    const discordMembers = await response.json();
+    // const response = await fetch(`${DISCORD_BASE_URL}/discord-members`, {
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${authToken}`,
+    //   },
+    // });
+    const discordMembers = [];
+    // await response.json();
 
     const allUsers = await userQuery.getAllUsers();
+    allUsers.forEach((doc) => {
+      const user = doc.data();
+      syncQueue.add({ user });
+    });
+
     mapDiscordMembersDataAndSyncRole(allUsers, discordMembers);
 
     return res.json({ message: "Synced with discord members " });

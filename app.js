@@ -11,6 +11,9 @@ const AppMiddlewares = require("./middlewares");
 // import routes
 const indexRouter = require("./routes/index");
 
+// processors
+require("./processors/index");
+
 const app = express();
 
 // Add Middlewares, routes
