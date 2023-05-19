@@ -4,6 +4,7 @@ const ROLES = {
   APPOWNER: "app_owner",
   MEMBER: "member",
   ARCHIVED: "archived",
+  INDISCORD: "in_discord",
 };
 
 module.exports = ROLES;
