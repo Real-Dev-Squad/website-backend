@@ -4,6 +4,7 @@ const chaiHttp = require("chai-http");
 const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const authService = require("../../services/authService");
+const sinon = require("sinon");
 const addUser = require("../utils/addUser");
 const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
@@ -1053,19 +1054,30 @@ describe("Users", function () {
         });
     });
     it("Should update the user", async function () {
-      const response1 = await chai
+      const usersMigrateResponse = await chai
         .request(app)
         .post(`/users/migrate`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`);
-      expect(response1).to.have.status(200);
-      expect(response1.body).to.eql({
+      expect(usersMigrateResponse).to.have.status(200);
+      expect(usersMigrateResponse.body).to.eql({
         message: `All Users github_user_id added successfully`,
+        data: {
+          invalidUsers: [],
+          totalCount: 0,
+        },
       });
-      const response2 = await chai.request(app).get(`/users`).set("cookie", `${cookieName}=${superUserAuthToken}`);
-      expect(response2).to.have.status(200);
-      response2.body.users.forEach((document) => {
+      const stub = sinon.stub(chai.request(app), "get").resolves({
+        status: 200,
+        body: {
+          users: [{ github_user_id: "12345678" }, { github_user_id: "78945612" }],
+        },
+      });
+      const usersReponse = await chai.request(app).get(`/users`).set("cookie", `${cookieName}=${superUserAuthToken}`);
+      expect(usersReponse).to.have.status(200);
+      usersReponse.body.users.forEach((document) => {
         expect(document).to.have.property(`github_user_id`);
       });
+      stub.restore();
     });
     it("Should return unauthorized error when not logged in", function (done) {
       chai

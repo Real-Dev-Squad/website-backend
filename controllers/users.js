@@ -466,9 +466,11 @@ const filterUsers = async (req, res) => {
 
 // one time script function to perform the migration - adding github_user_id field to the document
 const migrate = async (req, res) => {
-  const authToken = `${config.get("githubOauth.clientId")}:${config.get("githubOauth.clientSecret")}`;
+  const authToken = `${config.get("githubOauth.patToken")}`;
   // converting the `authToken` string into Base64 format
-  const encodedToken = Buffer.from(`${authToken}`, "binary").toString("base64");
+  const encodedToken = Buffer.from(`${authToken}`).toString("base64");
+  const usernameNotFound = [];
+  let countUserNotFound = 0;
   try {
     // Fetch user data from GitHub API for each document in the users collection
     // divided by 500 because firestore api guarantee that we can process in batch of 500.
@@ -481,6 +483,7 @@ const migrate = async (req, res) => {
       const batchWrites = [];
       for (const userDoc of batchDocs) {
         const githubUsername = userDoc.data().github_id;
+        const userName = userDoc.data().github_display_name;
         batchWrite.update(userDoc.ref, { github_user_id: null });
         batchWrites.push(
           axios
@@ -496,7 +499,12 @@ const migrate = async (req, res) => {
             })
             .catch((error) => {
               if (error.response && error.response.status === 404) {
-                logger.error(`Error: github_user_id not found for ${githubUsername}`);
+                countUserNotFound++;
+                const userNotFound = {
+                  name: `${userName}`,
+                  username: `${githubUsername}`,
+                };
+                usernameNotFound.push(userNotFound);
               } else {
                 // Other error occurred
                 logger.error("An error occurred at axios.get:", error);
@@ -510,11 +518,14 @@ const migrate = async (req, res) => {
 
     return res.status(200).json({
       message: "All Users github_user_id added successfully",
+      data: {
+        invalidUsers: usernameNotFound,
+        totalCount: countUserNotFound,
+      },
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Internal Server Error",
-    });
+    logger.error(`Error while Updating all users: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 

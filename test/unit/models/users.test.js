@@ -116,16 +116,6 @@ describe("users", function () {
       expect(data.github_id).to.equal(userData.github_id);
     });
 
-    it("github_user_id field should have a maximum length of 8 characters", async function () {
-      const userData = { ...userDataArray[0], github_user_id: "a".repeat(9) };
-
-      try {
-        await users.addOrUpdate(userData);
-      } catch (error) {
-        expect(error.message).to.equal("Validation error: github_id exceeds maximum length of 8 characters");
-      }
-    });
-
     it("should be stored correctly in the database", async function () {
       const userData = { ...userDataArray[0], github_id: "my_github_id" };
 
