@@ -1067,7 +1067,10 @@ describe("Users", function () {
           totalCount: 0,
         },
       });
-      sinon.stub(controller, "migrate").returns(userData[0]);
+      sinon.stub(controller, "migrate").returns(userData[0]).resolves({
+        empty: true,
+        forEach: sinon.stub(),
+      });
       const usersReponse = await chai.request(app).get(`/users`).set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(usersReponse).to.have.status(200);
       usersReponse.body.users.forEach((document) => {
