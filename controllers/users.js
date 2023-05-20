@@ -466,10 +466,11 @@ const filterUsers = async (req, res) => {
 
 // one time script function to perform the migration - adding github_user_id field to the document
 const migrate = async (req, res) => {
+  // pat yet to be generated
   const authToken = `${config.get("githubOauth.patToken")}`;
   // converting the `authToken` string into Base64 format
   const encodedToken = Buffer.from(`${authToken}`).toString("base64");
-  const usernameNotFound = [];
+  const usersNotFound = [];
   let countUserNotFound = 0;
   try {
     // Fetch user data from GitHub API for each document in the users collection
@@ -500,11 +501,11 @@ const migrate = async (req, res) => {
             .catch((error) => {
               if (error.response && error.response.status === 404) {
                 countUserNotFound++;
-                const userNotFound = {
+                const invalidUsers = {
                   name: `${userName}`,
                   username: `${githubUsername}`,
                 };
-                usernameNotFound.push(userNotFound);
+                usersNotFound.push(invalidUsers);
               } else {
                 // Other error occurred
                 logger.error("An error occurred at axios.get:", error);
@@ -519,7 +520,7 @@ const migrate = async (req, res) => {
     return res.status(200).json({
       message: "All Users github_user_id added successfully",
       data: {
-        invalidUsers: usernameNotFound,
+        invalidUsers: usersNotFound,
         totalCount: countUserNotFound,
       },
     });
