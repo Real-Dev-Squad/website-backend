@@ -166,6 +166,7 @@ const getTrackedProgressController = async (req, res) => {
     if (error instanceof NotFound) {
       return res.status(404).json({
         message: error.message,
+        data: [],
       });
     }
     return res.status(500).json({
