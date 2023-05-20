@@ -7,14 +7,22 @@ const {
   buildQueryForFetchingDocsOfType,
   buildQueryForFetchingSpecificDoc,
 } = require("../utils/trackedProgresses");
-const { TYPE_MAP } = require("../constants/progresses");
 
-const createTrackedProgressDocument = async (reqBody) => {
-  const { userId, taskId, frequency } = reqBody;
-  // if not passed, the default frequency of 1 will be used as the frequency
-  if (!frequency) {
-    reqBody.frequency = 1;
-  }
+/**
+ * Creates a tracked progress document based on the provided data.
+ * If a document with the same userId and taskId already exists,
+ * a Conflict error is thrown.
+ *
+ * @param {Object} documentData - The data for creating the tracked progress document.
+ * @param {string} documentData.userId - The ID of the user associated with the tracked progress.
+ * @param {string} documentData.taskId - The ID of the task associated with the tracked progress.
+ * @param {number} [documentData.frequency=1] - The frequency of tracking (optional, default: 1).
+ * @param {boolean} documentData.marked - Indicates if the user/task is currently being marked for tracking.
+ * @returns {Object} - The created tracked progress document with additional ID and timestamps.
+ * @throws {Conflict} - If a document with the same userId and taskId already exists.
+ */
+const createTrackedProgressDocument = async (documentData) => {
+  const { userId, taskId } = documentData;
   await assertUserOrTaskExists({ userId, taskId });
   const query = buildQueryToCheckIfDocExists({ userId, taskId });
   const existingDocumentSnapshot = await query.get();
@@ -22,14 +30,32 @@ const createTrackedProgressDocument = async (reqBody) => {
     throw new Conflict("Resource is already being tracked.");
   }
   const timeNow = new Date().toISOString();
-  const docData = { ...reqBody, createdAt: timeNow, updatedAt: timeNow };
-  const { id } = await trackedProgressesCollection.add(docData);
-  return { id, ...docData };
+  // if not passed, the default frequency of 1 will be used as the frequency
+  if (!documentData.frequency) documentData.frequency = 1;
+  const docDataWithTimestamp = { ...documentData, createdAt: timeNow, updatedAt: timeNow };
+  const { id } = await trackedProgressesCollection.add(docDataWithTimestamp);
+  return { id, ...docDataWithTimestamp };
 };
+
+/**
+ * Updates a tracked progress document based on the provided request data.
+ * The document to update is determined by the type and typeId parameters from the request parameters.
+ * If the document is not found, a NotFound error is thrown.
+ *
+ * @param {Object} req - The request object containing the parameters and body data.
+ * @param {Object} req.params - The parameters extracted from the request URL.
+ * @param {string} req.params.type - The type of the tracked progress document (e.g., "user", "task").
+ * @param {string} req.params.typeId - The ID associated with the type (e.g., userId, taskId).
+ * @param {Object} req.body - The data to update the tracked progress document.
+ * @param {number} [req.body.frequency] - The frequency of tracking (optional).
+ * @param {boolean} [req.body.marked] - Indicates if the user/task is currently being marked for tracking.(optional).
+ * @returns {Object} - The updated tracked progress document with additional ID and merged data.
+ * @throws {NotFound} - If the tracked progress document is not found.
+ */
 
 const updateTrackedProgressDocument = async (req) => {
   const { type, typeId } = req.params;
-  const updatedData = { type, [TYPE_MAP[type]]: typeId };
+  const updatedData = { type, [`${type}Id`]: typeId };
   const query = buildQueryToCheckIfDocExists(updatedData);
   const existingDocumentSnapshot = await query.get();
   if (existingDocumentSnapshot.empty) {
@@ -42,16 +68,29 @@ const updateTrackedProgressDocument = async (req) => {
   return { id: docId, ...doc.data(), ...docData };
 };
 
+/**
+ * Retrieves tracked progress documents based on the provided query parameters.
+ *
+ * @param {Object} reqQuery - The query parameters for fetching tracked progress documents.
+ * @returns {Array} - An array of tracked progress documents matching the query parameters.
+ * @throws {NotFound} - If the tracked progress documents are not found.
+ */
 const getTrackedProgressDocuments = async (reqQuery) => {
   const query = buildQueryForFetchingDocsOfType(reqQuery);
   const docsData = await getProgressDocs(query);
   return docsData;
 };
 
+/**
+ * Retrieves a tracked progress document based on the provided path parameters.
+ *
+ * @param {Object} reqParams - The path parameters for fetching tracked progress documents.
+ * @returns {Object} - An tracked progress document matching the query parameters.
+ * @throws {NotFound} - If the tracked progress document is not found.
+ */
 const getTrackedProgressDocument = async (reqParams) => {
   const { type, typeId } = reqParams;
-  const actualTypeName = `${type}Id`;
-  await assertUserOrTaskExists({ [actualTypeName]: typeId });
+  await assertUserOrTaskExists({ [`${type}Id`]: typeId });
   const query = buildQueryForFetchingSpecificDoc(reqParams);
   const docsData = await getProgressDocs(query);
   return docsData[0];
