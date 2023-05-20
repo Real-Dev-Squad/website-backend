@@ -5,6 +5,8 @@ const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const authService = require("../../services/authService");
 const sinon = require("sinon");
+const passport = require("passport");
+const githubUserInfo = require("../fixtures/auth/githubUserInfo")();
 const addUser = require("../utils/addUser");
 const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
@@ -1066,18 +1068,15 @@ describe("Users", function () {
           totalCount: 0,
         },
       });
-      const stub = sinon.stub(chai.request(app), "get").resolves({
-        status: 200,
-        body: {
-          users: [{ github_user_id: "12345678" }, { github_user_id: "78945612" }],
-        },
+      sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+        callback(null, "accessToken", githubUserInfo[0]);
+        return (req, res, next) => {};
       });
       const usersReponse = await chai.request(app).get(`/users`).set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(usersReponse).to.have.status(200);
       usersReponse.body.users.forEach((document) => {
         expect(document).to.have.property(`github_user_id`);
       });
-      stub.restore();
     });
     it("Should return unauthorized error when not logged in", function (done) {
       chai
