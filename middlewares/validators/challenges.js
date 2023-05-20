@@ -17,6 +17,22 @@ const createChallenge = async (req, res, next) => {
   }
 };
 
+const subscribeToChallenge = async (req, res, next) => {
+  const schema = joi.object().strict().keys({
+    userId: joi.string().required(),
+    challengeId: joi.string().required(),
+  });
+
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error(`Error validating subscribeToChallenge payload : ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
 module.exports = {
   createChallenge,
+  subscribeToChallenge
 };
