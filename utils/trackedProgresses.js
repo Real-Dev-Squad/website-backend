@@ -1,5 +1,8 @@
+const { NotFound } = require("http-errors");
 const fireStore = require("../utils/firestore");
 const trackedProgressesCollection = fireStore.collection("trackedProgresses");
+const { RESPONSE_MESSAGES } = require("../constants/trackedProgresses");
+const { RESOURCE_NOT_FOUND } = RESPONSE_MESSAGES;
 
 /**
  * Builds a Firestore query to check if a document exists based on the provided query parameters.
@@ -53,4 +56,27 @@ const buildQueryForFetchingSpecificDoc = (queryParams) => {
   }
 };
 
-module.exports = { buildQueryToCheckIfDocExists, buildQueryForFetchingDocsOfType, buildQueryForFetchingSpecificDoc };
+/**
+ * Retrieves progress documents from Firestore based on the given query.
+ * @param {Query} query - A Firestore query object for fetching progress documents.
+ * @returns {Array.<Object>} An array of objects representing the retrieved tracked progress documents. Each object contains the document ID and its data.
+ * @throws {NotFound} If no progress documents are found based on the given query.
+ */
+const getTrackedProgressDocs = async (query) => {
+  const progressesDocs = await query.get();
+  if (!progressesDocs.size) {
+    throw new NotFound(RESOURCE_NOT_FOUND);
+  }
+  const docsData = [];
+  progressesDocs.forEach((doc) => {
+    docsData.push({ id: doc.id, ...doc.data() });
+  });
+  return docsData;
+};
+
+module.exports = {
+  buildQueryToCheckIfDocExists,
+  buildQueryForFetchingDocsOfType,
+  buildQueryForFetchingSpecificDoc,
+  getTrackedProgressDocs,
+};

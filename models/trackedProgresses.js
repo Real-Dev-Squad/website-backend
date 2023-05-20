@@ -1,12 +1,15 @@
 const { Conflict, NotFound } = require("http-errors");
 const fireStore = require("../utils/firestore");
 const trackedProgressesCollection = fireStore.collection("trackedProgresses");
-const { assertUserOrTaskExists, getProgressDocs } = require("../utils/progresses");
+const { assertUserOrTaskExists } = require("../utils/progresses");
 const {
   buildQueryToCheckIfDocExists,
   buildQueryForFetchingDocsOfType,
   buildQueryForFetchingSpecificDoc,
+  getTrackedProgressDocs,
 } = require("../utils/trackedProgresses");
+const { RESPONSE_MESSAGES } = require("../constants/trackedProgresses");
+const { RESOURCE_NOT_FOUND } = RESPONSE_MESSAGES;
 
 /**
  * Creates a tracked progress document based on the provided data.
@@ -59,7 +62,7 @@ const updateTrackedProgressDocument = async (req) => {
   const query = buildQueryToCheckIfDocExists(updatedData);
   const existingDocumentSnapshot = await query.get();
   if (existingDocumentSnapshot.empty) {
-    throw new NotFound("Resource not found.");
+    throw new NotFound(RESOURCE_NOT_FOUND);
   }
   const doc = existingDocumentSnapshot.docs[0];
   const docId = doc.id;
@@ -77,7 +80,7 @@ const updateTrackedProgressDocument = async (req) => {
  */
 const getTrackedProgressDocuments = async (reqQuery) => {
   const query = buildQueryForFetchingDocsOfType(reqQuery);
-  const docsData = await getProgressDocs(query);
+  const docsData = await getTrackedProgressDocs(query);
   return docsData;
 };
 
@@ -92,7 +95,7 @@ const getTrackedProgressDocument = async (reqParams) => {
   const { type, typeId } = reqParams;
   await assertUserOrTaskExists({ [`${type}Id`]: typeId });
   const query = buildQueryForFetchingSpecificDoc(reqParams);
-  const docsData = await getProgressDocs(query);
+  const docsData = await getTrackedProgressDocs(query);
   return docsData[0];
 };
 
