@@ -1,8 +1,12 @@
 const { Conflict, NotFound } = require("http-errors");
 const fireStore = require("../utils/firestore");
 const trackedProgressesCollection = fireStore.collection("trackedProgresses");
-const { assertUserOrTaskExists } = require("../utils/progresses");
-const { buildQueryToCheckIfDocExists } = require("../utils/trackedProgresses");
+const { assertUserOrTaskExists, getProgressDocs } = require("../utils/progresses");
+const {
+  buildQueryToCheckIfDocExists,
+  buildQueryForFetchingDocsOfType,
+  buildQueryForFetchingSpecificDoc,
+} = require("../utils/trackedProgresses");
 const { TYPE_MAP } = require("../constants/progresses");
 
 const createTrackedProgressDocument = async (reqBody) => {
@@ -38,4 +42,24 @@ const updateTrackedProgressDocument = async (req) => {
   return { id: docId, ...doc.data(), ...docData };
 };
 
-module.exports = { createTrackedProgressDocument, updateTrackedProgressDocument };
+const getTrackedProgressDocuments = async (reqQuery) => {
+  const query = buildQueryForFetchingDocsOfType(reqQuery);
+  const docsData = await getProgressDocs(query);
+  return docsData;
+};
+
+const getTrackedProgressDocument = async (reqParams) => {
+  const { type, typeId } = reqParams;
+  const actualTypeName = `${type}Id`;
+  await assertUserOrTaskExists({ [actualTypeName]: typeId });
+  const query = buildQueryForFetchingSpecificDoc(reqParams);
+  const docsData = await getProgressDocs(query);
+  return docsData[0];
+};
+
+module.exports = {
+  createTrackedProgressDocument,
+  updateTrackedProgressDocument,
+  getTrackedProgressDocuments,
+  getTrackedProgressDocument,
+};

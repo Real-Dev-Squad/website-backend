@@ -6,10 +6,14 @@ const { SUPERUSER } = require("../constants/roles");
 const {
   createTrackedProgressController,
   updateTrackedProgressController,
+  getTrackedProgressController,
+  getIndividualTrackedProgressController,
 } = require("../controllers/trackedProgresses");
 const {
   validateCreateTrackedProgressRecords,
   validateUpdateTrackedProgress,
+  validateGetTrackedProgress,
+  validateGetIndividualTrackedProgress,
 } = require("../middlewares/validators/trackedProgresses");
 
 router.post(
@@ -27,5 +31,9 @@ router.patch(
   validateUpdateTrackedProgress,
   updateTrackedProgressController
 );
+
+router.get("/", validateGetTrackedProgress, getTrackedProgressController);
+
+router.get("/:type/:typeId", validateGetIndividualTrackedProgress, getIndividualTrackedProgressController);
 
 module.exports = router;
