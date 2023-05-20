@@ -30,7 +30,7 @@ const buildQueryForFetchingDocsOfType = (queryParams) => {
   const { type, currentlyTracked } = queryParams;
   let query = trackedProgressesCollection.where("type", "==", type);
   if (currentlyTracked !== undefined) {
-    query = query.where("currentlyTracked", "==", currentlyTracked);
+    query = query.where("currentlyTracked", "==", JSON.parse(currentlyTracked));
   }
   return query;
 };
