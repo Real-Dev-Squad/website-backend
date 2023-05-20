@@ -105,8 +105,8 @@ const validateGetTrackedProgress = async (req, res, next) => {
         .messages({
           "any.only": "Type field is restricted to either 'user' or 'task'.",
         }),
-      marked: joi.boolean().optional().messages({
-        "boolean.base": "marked must be a boolean value.",
+      currentlyTracked: joi.boolean().optional().messages({
+        "boolean.base": "currentlyTracked must be a boolean value.",
       }),
     })
     .messages({
