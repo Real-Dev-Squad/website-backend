@@ -5,8 +5,7 @@ const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const authService = require("../../services/authService");
 const sinon = require("sinon");
-const passport = require("passport");
-const githubUserInfo = require("../fixtures/auth/githubUserInfo")();
+const controller = require("../../controllers/users");
 const addUser = require("../utils/addUser");
 const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
@@ -1068,10 +1067,7 @@ describe("Users", function () {
           totalCount: 0,
         },
       });
-      sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-        callback(null, "accessToken", githubUserInfo[0]);
-        return (req, res, next) => {};
-      });
+      sinon.stub(controller, "migrate").returns(userData[0]);
       const usersReponse = await chai.request(app).get(`/users`).set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(usersReponse).to.have.status(200);
       usersReponse.body.users.forEach((document) => {
