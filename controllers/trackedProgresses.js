@@ -204,6 +204,7 @@ const getTrackedProgressController = async (req, res) => {
  * @param {Express.Response} res - The Express response object.
  * @returns {Promise<void>} - A Promise that resolves when the response has been sent.
  */
+
 const getIndividualTrackedProgressController = async (req, res) => {
   try {
     const data = await getTrackedProgressDocument({ ...req.params });

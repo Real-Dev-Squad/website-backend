@@ -27,7 +27,7 @@ const buildQueryToCheckIfDocExists = (queryParams) => {
  * @returns {Firestore.Query} - A Firestore query for fetching tracked progress documents of a specific type.
  */
 const buildQueryForFetchingDocsOfType = (queryParams) => {
-  const { type, marked: currentlyTracked } = queryParams;
+  const { type, currentlyTracked } = queryParams;
   let query = trackedProgressesCollection.where("type", "==", type);
   if (currentlyTracked !== undefined) {
     query = query.where("currentlyTracked", "==", currentlyTracked);
