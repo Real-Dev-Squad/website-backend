@@ -67,15 +67,23 @@ describe.skip("Test the tracked Progress API", function () {
       expect(response.body).to.have.property("message").that.equals("Resource created successfully.");
       expect(response.body).to.have.property("data").that.is.an("object");
 
-      const data = response.body.data;
-      expect(data).to.have.keys(["id", "type", "userId", "currentlyTracked", "frequency", "createdAt", "updatedAt"]);
-      expect(data).to.have.property("id").that.is.a("string");
-      expect(data).to.have.property("type").that.equals("user");
-      expect(data).to.have.property("userId").that.equals(userId1);
-      expect(data).to.have.property("currentlyTracked").that.equals(true);
-      expect(data).to.have.property("frequency").that.equals(1);
-      expect(data).to.have.property("createdAt").that.is.a("string").and.satisfy(isISOString);
-      expect(data).to.have.property("updatedAt").that.is.a("string").and.satisfy(isISOString);
+      expect(response.body.data).to.have.all.keys([
+        "id",
+        "type",
+        "userId",
+        "currentlyTracked",
+        "frequency",
+        "createdAt",
+        "updatedAt",
+      ]);
+      const { id, type, userId, currentlyTracked, frequency, createdAt, updatedAt } = response.body.data;
+      expect(id).to.be.a("string");
+      expect(type).to.be.equal("user");
+      expect(userId).to.be.equal(userId1);
+      expect(currentlyTracked).to.be.equal(true);
+      expect(frequency).to.be.equal(1);
+      expect(createdAt).to.satisfy(isISOString);
+      expect(updatedAt).to.satisfy(isISOString);
     });
 
     it("throws 409 if tracked progress document already exists for the same user", async function () {
@@ -106,15 +114,23 @@ describe.skip("Test the tracked Progress API", function () {
       expect(response.body).to.have.property("message").that.equals("Resource created successfully.");
       expect(response.body).to.have.property("data").that.is.an("object");
 
-      const data = response.body.data;
-      expect(data).to.have.keys(["id", "type", "taskId", "currentlyTracked", "frequency", "createdAt", "updatedAt"]);
-      expect(data).to.have.property("id").that.is.a("string");
-      expect(data).to.have.property("type").that.equals("task");
-      expect(data).to.have.property("taskId").that.equals(taskId1);
-      expect(data).to.have.property("currentlyTracked").that.equals(true);
-      expect(data).to.have.property("frequency").that.equals(2);
-      expect(data).to.have.property("createdAt").that.is.a("string").and.satisfy(isISOString);
-      expect(data).to.have.property("updatedAt").that.is.a("string").and.satisfy(isISOString);
+      expect(response.body.data).to.have.all.keys([
+        "id",
+        "type",
+        "taskId",
+        "currentlyTracked",
+        "frequency",
+        "createdAt",
+        "updatedAt",
+      ]);
+      const { id, type, taskId, currentlyTracked, frequency, createdAt, updatedAt } = response.body.data;
+      expect(id).to.be.a("string");
+      expect(type).to.be.equal("task");
+      expect(taskId).to.be.equal(taskId1);
+      expect(currentlyTracked).to.be.equal(true);
+      expect(frequency).to.be.equal(2);
+      expect(createdAt).to.satisfy(isISOString);
+      expect(updatedAt).to.satisfy(isISOString);
     });
 
     it("throws 409 if tracked progress document already exists for the same task", async function () {
@@ -159,8 +175,9 @@ describe.skip("Test the tracked Progress API", function () {
         });
       expect(response).to.have.status(401);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("error").that.equals("Unauthorized");
-      expect(response.body).to.have.property("message").that.equals("Unauthenticated User");
+      expect(response.body).to.have.all.keys(["error", "message", "statusCode"]);
+      expect(response.body.error).to.be.equal("Unauthorized");
+      expect(response.body.message).to.be.equal("Unauthenticated User");
     });
 
     it("handles unauthorized user request who don't have super user permission", async function () {
@@ -174,8 +191,10 @@ describe.skip("Test the tracked Progress API", function () {
         });
       expect(response).to.have.status(401);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("error").that.equals("Unauthorized");
-      expect(response.body).to.have.property("message").that.equals("You are not authorized for this action.");
+      expect(response.body).to.have.all.keys(["error", "message", "statusCode"]);
+
+      expect(response.body.error).to.equal("Unauthorized");
+      expect(response.body.message).to.equals("You are not authorized for this action.");
     });
 
     it("handles no resource found with 404 if the task / user does not exist", async function () {
@@ -205,12 +224,23 @@ describe.skip("Test the tracked Progress API", function () {
       expect(response.body).to.have.property("message").that.equals("Resource updated successfully.");
       expect(response.body).to.have.property("data").that.is.an("object");
 
-      const data = response.body.data;
-      expect(data).to.have.keys(["id", "type", "userId", "currentlyTracked", "frequency", "createdAt", "updatedAt"]);
-      expect(data).to.have.property("id").that.is.a("string");
-      expect(data).to.have.property("type").that.equals("user");
-      expect(data).to.have.property("userId").that.equals(userId0);
-      expect(data).to.have.property("currentlyTracked").that.equals(false);
+      expect(response.body.data).to.have.all.keys([
+        "id",
+        "type",
+        "userId",
+        "currentlyTracked",
+        "frequency",
+        "createdAt",
+        "updatedAt",
+      ]);
+      const { id, type, userId, currentlyTracked, frequency, createdAt, updatedAt } = response.body.data;
+      expect(id).to.be.a("string");
+      expect(frequency).to.be.a("number");
+      expect(type).to.be.equal("user");
+      expect(userId).to.be.equal(userId0);
+      expect(currentlyTracked).to.be.equal(false);
+      expect(createdAt).to.satisfy(isISOString);
+      expect(updatedAt).to.satisfy(isISOString);
     });
 
     it("throws 404 if tried to update a user document that doesn't exist", async function () {
@@ -234,13 +264,25 @@ describe.skip("Test the tracked Progress API", function () {
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.property("message").that.equals("Resource updated successfully.");
       expect(response.body).to.have.property("data").that.is.an("object");
+      expect(response.body.data).to.have.all.keys([
+        "id",
+        "type",
+        "taskId",
+        "currentlyTracked",
+        "frequency",
+        "createdAt",
+        "updatedAt",
+      ]);
 
-      const data = response.body.data;
-      expect(data).to.have.keys(["id", "type", "taskId", "currentlyTracked", "frequency", "createdAt", "updatedAt"]);
-      expect(data).to.have.property("id").that.is.a("string");
-      expect(data).to.have.property("type").that.equals("task");
-      expect(data).to.have.property("taskId").that.equals(taskId0);
-      expect(data).to.have.property("currentlyTracked").that.equals(false);
+      const { id, type, taskId, currentlyTracked, frequency, createdAt, updatedAt } = response.body.data;
+
+      expect(id).to.be.a("string");
+      expect(frequency).to.be.a("number");
+      expect(type).to.be.equal("task");
+      expect(taskId).to.be.equal(taskId0);
+      expect(currentlyTracked).to.be.equal(false);
+      expect(createdAt).to.satisfy(isISOString);
+      expect(updatedAt).to.satisfy(isISOString);
     });
 
     it("throws 404 if tried to update a task document that doesn't exist", async function () {
@@ -308,7 +350,7 @@ describe.skip("Test the tracked Progress API", function () {
       expect(response.body).to.have.keys(["message", "data"]);
       expect(response.body.data).to.be.an("object");
       expect(response.body.message).to.be.equal("Resource retrieved successfully.");
-      expect(response.body.data).to.have.keys([
+      expect(response.body.data).to.have.all.keys([
         "id",
         "type",
         "userId",
@@ -325,7 +367,7 @@ describe.skip("Test the tracked Progress API", function () {
       expect(response.body).to.have.keys(["message", "data"]);
       expect(response.body.data).to.be.an("object");
       expect(response.body.message).to.be.equal("Resource retrieved successfully.");
-      expect(response.body.data).to.have.keys([
+      expect(response.body.data).to.have.all.keys([
         "id",
         "type",
         "taskId",
@@ -375,13 +417,23 @@ describe.skip("Test the tracked Progress API", function () {
 
       const trackedProgress = response.body.data[0];
       expect(trackedProgress).to.be.an("object");
-      expect(trackedProgress).to.have.property("id").that.is.a("string");
-      expect(trackedProgress).to.have.property("currentlyTracked").that.is.a("boolean");
-      expect(trackedProgress).to.have.property("createdAt").that.is.a("string").and.satisfy(isISOString);
-      expect(trackedProgress).to.have.property("type").that.is.a("string");
-      expect(trackedProgress).to.have.property("userId").that.is.a("string");
-      expect(trackedProgress).to.have.property("frequency").that.is.a("number");
-      expect(trackedProgress).to.have.property("updatedAt").that.is.a("string").and.satisfy(isISOString);
+      expect(trackedProgress).to.have.all.keys([
+        "id",
+        "createdAt",
+        "type",
+        "userId",
+        "frequency",
+        "updatedAt",
+        "currentlyTracked",
+      ]);
+      const { id, createdAt, type, userId, frequency, updatedAt, currentlyTracked } = trackedProgress;
+      expect(id).to.be.a("string");
+      expect(currentlyTracked).to.be.a("boolean");
+      expect(createdAt).to.be.a("string").and.satisfy(isISOString);
+      expect(type).to.be.a("string");
+      expect(userId).to.be.a("string");
+      expect(frequency).to.be.a("number");
+      expect(updatedAt).to.be.a("string").and.satisfy(isISOString);
     });
 
     it("Returns the tracked progress document for a user type and currentlyTracked", async function () {
@@ -393,13 +445,23 @@ describe.skip("Test the tracked Progress API", function () {
 
       const trackedProgress = response.body.data[0];
       expect(trackedProgress).to.be.an("object");
-      expect(trackedProgress).to.have.property("id").that.is.a("string");
-      expect(trackedProgress).to.have.property("currentlyTracked").that.is.a("boolean");
-      expect(trackedProgress).to.have.property("createdAt").that.is.a("string").and.satisfy(isISOString);
-      expect(trackedProgress).to.have.property("type").that.is.a("string");
-      expect(trackedProgress).to.have.property("userId").that.is.a("string");
-      expect(trackedProgress).to.have.property("frequency").that.is.a("number");
-      expect(trackedProgress).to.have.property("updatedAt").that.is.a("string").and.satisfy(isISOString);
+      expect(trackedProgress).to.have.all.keys([
+        "id",
+        "createdAt",
+        "type",
+        "userId",
+        "frequency",
+        "updatedAt",
+        "currentlyTracked",
+      ]);
+      const { id, createdAt, type, userId, frequency, updatedAt, currentlyTracked } = trackedProgress;
+      expect(id).to.be.a("string");
+      expect(currentlyTracked).to.be.a("boolean");
+      expect(createdAt).to.be.a("string").and.satisfy(isISOString);
+      expect(type).to.be.a("string");
+      expect(userId).to.be.a("string");
+      expect(frequency).to.be.a("number");
+      expect(updatedAt).to.be.a("string").and.satisfy(isISOString);
     });
 
     it("Returns an empty array if none of the query matches for user", async function () {
@@ -416,16 +478,25 @@ describe.skip("Test the tracked Progress API", function () {
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.property("message").that.equals("Resource retrieved successfully.");
       expect(response.body).to.have.property("data").that.is.an("array").with.lengthOf(1);
-
       const trackedProgress = response.body.data[0];
       expect(trackedProgress).to.be.an("object");
-      expect(trackedProgress).to.have.property("id").that.is.a("string");
-      expect(trackedProgress).to.have.property("currentlyTracked").that.is.a("boolean");
-      expect(trackedProgress).to.have.property("createdAt").that.is.a("string").and.satisfy(isISOString);
-      expect(trackedProgress).to.have.property("type").that.is.a("string");
-      expect(trackedProgress).to.have.property("taskId").that.is.a("string");
-      expect(trackedProgress).to.have.property("frequency").that.is.a("number");
-      expect(trackedProgress).to.have.property("updatedAt").that.is.a("string").and.satisfy(isISOString);
+      expect(trackedProgress).to.have.all.keys([
+        "id",
+        "type",
+        "taskId",
+        "currentlyTracked",
+        "frequency",
+        "createdAt",
+        "updatedAt",
+      ]);
+      const { id, createdAt, type, taskId, frequency, updatedAt, currentlyTracked } = trackedProgress;
+      expect(id).to.be.a("string");
+      expect(currentlyTracked).to.be.a("boolean");
+      expect(createdAt).to.be.a("string").and.satisfy(isISOString);
+      expect(type).to.be.a("string");
+      expect(taskId).to.be.a("string");
+      expect(frequency).to.be.a("number");
+      expect(updatedAt).to.be.a("string").and.satisfy(isISOString);
     });
 
     it("Returns the tracked progress document for a task type and currentlyTracked", async function () {
@@ -437,13 +508,23 @@ describe.skip("Test the tracked Progress API", function () {
 
       const trackedProgress = response.body.data[0];
       expect(trackedProgress).to.be.an("object");
-      expect(trackedProgress).to.have.property("id").that.is.a("string");
-      expect(trackedProgress).to.have.property("currentlyTracked").that.is.a("boolean");
-      expect(trackedProgress).to.have.property("createdAt").that.is.a("string").and.satisfy(isISOString);
-      expect(trackedProgress).to.have.property("type").that.is.a("string");
-      expect(trackedProgress).to.have.property("taskId").that.is.a("string");
-      expect(trackedProgress).to.have.property("frequency").that.is.a("number");
-      expect(trackedProgress).to.have.property("updatedAt").that.is.a("string").and.satisfy(isISOString);
+      expect(trackedProgress).to.have.all.keys([
+        "id",
+        "type",
+        "taskId",
+        "currentlyTracked",
+        "frequency",
+        "createdAt",
+        "updatedAt",
+      ]);
+      const { id, createdAt, type, taskId, frequency, updatedAt, currentlyTracked } = trackedProgress;
+      expect(id).to.be.a("string");
+      expect(currentlyTracked).to.be.a("boolean");
+      expect(createdAt).to.be.a("string").and.satisfy(isISOString);
+      expect(type).to.be.a("string");
+      expect(taskId).to.be.a("string");
+      expect(frequency).to.be.a("number");
+      expect(updatedAt).to.be.a("string").and.satisfy(isISOString);
     });
 
     it("Returns an empty array if none of the query matches for task", async function () {
