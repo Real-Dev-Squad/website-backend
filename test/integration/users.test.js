@@ -1055,6 +1055,13 @@ describe("Users", function () {
         });
     });
     it("Should update the user", async function () {
+      // Create a stub for the migrate function
+      const migrateStub = sinon.stub(controller, "migrate");
+      // Define the desired behavior of the stub
+      migrateStub.returns(userData[0]).resolves({
+        empty: true,
+        forEach: sinon.stub(),
+      });
       const usersMigrateResponse = await chai
         .request(app)
         .post(`/users/migrate`)
@@ -1067,15 +1074,13 @@ describe("Users", function () {
           totalCount: 0,
         },
       });
-      sinon.stub(controller, "migrate").returns(userData[0]).resolves({
-        empty: true,
-        forEach: sinon.stub(),
-      });
       const usersReponse = await chai.request(app).get(`/users`).set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(usersReponse).to.have.status(200);
       usersReponse.body.users.forEach((document) => {
         expect(document).to.have.property(`github_user_id`);
       });
+      // Restore the original migrate function
+      migrateStub.restore();
     });
     it("Should return unauthorized error when not logged in", function (done) {
       chai
