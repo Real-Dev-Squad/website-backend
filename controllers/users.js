@@ -11,7 +11,7 @@ const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
-// const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const Queue = require("bull");
 const { REDIS_PORT, REDIS_URI } = require("../redisCredentials");
 
@@ -464,14 +464,9 @@ const filterUsers = async (req, res) => {
   }
 };
 
-/*
- * Sync user data with the data present in our discord server
- *
- *
- */
-// const DISCORD_BASE_URL = "https://553e-49-36-233-201.ngrok.io";
-// config.get("services.discordBot.baseUrl");
+const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
+// wroker queue created with Bull
 const syncQueue = new Queue("syncQueue", {
   redis: {
     port: REDIS_PORT,
@@ -479,24 +474,29 @@ const syncQueue = new Queue("syncQueue", {
   },
 });
 
+/*
+ * Sync user data with the data present in our discord server
+ *
+ */
+
 const syncInDiscordRole = async (req, res) => {
   try {
-    // const authToken = jwt.sign({}, config.get("botToken.botPrivateKey"), {
-    //   algorithm: "RS256",
-    // });
+    // create a authToken to verify on discord bot
+    const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
+      algorithm: "RS256",
+      expiresIn: config.get("rdsServerlessBot.ttl"),
+    });
 
-    // const response = await fetch(`${DISCORD_BASE_URL}/discord-members`, {
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: `Bearer ${authToken}`,
-    //   },
-    // });
-    const discordMembers = [
-      { user: { id: "688775365015240740" }, joined_at: "2023-01-13T18:21:09.278000+00:00" },
-      { user: { id: "528222297970966539" } },
-    ];
-    // await response.json();
+    // fetch the data of member in discord server
+    const response = await fetch(`${DISCORD_BASE_URL}/discord-members`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    const discordMembers = await response.json();
 
+    // get the data of the users from our database
     const allUsers = await userQuery.getAllUsers();
 
     allUsers.forEach((doc) => {
