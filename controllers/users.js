@@ -7,7 +7,7 @@ const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
-const { getPaginationLink, getUsernamesFromPRs, mapDiscordMembersDataAndSyncRole } = require("../utils/users");
+const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
@@ -465,7 +465,7 @@ const filterUsers = async (req, res) => {
 };
 
 /*
- * R
+ * Sync user data with the data present in our discord server
  *
  *
  */
@@ -491,18 +491,41 @@ const syncInDiscordRole = async (req, res) => {
     //     Authorization: `Bearer ${authToken}`,
     //   },
     // });
-    const discordMembers = [];
+    const discordMembers = [
+      { user: { id: "688775365015240740" }, joined_at: "2023-01-13T18:21:09.278000+00:00" },
+      { user: { id: "528222297970966539" } },
+    ];
     // await response.json();
 
     const allUsers = await userQuery.getAllUsers();
+
     allUsers.forEach((doc) => {
-      const user = doc.data();
-      syncQueue.add({ user });
+      const user = { id: doc.id, ...doc.data() };
+
+      if (user.roles.archived) {
+        // Update: If the user is archived change the role in_discord: false
+        user.roles = { ...user.roles, in_discord: false };
+        syncQueue.add({ user });
+
+        // If the user has verified them self and has discordId in the database
+      } else if (user.discordId) {
+        // find that users data from the discord members data we have
+        const discordUserData = discordMembers.find((item) => item.user.id === user.discordId);
+
+        // if data exists that means the user is present in our discord derver
+        if (discordUserData) {
+          // Update: the user role in_dicord: true and the joined_discord date
+          user.roles = { ...user.roles, in_discord: true };
+          user.joined_discord = discordUserData.joined_at;
+          syncQueue.add({ user });
+        } else {
+          user.roles = { ...user.roles, in_discord: false };
+          syncQueue.add({ user });
+        }
+      }
     });
 
-    mapDiscordMembersDataAndSyncRole(allUsers, discordMembers);
-
-    return res.json({ message: "Synced with discord members " });
+    return res.json({ message: "Synced with discord members." });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
