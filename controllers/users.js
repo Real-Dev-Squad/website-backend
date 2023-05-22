@@ -5,7 +5,7 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
-const { fetch } = require("../utils/fetch");
+
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
@@ -24,7 +24,11 @@ const verifyUser = async (req, res) => {
     logger.error(`Error while verifying user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
-  fetch(process.env.IDENTITY_SERVICE_URL, "POST", null, { userId }, { "Content-Type": "application/json" });
+  fetch(process.env.IDENTITY_SERVICE_URL, {
+    method: "POST",
+    body: { userId },
+    headers: { "Content-Type": "application/json" },
+  });
   return res.json({
     message: "Your request has been queued successfully",
   });
@@ -98,13 +102,13 @@ const getUsers = async (req, res) => {
     if (qualifiers?.filterBy) {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);
 
-      const filteredUsernames = getUsernamesFromPRs(allPRs);
+      const usernames = getUsernamesFromPRs(allPRs);
 
-      const { filterdUsersWithDetails } = await userQuery.fetchUsers(filteredUsernames);
+      const { users } = await userQuery.fetchUsers(usernames);
 
       return res.json({
         message: "Users returned successfully!",
-        users: filterdUsersWithDetails,
+        users,
       });
     }
 
@@ -415,7 +419,7 @@ const addUserIntro = async (req, res) => {
     await userQuery.addJoinData(data);
 
     return res.status(201).json({
-      message: "User data added successfully",
+      message: "User join data and newstatus data added and updated successfully",
     });
   } catch (err) {
     logger.error("Could not save user data");
@@ -474,12 +478,12 @@ const filterUsers = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    const allUsers = await userQuery.getUsersBasedOnFilter(req.query);
+    const users = await userQuery.getUsersBasedOnFilter(req.query);
 
     return res.json({
-      message: "Users found successfully!",
-      users: allUsers,
-      count: allUsers.length,
+      message: users.length ? "Users found successfully!" : "No users found",
+      users,
+      count: users.length,
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
