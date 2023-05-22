@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const uuid4 = require("uuid4");
+const crypto = require("crypto");
 
 // A service class for Token generation and management
 
@@ -16,7 +16,7 @@ class EventTokenService {
     const token = jwt.sign(payload, EventTokenService.#app_secret, {
       algorithm: "HS256",
       expiresIn: "24h",
-      jwtid: uuid4(),
+      jwtid: crypto.randomUUID(),
     });
     return token;
   }

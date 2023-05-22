@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { API_100MS_BASE_URL } = require("../constants/events");
 
 // A service class for all REST API operations
 class EventAPIService {
@@ -6,9 +7,8 @@ class EventAPIService {
   #tokenServiceInstance;
   constructor(tokenService) {
     // Set Axios baseURL to 100ms API BaseURI
-    logger.info({ axios });
     this.#axiosInstance = axios.create({
-      baseURL: "https://api.100ms.live/v2",
+      baseURL: API_100MS_BASE_URL,
       timeout: 3 * 60000,
     });
     this.#tokenServiceInstance = tokenService;
@@ -17,6 +17,10 @@ class EventAPIService {
 
   // Add Axios interceptors to process all requests and responses
   #configureAxios() {
+    const shouldRetryWithRefreshedToken = (error, originalRequest) => {
+      return (error.response?.status === 403 || error.response?.status === 401) && !originalRequest._retry;
+    };
+
     this.#axiosInstance.interceptors.request.use(
       (config) => {
         // Add Authorization on every request made using the Management token
@@ -36,7 +40,7 @@ class EventAPIService {
       (error) => {
         logger.error("Error in making API call", { response: error.response?.data });
         const originalRequest = error.config;
-        if ((error.response?.status === 403 || error.response?.status === 401) && !originalRequest._retry) {
+        if (shouldRetryWithRefreshedToken(error, originalRequest)) {
           logger.info("Retrying request with refreshed token");
           originalRequest._retry = true;
 
@@ -63,7 +67,6 @@ class EventAPIService {
 
   // A method for POST requests using the configured Axios instance
   async post(path, payload) {
-    logger.info({ path, payload });
     const res = await this.#axiosInstance.post(path, payload || {});
     logger.info(`post call to path - ${path}, status code - ${res.status}`);
     return res.data;
