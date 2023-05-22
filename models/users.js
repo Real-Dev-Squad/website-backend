@@ -164,7 +164,6 @@ const fetchPaginatedUsers = async (query) => {
 
     const allUsers = [];
 
-<<<<<<< HEAD
     snapshot.forEach((doc) => {
       allUsers.push({
         id: doc.id,
@@ -173,8 +172,6 @@ const fetchPaginatedUsers = async (query) => {
         email: undefined,
       });
     });
-=======
->>>>>>> 60bc481d5129f7064c4ad1949f3f1486043f147a
     return {
       allUsers,
       nextId: lastDoc?.id ?? "",
