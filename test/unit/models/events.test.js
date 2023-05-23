@@ -35,7 +35,7 @@ describe("Rooms", function () {
       await docRef.set(eventData);
 
       // Call the function with sample data
-      await eventQuery.updateRoom({ id: "1", enabled: true }, eventModel);
+      await eventQuery.updateRoom({ id: "641e3b43a42edf3910cbc8bf", enabled: true }, eventModel);
 
       // Get updated data from Firestore
       const docSnapshot = await eventModel.doc(docRef.id).get();
