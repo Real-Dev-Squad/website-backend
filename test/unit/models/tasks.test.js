@@ -10,6 +10,9 @@ const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
+const { addDependency } = require("../../../models/tasks");
+const firestore = require("../../../utils/firestore");
+const dependencyModel = firestore.collection("TaskDependencies");
 
 describe("tasks", function () {
   afterEach(async function () {
@@ -38,6 +41,33 @@ describe("tasks", function () {
         expect(startedOn).to.equal(null);
         expect(endsOn).to.equal(null);
       });
+    });
+  });
+
+  describe("addDependency", function () {
+    it("should add dependencies to firestore and return dependsOn array", async function () {
+      const data = {
+        taskId: "taskId1",
+        dependsOn: ["taskId2", "taskId3"],
+      };
+      const result = await addDependency(data);
+      expect(result).to.deep.equal(data.dependsOn);
+    });
+
+    it("should throw an error if there is an error while creating dependencies", async function () {
+      const data = {
+        taskId: "taskId1",
+        dependsOn: ["taskId2", "taskId3"],
+      };
+      const expectedError = new Error("test error");
+      dependencyModel.doc = () => {
+        throw expectedError;
+      };
+      try {
+        await addDependency(data);
+      } catch (err) {
+        expect(err).to.deep.equal(expectedError);
+      }
     });
   });
 });
