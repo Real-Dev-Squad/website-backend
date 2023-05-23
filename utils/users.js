@@ -142,12 +142,7 @@ function getUsernamesFromPRs(allPRs) {
 
   return usernames;
 }
-/**
- *
- * @param allUsers{Array} - users from firebase
- * @param discordMembers{Array} - list of all members in discord server
- *
- */
+
 
 module.exports = {
   addUserToDBForTest,
