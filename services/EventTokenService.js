@@ -16,7 +16,7 @@ class EventTokenService {
     const token = jwt.sign(payload, EventTokenService.#app_secret, {
       algorithm: "HS256",
       expiresIn: "24h",
-      jwtid: crypto.randomUUID(),
+      jwtid: crypto.randomUUID({ disableEntropyCache: true }),
     });
     return token;
   }
