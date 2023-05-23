@@ -3,7 +3,7 @@ const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
 const {
   createTrackedProgressDocument,
   updateTrackedProgressDocument,
-  getDocumentTracking,
+  getTrackedProgressDocuments,
 } = require("../models/monitor");
 const { RESPONSE_MESSAGES } = require("../constants/monitor");
 const { RESOURCE_CREATED_SUCCEEDED, RESOURCE_UPDATED_SUCCEEDED, RESOURCE_RETRIEVAL_SUCCEEDED } = RESPONSE_MESSAGES;
@@ -125,10 +125,10 @@ const updateTrackedProgressController = async (req, res) => {
 
 /**
  * @typedef {Object} GetTrackedProgressRequestParams
- * @property {string} type - The type of tracked progress ("user" or "task").
- * @property {string} monitored - Indicates if the progress is currently being tracked.
- * @property {string} userId - The ID of the User who is currently being tracked.
- * @property {string} taskId - The ID of the task which is currently being tracked.
+ * @property {string} [type] - The type of tracked progress ("user" or "task").
+ * @property {string} [monitored] - Indicates if the progress is currently being tracked.
+ * @property {string} [userId] - The ID of the User who is currently being tracked.
+ * @property {string} [taskId] - The ID of the task which is currently being tracked.
  */
 
 /**
@@ -139,7 +139,7 @@ const updateTrackedProgressController = async (req, res) => {
  * @property {string} type - The type of tracked progress ("user" or "task").
  * @property {string} [userId] - The user ID.
  * @property {string} [taskId] - The task ID.
- * @property {number} [frequency] - The frequency of tracking.
+ * @property {number} frequency - The frequency of tracking.
  * @property {string} updatedAt - The timestamp when the document was last updated.
  */
 
@@ -150,16 +150,16 @@ const updateTrackedProgressController = async (req, res) => {
  */
 
 /**
- * Controller function for retrieving combined tracked progress.
+ * Controller function for retrieving tracked progress documents.
  *
  * @param {Express.Request} req - The Express request object.
  * @param {Express.Response} res - The Express response object.
  * @returns {Promise<void>} A Promise that resolves when the response has been sent.
  */
 
-const getCombinedTrackedProgressController = async (req, res) => {
+const getTrackedProgressController = async (req, res) => {
   try {
-    const data = await getDocumentTracking({ ...req.query });
+    const data = await getTrackedProgressDocuments({ ...req.query });
     return res.status(200).json({
       message: RESOURCE_RETRIEVAL_SUCCEEDED,
       data,
@@ -179,5 +179,5 @@ const getCombinedTrackedProgressController = async (req, res) => {
 module.exports = {
   createTrackedProgressController,
   updateTrackedProgressController,
-  getCombinedTrackedProgressController,
+  getTrackedProgressController,
 };

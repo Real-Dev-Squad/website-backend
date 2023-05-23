@@ -95,7 +95,7 @@ const validateUpdateTrackedProgress = async (req, res, next) => {
   }
 };
 
-const validateCombinedGetTrackedProgress = async (req, res, next) => {
+const validateGetTrackedProgressQueryParams = async (req, res, next) => {
   const schema = joi
     .object({
       type: joi.string().valid(...VALID_PROGRESS_TYPES),
@@ -125,5 +125,5 @@ const validateCombinedGetTrackedProgress = async (req, res, next) => {
 module.exports = {
   validateCreateTrackedProgressRecords,
   validateUpdateTrackedProgress,
-  validateCombinedGetTrackedProgress,
+  validateGetTrackedProgressQueryParams,
 };

@@ -74,12 +74,12 @@ const updateTrackedProgressDocument = async (req) => {
 /**
  * Retrieves either a single document or list of documents based on the provided query parameters.
  *
- * @param {Object} reqQuery - The query parameters for fetching tracked progress documents.
+ * @param {Object} reqQuery - The query parameters for fetching tracked progress document(s).
  * @returns {Object| Array} - The tracked progress document or list of tracked documents matching the query.
  * @throws {NotFound} - If the tracked progress document is not found.
  */
 
-const getDocumentTracking = async (reqQuery) => {
+const getTrackedProgressDocuments = async (reqQuery) => {
   let query;
   let docsData;
   const { userId, taskId } = reqQuery;
@@ -97,5 +97,5 @@ const getDocumentTracking = async (reqQuery) => {
 module.exports = {
   createTrackedProgressDocument,
   updateTrackedProgressDocument,
-  getDocumentTracking,
+  getTrackedProgressDocuments,
 };
