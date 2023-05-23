@@ -536,7 +536,7 @@ describe("Extension Requests", function () {
               expect(res).to.have.status(200);
               expect(res.body).to.be.a("object");
               expect(res.body.message).to.equal("task returned successfully");
-              expect(res.body.task.endsOn).to.equal(1235);
+              expect(res.body.taskData.endsOn).to.equal(1235);
 
               return done();
             });

@@ -159,7 +159,7 @@ const getTask = async (req, res) => {
     }
     return res.json({
       message: "task returned successfully",
-      task: { ...taskData, dependsOn: dependencyDocReference },
+      taskData: { ...taskData, dependsOn: dependencyDocReference },
     });
   } catch (err) {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
