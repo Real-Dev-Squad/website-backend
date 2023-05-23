@@ -6,10 +6,16 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
+const { updateUserStatus } = require("../models/userStatus");
+const { arraysHaveCommonItem } = require("../utils/array");
+const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
+const { userState } = require("../constants/userStatus");
+const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
-
+const userStatusModel = firestore.collection("usersStatus");
+const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 /**
  * Adds or updates the user data
  *
@@ -55,7 +61,7 @@ const addOrUpdate = async (userData, userId = null) => {
     userData.roles = { archived: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
-    return { isNewUser: true, userId: userInfo.id };
+    return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true };
   } catch (err) {
     logger.error("Error in adding or updating user", err);
     throw err;
@@ -65,6 +71,10 @@ const addOrUpdate = async (userData, userId = null) => {
 const addJoinData = async (userData) => {
   try {
     await joinModel.add(userData);
+    await updateUserStatus(userData.userId, {
+      currentStatus: { state: userState.ONBOARDING },
+      monthlyHours: { committed: 4 * userData.intro.numberOfHours },
+    });
   } catch (err) {
     logger.error("Error in adding data", err);
     throw err;
@@ -126,7 +136,7 @@ const getSuggestedUsers = async (skill) => {
  * @param query { search, next, prev, size, page }: Filter for users
  * @return {Promise<userModel|Array>}
  */
-const fetchUsers = async (query) => {
+const fetchPaginatedUsers = async (query) => {
   try {
     // INFO: default user size set to 100
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
@@ -175,13 +185,52 @@ const fetchUsers = async (query) => {
   }
 };
 
+const fetchUsers = async (usernames = []) => {
+  try {
+    const dbQuery = userModel;
+    const users = [];
+
+    const groups = [];
+    for (let i = 0; i < usernames.length; i += BATCH_SIZE_IN_CLAUSE) {
+      groups.push(usernames.slice(i, i + BATCH_SIZE_IN_CLAUSE));
+    }
+
+    // For each group, write a separate query
+    const promises = groups.map((group) => {
+      return dbQuery.where("github_id", "in", group).get();
+    });
+
+    const snapshots = await Promise.all(promises);
+
+    snapshots.forEach((snapshot) => {
+      snapshot.forEach((doc) => {
+        users.push({
+          id: doc.id,
+          ...doc.data(),
+          phone: undefined,
+          email: undefined,
+          tokens: undefined,
+          chaincode: undefined,
+        });
+      });
+    });
+
+    return {
+      users,
+    };
+  } catch (err) {
+    logger.error("Error retrieving user data", err);
+    throw err;
+  }
+};
+
 /**
  * Fetches the user data from the the provided username or userId
  *
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const fetchUser = async ({ userId = null, username = null }) => {
+const fetchUser = async ({ userId = null, username = null, githubUsername = null }) => {
   try {
     let userData, id;
     if (username) {
@@ -195,6 +244,12 @@ const fetchUser = async ({ userId = null, username = null }) => {
       const user = await userModel.doc(userId).get();
       id = userId;
       userData = user.data();
+    } else if (githubUsername) {
+      const user = await userModel.where("github_id", "==", githubUsername).limit(1).get();
+      user.forEach((doc) => {
+        id = doc.id;
+        userData = doc.data();
+      });
     }
     return {
       userExists: !!userData,
@@ -239,7 +294,7 @@ const initializeUser = async (userId) => {
   if (!userWallet) {
     await createWallet(userId, walletConstants.INITIAL_WALLET);
   }
-
+  await updateUserStatus(userId, { currentStatus: { state: userState.ONBOARDING }, monthlyHours: { committed: 0 } });
   return true;
 };
 
@@ -292,9 +347,112 @@ const fetchUserSkills = async (id) => {
   }
 };
 
+const getRdsUserInfoByGitHubUsername = async (githubUsername) => {
+  const { user } = await fetchUser({ githubUsername });
+
+  return {
+    firstName: user.first_name ?? "",
+    lastName: user.last_name ?? "",
+    username: user.username ?? "",
+  };
+};
+
+/**
+ * Fetches user data based on the filter query
+ *
+ * @param {Object} query - Object with query parameters
+ * @param {Array} query.levelId - Array of levelIds to filter the users on
+ * @param {Array} query.levelName - Array of levelNames to filter the users on
+ * @param {Array} query.levelNumber - Array of levelNumbers to filter the users on
+ * @param {Array} query.tagId - Array of tagIds to filter the users on
+ * @param {Array} query.state - Array of states to filter the users on
+ * @param {String} query.role - filter the users on role
+ * @param {String} query.verified - filter the users on verified i.e, discordId data
+ * @return {Promise<Array>} - Array of user documents that match the filter criteria
+ */
+
+const getUsersBasedOnFilter = async (query) => {
+  const allQueryKeys = Object.keys(query);
+  const doesTagQueryExist = arraysHaveCommonItem(ITEM_TAG, allQueryKeys);
+  const doesStateQueryExist = arraysHaveCommonItem(USER_STATE, allQueryKeys);
+
+  const calls = {
+    item: itemModel,
+    state: userStatusModel,
+  };
+  calls.item = calls.item.where("itemType", "==", "USER").where("tagType", "==", "SKILL");
+
+  Object.entries(query).forEach(([key, value]) => {
+    const isTagKey = ITEM_TAG.includes(key);
+    const isStateKey = USER_STATE.includes(key);
+    const isValueArray = Array.isArray(value);
+
+    if (isTagKey) {
+      calls.item = isValueArray ? calls.item.where(key, "in", value) : calls.item.where(key, "==", value);
+    } else if (isStateKey) {
+      calls.state = isValueArray
+        ? calls.state.where("currentStatus.state", "in", value)
+        : calls.state.where("currentStatus.state", "==", value);
+    }
+  });
+
+  const tagItems = doesTagQueryExist ? (await calls.item.get()).docs.map((doc) => ({ id: doc.id, ...doc.data() })) : [];
+  const stateItems = doesStateQueryExist
+    ? (await calls.state.get()).docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+    : [];
+  let finalItems = [];
+
+  if (doesTagQueryExist && doesStateQueryExist) {
+    if (stateItems.length && tagItems.length) {
+      const stateItemIds = new Set(stateItems.map((item) => item.userId));
+      finalItems = tagItems.filter((item) => stateItemIds.has(item.itemId)).map((item) => item.itemId);
+    }
+  } else if (doesStateQueryExist) {
+    finalItems = stateItems.map((item) => item.userId);
+  } else if (doesTagQueryExist) {
+    finalItems = tagItems.map((item) => item.itemId);
+  }
+
+  if (finalItems.length) {
+    finalItems = [...new Set(finalItems)];
+    const userRefs = finalItems.map((itemId) => userModel.doc(itemId));
+    const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
+    const filteredUserDocs = userDocs.filter((doc) => !doc.roles?.archived);
+    return filteredUserDocs;
+  }
+
+  const { role: roleQuery, verified: verifiedQuery } = query;
+
+  if (roleQuery) {
+    const filteredUsers = [];
+    const snapshot = await userModel.where(`roles.${roleQuery}`, "==", true).get();
+    snapshot.forEach((doc) => {
+      filteredUsers.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    return filteredUsers.filter((user) => !user.roles?.archived);
+  }
+  if (verifiedQuery === "true") {
+    const filteredUsers = [];
+    const snapshot = await userModel.where("discordId", "!=", null).get();
+    snapshot.forEach((doc) => {
+      filteredUsers.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    return filteredUsers.filter((user) => !user.roles?.archived);
+  }
+  return [];
+};
+
 module.exports = {
   addOrUpdate,
-  fetchUsers,
+  fetchPaginatedUsers,
   fetchUser,
   setIncompleteUserDetails,
   initializeUser,
@@ -304,4 +462,7 @@ module.exports = {
   getJoinData,
   getSuggestedUsers,
   fetchUserSkills,
+  getRdsUserInfoByGitHubUsername,
+  fetchUsers,
+  getUsersBasedOnFilter,
 };

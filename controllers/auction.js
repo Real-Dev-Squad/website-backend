@@ -1,5 +1,6 @@
 const auctions = require("../models/auctions");
 const wallet = require("../models/wallets");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Fetches all the active (ongoing) auctions
@@ -16,7 +17,7 @@ const fetchAvailableAuctions = async (_req, res) => {
     });
   } catch (error) {
     logger.error(`Error fetching available auctions: ${error}`);
-    return res.boom.badImplementation("An internal server error occured.");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -36,7 +37,7 @@ const fetchAuctionById = async (req, res) => {
     return res.json(auctionData);
   } catch (error) {
     logger.error(`Error fetching auction: ${error}`);
-    return res.boom.badImplementation("An internal server error occured.");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -59,7 +60,7 @@ const createNewAuction = async (req, res) => {
     return res.status(201).json({ id: auctionId, message: "Auction created successfully!" });
   } catch (error) {
     logger.error(`Error creating new auctions: ${error}`);
-    return res.boom.badImplementation("An internal server error occured.");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -84,7 +85,7 @@ const makeNewBid = async (req, res) => {
     return res.status(201).json({ message: "Successfully placed bid!" });
   } catch (error) {
     logger.error(`Error creating new auctions: ${error}`);
-    return res.boom.badImplementation("An internal server error occured.");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 

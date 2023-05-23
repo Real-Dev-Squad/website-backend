@@ -6,16 +6,15 @@ name: Tests
 on:
   pull_request:
     branches:
-      - '**'
+      - "**"
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [18.x]
 
     steps:
     - uses: actions/checkout@v3

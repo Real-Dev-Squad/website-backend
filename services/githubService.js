@@ -1,5 +1,6 @@
 const utils = require("../utils/fetch");
 const { fetchUser } = require("../models/users");
+
 /**
  * Extracts only the necessary details required from the object returned by Github API
  * @param data {Object} - Object returned by Github API
@@ -47,7 +48,7 @@ const extractPRdetails = (data) => {
  * @param searchParams {Object} - List of params to create github API URL
  * @param resultsOptions {Object} - Ordering and pagination of results
  */
-const getGithubURL = (searchParams, resultsOptions = {}) => {
+const getGithubURL = (searchParams, resultsOptions = {}, searchString) => {
   const baseURL = config.get("githubApi.baseUrl");
   const issuesAndPRsPath = "/search/issues";
 
@@ -56,7 +57,6 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
 
   const defaultParams = {
     org: config.get("githubApi.org"),
-    type: "pr",
   };
 
   const finalSearchParams = Object.assign({}, defaultParams, searchParams);
@@ -65,7 +65,11 @@ const getGithubURL = (searchParams, resultsOptions = {}) => {
   const paramsStrArr = paramsObjArr.map(([key, value]) => `${key}:${value}`);
 
   // The string that can be entrered as text on Github website for simple search
-  const prsSearchText = paramsStrArr.join(" ");
+  let prsSearchText = paramsStrArr.join(" ");
+
+  if (searchString) {
+    prsSearchText = `${searchString} ${prsSearchText}`;
+  }
 
   urlObj.searchParams.append("q", prsSearchText);
 
@@ -93,6 +97,16 @@ function getFetch(url) {
 }
 
 /**
+ * Create fetch call for GitHub APIs as an authenticated user
+ * @param {*} url - url to fetch from
+ * @param {*} params - query params to pass
+ * @param {*} headers - requested headers
+ * @returns response object
+ */
+function getFetchWithAuthToken(url, params = null, headers = null) {
+  return utils.fetch(url, "get", params, null, headers);
+}
+/**
  * Fetches the pull requests in Real-Dev-Squad by user using GitHub API
  * @param username {string} - Username String
  */
@@ -102,6 +116,7 @@ const fetchPRsByUser = async (username) => {
     const { user } = await fetchUser({ username });
     const url = getGithubURL({
       author: user.github_id,
+      type: "pr",
     });
     return getFetch(url);
   } catch (err) {
@@ -111,47 +126,136 @@ const fetchPRsByUser = async (username) => {
 };
 
 /**
- * Fetches the oldest open `per_page` requests
+ * Fetches the latest `per_page` open PRs
+ *
+ * Order by default is desc, which will fetch latest open PRs,
+ * to fetch stale PRs just change pass order as asc
+ *
  */
-const fetchStalePRs = async (perPage = 10, page = 1) => {
+const fetchOpenPRs = async (params = {}) => {
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {} } = params;
+
   try {
     const url = getGithubURL(
       {
+        type: "pr",
         is: "open",
+        ...searchParams,
       },
       {
         sort: "created",
-        order: "asc",
+        ...resultOptions,
         per_page: perPage,
         page,
       }
     );
     return getFetch(url);
   } catch (err) {
-    logger.error(`Error while fetching pull requests: ${err}`);
+    logger.error(`Error while fetching open pull requests: ${err}`);
+    throw err;
+  }
+};
+
+const fetchMergedPRs = async (params = {}) => {
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {} } = params;
+
+  try {
+    const url = getGithubURL(
+      {
+        type: "pr",
+        is: "merged",
+        ...searchParams,
+      },
+      {
+        sort: "updated",
+        ...resultOptions,
+        per_page: perPage,
+        page,
+      }
+    );
+
+    return getFetch(url);
+  } catch (err) {
+    logger.error(`Error while fetching closed pull requests: ${err}`);
+    throw err;
+  }
+};
+
+const fetchOpenIssues = async (params = {}) => {
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {}, searchString = "" } = params;
+
+  try {
+    const url = getGithubURL(
+      {
+        type: "issue",
+        is: "open",
+        ...searchParams,
+      },
+      {
+        sort: "created",
+        ...resultOptions,
+        per_page: perPage,
+        page,
+      },
+      searchString
+    );
+    return getFetch(url);
+  } catch (err) {
+    logger.error(`Error while fetching open issues: ${err}`);
+    throw err;
+  }
+};
+
+const fetchClosedIssues = async (params = {}) => {
+  const { perPage = 100, page = 1, searchParams = {}, resultOptions = {} } = params;
+
+  try {
+    const url = getGithubURL(
+      {
+        type: "issue",
+        is: "closed",
+        ...searchParams,
+      },
+      {
+        sort: "updated",
+        ...resultOptions,
+        per_page: perPage,
+        page,
+      }
+    );
+    return getFetch(url);
+  } catch (err) {
+    logger.error(`Error while fetching closed issues: ${err}`);
     throw err;
   }
 };
 
 /**
- * Fetches the latest `per_page` open PRs
+ * Fetches issues across all repositories in the ORG
  */
-const fetchOpenPRs = async (perPage = 10, page = 1) => {
+const fetchIssues = async () => {
   try {
-    const url = getGithubURL(
+    const baseURL = config.get("githubApi.baseUrl");
+    const issues = "/issues";
+    const urlObj = new URL(baseURL);
+    urlObj.pathname = "orgs" + "/" + config.get("githubApi.org") + issues;
+    const createdURL = urlObj.href;
+    const res = await getFetchWithAuthToken(
+      createdURL,
       {
-        is: "open",
+        filter: "all",
+        state: "open",
       },
       {
-        sort: "created",
-        order: "desc",
-        per_page: perPage,
-        page,
+        Accept: "application/vnd.github+json",
+        // TODO: replace <AUTH-TOKEN> with RDS org PAT
+        Authorization: `Bearer <AUTH-TOKEN>`,
+        org: config.get("githubApi.org"),
       }
     );
-    return getFetch(url);
+    return res;
   } catch (err) {
-    logger.error(`Error while fetching pull requests: ${err}`);
+    logger.error(`Error while fetching issues: ${err}`);
     throw err;
   }
 };
@@ -159,7 +263,10 @@ const fetchOpenPRs = async (perPage = 10, page = 1) => {
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
-  fetchStalePRs,
+  fetchMergedPRs,
   getFetch,
   extractPRdetails,
+  fetchIssues,
+  fetchOpenIssues,
+  fetchClosedIssues,
 };

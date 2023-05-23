@@ -7,8 +7,8 @@ const validateUserStatusData = async (todaysTime, req, res, next) => {
     currentStatus: Joi.object().keys({
       state: Joi.string()
         .trim()
-        .valid(userState.IDLE, userState.ACTIVE, userState.OOO)
-        .error(new Error(`Invalid State. State must be either IDLE, ACTIVE or OOO`)),
+        .valid(userState.IDLE, userState.ACTIVE, userState.OOO, userState.ONBOARDING)
+        .error(new Error(`Invalid State. State must be either IDLE, ACTIVE, OOO, or ONBOARDING`)),
       updatedAt: Joi.number().required(),
       from: Joi.number()
         .min(todaysTime)

@@ -1,5 +1,6 @@
 const joi = require("joi");
 const { USER_STATUS } = require("../../constants/users");
+const ROLES = require("../../constants/roles");
 
 const updateUser = async (req, res, next) => {
   const schema = joi
@@ -68,6 +69,7 @@ const validateJoinData = async (req, res, next) => {
       funFact: joi.string().min(100).required(),
       whyRds: joi.string().min(100).required(),
       flowState: joi.string().optional(),
+      numberOfHours: joi.number().min(1).max(100).required(),
     });
 
   try {
@@ -136,6 +138,7 @@ async function getUsers(req, res, next) {
         .messages({
           "string.empty": "prev value cannot be empty",
         }),
+      query: joi.string().optional(),
     });
   try {
     await schema.validateAsync(req.query);
@@ -146,9 +149,50 @@ async function getUsers(req, res, next) {
   }
 }
 
+/**
+ * Validator function for query params for the filter route
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ * @param next {Object} - Express middleware function
+ */
+async function validateUserQueryParams(req, res, next) {
+  const schema = joi
+    .object()
+    .strict()
+    .min(1)
+    .keys({
+      levelId: joi.array().items(joi.string()).single().optional(),
+      levelName: joi.array().items(joi.string()).single().optional(),
+      levelValue: joi.array().items(joi.number()).single().optional(),
+      tagId: joi.array().items(joi.string()).single().optional(),
+      state: joi
+        .alternatives()
+        .try(
+          joi.string().valid("IDLE", "OOO", "ACTIVE"),
+          joi.array().items(joi.string().valid("IDLE", "OOO", "ACTIVE"))
+        )
+        .optional(),
+      role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD).optional(),
+      verified: joi.string().optional(),
+    })
+    .messages({
+      "object.min": "Please provide at least one filter criteria",
+    });
+
+  try {
+    await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    logger.error(`Error validating query params : ${error}`);
+    res.boom.badRequest(error);
+  }
+}
+
 module.exports = {
   updateUser,
   updateProfileURL,
   validateJoinData,
   getUsers,
+  validateUserQueryParams,
 };
