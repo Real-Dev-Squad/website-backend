@@ -144,7 +144,7 @@ const updateTrackedProgressController = async (req, res) => {
  */
 
 /**
- * @typedef {Object} GetCombinedTrackedProgressResponse
+ * @typedef {Object} GetTrackedProgressResponse
  * @property {string} message - The success message.
  * @property {TrackedProgressData | TrackedProgressData[]} data - The data of the tracked progress document(s).
  */
