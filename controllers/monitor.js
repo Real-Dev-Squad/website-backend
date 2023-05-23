@@ -226,9 +226,16 @@ const getIndividualTrackedProgressController = async (req, res) => {
   }
 };
 
+const getCombinedTrackedProgressController = async (req, res) => {
+  return res.status(200).json({
+    message: RESOURCE_RETRIEVAL_SUCCEEDED,
+  });
+};
+
 module.exports = {
   createTrackedProgressController,
   updateTrackedProgressController,
   getTrackedProgressController,
   getIndividualTrackedProgressController,
+  getCombinedTrackedProgressController,
 };

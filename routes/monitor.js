@@ -8,12 +8,14 @@ const {
   updateTrackedProgressController,
   getTrackedProgressController,
   getIndividualTrackedProgressController,
+  getCombinedTrackedProgressController,
 } = require("../controllers/monitor");
 const {
   validateCreateTrackedProgressRecords,
   validateUpdateTrackedProgress,
   validateGetTrackedProgress,
   validateGetIndividualTrackedProgress,
+  validateCombinedGetTrackedProgress,
 } = require("../middlewares/validators/monitor");
 
 router.post(
@@ -35,5 +37,7 @@ router.patch(
 router.get("/", validateGetTrackedProgress, getTrackedProgressController);
 
 router.get("/:type/:typeId", validateGetIndividualTrackedProgress, getIndividualTrackedProgressController);
+
+router.get("/test", validateCombinedGetTrackedProgress, getCombinedTrackedProgressController);
 
 module.exports = router;

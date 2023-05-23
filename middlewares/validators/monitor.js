@@ -145,9 +145,36 @@ const validateGetIndividualTrackedProgress = async (req, res, next) => {
   }
 };
 
+const validateCombinedGetTrackedProgress = async (req, res, next) => {
+  const schema = joi
+    .object({
+      type: joi.string().valid(...VALID_PROGRESS_TYPES),
+      userId: joi.string(),
+      taskId: joi.string(),
+      monitored: joi.bool().optional(),
+    })
+    .xor("type", "userId", "taskId")
+    .with("monitored", "type")
+    .messages({
+      "any.only": "Type field is restricted to either 'user' or 'task'.",
+      "object.xor": "Invalid combination of request params.",
+      "object.missing": "One of the following fields is required: type, userId, or taskId.",
+      "object.unknown": "Invalid field provided.",
+    });
+
+  try {
+    await schema.validateAsync(req.query, { abortEarly: false });
+    next();
+  } catch (error) {
+    logger.error(`Error validating payload: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
 module.exports = {
   validateCreateTrackedProgressRecords,
   validateUpdateTrackedProgress,
   validateGetTrackedProgress,
   validateGetIndividualTrackedProgress,
+  validateCombinedGetTrackedProgress,
 };
