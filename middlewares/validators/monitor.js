@@ -160,6 +160,7 @@ const validateCombinedGetTrackedProgress = async (req, res, next) => {
       "object.xor": "Invalid combination of request params.",
       "object.missing": "One of the following fields is required: type, userId, or taskId.",
       "object.unknown": "Invalid field provided.",
+      "object.with": "The monitored param is missing a required field type.",
     });
 
   try {

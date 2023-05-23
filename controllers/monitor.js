@@ -5,6 +5,7 @@ const {
   updateTrackedProgressDocument,
   getTrackedProgressDocuments,
   getTrackedProgressDocument,
+  getDocumentTracking,
 } = require("../models/monitor");
 const { RESPONSE_MESSAGES } = require("../constants/monitor");
 const { RESOURCE_CREATED_SUCCEEDED, RESOURCE_UPDATED_SUCCEEDED, RESOURCE_RETRIEVAL_SUCCEEDED } = RESPONSE_MESSAGES;
@@ -226,10 +227,57 @@ const getIndividualTrackedProgressController = async (req, res) => {
   }
 };
 
+/**
+ * @typedef {Object} GetTrackedProgressRequestParams
+ * @property {string} type - The type of tracked progress ("user" or "task").
+ * @property {string} monitored - Indicates if the progress is currently being tracked.
+ * @property {string} userId - The ID of the User who is currently being tracked.
+ * @property {string} taskId - The ID of the task which is currently being tracked.
+ */
+
+/**
+ * @typedef {Object} TrackedProgressData
+ * @property {string} id - The ID of the tracked progress document.
+ * @property {boolean} monitored - Indicates if the progress is currently being tracked.
+ * @property {string} createdAt - The timestamp when the document was created.
+ * @property {string} type - The type of tracked progress ("user" or "task").
+ * @property {string} [userId] - The user ID.
+ * @property {string} [taskId] - The task ID.
+ * @property {number} [frequency] - The frequency of tracking.
+ * @property {string} updatedAt - The timestamp when the document was last updated.
+ */
+
+/**
+ * @typedef {Object} GetCombinedTrackedProgressResponse
+ * @property {string} message - The success message.
+ * @property {TrackedProgressData | TrackedProgressData[]} data - The data of the tracked progress document(s).
+ */
+
+/**
+ * Controller function for retrieving combined tracked progress.
+ *
+ * @param {Express.Request} req - The Express request object.
+ * @param {Express.Response} res - The Express response object.
+ * @returns {Promise<void>} A Promise that resolves when the response has been sent.
+ */
+
 const getCombinedTrackedProgressController = async (req, res) => {
-  return res.status(200).json({
-    message: RESOURCE_RETRIEVAL_SUCCEEDED,
-  });
+  try {
+    const data = await getDocumentTracking({ ...req.query });
+    return res.status(200).json({
+      message: RESOURCE_RETRIEVAL_SUCCEEDED,
+      data,
+    });
+  } catch (error) {
+    if (error instanceof NotFound) {
+      return res.status(404).json({
+        message: error.message,
+      });
+    }
+    return res.status(500).json({
+      message: INTERNAL_SERVER_ERROR_MESSAGE,
+    });
+  }
 };
 
 module.exports = {
