@@ -13,7 +13,7 @@ const { RESOURCE_CREATED_SUCCEEDED, RESOURCE_UPDATED_SUCCEEDED, RESOURCE_RETRIEV
  * @property {string} type - The type of tracked progress ("user" or "task").
  * @property {string} [userId] - The user ID (required if type is "user").
  * @property {string} [taskId] - The task ID (required if type is "task").
- * @property {boolean} currentlyTracked - Indicates if the progress is currently being tracked.
+ * @property {boolean} monitored - Indicates if the progress is currently being tracked.
  * @property {number} [frequency=1] - The frequency of tracking.By default 1 if not specified
  */
 
@@ -22,7 +22,7 @@ const { RESOURCE_CREATED_SUCCEEDED, RESOURCE_UPDATED_SUCCEEDED, RESOURCE_RETRIEV
  * @property {string} id - The ID of the tracked progress document.
  * @property {string} type - The type of tracked progress ("user" or "task").
  * @property {string} userId - The user ID.
- * @property {boolean} currentlyTracked - Indicates if the progress is currently being tracked.
+ * @property {boolean} monitored - Indicates if the progress is currently being tracked.
  * @property {number} frequency - The frequency of tracking.
  * @property {string} createdAt - The timestamp when the document was created.
  * @property {string} updatedAt - The timestamp when the document was last updated.
@@ -75,7 +75,7 @@ const createTrackedProgressController = async (req, res) => {
 /**
  * @typedef {Object} UpdateTrackedProgressRequestBody
  * @property {number} frequency - The frequency of tracking.
- * @property {boolean} currentlyTracked - Indicates if the progress is currently being tracked.
+ * @property {boolean} monitored - Indicates if the progress is currently being tracked.
  */
 
 /**
@@ -85,7 +85,7 @@ const createTrackedProgressController = async (req, res) => {
  * @property {string} type - The type of tracked progress ("user" or "task").
  * @property {string} userId - The user ID.
  * @property {number} frequency - The frequency of tracking.
- * @property {boolean} currentlyTracked - Indicates if the progress is currently being tracked.
+ * @property {boolean} monitored - Indicates if the progress is currently being tracked.
  * @property {string} updatedAt - The timestamp when the document was last updated.
  */
 
@@ -127,13 +127,13 @@ const updateTrackedProgressController = async (req, res) => {
 /**
  * @typedef {Object} GetTrackedProgressRequestQuery
  * @property {string} [type] - The type of tracked progress ("user" or "task").
- * @property {string} [currentlyTracked] - Indicates if the progress is currently being tracked.
+ * @property {string} [monitored] - Indicates if the progress is currently being tracked.
  */
 
 /**
  * @typedef {Object} GetTrackedProgressResponseData
  * @property {string} id - The ID of the tracked progress document.
- * @property {boolean} currentlyTracked - Indicates if the progress is currently being tracked.
+ * @property {boolean} monitored - Indicates if the progress is currently being tracked.
  * @property {string} createdAt - The timestamp when the document was created.
  * @property {string} type - The type of tracked progress ("user" or "task").
  * @property {string} userId - The user ID.
@@ -184,7 +184,7 @@ const getTrackedProgressController = async (req, res) => {
 /**
  * @typedef {Object} GetIndividualTrackedProgressResponseData
  * @property {string} id - The ID of the tracked progress document.
- * @property {boolean} currentlyTracked - Indicates if the progress is currently being tracked.
+ * @property {boolean} monitored - Indicates if the progress is currently being tracked.
  * @property {string} createdAt - The timestamp when the document was created.
  * @property {string} type - The type of tracked progress ("user" or "task").
  * @property {string} userId - The user ID.

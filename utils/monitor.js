@@ -26,14 +26,14 @@ const buildQueryToCheckIfDocExists = (queryParams) => {
  *
  * @param {Object} queryParams - The query parameters for fetching tracked progress documents.
  * @param {string} queryParams.type - The type of tracked progress documents.
- * @param {boolean} queryParams.currentlyTracked - The flag indicating if the documents are marked (optional).
+ * @param {boolean} queryParams.monitored - The flag indicating if the documents are marked (optional).
  * @returns {Firestore.Query} - A Firestore query for fetching tracked progress documents of a specific type.
  */
 const buildQueryForFetchingDocsOfType = (queryParams) => {
-  const { type, currentlyTracked } = queryParams;
+  const { type, monitored } = queryParams;
   let query = trackedProgressesCollection.where("type", "==", type);
-  if (currentlyTracked !== undefined) {
-    query = query.where("currentlyTracked", "==", JSON.parse(currentlyTracked));
+  if (monitored !== undefined) {
+    query = query.where("monitored", "==", JSON.parse(monitored));
   }
   return query;
 };
