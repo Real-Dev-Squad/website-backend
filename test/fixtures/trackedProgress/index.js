@@ -1,6 +1,6 @@
 const predefinedTrackedProgressDataForUser = {
   type: "user",
-  currentlyTracked: true,
+  monitored: true,
   frequency: 1,
   createdAt: "2023-05-20T03:49:20.298Z",
   updatedAt: "2023-05-20T03:49:20.298Z",
@@ -8,7 +8,7 @@ const predefinedTrackedProgressDataForUser = {
 
 const predefinedTrackedProgressDataForTask = {
   type: "task",
-  currentlyTracked: true,
+  monitored: true,
   frequency: 4,
   createdAt: "2023-05-20T03:49:20.298Z",
   updatedAt: "2023-05-20T03:49:20.298Z",
@@ -16,17 +16,17 @@ const predefinedTrackedProgressDataForTask = {
 
 const trackedProgressUserDataForPost = {
   type: "user",
-  currentlyTracked: true,
+  monitored: true,
 };
 
 const trackedProgressTaskDataForPost = {
   type: "task",
-  currentlyTracked: true,
+  monitored: true,
   frequency: 2,
 };
 
 const trackedProgressDataForPatch = {
-  currentlyTracked: false,
+  monitored: false,
 };
 
 /**

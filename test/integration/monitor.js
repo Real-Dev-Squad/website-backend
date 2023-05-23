@@ -52,11 +52,11 @@ describe.skip("Test the tracked Progress API", function () {
     await cleanDb();
   });
 
-  describe("Verify the POST call for tracked progresses", function () {
+  describe("Verify the POST call for monitor route", function () {
     it("stores the tracked progress document for user", async function () {
       const response = await chai
         .request(app)
-        .post("/tracked-progresses")
+        .post("/monitor")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
           ...trackedProgressUserDataForPost,
@@ -64,23 +64,24 @@ describe.skip("Test the tracked Progress API", function () {
         });
       expect(response).to.have.status(201);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource created successfully.");
-      expect(response.body).to.have.property("data").that.is.an("object");
+      expect(response.body).to.have.keys(["message", "data"]);
+      expect(response.body.message).to.be.equal("Resource created successfully.");
+      expect(response.body.data).to.be.an("object");
 
       expect(response.body.data).to.have.all.keys([
         "id",
         "type",
         "userId",
-        "currentlyTracked",
+        "monitored",
         "frequency",
         "createdAt",
         "updatedAt",
       ]);
-      const { id, type, userId, currentlyTracked, frequency, createdAt, updatedAt } = response.body.data;
+      const { id, type, userId, monitored, frequency, createdAt, updatedAt } = response.body.data;
       expect(id).to.be.a("string");
       expect(type).to.be.equal("user");
       expect(userId).to.be.equal(userId1);
-      expect(currentlyTracked).to.be.equal(true);
+      expect(monitored).to.be.equal(true);
       expect(frequency).to.be.equal(1);
       expect(createdAt).to.satisfy(isISOString);
       expect(updatedAt).to.satisfy(isISOString);
@@ -89,7 +90,7 @@ describe.skip("Test the tracked Progress API", function () {
     it("throws 409 if tracked progress document already exists for the same user", async function () {
       const response = await chai
         .request(app)
-        .post("/tracked-progresses")
+        .post("/monitor")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
           ...trackedProgressUserDataForPost,
@@ -97,13 +98,14 @@ describe.skip("Test the tracked Progress API", function () {
         });
       expect(response).to.have.status(409);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource is already being tracked.");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.be.equal("Resource is already being tracked.");
     });
 
     it("stores the tracked progress document for task", async function () {
       const response = await chai
         .request(app)
-        .post("/tracked-progresses")
+        .post("/monitor")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
           ...trackedProgressTaskDataForPost,
@@ -111,23 +113,24 @@ describe.skip("Test the tracked Progress API", function () {
         });
       expect(response).to.have.status(201);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource created successfully.");
-      expect(response.body).to.have.property("data").that.is.an("object");
+      expect(response.body).to.have.keys(["message", "data"]);
+      expect(response.body.message).to.be.equal("Resource created successfully.");
+      expect(response.body.data).to.be.an("object");
 
       expect(response.body.data).to.have.all.keys([
         "id",
         "type",
         "taskId",
-        "currentlyTracked",
+        "monitored",
         "frequency",
         "createdAt",
         "updatedAt",
       ]);
-      const { id, type, taskId, currentlyTracked, frequency, createdAt, updatedAt } = response.body.data;
+      const { id, type, taskId, monitored, frequency, createdAt, updatedAt } = response.body.data;
       expect(id).to.be.a("string");
       expect(type).to.be.equal("task");
       expect(taskId).to.be.equal(taskId1);
-      expect(currentlyTracked).to.be.equal(true);
+      expect(monitored).to.be.equal(true);
       expect(frequency).to.be.equal(2);
       expect(createdAt).to.satisfy(isISOString);
       expect(updatedAt).to.satisfy(isISOString);
@@ -136,7 +139,7 @@ describe.skip("Test the tracked Progress API", function () {
     it("throws 409 if tracked progress document already exists for the same task", async function () {
       const response = await chai
         .request(app)
-        .post("/tracked-progresses")
+        .post("/monitor")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
           ...trackedProgressTaskDataForPost,
@@ -144,13 +147,14 @@ describe.skip("Test the tracked Progress API", function () {
         });
       expect(response).to.have.status(409);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource is already being tracked.");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.be.equal("Resource is already being tracked.");
     });
 
     it("throws 400 Bad Request if the payload is incorrect", async function () {
       const response = await chai
         .request(app)
-        .post("/tracked-progresses")
+        .post("/monitor")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
           ...trackedProgressTaskDataForPost,
@@ -159,16 +163,15 @@ describe.skip("Test the tracked Progress API", function () {
         });
       expect(response).to.have.status(400);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("error").that.equals("Bad Request");
-      expect(response.body)
-        .to.have.property("message")
-        .that.equals("Type field is restricted to either 'user' or 'task'.");
+      expect(response.body).to.have.keys(["error", "message", "statusCode"]);
+      expect(response.body.error).to.be.equal("Bad Request");
+      expect(response.body.message).to.be.equal("Type field is restricted to either 'user' or 'task'.");
     });
 
     it("Handles unauthenticated user request with 401 Unauthorized", async function () {
       const response = await chai
         .request(app)
-        .post("/tracked-progresses")
+        .post("/monitor")
         .send({
           ...trackedProgressUserDataForPost,
           userId: userId0,
@@ -183,7 +186,7 @@ describe.skip("Test the tracked Progress API", function () {
     it("handles unauthorized user request who don't have super user permission", async function () {
       const response = await chai
         .request(app)
-        .post("/tracked-progresses")
+        .post("/monitor")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...trackedProgressUserDataForPost,
@@ -200,7 +203,7 @@ describe.skip("Test the tracked Progress API", function () {
     it("handles no resource found with 404 if the task / user does not exist", async function () {
       const response = await chai
         .request(app)
-        .post("/tracked-progresses")
+        .post("/monitor")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
           ...trackedProgressUserDataForPost,
@@ -208,37 +211,39 @@ describe.skip("Test the tracked Progress API", function () {
         });
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("User with id invalid-user does not exist.");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.be.equal("User with id invalid-user does not exist.");
     });
   });
 
-  describe("Verify the PATCH call for tracked progresses", function () {
+  describe("Verify the PATCH call for monitor route", function () {
     it("Updates the tracked progress document for user", async function () {
       const response = await chai
         .request(app)
-        .patch(`/tracked-progresses/user/${userId0}`)
+        .patch(`/monitor/user/${userId0}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(trackedProgressDataForPatch);
       expect(response).to.have.status(200);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource updated successfully.");
-      expect(response.body).to.have.property("data").that.is.an("object");
+      expect(response.body).to.have.all.keys(["message", "data"]);
+      expect(response.body.message).to.be.equal("Resource updated successfully.");
+      expect(response.body.data).to.be.an("object");
 
       expect(response.body.data).to.have.all.keys([
         "id",
         "type",
         "userId",
-        "currentlyTracked",
+        "monitored",
         "frequency",
         "createdAt",
         "updatedAt",
       ]);
-      const { id, type, userId, currentlyTracked, frequency, createdAt, updatedAt } = response.body.data;
+      const { id, type, userId, monitored, frequency, createdAt, updatedAt } = response.body.data;
       expect(id).to.be.a("string");
       expect(frequency).to.be.a("number");
       expect(type).to.be.equal("user");
       expect(userId).to.be.equal(userId0);
-      expect(currentlyTracked).to.be.equal(false);
+      expect(monitored).to.be.equal(false);
       expect(createdAt).to.satisfy(isISOString);
       expect(updatedAt).to.satisfy(isISOString);
     });
@@ -246,41 +251,43 @@ describe.skip("Test the tracked Progress API", function () {
     it("throws 404 if tried to update a user document that doesn't exist", async function () {
       const response = await chai
         .request(app)
-        .patch(`/tracked-progresses/user/${userId1}`)
+        .patch(`/monitor/user/${userId1}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(trackedProgressDataForPatch);
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource not found.");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.be.equal("Resource not found.");
     });
 
     it("Updates the tracked progress document for task", async function () {
       const response = await chai
         .request(app)
-        .patch(`/tracked-progresses/task/${taskId0}`)
+        .patch(`/monitor/task/${taskId0}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(trackedProgressDataForPatch);
       expect(response).to.have.status(200);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource updated successfully.");
-      expect(response.body).to.have.property("data").that.is.an("object");
+      expect(response.body).to.have.all.keys(["message", "data"]);
+      expect(response.body.message).to.be.equal("Resource updated successfully.");
+      expect(response.body.data).to.be.an("object");
       expect(response.body.data).to.have.all.keys([
         "id",
         "type",
         "taskId",
-        "currentlyTracked",
+        "monitored",
         "frequency",
         "createdAt",
         "updatedAt",
       ]);
 
-      const { id, type, taskId, currentlyTracked, frequency, createdAt, updatedAt } = response.body.data;
+      const { id, type, taskId, monitored, frequency, createdAt, updatedAt } = response.body.data;
 
       expect(id).to.be.a("string");
       expect(frequency).to.be.a("number");
       expect(type).to.be.equal("task");
       expect(taskId).to.be.equal(taskId0);
-      expect(currentlyTracked).to.be.equal(false);
+      expect(monitored).to.be.equal(false);
       expect(createdAt).to.satisfy(isISOString);
       expect(updatedAt).to.satisfy(isISOString);
     });
@@ -288,73 +295,78 @@ describe.skip("Test the tracked Progress API", function () {
     it("throws 404 if tried to update a task document that doesn't exist", async function () {
       const response = await chai
         .request(app)
-        .patch(`/tracked-progresses/task/${taskId1}`)
+        .patch(`/monitor/task/${taskId1}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(trackedProgressDataForPatch);
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource not found.");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.be.equal("Resource not found.");
     });
 
     it("throws 400 Bad Request if the payload is incorrect", async function () {
       const response = await chai
         .request(app)
-        .patch(`/tracked-progresses/user/${taskId0}`)
+        .patch(`/monitor/user/${taskId0}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send({ currentlyTracked: "false" });
+        .send({ monitored: "false" });
       expect(response).to.have.status(400);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("error").that.equals("Bad Request");
-      expect(response.body).to.have.property("message").that.equals("currentlyTracked field must be a boolean value.");
+      expect(response.body).to.have.keys(["message", "error", "statusCode"]);
+      expect(response.body.statusCode).to.be.equal(400);
+      expect(response.body.error).to.be.equal("Bad Request");
+      expect(response.body.message).to.be.equal("monitored field must be a boolean value.");
     });
 
     it("Handles unauthenticated user request with 401 Unauthorized", async function () {
-      const response = await chai
-        .request(app)
-        .patch(`/tracked-progresses/task/${taskId0}`)
-        .send(trackedProgressDataForPatch);
+      const response = await chai.request(app).patch(`/monitor/task/${taskId0}`).send(trackedProgressDataForPatch);
       expect(response).to.have.status(401);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("error").that.equals("Unauthorized");
-      expect(response.body).to.have.property("message").that.equals("Unauthenticated User");
+      expect(response.body).to.have.keys(["message", "error", "statusCode"]);
+      expect(response.body.statusCode).to.be.equal(401);
+      expect(response.body.error).to.be.equal("Unauthorized");
+      expect(response.body.message).to.be.equal("Unauthenticated User");
     });
 
     it("handles unauthorized user request who don't have super user permission", async function () {
       const response = await chai
         .request(app)
-        .patch(`/tracked-progresses/task/${taskId0}`)
+        .patch(`/monitor/task/${taskId0}`)
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send(trackedProgressDataForPatch);
       expect(response).to.have.status(401);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("error").that.equals("Unauthorized");
-      expect(response.body).to.have.property("message").that.equals("You are not authorized for this action.");
+      expect(response.body).to.have.all.keys(["message", "error", "statusCode"]);
+      expect(response.body.statusCode).to.be.equal(401);
+      expect(response.body.error).to.be.equal("Unauthorized");
+      expect(response.body.message).to.be.equal("You are not authorized for this action.");
     });
 
     it("handles no resource found with 404 if the task / user does not exist", async function () {
       const response = await chai
         .request(app)
-        .patch(`/tracked-progresses/user/invalid-task`)
+        .patch(`/monitor/user/invalid-task`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(trackedProgressDataForPatch);
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource not found.");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.be.equal("Resource not found.");
     });
   });
 
-  describe("Verify the GET endpoint for retrieving progress document for the user on a particular date", function () {
+  describe("Verify the GET call for monitor route", function () {
     it("Returns the tracked progress document for a specific user", async function () {
-      const response = await chai.request(app).get(`/tracked-progresses/user/${userId0}`);
+      const response = await chai.request(app).get(`/monitor?userId=${userId0}`);
       expect(response).to.have.status(200);
-      expect(response.body).to.have.keys(["message", "data"]);
+      expect(response.body).to.have.all.keys(["message", "data"]);
       expect(response.body.data).to.be.an("object");
       expect(response.body.message).to.be.equal("Resource retrieved successfully.");
       expect(response.body.data).to.have.all.keys([
         "id",
         "type",
         "userId",
-        "currentlyTracked",
+        "monitored",
         "frequency",
         "createdAt",
         "updatedAt",
@@ -362,7 +374,7 @@ describe.skip("Test the tracked Progress API", function () {
     });
 
     it("Returns the tracked progress document for a specific task", async function () {
-      const response = await chai.request(app).get(`/tracked-progresses/task/${taskId0}`);
+      const response = await chai.request(app).get(`/monitor?taskId=${taskId0}`);
       expect(response).to.have.status(200);
       expect(response.body).to.have.keys(["message", "data"]);
       expect(response.body.data).to.be.an("object");
@@ -371,7 +383,7 @@ describe.skip("Test the tracked Progress API", function () {
         "id",
         "type",
         "taskId",
-        "currentlyTracked",
+        "monitored",
         "frequency",
         "createdAt",
         "updatedAt",
@@ -379,7 +391,7 @@ describe.skip("Test the tracked Progress API", function () {
     });
 
     it("Should return 404 No tracked progress exist in user collection", async function () {
-      const response = await chai.request(app).get(`/tracked-progresses/user/${userId1}`);
+      const response = await chai.request(app).get(`/monitor?userId=${userId1}`);
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.key("message");
@@ -387,7 +399,7 @@ describe.skip("Test the tracked Progress API", function () {
     });
 
     it("Should return 404 No tracked progress exist in task collection", async function () {
-      const response = await chai.request(app).get(`/tracked-progresses/task/${taskId1}`);
+      const response = await chai.request(app).get(`/monitor?taskId=${taskId1}`);
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.key("message");
@@ -395,25 +407,24 @@ describe.skip("Test the tracked Progress API", function () {
     });
 
     it("Returns 404 for invalid user id", async function () {
-      const response = await chai.request(app).get(`/tracked-progresses/user/invalidUserId`);
+      const response = await chai.request(app).get("/monitor?userId=invalidUserId");
       expect(response).to.have.status(404);
       expect(response.body.message).to.be.equal("User with id invalidUserId does not exist.");
     });
 
     it("Returns 404 for invalid task id", async function () {
-      const response = await chai.request(app).get(`/tracked-progresses/task/invalidTaskId`);
+      const response = await chai.request(app).get("/monitor?taskId=invalidTaskId");
       expect(response).to.have.status(404);
       expect(response.body.message).to.be.equal("Task with id invalidTaskId does not exist.");
     });
-  });
 
-  describe("Verify the GET endpoint for retrieving progress documents of specific type", function () {
     it("Returns the tracked progress document for a user type", async function () {
-      const response = await chai.request(app).get(`/tracked-progresses?type=user`);
+      const response = await chai.request(app).get(`/monitor?type=user`);
       expect(response).to.have.status(200);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource retrieved successfully.");
-      expect(response.body).to.have.property("data").that.is.an("array").with.lengthOf(1);
+      expect(response.body).to.have.all.keys(["message", "data"]);
+      expect(response.body.message).to.be.equal("Resource retrieved successfully.");
+      expect(response.body.data).to.be.an("array").with.lengthOf(1);
 
       const trackedProgress = response.body.data[0];
       expect(trackedProgress).to.be.an("object");
@@ -424,11 +435,11 @@ describe.skip("Test the tracked Progress API", function () {
         "userId",
         "frequency",
         "updatedAt",
-        "currentlyTracked",
+        "monitored",
       ]);
-      const { id, createdAt, type, userId, frequency, updatedAt, currentlyTracked } = trackedProgress;
+      const { id, createdAt, type, userId, frequency, updatedAt, monitored } = trackedProgress;
       expect(id).to.be.a("string");
-      expect(currentlyTracked).to.be.a("boolean");
+      expect(monitored).to.be.a("boolean");
       expect(createdAt).to.be.a("string").and.satisfy(isISOString);
       expect(type).to.be.a("string");
       expect(userId).to.be.a("string");
@@ -436,12 +447,14 @@ describe.skip("Test the tracked Progress API", function () {
       expect(updatedAt).to.be.a("string").and.satisfy(isISOString);
     });
 
-    it("Returns the tracked progress document for a user type and currentlyTracked", async function () {
-      const response = await chai.request(app).get(`/tracked-progresses?type=user&currentlyTracked=true`);
+    it("Returns the tracked progress document for a user type and monitored", async function () {
+      const response = await chai.request(app).get(`/monitor?type=user&monitored=true`);
       expect(response).to.have.status(200);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource retrieved successfully.");
-      expect(response.body).to.have.property("data").that.is.an("array").with.lengthOf(1);
+      expect(response.body).to.have.all.keys(["message", "data"]);
+      expect(response.body.message).to.be.equal("Resource retrieved successfully.");
+      expect(response.body.data).to.be.an("array");
+      expect(response.body.data).to.have.lengthOf(1);
 
       const trackedProgress = response.body.data[0];
       expect(trackedProgress).to.be.an("object");
@@ -452,11 +465,11 @@ describe.skip("Test the tracked Progress API", function () {
         "userId",
         "frequency",
         "updatedAt",
-        "currentlyTracked",
+        "monitored",
       ]);
-      const { id, createdAt, type, userId, frequency, updatedAt, currentlyTracked } = trackedProgress;
+      const { id, createdAt, type, userId, frequency, updatedAt, monitored } = trackedProgress;
       expect(id).to.be.a("string");
-      expect(currentlyTracked).to.be.a("boolean");
+      expect(monitored).to.be.a("boolean");
       expect(createdAt).to.be.a("string").and.satisfy(isISOString);
       expect(type).to.be.a("string");
       expect(userId).to.be.a("string");
@@ -465,33 +478,35 @@ describe.skip("Test the tracked Progress API", function () {
     });
 
     it("Returns an empty array if none of the query matches for user", async function () {
-      const response = await chai.request(app).get(`/tracked-progresses?type=user&currentlyTracked=false`);
+      const response = await chai.request(app).get(`/monitor?type=user&monitored=false`);
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource not found.");
-      expect(response.body).to.have.property("data").that.is.an("array").with.lengthOf(0);
+      expect(response.body).to.have.all.keys(["message", "data"]);
+      expect(response.body.message).to.be.equal("Resource not found.");
+      expect(response.body.data).to.be.an("array").with.lengthOf(0);
     });
 
     it("Returns the tracked progress document for a task type", async function () {
-      const response = await chai.request(app).get(`/tracked-progresses?type=task`);
+      const response = await chai.request(app).get(`/monitor?type=task`);
       expect(response).to.have.status(200);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource retrieved successfully.");
-      expect(response.body).to.have.property("data").that.is.an("array").with.lengthOf(1);
+      expect(response.body).to.have.all.keys(["message", "data"]);
+      expect(response.body.message).to.be.equal("Resource retrieved successfully.");
+      expect(response.body.data).to.be.an("array").with.lengthOf(1);
       const trackedProgress = response.body.data[0];
       expect(trackedProgress).to.be.an("object");
       expect(trackedProgress).to.have.all.keys([
         "id",
         "type",
         "taskId",
-        "currentlyTracked",
+        "monitored",
         "frequency",
         "createdAt",
         "updatedAt",
       ]);
-      const { id, createdAt, type, taskId, frequency, updatedAt, currentlyTracked } = trackedProgress;
+      const { id, createdAt, type, taskId, frequency, updatedAt, monitored } = trackedProgress;
       expect(id).to.be.a("string");
-      expect(currentlyTracked).to.be.a("boolean");
+      expect(monitored).to.be.a("boolean");
       expect(createdAt).to.be.a("string").and.satisfy(isISOString);
       expect(type).to.be.a("string");
       expect(taskId).to.be.a("string");
@@ -499,12 +514,13 @@ describe.skip("Test the tracked Progress API", function () {
       expect(updatedAt).to.be.a("string").and.satisfy(isISOString);
     });
 
-    it("Returns the tracked progress document for a task type and currentlyTracked", async function () {
-      const response = await chai.request(app).get(`/tracked-progresses?type=task&currentlyTracked=true`);
+    it("Returns the tracked progress document for a task type and monitored", async function () {
+      const response = await chai.request(app).get(`/monitor?type=task&monitored=true`);
       expect(response).to.have.status(200);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource retrieved successfully.");
-      expect(response.body).to.have.property("data").that.is.an("array").with.lengthOf(1);
+      expect(response.body).to.have.all.keys(["message", "data"]);
+      expect(response.body.message).to.be.equal("Resource retrieved successfully.");
+      expect(response.body.data).to.be.an("array").with.lengthOf(1);
 
       const trackedProgress = response.body.data[0];
       expect(trackedProgress).to.be.an("object");
@@ -512,14 +528,14 @@ describe.skip("Test the tracked Progress API", function () {
         "id",
         "type",
         "taskId",
-        "currentlyTracked",
+        "monitored",
         "frequency",
         "createdAt",
         "updatedAt",
       ]);
-      const { id, createdAt, type, taskId, frequency, updatedAt, currentlyTracked } = trackedProgress;
+      const { id, createdAt, type, taskId, frequency, updatedAt, monitored } = trackedProgress;
       expect(id).to.be.a("string");
-      expect(currentlyTracked).to.be.a("boolean");
+      expect(monitored).to.be.a("boolean");
       expect(createdAt).to.be.a("string").and.satisfy(isISOString);
       expect(type).to.be.a("string");
       expect(taskId).to.be.a("string");
@@ -528,11 +544,12 @@ describe.skip("Test the tracked Progress API", function () {
     });
 
     it("Returns an empty array if none of the query matches for task", async function () {
-      const response = await chai.request(app).get(`/tracked-progresses?type=task&currentlyTracked=false`);
+      const response = await chai.request(app).get(`/monitor?type=task&monitored=false`);
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
-      expect(response.body).to.have.property("message").that.equals("Resource not found.");
-      expect(response.body).to.have.property("data").that.is.an("array").with.lengthOf(0);
+      expect(response.body).to.have.all.keys(["message", "data"]);
+      expect(response.body.message).to.be.equal("Resource not found.");
+      expect(response.body.data).to.be.an("array").with.lengthOf(0);
     });
   });
 });
