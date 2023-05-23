@@ -1,7 +1,7 @@
 const { NotFound } = require("http-errors");
-const fireStore = require("../utils/firestore");
+const fireStore = require("./firestore");
 const trackedProgressesCollection = fireStore.collection("trackedProgresses");
-const { RESPONSE_MESSAGES } = require("../constants/trackedProgresses");
+const { RESPONSE_MESSAGES } = require("../constants/monitor");
 const { RESOURCE_NOT_FOUND } = RESPONSE_MESSAGES;
 
 /**

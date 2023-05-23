@@ -8,13 +8,13 @@ const {
   updateTrackedProgressController,
   getTrackedProgressController,
   getIndividualTrackedProgressController,
-} = require("../controllers/trackedProgresses");
+} = require("../controllers/monitor");
 const {
   validateCreateTrackedProgressRecords,
   validateUpdateTrackedProgress,
   validateGetTrackedProgress,
   validateGetIndividualTrackedProgress,
-} = require("../middlewares/validators/trackedProgresses");
+} = require("../middlewares/validators/monitor");
 
 router.post(
   "/",

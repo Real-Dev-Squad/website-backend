@@ -7,8 +7,8 @@ const {
   buildQueryForFetchingDocsOfType,
   buildQueryForFetchingSpecificDoc,
   getTrackedProgressDocs,
-} = require("../utils/trackedProgresses");
-const { RESPONSE_MESSAGES } = require("../constants/trackedProgresses");
+} = require("../utils/monitor");
+const { RESPONSE_MESSAGES } = require("../constants/monitor");
 const { RESOURCE_NOT_FOUND } = RESPONSE_MESSAGES;
 
 /**

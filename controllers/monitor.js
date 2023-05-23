@@ -5,8 +5,8 @@ const {
   updateTrackedProgressDocument,
   getTrackedProgressDocuments,
   getTrackedProgressDocument,
-} = require("../models/trackedProgresses");
-const { RESPONSE_MESSAGES } = require("../constants/trackedProgresses");
+} = require("../models/monitor");
+const { RESPONSE_MESSAGES } = require("../constants/monitor");
 const { RESOURCE_CREATED_SUCCEEDED, RESOURCE_UPDATED_SUCCEEDED, RESOURCE_RETRIEVAL_SUCCEEDED } = RESPONSE_MESSAGES;
 /**
  * @typedef {Object} TrackedProgressRequestBody
