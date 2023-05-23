@@ -14,9 +14,9 @@ const baseSchema = joi
         "any.required": "Required field 'type' is missing.",
         "any.only": "Type field is restricted to either 'user' or 'task'.",
       }),
-    currentlyTracked: joi.boolean().required().messages({
-      "any.required": "Required field 'currentlyTracked' is missing.",
-      "boolean.base": "currentlyTracked field must be a boolean value.",
+    monitored: joi.boolean().required().messages({
+      "any.required": "Required field 'monitored' is missing.",
+      "boolean.base": "monitored field must be a boolean value.",
     }),
     frequency: joi
       .number()
@@ -61,12 +61,12 @@ const baseSchema = joi
   .messages({ "object.unknown": "Invalid field provided." });
 
 const validateCreateTrackedProgressRecords = async (req, res, next) => {
-  const currentlyTrackedSchema = joi.object().keys({
-    currentlyTracked: joi.boolean().required().messages({
-      "boolean.base": "currentlyTracked field must be a boolean value.",
+  const monitoredSchema = joi.object().keys({
+    monitored: joi.boolean().required().messages({
+      "boolean.base": "monitored field must be a boolean value.",
     }),
   });
-  const createSchema = baseSchema.concat(currentlyTrackedSchema);
+  const createSchema = baseSchema.concat(monitoredSchema);
   try {
     await createSchema.validateAsync(req.body, { abortEarly: false });
     next();
@@ -78,14 +78,14 @@ const validateCreateTrackedProgressRecords = async (req, res, next) => {
 
 const validateUpdateTrackedProgress = async (req, res, next) => {
   const { type, typeId } = req.params;
-  const { currentlyTracked, frequency } = req.body;
-  const updatedData = { type, [TYPE_MAP[type]]: typeId, currentlyTracked, frequency };
-  const currentlyTrackedSchema = joi.object().keys({
-    currentlyTracked: joi.boolean().optional().messages({
-      "boolean.base": "currentlyTracked field must be a boolean value.",
+  const { monitored, frequency } = req.body;
+  const updatedData = { type, [TYPE_MAP[type]]: typeId, monitored, frequency };
+  const monitoredSchema = joi.object().keys({
+    monitored: joi.boolean().optional().messages({
+      "boolean.base": "monitored field must be a boolean value.",
     }),
   });
-  const updateSchema = baseSchema.concat(currentlyTrackedSchema).or("currentlyTracked", "frequency");
+  const updateSchema = baseSchema.concat(monitoredSchema).or("monitored", "frequency");
   try {
     await updateSchema.validateAsync(updatedData, { abortEarly: false });
     next();
@@ -105,8 +105,8 @@ const validateGetTrackedProgress = async (req, res, next) => {
         .messages({
           "any.only": "Type field is restricted to either 'user' or 'task'.",
         }),
-      currentlyTracked: joi.boolean().optional().messages({
-        "boolean.base": "currentlyTracked must be a boolean value.",
+      monitored: joi.boolean().optional().messages({
+        "boolean.base": "monitored must be a boolean value.",
       }),
     })
     .messages({
