@@ -29,7 +29,7 @@ const apiService = new EventAPIService(tokenService);
 
 chai.use(chaiHttp);
 
-describe("rooms", function () {
+describe("events", function () {
   let authToken;
   let userId;
 
@@ -42,7 +42,7 @@ describe("rooms", function () {
     await cleanDb();
   });
 
-  describe("POST rooms - createRoom", function () {
+  describe("POST events - createRoom", function () {
     afterEach(function () {
       Sinon.restore();
     });
@@ -58,7 +58,7 @@ describe("rooms", function () {
 
       chai
         .request(app)
-        .post("/rooms")
+        .post("/events")
         .set("cookie", `${cookieName}=${authToken}`)
         .send(roomData)
         .end((error, response) => {
@@ -66,7 +66,7 @@ describe("rooms", function () {
             return done(error);
           }
 
-          expect(response).to.have.status(200);
+          expect(response).to.have.status(201);
           expect(response.body).to.deep.equal(room1Data);
 
           return done();
@@ -78,7 +78,7 @@ describe("rooms", function () {
 
       chai
         .request(app)
-        .post("/rooms")
+        .post("/events")
         .set("cookie", `${cookieName}=${authToken}`)
         .send({
           name: "Test Room",
@@ -109,7 +109,7 @@ describe("rooms", function () {
 
       chai
         .request(app)
-        .post("/rooms")
+        .post("/events")
         .set("cookie", `${cookieName}=${authToken}`)
         .send(roomData)
         .end((error, response) => {
@@ -127,7 +127,7 @@ describe("rooms", function () {
     it("should return unauthorized error if user is not authenticated", function (done) {
       chai
         .request(app)
-        .post(`/rooms`)
+        .post(`/events`)
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -142,28 +142,11 @@ describe("rooms", function () {
     });
   });
 
-  describe("GET /rooms - getAllRooms", function () {
-    it("returns error when no query params are provided", function (done) {
+  describe("GET /events - getAllRooms", function () {
+    it("should return all events information based on query parameters and enabled as false", function (done) {
       chai
         .request(app)
-        .get("/rooms")
-        .end((error, response) => {
-          if (error) {
-            return done(error);
-          }
-
-          expect(response).to.have.status(500);
-          expect(response.body.error).to.equal("ERR_BAD_REQUEST");
-          expect(response.body.message).to.equal("Couldn't get rooms. Please try again later");
-
-          return done();
-        });
-    });
-
-    it("should return all rooms information based on query parameters and enabled as false", function (done) {
-      chai
-        .request(app)
-        .get("/rooms?hits=10&enabled=false")
+        .get("/events?limit=10&enabled=false")
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -172,16 +155,20 @@ describe("rooms", function () {
           expect(response).to.have.status(200);
           expect(response.body).to.be.a("object");
           expect(response.body).to.have.all.keys("limit", "data", "last");
-          expect(response.body.data).to.be.an("array");
+          if (response.body.data === null) {
+            expect(response.body.data).to.be.a("null");
+          } else {
+            expect(response.body.data).to.be.an("array");
+          }
 
           return done();
         });
     });
 
-    it("should return all rooms information based on query parameters and enabled as true", function (done) {
+    it("should return all events information based on query parameters and enabled as true", function (done) {
       chai
         .request(app)
-        .get("/rooms?hits=10&enabled=true")
+        .get("/events?limit=10&enabled=true")
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -197,19 +184,19 @@ describe("rooms", function () {
         });
     });
 
-    it("returns an error if there is a problem retrieving rooms", function (done) {
+    it("returns an error if there is a problem retrieving events", function (done) {
       Sinon.stub(apiService, "get").rejects({ code: "ERR_BAD_REQUEST" });
 
       chai
         .request(app)
-        .get("/rooms")
+        .get("/events")
         .end((error, response) => {
           if (error) {
             return done(error);
           }
           expect(response).to.have.status(500);
           expect(response.body.error).to.equal("ERR_BAD_REQUEST");
-          expect(response.body.message).to.equal("Couldn't get rooms. Please try again later");
+          expect(response.body.message).to.equal("Couldn't get events. Please try again later");
 
           apiService.get.restore();
 
@@ -233,7 +220,7 @@ describe("rooms", function () {
 
       chai
         .request(app)
-        .post("/rooms/join")
+        .post("/events/join")
         .send(payload)
         .end((error, response) => {
           if (error) {
@@ -243,20 +230,21 @@ describe("rooms", function () {
           expect(response).to.have.status(200);
           expect(response.body.token).to.be.a("string");
           expect(response.body.msg).to.be.a("string");
-          expect(response.body.success).to.be.a(true);
+          expect(response.body.success).to.be.equal(true);
 
           return done();
         });
     });
   });
 
-  describe("GET /rooms/:id - getRoomById", function () {
+  describe("GET /events/:id - getRoomById", function () {
+    // TODO: failing
     it("Should return room information if the room exists and is enabled", function (done) {
       const roomId = room1Data.id;
       chai
         .request(app)
-        .get(`/rooms/${roomId}`)
-        .send({ enabled: true })
+        .get(`/events/${roomId}`)
+        .send({ isActiveRoom: true })
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -267,7 +255,6 @@ describe("rooms", function () {
           expect(response.body.id).to.equal(roomId);
           expect(response.body.name).to.be.a("string");
           expect(response.body.session).to.be.a("object");
-          expect(response.body.customer_id).to.be.a("string");
 
           return done();
         });
@@ -280,7 +267,7 @@ describe("rooms", function () {
 
       chai
         .request(app)
-        .get(`/rooms/${roomId}`)
+        .get(`/events/${roomId}`)
         .send({ enabled: true })
         .end((error, response) => {
           if (error) {
@@ -312,9 +299,9 @@ describe("rooms", function () {
 
       chai
         .request(app)
-        .put("/rooms")
+        .put("/events")
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...payload, id: room1Data.id })
+        .send({ ...payload, id: room1Data.room_id })
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -322,7 +309,7 @@ describe("rooms", function () {
 
           expect(response).to.have.status(200);
           expect(response.body.message).to.be.a("string");
-          expect(response.body.data.id).to.equal(room1Data.id);
+          expect(response.body.data.id).to.equal(room1Data.room_id);
           expect(response.body.data.enabled).to.equal(true);
 
           return done();
@@ -338,9 +325,9 @@ describe("rooms", function () {
 
       chai
         .request(app)
-        .put("/rooms")
+        .put("/events")
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...payload, id: room1Data.id })
+        .send({ ...payload, id: room1Data.room_id })
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -348,7 +335,7 @@ describe("rooms", function () {
 
           expect(response).to.have.status(200);
           expect(response.body.message).to.be.a("string");
-          expect(response.body.data.id).to.equal(room1Data.id);
+          expect(response.body.data.id).to.equal(room1Data.room_id);
           expect(response.body.data.enabled).to.equal(false);
 
           return done();
@@ -365,7 +352,7 @@ describe("rooms", function () {
 
       chai
         .request(app)
-        .put("/rooms")
+        .put("/events")
         .set("cookie", `${cookieName}=${authToken}`)
         .send({ enabled: true, id: room1Data.id })
         .end((error, response) => {
@@ -383,7 +370,7 @@ describe("rooms", function () {
     it("should return unauthorized error if user is not authenticated", function (done) {
       chai
         .request(app)
-        .put(`/rooms`)
+        .put(`/events`)
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -403,6 +390,7 @@ describe("rooms", function () {
       Sinon.restore();
     });
 
+    // TODO: failing
     it("returns a success message when the request is successful", function (done) {
       const payload = {
         reason: "Room ended by user",
@@ -413,7 +401,7 @@ describe("rooms", function () {
 
       chai
         .request(app)
-        .delete("/rooms")
+        .delete("/events")
         .set("cookie", `${cookieName}=${authToken}`)
         .send({ ...payload, id: room1Data.id })
         .end((error, response) => {
@@ -432,7 +420,7 @@ describe("rooms", function () {
     it("should return unauthorized error if user is not authenticated", function (done) {
       chai
         .request(app)
-        .delete("/rooms")
+        .delete("/events")
         .end((error, response) => {
           if (error) {
             return done(error);

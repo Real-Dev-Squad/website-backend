@@ -10,7 +10,7 @@ const eventModel = firestore.collection("events");
 const eventDataArray = require("../../fixtures/events/events")();
 const eventData = eventDataArray[0];
 
-describe("Rooms", function () {
+describe("Events", function () {
   afterEach(async function () {
     await cleanDb();
   });
@@ -21,17 +21,17 @@ describe("Rooms", function () {
       const result = await eventQuery.createRoom(eventData);
 
       // Add sample data to Firestore
-      const data = (await eventModel.doc(eventData.id).get()).data();
+      const data = (await eventModel.doc(eventData.room_id).get()).data();
 
       // Verify that the room was created
       expect(result).to.deep.equal(data);
     });
   });
 
-  describe("getAllRooms", function () {
+  describe("updateRoom", function () {
     it("should update the enabled property of a room", async function () {
       // Add sample data to Firestore
-      const docRef = eventModel.doc(eventData.id);
+      const docRef = eventModel.doc(eventData.room_id);
       await docRef.set(eventData);
 
       // Call the function with sample data

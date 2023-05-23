@@ -13,7 +13,7 @@ const eventModel = firestore.collection("events");
  */
 const createRoom = async (roomData) => {
   try {
-    const docRef = eventModel.doc(roomData.id);
+    const docRef = eventModel.doc(roomData.room_id);
     await docRef.set(roomData);
     const docSnapshot = await docRef.get();
     const data = docSnapshot.data();
@@ -57,6 +57,7 @@ const endActiveRoom = async ({ id, reason, lock }) => {
     await docRef.update({
       lock,
       reason,
+      enabled: false,
       status: "inactive",
     });
   } catch (error) {

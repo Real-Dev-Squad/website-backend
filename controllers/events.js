@@ -1,7 +1,9 @@
+/* eslint-disable camelcase */
 const { EventAPIService } = require("../services/EventAPIService");
 const { EventTokenService } = require("../services/EventTokenService");
 const eventQuery = require("../models/events");
 const logger = require("../utils/logger");
+const { GET_ALL_ROOMS_LIMIT_MIN } = require("../constants/events");
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
@@ -16,12 +18,13 @@ const apiService = new EventAPIService(tokenService);
  * @throws {Error} If an error occurs while creating the room document.
  */
 const createRoom = async (req, res) => {
-  const { name, description, region } = req.body;
+  const { name, description, region, userId } = req.body;
   const payload = { name, description, region };
   try {
     const roomData = await apiService.post("/rooms", payload);
-    const savedRoomData = await eventQuery.createRoom(roomData);
-    return res.status(200).json(savedRoomData);
+    const { app_id, customer, customer_id, recording_info, template, id: room_id, ...cleanRoomData } = roomData;
+    const savedRoomData = await eventQuery.createRoom({ room_id, created_by: userId, ...cleanRoomData });
+    return res.status(201).json(savedRoomData);
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
@@ -32,25 +35,45 @@ const createRoom = async (req, res) => {
 };
 
 /**
- * Retrieves all rooms that match the query parameters provided in the HTTP request query string.
+ * Retrieves all events that match the query parameters provided in the HTTP request query string.
  * @async
  * @function
  * @param {Object} req - The Express request object.
  * @param {Object} res - The Express response object.
- * @returns {Object} The rooms data in JSON format.
- * @throws {Error} If an error occurs while retrieving the rooms data.
+ * @returns {Object} The events data in JSON format.
+ * @throws {Error} If an error occurs while retrieving the events data.
  */
 const getAllRooms = async (req, res) => {
-  const { enabled, hits, offset } = req.query;
+  /**
+   * @type {boolean} - enabled: determines whether the rooms should be enabled or disabled.
+   * @type {number} - limit: The maximum number of rooms to retrieve.
+   * @type {string} - offset: The starting point for retrieving rooms.
+   */
+  const { enabled, limit, offset } = req.query;
   try {
     const start = offset || "";
-    const roomsData = await apiService.get(`/rooms?limit=${hits}&enabled=${enabled}&start=${start}`);
-    return res.status(200).json(roomsData);
+    const limitOfRooms = limit || GET_ALL_ROOMS_LIMIT_MIN;
+    const isEnabled = enabled || false;
+    const roomsData = await apiService.get(`/rooms?limit=${limitOfRooms}&enabled=${isEnabled}&start=${start}`);
+
+    const events = roomsData.data.map(({ id, ...room }) => ({
+      ...room,
+      room_id: id,
+      customer_id: undefined,
+      app_id: undefined,
+      recording_info: undefined,
+      template_id: undefined,
+      template: undefined,
+      customer: undefined,
+    }));
+
+    const responseData = { limit: roomsData.limit, last: roomsData.last, data: events };
+    return res.status(200).json(responseData);
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "Couldn't get rooms. Please try again later",
+      message: "Couldn't get events. Please try again later",
     });
   }
 };
@@ -92,9 +115,22 @@ const joinRoom = async (req, res) => {
  */
 const getRoomById = async (req, res) => {
   const roomId = req.params.id;
-  const enabled = req.body.enabled;
+  const isActiveRoom = req.body.isActiveRoom;
   try {
-    const roomData = await apiService.get(`/${enabled ? "active-" : ""}rooms/${roomId}`);
+    let roomData = await apiService.get(`/${isActiveRoom ? "active-" : ""}rooms/${roomId}`);
+    if (!isActiveRoom) {
+      roomData = {
+        ...roomData,
+        room_id: roomData.id,
+        customer_id: undefined,
+        app_id: undefined,
+        recording_info: undefined,
+        template_id: undefined,
+        template: undefined,
+        customer: undefined,
+      };
+    }
+
     return res.status(200).json(roomData);
   } catch (error) {
     logger.error({ error });
@@ -120,9 +156,18 @@ const updateRoom = async (req, res) => {
     enabled: req.body.enabled,
   };
   try {
-    const roomData = await apiService.post(`/rooms/${req.body.id}`, payload);
-    logger.info({ roomData });
+    let roomData = await apiService.post(`/rooms/${req.body.id}`, payload);
     await eventQuery.updateRoom(roomData);
+    roomData = {
+      ...roomData,
+      room_id: roomData.id,
+      customer_id: undefined,
+      app_id: undefined,
+      recording_info: undefined,
+      template_id: undefined,
+      template: undefined,
+      customer: undefined,
+    };
     return res.status(200).json({ data: roomData, message: `Room is ${req.body.enabled ? "enabled" : "disabled"}` });
   } catch (error) {
     logger.error({ error });
