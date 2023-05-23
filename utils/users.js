@@ -143,7 +143,6 @@ function getUsernamesFromPRs(allPRs) {
   return usernames;
 }
 
-
 module.exports = {
   addUserToDBForTest,
   getUserId,
