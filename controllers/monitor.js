@@ -166,9 +166,13 @@ const getTrackedProgressController = async (req, res) => {
     });
   } catch (error) {
     if (error instanceof NotFound) {
-      return res.status(404).json({
+      const response = {
         message: error.message,
-      });
+      };
+      if (req.query.type) {
+        response.data = [];
+      }
+      return res.status(404).json(response);
     }
     return res.status(500).json({
       message: INTERNAL_SERVER_ERROR_MESSAGE,
