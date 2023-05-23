@@ -1,5 +1,9 @@
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const taskRequestsModel = require("../models/taskRequests");
+const userModel = require("../models/users.js");
+const userStatusModel = require("../models/userStatus.js");
+const { userState } = require("../constants/userStatus");
+const tasksModel = require("../models/tasks.js");
 
 const fetchTaskRequests = async (_, res) => {
   try {
@@ -18,7 +22,6 @@ const fetchTaskRequests = async (_, res) => {
 const addOrUpdate = async (req, res) => {
   try {
     const { taskId, userId } = req.body;
-
     if (!taskId) {
       return res.boom.badRequest("taskId not provided");
     }
@@ -26,25 +29,31 @@ const addOrUpdate = async (req, res) => {
       return res.boom.badRequest("userId not provided");
     }
 
-    const response = await taskRequestsModel.addOrUpdate(taskId, userId);
-
-    if (response.userDoesNotExist) {
+    const { userExists } = await userModel.fetchUser({ userId });
+    if (!userExists) {
       return res.boom.conflict("User does not exist");
     }
-    if (response.userStatusDoesNotExist) {
+
+    const { userStatusExists, data: userStatus } = await userStatusModel.getUserStatus(userId);
+    if (!userStatusExists) {
       return res.boom.conflict("User status does not exist");
     }
-    if (response.alreadyRequesting) {
-      return res.boom.conflict("User is already requesting for the task");
-    }
-    if (response.isUserOOO) {
+    if (userStatus.currentStatus.state === userState.OOO) {
       return res.boom.conflict("User is currently OOO");
     }
-    if (response.isUserActive) {
+    if (userStatus.currentStatus.state === userState.ACTIVE) {
       return res.boom.conflict("User is currently active on another task");
     }
-    if (response.taskDoesNotExist) {
+
+    const { taskData } = await tasksModel.fetchTask(taskId);
+    if (!taskData) {
       return res.boom.conflict("Task does not exist");
+    }
+
+    const response = await taskRequestsModel.addOrUpdate(taskId, userId);
+
+    if (response.alreadyRequesting) {
+      return res.boom.conflict("User is already requesting for the task");
     }
 
     if (response.isUpdate) {
@@ -67,7 +76,6 @@ const addOrUpdate = async (req, res) => {
 const approveTaskRequest = async (req, res) => {
   try {
     const { taskRequestId, userId } = req.body;
-
     if (!taskRequestId) {
       return res.boom.badRequest("taskRequestId not provided");
     }
@@ -75,21 +83,23 @@ const approveTaskRequest = async (req, res) => {
       return res.boom.badRequest("userId not provided");
     }
 
-    const response = await taskRequestsModel.approveTaskRequest(taskRequestId, userId);
-
-    if (response.userDoesNotExists) {
+    const { userExists, user } = await userModel.fetchUser({ userId });
+    if (!userExists) {
       return res.boom.conflict("User does not exists");
     }
-    if (response.userStatusDoesNotExists) {
+
+    const { userStatusExists, data: userStatus } = await userStatusModel.getUserStatus(userId);
+    if (!userStatusExists) {
       return res.boom.conflict("User status does not exists");
     }
-
-    if (response.isUserOOO) {
+    if (userStatus.currentStatus.state === userState.OOO) {
       return res.boom.conflict("User is currently OOO");
     }
-    if (response.isUserActive) {
+    if (userStatus.currentStatus.state === userState.ACTIVE) {
       return res.boom.conflict("User is currently active on another task");
     }
+
+    const response = await taskRequestsModel.approveTaskRequest(taskRequestId, user);
 
     return res.status(200).json({
       message: `Task successfully assigned to user ${response.approvedTo}`,

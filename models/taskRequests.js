@@ -1,11 +1,9 @@
 const { TASK_REQUEST_STATUS } = require("../constants/taskRequests");
 const { TASK_STATUS } = require("../constants/tasks");
-const { userState } = require("../constants/userStatus");
 const firestore = require("../utils/firestore");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const tasksModel = require("./tasks");
 const userModel = require("./users");
-const userStatusModel = require("./userStatus");
 
 /**
  * Fetch all task requests
@@ -13,43 +11,29 @@ const userStatusModel = require("./userStatus");
  * @return {Object}
  */
 const fetchTaskRequests = async () => {
-  try {
-    const taskRequestsSnapshot = await taskRequestsCollection.get();
+  const taskRequests = [];
 
-    const taskRequests = [];
+  const visitedUsersId = new Set();
+  const visitedUsers = [];
 
-    const visitedUsers = new Set();
-    const userSnapshot = [];
-    const users = [];
+  const taskRequestsSnapshot = (await taskRequestsCollection.get()).docs;
 
-    taskRequestsSnapshot.forEach((taskRequest) => {
-      const taskRequestData = taskRequest.data();
-      const requestors = taskRequestData.requestors;
-
-      requestors.forEach((requestor) => {
-        if (!visitedUsers.has(requestor)) {
-          visitedUsers.add(requestor);
-
-          userSnapshot.push(userModel.fetchUser({ userId: requestor }));
+  for (const taskRequestSnapshot of taskRequestsSnapshot) {
+    const taskRequest = taskRequestSnapshot.data();
+    const { taskData } = await tasksModel.fetchTask(taskRequest.taskId);
+    const users = await Promise.all(
+      taskRequest.requestors.map((requestor) => {
+        if (visitedUsers.includes(requestor)) {
+          return visitedUsersId.find((visitedUserId) => (visitedUserId.id = requestor));
         }
-      });
+        return userModel.fetchUser({ userId: requestor });
+      })
+    );
 
-      taskRequests.push({ id: taskRequest.id, ...taskRequestData });
-    });
-
-    const usersData = await Promise.all(userSnapshot);
-    usersData.forEach((user) => {
-      users.push(user.user);
-    });
-
-    return {
-      taskRequests,
-      users,
-    };
-  } catch (err) {
-    logger.error("error fetching tasks", err);
-    throw err;
+    taskRequests.push({ id: taskRequestSnapshot.id, ...taskRequest, task: taskData, requestors: users });
   }
+
+  return taskRequests;
 };
 
 /**
@@ -64,40 +48,20 @@ const addOrUpdate = async (taskId, userId) => {
     const [taskRequestRef] = taskRequestsSnapshot.docs;
     const taskRequestData = taskRequestRef?.data();
 
-    const { userExists, user } = await userModel.fetchUser({ userId });
-    const { userStatusExists, data: userStatus } = await userStatusModel.getUserStatus(userId);
-
-    if (!userExists) {
-      return { userDoesNotExists: true };
-    }
-    if (!userStatusExists) {
-      return { userStatusDoesNotExist: true };
-    }
-    if (userStatus.currentStatus.state === userState.OOO) {
-      return { isUserOOO: true };
-    }
-    if (userStatus.currentStatus.state === userState.ACTIVE) {
-      return { isUserActive: true };
-    }
     if (taskRequestData) {
       const currentRequestors = taskRequestData.requestors;
-      const alreadyRequesting = currentRequestors.some((requestor) => requestor === user.id);
+      const alreadyRequesting = currentRequestors.some((requestor) => requestor === userId);
       if (alreadyRequesting) {
         return { alreadyRequesting };
       }
 
-      const updatedRequestors = [...currentRequestors, user.id];
+      const updatedRequestors = [...currentRequestors, userId];
       await taskRequestsCollection.doc(taskRequestRef.id).update({ requestors: updatedRequestors });
 
       return {
         isUpdate: true,
         requestors: updatedRequestors,
       };
-    }
-
-    const { taskData } = await tasksModel.fetchTask(taskId);
-    if (!taskData) {
-      return { taskDoesNotExist: true };
     }
 
     const newTaskRequest = {
@@ -122,28 +86,12 @@ const addOrUpdate = async (taskId, userId) => {
  * Approves task request to user
  *
  * @param taskRequestId { string }: id of task request
- * @param userId { string }: id of user whose being approved
+ * @param userId { Object }: user whose being approved
  * @return {Promise<{approvedTo: string, taskRequest: Object}>}
  */
-const approveTaskRequest = async (taskRequestId, userId) => {
+const approveTaskRequest = async (taskRequestId, user) => {
   try {
     const taskRequest = await taskRequestsCollection.doc(taskRequestId).get();
-    const { user, userExists } = await userModel.fetchUser({ userId });
-    const { data: userStatus, userStatusExists } = await userStatusModel.getUserStatus(userId);
-
-    if (!userExists) {
-      return { userDoesNotExists: true };
-    }
-    if (!userStatusExists) {
-      return { userStatusDoesNotExists: true };
-    }
-
-    if (userStatus.currentStatus.state === userState.OOO) {
-      return { isUserOOO: true };
-    }
-    if (userStatus.currentStatus.state === userState.ACTIVE) {
-      return { isUserActive: true };
-    }
 
     const updatedTaskRequest = {
       ...taskRequest.data(),

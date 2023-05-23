@@ -73,11 +73,10 @@ describe("Task Requests", function () {
 
             expect(res).to.have.status(200);
             expect(res.body.message).to.equal("Task requests returned successfully");
-            expect(res.body.data).to.be.a("object");
-            expect(res.body.data.taskRequests).to.be.a("Array");
-            expect(res.body.data.taskRequests.length).to.equal(1);
-            expect(res.body.data.users).to.be.a("Array");
-            expect(res.body.data.users.length).to.equal(1);
+            expect(res.body.data).to.be.a("Array");
+            expect(res.body.data.length).to.equal(1);
+            expect(res.body.data[0]).to.have.property("requestors");
+            expect(res.body.data[0].requestors.length).to.equal(1);
             return done();
           });
       });
