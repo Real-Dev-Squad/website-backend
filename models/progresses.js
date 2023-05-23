@@ -1,7 +1,7 @@
-const { Conflict } = require("http-errors");
+const { Conflict, NotFound } = require("http-errors");
 const fireStore = require("../utils/firestore");
 const progressesCollection = fireStore.collection("progresses");
-const { RESPONSE_MESSAGES } = require("../constants/progresses");
+const { RESPONSE_MESSAGES, TYPE_MAP } = require("../constants/progresses");
 const {
   buildQueryToFetchDocs,
   getProgressDocs,
@@ -11,8 +11,9 @@ const {
   buildQueryForPostingProgress,
   assertTaskExists,
   getProgressDateTimestamp,
+  buildQueryToSearchProgressByDay,
 } = require("../utils/progresses");
-const { PROGRESS_ALREADY_CREATED } = RESPONSE_MESSAGES;
+const { PROGRESS_ALREADY_CREATED, PROGRESS_DOCUMENT_NOT_FOUND } = RESPONSE_MESSAGES;
 
 /**
  * Adds a new progress document for the given user or task, with a limit of one progress document per day.
@@ -68,4 +69,22 @@ const getRangeProgressData = async (queryParams) => {
   };
 };
 
-module.exports = { createProgressDocument, getProgressDocument, getRangeProgressData };
+/**
+ * This function fetches the progress records for a particular user or task on the specified date.
+ * @param pathParams {object} This is the data that will be used for querying the db. It should contain type, typeId and date
+ * @returns {Promise<object>} A Promise that resolves with the progress records of the queried user or task.
+ * @throws {Error} If the userId or taskId is invalid or does not exist.
+ **/
+async function getProgressByDate(pathParams) {
+  const { type, typeId, date } = pathParams;
+  await assertUserOrTaskExists({ [TYPE_MAP[type]]: typeId });
+  const query = buildQueryToSearchProgressByDay({ [TYPE_MAP[type]]: typeId, date });
+  const result = await query.get();
+  if (!result.size) {
+    throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
+  }
+  const doc = result.docs[0];
+  return { id: doc.id, ...doc.data() };
+}
+
+module.exports = { createProgressDocument, getProgressDocument, getRangeProgressData, getProgressByDate };

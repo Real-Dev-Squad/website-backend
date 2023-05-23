@@ -1,6 +1,7 @@
 const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
 const ItemModel = firestore.collection("itemTags");
+const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
@@ -32,10 +33,31 @@ const updateTask = async (taskData, taskId = null) => {
       taskId: taskInfo.id,
       taskDetails: await fromFirestoreData(taskData),
     };
-
     return result;
   } catch (err) {
     logger.error("Error in updating task", err);
+    throw err;
+  }
+};
+const addDependency = async (data) => {
+  try {
+    const { taskId, dependsOn } = data;
+    const batch = firestore.batch();
+    if (dependsOn.length > 500) {
+      throw new Error("Error cannot add more than 500 taskId");
+    }
+    for (const dependsId of dependsOn) {
+      const taskDependOn = {
+        taskId,
+        dependsId,
+      };
+      const docid = dependencyModel.doc();
+      batch.set(docid, taskDependOn);
+    }
+    await batch.commit();
+    return data.dependsOn;
+  } catch (err) {
+    logger.error("Error in creating dependency");
     throw err;
   }
 };
@@ -352,5 +374,6 @@ module.exports = {
   fetchSelfTask,
   fetchSkillLevelTask,
   overdueTasks,
+  addDependency,
   fetchTaskByIssueId,
 };
