@@ -95,56 +95,6 @@ const validateUpdateTrackedProgress = async (req, res, next) => {
   }
 };
 
-const validateGetTrackedProgress = async (req, res, next) => {
-  const schema = joi
-    .object({
-      type: joi
-        .string()
-        .valid(...VALID_PROGRESS_TYPES)
-        .required()
-        .messages({
-          "any.only": "Type field is restricted to either 'user' or 'task'.",
-        }),
-      monitored: joi.boolean().optional().messages({
-        "boolean.base": "monitored must be a boolean value.",
-      }),
-    })
-    .messages({
-      "object.unknown": "Invalid field provided.",
-    });
-  try {
-    await schema.validateAsync(req.query, { abortEarly: false });
-    next();
-  } catch (error) {
-    logger.error(`Error validating payload: ${error}`);
-    res.boom.badRequest(error.details[0].message);
-  }
-};
-
-const validateGetIndividualTrackedProgress = async (req, res, next) => {
-  const schema = joi
-    .object({
-      type: joi
-        .string()
-        .valid(...VALID_PROGRESS_TYPES)
-        .required()
-        .messages({
-          "any.only": "Type field is restricted to either 'user' or 'task'.",
-        }),
-      typeId: joi.string().required(),
-    })
-    .messages({
-      "object.unknown": "Invalid field provided.",
-    });
-  try {
-    await schema.validateAsync(req.params, { abortEarly: false });
-    next();
-  } catch (error) {
-    logger.error(`Error validating payload: ${error}`);
-    res.boom.badRequest(error.details[0].message);
-  }
-};
-
 const validateCombinedGetTrackedProgress = async (req, res, next) => {
   const schema = joi
     .object({
@@ -175,7 +125,5 @@ const validateCombinedGetTrackedProgress = async (req, res, next) => {
 module.exports = {
   validateCreateTrackedProgressRecords,
   validateUpdateTrackedProgress,
-  validateGetTrackedProgress,
-  validateGetIndividualTrackedProgress,
   validateCombinedGetTrackedProgress,
 };

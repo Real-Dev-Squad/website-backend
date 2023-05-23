@@ -42,24 +42,6 @@ const buildQueryForFetchingDocsOfType = (queryParams) => {
  * Builds a Firestore query for fetching a specific tracked progress document based on the provided query parameters.
  *
  * @param {Object} queryParams - The query parameters for fetching a specific tracked progress document.
- * @param {string} queryParams.type - The type of the tracked progress document.
- * @param {string} queryParams.typeId - The ID associated with the type (userId for "user", taskId for "task").
- * @returns {Firestore.Query} - A Firestore query for fetching a specific tracked progress document.
- */
-const buildQueryForFetchingSpecificDoc = (queryParams) => {
-  const { type, typeId } = queryParams;
-  const query = trackedProgressesCollection.where("type", "==", type);
-  if (type === "user") {
-    return query.where("userId", "==", typeId);
-  } else {
-    return query.where("taskId", "==", typeId);
-  }
-};
-
-/**
- * Builds a Firestore query for fetching a specific tracked progress document based on the provided query parameters.
- *
- * @param {Object} queryParams - The query parameters for fetching a specific tracked progress document.
  * @param {string} queryParams.userId - The userId of the tracked progress document
  * @param {string} queryParams.taskId - The taskId of the tracked progress document
  * @returns {Firestore.Query} - A Firestore query for fetching a specific tracked progress document.
@@ -94,7 +76,6 @@ const getTrackedProgressDocs = async (query) => {
 module.exports = {
   buildQueryToCheckIfDocExists,
   buildQueryForFetchingDocsOfType,
-  buildQueryForFetchingSpecificDoc,
   getTrackedProgressDocs,
   buildQueryToFetchTrackedDoc,
 };

@@ -5,7 +5,6 @@ const { assertUserOrTaskExists } = require("../utils/progresses");
 const {
   buildQueryToCheckIfDocExists,
   buildQueryForFetchingDocsOfType,
-  buildQueryForFetchingSpecificDoc,
   getTrackedProgressDocs,
   buildQueryToFetchTrackedDoc,
 } = require("../utils/monitor");
@@ -73,34 +72,6 @@ const updateTrackedProgressDocument = async (req) => {
 };
 
 /**
- * Retrieves tracked progress documents based on the provided query parameters.
- *
- * @param {Object} reqQuery - The query parameters for fetching tracked progress documents.
- * @returns {Array} - An array of tracked progress documents matching the query parameters.
- * @throws {NotFound} - If the tracked progress documents are not found.
- */
-const getTrackedProgressDocuments = async (reqQuery) => {
-  const query = buildQueryForFetchingDocsOfType(reqQuery);
-  const docsData = await getTrackedProgressDocs(query);
-  return docsData;
-};
-
-/**
- * Retrieves a tracked progress document based on the provided path parameters.
- *
- * @param {Object} reqParams - The path parameters for fetching tracked progress documents.
- * @returns {Object} - An tracked progress document matching the query parameters.
- * @throws {NotFound} - If the tracked progress document is not found.
- */
-const getTrackedProgressDocument = async (reqParams) => {
-  const { type, typeId } = reqParams;
-  await assertUserOrTaskExists({ [`${type}Id`]: typeId });
-  const query = buildQueryForFetchingSpecificDoc(reqParams);
-  const docsData = await getTrackedProgressDocs(query);
-  return docsData[0];
-};
-
-/**
  * Retrieves either a single document or list of documents based on the provided query parameters.
  *
  * @param {Object} reqQuery - The query parameters for fetching tracked progress documents.
@@ -126,7 +97,5 @@ const getDocumentTracking = async (reqQuery) => {
 module.exports = {
   createTrackedProgressDocument,
   updateTrackedProgressDocument,
-  getTrackedProgressDocuments,
-  getTrackedProgressDocument,
   getDocumentTracking,
 };
