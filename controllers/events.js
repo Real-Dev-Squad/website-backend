@@ -57,20 +57,22 @@ const getAllRooms = async (req, res) => {
     const limitOfRooms = limit || GET_ALL_ROOMS_LIMIT_MIN;
     const isEnabled = enabled || false;
     const roomsData = await apiService.get(`/rooms?limit=${limitOfRooms}&enabled=${isEnabled}&start=${start}`);
+    if (roomsData.data) {
+      const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
+      const events = removeUnwantedProperties(propertiesToRemove, roomsData.data);
 
-    const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
-    const events = removeUnwantedProperties(propertiesToRemove, roomsData.data);
-
-    const responseData = {
-      limit: roomsData.limit,
-      last: roomsData.last,
-      data: events.map(({ id, ...room }) => ({
-        id,
-        room_id: id,
-        ...room,
-      })),
-    };
-    return res.status(200).json(responseData);
+      const responseData = {
+        limit: roomsData.limit,
+        last: roomsData.last,
+        data: events.map(({ id, ...room }) => ({
+          id,
+          room_id: id,
+          ...room,
+        })),
+      };
+      return res.status(200).json(responseData);
+    }
+    return res.status(200).json(roomsData);
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
