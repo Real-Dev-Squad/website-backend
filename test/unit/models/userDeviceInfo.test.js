@@ -3,9 +3,10 @@ const { expect } = chai;
 
 const cleanDb = require("../../utils/cleanDb");
 const firestore = require("../../../utils/firestore");
-const { userDeviceInfoDataArray } = require("../../fixtures/userDeviceInfo/userDeviceInfo");
 const userDeviceInfo = require("../../../models/userDeviceInfo");
 const userDeviceInfoModel = firestore.collection("userDeviceInfo");
+const users = require("../../../models/users");
+const userDataArray = require("../../fixtures/user/user")();
 /**
  * Test the model functions and validate the data stored
  */
@@ -15,18 +16,25 @@ describe("UserDeviceInfo", function () {
     await cleanDb();
   });
   describe("storeUserDeviceInfo", function () {
-    it("should store user Id and device type of user for mobile auth", async function () {
-      const userDeviceInfoData = userDeviceInfoDataArray[0];
+    it("should store user Id and device info of user for mobile auth", async function () {
+      const userData = userDataArray[0];
+      const { userId } = await users.addOrUpdate(userData);
+
+      const userDeviceInfoData = {
+        user_id: userId,
+        device_info: "TEST_DEVICE_INFO",
+      };
       const response = await userDeviceInfo.storeUserDeviceInfo(userDeviceInfoData);
-      const { userId, deviceType } = response.userDeviceInfoData;
-      const data = (await userDeviceInfoModel.doc(userId).get()).data();
+
+      const { user_id: userID, device_info: deviceInfo } = response.userDeviceInfoData;
+      const data = (await userDeviceInfoModel.doc(userID).get()).data();
 
       Object.keys(userDeviceInfoData).forEach((key) => {
         expect(userDeviceInfoData[key]).to.deep.equal(data[key]);
       });
       expect(response).to.be.an("object");
-      expect(userId).to.be.a("string");
-      expect(deviceType).to.be.a("string");
+      expect(userID).to.be.a("string");
+      expect(deviceInfo).to.be.a("string");
     });
   });
 });

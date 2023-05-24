@@ -31,8 +31,8 @@ describe("User Device Info", function () {
           expect(res).to.have.status(200);
           expect(res.body.userDeviceInfoData).to.be.an("object");
           expect(res.body.message).to.equal("User Device Info added successfully!");
-          expect(res.body.userDeviceInfoData.userId).to.be.a("string");
-          expect(res.body.userDeviceInfoData.deviceType).to.be.a("string");
+          expect(res.body.userDeviceInfoData.user_id).to.be.a("string");
+          expect(res.body.userDeviceInfoData.device_info).to.be.a("string");
 
           return done();
         });

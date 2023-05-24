@@ -4,8 +4,8 @@ const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const storeUserDeviceInfo = async (req, res) => {
   try {
     const userJson = {
-      userId: req.body.userId,
-      deviceType: req.body.deviceType,
+      user_id: req.body.user_id,
+      device_info: req.body.device_info,
     };
 
     const userInfo = await UserDeviceInfoModel.storeUserDeviceInfo(userJson);

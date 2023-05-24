@@ -1,8 +1,9 @@
 const express = require("express");
-const { storeUserDeviceInfo } = require("../controllers/userDeviceInfo");
+const userDeviceInfo = require("../controllers/userDeviceInfo");
+const userDeviveInfoValidator = require("../middlewares/validators/userDeviceInfo");
 
 const router = express.Router();
 
-router.post("/", storeUserDeviceInfo);
+router.post("/", userDeviveInfoValidator.storeUserDeviceInfo, userDeviceInfo.storeUserDeviceInfo);
 
 module.exports = router;
