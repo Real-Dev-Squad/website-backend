@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const { expect } = require("chai");
 const jwt = require("jsonwebtoken");
 const { EventTokenService } = require("../../../services/EventTokenService");
@@ -9,7 +8,6 @@ describe("EventTokenService", function () {
       const service = new EventTokenService();
       const token = service.getManagementToken();
       const decodedToken = jwt.decode(token);
-      console.log({ decodedToken });
       expect(decodedToken).to.have.property("access_key");
       expect(decodedToken).to.have.property("type", "management");
       expect(decodedToken).to.have.property("version", 2);
@@ -40,7 +38,6 @@ describe("EventTokenService", function () {
       const role = "participant";
       const token = service.getAuthToken({ roomId, userId, role });
       const decodedToken = jwt.decode(token);
-      console.log({ decodedToken });
       expect(decodedToken).to.have.property("access_key");
       expect(decodedToken).to.have.property("room_id", roomId);
       expect(decodedToken).to.have.property("user_id", userId);
