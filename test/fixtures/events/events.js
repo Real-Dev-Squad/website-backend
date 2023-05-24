@@ -9,6 +9,7 @@ module.exports = () => {
       name: "TestingEvent",
       template_id: "6407e03fcf639e8a495419bf",
       room_id: "641e3b43a42edf3910cbc8bf",
+      id: "641e3b43a42edf3910cbc8bf",
       region: "in",
     },
   ];

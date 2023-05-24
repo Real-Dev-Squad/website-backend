@@ -4,6 +4,7 @@ const { EventTokenService } = require("../services/EventTokenService");
 const eventQuery = require("../models/events");
 const logger = require("../utils/logger");
 const { GET_ALL_ROOMS_LIMIT_MIN } = require("../constants/events");
+const { removeUnwantedProperties } = require("../utils/events");
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
@@ -22,8 +23,9 @@ const createRoom = async (req, res) => {
   const payload = { name, description, region };
   try {
     const roomData = await apiService.post("/rooms", payload);
-    const { app_id, customer, customer_id, recording_info, template, id: room_id, ...cleanRoomData } = roomData;
-    const savedRoomData = await eventQuery.createRoom({ room_id, created_by: userId, ...cleanRoomData });
+    const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
+    const event = removeUnwantedProperties(propertiesToRemove, roomData);
+    const savedRoomData = await eventQuery.createRoom({ room_id: roomData.id, created_by: userId, ...event });
     return res.status(201).json(savedRoomData);
   } catch (error) {
     logger.error({ error });
@@ -56,18 +58,18 @@ const getAllRooms = async (req, res) => {
     const isEnabled = enabled || false;
     const roomsData = await apiService.get(`/rooms?limit=${limitOfRooms}&enabled=${isEnabled}&start=${start}`);
 
-    const events = roomsData.data.map(({ id, ...room }) => ({
-      ...room,
-      room_id: id,
-      customer_id: undefined,
-      app_id: undefined,
-      recording_info: undefined,
-      template_id: undefined,
-      template: undefined,
-      customer: undefined,
-    }));
+    const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
+    const events = removeUnwantedProperties(propertiesToRemove, roomsData.data);
 
-    const responseData = { limit: roomsData.limit, last: roomsData.last, data: events };
+    const responseData = {
+      limit: roomsData.limit,
+      last: roomsData.last,
+      data: events.map(({ id, ...room }) => ({
+        id,
+        room_id: id,
+        ...room,
+      })),
+    };
     return res.status(200).json(responseData);
   } catch (error) {
     logger.error({ error });
@@ -92,7 +94,7 @@ const joinRoom = async (req, res) => {
   const payload = { room_id: roomId, user_id: userId, role };
   try {
     const token = tokenService.getAuthToken(payload);
-    res.status(200).json({
+    res.status(201).json({
       token: token,
       msg: "Token generated successfully!",
       success: true,
@@ -117,20 +119,12 @@ const getRoomById = async (req, res) => {
   const roomId = req.params.id;
   const isActiveRoom = req.body.isActiveRoom;
   try {
-    let roomData = await apiService.get(`/${isActiveRoom ? "active-" : ""}rooms/${roomId}`);
+    const roomData = await apiService.get(`/${isActiveRoom ? "active-" : ""}rooms/${roomId}`);
     if (!isActiveRoom) {
-      roomData = {
-        ...roomData,
-        room_id: roomData.id,
-        customer_id: undefined,
-        app_id: undefined,
-        recording_info: undefined,
-        template_id: undefined,
-        template: undefined,
-        customer: undefined,
-      };
+      const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
+      const event = removeUnwantedProperties(propertiesToRemove, roomData);
+      return res.status(200).json({ room_id: event.id, ...event });
     }
-
     return res.status(200).json(roomData);
   } catch (error) {
     logger.error({ error });
@@ -156,19 +150,13 @@ const updateRoom = async (req, res) => {
     enabled: req.body.enabled,
   };
   try {
-    let roomData = await apiService.post(`/rooms/${req.body.id}`, payload);
+    const roomData = await apiService.post(`/rooms/${req.body.id}`, payload);
     await eventQuery.updateRoom(roomData);
-    roomData = {
-      ...roomData,
-      room_id: roomData.id,
-      customer_id: undefined,
-      app_id: undefined,
-      recording_info: undefined,
-      template_id: undefined,
-      template: undefined,
-      customer: undefined,
-    };
-    return res.status(200).json({ data: roomData, message: `Room is ${req.body.enabled ? "enabled" : "disabled"}` });
+    const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
+    const event = removeUnwantedProperties(propertiesToRemove, roomData);
+    return res
+      .status(200)
+      .json({ data: { room_id: event.id, ...event }, message: `Room is ${req.body.enabled ? "enabled" : "disabled"}` });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
