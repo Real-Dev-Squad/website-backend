@@ -5,14 +5,14 @@ const { RESPONSE_MESSAGES } = require("../constants/monitor");
 const { RESOURCE_NOT_FOUND } = RESPONSE_MESSAGES;
 
 /**
- * Builds a Firestore query to check if a document exists based on the provided query parameters.
+ * Builds a Firestore query based on the provided query parameters.
  *
  * @param {Object} queryParams - The query parameters for checking if a document exists.
  * @param {string} queryParams.userId - The ID of the user (optional).
  * @param {string} queryParams.taskId - The ID of the task (optional).
  * @returns {Firestore.Query} - A Firestore query to check if a document exists.
  */
-const buildQueryToCheckIfDocExists = (queryParams) => {
+const buildTrackedProgressQueryByType = (queryParams) => {
   const { userId, taskId } = queryParams;
   if (userId) {
     return trackedProgressesCollection.where("userId", "==", userId);
@@ -74,7 +74,7 @@ const getTrackedProgressDocs = async (query) => {
 };
 
 module.exports = {
-  buildQueryToCheckIfDocExists,
+  buildTrackedProgressQueryByType,
   buildQueryForFetchingDocsOfType,
   getTrackedProgressDocs,
   buildQueryToFetchTrackedDoc,

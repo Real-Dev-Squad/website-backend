@@ -7,7 +7,6 @@ const baseSchema = joi
   .keys({
     type: joi
       .string()
-      .trim()
       .valid(...VALID_PROGRESS_TYPES)
       .required()
       .messages({
@@ -35,28 +34,20 @@ const baseSchema = joi
         "number.positive": "'frequency' field must be a positive integer",
         "any.only": "'frequency' field must be equal to 1 for type 'user'",
       }),
-    taskId: joi
-      .string()
-      .trim()
-      .when("type", {
-        is: "task",
-        then: joi.required().messages({
-          "any.required": "Required field 'taskId' is missing.",
-          "string.trim": "taskId must not have leading or trailing whitespace",
-        }),
-        otherwise: joi.optional(),
+    taskId: joi.string().when("type", {
+      is: "task",
+      then: joi.required().messages({
+        "any.required": "Required field 'taskId' is missing.",
       }),
-    userId: joi
-      .string()
-      .trim()
-      .when("type", {
-        is: "user",
-        then: joi.required().messages({
-          "any.required": "Required field 'userId' is missing.",
-          "string.trim": "userId must not have leading or trailing whitespace",
-        }),
-        otherwise: joi.optional(),
+      otherwise: joi.optional(),
+    }),
+    userId: joi.string().when("type", {
+      is: "user",
+      then: joi.required().messages({
+        "any.required": "Required field 'userId' is missing.",
       }),
+      otherwise: joi.optional(),
+    }),
   })
   .messages({ "object.unknown": "Invalid field provided." });
 

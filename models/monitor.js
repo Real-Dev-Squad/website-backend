@@ -3,7 +3,7 @@ const fireStore = require("../utils/firestore");
 const trackedProgressesCollection = fireStore.collection("trackedProgresses");
 const { assertUserOrTaskExists } = require("../utils/progresses");
 const {
-  buildQueryToCheckIfDocExists,
+  buildTrackedProgressQueryByType,
   buildQueryForFetchingDocsOfType,
   getTrackedProgressDocs,
   buildQueryToFetchTrackedDoc,
@@ -27,7 +27,7 @@ const { RESOURCE_NOT_FOUND } = RESPONSE_MESSAGES;
 const createTrackedProgressDocument = async (documentData) => {
   const { userId, taskId } = documentData;
   await assertUserOrTaskExists({ userId, taskId });
-  const query = buildQueryToCheckIfDocExists({ userId, taskId });
+  const query = buildTrackedProgressQueryByType({ userId, taskId });
   const existingDocumentSnapshot = await query.get();
   if (!existingDocumentSnapshot.empty) {
     throw new Conflict("Resource is already being tracked.");
@@ -59,7 +59,7 @@ const createTrackedProgressDocument = async (documentData) => {
 const updateTrackedProgressDocument = async (req) => {
   const { type, typeId } = req.params;
   const updatedData = { type, [`${type}Id`]: typeId };
-  const query = buildQueryToCheckIfDocExists(updatedData);
+  const query = buildTrackedProgressQueryByType(updatedData);
   const existingDocumentSnapshot = await query.get();
   if (existingDocumentSnapshot.empty) {
     throw new NotFound(RESOURCE_NOT_FOUND);
