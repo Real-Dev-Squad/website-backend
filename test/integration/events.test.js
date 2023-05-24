@@ -385,7 +385,7 @@ describe("events", function () {
     });
   });
 
-  describe("DELETE / - endActiveRoom", function () {
+  describe("PATCH / - endActiveRoom", function () {
     afterEach(function () {
       Sinon.restore();
     });
@@ -401,7 +401,7 @@ describe("events", function () {
 
       chai
         .request(app)
-        .delete("/events")
+        .patch("/events")
         .set("cookie", `${cookieName}=${authToken}`)
         .send({ ...payload, id: room1Data.id })
         .end((error, response) => {
@@ -420,7 +420,7 @@ describe("events", function () {
     it("should return unauthorized error if user is not authenticated", function (done) {
       chai
         .request(app)
-        .delete("/events")
+        .patch("/events")
         .end((error, response) => {
           if (error) {
             return done(error);

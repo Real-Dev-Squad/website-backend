@@ -8,6 +8,6 @@ router.get("/", events.getAllRooms);
 router.post("/join", events.joinRoom);
 router.get("/:id", events.getRoomById);
 router.put("/", authenticate, events.updateRoom);
-router.delete("/", authenticate, events.endActiveRoom);
+router.patch("/", authenticate, events.endActiveRoom);
 
 module.exports = router;
