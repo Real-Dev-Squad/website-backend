@@ -170,6 +170,8 @@ const fetchPaginatedUsers = async (query) => {
         ...doc.data(),
         phone: undefined,
         email: undefined,
+        tokens: undefined,
+        chaincode: undefined,
       });
     });
     return {

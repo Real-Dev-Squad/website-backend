@@ -69,6 +69,11 @@ const getUserById = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
+const removeKeys = (user) => {
+  const { phone, email, ...safeUser } = user;
+  return safeUser;
+};
+
 const getUsers = async (req, res) => {
   try {
     const query = req.query?.query ?? "";
@@ -89,9 +94,8 @@ const getUsers = async (req, res) => {
         return res.boom.notFound("User doesn't exist");
       }
 
-      const user = { ...result.user };
-      delete user.phone;
-      delete user.email;
+      const User = { ...result.user };
+      const user = removeKeys(User);
 
       return res.json({
         message: "User returned successfully!",

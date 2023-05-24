@@ -606,6 +606,7 @@ describe("Users", function () {
         "isMember",
         "roles",
       ]);
+      expect(Object.keys(res.body.user)).to.not.include.members(["phone", "email"]);
       expect(res.body.user.id).to.equal(testUser.id);
     });
 
