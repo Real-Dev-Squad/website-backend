@@ -508,8 +508,10 @@ const syncInDiscordRole = async (req, res) => {
 
       if (user.roles.archived) {
         // Update: If the user is archived change the role in_discord: false
-        user.roles = { ...user.roles, in_discord: false };
-        syncQueue.add({ user });
+        if (user.role.in_discord) {
+          user.roles = { ...user.roles, in_discord: false };
+          syncQueue.add({ user });
+        }
 
         // If the user has verified them self and has discordId in the database
       } else if (user.discordId) {
@@ -519,20 +521,24 @@ const syncInDiscordRole = async (req, res) => {
         // if data exists that means the user is present in our discord derver
         if (discordUserData) {
           // Update: the user role in_dicord: true and the joined_discord date
-          user.roles = { ...user.roles, in_discord: true };
-          user.joined_discord = discordUserData.joined_at;
-          syncQueue.add({ user });
+          if (!user.role.in_discord) {
+            user.roles = { ...user.roles, in_discord: true };
+            user.joined_discord = discordUserData.joined_at;
+            syncQueue.add({ user });
+          }
         } else {
-          user.roles = { ...user.roles, in_discord: false };
-          syncQueue.add({ user });
+          if (user.role.in_discord) {
+            user.roles = { ...user.roles, in_discord: false };
+            syncQueue.add({ user });
+          }
         }
       }
     });
 
     return res.json({ message: "Synced with discord members." });
   } catch (error) {
-    logger.error(`Error while fetching all users: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    logger.error(`Error while syncing users data: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 

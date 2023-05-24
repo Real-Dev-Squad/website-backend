@@ -453,7 +453,7 @@ const getUsersBasedOnFilter = async (query) => {
 /**
  * Fetch all users
  *
- * @return @return {Promise<users>}
+ * @return {Promise<users>}
  */
 
 const getAllUsers = async () => {
@@ -461,7 +461,7 @@ const getAllUsers = async () => {
     const usersRef = await userModel.get();
     return usersRef;
   } catch (err) {
-    logger.error("Error retrieving users data with roles of inDiscord", err);
+    logger.error(`Error while fetching all users: ${err}`);
     throw err;
   }
 };
