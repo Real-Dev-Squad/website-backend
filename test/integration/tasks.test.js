@@ -158,6 +158,7 @@ describe("Tasks", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Tasks returned successfully!");
           expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks[0].dependsOn).to.be.a("array");
           const taskWithParticipants = res.body.tasks[0];
 
           if (taskWithParticipants.type === "group") {
@@ -185,6 +186,8 @@ describe("Tasks", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("task returned successfully");
           expect(res.body.taskData).to.be.a("object");
+          expect(res.body.taskData.dependsOn).to.be.a("array");
+
           return done();
         });
     });

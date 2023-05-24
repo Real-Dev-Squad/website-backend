@@ -17,6 +17,7 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const updateTask = async (taskData, taskId = null) => {
   try {
     taskData = await toFirestoreData(taskData);
+
     if (taskId) {
       const task = await tasksModel.doc(taskId).get();
       if (taskData.status === "VERIFIED") {
@@ -73,8 +74,15 @@ const fetchTasks = async () => {
     const tasks = buildTasks(tasksSnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
     const updatedTasks = await Promise.all(promises);
-    const taskList = updatedTasks.map((task) => {
+    const taskList = updatedTasks.map(async (task) => {
       task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
+      const taskId = task.id;
+      const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
+      task.dependsOn = [];
+      dependencySnapshot.docs.forEach((doc) => {
+        const dependsId = doc.get("dependsId");
+        task.dependsOn.push(dependsId);
+      });
       return task;
     });
     return taskList;
@@ -116,11 +124,16 @@ const fetchActiveTaskMembers = async () => {
 const fetchTask = async (taskId) => {
   try {
     const task = await tasksModel.doc(taskId).get();
+    const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
+    const dependencyDocReference = dependencySnapshot.docs.map((doc) => {
+      const dependsId = doc.get("dependsId");
+      return dependsId;
+    });
     const taskData = await fromFirestoreData(task.data());
     if (taskData?.status) {
       taskData.status = TASK_STATUS[taskData.status.toUpperCase()] || task.status;
     }
-    return { taskData };
+    return { taskData, dependencyDocReference };
   } catch (err) {
     logger.error("Error retrieving task data", err);
     throw err;
