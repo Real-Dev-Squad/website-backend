@@ -111,4 +111,10 @@ module.exports = {
     rdsServerLessPrivateKey: "RSA PRIVATE KEY",
     ttl: 60,
   },
+
+  Event100ms: {
+    APP_ACCESS_KEY: "6407de59edc7c8f3674c0d14",
+    APP_SECRET:
+      "AmRnfHJ_1L6ZDoIwNUBNGQbntkHBDhDXlbrKg3oHxbbvXWpaptVpU3iFl3SSFA9Oyn1q4h8_n40QDZ8TkAHtF466wgJUxLGm5uROYkrecQqKcph67KjfB_edMHeSpdx8adSC0tihTeCMgpdbNHaNez2oUaVW1khBw-nvjS-EUAA=",
+  },
 };
