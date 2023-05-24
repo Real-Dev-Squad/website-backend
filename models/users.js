@@ -11,6 +11,7 @@ const { arraysHaveCommonItem } = require("../utils/array");
 const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
+const ROLES = require("../constants/roles");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
@@ -141,8 +142,11 @@ const fetchPaginatedUsers = async (query) => {
     // INFO: default user size set to 100
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
     const size = parseInt(query.size) || 100;
-    const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
-    let dbQuery = (query.prev ? userModel.limitToLast(size) : userModel.limit(size)).orderBy("username");
+    const unarchivedUserModel = userModel.where(`roles.${ROLES.ARCHIVED}`, "==", false);
+    const doc = (query.next || query.prev) && (await unarchivedUserModel.doc(query.next || query.prev).get());
+    let dbQuery = (query.prev ? unarchivedUserModel.limitToLast(size) : unarchivedUserModel.limit(size)).orderBy(
+      "username"
+    );
     if (Object.keys(query).length) {
       if (query.search) {
         dbQuery = dbQuery
