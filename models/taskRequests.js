@@ -23,8 +23,8 @@ const fetchTaskRequests = async () => {
     const { taskData } = await tasksModel.fetchTask(taskRequest.taskId);
     const users = await Promise.all(
       taskRequest.requestors.map((requestor) => {
-        if (visitedUsers.includes(requestor)) {
-          return visitedUsersId.find((visitedUserId) => (visitedUserId.id = requestor));
+        if (visitedUsersId.has(requestor)) {
+          return visitedUsers.find((visitedUserId) => (visitedUserId.id = requestor));
         }
         return userModel.fetchUser({ userId: requestor });
       })
