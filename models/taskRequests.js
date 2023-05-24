@@ -20,15 +20,22 @@ const fetchTaskRequests = async () => {
 
   for (const taskRequestSnapshot of taskRequestsSnapshot) {
     const taskRequest = taskRequestSnapshot.data();
+    const requestors = taskRequest.requestors;
+    const users = [];
+
     const { taskData } = await tasksModel.fetchTask(taskRequest.taskId);
-    const users = await Promise.all(
-      taskRequest.requestors.map((requestor) => {
-        if (visitedUsersId.has(requestor)) {
-          return visitedUsers.find((visitedUserId) => (visitedUserId.id = requestor));
-        }
-        return userModel.fetchUser({ userId: requestor });
-      })
-    );
+
+    for (const requestor of requestors) {
+      if (visitedUsersId.has(requestor)) {
+        users.push(visitedUsers.find((visitedUser) => visitedUser.id === requestor));
+        continue;
+      }
+
+      const { user } = await userModel.fetchUser({ userId: requestor });
+      users.push(user);
+      visitedUsersId.add(requestor);
+      visitedUsers.push(user);
+    }
 
     taskRequests.push({ id: taskRequestSnapshot.id, ...taskRequest, task: taskData, requestors: users });
   }
