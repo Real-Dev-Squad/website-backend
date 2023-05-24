@@ -51,7 +51,7 @@ const baseSchema = joi
   })
   .messages({ "object.unknown": "Invalid field provided." });
 
-const validateCreateTrackedProgressRecords = async (req, res, next) => {
+const validateCreateTrackedProgressRecord = async (req, res, next) => {
   const monitoredSchema = joi.object().keys({
     monitored: joi.boolean().required().messages({
       "boolean.base": "monitored field must be a boolean value.",
@@ -114,7 +114,7 @@ const validateGetTrackedProgressQueryParams = async (req, res, next) => {
 };
 
 module.exports = {
-  validateCreateTrackedProgressRecords,
+  validateCreateTrackedProgressRecord,
   validateUpdateTrackedProgress,
   validateGetTrackedProgressQueryParams,
 };

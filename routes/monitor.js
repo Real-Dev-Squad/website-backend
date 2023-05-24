@@ -9,7 +9,7 @@ const {
   getTrackedProgressController,
 } = require("../controllers/monitor");
 const {
-  validateCreateTrackedProgressRecords,
+  validateCreateTrackedProgressRecord,
   validateUpdateTrackedProgress,
   validateGetTrackedProgressQueryParams,
 } = require("../middlewares/validators/monitor");
@@ -18,7 +18,7 @@ router.post(
   "/",
   authenticate,
   authorizeRoles([SUPERUSER]),
-  validateCreateTrackedProgressRecords,
+  validateCreateTrackedProgressRecord,
   createTrackedProgressController
 );
 
