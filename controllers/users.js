@@ -69,7 +69,7 @@ const getUserById = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const removeKeys = (user) => {
+const removePersonalDetails = (user) => {
   const { phone, email, ...safeUser } = user;
   return safeUser;
 };
@@ -95,7 +95,7 @@ const getUsers = async (req, res) => {
       }
 
       const User = { ...result.user };
-      const user = removeKeys(User);
+      const user = removePersonalDetails(User);
 
       return res.json({
         message: "User returned successfully!",
