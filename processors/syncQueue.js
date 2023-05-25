@@ -1,7 +1,8 @@
 const userQuery = require("../models/users");
 
 const syncQueueProcessor = (job, done) => {
-  userQuery.addOrUpdate(job.data.user, job.data.user.id);
+  const { id, ...user } = job.data.user;
+  userQuery.addOrUpdate(user, id);
   done();
 };
 
