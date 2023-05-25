@@ -6,7 +6,8 @@ const {
   getTrackedProgressDocuments,
 } = require("../models/monitor");
 const { RESPONSE_MESSAGES } = require("../constants/monitor");
-const { RESOURCE_CREATED_SUCCEEDED, RESOURCE_UPDATED_SUCCEEDED, RESOURCE_RETRIEVAL_SUCCEEDED } = RESPONSE_MESSAGES;
+const { RESOURCE_CREATED_SUCCESSFULLY, RESOURCE_UPDATED_SUCCESSFULLY, RESOURCE_RETRIEVED_SUCCESSFULLY } =
+  RESPONSE_MESSAGES;
 /**
  * @typedef {Object} TrackedProgressRequestBody
  * @property {string} type - The type of tracked progress ("user" or "task").
@@ -46,7 +47,7 @@ const createTrackedProgressController = async (req, res) => {
   try {
     const data = await createTrackedProgressDocument({ ...req.body });
     return res.status(201).json({
-      message: RESOURCE_CREATED_SUCCEEDED,
+      message: RESOURCE_CREATED_SUCCESSFULLY,
       data,
     });
   } catch (error) {
@@ -109,7 +110,7 @@ const updateTrackedProgressController = async (req, res) => {
     const data = await updateTrackedProgressDocument({ ...req });
     return res.status(200).json({
       data,
-      message: RESOURCE_UPDATED_SUCCEEDED,
+      message: RESOURCE_UPDATED_SUCCESSFULLY,
     });
   } catch (error) {
     if (error instanceof NotFound) {
@@ -161,7 +162,7 @@ const getTrackedProgressController = async (req, res) => {
   try {
     const data = await getTrackedProgressDocuments({ ...req.query });
     return res.status(200).json({
-      message: RESOURCE_RETRIEVAL_SUCCEEDED,
+      message: RESOURCE_RETRIEVED_SUCCESSFULLY,
       data,
     });
   } catch (error) {

@@ -9,7 +9,7 @@ const {
   buildQueryToFetchTrackedDoc,
 } = require("../utils/monitor");
 const { RESPONSE_MESSAGES } = require("../constants/monitor");
-const { RESOURCE_NOT_FOUND, RESOURCE_ALREADY_EXIST } = RESPONSE_MESSAGES;
+const { RESOURCE_NOT_FOUND, RESOURCE_ALREADY_TRACKED } = RESPONSE_MESSAGES;
 
 /**
  * Creates a tracked progress document based on the provided data.
@@ -30,7 +30,7 @@ const createTrackedProgressDocument = async (documentData) => {
   const query = buildTrackedProgressQueryByType({ userId, taskId });
   const existingDocumentSnapshot = await query.get();
   if (!existingDocumentSnapshot.empty) {
-    throw new Conflict(RESOURCE_ALREADY_EXIST);
+    throw new Conflict(RESOURCE_ALREADY_TRACKED);
   }
   const timeNow = new Date().toISOString();
   // if not passed, the default frequency of 1 will be used as the frequency

@@ -1,15 +1,15 @@
-const RESOURCE_CREATED_SUCCEEDED = "Resource created successfully.";
-const RESOURCE_UPDATED_SUCCEEDED = "Resource updated successfully.";
-const RESOURCE_RETRIEVAL_SUCCEEDED = "Resource retrieved successfully.";
+const RESOURCE_CREATED_SUCCESSFULLY = "Resource created successfully.";
+const RESOURCE_UPDATED_SUCCESSFULLY = "Resource updated successfully.";
+const RESOURCE_RETRIEVED_SUCCESSFULLY = "Resource retrieved successfully.";
 const RESOURCE_NOT_FOUND = "Resource not found.";
-const RESOURCE_ALREADY_EXIST = "Resource is already being tracked.";
+const RESOURCE_ALREADY_TRACKED = "Resource is already being tracked.";
 
 const RESPONSE_MESSAGES = {
-  RESOURCE_CREATED_SUCCEEDED,
-  RESOURCE_UPDATED_SUCCEEDED,
-  RESOURCE_RETRIEVAL_SUCCEEDED,
+  RESOURCE_CREATED_SUCCESSFULLY,
+  RESOURCE_UPDATED_SUCCESSFULLY,
+  RESOURCE_RETRIEVED_SUCCESSFULLY,
   RESOURCE_NOT_FOUND,
-  RESOURCE_ALREADY_EXIST,
+  RESOURCE_ALREADY_TRACKED,
 };
 
 module.exports = { RESPONSE_MESSAGES };
