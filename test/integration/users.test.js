@@ -24,7 +24,6 @@ const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
 
 const cookieName = config.get("userToken.cookieName");
-const users = require("../../models/users");
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -588,10 +587,8 @@ describe("Users", function () {
     });
 
     it("Should return given user by id", async function () {
-      await addOrUpdate(userData[0], userId);
-      const { user: testUser } = await users.fetchUser({ userId });
-
-      const res = await chai.request(app).get(`/users/?id=${testUser.id}`);
+      const { userId } = await addOrUpdate(userData[0]);
+      const res = await chai.request(app).get(`/users/?id=${userId}`);
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
       expect(res.body.message).to.equal("User returned successfully!");
@@ -607,7 +604,7 @@ describe("Users", function () {
         "roles",
       ]);
       expect(Object.keys(res.body.user)).to.not.include.members(["phone", "email"]);
-      expect(res.body.user.id).to.equal(testUser.id);
+      expect(res.body.user.id).to.equal(userId);
     });
 
     it("Should return 404 if user not Found", function (done) {
