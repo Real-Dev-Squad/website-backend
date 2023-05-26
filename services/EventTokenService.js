@@ -4,8 +4,8 @@ const crypto = require("crypto");
 // A service class for Token generation and management
 
 class EventTokenService {
-  static #app_access_key = config.get("Event100ms.APP_ACCESS_KEY");
-  static #app_secret = config.get("Event100ms.APP_SECRET");
+  static #app_access_key = config.get("Event100ms.APP_ACCESS_KEY") || process.env.Event100ms.APP_ACCESS_KEY;
+  static #app_secret = config.get("Event100ms.APP_SECRET") || process.env.Event100ms.APP_SECRET;
   #managementToken;
   constructor() {
     this.#managementToken = this.getManagementToken(true);
@@ -27,9 +27,9 @@ class EventTokenService {
       const { exp } = jwt.decode(token);
       const buffer = 30; // generate new if it's going to expire soon
       const currTimeSeconds = Math.floor(Date.now() / 1000);
-      return !exp || exp + buffer < currTimeSeconds;
+      return exp + buffer < currTimeSeconds;
     } catch (err) {
-      logger.info("error in decoding token", err);
+      logger.error("error in decoding token", err);
       return true;
     }
   }
