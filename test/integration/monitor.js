@@ -23,8 +23,7 @@ const [userData0, userData1, , , superUserData] = userData;
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
-/* eslint-disable mocha/no-skipped-tests */
-describe.skip("Test the tracked Progress API", function () {
+describe("Test the tracked Progress API", function () {
   let userId0, userId1, superUser;
   let userIdToken0, superUserToken;
   let taskId0, taskId1;
