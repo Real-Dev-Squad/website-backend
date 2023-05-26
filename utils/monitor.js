@@ -15,9 +15,9 @@ const { RESOURCE_NOT_FOUND } = RESPONSE_MESSAGES;
 const buildTrackedProgressQueryByType = (queryParams) => {
   const { userId, taskId } = queryParams;
   if (userId) {
-    return trackedProgressesCollection.where("userId", "==", userId);
+    return trackedProgressesCollection.where("type", "==", "user").where("userId", "==", userId);
   } else {
-    return trackedProgressesCollection.where("taskId", "==", taskId);
+    return trackedProgressesCollection.where("type", "==", "task").where("taskId", "==", taskId);
   }
 };
 
@@ -49,9 +49,9 @@ const buildQueryForFetchingDocsOfType = (queryParams) => {
 const buildQueryToFetchTrackedDoc = (queryParams) => {
   const { userId, taskId } = queryParams;
   if (userId) {
-    return trackedProgressesCollection.where("userId", "==", userId);
+    return trackedProgressesCollection.where("type", "==", "user").where("userId", "==", userId);
   } else {
-    return trackedProgressesCollection.where("taskId", "==", taskId);
+    return trackedProgressesCollection.where("type", "==", "task").where("taskId", "==", taskId);
   }
 };
 
