@@ -3,7 +3,7 @@ const { EventAPIService } = require("../services/EventAPIService");
 const { EventTokenService } = require("../services/EventTokenService");
 const eventQuery = require("../models/events");
 const logger = require("../utils/logger");
-const { GET_ALL_ROOMS_LIMIT_MIN } = require("../constants/events");
+const { GET_ALL_EVENTS_LIMIT_MIN } = require("../constants/events");
 const { removeUnwantedProperties } = require("../utils/events");
 
 const tokenService = new EventTokenService();
@@ -54,7 +54,7 @@ const getAllEvents = async (req, res) => {
   const { enabled, limit, offset } = req.query;
   try {
     const start = offset || "";
-    const limitOfRooms = limit || GET_ALL_ROOMS_LIMIT_MIN;
+    const limitOfRooms = limit || GET_ALL_EVENTS_LIMIT_MIN;
     const isEnabled = enabled || false;
     const eventsData = await apiService.get(`/rooms?limit=${limitOfRooms}&enabled=${isEnabled}&start=${start}`);
     if (eventsData.data) {
@@ -98,7 +98,7 @@ const joinEvent = async (req, res) => {
     const token = tokenService.getAuthToken(payload);
     res.status(201).json({
       token: token,
-      msg: "Token generated successfully!",
+      message: "Token generated successfully!",
       success: true,
     });
   } catch (error) {
@@ -187,7 +187,7 @@ const endActiveEvent = async (req, res) => {
   try {
     await apiService.post(`/active-rooms/${req.body.id}/end-room`, payload);
     await eventQuery.endActiveEvent({ id: req.body.id, ...payload });
-    return res.status(200).json({ message: `Session is ended.` });
+    return res.status(200).json({ message: `Event ended successfully.` });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({

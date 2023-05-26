@@ -15,27 +15,27 @@ describe("Events", function () {
     await cleanDb();
   });
 
-  describe("createRoom", function () {
-    it("should create a new room in firestore", async function () {
+  describe("createEvent", function () {
+    it("should create a new event in firestore", async function () {
       // Call the function with sample data
-      const result = await eventQuery.createRoom(eventData);
+      const result = await eventQuery.createEvent(eventData);
 
       // Add sample data to Firestore
       const data = (await eventModel.doc(eventData.room_id).get()).data();
 
-      // Verify that the room was created
+      // Verify that the event was created
       expect(result).to.deep.equal(data);
     });
   });
 
-  describe("updateRoom", function () {
-    it("should update the enabled property of a room", async function () {
+  describe("updateEvent", function () {
+    it("should update the enabled property of a event", async function () {
       // Add sample data to Firestore
       const docRef = eventModel.doc(eventData.room_id);
       await docRef.set(eventData);
 
       // Call the function with sample data
-      await eventQuery.updateRoom({ id: "641e3b43a42edf3910cbc8bf", enabled: true }, eventModel);
+      await eventQuery.updateEvent({ id: "641e3b43a42edf3910cbc8bf", enabled: true }, eventModel);
 
       // Get updated data from Firestore
       const docSnapshot = await eventModel.doc(docRef.id).get();
@@ -46,14 +46,14 @@ describe("Events", function () {
     });
   });
 
-  describe("endActiveRoom", function () {
-    it("should update the lock, reason, and status of a room", async function () {
+  describe("endActiveEvent", function () {
+    it("should update the lock, reason, and status of a event", async function () {
       // Add sample data to Firestore
       const docRef = await eventModel.add(eventData);
 
       try {
         // Call the function with sample data
-        await eventQuery.endActiveRoom({
+        await eventQuery.endActiveEvent({
           id: docRef.id,
           reason: "test reason",
           lock: true,
@@ -70,7 +70,7 @@ describe("Events", function () {
       } catch (error) {
         // Check that the function threw an error
         expect(error).to.exist();
-        expect(error.message).to.equal("Error in enabling room.");
+        expect(error.message).to.equal("Error in enabling event.");
       }
     });
   });

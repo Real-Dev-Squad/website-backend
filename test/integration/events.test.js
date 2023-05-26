@@ -8,8 +8,8 @@ const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 
-const roomData = require("../fixtures/events/events")();
-const room1Data = roomData[0];
+const eventData = require("../fixtures/events/events")();
+const event1Data = eventData[0];
 
 const userData = require("../fixtures/user/user")();
 
@@ -42,32 +42,32 @@ describe("events", function () {
     await cleanDb();
   });
 
-  describe("POST events - createRoom", function () {
+  describe("POST events - createEvent", function () {
     afterEach(function () {
       sinon.restore();
     });
 
     it("returns the created room data when the request is successful", function (done) {
-      const roomData = {
+      const eventData = {
         name: "TestingEvent",
         description: "Hello world! How are you",
         region: "in",
       };
-      sinon.stub(apiService, "post").resolves(room1Data);
-      sinon.stub(eventQuery, "createRoom").resolves(room1Data);
+      sinon.stub(apiService, "post").resolves(event1Data);
+      sinon.stub(eventQuery, "createEvent").resolves(event1Data);
 
       chai
         .request(app)
         .post("/events")
         .set("cookie", `${cookieName}=${authToken}`)
-        .send(roomData)
+        .send(eventData)
         .end((error, response) => {
           if (error) {
             return done(error);
           }
 
           expect(response).to.have.status(201);
-          expect(response.body).to.deep.equal(room1Data);
+          expect(response.body).to.deep.equal(event1Data);
 
           return done();
         });
@@ -81,8 +81,8 @@ describe("events", function () {
         .post("/events")
         .set("cookie", `${cookieName}=${authToken}`)
         .send({
-          name: "Test Room",
-          description: "This is a test room",
+          name: "Test Event",
+          description: "This is a test event",
           region: "in",
         })
         .end((error, response) => {
@@ -91,34 +91,34 @@ describe("events", function () {
           }
           expect(response).to.have.status(500);
           expect(response.body.error).to.equal("ERR_BAD_REQUEST");
-          expect(response.body.message).to.equal("Couldn't create room. Please try again later");
+          expect(response.body.message).to.equal("Couldn't create event. Please try again later");
 
           return done();
         });
     });
 
     it("returns an error when the request to the eventQuery fails", function (done) {
-      const roomData = {
+      const eventData = {
         id: "test-room-id",
         name: "Test Room",
         description: "This is a test room",
         region: "in",
       };
-      sinon.stub(apiService, "post").resolves(roomData);
-      sinon.stub(eventQuery, "createRoom").rejects({ code: "ERR_BAD_REQUEST" });
+      sinon.stub(apiService, "post").resolves(eventData);
+      sinon.stub(eventQuery, "createEvent").rejects({ code: "ERR_BAD_REQUEST" });
 
       chai
         .request(app)
         .post("/events")
         .set("cookie", `${cookieName}=${authToken}`)
-        .send(roomData)
+        .send(eventData)
         .end((error, response) => {
           if (error) {
             return done(error);
           }
           expect(response).to.have.status(500);
           expect(response.body.error).to.equal("ERR_BAD_REQUEST");
-          expect(response.body.message).to.equal("Couldn't create room. Please try again later");
+          expect(response.body.message).to.equal("Couldn't create event. Please try again later");
 
           return done();
         });
@@ -142,7 +142,7 @@ describe("events", function () {
     });
   });
 
-  describe("GET /events - getAllRooms", function () {
+  describe("GET /events - getAllEvents", function () {
     it("should return all events information based on query parameters and enabled as false", function (done) {
       chai
         .request(app)
@@ -205,14 +205,14 @@ describe("events", function () {
     });
   });
 
-  describe("POST /join - joinRoom", function () {
+  describe("POST /events/join - joinEvent", function () {
     afterEach(function () {
       sinon.restore();
     });
 
     it("should return a token when the request is successful", function (done) {
       const payload = {
-        roomId: room1Data.id,
+        roomId: event1Data.id,
         userId: "5678",
         role: "guest",
       };
@@ -229,7 +229,7 @@ describe("events", function () {
 
           expect(response).to.have.status(201);
           expect(response.body.token).to.be.a("string");
-          expect(response.body.msg).to.be.a("string");
+          expect(response.body.message).to.be.a("string");
           expect(response.body.success).to.be.equal(true);
 
           return done();
@@ -237,9 +237,9 @@ describe("events", function () {
     });
   });
 
-  describe("GET /events/:id - getRoomById", function () {
-    it("Should return room information if the room exists", function (done) {
-      const roomId = room1Data.room_id;
+  describe("GET /events/:id - getEventById", function () {
+    it("Should return event information if the event exists", function (done) {
+      const roomId = event1Data.room_id;
       chai
         .request(app)
         .get(`/events/${roomId}`)
@@ -260,7 +260,7 @@ describe("events", function () {
 
     it("Should return 500 if an error occurs while retrieving the room information", function (done) {
       const roomId = "invalid-room-id";
-      const mockError = { code: "ERR_BAD_REQUEST", message: "Unable to retrieve room details" };
+      const mockError = { code: "ERR_BAD_REQUEST", message: "Unable to retrieve event details" };
       sinon.stub(apiService, "get").rejects(mockError);
 
       chai
@@ -283,23 +283,23 @@ describe("events", function () {
     });
   });
 
-  describe("PUT rooms - updateRoom", function () {
+  describe("PATCH /events - updateEvent", function () {
     afterEach(function () {
       sinon.restore();
     });
 
-    it("returns the enabled room data when the request is successful", function (done) {
+    it("returns the enabled event data when the request is successful", function (done) {
       const payload = {
         enabled: true,
       };
       sinon.stub(apiService, "post").resolves(payload);
-      sinon.stub(eventQuery, "updateRoom").resolves({ ...room1Data, enabled: true });
+      sinon.stub(eventQuery, "updateEvent").resolves({ ...event1Data, enabled: true });
 
       chai
         .request(app)
-        .put("/events")
+        .patch("/events")
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...payload, id: room1Data.room_id })
+        .send({ ...payload, id: event1Data.room_id })
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -307,7 +307,7 @@ describe("events", function () {
 
           expect(response).to.have.status(200);
           expect(response.body.message).to.be.a("string");
-          expect(response.body.data.id).to.equal(room1Data.room_id);
+          expect(response.body.data.id).to.equal(event1Data.room_id);
           expect(response.body.data.enabled).to.equal(true);
 
           return done();
@@ -319,13 +319,13 @@ describe("events", function () {
         enabled: false,
       };
       sinon.stub(apiService, "post").resolves(payload);
-      sinon.stub(eventQuery, "updateRoom").resolves({ ...room1Data, enabled: false });
+      sinon.stub(eventQuery, "updateEvent").resolves({ ...event1Data, enabled: false });
 
       chai
         .request(app)
-        .put("/events")
+        .patch("/events")
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...payload, id: room1Data.room_id })
+        .send({ ...payload, id: event1Data.room_id })
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -333,7 +333,7 @@ describe("events", function () {
 
           expect(response).to.have.status(200);
           expect(response.body.message).to.be.a("string");
-          expect(response.body.data.id).to.equal(room1Data.room_id);
+          expect(response.body.data.id).to.equal(event1Data.room_id);
           expect(response.body.data.enabled).to.equal(false);
 
           return done();
@@ -346,20 +346,20 @@ describe("events", function () {
       };
 
       sinon.stub(apiService, "post").resolves(payload);
-      sinon.stub(eventQuery, "updateRoom").rejects({ code: "ERR_BAD_REQUEST" });
+      sinon.stub(eventQuery, "updateEvent").rejects({ code: "ERR_BAD_REQUEST" });
 
       chai
         .request(app)
-        .put("/events")
+        .patch("/events")
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({ enabled: true, id: room1Data.id })
+        .send({ enabled: true, id: event1Data.id })
         .end((error, response) => {
           if (error) {
             return done(error);
           }
           expect(response).to.have.status(500);
           expect(response.body.error.code).to.equal("ERR_BAD_REQUEST");
-          expect(response.body.message).to.equal("Couldn't update room. Please try again later.");
+          expect(response.body.message).to.equal("Couldn't update event. Please try again later.");
 
           return done();
         });
@@ -368,7 +368,7 @@ describe("events", function () {
     it("should return unauthorized error if user is not authenticated", function (done) {
       chai
         .request(app)
-        .put(`/events`)
+        .patch(`/events`)
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -383,24 +383,24 @@ describe("events", function () {
     });
   });
 
-  describe("PATCH / - endActiveRoom", function () {
+  describe("PATCH /events/end - endActiveEvent", function () {
     afterEach(function () {
       sinon.restore();
     });
 
     it("returns a success message when the request is successful", function (done) {
       const payload = {
-        reason: "Room ended by user",
+        reason: "Event ended by user",
         lock: true,
       };
       sinon.stub(apiService, "post").resolves({ message: "session is ending" });
-      sinon.stub(eventQuery, "endActiveRoom").returns({ message: "Session is ended." });
+      sinon.stub(eventQuery, "endActiveEvent").returns({ message: "Event ended successfully." });
 
       chai
         .request(app)
-        .patch("/events")
+        .patch("/events/end")
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...payload, id: room1Data.room_id })
+        .send({ ...payload, id: event1Data.room_id })
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -408,7 +408,7 @@ describe("events", function () {
 
           expect(response).to.have.status(200);
           expect(response.body.message).to.be.a("string");
-          expect(response.body.message).to.equal("Session is ended.");
+          expect(response.body.message).to.equal("Event ended successfully.");
 
           return done();
         });
