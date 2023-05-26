@@ -102,4 +102,9 @@ module.exports = {
       "Ba+XMCP64pXPC3r1llhKRwIl+6UFn+QlpbxtgQjhbULnSbc7fw==\n" +
       "-----END RSA PRIVATE KEY-----",
   },
+
+  Event100ms: {
+    APP_ACCESS_KEY: "APP_ACCESS_KEY",
+    APP_SECRET: "APP_SECRET",
+  },
 };
