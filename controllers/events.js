@@ -10,28 +10,28 @@ const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
 
 /**
- * Creates a new room document in the Firestore database with the data provided in the HTTP request body.
+ * Creates a new event document in the Firestore database with the data provided in the HTTP request body.
  * @async
  * @function
  * @param {Object} req - The Express request object.
  * @param {Object} res - The Express response object.
- * @returns {Object} The saved room data in JSON format.
- * @throws {Error} If an error occurs while creating the room document.
+ * @returns {Object} The saved event data in JSON format.
+ * @throws {Error} If an error occurs while creating the event document.
  */
-const createRoom = async (req, res) => {
+const createEvent = async (req, res) => {
   const { name, description, region, userId } = req.body;
   const payload = { name, description, region };
   try {
-    const roomData = await apiService.post("/rooms", payload);
+    const eventData = await apiService.post("/rooms", payload);
     const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
-    const event = removeUnwantedProperties(propertiesToRemove, roomData);
-    const savedRoomData = await eventQuery.createRoom({ room_id: roomData.id, created_by: userId, ...event });
-    return res.status(201).json(savedRoomData);
+    const event = removeUnwantedProperties(propertiesToRemove, eventData);
+    const eventDataFromDB = await eventQuery.createEvent({ room_id: eventData.id, created_by: userId, ...event });
+    return res.status(201).json(eventDataFromDB);
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "Couldn't create room. Please try again later",
+      message: "Couldn't create event. Please try again later",
     });
   }
 };
@@ -45,7 +45,7 @@ const createRoom = async (req, res) => {
  * @returns {Object} The events data in JSON format.
  * @throws {Error} If an error occurs while retrieving the events data.
  */
-const getAllRooms = async (req, res) => {
+const getAllEvents = async (req, res) => {
   /**
    * @type {boolean} - enabled: determines whether the rooms should be enabled or disabled.
    * @type {number} - limit: The maximum number of rooms to retrieve.
@@ -56,23 +56,23 @@ const getAllRooms = async (req, res) => {
     const start = offset || "";
     const limitOfRooms = limit || GET_ALL_ROOMS_LIMIT_MIN;
     const isEnabled = enabled || false;
-    const roomsData = await apiService.get(`/rooms?limit=${limitOfRooms}&enabled=${isEnabled}&start=${start}`);
-    if (roomsData.data) {
+    const eventsData = await apiService.get(`/rooms?limit=${limitOfRooms}&enabled=${isEnabled}&start=${start}`);
+    if (eventsData.data) {
       const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
-      const events = removeUnwantedProperties(propertiesToRemove, roomsData.data);
+      const events = removeUnwantedProperties(propertiesToRemove, eventsData.data);
 
-      const responseData = {
-        limit: roomsData.limit,
-        last: roomsData.last,
-        data: events.map(({ id, ...room }) => ({
+      const filteredEventsData = {
+        limit: eventsData.limit,
+        last: eventsData.last,
+        data: events.map(({ id, ...event }) => ({
           id,
           room_id: id,
-          ...room,
+          ...event,
         })),
       };
-      return res.status(200).json(responseData);
+      return res.status(200).json(filteredEventsData);
     }
-    return res.status(200).json(roomsData);
+    return res.status(200).json(eventsData);
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
@@ -83,7 +83,7 @@ const getAllRooms = async (req, res) => {
 };
 
 /**
- * Generates a token for the specified room and user information.
+ * Generates a token for the specified event and user information.
  * @async
  * @function
  * @param {Object} req - The Express request object.
@@ -91,7 +91,7 @@ const getAllRooms = async (req, res) => {
  * @returns {Object} An object containing the generated token and a success message in JSON format.
  * @throws {Error} If an error occurs while generating the token.
  */
-const joinRoom = async (req, res) => {
+const joinEvent = async (req, res) => {
   const { roomId, userId, role } = req.body;
   const payload = { room_id: roomId, user_id: userId, role };
   try {
@@ -108,99 +108,100 @@ const joinRoom = async (req, res) => {
 };
 
 /**
- * Retrieves room details by ID and returns JSON response
+ * Retrieves event details by ID and returns JSON response
  *
  * @async
  * @function
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @returns {Object} - JSON response containing room details or error message
- * @throws {Object} - The JSON response with an error message if an error occurred if room retrieval fails.
+ * @returns {Object} - JSON response containing event details or error message
+ * @throws {Object} - The JSON response with an error message if an error occurred if event retrieval fails.
  */
-const getRoomById = async (req, res) => {
+const getEventById = async (req, res) => {
   const roomId = req.params.id;
   const isActiveRoom = req.body.isActiveRoom;
   try {
-    const roomData = await apiService.get(`/${isActiveRoom ? "active-" : ""}rooms/${roomId}`);
+    const eventData = await apiService.get(`/${isActiveRoom ? "active-" : ""}rooms/${roomId}`);
     if (!isActiveRoom) {
       const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
-      const event = removeUnwantedProperties(propertiesToRemove, roomData);
+      const event = removeUnwantedProperties(propertiesToRemove, eventData);
       return res.status(200).json({ room_id: event.id, ...event });
     }
-    return res.status(200).json(roomData);
+    return res.status(200).json(eventData);
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "Unable to retrieve room details",
+      message: "Unable to retrieve event details",
     });
   }
 };
 
 /**
- * Updates a room with the given ID and enables/disables it
+ * Updates a event with the given ID and enables/disables it
  *
  * @async
  * @function
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @returns {Object} - JSON response containing updated room data and success message or error message
- * @throws {Object} - If an error occurs while updating the room
+ * @returns {Object} - JSON response containing updated event data and success message or error message
+ * @throws {Object} - If an error occurs while updating the event
  */
-const updateRoom = async (req, res) => {
+const updateEvent = async (req, res) => {
   const payload = {
     enabled: req.body.enabled,
   };
   try {
-    const roomData = await apiService.post(`/rooms/${req.body.id}`, payload);
-    await eventQuery.updateRoom(roomData);
+    const eventData = await apiService.post(`/rooms/${req.body.id}`, payload);
+    await eventQuery.updateEvent(eventData);
     const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
-    const event = removeUnwantedProperties(propertiesToRemove, roomData);
-    return res
-      .status(200)
-      .json({ data: { room_id: event.id, ...event }, message: `Room is ${req.body.enabled ? "enabled" : "disabled"}` });
+    const event = removeUnwantedProperties(propertiesToRemove, eventData);
+    return res.status(200).json({
+      data: { room_id: event.id, ...event },
+      message: `Event is ${req.body.enabled ? "enabled" : "disabled"}`,
+    });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error,
-      message: "Couldn't update room. Please try again later.",
+      message: "Couldn't update event. Please try again later.",
     });
   }
 };
 
 /**
- * Ends an active room session.
+ * Ends an active event.
  *
  * @async
  * @function
  * @param {Object} req - The Express request object.
  * @param {Object} res - The Express response object.
  * @returns {Promise<Object>} The JSON response with a message indicating the session has ended.
- * @throws {Object} The JSON response with an error message if an error occurred while ending the room.
+ * @throws {Object} The JSON response with an error message if an error occurred while ending the event.
  */
-const endActiveRoom = async (req, res) => {
+const endActiveEvent = async (req, res) => {
   const payload = {
     reason: req.body.reason,
     lock: req.body.lock,
   };
   try {
     await apiService.post(`/active-rooms/${req.body.id}/end-room`, payload);
-    await eventQuery.endActiveRoom({ id: req.body.id, ...payload });
+    await eventQuery.endActiveEvent({ id: req.body.id, ...payload });
     return res.status(200).json({ message: `Session is ended.` });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "Couldn't end the room. Please try again later",
+      message: "Couldn't end the event. Please try again later",
     });
   }
 };
 
 module.exports = {
-  createRoom,
-  getAllRooms,
-  joinRoom,
-  getRoomById,
-  updateRoom,
-  endActiveRoom,
+  createEvent,
+  getAllEvents,
+  joinEvent,
+  getEventById,
+  updateEvent,
+  endActiveEvent,
 };
