@@ -27,5 +27,6 @@ app.use("/external-accounts", require("./external-accounts.js"));
 app.use("/discord-actions", require("./discordactions.js"));
 app.use("/issues", require("./issues.js"));
 app.use("/progresses", require("./progresses.js"));
-
+app.use("/userDeviceInfo", require("./userDeviceInfo.js"));
+app.use("/scanQr", require("./scanQr.js"));
 module.exports = app;
