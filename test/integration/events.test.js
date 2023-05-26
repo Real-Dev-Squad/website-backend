@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
@@ -19,7 +18,7 @@ const eventQuery = require("../../models/events");
 const defaultUser = userData[0];
 
 const config = require("config");
-const Sinon = require("sinon");
+const sinon = require("sinon");
 
 const { EventTokenService } = require("../../services/EventTokenService");
 const { EventAPIService } = require("../../services/EventAPIService");
@@ -45,7 +44,7 @@ describe("events", function () {
 
   describe("POST events - createRoom", function () {
     afterEach(function () {
-      Sinon.restore();
+      sinon.restore();
     });
 
     it("returns the created room data when the request is successful", function (done) {
@@ -54,8 +53,8 @@ describe("events", function () {
         description: "Hello world! How are you",
         region: "in",
       };
-      Sinon.stub(apiService, "post").resolves(room1Data);
-      Sinon.stub(eventQuery, "createRoom").resolves(room1Data);
+      sinon.stub(apiService, "post").resolves(room1Data);
+      sinon.stub(eventQuery, "createRoom").resolves(room1Data);
 
       chai
         .request(app)
@@ -75,7 +74,7 @@ describe("events", function () {
     });
 
     it("returns an error when the request to the API service fails", function (done) {
-      Sinon.stub(apiService, "post").rejects({ code: "ERR_BAD_REQUEST" });
+      sinon.stub(apiService, "post").rejects({ code: "ERR_BAD_REQUEST" });
 
       chai
         .request(app)
@@ -105,8 +104,8 @@ describe("events", function () {
         description: "This is a test room",
         region: "in",
       };
-      Sinon.stub(apiService, "post").resolves(roomData);
-      Sinon.stub(eventQuery, "createRoom").rejects({ code: "ERR_BAD_REQUEST" });
+      sinon.stub(apiService, "post").resolves(roomData);
+      sinon.stub(eventQuery, "createRoom").rejects({ code: "ERR_BAD_REQUEST" });
 
       chai
         .request(app)
@@ -186,7 +185,7 @@ describe("events", function () {
     });
 
     it("returns an error if there is a problem retrieving events", function (done) {
-      Sinon.stub(apiService, "get").rejects({ code: "ERR_BAD_REQUEST" });
+      sinon.stub(apiService, "get").rejects({ code: "ERR_BAD_REQUEST" });
 
       chai
         .request(app)
@@ -208,7 +207,7 @@ describe("events", function () {
 
   describe("POST /join - joinRoom", function () {
     afterEach(function () {
-      Sinon.restore();
+      sinon.restore();
     });
 
     it("should return a token when the request is successful", function (done) {
@@ -217,7 +216,7 @@ describe("events", function () {
         userId: "5678",
         role: "guest",
       };
-      Sinon.stub(tokenService, "getAuthToken").resolves("test-token");
+      sinon.stub(tokenService, "getAuthToken").resolves("test-token");
 
       chai
         .request(app)
@@ -262,7 +261,7 @@ describe("events", function () {
     it("Should return 500 if an error occurs while retrieving the room information", function (done) {
       const roomId = "invalid-room-id";
       const mockError = { code: "ERR_BAD_REQUEST", message: "Unable to retrieve room details" };
-      Sinon.stub(apiService, "get").rejects(mockError);
+      sinon.stub(apiService, "get").rejects(mockError);
 
       chai
         .request(app)
@@ -286,15 +285,15 @@ describe("events", function () {
 
   describe("PUT rooms - updateRoom", function () {
     afterEach(function () {
-      Sinon.restore();
+      sinon.restore();
     });
 
     it("returns the enabled room data when the request is successful", function (done) {
       const payload = {
         enabled: true,
       };
-      Sinon.stub(apiService, "post").resolves(payload);
-      Sinon.stub(eventQuery, "updateRoom").resolves({ ...room1Data, enabled: true });
+      sinon.stub(apiService, "post").resolves(payload);
+      sinon.stub(eventQuery, "updateRoom").resolves({ ...room1Data, enabled: true });
 
       chai
         .request(app)
@@ -319,8 +318,8 @@ describe("events", function () {
       const payload = {
         enabled: false,
       };
-      Sinon.stub(apiService, "post").resolves(payload);
-      Sinon.stub(eventQuery, "updateRoom").resolves({ ...room1Data, enabled: false });
+      sinon.stub(apiService, "post").resolves(payload);
+      sinon.stub(eventQuery, "updateRoom").resolves({ ...room1Data, enabled: false });
 
       chai
         .request(app)
@@ -346,8 +345,8 @@ describe("events", function () {
         enabled: true,
       };
 
-      Sinon.stub(apiService, "post").resolves(payload);
-      Sinon.stub(eventQuery, "updateRoom").rejects({ code: "ERR_BAD_REQUEST" });
+      sinon.stub(apiService, "post").resolves(payload);
+      sinon.stub(eventQuery, "updateRoom").rejects({ code: "ERR_BAD_REQUEST" });
 
       chai
         .request(app)
@@ -386,7 +385,7 @@ describe("events", function () {
 
   describe("PATCH / - endActiveRoom", function () {
     afterEach(function () {
-      Sinon.restore();
+      sinon.restore();
     });
 
     it("returns a success message when the request is successful", function (done) {
@@ -394,8 +393,8 @@ describe("events", function () {
         reason: "Room ended by user",
         lock: true,
       };
-      Sinon.stub(apiService, "post").resolves({ message: "session is ending" });
-      Sinon.stub(eventQuery, "endActiveRoom").resolves({ message: "Session is ended." });
+      sinon.stub(apiService, "post").resolves({ message: "session is ending" });
+      sinon.stub(eventQuery, "endActiveRoom").returns({ message: "Session is ended." });
 
       chai
         .request(app)
