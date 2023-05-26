@@ -18,7 +18,10 @@ class EventAPIService {
   // Add Axios interceptors to process all requests and responses
   #configureAxios() {
     const shouldRetryWithRefreshedToken = (error, originalRequest) => {
-      return (error.response?.status === 403 || error.response?.status === 401) && !originalRequest._retry;
+      const isUnauthorized = error.response?.status === 403 || error.response?.status === 401;
+      const hasWWWAuthenticateHeader = error.response?.headers["www-authenticate"];
+
+      return isUnauthorized && !originalRequest._retry && !hasWWWAuthenticateHeader;
     };
 
     this.#axiosInstance.interceptors.request.use(
@@ -43,15 +46,6 @@ class EventAPIService {
         if (shouldRetryWithRefreshedToken(error, originalRequest)) {
           logger.info("Retrying request with refreshed token");
           originalRequest._retry = true;
-
-          // Force refresh Management token on error making API call
-          this.axios.defaults.headers.common.Authorization =
-            "Bearer " + this.#tokenServiceInstance.getManagementToken(true);
-          try {
-            return this.axios(originalRequest);
-          } catch (error) {
-            logger.error("Unable to Retry!");
-          }
         }
         return Promise.reject(error);
       }
@@ -67,7 +61,7 @@ class EventAPIService {
 
   // A method for POST requests using the configured Axios instance
   async post(path, payload) {
-    const res = await this.#axiosInstance.post(path, payload || {});
+    const res = await this.#axiosInstance.post(path, payload);
     logger.info(`post call to path - ${path}, status code - ${res.status}`);
     return res.data;
   }
