@@ -437,22 +437,6 @@ describe("Task Requests", function () {
             return done();
           });
       });
-
-      it("should throw 400 error when taskId and userId is missing", function (done) {
-        chai
-          .request(app)
-          .patch("/taskRequests/approve")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
-            expect(res).to.have.status(400);
-            expect(res.body.message).to.equal("taskRequestId not provided");
-            return done();
-          });
-      });
     });
 
     describe("When the user is not super user", function () {

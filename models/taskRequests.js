@@ -13,33 +13,17 @@ const userModel = require("./users");
 const fetchTaskRequests = async () => {
   const taskRequests = [];
 
-  const visitedUsersId = new Set();
-  const visitedUsers = [];
+  const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
 
-  const taskRequestsSnapshot = (await taskRequestsCollection.get()).docs;
+  for (const taskRequestsSnapshot of taskRequestsSnapshots) {
+    const taskRequestData = taskRequestsSnapshot.data();
+    const { requestors } = taskRequestData;
 
-  for (const taskRequestSnapshot of taskRequestsSnapshot) {
-    const taskRequest = taskRequestSnapshot.data();
-    const requestors = taskRequest.requestors;
-    const users = [];
+    const { taskData } = await tasksModel.fetchTask(taskRequestData.taskId);
+    const users = await Promise.all(requestors.map((requestor) => userModel.fetchUser({ userId: requestor })));
 
-    const { taskData } = await tasksModel.fetchTask(taskRequest.taskId);
-
-    for (const requestor of requestors) {
-      if (visitedUsersId.has(requestor)) {
-        users.push(visitedUsers.find((visitedUser) => visitedUser.id === requestor));
-        continue;
-      }
-
-      const { user } = await userModel.fetchUser({ userId: requestor });
-      users.push(user);
-      visitedUsersId.add(requestor);
-      visitedUsers.push(user);
-    }
-
-    taskRequests.push({ id: taskRequestSnapshot.id, ...taskRequest, task: taskData, requestors: users });
+    taskRequests.push({ ...taskRequestData, task: taskData, requestors: users });
   }
-
   return taskRequests;
 };
 
@@ -66,7 +50,7 @@ const addOrUpdate = async (taskId, userId) => {
       await taskRequestsCollection.doc(taskRequestRef.id).update({ requestors: updatedRequestors });
 
       return {
-        isUpdate: true,
+        isCreate: false,
         requestors: updatedRequestors,
       };
     }
@@ -107,7 +91,7 @@ const approveTaskRequest = async (taskRequestId, user) => {
     };
 
     await taskRequestsCollection.doc(taskRequestId).set(updatedTaskRequest);
-    await tasksModel.updateTask({ assignee: user.username, status: TASK_STATUS.ASSIGNED }, taskRequestId);
+    await tasksModel.updateTask({ assignee: user.id, status: TASK_STATUS.ASSIGNED }, taskRequestId);
 
     return {
       approvedTo: user.username,
