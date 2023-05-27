@@ -24,7 +24,7 @@ const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
 describe("Test the tracked Progress API", function () {
-  let userId0, userId1, superUser;
+  let userId0, userId1, superUserId;
   let userIdToken0, superUserToken;
   let taskId0, taskId1;
 
@@ -32,8 +32,8 @@ describe("Test the tracked Progress API", function () {
     userId0 = await addUser(userData0);
     userIdToken0 = authService.generateAuthToken({ userId: userId0 });
     userId1 = await addUser(userData1);
-    superUser = await addUser(superUserData);
-    superUserToken = authService.generateAuthToken({ userId: superUser });
+    superUserId = await addUser(superUserData);
+    superUserToken = authService.generateAuthToken({ userId: superUserId });
 
     const taskObject0 = await updateTask(taskData[0]);
     taskId0 = taskObject0.taskId;

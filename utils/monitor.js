@@ -12,7 +12,7 @@ const { RESOURCE_NOT_FOUND } = RESPONSE_MESSAGES;
  * @param {string} queryParams.taskId - The ID of the task (optional).
  * @returns {Firestore.Query} - A Firestore query to check if a document exists.
  */
-const buildTrackedProgressQueryByType = (queryParams) => {
+const buildQueryByTypeId = (queryParams) => {
   const { userId, taskId } = queryParams;
   if (userId) {
     return trackedProgressesCollection.where("type", "==", "user").where("userId", "==", userId);
@@ -39,23 +39,6 @@ const buildQueryForFetchingDocsOfType = (queryParams) => {
 };
 
 /**
- * Builds a Firestore query for fetching a specific tracked progress document based on the provided query parameters.
- *
- * @param {Object} queryParams - The query parameters for fetching a specific tracked progress document.
- * @param {string} queryParams.userId - The userId of the tracked progress document
- * @param {string} queryParams.taskId - The taskId of the tracked progress document
- * @returns {Firestore.Query} - A Firestore query for fetching a specific tracked progress document.
- */
-const buildQueryToFetchTrackedDoc = (queryParams) => {
-  const { userId, taskId } = queryParams;
-  if (userId) {
-    return trackedProgressesCollection.where("type", "==", "user").where("userId", "==", userId);
-  } else {
-    return trackedProgressesCollection.where("type", "==", "task").where("taskId", "==", taskId);
-  }
-};
-
-/**
  * Retrieves progress documents from Firestore based on the given query.
  * @param {Query} query - A Firestore query object for fetching progress documents.
  * @returns {Array.<Object>} An array of objects representing the retrieved tracked progress documents. Each object contains the document ID and its data.
@@ -74,8 +57,7 @@ const getTrackedProgressDocs = async (query) => {
 };
 
 module.exports = {
-  buildTrackedProgressQueryByType,
+  buildQueryByTypeId,
   buildQueryForFetchingDocsOfType,
   getTrackedProgressDocs,
-  buildQueryToFetchTrackedDoc,
 };
