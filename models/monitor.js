@@ -2,12 +2,7 @@ const { Conflict, NotFound } = require("http-errors");
 const fireStore = require("../utils/firestore");
 const trackedProgressesCollection = fireStore.collection("trackedProgresses");
 const { assertUserOrTaskExists } = require("../utils/progresses");
-const {
-  buildTrackedProgressQueryByType,
-  buildQueryForFetchingDocsOfType,
-  getTrackedProgressDocs,
-  buildQueryToFetchTrackedDoc,
-} = require("../utils/monitor");
+const { buildQueryByTypeId, buildQueryForFetchingDocsOfType, getTrackedProgressDocs } = require("../utils/monitor");
 const { RESPONSE_MESSAGES } = require("../constants/monitor");
 const { RESOURCE_NOT_FOUND, RESOURCE_ALREADY_TRACKED } = RESPONSE_MESSAGES;
 
@@ -27,7 +22,7 @@ const { RESOURCE_NOT_FOUND, RESOURCE_ALREADY_TRACKED } = RESPONSE_MESSAGES;
 const createTrackedProgressDocument = async (documentData) => {
   const { userId, taskId } = documentData;
   await assertUserOrTaskExists({ userId, taskId });
-  const query = buildTrackedProgressQueryByType({ userId, taskId });
+  const query = buildQueryByTypeId({ userId, taskId });
   const existingDocumentSnapshot = await query.get();
   if (!existingDocumentSnapshot.empty) {
     throw new Conflict(RESOURCE_ALREADY_TRACKED);
@@ -59,7 +54,7 @@ const createTrackedProgressDocument = async (documentData) => {
 const updateTrackedProgressDocument = async (req) => {
   const { type, typeId } = req.params;
   const updatedData = { type, [`${type}Id`]: typeId };
-  const query = buildTrackedProgressQueryByType(updatedData);
+  const query = buildQueryByTypeId(updatedData);
   const existingDocumentSnapshot = await query.get();
   if (existingDocumentSnapshot.empty) {
     throw new NotFound(RESOURCE_NOT_FOUND);
@@ -85,7 +80,7 @@ const getTrackedProgressDocuments = async (reqQuery) => {
   const { userId, taskId } = reqQuery;
   if (userId || taskId) {
     await assertUserOrTaskExists({ userId, taskId });
-    query = buildQueryToFetchTrackedDoc(reqQuery);
+    query = buildQueryByTypeId(reqQuery);
     docsData = (await getTrackedProgressDocs(query))[0];
   } else {
     query = buildQueryForFetchingDocsOfType(reqQuery);
