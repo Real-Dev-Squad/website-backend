@@ -80,7 +80,7 @@ const fetchTasks = async () => {
       const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
       task.dependsOn = [];
       dependencySnapshot.docs.forEach((doc) => {
-        const dependency = doc.get("dependency");
+        const dependency = doc.get("dependsOn");
         task.dependsOn.push(dependency);
       });
       return task;
@@ -126,7 +126,7 @@ const fetchTask = async (taskId) => {
     const task = await tasksModel.doc(taskId).get();
     const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
     const dependencyDocReference = dependencySnapshot.docs.map((doc) => {
-      const dependency = doc.get("dependency");
+      const dependency = doc.get("dependsOn");
       return dependency;
     });
     const taskData = await fromFirestoreData(task.data());
