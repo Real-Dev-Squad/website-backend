@@ -1,10 +1,9 @@
 /* eslint-disable camelcase */
-const { EventAPIService } = require("../services/EventAPIService");
-const { EventTokenService } = require("../services/EventTokenService");
+const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS } = require("../constants/events");
+const { EventTokenService, EventAPIService } = require("../services");
+const { removeUnwantedProperties } = require("../utils/events");
 const eventQuery = require("../models/events");
 const logger = require("../utils/logger");
-const { GET_ALL_EVENTS_LIMIT_MIN } = require("../constants/events");
-const { removeUnwantedProperties } = require("../utils/events");
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
@@ -23,8 +22,7 @@ const createEvent = async (req, res) => {
   const payload = { name, description, region };
   try {
     const eventData = await apiService.post("/rooms", payload);
-    const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
-    const event = removeUnwantedProperties(propertiesToRemove, eventData);
+    const event = removeUnwantedProperties(UNWANTED_PROPERTIES_FROM_100MS, eventData);
     const eventDataFromDB = await eventQuery.createEvent({ room_id: eventData.id, created_by: userId, ...event });
     return res.status(201).json(eventDataFromDB);
   } catch (error) {
@@ -57,9 +55,8 @@ const getAllEvents = async (req, res) => {
     const limitOfRooms = limit || GET_ALL_EVENTS_LIMIT_MIN;
     const isEnabled = enabled || false;
     const eventsData = await apiService.get(`/rooms?limit=${limitOfRooms}&enabled=${isEnabled}&start=${start}`);
-    if (eventsData.data) {
-      const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
-      const events = removeUnwantedProperties(propertiesToRemove, eventsData.data);
+    if (eventsData?.data) {
+      const events = removeUnwantedProperties(UNWANTED_PROPERTIES_FROM_100MS, eventsData.data);
 
       const filteredEventsData = {
         limit: eventsData.limit,
@@ -96,11 +93,19 @@ const joinEvent = async (req, res) => {
   const payload = { room_id: roomId, user_id: userId, role };
   try {
     const token = tokenService.getAuthToken(payload);
-    res.status(201).json({
-      token: token,
-      message: "Token generated successfully!",
-      success: true,
-    });
+    if (res.statusCode === 201) {
+      res.status(201).json({
+        token: token,
+        message: "Token generated successfully!",
+        success: true,
+      });
+    }
+    // res.status(res.statusCode).send("Unexpected status code");
+    // res.status(201).json({
+    //   token: token,
+    //   message: "Token generated successfully!",
+    //   success: true,
+    // });
   } catch (error) {
     logger.error(error);
     res.status(500).send("Internal Server Error");
@@ -121,10 +126,10 @@ const getEventById = async (req, res) => {
   const roomId = req.params.id;
   const isActiveRoom = req.body.isActiveRoom;
   try {
-    const eventData = await apiService.get(`/${isActiveRoom ? "active-" : ""}rooms/${roomId}`);
+    const url = `/${isActiveRoom ? "active-" : ""}rooms/${roomId}`;
+    const eventData = await apiService.get(url);
     if (!isActiveRoom) {
-      const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
-      const event = removeUnwantedProperties(propertiesToRemove, eventData);
+      const event = removeUnwantedProperties(UNWANTED_PROPERTIES_FROM_100MS, eventData);
       return res.status(200).json({ room_id: event.id, ...event });
     }
     return res.status(200).json(eventData);
@@ -154,8 +159,7 @@ const updateEvent = async (req, res) => {
   try {
     const eventData = await apiService.post(`/rooms/${req.body.id}`, payload);
     await eventQuery.updateEvent(eventData);
-    const propertiesToRemove = ["customer_id", "app_id", "recording_info", "template_id", "template", "customer"];
-    const event = removeUnwantedProperties(propertiesToRemove, eventData);
+    const event = removeUnwantedProperties(UNWANTED_PROPERTIES_FROM_100MS, eventData);
     return res.status(200).json({
       data: { room_id: event.id, ...event },
       message: `Event is ${req.body.enabled ? "enabled" : "disabled"}`,
