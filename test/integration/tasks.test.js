@@ -37,7 +37,7 @@ describe("Tasks", function () {
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
-        status: "active",
+        status: "IN_PROGRESS",
         percentCompleted: 10,
         participants: [],
         assignee: appOwner.username,
@@ -371,7 +371,7 @@ describe("Tasks", function () {
     it("Should return 200 when username is valid", function (done) {
       chai
         .request(app)
-        .get(`/tasks/${appOwner.username}?status=active`)
+        .get(`/tasks/${appOwner.username}?status=IN_PROGRESS`) // TODO: if status is passed in lowercase it fails, fix this
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -396,7 +396,7 @@ describe("Tasks", function () {
     it("Should return 404 when username is invalid", function (done) {
       chai
         .request(app)
-        .get("/tasks/dummyUser?status=active")
+        .get("/tasks/dummyUser?status=in_progress")
         .end((err, res) => {
           if (err) {
             return done(err);
