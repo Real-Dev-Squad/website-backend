@@ -93,22 +93,14 @@ const joinEvent = async (req, res) => {
   const payload = { room_id: roomId, user_id: userId, role };
   try {
     const token = tokenService.getAuthToken(payload);
-    if (res.statusCode === 201) {
-      res.status(201).json({
-        token: token,
-        message: "Token generated successfully!",
-        success: true,
-      });
-    }
-    // res.status(res.statusCode).send("Unexpected status code");
-    // res.status(201).json({
-    //   token: token,
-    //   message: "Token generated successfully!",
-    //   success: true,
-    // });
+    return res.status(201).json({
+      token: token,
+      message: "Token generated successfully!",
+      success: true,
+    });
   } catch (error) {
-    logger.error(error);
-    res.status(500).send("Internal Server Error");
+    logger.error({ error });
+    return res.status(500).send("Internal Server Error");
   }
 };
 
