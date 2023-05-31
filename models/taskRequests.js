@@ -15,15 +15,27 @@ const fetchTaskRequests = async () => {
 
   const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
 
-  for (const taskRequestsSnapshot of taskRequestsSnapshots) {
+  const taskPromises = [];
+  const userPromises = [];
+
+  taskRequestsSnapshots.forEach((taskRequestsSnapshot) => {
     const taskRequestData = taskRequestsSnapshot.data();
     const { requestors } = taskRequestData;
 
-    const { taskData } = await tasksModel.fetchTask(taskRequestData.taskId);
-    const users = await Promise.all(requestors.map((requestor) => userModel.fetchUser({ userId: requestor })));
+    taskPromises.push(tasksModel.fetchTask(taskRequestData.taskId));
+    userPromises.push(Promise.all(requestors.map((requestor) => userModel.fetchUser({ userId: requestor }))));
 
-    taskRequests.push({ ...taskRequestData, task: taskData, requestors: users });
-  }
+    taskRequests.push(taskRequestData);
+  });
+
+  const tasks = await Promise.all(taskPromises);
+  const users = await Promise.all(userPromises);
+
+  taskRequests.forEach((taskRequest, index) => {
+    taskRequest.task = tasks[index].taskData;
+    taskRequest.requestors = users[index];
+  });
+
   return taskRequests;
 };
 
