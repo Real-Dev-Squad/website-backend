@@ -47,10 +47,10 @@ const addDependency = async (data) => {
     if (dependsOn.length > 500) {
       throw new Error("Error cannot add more than 500 taskId");
     }
-    for (const dependsId of dependsOn) {
+    for (const dependency of dependsOn) {
       const taskDependOn = {
-        taskId,
-        dependsId,
+        taskId: taskId,
+        dependsOn: dependency,
       };
       const docid = dependencyModel.doc();
       batch.set(docid, taskDependOn);
@@ -80,8 +80,8 @@ const fetchTasks = async () => {
       const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
       task.dependsOn = [];
       dependencySnapshot.docs.forEach((doc) => {
-        const dependsId = doc.get("dependsId");
-        task.dependsOn.push(dependsId);
+        const dependency = doc.get("dependsOn");
+        task.dependsOn.push(dependency);
       });
       return task;
     });
@@ -126,8 +126,8 @@ const fetchTask = async (taskId) => {
     const task = await tasksModel.doc(taskId).get();
     const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
     const dependencyDocReference = dependencySnapshot.docs.map((doc) => {
-      const dependsId = doc.get("dependsId");
-      return dependsId;
+      const dependency = doc.get("dependsOn");
+      return dependency;
     });
     const taskData = await fromFirestoreData(task.data());
     if (taskData?.status) {
