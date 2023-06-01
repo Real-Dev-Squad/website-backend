@@ -9,7 +9,6 @@ const { upload } = require("../utils/multer");
 const { getUserBadges } = require("../controllers/badges");
 const { updateRoles } = require("../controllers/members");
 
-
 router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
 router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);

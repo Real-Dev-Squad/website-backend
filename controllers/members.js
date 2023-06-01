@@ -102,12 +102,13 @@ const archiveMembers = async (req, res) => {
 };
 
 const updateRoles = async (req, res) => {
-  try{
+  try {
     const userId = req.params.id;
     const user = await fetchUser({ userId });
     if (user?.userExists) {
       const dataToUpdate = req.body;
       const successObject = await members.updateRoles(user.user.id, dataToUpdate);
+      const responseObject = { message: "" };
       let statusCode;
       if (successObject.isRoleUpdated) {
         statusCode = 204;
@@ -115,24 +116,27 @@ const updateRoles = async (req, res) => {
       }
       return res.status(statusCode).json(responseObject);
     }
+    return res.boom.notFound("role updated failed.");
   } catch (error) {
     if (error instanceof NotFound) {
       return res.status(404).json({
         message: "User not found",
       });
-    }else if(error instanceof Unauthorized) {
+    } else if (error instanceof Unauthorized) {
       return res.status(401).json({
         message: "Unauthenticated User",
       });
-    }else if(error instanceof ServiceUnavailable) {
+    } else if (error instanceof ServiceUnavailable) {
       return res.status(503).json({
         message: "Unauthenticated User",
       });
     }
     logger.error(error.message);
-    return res.boom.badRequest("Invalid Request");
+    return res.status(400).json({
+      message: "Invalid role",
+    });
   }
-}
+};
 
 module.exports = {
   archiveMembers,

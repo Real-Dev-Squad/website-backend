@@ -50,15 +50,10 @@ const fetchUsers = async (queryParams = {}) => {
  */
 
 const moveToMembers = async (userId) => {
-  console.log(userId);
   try {
     const userDoc = await userModel.doc(userId).get();
     const user = userDoc.data();
-    console.log('56',user);
-    console.log('58',user?.roles?.member);
     if (user?.roles?.member) return { isAlreadyMember: true, movedToMember: false };
-    console.log('60',user.roles);
-    console.log('61',{...user.roles});
     const roles = user.roles ? { ...user.roles, member: true } : { member: true };
     await userModel.doc(userId).update({
       roles,
@@ -125,20 +120,20 @@ const updateRoles = async (userId, newRoles) => {
     const userDoc = await userModel.doc(userId).get();
     const user = userDoc.data();
     let roles;
-    if(Object.keys(newRoles).includes("member")){
-      if(newRoles.member==true){
-        if (user?.roles?.member){
+    if (Object.keys(newRoles).includes("member")) {
+      if (newRoles.member === true) {
+        if (user?.roles?.member) {
           return { isRoleUpdated: false };
-        } 
-      }else if(newRoles.member==false){
-        if (user?.roles?.member==false){
+        }
+      } else if (newRoles.member === false) {
+        if (user?.roles?.member === false) {
           return { isRoleUpdated: false };
         }
       }
       roles = user.roles ? { ...user.roles, member: newRoles.member } : { member: newRoles.member };
-    }else if(Object.keys(newRoles).includes("archived")){
+    } else if (Object.keys(newRoles).includes("archived")) {
       if (user?.roles && user.roles[ROLES.ARCHIVED]) return { isRoleUpdated: false };
-      roles = { ...user.roles, archived: newRoles.archived};
+      roles = { ...user.roles, archived: newRoles.archived };
     }
     await userModel.doc(userId).update({
       roles,
@@ -148,7 +143,7 @@ const updateRoles = async (userId, newRoles) => {
     logger.error("Error updating user", err);
     throw err;
   }
-}
+};
 
 module.exports = {
   moveToMembers,
