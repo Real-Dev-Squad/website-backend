@@ -24,6 +24,8 @@ router.get("/:id/badges", getUserBadges);
 
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post("/picture", authenticate, upload.single("profile"), users.postUserPicture);
+router.patch("/picture/verify", authenticate, users.verifyUserImage);
+router.get("/picture", authenticate, users.getUserImageForVerification);
 router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);

@@ -13,6 +13,7 @@ const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
 const userStatusModel = firestore.collection("usersStatus");
+const photoVerificationModel = firestore.collection("photoVerification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 /**
  * Adds or updates the user data
@@ -293,6 +294,70 @@ const initializeUser = async (userId) => {
 };
 
 /**
+ * Adds user data for verification by moderators
+ * @param userId {String} - RDS User Id
+ * @param discordId {Object} - Discord id of RDS user
+ * @param profileImageUrl {number} - profile image URL of user
+ * @param discordImageUrl {number} - discord image URL of user
+ */
+const addForVerification = async (userId, discordId, profileImageUrl, discordImageUrl) => {
+  try {
+    const isNotVerified = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
+    const unverifiedUserData = {
+      userId,
+      discordId,
+      discordImageData: { discordImageUrl, verified: false },
+      profileImageData: { profileImageUrl, verified: false },
+    };
+    if (!isNotVerified.empty) {
+      const documentRef = isNotVerified.docs[0].ref;
+      await documentRef.update(unverifiedUserData);
+    } else await photoVerificationModel.add(unverifiedUserData);
+  } catch (err) {
+    logger.error("Error in creating Verification Entry", err);
+    throw err;
+  }
+};
+
+/**
+ * Removes if user passed a valid image; ignores if no unverified record
+ * @param userId {String} - RDS user Id
+ * @param type {String} - type of image that was verified
+ */
+const markAsVerified = async (userId, imageType) => {
+  try {
+    const isNotVerified = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
+    // VERIFIES BASED ON THE TYPE OF IMAGE
+    // IGNORES IF NO DOCUMENT FOUND
+    const imageVerificationType = imageType === "discord" ? "discordImageData.verified" : "profileImageData.verified";
+    if (!isNotVerified.empty) {
+      const documentRef = isNotVerified.docs[0].ref;
+      await documentRef.update({ [imageVerificationType]: true });
+    }
+  } catch (err) {
+    logger.error("Error while Removing Verification Entry", err);
+    throw err;
+  }
+};
+
+/**
+ * Removes if user passed a valid image; ignores if no unverified record
+ * @param userId {String} - RDS user Id
+ */
+const getUserImageForVerification = async (userId) => {
+  try {
+    const verificationImagesSnapshot = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
+    if (verificationImagesSnapshot.empty) {
+      throw new Error(`No document with userId: ${userId} was found!`);
+    }
+    return verificationImagesSnapshot.docs[0].data();
+  } catch (err) {
+    logger.error("Error while Removing Verification Entry", err);
+    throw err;
+  }
+};
+
+/**
  * Sets the user picture field of passed UserId to image data
  *
  * @param image { Object }: image data ( {publicId, url} )
@@ -430,4 +495,7 @@ module.exports = {
   getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
+  markAsVerified,
+  addForVerification,
+  getUserImageForVerification,
 };

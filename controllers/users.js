@@ -12,6 +12,7 @@ const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+const { getDiscordMemberDetails } = require("../services/discordMembersService");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -245,16 +246,68 @@ const updateSelf = async (req, res) => {
 const postUserPicture = async (req, res) => {
   try {
     const { file } = req;
-    const { id: userId } = req.userData;
+    const { id: userId, discordId } = req.userData;
     const { coordinates } = req.body;
+
+    const { user: discordUserData } = await getDiscordMemberDetails(discordId);
+    let discordAvatarUrl;
+    if (discordUserData) {
+      // CREATING/FETCHING THE USER'S DISCORD PROFILE PHOTO URL
+      discordAvatarUrl = `https://cdn.discordapp.com/avatars/${discordId}/${discordUserData?.avatar}.png`;
+    }
     const coordinatesObject = coordinates && JSON.parse(coordinates);
     const imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
+
+    await userQuery.addForVerification(userId, discordId, imageData.url, discordAvatarUrl);
+
     return res.json({
       message: "Profile picture uploaded successfully!",
       image: imageData,
     });
   } catch (error) {
     logger.error(`Error while adding profile picture of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
+ * Updates the user data
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const verifyUserImage = async (req, res) => {
+  try {
+    const { type: imageType } = req.query;
+    const { id: userId } = req.userData;
+    await userQuery.markAsVerified(userId, imageType);
+    return res.json({
+      message: `${imageType} image was verified successfully!`,
+    });
+  } catch (error) {
+    logger.error(`Error while verifying image of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
+ * Updates the user data
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getUserImageForVerification = async (req, res) => {
+  try {
+    const { id: userId } = req.userData;
+    const userImageVerificationData = await userQuery.getUserImageForVerification(userId);
+    return res.json({
+      message: "User image was data fetched successfully!",
+      data: userImageVerificationData,
+    });
+  } catch (error) {
+    logger.error(`Error while verifying image of user: ${error}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
@@ -481,4 +534,6 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
+  verifyUserImage,
+  getUserImageForVerification,
 };
