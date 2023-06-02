@@ -178,7 +178,7 @@ const updateTask = async (req, res) => {
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
     }
-    if (req.body.assignee) {
+    if (req.body?.assignee) {
       const user = await userQuery.fetchUser({ username: req.body.assignee });
       if (!user.userExists) {
         return res.boom.notFound("User doesn't exist");
