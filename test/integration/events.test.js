@@ -45,20 +45,32 @@ describe("events", function () {
 
   describe("POST events - createEvent", function () {
     let axiosStub;
+    let tokenService;
+    let axiosInstance;
+    let service;
 
     beforeEach(function () {
-      axiosStub = sinon.stub(axios, "create").returns({
-        post: sinon.stub().resolves({ event1Data }),
-      });
+      axiosInstance = {
+        // get: sinon.stub().resolves({ status: 200, data: {} }),
+        post: sinon.stub().resolves({ status: 200, data: {} }),
+        interceptors: {
+          request: {
+            use: sinon.stub(),
+          },
+          response: {
+            use: sinon.stub(),
+          },
+        },
+      };
 
-      // axiosInstanceStub = sinon.stub(EventAPIService.prototype, "post");
-      // axiosInstanceStub.resolves(event1Data);
-      // axiosInstanceStub = sinon.stub(axios, "post").resolves({ data: event1Data });
+      axiosStub = sinon.stub(axios, "create").returns(axiosInstance);
+
+      tokenService = new EventTokenService();
+      service = new EventAPIService(tokenService);
     });
 
     afterEach(function () {
       axiosStub.restore();
-      sinon.restore();
     });
 
     it("returns the created room data when the request is successful", function (done) {
@@ -69,7 +81,8 @@ describe("events", function () {
         userId: userId,
       };
 
-      sinon.stub(apiService, "post").resolves(event1Data);
+      axiosInstance.post.resolves({ data: event1Data });
+      // sinon.stub(service, "post").resolves(event1Data);
       sinon.stub(eventQuery, "createEvent").resolves(event1Data);
 
       chai
@@ -90,7 +103,8 @@ describe("events", function () {
     });
 
     it("returns an error when the request to the API service fails", function (done) {
-      sinon.stub(apiService, "post").rejects({ code: "ERR_BAD_REQUEST" });
+      // sinon.stub(service, "post").rejects({ code: "ERR_BAD_REQUEST" });
+      axiosInstance.post.rejects({ code: "ERR_BAD_REQUEST" });
 
       chai
         .request(app)
@@ -122,7 +136,8 @@ describe("events", function () {
         region: "in",
         userId: userId,
       };
-      sinon.stub(apiService, "post").resolves(eventData);
+      // sinon.stub(service, "post").resolves(eventData);
+      axiosInstance.post.resolves({ status: 200, data: eventData });
       sinon.stub(eventQuery, "createEvent").rejects({ code: "ERR_BAD_REQUEST" });
 
       chai

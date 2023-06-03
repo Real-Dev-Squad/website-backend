@@ -1,20 +1,20 @@
 const removeUnwantedProperties = (propertiesToRemove, data) => {
-  const cleanData = Array.isArray(data) ? [] : {};
+  let cleanData = Array.isArray(data) ? [] : {};
 
   if (Array.isArray(data)) {
     data.forEach((item) => {
-      const cleanItem = {};
-      Object.keys(item).forEach((key) => {
+      const cleanItem = Object.entries(item).reduce((acc, [key, value]) => {
         if (!propertiesToRemove.includes(key)) {
-          cleanItem[key] = item[key];
+          return Object.assign(acc, { [key]: value });
         }
-      });
+        return acc;
+      }, {});
       cleanData.push(cleanItem);
     });
   } else if (typeof data === "object") {
-    Object.keys(data).forEach((key) => {
+    Object.entries(data).forEach(([key, value]) => {
       if (!propertiesToRemove.includes(key)) {
-        cleanData[key] = data[key];
+        cleanData = { ...cleanData, [key]: value };
       }
     });
   }
