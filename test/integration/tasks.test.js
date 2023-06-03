@@ -365,6 +365,37 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("Should return 204 if assignee exists", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: `${userData[4].username}` })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("should return 404 if assignee is not in user db", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "invaliduser" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("User doesn't exist");
+          return done();
+        });
+    });
   });
 
   describe("GET /tasks/:username", function () {
