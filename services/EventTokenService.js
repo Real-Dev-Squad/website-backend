@@ -42,7 +42,6 @@ class EventTokenService {
         type: "management",
         version: 2,
         iat: Math.floor(Date.now() / 1000),
-        nbf: Math.floor(Date.now() / 1000),
       };
       this.#managementToken = this.#signPayloadToToken(payload);
     }
@@ -59,7 +58,6 @@ class EventTokenService {
       type: "app",
       version: 2,
       iat: Math.floor(Date.now() / 1000),
-      nbf: Math.floor(Date.now() / 1000),
     };
     return this.#signPayloadToToken(payload);
   }
