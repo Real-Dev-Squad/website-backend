@@ -1,6 +1,7 @@
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
+const axios = require("axios");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -43,7 +44,20 @@ describe("events", function () {
   });
 
   describe("POST events - createEvent", function () {
+    let axiosStub;
+
+    beforeEach(function () {
+      axiosStub = sinon.stub(axios, "create").returns({
+        post: sinon.stub().resolves({ event1Data }),
+      });
+
+      // axiosInstanceStub = sinon.stub(EventAPIService.prototype, "post");
+      // axiosInstanceStub.resolves(event1Data);
+      // axiosInstanceStub = sinon.stub(axios, "post").resolves({ data: event1Data });
+    });
+
     afterEach(function () {
+      axiosStub.restore();
       sinon.restore();
     });
 
@@ -52,7 +66,9 @@ describe("events", function () {
         name: "TestingEvent",
         description: "Hello world! How are you",
         region: "in",
+        userId: userId,
       };
+
       sinon.stub(apiService, "post").resolves(event1Data);
       sinon.stub(eventQuery, "createEvent").resolves(event1Data);
 
@@ -84,6 +100,7 @@ describe("events", function () {
           name: "Test Event",
           description: "This is a test event",
           region: "in",
+          userId: userId,
         })
         .end((error, response) => {
           if (error) {
@@ -103,6 +120,7 @@ describe("events", function () {
         name: "Test Room",
         description: "This is a test room",
         region: "in",
+        userId: userId,
       };
       sinon.stub(apiService, "post").resolves(eventData);
       sinon.stub(eventQuery, "createEvent").rejects({ code: "ERR_BAD_REQUEST" });
@@ -125,9 +143,17 @@ describe("events", function () {
     });
 
     it("should return unauthorized error if user is not authenticated", function (done) {
+      const eventData = {
+        id: "test-room-id",
+        name: "Test Room",
+        description: "This is a test room",
+        region: "in",
+        userId: userId,
+      };
       chai
         .request(app)
         .post(`/events`)
+        .send(eventData)
         .end((error, response) => {
           if (error) {
             return done(error);
