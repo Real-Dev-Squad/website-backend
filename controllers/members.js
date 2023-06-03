@@ -124,8 +124,9 @@ const updateRoles = async (req, res) => {
         message: "Unauthenticated User",
       });
     }
-    logger.error(error.message);
-    return res.boom.ServiceUnavailable("Something went wrong please contact admin");
+    return res.status(503).json({
+      message: "Something went wrong please contact admin",
+    });
   }
 };
 
