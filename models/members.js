@@ -133,7 +133,7 @@ const updateRoles = async (userId, newRoles) => {
       roles = user.roles ? { ...user.roles, member: newRoles.member } : { member: newRoles.member };
     } else if (Object.keys(newRoles).includes("archived")) {
       if (user?.roles && user.roles.archived) return { isRoleUpdated: false };
-      roles = { ...user.roles, archived: newRoles.archived };
+      roles = user.roles ? { ...user.roles, archived: newRoles.archived } : { archived: newRoles.archived };
     }
     await userModel.doc(userId).update({
       roles,
