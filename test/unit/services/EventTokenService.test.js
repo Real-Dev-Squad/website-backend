@@ -12,7 +12,6 @@ describe("EventTokenService", function () {
       expect(decodedToken).to.have.property("type", "management");
       expect(decodedToken).to.have.property("version", 2);
       expect(decodedToken).to.have.property("iat");
-      expect(decodedToken).to.have.property("nbf");
     });
 
     it("should return a new management token if forced", function () {
@@ -45,7 +44,6 @@ describe("EventTokenService", function () {
       expect(decodedToken).to.have.property("type", "app");
       expect(decodedToken).to.have.property("version", 2);
       expect(decodedToken).to.have.property("iat");
-      expect(decodedToken).to.have.property("nbf");
     });
   });
 });

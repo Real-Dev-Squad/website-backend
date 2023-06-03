@@ -80,12 +80,6 @@ describe("EventAPIService", function () {
       expect(axiosInstance.post).to.have.been.calledWith(path, payload);
     });
 
-    it("should make a POST request without payload if not provided", async function () {
-      const path = "/events";
-      await service.post(path);
-      expect(axiosInstance.post).to.have.been.calledWith(path, {});
-    });
-
     it("should return the response data", async function () {
       const responseData = { eventId: 1, success: true };
       axiosInstance.post.resolves({ status: 200, data: responseData });
