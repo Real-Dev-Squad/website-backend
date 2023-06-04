@@ -46,6 +46,9 @@ module.exports = {
         authRedirection: "/goto",
       },
     },
+    discordBot: {
+      baseUrl: "<DISCORD_BOT_BASE_URL>",
+    },
   },
 
   cors: {
