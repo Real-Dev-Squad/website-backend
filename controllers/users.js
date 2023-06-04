@@ -12,7 +12,7 @@ const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
-const { getDiscordMemberDetails } = require("../services/discordMembersService");
+const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -249,12 +249,7 @@ const postUserPicture = async (req, res) => {
     const { id: userId, discordId } = req.userData;
     const { coordinates } = req.body;
 
-    const { user: discordUserData } = await getDiscordMemberDetails(discordId);
-    let discordAvatarUrl;
-    if (discordUserData) {
-      // CREATING/FETCHING THE USER'S DISCORD PROFILE PHOTO URL
-      discordAvatarUrl = `https://cdn.discordapp.com/avatars/${discordId}/${discordUserData?.avatar}.png`;
-    }
+    const discordAvatarUrl = await generateDiscordProfileImageUrl(discordId);
     const coordinatesObject = coordinates && JSON.parse(coordinates);
     const imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
 
@@ -280,7 +275,7 @@ const postUserPicture = async (req, res) => {
 const verifyUserImage = async (req, res) => {
   try {
     const { type: imageType } = req.query;
-    const { id: userId } = req.userData;
+    const { id: userId } = req.params;
     await userQuery.markAsVerified(userId, imageType);
     return res.json({
       message: `${imageType} image was verified successfully!`,
@@ -300,10 +295,10 @@ const verifyUserImage = async (req, res) => {
 
 const getUserImageForVerification = async (req, res) => {
   try {
-    const { id: userId } = req.userData;
+    const { id: userId } = req.params;
     const userImageVerificationData = await userQuery.getUserImageForVerification(userId);
     return res.json({
-      message: "User image was data fetched successfully!",
+      message: "User image verification record fetched successfully!",
       data: userImageVerificationData,
     });
   } catch (error) {

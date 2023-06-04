@@ -1,6 +1,8 @@
+const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const firestore = require("../utils/firestore");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
+const photoVerificationModel = firestore.collection("photoVerification");
 
 /**
  *
@@ -87,9 +89,37 @@ const addGroupRoleToMember = async (roleData) => {
   }
 };
 
+/**
+ *
+ * @param userDiscordId { String }: DiscordId of the user
+ * @returns {Promise<String>}
+ */
+const updateDiscordImageForVerification = async (userDiscordId) => {
+  try {
+    const discordAvatarUrl = await generateDiscordProfileImageUrl(userDiscordId);
+    const verificationDataSnapshot = await photoVerificationModel
+      .where("discordId", "==", userDiscordId)
+      .limit(1)
+      .get();
+    const unverifiedUserDiscordImage = {
+      discordImageData: { discordAvatarUrl, verified: false },
+    };
+    if (verificationDataSnapshot.empty) {
+      throw new Error("No user verification record found");
+    }
+    const documentRef = verificationDataSnapshot.docs[0].ref;
+    await documentRef.update(unverifiedUserDiscordImage);
+    return discordAvatarUrl;
+  } catch (err) {
+    logger.error("Error in adding role", err);
+    throw err;
+  }
+};
+
 module.exports = {
   createNewRole,
   getAllGroupRoles,
   addGroupRoleToMember,
   isGroupRoleExists,
+  updateDiscordImageForVerification,
 };

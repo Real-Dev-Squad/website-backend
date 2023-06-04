@@ -311,8 +311,10 @@ const addForVerification = async (userId, discordId, profileImageUrl, discordIma
     };
     if (!isNotVerified.empty) {
       const documentRef = isNotVerified.docs[0].ref;
+      unverifiedUserData.discordImageData.verified = isNotVerified.docs[0].data().discordImageData.verified || false;
       await documentRef.update(unverifiedUserData);
     } else await photoVerificationModel.add(unverifiedUserData);
+    return { message: "Profile data added for verification successfully" };
   } catch (err) {
     logger.error("Error in creating Verification Entry", err);
     throw err;
@@ -326,14 +328,16 @@ const addForVerification = async (userId, discordId, profileImageUrl, discordIma
  */
 const markAsVerified = async (userId, imageType) => {
   try {
-    const isNotVerified = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
-    // VERIFIES BASED ON THE TYPE OF IMAGE
-    // IGNORES IF NO DOCUMENT FOUND
-    const imageVerificationType = imageType === "discord" ? "discordImageData.verified" : "profileImageData.verified";
-    if (!isNotVerified.empty) {
-      const documentRef = isNotVerified.docs[0].ref;
-      await documentRef.update({ [imageVerificationType]: true });
+    const verificationUserDatSnapshot = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
+    // THROWS ERROR IF NO DOCUMENT FOUND
+    if (verificationUserDatSnapshot.empty) {
+      throw new Error("No verification document record data for user was found");
     }
+    // VERIFIES BASED ON THE TYPE OF IMAGE
+    const imageVerificationType = imageType === "discord" ? "discordImageData.verified" : "profileImageData.verified";
+    const documentRef = verificationUserDatSnapshot.docs[0].ref;
+    await documentRef.update({ [imageVerificationType]: true });
+    return { message: "User image data verified successfully" };
   } catch (err) {
     logger.error("Error while Removing Verification Entry", err);
     throw err;
