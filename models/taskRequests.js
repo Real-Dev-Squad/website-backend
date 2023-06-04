@@ -32,8 +32,8 @@ const fetchTaskRequests = async () => {
   const users = await Promise.all(userPromises);
 
   taskRequests.forEach((taskRequest, index) => {
-    taskRequest.task = tasks[index].taskData;
-    taskRequest.requestors = users[index];
+    taskRequest.task = tasks[+index].taskData;
+    taskRequest.requestors = users[+index];
   });
 
   return taskRequests;
