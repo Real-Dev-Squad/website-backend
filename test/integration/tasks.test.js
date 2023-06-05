@@ -158,6 +158,7 @@ describe("Tasks", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Tasks returned successfully!");
           expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks[0].dependsOn).to.be.a("array");
           const taskWithParticipants = res.body.tasks[0];
 
           if (taskWithParticipants.type === "group") {
@@ -185,6 +186,8 @@ describe("Tasks", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("task returned successfully");
           expect(res.body.taskData).to.be.a("object");
+          expect(res.body.taskData.dependsOn).to.be.a("array");
+
           return done();
         });
     });
@@ -359,6 +362,37 @@ describe("Tasks", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Task not found");
 
+          return done();
+        });
+    });
+
+    it("Should return 204 if assignee exists", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: `${userData[4].username}` })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("should return 404 if assignee is not in user db", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "invaliduser" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("User doesn't exist");
           return done();
         });
     });

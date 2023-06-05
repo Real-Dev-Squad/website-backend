@@ -12,8 +12,8 @@
  * @returns {Object} - Returns unauthorized object if user has been restricted.
  */
 const checkIsVerifiedDiscord = async (req, res, next) => {
-  const { discordId } = req.userData;
-  if (!discordId) {
+  const { discordId, roles } = req.userData;
+  if (!discordId || roles.archived) {
     return res.boom.forbidden("You are restricted from performing this action");
   }
   return next();

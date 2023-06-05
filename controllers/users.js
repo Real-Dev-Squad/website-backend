@@ -69,10 +69,39 @@ const getUserById = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
+const removePersonalDetails = (user) => {
+  const { phone, email, ...safeUser } = user;
+  return safeUser;
+};
+
 const getUsers = async (req, res) => {
   try {
     const query = req.query?.query ?? "";
     const qualifiers = getQualifiers(query);
+
+    // getting user details by id if present.
+    if (req.query.id) {
+      const id = req.query.id;
+      let result;
+      try {
+        result = await userQuery.fetchUser({ userId: id });
+      } catch (error) {
+        logger.error(`Error while fetching user: ${error}`);
+        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+      }
+
+      if (!result.userExists) {
+        return res.boom.notFound("User doesn't exist");
+      }
+
+      const User = { ...result.user };
+      const user = removePersonalDetails(User);
+
+      return res.json({
+        message: "User returned successfully!",
+        user,
+      });
+    }
 
     if (qualifiers?.filterBy) {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);
