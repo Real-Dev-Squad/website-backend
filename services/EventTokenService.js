@@ -4,8 +4,8 @@ const crypto = require("crypto");
 // A service class for Token generation and management
 
 class EventTokenService {
-  static #app_access_key = config.get("Event100ms.APP_ACCESS_KEY") || process.env.Event100ms.APP_ACCESS_KEY;
-  static #app_secret = config.get("Event100ms.APP_SECRET") || process.env.Event100ms.APP_SECRET;
+  static #app_access_key = config.get("Event100ms.APP_ACCESS_KEY");
+  static #app_secret = config.get("Event100ms.APP_SECRET");
   #managementToken;
   constructor() {
     this.#managementToken = this.getManagementToken(true);
