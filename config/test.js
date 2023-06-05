@@ -30,6 +30,9 @@ module.exports = {
     rdsApi: {
       baseUrl: `http://localhost:${port}`,
     },
+    discordBot: {
+      baseUrl: "DISCORD_BASE_URL",
+    },
   },
 
   cors: {
@@ -106,5 +109,10 @@ module.exports = {
   Event100ms: {
     APP_ACCESS_KEY: "APP_ACCESS_KEY",
     APP_SECRET: "APP_SECRET",
+  },
+  rdsServerlessBot: {
+    rdsServerLessPublicKey: "RSA PUBLIC KEY",
+    rdsServerLessPrivateKey: "RSA PRIVATE KEY",
+    ttl: 60,
   },
 };

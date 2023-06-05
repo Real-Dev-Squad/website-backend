@@ -2,6 +2,7 @@ const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 
+const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
@@ -15,7 +16,13 @@ const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
+const {
+  userStatusDataAfterSignup,
+  userStatusDataAfterFillingJoinSection,
+} = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
+const userStatusModel = require("../../models/userStatus");
+
 const cookieName = config.get("userToken.cookieName");
 chai.use(chaiHttp);
 
@@ -688,6 +695,12 @@ describe("Users", function () {
   });
 
   describe("PUT /users/self/intro", function () {
+    let userStatusData;
+    beforeEach(async function () {
+      await userStatusModel.updateUserStatus(userId, userStatusDataAfterSignup);
+      const updateStatus = await userStatusModel.updateUserStatus(userId, userStatusDataAfterFillingJoinSection);
+      userStatusData = (await firestore.collection("usersStatus").doc(updateStatus.id).get()).data();
+    });
     it("should return 409 if the data already present", function (done) {
       addJoinData(joinData(userId)[3]);
       chai
@@ -718,7 +731,11 @@ describe("Users", function () {
           }
           expect(res).to.have.status(201);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User data added successfully");
+          expect(res.body.message).to.equal("User join data and newstatus data added and updated successfully");
+          expect(userStatusData).to.have.own.property("currentStatus");
+          expect(userStatusData).to.have.own.property("monthlyHours");
+          expect(userStatusData.currentStatus.state).to.equal("ONBOARDING");
+          expect(userStatusData.monthlyHours.committed).to.equal(40);
           return done();
         });
     });

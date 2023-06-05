@@ -1,6 +1,7 @@
 const { fetchUser } = require("../models/users");
 const userStatusModel = require("../models/userStatus");
 const { getUserIdBasedOnRoute } = require("../utils/userStatus");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Deletes a new User Status
@@ -26,7 +27,7 @@ const deleteUserStatus = async (req, res) => {
     return res.status(statusCode).json(responseObj);
   } catch (error) {
     logger.error(`Error while deleting User Status: ${error}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -88,7 +89,7 @@ const getAllUserStatus = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while fetching all the User Status: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -120,7 +121,7 @@ const updateUserStatus = async (req, res) => {
     return res.boom.badImplementation("The User doesn't exist.");
   } catch (err) {
     logger.error(`Error while updating the User Data: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -138,7 +139,7 @@ const updateAllUserStatus = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while updating the User Data: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
