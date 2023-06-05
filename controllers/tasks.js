@@ -51,7 +51,8 @@ const addNewTask = async (req, res) => {
  */
 const fetchTasks = async (req, res) => {
   try {
-    const allTasks = await tasks.fetchTasks();
+    const allTasksPromises = await tasks.fetchTasks();
+    const allTasks = await Promise.all(allTasksPromises);
     const fetchTasksWithRdsAssigneeInfo = allTasks.map(async (task) => {
       /*
        If the issue has a "github.issue" inner object and a property "assignee",
