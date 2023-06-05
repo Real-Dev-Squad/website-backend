@@ -19,8 +19,8 @@ const createChallenge = async (req, res, next) => {
 
 const subscribeToChallenge = async (req, res, next) => {
   const schema = joi.object().strict().keys({
-    userId: joi.string().guid({ version: 'uuidv4' }).required(),
-    challengeId: joi.string().guid({ version: 'uuidv4' }).required(),
+    userId: joi.string().required(),
+    challengeId: joi.string().required(),
   });
 
   try {
