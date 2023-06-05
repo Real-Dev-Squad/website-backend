@@ -42,6 +42,18 @@ const createTask = async (req, res, next) => {
         })
         .optional(),
       isNoteworthy: joi.bool().optional(),
+      isCollapsed: joi.bool().optional(),
+      github: joi
+        .object()
+        .keys({
+          issue: joi.object().keys({
+            status: joi.string().optional(),
+            assignee: joi.string().optional(),
+            id: joi.number().optional(),
+            closedAt: joi.string().optional(),
+          }),
+        })
+        .optional(),
     });
 
   try {
@@ -90,6 +102,7 @@ const updateTask = async (req, res, next) => {
         })
         .optional(),
       isNoteworthy: joi.bool().optional(),
+      isCollapsed: joi.bool().optional(),
     });
   try {
     await schema.validateAsync(req.body);

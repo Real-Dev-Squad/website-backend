@@ -1,4 +1,10 @@
 const { fetchUser } = require("../models/users");
+const firestore = require("../utils/firestore");
+const userModel = firestore.collection("users");
+
+const addUserToDBForTest = async (userData) => {
+  await userModel.add(userData);
+};
 
 /**
  * Used for receiving userId when providing username
@@ -6,6 +12,7 @@ const { fetchUser } = require("../models/users");
  * @param username {String} - username of the User.
  * @returns id {String} - userId of the same user
  */
+
 const getUserId = async (username) => {
   try {
     const {
@@ -114,11 +121,35 @@ function getPaginationLink(query, cursor, documentId) {
   return endpoint;
 }
 
+/**
+ * Returns an array of unique users from the filtered PRs/Issues response
+ *
+ * @param allPRs {Array} - list of all PRs/Issues from the respective github service
+ * @param allUsers {Array} - list of total users from firebase
+ *
+ */
+function getUsernamesFromPRs(allPRs) {
+  const uniqueUsernamesSet = new Set();
+  const usernames = [];
+
+  allPRs?.forEach((pr) => {
+    const username = pr?.username;
+    if (!uniqueUsernamesSet.has(username)) {
+      uniqueUsernamesSet.add(username);
+      usernames.push(username);
+    }
+  });
+
+  return usernames;
+}
+
 module.exports = {
+  addUserToDBForTest,
   getUserId,
   getUsername,
   getParticipantUserIds,
   getParticipantUsernames,
   getLowestLevelSkill,
   getPaginationLink,
+  getUsernamesFromPRs,
 };
