@@ -21,9 +21,22 @@ class EventTokenService {
     return token;
   }
 
+  // A private method to check if a JWT token has expired or going to expire soon
+  #isTokenExpired(token) {
+    try {
+      const { exp } = jwt.decode(token);
+      const buffer = 30; // generate new if it's going to expire soon
+      const currTimeSeconds = Math.floor(Date.now() / 1000);
+      return exp + buffer < currTimeSeconds;
+    } catch (err) {
+      logger.error("error in decoding token", err);
+      return true;
+    }
+  }
+
   // Generate new Management token, if expired or forced
   getManagementToken(forceNew) {
-    if (forceNew) {
+    if (forceNew || this.#isTokenExpired(this.#managementToken)) {
       const payload = {
         access_key: EventTokenService.#app_access_key,
         type: "management",
