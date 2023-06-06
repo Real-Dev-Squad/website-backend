@@ -181,6 +181,38 @@ describe("Task Requests", function () {
       });
     });
 
+    describe("When task does not exist", function () {
+      let userId;
+
+      before(async function () {
+        userId = await addUser(member);
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
+
+        jwt = authService.generateAuthToken({ userId });
+        await userStatusModel.updateUserStatus(userId, idleUserStatus);
+      });
+
+      it("should return 409 error", function (done) {
+        chai
+          .request(app)
+          .post("/taskRequests/addOrUpdate")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({
+            taskId: "random taskId",
+            userId,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.equal("Task does not exist");
+            return done();
+          });
+      });
+    });
+
     describe("When task request already exists", function () {
       let userId2;
       before(async function () {
