@@ -165,7 +165,8 @@ const fetchPaginatedUsers = async (query) => {
     const allUsers = [];
 
     snapshot.forEach((doc) => {
-      if (!doc.data().roles.archived) {
+      const userData = doc.data()
+      if (!userData.roles.archived) {
         allUsers.push({
           id: doc.id,
           ...doc.data(),
