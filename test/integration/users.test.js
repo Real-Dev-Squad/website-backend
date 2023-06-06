@@ -13,6 +13,7 @@ const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
+const inDiscordUsers = require("../fixtures/user/inDiscord")();
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
@@ -1067,6 +1068,29 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /users", function () {
+    beforeEach(async function () {
+      await addUser(inDiscordUsers[0]);
+      await addUser(inDiscordUsers[1]);
+      await addUser(inDiscordUsers[2]);
+    });
+    it("returns users with discord id and in_discord false", function (done) {
+      chai
+        .request(app)
+        .patch("/users")
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.length(1);
+          expect(res.body[0].username).equal("test-user");
           return done();
         });
     });
