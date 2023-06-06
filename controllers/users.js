@@ -496,8 +496,8 @@ const filterUsers = async (req, res) => {
 };
 
 const returnAllUsers = async (req, res) => {
-  const data = await userQuery.getAllUsers();
-  return data;
+  const data = await userQuery.getDiscordUsers();
+  return res.json(data);
 };
 
 module.exports = {

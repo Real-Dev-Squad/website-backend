@@ -456,10 +456,18 @@ const getUsersBasedOnFilter = async (query) => {
  * @return {Promise<users>}
  */
 
-const getAllUsers = async () => {
+const getDiscordUsers = async () => {
   try {
     const usersRef = await userModel.where("roles.archived", "==", false).get();
-    return usersRef;
+    const users = [];
+    usersRef.forEach((user) => {
+      if (user.data()?.discordId && user.data().roles?.in_discord === false)
+        users.push({
+          id: user.id,
+          ...user.data(),
+        });
+    });
+    return users;
   } catch (err) {
     logger.error(`Error while fetching all users: ${err}`);
     throw err;
@@ -481,5 +489,5 @@ module.exports = {
   getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
-  getAllUsers,
+  getDiscordUsers,
 };
