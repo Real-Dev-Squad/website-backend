@@ -140,10 +140,16 @@ const fetchPaginatedUsers = async (query) => {
   try {
     // INFO: default user size set to 100
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
-    const size = parseInt(query.size) || 100;
+    const size = parseInt(query.size) || 4;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
-    let dbQuery = (query.prev ? userModel.limitToLast(size) : userModel.limit(size)).orderBy("username");
-    dbQuery = dbQuery.where("roles.archived", "==", false);
+
+    let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+
+    if (query.prev) {
+      dbQuery = dbQuery.limitToLast(size);
+    } else {
+      dbQuery = dbQuery.limit(size);
+    }
 
     if (Object.keys(query).length) {
       if (query.search) {
