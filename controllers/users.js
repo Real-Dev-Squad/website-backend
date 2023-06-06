@@ -11,9 +11,6 @@ const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
-const jwt = require("jsonwebtoken");
-const Queue = require("bull");
-const { REDIS_PORT, REDIS_URI } = require("../redisCredentials");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -497,80 +494,6 @@ const filterUsers = async (req, res) => {
   }
 };
 
-const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
-
-// wroker queue created with Bull
-const syncQueue = new Queue("syncQueue", {
-  redis: {
-    port: REDIS_PORT,
-    host: REDIS_URI,
-  },
-});
-
-/*
- * Sync user data with the data present in our discord server
- *
- */
-
-const syncInDiscordRole = async (req, res) => {
-  try {
-    // create a authToken to verify on discord bot
-    const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
-      algorithm: "RS256",
-      expiresIn: config.get("rdsServerlessBot.ttl"),
-    });
-
-    // fetch the data of member in discord server
-    const response = await fetch(`${DISCORD_BASE_URL}/discord-members`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
-      },
-    });
-    const discordMembers = await response.json();
-
-    // get the data of the users from our database
-    const allUsers = await userQuery.getAllUsers();
-
-    allUsers.forEach((doc) => {
-      const user = { id: doc.id, ...doc.data() };
-
-      if (user.roles.archived) {
-        // Update: If the user is archived change the role in_discord: false
-        if (user.role.in_discord) {
-          user.roles = { ...user.roles, in_discord: false };
-          syncQueue.add({ user });
-        }
-
-        // If the user has verified them self and has discordId in the database
-      } else if (user.discordId) {
-        // find that users data from the discord members data we have
-        const discordUserData = discordMembers.find((item) => item.user.id === user.discordId);
-
-        // if data exists that means the user is present in our discord derver
-        if (discordUserData) {
-          // Update: the user role in_dicord: true and the joined_discord date
-          if (!user.role.in_discord) {
-            user.roles = { ...user.roles, in_discord: true };
-            user.joined_discord = discordUserData.joined_at;
-            syncQueue.add({ user });
-          }
-        } else {
-          if (user.role.in_discord) {
-            user.roles = { ...user.roles, in_discord: false };
-            syncQueue.add({ user });
-          }
-        }
-      }
-    });
-
-    return res.json({ message: "Synced with discord members." });
-  } catch (error) {
-    logger.error(`Error while syncing users data: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
-  }
-};
-
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -590,5 +513,4 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
-  syncInDiscordRole,
 };

@@ -458,7 +458,7 @@ const getUsersBasedOnFilter = async (query) => {
 
 const getAllUsers = async () => {
   try {
-    const usersRef = await userModel.get();
+    const usersRef = await userModel.where("roles.archived", "==", false).get();
     return usersRef;
   } catch (err) {
     logger.error(`Error while fetching all users: ${err}`);
