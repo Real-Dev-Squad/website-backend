@@ -276,6 +276,7 @@ const setIncompleteUserDetails = async (userId) => {
   const doc = await userRef.get();
   if (doc.exists) {
     return userRef.update({
+      JoinedAt: Date.now(),
       incompleteUserDetails: false,
     });
   }

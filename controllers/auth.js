@@ -27,6 +27,7 @@ const githubAuth = (req, res, next) => {
         tokens: {
           githubAccessToken: accessToken,
         },
+        githubLinked: Date.now(),
       };
 
       const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);
