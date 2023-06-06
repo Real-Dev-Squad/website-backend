@@ -165,14 +165,16 @@ const fetchPaginatedUsers = async (query) => {
     const allUsers = [];
 
     snapshot.forEach((doc) => {
-      allUsers.push({
-        id: doc.id,
-        ...doc.data(),
-        phone: undefined,
-        email: undefined,
-        tokens: undefined,
-        chaincode: undefined,
-      });
+      if (!doc.data().roles.archived) {
+        allUsers.push({
+          id: doc.id,
+          ...doc.data(),
+          phone: undefined,
+          email: undefined,
+          tokens: undefined,
+          chaincode: undefined,
+        });
+      }
     });
     return {
       allUsers,
