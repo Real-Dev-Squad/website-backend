@@ -503,10 +503,10 @@ const updateRoles = async (req, res) => {
       const successObject = await userQuery.updateRoles(user.user.id, dataToUpdate);
       if (successObject.isRoleUpdated) {
         return res.status(204).send();
-      }else{
-        return res.boom.badRequest("Invalid role")
+      } else {
+        return res.boom.badRequest("Invalid role");
       }
-    }else{
+    } else {
       return res.boom.notFound("User not found");
     }
   } catch (error) {

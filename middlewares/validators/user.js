@@ -193,10 +193,7 @@ async function validateUserQueryParams(req, res, next) {
 }
 
 async function validateUpdateRoles(req, res, next) {
-  const schema = joi
-  .object()
-  .strict()
-  .keys({
+  const schema = joi.object().strict().keys({
     member: joi.boolean(),
     archived: joi.boolean(),
   });
@@ -208,7 +205,7 @@ async function validateUpdateRoles(req, res, next) {
     logger.error(`Error validating updateRoles query params : ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
-};
+}
 
 module.exports = {
   updateUser,
