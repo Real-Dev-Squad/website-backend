@@ -1083,7 +1083,7 @@ describe("Users", function () {
       chai
         .request(app)
         .patch("/users")
-        .set("Cookie", `${cookieName}=${jwt}`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
             return done(err);
