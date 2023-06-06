@@ -495,7 +495,7 @@ const filterUsers = async (req, res) => {
   }
 };
 
-const returnAllUsers = async (req, res) => {
+const usersForInDiscord = async (req, res) => {
   const data = await userQuery.getDiscordUsers();
   return res.json(data);
 };
@@ -519,5 +519,5 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
-  returnAllUsers,
+  usersForInDiscord,
 };
