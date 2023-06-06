@@ -167,10 +167,9 @@ const fetchPaginatedUsers = async (query) => {
     const allUsers = [];
 
     snapshot.forEach((doc) => {
-      const userData = doc.data();
       allUsers.push({
         id: doc.id,
-        ...userData,
+        ...doc.data(),
         phone: undefined,
         email: undefined,
         tokens: undefined,
