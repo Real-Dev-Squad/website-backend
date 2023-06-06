@@ -495,6 +495,11 @@ const filterUsers = async (req, res) => {
   }
 };
 
+const returnAllUsers = async (req, res) => {
+  const data = await userQuery.getAllUsers();
+  return data;
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -514,4 +519,5 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
+  returnAllUsers,
 };
