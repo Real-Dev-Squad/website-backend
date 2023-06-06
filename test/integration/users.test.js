@@ -119,7 +119,7 @@ describe("Users", function () {
     afterEach(async function () {
       await cleanDb();
     });
-    // eslint-disable-next-line
+
     it("Should get all the users in system", function (done) {
       chai
         .request(app)
