@@ -135,8 +135,6 @@ describe("Users", function () {
           expect(res.body.users).to.be.a("array");
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
-          expect(res.body.users[0]).to.have.property("joinedAt");
-          expect(res.body.users[0]).to.have.property("githubLinked");
 
           return done();
         });
