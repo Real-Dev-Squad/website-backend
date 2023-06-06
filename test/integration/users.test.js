@@ -26,6 +26,11 @@ const userStatusModel = require("../../models/userStatus");
 const cookieName = config.get("userToken.cookieName");
 chai.use(chaiHttp);
 
+const userRoleUpdate = userData[4];
+const userAlreadyMember = userData[0];
+const userAlreadyArchived = userData[5];
+const nonSuperUser = userData[0];
+
 describe("Users", function () {
   let jwt;
   let superUserId;
@@ -1071,4 +1076,159 @@ describe("Users", function () {
         });
     });
   });
+
+
+  describe("PATCH /users/:userId/roles", function () {    
+
+    it("Should make the user a member", function (done) {
+      addUser(userRoleUpdate).then((userRoleUpdateId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUpdateId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(204);
+            /* eslint-disable no-unused-expressions */
+            expect(res.body).to.be.a("object").to.be.empty;
+            return done();
+          });
+        });
+    });
+
+      it("Should make the member a user", function (done) {
+        addUser(userRoleUpdate).then((userRoleUpdateId) => {
+          chai
+            .request(app)
+            .patch(`/users/${userRoleUpdateId}/roles`)
+            .set("cookie", `${cookieName}=${superUserAuthToken}`)
+            .send({
+              member: false,
+            })
+            .end((err, res) => {
+              if (err) {
+                return done(err);
+              }
+  
+              expect(res).to.have.status(204);
+              /* eslint-disable no-unused-expressions */
+              expect(res.body).to.be.a("object").to.be.empty;
+              return done();
+            });
+          });
+      });
+
+      it("Should archive the user", function (done) {
+        addUser(userRoleUpdate).then((userRoleUpdateId) => {
+          chai
+            .request(app)
+            .patch(`/users/${userRoleUpdateId}/roles`)
+            .set("cookie", `${cookieName}=${superUserAuthToken}`)
+            .send({
+              archived: true,
+            })
+            .end((err, res) => {
+              if (err) {
+                return done(err);
+              }
+  
+              expect(res).to.have.status(204);
+              /* eslint-disable no-unused-expressions */
+              expect(res.body).to.be.a("object").to.be.empty;
+              return done();
+            });
+          });
+      });
+
+      it("Should return 400 if user is already a member", function (done) {
+        addUser(userAlreadyMember).then((userAlreadyMemberId) => {
+          chai
+            .request(app)
+            .patch(`/users/${userAlreadyMemberId}/roles`)
+            .set("cookie", `${cookieName}=${superUserAuthToken}`)
+            .send({
+              member: true,
+            })
+            .end((err, res) => {
+              if (err) {
+                return done(err);
+              }
+  
+              expect(res).to.have.status(400);
+              expect(res.body.message).to.be.equal("Invalid role");
+              return done();
+            });
+          });
+      });
+
+      it("Should return 400 if user is already archived", function (done) {
+        addUser(userAlreadyArchived).then((userAlreadyArchivedId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userAlreadyArchivedId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            archived: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body.message).to.be.equal("Invalid role");
+            return done();
+          });
+        });
+    });
+
+    it("Should return 404 if user not found", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/userId/roles`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({
+          archived: true,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("User not found");
+          return done();
+        });
+    });
+
+    it("Should return 401 if user is not a super user", function (done) {
+      addUser(nonSuperUser).then((nonSuperUserId) => {
+      const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+      chai
+        .request(app)
+        .patch(`/users/${nonSuperUserId}/roles`)
+        .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
+        .send({
+          archived: true,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("You are not authorized for this action.");
+          return done();
+        });
+      });
+    });
+
+    });
 });

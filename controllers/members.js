@@ -1,4 +1,3 @@
-const { BadRequest, Unauthorized } = require("http-errors");
 const ROLES = require("../constants/roles");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
@@ -100,40 +99,9 @@ const archiveMembers = async (req, res) => {
   }
 };
 
-const updateRoles = async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const user = await fetchUser({ userId });
-    if (user?.userExists) {
-      const dataToUpdate = req.body;
-      const successObject = await members.updateRoles(user.user.id, dataToUpdate);
-      if (successObject.isRoleUpdated) {
-        return res.status(204).json({
-          message: "role updated successfully!",
-        });
-      }
-    }
-    return res.boom.notFound("User not found");
-  } catch (error) {
-    if (error instanceof BadRequest) {
-      return res.status(400).json({
-        message: "Invalid role",
-      });
-    } else if (error instanceof Unauthorized) {
-      return res.status(401).json({
-        message: "Unauthenticated User",
-      });
-    }
-    return res.status(503).json({
-      message: "Something went wrong please contact admin",
-    });
-  }
-};
-
 module.exports = {
   archiveMembers,
   getMembers,
   getIdleMembers,
   moveToMembers,
-  updateRoles,
 };

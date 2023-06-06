@@ -495,6 +495,26 @@ const filterUsers = async (req, res) => {
   }
 };
 
+const updateRoles = async (req, res) => {
+  try {
+    const user = await userQuery.fetchUser({ userId: req.params.userId });
+    if (user?.userExists) {
+      const dataToUpdate = req.body;
+      const successObject = await userQuery.updateRoles(user.user.id, dataToUpdate);
+      if (successObject.isRoleUpdated) {
+        return res.status(204).send();
+      }else{
+        return res.boom.badRequest("Invalid role")
+      }
+    }else{
+      return res.boom.notFound("User not found");
+    }
+  } catch (error) {
+    logger.error(`Error while updateRoles: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -514,4 +534,5 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
+  updateRoles,
 };

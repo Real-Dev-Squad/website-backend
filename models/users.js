@@ -450,6 +450,36 @@ const getUsersBasedOnFilter = async (query) => {
   return [];
 };
 
+const updateRoles = async (userId, newRoles) => {
+  try {
+    const userDoc = await userModel.doc(userId).get();
+    const user = userDoc.data();
+    let roles;
+    if (Object.keys(newRoles).includes("member")) {
+      if (newRoles.member === true) {
+        if (user?.roles?.member) {
+          return { isRoleUpdated: false };
+        }
+      } else if (newRoles.member === false) {
+        if (user?.roles?.member === false) {
+          return { isRoleUpdated: false };
+        }
+      }
+      roles = user.roles ? { ...user.roles, member: newRoles.member } : { member: newRoles.member };
+    } else if (Object.keys(newRoles).includes("archived")) {
+      if (user?.roles && user.roles.archived) return { isRoleUpdated: false };
+      roles = user.roles ? { ...user.roles, archived: newRoles.archived } : { archived: newRoles.archived };
+    }
+    await userModel.doc(userId).update({
+      roles,
+    });
+    return { isRoleUpdated: true };
+  } catch (err) {
+    logger.error("Error updating user", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -465,4 +495,5 @@ module.exports = {
   getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
+  updateRoles,
 };
