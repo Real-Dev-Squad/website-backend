@@ -143,6 +143,8 @@ const fetchPaginatedUsers = async (query) => {
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
     let dbQuery = (query.prev ? userModel.limitToLast(size) : userModel.limit(size)).orderBy("username");
+    dbQuery = dbQuery.where("roles.archived", "==", false);
+
     if (Object.keys(query).length) {
       if (query.search) {
         dbQuery = dbQuery
@@ -166,16 +168,14 @@ const fetchPaginatedUsers = async (query) => {
 
     snapshot.forEach((doc) => {
       const userData = doc.data();
-      if (!userData.roles.archived) {
-        allUsers.push({
-          id: doc.id,
-          ...doc.data(),
-          phone: undefined,
-          email: undefined,
-          tokens: undefined,
-          chaincode: undefined,
-        });
-      }
+      allUsers.push({
+        id: doc.id,
+        ...userData,
+        phone: undefined,
+        email: undefined,
+        tokens: undefined,
+        chaincode: undefined,
+      });
     });
     return {
       allUsers,
