@@ -27,7 +27,7 @@ const addLevel = async (levelData) => {
 const deleteLevel = async (id) => {
   try {
     await levelModel.doc(id).delete();
-    return null;
+    return;
   } catch (err) {
     logger.error("Error in deleting Level", err);
     throw err;
