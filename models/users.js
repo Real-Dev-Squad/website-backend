@@ -461,10 +461,11 @@ const getDiscordUsers = async () => {
     const usersRef = await userModel.where("roles.archived", "==", false).get();
     const users = [];
     usersRef.forEach((user) => {
-      if (user.data()?.discordId && user.data().roles?.in_discord === false)
+      const userData = user.data();
+      if (userData?.discordId && userData.roles?.in_discord === false)
         users.push({
           id: user.id,
-          ...user.data(),
+          ...userData,
         });
     });
     return users;
