@@ -3,6 +3,7 @@ const admin = require("firebase-admin");
 const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
+const discordServices = require("../services/discordService");
 
 /**
  * Creates a role
@@ -122,8 +123,14 @@ const addGroupRoleToMember = async (req, res) => {
   }
 };
 
+const getDiscordMembers = async (req, res) => {
+  const response = await discordServices.getDiscordMembers();
+  return res.json(response);
+};
+
 module.exports = {
   createGroupRole,
   getAllGroupRoles,
   addGroupRoleToMember,
+  getDiscordMembers,
 };
