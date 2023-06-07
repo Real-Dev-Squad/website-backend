@@ -450,27 +450,25 @@ const getUsersBasedOnFilter = async (query) => {
   return [];
 };
 
-const updateRoles = async (userId, newRoles) => {
+const updateRoles = async (userData, newRoles) => {
   try {
-    const userDoc = await userModel.doc(userId).get();
-    const user = userDoc.data();
-    let roles;
+    const roles = { ...userData.roles };
     if (Object.keys(newRoles).includes("member")) {
       if (newRoles.member === true) {
-        if (user?.roles?.member) {
+        if (userData.roles.member) {
           return { isRoleUpdated: false };
         }
       } else if (newRoles.member === false) {
-        if (user?.roles?.member === false) {
+        if (userData.roles.member === false) {
           return { isRoleUpdated: false };
         }
       }
-      roles = user.roles ? { ...user.roles, member: newRoles.member } : { member: newRoles.member };
+      roles.member = newRoles.member;
     } else if (Object.keys(newRoles).includes("archived")) {
-      if (user?.roles && user.roles.archived) return { isRoleUpdated: false };
-      roles = user.roles ? { ...user.roles, archived: newRoles.archived } : { archived: newRoles.archived };
+      if (userData.roles && userData.roles.archived) return { isRoleUpdated: false };
+      roles.archived = newRoles.archived;
     }
-    await userModel.doc(userId).update({
+    await userModel.doc(userData.id).update({
       roles,
     });
     return { isRoleUpdated: true };

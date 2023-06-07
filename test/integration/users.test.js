@@ -1077,7 +1077,7 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /users/:userId/roles", function () {
+  describe("PATCH /users/:id/roles", function () {
     it("Should make the user a member", function (done) {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
         chai
@@ -1092,9 +1092,8 @@ describe("Users", function () {
               return done(err);
             }
 
-            expect(res).to.have.status(204);
-            /* eslint-disable no-unused-expressions */
-            expect(res.body).to.be.a("object").to.be.empty;
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("role updated successfully!");
             return done();
           });
       });
@@ -1114,9 +1113,8 @@ describe("Users", function () {
               return done(err);
             }
 
-            expect(res).to.have.status(204);
-            /* eslint-disable no-unused-expressions */
-            expect(res.body).to.be.a("object").to.be.empty;
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("role updated successfully!");
             return done();
           });
       });
@@ -1136,15 +1134,37 @@ describe("Users", function () {
               return done(err);
             }
 
-            expect(res).to.have.status(204);
-            /* eslint-disable no-unused-expressions */
-            expect(res.body).to.be.a("object").to.be.empty;
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("role updated successfully!");
             return done();
           });
       });
     });
 
-    it("Should return 400 if user is already a member", function (done) {
+    it("Should return 400 if invalid role", function (done) {
+      addUser(userRoleUpdate).then((userRoleUpdateId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUpdateId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: true,
+            archived: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.be.equal("Invalid role");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 409 if user is already a member", function (done) {
       addUser(userAlreadyMember).then((userAlreadyMemberId) => {
         chai
           .request(app)
@@ -1158,14 +1178,14 @@ describe("Users", function () {
               return done(err);
             }
 
-            expect(res).to.have.status(400);
-            expect(res.body.message).to.be.equal("Invalid role");
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.be.equal("role already updated!");
             return done();
           });
       });
     });
 
-    it("Should return 400 if user is already archived", function (done) {
+    it("Should return 409 if user is already archived", function (done) {
       addUser(userAlreadyArchived).then((userAlreadyArchivedId) => {
         chai
           .request(app)
@@ -1179,8 +1199,8 @@ describe("Users", function () {
               return done(err);
             }
 
-            expect(res).to.have.status(400);
-            expect(res.body.message).to.be.equal("Invalid role");
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.be.equal("role already updated!");
             return done();
           });
       });
@@ -1189,7 +1209,7 @@ describe("Users", function () {
     it("Should return 404 if user not found", function (done) {
       chai
         .request(app)
-        .patch(`/users/userId/roles`)
+        .patch(`/users/111111111111/roles`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({
           archived: true,

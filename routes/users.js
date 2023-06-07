@@ -22,10 +22,10 @@ router.put("/self/intro", authenticate, userValidator.validateJoinData, users.ad
 router.get("/:id/skills", users.getUserSkills);
 router.get("/:id/badges", getUserBadges);
 router.patch(
-  "/:userId/roles",
+  "/:id/roles",
   authenticate,
-  userValidator.validateUpdateRoles,
   authorizeRoles([SUPERUSER]),
+  userValidator.validateUpdateRoles,
   users.updateRoles
 );
 
