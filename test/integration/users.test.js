@@ -140,6 +140,26 @@ describe("Users", function () {
           return done();
         });
     });
+    it("Should get all the users with archived false", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          const userData = res.body.users;
+          userData.forEach((user) => {
+            expect(user.roles.archived).to.equal(false);
+          });
+          return done();
+        });
+    });
 
     it("Should get all the users in system when query params are valid", function (done) {
       chai
