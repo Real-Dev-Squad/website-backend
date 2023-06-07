@@ -12,9 +12,9 @@ module.exports = () => {
       id: "641e3b43a42edf3910cbc8bf",
       region: "in",
       customer: "627cdddff2e4e30487862ad1",
-      recording_info: {
-        enabled: false,
-      },
+      customer_id: "6407de59edc7c8f3674c0d12",
+      app_id: "6407de59edc7c8f3674c0d13",
+      recording_info: null,
     },
   ];
 };

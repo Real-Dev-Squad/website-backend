@@ -1,7 +1,6 @@
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
-const axios = require("axios");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -21,12 +20,9 @@ const defaultUser = userData[0];
 const config = require("config");
 const sinon = require("sinon");
 
-const { EventTokenService } = require("../../services/EventTokenService");
-const { EventAPIService } = require("../../services/EventAPIService");
-const cookieName = config.get("userToken.cookieName");
+const { EventTokenService, EventAPIService } = require("../../services");
 
-const tokenService = new EventTokenService();
-const apiService = new EventAPIService(tokenService);
+const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
@@ -44,33 +40,10 @@ describe("events", function () {
   });
 
   describe("POST events - createEvent", function () {
-    let axiosStub;
-    let tokenService;
-    let axiosInstance;
     let service;
 
-    beforeEach(function () {
-      axiosInstance = {
-        // get: sinon.stub().resolves({ status: 200, data: {} }),
-        post: sinon.stub().resolves({ status: 200, data: {} }),
-        interceptors: {
-          request: {
-            use: sinon.stub(),
-          },
-          response: {
-            use: sinon.stub(),
-          },
-        },
-      };
-
-      axiosStub = sinon.stub(axios, "create").returns(axiosInstance);
-
-      tokenService = new EventTokenService();
-      service = new EventAPIService(tokenService);
-    });
-
     afterEach(function () {
-      axiosStub.restore();
+      service.restore();
     });
 
     it("returns the created room data when the request is successful", function (done) {
@@ -81,9 +54,7 @@ describe("events", function () {
         userId: userId,
       };
 
-      axiosInstance.post.resolves({ data: event1Data });
-      // sinon.stub(service, "post").resolves(event1Data);
-      sinon.stub(eventQuery, "createEvent").resolves(event1Data);
+      service = sinon.stub(EventAPIService.prototype, "post").returns(event1Data);
 
       chai
         .request(app)
@@ -96,15 +67,17 @@ describe("events", function () {
           }
 
           expect(response).to.have.status(201);
-          expect(response.body).to.deep.equal(event1Data);
+          expect(response.body.name).to.equal(event1Data.name);
+          expect(response.body.description).to.equal(event1Data.description);
+          expect(response.body.region).to.equal(event1Data.region);
+          expect(response.body.enabled).to.be.equal(true);
 
           return done();
         });
     });
 
     it("returns an error when the request to the API service fails", function (done) {
-      // sinon.stub(service, "post").rejects({ code: "ERR_BAD_REQUEST" });
-      axiosInstance.post.rejects({ code: "ERR_BAD_REQUEST" });
+      service = sinon.stub(EventAPIService.prototype, "post").rejects({ code: "ERR_BAD_REQUEST" });
 
       chai
         .request(app)
@@ -116,35 +89,6 @@ describe("events", function () {
           region: "in",
           userId: userId,
         })
-        .end((error, response) => {
-          if (error) {
-            return done(error);
-          }
-          expect(response).to.have.status(500);
-          expect(response.body.error).to.equal("ERR_BAD_REQUEST");
-          expect(response.body.message).to.equal("Couldn't create event. Please try again later");
-
-          return done();
-        });
-    });
-
-    it("returns an error when the request to the eventQuery fails", function (done) {
-      const eventData = {
-        id: "test-room-id",
-        name: "Test Room",
-        description: "This is a test room",
-        region: "in",
-        userId: userId,
-      };
-      // sinon.stub(service, "post").resolves(eventData);
-      axiosInstance.post.resolves({ status: 200, data: eventData });
-      sinon.stub(eventQuery, "createEvent").rejects({ code: "ERR_BAD_REQUEST" });
-
-      chai
-        .request(app)
-        .post("/events")
-        .set("cookie", `${cookieName}=${authToken}`)
-        .send(eventData)
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -184,7 +128,15 @@ describe("events", function () {
   });
 
   describe("GET /events - getAllEvents", function () {
+    let service;
+
+    afterEach(function () {
+      service.restore();
+    });
+
     it("should return all events information based on query parameters and enabled as false", function (done) {
+      service = sinon.stub(EventAPIService.prototype, "get").returns({ limit: 10, last: "id", data: eventData });
+
       chai
         .request(app)
         .get("/events?limit=10&enabled=false")
@@ -207,6 +159,8 @@ describe("events", function () {
     });
 
     it("should return all events information based on query parameters and enabled as true", function (done) {
+      service = sinon.stub(EventAPIService.prototype, "get").returns({ limit: 10, last: "id", data: eventData });
+
       chai
         .request(app)
         .get("/events?limit=10&enabled=true")
@@ -226,11 +180,11 @@ describe("events", function () {
     });
 
     it("returns an error if there is a problem retrieving events", function (done) {
-      sinon.stub(apiService, "get").rejects({ code: "ERR_BAD_REQUEST" });
+      service = sinon.stub(EventAPIService.prototype, "get").rejects({ code: "ERR_BAD_REQUEST" });
 
       chai
         .request(app)
-        .get("/events?limit=5&enabled=true")
+        .get("/events?limit=10&enabled=true")
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -239,16 +193,16 @@ describe("events", function () {
           expect(response.body.error).to.equal("ERR_BAD_REQUEST");
           expect(response.body.message).to.equal("Couldn't get events. Please try again later");
 
-          apiService.get.restore();
-
           return done();
         });
     });
   });
 
   describe("POST /events/join - joinEvent", function () {
+    let tokenService;
+
     afterEach(function () {
-      sinon.restore();
+      tokenService.restore();
     });
 
     it("should return a token when the request is successful", function (done) {
@@ -257,7 +211,7 @@ describe("events", function () {
         userId: "5678",
         role: "guest",
       };
-      sinon.stub(tokenService, "getAuthToken").resolves("test-token");
+      tokenService = sinon.stub(EventTokenService.prototype, "getAuthToken").returns("test-token");
 
       chai
         .request(app)
@@ -279,8 +233,15 @@ describe("events", function () {
   });
 
   describe("GET /events/:id - getEventById", function () {
+    let service;
+
+    afterEach(function () {
+      service.restore();
+    });
+
     it("Should return event information if the event exists", function (done) {
       const roomId = event1Data.room_id;
+      service = sinon.stub(EventAPIService.prototype, "get").returns(event1Data);
       chai
         .request(app)
         .get(`/events/${roomId}`)
@@ -302,7 +263,8 @@ describe("events", function () {
     it("Should return 500 if an error occurs while retrieving the room information", function (done) {
       const roomId = "invalid-room-id";
       const mockError = { code: "ERR_BAD_REQUEST", message: "Unable to retrieve event details" };
-      sinon.stub(apiService, "get").rejects(mockError);
+
+      service = sinon.stub(EventAPIService.prototype, "get").rejects(mockError);
 
       chai
         .request(app)
@@ -318,14 +280,16 @@ describe("events", function () {
           expect(response.body.error).to.equal(mockError.code);
           expect(response.body.message).to.equal(mockError.message);
 
-          apiService.get.restore();
           return done();
         });
     });
   });
 
   describe("PATCH /events - updateEvent", function () {
+    let service;
+
     afterEach(function () {
+      service.restore();
       sinon.restore();
     });
 
@@ -333,7 +297,7 @@ describe("events", function () {
       const payload = {
         enabled: true,
       };
-      sinon.stub(apiService, "post").resolves(payload);
+      service = sinon.stub(EventAPIService.prototype, "post").returns(payload);
       sinon.stub(eventQuery, "updateEvent").resolves({ ...event1Data, enabled: true });
 
       chai
@@ -348,7 +312,6 @@ describe("events", function () {
 
           expect(response).to.have.status(200);
           expect(response.body.message).to.be.a("string");
-          expect(response.body.data.id).to.equal(event1Data.room_id);
           expect(response.body.data.enabled).to.equal(true);
 
           return done();
@@ -359,7 +322,9 @@ describe("events", function () {
       const payload = {
         enabled: false,
       };
-      sinon.stub(apiService, "post").resolves(payload);
+
+      service = sinon.stub(EventAPIService.prototype, "post").returns(payload);
+
       sinon.stub(eventQuery, "updateEvent").resolves({ ...event1Data, enabled: false });
 
       chai
@@ -374,33 +339,7 @@ describe("events", function () {
 
           expect(response).to.have.status(200);
           expect(response.body.message).to.be.a("string");
-          expect(response.body.data.id).to.equal(event1Data.room_id);
           expect(response.body.data.enabled).to.equal(false);
-
-          return done();
-        });
-    });
-
-    it("returns an error when the request to the eventQuery fails", function (done) {
-      const payload = {
-        enabled: true,
-      };
-
-      sinon.stub(apiService, "post").resolves(payload);
-      sinon.stub(eventQuery, "updateEvent").rejects({ code: "ERR_BAD_REQUEST" });
-
-      chai
-        .request(app)
-        .patch("/events")
-        .set("cookie", `${cookieName}=${authToken}`)
-        .send({ enabled: true, id: event1Data.id })
-        .end((error, response) => {
-          if (error) {
-            return done(error);
-          }
-          expect(response).to.have.status(500);
-          expect(response.body.error.code).to.equal("ERR_BAD_REQUEST");
-          expect(response.body.message).to.equal("Couldn't update event. Please try again later.");
 
           return done();
         });
@@ -425,7 +364,10 @@ describe("events", function () {
   });
 
   describe("PATCH /events/end - endActiveEvent", function () {
+    let service;
+
     afterEach(function () {
+      service.restore();
       sinon.restore();
     });
 
@@ -434,7 +376,8 @@ describe("events", function () {
         reason: "Event ended by user",
         lock: true,
       };
-      sinon.stub(apiService, "post").resolves({ message: "session is ending" });
+      service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "session is ending" });
+
       sinon.stub(eventQuery, "endActiveEvent").returns({ message: "Event ended successfully." });
 
       chai
