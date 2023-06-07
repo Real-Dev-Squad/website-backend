@@ -458,6 +458,31 @@ const getUsersBasedOnFilter = async (query) => {
   return [];
 };
 
+/**
+ * Fetch all users
+ *
+ * @return {Promise<users>}
+ */
+
+const getDiscordUsers = async () => {
+  try {
+    const usersRef = await userModel.where("roles.archived", "==", false).get();
+    const users = [];
+    usersRef.forEach((user) => {
+      const userData = user.data();
+      if (userData?.discordId && userData.roles?.in_discord === false)
+        users.push({
+          id: user.id,
+          ...userData,
+        });
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Error while fetching all users: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -473,4 +498,5 @@ module.exports = {
   getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
+  getDiscordUsers,
 };
