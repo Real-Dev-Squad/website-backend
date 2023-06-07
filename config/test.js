@@ -111,4 +111,9 @@ module.exports = {
     rdsServerLessPrivateKey: "RSA PRIVATE KEY",
     ttl: 60,
   },
+
+  Event100ms: {
+    APP_ACCESS_KEY: "APP_ACCESS_KEY",
+    APP_SECRET: "APP_SECRET",
+  },
 };
