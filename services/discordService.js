@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
-const getDiscordMembers = async (req, res) => {
+const getDiscordMembers = async () => {
   const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
     algorithm: "RS256",
     expiresIn: config.get("rdsServerlessBot.ttl"),
