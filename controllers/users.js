@@ -500,6 +500,31 @@ const nonVerifiedDiscordUsers = async (req, res) => {
   return res.json(data);
 };
 
+const updateRoles = async (req, res) => {
+  try {
+    const result = await userQuery.fetchUser({ userId: req.params.id });
+    if (result?.userExists) {
+      const dataToUpdate = req.body;
+      if (Object.keys(dataToUpdate).length > 1) {
+        return res.boom.badRequest("Invalid role");
+      }
+      const userQueryResponse = await userQuery.updateRoles(result.user, dataToUpdate);
+      if (userQueryResponse.isRoleUpdated) {
+        return res.status(200).json({
+          message: "role updated successfully!",
+        });
+      } else {
+        return res.boom.conflict("role already updated!");
+      }
+    } else {
+      return res.boom.notFound("User not found");
+    }
+  } catch (error) {
+    logger.error(`Error while updateRoles: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -520,4 +545,5 @@ module.exports = {
   getUserSkills,
   filterUsers,
   nonVerifiedDiscordUsers,
+  updateRoles,
 };

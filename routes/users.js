@@ -22,6 +22,13 @@ router.put("/self/intro", authenticate, userValidator.validateJoinData, users.ad
 router.get("/:id/skills", users.getUserSkills);
 router.get("/:id/badges", getUserBadges);
 router.patch("/", authenticate, authorizeRoles([SUPERUSER]), users.nonVerifiedDiscordUsers);
+router.patch(
+  "/:id/roles",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  userValidator.validateUpdateRoles,
+  users.updateRoles
+);
 
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post("/picture", authenticate, upload.single("profile"), users.postUserPicture);
