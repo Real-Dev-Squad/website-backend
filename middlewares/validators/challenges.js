@@ -34,5 +34,5 @@ const subscribeToChallenge = async (req, res, next) => {
 
 module.exports = {
   createChallenge,
-  subscribeToChallenge
+  subscribeToChallenge,
 };
