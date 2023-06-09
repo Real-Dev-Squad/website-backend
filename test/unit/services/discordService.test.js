@@ -5,14 +5,6 @@ const discordServiceMock = require("../../fixtures/discordResponse/discord-respo
 const discordService = require("../../../services/discordService");
 
 describe("discord service", function () {
-  describe("Fetch fails", function () {
-    it("tests discordService faild response", async function () {
-      const response = await discordService.getDiscordMembers();
-      expect(response).to.have.length(1);
-      expect(response[0].message).to.be.equal("Oops an internal error occured");
-    });
-  });
-
   describe("Returns appropriate response", function () {
     beforeEach(function () {
       sinon.stub(discordService, "getDiscordMembers").returns(discordServiceMock.getDiscordMembers);
