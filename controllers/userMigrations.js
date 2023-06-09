@@ -16,7 +16,7 @@ const addDefaultColors = async (req, res) => {
     const updateUserPromises = [];
 
     for (const user of usersArr) {
-      const colors = user.colors ? user.colors : {};
+      const colors = user.colors ?? {};
       if (user.colors === undefined) {
         const userColorIndex = getRandomIndex(userColors);
         colors.color_id = userColorIndex;
