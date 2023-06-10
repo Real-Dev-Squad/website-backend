@@ -229,14 +229,14 @@ describe("External Accounts", function () {
   });
 
   describe("PATCH /external-accounts/discord-sync", function () {
-    let jwtToken, sandbox;
+    let jwtToken, fetchStub;
 
     beforeEach(async function () {
       const userId = await addUser(userData[4]);
       jwtToken = authService.generateAuthToken({ userId });
       await userModel.add(usersFromRds[0]);
       await userModel.add(usersFromRds[1]);
-      sandbox = Sinon.createSandbox();
+      fetchStub = Sinon.stub(global, "fetch");
     });
 
     afterEach(async function () {
@@ -245,14 +245,14 @@ describe("External Accounts", function () {
     });
 
     it("updates user and adds discord related data", function (done) {
-      sandbox.replace(global, "fetch", function () {
-        return Promise.resolve({
+      fetchStub.returns(
+        Promise.resolve({
           status: 200,
           json: () => {
             Promise.resolve(getDiscordMembers);
           },
-        });
-      });
+        })
+      );
       chai
         .request(app)
         .patch("/external-accounts/discord-sync")
@@ -271,9 +271,7 @@ describe("External Accounts", function () {
     });
 
     it("returns 5xx errors", function (done) {
-      sandbox.replace(global, "fetch", function () {
-        throw new Error("Some Error");
-      });
+      fetchStub.throws(new Error("Some Internal Error"));
       chai
         .request(app)
         .patch("/external-accounts/discord-sync")
