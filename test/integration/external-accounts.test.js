@@ -12,12 +12,17 @@ const externalAccountsModel = require("../../models/external-accounts");
 const { usersFromRds, getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
+const firestore = require("../../utils/firestore");
 const userData = require("../fixtures/user/user")();
+const userModel = firestore.collection("users");
 
 chai.use(chaiHttp);
 const cookieName = config.get("userToken.cookieName");
 
 describe("External Accounts", function () {
+  afterEach(async function () {
+    await cleanDb();
+  });
   describe("POST /external-accounts", function () {
     let jwtToken;
 
@@ -232,7 +237,8 @@ describe("External Accounts", function () {
     beforeEach(async function () {
       const userId = await addUser(userData[4]);
       jwtToken = authService.generateAuthToken({ userId });
-      addUser(usersFromRds[0]);
+      await userModel.add(usersFromRds[0]);
+      await userModel.add(usersFromRds[1]);
       fetchStub = Sinon.stub(global, "fetch");
     });
 
@@ -260,12 +266,13 @@ describe("External Accounts", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.deep.equal({
-            rdsUsers: 1,
+            rdsUsers: 2,
             message: "Data Sync Complete",
           });
           return done();
         });
     });
+
     it("returns 5xx errors", function (done) {
       fetchStub.throws(new Error("Some Internal Error"));
       chai

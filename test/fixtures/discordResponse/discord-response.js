@@ -58,6 +58,7 @@ const usersFromRds = [
     discordId: "123456789098765432",
     roles: {
       in_discord: false,
+      archived: false,
     },
   },
   {
@@ -70,6 +71,7 @@ const usersFromRds = [
     discordId: "12345678909867666",
     roles: {
       in_discord: false,
+      archived: false,
     },
   },
 ];
