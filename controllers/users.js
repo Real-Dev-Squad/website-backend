@@ -505,16 +505,13 @@ const updateRoles = async (req, res) => {
     const result = await userQuery.fetchUser({ userId: req.params.id });
     if (result?.userExists) {
       const dataToUpdate = req.body;
-      if (Object.keys(dataToUpdate).length > 1) {
-        return res.boom.badRequest("Invalid role");
-      }
       const userQueryResponse = await userQuery.updateRoles(result.user, dataToUpdate);
       if (userQueryResponse.isRoleUpdated) {
         return res.status(200).json({
           message: "role updated successfully!",
         });
       } else {
-        return res.boom.conflict("role already updated!");
+        return res.boom.conflict("role already exist!");
       }
     } else {
       return res.boom.notFound("User not found");

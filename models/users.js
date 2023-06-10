@@ -486,24 +486,18 @@ const getDiscordUsers = async () => {
 const updateRoles = async (userData, newRoles) => {
   try {
     const roles = { ...userData.roles };
-    if (Object.keys(newRoles).includes("member")) {
-      if (newRoles.member === true) {
-        if (userData.roles.member) {
-          return { isRoleUpdated: false };
-        }
-      } else if (newRoles.member === false) {
-        if (userData.roles.member === false) {
-          return { isRoleUpdated: false };
-        }
-      }
-      roles.member = newRoles.member;
-    } else if (Object.keys(newRoles).includes("archived")) {
-      if (userData.roles && userData.roles.archived) return { isRoleUpdated: false };
-      roles.archived = newRoles.archived;
-    }
-    await userModel.doc(userData.id).update({
-      roles,
+    const newRolesArray = Object.entries(newRoles);
+    const rolesContainNewRoles = newRolesArray.every(([key, value]) => {
+      return roles[key] === value;
     });
+
+    if (rolesContainNewRoles) return { isRoleUpdated: false };
+    const updateRoles = { ...roles, ...newRoles };
+
+    await userModel.doc(userData.id).update({
+      updateRoles,
+    });
+
     return { isRoleUpdated: true };
   } catch (err) {
     logger.error("Error updating user", err);

@@ -25,8 +25,11 @@ const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
 
 const userRoleUpdate = userData[4];
+const userRoleUnArchived = userData[9];
 const userAlreadyMember = userData[0];
+const userAlreadyNotMember = userData[9];
 const userAlreadyArchived = userData[5];
+const userAlreadyUnArchived = userData[4];
 const nonSuperUser = userData[0];
 
 const cookieName = config.get("userToken.cookieName");
@@ -1185,6 +1188,27 @@ describe("Users", function () {
       });
     });
 
+    it("Should un-archive the user", function (done) {
+      addUser(userRoleUnArchived).then((userRoleUnArchivedId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUnArchivedId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            archived: false,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("role updated successfully!");
+            return done();
+          });
+      });
+    });
+
     it("Should return 400 if invalid role", function (done) {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
         chai
@@ -1201,8 +1225,7 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(400);
-            expect(res.body).to.be.a("object");
-            expect(res.body.message).to.be.equal("Invalid role");
+            expect(res.body.message).to.be.equal('"value" must have less than or equal to 1 key');
             return done();
           });
       });
@@ -1223,7 +1246,28 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(409);
-            expect(res.body.message).to.be.equal("role already updated!");
+            expect(res.body.message).to.be.equal("role already exist!");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 409 if user is already not a member", function (done) {
+      addUser(userAlreadyNotMember).then((userAlreadyNotMemberId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userAlreadyNotMemberId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: false,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.be.equal("role already exist!");
             return done();
           });
       });
@@ -1244,7 +1288,28 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(409);
-            expect(res.body.message).to.be.equal("role already updated!");
+            expect(res.body.message).to.be.equal("role already exist!");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 409 if user is already un-archived", function (done) {
+      addUser(userAlreadyUnArchived).then((userAlreadyUnArchivedId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userAlreadyUnArchivedId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            archived: false,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.be.equal("role already exist!");
             return done();
           });
       });
