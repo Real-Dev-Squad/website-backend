@@ -20,9 +20,6 @@ chai.use(chaiHttp);
 const cookieName = config.get("userToken.cookieName");
 
 describe("External Accounts", function () {
-  afterEach(async function () {
-    await cleanDb();
-  });
   describe("POST /external-accounts", function () {
     let jwtToken;
 

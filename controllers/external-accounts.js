@@ -47,11 +47,7 @@ const getExternalAccountData = async (req, res) => {
 const syncExternalAccountData = async (req, res) => {
   try {
     const discordUserData = await getDiscordMembers();
-    // eslint-disable-next-line
-    console.log("🚀 ~ file: external-accounts.js:50 ~ syncExternalAccountData ~ discordUserData:", discordUserData);
     const rdsUserData = await getDiscordUsers();
-    // eslint-disable-next-line
-    console.log("🚀 ~ file: external-accounts.js:52 ~ syncExternalAccountData ~ rdsUserData:", rdsUserData);
     rdsUserData.forEach(async (rdsUser) => {
       discordUserData.forEach(async (discordUser) => {
         if (rdsUser.discordId === discordUser.user.id) {
