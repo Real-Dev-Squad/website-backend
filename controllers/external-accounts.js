@@ -1,5 +1,8 @@
 const externalAccountsModel = require("../models/external-accounts");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const { getDiscordMembers } = require("../services/discordService");
+const { getDiscordUsers, addOrUpdate } = require("../models/users");
+const logger = require("../utils/logger");
 
 const addExternalAccountData = async (req, res) => {
   const createdOn = Date.now();
@@ -41,4 +44,32 @@ const getExternalAccountData = async (req, res) => {
   }
 };
 
-module.exports = { addExternalAccountData, getExternalAccountData };
+const syncExternalAccountData = async (req, res) => {
+  try {
+    const discordUserData = await getDiscordMembers();
+    const rdsUserData = await getDiscordUsers();
+    rdsUserData.forEach(async (rdsUser) => {
+      discordUserData.forEach(async (discordUser) => {
+        if (rdsUser.discordId === discordUser.user.id) {
+          const userData = {
+            discordJoinedAt: discordUser.joined_at,
+            roles: {
+              inDiscord: true,
+            },
+          };
+          await addOrUpdate(userData, rdsUser.id);
+        }
+      });
+    });
+    return res.json({
+      rdsUsers: rdsUserData.length,
+      discordUsers: discordUserData.length,
+      message: "worked with above count",
+    });
+  } catch (err) {
+    logger.error("Error in syncind users discord joined at", err);
+    return res.json({ message: "Some Internal error occured" });
+  }
+};
+
+module.exports = { addExternalAccountData, getExternalAccountData, syncExternalAccountData };
