@@ -9,8 +9,13 @@ const { BAD_TOKEN, CLOUDFLARE_WORKER } = require("../../constants/bot");
 const authService = require("../../services/authService");
 const externalAccountData = require("../fixtures/external-accounts/external-accounts")();
 const externalAccountsModel = require("../../models/external-accounts");
+const { usersFromRds, getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
+const Sinon = require("sinon");
+const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
+const userData = require("../fixtures/user/user")();
 
 chai.use(chaiHttp);
+const cookieName = config.get("userToken.cookieName");
 
 describe("External Accounts", function () {
   describe("POST /external-accounts", function () {
@@ -216,6 +221,64 @@ describe("External Accounts", function () {
             message: "Unauthenticated User",
           });
 
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /external-accounts/discord-sync", function () {
+    let jwtToken, fetchStub;
+
+    beforeEach(async function () {
+      const userId = await addUser(userData[4]);
+      jwtToken = authService.generateAuthToken({ userId });
+      addUser(usersFromRds[0]);
+      fetchStub = Sinon.stub(global, "fetch");
+    });
+
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
+    });
+
+    it("updates user and adds discord related data", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => {
+            Promise.resolve(getDiscordMembers);
+          },
+        })
+      );
+      chai
+        .request(app)
+        .patch("/external-accounts/discord-sync")
+        .set("Cookie", `${cookieName}=${jwtToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.deep.equal({
+            rdsUsers: 1,
+            message: "Data Sync Complete",
+          });
+          return done();
+        });
+    });
+    it("returns 5xx errors", function (done) {
+      fetchStub.throws(new Error("Some Internal Error"));
+      chai
+        .request(app)
+        .patch("/external-accounts/discord-sync")
+        .set("Cookie", `${cookieName}=${jwtToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.deep.equal({
+            message: INTERNAL_SERVER_ERROR,
+          });
           return done();
         });
     });
