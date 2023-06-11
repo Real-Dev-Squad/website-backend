@@ -4,8 +4,6 @@ const chaiHttp = require("chai-http");
 const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const authService = require("../../services/authService");
-const sinon = require("sinon");
-const controller = require("../../controllers/users");
 const addUser = require("../utils/addUser");
 const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
@@ -1055,13 +1053,6 @@ describe("Users", function () {
         });
     });
     it("Should update the user", async function () {
-      // Create a stub for the migrate function
-      const migrateStub = sinon.stub(controller, "migrate");
-      // Define the desired behavior of the stub
-      migrateStub.returns(userData[0]).resolves({
-        empty: true,
-        forEach: sinon.stub(),
-      });
       const usersMigrateResponse = await chai
         .request(app)
         .post(`/users/migrate`)
@@ -1079,8 +1070,6 @@ describe("Users", function () {
       usersReponse.body.users.forEach((document) => {
         expect(document).to.have.property(`github_user_id`);
       });
-      // Restore the original migrate function
-      migrateStub.restore();
     });
     it("Should return unauthorized error when not logged in", function (done) {
       chai
