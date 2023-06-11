@@ -303,7 +303,7 @@ const postUserPicture = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
   return res.status(201).json({
-    message: "Profile picture uploaded successfully! " + verificationResult.message,
+    message: `Profile picture uploaded successfully! ${verificationResult.message}`,
     image: imageData,
   });
 };

@@ -112,7 +112,7 @@ const updateDiscordImageForVerification = async (userDiscordId) => {
     await documentRef.update(unverifiedUserDiscordImage);
     return discordAvatarUrl;
   } catch (err) {
-    logger.error("Error in adding role", err);
+    logger.error("Error while updating discord verification image:", err);
     throw err;
   }
 };

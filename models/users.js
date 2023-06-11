@@ -312,9 +312,10 @@ const initializeUser = async (userId) => {
 /**
  * Adds user data for verification by moderators
  * @param userId {String} - RDS User Id
- * @param discordId {Object} - Discord id of RDS user
- * @param profileImageUrl {number} - profile image URL of user
- * @param discordImageUrl {number} - discord image URL of user
+ * @param discordId {String} - Discord id of RDS user
+ * @param profileImageUrl {String} - profile image URL of user
+ * @param discordImageUrl {String} - discord image URL of user
+ * @return {Promise<{message: string}|{message: string}>}
  */
 const addForVerification = async (userId, discordId, profileImageUrl, discordImageUrl) => {
   try {
@@ -326,12 +327,10 @@ const addForVerification = async (userId, discordId, profileImageUrl, discordIma
       profile: { url: profileImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
     };
     if (!isNotVerified.empty) {
-      const documentRef = isNotVerified.docs[0].ref;
+      const unVerifiedDocument = isNotVerified.docs[0];
+      const documentRef = unVerifiedDocument.ref;
       // DOESN"T CHANGE THE APPROVAL STATE OF DISCORD IMAGE IF ALREADY VERIFIED
-      unverifiedUserData.discord.approved = isNotVerified.docs[0].data().discord.approved || false;
-      // DOESN"T CHANGE THE UPDATE DATE OF DISCORD IMAGE
-      unverifiedUserData.discord.date =
-        isNotVerified.docs[0].data().discord.date || admin.firestore.Timestamp.fromDate(new Date());
+      unverifiedUserData.discord.approved = unVerifiedDocument.data().discord.approved || false;
       await documentRef.update(unverifiedUserData);
     } else await photoVerificationModel.add(unverifiedUserData);
     return { message: "Profile data added for verification successfully" };

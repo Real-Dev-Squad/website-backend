@@ -136,7 +136,7 @@ const updateDiscordImageForVerification = async (req, res) => {
       discordAvatarUrl,
     });
   } catch (err) {
-    logger.error(`Error while adding new Role: ${err}`);
+    logger.error(`Error while updating discord image url verification document: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
