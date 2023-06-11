@@ -44,6 +44,11 @@ const getExternalAccountData = async (req, res) => {
   }
 };
 
+/**
+ * Gets all group-roles
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
 const syncExternalAccountData = async (req, res) => {
   try {
     const discordUserData = await getDiscordMembers();
