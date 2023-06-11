@@ -49,6 +49,7 @@ const syncExternalAccountData = async (req, res) => {
     const discordUserData = await getDiscordMembers();
     const rdsUserData = await getDiscordUsers();
     const rdsUserDataMap = {};
+    const userDataUpdatorPromises = [];
 
     rdsUserData.forEach((rdsUser) => {
       rdsUserDataMap[rdsUser.discordId] = {
@@ -57,7 +58,7 @@ const syncExternalAccountData = async (req, res) => {
       };
     });
 
-    discordUserData.forEach(async (discordUser) => {
+    discordUserData.forEach((discordUser) => {
       const mappedRdsUser = rdsUserDataMap[discordUser.user.id];
       if (mappedRdsUser) {
         const userData = {
@@ -67,16 +68,19 @@ const syncExternalAccountData = async (req, res) => {
             in_discord: true,
           },
         };
-        await addOrUpdate(userData, mappedRdsUser.id);
+        userDataUpdatorPromises.push(addOrUpdate(userData, mappedRdsUser.id));
       }
     });
 
+    await Promise.all(userDataUpdatorPromises);
+
     return res.json({
       rdsUsers: rdsUserData.length,
+      discordUsers: discordUserData.length,
       message: "Data Sync Complete",
     });
   } catch (err) {
-    logger.error("Error in syncind users discord joined at", err);
+    logger.error("Error in syncing users discord joined at", err);
     return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
   }
 };

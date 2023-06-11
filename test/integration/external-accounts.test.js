@@ -248,9 +248,7 @@ describe("External Accounts", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => {
-            Promise.resolve(getDiscordMembers);
-          },
+          json: () => Promise.resolve(getDiscordMembers),
         })
       );
       chai
@@ -264,6 +262,7 @@ describe("External Accounts", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.deep.equal({
             rdsUsers: 2,
+            discordUsers: 2,
             message: "Data Sync Complete",
           });
           return done();
