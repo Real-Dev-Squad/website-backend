@@ -5,7 +5,7 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
-const { fetch } = require("../utils/fetch");
+
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
@@ -25,7 +25,11 @@ const verifyUser = async (req, res) => {
     logger.error(`Error while verifying user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
-  fetch(process.env.IDENTITY_SERVICE_URL, "POST", null, { userId }, { "Content-Type": "application/json" });
+  fetch(process.env.IDENTITY_SERVICE_URL, {
+    method: "POST",
+    body: { userId },
+    headers: { "Content-Type": "application/json" },
+  });
   return res.json({
     message: "Your request has been queued successfully",
   });
@@ -66,10 +70,39 @@ const getUserById = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
+const removePersonalDetails = (user) => {
+  const { phone, email, ...safeUser } = user;
+  return safeUser;
+};
+
 const getUsers = async (req, res) => {
   try {
     const query = req.query?.query ?? "";
     const qualifiers = getQualifiers(query);
+
+    // getting user details by id if present.
+    if (req.query.id) {
+      const id = req.query.id;
+      let result;
+      try {
+        result = await userQuery.fetchUser({ userId: id });
+      } catch (error) {
+        logger.error(`Error while fetching user: ${error}`);
+        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+      }
+
+      if (!result.userExists) {
+        return res.boom.notFound("User doesn't exist");
+      }
+
+      const User = { ...result.user };
+      const user = removePersonalDetails(User);
+
+      return res.json({
+        message: "User returned successfully!",
+        user,
+      });
+    }
 
     if (qualifiers?.filterBy) {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);
@@ -451,7 +484,7 @@ const addUserIntro = async (req, res) => {
     await userQuery.addJoinData(data);
 
     return res.status(201).json({
-      message: "User data added successfully",
+      message: "User join data and newstatus data added and updated successfully",
     });
   } catch (err) {
     logger.error("Could not save user data");
@@ -523,6 +556,11 @@ const filterUsers = async (req, res) => {
   }
 };
 
+const nonVerifiedDiscordUsers = async (req, res) => {
+  const data = await userQuery.getDiscordUsers();
+  return res.json(data);
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -544,4 +582,5 @@ module.exports = {
   filterUsers,
   verifyUserImage,
   getUserImageForVerification,
+  nonVerifiedDiscordUsers,
 };

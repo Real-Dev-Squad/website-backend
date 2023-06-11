@@ -2,6 +2,7 @@ const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 
+const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
@@ -15,9 +16,14 @@ const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
+const {
+  userStatusDataAfterSignup,
+  userStatusDataAfterFillingJoinSection,
+} = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
+const userStatusModel = require("../../models/userStatus");
+
 const cookieName = config.get("userToken.cookieName");
-const firestore = require("../../utils/firestore");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const photoVerificationModel = firestore.collection("photo-verification");
 chai.use(chaiHttp);
@@ -124,7 +130,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -140,12 +145,31 @@ describe("Users", function () {
           return done();
         });
     });
+    it("Should get all the users with archived false", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          const userData = res.body.users;
+          userData.forEach((user) => {
+            expect(user.roles.archived).to.equal(false);
+          });
+          return done();
+        });
+    });
 
     it("Should get all the users in system when query params are valid", function (done) {
       chai
         .request(app)
         .get("/users")
-        .set("cookie", `${cookieName}=${jwt}`)
         .query({
           size: 1,
           page: 0,
@@ -171,7 +195,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .set("cookie", `${cookieName}=${jwt}`)
         .query({
           size: -1,
           page: -1,
@@ -194,7 +217,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .set("cookie", `${cookieName}=${jwt}`)
         .query({
           size: 101,
         })
@@ -216,7 +238,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users?size=2")
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -237,7 +258,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?next=${userId}&prev=${userId}&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -254,7 +274,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?next=${userId}&page=1&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -271,7 +290,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?page=1&prev=${userId}&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -288,7 +306,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?search=an&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -313,7 +330,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?page=1&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -333,8 +349,7 @@ describe("Users", function () {
     });
 
     it("Should get next and previous page results based upon the links in the response", async function () {
-      const response = await chai.request(app).get(`/users?size=2`).set("cookie", `${cookieName}=${jwt}`);
-
+      const response = await chai.request(app).get(`/users?size=2`);
       expect(response).to.have.status(200);
       expect(response.body).to.be.a("object");
       expect(response.body.message).to.equal("Users returned successfully!");
@@ -343,7 +358,7 @@ describe("Users", function () {
       expect(response.body.links).to.have.property("prev");
 
       const nextPageLink = response.body.links.next;
-      const nextPageResponse = await chai.request(app).get(nextPageLink).set("cookie", `${cookieName}=${jwt}`);
+      const nextPageResponse = await chai.request(app).get(nextPageLink);
 
       expect(nextPageResponse).to.have.status(200);
       expect(nextPageResponse.body).to.be.a("object");
@@ -354,7 +369,7 @@ describe("Users", function () {
       expect(nextPageResponse.body.users).to.have.length(2);
 
       const prevPageLink = nextPageResponse.body.links.prev;
-      const previousPageResponse = await chai.request(app).get(prevPageLink).set("cookie", `${cookieName}=${jwt}`);
+      const previousPageResponse = await chai.request(app).get(prevPageLink);
 
       expect(previousPageResponse).to.have.status(200);
       expect(previousPageResponse.body).to.be.a("object");
@@ -592,6 +607,48 @@ describe("Users", function () {
     });
   });
 
+  describe("GET /users/?id", function () {
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("Should return given user by id", async function () {
+      const { userId } = await addOrUpdate(userData[0]);
+      const res = await chai.request(app).get(`/users/?id=${userId}`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("User returned successfully!");
+      expect(res.body.user).to.be.a("object");
+      expect(Object.keys(res.body.user)).to.include.members([
+        "username",
+        "first_name",
+        "last_name",
+        "yoe",
+        "linkedin_id",
+        "github_id",
+        "isMember",
+        "roles",
+      ]);
+      expect(Object.keys(res.body.user)).to.not.include.members(["phone", "email"]);
+      expect(res.body.user.id).to.equal(userId);
+    });
+
+    it("Should return 404 if user not Found", function (done) {
+      chai
+        .request(app)
+        .get(`/users/?id=anyRandomuserId`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User doesn't exist");
+          return done();
+        });
+    });
+  });
+
   describe("GET /users?search", function () {
     beforeEach(async function () {
       await addOrUpdate(userData[0]);
@@ -695,6 +752,12 @@ describe("Users", function () {
   });
 
   describe("PUT /users/self/intro", function () {
+    let userStatusData;
+    beforeEach(async function () {
+      await userStatusModel.updateUserStatus(userId, userStatusDataAfterSignup);
+      const updateStatus = await userStatusModel.updateUserStatus(userId, userStatusDataAfterFillingJoinSection);
+      userStatusData = (await firestore.collection("usersStatus").doc(updateStatus.id).get()).data();
+    });
     it("should return 409 if the data already present", function (done) {
       addJoinData(joinData(userId)[3]);
       chai
@@ -725,7 +788,11 @@ describe("Users", function () {
           }
           expect(res).to.have.status(201);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User data added successfully");
+          expect(res.body.message).to.equal("User join data and newstatus data added and updated successfully");
+          expect(userStatusData).to.have.own.property("currentStatus");
+          expect(userStatusData).to.have.own.property("monthlyHours");
+          expect(userStatusData.currentStatus.state).to.equal("ONBOARDING");
+          expect(userStatusData.monthlyHours.committed).to.equal(40);
           return done();
         });
     });
@@ -1030,6 +1097,7 @@ describe("Users", function () {
         });
     });
   });
+
   describe("PATCH /users/picture/verify/id", function () {
     it("Should verify the discord image of the user", function (done) {
       chai

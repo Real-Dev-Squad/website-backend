@@ -6,8 +6,10 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
+const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem } = require("../utils/array");
 const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
+const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
@@ -72,6 +74,10 @@ const addOrUpdate = async (userData, userId = null) => {
 const addJoinData = async (userData) => {
   try {
     await joinModel.add(userData);
+    await updateUserStatus(userData.userId, {
+      currentStatus: { state: userState.ONBOARDING },
+      monthlyHours: { committed: 4 * userData.intro.numberOfHours },
+    });
   } catch (err) {
     logger.error("Error in adding data", err);
     throw err;
@@ -139,7 +145,15 @@ const fetchPaginatedUsers = async (query) => {
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
-    let dbQuery = (query.prev ? userModel.limitToLast(size) : userModel.limit(size)).orderBy("username");
+
+    let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+
+    if (query.prev) {
+      dbQuery = dbQuery.limitToLast(size);
+    } else {
+      dbQuery = dbQuery.limit(size);
+    }
+
     if (Object.keys(query).length) {
       if (query.search) {
         dbQuery = dbQuery
@@ -291,7 +305,7 @@ const initializeUser = async (userId) => {
   if (!userWallet) {
     await createWallet(userId, walletConstants.INITIAL_WALLET);
   }
-
+  await updateUserStatus(userId, { currentStatus: { state: userState.ONBOARDING }, monthlyHours: { committed: 0 } });
   return true;
 };
 
@@ -435,6 +449,8 @@ const getRdsUserInfoByGitHubUsername = async (githubUsername) => {
  * @param {Array} query.levelNumber - Array of levelNumbers to filter the users on
  * @param {Array} query.tagId - Array of tagIds to filter the users on
  * @param {Array} query.state - Array of states to filter the users on
+ * @param {String} query.role - filter the users on role
+ * @param {String} query.verified - filter the users on verified i.e, discordId data
  * @return {Promise<Array>} - Array of user documents that match the filter criteria
  */
 
@@ -487,7 +503,59 @@ const getUsersBasedOnFilter = async (query) => {
     const filteredUserDocs = userDocs.filter((doc) => !doc.roles?.archived);
     return filteredUserDocs;
   }
+
+  const { role: roleQuery, verified: verifiedQuery } = query;
+
+  if (roleQuery) {
+    const filteredUsers = [];
+    const snapshot = await userModel.where(`roles.${roleQuery}`, "==", true).get();
+    snapshot.forEach((doc) => {
+      filteredUsers.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    return filteredUsers.filter((user) => !user.roles?.archived);
+  }
+  if (verifiedQuery === "true") {
+    const filteredUsers = [];
+    const snapshot = await userModel.where("discordId", "!=", null).get();
+    snapshot.forEach((doc) => {
+      filteredUsers.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    return filteredUsers.filter((user) => !user.roles?.archived);
+  }
   return [];
+};
+
+/**
+ * Fetch all users
+ *
+ * @return {Promise<users>}
+ */
+
+const getDiscordUsers = async () => {
+  try {
+    const usersRef = await userModel.where("roles.archived", "==", false).get();
+    const users = [];
+    usersRef.forEach((user) => {
+      const userData = user.data();
+      if (userData?.discordId && userData.roles?.in_discord === false)
+        users.push({
+          id: user.id,
+          ...userData,
+        });
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Error while fetching all users: ${err}`);
+    throw err;
+  }
 };
 
 module.exports = {
@@ -508,4 +576,5 @@ module.exports = {
   markAsVerified,
   addForVerification,
   getUserImageForVerification,
+  getDiscordUsers,
 };

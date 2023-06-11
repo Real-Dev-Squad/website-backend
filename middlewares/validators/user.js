@@ -1,5 +1,6 @@
 const joi = require("joi");
 const { USER_STATUS } = require("../../constants/users");
+const ROLES = require("../../constants/roles");
 
 const updateUser = async (req, res, next) => {
   const schema = joi
@@ -111,6 +112,9 @@ async function getUsers(req, res, next) {
       search: joi.string().optional().messages({
         "string.empty": "search value must not be empty",
       }),
+      id: joi.string().optional().messages({
+        "string.empty": "id value must not be empty",
+      }),
       next: joi
         .string()
         .optional()
@@ -172,6 +176,8 @@ async function validateUserQueryParams(req, res, next) {
           joi.array().items(joi.string().valid("IDLE", "OOO", "ACTIVE"))
         )
         .optional(),
+      role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD).optional(),
+      verified: joi.string().optional(),
     })
     .messages({
       "object.min": "Please provide at least one filter criteria",
