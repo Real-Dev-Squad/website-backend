@@ -48,20 +48,29 @@ const syncExternalAccountData = async (req, res) => {
   try {
     const discordUserData = await getDiscordMembers();
     const rdsUserData = await getDiscordUsers();
-    rdsUserData.forEach(async (rdsUser) => {
-      discordUserData.forEach(async (discordUser) => {
-        if (rdsUser.discordId === discordUser.user.id) {
-          const userData = {
-            discordJoinedAt: discordUser.joined_at,
-            roles: {
-              ...rdsUser.roles,
-              in_discord: true,
-            },
-          };
-          await addOrUpdate(userData, rdsUser.id);
-        }
-      });
+    const rdsUserDataMap = {};
+
+    rdsUserData.forEach((rdsUser) => {
+      rdsUserDataMap[rdsUser.discordId] = {
+        id: rdsUser.id,
+        roles: rdsUser.roles,
+      };
     });
+
+    discordUserData.forEach(async (discordUser) => {
+      const mappedRdsUser = rdsUserDataMap[discordUser.user.id];
+      if (mappedRdsUser) {
+        const userData = {
+          discordJoinedAt: discordUser.joined_at,
+          roles: {
+            ...mappedRdsUser.roles,
+            in_discord: true,
+          },
+        };
+        await addOrUpdate(userData, mappedRdsUser.id);
+      }
+    });
+
     return res.json({
       rdsUsers: rdsUserData.length,
       message: "Data Sync Complete",
