@@ -2,7 +2,8 @@ const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const firestore = require("../utils/firestore");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
-const photoVerificationModel = firestore.collection("photoVerification");
+const admin = require("firebase-admin");
+const photoVerificationModel = firestore.collection("photo-verification");
 
 /**
  *
@@ -102,7 +103,7 @@ const updateDiscordImageForVerification = async (userDiscordId) => {
       .limit(1)
       .get();
     const unverifiedUserDiscordImage = {
-      discordImageData: { discordAvatarUrl, verified: false },
+      discord: { url: discordAvatarUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
     };
     if (verificationDataSnapshot.empty) {
       throw new Error("No user verification record found");

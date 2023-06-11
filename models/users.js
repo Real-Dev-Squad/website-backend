@@ -13,8 +13,10 @@ const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
 const userStatusModel = firestore.collection("usersStatus");
-const photoVerificationModel = firestore.collection("photoVerification");
+const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
+const admin = require("firebase-admin");
+
 /**
  * Adds or updates the user data
  *
@@ -306,12 +308,16 @@ const addForVerification = async (userId, discordId, profileImageUrl, discordIma
     const unverifiedUserData = {
       userId,
       discordId,
-      discordImageData: { discordImageUrl, verified: false },
-      profileImageData: { profileImageUrl, verified: false },
+      discord: { url: discordImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+      profile: { url: profileImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
     };
     if (!isNotVerified.empty) {
       const documentRef = isNotVerified.docs[0].ref;
-      unverifiedUserData.discordImageData.verified = isNotVerified.docs[0].data().discordImageData.verified || false;
+      // DOESN"T CHANGE THE APPROVAL STATE OF DISCORD IMAGE IF ALREADY VERIFIED
+      unverifiedUserData.discord.approved = isNotVerified.docs[0].data().discord.approved || false;
+      // DOESN"T CHANGE THE UPDATE DATE OF DISCORD IMAGE
+      unverifiedUserData.discord.date =
+        isNotVerified.docs[0].data().discord.date || admin.firestore.Timestamp.fromDate(new Date());
       await documentRef.update(unverifiedUserData);
     } else await photoVerificationModel.add(unverifiedUserData);
     return { message: "Profile data added for verification successfully" };
@@ -328,14 +334,14 @@ const addForVerification = async (userId, discordId, profileImageUrl, discordIma
  */
 const markAsVerified = async (userId, imageType) => {
   try {
-    const verificationUserDatSnapshot = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
+    const verificationUserDataSnapshot = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
     // THROWS ERROR IF NO DOCUMENT FOUND
-    if (verificationUserDatSnapshot.empty) {
+    if (verificationUserDataSnapshot.empty) {
       throw new Error("No verification document record data for user was found");
     }
     // VERIFIES BASED ON THE TYPE OF IMAGE
-    const imageVerificationType = imageType === "discord" ? "discordImageData.verified" : "profileImageData.verified";
-    const documentRef = verificationUserDatSnapshot.docs[0].ref;
+    const imageVerificationType = imageType === "discord" ? "discord.approved" : "profile.approved";
+    const documentRef = verificationUserDataSnapshot.docs[0].ref;
     await documentRef.update({ [imageVerificationType]: true });
     return { message: "User image data verified successfully" };
   } catch (err) {

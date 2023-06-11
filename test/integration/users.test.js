@@ -17,6 +17,9 @@ const config = require("config");
 const joinData = require("../fixtures/user/join");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const cookieName = config.get("userToken.cookieName");
+const firestore = require("../../utils/firestore");
+const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
+const photoVerificationModel = firestore.collection("photo-verification");
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -30,6 +33,10 @@ describe("Users", function () {
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+
+    const docRefUser0 = photoVerificationModel.doc();
+    userPhotoVerificationData.userId = userId;
+    await docRefUser0.set(userPhotoVerificationData);
   });
 
   afterEach(async function () {
@@ -1019,6 +1026,69 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+  describe("PATCH /users/picture/verify/id", function () {
+    it("Should verify the discord image of the user", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/picture/verify/${userId}?type=discord`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("discord image was verified successfully!");
+          return done();
+        });
+    });
+    it("Should throw for wrong query while verifying the discord image of the user", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/picture/verify/${userId}?type=RANDOM`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          expect(res.body.message).to.equal("An internal server error occurred");
+          return done();
+        });
+    });
+  });
+  describe("GET /users/picture/id", function () {
+    it("Should get the user's verification record", function (done) {
+      chai
+        .request(app)
+        .get(`/users/picture/${userId}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.data).to.deep.equal(userPhotoVerificationData);
+          expect(res.body.message).to.equal("User image verification record fetched successfully!");
+          return done();
+        });
+    });
+    it("Should throw error if no user's verification record was foound", function (done) {
+      chai
+        .request(app)
+        .get(`/users/picture/${userId + "00"}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          expect(res.body.message).to.equal("An internal server error occurred");
           return done();
         });
     });

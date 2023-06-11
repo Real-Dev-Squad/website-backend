@@ -14,11 +14,13 @@ const getDiscordMemberDetails = async (discordId) => {
       expiresIn: config.get("rdsServerlessBot.ttl"),
     });
 
-    const memberDetails = await fetch(`${DISCORD_BASE_URL}/member/${discordId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-    }).then((response) => response.json());
-    return memberDetails;
+    const memberDiscordDetails = await (
+      await fetch(`${DISCORD_BASE_URL}/member/${discordId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      })
+    ).json();
+    return memberDiscordDetails;
   } catch (err) {
     logger.error(`Error while fetching discord data of the member: ${err}`);
     throw err;

@@ -244,25 +244,35 @@ const updateSelf = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const postUserPicture = async (req, res) => {
+  const { file } = req;
+  const { id: userId, discordId } = req.userData;
+  const { coordinates } = req.body;
+  let discordAvatarUrl = "";
+  let imageData;
+  let verificationResult;
   try {
-    const { file } = req;
-    const { id: userId, discordId } = req.userData;
-    const { coordinates } = req.body;
-
-    const discordAvatarUrl = await generateDiscordProfileImageUrl(discordId);
-    const coordinatesObject = coordinates && JSON.parse(coordinates);
-    const imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
-
-    await userQuery.addForVerification(userId, discordId, imageData.url, discordAvatarUrl);
-
-    return res.json({
-      message: "Profile picture uploaded successfully!",
-      image: imageData,
-    });
+    discordAvatarUrl = await generateDiscordProfileImageUrl(discordId);
   } catch (error) {
     logger.error(`Error while adding profile picture of user: ${error}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
+  try {
+    const coordinatesObject = coordinates && JSON.parse(coordinates);
+    imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
+  } catch (error) {
+    logger.error(`Error while adding profile picture of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+  try {
+    verificationResult = await userQuery.addForVerification(userId, discordId, imageData.url, discordAvatarUrl);
+  } catch (error) {
+    logger.error(`Error while adding profile picture of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+  return res.status(201).json({
+    message: "Profile picture uploaded successfully! " + verificationResult.message,
+    image: imageData,
+  });
 };
 
 /**
@@ -275,6 +285,9 @@ const postUserPicture = async (req, res) => {
 const verifyUserImage = async (req, res) => {
   try {
     const { type: imageType } = req.query;
+    if (!(imageType === "profile" || imageType === "discord")) {
+      throw new Error("Invalid verification type was provided!");
+    }
     const { id: userId } = req.params;
     await userQuery.markAsVerified(userId, imageType);
     return res.json({
