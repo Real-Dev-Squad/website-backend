@@ -51,8 +51,7 @@ const getExternalAccountData = async (req, res) => {
  */
 const syncExternalAccountData = async (req, res) => {
   try {
-    const discordUserData = await getDiscordMembers();
-    const rdsUserData = await getDiscordUsers();
+    const [discordUserData, rdsUserData] = await Promise.all([getDiscordMembers(), getDiscordUsers()]);
     const rdsUserDataMap = {};
     const userDataUpdatorPromises = [];
 
