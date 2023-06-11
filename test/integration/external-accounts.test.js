@@ -229,11 +229,12 @@ describe("External Accounts", function () {
   });
 
   describe("PATCH /external-accounts/discord-sync", function () {
-    let jwtToken, fetchStub;
+    let superUserJwt, fetchStub;
 
     beforeEach(async function () {
+      // userData[4] is a super user
       const userId = await addUser(userData[4]);
-      jwtToken = authService.generateAuthToken({ userId });
+      superUserJwt = authService.generateAuthToken({ userId });
       await userModel.add(usersFromRds[0]);
       await userModel.add(usersFromRds[1]);
       fetchStub = Sinon.stub(global, "fetch");
@@ -254,7 +255,7 @@ describe("External Accounts", function () {
       chai
         .request(app)
         .patch("/external-accounts/discord-sync")
-        .set("Cookie", `${cookieName}=${jwtToken}`)
+        .set("Cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -274,7 +275,7 @@ describe("External Accounts", function () {
       chai
         .request(app)
         .patch("/external-accounts/discord-sync")
-        .set("Cookie", `${cookieName}=${jwtToken}`)
+        .set("Cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
