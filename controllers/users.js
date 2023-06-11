@@ -466,10 +466,6 @@ const filterUsers = async (req, res) => {
 
 // one time script function to perform the migration - adding github_user_id field to the document
 const migrate = async (req, res) => {
-  // pat yet to be generated
-  const authToken = `${config.get("githubOauth.patToken")}`;
-  // converting the `authToken` string into Base64 format
-  const encodedToken = Buffer.from(`${authToken}`).toString("base64");
   const usersNotFound = [];
   let countUserNotFound = 0;
   try {
@@ -491,7 +487,7 @@ const migrate = async (req, res) => {
             .get(`https://api.github.com/users/${githubUsername}`, {
               headers: {
                 "Content-Type": "application/json",
-                auth: `Bearer ${encodedToken}`,
+                auth: `Bearer <Auth Token>`,
               },
             })
             .then((response) => {
