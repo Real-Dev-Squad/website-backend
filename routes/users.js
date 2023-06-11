@@ -11,7 +11,7 @@ const { getUserBadges } = require("../controllers/badges");
 router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
 router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
-router.get("/", authenticate, userValidator.getUsers, users.getUsers);
+router.get("/", userValidator.getUsers, users.getUsers);
 router.get("/self", authenticate, users.getSelfDetails);
 router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
 router.get("/chaincode", authenticate, users.generateChaincode);
@@ -21,6 +21,7 @@ router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.ge
 router.put("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);
 router.get("/:id/skills", users.getUserSkills);
 router.get("/:id/badges", getUserBadges);
+router.patch("/", authenticate, authorizeRoles([SUPERUSER]), users.nonVerifiedDiscordUsers);
 
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post("/picture", authenticate, upload.single("profile"), users.postUserPicture);

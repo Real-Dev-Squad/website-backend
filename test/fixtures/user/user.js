@@ -22,8 +22,10 @@ module.exports = () => {
       isMember: true,
       phone: "1234567890",
       email: "abc@gmail.com",
+      joined_discord: "2023-01-13T18:21:09.278000+00:00",
       roles: {
         member: true,
+        in_discord: true,
       },
       tokens: {
         githubAccessToken: "githubAccessToken",
@@ -110,6 +112,7 @@ module.exports = () => {
       github_display_name: "Ankush Dharkar",
       phone: "1234567890",
       email: "ad@amazon.com",
+      joined_discord: "2023-01-13T18:21:09.278000+00:00",
       status: "idle",
       tokens: {
         githubAccessToken: "githubAccessToken",
@@ -117,6 +120,7 @@ module.exports = () => {
       roles: {
         super_user: true,
         archived: false,
+        in_discord: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",

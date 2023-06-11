@@ -4,6 +4,7 @@ const { expect } = chai;
 const usersUtils = require("../../../utils/users");
 const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
+const { filteredPRs } = require("../../fixtures/pullrequests/pullrequests");
 const userData = require("../../fixtures/user/user")()[0];
 /**
  * Test the utils functions and validate the data returned
@@ -63,6 +64,33 @@ describe("users", function () {
       const participantArray = taskData.participants;
       const participantUserId = await usersUtils.getParticipantUserIds(participantArray);
       expect(participantUserId).to.include(userId);
+    });
+  });
+
+  describe("getUsernamesFromPRs", function () {
+    it("returns an array of unique usernames from the filtered PRs/Issues response", function () {
+      // Mock the allPRs data
+      const allPRs = filteredPRs;
+
+      // Execute the function and store the result
+      const usernames = usersUtils.getUsernamesFromPRs(allPRs);
+
+      // Assert that the returned value is an array
+      expect(usernames).to.be.an("array");
+
+      // Assert that the returned array contains the correct usernames
+      const expectedUsernames = [
+        "RitikJaiswal75",
+        "kushvahasumit",
+        "vvaibhavdesai",
+        "rohan09-raj",
+        "vinit717",
+        "SanketDhabarde",
+        "prakashchoudhary07",
+        "Pratiyushkumar",
+        "YashJain24-chief",
+      ];
+      expect(usernames).to.have.members(expectedUsernames);
     });
   });
 });

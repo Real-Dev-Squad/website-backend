@@ -125,4 +125,16 @@ describe("users", function () {
       expect(data.github_id).to.equal("my_github_id");
     });
   });
+
+  describe(" search users API: getUsersBasedOnFilter", function () {
+    it("should return an empty array if no query is provided", async function () {
+      const result = await users.getUsersBasedOnFilter({});
+      expect(result).to.deep.equal([]);
+    });
+
+    it("should return an array of verified users", async function () {
+      const result = await users.getUsersBasedOnFilter({ verified: "true" });
+      expect(result).to.deep.equal(userDataArray.filter((user) => user.discordId));
+    });
+  });
 });
