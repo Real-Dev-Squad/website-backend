@@ -3,7 +3,7 @@
  * Defaults set from default.js
  */
 
-// const port = 3000;
+const port = 3000;
 
 module.exports = {
   enableFileLogs: false,
@@ -28,16 +28,8 @@ module.exports = {
   }`,
   services: {
     rdsApi: {
-      baseUrl: "SERVICES_RDSAPI_BASEURL",
+      baseUrl: `http://localhost:${port}`,
     },
-
-    rdsUi: {
-      baseUrl: "SERVICES_RDSUI_BASEURL",
-      routes: {
-        authRedirection: "SERVICES_RDSUI_ROUTES_AUTH_REDIRECTION",
-      },
-    },
-
     discordBot: {
       baseUrl: "DISCORD_BASE_URL",
     },
