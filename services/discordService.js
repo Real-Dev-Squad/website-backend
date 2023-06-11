@@ -7,17 +7,22 @@ const getDiscordMembers = async () => {
     algorithm: "RS256",
     expiresIn: config.get("rdsServerlessBot.ttl"),
   });
-  const response = await fetch(`${DISCORD_BASE_URL}/discord-members`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-  })
-    .then((response, err) => {
-      return response.json();
+
+  try {
+    const response = await fetch(`${DISCORD_BASE_URL}/discord-members`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
     })
-    .then((data) => {
-      return data;
-    });
-  return response;
+      .then((response, err) => {
+        return response.json();
+      })
+      .then((data) => {
+        return data;
+      });
+    return response;
+  } catch (err) {
+    return [{ message: "Oops an internal error occured" }];
+  }
 };
 
 module.exports = {
