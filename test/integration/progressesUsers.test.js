@@ -18,8 +18,7 @@ const userData = require("../fixtures/user/user")();
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
-// eslint-disable-next-line mocha/no-skipped-tests
-describe.skip("Test Progress Updates API for Users", function () {
+describe("Test Progress Updates API for Users", function () {
   afterEach(async function () {
     await cleanDb();
   });
@@ -32,7 +31,7 @@ describe.skip("Test Progress Updates API for Users", function () {
     let anotherUserToken;
     beforeEach(async function () {
       clock = sinon.useFakeTimers({
-        now: new Date(2023, 4, 2, 5, 55).getTime(),
+        now: new Date(Date.UTC(2023, 4, 2, 0, 25)).getTime(), // UTC time equivalent to 5:55 AM IST
         toFake: ["Date"],
       });
       userId = await addUser(userData[1]);
@@ -47,7 +46,7 @@ describe.skip("Test Progress Updates API for Users", function () {
       clock.restore();
     });
 
-    it("stores the user progress document for the first time", function (done) {
+    it("stores the user progress document", function (done) {
       chai
         .request(app)
         .post(`/progresses`)
@@ -69,6 +68,36 @@ describe.skip("Test Progress Updates API for Users", function () {
           ]);
           expect(res.body.message).to.be.equal("User Progress document created successfully.");
           expect(res.body.data.userId).to.be.equal(userId);
+          return done();
+        });
+    });
+
+    it("stores the user progress document for the previous day if the update is sent before 6am IST", function (done) {
+      clock.setSystemTime(new Date(Date.UTC(2023, 4, 2, 0, 29)).getTime()); // 2nd May 2023 05:59 am IST
+      chai
+        .request(app)
+        .post(`/progresses`)
+        .set("cookie", `${cookieName}=${userToken}`)
+        .send(standupProgressDay1)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(201);
+          expect(res.body.data.date).to.be.equal(1682899200000); // 1st May 2023
+          return done();
+        });
+    });
+
+    it("stores the user progress document for the current day if the update is sent after 6am IST", function (done) {
+      clock.setSystemTime(new Date(Date.UTC(2023, 4, 2, 0, 31)).getTime()); // 2nd May 2023 06:01 am IST
+      chai
+        .request(app)
+        .post(`/progresses`)
+        .set("cookie", `${cookieName}=${userToken}`)
+        .send(standupProgressDay1)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(201);
+          expect(res.body.data.date).to.be.equal(1682985600000); // 2nd May 2023
           return done();
         });
     });
@@ -286,6 +315,92 @@ describe.skip("Test Progress Updates API for Users", function () {
       chai
         .request(app)
         .get(`/progresses/range?userId=${userId2}&startDate=2023-05-09&endDate=2023-05-12`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("No progress records found.");
+          return done();
+        });
+    });
+  });
+
+  describe("Verify the GET endpoint for retrieving progress document for the user on a particular date", function () {
+    let userId;
+    let anotherUserId;
+
+    beforeEach(async function () {
+      userId = await addUser(userData[0]);
+      anotherUserId = await addUser(userData[1]);
+      const progressData = stubbedModelProgressData(userId, 1683072000000, 1682985600000);
+      await firestore.collection("progresses").doc("progressDoc").set(progressData);
+    });
+
+    it("Returns the progress data for a specific user", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/user/${userId}/date/2023-05-02`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data"]);
+          expect(res.body.data).to.be.an("object");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.data).to.have.keys([
+            "id",
+            "type",
+            "completed",
+            "planned",
+            "blockers",
+            "userId",
+            "createdAt",
+            "date",
+          ]);
+          return done();
+        });
+    });
+
+    it("Should return 404 No progress records found if the document doesn't exist", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/user/${userId}/date/2023-05-03`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.have.key("message");
+          expect(res.body.message).to.be.equal("No progress records found.");
+          return done();
+        });
+    });
+
+    it("Returns 400 for bad request", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/user/${userId}/date/2023-05-33`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.be.equal('"date" must be in ISO 8601 date format');
+          return done();
+        });
+    });
+
+    it("Returns 404 for invalid user id", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/user/invalidUserId/date/2023-05-02`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("User with id invalidUserId does not exist.");
+          return done();
+        });
+    });
+
+    it("Returns 404 if the progress document doesn't exist for the user", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/user/${anotherUserId}/date/2023-05-02`)
         .end((err, res) => {
           if (err) return done(err);
           expect(res).to.have.status(404);

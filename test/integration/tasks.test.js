@@ -98,6 +98,7 @@ describe("Tasks", function () {
           lossRate: { [DINERO]: 1 },
           assignee: appOwner.username,
           participants: [],
+          dependsOn: [],
         })
         .end((err, res) => {
           if (err) {
@@ -106,11 +107,12 @@ describe("Tasks", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Task created successfully!");
-          expect(res.body.id).to.be.a("string");
           expect(res.body.task).to.be.a("object");
+          expect(res.body.task.id).to.be.a("string");
           expect(res.body.task.createdBy).to.equal(appOwner.username);
           expect(res.body.task.assignee).to.equal(appOwner.username);
           expect(res.body.task.participants).to.be.a("array");
+          expect(res.body.task.dependsOn).to.be.a("array");
           return done();
         });
     });
@@ -156,6 +158,7 @@ describe("Tasks", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Tasks returned successfully!");
           expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks[0].dependsOn).to.be.a("array");
           const taskWithParticipants = res.body.tasks[0];
 
           if (taskWithParticipants.type === "group") {
@@ -183,6 +186,8 @@ describe("Tasks", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("task returned successfully");
           expect(res.body.taskData).to.be.a("object");
+          expect(res.body.taskData.dependsOn).to.be.a("array");
+
           return done();
         });
     });

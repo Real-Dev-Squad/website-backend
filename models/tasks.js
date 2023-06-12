@@ -1,6 +1,7 @@
 const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
 const ItemModel = firestore.collection("itemTags");
+const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
@@ -16,6 +17,7 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const updateTask = async (taskData, taskId = null) => {
   try {
     taskData = await toFirestoreData(taskData);
+
     if (taskId) {
       const task = await tasksModel.doc(taskId).get();
       if (taskData.status === "VERIFIED") {
@@ -32,10 +34,31 @@ const updateTask = async (taskData, taskId = null) => {
       taskId: taskInfo.id,
       taskDetails: await fromFirestoreData(taskData),
     };
-
     return result;
   } catch (err) {
     logger.error("Error in updating task", err);
+    throw err;
+  }
+};
+const addDependency = async (data) => {
+  try {
+    const { taskId, dependsOn } = data;
+    const batch = firestore.batch();
+    if (dependsOn.length > 500) {
+      throw new Error("Error cannot add more than 500 taskId");
+    }
+    for (const dependsId of dependsOn) {
+      const taskDependOn = {
+        taskId,
+        dependsId,
+      };
+      const docid = dependencyModel.doc();
+      batch.set(docid, taskDependOn);
+    }
+    await batch.commit();
+    return data.dependsOn;
+  } catch (err) {
+    logger.error("Error in creating dependency");
     throw err;
   }
 };
@@ -51,8 +74,15 @@ const fetchTasks = async () => {
     const tasks = buildTasks(tasksSnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
     const updatedTasks = await Promise.all(promises);
-    const taskList = updatedTasks.map((task) => {
+    const taskList = updatedTasks.map(async (task) => {
       task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
+      const taskId = task.id;
+      const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
+      task.dependsOn = [];
+      dependencySnapshot.docs.forEach((doc) => {
+        const dependsId = doc.get("dependsId");
+        task.dependsOn.push(dependsId);
+      });
       return task;
     });
     return taskList;
@@ -94,11 +124,16 @@ const fetchActiveTaskMembers = async () => {
 const fetchTask = async (taskId) => {
   try {
     const task = await tasksModel.doc(taskId).get();
+    const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
+    const dependencyDocReference = dependencySnapshot.docs.map((doc) => {
+      const dependsId = doc.get("dependsId");
+      return dependsId;
+    });
     const taskData = await fromFirestoreData(task.data());
     if (taskData?.status) {
       taskData.status = TASK_STATUS[taskData.status.toUpperCase()] || task.status;
     }
-    return { taskData };
+    return { taskData, dependencyDocReference };
   } catch (err) {
     logger.error("Error retrieving task data", err);
     throw err;
@@ -352,5 +387,6 @@ module.exports = {
   fetchSelfTask,
   fetchSkillLevelTask,
   overdueTasks,
+  addDependency,
   fetchTaskByIssueId,
 };

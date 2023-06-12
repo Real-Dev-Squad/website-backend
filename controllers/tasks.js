@@ -6,6 +6,7 @@ const { addOrUpdate, getRdsUserInfoByGitHubUsername } = require("../models/users
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const dependencyModel = require("../models/tasks");
 /**
  * Creates new task
  *
@@ -16,17 +17,25 @@ const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/er
 const addNewTask = async (req, res) => {
   try {
     const { id: createdBy } = req.userData;
+    const dependsOn = req.body.dependsOn;
     const body = {
       ...req.body,
       createdBy,
     };
-
-    const task = await tasks.updateTask(body);
-
+    delete body.dependsOn;
+    const { taskId, taskDetails } = await tasks.updateTask(body);
+    const data = {
+      taskId,
+      dependsOn,
+    };
+    const taskDependency = dependsOn && (await dependencyModel.addDependency(data));
     return res.json({
       message: "Task created successfully!",
-      task: task.taskDetails,
-      id: task.taskId,
+      task: {
+        ...taskDetails,
+        ...(taskDependency && { dependsOn: taskDependency }),
+        id: taskId,
+      },
     });
   } catch (err) {
     logger.error(`Error while creating new task: ${err}`);
@@ -144,12 +153,14 @@ const getSelfTasks = async (req, res) => {
 const getTask = async (req, res) => {
   try {
     const taskId = req.params.id;
-    const { taskData } = await tasks.fetchTask(taskId);
-
+    const { taskData, dependencyDocReference } = await tasks.fetchTask(taskId);
     if (!taskData) {
       return res.boom.notFound("Task not found");
     }
-    return res.json({ message: "task returned successfully", taskData });
+    return res.json({
+      message: "task returned successfully",
+      taskData: { ...taskData, dependsOn: dependencyDocReference },
+    });
   } catch (err) {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
