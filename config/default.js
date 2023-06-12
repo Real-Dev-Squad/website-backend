@@ -46,6 +46,9 @@ module.exports = {
         authRedirection: "/goto",
       },
     },
+    discordBot: {
+      baseUrl: "<DISCORD_BOT_BASE_URL>",
+    },
   },
 
   cors: {
@@ -95,7 +98,7 @@ module.exports = {
   },
 
   Event100ms: {
-    APP_ACCESS_KEY: "APP_ACCESS_KEY",
-    APP_SECRET: "APP_SECRET",
+    APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
+    APP_SECRET: "EVENT_100MS_APP_SECREt",
   },
 };
