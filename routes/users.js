@@ -8,7 +8,6 @@ const userValidator = require("../middlewares/validators/user");
 const { upload } = require("../utils/multer");
 const { getUserBadges } = require("../controllers/badges");
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
-const { validateVerificationQuery } = require("../middlewares/validators/discord-actions");
 
 router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
@@ -31,7 +30,7 @@ router.patch(
   "/picture/verify/:id",
   authenticate,
   authorizeRoles([SUPERUSER]),
-  validateVerificationQuery,
+  userValidator.validateImageVerificationQuery,
   users.verifyUserImage
 );
 router.get("/picture/:id", authenticate, authorizeRoles([SUPERUSER]), users.getUserImageForVerification);

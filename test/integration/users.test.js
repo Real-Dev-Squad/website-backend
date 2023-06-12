@@ -1146,7 +1146,7 @@ describe("Users", function () {
           return done();
         });
     });
-    it("Should throw error if no user's verification record was foound", function (done) {
+    it("Should throw error if no user's verification record was found", function (done) {
       chai
         .request(app)
         .get(`/users/picture/${userId + "00"}`)

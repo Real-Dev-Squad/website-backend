@@ -316,34 +316,44 @@ const initializeUser = async (userId) => {
  * @param profileImageUrl {String} - profile image URL of user
  * @param discordImageUrl {String} - discord image URL of user
  * @return {Promise<{message: string}|{message: string}>}
+ * @throws {Error} - If error occurs while creating Verification Entry
  */
 const addForVerification = async (userId, discordId, profileImageUrl, discordImageUrl) => {
+  let isNotVerifiedSnapshot;
   try {
-    const isNotVerified = await photoVerificationModel.where("userId", "==", userId).get();
-    const unverifiedUserData = {
-      userId,
-      discordId,
-      discord: { url: discordImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
-      profile: { url: profileImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
-    };
-    if (!isNotVerified.empty) {
-      const unVerifiedDocument = isNotVerified.docs[0];
-      const documentRef = unVerifiedDocument.ref;
-      // DOESN"T CHANGE THE APPROVAL STATE OF DISCORD IMAGE IF ALREADY VERIFIED
-      unverifiedUserData.discord.approved = unVerifiedDocument.data().discord.approved || false;
-      await documentRef.update(unverifiedUserData);
-    } else await photoVerificationModel.add(unverifiedUserData);
-    return { message: "Profile data added for verification successfully" };
+    isNotVerifiedSnapshot = await photoVerificationModel.where("userId", "==", userId).get();
   } catch (err) {
     logger.error("Error in creating Verification Entry", err);
     throw err;
   }
+  const unverifiedUserData = {
+    userId,
+    discordId,
+    discord: { url: discordImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+    profile: { url: profileImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+  };
+  try {
+    if (!isNotVerifiedSnapshot.empty) {
+      const unVerifiedDocument = isNotVerifiedSnapshot.docs[0];
+      const documentRef = unVerifiedDocument.ref;
+      // DOESN"T CHANGE THE APPROVAL STATE OF DISCORD IMAGE IF ALREADY VERIFIED
+      unverifiedUserData.discord.approved = unVerifiedDocument.data().discord.approved || false;
+
+      await documentRef.update(unverifiedUserData);
+    } else await photoVerificationModel.add(unverifiedUserData);
+  } catch (err) {
+    logger.error("Error in creating Verification Entry", err);
+    throw err;
+  }
+  return { message: "Profile data added for verification successfully" };
 };
 
 /**
  * Removes if user passed a valid image; ignores if no unverified record
  * @param userId {String} - RDS user Id
  * @param type {String} - type of image that was verified
+ * @return {Promise<{message: string}|{message: string}>}
+ * @throws {Error} - If error occurs while verifying user's image
  */
 const markAsVerified = async (userId, imageType) => {
   try {
@@ -366,6 +376,8 @@ const markAsVerified = async (userId, imageType) => {
 /**
  * Removes if user passed a valid image; ignores if no unverified record
  * @param userId {String} - RDS user Id
+ * @return {Promise<{Object}|{Object}>}
+ * @throws {Error} - If error occurs while fetching user's image verification entry
  */
 const getUserImageForVerification = async (userId) => {
   try {
