@@ -318,9 +318,6 @@ const postUserPicture = async (req, res) => {
 const verifyUserImage = async (req, res) => {
   try {
     const { type: imageType } = req.query;
-    if (!(imageType === "profile" || imageType === "discord")) {
-      throw new Error("Invalid verification type was provided!");
-    }
     const { id: userId } = req.params;
     await userQuery.markAsVerified(userId, imageType);
     return res.json({

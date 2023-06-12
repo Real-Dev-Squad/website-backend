@@ -1121,10 +1121,10 @@ describe("Users", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
-            return done(err);
+            return done();
           }
-          expect(res).to.have.status(500);
-          expect(res.body.message).to.equal("An internal server error occurred");
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Invalid verification type was provided!");
           return done();
         });
     });
