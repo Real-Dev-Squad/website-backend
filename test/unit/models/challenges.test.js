@@ -66,6 +66,10 @@ describe("Challenges", function () {
       const response = await challengeQuery.subscribeUserToChallenge(userId2, challengeId);
       const data = response.data();
 
+      expect(userId1).to.be.a("string");
+      expect(userId2).to.be.a("string");
+      expect(challengeId).to.be.a("string");
+
       expect(data.participants).to.be.a("array").with.lengthOf(2);
       expect(data.participants[0]).to.be.equal(userId1);
       expect(data.participants[1]).to.be.equal(userId2);
