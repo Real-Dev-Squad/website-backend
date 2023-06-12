@@ -488,7 +488,7 @@ const updateRoles = async (userData, newRoles) => {
     const roles = { ...userData.roles };
     const newRolesArray = Object.entries(newRoles);
     const rolesContainNewRoles = newRolesArray.every(([key, value]) => {
-      return roles[key] === value;
+      return roles[String(key)] === value;
     });
 
     if (rolesContainNewRoles) return { isRoleUpdated: false };
