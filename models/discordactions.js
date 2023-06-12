@@ -98,10 +98,7 @@ const addGroupRoleToMember = async (roleData) => {
 const updateDiscordImageForVerification = async (userDiscordId) => {
   try {
     const discordAvatarUrl = await generateDiscordProfileImageUrl(userDiscordId);
-    const verificationDataSnapshot = await photoVerificationModel
-      .where("discordId", "==", userDiscordId)
-      .limit(1)
-      .get();
+    const verificationDataSnapshot = await photoVerificationModel.where("discordId", "==", userDiscordId).get();
     const unverifiedUserDiscordImage = {
       discord: { url: discordAvatarUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
     };

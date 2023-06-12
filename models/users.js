@@ -319,7 +319,7 @@ const initializeUser = async (userId) => {
  */
 const addForVerification = async (userId, discordId, profileImageUrl, discordImageUrl) => {
   try {
-    const isNotVerified = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
+    const isNotVerified = await photoVerificationModel.where("userId", "==", userId).get();
     const unverifiedUserData = {
       userId,
       discordId,
@@ -347,7 +347,7 @@ const addForVerification = async (userId, discordId, profileImageUrl, discordIma
  */
 const markAsVerified = async (userId, imageType) => {
   try {
-    const verificationUserDataSnapshot = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
+    const verificationUserDataSnapshot = await photoVerificationModel.where("userId", "==", userId).get();
     // THROWS ERROR IF NO DOCUMENT FOUND
     if (verificationUserDataSnapshot.empty) {
       throw new Error("No verification document record data for user was found");
@@ -369,7 +369,7 @@ const markAsVerified = async (userId, imageType) => {
  */
 const getUserImageForVerification = async (userId) => {
   try {
-    const verificationImagesSnapshot = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
+    const verificationImagesSnapshot = await photoVerificationModel.where("userId", "==", userId).get();
     if (verificationImagesSnapshot.empty) {
       throw new Error(`No document with userId: ${userId} was found!`);
     }
