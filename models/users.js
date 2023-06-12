@@ -142,7 +142,15 @@ const fetchPaginatedUsers = async (query) => {
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
-    let dbQuery = (query.prev ? userModel.limitToLast(size) : userModel.limit(size)).orderBy("username");
+
+    let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+
+    if (query.prev) {
+      dbQuery = dbQuery.limitToLast(size);
+    } else {
+      dbQuery = dbQuery.limit(size);
+    }
+
     if (Object.keys(query).length) {
       if (query.search) {
         dbQuery = dbQuery
@@ -450,6 +458,31 @@ const getUsersBasedOnFilter = async (query) => {
   return [];
 };
 
+/**
+ * Fetch all users
+ *
+ * @return {Promise<users>}
+ */
+
+const getDiscordUsers = async () => {
+  try {
+    const usersRef = await userModel.where("roles.archived", "==", false).get();
+    const users = [];
+    usersRef.forEach((user) => {
+      const userData = user.data();
+      if (userData?.discordId && userData.roles?.in_discord === false)
+        users.push({
+          id: user.id,
+          ...userData,
+        });
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Error while fetching all users: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -465,4 +498,5 @@ module.exports = {
   getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
+  getDiscordUsers,
 };
