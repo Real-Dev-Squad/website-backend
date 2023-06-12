@@ -53,7 +53,7 @@ const syncExternalAccountData = async (req, res) => {
   try {
     const [discordUserData, rdsUserData] = await Promise.all([getDiscordMembers(), getDiscordUsers()]);
     const rdsUserDataMap = {};
-    const userDataUpdatorPromises = [];
+    const updateUserDataPromises = [];
 
     rdsUserData.forEach((rdsUser) => {
       rdsUserDataMap[rdsUser.discordId] = {
@@ -72,11 +72,11 @@ const syncExternalAccountData = async (req, res) => {
             in_discord: true,
           },
         };
-        userDataUpdatorPromises.push(addOrUpdate(userData, mappedRdsUser.id));
+        updateUserDataPromises.push(addOrUpdate(userData, mappedRdsUser.id));
       }
     });
 
-    await Promise.all(userDataUpdatorPromises);
+    await Promise.all(updateUserDataPromises);
 
     return res.json({
       rdsUsers: rdsUserData.length,
