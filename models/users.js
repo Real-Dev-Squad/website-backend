@@ -7,7 +7,7 @@ const walletConstants = require("../constants/wallets");
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
-const { arraysHaveCommonItem } = require("../utils/array");
+const { arraysHaveCommonItem, arraysHaveSameValues } = require("../utils/array");
 const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
@@ -16,7 +16,7 @@ const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
 const userStatusModel = firestore.collection("usersStatus");
-const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
+const { ITEM_TAG, USER_STATE, ROLE } = ALLOWED_FILTER_PARAMS;
 /**
  * Adds or updates the user data
  *
@@ -375,6 +375,8 @@ const getUsersBasedOnFilter = async (query) => {
   const allQueryKeys = Object.keys(query);
   const doesTagQueryExist = arraysHaveCommonItem(ITEM_TAG, allQueryKeys);
   const doesStateQueryExist = arraysHaveCommonItem(USER_STATE, allQueryKeys);
+  const doesRoleQueryExist = arraysHaveCommonItem(ROLE, allQueryKeys);
+  const rolesQueryValue = [];
 
   const calls = {
     item: itemModel,
@@ -386,6 +388,11 @@ const getUsersBasedOnFilter = async (query) => {
     const isTagKey = ITEM_TAG.includes(key);
     const isStateKey = USER_STATE.includes(key);
     const isValueArray = Array.isArray(value);
+    const isRoleKey = ROLE.includes(key);
+
+    if (isRoleKey) {
+      rolesQueryValue.push(value);
+    }
 
     if (isTagKey) {
       calls.item = isValueArray ? calls.item.where(key, "in", value) : calls.item.where(key, "==", value);
@@ -417,7 +424,24 @@ const getUsersBasedOnFilter = async (query) => {
     finalItems = [...new Set(finalItems)];
     const userRefs = finalItems.map((itemId) => userModel.doc(itemId));
     const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
-    const filteredUserDocs = userDocs.filter((doc) => !doc.roles?.archived);
+
+    const filteredUserDocs = [];
+
+    if (doesRoleQueryExist) {
+      filteredUserDocs.push(
+        userDocs.filter((doc) => {
+          const userRoles = [];
+          Object.entries(doc?.roles)?.forEach(([key, value]) => {
+            if (value) {
+              userRoles.push(key);
+            }
+          });
+
+          return arraysHaveSameValues(userRoles, rolesQueryValue);
+        })
+      );
+    }
+
     return filteredUserDocs;
   }
   return [];
