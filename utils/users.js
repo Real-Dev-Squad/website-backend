@@ -122,11 +122,8 @@ function getPaginationLink(query, cursor, documentId) {
 }
 
 /**
- * Returns an array of unique users from the filtered PRs/Issues response
- *
+ * @desc Returns an array of unique users from the filtered PRs/Issues response
  * @param allPRs {Array} - list of all PRs/Issues from the respective github service
- * @param allUsers {Array} - list of total users from firebase
- *
  */
 function getUsernamesFromPRs(allPRs) {
   const uniqueUsernamesSet = new Set();

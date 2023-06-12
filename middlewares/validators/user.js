@@ -112,6 +112,9 @@ async function getUsers(req, res, next) {
       search: joi.string().optional().messages({
         "string.empty": "search value must not be empty",
       }),
+      id: joi.string().optional().messages({
+        "string.empty": "id value must not be empty",
+      }),
       next: joi
         .string()
         .optional()

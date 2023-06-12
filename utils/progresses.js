@@ -32,8 +32,8 @@ const getProgressDateTimestamp = () => {
 const buildQueryForPostingProgress = ({ type, userId, taskId }) => {
   const query =
     type === "user"
-      ? progressesCollection.where("userId", "==", userId)
-      : progressesCollection.where("taskId", "==", taskId);
+      ? progressesCollection.where("type", "==", "user").where("userId", "==", userId)
+      : progressesCollection.where("type", "==", "task").where("taskId", "==", taskId);
   return query;
 };
 
@@ -136,9 +136,9 @@ const buildRangeProgressQuery = (queryParams) => {
   const { userId, taskId, startDate, endDate } = queryParams;
   let query = progressesCollection;
   if (userId) {
-    query = query.where("userId", "==", userId);
+    query = query.where("type", "==", "user").where("userId", "==", userId);
   } else if (taskId) {
-    query = query.where("taskId", "==", taskId);
+    query = query.where("type", "==", "task").where("taskId", "==", taskId);
   } else {
     throw new Error("Either userId or taskId is required.");
   }
@@ -191,14 +191,15 @@ const buildQueryToSearchProgressByDay = (pathParams) => {
   const { userId, taskId, date } = pathParams;
   let query = progressesCollection;
   if (userId) {
-    query = query.where("userId", "==", userId);
+    query = query.where("type", "==", "user").where("userId", "==", userId);
   } else {
-    query = query.where("taskId", "==", taskId);
+    query = query.where("type", "==", "task").where("taskId", "==", taskId);
   }
   const dateTimeStamp = new Date(date).setUTCHours(0, 0, 0, 0);
   query = query.where("date", "==", dateTimeStamp).limit(1);
   return query;
 };
+
 module.exports = {
   getProgressDateTimestamp,
   buildQueryForPostingProgress,
