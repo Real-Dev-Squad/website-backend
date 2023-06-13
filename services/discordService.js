@@ -5,8 +5,9 @@ const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 const getDiscordMembers = async () => {
   let authToken;
   const expiry = config.get("rdsServerlessBot.ttl");
+  const privateKey = config.get("rdsServerlessBot.rdsServerLessPrivateKey");
   try {
-    authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
+    authToken = jwt.sign({}, privateKey, {
       algorithm: "RS256",
       expiresIn: expiry,
     });
