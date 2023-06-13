@@ -4,10 +4,11 @@ const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
 const getDiscordMembers = async () => {
   let authToken;
+  const expiry = config.get("rdsServerlessBot.ttl");
   try {
     authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
       algorithm: "RS256",
-      expiresIn: config.get("rdsServerlessBot.ttl"),
+      expiresIn: expiry,
     });
   } catch (err) {
     logger.error("Error in generating auth token", err);
