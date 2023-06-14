@@ -40,9 +40,9 @@ describe("Users", function () {
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
 
-    const docRefUser = photoVerificationModel.doc();
+    const userDocRef = photoVerificationModel.doc();
     userPhotoVerificationData.userId = userId;
-    await docRefUser.set(userPhotoVerificationData);
+    await userDocRef.set(userPhotoVerificationData);
   });
 
   afterEach(async function () {
