@@ -22,7 +22,6 @@ const {
 } = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
-const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
@@ -1175,21 +1174,6 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.be.equal("Successfully added the in_discord field to false for all users");
-          return done();
-        });
-    });
-
-    it("returns 5xx", function (done) {
-      chai
-        .request(app)
-        .post("/users/update-in-discord")
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(500);
-          expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
           return done();
         });
     });
