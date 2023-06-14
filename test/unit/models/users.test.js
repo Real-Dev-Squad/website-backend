@@ -100,4 +100,19 @@ describe("users", function () {
       expect(result).to.deep.equal(userDataArray.filter((user) => user.discordId));
     });
   });
+
+  describe("fetchAllUsers", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+
+    it("gets all users from user model", async function () {
+      const result = await users.fetchAllUsers();
+      expect(result).to.have.length(userDataArray.length);
+    });
+  });
 });

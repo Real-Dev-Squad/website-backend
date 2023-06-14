@@ -483,6 +483,13 @@ const getDiscordUsers = async () => {
   }
 };
 
+const fetchAllUsers = async () => {
+  const users = [];
+  const usersQuerySnapshot = await userModel.get();
+  usersQuerySnapshot.forEach((user) => users.push(user.data()));
+  return users;
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -499,4 +506,5 @@ module.exports = {
   fetchUsers,
   getUsersBasedOnFilter,
   getDiscordUsers,
+  fetchAllUsers,
 };
