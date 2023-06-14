@@ -12,6 +12,7 @@ const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+const { setInDiscordFalseScript } = require("../services/discordService");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -500,6 +501,15 @@ const nonVerifiedDiscordUsers = async (req, res) => {
   return res.json(data);
 };
 
+const setInDiscordScript = async (req, res) => {
+  try {
+    await setInDiscordFalseScript();
+    return res.json({ message: "Successfully added the in_discord field to false for all users" });
+  } catch (err) {
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -520,4 +530,5 @@ module.exports = {
   getUserSkills,
   filterUsers,
   nonVerifiedDiscordUsers,
+  setInDiscordScript,
 };

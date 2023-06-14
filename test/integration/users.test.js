@@ -14,6 +14,7 @@ const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
 const inDiscordUsers = require("../fixtures/user/inDiscord")();
+const discordService = require("../../services/discordService");
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
@@ -23,6 +24,8 @@ const {
 } = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
+const Sinon = require("sinon");
+const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 
 const cookieName = config.get("userToken.cookieName");
 chai.use(chaiHttp);
@@ -1111,6 +1114,38 @@ describe("Users", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.have.length(1);
           expect(res.body[0].username).equal("test-user");
+          return done();
+        });
+    });
+  });
+
+  describe("POST /update-in-discord", function () {
+    it("it returns proper response", function (done) {
+      chai
+        .request(app)
+        .post("/users/update-in-discord")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Successfully added the in_discord field to false for all users");
+          return done();
+        });
+    });
+
+    it("returns 5xx", function (done) {
+      chai
+        .request(app)
+        .post("/users/update-in-discord")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
           return done();
         });
     });
