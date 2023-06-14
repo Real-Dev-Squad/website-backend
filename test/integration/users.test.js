@@ -14,7 +14,6 @@ const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
 const inDiscordUsers = require("../fixtures/user/inDiscord")();
-const discordService = require("../../services/discordService");
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
@@ -24,7 +23,6 @@ const {
 } = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
-const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 
 const cookieName = config.get("userToken.cookieName");
