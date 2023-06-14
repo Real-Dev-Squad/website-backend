@@ -13,7 +13,6 @@ const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
-const inDiscordUsers = require("../fixtures/user/inDiscord")();
 
 const config = require("config");
 const joinData = require("../fixtures/user/join");
@@ -25,6 +24,8 @@ const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
 
 const cookieName = config.get("userToken.cookieName");
+const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
+const photoVerificationModel = firestore.collection("photo-verification");
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -38,6 +39,10 @@ describe("Users", function () {
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+
+    const userDocRef = photoVerificationModel.doc();
+    userPhotoVerificationData.userId = userId;
+    await userDocRef.set(userPhotoVerificationData);
   });
 
   afterEach(async function () {
@@ -1093,24 +1098,65 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /users", function () {
-    beforeEach(async function () {
-      await addUser(inDiscordUsers[0]);
-      await addUser(inDiscordUsers[1]);
-      await addUser(inDiscordUsers[2]);
-    });
-    it("returns users with discord id and in_discord false", function (done) {
+  describe("PATCH /users/picture/verify/id", function () {
+    it("Should verify the discord image of the user", function (done) {
       chai
         .request(app)
-        .patch("/users")
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .patch(`/users/picture/verify/${userId}?type=discord`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
           expect(res).to.have.status(200);
-          expect(res.body).to.have.length(1);
-          expect(res.body[0].username).equal("test-user");
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("discord image was verified successfully!");
+          return done();
+        });
+    });
+    it("Should throw for wrong query while verifying the discord image of the user", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/picture/verify/${userId}?type=RANDOM`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Invalid verification type was provided!");
+          return done();
+        });
+    });
+  });
+  describe("GET /users/picture/id", function () {
+    it("Should get the user's verification record", function (done) {
+      chai
+        .request(app)
+        .get(`/users/picture/${userId}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.data).to.deep.equal(userPhotoVerificationData);
+          expect(res.body.message).to.equal("User image verification record fetched successfully!");
+          return done();
+        });
+    });
+    it("Should throw error if no user's verification record was found", function (done) {
+      chai
+        .request(app)
+        .get("/users/picture/some-unknown-user-id")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          expect(res.body.message).to.equal("An internal server error occurred");
           return done();
         });
     });
