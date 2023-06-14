@@ -486,7 +486,7 @@ const getDiscordUsers = async () => {
 const fetchAllUsers = async () => {
   const users = [];
   const usersQuerySnapshot = await userModel.get();
-  usersQuerySnapshot.forEach((user) => users.push(user.data()));
+  usersQuerySnapshot.forEach((user) => users.push({ ...user.data(), id: user.id }));
   return users;
 };
 

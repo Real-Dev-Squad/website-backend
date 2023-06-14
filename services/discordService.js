@@ -1,4 +1,7 @@
 const jwt = require("jsonwebtoken");
+const firestore = require("../utils/firestore");
+const { fetchAllUsers } = require("../models/users");
+const userModel = firestore.collection("users");
 
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
@@ -30,6 +33,26 @@ const getDiscordMembers = async () => {
   }
 };
 
+const setInDiscordFalseScript = async () => {
+  const users = await fetchAllUsers();
+  const updateUsersPromises = [];
+  users.forEach((user) => {
+    const id = user.id;
+    // eslint-disable-next-line security/detect-object-injection
+    delete user[id];
+    const userData = {
+      ...user,
+      roles: {
+        ...user.roles,
+        in_discord: false,
+      },
+    };
+    updateUsersPromises.push(userModel.doc(id).update(userData));
+  });
+  await Promise.all(updateUsersPromises);
+};
+
 module.exports = {
   getDiscordMembers,
+  setInDiscordFalseScript,
 };
