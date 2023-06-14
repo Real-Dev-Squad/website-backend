@@ -26,7 +26,6 @@ module.exports = () => {
       incompleteUserDetails: false,
       roles: {
         archived: false,
-        in_discord: false,
       },
       tokens: {
         githubAccessToken: "weuytrertyuiiuyrtyui4567yyyuyghy",
@@ -41,7 +40,7 @@ module.exports = () => {
       incompleteUserDetails: false,
       roles: {
         archived: false,
-        in_discord: false,
+        in_discord: true,
       },
       tokens: {
         githubAccessToken: "weuytrertyuiiuyrtyui4567yyyuyghy",

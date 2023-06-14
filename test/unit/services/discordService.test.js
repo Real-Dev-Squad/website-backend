@@ -3,7 +3,7 @@ const firestore = require("../../../utils/firestore");
 const { setInDiscordFalseScript } = require("../../../services/discordService");
 const { fetchAllUsers } = require("../../../models/users");
 const userModel = firestore.collection("users");
-const userDataArray = require("../../fixtures/user/inDiscord")();
+const userDataArray = require("../../fixtures/user/user")();
 
 describe("setInDiscordFalseScript", function () {
   beforeEach(async function () {
