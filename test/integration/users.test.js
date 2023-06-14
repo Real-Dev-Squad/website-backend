@@ -40,9 +40,9 @@ describe("Users", function () {
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
 
-    const docRefUser0 = photoVerificationModel.doc();
+    const docRefUser = photoVerificationModel.doc();
     userPhotoVerificationData.userId = userId;
-    await docRefUser0.set(userPhotoVerificationData);
+    await docRefUser.set(userPhotoVerificationData);
   });
 
   afterEach(async function () {
@@ -1149,7 +1149,7 @@ describe("Users", function () {
     it("Should throw error if no user's verification record was found", function (done) {
       chai
         .request(app)
-        .get(`/users/picture/${userId + "00"}`)
+        .get("/users/picture/some-unknown-user-id")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
