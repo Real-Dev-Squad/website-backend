@@ -487,11 +487,11 @@ const updateRoles = async (userData, newRoles) => {
   try {
     const roles = { ...userData.roles };
     const newRolesArray = Object.entries(newRoles);
-    const rolesContainNewRoles = newRolesArray.every(([key, value]) => {
+    const rolesContainNewRole = newRolesArray.every(([key, value]) => {
       return roles[String(key)] === value;
     });
 
-    if (rolesContainNewRoles) return { isRoleUpdated: false };
+    if (rolesContainNewRole) return { isRoleUpdated: false };
     const updateRoles = { ...roles, ...newRoles };
 
     await userModel.doc(userData.id).update({
@@ -500,7 +500,7 @@ const updateRoles = async (userData, newRoles) => {
 
     return { isRoleUpdated: true };
   } catch (err) {
-    logger.error("Error updating user", err);
+    logger.error("Error while updating roles for a user", err);
     throw err;
   }
 };

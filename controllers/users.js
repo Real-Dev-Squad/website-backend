@@ -507,7 +507,7 @@ const updateRoles = async (req, res) => {
       const dataToUpdate = req.body;
       const userQueryResponse = await userQuery.updateRoles(result.user, dataToUpdate);
       if (userQueryResponse.isRoleUpdated) {
-        return res.status(200).json({
+        return res.json({
           message: "role updated successfully!",
         });
       } else {
@@ -518,7 +518,7 @@ const updateRoles = async (req, res) => {
     }
   } catch (error) {
     logger.error(`Error while updateRoles: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
