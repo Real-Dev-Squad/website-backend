@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { fetchAllUsers, addOrUpdate } = require("../models/users");
 
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
@@ -30,6 +31,22 @@ const getDiscordMembers = async () => {
   }
 };
 
+const setInDiscordFalseScript = async () => {
+  const users = await fetchAllUsers();
+  const updateUsersPromises = [];
+  users.forEach((user) => {
+    const userData = {
+      ...user,
+      roles: {
+        in_discord: false,
+      },
+    };
+    updateUsersPromises.push(addOrUpdate(userData, user.id));
+  });
+  await Promise.all(updateUsersPromises);
+};
+
 module.exports = {
   getDiscordMembers,
+  setInDiscordFalseScript,
 };
