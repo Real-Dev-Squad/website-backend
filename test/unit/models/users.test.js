@@ -25,7 +25,7 @@ describe("users", function () {
   });
 
   describe("addOrUpdate", function () {
-    it("should add the user collection and set the flag incompleteUserDetails and isNewUser", async function () {
+    it("should add the user collection and set the flag incompleteUserDetails and isNewUser and in_discord", async function () {
       const userData = userDataArray[0];
       const { isNewUser, userId } = await users.addOrUpdate(userData);
 
@@ -37,6 +37,7 @@ describe("users", function () {
 
       expect(data.incompleteUserDetails).to.equal(true);
       expect(isNewUser).to.equal(true);
+      expect(data.roles.in_discord).to.equal(false);
     });
 
     it("should update the user collection and unset the flag isNewUser", async function () {
