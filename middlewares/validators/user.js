@@ -1,6 +1,7 @@
 const joi = require("joi");
 const { USER_STATUS } = require("../../constants/users");
 const ROLES = require("../../constants/roles");
+const { IMAGE_VERIFICATION_TYPES } = require("../../constants/imageVerificationTypes");
 
 const updateUser = async (req, res, next) => {
   const schema = joi
@@ -192,6 +193,27 @@ async function validateUserQueryParams(req, res, next) {
   }
 }
 
+/**
+ * Validator function for query params for the filter route
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ * @param next {Object} - Express middleware function
+ */
+const validateImageVerificationQuery = async (req, res, next) => {
+  const { type: imageType } = req.query;
+  try {
+    if (!IMAGE_VERIFICATION_TYPES.includes(imageType)) {
+      throw new Error("Invalid verification type was provided!");
+    }
+    next();
+  } catch (error) {
+    logger.error(`Error validating createLevel payload : ${error}`);
+    res.boom.badRequest(error.message);
+  }
+};
+
+
 async function validateUpdateRoles(req, res, next) {
   const schema = joi.object().strict().min(1).max(1).keys({
     member: joi.boolean(),
@@ -213,5 +235,6 @@ module.exports = {
   validateJoinData,
   getUsers,
   validateUserQueryParams,
+  validateImageVerificationQuery,
   validateUpdateRoles,
 };

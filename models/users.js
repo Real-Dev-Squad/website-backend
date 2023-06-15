@@ -15,7 +15,10 @@ const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
 const userStatusModel = firestore.collection("usersStatus");
+const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
+const admin = require("firebase-admin");
+
 /**
  * Adds or updates the user data
  *
@@ -307,6 +310,89 @@ const initializeUser = async (userId) => {
 };
 
 /**
+ * Adds user data for verification by moderators
+ * @param userId {String} - RDS User Id
+ * @param discordId {String} - Discord id of RDS user
+ * @param profileImageUrl {String} - profile image URL of user
+ * @param discordImageUrl {String} - discord image URL of user
+ * @return {Promise<{message: string}|{message: string}>}
+ * @throws {Error} - If error occurs while creating Verification Entry
+ */
+const addForVerification = async (userId, discordId, profileImageUrl, discordImageUrl) => {
+  let isNotVerifiedSnapshot;
+  try {
+    isNotVerifiedSnapshot = await photoVerificationModel.where("userId", "==", userId).get();
+  } catch (err) {
+    logger.error("Error in creating Verification Entry", err);
+    throw err;
+  }
+  const unverifiedUserData = {
+    userId,
+    discordId,
+    discord: { url: discordImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+    profile: { url: profileImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+  };
+  try {
+    if (!isNotVerifiedSnapshot.empty) {
+      const unVerifiedDocument = isNotVerifiedSnapshot.docs[0];
+      const documentRef = unVerifiedDocument.ref;
+      // DOESN"T CHANGE THE APPROVAL STATE OF DISCORD IMAGE IF ALREADY VERIFIED
+      unverifiedUserData.discord.approved = unVerifiedDocument.data().discord.approved || false;
+
+      await documentRef.update(unverifiedUserData);
+    } else await photoVerificationModel.add(unverifiedUserData);
+  } catch (err) {
+    logger.error("Error in creating Verification Entry", err);
+    throw err;
+  }
+  return { message: "Profile data added for verification successfully" };
+};
+
+/**
+ * Removes if user passed a valid image; ignores if no unverified record
+ * @param userId {String} - RDS user Id
+ * @param type {String} - type of image that was verified
+ * @return {Promise<{message: string}|{message: string}>}
+ * @throws {Error} - If error occurs while verifying user's image
+ */
+const markAsVerified = async (userId, imageType) => {
+  try {
+    const verificationUserDataSnapshot = await photoVerificationModel.where("userId", "==", userId).get();
+    // THROWS ERROR IF NO DOCUMENT FOUND
+    if (verificationUserDataSnapshot.empty) {
+      throw new Error("No verification document record data for user was found");
+    }
+    // VERIFIES BASED ON THE TYPE OF IMAGE
+    const imageVerificationType = imageType === "discord" ? "discord.approved" : "profile.approved";
+    const documentRef = verificationUserDataSnapshot.docs[0].ref;
+    await documentRef.update({ [imageVerificationType]: true });
+    return { message: "User image data verified successfully" };
+  } catch (err) {
+    logger.error("Error while Removing Verification Entry", err);
+    throw err;
+  }
+};
+
+/**
+ * Removes if user passed a valid image; ignores if no unverified record
+ * @param userId {String} - RDS user Id
+ * @return {Promise<{Object}|{Object}>}
+ * @throws {Error} - If error occurs while fetching user's image verification entry
+ */
+const getUserImageForVerification = async (userId) => {
+  try {
+    const verificationImagesSnapshot = await photoVerificationModel.where("userId", "==", userId).get();
+    if (verificationImagesSnapshot.empty) {
+      throw new Error(`No document with userId: ${userId} was found!`);
+    }
+    return verificationImagesSnapshot.docs[0].data();
+  } catch (err) {
+    logger.error("Error while Removing Verification Entry", err);
+    throw err;
+  }
+};
+
+/**
  * Sets the user picture field of passed UserId to image data
  *
  * @param image { Object }: image data ( {publicId, url} )
@@ -483,6 +569,13 @@ const getDiscordUsers = async () => {
   }
 };
 
+const fetchAllUsers = async () => {
+  const users = [];
+  const usersQuerySnapshot = await userModel.get();
+  usersQuerySnapshot.forEach((user) => users.push({ ...user.data(), id: user.id }));
+  return users;
+};
+
 const updateRoles = async (userData, newRoles) => {
   try {
     const roles = { ...userData.roles };
@@ -505,6 +598,7 @@ const updateRoles = async (userData, newRoles) => {
   }
 };
 
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -520,6 +614,10 @@ module.exports = {
   getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
+  markAsVerified,
+  addForVerification,
+  getUserImageForVerification,
   getDiscordUsers,
+  fetchAllUsers,
   updateRoles,
 };
