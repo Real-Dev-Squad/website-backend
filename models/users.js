@@ -598,7 +598,6 @@ const updateRoles = async (userData, newRoles) => {
   }
 };
 
-
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
