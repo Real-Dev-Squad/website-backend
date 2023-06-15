@@ -213,7 +213,6 @@ const validateImageVerificationQuery = async (req, res, next) => {
   }
 };
 
-
 async function validateUpdateRoles(req, res, next) {
   const schema = joi.object().strict().min(1).max(1).keys({
     member: joi.boolean(),
