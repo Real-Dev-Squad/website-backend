@@ -2,6 +2,7 @@ const chai = require("chai");
 const expect = chai.expect;
 const sinon = require("sinon");
 const firestore = require("../../../utils/firestore");
+const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 
@@ -10,8 +11,13 @@ const {
   getAllGroupRoles,
   isGroupRoleExists,
   addGroupRoleToMember,
+  updateDiscordImageForVerification,
 } = require("../../../models/discordactions");
 const { groupData, roleData, existingRole } = require("../../fixtures/discordactions/discordactions");
+const cleanDb = require("../../utils/cleanDb");
+const { userPhotoVerificationData } = require("../../fixtures/user/photo-verification");
+
+chai.should();
 
 describe("discordactions", function () {
   describe("createGroupRoles", function () {
@@ -172,6 +178,69 @@ describe("discordactions", function () {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Database error");
       });
+    });
+  });
+
+  describe("updateDiscordImageForVerification", function () {
+    let fetchStub;
+    beforeEach(async function () {
+      fetchStub = sinon.stub(global, "fetch");
+      const docRefUser0 = photoVerificationModel.doc();
+      await docRefUser0.set(userPhotoVerificationData);
+    });
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should update the user's discord image for verification", async function () {
+      const userDiscordId = "12345";
+      const discordAvatarUrl = "https://cdn.discordapp.com/avatars/12345/12345.png";
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ user: { avatar: 12345 } }),
+        })
+      );
+
+      const result = await updateDiscordImageForVerification(userDiscordId);
+      expect(result).to.equal(discordAvatarUrl);
+    });
+
+    it("should throw an error if no user verification record is found", async function () {
+      const userDiscordId = "1234567890";
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ user: { avatar: 12345 } }),
+        })
+      );
+
+      try {
+        await updateDiscordImageForVerification(userDiscordId);
+      } catch (err) {
+        expect(err.message).to.equal("No user verification record found");
+      }
+    });
+    it("should log and rethrow an error if an error occurs during the process", async function () {
+      const userDiscordId = "12345";
+      const error = new Error("Test error");
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ user: { avatar: 12345 } }),
+        })
+      );
+      sinon.stub(logger, "error");
+
+      try {
+        await updateDiscordImageForVerification(userDiscordId);
+      } catch (err) {
+        expect(err).to.equal(error);
+        expect(logger.error.calledOnce).to.be.equal(true);
+        expect(logger.error.calledWith("Error in adding role", error)).to.be.equal(true);
+      }
     });
   });
 });

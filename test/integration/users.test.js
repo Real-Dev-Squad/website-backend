@@ -24,6 +24,8 @@ const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
 
 const cookieName = config.get("userToken.cookieName");
+const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
+const photoVerificationModel = firestore.collection("photo-verification");
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -37,6 +39,10 @@ describe("Users", function () {
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+
+    const userDocRef = photoVerificationModel.doc();
+    userPhotoVerificationData.userId = userId;
+    await userDocRef.set(userPhotoVerificationData);
   });
 
   afterEach(async function () {
@@ -136,6 +142,26 @@ describe("Users", function () {
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
 
+          return done();
+        });
+    });
+    it("Should get all the users with archived false", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          const userData = res.body.users;
+          userData.forEach((user) => {
+            expect(user.roles.archived).to.equal(false);
+          });
           return done();
         });
     });
@@ -1067,6 +1093,87 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /users/picture/verify/id", function () {
+    it("Should verify the discord image of the user", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/picture/verify/${userId}?type=discord`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("discord image was verified successfully!");
+          return done();
+        });
+    });
+    it("Should throw for wrong query while verifying the discord image of the user", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/picture/verify/${userId}?type=RANDOM`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Invalid verification type was provided!");
+          return done();
+        });
+    });
+  });
+  describe("GET /users/picture/id", function () {
+    it("Should get the user's verification record", function (done) {
+      chai
+        .request(app)
+        .get(`/users/picture/${userId}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.data).to.deep.equal(userPhotoVerificationData);
+          expect(res.body.message).to.equal("User image verification record fetched successfully!");
+          return done();
+        });
+    });
+    it("Should throw error if no user's verification record was found", function (done) {
+      chai
+        .request(app)
+        .get("/users/picture/some-unknown-user-id")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          expect(res.body.message).to.equal("An internal server error occurred");
+          return done();
+        });
+    });
+  });
+
+  describe("POST /update-in-discord", function () {
+    it("it returns proper response", function (done) {
+      chai
+        .request(app)
+        .post("/users/update-in-discord")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Successfully added the in_discord field to false for all users");
           return done();
         });
     });
