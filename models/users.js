@@ -61,7 +61,7 @@ const addOrUpdate = async (userData, userId = null) => {
        the unarchived users in the /members endpoint
        For more info : https://github.com/Real-Dev-Squad/website-backend/issues/651
      */
-    userData.roles = { archived: false };
+    userData.roles = { archived: false, in_discord: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
     return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true };
