@@ -193,6 +193,32 @@ const endActiveEvent = async (req, res) => {
   }
 };
 
+/**
+ * Adds a peer to an event.
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with the added peer data and a success message.
+ * @throws {Object} The JSON response with an error message if an error occurred while adding the peer.
+ */
+const addPeerToEvent = async (req, res) => {
+  try {
+    const data = await eventQuery.addPeerToEvent(req.body);
+    return res.status(200).json({
+      data,
+      message: `Peer is added to the event`,
+    });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Couldn't add peer to the event. Please try again later",
+    });
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -200,4 +226,5 @@ module.exports = {
   getEventById,
   updateEvent,
   endActiveEvent,
+  addPeerToEvent,
 };

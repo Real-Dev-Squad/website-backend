@@ -100,6 +100,23 @@ const endActiveEvent = async (req, res, next) => {
   }
 };
 
+const addPeerToEvent = async (req, res, next) => {
+  const schema = joi.object({
+    name: joi.string().required(),
+    eventId: joi.string().required(),
+    role: joi.string().required(),
+    joinedAt: joi.date().required(),
+  });
+
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error(`Error while adding a peer to the event: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -107,4 +124,5 @@ module.exports = {
   getEventById,
   updateEvent,
   endActiveEvent,
+  addPeerToEvent,
 };
