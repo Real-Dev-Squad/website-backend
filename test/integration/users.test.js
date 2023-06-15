@@ -1161,4 +1161,21 @@ describe("Users", function () {
         });
     });
   });
+
+  describe("POST /update-in-discord", function () {
+    it("it returns proper response", function (done) {
+      chai
+        .request(app)
+        .post("/users/update-in-discord")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Successfully added the in_discord field to false for all users");
+          return done();
+        });
+    });
+  });
 });
