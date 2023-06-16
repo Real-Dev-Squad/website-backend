@@ -44,7 +44,29 @@ const getDateTimeRangeForPRs = (startDate, endDate) => {
   return "";
 };
 
+/**
+ * Creates pagination link for next and previous pages
+ * @param route {string} - service route ( users, tasks)
+ * @param query {Object} - request query params
+ * @param cursor {string} - next | prev
+ * @param documentId {string} - DB document Id
+ */
+
+function getPaginationLink(route, query, cursor, documentId) {
+  let endpoint = `/${route}?${cursor}=${documentId}`;
+  const keysToExclude = ["next", "prev", "page"]; // next, prev needs to be updated with new document Id and page is not required in the links.
+  for (const [key, value] of Object.entries(query)) {
+    if (keysToExclude.includes(key)) continue;
+    endpoint = endpoint.concat(`&${key}=${value}`);
+  }
+  if (!query.size) {
+    endpoint = endpoint.concat("&size=100");
+  }
+  return endpoint;
+}
+
 module.exports = {
   getQualifiers,
   getDateTimeRangeForPRs,
+  getPaginationLink,
 };

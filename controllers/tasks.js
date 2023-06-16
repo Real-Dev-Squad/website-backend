@@ -8,6 +8,7 @@ const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
 const userQuery = require("../models/users");
+const { getPaginationLink } = require("../utils/helper");
 /**
  * Creates new task
  *
@@ -51,7 +52,7 @@ const addNewTask = async (req, res) => {
  */
 const fetchTasks = async (req, res) => {
   try {
-    const allTasks = await tasks.fetchTasks();
+    const { allTasks, nextId, prevId } = await tasks.fetchTasks(req.query);
     const fetchTasksWithRdsAssigneeInfo = allTasks.map(async (task) => {
       /*
        If the issue has a "github.issue" inner object and a property "assignee",
@@ -78,6 +79,10 @@ const fetchTasks = async (req, res) => {
     return res.json({
       message: "Tasks returned successfully!",
       tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
+      links: {
+        next: nextId ? getPaginationLink("tasks", req.query, "next", nextId) : "",
+        prev: prevId ? getPaginationLink("tasks", req.query, "prev", prevId) : "",
+      },
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);

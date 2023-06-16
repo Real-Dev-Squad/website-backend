@@ -68,9 +68,22 @@ const addDependency = async (data) => {
  *
  * @return {Promise<tasks|Array>}
  */
-const fetchTasks = async () => {
+const fetchTasks = async (query) => {
   try {
-    const tasksSnapshot = await tasksModel.get();
+    const size = parseInt(query.size) || 100;
+
+    let dbQuery = tasksModel();
+    if (query.prev) {
+      dbQuery = dbQuery.limitToLast(size);
+    } else {
+      dbQuery = dbQuery.limit(size);
+    }
+
+    const tasksSnapshot = await dbQuery.get();
+
+    const firstDoc = tasksSnapshot.docs[0];
+    const lastDoc = tasksSnapshot.docs[tasksSnapshot.docs.length - 1];
+
     const tasks = buildTasks(tasksSnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
     const updatedTasks = await Promise.all(promises);
@@ -86,7 +99,7 @@ const fetchTasks = async () => {
       return task;
     });
     const taskList = await Promise.all(taskPromises);
-    return taskList;
+    return { taskList, nextId: lastDoc?.id ?? "", prevId: firstDoc?.id ?? "" };
   } catch (err) {
     logger.error("error getting tasks", err);
     throw err;
