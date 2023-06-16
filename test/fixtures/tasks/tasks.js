@@ -64,7 +64,7 @@ module.exports = () => {
       participants: [],
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
       lossRate: { [DINERO]: 1 },
-
+      priority: "HIGH",
       isNoteworthy: true,
     },
   ];
