@@ -1169,7 +1169,6 @@ describe("Users", function () {
         });
     });
   });
- 
   describe("POST /update-in-discord", function () {
     it("it returns proper response", function (done) {
       chai
@@ -1370,7 +1369,6 @@ describe("Users", function () {
             if (err) {
               return done(err);
             }
-
             expect(res).to.have.status(409);
             expect(res.body.message).to.be.equal("role already exist!");
             return done();
@@ -1390,7 +1388,6 @@ describe("Users", function () {
           if (err) {
             return done(err);
           }
-        
           expect(res).to.have.status(404);
           expect(res.body.message).to.be.equal("User not found");
           return done();
