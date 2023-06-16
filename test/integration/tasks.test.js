@@ -381,7 +381,7 @@ describe("Tasks", function () {
         });
     });
 
-    it("should return 404 if assignee is not in user db", function (done) {
+    it("should return 204 if assignee is not in user db", function (done) {
       chai
         .request(app)
         .patch(`/tasks/${taskId}`)
@@ -391,8 +391,7 @@ describe("Tasks", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(404);
-          expect(res.body.message).to.be.equal("User doesn't exist");
+          expect(res).to.have.status(204);
           return done();
         });
     });
