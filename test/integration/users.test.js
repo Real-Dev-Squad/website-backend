@@ -24,9 +24,9 @@ const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
 
 const userRoleUpdate = userData[4];
-const userRoleUnArchived = userData[9];
+const userRoleUnArchived = userData[12];
 const userAlreadyMember = userData[0];
-const userAlreadyNotMember = userData[9];
+const userAlreadyNotMember = userData[12];
 const userAlreadyArchived = userData[5];
 const userAlreadyUnArchived = userData[4];
 const nonSuperUser = userData[0];
