@@ -1186,7 +1186,6 @@ describe("Users", function () {
         });
     });
   });
-});
 
   describe("PATCH /users/:id/roles", function () {
     it("Should make the user a member", function (done) {
