@@ -1,0 +1,6 @@
+const TASK_REQUEST_STATUS = {
+  WAITING: "WAITING",
+  APPROVED: "APPROVED",
+};
+
+module.exports = { TASK_REQUEST_STATUS };
