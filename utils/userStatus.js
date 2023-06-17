@@ -54,4 +54,14 @@ const filterStatusData = (newStatusData) => {
   }
 };
 
-module.exports = { getUserIdBasedOnRoute, getTommorowTimeStamp, getTodayTimeStamp, filterStatusData };
+const filterUsersWithOnboardingState = (data) => {
+  return data.filter((item) => item.currentStatus.state === userState.ONBOARDING);
+};
+
+module.exports = {
+  getUserIdBasedOnRoute,
+  getTommorowTimeStamp,
+  getTodayTimeStamp,
+  filterStatusData,
+  filterUsersWithOnboardingState,
+};
