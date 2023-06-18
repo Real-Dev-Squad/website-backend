@@ -255,6 +255,12 @@ const updateSelf = async (req, res) => {
       }
       await userQuery.setIncompleteUserDetails(userId);
     }
+    if (req.body?.discordId) {
+      req.body.roles = {
+        ...req.userData.roles,
+        in_discord: true,
+      };
+    }
 
     const user = await userQuery.addOrUpdate(req.body, userId);
 
