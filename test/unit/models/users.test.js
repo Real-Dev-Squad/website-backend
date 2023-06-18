@@ -12,7 +12,9 @@ const users = require("../../../models/users");
 const firestore = require("../../../utils/firestore");
 const { userPhotoVerificationData, newUserPhotoVerificationData } = require("../../fixtures/user/photo-verification");
 const userModel = firestore.collection("users");
+const joinModel = firestore.collection("applicants");
 const userDataArray = require("../../fixtures/user/user")();
+const joinData = require("../../fixtures/user/join")();
 const photoVerificationModel = firestore.collection("photo-verification");
 
 /**
@@ -193,6 +195,29 @@ describe("users", function () {
     it("gets all users from user model", async function () {
       const result = await users.fetchAllUsers();
       expect(result).to.have.length(userDataArray.length);
+    });
+  });
+
+  describe("add Join Data", function () {
+    it("adds join data", async function () {
+      joinData[0].userId = "12345";
+      await users.addJoinData(joinData[0]);
+      const savedJoinedData = await joinModel.where("userId", "==", "12345").get();
+      savedJoinedData.forEach((data) => {
+        expect(data.data()).to.have.all.keys(Object.keys(joinData[0]));
+      });
+    });
+  });
+
+  describe("get join data", function () {
+    beforeEach(async function () {
+      joinData[0].userId = "12345";
+      await users.addJoinData(joinData[0]);
+    });
+    it("gets joinData", async function () {
+      const data = await users.getJoinData("12345");
+      expect(data.length).to.be.equal(1);
+      expect(data[0]).to.have.all.keys([...Object.keys(joinData[0]), "id"]);
     });
   });
 });
