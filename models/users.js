@@ -580,13 +580,8 @@ const updateRoles = async (userData, newRoles) => {
   try {
     const roles = { ...userData.roles };
     const newRolesArray = Object.entries(newRoles);
-    const rolesContainNewRole = newRolesArray.every(([key, value]) => {
-      return roles[String(key)] === value;
-    });
-
-    if (rolesContainNewRole) return { isRoleUpdated: false };
+    if(roles[newRolesArray[0][0]]===newRolesArray[0][1]) return { isRoleUpdated: false };
     const updateRoles = { ...roles, ...newRoles };
-
     await userModel.doc(userData.id).update({
       updateRoles,
     });
