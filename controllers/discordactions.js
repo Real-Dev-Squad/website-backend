@@ -128,9 +128,7 @@ const addGroupRoleToMember = async (req, res) => {
 const changeNicknameOfUsers = async (req, res) => {
   try {
     const userData = req.userData;
-    const {discordId , username} = userData;
-    console.log(discordId); 
-
+    const {discordId,username} = userData;
     const dataForDiscord = {
       userName: `${username}-ooo`,
       discordId: discordId,
@@ -153,10 +151,8 @@ const changeNicknameOfUsers = async (req, res) => {
   } catch (err) {
     logger.error(`Error while updating nickname: ${err}`);
   }
-}
-
+};
 /**
-    
  * Gets all group-roles
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
