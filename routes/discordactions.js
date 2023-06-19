@@ -4,19 +4,11 @@ const {
   createGroupRole,
   getAllGroupRoles,
   addGroupRoleToMember,
-<<<<<<< HEAD
-  changeNicknameOfUsers,
-} = require("../controllers/discordactions");
-const {
-  validateGroupRoleBody,
-  validateMemberRoleBody,
-  ValidateNickNamechangeBody,
-} = require("../middlewares/validators/discordactions");
-=======
   updateDiscordImageForVerification,
+  changeNicknameOfUsers,
+  
 } = require("../controllers/discordactions");
 const { validateGroupRoleBody, validateMemberRoleBody } = require("../middlewares/validators/discordactions");
->>>>>>> develop
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
 const { SUPERUSER } = require("../constants/roles");
 const authorizeRoles = require("../middlewares/authorizeRoles");
@@ -26,10 +18,7 @@ const router = express.Router();
 router.post("/groups", authenticate, checkIsVerifiedDiscord, validateGroupRoleBody, createGroupRole);
 router.get("/groups", authenticate, checkIsVerifiedDiscord, getAllGroupRoles);
 router.post("/roles", authenticate, checkIsVerifiedDiscord, validateMemberRoleBody, addGroupRoleToMember);
-<<<<<<< HEAD
-// router.post("/nickname", authenticate, checkIsVerifiedDiscord, ValidateNickNamechangeBody, changeNicknameOfUsers);
-router.post("/nickname", authenticate, changeNicknameOfUsers)
-=======
+router.patch("/nickname", authenticate,authorizeRoles([SUPERUSER]),checkIsVerifiedDiscord,changeNicknameOfUsers )
 router.patch(
   "/avatar/verify/:id",
   authenticate,
@@ -37,6 +26,5 @@ router.patch(
   checkIsVerifiedDiscord,
   updateDiscordImageForVerification
 );
->>>>>>> develop
 
 module.exports = router;

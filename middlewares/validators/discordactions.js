@@ -28,22 +28,7 @@ const validateMemberRoleBody = async (req, res, next) => {
   }
 };
 
-const ValidateNickNamechangeBody = async (req, res, next) => {
-  const schema = Joi.object({
-    userName: Joi.string().trim().required(),
-  });
-
-  try {
-    await schema.validateAsync(req.body);
-    next();
-  } catch (error) {
-    logger.error(`Error validating user crendential : ${error}`);
-    res.boom.badRequest(error.details[0].message);
-  }
-};
-
 module.exports = {
   validateGroupRoleBody,
   validateMemberRoleBody,
-  ValidateNickNamechangeBody,
 };
