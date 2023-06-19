@@ -123,6 +123,7 @@ const addGroupRoleToMember = async (req, res) => {
 };
 
 /**
+<<<<<<< HEAD
  * Patch Update user nickname
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
@@ -156,6 +157,22 @@ const changeNicknameOfUsers = async (req, res) => {
     // });
   } catch (err) {
     logger.error(`Error while updating nickname: ${err}`);
+=======
+ * Gets all group-roles
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const updateDiscordImageForVerification = async (req, res) => {
+  try {
+    const { id: userDiscordId } = req.params;
+    const discordAvatarUrl = await discordRolesModel.updateDiscordImageForVerification(userDiscordId);
+    return res.json({
+      message: "Discord avatar URL updated successfully!",
+      discordAvatarUrl,
+    });
+  } catch (err) {
+    logger.error(`Error while updating discord image url verification document: ${err}`);
+>>>>>>> develop
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
@@ -164,5 +181,9 @@ module.exports = {
   createGroupRole,
   getAllGroupRoles,
   addGroupRoleToMember,
+<<<<<<< HEAD
   changeNicknameOfUsers,
+=======
+  updateDiscordImageForVerification,
+>>>>>>> develop
 };
