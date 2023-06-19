@@ -52,7 +52,41 @@ const setInDiscordFalseScript = async () => {
   await Promise.all(updateUsersPromises);
 };
 
+const generateAuthTokenForCloudflare = async () => {
+  let authToken;
+  const expiry = config.get("rdsServerlessBot.ttl");
+  const privateKey = config.get("rdsServerlessBot.rdsServerLessPrivateKey");
+  try {
+    authToken = await jwt.sign({}, privateKey, {
+      algorithm: "RS256",
+      expiresIn: expiry,
+    });
+  } catch (err) {
+    logger.error("Error in generating auth token", err);
+    throw err;
+  }
+  return authToken;
+};
+
+const addRoleToUser = async (userid, roleid) => {
+  try {
+    const authToken = await generateAuthTokenForCloudflare();
+    const response = await (
+      await fetch(`${DISCORD_BASE_URL}/roles/add`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ userid, roleid }),
+      })
+    ).json();
+    return response;
+  } catch (err) {
+    logger.error("Some Error occured", err);
+    throw err;
+  }
+};
+
 module.exports = {
   getDiscordMembers,
   setInDiscordFalseScript,
+  addRoleToUser,
 };
