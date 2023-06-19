@@ -27,6 +27,7 @@ describe("Filter Users", function () {
   let oooUser;
   let idleUser;
   let activeUser;
+  let onboardingUser;
   let tagIdFE;
   let tagIdBE;
   let levelId1;
@@ -46,6 +47,8 @@ describe("Filter Users", function () {
     await updateUserStatus(idleUser, generateUserStatusData("IDLE", updatedAtDate, updatedAtDate, untilDate, "CSS"));
     activeUser = await addUser(userData[8]);
     await updateUserStatus(activeUser, generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate));
+    onboardingUser = await addUser(userData[2]);
+    await updateUserStatus(onboardingUser, generateUserStatusData("ONBOARDING", updatedAtDate, updatedAtDate));
 
     // creating tag and levels
     const { id: id1 } = await addTag({
@@ -191,7 +194,7 @@ describe("Filter Users", function () {
       chai
         .request(app)
         .get("/users/search")
-        .query({ state: ["OOO", "IDLE"] })
+        .query({ state: ["OOO", "IDLE", "ONBOARDING"] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -202,8 +205,8 @@ describe("Filter Users", function () {
           expect(res.body.count).to.be.a("number");
           expect(res.body.message).to.equal("Users found successfully!");
           expect(res.body.users).to.be.a("array");
-          expect(res.body.users.length).to.equal(2);
-          assertUserIds(res.body.users, [oooUser, idleUser]);
+          expect(res.body.users.length).to.equal(3);
+          assertUserIds(res.body.users, [oooUser, idleUser, onboardingUser]);
           return done();
         });
     });

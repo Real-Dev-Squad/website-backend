@@ -173,8 +173,8 @@ async function validateUserQueryParams(req, res, next) {
       state: joi
         .alternatives()
         .try(
-          joi.string().valid("IDLE", "OOO", "ACTIVE"),
-          joi.array().items(joi.string().valid("IDLE", "OOO", "ACTIVE"))
+          joi.string().valid("IDLE", "OOO", "ACTIVE", "ONBOARDING"),
+          joi.array().items(joi.string().valid("IDLE", "OOO", "ACTIVE", "ONBOARDING"))
         )
         .optional(),
       role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD).optional(),
