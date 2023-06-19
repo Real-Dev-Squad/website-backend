@@ -8,6 +8,12 @@ const {
   changeNicknameOfUsers,
   
 } = require("../controllers/discordactions");
+
+const {
+  validateGroupRoleBody,
+  validateMemberRoleBody,
+  updateDiscordImageForVerification,
+} = require("../controllers/discordactions");
 const { validateGroupRoleBody, validateMemberRoleBody } = require("../middlewares/validators/discordactions");
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
 const { SUPERUSER } = require("../constants/roles");
@@ -19,6 +25,7 @@ router.post("/groups", authenticate, checkIsVerifiedDiscord, validateGroupRoleBo
 router.get("/groups", authenticate, checkIsVerifiedDiscord, getAllGroupRoles);
 router.post("/roles", authenticate, checkIsVerifiedDiscord, validateMemberRoleBody, addGroupRoleToMember);
 router.patch("/nickname", authenticate,authorizeRoles([SUPERUSER]),checkIsVerifiedDiscord,changeNicknameOfUsers )
+router.post("/nickname", authenticate, checkIsVerifiedDiscord, ValidateNickNamechangeBody, changeNicknameOfUsers);
 router.patch(
   "/avatar/verify/:id",
   authenticate,
@@ -26,5 +33,6 @@ router.patch(
   checkIsVerifiedDiscord,
   updateDiscordImageForVerification
 );
+
 
 module.exports = router;
