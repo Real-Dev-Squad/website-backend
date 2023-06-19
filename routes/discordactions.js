@@ -25,7 +25,6 @@ router.post("/groups", authenticate, checkIsVerifiedDiscord, validateGroupRoleBo
 router.get("/groups", authenticate, checkIsVerifiedDiscord, getAllGroupRoles);
 router.post("/roles", authenticate, checkIsVerifiedDiscord, validateMemberRoleBody, addGroupRoleToMember);
 router.patch("/nickname", authenticate,authorizeRoles([SUPERUSER]),checkIsVerifiedDiscord,changeNicknameOfUsers )
-router.post("/nickname", authenticate, checkIsVerifiedDiscord, ValidateNickNamechangeBody, changeNicknameOfUsers);
 router.patch(
   "/avatar/verify/:id",
   authenticate,
