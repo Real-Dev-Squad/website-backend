@@ -1,4 +1,5 @@
 const joi = require("joi");
+const { SOMETHING_WENT_WRONG } = require("../../constants/errorMessages");
 
 const createChallenge = async (req, res, next) => {
   const schema = joi.object().strict().keys({
@@ -28,7 +29,7 @@ const subscribeToChallenge = async (req, res, next) => {
     next();
   } catch (error) {
     logger.error(`Error validating subscribeToChallenge payload : ${error}`);
-    res.boom.badRequest(error.details[0].message);
+    res.boom.badRequest(SOMETHING_WENT_WRONG);
   }
 };
 
