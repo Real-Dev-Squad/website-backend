@@ -3,7 +3,6 @@ const admin = require("firebase-admin");
 const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
-const userQuery = require("../models/users");
 /**
  * Creates a role
  *
@@ -128,9 +127,10 @@ const addGroupRoleToMember = async (req, res) => {
  */
 const changeNicknameOfUsers = async (req, res) => {
   try {
-    const userData = req.userData
-    const {discordId , username} = userData
-     
+    const userData = req.userData;
+    const {discordId , username} = userData;
+    console.log(discordId); 
+
     const dataForDiscord = {
       userName: `${username}-ooo`,
       discordId: discordId,
@@ -181,5 +181,4 @@ module.exports = {
   addGroupRoleToMember,
   updateDiscordImageForVerification,
   changeNicknameOfUsers,
-  updateDiscordImageForVerification,
 };
