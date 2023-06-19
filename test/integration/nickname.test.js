@@ -20,36 +20,35 @@ describe.only("Discord actions", function () {
   let superUserId;
   let superUserAuthToken;
   let fetchStub;
-   beforeEach(async function () {
+  beforeEach(async function () {
     fetchStub = sinon.stub(global, "fetch");
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
     discordId = "12345";
-   })
+  });
 
-   afterEach(async function () {
+  afterEach(async function () {
     sinon.restore();
     await cleanDb();
   });
-  
-  describe("POST /discord-actions/nickname", function(done){
+
+  describe("POST /discord-actions/nickname", function (done) {
     fetchStub.returns(
-        Promise.resolve({
-          status: 200,
-        })
+      Promise.resolve({
+        status: 200,
+      })
     );
     chai
-        .request(app)
-        .patch(`/discord-actions/nickname`)
-        .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body.message).to.equal("nickname has been updated");
-          return done();
-        });
-  })
-  
-})
+      .request(app)
+      .patch(`/discord-actions/nickname`)
+      .set("cookie", `${cookieName}=${superUserAuthToken}`)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        expect(res).to.have.status(200);
+        expect(res.body.message).to.equal("nickname has been updated");
+        return done();
+      });
+  });
+});

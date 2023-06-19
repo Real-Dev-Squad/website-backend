@@ -13,7 +13,7 @@ module.exports = () => {
       username: "ankur",
       first_name: "Ankur",
       last_name: "Narkhede",
-      discordId : "5627517",
+      discordId: "5627517",
       yoe: 0,
       img: "./img.png",
       linkedin_id: "ankurnarkhede",
