@@ -132,7 +132,7 @@ const changeNicknameOfUsers = async (req, res) => {
     const { discordId, username } = userData;
 
     const dataForDiscord = {
-      userName:username,
+      userName: username,
       discordId,
     };
 
