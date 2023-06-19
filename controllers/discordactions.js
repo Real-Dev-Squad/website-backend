@@ -150,17 +150,21 @@ const markUnverified = async (req, res) => {
     const unverifiedRoleId = config.get("discordUnverifiedRoleId");
     const usersToApplyUnverifiedRole = [];
     const addRolePromises = [];
+
     allRdsLoggedInUsers.forEach((user) => {
       rdsUserMap[user.discordId] = true;
     });
+
     usersInRdsDiscordServer.forEach((user) => {
       if (!rdsUserMap[user.user.id]) {
         usersToApplyUnverifiedRole.push(user.user.id);
       }
     });
+
     usersToApplyUnverifiedRole.forEach((id) => {
       addRolePromises.push(addRoleToUser(id, unverifiedRoleId));
     });
+
     await Promise.all(addRolePromises);
     return res.json({ message: "ROLES APPLIED SUCCESSFULLY" });
   } catch (err) {

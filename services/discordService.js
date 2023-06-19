@@ -55,13 +55,12 @@ const setInDiscordFalseScript = async () => {
 
 const addRoleToUser = async (userid, roleid) => {
   const authToken = await generateAuthTokenForCloudflare();
-  const response = await (
-    await fetch(`${DISCORD_BASE_URL}/roles/add`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-      body: JSON.stringify({ userid, roleid }),
-    })
-  ).json();
+  const data = await fetch(`${DISCORD_BASE_URL}/roles/add`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+    body: JSON.stringify({ userid, roleid }),
+  });
+  const response = await data.json();
   return response;
 };
 
