@@ -1,10 +1,6 @@
 const { expect } = require("chai");
 const firestore = require("../../../utils/firestore");
-const {
-  setInDiscordFalseScript,
-  addRoleToUser,
-  generateAuthTokenForCloudflare,
-} = require("../../../services/discordService");
+const { setInDiscordFalseScript, addRoleToUser } = require("../../../services/discordService");
 const { fetchAllUsers } = require("../../../models/users");
 const Sinon = require("sinon");
 const userModel = firestore.collection("users");
@@ -45,13 +41,6 @@ describe("Discord services", function () {
       const response = await addRoleToUser("123456789", "987654321");
 
       expect(response.message).to.be.equal("done");
-    });
-  });
-
-  describe("test generate auth token for cloudflare", function () {
-    it("generates auth token", function () {
-      const data = generateAuthTokenForCloudflare();
-      expect(data !== undefined);
     });
   });
 });
