@@ -129,28 +129,31 @@ const addGroupRoleToMember = async (req, res) => {
  */
 const changeNicknameOfUsers = async (req, res) => {
   try {
-    const userName = req.body.userName;
-    const result = await userQuery.fetchUser({ username: userName });
 
+    // const userName = req.body.userName;
+    const userData = req.userData
+    const {discordId , username} = userData
+     
+    console.log(discordId,username)
     const dataForDiscord = {
-      userName: `${userName}-ooo`,
+      userName: `${username}-ooo`,
       discordId: "670589026616475658",
     };
 
-    const authToken = await jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
-      algorithm: "RS256",
-      expiresIn: config.get("rdsServerlessBot.ttl"),
-    });
+    // const authToken = await jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
+    //   algorithm: "RS256",
+    //   expiresIn: config.get("rdsServerlessBot.ttl"),
+    // });
 
-    await fetch(`${DISCORD_BASE_URL}/guild/member`, {
-      method: "PATCH",
-      body: JSON.stringify(dataForDiscord),
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-    }).then((response) => response.json());
+    // await fetch(`${DISCORD_BASE_URL}/guild/member`, {
+    //   method: "PATCH",
+    //   body: JSON.stringify(dataForDiscord),
+    //   headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+    // }).then((response) => response.json());
 
-    return res.status(200).json({
-      message: "nickname has been changed",
-    });
+    // return res.status(200).json({
+    //   message: "nickname has been changed",
+    // });
   } catch (err) {
     logger.error(`Error while updating nickname: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
