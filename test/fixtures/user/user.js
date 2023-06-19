@@ -22,7 +22,7 @@ module.exports = () => {
       isMember: true,
       phone: "1234567890",
       email: "abc@gmail.com",
-      joined_discord: "2023-01-13T18:21:09.278000+00:00",
+      discordJoinedAt: "2022-05-01T06:41:29.396000+00:00",
       roles: {
         member: true,
         in_discord: true,
@@ -48,6 +48,7 @@ module.exports = () => {
       linkedin_id: "nikhil-bhandarkar",
       twitter_id: "whatifi",
       phone: "1234567891",
+      discordJoinedAt: "2023-02-01T06:41:29.396000+00:00",
       email: "abc1@gmail.com",
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
@@ -109,7 +110,7 @@ module.exports = () => {
       github_display_name: "Ankush Dharkar",
       phone: "1234567890",
       email: "ad@amazon.com",
-      joined_discord: "2023-01-13T18:21:09.278000+00:00",
+      discordJoinedAt: "2023-01-13T18:21:09.278000+00:00",
       status: "idle",
       tokens: {
         githubAccessToken: "githubAccessToken",
@@ -248,6 +249,27 @@ module.exports = () => {
       roles: {
         member: true,
       },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
+    },
+    {
+      username: "shekhar",
+      first_name: "Shekhar",
+      last_name: "Dhangar",
+      yoe: 0,
+      img: "./img.png",
+      github_id: "shekhardhangar",
+      linkedin_id: "shekhardhangar",
+      twitter_id: "_shekhar23",
+      phone: "1234567891",
+      email: "sd@gmail.com",
+      incompleteUserDetails: false,
+      roles: {
+        restricted: true,
+      },
+      discordJoinedAt: "2023-05-01T06:41:29.396000+00:00",
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
