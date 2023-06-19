@@ -141,7 +141,7 @@ const changeNicknameOfUsers = async (req, res) => {
       expiresIn: config.get("rdsServerlessBot.ttl"),
     });
 
-    await fetch(`https://98d7-2405-201-6008-8031-75-f4fd-49c0-43be.ngrok-free.app/guild/member`, {
+    await fetch(`${DISCORD_BASE_URL}/guild/member`, {
       method: "PATCH",
       body: JSON.stringify(dataForDiscord),
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
