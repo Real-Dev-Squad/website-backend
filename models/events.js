@@ -149,4 +149,5 @@ module.exports = {
   updateEvent,
   endActiveEvent,
   addPeerToEvent,
+  storePeerReferenceInEvent,
 };
