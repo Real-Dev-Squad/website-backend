@@ -165,7 +165,7 @@ const markUnverified = async (req, res) => {
     return res.json({ message: "ROLES APPLIED SUCCESSFULLY" });
   } catch (err) {
     logger.error(err);
-    return res.json({ message: INTERNAL_SERVER_ERROR });
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
   }
 };
 
