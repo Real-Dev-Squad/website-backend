@@ -128,10 +128,12 @@ const addGroupRoleToMember = async (req, res) => {
 const changeNicknameOfUsers = async (req, res) => {
   try {
     const userData = req.userData;
-    const {discordId,username} = userData;
+
+    const { discordId, username } = userData;
+
     const dataForDiscord = {
-      userName: `${username}-ooo`,
-      discordId: discordId,
+      userName:username,
+      discordId,
     };
 
     const authToken = await jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
@@ -150,6 +152,7 @@ const changeNicknameOfUsers = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while updating nickname: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 /**
