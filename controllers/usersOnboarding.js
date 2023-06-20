@@ -45,14 +45,10 @@ const getUsersWithOnboardingState = async (req, res) => {
       }
     }
 
-    if (!updatedOnboardingUsersWithDate.length) {
-      return res.boom.notFound(
-        "Users with an onboarding state of more than 31 days do not exist or user has missing discordJoinedDate"
-      );
-    }
-
     return res.json({
-      message: "All User found successfully.",
+      message: updatedOnboardingUsersWithDate.length
+        ? "All User found successfully."
+        : "Users with an ONBOARDING state of more than 31 days do not exist or user has not been verified.",
       totalUsers: updatedOnboardingUsersWithDate.length,
       allUser: updatedOnboardingUsersWithDate,
     });
