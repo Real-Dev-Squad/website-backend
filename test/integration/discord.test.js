@@ -84,6 +84,10 @@ describe("test discord actions", function () {
       jwt = authService.generateAuthToken({ userId });
     });
 
+    afterEach(async function () {
+      sinon.restore();
+    });
+
     it("returns 200 for updating nickname post method", function (done) {
       fetchStub.returns(
         Promise.resolve({
@@ -113,7 +117,17 @@ describe("test discord actions", function () {
       jwt = authService.generateAuthToken({ userId });
     });
 
+    afterEach(async function () {
+      sinon.restore();
+    });
+
     it("returns 403 for updating nickname post method", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({}),
+        })
+      );
       chai
         .request(app)
         .post("/discord-actions/nickname")
