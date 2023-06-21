@@ -579,39 +579,27 @@ const setInDiscordScript = async (req, res) => {
 
 const getUsersWithOnboardingState = async (req, res) => {
   let minDaysInServer = 31;
-
   try {
     const { allUserStatus } = await userStatusModel.getAllUserStatus(req.query);
     const { minPresenceDays } = req.query;
-
-    if (!allUserStatus.length) {
-      return res.boom.notFound("User status not found");
-    }
 
     if (parseInt(minPresenceDays)) {
       minDaysInServer = parseInt(minPresenceDays);
     }
 
     const allUsersWithOnboardingState = filterUsersWithOnboardingState(allUserStatus);
-
     if (!allUsersWithOnboardingState.length) {
       return res.boom.notFound("No users exist with an 'ONBOARDING' state");
     }
 
     const updatedOnboardingUsersWithDate = [];
-
     for (const user of allUsersWithOnboardingState) {
       const result = await userQuery.fetchUser({ userId: user.userId });
-
       if (result.user.discordJoinedAt) {
         const userDiscordJoinedDate = new Date(result.user.discordJoinedAt);
-
         const currentDate = new Date();
-
         const timeDifferenceInMilliseconds = currentDate.getTime() - userDiscordJoinedDate.getTime();
-
         const currentAndUserJoinedDateDifference = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
-
         if (currentAndUserJoinedDateDifference > minDaysInServer) {
           updatedOnboardingUsersWithDate.push(result.user);
         }

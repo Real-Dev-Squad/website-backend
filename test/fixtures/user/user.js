@@ -22,7 +22,6 @@ module.exports = () => {
       isMember: true,
       phone: "1234567890",
       email: "abc@gmail.com",
-      discordJoinedAt: "2022-05-01T06:41:29.396000+00:00",
       roles: {
         member: true,
         in_discord: true,
@@ -48,7 +47,7 @@ module.exports = () => {
       linkedin_id: "nikhil-bhandarkar",
       twitter_id: "whatifi",
       phone: "1234567891",
-      discordJoinedAt: "2023-02-01T06:41:29.396000+00:00",
+      discordJoinedAt: "2023-05-01T06:41:29.396000+00:00",
       email: "abc1@gmail.com",
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
@@ -269,7 +268,6 @@ module.exports = () => {
       roles: {
         restricted: true,
       },
-      discordJoinedAt: "2023-05-01T06:41:29.396000+00:00",
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
