@@ -1287,7 +1287,7 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(400);
-            expect(res.body.message).to.be.equal('"value" must have less than or equal to 1 key');
+            expect(res.body.message).to.be.equal("we only allow either role member or archieve");
             return done();
           });
       });
