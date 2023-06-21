@@ -3,6 +3,7 @@
  * Defaults set from default.js
  */
 module.exports = {
+  discordUnverifiedRoleId: "1120875993771544687",
   enableFileLogs: false,
   enableConsoleLogs: true,
 
