@@ -14,6 +14,8 @@ const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/er
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
+const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
+const { fetchAllUsers } = require("../models/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -330,6 +332,36 @@ const verifyUserImage = async (req, res) => {
   }
 };
 
+const markUnverified = async (req, res) => {
+  try {
+    const [usersInRdsDiscordServer, allRdsLoggedInUsers] = await Promise.all([getDiscordMembers(), fetchAllUsers()]);
+    const rdsUserMap = {};
+    const unverifiedRoleId = config.get("discordUnverifiedRoleId");
+    const usersToApplyUnverifiedRole = [];
+    const addRolePromises = [];
+
+    allRdsLoggedInUsers.forEach((user) => {
+      rdsUserMap[user.discordId] = true;
+    });
+
+    usersInRdsDiscordServer.forEach((user) => {
+      if (!rdsUserMap[user.user.id]) {
+        usersToApplyUnverifiedRole.push(user.user.id);
+      }
+    });
+
+    usersToApplyUnverifiedRole.forEach((id) => {
+      addRolePromises.push(addRoleToUser(id, unverifiedRoleId));
+    });
+
+    await Promise.all(addRolePromises);
+    return res.json({ message: "ROLES APPLIED SUCCESSFULLY" });
+  } catch (err) {
+    logger.error(err);
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
 /**
  * Updates the user data
  *
@@ -591,4 +623,5 @@ module.exports = {
   getUserImageForVerification,
   nonVerifiedDiscordUsers,
   setInDiscordScript,
+  markUnverified,
 };
