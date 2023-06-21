@@ -79,7 +79,7 @@ describe("test discord actions", function () {
     });
   });
 
-  describe.only("test discord actions for nickname for verified user", function () {
+  describe("test discord actions for nickname for verified user", function () {
     beforeEach(async function () {
       fetchStub = sinon.stub(global, "fetch");
       superUser = { ...userData[4], discordId: "123456789" };
@@ -115,7 +115,7 @@ describe("test discord actions", function () {
     });
   });
 
-  describe.only("test discord actions for nickname for unverified user", function () {
+  describe("test discord actions for nickname for unverified user", function () {
     beforeEach(async function () {
       const { discordId, ...superUser } = userData[4];
       userId = await addUser();
