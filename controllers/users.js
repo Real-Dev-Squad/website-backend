@@ -5,7 +5,9 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
+const userStatusModel = require("../models/userStatus");
 
+const { filterUsersWithOnboardingState } = require("../utils/userStatus");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
@@ -568,6 +570,67 @@ const setInDiscordScript = async (req, res) => {
   }
 };
 
+/**
+ * Collects all Users with ONBOARDING state and are present in discord server for more than 31 days
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getUsersWithOnboardingState = async (req, res) => {
+  let minDaysInServer = 31;
+
+  try {
+    const { allUserStatus } = await userStatusModel.getAllUserStatus(req.query);
+    const { minPresenceDays } = req.query;
+
+    if (!allUserStatus.length) {
+      return res.boom.notFound("User status not found");
+    }
+
+    if (parseInt(minPresenceDays)) {
+      minDaysInServer = parseInt(minPresenceDays);
+    }
+
+    const allUsersWithOnboardingState = filterUsersWithOnboardingState(allUserStatus);
+
+    if (!allUsersWithOnboardingState.length) {
+      return res.boom.notFound("No users exist with an 'ONBOARDING' state");
+    }
+
+    const updatedOnboardingUsersWithDate = [];
+
+    for (const user of allUsersWithOnboardingState) {
+      const result = await userQuery.fetchUser({ userId: user.userId });
+
+      if (result.user.discordJoinedAt) {
+        const userDiscordJoinedDate = new Date(result.user.discordJoinedAt);
+
+        const currentDate = new Date();
+
+        const timeDifferenceInMilliseconds = currentDate.getTime() - userDiscordJoinedDate.getTime();
+
+        const currentAndUserJoinedDateDifference = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+
+        if (currentAndUserJoinedDateDifference > minDaysInServer) {
+          updatedOnboardingUsersWithDate.push(result.user);
+        }
+      }
+    }
+
+    return res.json({
+      message: updatedOnboardingUsersWithDate.length
+        ? `All Users with ONBOARDING state of more than ${minDaysInServer} days found successfully`
+        : `No users exist with ONBOARDING state of more than ${minDaysInServer} days, or the user has not been verified`,
+      totalUsers: updatedOnboardingUsersWithDate.length,
+      allUser: updatedOnboardingUsersWithDate,
+    });
+  } catch (err) {
+    logger.error(`Error while fetching all the User: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -591,4 +654,5 @@ module.exports = {
   getUserImageForVerification,
   nonVerifiedDiscordUsers,
   setInDiscordScript,
+  getUsersWithOnboardingState,
 };

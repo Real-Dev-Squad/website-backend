@@ -11,6 +11,7 @@ const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
 
 router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), users.setInDiscordScript);
 router.post("/verify", authenticate, users.verifyUser);
+router.get("/onboarding", authenticate, authorizeRoles([SUPERUSER]), users.getUsersWithOnboardingState);
 router.get("/userId/:userId", users.getUserById);
 router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
 router.get("/", userValidator.getUsers, users.getUsers);

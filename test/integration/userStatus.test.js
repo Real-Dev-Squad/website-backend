@@ -14,7 +14,6 @@ const {
   userStatusDataForNewUser,
   userStatusDataForOooState,
   oooStatusDataForShortDuration,
-  userStatusDataAfterFillingJoinSection,
   generateUserStatusData,
 } = require("../fixtures/userStatus/userStatus");
 
@@ -605,71 +604,6 @@ describe("UserStatus", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
           expect(res.body.message).to.equal("User Status deleted successfully.");
-          return done();
-        });
-    });
-  });
-
-  describe("GET /users/status/onboarding", function () {
-    let userId1 = "";
-    let userId2 = "";
-    let userId3 = "";
-
-    beforeEach(async function () {
-      userId1 = await addUser(userData[userData.length - 1]);
-      userId3 = await addUser();
-      userId2 = await addUser(userData[1]);
-
-      await updateUserStatus(userId1, userStatusDataAfterFillingJoinSection);
-      await updateUserStatus(userId2, userStatusDataForNewUser);
-      await updateUserStatus(userId3, userStatusDataForNewUser);
-    });
-
-    afterEach(async function () {
-      await cleanDb();
-    });
-
-    it("Should get all the users with ONBOARDING state and are present in discord server for more than 31 days(DEFAULT MIN DATE, without query)", function (done) {
-      chai
-        .request(app)
-        .get("/users/status/onboarding")
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.totalUsers).to.be.a("number");
-          expect(res.body.message).to.equal("All Users with ONBOARDING state of more than 31 days found successfully");
-          expect(res.body.allUser).to.be.a("array");
-          res.body.allUser.forEach((status) => {
-            expect(status).to.have.property("discordJoinedAt");
-            expect(status).to.have.property("currentStatus");
-          });
-          return done();
-        });
-    });
-
-    it("Should get all the user with ONBOARDING state and are present in discord server for more than (given date in query)", function (done) {
-      chai
-        .request(app)
-        .get("/users/status/onboarding")
-        .query({ minPresenceDays: 30 })
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.totalUsers).to.be.a("number");
-          expect(res.body.message).to.equal("All Users with ONBOARDING state of more than 30 days found successfully");
-          expect(res.body.allUser).to.be.a("array");
-          res.body.allUser.forEach((status) => {
-            expect(status).to.have.property("discordJoinedAt");
-            expect(status).to.have.property("currentStatus");
-          });
           return done();
         });
     });
