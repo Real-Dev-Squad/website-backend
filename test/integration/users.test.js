@@ -1180,7 +1180,7 @@ describe("Users", function () {
     });
   });
 
-  describe("GET /users/status/onboarding", function () {
+  describe("GET /users/onboarding", function () {
     let userId1 = "";
     let userId2 = "";
     let userId3 = "";
