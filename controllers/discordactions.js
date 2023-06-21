@@ -127,14 +127,10 @@ const addGroupRoleToMember = async (req, res) => {
  */
 const changeNicknameOfUsers = async (req, res) => {
   try {
-    const userData = req.userData;
 
-    const { discordId, username } = userData;
+    const { discordId, username:userName } = req.userData;
 
-    const discordData = {
-      userName: username,
-      discordId,
-    };
+    const discordData = { userName,  discordId };
 
     const authToken = await jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
       algorithm: "RS256",
