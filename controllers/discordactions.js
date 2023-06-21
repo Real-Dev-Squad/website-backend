@@ -131,7 +131,7 @@ const changeNicknameOfUsers = async (req, res) => {
 
     const { discordId, username } = userData;
 
-    const dataForDiscord = {
+    const discordData = {
       userName: username,
       discordId,
     };
@@ -143,7 +143,7 @@ const changeNicknameOfUsers = async (req, res) => {
 
     await fetch(`${DISCORD_BASE_URL}/guild/member`, {
       method: "PATCH",
-      body: JSON.stringify(dataForDiscord),
+      body: JSON.stringify(discordData),
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
     }).then((response) => response.json());
 

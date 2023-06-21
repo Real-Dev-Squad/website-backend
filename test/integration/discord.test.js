@@ -7,11 +7,11 @@ const cleanDb = require("../utils/cleanDb");
 const authService = require("../../services/authService");
 const userData = require("../fixtures/user/user")();
 const { requestRoleData } = require("../fixtures/discordactions/discordactions");
-
 const cookieName = config.get("userToken.cookieName");
-
+const sinon = require("sinon");
 let userId;
 let jwt;
+let fetchStub;
 
 describe("test discord actions", function () {
   describe("test discord actions for archived users", function (done) {
@@ -71,6 +71,58 @@ describe("test discord actions", function () {
             return done(err);
           }
           expect(res).to.have.status(200);
+          return done();
+        });
+    });
+  });
+
+  describe("test discord actions for nickname for verified user", function () {
+    beforeEach(async function () {
+      fetchStub = sinon.stub(global, "fetch");
+      const user = { ...userData[4], discordId: "123456789" };
+      userId = await addUser(user);
+      jwt = authService.generateAuthToken({ userId });
+    });
+
+    it("returns 200 for updating nickname post method", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({}),
+        })
+      );
+      chai
+        .request(app)
+        .post("/discord-actions/nickname")
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("nickname has been changed");
+          return done();
+        });
+    });
+  });
+
+  describe("test discord actions for nickname for unverified user", function () {
+    beforeEach(async function () {
+      const user = { ...userData[3] };
+      userId = await addUser(user);
+      jwt = authService.generateAuthToken({ userId });
+    });
+
+    it("returns 403 for updating nickname post method", function (done) {
+      chai
+        .request(app)
+        .post("/discord-actions/nickname")
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(403);
           return done();
         });
     });
