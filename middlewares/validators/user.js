@@ -224,7 +224,7 @@ async function validateUpdateRoles(req, res, next) {
     next();
   } catch (error) {
     logger.error(`Error validating updateRoles query params : ${error}`);
-    res.boom.badRequest(error.details[0].message);
+    res.boom.badRequest('we only allow either role member or archieve');
   }
 }
 
