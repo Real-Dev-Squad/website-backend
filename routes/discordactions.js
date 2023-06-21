@@ -18,7 +18,7 @@ const router = express.Router();
 router.post("/groups", authenticate, checkIsVerifiedDiscord, validateGroupRoleBody, createGroupRole);
 router.get("/groups", authenticate, checkIsVerifiedDiscord, getAllGroupRoles);
 router.post("/roles", authenticate, checkIsVerifiedDiscord, validateMemberRoleBody, addGroupRoleToMember);
-router.post("/nickname", authenticate, checkIsVerifiedDiscord, changeNicknameOfUsers);
+router.post("/nickname", authenticate, authorizeRoles([SUPERUSER]), checkIsVerifiedDiscord, changeNicknameOfUsers);
 router.patch(
   "/avatar/verify/:id",
   authenticate,

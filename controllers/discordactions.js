@@ -127,23 +127,24 @@ const addGroupRoleToMember = async (req, res) => {
  */
 const changeNicknameOfUsers = async (req, res) => {
   try {
+    const { discordId, username: userName } = req.userData;
 
-    const { discordId, username:userName } = req.userData;
-
-    const discordData = { userName,  discordId };
+    const discordData = { userName, discordId };
 
     const authToken = await jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
       algorithm: "RS256",
       expiresIn: config.get("rdsServerlessBot.ttl"),
     });
 
-    await fetch(`${DISCORD_BASE_URL}/guild/member`, {
-      method: "PATCH",
-      body: JSON.stringify(discordData),
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-    }).then((response) => response.json());
+    await (
+      await fetch(`${DISCORD_BASE_URL}/guild/member`, {
+        method: "PATCH",
+        body: JSON.stringify(discordData),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      })
+    ).json();
 
-    return res.status(200).json({
+    return res.json({
       message: "nickname has been changed",
     });
   } catch (err) {

@@ -12,6 +12,8 @@ const sinon = require("sinon");
 let userId;
 let jwt;
 let fetchStub;
+let superUser;
+let superUserId;
 
 describe("test discord actions", function () {
   describe("test discord actions for archived users", function (done) {
@@ -79,12 +81,14 @@ describe("test discord actions", function () {
   describe("test discord actions for nickname for verified user", function () {
     beforeEach(async function () {
       fetchStub = sinon.stub(global, "fetch");
-      const user = { ...userData[4], discordId: "123456789" };
-      userId = await addUser(user);
-      jwt = authService.generateAuthToken({ userId });
+      const superUser = { ...userData[4], discordId: "123456789" };
+      userId = await addUser();
+      superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
     });
 
     afterEach(async function () {
+      await cleanDb();
       sinon.restore();
     });
 
@@ -98,7 +102,7 @@ describe("test discord actions", function () {
       chai
         .request(app)
         .post("/discord-actions/nickname")
-        .set("Cookie", `${cookieName}=${jwt}`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -112,12 +116,14 @@ describe("test discord actions", function () {
 
   describe("test discord actions for nickname for unverified user", function () {
     beforeEach(async function () {
-      const user = { ...userData[3] };
-      userId = await addUser(user);
-      jwt = authService.generateAuthToken({ userId });
+      const { discordId, ...superUser } = userData[4];
+      userId = await addUser();
+      superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
     });
 
     afterEach(async function () {
+      await cleanDb();
       sinon.restore();
     });
 
@@ -131,7 +137,7 @@ describe("test discord actions", function () {
       chai
         .request(app)
         .post("/discord-actions/nickname")
-        .set("Cookie", `${cookieName}=${jwt}`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
             return done(err);
