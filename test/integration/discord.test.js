@@ -14,6 +14,7 @@ let jwt;
 let fetchStub;
 let superUser;
 let superUserId;
+let superUserAuthToken;
 
 describe("test discord actions", function () {
   describe("test discord actions for archived users", function (done) {
@@ -78,10 +79,10 @@ describe("test discord actions", function () {
     });
   });
 
-  describe("test discord actions for nickname for verified user", function () {
+  describe.only("test discord actions for nickname for verified user", function () {
     beforeEach(async function () {
       fetchStub = sinon.stub(global, "fetch");
-      const superUser = { ...userData[4], discordId: "123456789" };
+      superUser = { ...userData[4], discordId: "123456789" };
       userId = await addUser();
       superUserId = await addUser(superUser);
       superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
@@ -114,7 +115,7 @@ describe("test discord actions", function () {
     });
   });
 
-  describe("test discord actions for nickname for unverified user", function () {
+  describe.only("test discord actions for nickname for unverified user", function () {
     beforeEach(async function () {
       const { discordId, ...superUser } = userData[4];
       userId = await addUser();
