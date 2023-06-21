@@ -6,7 +6,9 @@ const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
 const userStatusModel = require("../models/userStatus");
+const userStatusModel = require("../models/userStatus");
 
+const { filterUsersWithOnboardingState } = require("../utils/userStatus");
 const { filterUsersWithOnboardingState } = require("../utils/userStatus");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
@@ -678,4 +680,5 @@ module.exports = {
   setInDiscordScript,
   getUsersWithOnboardingState,
   markUnverified,
+  getUsersWithOnboardingState,
 };
