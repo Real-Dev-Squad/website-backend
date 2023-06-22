@@ -148,6 +148,29 @@ describe("Filter Users", function () {
         });
     });
 
+    it("Should search users based on Onboarding state", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ state: "ONBOARDING" })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(1);
+          expect(res.body.users[0]).to.deep.include({
+            id: onboardingUser,
+          });
+          return done();
+        });
+    });
+
     it("Should search users based on Tag", function (done) {
       chai
         .request(app)
