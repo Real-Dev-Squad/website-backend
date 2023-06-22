@@ -1188,7 +1188,7 @@ describe("Users", function () {
       await cleanDb();
     });
 
-    it("Should get all the users with ONBOARDING state and are present in discord server for more than 31 days(DEFAULT MIN DATE, without query)", async function () {
+    it("Should get all the users with ONBOARDING state and are present in discord server for more than 31 days", async function () {
       let userId1 = "";
       let userId2 = "";
       let userId3 = "";
@@ -1216,35 +1216,6 @@ describe("Users", function () {
       });
     });
 
-    it("Should get all the users with ONBOARDING state and are present in discord server for more than (given days in query)", async function () {
-      let userId1 = "";
-      let userId2 = "";
-      let userId3 = "";
-
-      userId1 = await addUser(userData[0]);
-      userId2 = await addUser(userData[1]);
-      userId3 = await addUser();
-
-      await userStatusModel.updateUserStatus(userId1, userStatusDataAfterFillingJoinSection);
-      await userStatusModel.updateUserStatus(userId2, userStatusDataAfterFillingJoinSection);
-      await userStatusModel.updateUserStatus(userId3, userStatusDataForNewUser);
-
-      const response = await chai
-        .request(app)
-        .get("/users/onboarding")
-        .query({ minPresenceDays: 20 })
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`);
-
-      expect(response).to.have.status(200);
-      expect(response.body).to.be.a("object");
-      expect(response.body.totalUsers).to.be.a("number");
-      expect(response.body.message).to.equal("All Users with ONBOARDING state of more than 20 days found successfully");
-      expect(response.body.allUser).to.be.a("array");
-      response.body.allUser.forEach((status) => {
-        expect(status).to.have.property("discordJoinedAt");
-      });
-    });
-
     it("Should return zero users as users are not verified or discordJoinedAt property is missing", async function () {
       let userId1 = "";
       let userId2 = "";
@@ -1258,14 +1229,13 @@ describe("Users", function () {
       const response = await chai
         .request(app)
         .get("/users/onboarding")
-        .query({ minPresenceDays: 30 })
         .set("Cookie", `${cookieName}=${superUserAuthToken}`);
 
       expect(response).to.have.status(200);
       expect(response.body.allUser.length).to.equal(0);
       expect(response.body.totalUsers).to.equal(0);
       expect(response.body.message).to.equal(
-        `No users exist with ONBOARDING state of more than 30 days, or the user has not been verified`
+        `No users exist with ONBOARDING state of more than 31 days, or the user has not been verified`
       );
     });
 
@@ -1290,12 +1260,36 @@ describe("Users", function () {
       expect(response).to.have.status(404);
       expect(response.body.message).to.equal("No users exist with an 'ONBOARDING' state");
     });
+
+    it("Should return unauthorized error when not authorized", async function () {
+      let userId1 = "";
+      let userId2 = "";
+      let userId3 = "";
+
+      userId1 = await addUser(userData[0]);
+      userId2 = await addUser(userData[1]);
+      userId3 = await addUser();
+
+      await userStatusModel.updateUserStatus(userId1, userStatusDataForNewUser);
+      await userStatusModel.updateUserStatus(userId2, userStatusDataForNewUser);
+      await userStatusModel.updateUserStatus(userId3, userStatusDataForNewUser);
+
+      const response = await chai.request(app).get("/users/onboarding").set("Cookie", `${cookieName}=${jwt}`);
+
+      expect(response).to.have.status(401);
+      expect(response.body.error).to.be.equal("Unauthorized");
+      expect(response.body.message).to.equal("You are not authorized for this action.");
+    });
   });
 
   describe("POST /", function () {
     let fetchStub;
     beforeEach(async function () {
       fetchStub = Sinon.stub(global, "fetch");
+    });
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
     });
 
     it("tests adding unverified role to user", function (done) {
@@ -1334,115 +1328,6 @@ describe("Users", function () {
           expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
           return done();
         });
-    });
-  });
-
-  describe("GET /users/onboarding", function () {
-    afterEach(async function () {
-      Sinon.restore();
-      await cleanDb();
-    });
-    it("Should get all the users with ONBOARDING state and are present in discord server for more than 31 days(DEFAULT MIN DATE, without query)", async function () {
-      let userId1 = "";
-      let userId2 = "";
-      let userId3 = "";
-
-      userId1 = await addUser(userData[0]);
-      userId2 = await addUser(userData[1]);
-      userId3 = await addUser();
-
-      await userStatusModel.updateUserStatus(userId1, userStatusDataAfterFillingJoinSection);
-      await userStatusModel.updateUserStatus(userId2, userStatusDataAfterFillingJoinSection);
-      await userStatusModel.updateUserStatus(userId3, userStatusDataForNewUser);
-
-      const response = await chai
-        .request(app)
-        .get("/users/onboarding")
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`);
-
-      expect(response).to.have.status(200);
-      expect(response.body).to.be.a("object");
-      expect(response.body.totalUsers).to.be.a("number");
-      expect(response.body.message).to.equal("All Users with ONBOARDING state of more than 31 days found successfully");
-      expect(response.body.allUser).to.be.a("array");
-      response.body.allUser.forEach((status) => {
-        expect(status).to.have.property("discordJoinedAt");
-      });
-    });
-
-    it("Should get all the users with ONBOARDING state and are present in discord server for more than (given days in query)", async function () {
-      let userId1 = "";
-      let userId2 = "";
-      let userId3 = "";
-
-      userId1 = await addUser(userData[0]);
-      userId2 = await addUser(userData[1]);
-      userId3 = await addUser();
-
-      await userStatusModel.updateUserStatus(userId1, userStatusDataAfterFillingJoinSection);
-      await userStatusModel.updateUserStatus(userId2, userStatusDataAfterFillingJoinSection);
-      await userStatusModel.updateUserStatus(userId3, userStatusDataForNewUser);
-
-      const response = await chai
-        .request(app)
-        .get("/users/onboarding")
-        .query({ minPresenceDays: 20 })
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`);
-
-      expect(response).to.have.status(200);
-      expect(response.body).to.be.a("object");
-      expect(response.body.totalUsers).to.be.a("number");
-      expect(response.body.message).to.equal("All Users with ONBOARDING state of more than 20 days found successfully");
-      expect(response.body.allUser).to.be.a("array");
-      response.body.allUser.forEach((status) => {
-        expect(status).to.have.property("discordJoinedAt");
-      });
-    });
-
-    it("Should return zero users as users are not verified or discordJoinedAt property is missing", async function () {
-      let userId1 = "";
-      let userId2 = "";
-
-      userId1 = await addUser(userData[2]);
-      userId2 = await addUser(userData[3]);
-
-      await userStatusModel.updateUserStatus(userId1, userStatusDataAfterFillingJoinSection);
-      await userStatusModel.updateUserStatus(userId2, userStatusDataAfterFillingJoinSection);
-
-      const response = await chai
-        .request(app)
-        .get("/users/onboarding")
-        .query({ minPresenceDays: 30 })
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`);
-
-      expect(response).to.have.status(200);
-      expect(response.body.allUser.length).to.equal(0);
-      expect(response.body.totalUsers).to.equal(0);
-      expect(response.body.message).to.equal(
-        `No users exist with ONBOARDING state of more than 30 days, or the user has not been verified`
-      );
-    });
-
-    it("Should throw for no user is with ONBOARDING state", async function () {
-      let userId1 = "";
-      let userId2 = "";
-      let userId3 = "";
-
-      userId1 = await addUser(userData[0]);
-      userId2 = await addUser(userData[1]);
-      userId3 = await addUser();
-
-      await userStatusModel.updateUserStatus(userId1, userStatusDataForNewUser);
-      await userStatusModel.updateUserStatus(userId2, userStatusDataForNewUser);
-      await userStatusModel.updateUserStatus(userId3, userStatusDataForNewUser);
-
-      const response = await chai
-        .request(app)
-        .get("/users/onboarding")
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`);
-
-      expect(response).to.have.status(404);
-      expect(response.body.message).to.equal("No users exist with an 'ONBOARDING' state");
     });
   });
 });

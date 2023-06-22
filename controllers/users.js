@@ -6,9 +6,7 @@ const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
 const userStatusModel = require("../models/userStatus");
-const userStatusModel = require("../models/userStatus");
 
-const { filterUsersWithOnboardingState } = require("../utils/userStatus");
 const { filterUsersWithOnboardingState } = require("../utils/userStatus");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
@@ -614,16 +612,12 @@ const setInDiscordScript = async (req, res) => {
  */
 
 const getUsersWithOnboardingState = async (req, res) => {
-  let minDaysInServer = 31;
+  const minimumPresentDaysInServer = 31;
   try {
     const { allUserStatus } = await userStatusModel.getAllUserStatus(req.query);
-    const { minPresenceDays } = req.query;
-
-    if (parseInt(minPresenceDays)) {
-      minDaysInServer = parseInt(minPresenceDays);
-    }
 
     const allUsersWithOnboardingState = filterUsersWithOnboardingState(allUserStatus);
+
     if (!allUsersWithOnboardingState.length) {
       return res.boom.notFound("No users exist with an 'ONBOARDING' state");
     }
@@ -636,7 +630,7 @@ const getUsersWithOnboardingState = async (req, res) => {
         const currentDate = new Date();
         const timeDifferenceInMilliseconds = currentDate.getTime() - userDiscordJoinedDate.getTime();
         const currentAndUserJoinedDateDifference = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
-        if (currentAndUserJoinedDateDifference > minDaysInServer) {
+        if (currentAndUserJoinedDateDifference > minimumPresentDaysInServer) {
           updatedOnboardingUsersWithDate.push(result.user);
         }
       }
@@ -644,8 +638,8 @@ const getUsersWithOnboardingState = async (req, res) => {
 
     return res.json({
       message: updatedOnboardingUsersWithDate.length
-        ? `All Users with ONBOARDING state of more than ${minDaysInServer} days found successfully`
-        : `No users exist with ONBOARDING state of more than ${minDaysInServer} days, or the user has not been verified`,
+        ? `All Users with ONBOARDING state of more than ${minimumPresentDaysInServer} days found successfully`
+        : `No users exist with ONBOARDING state of more than ${minimumPresentDaysInServer} days, or the user has not been verified`,
       totalUsers: updatedOnboardingUsersWithDate.length,
       allUser: updatedOnboardingUsersWithDate,
     });
@@ -680,5 +674,4 @@ module.exports = {
   setInDiscordScript,
   getUsersWithOnboardingState,
   markUnverified,
-  getUsersWithOnboardingState,
 };
