@@ -9,7 +9,8 @@ module.exports = {
   enableFileLogs: false,
   // Console logs are set to avoid the winston error of no defined transports
   enableConsoleLogs: true,
-  discordUnverifiedRoleId: "1120334294355808448",
+  discordUnverifiedRoleId: "1234567890",
+  discordDeveloperRoleId: "9876543210",
   githubOauth: {
     clientId: "clientId",
     clientSecret: "clientSecret",
