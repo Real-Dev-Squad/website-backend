@@ -125,7 +125,7 @@ const addGroupRoleToMember = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const changeNicknameOfUsers = async (req, res) => {
+const changeUserNickname = async (req, res) => {
   try {
     const { discordId, username: userName } = req.userData;
 
@@ -176,5 +176,5 @@ module.exports = {
   getAllGroupRoles,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
-  changeNicknameOfUsers,
+  changeUserNickname,
 };

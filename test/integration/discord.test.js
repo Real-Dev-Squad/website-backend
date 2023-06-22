@@ -83,7 +83,6 @@ describe("test discord actions", function () {
     beforeEach(async function () {
       fetchStub = sinon.stub(global, "fetch");
       superUser = { ...userData[4], discordId: "123456789" };
-      userId = await addUser();
       superUserId = await addUser(superUser);
       superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
     });
@@ -118,7 +117,6 @@ describe("test discord actions", function () {
   describe("test discord actions for nickname for unverified user", function () {
     beforeEach(async function () {
       const { discordId, ...superUser } = userData[4];
-      userId = await addUser();
       superUserId = await addUser(superUser);
       superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
     });
