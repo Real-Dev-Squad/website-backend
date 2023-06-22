@@ -631,4 +631,5 @@ module.exports = {
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
+  updateRoles,
 };
