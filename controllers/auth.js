@@ -1,7 +1,11 @@
 const passport = require("passport");
 const users = require("../models/users");
+const QrCodeAuthModel = require("../models/qrCodeAuth");
 const authService = require("../services/authService");
-
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const DATA_ADDED_SUCCESSFULLY = "User Device Info added successfully!";
+const USER_DATA_ALREADY_PRESENT = "The authentication document has already been created";
+const BAD_REQUEST = "BAD_REQUEST";
 /**
  * Fetches the user info from GitHub and authenticates User
  *
@@ -66,7 +70,50 @@ const signout = (req, res) => {
   });
 };
 
+/**
+ * Stores user-device data inside the DB for mobile auth
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const storeUserDeviceInfo = async (req, res) => {
+  try {
+    const userJson = {
+      user_id: req.body.user_id,
+      device_info: req.body.device_info,
+      device_id: req.body.device_id,
+      authorization_status: "NOT_INIT",
+    };
+    const userData = await QrCodeAuthModel.getUserAuthStatus(req.body.user_id);
+    const data = userData.docs[0].data();
+
+    if (data?.authorization_status) {
+      return res.status(409).json({
+        message: USER_DATA_ALREADY_PRESENT,
+      });
+    }
+
+    const userInfo = await QrCodeAuthModel.storeUserDeviceInfo(userJson);
+
+    if (!userInfo) {
+      return res.status(400).json({
+        message: BAD_REQUEST,
+      });
+    }
+
+    return res.status(201).json({
+      ...userInfo,
+      message: DATA_ADDED_SUCCESSFULLY,
+    });
+  } catch (err) {
+    logger.error(`Error while storing user device info : ${err}`);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+  }
+};
+
 module.exports = {
   githubAuth,
   signout,
+  storeUserDeviceInfo,
 };

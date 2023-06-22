@@ -4,6 +4,7 @@ const storeUserDeviceInfo = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     user_id: joi.string().required(),
     device_info: joi.string().required(),
+    device_id: joi.string().required(),
   });
 
   try {
