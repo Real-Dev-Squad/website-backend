@@ -344,14 +344,11 @@ const markUnverified = async (req, res) => {
     allRdsLoggedInUsers.forEach((user) => {
       rdsUserMap[user.discordId] = true;
     });
-    
+
     usersInRdsDiscordServer.forEach((discordUser) => {
       const found = discordUser.roles.find((role) => role === discordDeveloperRoleId);
       if (found && !rdsUserMap[discordUser.user.id]) {
         usersToApplyUnverifiedRole.push(discordUser.user.id);
-    usersInRdsDiscordServer.forEach((user) => {
-      if (!rdsUserMap[user.user.id]) {
-        usersToApplyUnverifiedRole.push(user.user.id);
       }
     });
 
