@@ -1291,7 +1291,7 @@ describe("Users", function () {
       expect(response.body.message).to.equal("No users exist with an 'ONBOARDING' state");
     });
   });
-  
+
   describe("POST /", function () {
     let fetchStub;
     beforeEach(async function () {
@@ -1335,6 +1335,7 @@ describe("Users", function () {
           expect(res).to.have.status(500);
           expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
           return done();
-      });
+        });
     });
+  });
 });
