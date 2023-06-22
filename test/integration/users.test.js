@@ -1206,6 +1206,7 @@ describe("Users", function () {
           if (err) {
             return done(err);
           }
+          expect(fetchStub.calledOnce).to.be.equal(true);
           expect(res).to.have.status(200);
           expect(res.body.message).to.be.equal("ROLES APPLIED SUCCESSFULLY");
           return done();
