@@ -611,9 +611,8 @@ const setInDiscordScript = async (req, res) => {
  */
 const changeUserNickname = async (req, res) => {
   try {
-    console.log("hello there@@@");
     const { user } = await userQuery.fetchUser({ userId: req.params.userId });
-    console.log("hello there@@@");
+
     const { discordId, username: userName } = user;
 
     const discordData = {
@@ -625,7 +624,7 @@ const changeUserNickname = async (req, res) => {
       algorithm: "RS256",
       expiresIn: config.get("rdsServerlessBot.ttl"),
     });
-    console.log("hello there@@@");
+
     await (
       await fetch(`${DISCORD_BASE_URL}/guild/member`, {
         method: "PATCH",
@@ -633,7 +632,7 @@ const changeUserNickname = async (req, res) => {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
       })
     ).json();
-    console.log("hello there@@@");
+
     return res.json({
       message: "nickname has been changed",
     });
