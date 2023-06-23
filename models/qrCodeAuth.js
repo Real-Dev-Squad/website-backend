@@ -14,7 +14,7 @@ const storeUserDeviceInfo = async (userDeviceInfoData) => {
     const user = await userModel.doc(userId).get();
     if (user.data()) {
       await QrCodeAuthModel.doc(userId).set(userDeviceInfoData);
-      // console.log({ userDeviceInfoData });
+
       return { userDeviceInfoData };
     } else {
       throw new Error(USER_DOES_NOT_EXIST_ERROR);
