@@ -3,7 +3,7 @@ const { userState } = require("../../constants/userStatus");
 const threeDaysInMilliseconds = 172800000;
 
 const validateUserStatusData = async (todaysTime, req, res, next) => {
-  const schema = Joi.object({
+  const statusSchema = Joi.object({
     currentStatus: Joi.object().keys({
       state: Joi.string()
         .trim()
@@ -54,9 +54,22 @@ const validateUserStatusData = async (todaysTime, req, res, next) => {
       committed: Joi.number().required(),
       updatedAt: Joi.number().required(),
     }),
-  }).or("currentStatus", "monthlyHours");
+  });
 
+  const cancelOooSchema = Joi.object()
+    .keys({
+      cancelOOO: Joi.boolean().valid(true).required(),
+      userId: Joi.string.optional(),
+    })
+    .unknown(false);
+
+  let schema;
   try {
+    if (Object.keys(req.body).includes("cancelOOO")) {
+      schema = cancelOooSchema;
+    } else {
+      schema = statusSchema;
+    }
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
