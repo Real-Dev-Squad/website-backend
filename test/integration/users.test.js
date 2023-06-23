@@ -15,6 +15,7 @@ const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
+const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const joinData = require("../fixtures/user/join");
 const {
   userStatusDataAfterSignup,
@@ -25,6 +26,8 @@ const userStatusModel = require("../../models/userStatus");
 
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
+const Sinon = require("sinon");
+const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const photoVerificationModel = firestore.collection("photo-verification");
 chai.use(chaiHttp);
 
@@ -1174,6 +1177,54 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.be.equal("Successfully added the in_discord field to false for all users");
+          return done();
+        });
+    });
+  });
+
+  describe("POST /", function () {
+    let fetchStub;
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(global, "fetch");
+    });
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
+    });
+    it("tests adding unverified role to user", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+      chai
+        .request(app)
+        .post("/users")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(fetchStub.calledOnce).to.be.equal(true);
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("ROLES APPLIED SUCCESSFULLY");
+          return done();
+        });
+    });
+
+    it("Gives internal server error", function (done) {
+      fetchStub.throws(new Error("OOps"));
+      chai
+        .request(app)
+        .post("/users")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
           return done();
         });
     });

@@ -1,4 +1,15 @@
+const jwt = require("jsonwebtoken");
 const { getDiscordMemberDetails } = require("../services/discordMembersService");
+
+const generateAuthTokenForCloudflare = async () => {
+  const expiry = config.get("rdsServerlessBot.ttl");
+  const privateKey = config.get("rdsServerlessBot.rdsServerLessPrivateKey");
+  const authToken = await jwt.sign({}, privateKey, {
+    algorithm: "RS256",
+    expiresIn: expiry,
+  });
+  return authToken;
+};
 
 const generateDiscordProfileImageUrl = async (discordId) => {
   try {
@@ -17,4 +28,5 @@ const generateDiscordProfileImageUrl = async (discordId) => {
 
 module.exports = {
   generateDiscordProfileImageUrl,
+  generateAuthTokenForCloudflare,
 };

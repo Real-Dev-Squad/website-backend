@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const firestore = require("../utils/firestore");
 const { fetchAllUsers } = require("../models/users");
+const { generateAuthTokenForCloudflare } = require("../utils/discord-actions");
 const userModel = firestore.collection("users");
 
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
@@ -52,7 +53,19 @@ const setInDiscordFalseScript = async () => {
   await Promise.all(updateUsersPromises);
 };
 
+const addRoleToUser = async (userid, roleid) => {
+  const authToken = await generateAuthTokenForCloudflare();
+  const data = await fetch(`${DISCORD_BASE_URL}/roles/add`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+    body: JSON.stringify({ userid, roleid }),
+  });
+  const response = await data.json();
+  return response;
+};
+
 module.exports = {
   getDiscordMembers,
   setInDiscordFalseScript,
+  addRoleToUser,
 };
