@@ -59,7 +59,6 @@ const validateUserStatusData = async (todaysTime, req, res, next) => {
   const cancelOooSchema = Joi.object()
     .keys({
       cancelOOO: Joi.boolean().valid(true).required(),
-      userId: Joi.string.optional(),
     })
     .unknown(false);
 
