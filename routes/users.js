@@ -9,6 +9,7 @@ const { upload } = require("../utils/multer");
 const { getUserBadges } = require("../controllers/badges");
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
 
+router.post("/", authenticate, authorizeRoles([SUPERUSER]), users.markUnverified);
 router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), users.setInDiscordScript);
 router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
