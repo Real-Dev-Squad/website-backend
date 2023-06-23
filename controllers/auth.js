@@ -88,7 +88,7 @@ const storeUserDeviceInfo = async (req, res) => {
     const userData = await QrCodeAuthModel.getUserAuthStatus(req.body.user_id);
 
     const data = userData.docs.length ? userData.docs[0].data() : null;
-
+    console.log(data);
     if (data?.authorization_status) {
       return res.status(409).json({
         message: USER_DATA_ALREADY_PRESENT,

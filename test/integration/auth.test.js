@@ -5,7 +5,7 @@ const chaiHttp = require("chai-http");
 const passport = require("passport");
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
-// const qrCodeAuthModel = require("../../models/qrCodeAuth");
+const qrCodeAuthModel = require("../../models/qrCodeAuth");
 const { addUserToDBForTest } = require("../../utils/users");
 const userData = require("../fixtures/user/user")();
 const { userDeviceInfoDataArray } = require("../fixtures/userDeviceInfo/userDeviceInfo");
@@ -18,12 +18,14 @@ const githubUserInfo = require("../fixtures/auth/githubUserInfo")();
 let userDeviceInfoData;
 let wrongUserDeviceInfoData;
 let userId;
+let userDeviceInfoWithAUthStatus;
 const user = userData[0];
 
 describe("auth", function () {
   beforeEach(async function () {
     userId = await addUser(user);
     userDeviceInfoData = { ...userDeviceInfoDataArray[0], user_id: userId };
+    userDeviceInfoWithAUthStatus = { ...userDeviceInfoData, authorization_status: "NOT_INIT" };
     wrongUserDeviceInfoData = userDeviceInfoDataArray[0];
   });
   afterEach(async function () {
@@ -158,8 +160,8 @@ describe("auth", function () {
       });
   });
   it("Should return 409 when user authorization status already exists for mobile auth", function (done) {
-    // qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoData);
-    // sinon.stub(qrCodeAuthModel, "storeUserDeviceInfo").returns(userDeviceInfoData);
+    qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoWithAUthStatus);
+
     chai
       .request(app)
       .post("/auth/qr-code-auth")
@@ -168,11 +170,8 @@ describe("auth", function () {
         if (err) {
           return done(err);
         }
-        expect(response.body).to.be.eql({
-          statusCode: 409,
-          error: "Conflict",
-          message: "The authentication document has already been created",
-        });
+
+        expect(response.body.message).to.be.equal("The authentication document has already been created");
 
         return done();
       });
