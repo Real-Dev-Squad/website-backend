@@ -145,5 +145,4 @@ module.exports = {
   getAllGroupRoles,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
-  changeUserNickname,
 };

@@ -5,7 +5,6 @@ const {
   getAllGroupRoles,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
-  changeUserNickname,
 } = require("../controllers/discordactions");
 
 const { validateGroupRoleBody, validateMemberRoleBody } = require("../middlewares/validators/discordactions");
