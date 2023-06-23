@@ -79,7 +79,7 @@ describe("test discord actions", function () {
     });
   });
 
-  describe("test discord actions for nickname for verified user", function () {
+  describe.only("test discord actions for nickname for verified user", function () {
     beforeEach(async function () {
       fetchStub = sinon.stub(global, "fetch");
       superUser = { ...userData[4], discordId: "123456789" };
@@ -92,7 +92,7 @@ describe("test discord actions", function () {
       sinon.restore();
     });
 
-    it("returns 200 for updating nickname post method", function (done) {
+    it("returns 200 for updating nickname patch method", function (done) {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
@@ -101,7 +101,7 @@ describe("test discord actions", function () {
       );
       chai
         .request(app)
-        .post("/discord-actions/nickname")
+        .patch(`/users/${userData[3].username}?type=discord`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -114,7 +114,7 @@ describe("test discord actions", function () {
     });
   });
 
-  describe("test discord actions for nickname for unverified user", function () {
+  describe.only("test discord actions for nickname for unverified user", function () {
     beforeEach(async function () {
       const { discordId, ...superUser } = userData[4];
       superUserId = await addUser(superUser);
@@ -126,7 +126,7 @@ describe("test discord actions", function () {
       sinon.restore();
     });
 
-    it("returns 403 for updating nickname post method", function (done) {
+    it("returns 403 for updating nickname patch method", function (done) {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
@@ -135,7 +135,7 @@ describe("test discord actions", function () {
       );
       chai
         .request(app)
-        .post("/discord-actions/nickname")
+        .patch(`/users/${userData[4].username}?type=discord`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {

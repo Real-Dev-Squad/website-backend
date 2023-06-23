@@ -15,6 +15,8 @@ const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 
+const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
+
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
   try {
@@ -568,6 +570,45 @@ const setInDiscordScript = async (req, res) => {
   }
 };
 
+/**
+ * Patch Update user nickname
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const changeUserNickname = async (req, res) => {
+  try {    
+    const result = userQuery.fetchUser({userId : req.params.userId})
+    console.log(result)
+
+    const { discordId } = result.user
+
+    const discordData = {
+        userName :username,
+        discordId
+    }
+
+    const authToken = await jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
+      algorithm: "RS256",
+      expiresIn: config.get("rdsServerlessBot.ttl"),
+    });
+
+    await (
+      await fetch(`${DISCORD_BASE_URL}/guild/member`, {
+        method: "PATCH",
+        body: JSON.stringify(discordData),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      })
+    ).json();
+
+    return res.json({
+      message: "nickname has been changed",
+    });
+  } catch (err) {
+    logger.error(`Error while updating nickname: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -591,4 +632,5 @@ module.exports = {
   getUserImageForVerification,
   nonVerifiedDiscordUsers,
   setInDiscordScript,
+  changeUserNickname
 };
