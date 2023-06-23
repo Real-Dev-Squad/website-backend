@@ -83,6 +83,7 @@ describe("test discord actions", function () {
     beforeEach(async function () {
       fetchStub = sinon.stub(global, "fetch");
       superUser = { ...userData[4], discordId: "123456789" };
+      userId = await addUser(userData[0]);
       superUserId = await addUser(superUser);
       superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
     });
@@ -101,7 +102,7 @@ describe("test discord actions", function () {
       );
       chai
         .request(app)
-        .patch(`/users/${userData[3].username}?type=discord`)
+        .patch(`/users/username/${userId}`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -135,7 +136,7 @@ describe("test discord actions", function () {
       );
       chai
         .request(app)
-        .patch(`/users/${userData[4].username}?type=discord`)
+        .patch(`/users/username/${userData[3].userId}`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {

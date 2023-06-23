@@ -39,6 +39,12 @@ router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
-router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), checkIsVerifiedDiscord, users.changeUserNickname)
+router.patch(
+  "/username/:userId",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  checkIsVerifiedDiscord,
+  users.changeUserNickname
+);
 
 module.exports = router;

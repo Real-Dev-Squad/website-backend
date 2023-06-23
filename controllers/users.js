@@ -576,22 +576,22 @@ const setInDiscordScript = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const changeUserNickname = async (req, res) => {
-  try {    
-    const result = userQuery.fetchUser({userId : req.params.userId})
-    console.log(result)
-
-    const { discordId } = result.user
+  try {
+    console.log("hello there@@@");
+    const { user } = await userQuery.fetchUser({ userId: req.params.userId });
+    console.log("hello there@@@");
+    const { discordId, username: userName } = user;
 
     const discordData = {
-        userName :username,
-        discordId
-    }
+      userName,
+      discordId,
+    };
 
-    const authToken = await jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
+    const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
       algorithm: "RS256",
       expiresIn: config.get("rdsServerlessBot.ttl"),
     });
-
+    console.log("hello there@@@");
     await (
       await fetch(`${DISCORD_BASE_URL}/guild/member`, {
         method: "PATCH",
@@ -599,7 +599,7 @@ const changeUserNickname = async (req, res) => {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
       })
     ).json();
-
+    console.log("hello there@@@");
     return res.json({
       message: "nickname has been changed",
     });
@@ -632,5 +632,5 @@ module.exports = {
   getUserImageForVerification,
   nonVerifiedDiscordUsers,
   setInDiscordScript,
-  changeUserNickname
+  changeUserNickname,
 };
