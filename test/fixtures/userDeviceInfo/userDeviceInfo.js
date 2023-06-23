@@ -7,11 +7,12 @@
 
 const userDeviceInfoDataArray = [
   {
-    userId: "TEST_USER_ID",
-    deviceType: "TEST_DEVICE_TYPE",
+    user_id: "TEST_USER_ID",
+    device_info: "TEST_DEVICE_INFO",
+    device_id: "TEST_DEVICE_ID",
   },
 ];
 
-const userDeviceInfoIdKeys = ["userId", "deviceType"];
+const userDeviceInfoIdKeys = ["user_id", "device_info", "device_id"];
 
 module.exports = { userDeviceInfoDataArray, userDeviceInfoIdKeys };

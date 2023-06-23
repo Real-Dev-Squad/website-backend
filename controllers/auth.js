@@ -86,7 +86,8 @@ const storeUserDeviceInfo = async (req, res) => {
       authorization_status: "NOT_INIT",
     };
     const userData = await QrCodeAuthModel.getUserAuthStatus(req.body.user_id);
-    const data = userData.docs[0].data();
+
+    const data = userData.docs.length ? userData.docs[0].data() : null;
 
     if (data?.authorization_status) {
       return res.status(409).json({
