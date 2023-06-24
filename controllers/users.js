@@ -14,7 +14,7 @@ const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/er
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
-const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
+const { addRoleToUser, getDiscordMembers, setDiscordNickname } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
 
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
@@ -611,27 +611,14 @@ const setInDiscordScript = async (req, res) => {
  */
 const changeUserNickname = async (req, res) => {
   try {
+    const type = req.body.type;
     const { user } = await userQuery.fetchUser({ userId: req.params.userId });
 
     const { discordId, username: userName } = user;
 
-    const discordData = {
-      userName,
-      discordId,
-    };
-
-    const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
-      algorithm: "RS256",
-      expiresIn: config.get("rdsServerlessBot.ttl"),
-    });
-
-    await (
-      await fetch(`${DISCORD_BASE_URL}/guild/member`, {
-        method: "PATCH",
-        body: JSON.stringify(discordData),
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-      })
-    ).json();
+    if (type === "discord") {
+      setDiscordNickname(userName, discordId);
+    }
 
     return res.json({
       message: "nickname has been changed",

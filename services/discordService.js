@@ -64,8 +64,24 @@ const addRoleToUser = async (userid, roleid) => {
   return response;
 };
 
+const setDiscordNickname = async (userName, discordId) => {
+  const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
+    algorithm: "RS256",
+    expiresIn: config.get("rdsServerlessBot.ttl"),
+  });
+
+  await (
+    await fetch(`${DISCORD_BASE_URL}/guild/member`, {
+      method: "PATCH",
+      body: JSON.stringify({ userName, discordId }),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+    })
+  ).json();
+};
+
 module.exports = {
   getDiscordMembers,
   setInDiscordFalseScript,
   addRoleToUser,
+  setDiscordNickname,
 };

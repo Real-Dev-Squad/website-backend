@@ -102,7 +102,8 @@ describe("test discord actions", function () {
       );
       chai
         .request(app)
-        .patch(`/users/username/${userId}`)
+        .patch(`/users/servername/${userId}`)
+        .send({ type: "discord" })
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -136,7 +137,8 @@ describe("test discord actions", function () {
       );
       chai
         .request(app)
-        .patch(`/users/username/${userData[3].userId}`)
+        .patch(`/users/servername/${userData[3].userId}`)
+        .send({ type: "discord" })
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
