@@ -5,7 +5,6 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
-const jwt = require("jsonwebtoken");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
@@ -16,8 +15,6 @@ const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers, setDiscordNickname } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
-
-const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
