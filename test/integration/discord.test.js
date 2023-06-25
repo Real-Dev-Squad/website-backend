@@ -118,6 +118,7 @@ describe("test discord actions", function () {
 
   describe("test discord actions for nickname for unverified user", function () {
     beforeEach(async function () {
+      fetchStub = sinon.stub(global, "fetch");
       const { discordId, ...superUser } = userData[4];
       superUserId = await addUser(superUser);
       superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
@@ -137,7 +138,7 @@ describe("test discord actions", function () {
       );
       chai
         .request(app)
-        .patch(`/users/servername/${userData[3].userId}`)
+        .patch(`/users/servername/${userId}`)
         .send({ type: "discord" })
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {

@@ -45,7 +45,7 @@ router.patch(
   authenticate,
   authorizeRoles([SUPERUSER]),
   checkIsVerifiedDiscord,
-  users.changeUserNickname
+  users.updateUserNickname
 );
 
 module.exports = router;

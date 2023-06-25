@@ -13,7 +13,7 @@ const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/er
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
-const { addRoleToUser, getDiscordMembers, setDiscordNickname } = require("../services/discordService");
+const { addRoleToUser, getDiscordMembers, setUserDiscordNickname } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
 
 const verifyUser = async (req, res) => {
@@ -606,20 +606,23 @@ const setInDiscordScript = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const changeUserNickname = async (req, res) => {
+const updateUserNickname = async (req, res) => {
   try {
     const type = req.body.type;
+
     const { user } = await userQuery.fetchUser({ userId: req.params.userId });
 
     const { discordId, username: userName } = user;
 
-    if (type === "discord") {
-      setDiscordNickname(userName, discordId);
-    }
+    if (type === "discord" && discordId && userName) {
+      await setUserDiscordNickname(userName, discordId);
 
-    return res.json({
-      message: "nickname has been changed",
-    });
+      return res.json({
+        message: "nickname has been changed",
+      });
+    } else {
+      return res.boom.badRequest("incorrect type");
+    }
   } catch (err) {
     logger.error(`Error while updating nickname: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
@@ -649,6 +652,6 @@ module.exports = {
   getUserImageForVerification,
   nonVerifiedDiscordUsers,
   setInDiscordScript,
-  changeUserNickname,
+  updateUserNickname,
   markUnverified,
 };

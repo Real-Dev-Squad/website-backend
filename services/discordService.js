@@ -64,7 +64,7 @@ const addRoleToUser = async (userid, roleid) => {
   return response;
 };
 
-const setDiscordNickname = async (userName, discordId) => {
+const setUserDiscordNickname = async (userName, discordId) => {
   const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
     algorithm: "RS256",
     expiresIn: config.get("rdsServerlessBot.ttl"),
@@ -83,5 +83,5 @@ module.exports = {
   getDiscordMembers,
   setInDiscordFalseScript,
   addRoleToUser,
-  setDiscordNickname,
+  setUserDiscordNickname,
 };
