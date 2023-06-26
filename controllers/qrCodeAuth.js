@@ -4,12 +4,12 @@ const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const updateAuthStatus = async (req, res) => {
   try {
     const userId = req.userData.id;
-    const authStatus = req.params.authorization_status ? req.params.authorization_status : "NOT_INIT";
+    const authStatus = req.params.authorization_status;
     const result = await qrAuthQuery.updateStatus(userId, authStatus);
 
     if (result.userExists) {
       return res.json({
-        message: "Updated successfully!",
+        message: `Authentication document for user ${userId} updated successfully`,
         data: { ...result.data },
       });
     }

@@ -1,11 +1,11 @@
 const firestore = require("../utils/firestore");
-const qrAuthModel = firestore.collection("Qr_auth");
+const qrAuthModel = firestore.collection("QrCodeAuth");
 
 const updateStatus = async (userId, authStatus = "NOT_INIT") => {
   try {
     const authData = await qrAuthModel.doc(userId).get();
 
-    if (!authData) {
+    if (!authData.data()) {
       return {
         userExists: false,
       };
@@ -13,14 +13,14 @@ const updateStatus = async (userId, authStatus = "NOT_INIT") => {
 
     await qrAuthModel.doc(userId).set({
       ...authData.data(),
-      authStatus,
+      authorization_status: authStatus,
     });
 
     return {
       userExists: true,
       data: {
         ...authData.data(),
-        authStatus,
+        authorization_status: authStatus,
       },
     };
   } catch (err) {
