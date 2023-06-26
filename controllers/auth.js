@@ -2,10 +2,13 @@ const passport = require("passport");
 const users = require("../models/users");
 const QrCodeAuthModel = require("../models/qrCodeAuth");
 const authService = require("../services/authService");
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const DATA_ADDED_SUCCESSFULLY = "User Device Info added successfully!";
-const USER_DATA_ALREADY_PRESENT = "The authentication document has already been created";
-const BAD_REQUEST = "BAD_REQUEST";
+const {
+  SOMETHING_WENT_WRONG,
+  DATA_ADDED_SUCCESSFULLY,
+  USER_DATA_ALREADY_PRESENT,
+  BAD_REQUEST,
+} = require("../constants/errorMessages");
+
 /**
  * Fetches the user info from GitHub and authenticates User
  *
