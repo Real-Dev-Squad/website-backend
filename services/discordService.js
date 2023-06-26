@@ -64,8 +64,20 @@ const addRoleToUser = async (userid, roleid) => {
   return response;
 };
 
+const removeRoleFromUser = async (roleId, discordId) => {
+  const authToken = await generateAuthTokenForCloudflare();
+  const data = await fetch(`${DISCORD_BASE_URL}/roles`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+    body: JSON.stringify({ userid: discordId, roleid: roleId }),
+  });
+  const response = await data.json();
+  return response;
+};
+
 module.exports = {
   getDiscordMembers,
   setInDiscordFalseScript,
   addRoleToUser,
+  removeRoleFromUser,
 };

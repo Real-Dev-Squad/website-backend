@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const firestore = require("../../../utils/firestore");
-const { setInDiscordFalseScript, addRoleToUser } = require("../../../services/discordService");
+const { setInDiscordFalseScript, addRoleToUser, removeRoleFromUser } = require("../../../services/discordService");
 const { fetchAllUsers } = require("../../../models/users");
 const Sinon = require("sinon");
 const userModel = firestore.collection("users");
@@ -41,6 +41,33 @@ describe("Discord services", function () {
       const response = await addRoleToUser("123456789", "987654321");
 
       expect(response.message).to.be.equal("done");
+    });
+  });
+
+  describe("remove role from a user", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+    });
+    afterEach(function () {
+      fetchStub.restore();
+    });
+    it("makes a successful fetch call to discord", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              message: "Role Removed Successfully",
+              userAffected: { userid: "987654321123456789", roleid: "112233445566778899" },
+            }),
+        })
+      );
+      const response = await removeRoleFromUser("112233445566778899", "987654321123456789");
+      expect(response).to.deep.equal({
+        message: "Role Removed Successfully",
+        userAffected: { userid: "987654321123456789", roleid: "112233445566778899" },
+      });
+      expect(fetchStub.calledOnce).to.be.equal(true);
     });
   });
 });
