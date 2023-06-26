@@ -497,7 +497,6 @@ const filterUsers = async (req, res) => {
   }
 };
 
-
 // one time script function to perform the migration - adding github_user_id field to the document
 const migrate = async (req, res) => {
   const usersNotFound = [];
@@ -558,6 +557,7 @@ const migrate = async (req, res) => {
     logger.error(`Error while Updating all users: ${error}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
+};
 
 const nonVerifiedDiscordUsers = async (req, res) => {
   const data = await userQuery.getDiscordUsers();
