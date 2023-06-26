@@ -65,14 +65,19 @@ const addRoleToUser = async (userid, roleid) => {
 };
 
 const removeRoleFromUser = async (roleId, discordId) => {
-  const authToken = await generateAuthTokenForCloudflare();
-  const data = await fetch(`${DISCORD_BASE_URL}/roles`, {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-    body: JSON.stringify({ userid: discordId, roleid: roleId }),
-  });
-  const response = await data.json();
-  return response;
+  try {
+    const authToken = await generateAuthTokenForCloudflare();
+    const data = await fetch(`${DISCORD_BASE_URL}/roles`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ userid: discordId, roleid: roleId }),
+    });
+    const response = await data.json();
+    return response;
+  } catch (err) {
+    logger.error("Error in making fetch call to remove the role", err);
+    throw new Error(err);
+  }
 };
 
 module.exports = {
