@@ -98,7 +98,7 @@ const storeUserDeviceInfo = async (req, res) => {
     const userInfo = await QrCodeAuthModel.storeUserDeviceInfo(userJson);
 
     if (!userInfo) {
-      return res.status(400).json({
+      return res.status(404).json({
         message: BAD_REQUEST,
       });
     }
