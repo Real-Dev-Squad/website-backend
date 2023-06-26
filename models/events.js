@@ -69,21 +69,6 @@ const endActiveEvent = async ({ id, reason, lock }) => {
 };
 
 /**
- * Stores a reference to a peer in the event document in the Firestore database.
- * @async
- * @function
- * @param {string} peerId - The ID of the peer document to be referenced.
- * @param {string} eventId - The ID of the event document where the peer reference will be stored.
- * @throws {Error} If an error occurs while updating the event document.
- */
-const storePeerReferenceInEvent = async (peerId, eventId) => {
-  const eventDocRef = eventModel.doc(eventId);
-  await eventDocRef.update({
-    peers: Firestore.FieldValue.arrayUnion(peerId),
-  });
-};
-
-/**
  * Adds a peer to an event in the Firestore database.
  * @async
  * @function
@@ -95,14 +80,19 @@ const storePeerReferenceInEvent = async (peerId, eventId) => {
  * @returns {Promise<Object>} The data of the added peer.
  * @throws {Error} If an error occurs while adding the peer to the event.
  */
+
 const addPeerToEvent = async (peerData) => {
   try {
-    let docRef;
-    const querySnapshot = await peerModel.where("name", "==", peerData.name).limit(1).get();
+    const batch = firestore.batch();
 
-    if (querySnapshot.empty) {
+    const peerQuerySnapshot = await peerModel.where("name", "==", peerData.name).limit(1).get();
+    let peerRef;
+
+    if (peerQuerySnapshot.empty) {
       // If the peer document doesn't exist, create a new one
-      docRef = await peerModel.add({
+      peerRef = peerModel.doc();
+      const peerDocData = {
+        id: peerRef.id,
         name: peerData.name,
         joinedEvents: [
           {
@@ -111,12 +101,13 @@ const addPeerToEvent = async (peerData) => {
             joined_at: peerData.joinedAt,
           },
         ],
-      });
+      };
+      batch.set(peerRef, peerDocData);
     } else {
       // If the peer document exists, update the joinedEvents array
-      const doc = querySnapshot.docs[0];
-      docRef = doc.ref;
-      await docRef.update({
+      const doc = peerQuerySnapshot.docs[0];
+      peerRef = doc.ref;
+      batch.update(peerRef, {
         joinedEvents: Firestore.FieldValue.arrayUnion({
           event_id: peerData.eventId,
           role: peerData.role,
@@ -125,19 +116,15 @@ const addPeerToEvent = async (peerData) => {
       });
     }
 
-    const docId = docRef.id;
-    await docRef.update({ id: docId });
+    const eventRef = eventModel.doc(peerData.eventId);
+    batch.update(eventRef, {
+      peers: Firestore.FieldValue.arrayUnion(peerRef.id),
+    });
 
-    // Store a reference of the document in the event model
-    try {
-      await storePeerReferenceInEvent(docId, peerData.eventId);
-    } catch (error) {
-      throw new Error(`Error in storing peer reference in event model: ${error.message}`);
-    }
+    await batch.commit();
 
-    const docSnapshot = await docRef.get();
-    const data = docSnapshot.data();
-    return data;
+    const peerDocSnapshot = await peerRef.get();
+    return peerDocSnapshot.data();
   } catch (error) {
     logger.error("Error in adding peer to the event", error);
     throw error;
@@ -149,5 +136,4 @@ module.exports = {
   updateEvent,
   endActiveEvent,
   addPeerToEvent,
-  storePeerReferenceInEvent,
 };

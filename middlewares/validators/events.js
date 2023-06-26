@@ -101,15 +101,20 @@ const endActiveEvent = async (req, res, next) => {
 };
 
 const addPeerToEvent = async (req, res, next) => {
+  const { id } = req.params;
+  const { name, role, joinedAt } = req.body;
+
   const schema = joi.object({
     name: joi.string().required(),
-    eventId: joi.string().required(),
+    id: joi.string().required(),
     role: joi.string().required(),
     joinedAt: joi.date().required(),
   });
 
+  const validationOptions = { abortEarly: false };
+
   try {
-    await schema.validateAsync(req.body);
+    await schema.validateAsync({ name, id, role, joinedAt }, validationOptions);
     next();
   } catch (error) {
     logger.error(`Error while adding a peer to the event: ${error}`);

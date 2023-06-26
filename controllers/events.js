@@ -4,6 +4,7 @@ const { EventTokenService, EventAPIService } = require("../services");
 const { removeUnwantedProperties } = require("../utils/events");
 const eventQuery = require("../models/events");
 const logger = require("../utils/logger");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
@@ -100,7 +101,7 @@ const joinEvent = async (req, res) => {
     });
   } catch (error) {
     logger.error({ error });
-    return res.status(500).send("Internal Server Error");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -205,7 +206,12 @@ const endActiveEvent = async (req, res) => {
  */
 const addPeerToEvent = async (req, res) => {
   try {
-    const data = await eventQuery.addPeerToEvent(req.body);
+    const data = await eventQuery.addPeerToEvent({
+      name: req.body.name,
+      role: req.body.role,
+      joinedAt: req.body.joinedAt,
+      eventId: req.params.id,
+    });
     return res.status(200).json({
       data,
       message: `Peer is added to the event`,
