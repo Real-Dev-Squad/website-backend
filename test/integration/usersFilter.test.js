@@ -292,5 +292,29 @@ describe("Filter Users", function () {
           return done();
         });
     });
+
+    it("Check personal details not present", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ state: ["OOO", "ACTIVE", "IDLE"] })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          res.body.users.forEach((user) => {
+            expect(user).to.not.have.property("phone");
+            expect(user).to.not.have.property("email");
+            expect(user).to.not.have.property("tokens");
+          });
+          return done();
+        });
+    });
   });
 });
