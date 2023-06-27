@@ -1280,6 +1280,23 @@ describe("Users", function () {
       expect(response.body.error).to.be.equal("Unauthorized");
       expect(response.body.message).to.equal("You are not authorized for this action.");
     });
+
+    it("Gives internal server error", function (done) {
+      const mockGetAllUserStatus = Sinon.stub(userStatusModel, "getAllUserStatus");
+      mockGetAllUserStatus.rejects(new Error("Oops"));
+      chai
+        .request(app)
+        .get("/users/onboarding")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
+          return done();
+        });
+    });
   });
 
   describe("POST /", function () {
