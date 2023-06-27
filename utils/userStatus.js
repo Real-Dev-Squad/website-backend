@@ -1,5 +1,3 @@
-const firestore = require("./firestore");
-const tasksModel = firestore.collection("tasks");
 const { userState } = require("../constants/userStatus");
 
 /* returns the User Id based on the route path
@@ -64,7 +62,7 @@ const filterStatusData = (newStatusData) => {
  * @throws {Error} - If an error occurs during the query.
  */
 
-const checkIfUserHasLiveTasks = async (userId) => {
+const checkIfUserHasLiveTasks = async (userId, tasksModel) => {
   const liveTasksState = ["ASSIGNED", "IN_PROGRESS"];
   let liveTasksSnapshot;
   try {

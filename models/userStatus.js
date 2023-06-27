@@ -1,6 +1,7 @@
 const { Forbidden, NotFound } = require("http-errors");
 const firestore = require("../utils/firestore");
 const userStatusModel = firestore.collection("usersStatus");
+const tasksModel = firestore.collection("tasks");
 const { userState } = require("../constants/userStatus");
 const {
   getTommorowTimeStamp,
@@ -228,7 +229,7 @@ const cancelOooStatus = async (userId) => {
       );
     }
     try {
-      isActive = await checkIfUserHasLiveTasks(userId);
+      isActive = await checkIfUserHasLiveTasks(userId, tasksModel);
     } catch (error) {
       logger.error(`Unable to fetch user status based on the task : ${error.message}`);
       throw error;
