@@ -42,11 +42,9 @@ const updateTask = async (taskData, taskId = null) => {
             batch.set(docid, taskDependOn);
           }
         }
-        // console.log("-----------------aa------------");
         await batch.commit();
       }
 
-      // console.log("-----taskid----", taskId);
       return { taskId };
     }
     const taskInfo = await tasksModel.add(taskData);
