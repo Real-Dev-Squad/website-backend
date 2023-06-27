@@ -18,14 +18,14 @@ const githubUserInfo = require("../fixtures/auth/githubUserInfo")();
 let userDeviceInfoData;
 let wrongUserDeviceInfoData;
 let userId;
-let userDeviceInfoWithAUthStatus;
+let userDeviceInfoWithAuthStatus;
 const user = userData[0];
 
 describe("auth", function () {
   beforeEach(async function () {
     userId = await addUser(user);
     userDeviceInfoData = { ...userDeviceInfoDataArray[0], user_id: userId };
-    userDeviceInfoWithAUthStatus = { ...userDeviceInfoData, authorization_status: "NOT_INIT" };
+    userDeviceInfoWithAuthStatus = { ...userDeviceInfoData, authorization_status: "NOT_INIT" };
     wrongUserDeviceInfoData = userDeviceInfoDataArray[0];
   });
   afterEach(async function () {
@@ -159,22 +159,12 @@ describe("auth", function () {
         return done();
       });
   });
-  it("Should return 409 when user authorization status already exists for mobile auth", function (done) {
-    qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoWithAUthStatus);
+  it("Should return 409 when user authorization status already exists for mobile auth", async function () {
+    await qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoWithAuthStatus);
 
-    chai
-      .request(app)
-      .post("/auth/qr-code-auth")
-      .send(userDeviceInfoData)
-      .end((err, response) => {
-        if (err) {
-          return done(err);
-        }
+    const response = await chai.request(app).post("/auth/qr-code-auth").send(userDeviceInfoData);
 
-        expect(response.body.message).to.be.equal("The authentication document has already been created");
-
-        return done();
-      });
+    expect(response.body.message).to.be.equal("The authentication document has already been created");
   });
 
   it("Should return a 500 status code and the correct error message when an error occurs while storing user device info", function (done) {
