@@ -299,6 +299,7 @@ describe("Tasks", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
+          dependsOn: ["dependency1", "dependency2"],
         })
         .end((err, res) => {
           if (err) {

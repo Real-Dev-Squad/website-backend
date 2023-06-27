@@ -17,16 +17,36 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const updateTask = async (taskData, taskId = null) => {
   try {
     taskData = await toFirestoreData(taskData);
-
     if (taskId) {
       const task = await tasksModel.doc(taskId).get();
       if (taskData.status === "VERIFIED") {
         taskData = { ...taskData, endsOn: Math.floor(Date.now() / 1000) };
       }
+      const { dependsOn, ...taskWithoutDependsOn } = taskData;
       await tasksModel.doc(taskId).set({
         ...task.data(),
-        ...taskData,
+        ...taskWithoutDependsOn,
       });
+      if (dependsOn) {
+        const existingDependencies = await dependencyModel.where("taskId", "==", taskId).get();
+        const existingDependsOnIds = existingDependencies.docs.map((doc) => doc.data().dependsOn);
+        const newDependencies = dependsOn.filter((dependency) => !existingDependsOnIds.includes(dependency));
+        const batch = firestore.batch();
+        if (newDependencies.length > 0) {
+          for (const dependency of newDependencies) {
+            const taskDependOn = {
+              taskId: taskId,
+              dependsOn: dependency,
+            };
+            const docid = dependencyModel.doc();
+            batch.set(docid, taskDependOn);
+          }
+        }
+        // console.log("-----------------aa------------");
+        await batch.commit();
+      }
+
+      // console.log("-----taskid----", taskId);
       return { taskId };
     }
     const taskInfo = await tasksModel.add(taskData);
