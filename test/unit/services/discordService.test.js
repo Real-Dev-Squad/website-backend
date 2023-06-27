@@ -105,7 +105,7 @@ describe("Discord services", function () {
       expect(fetchStub.calledOnce).to.be.equal(true);
     });
 
-    it("makis a failing fetch call to discord", async function () {
+    it("makes a failing fetch call to discord", async function () {
       fetchStub.rejects(new Error("Fetch Error"));
       removeRoleFromUser("", "").catch((err) => {
         expect(err).to.be.an.instanceOf(Error);

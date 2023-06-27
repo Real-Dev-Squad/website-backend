@@ -62,7 +62,7 @@ const removeRoleFromUser = async (roleId, discordId) => {
     const response = await data.json();
     return response;
   } catch (err) {
-    logger.error("Error in making fetch call to remove the role", err);
+    logger.error("Error in consuming remove role service", err);
     throw new Error(err);
   }
 };
