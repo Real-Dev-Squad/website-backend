@@ -612,7 +612,7 @@ const updateRoles = async (req, res) => {
     const result = await userQuery.fetchUser({ userId: req.params.id });
     if (result?.userExists) {
       const dataToUpdate = req.body;
-      const userQueryResponse = await userQuery.updateRoles(result.user, dataToUpdate);
+      const userQueryResponse = await userQuery.addOrUpdate(dataToUpdate, req.params.id);
       if (userQueryResponse.isRoleUpdated) {
         return res.json({
           message: "role updated successfully!",

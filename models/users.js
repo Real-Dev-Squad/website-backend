@@ -32,6 +32,19 @@ const addOrUpdate = async (userData, userId = null) => {
     if (userId !== null) {
       const user = await userModel.doc(userId).get();
       const isNewUser = !user.data();
+
+      if (Object.keys(userData).includes("member") || Object.keys(userData).includes("archived")) {
+        const roles = { ...user.data().roles };
+        const newRolesArray = Object.entries(userData);
+        if (roles[newRolesArray[0][0]] === newRolesArray[0][1]) return { isRoleUpdated: false };
+        await userModel.doc(userId).update({
+          ...user.data().roles,
+          ...userData,
+        });
+
+        return { isRoleUpdated: true };
+      }
+
       // user exists update user
       if (user.data()) {
         await userModel.doc(userId).set({
@@ -576,23 +589,6 @@ const fetchAllUsers = async () => {
   return users;
 };
 
-const updateRoles = async (userData, newRoles) => {
-  try {
-    const roles = { ...userData.roles };
-    const newRolesArray = Object.entries(newRoles);
-    if (roles[newRolesArray[0][0]] === newRolesArray[0][1]) return { isRoleUpdated: false };
-    const updateRoles = { ...roles, ...newRoles };
-    await userModel.doc(userData.id).update({
-      updateRoles,
-    });
-
-    return { isRoleUpdated: true };
-  } catch (err) {
-    logger.error("Error while updating roles for a user", err);
-    throw err;
-  }
-};
-
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -613,5 +609,4 @@ module.exports = {
   getUserImageForVerification,
   getDiscordUsers,
   fetchAllUsers,
-  updateRoles,
 };
