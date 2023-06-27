@@ -52,7 +52,7 @@ module.exports = {
   },
 
   cors: {
-    allowedOrigins: /(http:\/\/localhost:[0-9]{4}$)/,
+    allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)/, // Allow realdevsquad.com, *.realdevsquad.com
   },
 
   userToken: {
