@@ -1,3 +1,5 @@
+const firestore = require("./firestore");
+const tasksModel = firestore.collection("tasks");
 const { userState } = require("../constants/userStatus");
 
 /* returns the User Id based on the route path
@@ -54,4 +56,57 @@ const filterStatusData = (newStatusData) => {
   }
 };
 
-module.exports = { getUserIdBasedOnRoute, getTommorowTimeStamp, getTodayTimeStamp, filterStatusData };
+/**
+ * Checks if a user has any active tasks.
+ *
+ * @param {string} userId - The ID of the user.
+ * @returns {Promise<boolean>} - A promise that resolves to a boolean indicating if the user has active tasks.
+ * @throws {Error} - If an error occurs during the query.
+ */
+
+const checkIfUserHasLiveTasks = async (userId) => {
+  const liveTasksState = ["ASSIGNED", "IN_PROGRESS"];
+  let liveTasksSnapshot;
+  try {
+    liveTasksSnapshot = await tasksModel.where("assignee", "==", userId).where("status", "in", liveTasksState).get();
+  } catch (err) {
+    logger.error(`An error occurred while querying ${liveTasksState.join(",")} tasks:`, err);
+    throw err;
+  }
+  return liveTasksSnapshot.size > 0;
+};
+
+/**
+ * Generates new status data based on the isActive flag.
+ *
+ * @param {boolean} isActive - Indicates if the user is active or not.
+ * @returns {object} - The generated status data object.
+ */
+const generateNewStatus = (isActive) => {
+  const currentTimeStamp = new Date().getTime();
+
+  const newStatusData = {
+    currentStatus: {
+      message: "",
+      from: currentTimeStamp,
+      until: "",
+      updatedAt: currentTimeStamp,
+    },
+  };
+
+  if (isActive) {
+    newStatusData.currentStatus.state = "ACTIVE";
+  } else {
+    newStatusData.currentStatus.state = "IDLE";
+  }
+  return newStatusData;
+};
+
+module.exports = {
+  getUserIdBasedOnRoute,
+  getTommorowTimeStamp,
+  getTodayTimeStamp,
+  filterStatusData,
+  checkIfUserHasLiveTasks,
+  generateNewStatus,
+};

@@ -1,7 +1,9 @@
+const { Forbidden, NotFound } = require("http-errors");
 const { fetchUser } = require("../models/users");
 const userStatusModel = require("../models/userStatus");
 const { getUserIdBasedOnRoute } = require("../utils/userStatus");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { userState } = require("../constants/userStatus");
 
 /**
  * Deletes a new User Status
@@ -143,4 +145,35 @@ const updateAllUserStatus = async (req, res) => {
   }
 };
 
-module.exports = { deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus, updateAllUserStatus };
+const cancelOOOStatus = async (req, res) => {
+  const userId = req.userData.id;
+  try {
+    const responseObject = await userStatusModel.cancelOooStatus(userId);
+    return res.status(200).json(responseObject);
+  } catch (error) {
+    logger.error(`Error while cancelling the ${userState.OOO} Status : ${error}`);
+    if (error instanceof Forbidden) {
+      return res.status(403).json({
+        statusCode: 403,
+        error: "Forbidden",
+        message: error.message,
+      });
+    } else if (error instanceof NotFound) {
+      return res.status(404).json({
+        statusCode: 404,
+        error: "NotFound",
+        message: error.message,
+      });
+    }
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+module.exports = {
+  deleteUserStatus,
+  getUserStatus,
+  getAllUserStatus,
+  updateUserStatus,
+  updateAllUserStatus,
+  cancelOOOStatus,
+};

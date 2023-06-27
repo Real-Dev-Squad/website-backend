@@ -1,7 +1,13 @@
-const { userState } = require("../constants/userStatus");
+const { Forbidden, NotFound } = require("http-errors");
 const firestore = require("../utils/firestore");
-const { getTommorowTimeStamp, filterStatusData } = require("../utils/userStatus");
 const userStatusModel = firestore.collection("usersStatus");
+const { userState } = require("../constants/userStatus");
+const {
+  getTommorowTimeStamp,
+  filterStatusData,
+  checkIfUserHasLiveTasks,
+  generateNewStatus,
+} = require("../utils/userStatus");
 
 /**
  * @param userId {string} : id of the user
@@ -193,4 +199,55 @@ const updateAllUserStatus = async () => {
   }
 };
 
-module.exports = { deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus, updateAllUserStatus };
+/**
+ * Cancels the Out-of-Office (OOO) status for a user.
+ * @param {string} userId - The ID of the user.
+ * @returns {Promise<object>} - A promise that resolves to an object with cancellation details.
+ * @throws {Error} - If there is an error fetching the user status document or updating the status.
+ */
+
+const cancelOooStatus = async (userId) => {
+  try {
+    let userStatusDoc;
+    let isActive;
+    try {
+      userStatusDoc = await userStatusModel.where("userId", "==", userId).get();
+    } catch (error) {
+      logger.error(`Unable to fetch user status document from the firestore : ${error.message}`);
+      throw error;
+    }
+    if (!userStatusDoc.size) {
+      throw new NotFound("No User status document found");
+    }
+    const [userStatusDocument] = userStatusDoc.docs;
+    const docId = userStatusDocument.id;
+    const { futureStatus, ...docData } = userStatusDocument.data();
+    if (docData.currentStatus.state !== userState.OOO) {
+      throw new Forbidden(
+        `The ${userState.OOO} Status cannot be canceled because the current status is ${docData.currentStatus.state}.`
+      );
+    }
+    try {
+      isActive = await checkIfUserHasLiveTasks(userId);
+    } catch (error) {
+      logger.error(`Unable to fetch user status based on the task : ${error.message}`);
+      throw error;
+    }
+    const updatedStatus = generateNewStatus(isActive);
+    const newStatusData = { ...docData, ...updatedStatus };
+    await userStatusModel.doc(docId).update(newStatusData);
+    return { id: docId, userStatusExists: true, data: newStatusData };
+  } catch (error) {
+    logger.error(`Error while canceling ${userState.OOO} status: ${error.message}`);
+    throw error;
+  }
+};
+
+module.exports = {
+  deleteUserStatus,
+  getUserStatus,
+  getAllUserStatus,
+  updateUserStatus,
+  updateAllUserStatus,
+  cancelOooStatus,
+};
