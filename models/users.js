@@ -38,8 +38,8 @@ const addOrUpdate = async (userData, userId = null) => {
         const newRolesArray = Object.entries(userData);
         if (roles[newRolesArray[0][0]] === newRolesArray[0][1]) return { isRoleUpdated: false };
         await userModel.doc(userId).update({
-          ...user.data().roles,
-          ...userData,
+          ...user.data(),
+          roles: { ...user.data().roles, ...userData },
         });
 
         return { isRoleUpdated: true };
