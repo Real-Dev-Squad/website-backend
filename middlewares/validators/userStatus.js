@@ -58,13 +58,13 @@ const validateUserStatusData = async (todaysTime, req, res, next) => {
 
   const cancelOooSchema = Joi.object()
     .keys({
-      cancelOOO: Joi.boolean().valid(true).required(),
+      cancelOoo: Joi.boolean().valid(true).required(),
     })
     .unknown(false);
 
   let schema;
   try {
-    if (Object.keys(req.body).includes("cancelOOO")) {
+    if (Object.keys(req.body).includes("cancelOoo")) {
       schema = cancelOooSchema;
     } else {
       schema = statusSchema;

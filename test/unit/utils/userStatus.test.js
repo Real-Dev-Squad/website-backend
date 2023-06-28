@@ -1,20 +1,20 @@
-// Import the necessary dependencies and functions
 const chai = require("chai");
 const { expect } = chai;
 const { generateNewStatus, checkIfUserHasLiveTasks } = require("../../../utils/userStatus");
+const { userState } = require("../../../constants/userStatus");
 
 describe("User Status Functions", function () {
   describe("generateNewStatus", function () {
     it('should return a new status object with state "ACTIVE" when isActive is true', function () {
       const isActive = true;
       const result = generateNewStatus(isActive);
-      expect(result.currentStatus.state).to.equal("ACTIVE");
+      expect(result.currentStatus.state).to.equal(userState.ACTIVE);
     });
 
     it('should return a new status object with state "IDLE" when isActive is false', function () {
       const isActive = false;
       const result = generateNewStatus(isActive);
-      expect(result.currentStatus.state).to.equal("IDLE");
+      expect(result.currentStatus.state).to.equal(userState.IDLE);
     });
 
     it("should set the from and updatedAt properties to the current timestamp", function () {

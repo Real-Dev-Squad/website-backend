@@ -19,6 +19,7 @@ const {
 
 const config = require("config");
 const { updateUserStatus } = require("../../models/userStatus");
+const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
@@ -572,7 +573,7 @@ describe("UserStatus", function () {
       await firestore.collection("users").doc(userId).delete();
     });
 
-    it("Should Change the status to Active if user has task assigned.", async function () {
+    it("Should Change the status to ACTIVE if user has task assigned.", async function () {
       const now = new Date();
       const nowTimeStamp = new Date().setUTCHours(0, 0, 0, 0);
       const fiveDaysFromNowTimeStamp = new Date(now.setUTCHours(0, 0, 0, 0) + 5 * 24 * 60 * 60 * 1000);
@@ -591,21 +592,21 @@ describe("UserStatus", function () {
             from: nowTimeStamp,
             until: fiveDaysFromNowTimeStamp,
             updatedAt: nowTimeStamp,
-            state: "OOO",
+            state: userState.OOO,
           },
         });
       const res = await chai
         .request(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${userJwt}`)
-        .send({ cancelOOO: true });
-      expect(res.body.data.currentStatus.state).to.equal("ACTIVE");
+        .send({ cancelOoo: true });
+      expect(res.body.data.currentStatus.state).to.equal(userState.ACTIVE);
       expect(res.body.data.currentStatus.from).to.be.gt(nowTimeStamp);
       expect(res.body.data.currentStatus.until).to.equal("");
       expect(res.body.data.currentStatus.message).to.equal("");
     });
 
-    it("Should Change the status to Idle if user has task assigned.", async function () {
+    it("Should Change the status to IDLE if user has task assigned.", async function () {
       const now = new Date();
       const nowTimeStamp = new Date().setUTCHours(0, 0, 0, 0);
       const fiveDaysFromNowTimeStamp = new Date(now.setUTCHours(0, 0, 0, 0) + 5 * 24 * 60 * 60 * 1000);
@@ -620,15 +621,15 @@ describe("UserStatus", function () {
             from: nowTimeStamp,
             until: fiveDaysFromNowTimeStamp,
             updatedAt: nowTimeStamp,
-            state: "OOO",
+            state: userState.OOO,
           },
         });
       const res = await chai
         .request(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${userJwt}`)
-        .send({ cancelOOO: true });
-      expect(res.body.data.currentStatus.state).to.equal("IDLE");
+        .send({ cancelOoo: true });
+      expect(res.body.data.currentStatus.state).to.equal(userState.IDLE);
       expect(res.body.data.currentStatus.from).to.be.gt(nowTimeStamp);
       expect(res.body.data.currentStatus.until).to.equal("");
       expect(res.body.data.currentStatus.message).to.equal("");
@@ -639,7 +640,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${userJwt}`)
-        .send({ cancelOOO: true });
+        .send({ cancelOoo: true });
       expect(res.body.statusCode).to.equal(404);
       expect(res.body.error).to.equal("NotFound");
       expect(res.body.message).to.equal("No User status document found");
@@ -664,7 +665,7 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${userJwt}`)
-        .send({ cancelOOO: true });
+        .send({ cancelOoo: true });
       expect(res.body.statusCode).to.equal(403);
       expect(res.body.error).to.equal("Forbidden");
       expect(res.body.message).to.equal("The OOO Status cannot be canceled because the current status is ACTIVE.");

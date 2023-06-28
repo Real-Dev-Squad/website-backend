@@ -17,7 +17,7 @@ router.get("/", getAllUserStatus);
 router.get("/self", authenticate, getUserStatus);
 router.get("/:userId", getUserStatus);
 router.patch("/self", authenticate, validateUserStatus, (req, res, next) => {
-  if (Object.keys(req.body).includes("cancelOOO")) {
+  if (Object.keys(req.body).includes("cancelOoo")) {
     cancelOOOStatus(req, res, next);
   } else {
     updateUserStatus(req, res, next);
