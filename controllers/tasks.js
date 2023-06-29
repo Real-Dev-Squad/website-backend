@@ -7,7 +7,6 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
-const userQuery = require("../models/users");
 const { updateUserStatusOnTaskUpdate } = require("../models/userStatus");
 /**
  * Creates new task
@@ -184,9 +183,9 @@ const updateTask = async (req, res) => {
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
     }
-    if (req.body?.assignee) {
-      const user = await userQuery.fetchUser({ username: req.body.assignee });
-      if (!user.userExists) {
+    if (req.body.assignee) {
+      const response = await updateUserStatusOnTaskUpdate(req.body.assignee);
+      if (response?.status === 404) {
         return res.boom.notFound("User doesn't exist");
       }
     }
