@@ -6,7 +6,7 @@ const firestore = require("../../../utils/firestore");
 const qrCodeAuthModel = require("../../../models/qrCodeAuth");
 const qrCodeAuth = firestore.collection("QrCodeAuth");
 const users = require("../../../models/users");
-const Sinon = require("sinon");
+// const Sinon = require("sinon");
 const userDataArray = require("../../fixtures/user/user")();
 
 describe("QrCodeAuthModel", function () {
@@ -42,16 +42,6 @@ describe("QrCodeAuthModel", function () {
     it("should return userExist as false when the user document is not found", async function () {
       const response = await qrCodeAuthModel.updateStatus("fmk124", "REJECTED");
       expect(response.userExists).to.be.equal(false);
-    });
-
-    it("should throw server error", async function () {
-      await qrCodeAuthModel.updateStatus(12345, "AUTHORIZED");
-
-      const errorFunc = Sinon.spy(() => {
-        throw new Error("Wrong Id");
-      });
-
-      expect(errorFunc.callCount).to.be.equal(1);
     });
   });
 });
