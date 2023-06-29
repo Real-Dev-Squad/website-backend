@@ -7,17 +7,17 @@ const updateAuthStatus = async (req, res) => {
     const authStatus = req.params.authorization_status;
     const result = await qrAuthQuery.updateStatus(userId, authStatus);
 
-    if (result.userExists) {
-      return res.json({
-        message: `Authentication document for user ${userId} updated successfully`,
-        data: { ...result.data },
-      });
+    if (!result.userExists) {
+      return res.boom.notFound("Document not found!");
     }
 
-    return res.boom.notFound("Document not found!");
+    return res.json({
+      message: `Authentication document for user ${userId} updated successfully`,
+      data: { ...result.data },
+    });
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
