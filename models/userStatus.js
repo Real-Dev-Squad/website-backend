@@ -1,3 +1,4 @@
+const { NotFound } = require("http-errors");
 const { userState } = require("../constants/userStatus");
 const firestore = require("../utils/firestore");
 const {
@@ -7,6 +8,7 @@ const {
   updateCurrentStatusToActive,
   updateFutureStatusToActive,
   createStatusAsActive,
+  getUserIdFromUserName,
 } = require("../utils/userStatus");
 const userStatusModel = firestore.collection("usersStatus");
 
@@ -209,21 +211,54 @@ const updateUserStatusOnNewTaskAssignment = async (userId) => {
       logger.error("Unable to retrieve the current status" + error.message);
       throw new Error("Unable to retrieve the current status");
     }
-    const { id, data } = statusData;
+    const { id, data, userStatusExists } = statusData;
     const currentTimeStamp = new Date().getTime();
-
-    if (data.currentStatus === userState.ACTIVE) {
+    if (!userStatusExists) {
+      return createStatusAsActive(userId, userStatusModel, currentTimeStamp);
+    }
+    if (data.currentStatus.state === userState.ACTIVE) {
       return handleAlreadyActiveStatusResponse();
-    } else if (data.currentStatus === userState.IDLE || data.currentStatus === userState.ONBOARDING) {
+    } else if (data.currentStatus.state === userState.IDLE || data.currentStatus.state === userState.ONBOARDING) {
       return updateCurrentStatusToActive(id, data, userStatusModel, currentTimeStamp);
-    } else if (data.currentStatus === userState.OOO) {
+    } else if (data.currentStatus.state === userState.OOO) {
       return updateFutureStatusToActive(id, data, userStatusModel, currentTimeStamp);
     }
-    return createStatusAsActive(userId, userStatusModel, currentTimeStamp);
+    throw new Error("Please reach out to the administrator as your user status is not recognized as valid.");
   } catch (error) {
     logger.error(`Error while updating the status for ${userId} - ${error.message}`);
     throw error;
   }
+};
+
+const updateUserStatusOnTaskUpdate = async (userName) => {
+  let userId;
+  let userStatusUpdate;
+  try {
+    userId = await getUserIdFromUserName(userName);
+  } catch (error) {
+    if (error instanceof NotFound) {
+      return {
+        status: 404,
+        error: "Not Found",
+        message: error.message,
+      };
+    }
+    return {
+      status: 500,
+      error: "Internal Server Error",
+      message: error.message,
+    };
+  }
+  try {
+    userStatusUpdate = await updateUserStatusOnNewTaskAssignment(userId);
+  } catch (error) {
+    return {
+      status: 500,
+      error: "Internal Server Error",
+      message: error.message,
+    };
+  }
+  return userStatusUpdate;
 };
 
 module.exports = {
@@ -233,4 +268,5 @@ module.exports = {
   updateUserStatus,
   updateAllUserStatus,
   updateUserStatusOnNewTaskAssignment,
+  updateUserStatusOnTaskUpdate,
 };

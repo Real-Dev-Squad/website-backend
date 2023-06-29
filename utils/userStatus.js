@@ -1,3 +1,6 @@
+const firestore = require("../utils/firestore");
+const usersCollection = firestore.collection("users");
+const { NotFound } = require("http-errors");
 const { userState } = require("../constants/userStatus");
 
 /* returns the User Id based on the route path
@@ -198,6 +201,21 @@ const createStatusAsActive = async (userId, collection, currentTimeStamp) => {
   };
 };
 
+async function getUserIdFromUserName(userName) {
+  let userSnapShot;
+  try {
+    userSnapShot = await usersCollection.where("username", "==", userName).limit(1).get();
+  } catch (error) {
+    logger.error(`Couldn't get user snapshot for ${userName} ${error.message}`);
+    throw new Error(`Something went wrong. The User ${userName} couldn't be verified.`);
+  }
+  if (!userSnapShot.size) {
+    throw new NotFound(`Something went wrong. Username ${userName} could not be found.`);
+  }
+  const [userDoc] = userSnapShot.docs;
+  return userDoc.id;
+}
+
 module.exports = {
   getUserIdBasedOnRoute,
   getTommorowTimeStamp,
@@ -207,4 +225,5 @@ module.exports = {
   updateCurrentStatusToActive,
   updateFutureStatusToActive,
   createStatusAsActive,
+  getUserIdFromUserName,
 };

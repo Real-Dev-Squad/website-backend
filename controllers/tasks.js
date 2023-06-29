@@ -8,6 +8,7 @@ const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
 const userQuery = require("../models/users");
+const { updateUserStatusOnTaskUpdate } = require("../models/userStatus");
 /**
  * Creates new task
  *
@@ -19,6 +20,7 @@ const addNewTask = async (req, res) => {
   try {
     const { id: createdBy } = req.userData;
     const dependsOn = req.body.dependsOn;
+    let userStatusUpdate;
     const body = {
       ...req.body,
       createdBy,
@@ -30,6 +32,9 @@ const addNewTask = async (req, res) => {
       dependsOn,
     };
     const taskDependency = dependsOn && (await dependencyModel.addDependency(data));
+    if (req.body.assignee) {
+      userStatusUpdate = await updateUserStatusOnTaskUpdate(req.body.assignee);
+    }
     return res.json({
       message: "Task created successfully!",
       task: {
@@ -37,6 +42,7 @@ const addNewTask = async (req, res) => {
         ...(taskDependency && { dependsOn: taskDependency }),
         id: taskId,
       },
+      ...(userStatusUpdate && { userStatus: userStatusUpdate }),
     });
   } catch (err) {
     logger.error(`Error while creating new task: ${err}`);
