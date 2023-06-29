@@ -1,7 +1,7 @@
 const passport = require("passport");
 const users = require("../models/users");
 const authService = require("../services/authService");
-const REALDEVSQUAD_HOSTNAME = config.get("services.hostName");
+const REALDEVSQUAD_HOSTNAME = new URL(config.get("services.rdsUi.baseUrl")).hostname;
 
 /**
  * Makes authentication call to GitHub statergy
