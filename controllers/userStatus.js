@@ -3,7 +3,7 @@ const { fetchUser } = require("../models/users");
 const userStatusModel = require("../models/userStatus");
 const { getUserIdBasedOnRoute } = require("../utils/userStatus");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { userState } = require("../constants/userStatus");
+const { userState, CANCEL_OOO } = require("../constants/userStatus");
 
 /**
  * Deletes a new User Status
@@ -169,11 +169,28 @@ const cancelOOOStatus = async (req, res) => {
   }
 };
 
+/**
+ * Controller function for updating a user's status.
+ *
+ * @param req {Object} - The express request object.
+ * @param res {Object} - The express response object.
+ * @param next {Object} - The express next middleware function.
+ * @returns {Promise<void>}
+ */
+
+const updateUserStatusController = async (req, res, next) => {
+  if (Object.keys(req.body).includes(CANCEL_OOO)) {
+    await cancelOOOStatus(req, res, next);
+  } else {
+    await updateUserStatus(req, res, next);
+  }
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
   getAllUserStatus,
   updateUserStatus,
   updateAllUserStatus,
-  cancelOOOStatus,
+  updateUserStatusController,
 };

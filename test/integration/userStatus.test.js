@@ -606,7 +606,7 @@ describe("UserStatus", function () {
       expect(res.body.data.currentStatus.message).to.equal("");
     });
 
-    it("Should Change the status to IDLE if user has task assigned.", async function () {
+    it("Should Change the status to IDLE if user doesn't have a task assigned.", async function () {
       const now = new Date();
       const nowTimeStamp = new Date().setUTCHours(0, 0, 0, 0);
       const fiveDaysFromNowTimeStamp = new Date(now.setUTCHours(0, 0, 0, 0) + 5 * 24 * 60 * 60 * 1000);

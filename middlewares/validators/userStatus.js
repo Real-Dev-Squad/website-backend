@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { userState } = require("../../constants/userStatus");
+const { userState, CANCEL_OOO } = require("../../constants/userStatus");
 const threeDaysInMilliseconds = 172800000;
 
 const validateUserStatusData = async (todaysTime, req, res, next) => {
@@ -64,7 +64,7 @@ const validateUserStatusData = async (todaysTime, req, res, next) => {
 
   let schema;
   try {
-    if (Object.keys(req.body).includes("cancelOoo")) {
+    if (Object.keys(req.body).includes(CANCEL_OOO)) {
       schema = cancelOooSchema;
     } else {
       schema = statusSchema;

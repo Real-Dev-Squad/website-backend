@@ -5,7 +5,7 @@ const {
   getAllUserStatus,
   updateUserStatus,
   updateAllUserStatus,
-  cancelOOOStatus,
+  updateUserStatusController,
 } = require("../controllers/userStatus");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
@@ -16,13 +16,7 @@ const { validateUserStatus } = require("../middlewares/validators/userStatus");
 router.get("/", getAllUserStatus);
 router.get("/self", authenticate, getUserStatus);
 router.get("/:userId", getUserStatus);
-router.patch("/self", authenticate, validateUserStatus, (req, res, next) => {
-  if (Object.keys(req.body).includes("cancelOoo")) {
-    cancelOOOStatus(req, res, next);
-  } else {
-    updateUserStatus(req, res, next);
-  }
-});
+router.patch("/self", authenticate, validateUserStatus, updateUserStatusController);
 router.patch("/update", authenticate, authorizeRoles([SUPERUSER]), updateAllUserStatus);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), validateUserStatus, updateUserStatus);
 router.delete("/:userId", authenticate, authorizeRoles([SUPERUSER]), deleteUserStatus);
