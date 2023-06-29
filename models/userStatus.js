@@ -202,6 +202,16 @@ const updateAllUserStatus = async () => {
   }
 };
 
+/**
+ * Updates the user status based on a new task assignment.
+ * @param {string} userId - The ID of the user.
+ * @returns {Promise<{
+ *   status: string,
+ *   message: string,
+ *   data?: object
+ * }>} - The response object indicating the status of the user status update.
+ * @throws {Error} If there is an error retrieving or updating the user status.
+ */
 const updateUserStatusOnNewTaskAssignment = async (userId) => {
   try {
     let statusData;
@@ -229,6 +239,20 @@ const updateUserStatusOnNewTaskAssignment = async (userId) => {
     throw error;
   }
 };
+
+/**
+ * Updates the user status based on a task update.
+ * @param {string} userName - The username associated with the user.
+ * @returns {Promise<{
+ *   status: number,
+ *   message: string,
+ *   error: string,
+ * } | {
+ *   status: string,
+ *   message: string,
+ *   data: object
+ * }>} - The response object indicating the status of the user status update or an error.
+ */
 
 const updateUserStatusOnTaskUpdate = async (userName) => {
   let userId;
