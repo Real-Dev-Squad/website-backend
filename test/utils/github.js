@@ -1,10 +1,12 @@
+const defaultClientId = config.get("githubOauth.clientId");
+
 const generateGithubAuthRedirectUrl = function ({
   baseUrl = "https://github.com/login/oauth/authorize",
   responseType = "code",
   redirectUri = "http://localhost:3000/auth/github/callback",
   scope = "user:email",
   state = "",
-  clientId = "28a2ba477ffa627973ac",
+  clientId = defaultClientId,
 }) {
   const encodedBaseUrl = encodeURI(baseUrl);
   const encodedRedirectUri = encodeURIComponent(redirectUri);
