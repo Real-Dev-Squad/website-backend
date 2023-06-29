@@ -1,6 +1,13 @@
 const { userState } = require("../constants/userStatus");
 const firestore = require("../utils/firestore");
-const { getTommorowTimeStamp, filterStatusData } = require("../utils/userStatus");
+const {
+  getTommorowTimeStamp,
+  filterStatusData,
+  handleAlreadyActiveStatusResponse,
+  updateCurrentStatusToActive,
+  updateFutureStatusToActive,
+  createStatusAsActive,
+} = require("../utils/userStatus");
 const userStatusModel = firestore.collection("usersStatus");
 
 /**
@@ -194,100 +201,29 @@ const updateAllUserStatus = async () => {
 };
 
 const updateUserStatusOnNewTaskAssignment = async (userId) => {
-  let statusData;
   try {
-    statusData = await getUserStatus(userId);
-  } catch (error) {
-    logger.error("Unable to retrieve the current status" + error.message);
-    throw new Error("Unable to retrieve the current status");
-  }
-  const { id, data } = statusData;
-  if (data.currentStatus === userState.ACTIVE) {
-    return {
-      status: "success",
-      message: "The status is already active.",
-      data: {
-        currentStatus: userState.ACTIVE,
-      },
-    };
-  } else if (data.currentStatus === userState.IDLE || data.currentStatus === userState.ONBOARDING) {
-    const { currentStatus, ...docData } = data;
-    const currentTimeStamp = new Date().getTime();
-    const updatedStatusData = {
-      ...docData,
-      currentStatus: {
-        state: userState.ACTIVE,
-        message: "",
-        from: currentTimeStamp,
-        until: "",
-        updatedAt: currentTimeStamp,
-      },
-    };
+    let statusData;
     try {
-      await userStatusModel.doc(id).update(updatedStatusData);
-    } catch {
-      throw new Error("Status Update Failed.");
+      statusData = await getUserStatus(userId);
+    } catch (error) {
+      logger.error("Unable to retrieve the current status" + error.message);
+      throw new Error("Unable to retrieve the current status");
     }
-    return {
-      status: "success",
-      message: "The status has been updated to active.",
-      data: {
-        previousStatus: currentStatus.state,
-        currentStatus: userState.ACTIVE,
-      },
-    };
-  } else if (data.currentStatus === userState.OOO) {
-    const { currentStatus, ...docData } = data;
+    const { id, data } = statusData;
     const currentTimeStamp = new Date().getTime();
-    const updatedStatusData = {
-      ...docData,
-      currentStatus,
-      futureStatus: {
-        state: userState.ACTIVE,
-        message: "",
-        from: currentStatus.until,
-        until: "",
-        updatedAt: currentTimeStamp,
-      },
-    };
-    try {
-      await userStatusModel.doc(id).update(updatedStatusData);
-    } catch {
-      throw new Error("Status Update Failed.");
-    }
-    return {
-      status: "success",
-      message: "As the user is currently OOO hence the Future status has been updated to active.",
-      data: {
-        currentStatus: userState.OOO,
-        futureStatus: userState.ACTIVE,
-      },
-    };
-  }
 
-  const currentTimeStamp = new Date().getTime();
-  try {
-    await userStatusModel.add({
-      userId,
-      currentStatus: {
-        state: userState.ACTIVE,
-        message: "",
-        from: currentTimeStamp,
-        until: "",
-        updatedAt: currentTimeStamp,
-      },
-    });
-  } catch (err) {
-    throw new Error("Status Creation Failed.");
+    if (data.currentStatus === userState.ACTIVE) {
+      return handleAlreadyActiveStatusResponse();
+    } else if (data.currentStatus === userState.IDLE || data.currentStatus === userState.ONBOARDING) {
+      return updateCurrentStatusToActive(id, data, userStatusModel, currentTimeStamp);
+    } else if (data.currentStatus === userState.OOO) {
+      return updateFutureStatusToActive(id, data, userStatusModel, currentTimeStamp);
+    }
+    return createStatusAsActive(userId, userStatusModel, currentTimeStamp);
+  } catch (error) {
+    logger.error(`Error while updating the status for ${userId} - ${error.message}`);
+    throw error;
   }
-  return {
-    status: "success",
-    message:
-      "UserStatus Document did not previously exist, New UserStatus Document created and updated to an active status.",
-    data: {
-      currentStatus: userState.ACTIVE,
-    },
-  };
 };
 
 module.exports = {
