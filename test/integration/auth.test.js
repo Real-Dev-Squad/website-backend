@@ -182,7 +182,7 @@ describe("auth", function () {
       });
   });
 
-  it("should return 401 if add or update user fails call fails", function (done) {
+  it("should return 401 if passportjs fails", function (done) {
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
       throw new Error("Intensional error");
     });
