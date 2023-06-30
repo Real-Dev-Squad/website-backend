@@ -28,21 +28,23 @@ const updateTask = async (taskData, taskId = null) => {
         ...taskWithoutDependsOn,
       });
       if (dependsOn) {
-        const existingDependencies = await dependencyModel.where("taskId", "==", taskId).get();
-        const existingDependsOnIds = existingDependencies.docs.map((doc) => doc.data().dependsOn);
-        const newDependencies = dependsOn.filter((dependency) => !existingDependsOnIds.includes(dependency));
-        const batch = firestore.batch();
-        if (newDependencies.length > 0) {
-          for (const dependency of newDependencies) {
-            const taskDependOn = {
-              taskId: taskId,
-              dependsOn: dependency,
-            };
-            const docid = dependencyModel.doc();
-            batch.set(docid, taskDependOn);
+        await firestore.runTransaction(async (transaction) => {
+          const dependencyQuery = dependencyModel.where("taskId", "==", taskId);
+          const existingDependenciesSnapshot = await transaction.get(dependencyQuery);
+          const existingDependsOnIds = existingDependenciesSnapshot.docs.map((doc) => doc.data().dependsOn);
+          const newDependencies = dependsOn.filter((dependency) => !existingDependsOnIds.includes(dependency));
+
+          if (newDependencies.length > 0) {
+            for (const dependency of newDependencies) {
+              const taskDependOn = {
+                taskId: taskId,
+                dependsOn: dependency,
+              };
+              const docRef = dependencyModel.doc();
+              transaction.set(docRef, taskDependOn);
+            }
           }
-        }
-        await batch.commit();
+        });
       }
 
       return { taskId };
