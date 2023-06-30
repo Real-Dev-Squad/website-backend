@@ -36,12 +36,12 @@ const updateTask = async (taskData, taskId = null) => {
 
           if (newDependencies.length > 0) {
             for (const dependency of newDependencies) {
-              const taskDependOn = {
+              const taskDependsOn = {
                 taskId: taskId,
                 dependsOn: dependency,
               };
               const docRef = dependencyModel.doc();
-              transaction.set(docRef, taskDependOn);
+              transaction.set(docRef, taskDependsOn);
             }
           }
         });
