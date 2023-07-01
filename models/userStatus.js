@@ -1,6 +1,15 @@
+const { NotFound } = require("http-errors");
 const { userState } = require("../constants/userStatus");
 const firestore = require("../utils/firestore");
-const { getTommorowTimeStamp, filterStatusData } = require("../utils/userStatus");
+const {
+  getTommorowTimeStamp,
+  filterStatusData,
+  handleAlreadyActiveStatusResponse,
+  updateCurrentStatusToActive,
+  updateFutureStatusToActive,
+  createStatusAsActive,
+  getUserIdFromUserName,
+} = require("../utils/userStatus");
 const userStatusModel = firestore.collection("usersStatus");
 
 /**
@@ -193,4 +202,95 @@ const updateAllUserStatus = async () => {
   }
 };
 
-module.exports = { deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus, updateAllUserStatus };
+/**
+ * Updates the user status based on a new task assignment.
+ * @param {string} userId - The ID of the user.
+ * @returns {Promise<{
+ *   status: string,
+ *   message: string,
+ *   data?: object
+ * }>} - The response object indicating the status of the user status update.
+ * @throws {Error} If there is an error retrieving or updating the user status.
+ */
+const updateUserStatusOnNewTaskAssignment = async (userId) => {
+  try {
+    let statusData;
+    try {
+      statusData = await getUserStatus(userId);
+    } catch (error) {
+      logger.error("Unable to retrieve the current status" + error.message);
+      throw new Error("Unable to retrieve the current status");
+    }
+    const { id, data, userStatusExists } = statusData;
+    const currentTimeStamp = new Date().getTime();
+    if (!userStatusExists) {
+      return createStatusAsActive(userId, userStatusModel, currentTimeStamp);
+    }
+    if (data.currentStatus.state === userState.ACTIVE) {
+      return handleAlreadyActiveStatusResponse();
+    } else if (data.currentStatus.state === userState.IDLE || data.currentStatus.state === userState.ONBOARDING) {
+      return updateCurrentStatusToActive(id, data, userStatusModel, currentTimeStamp);
+    } else if (data.currentStatus.state === userState.OOO) {
+      return updateFutureStatusToActive(id, data, userStatusModel, currentTimeStamp);
+    }
+    throw new Error("Please reach out to the administrator as your user status is not recognized as valid.");
+  } catch (error) {
+    logger.error(`Error while updating the status for ${userId} - ${error.message}`);
+    throw error;
+  }
+};
+
+/**
+ * Updates the user status based on a task update.
+ * @param {string} userName - The username associated with the user.
+ * @returns {Promise<{
+ *   status: number,
+ *   message: string,
+ *   error: string,
+ * } | {
+ *   status: string,
+ *   message: string,
+ *   data: object
+ * }>} - The response object indicating the status of the user status update or an error.
+ */
+
+const updateUserStatusOnTaskUpdate = async (userName) => {
+  let userId;
+  let userStatusUpdate;
+  try {
+    userId = await getUserIdFromUserName(userName);
+  } catch (error) {
+    if (error instanceof NotFound) {
+      return {
+        status: 404,
+        error: "Not Found",
+        message: error.message,
+      };
+    }
+    return {
+      status: 500,
+      error: "Internal Server Error",
+      message: error.message,
+    };
+  }
+  try {
+    userStatusUpdate = await updateUserStatusOnNewTaskAssignment(userId);
+  } catch (error) {
+    return {
+      status: 500,
+      error: "Internal Server Error",
+      message: error.message,
+    };
+  }
+  return userStatusUpdate;
+};
+
+module.exports = {
+  deleteUserStatus,
+  getUserStatus,
+  getAllUserStatus,
+  updateUserStatus,
+  updateAllUserStatus,
+  updateUserStatusOnNewTaskAssignment,
+  updateUserStatusOnTaskUpdate,
+};
