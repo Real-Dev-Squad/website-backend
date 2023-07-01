@@ -32,11 +32,11 @@ describe("QrCodeAuth", function () {
     await cleanDb();
   });
 
-  describe("PATCH CALL", function () {
+  describe("PATCH CALL for updating auth status", function () {
     it("Should fail with 401 when cookie is invalid", function (done) {
       chai
         .request(app)
-        .patch("/auth/qr-code-auth/authorization_status/")
+        .patch("/auth/qr-code-auth/authorization_status/AUTHORIZED")
         .set("cookie", `${cookieName}=xyzdddaa`)
         .end((err, res) => {
           if (err) {

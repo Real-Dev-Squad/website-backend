@@ -6,7 +6,7 @@ const firestore = require("../../../utils/firestore");
 const qrCodeAuthModel = require("../../../models/qrCodeAuth");
 const qrCodeAuth = firestore.collection("QrCodeAuth");
 const users = require("../../../models/users");
-// const Sinon = require("sinon");
+
 const userDataArray = require("../../fixtures/user/user")();
 
 describe("QrCodeAuthModel", function () {
