@@ -7,7 +7,7 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
-const { updateUserStatusOnTaskUpdate } = require("../models/userStatus");
+const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 /**
  * Creates new task
  *
@@ -204,6 +204,7 @@ const updateTask = async (req, res) => {
  */
 const updateTaskStatus = async (req, res, next) => {
   try {
+    let userStatusUpdate;
     const taskId = req.params.id;
     const { dev } = req.query;
     const { id: userId, username } = req.userData;
@@ -263,7 +264,14 @@ const updateTaskStatus = async (req, res, next) => {
       }
     }
 
-    return res.json({ message: "Task updated successfully!", taskLog });
+    if (req.body.status === TASK_STATUS.COMPLETED && task.taskData.percentCompleted === 100) {
+      userStatusUpdate = await updateStatusOnTaskCompletion(userId);
+    }
+    return res.json({
+      message: "Task updated successfully!",
+      taskLog,
+      ...(userStatusUpdate && { userStatus: userStatusUpdate }),
+    });
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);

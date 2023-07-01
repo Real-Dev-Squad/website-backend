@@ -206,10 +206,9 @@ const createUserStatusWithState = async (userId, collection, state) => {
   }
   return {
     status: "success",
-    message:
-      "UserStatus Document did not previously exist, New UserStatus Document created and updated to an active status.",
+    message: `UserStatus Document did not previously exist, New UserStatus Document created and updated to an ${state} status.`,
     data: {
-      currentStatus: userState.ACTIVE,
+      currentStatus: state,
     },
   };
 };
@@ -236,6 +235,66 @@ async function getUserIdFromUserName(userName) {
   return userDoc.id;
 }
 
+/**
+ * Checks if a user has any active tasks.
+ *
+ * @param {string} userId - The ID of the user.
+ * @returns {Promise<boolean>} - A promise that resolves to a boolean indicating if the user has active tasks.
+ * @throws {Error} - If an error occurs during the query.
+ */
+
+const checkIfUserHasLiveTasks = async (userId, tasksModel) => {
+  const liveTasksState = ["ASSIGNED", "IN_PROGRESS"];
+  let liveTasksSnapshot;
+  try {
+    liveTasksSnapshot = await tasksModel.where("assignee", "==", userId).where("status", "in", liveTasksState).get();
+  } catch (err) {
+    logger.error(`An error occurred while querying ${liveTasksState.join(",")} tasks:`, err);
+    throw err;
+  }
+  return liveTasksSnapshot.size > 0;
+};
+
+/**
+ * Generates new status data based on the isActive flag.
+ *
+ * @param {boolean} isActive - Indicates if the user is active or not.
+ * @returns {object} - The generated status data object.
+ */
+const generateNewStatus = (isActive) => {
+  const currentTimeStamp = new Date().getTime();
+
+  const newStatusData = {
+    currentStatus: {
+      message: "",
+      from: currentTimeStamp,
+      until: "",
+      updatedAt: currentTimeStamp,
+    },
+  };
+
+  if (isActive) {
+    newStatusData.currentStatus.state = "ACTIVE";
+  } else {
+    newStatusData.currentStatus.state = "IDLE";
+  }
+  return newStatusData;
+};
+
+/**
+ * Generates the error response message
+ *
+ * @param {string} message - the error message to respond with
+ * @returns {object} - The generated response object.
+ */
+const generateErrorResponse = (message) => {
+  return {
+    status: 500,
+    error: "Internal Server Error",
+    message: message,
+  };
+};
+
 module.exports = {
   getUserIdBasedOnRoute,
   getTommorowTimeStamp,
@@ -246,4 +305,7 @@ module.exports = {
   updateFutureStatusToState,
   createUserStatusWithState,
   getUserIdFromUserName,
+  checkIfUserHasLiveTasks,
+  generateNewStatus,
+  generateErrorResponse,
 };

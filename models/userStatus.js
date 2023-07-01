@@ -9,8 +9,11 @@ const {
   updateFutureStatusToState,
   createUserStatusWithState,
   getUserIdFromUserName,
+  checkIfUserHasLiveTasks,
+  generateErrorResponse,
 } = require("../utils/userStatus");
 const userStatusModel = firestore.collection("usersStatus");
+const tasksModel = firestore.collection("tasks");
 
 /**
  * @param userId {string} : id of the user
@@ -288,6 +291,47 @@ const updateUserStatusOnTaskUpdate = async (userName) => {
   return userStatusUpdate;
 };
 
+const updateStatusOnTaskCompletion = async (userId) => {
+  try {
+    const hasActiveTask = await checkIfUserHasLiveTasks(userId, tasksModel);
+    const latestStatusData = await getUserStatus(userId);
+    const { userStatusExists } = latestStatusData;
+    if (!userStatusExists) {
+      if (hasActiveTask) {
+        return createUserStatusWithState(userId, userStatusModel, userState.ACTIVE);
+      } else {
+        return createUserStatusWithState(userId, userStatusModel, userState.IDLE);
+      }
+    }
+    const {
+      data: {
+        currentStatus: { state },
+      },
+    } = latestStatusData;
+    if (hasActiveTask) {
+      if (state === userState.OOO) {
+        return updateFutureStatusToState(userStatusModel, latestStatusData, userState.ACTIVE);
+      } else {
+        if (state === userState.ACTIVE) {
+          return generateAlreadyExistingStatusResponse(userState.ACTIVE);
+        }
+        return updateCurrentStatusToState(userStatusModel, latestStatusData, userState.ACTIVE);
+      }
+    } else {
+      if (state === userState.OOO) {
+        return updateFutureStatusToState(userStatusModel, latestStatusData, userState.IDLE);
+      } else {
+        if (state === userState.IDLE) {
+          return generateAlreadyExistingStatusResponse(userState.IDLE);
+        }
+        return updateCurrentStatusToState(userStatusModel, latestStatusData, userState.IDLE);
+      }
+    }
+  } catch (error) {
+    return generateErrorResponse(error.message);
+  }
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -296,4 +340,5 @@ module.exports = {
   updateAllUserStatus,
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
+  updateStatusOnTaskCompletion,
 };
