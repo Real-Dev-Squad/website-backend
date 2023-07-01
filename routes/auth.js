@@ -13,7 +13,7 @@ router.get("/github/callback", auth.githubAuth);
 router.get("/signout", auth.signout);
 
 router.patch(
-  "/qr-code-auth/authorization_status/:authorization_status?",
+  "/qr-code-auth/authorization_status/:authorization_status",
   authenticate,
   qrCodeAuthValidator.validateAuthStatus,
   qrCodeAuth.updateAuthStatus

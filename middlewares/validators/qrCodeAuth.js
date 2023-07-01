@@ -5,7 +5,7 @@ const validateAuthStatus = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      authorization_status: joi.string().valid("AUTHORIZED", "REJECTED", "NOT_INIT").optional(),
+      authorization_status: joi.string().valid("AUTHORIZED", "REJECTED", "NOT_INIT"),
     });
 
   try {
