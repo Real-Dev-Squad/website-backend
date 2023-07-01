@@ -227,6 +227,7 @@ module.exports = () => {
       linkedin_id: "tanishqsingla",
       github_id: "tanishqsingla",
       github_display_name: "Tanishq Singla",
+      github_user_id: "26207583",
       phone: "1234567890",
       email: "ts@gmail.com",
       tokens: {
@@ -249,6 +250,7 @@ module.exports = () => {
       linkedin_id: "darthvader",
       github_id: "darthvader",
       github_display_name: "Darth Vader",
+      github_user_id: "3188964",
       phone: "1234567890",
       email: "dv@gmail.com",
       tokens: {
