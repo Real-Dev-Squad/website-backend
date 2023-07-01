@@ -256,32 +256,6 @@ const checkIfUserHasLiveTasks = async (userId, tasksModel) => {
 };
 
 /**
- * Generates new status data based on the isActive flag.
- *
- * @param {boolean} isActive - Indicates if the user is active or not.
- * @returns {object} - The generated status data object.
- */
-const generateNewStatus = (isActive) => {
-  const currentTimeStamp = new Date().getTime();
-
-  const newStatusData = {
-    currentStatus: {
-      message: "",
-      from: currentTimeStamp,
-      until: "",
-      updatedAt: currentTimeStamp,
-    },
-  };
-
-  if (isActive) {
-    newStatusData.currentStatus.state = "ACTIVE";
-  } else {
-    newStatusData.currentStatus.state = "IDLE";
-  }
-  return newStatusData;
-};
-
-/**
  * Generates the error response message
  *
  * @param {string} message - the error message to respond with
@@ -306,6 +280,5 @@ module.exports = {
   createUserStatusWithState,
   getUserIdFromUserName,
   checkIfUserHasLiveTasks,
-  generateNewStatus,
   generateErrorResponse,
 };
