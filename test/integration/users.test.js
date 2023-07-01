@@ -1,6 +1,7 @@
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
+
 const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -13,8 +14,6 @@ const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
 
-const inDiscordUsers = require("../fixtures/user/inDiscord")();
-
 const config = require("config");
 const joinData = require("../fixtures/user/join");
 const {
@@ -26,6 +25,7 @@ const userStatusModel = require("../../models/userStatus");
 
 const cookieName = config.get("userToken.cookieName");
 chai.use(chaiHttp);
+
 describe("Users", function () {
   let jwt;
   let superUserId;
@@ -1092,7 +1092,6 @@ describe("Users", function () {
     });
   });
 
-
   describe("POST /users/migrate", function () {
     it("Should return 401 when user is unauthorize", function (done) {
       chai
@@ -1130,33 +1129,16 @@ describe("Users", function () {
       chai
         .request(app)
         .post(`/users/migrate`)
-
-  describe("PATCH /users", function () {
-    beforeEach(async function () {
-      await addUser(inDiscordUsers[0]);
-      await addUser(inDiscordUsers[1]);
-      await addUser(inDiscordUsers[2]);
-    });
-    it("returns users with discord id and in_discord false", function (done) {
-      chai
-        .request(app)
-        .patch("/users")
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
-
         .end((err, res) => {
           if (err) {
             return done(err);
           }
-
           expect(res).to.have.status(401);
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
             message: "Unauthenticated User",
           });
-          expect(res).to.have.status(200);
-          expect(res.body).to.have.length(1);
-          expect(res.body[0].username).equal("test-user");
           return done();
         });
     });
