@@ -21,6 +21,7 @@ const config = require("config");
 const { updateUserStatus } = require("../../models/userStatus");
 const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
+const userStatusModel = require("../../models/userStatus");
 
 chai.use(chaiHttp);
 
@@ -669,6 +670,18 @@ describe("UserStatus", function () {
       expect(res.body.statusCode).to.equal(403);
       expect(res.body.error).to.equal("Forbidden");
       expect(res.body.message).to.equal("The OOO Status cannot be canceled because the current status is ACTIVE.");
+    });
+
+    it("Should throw an error if firestore error", async function () {
+      sinon.stub(userStatusModel, "cancelOooStatus").throws(new Error("Firestore error"));
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${userJwt}`)
+        .send({ cancelOoo: true });
+      expect(res.body.statusCode).to.equal(500);
+      expect(res.body.error).to.equal("Internal Server Error");
+      expect(res.body.message).to.equal("An internal server error occurred");
     });
   });
 
