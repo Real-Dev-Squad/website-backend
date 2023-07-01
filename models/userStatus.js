@@ -4,10 +4,10 @@ const firestore = require("../utils/firestore");
 const {
   getTommorowTimeStamp,
   filterStatusData,
-  handleAlreadyActiveStatusResponse,
-  updateCurrentStatusToActive,
-  updateFutureStatusToActive,
-  createStatusAsActive,
+  generateAlreadyExistingStatusResponse,
+  updateCurrentStatusToState,
+  updateFutureStatusToState,
+  createUserStatusWithState,
   getUserIdFromUserName,
 } = require("../utils/userStatus");
 const userStatusModel = firestore.collection("usersStatus");
@@ -44,7 +44,6 @@ const getUserStatus = async (userId) => {
     if (userStatusDoc) {
       const id = userStatusDoc.id;
       const data = userStatusDoc.data();
-      delete data.userId;
       return { id, data, userStatusExists: true };
     } else {
       return { id: null, data: null, userStatusExists: false };
@@ -214,24 +213,28 @@ const updateAllUserStatus = async () => {
  */
 const updateUserStatusOnNewTaskAssignment = async (userId) => {
   try {
-    let statusData;
+    let latestStatusData;
     try {
-      statusData = await getUserStatus(userId);
+      latestStatusData = await getUserStatus(userId);
     } catch (error) {
       logger.error("Unable to retrieve the current status" + error.message);
       throw new Error("Unable to retrieve the current status");
     }
-    const { id, data, userStatusExists } = statusData;
-    const currentTimeStamp = new Date().getTime();
+    const { userStatusExists } = latestStatusData;
     if (!userStatusExists) {
-      return createStatusAsActive(userId, userStatusModel, currentTimeStamp);
+      return createUserStatusWithState(userId, userStatusModel, userState.ACTIVE);
     }
-    if (data.currentStatus.state === userState.ACTIVE) {
-      return handleAlreadyActiveStatusResponse();
-    } else if (data.currentStatus.state === userState.IDLE || data.currentStatus.state === userState.ONBOARDING) {
-      return updateCurrentStatusToActive(id, data, userStatusModel, currentTimeStamp);
-    } else if (data.currentStatus.state === userState.OOO) {
-      return updateFutureStatusToActive(id, data, userStatusModel, currentTimeStamp);
+    const {
+      data: {
+        currentStatus: { state },
+      },
+    } = latestStatusData;
+    if (state === userState.ACTIVE) {
+      return generateAlreadyExistingStatusResponse(userState.ACTIVE);
+    } else if (state === userState.IDLE || state === userState.ONBOARDING) {
+      return updateCurrentStatusToState(userStatusModel, latestStatusData, userState.ACTIVE);
+    } else if (state === userState.OOO) {
+      return updateFutureStatusToState(userStatusModel, latestStatusData, userState.ACTIVE);
     }
     throw new Error("Please reach out to the administrator as your user status is not recognized as valid.");
   } catch (error) {

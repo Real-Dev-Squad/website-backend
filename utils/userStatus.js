@@ -59,28 +59,28 @@ const filterStatusData = (newStatusData) => {
 
 /**
  * Returns the Response for the Active State
- * @param None
+ * @param state The already existing state
  * @returns {Object} A successful response object containing the properties
  * - status: The string representing the call was successful
  * - message: The string representing the message about the current status
  * - data: The object containing the details of current status
  *  - currentStatus: The string representing the current status
  */
-const handleAlreadyActiveStatusResponse = () => {
+const generateAlreadyExistingStatusResponse = (state) => {
   return {
     status: "success",
-    message: `The status is already ${userState.ACTIVE}`,
+    message: `The status is already ${state}`,
     data: {
-      currentStatus: userState.ACTIVE,
+      currentStatus: state,
     },
   };
 };
 
 /**
  * Returns the Response for the Update to Active State
- * @param id The id of the user status document
- * @param data The object containing the current status data
- * @param currentTimeStamp The Current time stamp
+ * @param collection The Collection to update
+ * @param latestStatusData The latest data stored in the collection
+ * @param newState The Updated state for the new Status
  * @returns {Response} The Response object containing the properties
  * - status: The string representing the call was successful
  * - message: The string describing the update was successful
@@ -90,12 +90,19 @@ const handleAlreadyActiveStatusResponse = () => {
  *  - previousStatus: The string representing the previous status
  * @throws {Error} If there is an error while updating the status
  */
-const updateCurrentStatusToActive = async (id, data, collection, currentTimeStamp) => {
-  const { currentStatus, ...docData } = data;
+const updateCurrentStatusToState = async (collection, latestStatusData, newState) => {
+  const {
+    id,
+    data: {
+      currentStatus: { state },
+      ...docData
+    },
+  } = latestStatusData;
+  const currentTimeStamp = new Date().getTime();
   const updatedStatusData = {
     ...docData,
     currentStatus: {
-      state: userState.ACTIVE,
+      state: newState,
       message: "",
       from: currentTimeStamp,
       until: "",
@@ -105,26 +112,25 @@ const updateCurrentStatusToActive = async (id, data, collection, currentTimeStam
   try {
     await collection.doc(id).update(updatedStatusData);
   } catch (err) {
-    logger.error(`error updating status for user id ${data.userId} - ${err.message}`);
+    logger.error(`error updating status for user id ${docData.userId} - ${err.message}`);
     throw new Error(`error updating the current status.`);
   }
 
   return {
     status: "success",
-    message: `The status has been updated to ${userState.ACTIVE}`,
+    message: `The status has been updated to ${newState}`,
     data: {
-      previousStatus: currentStatus.state,
-      currentStatus: userState.ACTIVE,
+      previousStatus: state,
+      currentStatus: newState,
     },
   };
 };
 
 /**
  * Returns the Response for the Future Status Update to Active State
- * @param id The id of the user status document
- * @param data The object containing the current status data
- * @param collection The collection containing the status data
- * @param currentTimeStamp The Current time stamp
+ * @param collection The Collection to update
+ * @param latestStatusData The latest data stored in the collection
+ * @param newState The Updated state for the new Status
  * @returns {Response} The Response object containing the properties
  * - status: The string representing the call was successful
  * - message: The string describing the update was successful
@@ -133,15 +139,21 @@ const updateCurrentStatusToActive = async (id, data, collection, currentTimeStam
  *  - futureStatus: The string representing the future status
  * @throws {Error} If there is an error while updating the status
  */
-const updateFutureStatusToActive = async (id, data, collection, currentTimeStamp) => {
-  const { currentStatus, ...docData } = data;
+const updateFutureStatusToState = async (collection, latestStatusData, newState) => {
+  const {
+    id,
+    data: { futureStatus, ...docData },
+  } = latestStatusData;
+  const {
+    currentStatus: { state, until },
+  } = docData;
+  const currentTimeStamp = new Date().getTime();
   const updatedStatusData = {
     ...docData,
-    currentStatus,
     futureStatus: {
-      state: userState.ACTIVE,
+      state: newState,
       message: "",
-      from: currentStatus.until,
+      from: until,
       until: "",
       updatedAt: currentTimeStamp,
     },
@@ -149,15 +161,15 @@ const updateFutureStatusToActive = async (id, data, collection, currentTimeStamp
   try {
     await collection.doc(id).update(updatedStatusData);
   } catch (err) {
-    logger.error(`error updating the future status for user id ${data.userId} - ${err.message}`);
+    logger.error(`error updating the future status for user id ${docData.userId} - ${err.message}`);
     throw new Error(`error updating the future status.`);
   }
   return {
     status: "success",
-    message: `As the user is currently ${userState.OOO}, the future status has been updated to ${userState.ACTIVE}.`,
+    message: `As the user is currently ${state}, the future status has been updated to ${newState}.`,
     data: {
-      currentStatus: userState.OOO,
-      futureStatus: userState.ACTIVE,
+      currentStatus: state,
+      futureStatus: newState,
     },
   };
 };
@@ -166,7 +178,7 @@ const updateFutureStatusToActive = async (id, data, collection, currentTimeStamp
  * Returns the Response for the New User Status Creation Document
  * @param userId The id of the user
  * @param collection The collection containing the status data
- * @param currentTimeStamp The Current time stamp
+ * @param state The new state of the user status document
  * @returns {Response} The Response object containing the properties
  * - status: The string representing the call was successful
  * - message: The string describing the update was successful
@@ -175,12 +187,13 @@ const updateFutureStatusToActive = async (id, data, collection, currentTimeStamp
  * @throws {Error} If there is an error while creating the status
  */
 
-const createStatusAsActive = async (userId, collection, currentTimeStamp) => {
+const createUserStatusWithState = async (userId, collection, state) => {
+  const currentTimeStamp = new Date().getTime();
   try {
     await collection.add({
       userId,
       currentStatus: {
-        state: userState.ACTIVE,
+        state,
         message: "",
         from: currentTimeStamp,
         until: "",
@@ -228,9 +241,9 @@ module.exports = {
   getTommorowTimeStamp,
   getTodayTimeStamp,
   filterStatusData,
-  handleAlreadyActiveStatusResponse,
-  updateCurrentStatusToActive,
-  updateFutureStatusToActive,
-  createStatusAsActive,
+  generateAlreadyExistingStatusResponse,
+  updateCurrentStatusToState,
+  updateFutureStatusToState,
+  createUserStatusWithState,
   getUserIdFromUserName,
 };
