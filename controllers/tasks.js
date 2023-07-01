@@ -264,7 +264,7 @@ const updateTaskStatus = async (req, res, next) => {
       }
     }
 
-    if (req.body.status === TASK_STATUS.COMPLETED && task.taskData.percentCompleted === 100) {
+    if (req.body.status === TASK_STATUS.COMPLETED && req.body.percentCompleted === 100) {
       userStatusUpdate = await updateStatusOnTaskCompletion(userId);
     }
     return res.json({
