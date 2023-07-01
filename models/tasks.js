@@ -70,13 +70,7 @@ const addDependency = async (data) => {
  */
 const fetchTasks = async (dev = false, status = "") => {
   try {
-    let tasksSnapshot;
-
-    if (dev && status) {
-      tasksSnapshot = await tasksModel.where("status", "==", status).get();
-    } else {
-      tasksSnapshot = await tasksModel.get();
-    }
+    const tasksSnapshot = dev && status ? await tasksModel.where("status", "==", status).get() : await tasksModel.get();
 
     const tasks = buildTasks(tasksSnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
