@@ -607,6 +607,28 @@ const setInDiscordScript = async (req, res) => {
   }
 };
 
+const updateRoles = async (req, res) => {
+  try {
+    const result = await userQuery.fetchUser({ userId: req.params.id });
+    if (result?.userExists) {
+      const dataToUpdate = req.body;
+      const userQueryResponse = await userQuery.addOrUpdate(dataToUpdate, req.params.id);
+      if (userQueryResponse.isRoleUpdated) {
+        return res.json({
+          message: "role updated successfully!",
+        });
+      } else {
+        return res.boom.conflict("role already exist!");
+      }
+    } else {
+      return res.boom.notFound("User not found");
+    }
+  } catch (error) {
+    logger.error(`Error while updateRoles: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,

@@ -24,6 +24,14 @@ const {
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
 
+const userRoleUpdate = userData[4];
+const userRoleUnArchived = userData[11];
+const userAlreadyMember = userData[0];
+const userAlreadyNotMember = userData[11];
+const userAlreadyArchived = userData[5];
+const userAlreadyUnArchived = userData[4];
+const nonSuperUser = userData[0];
+
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const Sinon = require("sinon");
@@ -1164,7 +1172,6 @@ describe("Users", function () {
         });
     });
   });
-
   describe("POST /update-in-discord", function () {
     it("it returns proper response", function (done) {
       chai
@@ -1227,6 +1234,238 @@ describe("Users", function () {
           expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
           return done();
         });
+    });
+  });
+
+  describe("PATCH /users/:id/roles", function () {
+    it("Should make the user a member", function (done) {
+      addUser(userRoleUpdate).then((userRoleUpdateId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUpdateId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("role updated successfully!");
+            return done();
+          });
+      });
+    });
+
+    it("Should make the member a user", function (done) {
+      addUser(userRoleUpdate).then((userRoleUpdateId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUpdateId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: false,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("role updated successfully!");
+            return done();
+          });
+      });
+    });
+
+    it("Should archive the user", function (done) {
+      addUser(userRoleUpdate).then((userRoleUpdateId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUpdateId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            archived: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("role updated successfully!");
+            return done();
+          });
+      });
+    });
+
+    it("Should un-archive the user", function (done) {
+      addUser(userRoleUnArchived).then((userRoleUnArchivedId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUnArchivedId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            archived: false,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("role updated successfully!");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 400 if invalid role", function (done) {
+      addUser(userRoleUpdate).then((userRoleUpdateId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUpdateId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: true,
+            archived: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body.message).to.be.equal("we only allow either role member or archieve");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 409 if user is already a member", function (done) {
+      addUser(userAlreadyMember).then((userAlreadyMemberId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userAlreadyMemberId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.be.equal("role already exist!");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 409 if user is already not a member", function (done) {
+      addUser(userAlreadyNotMember).then((userAlreadyNotMemberId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userAlreadyNotMemberId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: false,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.be.equal("role already exist!");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 409 if user is already archived", function (done) {
+      addUser(userAlreadyArchived).then((userAlreadyArchivedId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userAlreadyArchivedId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            archived: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.be.equal("role already exist!");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 409 if user is already un-archived", function (done) {
+      addUser(userAlreadyUnArchived).then((userAlreadyUnArchivedId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userAlreadyUnArchivedId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            archived: false,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.be.equal("role already exist!");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 404 if user not found", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/111111111111/roles`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({
+          archived: true,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("User not found");
+          return done();
+        });
+    });
+
+    it("Should return 401 if user is not a super user", function (done) {
+      addUser(nonSuperUser).then((nonSuperUserId) => {
+        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+        chai
+          .request(app)
+          .patch(`/users/${nonSuperUserId}/roles`)
+          .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
+          .send({
+            archived: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(401);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal("You are not authorized for this action.");
+            return done();
+          });
+      });
     });
   });
 });
