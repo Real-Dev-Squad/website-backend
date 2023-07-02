@@ -5,7 +5,7 @@ const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const retrieveUsers = async (req, res) => {
   try {
     const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(req.query);
-    allUsers.array.forEach((element) => {
+    allUsers.forEach((element) => {
       delete element.phone;
       delete element.email;
       delete element.chaincode;
