@@ -182,6 +182,32 @@ describe("auth", function () {
       });
   });
 
+  it("should return 401 if passportjs fails", function (done) {
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      throw new Error("Intensional error");
+    });
+
+    chai
+      .request(app)
+      .get("/auth/github/callback")
+      .query({ code: "codeReturnedByGithub" })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        expect(res).to.have.status(401);
+        expect(res.body).to.be.an("object");
+        expect(res.body).to.eql({
+          statusCode: 401,
+          error: "Unauthorized",
+          message: "User cannot be authenticated",
+        });
+
+        return done();
+      });
+  });
+
   it("Should clear the rds session cookies", function (done) {
     chai
       .request(app)
