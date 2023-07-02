@@ -43,7 +43,7 @@ router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER])
 router.patch(
   "/servername/:userId",
   authenticate,
-  authorizeRoles([SUPERUSER]),
+  // authorizeRoles([SUPERUSER]),
   checkIsVerifiedDiscord,
   users.updateUserNickname
 );

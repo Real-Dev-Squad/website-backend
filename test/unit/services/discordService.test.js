@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const firestore = require("../../../utils/firestore");
-const { setInDiscordFalseScript, addRoleToUser } = require("../../../services/discordService");
+const { setInDiscordFalseScript, addRoleToUser, setUserDiscordNickname } = require("../../../services/discordService");
 const { fetchAllUsers } = require("../../../models/users");
 const Sinon = require("sinon");
 const userModel = firestore.collection("users");
@@ -39,6 +39,29 @@ describe("Discord services", function () {
       );
 
       const response = await addRoleToUser("123456789", "987654321");
+
+      expect(response.message).to.be.equal("done");
+    });
+  });
+
+  describe("change user nickname", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+    });
+
+    afterEach(function () {
+      fetchStub.restore();
+    });
+
+    it("makes a fetch call", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ message: "done" }),
+        })
+      );
+
+      const response = await setUserDiscordNickname("abcd", 98178);
 
       expect(response.message).to.be.equal("done");
     });

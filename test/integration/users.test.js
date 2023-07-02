@@ -36,6 +36,7 @@ describe("Users", function () {
   let superUserId;
   let superUserAuthToken;
   let userId = "";
+  let fetchStub;
 
   beforeEach(async function () {
     userId = await addUser();
@@ -1225,6 +1226,74 @@ describe("Users", function () {
           }
           expect(res).to.have.status(500);
           expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
+          return done();
+        });
+    });
+  });
+
+  describe("test discord actions for nickname for verified user", function () {
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      userId = await addUser(userData[0]);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+      Sinon.restore();
+    });
+
+    it("returns 200 for updating nickname patch method", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({}),
+        })
+      );
+      chai
+        .request(app)
+        .patch(`/users/servername/${userId}`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("nickname has been changed");
+          return done();
+        });
+    });
+  });
+
+  describe("test discord actions for nickname for unverified user", function () {
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      const superUser = userData[4];
+      userId = await addUser(userData[2]);
+      superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+      Sinon.restore();
+    });
+
+    it("throw error if discordId is not present", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({}),
+        })
+      );
+      chai
+        .request(app)
+        .patch(`/users/servername/${userId}`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
           return done();
         });
     });

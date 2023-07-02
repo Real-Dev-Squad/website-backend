@@ -608,21 +608,19 @@ const setInDiscordScript = async (req, res) => {
  */
 const updateUserNickname = async (req, res) => {
   try {
-    const type = req.body.type;
-
     const { user } = await userQuery.fetchUser({ userId: req.params.userId });
 
     const { discordId, username: userName } = user;
 
-    if (type === "discord" && discordId && userName) {
-      await setUserDiscordNickname(userName, discordId);
-
-      return res.json({
-        message: "nickname has been changed",
-      });
-    } else {
-      return res.boom.badRequest("incorrect type");
+    if (!discordId) {
+      throw new Error("user not verified");
     }
+
+    const response = await setUserDiscordNickname(userName, discordId);
+
+    return res.json({
+      message: response,
+    });
   } catch (err) {
     logger.error(`Error while updating nickname: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);

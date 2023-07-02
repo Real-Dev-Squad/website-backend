@@ -65,18 +65,17 @@ const addRoleToUser = async (userid, roleid) => {
 };
 
 const setUserDiscordNickname = async (userName, discordId) => {
-  const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
-    algorithm: "RS256",
-    expiresIn: config.get("rdsServerlessBot.ttl"),
-  });
+  const authToken = await generateAuthTokenForCloudflare();
 
-  await (
+  const response = await (
     await fetch(`${DISCORD_BASE_URL}/guild/member`, {
       method: "PATCH",
       body: JSON.stringify({ userName, discordId }),
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
     })
   ).json();
+
+  return response;
 };
 
 module.exports = {
