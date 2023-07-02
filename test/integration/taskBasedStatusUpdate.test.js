@@ -47,7 +47,7 @@ describe("PATCH /tasks/self/:taskId - Update User Status Document on marking Tas
       expect(res.body.userStatus.message).to.equal(
         "UserStatus Document did not previously exist, New UserStatus Document created and updated to an IDLE status."
       );
-      expect(res.body.userStatus.data.currentStatus).to.equal("IDLE");
+      expect(res.body.userStatus.data.currentStatus).to.equal(userState.IDLE);
     });
 
     it("Should change the Future Status to IDLE if no other task is assigned to the user and the user is currently OOO .", async function () {
@@ -112,7 +112,7 @@ describe("PATCH /tasks/self/:taskId - Update User Status Document on marking Tas
       expect(res.body.userStatus.message).to.equal(
         "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status."
       );
-      expect(res.body.userStatus.data.currentStatus).to.equal("ACTIVE");
+      expect(res.body.userStatus.data.currentStatus).to.equal(userState.ACTIVE);
     });
 
     it("Should change the Future Status to ACTIVE if another task is assigned to the user and the user is currently OOO .", async function () {
