@@ -575,10 +575,15 @@ const filterUsers = async (req, res) => {
       return res.boom.badRequest("filter for item not provided");
     }
     const users = await userQuery.getUsersBasedOnFilter(req.query);
-
+    const sanitizedUsers = users.map((user) => {
+      delete user.tokens;
+      delete user.email;
+      delete user.phone;
+      return user;
+    });
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
-      users,
+      users: sanitizedUsers,
       count: users.length,
     });
   } catch (error) {
