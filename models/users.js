@@ -170,16 +170,16 @@ const fetchPaginatedUsers = async (query) => {
       }
     }
     const snapshot = await dbQuery.get();
-    
+
     const firstDoc = snapshot.docs[0];
     const lastDoc = snapshot.docs[snapshot.docs.length - 1];
-  
+
     const allUsers = [];
 
     snapshot.forEach((doc) => {
       allUsers.push({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       });
     });
 
@@ -241,14 +241,12 @@ const fetchUsers = async (usernames = []) => {
  */
 const fetchUser = async ({ userId = null, username = null, githubUsername = null }) => {
   try {
-    console.log("hioi");
     let userData, id;
     if (username) {
       const user = await userModel.where("username", "==", username).limit(1).get();
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
-        
       });
     } else if (userId) {
       const user = await userModel.doc(userId).get();
@@ -256,7 +254,6 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       userData = user.data();
     } else if (githubUsername) {
       const user = await userModel.where("github_id", "==", githubUsername).limit(1).get();
-      console.log(user,"user");
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
