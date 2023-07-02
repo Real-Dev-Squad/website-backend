@@ -1,9 +1,10 @@
 const userQuery = require("../models/users");
 const { getPaginationLink } = require("../utils/users");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const { getFilteredPRsOrIssues} = require("../utils/pullRequests");
 const { getQualifiers } = require("../utils/helper");
 const { getUsernamesFromPRs } = require("../utils/users");
+const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+
 const retrieveUsers = async (req, res) => {
   try {
     // getting user details by id if present.
