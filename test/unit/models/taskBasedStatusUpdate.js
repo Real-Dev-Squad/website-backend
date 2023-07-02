@@ -4,7 +4,11 @@ const { expect } = chai;
 const firestore = require("../../../utils/firestore");
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
-const { updateStatusOnTaskCompletion, updateUserStatusOnNewTaskAssignment } = require("../../../models/userStatus");
+const {
+  updateStatusOnTaskCompletion,
+  updateUserStatusOnNewTaskAssignment,
+  updateUserStatusOnTaskUpdate,
+} = require("../../../models/userStatus");
 const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
@@ -17,7 +21,7 @@ describe("Update Status based on task update", function () {
     let userId;
     let taskArr;
     beforeEach(async function () {
-      userId = await addUser(userData[6]);
+      userId = await addUser(userData()[6]);
       taskArr = allTasks();
     });
     afterEach(async function () {
@@ -134,7 +138,8 @@ describe("Update Status based on task update", function () {
   describe("Test the Model Function for Status update on Task Assignment/Update", function () {
     let userId;
     beforeEach(async function () {
-      userId = await addUser(userData[6]);
+      const userInfo = userData()[6];
+      userId = await addUser(userInfo);
     });
     afterEach(async function () {
       sinon.restore();
@@ -195,6 +200,26 @@ describe("Update Status based on task update", function () {
           "Please reach out to the administrator as your user status is not recognized as valid."
         );
       });
+    });
+
+    it("Should give NotFound message if the userName is invalid.", async function () {
+      const res = await updateUserStatusOnTaskUpdate("funkeyMonkey123");
+      expect(res).to.deep.equal({
+        status: 404,
+        error: "Not Found",
+        message: "Something went wrong. Username funkeyMonkey123 could not be found.",
+      });
+    });
+
+    it("Should return an valid status if the userName is valid.", async function () {
+      const statusData = await generateStatusDataForState(userId, userState.IDLE);
+      await firestore.collection("usersStatus").doc("userStatus").set(statusData);
+      const userName = userData()[6].username;
+      const res = await updateUserStatusOnTaskUpdate(userName);
+      expect(res.status).to.equal("success");
+      expect(res.message).to.equal("The status has been updated to ACTIVE");
+      expect(res.data.previousStatus).to.equal(userState.IDLE);
+      expect(res.data.currentStatus).to.equal(userState.ACTIVE);
     });
   });
 });

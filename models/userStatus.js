@@ -265,6 +265,8 @@ const updateUserStatusOnTaskUpdate = async (userName) => {
   let userStatusUpdate;
   try {
     userId = await getUserIdFromUserName(userName);
+    userStatusUpdate = await updateUserStatusOnNewTaskAssignment(userId);
+    return userStatusUpdate;
   } catch (error) {
     if (error instanceof NotFound) {
       return {
@@ -279,16 +281,6 @@ const updateUserStatusOnTaskUpdate = async (userName) => {
       message: error.message,
     };
   }
-  try {
-    userStatusUpdate = await updateUserStatusOnNewTaskAssignment(userId);
-  } catch (error) {
-    return {
-      status: 500,
-      error: "Internal Server Error",
-      message: error.message,
-    };
-  }
-  return userStatusUpdate;
 };
 
 const updateStatusOnTaskCompletion = async (userId) => {
