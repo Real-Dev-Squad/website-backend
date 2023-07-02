@@ -216,10 +216,6 @@ const fetchUsers = async (usernames = []) => {
         users.push({
           id: doc.id,
           ...doc.data(),
-          phone: undefined,
-          email: undefined,
-          tokens: undefined,
-          chaincode: undefined,
         });
       });
     });
@@ -264,8 +260,6 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       user: {
         id,
         ...userData,
-        tokens: undefined,
-        chaincode: undefined,
       },
     };
   } catch (err) {
