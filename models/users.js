@@ -136,7 +136,7 @@ const getSuggestedUsers = async (skill) => {
 
 /**
  * Fetches the data about our users
- * @param query { search, next, prev, size, page }: Filter for users
+ * @param query { search, next, prev, size, page, include }: Filter for users
  * @return {Promise<userModel|Array>}
  */
 const fetchPaginatedUsers = async (query) => {
@@ -145,9 +145,15 @@ const fetchPaginatedUsers = async (query) => {
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
-
-    let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
-
+    let dbQuery;
+    if (query.q) {
+      const [queryName, queryValue] = query.q.split(":");
+      if (queryName === "includes" && queryValue === "archived") {
+        dbQuery = userModel;
+      }
+    } else {
+      dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+    }
     if (query.prev) {
       dbQuery = dbQuery.limitToLast(size);
     } else {

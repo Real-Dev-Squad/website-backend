@@ -176,6 +176,7 @@ describe("Users", function () {
         .query({
           size: 1,
           page: 0,
+          q: "includes:archived",
         })
         .end((err, res) => {
           if (err) {
@@ -201,6 +202,7 @@ describe("Users", function () {
         .query({
           size: -1,
           page: -1,
+          q: "",
         })
         .end((err, res) => {
           if (err) {
