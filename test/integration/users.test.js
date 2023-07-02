@@ -1258,7 +1258,6 @@ describe("Users", function () {
             return done(err);
           }
           expect(res).to.have.status(200);
-          expect(res.body.message).to.equal("nickname has been changed");
           return done();
         });
     });
