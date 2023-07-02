@@ -263,5 +263,28 @@ describe("Task Based Status Updates", function () {
       // expect(res.body.userStatus.data.previousStatus).to.equal(userState.IDLE);
       // expect(res.body.userStatus.data.currentStatus).to.equal(userState.ACTIVE);
     });
+
+    it("Should throw an error to if an invalid state is set in the Status.", async function () {
+      const statusData = await generateStatusDataForState(userId, "InvalidState");
+      await firestore.collection("usersStatus").doc("userStatus").set(statusData);
+      const res = await chai.request(app).post(`/tasks`).set("cookie", `${cookieName}=${superUserJwt}`).send(reqBody);
+      expect(res.status).to.equal(200);
+      expect(res.body.userStatus.status).to.equal(500);
+      expect(res.body.userStatus.error).to.equal("Internal Server Error");
+      expect(res.body.userStatus.message).to.equal(
+        "Please reach out to the administrator as your user status is not recognized as valid."
+      );
+    });
+
+    it("Should give NotFound message if the userName is invalid.", async function () {
+      reqBody.assignee = "funkeyMonkey123";
+      const res = await chai.request(app).post(`/tasks`).set("cookie", `${cookieName}=${superUserJwt}`).send(reqBody);
+      expect(res.status).to.equal(200);
+      expect(res.body.userStatus.status).to.equal(404);
+      expect(res.body.userStatus.error).to.equal("Not Found");
+      expect(res.body.userStatus.message).to.equal(
+        "Something went wrong. Username funkeyMonkey123 could not be found."
+      );
+    });
   });
 });
