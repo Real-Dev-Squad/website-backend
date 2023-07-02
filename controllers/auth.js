@@ -1,7 +1,6 @@
 const passport = require("passport");
 const users = require("../models/users");
 const authService = require("../services/authService");
-const REALDEVSQUAD_HOSTNAME = new URL(config.get("services.rdsUi.baseUrl")).hostname;
 
 /**
  * Makes authentication call to GitHub statergy
@@ -32,7 +31,8 @@ const githubAuthCallback = (req, res, next) => {
   if ("state" in req.query) {
     try {
       const redirectUrl = new URL(req.query.state);
-      if (redirectUrl.hostname.endsWith(REALDEVSQUAD_HOSTNAME)) {
+      if (`.${redirectUrl.hostname}`.endsWith(`.${rdsUiUrl.hostname}`)) {
+        // Matching *.realdevsquad.com
         authRedirectionUrl = redirectUrl;
       } else {
         logger.error(`Malicious redirect URL provided URL: ${redirectUrl}, Will redirect to RDS`);
