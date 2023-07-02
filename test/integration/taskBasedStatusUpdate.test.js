@@ -37,10 +37,6 @@ describe("PATCH /tasks/self/:taskId - Update User Status Document on marking Tas
   });
 
   describe("User is IDLE without any Task", function () {
-    // it("should throw an error if the db query fails",async function () {
-    //   sinon.stub(userStatusModel, "where").throws(new Error("Unable to fetch user status document"));
-    // });
-
     it("Should Create a new user status Document with status IDLE if the status document doesn't exist & the user is IDLE.", async function () {
       const res = await chai
         .request(app)
