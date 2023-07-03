@@ -25,17 +25,6 @@ const storeUserDeviceInfo = async (userDeviceInfoData) => {
   }
 };
 
-const getUserAuthStatus = async (userId) => {
-  try {
-    const userAuthStatus = await QrCodeAuthModel.where("user_id", "==", userId).get();
-    return userAuthStatus;
-  } catch (err) {
-    logger.log("Could not get", err);
-    throw err;
-  }
-};
-
 module.exports = {
   storeUserDeviceInfo,
-  getUserAuthStatus,
 };
