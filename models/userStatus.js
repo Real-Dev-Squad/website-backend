@@ -262,11 +262,9 @@ const updateUserStatusOnNewTaskAssignment = async (userId) => {
  */
 
 const updateUserStatusOnTaskUpdate = async (userName) => {
-  let userId;
-  let userStatusUpdate;
   try {
-    userId = await getUserIdFromUserName(userName, usersCollection);
-    userStatusUpdate = await updateUserStatusOnNewTaskAssignment(userId);
+    const userId = await getUserIdFromUserName(userName, usersCollection);
+    const userStatusUpdate = await updateUserStatusOnNewTaskAssignment(userId);
     return userStatusUpdate;
   } catch (error) {
     if (error instanceof NotFound) {
