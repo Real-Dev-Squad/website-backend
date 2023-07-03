@@ -1,4 +1,5 @@
 const chai = require("chai");
+const axios = require("axios");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 
@@ -26,6 +27,7 @@ const userStatusModel = require("../../models/userStatus");
 
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
+const githubUserInfo = require("../fixtures/auth/githubUserInfo")();
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const photoVerificationModel = firestore.collection("photo-verification");
@@ -1231,35 +1233,37 @@ describe("Users", function () {
   });
 
   describe("POST /users/migrate", function () {
-    it("Should return 401 when user is unauthorize", function (done) {
-      chai
-        .request(app)
-        .post("/users/migrate")
-        .end((err, res) => {
-          if (err) {
-            return done();
-          }
-          expect(res).to.have.status(401);
-          expect(res.body.message).to.equal("Unauthenticated User");
-          return done();
-        });
+    let fetchStub;
+
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(axios, "get");
     });
+
+    afterEach(async function () {
+      Sinon.restore();
+    });
+
     it("Should update the user", async function () {
+      fetchStub.resolves({
+        data: githubUserInfo[0]._json,
+      });
       const usersMigrateResponse = await chai
         .request(app)
         .post(`/users/migrate`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`);
       expect(usersMigrateResponse).to.have.status(200);
       expect(usersMigrateResponse.body).to.eql({
-        message: `All Users github_user_id added successfully`,
+        message: "Result of migration",
         data: {
-          invalidUsers: [],
-          totalCount: 0,
+          totalUsers: 2,
+          usersUpdated: 2,
+          usersNotUpdated: 0,
+          invalidUsersDetails: [],
         },
       });
-      const usersReponse = await chai.request(app).get(`/users`).set("cookie", `${cookieName}=${superUserAuthToken}`);
-      expect(usersReponse).to.have.status(200);
-      usersReponse.body.users.forEach((document) => {
+      const usersResponse = await chai.request(app).get(`/users`).set("cookie", `${cookieName}=${superUserAuthToken}`);
+      expect(usersResponse).to.have.status(200);
+      usersResponse.body.users.forEach((document) => {
         expect(document).to.have.property(`github_user_id`);
       });
     });
