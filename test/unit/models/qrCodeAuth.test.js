@@ -11,7 +11,7 @@ const userDataArray = require("../../fixtures/user/user")();
  * Test the model functions and validate the data stored
  */
 
-describe("UserDeviceInfo", function () {
+describe("mobile auth", function () {
   afterEach(async function () {
     await cleanDb();
   });

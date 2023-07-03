@@ -2,12 +2,7 @@ const passport = require("passport");
 const users = require("../models/users");
 const QrCodeAuthModel = require("../models/qrCodeAuth");
 const authService = require("../services/authService");
-const {
-  SOMETHING_WENT_WRONG,
-  DATA_ADDED_SUCCESSFULLY,
-  USER_DATA_ALREADY_PRESENT,
-  BAD_REQUEST,
-} = require("../constants/errorMessages");
+const { SOMETHING_WENT_WRONG, DATA_ADDED_SUCCESSFULLY, BAD_REQUEST } = require("../constants/errorMessages");
 
 /**
  * Fetches the user info from GitHub and authenticates User
@@ -88,15 +83,6 @@ const storeUserDeviceInfo = async (req, res) => {
       device_id: req.body.device_id,
       authorization_status: "NOT_INIT",
     };
-    const userData = await QrCodeAuthModel.getUserAuthStatus(req.body.user_id);
-
-    const data = userData.docs.length ? userData.docs[0].data() : null;
-
-    if (data?.authorization_status) {
-      return res.status(409).json({
-        message: USER_DATA_ALREADY_PRESENT,
-      });
-    }
 
     const userInfo = await QrCodeAuthModel.storeUserDeviceInfo(userJson);
 

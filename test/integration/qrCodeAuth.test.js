@@ -3,7 +3,6 @@ const sinon = require("sinon");
 const { expect } = chai;
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
-const qrCodeAuthModel = require("../../models/qrCodeAuth");
 const userData = require("../fixtures/user/user")();
 const { userDeviceInfoDataArray } = require("../fixtures/userDeviceInfo/userDeviceInfo");
 const addUser = require("../utils/addUser");
@@ -12,14 +11,12 @@ const addUser = require("../utils/addUser");
 let userDeviceInfoData;
 let wrongUserDeviceInfoData;
 let userId;
-let userDeviceInfoWithAuthStatus;
 const user = userData[0];
 
 describe("mobile auth", function () {
   beforeEach(async function () {
     userId = await addUser(user);
     userDeviceInfoData = { ...userDeviceInfoDataArray[0], user_id: userId };
-    userDeviceInfoWithAuthStatus = { ...userDeviceInfoData, authorization_status: "NOT_INIT" };
     wrongUserDeviceInfoData = userDeviceInfoDataArray[0];
   });
   afterEach(async function () {
@@ -45,14 +42,6 @@ describe("mobile auth", function () {
 
         return done();
       });
-  });
-
-  it("Should return 409 when user authorization status already exists for mobile auth", async function () {
-    await qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoWithAuthStatus);
-
-    const response = await chai.request(app).post("/auth/qr-code-auth").send(userDeviceInfoData);
-
-    expect(response.body.message).to.be.equal("The authentication document has already been created");
   });
 
   it("Should return a 500 status code and the correct error message when an error occurs while storing user device info", function (done) {
