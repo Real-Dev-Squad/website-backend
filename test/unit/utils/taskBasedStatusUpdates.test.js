@@ -1,4 +1,5 @@
 const chai = require("chai");
+const sinon = require("sinon");
 const { NotFound } = require("http-errors");
 const { expect } = chai;
 const { userState } = require("../../../constants/userStatus");
@@ -7,6 +8,7 @@ const {
   getUserIdFromUserName,
   checkIfUserHasLiveTasks,
   generateErrorResponse,
+  createUserStatusWithState,
 } = require("../../../utils/userStatus");
 
 describe("Task Based User Status Update Util Functions", function () {
@@ -151,6 +153,38 @@ describe("Task Based User Status Update Util Functions", function () {
       } catch (error) {
         expect(error).to.be.an.instanceof(Error);
         expect(error.message).to.equal(`Something went wrong. The User ${userName} couldn't be verified.`);
+      }
+    });
+  });
+
+  describe("createUserStatusWithState", function () {
+    it("should return the userId from the user Name", async function () {
+      const userId = "user123";
+      const state = userState.ACTIVE;
+      const mockCollection = {
+        add: sinon.stub().resolves(),
+      };
+      const result = await createUserStatusWithState(userId, mockCollection, state);
+      expect(result).to.deep.equal({
+        status: "success",
+        message: `UserStatus Document did not previously exist, New UserStatus Document created and updated to an ${state} status.`,
+        data: {
+          currentStatus: state,
+        },
+      });
+    });
+
+    it("should throw error if error happens while adding to DB", async function () {
+      const userId = "user123";
+      const state = userState.ACTIVE;
+      const mockCollection = {
+        add: sinon.stub().rejects(new Error("FireStore Error")),
+      };
+      try {
+        await createUserStatusWithState(userId, mockCollection, state);
+      } catch (error) {
+        expect(error).to.be.an.instanceof(Error);
+        expect(error.message).to.equal(`Status Creation Failed.`);
       }
     });
   });
