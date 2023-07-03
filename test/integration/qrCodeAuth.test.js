@@ -4,7 +4,7 @@ const { expect } = chai;
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
-const { userDeviceInfoDataArray } = require("../fixtures/userDeviceInfo/userDeviceInfo");
+const { userDeviceInfoDataArray } = require("../fixtures/qrCodeAuth/qrCodeAuth");
 const addUser = require("../utils/addUser");
 
 // Import fixtures
