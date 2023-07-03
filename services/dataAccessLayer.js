@@ -27,10 +27,7 @@ const retrieveUsers = async (req, res) => {
       }
 
       const user = result.user;
-      delete user.phone;
-      delete user.email;
-      delete user.chaincode;
-      delete user.tokens;
+      removeSensitiveInfo(user, ["phone", "email", "chaincode", "tokens"]);
 
       return res.json({
         message: "User returned successfully!",
@@ -42,10 +39,7 @@ const retrieveUsers = async (req, res) => {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);
       const usernames = getUsernamesFromPRs(allPRs);
       const { users } = await userQuery.fetchUsers(usernames);
-      delete users.phone;
-      delete users.email;
-      delete users.chaincode;
-      delete users.tokens;
+      removeSensitiveInfo(users, ["phone", "email", "chaincode", "tokens"]);
 
       return res.json({
         message: "Users returned successfully!",
@@ -55,10 +49,7 @@ const retrieveUsers = async (req, res) => {
 
     const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(req.query);
     allUsers.forEach((element) => {
-      delete element.phone;
-      delete element.email;
-      delete element.chaincode;
-      delete element.tokens;
+      removeSensitiveInfo(element, ["phone", "email", "chaincode", "tokens"]);
     });
     return res.json({
       message: "Users returned successfully!",
@@ -71,6 +62,14 @@ const retrieveUsers = async (req, res) => {
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
+const removeSensitiveInfo = function (obj, props) {
+  for (let i = 0; i < props.length; i++) {
+    if (Object.prototype.hasOwnProperty.call(obj, props[i])) {
+      delete obj[props[i]];
+    }
   }
 };
 
