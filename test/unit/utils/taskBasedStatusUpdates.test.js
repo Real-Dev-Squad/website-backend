@@ -10,6 +10,7 @@ const {
   generateErrorResponse,
   createUserStatusWithState,
   updateCurrentStatusToState,
+  updateFutureStatusToState,
 } = require("../../../utils/userStatus");
 
 describe("Task Based User Status Update Util Functions", function () {
@@ -111,7 +112,7 @@ describe("Task Based User Status Update Util Functions", function () {
       };
 
       const result = await getUserIdFromUserName(userName, usersModel);
-      expect(result).to.equal("userId123");
+      expect(result).to.equal(userId);
     });
 
     it("should throw error if query size is 0", async function () {
@@ -233,6 +234,53 @@ describe("Task Based User Status Update Util Functions", function () {
       } catch (error) {
         expect(error).to.be.an.instanceof(Error);
         expect(error.message).to.equal("error updating the current status.");
+      }
+    });
+  });
+
+  describe("updateFutureStatusToState", function () {
+    let latestStatusData;
+    let newState;
+    beforeEach(async function () {
+      const currentTimeStamp = new Date().getTime();
+      newState = userState.ACTIVE;
+      latestStatusData = {
+        id: "statusData123",
+        data: {
+          userId: "userId123",
+          currentStatus: {
+            state: userState.OOO,
+            message: "",
+            from: currentTimeStamp,
+            until: "",
+            updatedAt: currentTimeStamp,
+          },
+        },
+      };
+    });
+    it("should update the Future status", async function () {
+      const mockCollection = {
+        doc: () => mockCollection,
+        update: sinon.stub().resolves(),
+      };
+      const response = await updateFutureStatusToState(mockCollection, latestStatusData, newState);
+      expect(response).to.deep.equal({
+        status: "success",
+        message: "As the user is currently OOO, the future status has been updated to ACTIVE.",
+        data: { currentStatus: "OOO", futureStatus: "ACTIVE" },
+      });
+    });
+
+    it("should throw an error if firebase query fails", async function () {
+      const mockCollection = {
+        doc: () => mockCollection,
+        update: sinon.stub().rejects(new Error("Firestore error")),
+      };
+      try {
+        await updateFutureStatusToState(mockCollection, latestStatusData, newState);
+      } catch (error) {
+        expect(error).to.be.an.instanceof(Error);
+        expect(error.message).to.equal("error updating the future status.");
       }
     });
   });
