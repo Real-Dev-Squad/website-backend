@@ -49,7 +49,7 @@ const retrieveUsers = async (req, res) => {
 
     const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(req.query);
     allUsers.forEach((element) => {
-      removeSensitiveInfo(element, ["phone", "email", "chaincode", "tokens"]);
+      removeSensitiveInfo(element, ["phone", "email", "chaincode","tokens"]);
     });
     return res.json({
       message: "Users returned successfully!",
@@ -65,10 +65,10 @@ const retrieveUsers = async (req, res) => {
   }
 };
 
-const removeSensitiveInfo = function (obj, props) {
-  for (let i = 0; i < props.length; i++) {
-    if (Object.prototype.hasOwnProperty.call(obj, props[i])) {
-      delete obj[props[i]];
+const removeSensitiveInfo = function (obj,properties = ["phone", "email", "chaincode", "tokens"]) {
+  for (let i = 0; i < properties.length; i++) {
+    if (Object.prototype.hasOwnProperty.call(obj, properties[i])) {
+      delete obj[properties[i]];
     }
   }
 };
