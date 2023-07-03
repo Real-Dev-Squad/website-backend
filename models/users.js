@@ -148,8 +148,10 @@ const fetchPaginatedUsers = async (query) => {
     let dbQuery;
     if (query.q) {
       const [queryName, queryValue] = query.q.split(":");
-      if (queryName === "includes" && queryValue === "archived") {
-        dbQuery = userModel;
+      if (queryName === "includes") {
+        if (queryValue === "archived") {
+          dbQuery = userModel;
+        }
       }
     } else {
       dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
