@@ -31,11 +31,15 @@ describe("Filter Users", function () {
   let tagIdBE;
   let levelId1;
   let levelId2;
+  let archivedUser1;
+  let archivedUser2;
 
   before(async function () {
     const updatedAtDate = Date.now();
     const untilDate = updatedAtDate + 16 * 24 * 60 * 60 * 1000;
     userId = await addUser();
+    archivedUser1 = await addUser(userData[3]);
+    archivedUser2 = await addUser(userData[5]);
     jwt = authService.generateAuthToken({ userId });
     oooUser = await addUser(userData[0]);
     await updateUserStatus(
@@ -293,7 +297,7 @@ describe("Filter Users", function () {
         });
     });
 
-    it("Should search users based on role", function (done) {
+    it("Should search users based on archived role", function (done) {
       chai
         .request(app)
         .get("/users/search")
@@ -309,9 +313,7 @@ describe("Filter Users", function () {
           expect(res.body.message).to.equal("Users found successfully!");
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(2);
-          res.body.users.forEach((user) => {
-            expect(user.role).to.deep.equal({ archived: true });
-          });
+          assertUserIds(res.body.users, [archivedUser1, archivedUser2]);
 
           return done();
         });

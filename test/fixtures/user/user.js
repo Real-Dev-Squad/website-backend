@@ -47,7 +47,8 @@ module.exports = () => {
       github_id: "whydonti",
       linkedin_id: "nikhil-bhandarkar",
       roles: {
-        archived: true,
+        member: true,
+        in_discord: true,
       },
       twitter_id: "whatifi",
       phone: "1234567891",
@@ -94,6 +95,7 @@ module.exports = () => {
       roles: {
         restricted: false,
         app_owner: true,
+        archived: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
@@ -228,7 +230,6 @@ module.exports = () => {
       },
       roles: {
         member: true,
-        arvhied: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
