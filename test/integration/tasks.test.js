@@ -306,10 +306,33 @@ describe("Tasks", function () {
             return done(err);
           }
           expect(res).to.have.status(204);
-
           return done();
         });
     });
+    it("Should update dependency", async function () {
+      const taskData = {
+        title: "Test task",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "COMPLETED",
+        dependsOn: ["taskId2", "taskId3"],
+        percentCompleted: 100,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      };
+      taskId = (await tasks.updateTask(taskData)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ dependsOn: ["taskId5", "taskId4"] });
+      expect(res).to.have.status(204);
+    });
+
     it("Should update the task status collapsed for the given taskid", function (done) {
       chai
         .request(app)
