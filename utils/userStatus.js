@@ -1,5 +1,3 @@
-const firestore = require("../utils/firestore");
-const usersCollection = firestore.collection("users");
 const { NotFound } = require("http-errors");
 const { userState } = require("../constants/userStatus");
 
@@ -216,14 +214,15 @@ const createUserStatusWithState = async (userId, collection, state) => {
 /**
  * Retrieves the user ID based on the given username.
  * @param {string} userName - The username to search for.
+ * @param {FireStore Object} usersCollection - The FireStore Collection to search for.
  * @returns {Promise<string>} - The user ID corresponding to the given username.
  * @throws {Error} - If there is an error retrieving the user snapshot.
  * @throws {NotFound} - If the username could not be found.
  */
-async function getUserIdFromUserName(userName) {
+async function getUserIdFromUserName(userName, usersCollection) {
   let userSnapShot;
   try {
-    userSnapShot = await usersCollection.where("username", "==", userName).limit(1).get();
+    userSnapShot = await usersCollection.where("username", "==", userName).get();
   } catch (error) {
     logger.error(`Couldn't get user snapshot for ${userName} ${error.message}`);
     throw new Error(`Something went wrong. The User ${userName} couldn't be verified.`);

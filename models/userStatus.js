@@ -14,6 +14,7 @@ const {
 } = require("../utils/userStatus");
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
+const usersCollection = firestore.collection("users");
 
 /**
  * @param userId {string} : id of the user
@@ -264,7 +265,7 @@ const updateUserStatusOnTaskUpdate = async (userName) => {
   let userId;
   let userStatusUpdate;
   try {
-    userId = await getUserIdFromUserName(userName);
+    userId = await getUserIdFromUserName(userName, usersCollection);
     userStatusUpdate = await updateUserStatusOnNewTaskAssignment(userId);
     return userStatusUpdate;
   } catch (error) {
