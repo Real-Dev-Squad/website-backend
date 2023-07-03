@@ -235,9 +235,11 @@ const updateUserStatusOnNewTaskAssignment = async (userId) => {
     } = latestStatusData;
     if (state === userState.ACTIVE) {
       return generateAlreadyExistingStatusResponse(userState.ACTIVE);
-    } else if (state === userState.IDLE || state === userState.ONBOARDING) {
+    }
+    if (state === userState.IDLE || state === userState.ONBOARDING) {
       return updateCurrentStatusToState(userStatusModel, latestStatusData, userState.ACTIVE);
-    } else if (state === userState.OOO) {
+    }
+    if (state === userState.OOO) {
       return updateFutureStatusToState(userStatusModel, latestStatusData, userState.ACTIVE);
     }
     throw new Error("Please reach out to the administrator as your user status is not recognized as valid.");
