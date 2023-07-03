@@ -8,7 +8,8 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem } = require("../utils/array");
-const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
+const { ALLOWED_FILTER_PARAMS, QUERY_PARAM } = require("../constants/users");
+const ROLES = require("../constants/roles");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const userModel = firestore.collection("users");
@@ -148,13 +149,13 @@ const fetchPaginatedUsers = async (query) => {
     let dbQuery;
     if (query.q) {
       const [queryName, queryValue] = query.q.split(":");
-      if (queryName === "includes") {
-        if (queryValue === "archived") {
+      if (queryName === QUERY_PARAM.INCLUDES) {
+        if (queryValue === ROLES.ARCHIVED) {
           dbQuery = userModel;
         }
       }
     } else {
-      dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+      dbQuery = userModel.where(`roles.${ROLES.ARCHIVED}`, "==", false).orderBy("username");
     }
     if (query.prev) {
       dbQuery = dbQuery.limitToLast(size);
