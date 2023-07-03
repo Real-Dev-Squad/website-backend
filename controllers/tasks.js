@@ -7,6 +7,7 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
+const userQuery = require("../models/users");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 /**
  * Creates new task
@@ -17,6 +18,9 @@ const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("
  */
 const addNewTask = async (req, res) => {
   try {
+    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
+    const { userStatusFlag } = req.query;
+    const isUserStatusEnabled = userStatusFlag === "true";
     const { id: createdBy } = req.userData;
     const dependsOn = req.body.dependsOn;
     let userStatusUpdate;
@@ -31,7 +35,7 @@ const addNewTask = async (req, res) => {
       dependsOn,
     };
     const taskDependency = dependsOn && (await dependencyModel.addDependency(data));
-    if (req.body.assignee) {
+    if (isUserStatusEnabled && req.body.assignee) {
       userStatusUpdate = await updateUserStatusOnTaskUpdate(req.body.assignee);
     }
     return res.json({
@@ -179,17 +183,23 @@ const getTask = async (req, res) => {
  */
 const updateTask = async (req, res) => {
   try {
+    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
+    const { userStatusFlag } = req.query;
+    const isUserStatusEnabled = userStatusFlag === "true";
     const task = await tasks.fetchTask(req.params.id);
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
     }
-    if (req.body.assignee) {
-      const response = await updateUserStatusOnTaskUpdate(req.body.assignee);
-      if (response?.status === 404) {
+    if (req.body?.assignee) {
+      const user = await userQuery.fetchUser({ username: req.body.assignee });
+      if (!user.userExists) {
         return res.boom.notFound("User doesn't exist");
       }
     }
     await tasks.updateTask(req.body, req.params.id);
+    if (isUserStatusEnabled && req.body.assignee) {
+      await updateUserStatusOnTaskUpdate(req.body.assignee);
+    }
     return res.status(204).send();
   } catch (err) {
     logger.error(`Error while updating task: ${err}`);
@@ -204,6 +214,9 @@ const updateTask = async (req, res) => {
  */
 const updateTaskStatus = async (req, res, next) => {
   try {
+    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
+    const { userStatusFlag } = req.query;
+    const isUserStatusEnabled = userStatusFlag === "true";
     let userStatusUpdate;
     const taskId = req.params.id;
     const { dev } = req.query;
@@ -264,7 +277,7 @@ const updateTaskStatus = async (req, res, next) => {
       }
     }
 
-    if (req.body.status === TASK_STATUS.COMPLETED && req.body.percentCompleted === 100) {
+    if (isUserStatusEnabled && req.body.status === TASK_STATUS.COMPLETED && req.body.percentCompleted === 100) {
       userStatusUpdate = await updateStatusOnTaskCompletion(userId);
     }
     return res.json({
