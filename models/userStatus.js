@@ -300,22 +300,22 @@ const updateStatusOnTaskCompletion = async (userId) => {
       },
     } = latestStatusData;
     if (hasActiveTask) {
-      if (state === userState.OOO) {
-        return updateFutureStatusToState(userStatusModel, latestStatusData, userState.ACTIVE);
-      } else {
-        if (state === userState.ACTIVE) {
+      switch (state) {
+        case userState.OOO:
+          return updateFutureStatusToState(userStatusModel, latestStatusData, userState.ACTIVE);
+        case userState.ACTIVE:
           return generateAlreadyExistingStatusResponse(userState.ACTIVE);
-        }
-        return updateCurrentStatusToState(userStatusModel, latestStatusData, userState.ACTIVE);
+        default:
+          return updateCurrentStatusToState(userStatusModel, latestStatusData, userState.ACTIVE);
       }
     } else {
-      if (state === userState.OOO) {
-        return updateFutureStatusToState(userStatusModel, latestStatusData, userState.IDLE);
-      } else {
-        if (state === userState.IDLE) {
+      switch (state) {
+        case userState.OOO:
+          return updateFutureStatusToState(userStatusModel, latestStatusData, userState.IDLE);
+        case userState.IDLE:
           return generateAlreadyExistingStatusResponse(userState.IDLE);
-        }
-        return updateCurrentStatusToState(userStatusModel, latestStatusData, userState.IDLE);
+        default:
+          return updateCurrentStatusToState(userStatusModel, latestStatusData, userState.IDLE);
       }
     }
   } catch (error) {
