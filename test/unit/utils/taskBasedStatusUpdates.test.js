@@ -9,6 +9,7 @@ const {
   checkIfUserHasLiveTasks,
   generateErrorResponse,
   createUserStatusWithState,
+  updateCurrentStatusToState,
 } = require("../../../utils/userStatus");
 
 describe("Task Based User Status Update Util Functions", function () {
@@ -185,6 +186,53 @@ describe("Task Based User Status Update Util Functions", function () {
       } catch (error) {
         expect(error).to.be.an.instanceof(Error);
         expect(error.message).to.equal(`Status Creation Failed.`);
+      }
+    });
+  });
+
+  describe("updateCurrentStatusToState", function () {
+    let latestStatusData;
+    let newState;
+    beforeEach(async function () {
+      const currentTimeStamp = new Date().getTime();
+      newState = userState.ACTIVE;
+      latestStatusData = {
+        id: "statusData123",
+        data: {
+          userId: "userId123",
+          currentStatus: {
+            state: userState.IDLE,
+            message: "",
+            from: currentTimeStamp,
+            until: "",
+            updatedAt: currentTimeStamp,
+          },
+        },
+      };
+    });
+    it("should update current status", async function () {
+      const mockCollection = {
+        doc: () => mockCollection,
+        update: sinon.stub().resolves(),
+      };
+      const response = await updateCurrentStatusToState(mockCollection, latestStatusData, newState);
+      expect(response).to.deep.equal({
+        status: "success",
+        message: "The status has been updated to ACTIVE",
+        data: { previousStatus: "IDLE", currentStatus: "ACTIVE" },
+      });
+    });
+
+    it("should throw an error if firebase query fails", async function () {
+      const mockCollection = {
+        doc: () => mockCollection,
+        update: sinon.stub().rejects(new Error("Firestore error")),
+      };
+      try {
+        await updateCurrentStatusToState(mockCollection, latestStatusData, newState);
+      } catch (error) {
+        expect(error).to.be.an.instanceof(Error);
+        expect(error.message).to.equal("error updating the current status.");
       }
     });
   });
