@@ -46,6 +46,9 @@ module.exports = () => {
       img: "./img.png",
       github_id: "whydonti",
       linkedin_id: "nikhil-bhandarkar",
+      roles: {
+        archived: true,
+      },
       twitter_id: "whatifi",
       phone: "1234567891",
       email: "abc1@gmail.com",
@@ -225,6 +228,7 @@ module.exports = () => {
       },
       roles: {
         member: true,
+        arvhied: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
