@@ -1,5 +1,4 @@
 const chai = require("chai");
-const sinon = require("sinon");
 const { expect } = chai;
 const firestore = require("../../utils/firestore");
 const addUser = require("../utils/addUser");
@@ -11,8 +10,6 @@ const { generateStatusDataForState } = require("../fixtures/userStatus/userStatu
 const allTasks = require("../fixtures/tasks/tasks");
 const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
-const userStatusModel = require("../../models/userStatus");
-// const userStatusUtil = require("../../utils/userStatus");
 
 describe("Task Based Status Updates", function () {
   describe("PATCH /tasks/self/:taskId - Update User Status Document on marking Task as Completed.", function () {
@@ -236,32 +233,6 @@ describe("Task Based Status Updates", function () {
       expect(res.body.userStatus.message).to.equal("The status has been updated to ACTIVE");
       expect(res.body.userStatus.data.previousStatus).to.equal(userState.IDLE);
       expect(res.body.userStatus.data.currentStatus).to.equal(userState.ACTIVE);
-    });
-
-    it("Should throw an error if error occurs.", async function () {
-      sinon.stub(userStatusModel, "updateUserStatusOnTaskUpdate").rejects(new Error("Firestore error"));
-
-      // sinon.stub(userStatusUtil,"getUserIdFromUserName").rejects(new Error("Firestore error"));
-      // sinon.stub(userStatusModel,"updateUserStatusOnNewTaskAssignment").rejects(new Error("Firestore error"));
-      // sinon.stub(firestore,"*").rejects(new Error("Firestore error"));
-
-      // sinon.stub(userStatusModel,"updateUserStatusOnNewTaskAssignment").throws(new Error("Firestore error"));
-      // sinon.stub(firestore.collection("usersStatus"),"where").throws(new Error("Firestore error"));
-      // sinon.stub(firestore.collection("usersStatus"),"get").throws(new Error("Firestore error"));
-      // sinon.stub(userStatusModel,"updateUserStatusOnTaskUpdate").rejects(new Error("Firestore error"));
-      // sinon.stub(userStatusModel,"updateUserStatusOnNewTaskAssignment").rejects(new Error("Firestore error"));
-      // sinon.stub(firestore.collection("usersStatus"),"where").rejects(new Error("Firestore error"));
-      // sinon.stub(firestore.collection("usersStatus"),"get").rejects(new Error("Firestore error"));
-
-      // const statusData = await generateStatusDataForState(userId, userState.IDLE);
-      // await firestore.collection("usersStatus").doc("userStatus").set(statusData);
-
-      await chai.request(app).post(`/tasks`).set("cookie", `${cookieName}=${superUserJwt}`).send(reqBody);
-      // expect(res.status).to.equal(200);
-      // expect(res.body.userStatus.status).to.equal("success");
-      // expect(res.body.userStatus.message).to.equal("The status has been updated to ACTIVE");
-      // expect(res.body.userStatus.data.previousStatus).to.equal(userState.IDLE);
-      // expect(res.body.userStatus.data.currentStatus).to.equal(userState.ACTIVE);
     });
 
     it("Should throw an error to if an invalid state is set in the Status.", async function () {
