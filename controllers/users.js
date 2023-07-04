@@ -8,7 +8,7 @@ const { logType } = require("../constants/logs");
 
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
-const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
+const { getPaginationLink, getUsernamesFromPRs, updateUserRole } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
@@ -612,8 +612,8 @@ const updateRoles = async (req, res) => {
     const result = await userQuery.fetchUser({ userId: req.params.id });
     if (result?.userExists) {
       const dataToUpdate = req.body;
-      const userQueryResponse = await userQuery.addOrUpdate(dataToUpdate, req.params.id);
-      if (userQueryResponse.isRoleUpdated) {
+      const response = await updateUserRole(result.user, dataToUpdate);
+      if (response.isRoleUpdated) {
         return res.json({
           message: "role updated successfully!",
         });

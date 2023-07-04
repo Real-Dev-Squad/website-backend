@@ -32,19 +32,6 @@ const addOrUpdate = async (userData, userId = null) => {
     if (userId !== null) {
       const user = await userModel.doc(userId).get();
       const isNewUser = !user.data();
-
-      if (Object.keys(userData).includes("member") || Object.keys(userData).includes("archived")) {
-        const roles = { ...user.data().roles };
-        const newRolesArray = Object.entries(userData);
-        if (roles[newRolesArray[0][0]] === newRolesArray[0][1]) return { isRoleUpdated: false };
-        await userModel.doc(userId).update({
-          ...user.data(),
-          roles: { ...user.data().roles, ...userData },
-        });
-
-        return { isRoleUpdated: true };
-      }
-
       // user exists update user
       if (user.data()) {
         await userModel.doc(userId).set({
