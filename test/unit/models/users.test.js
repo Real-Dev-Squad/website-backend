@@ -220,4 +220,27 @@ describe("users", function () {
       expect(data[0]).to.have.all.keys([...Object.keys(joinData[0]), "id"]);
     });
   });
+
+  describe("remove github token from users", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("return array of users", async function () {
+      const data = await users.usersWithGitHubToken();
+      expect(data).to.have.length(7);
+    });
+    it('removes token field from user"s data', async function () {
+      const data = await users.usersWithGitHubToken();
+      await users.removeGitHubToken(data[0]);
+    });
+  });
 });

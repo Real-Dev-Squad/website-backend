@@ -576,6 +576,31 @@ const fetchAllUsers = async () => {
   return users;
 };
 
+const usersWithGitHubToken = async () => {
+  try {
+    const users = [];
+    const usersRef = await userModel.where("tokens", "!=", false).get();
+    usersRef.forEach((user) => {
+      users.push(user.id);
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Error while fetching all users with tokens field: ${err}`);
+    throw err;
+  }
+};
+
+const removeGitHubToken = async (userId) => {
+  try {
+    const userRef = userModel.doc(userId);
+    await userRef.update({
+      tokens: admin.firestore.FieldValue.delete(),
+    });
+  } catch (err) {
+    logger.error(`Error while deleting tokens field: ${err}`);
+    throw err;
+  }
+};
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -596,4 +621,6 @@ module.exports = {
   getUserImageForVerification,
   getDiscordUsers,
   fetchAllUsers,
+  usersWithGitHubToken,
+  removeGitHubToken,
 };

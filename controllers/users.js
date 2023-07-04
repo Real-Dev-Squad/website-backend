@@ -607,6 +607,31 @@ const setInDiscordScript = async (req, res) => {
   }
 };
 
+const removeGitHubTokenFromAllUsers = async (req, res) => {
+  try {
+    const users = await userQuery.usersWithGitHubToken();
+    const length = users.length;
+
+    if (length === 0) {
+      return res.status(500).json({ message: "No users found with github Token!" });
+    }
+
+    const allPromises = [];
+
+    users.forEach((id) => {
+      allPromises.push(userQuery.removeGitHubToken(id));
+    });
+
+    await Promise.all(allPromises);
+    return res.status(200).json({
+      message: "Github Token removed from all users!",
+      usersFoundWithToken: length,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -631,4 +656,5 @@ module.exports = {
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
+  removeGitHubTokenFromAllUsers,
 };

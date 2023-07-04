@@ -1229,4 +1229,32 @@ describe("Users", function () {
         });
     });
   });
+
+  describe("PATCH /users/removeGitHubToken", function () {
+    beforeEach(async function () {
+      await addOrUpdate(userData[0]);
+      await addOrUpdate(userData[1]);
+      await addOrUpdate(userData[2]);
+      await addOrUpdate(userData[3]);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should remove all the users with token field", function (done) {
+      chai
+        .request(app)
+        .patch("/users/removeGitHubToken")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Github Token removed from all users!");
+          return done();
+        });
+    });
+  });
 });
