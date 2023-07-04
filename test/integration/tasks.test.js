@@ -325,14 +325,41 @@ describe("Tasks", function () {
         isNoteworthy: true,
       };
       taskId = (await tasks.updateTask(taskData)).taskId;
+      const dependsOn = ["taskId5", "taskId4"];
       const res = await chai
         .request(app)
         .patch(`/tasks/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send({ dependsOn: ["taskId5", "taskId4"] });
+        .send({ dependsOn });
       expect(res).to.have.status(204);
-    });
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
 
+      expect(res2).to.have.status(200);
+      expect(res2.body.taskData.dependsOn).to.be.a("array");
+      res2.body.taskData.dependsOn.forEach((taskId) => {
+        expect(dependsOn).to.include(taskId);
+      });
+
+      return taskId;
+    });
+    it("should check updated dependsOn", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("task returned successfully");
+          expect(res.body.taskData).to.be.a("object");
+          expect(res.body.taskData.dependsOn).to.be.a("array");
+
+          return done();
+        });
+    });
     it("Should update the task status collapsed for the given taskid", function (done) {
       chai
         .request(app)
