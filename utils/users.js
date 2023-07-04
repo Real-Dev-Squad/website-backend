@@ -1,4 +1,3 @@
-const { func } = require("joi");
 const { fetchUser, addOrUpdate } = require("../models/users");
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
