@@ -142,6 +142,28 @@ const getTasks = async (req, res, next) => {
       .insensitive()
       .valid(...MAPPED_TASK_STATUS_ENUM)
       .optional(),
+    page: joi.number().integer().min(0),
+    next: joi
+      .string()
+      .optional()
+      .when("page", {
+        is: joi.exist(),
+        then: joi.custom((_, helpers) => helpers.message("Both next and page cannot be passed")),
+      }),
+    prev: joi
+      .string()
+      .optional()
+      .when("page", {
+        is: joi.exist(),
+        then: joi.custom((_, helpers) => helpers.message("Both prev and page cannot be passed")),
+      })
+      .concat(
+        joi.when("next", {
+          is: joi.exist(),
+          then: joi.custom((_, helpers) => helpers.message("Both prev and next cannot be passed")),
+        })
+      ),
+    size: joi.number().integer().positive().min(1).max(100).optional(),
   });
 
   try {
