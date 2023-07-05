@@ -1267,6 +1267,28 @@ describe("Users", function () {
         expect(document).to.have.property(`github_user_id`);
       });
     });
+    it("Should return details of users with invalid github username", async function () {
+      fetchStub.rejects({ response: { status: 404 } });
+      const usersMigrateResponse = await chai
+        .request(app)
+        .post(`/users/migrate`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`);
+      expect(usersMigrateResponse).to.have.status(200);
+      expect(usersMigrateResponse.body.message).to.be.equal("Result of migration");
+      expect(usersMigrateResponse.body).to.have.property("data");
+      expect(usersMigrateResponse.body.data).to.have.property("totalUsers");
+      expect(usersMigrateResponse.body.data.totalUsers).to.be.equal(2);
+      expect(usersMigrateResponse.body.data).to.have.property("usersUpdated");
+      expect(usersMigrateResponse.body.data.usersUpdated).to.be.equal(0);
+      expect(usersMigrateResponse.body.data).to.have.property("usersNotUpdated");
+      expect(usersMigrateResponse.body.data.usersNotUpdated).to.be.equal(2);
+      expect(usersMigrateResponse.body.data).to.have.property("invalidUsersDetails");
+      usersMigrateResponse.body.data.invalidUsersDetails.forEach((document) => {
+        expect(document).to.have.property("userId");
+        expect(document).to.have.property("username");
+        expect(document).to.have.property("githubUsername");
+      });
+    });
     it("Should return unauthorized error when not logged in", function (done) {
       chai
         .request(app)
