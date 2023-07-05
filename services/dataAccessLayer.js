@@ -1,71 +1,26 @@
 const userQuery = require("../models/users");
-const { getPaginationLink } = require("../utils/users");
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const { getQualifiers } = require("../utils/helper");
-const { getUsernamesFromPRs } = require("../utils/users");
-const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 
-const retrieveUsers = async (req, res) => {
-  try {
-    // getting user details by id if present.
-    const query = req.query?.query ?? "";
-    const qualifiers = getQualifiers(query);
-
-    // getting user details by id if present.
-    if (req.query.id) {
-      const id = req.query.id;
-      let result;
-      try {
-        result = await userQuery.fetchUser({ userId: id });
-      } catch (error) {
-        logger.error(`Error while fetching user: ${error}`);
-        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
-      }
-
-      if (!result.userExists) {
-        return res.boom.notFound("User doesn't exist");
-      }
-
-      const user = result.user;
-      removeSensitiveInfo(user, ["phone", "email", "chaincode", "tokens"]);
-
-      return res.json({
-        message: "User returned successfully!",
-        user,
-      });
-    }
-
-    if (qualifiers?.filterBy) {
-      const allPRs = await getFilteredPRsOrIssues(qualifiers);
-      const usernames = getUsernamesFromPRs(allPRs);
-      const { users } = await userQuery.fetchUsers(usernames);
-      removeSensitiveInfo(users, ["phone", "email", "chaincode", "tokens"]);
-
-      return res.json({
-        message: "Users returned successfully!",
-        users,
-      });
-    }
-
+const retrieveUsers = async ({ id = null, usernames = null, req = null }) => {
+  if (id) {
+    const result = await userQuery.fetchUser({ userId: id });
+    removeSensitiveInfo(result.user);
+    return result;
+  } else if (usernames) {
+    const { users } = await userQuery.fetchUsers(usernames);
+    users.forEach((element) => {
+      removeSensitiveInfo(element);
+    });
+    return users;
+  } else {
     const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(req.query);
     allUsers.forEach((element) => {
-      removeSensitiveInfo(element, ["phone", "email", "chaincode","tokens"]);
+      removeSensitiveInfo(element);
     });
-    return res.json({
-      message: "Users returned successfully!",
-      users: allUsers,
-      links: {
-        next: nextId ? getPaginationLink(req.query, "next", nextId) : "",
-        prev: prevId ? getPaginationLink(req.query, "prev", prevId) : "",
-      },
-    });
-  } catch (error) {
-    logger.error(`Error while fetching all users: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    return { allUsers, nextId, prevId };
   }
 };
 
-const removeSensitiveInfo = function (obj,properties = ["phone", "email", "chaincode", "tokens"]) {
+const removeSensitiveInfo = function (obj, properties = ["phone", "email", "chaincode", "tokens"]) {
   for (let i = 0; i < properties.length; i++) {
     if (Object.prototype.hasOwnProperty.call(obj, properties[i])) {
       delete obj[properties[i]];
@@ -75,4 +30,5 @@ const removeSensitiveInfo = function (obj,properties = ["phone", "email", "chain
 
 module.exports = {
   retrieveUsers,
+  removeSensitiveInfo,
 };

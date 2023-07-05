@@ -13,6 +13,10 @@ const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
+const { getPaginationLink } = require("../utils/users");
+const { getQualifiers } = require("../utils/helper");
+const { getUsernamesFromPRs } = require("../utils/users");
+const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -71,7 +75,58 @@ const getUserById = async (req, res) => {
  */
 
 const getUsers = async (req, res) => {
-  return dataAccess.retrieveUsers(req, res);
+  try {
+    
+    // getting user details by id if present.
+    const query = req.query?.query ?? "";
+    const qualifiers = getQualifiers(query);
+  
+    // getting user details by id if present.
+    if (req.query.id) {
+      const id = req.query.id;
+      let result;
+      try {
+        result = await dataAccess.retrieveUsers({id:id});
+      } catch (error) {
+        logger.error(`Error while fetching user: ${error}`);
+        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+      }
+
+      if (!result.userExists) {
+        return res.boom.notFound("User doesn't exist");
+      }
+
+      const user = result.user;  
+      return res.json({
+        message: "User returned successfully!",
+        user,
+      });
+    }
+
+    if (qualifiers?.filterBy) {
+      const allPRs = await gilteredPRsOrIssues(qualifiers);
+      const usernames = getUsernamesFromPRs(allPRs);
+      const users = await dataAccess.retrieveUsers({usernames:usernames});
+      
+      return res.json({
+        message: "Users returned successfully!",
+        users,
+      });
+    }
+    
+    const data = await dataAccess.retrieveUsers({req: req});
+    return res.json({
+      message: "Users returned successfully!",
+      users: data.allUsers,
+      links: {
+        next: data.nextId ? getPaginationLink(req.query, "next", data.nextId) : "",
+        prev: data.prevId ? getPaginationLink(req.query, "prev", data.prevId) : "",
+      },
+    });
+  } catch (error) {
+    logger.error(`Error while fetching all users: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
 };
 
 /**
@@ -123,7 +178,7 @@ const getUserSkills = async (req, res) => {
  */
 
 const getSuggestedUsers = async (req, res) => {
-  try {
+  try {etF
     const { users } = await userQuery.getSuggestedUsers(req.params.skillId);
 
     return res.json({
