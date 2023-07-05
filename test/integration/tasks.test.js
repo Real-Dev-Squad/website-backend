@@ -310,20 +310,6 @@ describe("Tasks", function () {
         });
     });
     it("Should update dependency", async function () {
-      // const taskData = {
-      //   title: "Test task",
-      //   type: "feature",
-      //   endsOn: 1234,
-      //   startedOn: 4567,
-      //   status: "COMPLETED",
-      //   dependsOn: ["taskId2", "taskId3"],
-      //   percentCompleted: 100,
-      //   participants: [],
-      //   assignee: appOwner.username,
-      //   completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-      //   lossRate: { [DINERO]: 1 },
-      //   isNoteworthy: true,
-      // };
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
       const dependsOn = ["taskId5", "taskId4"];
       const res = await chai
