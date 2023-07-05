@@ -2,8 +2,9 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router();
 const auth = require("../controllers/auth");
-const { userDeviceInfoValidator, qrCodeAuthValidator } = require("../middlewares/validators/qrCodeAuth");
 const authenticate = require("../middlewares/authenticate");
+const userDeviceInfoValidator = require("../middlewares/validators/qrCodeAuth");
+const qrCodeAuthValidator = require("../middlewares/validators/qrCodeAuth");
 const qrCodeAuth = require("../controllers/qrCodeAuth");
 
 router.get("/github/login", passport.authenticate("github", { scope: ["user:email"] }));
