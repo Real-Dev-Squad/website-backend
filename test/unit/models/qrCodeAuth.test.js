@@ -4,6 +4,7 @@ const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const firestore = require("../../../utils/firestore");
 const qrCodeAuth = require("../../../models/qrCodeAuth");
+const { userDeviceInfoDataArray } = require("../../fixtures/qrCodeAuth/qrCodeAuth");
 const qrCodeAuthModel = firestore.collection("QrCodeAuth");
 const users = require("../../../models/users");
 const userDataArray = require("../../fixtures/user/user")();
@@ -21,11 +22,11 @@ describe("mobile auth", function () {
       const { userId } = await users.addOrUpdate(userData);
 
       const userDeviceInfoData = {
+        ...userDeviceInfoDataArray[0],
         user_id: userId,
-        device_info: "TEST_DEVICE_INFO",
-        device_id: "TEST_DEVICE_ID",
         authorization_status: "NOT_INIT",
       };
+
       const response = await qrCodeAuth.storeUserDeviceInfo(userDeviceInfoData);
 
       const {

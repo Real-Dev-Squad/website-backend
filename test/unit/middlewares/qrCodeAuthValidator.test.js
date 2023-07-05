@@ -1,15 +1,13 @@
 const Sinon = require("sinon");
 const { validateAuthStatus, storeUserDeviceInfo } = require("../../../middlewares/validators/qrCodeAuth");
 const { expect } = require("chai");
-
+const { userDeviceInfoDataArray } = require("../../fixtures/qrCodeAuth/qrCodeAuth");
 describe("qrCodeAuth", function () {
   describe("test post call validator", function () {
     it("Allows request to pass on valid params", async function () {
       const req = {
         body: {
-          user_id: "TEST_USER_ID",
-          device_info: "TEST_DEVICE_INFO",
-          device_id: "TEST_DEVICE_ID",
+          ...userDeviceInfoDataArray[0],
         },
       };
 
@@ -22,9 +20,8 @@ describe("qrCodeAuth", function () {
     it("It does not allow request to pass on invalid params", async function () {
       const req = {
         body: {
+          ...userDeviceInfoDataArray[0],
           user_id: 12,
-          device_info: "TEST_DEVICE_INFO",
-          device_id: "TEST_DEVICE_ID",
         },
       };
 
