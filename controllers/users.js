@@ -633,14 +633,11 @@ const migrate = async (req, res) => {
               countUserFound++;
             })
             .catch((error) => {
+              countUserNotFound++;
+              const invalidUsers = { userId, username, githubUsername };
+              usersNotFound.push(invalidUsers);
               if (error.response && error.response.status === 404) {
-                countUserNotFound++;
-                const invalidUsers = {
-                  userId: `${userId}`,
-                  username: `${username}`,
-                  githubUsername: `${githubUsername}`,
-                };
-                usersNotFound.push(invalidUsers);
+                logger.error("GitHub user not found", error);
               } else {
                 logger.error("An error occurred at axios.get:", error);
               }
