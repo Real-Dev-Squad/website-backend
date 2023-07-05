@@ -12,6 +12,10 @@ const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+const { setInDiscordFalseScript } = require("../services/discordService");
+const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
+const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
+const { fetchAllUsers } = require("../models/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -69,10 +73,39 @@ const getUserById = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
+const removePersonalDetails = (user) => {
+  const { phone, email, ...safeUser } = user;
+  return safeUser;
+};
+
 const getUsers = async (req, res) => {
   try {
     const query = req.query?.query ?? "";
     const qualifiers = getQualifiers(query);
+
+    // getting user details by id if present.
+    if (req.query.id) {
+      const id = req.query.id;
+      let result;
+      try {
+        result = await userQuery.fetchUser({ userId: id });
+      } catch (error) {
+        logger.error(`Error while fetching user: ${error}`);
+        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+      }
+
+      if (!result.userExists) {
+        return res.boom.notFound("User doesn't exist");
+      }
+
+      const User = { ...result.user };
+      const user = removePersonalDetails(User);
+
+      return res.json({
+        message: "User returned successfully!",
+        user,
+      });
+    }
 
     if (qualifiers?.filterBy) {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);
@@ -247,18 +280,107 @@ const updateSelf = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const postUserPicture = async (req, res) => {
+  const { file } = req;
+  const { id: userId, discordId } = req.userData;
+  const { coordinates } = req.body;
+  let discordAvatarUrl = "";
+  let imageData;
+  let verificationResult;
   try {
-    const { file } = req;
-    const { id: userId } = req.userData;
-    const { coordinates } = req.body;
-    const coordinatesObject = coordinates && JSON.parse(coordinates);
-    const imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
-    return res.json({
-      message: "Profile picture uploaded successfully!",
-      image: imageData,
-    });
+    discordAvatarUrl = await generateDiscordProfileImageUrl(discordId);
   } catch (error) {
     logger.error(`Error while adding profile picture of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+  try {
+    const coordinatesObject = coordinates && JSON.parse(coordinates);
+    imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
+  } catch (error) {
+    logger.error(`Error while adding profile picture of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+  try {
+    verificationResult = await userQuery.addForVerification(userId, discordId, imageData.url, discordAvatarUrl);
+  } catch (error) {
+    logger.error(`Error while adding profile picture of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+  return res.status(201).json({
+    message: `Profile picture uploaded successfully! ${verificationResult.message}`,
+    image: imageData,
+  });
+};
+
+/**
+ * Updates the user data
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const verifyUserImage = async (req, res) => {
+  try {
+    const { type: imageType } = req.query;
+    const { id: userId } = req.params;
+    await userQuery.markAsVerified(userId, imageType);
+    return res.json({
+      message: `${imageType} image was verified successfully!`,
+    });
+  } catch (error) {
+    logger.error(`Error while verifying image of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const markUnverified = async (req, res) => {
+  try {
+    const [usersInRdsDiscordServer, allRdsLoggedInUsers] = await Promise.all([getDiscordMembers(), fetchAllUsers()]);
+    const rdsUserMap = {};
+    const unverifiedRoleId = config.get("discordUnverifiedRoleId");
+    const usersToApplyUnverifiedRole = [];
+    const addRolePromises = [];
+    const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+
+    allRdsLoggedInUsers.forEach((user) => {
+      rdsUserMap[user.discordId] = true;
+    });
+
+    usersInRdsDiscordServer.forEach((discordUser) => {
+      const found = discordUser.roles.find((role) => role === discordDeveloperRoleId);
+      if (found && !rdsUserMap[discordUser.user.id]) {
+        usersToApplyUnverifiedRole.push(discordUser.user.id);
+      }
+    });
+
+    usersToApplyUnverifiedRole.forEach((id) => {
+      addRolePromises.push(addRoleToUser(id, unverifiedRoleId));
+    });
+
+    await Promise.all(addRolePromises);
+    return res.json({ message: "ROLES APPLIED SUCCESSFULLY" });
+  } catch (err) {
+    logger.error(err);
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
+/**
+ * Updates the user data
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getUserImageForVerification = async (req, res) => {
+  try {
+    const { id: userId } = req.params;
+    const userImageVerificationData = await userQuery.getUserImageForVerification(userId);
+    return res.json({
+      message: "User image verification record fetched successfully!",
+      data: userImageVerificationData,
+    });
+  } catch (error) {
+    logger.error(`Error while verifying image of user: ${error}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
@@ -454,15 +576,34 @@ const filterUsers = async (req, res) => {
       return res.boom.badRequest("filter for item not provided");
     }
     const users = await userQuery.getUsersBasedOnFilter(req.query);
-
+    const sanitizedUsers = users.map((user) => {
+      delete user.tokens;
+      delete user.email;
+      delete user.phone;
+      return user;
+    });
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
-      users,
+      users: sanitizedUsers,
       count: users.length,
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
+const nonVerifiedDiscordUsers = async (req, res) => {
+  const data = await userQuery.getDiscordUsers();
+  return res.json(data);
+};
+
+const setInDiscordScript = async (req, res) => {
+  try {
+    await setInDiscordFalseScript();
+    return res.json({ message: "Successfully added the in_discord field to false for all users" });
+  } catch (err) {
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -485,4 +626,9 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
+  verifyUserImage,
+  getUserImageForVerification,
+  nonVerifiedDiscordUsers,
+  setInDiscordScript,
+  markUnverified,
 };

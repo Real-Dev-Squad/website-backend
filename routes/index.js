@@ -13,6 +13,7 @@ app.use("/members", require("./members.js"));
 app.use("/pullrequests", require("./pullrequests.js"));
 app.use("/stocks", require("./stocks.js"));
 app.use("/tasks", require("./tasks.js"));
+app.use("/taskRequests", require("./taskRequests"));
 app.use("/trade", require("./trading.js"));
 app.use("/users/status", require("./userStatus.js"));
 app.use("/users", require("./users.js"));
@@ -24,8 +25,10 @@ app.use("/levels", require("./levels.js"));
 app.use("/items", require("./items.js"));
 app.use("/cache", require("./cloudflareCache.js"));
 app.use("/external-accounts", require("./external-accounts.js"));
+app.use("/events", require("./events.js"));
 app.use("/discord-actions", require("./discordactions.js"));
 app.use("/issues", require("./issues.js"));
 app.use("/progresses", require("./progresses.js"));
+app.use("/monitor", require("./monitor.js"));
 
 module.exports = app;

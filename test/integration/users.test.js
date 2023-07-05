@@ -15,6 +15,7 @@ const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
+const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const joinData = require("../fixtures/user/join");
 const {
   userStatusDataAfterSignup,
@@ -24,6 +25,10 @@ const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
 
 const cookieName = config.get("userToken.cookieName");
+const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
+const Sinon = require("sinon");
+const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
+const photoVerificationModel = firestore.collection("photo-verification");
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -37,6 +42,10 @@ describe("Users", function () {
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+
+    const userDocRef = photoVerificationModel.doc();
+    userPhotoVerificationData.userId = userId;
+    await userDocRef.set(userPhotoVerificationData);
   });
 
   afterEach(async function () {
@@ -124,7 +133,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -140,12 +148,31 @@ describe("Users", function () {
           return done();
         });
     });
+    it("Should get all the users with archived false", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          const userData = res.body.users;
+          userData.forEach((user) => {
+            expect(user.roles.archived).to.equal(false);
+          });
+          return done();
+        });
+    });
 
     it("Should get all the users in system when query params are valid", function (done) {
       chai
         .request(app)
         .get("/users")
-        .set("cookie", `${cookieName}=${jwt}`)
         .query({
           size: 1,
           page: 0,
@@ -171,7 +198,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .set("cookie", `${cookieName}=${jwt}`)
         .query({
           size: -1,
           page: -1,
@@ -194,7 +220,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .set("cookie", `${cookieName}=${jwt}`)
         .query({
           size: 101,
         })
@@ -216,7 +241,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users?size=2")
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -237,7 +261,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?next=${userId}&prev=${userId}&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -254,7 +277,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?next=${userId}&page=1&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -271,7 +293,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?page=1&prev=${userId}&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -288,7 +309,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?search=an&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -313,7 +333,6 @@ describe("Users", function () {
       chai
         .request(app)
         .get(`/users?page=1&size=2`)
-        .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -333,8 +352,7 @@ describe("Users", function () {
     });
 
     it("Should get next and previous page results based upon the links in the response", async function () {
-      const response = await chai.request(app).get(`/users?size=2`).set("cookie", `${cookieName}=${jwt}`);
-
+      const response = await chai.request(app).get(`/users?size=2`);
       expect(response).to.have.status(200);
       expect(response.body).to.be.a("object");
       expect(response.body.message).to.equal("Users returned successfully!");
@@ -343,7 +361,7 @@ describe("Users", function () {
       expect(response.body.links).to.have.property("prev");
 
       const nextPageLink = response.body.links.next;
-      const nextPageResponse = await chai.request(app).get(nextPageLink).set("cookie", `${cookieName}=${jwt}`);
+      const nextPageResponse = await chai.request(app).get(nextPageLink);
 
       expect(nextPageResponse).to.have.status(200);
       expect(nextPageResponse.body).to.be.a("object");
@@ -354,7 +372,7 @@ describe("Users", function () {
       expect(nextPageResponse.body.users).to.have.length(2);
 
       const prevPageLink = nextPageResponse.body.links.prev;
-      const previousPageResponse = await chai.request(app).get(prevPageLink).set("cookie", `${cookieName}=${jwt}`);
+      const previousPageResponse = await chai.request(app).get(prevPageLink);
 
       expect(previousPageResponse).to.have.status(200);
       expect(previousPageResponse.body).to.be.a("object");
@@ -587,6 +605,48 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("GET /users/?id", function () {
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("Should return given user by id", async function () {
+      const { userId } = await addOrUpdate(userData[0]);
+      const res = await chai.request(app).get(`/users/?id=${userId}`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("User returned successfully!");
+      expect(res.body.user).to.be.a("object");
+      expect(Object.keys(res.body.user)).to.include.members([
+        "username",
+        "first_name",
+        "last_name",
+        "yoe",
+        "linkedin_id",
+        "github_id",
+        "isMember",
+        "roles",
+      ]);
+      expect(Object.keys(res.body.user)).to.not.include.members(["phone", "email"]);
+      expect(res.body.user.id).to.equal(userId);
+    });
+
+    it("Should return 404 if user not Found", function (done) {
+      chai
+        .request(app)
+        .get(`/users/?id=anyRandomuserId`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User doesn't exist");
           return done();
         });
     });
@@ -1036,6 +1096,135 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /users/picture/verify/id", function () {
+    it("Should verify the discord image of the user", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/picture/verify/${userId}?type=discord`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("discord image was verified successfully!");
+          return done();
+        });
+    });
+    it("Should throw for wrong query while verifying the discord image of the user", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/picture/verify/${userId}?type=RANDOM`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Invalid verification type was provided!");
+          return done();
+        });
+    });
+  });
+  describe("GET /users/picture/id", function () {
+    it("Should get the user's verification record", function (done) {
+      chai
+        .request(app)
+        .get(`/users/picture/${userId}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.data).to.deep.equal(userPhotoVerificationData);
+          expect(res.body.message).to.equal("User image verification record fetched successfully!");
+          return done();
+        });
+    });
+    it("Should throw error if no user's verification record was found", function (done) {
+      chai
+        .request(app)
+        .get("/users/picture/some-unknown-user-id")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          expect(res.body.message).to.equal("An internal server error occurred");
+          return done();
+        });
+    });
+  });
+
+  describe("POST /update-in-discord", function () {
+    it("it returns proper response", function (done) {
+      chai
+        .request(app)
+        .post("/users/update-in-discord")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Successfully added the in_discord field to false for all users");
+          return done();
+        });
+    });
+  });
+
+  describe("POST /", function () {
+    let fetchStub;
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(global, "fetch");
+    });
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
+    });
+    it("tests adding unverified role to user", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+      chai
+        .request(app)
+        .post("/users")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(fetchStub.calledOnce).to.be.equal(true);
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("ROLES APPLIED SUCCESSFULLY");
+          return done();
+        });
+    });
+
+    it("Gives internal server error", function (done) {
+      fetchStub.throws(new Error("OOps"));
+      chai
+        .request(app)
+        .post("/users")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
           return done();
         });
     });
