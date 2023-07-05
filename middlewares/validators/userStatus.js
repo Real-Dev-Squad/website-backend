@@ -72,6 +72,28 @@ const validateUserStatus = (req, res, next) => {
   validateUserStatusData(todaysTime, req, res, next);
 };
 
+const validateGetQueryParams = async (req, res, next) => {
+  const schema = Joi.object()
+    .keys({
+      taskStatus: Joi.string()
+        .trim()
+        .valid(userState.IDLE)
+        .error(new Error(`Invalid state value passed for taskStatus.`)),
+    })
+    .messages({
+      "object.unknown": "Invalid query param provided.",
+    });
+
+  try {
+    await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    logger.error(`Error validating Query Params for GET ${error.message}`);
+    res.boom.badRequest(error);
+  }
+};
+
 module.exports = {
   validateUserStatus,
+  validateGetQueryParams,
 };

@@ -10,9 +10,9 @@ const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const { SUPERUSER } = require("../constants/roles");
-const { validateUserStatus } = require("../middlewares/validators/userStatus");
+const { validateUserStatus, validateGetQueryParams } = require("../middlewares/validators/userStatus");
 
-router.get("/", getAllUserStatus);
+router.get("/", validateGetQueryParams, getAllUserStatus);
 router.get("/self", authenticate, getUserStatus);
 router.get("/:userId", getUserStatus);
 router.patch("/self", authenticate, validateUserStatus, updateUserStatus);
