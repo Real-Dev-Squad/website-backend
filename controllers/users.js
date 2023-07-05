@@ -104,7 +104,7 @@ const getUsers = async (req, res) => {
     }
 
     if (qualifiers?.filterBy) {
-      const allPRs = await gilteredPRsOrIssues(qualifiers);
+      const allPRs = await getFilteredPRsOrIssues(qualifiers);
       const usernames = getUsernamesFromPRs(allPRs);
       const users = await dataAccess.retrieveUsers({usernames:usernames});
       
