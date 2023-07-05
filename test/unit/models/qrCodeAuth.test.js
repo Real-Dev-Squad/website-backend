@@ -3,8 +3,6 @@ const { expect } = chai;
 
 const cleanDb = require("../../utils/cleanDb");
 const firestore = require("../../../utils/firestore");
-// const userDeviceInfo = require("../../../models/qrCodeAuth");
-// const userDeviceInfoModel = firestore.collection("QrCodeAuth");
 const qrCodeAuth = require("../../../models/qrCodeAuth");
 const qrCodeAuthModel = firestore.collection("QrCodeAuth");
 const users = require("../../../models/users");
