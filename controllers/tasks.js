@@ -50,35 +50,66 @@ const addNewTask = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
+
+const fetchTasksWithRdsAssigneeInfo = async (allTasks) => {
+  const tasksWithRdsAssigneeInfo = allTasks.map(async (task) => {
+    /*
+     If the issue has a "github.issue" inner object and a property "assignee",
+     then fetch the RDS user information with GitHub username in "assignee"
+    */
+    if (Object.keys(task).includes("github")) {
+      if (Object.keys(task.github.issue).includes("assignee")) {
+        return {
+          ...task,
+          github: {
+            ...task.github,
+            issue: {
+              ...task.github.issue,
+              assigneeRdsInfo: await getRdsUserInfoByGitHubUsername(task.github.issue.assignee),
+            },
+          },
+        };
+      }
+    }
+    return task;
+  });
+  const tasks = await Promise.all(tasksWithRdsAssigneeInfo);
+  return tasks;
+};
+
+const fetchPaginatedTasks = async (query) => {
+  try {
+    const tasksData = await tasks.fetchPaginatedTasks(query);
+    const { allTasks, next, prev } = tasksData;
+    const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
+
+    return {
+      tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
+      next,
+      prev,
+    };
+  } catch (err) {
+    logger.error(`Error while fetching paginated tasks ${err}`);
+    return err;
+  }
+};
+
 const fetchTasks = async (req, res) => {
   try {
-    const { dev, status } = req.query;
-    const { dev: transformedDev, status: transformedStatus } = transformQuery(dev, status);
+    const { dev, status, page, size, prev, next } = req.query;
+    const transformedQuery = transformQuery(dev, status, size, page);
 
-    const allTasks = await tasks.fetchTasks(transformedDev, transformedStatus);
-    const fetchTasksWithRdsAssigneeInfo = allTasks.map(async (task) => {
-      /*
-       If the issue has a "github.issue" inner object and a property "assignee",
-       then fetch the RDS user information with GitHub username in "assignee"
-      */
-      if (Object.keys(task).includes("github")) {
-        if (Object.keys(task.github.issue).includes("assignee")) {
-          return {
-            ...task,
-            github: {
-              ...task.github,
-              issue: {
-                ...task.github.issue,
-                assigneeRdsInfo: await getRdsUserInfoByGitHubUsername(task.github.issue.assignee),
-              },
-            },
-          };
-        }
-      }
-      return task;
-    });
+    if (dev) {
+      const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next });
+      return res.json({
+        message: "Tasks returned successfully!",
+        ...paginatedTasks,
+      });
+    }
 
-    const tasksWithRdsAssigneeInfo = await Promise.all(fetchTasksWithRdsAssigneeInfo);
+    const allTasks = await tasks.fetchTasks();
+    const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
+
     return res.json({
       message: "Tasks returned successfully!",
       tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
