@@ -624,6 +624,11 @@ const updateUserNickname = async (req, res) => {
     const response = await setUserDiscordNickname(userName, discordId);
 
     return res.json({
+      userAffected: {
+        userId: req.params.userId,
+        username: userName,
+        discordId,
+      },
       message: response,
     });
   } catch (err) {
