@@ -14,7 +14,6 @@ chai.use(chaiHttp);
 const githubUserInfo = require("../fixtures/auth/githubUserInfo")();
 
 describe("auth", function () {
-  beforeEach(async function () {});
   afterEach(async function () {
     await cleanDb();
 
