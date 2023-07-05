@@ -9,13 +9,12 @@ const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
 const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
-const { getPaginationLink } = require("../utils/users");
 const { getQualifiers } = require("../utils/helper");
-const { getUsernamesFromPRs } = require("../utils/users");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 
 const verifyUser = async (req, res) => {
@@ -76,27 +75,24 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    
     // getting user details by id if present.
     const query = req.query?.query ?? "";
     const qualifiers = getQualifiers(query);
-  
+
     // getting user details by id if present.
     if (req.query.id) {
       const id = req.query.id;
       let result;
       try {
-        result = await dataAccess.retrieveUsers({id:id});
+        result = await dataAccess.retrieveUsers({ id: id });
       } catch (error) {
         logger.error(`Error while fetching user: ${error}`);
         return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
       }
-
       if (!result.userExists) {
         return res.boom.notFound("User doesn't exist");
       }
-
-      const user = result.user;  
+      const user = result.user;
       return res.json({
         message: "User returned successfully!",
         user,
@@ -104,17 +100,16 @@ const getUsers = async (req, res) => {
     }
 
     if (qualifiers?.filterBy) {
-      const allPRs = await gilteredPRsOrIssues(qualifiers);
+      const allPRs = await getFilteredPRsOrIssues(qualifiers);
       const usernames = getUsernamesFromPRs(allPRs);
-      const users = await dataAccess.retrieveUsers({usernames:usernames});
-      
+      const users = await dataAccess.retrieveUsers({ usernames: usernames });
       return res.json({
         message: "Users returned successfully!",
         users,
       });
     }
-    
-    const data = await dataAccess.retrieveUsers({req: req});
+
+    const data = await dataAccess.retrieveUsers({ req: req });
     return res.json({
       message: "Users returned successfully!",
       users: data.allUsers,
@@ -178,7 +173,7 @@ const getUserSkills = async (req, res) => {
  */
 
 const getSuggestedUsers = async (req, res) => {
-  try {etF
+  try {
     const { users } = await userQuery.getSuggestedUsers(req.params.skillId);
 
     return res.json({
