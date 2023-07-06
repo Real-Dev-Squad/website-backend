@@ -143,9 +143,9 @@ function getUsernamesFromPRs(allPRs) {
 const checkRoleToUpdate = async (userData, newRoles) => {
   const roles = { ...userData.roles };
   const newRolesArray = Object.entries(newRoles);
-  if (roles[newRolesArray[0][0]] === newRolesArray[0][1]) return { isRoleUpdated: false };
+  if (roles[newRolesArray[0][0]] === newRolesArray[0][1]) return { updateRole: false };
   const newUserRoles = { roles: { ...userData.roles, ...newRoles } };
-  return { isRoleUpdated: true, newUserRoles };
+  return { updateRole: true, newUserRoles };
 };
 
 module.exports = {

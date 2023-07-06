@@ -613,8 +613,8 @@ const updateRoles = async (req, res) => {
     if (result?.userExists) {
       const dataToUpdate = req.body;
       const response = await checkRoleToUpdate(result.user, dataToUpdate);
-      await userQuery.addOrUpdate(response.newUserRoles, result.user.id);
-      if (response.isRoleUpdated) {
+      if (response.updateRole) {
+        await userQuery.addOrUpdate(response.newUserRoles, result.user.id);
         return res.json({
           message: "role updated successfully!",
         });
