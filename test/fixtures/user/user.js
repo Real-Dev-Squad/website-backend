@@ -167,6 +167,7 @@ module.exports = () => {
       roles: {
         member: true,
         archived: false,
+        in_discord: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
@@ -205,6 +206,7 @@ module.exports = () => {
       roles: {
         archived: false,
         member: true,
+        in_discord: true,
       },
       twitter_id: "RitvikJamwal4u",
       linkedin_id: "ritvik-jamwal4u",
@@ -225,6 +227,8 @@ module.exports = () => {
       },
       roles: {
         member: true,
+        archived: false,
+        in_discord: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",

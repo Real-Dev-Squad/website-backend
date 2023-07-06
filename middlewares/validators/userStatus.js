@@ -79,6 +79,10 @@ const validateGetQueryParams = async (req, res, next) => {
         .trim()
         .valid(userState.IDLE)
         .error(new Error(`Invalid state value passed for taskStatus.`)),
+      state: Joi.string()
+        .trim()
+        .valid(userState.IDLE, userState.ACTIVE, userState.OOO, userState.ONBOARDING)
+        .error(new Error(`Invalid State. State must be either IDLE, ACTIVE, OOO, or ONBOARDING`)),
     })
     .messages({
       "object.unknown": "Invalid query param provided.",

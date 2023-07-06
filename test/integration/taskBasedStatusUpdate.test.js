@@ -282,4 +282,58 @@ describe("Task Based Status Updates", function () {
       );
     });
   });
+
+  describe("GET users/status?taskStatus=IDLE Find Users without Assigned Or InProgress Tasks", function () {
+    let userId1;
+    let userId2;
+    let userId3;
+
+    let superUserId;
+    let superUserJwt;
+
+    beforeEach(async function () {
+      userId1 = await addUser(userData[6]);
+      userId2 = await addUser(userData[8]);
+      userId3 = await addUser(userData[9]);
+      superUserId = await addUser(userData[4]);
+      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+
+      const taskArr = allTasks();
+
+      const sampleTask1 = taskArr[0];
+      sampleTask1.assignee = userId1;
+      sampleTask1.status = "ASSIGNED";
+
+      const sampleTask2 = taskArr[1];
+      sampleTask2.assignee = userId2;
+      sampleTask2.status = "IN_PROGRESS";
+
+      const sampleTask3 = taskArr[2];
+      sampleTask3.assignee = userId3;
+      sampleTask3.status = "COMPLETED";
+
+      await firestore.collection("tasks").doc("taskId001").set(sampleTask1);
+      await firestore.collection("tasks").doc("taskId002").set(sampleTask2);
+      await firestore.collection("tasks").doc("taskId003").set(sampleTask3);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should get the users who without Assigned Or InProgress Tasks", async function () {
+      const response = await chai
+        .request(app)
+        .get(`/users/status?taskStatus=IDLE`)
+        .set("cookie", `${cookieName}=${superUserJwt}`);
+
+      expect(response.status).to.equal(200);
+      expect(response.body.message).to.equal("All Non IN_PROGRESS and Non ACTIVE task state users found successfully.");
+      expect(response.body.data.totalValidUsersCount).to.equal(4);
+      expect(response.body.data.usersWithoutAssignedOrInProgressTasksCount).to.equal(2);
+      expect(response.body.data.usersWithoutAssignedOrInProgressTasks).to.have.members([userId3, superUserId]);
+      expect(response.body.data.usersNotProcessedCount).to.equal(0);
+      expect(response.body.data.usersNotProcessed).to.deep.equal([]);
+    });
+  });
 });
