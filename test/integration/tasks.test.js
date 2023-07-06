@@ -299,12 +299,49 @@ describe("Tasks", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
+          dependsOn: ["dependency1", "dependency2"],
         })
         .end((err, res) => {
           if (err) {
             return done(err);
           }
           expect(res).to.have.status(204);
+          return done();
+        });
+    });
+    it("Should update dependency", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const dependsOn = ["taskId5", "taskId4"];
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ dependsOn });
+      expect(res).to.have.status(204);
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+
+      expect(res2).to.have.status(200);
+      expect(res2.body.taskData.dependsOn).to.be.a("array");
+      res2.body.taskData.dependsOn.forEach((taskId) => {
+        expect(dependsOn).to.include(taskId);
+      });
+
+      return taskId;
+    });
+    it("should check updated dependsOn", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("task returned successfully");
+          expect(res.body.taskData).to.be.a("object");
+          expect(res.body.taskData.dependsOn).to.be.a("array");
 
           return done();
         });
