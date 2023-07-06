@@ -1,4 +1,4 @@
-const { fetchUser, addOrUpdate } = require("../models/users");
+const { fetchUser } = require("../models/users");
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 
@@ -140,18 +140,12 @@ function getUsernamesFromPRs(allPRs) {
   return usernames;
 }
 
-const updateUserRole = async (userData, newRoles) => {
-  try {
-    const roles = { ...userData.roles };
-    const newRolesArray = Object.entries(newRoles);
-    if (roles[newRolesArray[0][0]] === newRolesArray[0][1]) return { isRoleUpdated: false };
-    const newUserRoles = { roles: { ...userData.roles, ...newRoles } };
-    await addOrUpdate(newUserRoles, userData.id);
-    return { isRoleUpdated: true };
-  } catch (err) {
-    logger.error("Error in updating the role object", err);
-    throw err;
-  }
+const checkRoleToUpdate = async (userData, newRoles) => {
+  const roles = { ...userData.roles };
+  const newRolesArray = Object.entries(newRoles);
+  if (roles[newRolesArray[0][0]] === newRolesArray[0][1]) return { isRoleUpdated: false };
+  const newUserRoles = { roles: { ...userData.roles, ...newRoles } };
+  return { isRoleUpdated: true, newUserRoles };
 };
 
 module.exports = {
@@ -163,5 +157,5 @@ module.exports = {
   getLowestLevelSkill,
   getPaginationLink,
   getUsernamesFromPRs,
-  updateUserRole,
+  checkRoleToUpdate,
 };
