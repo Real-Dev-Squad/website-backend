@@ -22,7 +22,7 @@ const retrieveUsers = async ({ id = null, usernames = null, req = null }) => {
 
 const removeSensitiveInfo = function (obj, properties = ["phone", "email", "chaincode", "tokens"]) {
   for (let i = 0; i < properties.length; i++) {
-    if (Object.prototype.hasOwnProperty.call(obj, properties[i])) {
+    if (properties[i] in obj) {
       delete obj[properties[i]];
     }
   }
