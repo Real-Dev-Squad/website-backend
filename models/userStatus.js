@@ -325,6 +325,52 @@ const updateStatusOnTaskCompletion = async (userId) => {
   }
 };
 
+const getUsersWithoutAssignedOrInProgressTasks = async () => {
+  const usersWithoutAssignedOrInProgressTasks = [];
+  const usersNotProcessed = [];
+  let errorCount = 0;
+  let discordActiveNonArchivedUsersQuerySnapshot;
+  try {
+    discordActiveNonArchivedUsersQuerySnapshot = await usersCollection
+      .where("roles.in_discord", "==", true)
+      .where("roles.archived", "==", false)
+      .get();
+  } catch (error) {
+    logger.error(`unable to get users ${error.message}`);
+    throw new Error("unable to get users");
+  }
+  const totalValidUsersCount = discordActiveNonArchivedUsersQuerySnapshot.size;
+  if (totalValidUsersCount) {
+    await Promise.all(
+      discordActiveNonArchivedUsersQuerySnapshot.docs.map(async (userDoc) => {
+        const assigneeId = userDoc.id;
+        try {
+          const tasksQuerySnapshot = await firestore
+            .collection("tasks")
+            .where("assignee", "==", assigneeId)
+            .where("status", "in", ["ASSIGNED", "IN_PROGRESS"])
+            .get();
+          if (tasksQuerySnapshot.empty) {
+            usersWithoutAssignedOrInProgressTasks.push(assigneeId);
+          }
+        } catch (error) {
+          errorCount++;
+          usersNotProcessed.push(assigneeId);
+          logger.error(`Error retrieving tasks for user ${assigneeId}: ${error.message}`);
+        }
+      })
+    );
+  }
+
+  return {
+    totalValidUsersCount,
+    usersWithoutAssignedOrInProgressTasksCount: usersWithoutAssignedOrInProgressTasks.length,
+    usersWithoutAssignedOrInProgressTasks,
+    usersNotProcessedCount: errorCount,
+    usersNotProcessed,
+  };
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -334,4 +380,5 @@ module.exports = {
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
   updateStatusOnTaskCompletion,
+  getUsersWithoutAssignedOrInProgressTasks,
 };
