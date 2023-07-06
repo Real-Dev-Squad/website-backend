@@ -39,8 +39,8 @@ describe("Data Access Layer", function () {
     it("should fetch paginated users and remove sensitive info", async function () {
       const fetchUserStub = sinon.stub(userQuery, "fetchPaginatedUsers");
       fetchUserStub.returns(Promise.resolve({ allUsers: [userData[12]], nextId: 3, prevId: 1 }));
-      const req = { query: { page: 1 } };
-      const result = await retrieveUsers({ req });
+      const query = { page: 1 };
+      const result = await retrieveUsers({ query });
       removeSensitiveInfo(userData[12]);
       result.allUsers.forEach((element) => {
         expect(element).to.deep.equal(userData[12]);

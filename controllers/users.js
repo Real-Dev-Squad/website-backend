@@ -109,7 +109,7 @@ const getUsers = async (req, res) => {
       });
     }
 
-    const data = await dataAccess.retrieveUsers({ req: req });
+    const data = await dataAccess.retrieveUsers({ query: req.query });
     return res.json({
       message: "Users returned successfully!",
       users: data.allUsers,
