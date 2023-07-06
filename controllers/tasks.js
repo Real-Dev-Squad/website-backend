@@ -10,6 +10,7 @@ const dependencyModel = require("../models/tasks");
 const userQuery = require("../models/users");
 const { transformQuery } = require("../utils/tasks");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
+
 /**
  * Creates new task
  *
