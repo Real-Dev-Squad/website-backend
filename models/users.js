@@ -581,7 +581,7 @@ const usersWithGitHubToken = async () => {
     const users = [];
     const usersRef = await userModel.where("tokens", "!=", false).get();
     usersRef.forEach((user) => {
-      users.push(user.id);
+      users.push(userModel.doc(user.id));
     });
     return users;
   } catch (err) {
@@ -590,12 +590,14 @@ const usersWithGitHubToken = async () => {
   }
 };
 
-const removeGitHubToken = async (userId) => {
+const removeGitHubToken = async (users) => {
   try {
-    const userRef = userModel.doc(userId);
-    await userRef.update({
-      tokens: admin.firestore.FieldValue.delete(),
+    const batch = firestore.batch();
+    users.forEach((user) => {
+      batch.update(user, { tokens: admin.firestore.FieldValue.delete() });
     });
+
+    await batch.commit();
   } catch (err) {
     logger.error(`Error while deleting tokens field: ${err}`);
     throw err;

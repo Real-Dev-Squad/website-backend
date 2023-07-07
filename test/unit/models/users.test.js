@@ -240,7 +240,15 @@ describe("users", function () {
     });
     it('removes token field from user"s data', async function () {
       const data = await users.usersWithGitHubToken();
-      await users.removeGitHubToken(data[0]);
+      await users.removeGitHubToken(data);
+    });
+
+    it("throws error if id is not found in db", async function () {
+      try {
+        await users.removeGitHubToken("1223");
+      } catch (error) {
+        expect(error).to.be.instanceOf(Error);
+      }
     });
   });
 });

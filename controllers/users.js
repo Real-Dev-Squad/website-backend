@@ -616,13 +616,8 @@ const removeGitHubTokenFromAllUsers = async (req, res) => {
       return res.status(500).json({ message: "No users found with github Token!" });
     }
 
-    const allPromises = [];
+    await userQuery.removeGitHubToken(users);
 
-    users.forEach((id) => {
-      allPromises.push(userQuery.removeGitHubToken(id));
-    });
-
-    await Promise.all(allPromises);
     return res.status(200).json({
       message: "Github Token removed from all users!",
       usersFoundWithToken: length,

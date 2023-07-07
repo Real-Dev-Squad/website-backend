@@ -1231,18 +1231,17 @@ describe("Users", function () {
   });
 
   describe("PATCH /users/removeGitHubToken", function () {
-    beforeEach(async function () {
-      await addOrUpdate(userData[0]);
-      await addOrUpdate(userData[1]);
-      await addOrUpdate(userData[2]);
-      await addOrUpdate(userData[3]);
-    });
-
-    afterEach(async function () {
-      await cleanDb();
-    });
-
     it("should remove all the users with token field", function (done) {
+      before(async function () {
+        await addOrUpdate(userData[0]);
+        await addOrUpdate(userData[1]);
+        await addOrUpdate(userData[2]);
+        await addOrUpdate(userData[3]);
+      });
+      after(async function () {
+        await cleanDb();
+      });
+
       chai
         .request(app)
         .patch("/users/removeGitHubToken")
