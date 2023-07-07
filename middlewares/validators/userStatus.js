@@ -72,6 +72,25 @@ const validateUserStatus = (req, res, next) => {
   validateUserStatusData(todaysTime, req, res, next);
 };
 
+const validateMassUpdate = async (req, res, next) => {
+  const schema = Joi.object()
+    .keys({
+      users: Joi.Joi.array().items(Joi.string().trim()).error(new Error(`Invalid state value passed for users.`)),
+    })
+    .messages({
+      "object.unknown": "Invalid key in Request payload.",
+    });
+
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error(`Error validating Query Params for GET ${error.message}`);
+    res.boom.badRequest(error);
+  }
+};
+
 module.exports = {
   validateUserStatus,
+  validateMassUpdate,
 };
