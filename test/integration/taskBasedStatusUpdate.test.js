@@ -1,4 +1,5 @@
 const chai = require("chai");
+const sinon = require("sinon");
 const { expect } = chai;
 const firestore = require("../../utils/firestore");
 const addUser = require("../utils/addUser");
@@ -10,6 +11,7 @@ const { generateStatusDataForState } = require("../fixtures/userStatus/userStatu
 const allTasks = require("../fixtures/tasks/tasks");
 const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
+const userStatusModel = require("../../models/userStatus");
 
 describe("Task Based Status Updates", function () {
   describe("PATCH /tasks/self/:taskId - Update User Status Document on marking Task as Completed.", function () {
@@ -334,6 +336,24 @@ describe("Task Based Status Updates", function () {
       expect(response.body.data.usersWithoutAssignedOrInProgressTasks).to.have.members([userId3, superUserId]);
       expect(response.body.data.usersNotProcessedCount).to.equal(0);
       expect(response.body.data.usersNotProcessed).to.deep.equal([]);
+    });
+
+    it("should throw an error when an error occurs", async function () {
+      sinon
+        .stub(userStatusModel, "getUsersWithoutAssignedOrInProgressTasks")
+        .throws(
+          new Error(
+            "The server has encountered an unexpected error. Please contact the administrator for more information."
+          )
+        );
+      const response = await chai
+        .request(app)
+        .get(`/users/status?taskStatus=IDLE`)
+        .set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(response.status).to.equal(500);
+      expect(response.body.message).to.equal(
+        "The server has encountered an unexpected error. Please contact the administrator for more information."
+      );
     });
   });
 });
