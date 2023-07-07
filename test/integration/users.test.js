@@ -1344,7 +1344,7 @@ describe("Users", function () {
       });
     });
 
-    it("Should return 400 if invalid role", function (done) {
+    it("Should return 400 if we pass in_discord role", function (done) {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
         chai
           .request(app)
