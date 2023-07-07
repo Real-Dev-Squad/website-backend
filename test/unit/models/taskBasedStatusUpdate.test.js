@@ -1,5 +1,6 @@
 const chai = require("chai");
 const sinon = require("sinon");
+// const admin = require("firebase-admin");
 const { expect } = chai;
 const firestore = require("../../../utils/firestore");
 const userStatusModel = firestore.collection("usersStatus");
@@ -8,6 +9,7 @@ const {
   updateStatusOnTaskCompletion,
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
+  getUsersWithoutAssignedOrInProgressTasks,
 } = require("../../../models/userStatus");
 const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
@@ -220,6 +222,98 @@ describe("Update Status based on task update", function () {
       expect(res.message).to.equal("The status has been updated to ACTIVE");
       expect(res.data.previousStatus).to.equal(userState.IDLE);
       expect(res.data.currentStatus).to.equal(userState.ACTIVE);
+    });
+  });
+
+  describe("getUsersWithoutAssignedOrInProgressTasks", function () {
+    let userId1;
+    let userId2;
+    let userId3;
+
+    beforeEach(async function () {
+      const userArr = userData();
+      userId1 = await addUser(userArr[6]);
+      userId2 = await addUser(userArr[8]);
+      userId3 = await addUser(userArr[9]);
+      const taskArr = allTasks();
+
+      const sampleTask1 = taskArr[0];
+      sampleTask1.assignee = userId1;
+      sampleTask1.status = "ASSIGNED";
+
+      const sampleTask2 = taskArr[1];
+      sampleTask2.assignee = userId2;
+      sampleTask2.status = "IN_PROGRESS";
+
+      const sampleTask3 = taskArr[2];
+      sampleTask3.assignee = userId3;
+      sampleTask3.status = "COMPLETED";
+
+      await firestore.collection("tasks").doc("taskId001").set(sampleTask1);
+      await firestore.collection("tasks").doc("taskId002").set(sampleTask2);
+      await firestore.collection("tasks").doc("taskId003").set(sampleTask3);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return the correct results when there are no errors", async function () {
+      const result = await getUsersWithoutAssignedOrInProgressTasks();
+      expect(result.totalValidUsersCount).to.equal(3);
+      expect(result.usersWithoutAssignedOrInProgressTasksCount).to.equal(1);
+      expect(result.usersWithoutAssignedOrInProgressTasks).to.deep.equal([userId3]);
+      expect(result.usersNotProcessedCount).to.equal(0);
+      expect(result.usersNotProcessed).to.deep.equal([]);
+    });
+
+    it("should return the correct results when there are errors", async function () {
+      // const usersCollection = firestore.collection("users");
+      // ----------------------------------------------------------------------------------------
+      // sinon.stub(usersCollection, "get").throws(new Error("Unable to fetch users"));
+      // ----------------------------------------------------------------------------------------
+      // sinon.stub(usersCollection, "where").callsFake((query) => {
+      // console.log("Stubbed get method called");
+      //   if (query.where("roles.in_discord", "==", true) && query.where("roles.archived", "==", false)) {
+      //     throw new Error("Unable to fetch users");
+      //   } else {
+      //     return usersCollection.get();
+      //   }
+      // });
+      // ----------------------------------------------------------------------------------------
+      // sinon.stub(usersCollection, "get").callsFake(() => {
+      //   console.log("Stubbed get method called");
+      //   throw new Error("Unable to fetch users");
+      // });
+      // ----------------------------------------------------------------------------------------
+      // sinon.stub(usersCollection, "where").returns(usersCollection);
+      // sinon.stub(usersCollection, "get").throws(new Error("Unable to fetch users"));
+      // ----------------------------------------------------------------------------------------
+      // sinon.stub(usersCollection, "where").returnsThis();
+      // sinon.stub(usersCollection, "get").throws(new Error("Unable to fetch users"));
+      // ----------------------------------------------------------------------------------------
+      // sinon.stub(usersCollection, "where").callsFake((query) => {
+      //   console.log("Stubbed where method called with query:", query);
+      //   return usersCollection;
+      // });
+      // sinon.stub(usersCollection, "get").callsFake(() => {
+      //   console.log("Stubbed get method called");
+      //   throw new Error("Unable to fetch users");
+      // });
+      // ----------------------------------------------------------------------------------------
+      // const queryStub = sinon.stub().throws(new Error('Unable to fetch users'));
+      // sinon.stub(usersCollection, 'where').returns({ get: queryStub });
+      // ----------------------------------------------------------------------------------------
+      // Mocking the entire firestore to throw an error
+      // sinon.stub(admin, 'initializeApp').throws(new Error('Unable to initializeApp'));
+      // sinon.stub(admin, 'initializeApp').callsFake(() => {
+      //   console.log("Stubbed initializeApp");
+      //   throw new Error("Unable to initializeApp");
+      // });
+      // ----------------------------------------------------------------------------------------
+      // const result = await getUsersWithoutAssignedOrInProgressTasks();
+      // expect(result).to.deep.equal(expectedResult);
     });
   });
 });
