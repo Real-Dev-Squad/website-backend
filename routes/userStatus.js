@@ -16,6 +16,7 @@ const { validateUserStatus, validateMassUpdate } = require("../middlewares/valid
 router.get("/", getAllUserStatus);
 router.get("/self", authenticate, getUserStatus);
 router.get("/:userId", getUserStatus);
+router.patch("/batch", authenticate, authorizeRoles([SUPERUSER]), validateMassUpdate, massUpdateIdleUsers);
 router.patch("/self", authenticate, validateUserStatus, updateUserStatus);
 router.patch("/update", authenticate, authorizeRoles([SUPERUSER]), updateAllUserStatus);
 router.patch("/batch", authenticate, authorizeRoles([SUPERUSER]), validateMassUpdate, massUpdateIdleUsers);

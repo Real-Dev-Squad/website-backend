@@ -75,7 +75,11 @@ const validateUserStatus = (req, res, next) => {
 const validateMassUpdate = async (req, res, next) => {
   const schema = Joi.object()
     .keys({
-      users: Joi.Joi.array().items(Joi.string().trim()).error(new Error(`Invalid state value passed for users.`)),
+      users: Joi.array()
+        .items(Joi.string().trim())
+        .min(1)
+        .required()
+        .error(new Error(`Invalid state value passed for users.`)),
     })
     .messages({
       "object.unknown": "Invalid key in Request payload.",
