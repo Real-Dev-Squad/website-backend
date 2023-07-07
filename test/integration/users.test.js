@@ -1344,6 +1344,27 @@ describe("Users", function () {
       });
     });
 
+    it("Should return 400 if invalid role", function (done) {
+      addUser(userRoleUpdate).then((userRoleUpdateId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUpdateId}/roles`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            in_discord: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body.message).to.be.equal("we only allow either role member or archieve");
+            return done();
+          });
+      });
+    });
+
     it("Should return 409 if user is already a member", function (done) {
       addUser(userAlreadyMember).then((userAlreadyMemberId) => {
         chai
