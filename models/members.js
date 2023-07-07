@@ -99,14 +99,21 @@ const fetchUsersWithRole = async (role) => {
  * @return { Object }: whether moveToMember was successful or not and whether user is already a member or not
  */
 
-const addArchiveRoleToMembers = async (userId) => {
+const addArchiveRoleToMembers = async (userId, currentUserId, body) => {
   try {
     const userDoc = await userModel.doc(userId).get();
     const user = userDoc.data();
     if (user?.roles && user.roles[ROLES.ARCHIVED]) return { isArchived: true };
     const roles = { ...user.roles, [ROLES.ARCHIVED]: true };
+    const archivedDetails = {
+      archived_at: new Date(),
+      reason: body.reason,
+      super_user_id: currentUserId,
+      archived_user_id: userId,
+    };
     await userModel.doc(userId).update({
       roles,
+      archivedDetails,
     });
     return { isArchived: false };
   } catch (err) {
