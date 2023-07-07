@@ -325,6 +325,83 @@ const updateStatusOnTaskCompletion = async (userId) => {
   }
 };
 
+const massUpdateIdleUsers = async (users) => {
+  const currentTimeStamp = new Date().getTime();
+  const batch = firestore.batch();
+  let usersWithStatusUnchanged = 0;
+
+  await Promise.all(
+    users.map(async (userId) => {
+      let latestStatusData;
+      try {
+        latestStatusData = await getUserStatus(userId);
+      } catch (error) {
+        usersWithStatusUnchanged++;
+        return batch;
+      }
+      const { id, userStatusExists, data } = latestStatusData;
+
+      if (!userStatusExists || !data?.currentStatus) {
+        const newUserStatusRef = userStatusModel.doc();
+        const newUserStatusData = {
+          userId,
+          currentStatus: {
+            state: userState.IDLE,
+            message: "",
+            from: currentTimeStamp,
+            until: "",
+            updatedAt: currentTimeStamp,
+          },
+        };
+        batch.set(newUserStatusRef, newUserStatusData);
+      } else {
+        const {
+          currentStatus: { state, until },
+        } = data;
+
+        if (state === userState.OOO || state === userState.ACTIVE) {
+          const docRef = userStatusModel.doc(id);
+          const updatedStatusData =
+            state === userState.OOO
+              ? {
+                  futureStatus: {
+                    state: userState.IDLE,
+                    message: "",
+                    from: until,
+                    until: "",
+                    updatedAt: currentTimeStamp,
+                  },
+                }
+              : {
+                  currentStatus: {
+                    state: userState.IDLE,
+                    message: "",
+                    from: currentTimeStamp,
+                    until: "",
+                    updatedAt: currentTimeStamp,
+                  },
+                };
+          batch.update(docRef, updatedStatusData);
+        } else {
+          usersWithStatusUnchanged++;
+        }
+      }
+      return batch;
+    })
+  );
+
+  try {
+    await batch.commit();
+    return {
+      totalUsers: users.length,
+      usersWithStatusUpdated: users.length - usersWithStatusUnchanged,
+      usersOnboardingOrAlreadyIdle: usersWithStatusUnchanged,
+    };
+  } catch (error) {
+    throw new Error("Batch operation failed");
+  }
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -334,4 +411,5 @@ module.exports = {
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
   updateStatusOnTaskCompletion,
+  massUpdateIdleUsers,
 };
