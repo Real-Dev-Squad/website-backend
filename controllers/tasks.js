@@ -9,6 +9,7 @@ const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/er
 const dependencyModel = require("../models/tasks");
 const userQuery = require("../models/users");
 const { transformQuery } = require("../utils/tasks");
+const { getPaginatedLink } = require("../utils/helper");
 /**
  * Creates new task
  *
@@ -83,11 +84,33 @@ const fetchPaginatedTasks = async (query) => {
     const { allTasks, next, prev } = tasksData;
     const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
 
-    return {
+    const result = {
       tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
-      next,
       prev,
+      next,
     };
+
+    if (next) {
+      const nextLink = getPaginatedLink({
+        endpoint: "/tasks",
+        query,
+        cursorKey: "next",
+        docId: next,
+      });
+      result.next = nextLink;
+    }
+
+    if (prev) {
+      const prevLink = getPaginatedLink({
+        endpoint: "/tasks",
+        query,
+        cursorKey: "prev",
+        docId: prev,
+      });
+      result.prev = prevLink;
+    }
+
+    return result;
   } catch (err) {
     logger.error(`Error while fetching paginated tasks ${err}`);
     return err;

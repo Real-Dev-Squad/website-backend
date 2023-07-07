@@ -4,7 +4,7 @@ const ItemModel = firestore.collection("itemTags");
 const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
-const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
+const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 /**
@@ -88,7 +88,7 @@ const getBuiltTasks = async (tasksSnapshot) => {
   return taskList;
 };
 
-const fetchPaginatedTasks = async ({ status = "", size = 5, page, next, prev }) => {
+const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, prev }) => {
   try {
     const initialQuery = status
       ? tasksModel.where("status", "==", status).orderBy("title")

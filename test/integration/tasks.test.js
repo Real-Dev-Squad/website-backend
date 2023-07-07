@@ -242,7 +242,7 @@ describe("Tasks", function () {
       expect(response.body.tasks).to.have.length(1);
 
       const nextPageLink = response.body.next;
-      const nextPageResponse = await chai.request(app).get(`${initialReq}&next=${nextPageLink}`);
+      const nextPageResponse = await chai.request(app).get(nextPageLink);
 
       expect(nextPageResponse).to.have.status(200);
       expect(nextPageResponse.body).to.be.a("object");
@@ -252,7 +252,7 @@ describe("Tasks", function () {
       expect(nextPageResponse.body.tasks).to.have.length(1);
 
       const prevPageLink = nextPageResponse.body.prev;
-      const previousPageResponse = await chai.request(app).get(`${initialReq}&prev=${prevPageLink}`);
+      const previousPageResponse = await chai.request(app).get(prevPageLink);
 
       expect(previousPageResponse).to.have.status(200);
       expect(previousPageResponse.body).to.be.a("object");
