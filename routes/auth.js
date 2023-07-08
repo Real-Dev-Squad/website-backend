@@ -5,7 +5,6 @@ const auth = require("../controllers/auth");
 const authenticate = require("../middlewares/authenticate");
 const userDeviceInfoValidator = require("../middlewares/validators/qrCodeAuth");
 const qrCodeAuthValidator = require("../middlewares/validators/qrCodeAuth");
-const qrCodeAuth = require("../controllers/qrCodeAuth");
 
 router.get("/github/login", passport.authenticate("github", { scope: ["user:email"] }));
 
@@ -18,7 +17,7 @@ router.patch(
   "/qr-code-auth/authorization_status/:authorization_status",
   authenticate,
   qrCodeAuthValidator.validateAuthStatus,
-  qrCodeAuth.updateAuthStatus
+  auth.updateAuthStatus
 );
 
 module.exports = router;

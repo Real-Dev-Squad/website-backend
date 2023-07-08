@@ -102,8 +102,29 @@ const storeUserDeviceInfo = async (req, res) => {
   }
 };
 
+const updateAuthStatus = async (req, res) => {
+  try {
+    const userId = req.userData.id;
+    const authStatus = req.params.authorization_status;
+    const result = await QrCodeAuthModel.updateStatus(userId, authStatus);
+
+    if (!result.userExists) {
+      return res.boom.notFound("Document not found!");
+    }
+
+    return res.json({
+      message: `Authentication document for user ${userId} updated successfully`,
+      data: { ...result.data },
+    });
+  } catch (error) {
+    logger.error(`Error while fetching user: ${error}`);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+  }
+};
+
 module.exports = {
   githubAuth,
   signout,
   storeUserDeviceInfo,
+  updateAuthStatus,
 };
