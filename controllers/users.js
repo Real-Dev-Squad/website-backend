@@ -7,7 +7,7 @@ const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
 const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
-const obfuscate = require("../utils/obfuscate");
+
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
 const { setInDiscordFalseScript } = require("../services/discordService");
@@ -41,7 +41,7 @@ const verifyUser = async (req, res) => {
 const getUserById = async (req, res) => {
   let result;
   try {
-    result = await userQuery.fetchUser({ userId: req.params.userId });
+    result = await dataAccess.retrieveUsers({ id: req.params.userId });
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -51,15 +51,7 @@ const getUserById = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   }
 
-  const { phone = "", email = "", ...user } = result.user;
-  try {
-    user.phone = obfuscate.obfuscatePhone(phone);
-    user.email = obfuscate.obfuscateMail(email);
-  } catch (error) {
-    logger.error(`Error while formatting phone and email: ${error}`);
-    return res.boom.badImplementation("Error while formatting phone and email");
-  }
-
+  const user = result.user;
   return res.json({
     message: "User returned successfully!",
     user,
@@ -133,6 +125,7 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
+    // replace below line woth call to retrieveUsers(id)
     const result = await userQuery.fetchUser({ username: req.params.username });
     const { phone, email, ...user } = result.user;
 
@@ -153,6 +146,7 @@ const getUser = async (req, res) => {
 const getUserSkills = async (req, res) => {
   try {
     const { id } = req.params;
+    // for below line use a new func in dataAccessLayer.js
     const { skills } = await userQuery.fetchUserSkills(id);
 
     return res.json({
@@ -195,7 +189,7 @@ const getSuggestedUsers = async (req, res) => {
 
 const getUsernameAvailabilty = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
+    const result = await userQuery.fetchUser({ username: req.params.username }); // retrieveUsers(id)
     return res.json({
       isUsernameAvailable: !result.userExists,
     });
@@ -414,6 +408,7 @@ const updateUser = async (req, res) => {
 const generateChaincode = async (req, res) => {
   try {
     const { id } = req.userData;
+    // modify next 2 lines to a serviceLayer func if needed
     const chaincode = await chaincodeQuery.storeChaincode(id);
     await userQuery.addOrUpdate({ chaincode }, id);
     return res.json({
@@ -514,6 +509,7 @@ const addUserIntro = async (req, res) => {
 
 const getUserIntro = async (req, res) => {
   try {
+    // write new function in dataAccessLayer for this below line
     const data = await userQuery.getJoinData(req.params.userId);
     if (data.length) {
       return res.json({
@@ -563,6 +559,7 @@ const filterUsers = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
+    // new function in dataAceessLayer for getUsersBasedOnFilter
     const users = await userQuery.getUsersBasedOnFilter(req.query);
     const sanitizedUsers = users.map((user) => {
       delete user.tokens;
