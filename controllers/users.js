@@ -206,14 +206,14 @@ const getUsernameAvailabilty = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getSelfDetails = (req, res) => {
+const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
       if (req.query.private) {
         return res.send(req.userData);
       }
-      const { phone, email, ...userData } = req.userData;
-      return res.send(userData);
+      const user = await dataAccess.retrieveUsers({ userdata: req.userData });
+      return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");
   } catch (error) {

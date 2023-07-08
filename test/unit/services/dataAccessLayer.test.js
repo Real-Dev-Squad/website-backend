@@ -49,6 +49,15 @@ describe("Data Access Layer", function () {
         });
       });
     });
+
+    it("should return /users/self data and remove sensitive info", async function () {
+      const userdata = userData[12];
+      await retrieveUsers({ userdata });
+      removeSensitiveInfo(userData[12]);
+      remove.forEach((key) => {
+        expect(userData[12]).to.not.have.property(key);
+      });
+    });
   });
 
   describe("removeSensitiveInfo", function () {

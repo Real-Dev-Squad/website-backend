@@ -1,6 +1,6 @@
 const userQuery = require("../models/users");
 
-const retrieveUsers = async ({ id = null, usernames = null, query = null }) => {
+const retrieveUsers = async ({ id = null, usernames = null, query = null, userdata = null }) => {
   if (id) {
     const result = await userQuery.fetchUser({ userId: id });
     removeSensitiveInfo(result.user);
@@ -11,12 +11,15 @@ const retrieveUsers = async ({ id = null, usernames = null, query = null }) => {
       removeSensitiveInfo(element);
     });
     return users;
-  } else {
+  } else if (query != null) {
     const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(query);
     allUsers.forEach((element) => {
       removeSensitiveInfo(element);
     });
     return { allUsers, nextId, prevId };
+  } else {
+    removeSensitiveInfo(userdata);
+    return userdata;
   }
 };
 
