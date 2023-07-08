@@ -248,6 +248,7 @@ describe("Update Status based on task update", function () {
 
     afterEach(async function () {
       await cleanDb();
+      sinon.restore();
     });
 
     it("should return the correct results when there are no errors", async function () {
