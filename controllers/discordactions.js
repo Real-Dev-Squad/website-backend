@@ -3,7 +3,6 @@ const admin = require("firebase-admin");
 const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
-
 /**
  * Creates a role
  *

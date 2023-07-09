@@ -7,9 +7,7 @@ const cleanDb = require("../utils/cleanDb");
 const authService = require("../../services/authService");
 const userData = require("../fixtures/user/user")();
 const { requestRoleData } = require("../fixtures/discordactions/discordactions");
-
 const cookieName = config.get("userToken.cookieName");
-
 let userId;
 let jwt;
 

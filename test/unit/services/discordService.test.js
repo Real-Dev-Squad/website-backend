@@ -5,6 +5,7 @@ const {
   addRoleToUser,
   getDiscordMembers,
   removeRoleFromUser,
+  setUserDiscordNickname,
 } = require("../../../services/discordService");
 const { fetchAllUsers } = require("../../../models/users");
 const Sinon = require("sinon");
@@ -12,7 +13,31 @@ const userModel = firestore.collection("users");
 const userDataArray = require("../../fixtures/user/user")();
 const discordMembersArray = require("../../fixtures/discordResponse/discord-response");
 let fetchStub;
+
 describe("Discord services", function () {
+  describe("change user nickname", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+    });
+
+    afterEach(function () {
+      fetchStub.restore();
+    });
+
+    it("makes a fetch call", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ message: "done" }),
+        })
+      );
+
+      const response = await setUserDiscordNickname("abcd", 98178);
+
+      expect(response.message).to.be.equal("done");
+    });
+  });
+
   describe("setInDiscordFalseScript", function () {
     beforeEach(async function () {
       const addUsersPromises = [];

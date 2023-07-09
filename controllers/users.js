@@ -5,7 +5,6 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
-
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
@@ -14,7 +13,7 @@ const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/er
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
-const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
+const { addRoleToUser, getDiscordMembers, setUserDiscordNickname } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
 
 const verifyUser = async (req, res) => {
@@ -607,6 +606,37 @@ const setInDiscordScript = async (req, res) => {
   }
 };
 
+/**
+ * Patch Update user nickname
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const updateUserNickname = async (req, res) => {
+  try {
+    const { user } = await userQuery.fetchUser({ userId: req.params.userId });
+
+    const { discordId, username: userName } = user;
+
+    if (!discordId) {
+      throw new Error("user not verified");
+    }
+
+    const response = await setUserDiscordNickname(userName, discordId);
+
+    return res.json({
+      userAffected: {
+        userId: req.params.userId,
+        username: userName,
+        discordId,
+      },
+      message: response,
+    });
+  } catch (err) {
+    logger.error(`Error while updating nickname: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -630,5 +660,6 @@ module.exports = {
   getUserImageForVerification,
   nonVerifiedDiscordUsers,
   setInDiscordScript,
+  updateUserNickname,
   markUnverified,
 };
