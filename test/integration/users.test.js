@@ -186,9 +186,22 @@ describe("Users", function () {
           expect(res.body.message).to.equal("Users returned successfully!");
           expect(res.body.users).to.be.a("array");
           const userData = res.body.users;
+
+          let hasArchivedUser = false;
+          let hasNonArchivedUser = false;
+
           userData.forEach((user) => {
             expect(user.roles.archived).to.be.oneOf([false, true]);
+
+            if (user.roles.archived === true) {
+              hasArchivedUser = true;
+            } else if (user.roles.archived === false) {
+              hasNonArchivedUser = true;
+            }
           });
+
+          expect(hasArchivedUser).to.be.equal(true);
+          expect(hasNonArchivedUser).to.be.equal(true);
           return done();
         });
     });
