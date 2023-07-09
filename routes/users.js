@@ -26,7 +26,7 @@ router.get("/:id/skills", users.getUserSkills);
 router.get("/:id/badges", getUserBadges);
 router.patch("/", authenticate, authorizeRoles([SUPERUSER]), users.nonVerifiedDiscordUsers);
 router.patch(
-  "/:id/roles",
+  "/:id/temporary/data",
   authenticate,
   authorizeRoles([SUPERUSER]),
   userValidator.validateUpdateRoles,

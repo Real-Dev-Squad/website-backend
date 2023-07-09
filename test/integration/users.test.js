@@ -1237,12 +1237,12 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /users/:id/roles", function () {
+  describe("PATCH /users/:id/temporary/data", function () {
     it("Should make the user a member", function (done) {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
         chai
           .request(app)
-          .patch(`/users/${userRoleUpdateId}/roles`)
+          .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
             member: true,
@@ -1263,7 +1263,7 @@ describe("Users", function () {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
         chai
           .request(app)
-          .patch(`/users/${userRoleUpdateId}/roles`)
+          .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
             member: false,
@@ -1284,7 +1284,7 @@ describe("Users", function () {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
         chai
           .request(app)
-          .patch(`/users/${userRoleUpdateId}/roles`)
+          .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
             archived: true,
@@ -1305,7 +1305,7 @@ describe("Users", function () {
       addUser(userRoleUnArchived).then((userRoleUnArchivedId) => {
         chai
           .request(app)
-          .patch(`/users/${userRoleUnArchivedId}/roles`)
+          .patch(`/users/${userRoleUnArchivedId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
             archived: false,
@@ -1326,7 +1326,7 @@ describe("Users", function () {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
         chai
           .request(app)
-          .patch(`/users/${userRoleUpdateId}/roles`)
+          .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
             member: true,
@@ -1348,7 +1348,7 @@ describe("Users", function () {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
         chai
           .request(app)
-          .patch(`/users/${userRoleUpdateId}/roles`)
+          .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
             in_discord: true,
@@ -1369,7 +1369,7 @@ describe("Users", function () {
       addUser(userAlreadyMember).then((userAlreadyMemberId) => {
         chai
           .request(app)
-          .patch(`/users/${userAlreadyMemberId}/roles`)
+          .patch(`/users/${userAlreadyMemberId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
             member: true,
@@ -1390,7 +1390,7 @@ describe("Users", function () {
       addUser(userAlreadyNotMember).then((userAlreadyNotMemberId) => {
         chai
           .request(app)
-          .patch(`/users/${userAlreadyNotMemberId}/roles`)
+          .patch(`/users/${userAlreadyNotMemberId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
             member: false,
@@ -1411,7 +1411,7 @@ describe("Users", function () {
       addUser(userAlreadyArchived).then((userAlreadyArchivedId) => {
         chai
           .request(app)
-          .patch(`/users/${userAlreadyArchivedId}/roles`)
+          .patch(`/users/${userAlreadyArchivedId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
             archived: true,
@@ -1432,7 +1432,7 @@ describe("Users", function () {
       addUser(userAlreadyUnArchived).then((userAlreadyUnArchivedId) => {
         chai
           .request(app)
-          .patch(`/users/${userAlreadyUnArchivedId}/roles`)
+          .patch(`/users/${userAlreadyUnArchivedId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
             archived: false,
@@ -1451,7 +1451,7 @@ describe("Users", function () {
     it("Should return 404 if user not found", function (done) {
       chai
         .request(app)
-        .patch(`/users/111111111111/roles`)
+        .patch(`/users/111111111111/temporary/data`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({
           archived: true,
@@ -1471,7 +1471,7 @@ describe("Users", function () {
         const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
         chai
           .request(app)
-          .patch(`/users/${nonSuperUserId}/roles`)
+          .patch(`/users/${nonSuperUserId}/temporary/data`)
           .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
           .send({
             archived: true,

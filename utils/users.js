@@ -140,7 +140,15 @@ function getUsernamesFromPRs(allPRs) {
   return usernames;
 }
 
-const checkRoleToUpdate = async (userData, newRoles) => {
+/**
+ * Checks if user roles need to be updated based on new roles provided.
+ *
+ * @param {Object} userData - The user data object containing the current roles.
+ * @param {Object} newRoles - The new roles to be checked against the current roles.
+ * @returns {Promise<Object>} An object indicating whether the roles should be updated and the new user roles.
+ */
+
+const getRoleToUpdate = async (userData, newRoles) => {
   const roles = { ...userData.roles };
   const newRolesArray = Object.entries(newRoles);
   if (roles[newRolesArray[0][0]] === newRolesArray[0][1]) return { updateRole: false };
@@ -157,5 +165,5 @@ module.exports = {
   getLowestLevelSkill,
   getPaginationLink,
   getUsernamesFromPRs,
-  checkRoleToUpdate,
+  getRoleToUpdate,
 };
