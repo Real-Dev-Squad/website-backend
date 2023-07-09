@@ -12,6 +12,7 @@ const { ALLOWED_FILTER_PARAMS, QUERY_PARAM } = require("../constants/users");
 const ROLES = require("../constants/roles");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
+const ROLES = require("../constants/roles");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
@@ -535,6 +536,10 @@ const getUsersBasedOnFilter = async (query) => {
         ...doc.data(),
       });
     });
+
+    if (roleQuery === ROLES.ARCHIVED) {
+      return filteredUsers;
+    }
 
     return filteredUsers.filter((user) => !user.roles?.archived);
   }
