@@ -6,7 +6,7 @@ const userModel = firestore.collection("users");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
 const getDiscordMembers = async () => {
-  const authToken = generateAuthTokenForCloudflare();
+  const authToken = await generateAuthTokenForCloudflare();
   try {
     const response = await (
       await fetch(`${DISCORD_BASE_URL}/discord-members`, {
