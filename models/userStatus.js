@@ -12,6 +12,7 @@ const {
   checkIfUserHasLiveTasks,
   generateErrorResponse,
 } = require("../utils/userStatus");
+const { TASK_STATUS } = require("../constants/tasks");
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
 const usersCollection = firestore.collection("users");
@@ -348,7 +349,7 @@ const getUsersWithoutAssignedOrInProgressTasks = async () => {
           const tasksQuerySnapshot = await firestore
             .collection("tasks")
             .where("assignee", "==", assigneeId)
-            .where("status", "in", ["ASSIGNED", "IN_PROGRESS"])
+            .where("status", "in", [TASK_STATUS.ASSIGNED, TASK_STATUS.IN_PROGRESS])
             .get();
           if (tasksQuerySnapshot.empty) {
             usersWithoutAssignedOrInProgressTasks.push(assigneeId);
