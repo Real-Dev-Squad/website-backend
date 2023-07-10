@@ -1380,7 +1380,7 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(409);
-            expect(res.body.message).to.be.equal("role already exist!");
+            expect(res.body.message).to.be.equal("Role already exist!");
             return done();
           });
       });
@@ -1401,7 +1401,7 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(409);
-            expect(res.body.message).to.be.equal("role already exist!");
+            expect(res.body.message).to.be.equal("Role already exist!");
             return done();
           });
       });
@@ -1422,7 +1422,7 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(409);
-            expect(res.body.message).to.be.equal("role already exist!");
+            expect(res.body.message).to.be.equal("Role already exist!");
             return done();
           });
       });
@@ -1442,7 +1442,7 @@ describe("Users", function () {
               return done(err);
             }
             expect(res).to.have.status(409);
-            expect(res.body.message).to.be.equal("role already exist!");
+            expect(res.body.message).to.be.equal("Role already exist!");
             return done();
           });
       });

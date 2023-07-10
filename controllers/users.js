@@ -619,7 +619,7 @@ const updateRoles = async (req, res) => {
           message: "role updated successfully!",
         });
       } else {
-        return res.boom.conflict("role already exist!");
+        return res.boom.conflict("Role already exist!");
       }
     } else {
       return res.boom.notFound("User not found");
