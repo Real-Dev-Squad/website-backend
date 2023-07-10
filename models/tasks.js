@@ -253,7 +253,8 @@ const fetchUserTasks = async (username, statuses = [], field, order) => {
           .where("participants", "array-contains", userId)
           .orderBy(field, order)
           .get();
-        featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).orderBy(field, order).get();
+        featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).get();
+        // removed orderBy(field, order) as now task is not have field startedOn
       } else {
         groupTasksSnapshot = await tasksModel.where("participants", "array-contains", userId).get();
         featureTasksSnapshot = await tasksModel.where("assignee", "==", userId).get();
