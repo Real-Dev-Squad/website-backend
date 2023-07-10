@@ -2,7 +2,12 @@ const passport = require("passport");
 const users = require("../models/users");
 const QrCodeAuthModel = require("../models/qrCodeAuth");
 const authService = require("../services/authService");
-const { SOMETHING_WENT_WRONG, DATA_ADDED_SUCCESSFULLY, BAD_REQUEST } = require("../constants/errorMessages");
+const {
+  SOMETHING_WENT_WRONG,
+  DATA_ADDED_SUCCESSFULLY,
+  BAD_REQUEST,
+  INVALID_QUERY_PARAM,
+} = require("../constants/errorMessages");
 
 /**
  * Fetches the user info from GitHub and authenticates User
@@ -122,9 +127,32 @@ const updateAuthStatus = async (req, res) => {
   }
 };
 
+const fetchUserDeviceInfo = async (req, res) => {
+  try {
+    const queryParamArray = Object.keys(req.query);
+    if (queryParamArray.length === 1 && queryParamArray[0] === "device_id") {
+      const deviceId = req.query.device_id;
+      const userDeviceInfoData = await QrCodeAuthModel.retrieveUserDeviceInfo(deviceId);
+      if (!userDeviceInfoData.userExists) {
+        return res.boom.notFound("No Authentication found!");
+      }
+      return res.json({
+        message: "Authentication document retrieved successfully.",
+        data: { ...userDeviceInfoData.data },
+      });
+    } else {
+      return res.boom.badRequest(INVALID_QUERY_PARAM);
+    }
+  } catch (error) {
+    logger.error(`Error while fetching user: ${error}`);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+  }
+};
+
 module.exports = {
   githubAuth,
   signout,
   storeUserDeviceInfo,
   updateAuthStatus,
+  fetchUserDeviceInfo,
 };

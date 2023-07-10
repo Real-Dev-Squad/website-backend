@@ -160,4 +160,51 @@ describe("QrCodeAuth", function () {
         });
     });
   });
+
+  describe("GET call for fetching user device info", function () {
+    let userId = "";
+    let userDeviceInfoData;
+    beforeEach(async function () {
+      userId = await addUser(user);
+      userDeviceInfoData = { ...userDeviceInfoDataArray[0], user_id: userId, authorization_status: "NOT_INIT" };
+    });
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should successfully fetch the user device info", function (done) {
+      qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoData);
+      chai
+        .request(app)
+        .get(`/auth/qr-code-auth?device_id=${userDeviceInfoData.device_id}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal(`Authentication document retrieved successfully.`);
+
+          return done();
+        });
+    });
+
+    it("should fail with 404, when the document is not found", function (done) {
+      chai
+        .request(app)
+        .get(`/auth/qr-code-auth?device_id=${userDeviceInfoData.device_id}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("No Authentication found!");
+          expect(res.body.error).to.equal("Not Found");
+
+          return done();
+        });
+    });
+  });
 });
