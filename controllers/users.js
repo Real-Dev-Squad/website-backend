@@ -626,7 +626,7 @@ const updateRoles = async (req, res) => {
     }
   } catch (error) {
     logger.error(`Error while updateRoles: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
