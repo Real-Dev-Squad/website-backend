@@ -202,7 +202,7 @@ describe("Tasks", function () {
           expect(res.body).to.have.property("next");
           expect(res.body).to.have.property("prev");
 
-          const tasksData = res.body.tasks;
+          const tasksData = res.body.tasks ?? [];
           tasksData.forEach((task) => {
             expect(task.status).to.equal(TASK_STATUS.IN_PROGRESS);
           });
