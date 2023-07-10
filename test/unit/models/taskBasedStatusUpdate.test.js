@@ -8,7 +8,7 @@ const {
   updateStatusOnTaskCompletion,
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
-  getUsersWithoutAssignedOrInProgressTasks,
+  getIdleUsers,
 } = require("../../../models/userStatus");
 const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
@@ -224,7 +224,7 @@ describe("Update Status based on task update", function () {
     });
   });
 
-  describe("getUsersWithoutAssignedOrInProgressTasks", function () {
+  describe("getIdleUsers", function () {
     let userId1;
     let userId2;
     let userId3;
@@ -259,10 +259,10 @@ describe("Update Status based on task update", function () {
     });
 
     it("should return the correct results when there are no errors", async function () {
-      const result = await getUsersWithoutAssignedOrInProgressTasks();
+      const result = await getIdleUsers();
       expect(result.totalValidUsersCount).to.equal(3);
-      expect(result.usersWithoutAssignedOrInProgressTasksCount).to.equal(1);
-      expect(result.usersWithoutAssignedOrInProgressTasks).to.deep.equal([userId3]);
+      expect(result.idleUsersCount).to.equal(1);
+      expect(result.idleUsers).to.deep.equal([userId3]);
       expect(result.usersNotProcessedCount).to.equal(0);
       expect(result.usersNotProcessed).to.deep.equal([]);
     });
@@ -271,7 +271,7 @@ describe("Update Status based on task update", function () {
       const usersCollection = firestore.collection("users");
       sinon.stub(usersCollection, "where").returns(usersCollection);
       sinon.stub(usersCollection, "get").throws(new Error("unable to get users"));
-      await getUsersWithoutAssignedOrInProgressTasks().catch((err) => {
+      await getIdleUsers().catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.be.equal("unable to get users");
       });

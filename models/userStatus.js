@@ -326,8 +326,8 @@ const updateStatusOnTaskCompletion = async (userId) => {
   }
 };
 
-const getUsersWithoutAssignedOrInProgressTasks = async () => {
-  const usersWithoutAssignedOrInProgressTasks = [];
+const getIdleUsers = async () => {
+  const idleUsers = [];
   const usersNotProcessed = [];
   let errorCount = 0;
   let discordActiveNonArchivedUsersQuerySnapshot;
@@ -352,7 +352,7 @@ const getUsersWithoutAssignedOrInProgressTasks = async () => {
             .where("status", "in", [TASK_STATUS.ASSIGNED, TASK_STATUS.IN_PROGRESS])
             .get();
           if (tasksQuerySnapshot.empty) {
-            usersWithoutAssignedOrInProgressTasks.push(assigneeId);
+            idleUsers.push(assigneeId);
           }
         } catch (error) {
           errorCount++;
@@ -365,8 +365,8 @@ const getUsersWithoutAssignedOrInProgressTasks = async () => {
 
   return {
     totalValidUsersCount,
-    usersWithoutAssignedOrInProgressTasksCount: usersWithoutAssignedOrInProgressTasks.length,
-    usersWithoutAssignedOrInProgressTasks,
+    idleUsersCount: idleUsers.length,
+    idleUsers,
     usersNotProcessedCount: errorCount,
     usersNotProcessed,
   };
@@ -381,5 +381,5 @@ module.exports = {
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
   updateStatusOnTaskCompletion,
-  getUsersWithoutAssignedOrInProgressTasks,
+  getIdleUsers,
 };

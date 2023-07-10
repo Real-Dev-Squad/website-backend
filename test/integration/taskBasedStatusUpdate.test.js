@@ -330,17 +330,17 @@ describe("Task Based Status Updates", function () {
         .set("cookie", `${cookieName}=${superUserJwt}`);
 
       expect(response.status).to.equal(200);
-      expect(response.body.message).to.equal("All Non IN_PROGRESS and Non ACTIVE task state users found successfully.");
+      expect(response.body.message).to.equal("All idle users found successfully.");
       expect(response.body.data.totalValidUsersCount).to.equal(4);
-      expect(response.body.data.usersWithoutAssignedOrInProgressTasksCount).to.equal(2);
-      expect(response.body.data.usersWithoutAssignedOrInProgressTasks).to.have.members([userId3, superUserId]);
+      expect(response.body.data.idleUsersCount).to.equal(2);
+      expect(response.body.data.idleUsers).to.have.members([userId3, superUserId]);
       expect(response.body.data.usersNotProcessedCount).to.equal(0);
       expect(response.body.data.usersNotProcessed).to.deep.equal([]);
     });
 
     it("should throw an error when an error occurs", async function () {
       sinon
-        .stub(userStatusModel, "getUsersWithoutAssignedOrInProgressTasks")
+        .stub(userStatusModel, "getIdleUsers")
         .throws(
           new Error(
             "The server has encountered an unexpected error. Please contact the administrator for more information."

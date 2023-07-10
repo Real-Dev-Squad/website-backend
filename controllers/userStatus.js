@@ -149,11 +149,11 @@ const updateAllUserStatus = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getUsersWithoutAssignedOrInProgressTasks = async (req, res) => {
+const getIdleUsers = async (req, res) => {
   try {
-    const data = await userStatusModel.getUsersWithoutAssignedOrInProgressTasks();
+    const data = await userStatusModel.getIdleUsers();
     return res.json({
-      message: "All Non IN_PROGRESS and Non ACTIVE task state users found successfully.",
+      message: "All idle users found successfully.",
       data,
     });
   } catch (error) {
@@ -166,7 +166,7 @@ const getUsersWithoutAssignedOrInProgressTasks = async (req, res) => {
 
 const getUserStatusControllers = async (req, res, next) => {
   if (Object.keys(req.query).includes("taskStatus")) {
-    await getUsersWithoutAssignedOrInProgressTasks(req, res, next);
+    await getIdleUsers(req, res, next);
   } else {
     await getAllUserStatus(req, res, next);
   }
@@ -178,6 +178,6 @@ module.exports = {
   getAllUserStatus,
   updateUserStatus,
   updateAllUserStatus,
-  getUsersWithoutAssignedOrInProgressTasks,
+  getIdleUsers,
   getUserStatusControllers,
 };
