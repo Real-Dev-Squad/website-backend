@@ -356,7 +356,7 @@ const fetchSkillLevelTask = async (userId) => {
  */
 const fetchSelfTasks = async (username) => {
   return await fetchUserTasks(username, []);
-  // removed startedOn as now task is not have field startedOn
+Removed `startedOn` field since we are getting issues with some of the documents in the tasks collection as some of the documents dont have `startedOn` present. 
 };
 
 /**
