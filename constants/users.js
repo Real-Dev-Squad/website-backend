@@ -16,4 +16,8 @@ const ALLOWED_FILTER_PARAMS = {
   ROLE: ["role"],
 };
 
-module.exports = { profileStatus, USER_STATUS, ALLOWED_FILTER_PARAMS };
+const QUERY_PARAM = {
+  INCLUDES: "includes",
+};
+
+module.exports = { profileStatus, USER_STATUS, ALLOWED_FILTER_PARAMS, QUERY_PARAM };

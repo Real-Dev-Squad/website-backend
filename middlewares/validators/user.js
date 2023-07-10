@@ -102,6 +102,7 @@ async function getUsers(req, res, next) {
           "string.empty": "size must contain value in range 1-100",
           "string.pattern.base": "size must be in range 1-100",
         }),
+      q: joi.string().empty("").optional(),
       page: joi
         .string()
         .optional()

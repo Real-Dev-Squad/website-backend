@@ -169,6 +169,43 @@ describe("Users", function () {
         });
     });
 
+    it("Should get all the users with both archived true and false", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({
+          q: "includes:archived",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          const userData = res.body.users;
+
+          let hasArchivedUser = false;
+          let hasNonArchivedUser = false;
+
+          userData.forEach((user) => {
+            expect(user.roles.archived).to.be.oneOf([false, true]);
+
+            if (user.roles.archived === true) {
+              hasArchivedUser = true;
+            } else if (user.roles.archived === false) {
+              hasNonArchivedUser = true;
+            }
+          });
+
+          expect(hasArchivedUser).to.be.equal(true);
+          expect(hasNonArchivedUser).to.be.equal(true);
+          return done();
+        });
+    });
+
     it("Should get all the users in system when query params are valid", function (done) {
       chai
         .request(app)
@@ -176,6 +213,7 @@ describe("Users", function () {
         .query({
           size: 1,
           page: 0,
+          q: "",
         })
         .end((err, res) => {
           if (err) {

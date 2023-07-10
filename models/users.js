@@ -8,7 +8,8 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem } = require("../utils/array");
-const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
+const { ALLOWED_FILTER_PARAMS, QUERY_PARAM } = require("../constants/users");
+const ROLES = require("../constants/roles");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const ROLES = require("../constants/roles");
@@ -137,7 +138,7 @@ const getSuggestedUsers = async (skill) => {
 
 /**
  * Fetches the data about our users
- * @param query { search, next, prev, size, page }: Filter for users
+ * @param query { search, next, prev, size, page, include }: Filter for users
  * @return {Promise<userModel|Array>}
  */
 const fetchPaginatedUsers = async (query) => {
@@ -146,9 +147,17 @@ const fetchPaginatedUsers = async (query) => {
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
-
-    let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
-
+    let dbQuery;
+    if (query.q) {
+      const [queryName, queryValue] = query.q.split(":");
+      if (queryName === QUERY_PARAM.INCLUDES) {
+        if (queryValue === ROLES.ARCHIVED) {
+          dbQuery = userModel;
+        }
+      }
+    } else {
+      dbQuery = userModel.where(`roles.${ROLES.ARCHIVED}`, "==", false).orderBy("username");
+    }
     if (query.prev) {
       dbQuery = dbQuery.limitToLast(size);
     } else {
