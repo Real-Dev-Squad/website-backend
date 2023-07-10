@@ -50,6 +50,7 @@ describe("getTasks validator", function () {
     const nextMiddlewareSpy = Sinon.spy();
     await getTasks(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+    expect(res.boom.badRequest.callCount).to.be.equal(1);
   });
 
   it("should pass the request when status query param has a valid task status value", async function () {
