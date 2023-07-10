@@ -3,6 +3,7 @@ const members = require("../models/members");
 const tasks = require("../models/tasks");
 const { fetchUser } = require("../models/users");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const logger = require("../utils/logger");
 
 /**
  * Fetches the data about our members
@@ -89,8 +90,11 @@ const archiveMembers = async (req, res) => {
     const userId = user.user.id;
     const currentUserID = req.userData.id;
     const body = req.body;
+    if (body?.reason === "" || body?.reason === undefined) {
+      return res.boom.badRequest("Reason is required");
+    }
     if (user?.userExists) {
-      const successObject = await members.addArchiveRoleToMembers(userId, currentUserID, body);
+      const successObject = await members.addArchiveRoleToMembers(userId, currentUserID, body?.reason);
       if (successObject.isArchived) {
         return res.boom.badRequest("User is already archived");
       }
