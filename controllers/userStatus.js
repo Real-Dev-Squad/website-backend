@@ -144,7 +144,7 @@ const updateAllUserStatus = async (req, res) => {
 };
 
 /**
- * Retrieve the idle users based on their task status - in progress , assigned
+ * Retrieve idle users based on task status where the status is not assigned and in progress
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
