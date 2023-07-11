@@ -16,4 +16,9 @@ const ALLOWED_FILTER_PARAMS = {
   ROLE: ["role"],
 };
 
-module.exports = { profileStatus, USER_STATUS, ALLOWED_FILTER_PARAMS };
+module.exports = {
+  profileStatus,
+  USER_STATUS,
+  ALLOWED_FILTER_PARAMS,
+  sensitiveData: ["phone", "email", "chaincode", "tokens"],
+};

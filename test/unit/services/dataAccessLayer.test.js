@@ -5,7 +5,7 @@ const userQuery = require("../../../models/users");
 const sinon = require("sinon");
 const { retrieveUsers, removeSensitiveInfo } = require("../../../services/dataAccessLayer");
 const userData = require("../../fixtures/user/user")();
-const remove = require("../../fixtures/user/removalData")();
+const { sensitiveData } = require("../../../constants/users");
 chai.use(chaiHttp);
 const expect = chai.expect;
 
@@ -18,7 +18,7 @@ describe("Data Access Layer", function () {
       const result = await retrieveUsers({ id: userData[12].id });
       removeSensitiveInfo(userData[12]);
       expect(result.user).to.deep.equal(userData[12]);
-      remove.forEach((key) => {
+      sensitiveData.forEach((key) => {
         expect(userData[12]).to.not.have.property(key);
       });
     });
@@ -30,7 +30,7 @@ describe("Data Access Layer", function () {
       removeSensitiveInfo(userData[12]);
       result.forEach((element) => {
         expect(element).to.deep.equal(userData[12]);
-        remove.forEach((key) => {
+        sensitiveData.forEach((key) => {
           expect(userData[12]).to.not.have.property(key);
         });
       });
@@ -44,7 +44,7 @@ describe("Data Access Layer", function () {
       removeSensitiveInfo(userData[12]);
       result.allUsers.forEach((element) => {
         expect(element).to.deep.equal(userData[12]);
-        remove.forEach((key) => {
+        sensitiveData.forEach((key) => {
           expect(userData[12]).to.not.have.property(key);
         });
       });
@@ -54,7 +54,7 @@ describe("Data Access Layer", function () {
   describe("removeSensitiveInfo", function () {
     it("should remove sensitive information from the users object", function () {
       removeSensitiveInfo(userData);
-      remove.forEach((key) => {
+      sensitiveData.forEach((key) => {
         expect(userData[12]).to.not.have.property(key);
       });
     });
