@@ -1,10 +1,10 @@
 const jwt = require("jsonwebtoken");
 const { getDiscordMemberDetails } = require("../services/discordMembersService");
 
-const generateAuthTokenForCloudflare = async () => {
+const generateAuthTokenForCloudflare = () => {
   const expiry = config.get("rdsServerlessBot.ttl");
   const privateKey = config.get("rdsServerlessBot.rdsServerLessPrivateKey");
-  const authToken = await jwt.sign({}, privateKey, {
+  const authToken = jwt.sign({}, privateKey, {
     algorithm: "RS256",
     expiresIn: expiry,
   });
