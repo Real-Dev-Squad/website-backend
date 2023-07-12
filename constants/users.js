@@ -4,7 +4,7 @@ const profileStatus = {
   NOT_APPROVED: "NOT APPROVED",
 };
 
-const sensitiveData = ["phone", "email", "chaincode", "tokens"];
+const USER_SENSITIVE_DATA = ["phone", "email", "chaincode", "tokens"];
 
 const USER_STATUS = {
   OOO: "ooo",
@@ -22,5 +22,5 @@ module.exports = {
   profileStatus,
   USER_STATUS,
   ALLOWED_FILTER_PARAMS,
-  sensitiveData,
+  USER_SENSITIVE_DATA,
 };

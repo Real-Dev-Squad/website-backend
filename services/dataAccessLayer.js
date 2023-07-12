@@ -1,5 +1,5 @@
 const userQuery = require("../models/users");
-const { sensitiveData } = require("../constants/users");
+const { USER_SENSITIVE_DATA } = require("../constants/users");
 
 const retrieveUsers = async ({ id = null, usernames = null, query }) => {
   if (id) {
@@ -22,9 +22,9 @@ const retrieveUsers = async ({ id = null, usernames = null, query }) => {
 };
 
 const removeSensitiveInfo = function (obj) {
-  for (let i = 0; i < sensitiveData.length; i++) {
-    if (sensitiveData[i] in obj) {
-      delete obj[sensitiveData[i]];
+  for (let i = 0; i < USER_SENSITIVE_DATA.length; i++) {
+    if (USER_SENSITIVE_DATA[i] in obj) {
+      delete obj[USER_SENSITIVE_DATA[i]];
     }
   }
 };
