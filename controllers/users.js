@@ -133,8 +133,8 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
-    const { phone, email, ...user } = result.user;
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
+    const user = result.user;
 
     if (result.userExists) {
       return res.json({
