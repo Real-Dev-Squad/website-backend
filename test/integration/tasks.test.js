@@ -632,7 +632,32 @@ describe("Tasks", function () {
         .send({ percentCompleted: 80 });
 
       expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
+      expect(res.body.message).to.be.equal("Task details can't be updated as it is marked as COMPLETED");
+    });
+
+    it("Should give 400 if status is COMPLETED and the status is to be changed", async function () {
+      const taskData = {
+        title: "Test task",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "COMPLETED",
+        percentCompleted: 100,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      };
+      taskId = (await tasks.updateTask(taskData)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: TASK_STATUS.IN_PROGRESS });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Task details can't be updated as it is marked as COMPLETED");
     });
   });
 
