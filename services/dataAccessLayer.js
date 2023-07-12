@@ -1,9 +1,14 @@
 const userQuery = require("../models/users");
 const { sensitiveData } = require("../constants/users");
 
-const retrieveUsers = async ({ id = null, usernames = null, query = null }) => {
-  if (id) {
-    const result = await userQuery.fetchUser({ userId: id });
+const retrieveUsers = async ({ id = null, username = null, usernames = null, query = null }) => {
+  if (id || username) {
+    let result;
+    if (id != null) {
+      result = await userQuery.fetchUser({ userId: id });
+    } else {
+      result = await userQuery.fetchUser({ username: username });
+    }
     removeSensitiveInfo(result.user);
     return result;
   } else if (usernames) {

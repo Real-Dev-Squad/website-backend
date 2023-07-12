@@ -195,7 +195,7 @@ const getSuggestedUsers = async (req, res) => {
 
 const getUsernameAvailabilty = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
     return res.json({
       isUsernameAvailable: !result.userExists,
     });
