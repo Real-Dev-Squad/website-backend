@@ -134,7 +134,7 @@ const updateSelfTask = async (req, res, next) => {
   }
 };
 
-const getTasks = async (req, res, next) => {
+const getTasksValidator = async (req, res, next) => {
   const schema = joi.object().keys({
     dev: joi.bool().optional().sensitive(),
     status: joi
@@ -179,5 +179,5 @@ module.exports = {
   createTask,
   updateTask,
   updateSelfTask,
-  getTasks,
+  getTasksValidator,
 };

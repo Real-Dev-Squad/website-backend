@@ -1,5 +1,5 @@
 const Sinon = require("sinon");
-const { getTasks } = require("../../../middlewares/validators/tasks");
+const { getTasksValidator } = require("../../../middlewares/validators/tasks");
 const { expect } = require("chai");
 const { TASK_STATUS } = require("../../../constants/tasks");
 
@@ -8,7 +8,7 @@ describe("getTasks validator", function () {
     const req = {};
     const res = {};
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
@@ -20,7 +20,7 @@ describe("getTasks validator", function () {
     };
     const res = {};
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
@@ -32,7 +32,7 @@ describe("getTasks validator", function () {
     };
     const res = {};
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
@@ -48,7 +48,7 @@ describe("getTasks validator", function () {
       },
     };
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
     expect(res.boom.badRequest.callCount).to.be.equal(1);
   });
@@ -61,7 +61,7 @@ describe("getTasks validator", function () {
     };
     const res = {};
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
@@ -73,7 +73,7 @@ describe("getTasks validator", function () {
     };
     const res = {};
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
@@ -89,7 +89,7 @@ describe("getTasks validator", function () {
       },
     };
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
@@ -102,7 +102,7 @@ describe("getTasks validator", function () {
     };
     const res = {};
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
@@ -119,7 +119,7 @@ describe("getTasks validator", function () {
       },
     };
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
@@ -136,7 +136,7 @@ describe("getTasks validator", function () {
       },
     };
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
@@ -152,7 +152,7 @@ describe("getTasks validator", function () {
       },
     };
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
@@ -168,7 +168,7 @@ describe("getTasks validator", function () {
       },
     };
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
@@ -185,7 +185,7 @@ describe("getTasks validator", function () {
       },
     };
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
@@ -198,7 +198,7 @@ describe("getTasks validator", function () {
     };
     const res = {};
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
@@ -215,7 +215,7 @@ describe("getTasks validator", function () {
       },
     };
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
@@ -232,7 +232,7 @@ describe("getTasks validator", function () {
       },
     };
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
@@ -245,7 +245,7 @@ describe("getTasks validator", function () {
     };
     const res = {};
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
@@ -263,7 +263,7 @@ describe("getTasks validator", function () {
       },
     };
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
@@ -281,7 +281,7 @@ describe("getTasks validator", function () {
       },
     };
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
@@ -299,7 +299,7 @@ describe("getTasks validator", function () {
       },
     };
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
@@ -314,7 +314,7 @@ describe("getTasks validator", function () {
     };
     const res = {};
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
@@ -329,7 +329,7 @@ describe("getTasks validator", function () {
     };
     const res = {};
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
@@ -344,7 +344,7 @@ describe("getTasks validator", function () {
     };
     const res = {};
     const nextMiddlewareSpy = Sinon.spy();
-    await getTasks(req, res, nextMiddlewareSpy);
+    await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 });
