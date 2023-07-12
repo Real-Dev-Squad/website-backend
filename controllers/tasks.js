@@ -235,7 +235,7 @@ const updateTaskStatus = async (req, res, next) => {
 
     if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
       if (req.body.status === TASK_STATUS.COMPLETED || !req.body.status) {
-        return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
+        return res.boom.badRequest("Task percent can't be updated as status is COMPLETED");
       }
     }
 
