@@ -1,7 +1,7 @@
 const userQuery = require("../models/users");
 const { sensitiveData } = require("../constants/users");
 
-const retrieveUsers = async ({ id = null, usernames = null, query = null }) => {
+const retrieveUsers = async ({ id = null, usernames = null, query }) => {
   if (id) {
     const result = await userQuery.fetchUser({ userId: id });
     removeSensitiveInfo(result.user);
