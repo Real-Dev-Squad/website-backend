@@ -143,4 +143,41 @@ const updateAllUserStatus = async (req, res) => {
   }
 };
 
-module.exports = { deleteUserStatus, getUserStatus, getAllUserStatus, updateUserStatus, updateAllUserStatus };
+/**
+ * Retrieve idle users based on task status where the status is not assigned and in progress
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getIdleUsers = async (req, res) => {
+  try {
+    const data = await userStatusModel.getIdleUsers();
+    return res.json({
+      message: "All idle users found successfully.",
+      data,
+    });
+  } catch (error) {
+    logger.error(error.message);
+    return res.status(500).json({
+      message: "The server has encountered an unexpected error. Please contact the administrator for more information.",
+    });
+  }
+};
+
+const getUserStatusControllers = async (req, res, next) => {
+  if (Object.keys(req.query).includes("taskStatus")) {
+    await getIdleUsers(req, res, next);
+  } else {
+    await getAllUserStatus(req, res, next);
+  }
+};
+
+module.exports = {
+  deleteUserStatus,
+  getUserStatus,
+  getAllUserStatus,
+  updateUserStatus,
+  updateAllUserStatus,
+  getIdleUsers,
+  getUserStatusControllers,
+};

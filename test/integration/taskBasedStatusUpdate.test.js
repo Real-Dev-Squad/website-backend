@@ -1,4 +1,5 @@
 const chai = require("chai");
+const sinon = require("sinon");
 const { expect } = chai;
 const firestore = require("../../utils/firestore");
 const addUser = require("../utils/addUser");
@@ -10,6 +11,7 @@ const { generateStatusDataForState } = require("../fixtures/userStatus/userStatu
 const allTasks = require("../fixtures/tasks/tasks");
 const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
+const userStatusModel = require("../../models/userStatus");
 
 describe("Task Based Status Updates", function () {
   describe("PATCH /tasks/self/:taskId - Update User Status Document on marking Task as Completed.", function () {
@@ -279,6 +281,78 @@ describe("Task Based Status Updates", function () {
       expect(res.body.userStatus.error).to.equal("Not Found");
       expect(res.body.userStatus.message).to.equal(
         "Something went wrong. Username funkeyMonkey123 could not be found."
+      );
+    });
+  });
+
+  describe("GET users/status?taskStatus=IDLE Find Users without Assigned Or InProgress Tasks", function () {
+    let userId1;
+    let userId2;
+    let userId3;
+
+    let superUserId;
+    let superUserJwt;
+
+    beforeEach(async function () {
+      userId1 = await addUser(userData[6]);
+      userId2 = await addUser(userData[8]);
+      userId3 = await addUser(userData[9]);
+      superUserId = await addUser(userData[4]);
+      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+
+      const taskArr = allTasks();
+
+      const sampleTask1 = taskArr[0];
+      sampleTask1.assignee = userId1;
+      sampleTask1.status = "ASSIGNED";
+
+      const sampleTask2 = taskArr[1];
+      sampleTask2.assignee = userId2;
+      sampleTask2.status = "IN_PROGRESS";
+
+      const sampleTask3 = taskArr[2];
+      sampleTask3.assignee = userId3;
+      sampleTask3.status = "COMPLETED";
+
+      await firestore.collection("tasks").doc("taskId001").set(sampleTask1);
+      await firestore.collection("tasks").doc("taskId002").set(sampleTask2);
+      await firestore.collection("tasks").doc("taskId003").set(sampleTask3);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should get the users who without Assigned Or InProgress Tasks", async function () {
+      const response = await chai
+        .request(app)
+        .get(`/users/status?taskStatus=IDLE`)
+        .set("cookie", `${cookieName}=${superUserJwt}`);
+
+      expect(response.status).to.equal(200);
+      expect(response.body.message).to.equal("All idle users found successfully.");
+      expect(response.body.data.totalValidUsersCount).to.equal(4);
+      expect(response.body.data.idleUsersCount).to.equal(2);
+      expect(response.body.data.idleUsers).to.have.members([userId3, superUserId]);
+      expect(response.body.data.usersNotProcessedCount).to.equal(0);
+      expect(response.body.data.usersNotProcessed).to.deep.equal([]);
+    });
+
+    it("should throw an error when an error occurs", async function () {
+      sinon
+        .stub(userStatusModel, "getIdleUsers")
+        .throws(
+          new Error(
+            "The server has encountered an unexpected error. Please contact the administrator for more information."
+          )
+        );
+      const response = await chai
+        .request(app)
+        .get(`/users/status?taskStatus=IDLE`)
+        .set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(response.status).to.equal(500);
+      expect(response.body.message).to.equal(
+        "The server has encountered an unexpected error. Please contact the administrator for more information."
       );
     });
   });
