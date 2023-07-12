@@ -300,12 +300,14 @@ describe("Tasks", function () {
         .send({
           title: "new-title",
           dependsOn: ["dependency1", "dependency2"],
+          status: "ASSIGNED",
         })
         .end((err, res) => {
           if (err) {
             return done(err);
           }
           expect(res).to.have.status(204);
+          expect(res.body.taskData.status).to.equal("ASSIGNED");
           return done();
         });
     });
