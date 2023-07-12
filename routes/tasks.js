@@ -2,13 +2,13 @@ const express = require("express");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
 const tasks = require("../controllers/tasks");
-const { createTask, updateTask, updateSelfTask } = require("../middlewares/validators/tasks");
+const { createTask, updateTask, updateSelfTask, getTasksValidator } = require("../middlewares/validators/tasks");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const { APPOWNER, SUPERUSER } = require("../constants/roles");
 const assignTask = require("../middlewares/assignTask");
 const cache = require("../utils/cache");
 
-router.get("/", cache(), tasks.fetchTasks);
+router.get("/", getTasksValidator, cache(), tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);
 router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasks);
 router.post("/", authenticate, authorizeRoles([APPOWNER, SUPERUSER]), createTask, tasks.addNewTask);

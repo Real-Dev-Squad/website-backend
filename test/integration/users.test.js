@@ -152,6 +152,8 @@ describe("Users", function () {
           expect(res.body.users).to.be.a("array");
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
+          expect(res.body.users[0]).to.not.have.property("tokens");
+          expect(res.body.users[0]).to.not.have.property("chaincode");
 
           return done();
         });
@@ -197,7 +199,8 @@ describe("Users", function () {
           expect(res.body.users.length).to.equal(1);
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
-
+          expect(res.body.users[0]).to.not.have.property("tokens");
+          expect(res.body.users[0]).to.not.have.property("chaincode");
           return done();
         });
     });
@@ -640,7 +643,7 @@ describe("Users", function () {
         "isMember",
         "roles",
       ]);
-      expect(Object.keys(res.body.user)).to.not.include.members(["phone", "email"]);
+      expect(Object.keys(res.body.user)).to.not.include.members(["phone", "email", "tokens", "chaincode"]);
       expect(res.body.user.id).to.equal(userId);
     });
 
