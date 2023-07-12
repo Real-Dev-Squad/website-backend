@@ -172,6 +172,27 @@ const getUserStatusControllers = async (req, res, next) => {
   }
 };
 
+/**
+ * Mass Update User Status of Idle Users to Idle
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const massUpdateIdleUsers = async (req, res) => {
+  try {
+    const data = await userStatusModel.massUpdateIdleUsers(req.body.users);
+    return res.json({
+      message: "users status updated successfully.",
+      data,
+    });
+  } catch (error) {
+    logger.error(error.message);
+    return res.status(500).json({
+      message: "The server has encountered an unexpected error. Please contact the administrator for more information.",
+    });
+  }
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -180,4 +201,5 @@ module.exports = {
   updateAllUserStatus,
   getIdleUsers,
   getUserStatusControllers,
+  massUpdateIdleUsers,
 };
