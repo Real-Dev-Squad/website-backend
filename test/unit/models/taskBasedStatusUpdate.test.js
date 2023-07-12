@@ -9,6 +9,7 @@ const {
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
   massUpdateIdleUsers,
+  getIdleUsers,
 } = require("../../../models/userStatus");
 const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
@@ -280,6 +281,60 @@ describe("Update Status based on task update", function () {
       await massUpdateIdleUsers().catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("something went wrong");
+      });
+    });
+  });
+
+  describe("getIdleUsers", function () {
+    let userId1;
+    let userId2;
+    let userId3;
+
+    beforeEach(async function () {
+      const userArr = userData();
+      userId1 = await addUser(userArr[6]);
+      userId2 = await addUser(userArr[8]);
+      userId3 = await addUser(userArr[9]);
+      const taskArr = allTasks();
+
+      const sampleTask1 = taskArr[0];
+      sampleTask1.assignee = userId1;
+      sampleTask1.status = "ASSIGNED";
+
+      const sampleTask2 = taskArr[1];
+      sampleTask2.assignee = userId2;
+      sampleTask2.status = "IN_PROGRESS";
+
+      const sampleTask3 = taskArr[2];
+      sampleTask3.assignee = userId3;
+      sampleTask3.status = "COMPLETED";
+
+      await firestore.collection("tasks").doc("taskId001").set(sampleTask1);
+      await firestore.collection("tasks").doc("taskId002").set(sampleTask2);
+      await firestore.collection("tasks").doc("taskId003").set(sampleTask3);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return the correct results when there are no errors", async function () {
+      const result = await getIdleUsers();
+      expect(result.totalValidUsersCount).to.equal(3);
+      expect(result.idleUsersCount).to.equal(1);
+      expect(result.idleUsers).to.deep.equal([userId3]);
+      expect(result.usersNotProcessedCount).to.equal(0);
+      expect(result.usersNotProcessed).to.deep.equal([]);
+    });
+
+    it("should throw an error if users query fail", async function () {
+      const usersCollection = firestore.collection("users");
+      sinon.stub(usersCollection, "where").returns(usersCollection);
+      sinon.stub(usersCollection, "get").throws(new Error("unable to get users"));
+      await getIdleUsers().catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.be.equal("unable to get users");
       });
     });
   });

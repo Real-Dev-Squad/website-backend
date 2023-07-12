@@ -8,7 +8,9 @@ const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
 const userQuery = require("../models/users");
+const { transformQuery } = require("../utils/tasks");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
+
 /**
  * Creates new task
  *
@@ -60,7 +62,10 @@ const addNewTask = async (req, res) => {
  */
 const fetchTasks = async (req, res) => {
   try {
-    const allTasks = await tasks.fetchTasks();
+    const { dev, status } = req.query;
+    const { dev: transformedDev, status: transformedStatus } = transformQuery(dev, status);
+
+    const allTasks = await tasks.fetchTasks(transformedDev, transformedStatus);
     const fetchTasksWithRdsAssigneeInfo = allTasks.map(async (task) => {
       /*
        If the issue has a "github.issue" inner object and a property "assignee",

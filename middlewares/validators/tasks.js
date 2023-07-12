@@ -1,8 +1,9 @@
 const joi = require("joi");
 const { DINERO, NEELAM } = require("../../constants/wallets");
-const { TASK_STATUS, TASK_STATUS_OLD } = require("../../constants/tasks");
+const { TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS } = require("../../constants/tasks");
 
 const TASK_STATUS_ENUM = Object.values(TASK_STATUS);
+const MAPPED_TASK_STATUS_ENUM = Object.keys(MAPPED_TASK_STATUS);
 
 const createTask = async (req, res, next) => {
   const schema = joi
@@ -133,8 +134,28 @@ const updateSelfTask = async (req, res, next) => {
   }
 };
 
+const getTasksValidator = async (req, res, next) => {
+  const schema = joi.object().keys({
+    dev: joi.bool().optional().sensitive(),
+    status: joi
+      .string()
+      .insensitive()
+      .valid(...MAPPED_TASK_STATUS_ENUM)
+      .optional(),
+  });
+
+  try {
+    await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    logger.error(`Error validating getTasks query : ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
 module.exports = {
   createTask,
   updateTask,
   updateSelfTask,
+  getTasksValidator,
 };

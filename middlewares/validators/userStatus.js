@@ -94,7 +94,33 @@ const validateMassUpdate = async (req, res, next) => {
   }
 };
 
+const validateGetQueryParams = async (req, res, next) => {
+  const schema = Joi.object()
+    .keys({
+      taskStatus: Joi.string()
+        .trim()
+        .valid(userState.IDLE)
+        .error(new Error(`Invalid state value passed for taskStatus.`)),
+      state: Joi.string()
+        .trim()
+        .valid(userState.IDLE, userState.ACTIVE, userState.OOO, userState.ONBOARDING)
+        .error(new Error(`Invalid State. State must be either IDLE, ACTIVE, OOO, or ONBOARDING`)),
+    })
+    .messages({
+      "object.unknown": "Invalid query param provided.",
+    });
+
+  try {
+    await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    logger.error(`Error validating Query Params for GET ${error.message}`);
+    res.boom.badRequest(error);
+  }
+};
+
 module.exports = {
   validateUserStatus,
   validateMassUpdate,
+  validateGetQueryParams,
 };

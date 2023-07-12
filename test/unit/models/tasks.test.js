@@ -12,6 +12,7 @@ const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
 const { addDependency, updateTask } = require("../../../models/tasks");
 const firestore = require("../../../utils/firestore");
+const { TASK_STATUS } = require("../../../constants/tasks");
 const dependencyModel = firestore.collection("TaskDependencies");
 
 describe("tasks", function () {
@@ -70,6 +71,63 @@ describe("tasks", function () {
       }
     });
   });
+
+  describe("fetchTasks", function () {
+    beforeEach(async function () {
+      const tasksPromise = tasksData.map(async (task) => {
+        await tasks.updateTask(task);
+      });
+      await Promise.all(tasksPromise);
+    });
+
+    it("should fetch all tasks when dev is false and no status is passed to the fetchTasks function", async function () {
+      const result = await tasks.fetchTasks();
+
+      expect(result).to.have.length(tasksData.length);
+      result.forEach((task) => {
+        const sameTask = tasksData.find((t) => t.title === task.title);
+        expect(task).to.contain.all.keys(sameTask);
+      });
+    });
+
+    it("should fetch all tasks when dev is false but status is passed to the fetchTasks function", async function () {
+      const status = TASK_STATUS.ASSIGNED;
+      const result = await tasks.fetchTasks(false, status);
+
+      expect(result).to.have.length(tasksData.length);
+
+      result.forEach((task) => {
+        const sameTask = tasksData.find((t) => t.title === task.title);
+        expect(task).to.contain.all.keys(sameTask);
+      });
+    });
+
+    it("should fetch all tasks when dev is true but no status is passed to the fetchTasks function", async function () {
+      const result = await tasks.fetchTasks(true);
+
+      expect(result).to.have.length(tasksData.length);
+
+      result.forEach((task) => {
+        const sameTask = tasksData.find((t) => t.title === task.title);
+        expect(task).to.contain.all.keys(sameTask);
+      });
+    });
+
+    it("should fetch tasks filtered by the status when dev is true ans no status is passed to the fetchTasks function", async function () {
+      const status = TASK_STATUS.ASSIGNED;
+      const result = await tasks.fetchTasks(true, status);
+      const taskDataByStatus = tasksData.filter((data) => data.status === status);
+
+      expect(result).to.have.length(taskDataByStatus.length);
+      result.forEach((task) => expect(task.status).to.equal(status));
+
+      result.forEach((task) => {
+        const sameTask = taskDataByStatus.find((t) => t.title === task.title);
+        expect(task).to.contain.all.keys(sameTask);
+      });
+    });
+  });
+
   describe("updateDependency", function () {
     it("should add dependencies to firestore", async function () {
       const data = {

@@ -88,9 +88,10 @@ const addDependency = async (data) => {
  *
  * @return {Promise<tasks|Array>}
  */
-const fetchTasks = async () => {
+const fetchTasks = async (dev = false, status = "") => {
   try {
-    const tasksSnapshot = await tasksModel.get();
+    const tasksSnapshot = dev && status ? await tasksModel.where("status", "==", status).get() : await tasksModel.get();
+
     const tasks = buildTasks(tasksSnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
     const updatedTasks = await Promise.all(promises);
@@ -355,7 +356,8 @@ const fetchSkillLevelTask = async (userId) => {
  * @returns {Promise<tasks>|Array}
  */
 const fetchSelfTasks = async (username) => {
-  return await fetchUserTasks(username, [], "startedOn", "desc");
+  return await fetchUserTasks(username, []);
+  // Removed `startedOn` field since we are getting issues with some of the documents in the tasks collection as some of the documents dont have `startedOn` present.
 };
 
 /**
