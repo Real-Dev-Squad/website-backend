@@ -22,9 +22,6 @@ const updateTask = async (taskData, taskId = null) => {
       if (taskData.status === "VERIFIED") {
         taskData = { ...taskData, endsOn: Math.floor(Date.now() / 1000) };
       }
-      // if (taskData.assignee) {
-      //   taskData = { ...taskData, status: "assigned" };
-      // }
       const { dependsOn, ...taskWithoutDependsOn } = taskData;
       await tasksModel.doc(taskId).set({
         ...task.data(),
