@@ -12,6 +12,7 @@ const {
   checkIfUserHasLiveTasks,
   generateErrorResponse,
 } = require("../utils/userStatus");
+const { TASK_STATUS } = require("../constants/tasks");
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
 const usersCollection = firestore.collection("users");
@@ -325,6 +326,52 @@ const updateStatusOnTaskCompletion = async (userId) => {
   }
 };
 
+const getIdleUsers = async () => {
+  const idleUsers = [];
+  const usersNotProcessed = [];
+  let errorCount = 0;
+  let discordActiveNonArchivedUsersQuerySnapshot;
+  try {
+    discordActiveNonArchivedUsersQuerySnapshot = await usersCollection
+      .where("roles.in_discord", "==", true)
+      .where("roles.archived", "==", false)
+      .get();
+  } catch (error) {
+    logger.error(`unable to get users ${error.message}`);
+    throw new Error("unable to get users");
+  }
+  const totalValidUsersCount = discordActiveNonArchivedUsersQuerySnapshot.size;
+  if (totalValidUsersCount) {
+    await Promise.all(
+      discordActiveNonArchivedUsersQuerySnapshot.docs.map(async (userDoc) => {
+        const assigneeId = userDoc.id;
+        try {
+          const tasksQuerySnapshot = await firestore
+            .collection("tasks")
+            .where("assignee", "==", assigneeId)
+            .where("status", "in", [TASK_STATUS.ASSIGNED, TASK_STATUS.IN_PROGRESS])
+            .get();
+          if (tasksQuerySnapshot.empty) {
+            idleUsers.push(assigneeId);
+          }
+        } catch (error) {
+          errorCount++;
+          usersNotProcessed.push(assigneeId);
+          logger.error(`Error retrieving tasks for user ${assigneeId}: ${error.message}`);
+        }
+      })
+    );
+  }
+
+  return {
+    totalValidUsersCount,
+    idleUsersCount: idleUsers.length,
+    idleUsers,
+    usersNotProcessedCount: errorCount,
+    usersNotProcessed,
+  };
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -334,4 +381,5 @@ module.exports = {
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
   updateStatusOnTaskCompletion,
+  getIdleUsers,
 };

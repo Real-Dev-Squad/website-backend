@@ -2,17 +2,17 @@ const express = require("express");
 const {
   deleteUserStatus,
   getUserStatus,
-  getAllUserStatus,
   updateUserStatus,
   updateAllUserStatus,
+  getUserStatusControllers,
 } = require("../controllers/userStatus");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const { SUPERUSER } = require("../constants/roles");
-const { validateUserStatus } = require("../middlewares/validators/userStatus");
+const { validateUserStatus, validateGetQueryParams } = require("../middlewares/validators/userStatus");
 
-router.get("/", getAllUserStatus);
+router.get("/", validateGetQueryParams, getUserStatusControllers);
 router.get("/self", authenticate, getUserStatus);
 router.get("/:userId", getUserStatus);
 router.patch("/self", authenticate, validateUserStatus, updateUserStatus);
