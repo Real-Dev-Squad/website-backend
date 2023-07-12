@@ -382,6 +382,25 @@ describe("Tasks", function () {
           return done();
         });
     });
+    it("Should return fail response if percent completed is < 0 or > 100", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/" + taskId1)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          status: TASK_STATUS.IN_REVIEW,
+          percentCompleted: 120,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          return done();
+        });
+    });
 
     it("Should return 404 if task does not exist", function (done) {
       chai
@@ -524,6 +543,23 @@ describe("Tasks", function () {
         .patch(`/tasks/self/${taskId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "invalidStatus" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          return done();
+        });
+    });
+
+    it("Should return fail response if percentage is < 0 or  > 100", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, percentCompleted: 150 })
         .end((err, res) => {
           if (err) {
             return done(err);
