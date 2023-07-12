@@ -1,5 +1,5 @@
 const { getUsername, getUserId, getParticipantUsernames, getParticipantUserIds } = require("./users");
-const { TASK_TYPE } = require("../constants/tasks");
+const { TASK_TYPE, MAPPED_TASK_STATUS } = require("../constants/tasks");
 
 const fromFirestoreData = async (task) => {
   if (!task) {
@@ -57,8 +57,15 @@ const buildTasks = (tasks, initialTaskArray = []) => {
   return initialTaskArray;
 };
 
+const transformQuery = (dev = false, status = "") => {
+  const transformedDev = JSON.parse(dev);
+  const transformedStatus = MAPPED_TASK_STATUS[status.toUpperCase()];
+  return { status: transformedStatus, dev: transformedDev };
+};
+
 module.exports = {
   fromFirestoreData,
   toFirestoreData,
   buildTasks,
+  transformQuery,
 };
