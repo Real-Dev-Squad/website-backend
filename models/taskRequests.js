@@ -40,6 +40,17 @@ const fetchTaskRequests = async () => {
 };
 
 /**
+ * Fetches task request by id
+ *
+ * @param taskRequestId { string }: id of task request
+ * @return Promise<{taskRequest: Object}>
+ */
+const fetchTaskRequestById = async (taskRequestId) => {
+  const taskRequestSnapshot = await taskRequestsCollection.doc(taskRequestId).get();
+  return taskRequestSnapshot.data();
+};
+
+/**
  * Creates a task request
  *
  * @param taskId { string }: id of task request
@@ -73,11 +84,12 @@ const addOrUpdate = async (taskId, userId) => {
       taskId,
     };
 
-    await taskRequestsCollection.add(newTaskRequest);
+    const newTaskRequestRef = await taskRequestsCollection.add(newTaskRequest);
 
     return {
       isCreate: true,
       taskRequest: newTaskRequest,
+      id: newTaskRequestRef.id,
     };
   } catch (err) {
     logger.error("Error in updating task", err);
@@ -117,6 +129,7 @@ const approveTaskRequest = async (taskRequestId, user) => {
 
 module.exports = {
   fetchTaskRequests,
+  fetchTaskRequestById,
   addOrUpdate,
   approveTaskRequest,
 };

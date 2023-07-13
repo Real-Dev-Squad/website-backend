@@ -6,8 +6,8 @@ const fetchTaskRequests = async (_, res) => {
   try {
     const data = await taskRequestsModel.fetchTaskRequests();
 
-    if (data || data.length > 0) {
-      res.status(200).json({
+    if (data.length > 0) {
+      return res.status(200).json({
         message: "Task requests returned successfully",
         data,
       });
@@ -16,6 +16,27 @@ const fetchTaskRequests = async (_, res) => {
     return res.status(404).json({
       message: "Task requests not found",
       data,
+    });
+  } catch (err) {
+    logger.error("Error while fetching task requests", err);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const fetchTaskRequestById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const data = await taskRequestsModel.fetchTaskRequestById(id);
+
+    if (data) {
+      res.status(200).json({
+        message: "Task request returned successfully",
+        data,
+      });
+    }
+
+    return res.status(404).json({
+      message: "Task request not found",
     });
   } catch (err) {
     logger.error("Error while fetching task requests", err);
@@ -81,4 +102,5 @@ module.exports = {
   approveTaskRequest,
   addOrUpdate,
   fetchTaskRequests,
+  fetchTaskRequestById,
 };
