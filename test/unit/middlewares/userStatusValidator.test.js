@@ -16,6 +16,7 @@ describe("Validation Tests for Cancel OOO", function () {
   });
   it("should validate for a valid request", async function () {
     req = {
+      query: { userStatusFlag: false },
       body: {
         cancelOoo: true,
       },
