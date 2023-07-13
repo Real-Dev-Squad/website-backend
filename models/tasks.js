@@ -20,7 +20,7 @@ const updateTask = async (taskData, taskId = null) => {
     if (taskId) {
       const task = await tasksModel.doc(taskId).get();
       if (taskData?.assignee && task.data().status === "AVAILABLE") {
-        taskData = { ...taskData, status: "ASSIGNED" }; // Set the status field to "assigned"
+        taskData = { ...taskData, status: "ASSIGNED" };
       }
       if (taskData.status === "VERIFIED") {
         taskData = { ...taskData, endsOn: Math.floor(Date.now() / 1000) };

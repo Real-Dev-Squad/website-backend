@@ -300,7 +300,6 @@ describe("Tasks", function () {
         .send({
           title: "new-title",
           dependsOn: ["dependency1", "dependency2"],
-          // status: "ASSIGNED",
         })
         .end((err, res) => {
           if (err) {
@@ -310,6 +309,24 @@ describe("Tasks", function () {
           // expect(res.body.taskData.status).to.equal("ASSIGNED");
           return done();
         });
+    });
+    it("Should update assigne", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "vinit" });
+      expect(res).to.have.status(204);
+      // const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+
+      // expect(res2).to.have.status(200);
+      // expect(res2.body.taskData.dependsOn).to.be.a("array");
+      // res2.body.taskData.dependsOn.forEach((taskId) => {
+      //   expect(dependsOn).to.include(taskId);
+      // });
+
+      return taskId;
     });
     it("Should update dependency", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
