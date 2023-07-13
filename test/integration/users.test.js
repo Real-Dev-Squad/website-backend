@@ -1244,7 +1244,7 @@ describe("Users", function () {
 
       chai
         .request(app)
-        .patch("/users/removeGitHubToken")
+        .patch("/users/remove-tokens")
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
