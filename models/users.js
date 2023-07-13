@@ -171,6 +171,7 @@ const fetchPaginatedUsers = async (query) => {
       }
     }
     const snapshot = await dbQuery.get();
+
     const firstDoc = snapshot.docs[0];
     const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
@@ -180,12 +181,9 @@ const fetchPaginatedUsers = async (query) => {
       allUsers.push({
         id: doc.id,
         ...doc.data(),
-        phone: undefined,
-        email: undefined,
-        tokens: undefined,
-        chaincode: undefined,
       });
     });
+
     return {
       allUsers,
       nextId: lastDoc?.id ?? "",
@@ -219,10 +217,6 @@ const fetchUsers = async (usernames = []) => {
         users.push({
           id: doc.id,
           ...doc.data(),
-          phone: undefined,
-          email: undefined,
-          tokens: undefined,
-          chaincode: undefined,
         });
       });
     });
@@ -247,7 +241,6 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
     let userData, id;
     if (username) {
       const user = await userModel.where("username", "==", username).limit(1).get();
-
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
@@ -268,8 +261,6 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       user: {
         id,
         ...userData,
-        tokens: undefined,
-        chaincode: undefined,
       },
     };
   } catch (err) {
