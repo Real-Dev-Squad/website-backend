@@ -2,6 +2,7 @@ const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
 const firestore = require("../../utils/firestore");
+const userStatusModel = firestore.collection("usersStatus");
 const addUser = require("../utils/addUser");
 const authService = require("../../services/authService");
 const userData = require("../fixtures/user/user")();
@@ -11,7 +12,7 @@ const { generateStatusDataForState } = require("../fixtures/userStatus/userStatu
 const allTasks = require("../fixtures/tasks/tasks");
 const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
-const userStatusModel = require("../../models/userStatus");
+const userStatusModelFunction = require("../../models/userStatus");
 
 describe("Task Based Status Updates", function () {
   describe("PATCH /tasks/self/:taskId - Update User Status Document on marking Task as Completed.", function () {
@@ -285,6 +286,83 @@ describe("Task Based Status Updates", function () {
     });
   });
 
+  describe("PATCH Integration tests for Changing the status to IDLE based on users list passed", function () {
+    let superUserId;
+    let superUserJwt;
+    let userId1;
+    let userId2;
+    let userId3;
+    let userId4;
+    let userId5;
+    let listUsers;
+    const reqBody = {};
+
+    beforeEach(async function () {
+      superUserId = await addUser(userData[4]);
+      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+
+      userId1 = await addUser(userData[6]);
+      userId2 = await addUser(userData[8]);
+      userId3 = await addUser(userData[9]);
+      userId4 = await addUser(userData[0]);
+      userId5 = await addUser(userData[1]);
+      listUsers = [userId1, userId2, userId3, userId4, userId5];
+      reqBody.users = listUsers;
+      await userStatusModel.doc("userStatus001").set(generateStatusDataForState(userId1, userState.ACTIVE));
+      await userStatusModel.doc("userStatus002").set(generateStatusDataForState(userId2, userState.OOO));
+      await userStatusModel.doc("userStatus003").set(generateStatusDataForState(userId3, userState.IDLE));
+      await userStatusModel.doc("userStatus004").set(generateStatusDataForState(userId4, userState.ONBOARDING));
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should return the correct results when there are no errors", async function () {
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/batch`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send(reqBody);
+      expect(res.status).to.equal(200);
+      const response = res.body;
+      expect(response.data).to.have.property("totalUsers");
+      expect(response.data).to.have.property("usersWithStatusUpdated");
+      expect(response.data).to.have.property("usersOnboardingOrAlreadyIdle");
+      expect(response.data.totalUsers).to.equal(5);
+      expect(response.data.usersWithStatusUpdated).to.deep.equal(3);
+      expect(response.data.usersOnboardingOrAlreadyIdle).to.equal(2);
+      const userStatus001Data = (await userStatusModel.doc("userStatus001").get()).data();
+      expect(userStatus001Data.currentStatus.state).to.equal(userState.IDLE);
+      const userStatus002Data = (await userStatusModel.doc("userStatus002").get()).data();
+      expect(userStatus002Data.currentStatus.state).to.equal(userState.OOO);
+      expect(userStatus002Data.futureStatus.state).to.equal(userState.IDLE);
+      const userStatus003Data = (await userStatusModel.doc("userStatus003").get()).data();
+      expect(userStatus003Data.currentStatus.state).to.equal(userState.IDLE);
+      const userStatus004Data = (await userStatusModel.doc("userStatus004").get()).data();
+      expect(userStatus004Data.currentStatus.state).to.equal(userState.ONBOARDING);
+      const userStatus005SnapShot = await userStatusModel.where("userId", "==", userId5).limit(1).get();
+      const [userStatus005Doc] = userStatus005SnapShot.docs;
+      const userStatus005Data = userStatus005Doc.data();
+      expect(userStatus005Data.currentStatus.state).to.equal(userState.IDLE);
+    });
+
+    it("should throw an error if users firestore batch operations fail", async function () {
+      sinon.stub(firestore, "batch").throws(new Error("something went wrong"));
+
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/batch`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send(reqBody);
+      expect(res.status).to.equal(500);
+      const response = res.body;
+      expect(response.message).to.be.equal(
+        "The server has encountered an unexpected error. Please contact the administrator for more information."
+      );
+    });
+  });
+
   describe("GET users/status?taskStatus=IDLE Find Users without Assigned Or InProgress Tasks", function () {
     let userId1;
     let userId2;
@@ -340,7 +418,7 @@ describe("Task Based Status Updates", function () {
 
     it("should throw an error when an error occurs", async function () {
       sinon
-        .stub(userStatusModel, "getIdleUsers")
+        .stub(userStatusModelFunction, "getIdleUsers")
         .throws(
           new Error(
             "The server has encountered an unexpected error. Please contact the administrator for more information."
