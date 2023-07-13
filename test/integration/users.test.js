@@ -1230,7 +1230,7 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /users/removeGitHubToken", function () {
+  describe("PATCH /users/remove-tokens", function () {
     it("should remove all the users with token field", function (done) {
       before(async function () {
         await addOrUpdate(userData[0]);
