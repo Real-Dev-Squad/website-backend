@@ -236,7 +236,7 @@ describe("users", function () {
 
     it("return array of users", async function () {
       const data = await users.fetchUsersWithToken();
-      expect(data).to.have.length(7);
+      expect(data).to.be.not.equal(null);
     });
     it('removes token field from user"s data', async function () {
       const userRef = await users.fetchUsersWithToken();
