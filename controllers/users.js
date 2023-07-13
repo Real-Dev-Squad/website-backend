@@ -607,13 +607,13 @@ const setInDiscordScript = async (req, res) => {
   }
 };
 
-const removeGitHubTokenFromAllUsers = async (req, res) => {
+const removeTokens = async (req, res) => {
   try {
-    const users = await userQuery.usersWithGitHubToken();
+    const users = await userQuery.fetchUsersWithToken();
     const length = users.length;
 
     if (length === 0) {
-      return res.status(500).json({ message: "No users found with github Token!" });
+      return res.status(404).json({ message: "No users found with github Token!" });
     }
 
     await userQuery.removeGitHubToken(users);
@@ -651,5 +651,5 @@ module.exports = {
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
-  removeGitHubTokenFromAllUsers,
+  removeTokens,
 };

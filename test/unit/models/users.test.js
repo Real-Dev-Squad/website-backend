@@ -235,12 +235,18 @@ describe("users", function () {
     });
 
     it("return array of users", async function () {
-      const data = await users.usersWithGitHubToken();
+      const data = await users.fetchUsersWithToken();
       expect(data).to.have.length(7);
     });
     it('removes token field from user"s data', async function () {
-      const data = await users.usersWithGitHubToken();
-      await users.removeGitHubToken(data);
+      const userRef = await users.fetchUsersWithToken();
+      const dataBefore = await userRef[1].get();
+      const beforeRemoval = Object.keys(dataBefore.data()).includes("tokens");
+      expect(beforeRemoval).to.be.equal(true);
+      await users.removeGitHubToken(userRef);
+      const dataAfter = await userRef[1].get();
+      const afterRemoval = Object.keys(dataAfter.data()).includes("tokens");
+      expect(afterRemoval).to.be.equal(false);
     });
 
     it("throws error if id is not found in db", async function () {

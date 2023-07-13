@@ -576,7 +576,7 @@ const fetchAllUsers = async () => {
   return users;
 };
 
-const usersWithGitHubToken = async () => {
+const fetchUsersWithToken = async () => {
   try {
     const users = [];
     const usersRef = await userModel.where("tokens", "!=", false).get();
@@ -592,12 +592,31 @@ const usersWithGitHubToken = async () => {
 
 const removeGitHubToken = async (users) => {
   try {
-    const batch = firestore.batch();
-    users.forEach((user) => {
-      batch.update(user, { tokens: admin.firestore.FieldValue.delete() });
-    });
+    const length = users.length;
 
-    await batch.commit();
+    let numberOfBatches = length / 500;
+    numberOfBatches = numberOfBatches + 1;
+
+    const batchArray = [];
+    for (let i = 0; i < numberOfBatches; i++) {
+      const batch = firestore.batch();
+      batchArray.push(batch);
+    }
+
+    let batchIndex = 0;
+    let operations = 0;
+
+    for (let i = 0; i < length; i++) {
+      batchArray[batchIndex].update(users[i], { tokens: admin.firestore.FieldValue.delete() });
+      operations++;
+
+      if (operations === 500) {
+        batchIndex++;
+        operations = 0;
+      }
+    }
+
+    await Promise.all(batchArray.map(async (batch) => await batch.commit()));
   } catch (err) {
     logger.error(`Error while deleting tokens field: ${err}`);
     throw err;
@@ -623,6 +642,6 @@ module.exports = {
   getUserImageForVerification,
   getDiscordUsers,
   fetchAllUsers,
-  usersWithGitHubToken,
+  fetchUsersWithToken,
   removeGitHubToken,
 };
