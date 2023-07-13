@@ -28,6 +28,7 @@ const updateTask = async (taskData, taskId = null) => {
         ...taskWithoutDependsOn,
       });
       if (dependsOn) {
+        const invalidDependsOnIds = [];
         await firestore.runTransaction(async (transaction) => {
           const dependencyQuery = dependencyModel.where("taskId", "==", taskId);
           const existingDependenciesSnapshot = await transaction.get(dependencyQuery);
@@ -36,19 +37,22 @@ const updateTask = async (taskData, taskId = null) => {
           if (newDependencies.length > 0) {
             for (const dependency of newDependencies) {
               const dependencyDoc = await tasksModel.doc(dependency).get();
-              const taskDependsOn = {
-                taskId: taskId,
-                dependsOn: dependency,
-              };
               if (dependencyDoc.exists) {
+                const taskDependsOn = {
+                  taskId: taskId,
+                  dependsOn: dependency,
+                };
                 const docRef = dependencyModel.doc();
                 transaction.set(docRef, taskDependsOn);
               } else {
-                throw new Error("Invalid dependency taskId");
+                invalidDependsOnIds.push(dependency);
               }
             }
           }
         });
+        if (invalidDependsOnIds.length > 0) {
+          throw new Error("Invalid dependency taskId");
+        }
       }
 
       return { taskId };
