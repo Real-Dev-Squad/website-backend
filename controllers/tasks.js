@@ -195,9 +195,6 @@ const updateTask = async (req, res) => {
       if (!user.userExists) {
         return res.boom.notFound("User doesn't exist");
       }
-      if (task.taskData.status === "AVAILABLE") {
-        req.body.status = "assigned";
-      }
     }
     await tasks.updateTask(req.body, req.params.id);
     if (isUserStatusEnabled && req.body.assignee) {
