@@ -8,6 +8,9 @@ const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
 const userQuery = require("../models/users");
+const { transformQuery } = require("../utils/tasks");
+const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
+
 /**
  * Creates new task
  *
@@ -17,8 +20,12 @@ const userQuery = require("../models/users");
  */
 const addNewTask = async (req, res) => {
   try {
+    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
+    const { userStatusFlag } = req.query;
+    const isUserStatusEnabled = userStatusFlag === "true";
     const { id: createdBy } = req.userData;
     const dependsOn = req.body.dependsOn;
+    let userStatusUpdate;
     const body = {
       ...req.body,
       createdBy,
@@ -30,6 +37,9 @@ const addNewTask = async (req, res) => {
       dependsOn,
     };
     const taskDependency = dependsOn && (await dependencyModel.addDependency(data));
+    if (isUserStatusEnabled && req.body.assignee) {
+      userStatusUpdate = await updateUserStatusOnTaskUpdate(req.body.assignee);
+    }
     return res.json({
       message: "Task created successfully!",
       task: {
@@ -37,6 +47,7 @@ const addNewTask = async (req, res) => {
         ...(taskDependency && { dependsOn: taskDependency }),
         id: taskId,
       },
+      ...(userStatusUpdate && { userStatus: userStatusUpdate }),
     });
   } catch (err) {
     logger.error(`Error while creating new task: ${err}`);
@@ -51,7 +62,10 @@ const addNewTask = async (req, res) => {
  */
 const fetchTasks = async (req, res) => {
   try {
-    const allTasks = await tasks.fetchTasks();
+    const { dev, status } = req.query;
+    const { dev: transformedDev, status: transformedStatus } = transformQuery(dev, status);
+
+    const allTasks = await tasks.fetchTasks(transformedDev, transformedStatus);
     const fetchTasksWithRdsAssigneeInfo = allTasks.map(async (task) => {
       /*
        If the issue has a "github.issue" inner object and a property "assignee",
@@ -174,6 +188,9 @@ const getTask = async (req, res) => {
  */
 const updateTask = async (req, res) => {
   try {
+    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
+    const { userStatusFlag } = req.query;
+    const isUserStatusEnabled = userStatusFlag === "true";
     const task = await tasks.fetchTask(req.params.id);
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
@@ -185,6 +202,9 @@ const updateTask = async (req, res) => {
       }
     }
     await tasks.updateTask(req.body, req.params.id);
+    if (isUserStatusEnabled && req.body.assignee) {
+      await updateUserStatusOnTaskUpdate(req.body.assignee);
+    }
     return res.status(204).send();
   } catch (err) {
     logger.error(`Error while updating task: ${err}`);
@@ -199,6 +219,10 @@ const updateTask = async (req, res) => {
  */
 const updateTaskStatus = async (req, res, next) => {
   try {
+    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
+    const { userStatusFlag } = req.query;
+    const isUserStatusEnabled = userStatusFlag === "true";
+    let userStatusUpdate;
     const taskId = req.params.id;
     const { dev } = req.query;
     const { id: userId, username } = req.userData;
@@ -258,7 +282,14 @@ const updateTaskStatus = async (req, res, next) => {
       }
     }
 
-    return res.json({ message: "Task updated successfully!", taskLog });
+    if (isUserStatusEnabled && req.body.status === TASK_STATUS.COMPLETED && req.body.percentCompleted === 100) {
+      userStatusUpdate = await updateStatusOnTaskCompletion(userId);
+    }
+    return res.json({
+      message: "Task updated successfully!",
+      taskLog,
+      ...(userStatusUpdate && { userStatus: userStatusUpdate }),
+    });
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);

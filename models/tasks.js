@@ -17,16 +17,36 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const updateTask = async (taskData, taskId = null) => {
   try {
     taskData = await toFirestoreData(taskData);
-
     if (taskId) {
       const task = await tasksModel.doc(taskId).get();
       if (taskData.status === "VERIFIED") {
         taskData = { ...taskData, endsOn: Math.floor(Date.now() / 1000) };
       }
+      const { dependsOn, ...taskWithoutDependsOn } = taskData;
       await tasksModel.doc(taskId).set({
         ...task.data(),
-        ...taskData,
+        ...taskWithoutDependsOn,
       });
+      if (dependsOn) {
+        await firestore.runTransaction(async (transaction) => {
+          const dependencyQuery = dependencyModel.where("taskId", "==", taskId);
+          const existingDependenciesSnapshot = await transaction.get(dependencyQuery);
+          const existingDependsOnIds = existingDependenciesSnapshot.docs.map((doc) => doc.data().dependsOn);
+          const newDependencies = dependsOn.filter((dependency) => !existingDependsOnIds.includes(dependency));
+
+          if (newDependencies.length > 0) {
+            for (const dependency of newDependencies) {
+              const taskDependsOn = {
+                taskId: taskId,
+                dependsOn: dependency,
+              };
+              const docRef = dependencyModel.doc();
+              transaction.set(docRef, taskDependsOn);
+            }
+          }
+        });
+      }
+
       return { taskId };
     }
     const taskInfo = await tasksModel.add(taskData);
@@ -68,9 +88,10 @@ const addDependency = async (data) => {
  *
  * @return {Promise<tasks|Array>}
  */
-const fetchTasks = async () => {
+const fetchTasks = async (dev = false, status = "") => {
   try {
-    const tasksSnapshot = await tasksModel.get();
+    const tasksSnapshot = dev && status ? await tasksModel.where("status", "==", status).get() : await tasksModel.get();
+
     const tasks = buildTasks(tasksSnapshot);
     const promises = tasks.map(async (task) => fromFirestoreData(task));
     const updatedTasks = await Promise.all(promises);
@@ -335,7 +356,8 @@ const fetchSkillLevelTask = async (userId) => {
  * @returns {Promise<tasks>|Array}
  */
 const fetchSelfTasks = async (username) => {
-  return await fetchUserTasks(username, [], "startedOn", "desc");
+  return await fetchUserTasks(username, []);
+  // Removed `startedOn` field since we are getting issues with some of the documents in the tasks collection as some of the documents dont have `startedOn` present.
 };
 
 /**
