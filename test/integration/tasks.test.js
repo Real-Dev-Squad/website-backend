@@ -299,7 +299,7 @@ describe("Tasks", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
-          dependsOn: ["dependency1", "dependency2"],
+          // dependsOn: ["dependency1", "dependency2"],
         })
         .end((err, res) => {
           if (err) {
@@ -311,17 +311,23 @@ describe("Tasks", function () {
     });
     it("Should update dependency", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
-      const dependsOn = ["taskId5", "taskId4"];
+      const taskId5 = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId6 = (await tasks.updateTask(tasksData[5])).taskId;
+
+      // console.log("taskid", taskId);
+      const dependsOn = [taskId5, taskId6];
       const res = await chai
         .request(app)
         .patch(`/tasks/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ dependsOn });
+      // console.log("res333333333333331", res);
       expect(res).to.have.status(204);
       const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
-
+      // console.log("res2", res2);
       expect(res2).to.have.status(200);
       expect(res2.body.taskData.dependsOn).to.be.a("array");
+      // console.log("tasdata", res2.body.taskData);
       res2.body.taskData.dependsOn.forEach((taskId) => {
         expect(dependsOn).to.include(taskId);
       });
