@@ -1,7 +1,7 @@
 const { Forbidden, NotFound } = require("http-errors");
 const firestore = require("../utils/firestore");
 const {
-  getTommorowTimeStamp,
+  getTomorrowTimeStamp,
   filterStatusData,
   generateAlreadyExistingStatusResponse,
   updateCurrentStatusToState,
@@ -101,7 +101,7 @@ const updateUserStatus = async (userId, newStatusData) => {
   try {
     const userStatusDocs = await userStatusModel.where("userId", "==", userId).limit(1).get();
     const [userStatusDoc] = userStatusDocs.docs;
-    const tommorow = getTommorowTimeStamp();
+    const tommorow = getTomorrowTimeStamp();
     if (userStatusDoc) {
       const docId = userStatusDoc.id;
       const userStatusData = userStatusDoc.data();

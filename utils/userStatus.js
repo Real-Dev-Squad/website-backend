@@ -19,7 +19,7 @@ const getUserIdBasedOnRoute = (req) => {
  *  @param None
  *  @returns timeStamp : timestamp for the next day at midnight
  */
-const getTommorowTimeStamp = () => {
+const getTomorrowTimeStamp = () => {
   const today = new Date();
   today.setDate(today.getDate() + 1);
   today.setHours(0, 0, 0, 0);
@@ -296,7 +296,7 @@ const generateErrorResponse = (message) => {
 
 module.exports = {
   getUserIdBasedOnRoute,
-  getTommorowTimeStamp,
+  getTomorrowTimeStamp,
   getTodayTimeStamp,
   filterStatusData,
   generateAlreadyExistingStatusResponse,
