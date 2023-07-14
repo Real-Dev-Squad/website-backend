@@ -20,6 +20,8 @@ const fetchTaskRequests = async () => {
 
   taskRequestsSnapshots.forEach((taskRequestsSnapshot) => {
     const taskRequestData = taskRequestsSnapshot.data();
+    taskRequestData.id = taskRequestsSnapshot.id;
+    taskRequestData.url = new URL(`/taskRequests/${taskRequestData.id}`, config.get("services.rdsUi.baseUrl"));
     const { requestors } = taskRequestData;
 
     taskPromises.push(tasksModel.fetchTask(taskRequestData.taskId));
