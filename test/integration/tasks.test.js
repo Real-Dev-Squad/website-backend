@@ -170,6 +170,97 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("Should call paginated tasks when dev flag passed to GET /tasks is true", function (done) {
+      const fetchPaginatedUserStub = sinon.stub(tasks, "fetchPaginatedTasks");
+      chai
+        .request(app)
+        .get("/tasks?dev=true")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(fetchPaginatedUserStub.calledOnce).to.be.equal(true);
+
+          return done();
+        });
+    });
+
+    it("Should get all tasks filtered with status when passed to GET /tasks", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?dev=true&status=${TASK_STATUS.IN_PROGRESS}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          const tasksData = res.body.tasks ?? [];
+          tasksData.forEach((task) => {
+            expect(task.status).to.equal(TASK_STATUS.IN_PROGRESS);
+          });
+          return done();
+        });
+    });
+
+    it("Should get tasks when correct query parameters are passed", function (done) {
+      chai
+        .request(app)
+        .get("/tasks?dev=true&size=1&page=0")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          expect(res.body.tasks.length).to.be.equal(1);
+          return done();
+        });
+    });
+
+    it("Should get next and previous page results based returned by the links in the response", async function () {
+      const initialReq = `/tasks?size=1&dev=true`;
+      const response = await chai.request(app).get(initialReq);
+      expect(response).to.have.status(200);
+      expect(response.body).to.be.a("object");
+      expect(response.body.message).to.equal("Tasks returned successfully!");
+      expect(response.body).to.have.property("next");
+      expect(response.body).to.have.property("prev");
+      expect(response.body.tasks).to.have.length(1);
+
+      const nextPageLink = response.body.next;
+      const nextPageResponse = await chai.request(app).get(nextPageLink);
+
+      expect(nextPageResponse).to.have.status(200);
+      expect(nextPageResponse.body).to.be.a("object");
+      expect(nextPageResponse.body.message).to.equal("Tasks returned successfully!");
+      expect(nextPageResponse.body).to.have.property("next");
+      expect(nextPageResponse.body).to.have.property("prev");
+      expect(nextPageResponse.body.tasks).to.have.length(1);
+
+      const prevPageLink = nextPageResponse.body.prev;
+      const previousPageResponse = await chai.request(app).get(prevPageLink);
+
+      expect(previousPageResponse).to.have.status(200);
+      expect(previousPageResponse.body).to.be.a("object");
+      expect(previousPageResponse.body.message).to.equal("Tasks returned successfully!");
+      expect(previousPageResponse.body).to.have.property("next");
+      expect(previousPageResponse.body).to.have.property("prev");
+      expect(previousPageResponse.body.tasks).to.have.length(1);
+    });
   });
 
   describe("GET /tasks/:id/details", function () {
