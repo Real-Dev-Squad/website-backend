@@ -90,7 +90,7 @@ const archiveMembers = async (req, res) => {
     const userId = user.user.id;
     const currentUserID = req.userData.id;
     const body = req.body;
-    if (body?.reason === "" || body?.reason === undefined) {
+    if (!body?.reason || /^\s*$/.test(body?.reason)) {
       return res.boom.badRequest("Reason is required");
     }
     if (user?.userExists) {
