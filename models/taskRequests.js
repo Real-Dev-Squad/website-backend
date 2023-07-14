@@ -49,7 +49,12 @@ const fetchTaskRequests = async () => {
  */
 const fetchTaskRequestById = async (taskRequestId) => {
   const taskRequestSnapshot = await taskRequestsCollection.doc(taskRequestId).get();
-  return taskRequestSnapshot.data();
+  const taskRequestData = taskRequestSnapshot.data();
+
+  taskRequestData.id = taskRequestSnapshot.id;
+  taskRequestData.url = new URL(`/taskRequests/${taskRequestData.id}`, config.get("services.rdsUi.baseUrl"));
+
+  return taskRequestData;
 };
 
 /**
