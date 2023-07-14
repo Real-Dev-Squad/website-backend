@@ -8,12 +8,12 @@ const chai = require("chai");
 const { expect } = chai;
 const sinon = require("sinon");
 const cleanDb = require("../../utils/cleanDb");
+const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
 const { addDependency, updateTask } = require("../../../models/tasks");
 const firestore = require("../../../utils/firestore");
 const { TASK_STATUS } = require("../../../constants/tasks");
 const dependencyModel = firestore.collection("TaskDependencies");
-const tasksData = require("../../fixtures/tasks/tasks");
 
 describe("tasks", function () {
   afterEach(async function () {
@@ -153,7 +153,7 @@ describe("tasks", function () {
     });
 
     afterEach(async function () {
-      await cleanDb();
+      // await cleanDb();
       sinon.restore();
     });
 
