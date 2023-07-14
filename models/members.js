@@ -106,7 +106,7 @@ const addArchiveRoleToMembers = async (userId, currentUserId, reason) => {
     if (user?.roles && user.roles[ROLES.ARCHIVED]) return { isArchived: true };
     const roles = { ...user.roles, [ROLES.ARCHIVED]: true };
     const archivedDetails = {
-      archived_at: new Date(),
+      archived_at: Math.floor(Date.now() / 1000),
       reason: reason || "",
       super_user_id: currentUserId,
       archived_user_id: userId,
