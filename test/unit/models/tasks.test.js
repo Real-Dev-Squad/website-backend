@@ -142,14 +142,13 @@ describe("tasks", function () {
   });
 
   describe("Test the Model Function", function () {
-    let task2;
     const data = {
       taskId: "taskId1",
       dependsOn: ["taskId4", "taskId5"],
     };
 
     beforeEach(async function () {
-      task2 = await addDependency(data);
+      await addDependency(data);
       await dependencyModel.doc("taskDependencies").set(data);
     });
 
