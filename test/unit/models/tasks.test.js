@@ -6,14 +6,14 @@
 
 const chai = require("chai");
 const { expect } = chai;
-
+const sinon = require("sinon");
 const cleanDb = require("../../utils/cleanDb");
-const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
 const { addDependency, updateTask } = require("../../../models/tasks");
 const firestore = require("../../../utils/firestore");
 const { TASK_STATUS } = require("../../../constants/tasks");
 const dependencyModel = firestore.collection("TaskDependencies");
+const tasksData = require("../../fixtures/tasks/tasks");
 
 describe("tasks", function () {
   afterEach(async function () {
@@ -138,6 +138,33 @@ describe("tasks", function () {
 
       expect(result.taskDetails.taskId).to.equal(data.taskId);
       expect(result.taskDetails.dependsOn).to.equal(data.dependsOn);
+    });
+  });
+
+  describe("Test the Model Function", function () {
+    let task2;
+    const data = {
+      taskId: "taskId1",
+      dependsOn: ["taskId4", "taskId5"],
+    };
+
+    beforeEach(async function () {
+      task2 = await addDependency(data);
+      await dependencyModel.doc("taskDependencies").set(data);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+      sinon.restore();
+    });
+
+    it("should return the correct results", async function () {
+      const result = await updateTask(data);
+      expect(result).to.have.property("taskDetails");
+      expect(result.taskDetails.dependsOn).to.be.a("array");
+      const dependencyData = (await dependencyModel.doc("taskDependencies").get()).data();
+      expect(dependencyData.dependsOn).to.be.a("array");
+      expect(dependencyData.taskId).to.be.equal("taskId1");
     });
   });
 });
