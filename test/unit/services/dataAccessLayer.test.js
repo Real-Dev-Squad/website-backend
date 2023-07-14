@@ -50,7 +50,6 @@ describe("Data Access Layer", function () {
       });
     });
 
-
     it("should return /users/self data and remove sensitive info", async function () {
       const userdata = userData[12];
       await retrieveUsers({ userdata });

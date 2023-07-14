@@ -2,7 +2,6 @@ const userQuery = require("../models/users");
 const { USER_SENSITIVE_DATA } = require("../constants/users");
 
 const retrieveUsers = async ({ id = null, usernames = null, query = null, userdata = null }) => {
-
   if (id) {
     const result = await userQuery.fetchUser({ userId: id });
     removeSensitiveInfo(result.user);
@@ -13,7 +12,6 @@ const retrieveUsers = async ({ id = null, usernames = null, query = null, userda
       removeSensitiveInfo(element);
     });
     return users;
-
   } else if (query) {
     const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(query);
     allUsers.forEach((element) => {
@@ -25,7 +23,6 @@ const retrieveUsers = async ({ id = null, usernames = null, query = null, userda
     return userdata;
   }
 };
-
 
 const removeSensitiveInfo = function (obj) {
   for (let i = 0; i < USER_SENSITIVE_DATA.length; i++) {
