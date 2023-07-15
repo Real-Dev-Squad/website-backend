@@ -27,7 +27,7 @@ const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
 
     // If data is expired remove it from store, time to get a fresh copy.
     if (isCacheDataExpired) {
-      cacheStore.delete(key);
+      evict(key);
       return null;
     }
 
@@ -38,6 +38,15 @@ const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
       logger.error(`Error while parsing cachedData.response ${err}`);
       throw err;
     }
+  };
+
+  /**
+   * Remove an API Response from cacheStore.
+   * @param {string} key
+   * @returns {boolean}
+   */
+  const evict = (key) => {
+    return cacheStore.delete(key);
   };
 
   /**
@@ -59,7 +68,7 @@ const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
     }
   };
 
-  return { get, set, hits, cacheStore };
+  return { get, set, evict, hits, cacheStore };
 };
 
 // Initialize cache pool.
@@ -67,15 +76,18 @@ const pool = cachePool();
 
 /**
  * Caching middleware for API resposnes.
- * @param {Object} [data] Options to handle individual api cache.
- * @param {number} data.priority The priority of api in cache store.
- * @param {number} data.expiry Cache expiry time of api in minutes.
+ * @param {string} key Cache key.
+ * @param {number} expiry Cache expiry time of api in minutes.
+ * @param {number} priority The priority of api in cache store.
  * @returns {function} middleware function to help cache api response.
  */
-const cache = (data = { priority: 2, expiry: CACHE_EXPIRY_TIME_MIN }) => {
+const cache = (key, expiry = CACHE_EXPIRY_TIME_MIN, priority = 2) => {
   return async (req, res, next) => {
     try {
-      const key = "__cache__" + req.method + req.originalUrl;
+      if (!key) {
+        key = generateCacheKey(req);
+      }
+
       const cacheData = pool.get(key);
 
       if (cacheData) {
@@ -89,9 +101,9 @@ const cache = (data = { priority: 2, expiry: CACHE_EXPIRY_TIME_MIN }) => {
 
         res.send = (body) => {
           const cacheValue = {
-            priority: data.priority,
+            priority: priority,
             response: body,
-            expiry: new Date().getTime() + minutesToMilliseconds(data.expiry),
+            expiry: new Date().getTime() + minutesToMilliseconds(expiry),
             size: Buffer.byteLength(body),
           };
           pool.set(key, cacheValue);
@@ -102,10 +114,42 @@ const cache = (data = { priority: 2, expiry: CACHE_EXPIRY_TIME_MIN }) => {
         next();
       }
     } catch (err) {
-      logger.error(`Error while getting cached tasks response ${err}`);
+      logger.error(`Error while getting cached response ${err}`);
       next();
     }
   };
 };
 
-module.exports = cache;
+/**
+ * Generate key to save cache.
+ * @param {Object} [data] Options to generate cache key.
+ * @param {number} data.method api method name.
+ * @param {number} data.originalUrl api url.
+ * @returns {string} cache key.
+ */
+const generateCacheKey = (data) => {
+  return "__cache__" + data.method + data.originalUrl;
+};
+
+/**
+ * Invalidate the cache for given keys
+ * @param {Array} [cacheKeys] Array of cache keys.
+ * @returns {function} middleware function to help cache api response.
+ */
+const invalidateCache = (cacheKeys) => {
+  return async (req, res, next) => {
+    try {
+      if (Array.isArray(cacheKeys)) {
+        for (const key of cacheKeys) {
+          pool.evict(key);
+        }
+      }
+    } catch (err) {
+      logger.error(`Error while removing cached response ${err}`);
+    } finally {
+      next();
+    }
+  };
+};
+
+module.exports = { cache, invalidateCache, generateCacheKey };
