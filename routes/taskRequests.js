@@ -4,7 +4,7 @@ const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const taskRequests = require("../controllers/tasksRequests");
-const cache = require("../utils/cache");
+const { cache } = require("../utils/cache");
 const { validateUser } = require("../middlewares/taskRequests");
 
 router.get("/", authenticate, authorizeRoles([SUPERUSER]), cache(), taskRequests.fetchTaskRequests);
