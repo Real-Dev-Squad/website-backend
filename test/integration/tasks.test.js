@@ -306,7 +306,6 @@ describe("Tasks", function () {
             return done(err);
           }
           expect(res).to.have.status(204);
-          // expect(res.body.taskData.status).to.equal("ASSIGNED");
           return done();
         });
     });
@@ -318,14 +317,6 @@ describe("Tasks", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ assignee: "vinit" });
       expect(res).to.have.status(204);
-      // const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
-
-      // expect(res2).to.have.status(200);
-      // expect(res2.body.taskData.dependsOn).to.be.a("array");
-      // res2.body.taskData.dependsOn.forEach((taskId) => {
-      //   expect(dependsOn).to.include(taskId);
-      // });
-
       return taskId;
     });
     it("Should update dependency", async function () {

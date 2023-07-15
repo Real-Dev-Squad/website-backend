@@ -16,6 +16,11 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
  */
 const updateTask = async (taskData, taskId = null) => {
   try {
+    if (taskData?.assignee) {
+      if (taskData.status === "AVAILABLE") {
+        taskData.body.status = "assigned";
+      }
+    }
     taskData = await toFirestoreData(taskData);
     if (taskId) {
       const task = await tasksModel.doc(taskId).get();
