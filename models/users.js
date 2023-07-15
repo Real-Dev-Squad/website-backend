@@ -611,7 +611,7 @@ const removeGitHubToken = async (users) => {
     let operations = 0;
 
     for (let i = 0; i < length; i++) {
-      batchArray.at(parseInt(batchIndex)).update(users[+i], { tokens: admin.firestore.FieldValue.delete() });
+      batchArray[batchIndex].update(users[i], { tokens: admin.firestore.FieldValue.delete() });
       operations++;
 
       if (operations === 500) {
