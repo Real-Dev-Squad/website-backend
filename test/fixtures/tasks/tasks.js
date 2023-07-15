@@ -72,14 +72,13 @@ module.exports = () => {
       type: "feature",
       endsOn: 1234,
       startedOn: 4567,
-      status: "AVAILABLE",
+      status: "COMPLETED",
       dependsOn: ["taskId2", "taskId3"],
       percentCompleted: 100,
       participants: [],
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
       lossRate: { [DINERO]: 1 },
       isNoteworthy: true,
-      assignee: false,
     },
   ];
 };

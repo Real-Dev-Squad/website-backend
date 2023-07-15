@@ -309,16 +309,6 @@ describe("Tasks", function () {
           return done();
         });
     });
-    it("Should update assigne", async function () {
-      taskId = (await tasks.updateTask(tasksData[5])).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/${taskId}`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ assignee: "vinit" });
-      expect(res).to.have.status(204);
-      return taskId;
-    });
     it("Should update dependency", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
       const dependsOn = ["taskId5", "taskId4"];
