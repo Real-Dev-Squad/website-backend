@@ -19,6 +19,8 @@ const updateTask = async (taskData, taskId = null) => {
     taskData = await toFirestoreData(taskData);
     if (taskId) {
       const task = await tasksModel.doc(taskId).get();
+      console.log("data", taskData);
+      console.log("datastatus", task.data().status);
       if (taskData?.assignee && task.data().status === "AVAILABLE") {
         taskData = { ...taskData, status: "ASSIGNED" };
       }
