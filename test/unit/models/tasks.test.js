@@ -47,7 +47,7 @@ describe("tasks", function () {
 
   describe("addDependency", function () {
     afterEach(function () {
-      sinon.restore(); // Restore the original behavior of stubbed functions
+      sinon.restore();
     });
 
     it("should add dependencies to firestore and return dependsOn array", async function () {
@@ -72,7 +72,7 @@ describe("tasks", function () {
       } catch (err) {
         expect(err).to.deep.equal(expectedError);
       } finally {
-        stub.restore(); // Restore the original behavior of dependencyModel.doc
+        stub.restore();
       }
     });
   });
