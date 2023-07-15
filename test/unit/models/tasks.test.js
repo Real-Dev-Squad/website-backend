@@ -146,12 +146,12 @@ describe("tasks", function () {
     });
   });
 
-  describe("asdasdas", function () {
+  describe("taskdependency", function () {
     afterEach(function () {
       sinon.restore();
     });
 
-    it("XXXXXXASFSDFASDFASDF", async function () {
+    it("should return correct result", async function () {
       const data = {
         taskId: "taskId1",
         dependsOn: ["taskId2", "taskId3"],
@@ -172,32 +172,4 @@ describe("tasks", function () {
       getStub.restore();
     });
   });
-
-  // describe("asdasdas", function () {
-  //   it("XXXXXXASFSDFASDFASDF", async function () {
-  //     const data = {
-  //       taskId: "taskId1",
-  //       dependsOn: ["taskId2", "taskId3"],
-  //     };
-  //     await dependencyModel.doc("taskDependencies").set(data);
-  //     const dependencyData = (await dependencyModel.doc("taskDependencies").get()).data();
-  //     expect(dependencyData.dependsOn).to.be.a("array");
-  //     expect(dependencyData.taskId).to.be.equal("taskId1");
-  //     // firestore
-  //     //   .collection("TaskDependencies")
-  //     //   .doc("taskId1")
-  //     //   .set(data)
-  //     //   .then(() => {
-  //     //     firestore
-  //     //       .collection("TaskDependencies")
-  //     //       .doc("taskId1")
-  //     //       .get()
-  //     //       .then((doc) => {
-  //     //         const dependencyData = doc.data();
-  //     //         expect(dependencyData.dependsOn).to.be.a("array");
-  //     //         expect(dependencyData.taskId).to.be.equal("taskId1");
-  //     //       });
-  //     //   });
-  //   });
-  // });
 });
