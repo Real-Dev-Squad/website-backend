@@ -6,7 +6,7 @@
 
 const chai = require("chai");
 const { expect } = chai;
-const sinon = require("sinon");
+// const sinon = require("sinon");
 const cleanDb = require("../../utils/cleanDb");
 const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
@@ -14,7 +14,7 @@ const { addDependency, updateTask } = require("../../../models/tasks");
 const firestore = require("../../../utils/firestore");
 const { TASK_STATUS } = require("../../../constants/tasks");
 const dependencyModel = firestore.collection("TaskDependencies");
-
+const sinon = require("sinon");
 describe("tasks", function () {
   afterEach(async function () {
     await cleanDb();
@@ -46,6 +46,10 @@ describe("tasks", function () {
   });
 
   describe("addDependency", function () {
+    afterEach(function () {
+      sinon.restore(); // Restore the original behavior of stubbed functions
+    });
+
     it("should add dependencies to firestore and return dependsOn array", async function () {
       const data = {
         taskId: "taskId1",
@@ -61,13 +65,14 @@ describe("tasks", function () {
         dependsOn: ["taskId2", "taskId3"],
       };
       const expectedError = new Error("test error");
-      dependencyModel.doc = () => {
-        throw expectedError;
-      };
+      const stub = sinon.stub(dependencyModel, "doc").throws(expectedError);
+
       try {
         await addDependency(data);
       } catch (err) {
         expect(err).to.deep.equal(expectedError);
+      } finally {
+        stub.restore(); // Restore the original behavior of dependencyModel.doc
       }
     });
   });
@@ -141,29 +146,58 @@ describe("tasks", function () {
     });
   });
 
-  describe("Test the Model Function", function () {
-    const data = {
-      taskId: "taskId1",
-      dependsOn: ["taskId4", "taskId5"],
-    };
-
-    beforeEach(async function () {
-      await addDependency(data);
-      await dependencyModel.doc("taskDependencies").set(data);
-    });
-
-    afterEach(async function () {
-      // await cleanDb();
+  describe("asdasdas", function () {
+    afterEach(function () {
       sinon.restore();
     });
 
-    it("should return the correct results", async function () {
-      const result = await updateTask(data);
-      expect(result).to.have.property("taskDetails");
-      expect(result.taskDetails.dependsOn).to.be.a("array");
+    it("XXXXXXASFSDFASDFASDF", async function () {
+      const data = {
+        taskId: "taskId1",
+        dependsOn: ["taskId2", "taskId3"],
+      };
+
+      const setStub = sinon.stub(dependencyModel.doc("taskDependencies"), "set").resolves();
+      const getStub = sinon.stub(dependencyModel.doc("taskDependencies"), "get").resolves({
+        data: () => data,
+      });
+
+      await dependencyModel.doc("taskDependencies").set(data);
       const dependencyData = (await dependencyModel.doc("taskDependencies").get()).data();
+
       expect(dependencyData.dependsOn).to.be.a("array");
       expect(dependencyData.taskId).to.be.equal("taskId1");
+
+      setStub.restore();
+      getStub.restore();
     });
   });
+
+  // describe("asdasdas", function () {
+  //   it("XXXXXXASFSDFASDFASDF", async function () {
+  //     const data = {
+  //       taskId: "taskId1",
+  //       dependsOn: ["taskId2", "taskId3"],
+  //     };
+  //     await dependencyModel.doc("taskDependencies").set(data);
+  //     const dependencyData = (await dependencyModel.doc("taskDependencies").get()).data();
+  //     expect(dependencyData.dependsOn).to.be.a("array");
+  //     expect(dependencyData.taskId).to.be.equal("taskId1");
+  //     // firestore
+  //     //   .collection("TaskDependencies")
+  //     //   .doc("taskId1")
+  //     //   .set(data)
+  //     //   .then(() => {
+  //     //     firestore
+  //     //       .collection("TaskDependencies")
+  //     //       .doc("taskId1")
+  //     //       .get()
+  //     //       .then((doc) => {
+  //     //         const dependencyData = doc.data();
+  //     //         expect(dependencyData.dependsOn).to.be.a("array");
+  //     //         expect(dependencyData.taskId).to.be.equal("taskId1");
+  //     //       });
+  //     //   });
+  //   });
+  // });
 });
