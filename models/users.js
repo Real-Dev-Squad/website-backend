@@ -11,6 +11,7 @@ const { arraysHaveCommonItem } = require("../utils/array");
 const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
+const ROLES = require("../constants/roles");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
@@ -170,6 +171,7 @@ const fetchPaginatedUsers = async (query) => {
       }
     }
     const snapshot = await dbQuery.get();
+
     const firstDoc = snapshot.docs[0];
     const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
@@ -179,12 +181,9 @@ const fetchPaginatedUsers = async (query) => {
       allUsers.push({
         id: doc.id,
         ...doc.data(),
-        phone: undefined,
-        email: undefined,
-        tokens: undefined,
-        chaincode: undefined,
       });
     });
+
     return {
       allUsers,
       nextId: lastDoc?.id ?? "",
@@ -218,10 +217,6 @@ const fetchUsers = async (usernames = []) => {
         users.push({
           id: doc.id,
           ...doc.data(),
-          phone: undefined,
-          email: undefined,
-          tokens: undefined,
-          chaincode: undefined,
         });
       });
     });
@@ -246,7 +241,6 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
     let userData, id;
     if (username) {
       const user = await userModel.where("username", "==", username).limit(1).get();
-
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
@@ -267,8 +261,6 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       user: {
         id,
         ...userData,
-        tokens: undefined,
-        chaincode: undefined,
       },
     };
   } catch (err) {
@@ -526,6 +518,10 @@ const getUsersBasedOnFilter = async (query) => {
         ...doc.data(),
       });
     });
+
+    if (roleQuery === ROLES.ARCHIVED) {
+      return filteredUsers;
+    }
 
     return filteredUsers.filter((user) => !user.roles?.archived);
   }

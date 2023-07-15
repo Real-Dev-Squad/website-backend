@@ -32,11 +32,13 @@ describe("Filter Users", function () {
   let tagIdBE;
   let levelId1;
   let levelId2;
+  let archivedUser;
 
   before(async function () {
     const updatedAtDate = Date.now();
     const untilDate = updatedAtDate + 16 * 24 * 60 * 60 * 1000;
     userId = await addUser();
+    archivedUser = await addUser(userData[5]);
     jwt = authService.generateAuthToken({ userId });
     oooUser = await addUser(userData[0]);
     await updateUserStatus(
@@ -315,6 +317,28 @@ describe("Filter Users", function () {
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(2);
           assertUserIds(res.body.users, [activeUser, oooUser]);
+          return done();
+        });
+    });
+
+    it("Should search users based on archived role", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ role: "archived" })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(1);
+          assertUserIds(res.body.users, [archivedUser]);
+
           return done();
         });
     });

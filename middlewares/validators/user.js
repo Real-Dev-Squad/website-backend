@@ -177,7 +177,7 @@ async function validateUserQueryParams(req, res, next) {
           joi.array().items(joi.string().valid("IDLE", "OOO", "ACTIVE", "ONBOARDING"))
         )
         .optional(),
-      role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD).optional(),
+      role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD, ROLES.ARCHIVED).optional(),
       verified: joi.string().optional(),
     })
     .messages({
