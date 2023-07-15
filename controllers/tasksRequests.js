@@ -28,15 +28,14 @@ const fetchTaskRequestById = async (req, res) => {
     const id = req.params.id;
     const data = await taskRequestsModel.fetchTaskRequestById(id);
 
-    if (data.taskRequestExists) {
-      res.status(200).json({
-        message: "Task request returned successfully",
-        data: data.taskRequestData,
+    if (!data.taskRequestExists) {
+      return res.status(404).json({
+        message: "Task request not found",
       });
     }
-
-    return res.status(404).json({
-      message: "Task request not found",
+    return res.status(200).json({
+      message: "Task request returned successfully",
+      data: data.taskRequestData,
     });
   } catch (err) {
     logger.error("Error while fetching task requests", err);
