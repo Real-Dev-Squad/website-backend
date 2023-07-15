@@ -80,7 +80,7 @@ describe("tasks", function () {
       await Promise.all(tasksPromise);
     });
 
-    it("should fetch all tasks when dev is false and no status is passed to the fetchTasks function", async function () {
+    it("should fetch all tasks", async function () {
       const result = await tasks.fetchTasks();
 
       expect(result).to.have.length(tasksData.length);
@@ -89,42 +89,54 @@ describe("tasks", function () {
         expect(task).to.contain.all.keys(sameTask);
       });
     });
+  });
 
-    it("should fetch all tasks when dev is false but status is passed to the fetchTasks function", async function () {
-      const status = TASK_STATUS.ASSIGNED;
-      const result = await tasks.fetchTasks(false, status);
-
-      expect(result).to.have.length(tasksData.length);
-
-      result.forEach((task) => {
-        const sameTask = tasksData.find((t) => t.title === task.title);
-        expect(task).to.contain.all.keys(sameTask);
+  describe("paginatedTasks", function () {
+    beforeEach(async function () {
+      const tasksPromise = tasksData.map(async (task) => {
+        await tasks.updateTask(task);
       });
+      await Promise.all(tasksPromise);
     });
 
-    it("should fetch all tasks when dev is true but no status is passed to the fetchTasks function", async function () {
-      const result = await tasks.fetchTasks(true);
+    it("should return allTasks, next and prev parameters", async function () {
+      const result = await tasks.fetchPaginatedTasks({});
 
-      expect(result).to.have.length(tasksData.length);
-
-      result.forEach((task) => {
-        const sameTask = tasksData.find((t) => t.title === task.title);
-        expect(task).to.contain.all.keys(sameTask);
-      });
+      expect(result).to.have.property("allTasks");
+      expect(result).to.have.property("next");
+      expect(result).to.have.property("prev");
     });
 
-    it("should fetch tasks filtered by the status when dev is true ans no status is passed to the fetchTasks function", async function () {
-      const status = TASK_STATUS.ASSIGNED;
-      const result = await tasks.fetchTasks(true, status);
-      const taskDataByStatus = tasksData.filter((data) => data.status === status);
+    it("should paginate and fetch all tasks when no status is passed", async function () {
+      const SIZE = 5;
+      const result = await tasks.fetchPaginatedTasks({});
 
-      expect(result).to.have.length(taskDataByStatus.length);
-      result.forEach((task) => expect(task.status).to.equal(status));
+      expect(result).to.have.property("allTasks");
+      expect(result.allTasks).to.have.length(SIZE);
+    });
 
-      result.forEach((task) => {
-        const sameTask = taskDataByStatus.find((t) => t.title === task.title);
-        expect(task).to.contain.all.keys(sameTask);
+    it("should paginate and fetch tasks with the passed size", async function () {
+      const SIZE = 3;
+      const result = await tasks.fetchPaginatedTasks({
+        size: SIZE,
       });
+
+      expect(result).to.have.property("allTasks");
+      expect(result.allTasks).to.have.length(SIZE);
+    });
+
+    it("should fetch all tasks filtered by the status passed", async function () {
+      const status = TASK_STATUS.ASSIGNED;
+      const SIZE = 5;
+      const result = await tasks.fetchPaginatedTasks({ status });
+
+      const filteredTasks = tasksData.filter((task) => task.status === status);
+      const tasksLength = filteredTasks.length > SIZE ? SIZE : filteredTasks.length;
+
+      expect(result).to.have.property("allTasks");
+
+      expect(result.allTasks).to.have.length(tasksLength);
+      result.allTasks.forEach((task) => expect(task.status).to.be.equal(status));
     });
   });
 
