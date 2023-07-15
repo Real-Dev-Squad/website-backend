@@ -6,7 +6,6 @@
 
 const chai = require("chai");
 const { expect } = chai;
-// const sinon = require("sinon");
 const cleanDb = require("../../utils/cleanDb");
 const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
@@ -161,11 +160,11 @@ describe("tasks", function () {
       const getStub = sinon.stub(dependencyModel.doc("taskDependencies"), "get").resolves({
         data: () => data,
       });
-
+      const result = await updateTask(data);
+      expect(result.taskDetails.dependsOn).to.be.a("array");
+      expect(result.taskDetails.dependsOn).to.deep.equal(data.dependsOn);
       await dependencyModel.doc("taskDependencies").set(data);
       const dependencyData = (await dependencyModel.doc("taskDependencies").get()).data();
-
-      expect(dependencyData.dependsOn).to.be.a("array");
       expect(dependencyData.taskId).to.be.equal("taskId1");
 
       setStub.restore();

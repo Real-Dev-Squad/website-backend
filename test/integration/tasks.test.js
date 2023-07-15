@@ -310,10 +310,10 @@ describe("Tasks", function () {
     });
     it("Should update dependency", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
-      const taskId5 = (await tasks.updateTask(tasksData[5])).taskId;
-      const taskId6 = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId2 = (await tasks.updateTask(tasksData[5])).taskId;
 
-      const dependsOn = [taskId5, taskId6];
+      const dependsOn = [taskId1, taskId2];
       const res = await chai
         .request(app)
         .patch(`/tasks/${taskId}`)
@@ -330,16 +330,17 @@ describe("Tasks", function () {
       return taskId;
     });
 
-    it("Should return 400 if taskid is not exist", async function () {
+    it("Should return 400 if any of taskid is not exist", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
-
-      const dependsOn = ["taskId5", "taskId6"];
+      const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
+      const dependsOn = ["taskId5", "taskId6", taskId1];
       const res = await chai
         .request(app)
         .patch(`/tasks/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ dependsOn });
       expect(res).to.have.status(400);
+      expect(res.body.message).to.equal("Invalid dependency");
     });
     it("should check updated dependsOn", function (done) {
       chai
