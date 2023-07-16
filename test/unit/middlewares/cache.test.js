@@ -1,15 +1,25 @@
 const sinon = require("sinon");
 const { expect } = require("chai");
 const { cache, invalidateCache } = require("../../../utils/cache");
+
 const { dummyResponse } = require("../../fixtures/cache/cache");
 
 const responseBody = JSON.stringify(dummyResponse);
 
 describe("Middleware | Utils | cache", function () {
+  afterEach(function () {
+    sinon.restore();
+  });
   it("should cache the response", async function () {
     const cacheTestKey = "__cache__1";
 
-    const request = {};
+    const request = {
+      params: {},
+      query: {},
+      _parsedUrl: {
+        pathname: "/test",
+      },
+    };
 
     const response = {
       send: sinon.spy(),
@@ -17,7 +27,7 @@ describe("Middleware | Utils | cache", function () {
 
     const nextSpy = sinon.spy();
 
-    const cacheMiddleware = cache(cacheTestKey);
+    const cacheMiddleware = cache({ invalidationKey: cacheTestKey });
 
     cacheMiddleware(request, response, nextSpy);
 
@@ -35,15 +45,20 @@ describe("Middleware | Utils | cache", function () {
   it("should invalidate stale the response", async function () {
     const cacheTestKey = "__cache__2";
 
-    const request = {};
-
+    const request = {
+      params: {},
+      query: {},
+      _parsedUrl: {
+        pathname: "/test2",
+      },
+    };
     const response = {
       send: sinon.spy(),
     };
 
     const nextSpy = sinon.spy();
 
-    const cacheMiddlewareForCache = cache(cacheTestKey);
+    const cacheMiddlewareForCache = cache({ invalidationKey: cacheTestKey });
 
     cacheMiddlewareForCache(request, response, nextSpy);
 
@@ -52,7 +67,7 @@ describe("Middleware | Utils | cache", function () {
     expect(nextSpy.callCount).to.equal(1);
     expect(response.send.callCount).to.equal(1);
 
-    const cacheMiddlewareForInvalidation = invalidateCache([cacheTestKey]);
+    const cacheMiddlewareForInvalidation = invalidateCache({ invalidationKeys: [cacheTestKey] });
 
     cacheMiddlewareForInvalidation(request, response, nextSpy);
     response.send(responseBody);
