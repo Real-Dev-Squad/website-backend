@@ -84,6 +84,24 @@ describe("Middleware | Authorize Bot", function () {
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
 
+    it("Should stop propagation for bad token data", function () {
+      const jwtToken = bot.generateCronJobToken({ name: "Some Random Name" });
+      const request = {
+        headers: {
+          authorization: `Bearer ${jwtToken}`,
+        },
+      };
+
+      const response = {};
+
+      const nextSpy = sinon.spy();
+
+      authorizeBot.verifyCronJob(request, response, nextSpy).catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+      });
+      expect(nextSpy.calledOnce).to.be.equal(false);
+    });
+
     it("Should allow request Propogation for valid request", function () {
       const jwtToken = bot.generateCronJobToken({ name: CRON_JOB_HANDLER });
       const request = {
