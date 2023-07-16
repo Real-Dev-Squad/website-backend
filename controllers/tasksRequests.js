@@ -26,9 +26,6 @@ const fetchTaskRequests = async (_, res) => {
 const addOrUpdate = async (req, res) => {
   try {
     const { taskId, userId } = req.body;
-    if (!taskId) {
-      return res.boom.badRequest("taskId not provided");
-    }
 
     const { taskData } = await tasksModel.fetchTask(taskId);
     if (!taskData) {
@@ -61,9 +58,6 @@ const addOrUpdate = async (req, res) => {
 const approveTaskRequest = async (req, res) => {
   try {
     const { taskRequestId, user } = req.body;
-    if (!taskRequestId) {
-      return res.boom.badRequest("taskRequestId not provided");
-    }
 
     const response = await taskRequestsModel.approveTaskRequest(taskRequestId, user);
 
