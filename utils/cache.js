@@ -9,6 +9,7 @@ const minutesToMilliseconds = (minutes) => minutes * 60000;
  */
 const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
   const cacheStore = new Map();
+
   let hits = 0;
 
   /**
@@ -71,25 +72,62 @@ const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
   return { get, set, evict, hits, cacheStore };
 };
 
+const cachedKeysStore = () => {
+  const keyStore = new Map();
+
+  const getCachedKeys = (modelKey) => {
+    if (keyStore.has(modelKey)) {
+      return [...keyStore.get(modelKey).keys()];
+    } else {
+      return [];
+    }
+  };
+
+  const addCachedKey = (modelKey, cachedKey) => {
+    if (keyStore.has(modelKey)) {
+      keyStore.get(modelKey).add(cachedKey);
+    } else {
+      const set = new Set();
+      set.add(cachedKey);
+      keyStore.set(modelKey, set);
+    }
+  };
+
+  const removeModelKey = (modelKey) => {
+    keyStore.delete(modelKey);
+  };
+
+  const removeCachedKey = (modelKey, cachedKey) => {
+    if (keyStore.has(modelKey)) {
+      keyStore.get(modelKey).delete(cachedKey);
+    }
+  };
+
+  return { getCachedKeys, addCachedKey, removeModelKey, removeCachedKey };
+};
+
 // Initialize cache pool.
 const pool = cachePool();
 
+const cachedKeys = cachedKeysStore();
+
 /**
  * Caching middleware for API resposnes.
- * @param {string} key Cache key.
- * @param {number} expiry Cache expiry time of api in minutes.
- * @param {number} priority The priority of api in cache store.
+ * @param {Object} [options] Options to handle individual api cache.
+ * @param {number} options.priority The priority of api in cache store.
+ * @param {number} options.expiry Cache expiry time of api in minutes.
+ * @param {number} options.invalidationKey key to be used while using the invalidateCache middleware.
  * @returns {function} middleware function to help cache api response.
  */
-const cache = (key, expiry = CACHE_EXPIRY_TIME_MIN, priority = 2) => {
+const cache = (options = {}) => {
+  const priority = options.priority || 2;
+  const expiry = options.expiry || CACHE_EXPIRY_TIME_MIN;
+  const modelKey = options.invalidationKey;
   return async (req, res, next) => {
     try {
-      if (!key) {
-        key = generateCacheKey(req);
-      }
+      const key = generateCacheKey(req);
 
       const cacheData = pool.get(key);
-
       if (cacheData) {
         res.send(cacheData);
       } else {
@@ -107,6 +145,9 @@ const cache = (key, expiry = CACHE_EXPIRY_TIME_MIN, priority = 2) => {
             size: Buffer.byteLength(body),
           };
           pool.set(key, cacheValue);
+          if (modelKey) {
+            cachedKeys.addCachedKey(modelKey, key);
+          }
           res.send = oldSend;
           return res.send(body);
         };
@@ -122,26 +163,38 @@ const cache = (key, expiry = CACHE_EXPIRY_TIME_MIN, priority = 2) => {
 
 /**
  * Generate key to save cache.
- * @param {Object} [data] Options to generate cache key.
- * @param {number} data.method api method name.
- * @param {number} data.originalUrl api url.
+ * @param {Object} [request]  HTTP request argument to the middleware function passed by express.
  * @returns {string} cache key.
  */
-const generateCacheKey = (data) => {
-  return "__cache__" + data.method + data.originalUrl;
+const generateCacheKey = (request) => {
+  return (
+    "__cache__" +
+    request._parsedUrl.pathname +
+    "_p_" +
+    JSON.stringify(request.params) +
+    "_q_" +
+    JSON.stringify(request.query)
+  );
 };
 
 /**
  * Invalidate the cache for given keys
- * @param {Array} [cacheKeys] Array of cache keys.
+ * @param {Object} [options]
+ * @param {Object} [options.invalidationKeys] Array of invalidation keys used in cache middleware.
  * @returns {function} middleware function to help cache api response.
  */
-const invalidateCache = (cacheKeys) => {
+const invalidateCache = (options = {}) => {
+  const keys = options.invalidationKeys;
+
   return async (req, res, next) => {
     try {
-      if (Array.isArray(cacheKeys)) {
-        for (const key of cacheKeys) {
-          pool.evict(key);
+      if (Array.isArray(keys)) {
+        for (const key of keys) {
+          const cachedKeysList = cachedKeys.getCachedKeys(key);
+          for (const ck of cachedKeysList) {
+            pool.evict(ck);
+          }
+          cachedKeys.removeModelKey(key);
         }
       }
     } catch (err) {
@@ -152,4 +205,4 @@ const invalidateCache = (cacheKeys) => {
   };
 };
 
-module.exports = { cache, invalidateCache, generateCacheKey };
+module.exports = { cache, invalidateCache, generateCacheKey, cachedKeysStore };
