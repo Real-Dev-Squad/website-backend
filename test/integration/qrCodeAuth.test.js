@@ -166,7 +166,12 @@ describe("QrCodeAuth", function () {
     let userDeviceInfoData;
     beforeEach(async function () {
       userId = await addUser(user);
-      userDeviceInfoData = { ...userDeviceInfoDataArray[0], user_id: userId, authorization_status: "NOT_INIT" };
+      userDeviceInfoData = {
+        ...userDeviceInfoDataArray[0],
+        user_id: userId,
+        authorization_status: "NOT_INIT",
+        access_token: "ACCESS_TOKEN",
+      };
     });
     afterEach(async function () {
       await cleanDb();
@@ -183,6 +188,11 @@ describe("QrCodeAuth", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
+          expect(res.body.data.user_id).to.be.a("string");
+          expect(res.body.data.device_info).to.be.a("string");
+          expect(res.body.data.device_id).to.be.a("string");
+          expect(res.body.data.authorization_status).to.be.a("string");
+          expect(res.body.data.access_token).to.be.a("string");
           expect(res.body.message).to.equal(`Authentication document retrieved successfully.`);
 
           return done();
@@ -200,7 +210,7 @@ describe("QrCodeAuth", function () {
 
           expect(res).to.have.status(404);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("No Authentication found!");
+          expect(res.body.message).to.equal(`User with id ${userDeviceInfoData.device_id} does not exist.`);
           expect(res.body.error).to.equal("Not Found");
 
           return done();

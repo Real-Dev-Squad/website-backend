@@ -88,17 +88,18 @@ describe("mobile auth", function () {
         ...userDeviceInfoDataArray[0],
         user_id: userId,
         authorization_status: "NOT_INIT",
+        access_token: "ACCESS_TOKEN",
       };
 
       await qrCodeAuth.storeUserDeviceInfo(userDeviceInfoData);
       const response = await qrCodeAuth.retrieveUserDeviceInfo(userDeviceInfoData.device_id);
-
       const userDeviceInfo = response.data;
       const {
         user_id: userID,
         device_info: deviceInfo,
         device_id: deviceId,
         authorization_status: authorizationStatus,
+        access_token: accessToken,
       } = userDeviceInfo;
 
       const data = (await qrCodeAuthModel.doc(userId).get()).data();
@@ -112,6 +113,7 @@ describe("mobile auth", function () {
       expect(deviceInfo).to.be.a("string");
       expect(deviceId).to.be.a("string");
       expect(authorizationStatus).to.be.a("string");
+      expect(accessToken).to.be.a("string");
     });
   });
 });

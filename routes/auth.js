@@ -12,7 +12,7 @@ router.get("/github/callback", auth.githubAuth);
 
 router.get("/signout", auth.signout);
 
-router.get("/qr-code-auth", auth.fetchUserDeviceInfo);
+router.get("/qr-code-auth", userDeviceInfoValidator.validateFetchingUserDocument, auth.fetchUserDeviceInfo);
 
 router.post("/qr-code-auth", userDeviceInfoValidator.storeUserDeviceInfo, auth.storeUserDeviceInfo);
 
