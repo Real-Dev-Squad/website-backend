@@ -18,6 +18,10 @@ module.exports = {
     },
   },
 
+  cronJobHandler: {
+    publicKey: "CRON_JOB_PUBLIC_KEY",
+  },
+
   integrations: {
     newrelic: {
       appName: "RDS_API_staging",
