@@ -14,7 +14,7 @@ const { addDependency, updateTask } = require("../../../models/tasks");
 const firestore = require("../../../utils/firestore");
 const { TASK_STATUS } = require("../../../constants/tasks");
 const dependencyModel = firestore.collection("TaskDependencies");
-const tasksModel = firestore.collection("tasks");
+// const tasksModel = firestore.collection("tasks");
 
 describe("tasks", function () {
   afterEach(async function () {
@@ -147,44 +147,40 @@ describe("tasks", function () {
     });
 
     it("should return correct result", async function () {
-      const data = {
-        title: "Test task-dependency",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "AVAILABLE",
-        dependsOn: ["taskId2", "taskId3"],
-        percentCompleted: 100,
-        participants: [],
-        isNoteworthy: true,
-        assignee: false,
-      };
-
+      // const data = {
+      //   title: "Test task-dependency",
+      //   type: "feature",
+      //   endsOn: 1234,
+      //   startedOn: 4567,
+      //   status: "AVAILABLE",
+      //   dependsOn: ["taskId2", "taskId3"],
+      //   percentCompleted: 100,
+      //   participants: [],
+      //   isNoteworthy: true,
+      //   assignee: false,
+      // };
       // const setStub = sinon.stub(tasksModel.doc("tasks"), "set").resolves();
       // const getStub = sinon.stub(tasksModel.doc("tasks"), "get").resolves({
       //   data: () => data,
       // });
-
       // const result = await updateTask(data);
-      await tasksModel.doc("tasks").set(data);
+      // console.log("taskdata_1", result);
+      // await tasksModel.doc("tasks").set(data);
       // const dependencyDatas = (await tasksModel.doc("tasks").get()).data();
       // console.log("datat12", dependencyDatas);
-      // console.log("rs", result);
       // const taskData = {
-      // title: "vinit",
+      //   assignee: "sagar",
       // };
-      // const result3 = await updateTask(taskData, "tasks");
-      // console.log("assigne", taskData);
+      // const result3 = await updateTask(taskData, result.taskId);
+      // // console.log("assigne", taskData);
       // console.log("d3", result3);
-      // await tasksModel.doc("tasks").set(taskData);
-      // const dependencyData = await tasksModel.doc("tasks").get();
+      // await tasksModel.doc(result.taskId).set(taskData);
+      // const dependencyData = await tasksModel.doc(result.taskId).get();
       // console.log("docccc", dependencyData.data());
-      // const result2 = await fetchTask(result3.taskId);
+      // const result2 = await fetchTask(result.taskId);
       // console.log("*******", result2);
-
       // expect(dependencyData.dependsOn).to.be.a("array");
       // expect(dependencyData.taskId).to.be.equal("taskId1");
-
       // setStub.restore();
       // getStub.restore();
     });

@@ -328,6 +328,21 @@ describe("Tasks", function () {
 
       return taskId;
     });
+    it("Should update status when assignee pass as a payload", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "sagar" });
+      expect(res).to.have.status(204);
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      expect(res2).to.have.status(200);
+      expect(res2.body.taskData.assignee).to.be.equal("sagar");
+      expect(res2.body.taskData.status).to.be.equal("ASSIGNED");
+
+      return taskId;
+    });
     it("should check updated dependsOn", function (done) {
       chai
         .request(app)
