@@ -43,7 +43,7 @@ describe("cachedKeysStore", function () {
 
       const result = keyStore.getCachedKeys(modelKey);
       expect(result).to.be.an("array");
-      //   expect(result).to.be.empty;
+      expect(result).to.deep.equal([]);
     });
   });
 
@@ -56,6 +56,7 @@ describe("cachedKeysStore", function () {
 
       const result = keyStore.getCachedKeys(modelKey);
       expect(result).to.be.an("array");
+      expect(result).to.deep.equal([]);
     });
 
     it("should not remove other cached keys for the same model key", function () {
