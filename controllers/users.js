@@ -124,7 +124,6 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    // replace below line woth call to retrieveUsers(id)
     const result = await userQuery.fetchUser({ username: req.params.username });
     const { phone, email, ...user } = result.user;
 
@@ -558,7 +557,7 @@ const filterUsers = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    // new function in dataAceessLayer for getUsersBasedOnFilter
+    
     const users = await userQuery.getUsersBasedOnFilter(req.query);
     const sanitizedUsers = users.map((user) => {
       delete user.tokens;
