@@ -10,7 +10,7 @@ describe("Middleware | Utils | cache", function () {
   afterEach(function () {
     sinon.restore();
   });
-  it("should cache the response", async function () {
+  it("should cache the response", function () {
     const cacheTestKey = "__cache__1";
 
     const request = {
@@ -33,13 +33,13 @@ describe("Middleware | Utils | cache", function () {
     expect(nextSpy.callCount).to.equal(1);
     expect(response.send.callCount).to.equal(1);
 
-    await cacheMiddleware(request, response, nextSpy);
+    cacheMiddleware(request, response, nextSpy);
 
     expect(nextSpy.callCount).to.equal(1);
     expect(response.send.callCount).to.equal(2);
   });
 
-  it("should invalidate stale the response", async function () {
+  it("should invalidate stale the response", function () {
     const cacheTestKey = "__cache__2";
 
     const request = {
