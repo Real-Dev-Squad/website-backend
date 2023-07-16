@@ -610,9 +610,8 @@ const setInDiscordScript = async (req, res) => {
 const removeTokens = async (req, res) => {
   try {
     const users = await userQuery.fetchUsersWithToken();
-    const length = users.length;
 
-    if (length === 0) {
+    if (!users.length) {
       return res.status(404).json({ message: "No users found with github Token!" });
     }
 
@@ -620,7 +619,7 @@ const removeTokens = async (req, res) => {
 
     return res.status(200).json({
       message: "Github Token removed from all users!",
-      usersFoundWithToken: length,
+      usersFound: users.length,
     });
   } catch (err) {
     return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
