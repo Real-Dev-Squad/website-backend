@@ -126,7 +126,6 @@ const cache = (options = {}) => {
   return async (req, res, next) => {
     try {
       const key = generateCacheKey(req);
-
       const cacheData = pool.get(key);
       if (cacheData) {
         res.send(cacheData);
@@ -167,14 +166,7 @@ const cache = (options = {}) => {
  * @returns {string} cache key.
  */
 const generateCacheKey = (request) => {
-  return (
-    "__cache__" +
-    request._parsedUrl.pathname +
-    "_p_" +
-    JSON.stringify(request.params) +
-    "_q_" +
-    JSON.stringify(request.query)
-  );
+  return "__cache__" + request.method + request.originalUrl;
 };
 
 /**

@@ -14,11 +14,8 @@ describe("Middleware | Utils | cache", function () {
     const cacheTestKey = "__cache__1";
 
     const request = {
-      params: {},
-      query: {},
-      _parsedUrl: {
-        pathname: "/test",
-      },
+      method: "GET",
+      originalUrl: "/test1",
     };
 
     const response = {
@@ -46,11 +43,8 @@ describe("Middleware | Utils | cache", function () {
     const cacheTestKey = "__cache__2";
 
     const request = {
-      params: {},
-      query: {},
-      _parsedUrl: {
-        pathname: "/test2",
-      },
+      method: "GET",
+      originalUrl: "/test2",
     };
     const response = {
       send: sinon.spy(),
