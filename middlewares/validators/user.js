@@ -2,6 +2,7 @@ const joi = require("joi");
 const { USER_STATUS } = require("../../constants/users");
 const ROLES = require("../../constants/roles");
 const { IMAGE_VERIFICATION_TYPES } = require("../../constants/imageVerificationTypes");
+const { userState } = require("../../constants/userStatus");
 
 const updateUser = async (req, res, next) => {
   const schema = joi
@@ -161,6 +162,7 @@ async function getUsers(req, res, next) {
  * @param next {Object} - Express middleware function
  */
 async function validateUserQueryParams(req, res, next) {
+  const validUserStates = [userState.OOO, userState.ONBOARDING, userState.IDLE, userState.ACTIVE];
   const schema = joi
     .object()
     .strict()
@@ -172,10 +174,7 @@ async function validateUserQueryParams(req, res, next) {
       tagId: joi.array().items(joi.string()).single().optional(),
       state: joi
         .alternatives()
-        .try(
-          joi.string().valid("IDLE", "OOO", "ACTIVE", "ONBOARDING"),
-          joi.array().items(joi.string().valid("IDLE", "OOO", "ACTIVE", "ONBOARDING"))
-        )
+        .try(joi.string().valid(...validUserStates), joi.array().items(joi.string().valid(...validUserStates)))
         .optional(),
       role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD, ROLES.ARCHIVED).optional(),
       verified: joi.string().optional(),

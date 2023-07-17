@@ -16,6 +16,7 @@ const { addTag } = require("../../models/tags");
 const { addLevel } = require("../../models/levels");
 const { addTagsToItem } = require("../../models/items");
 const { assertUserIds } = require("../utils/user");
+const { userState } = require("../../constants/userStatus");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -43,14 +44,17 @@ describe("Filter Users", function () {
     oooUser = await addUser(userData[0]);
     await updateUserStatus(
       oooUser,
-      generateUserStatusData("OOO", updatedAtDate, updatedAtDate, untilDate, "Bad Health")
+      generateUserStatusData(userState.OOO, updatedAtDate, updatedAtDate, untilDate, "Bad Health")
     );
     idleUser = await addUser(userData[1]);
-    await updateUserStatus(idleUser, generateUserStatusData("IDLE", updatedAtDate, updatedAtDate, untilDate, "CSS"));
+    await updateUserStatus(
+      idleUser,
+      generateUserStatusData(userState.IDLE, updatedAtDate, updatedAtDate, untilDate, "CSS")
+    );
     activeUser = await addUser(userData[8]);
-    await updateUserStatus(activeUser, generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate));
+    await updateUserStatus(activeUser, generateUserStatusData(userState.ACTIVE, updatedAtDate, updatedAtDate));
     onboardingUser = await addUser(userData[2]);
-    await updateUserStatus(onboardingUser, generateUserStatusData("ONBOARDING", updatedAtDate, updatedAtDate));
+    await updateUserStatus(onboardingUser, generateUserStatusData(userState.ONBOARDING, updatedAtDate, updatedAtDate));
 
     // creating tag and levels
     const { id: id1 } = await addTag({
