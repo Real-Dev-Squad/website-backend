@@ -230,7 +230,7 @@ const updateSelf = async (req, res) => {
   try {
     const { id: userId } = req.userData;
     if (req.body.username) {
-      const { user } = await userQuery.fetchUser({ userId });
+      const { user } = await dataAccess.retrieveUsers({ id:userId });
       if (!user.incompleteUserDetails) {
         return res.boom.forbidden("Cannot update username again");
       }
@@ -379,7 +379,7 @@ const updateUser = async (req, res) => {
 
     const { approval, timestamp, userId, ...profileDiff } = profileDiffData;
 
-    const user = await userQuery.fetchUser({ userId });
+    const user = await dataAccess.retrieveUsers({ id:userId });
     if (!user.userExists) return res.boom.notFound("User doesn't exist");
 
     await profileDiffsQuery.updateProfileDiff({ approval: profileDiffStatus.APPROVED }, profileDiffId);
@@ -588,7 +588,7 @@ const setInDiscordScript = async (req, res) => {
 
 const updateRoles = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ userId: req.params.id });
+    const result = await dataAccess.retrieveUsers({ id: req.params.id });
     if (result?.userExists) {
       const dataToUpdate = req.body;
       const response = await getRoleToUpdate(result.user, dataToUpdate);
