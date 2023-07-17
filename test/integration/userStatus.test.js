@@ -20,7 +20,9 @@ const {
 
 const config = require("config");
 const { updateUserStatus } = require("../../models/userStatus");
+const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
+const userStatusModel = require("../../models/userStatus");
 
 chai.use(chaiHttp);
 
@@ -532,6 +534,135 @@ describe("UserStatus", function () {
       expect(response2.body.data.currentStatus.from).to.equal(fromDate); // 12 Nov 2022
       expect(response2.body.data.currentStatus.until).to.equal(untilDate); // 17 Nov 2022
       expect(response2.body.data.futureStatus.state).to.equal(undefined);
+    });
+  });
+
+  describe("PATCH /users/status/self", function () {
+    let userId;
+    let userJwt;
+
+    before(async function () {
+      userId = await addUser(userData[8]);
+      userJwt = authService.generateAuthToken({ userId });
+    });
+
+    afterEach(async function () {
+      await firestore.collection("tasks").doc("user1AssignedTask").delete();
+      await firestore.collection("usersStatus").doc("user1AssignedStatus").delete();
+    });
+
+    after(async function () {
+      await firestore.collection("users").doc(userId).delete();
+    });
+
+    it("Should Change the status to ACTIVE if user has task assigned.", async function () {
+      const now = new Date();
+      const nowTimeStamp = new Date().setUTCHours(0, 0, 0, 0);
+      const fiveDaysFromNowTimeStamp = new Date(now.setUTCHours(0, 0, 0, 0) + 5 * 24 * 60 * 60 * 1000);
+
+      await firestore.collection("tasks").doc("user1AssignedTask").set({
+        assignee: userId,
+        status: "ASSIGNED",
+      });
+      await firestore
+        .collection("usersStatus")
+        .doc("user1AssignedStatus")
+        .set({
+          userId: userId,
+          currentStatus: {
+            message: "",
+            from: nowTimeStamp,
+            until: fiveDaysFromNowTimeStamp,
+            updatedAt: nowTimeStamp,
+            state: userState.OOO,
+          },
+        });
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${userJwt}`)
+        .send({ cancelOoo: true });
+      expect(res.body.data.currentStatus.state).to.equal(userState.ACTIVE);
+      expect(res.body.data.currentStatus.from).to.be.gt(nowTimeStamp);
+      expect(res.body.data.currentStatus.until).to.equal("");
+      expect(res.body.data.currentStatus.message).to.equal("");
+    });
+
+    it("Should Change the status to IDLE if user doesn't have a task assigned.", async function () {
+      const now = new Date();
+      const nowTimeStamp = new Date().setUTCHours(0, 0, 0, 0);
+      const fiveDaysFromNowTimeStamp = new Date(now.setUTCHours(0, 0, 0, 0) + 5 * 24 * 60 * 60 * 1000);
+
+      await firestore
+        .collection("usersStatus")
+        .doc("user1AssignedStatus")
+        .set({
+          userId: userId,
+          currentStatus: {
+            message: "",
+            from: nowTimeStamp,
+            until: fiveDaysFromNowTimeStamp,
+            updatedAt: nowTimeStamp,
+            state: userState.OOO,
+          },
+        });
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${userJwt}`)
+        .send({ cancelOoo: true });
+      expect(res.body.data.currentStatus.state).to.equal(userState.IDLE);
+      expect(res.body.data.currentStatus.from).to.be.gt(nowTimeStamp);
+      expect(res.body.data.currentStatus.until).to.equal("");
+      expect(res.body.data.currentStatus.message).to.equal("");
+    });
+
+    it("Should throw Not Found when User Status does not exist.", async function () {
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${userJwt}`)
+        .send({ cancelOoo: true });
+      expect(res.body.statusCode).to.equal(404);
+      expect(res.body.error).to.equal("NotFound");
+      expect(res.body.message).to.equal("No User status document found");
+    });
+
+    it("Should throw Forbidden when User Status is not OOO.", async function () {
+      const nowTimeStamp = new Date().setUTCHours(0, 0, 0, 0);
+      await firestore
+        .collection("usersStatus")
+        .doc("user1AssignedStatus")
+        .set({
+          userId: userId,
+          currentStatus: {
+            message: "",
+            from: nowTimeStamp,
+            until: "",
+            updatedAt: nowTimeStamp,
+            state: "ACTIVE",
+          },
+        });
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${userJwt}`)
+        .send({ cancelOoo: true });
+      expect(res.body.statusCode).to.equal(403);
+      expect(res.body.error).to.equal("Forbidden");
+      expect(res.body.message).to.equal("The OOO Status cannot be canceled because the current status is ACTIVE.");
+    });
+
+    it("Should throw an error if firestore error", async function () {
+      sinon.stub(userStatusModel, "cancelOooStatus").throws(new Error("Firestore error"));
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${userJwt}`)
+        .send({ cancelOoo: true });
+      expect(res.body.statusCode).to.equal(500);
+      expect(res.body.error).to.equal("Internal Server Error");
+      expect(res.body.message).to.equal("An internal server error occurred");
     });
   });
 
