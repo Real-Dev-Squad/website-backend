@@ -42,6 +42,10 @@ module.exports = {
         authRedirection: "SERVICES_RDSUI_ROUTES_AUTH_REDIRECTION",
       },
     },
+
+    discordBot: {
+      baseUrl: "DISCORD_BASE_URL",
+    },
   },
 
   userToken: {
@@ -56,6 +60,15 @@ module.exports = {
     },
     publicKey: "PUBLIC_KEY",
     privateKey: "PRIVATE_KEY",
+  },
+
+  botToken: {
+    botPublicKey: "BOT_PUBLIC_KEY",
+  },
+
+  rdsServerlessBot: {
+    rdsServerLessPrivateKey: "RDS_SERVERLESS_PRIVATE_KEY",
+    ttl: "RDS_SERVERLESS_TTL",
   },
 
   cloudinary: {
@@ -73,5 +86,10 @@ module.exports = {
 
   routesCacheTTL: {
     "/members": "ROUTESCACHETTL_MEMBERS",
+  },
+
+  Event100ms: {
+    APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
+    APP_SECRET: "EVENT_100MS_APP_SECREt",
   },
 };

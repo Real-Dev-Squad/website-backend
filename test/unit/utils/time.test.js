@@ -54,4 +54,13 @@ describe("time", function () {
       sinon.restore();
     });
   });
+
+  describe("getBeforeHourTime", function () {
+    it("should return the time in firestore timestamp before duration", function () {
+      for (const query of timeData.timeBeforeHour) {
+        const result = timeUtils.getBeforeHourTime(query.param.timestamp, query.param.hours)._seconds;
+        expect(result).to.be.equal(query.result);
+      }
+    });
+  });
 });

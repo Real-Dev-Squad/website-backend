@@ -1,4 +1,4 @@
-const CACHE_EXPIRY_TIME_MIN = 2;
+const CACHE_EXPIRY_TIME_MIN = 0.1;
 const CACHE_SIZE_MB = 10;
 const minutesToMilliseconds = (minutes) => minutes * 60000;
 
@@ -12,7 +12,7 @@ const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
   let hits = 0;
 
   /**
-   * Get an API Respnose from cacheStore.
+   * Get an API Response from cacheStore.
    * @param {string} key
    * @returns {null | object}
    */
@@ -32,7 +32,12 @@ const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
     }
 
     hits += 1;
-    return JSON.parse(cachedData.response);
+    try {
+      return JSON.parse(cachedData.response);
+    } catch (err) {
+      logger.error(`Error while parsing cachedData.response ${err}`);
+      throw err;
+    }
   };
 
   /**
@@ -69,43 +74,35 @@ const pool = cachePool();
  */
 const cache = (data = { priority: 2, expiry: CACHE_EXPIRY_TIME_MIN }) => {
   return async (req, res, next) => {
-    const key = "__cache__" + req.method + req.originalUrl;
-    const cacheData = pool.get(key);
+    try {
+      const key = "__cache__" + req.method + req.originalUrl;
+      const cacheData = pool.get(key);
 
-    if (cacheData) {
-      res.send(cacheData);
-    } else {
-      /**
-       * As we do not have data in our cache we call the next middleware,
-       * intercept the response being sent from middleware and store it in cache.
-       *  */
-      const chunks = [];
-      const oldWrite = res.write;
-      const oldEnd = res.end;
+      if (cacheData) {
+        res.send(cacheData);
+      } else {
+        /**
+         * As we do not have data in our cache we call the next middleware,
+         * intercept the response being sent from middleware and store it in cache.
+         *  */
+        const oldSend = res.send;
 
-      res.write = (chunk, ...args) => {
-        chunks.push(chunk);
-        return oldWrite.apply(res, [chunk, ...args]);
-      };
-
-      res.end = (chunk, ...args) => {
-        if (chunk) {
-          chunks.push(chunk);
-        }
-
-        const apiResponse = Buffer.concat(chunks).toString();
-
-        const cacheValue = {
-          priority: data.priority,
-          response: apiResponse,
-          expiry: new Date().getTime() + minutesToMilliseconds(data.expiry),
-          size: Buffer.byteLength(apiResponse),
+        res.send = (body) => {
+          const cacheValue = {
+            priority: data.priority,
+            response: body,
+            expiry: new Date().getTime() + minutesToMilliseconds(data.expiry),
+            size: Buffer.byteLength(body),
+          };
+          pool.set(key, cacheValue);
+          res.send = oldSend;
+          return res.send(body);
         };
 
-        pool.set(key, cacheValue);
-        return oldEnd.apply(res, [chunk, ...args]);
-      };
-
+        next();
+      }
+    } catch (err) {
+      logger.error(`Error while getting cached tasks response ${err}`);
       next();
     }
   };

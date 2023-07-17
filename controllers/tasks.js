@@ -1,7 +1,17 @@
 const tasks = require("../models/tasks");
 const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
+const { addLog } = require("../models/logs");
+const { USER_STATUS } = require("../constants/users");
+const { addOrUpdate, getRdsUserInfoByGitHubUsername } = require("../models/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
+const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const dependencyModel = require("../models/tasks");
+const userQuery = require("../models/users");
+const { transformQuery } = require("../utils/tasks");
+const { getPaginatedLink } = require("../utils/helper");
+const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
+
 /**
  * Creates new task
  *
@@ -11,21 +21,38 @@ const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
  */
 const addNewTask = async (req, res) => {
   try {
+    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
+    const { userStatusFlag } = req.query;
+    const isUserStatusEnabled = userStatusFlag === "true";
     const { id: createdBy } = req.userData;
+    const dependsOn = req.body.dependsOn;
+    let userStatusUpdate;
     const body = {
       ...req.body,
       createdBy,
     };
-    const task = await tasks.updateTask(body);
-
+    delete body.dependsOn;
+    const { taskId, taskDetails } = await tasks.updateTask(body);
+    const data = {
+      taskId,
+      dependsOn,
+    };
+    const taskDependency = dependsOn && (await dependencyModel.addDependency(data));
+    if (isUserStatusEnabled && req.body.assignee) {
+      userStatusUpdate = await updateUserStatusOnTaskUpdate(req.body.assignee);
+    }
     return res.json({
       message: "Task created successfully!",
-      task: task.taskDetails,
-      id: task.taskId,
+      task: {
+        ...taskDetails,
+        ...(taskDependency && { dependsOn: taskDependency }),
+        id: taskId,
+      },
+      ...(userStatusUpdate && { userStatus: userStatusUpdate }),
     });
   } catch (err) {
     logger.error(`Error while creating new task: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 /**
@@ -34,16 +61,95 @@ const addNewTask = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
+
+const fetchTasksWithRdsAssigneeInfo = async (allTasks) => {
+  const tasksWithRdsAssigneeInfo = allTasks.map(async (task) => {
+    /*
+     If the issue has a "github.issue" inner object and a property "assignee",
+     then fetch the RDS user information with GitHub username in "assignee"
+    */
+    if (Object.keys(task).includes("github")) {
+      if (Object.keys(task.github.issue).includes("assignee")) {
+        return {
+          ...task,
+          github: {
+            ...task.github,
+            issue: {
+              ...task.github.issue,
+              assigneeRdsInfo: await getRdsUserInfoByGitHubUsername(task.github.issue.assignee),
+            },
+          },
+        };
+      }
+    }
+    return task;
+  });
+  const tasks = await Promise.all(tasksWithRdsAssigneeInfo);
+  return tasks;
+};
+
+const fetchPaginatedTasks = async (query) => {
+  try {
+    const tasksData = await tasks.fetchPaginatedTasks(query);
+    const { allTasks, next, prev } = tasksData;
+    const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
+
+    const result = {
+      tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
+      prev,
+      next,
+    };
+
+    if (next) {
+      const nextLink = getPaginatedLink({
+        endpoint: "/tasks",
+        query,
+        cursorKey: "next",
+        docId: next,
+      });
+      result.next = nextLink;
+    }
+
+    if (prev) {
+      const prevLink = getPaginatedLink({
+        endpoint: "/tasks",
+        query,
+        cursorKey: "prev",
+        docId: prev,
+      });
+      result.prev = prevLink;
+    }
+
+    return result;
+  } catch (err) {
+    logger.error(`Error while fetching paginated tasks ${err}`);
+    return err;
+  }
+};
+
 const fetchTasks = async (req, res) => {
   try {
+    const { dev, status, page, size, prev, next } = req.query;
+    const transformedQuery = transformQuery(dev, status, size, page);
+
+    if (dev) {
+      const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next });
+      return res.json({
+        message: "Tasks returned successfully!",
+        ...paginatedTasks,
+      });
+    }
+
     const allTasks = await tasks.fetchTasks();
+    const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
+
     return res.json({
       message: "Tasks returned successfully!",
-      tasks: allTasks.length > 0 ? allTasks : [],
+      tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -83,7 +189,7 @@ const getUserTasks = async (req, res) => {
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`);
 
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -109,7 +215,23 @@ const getSelfTasks = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const getTask = async (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const { taskData, dependencyDocReference } = await tasks.fetchTask(taskId);
+    if (!taskData) {
+      return res.boom.notFound("Task not found");
+    }
+    return res.json({
+      message: "task returned successfully",
+      taskData: { ...taskData, dependsOn: dependencyDocReference },
+    });
+  } catch (err) {
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 /**
@@ -120,16 +242,27 @@ const getSelfTasks = async (req, res) => {
  */
 const updateTask = async (req, res) => {
   try {
+    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
+    const { userStatusFlag } = req.query;
+    const isUserStatusEnabled = userStatusFlag === "true";
     const task = await tasks.fetchTask(req.params.id);
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
     }
-
+    if (req.body?.assignee) {
+      const user = await userQuery.fetchUser({ username: req.body.assignee });
+      if (!user.userExists) {
+        return res.boom.notFound("User doesn't exist");
+      }
+    }
     await tasks.updateTask(req.body, req.params.id);
+    if (isUserStatusEnabled && req.body.assignee) {
+      await updateUserStatusOnTaskUpdate(req.body.assignee);
+    }
     return res.status(204).send();
   } catch (err) {
     logger.error(`Error while updating task: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -140,17 +273,62 @@ const updateTask = async (req, res) => {
  */
 const updateTaskStatus = async (req, res, next) => {
   try {
+    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
+    const { userStatusFlag } = req.query;
+    const isUserStatusEnabled = userStatusFlag === "true";
+    let userStatusUpdate;
     const taskId = req.params.id;
     const { dev } = req.query;
-    const { id: userId } = req.userData;
+    const { id: userId, username } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
 
     if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
     if (task.notAssignedToYou) return res.boom.forbidden("This task is not assigned to you");
-    if (task.taskData.status === "VERIFIED")
+    if (task.taskData.status === TASK_STATUS.VERIFIED || req.body.status === TASK_STATUS.MERGED)
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
-    await tasks.updateTask(req.body, taskId);
+    if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
+      if (req.body.status === TASK_STATUS.COMPLETED || !req.body.status) {
+        return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
+      }
+    }
+
+    if (req.body.status === TASK_STATUS.COMPLETED && task.taskData.percentCompleted !== 100) {
+      if (req.body.percentCompleted !== 100) {
+        return res.boom.badRequest("Status cannot be updated. Task is not completed yet");
+      }
+    }
+
+    const taskLog = {
+      type: "task",
+      meta: {
+        userId,
+        taskId,
+        username,
+      },
+      body: {
+        subType: "update",
+        new: {},
+      },
+    };
+
+    if (req.body.status && !req.body.percentCompleted) {
+      taskLog.body.new.status = req.body.status;
+    }
+    if (req.body.percentCompleted && !req.body.status) {
+      taskLog.body.new.percentCompleted = req.body.percentCompleted;
+    }
+
+    if (req.body.percentCompleted && req.body.status) {
+      taskLog.body.new.percentCompleted = req.body.percentCompleted;
+      taskLog.body.new.status = req.body.status;
+    }
+
+    const [, taskLogResult] = await Promise.all([
+      tasks.updateTask(req.body, taskId),
+      addLog(taskLog.type, taskLog.meta, taskLog.body),
+    ]);
+    taskLog.id = taskLogResult.id;
 
     if (dev) {
       if (req.body.percentCompleted === 100) {
@@ -158,10 +336,17 @@ const updateTaskStatus = async (req, res, next) => {
       }
     }
 
-    return res.json({ message: "Task updated successfully!" });
+    if (isUserStatusEnabled && req.body.status === TASK_STATUS.COMPLETED && req.body.percentCompleted === 100) {
+      userStatusUpdate = await updateStatusOnTaskCompletion(userId);
+    }
+    return res.json({
+      message: "Task updated successfully!",
+      taskLog,
+      ...(userStatusUpdate && { userStatus: userStatusUpdate }),
+    });
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`);
-    return res.boom.badImplementation("An internal server error occured");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -185,7 +370,29 @@ const overdueTasks = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while fetching overdue tasks : ${err}`);
-    return res.boom.badImplementation("An internal server error occured");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const assignTask = async (req, res) => {
+  try {
+    const { status, username, id: userId } = req.userData;
+
+    if (status !== USER_STATUS.IDLE) {
+      return res.json({ message: "Task cannot be assigned to users with active or OOO status" });
+    }
+
+    const { task } = await tasks.fetchSkillLevelTask(userId);
+    if (!task) return res.json({ message: "Task not found" });
+
+    const { taskId } = await tasks.updateTask({ assignee: username, status: TASK_STATUS.ASSIGNED }, task.itemId);
+    if (taskId) {
+      // this will change once we start storing status in different collection
+      await addOrUpdate({ status: "active" }, userId);
+    }
+    return res.json({ message: "Task assigned", Id: task.itemId });
+  } catch {
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -195,6 +402,8 @@ module.exports = {
   updateTask,
   getSelfTasks,
   getUserTasks,
+  getTask,
   updateTaskStatus,
   overdueTasks,
+  assignTask,
 };

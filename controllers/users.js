@@ -5,9 +5,17 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
-const { fetch } = require("../utils/fetch");
+const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
+const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
+const { setInDiscordFalseScript } = require("../services/discordService");
+const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
+const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
+const { fetchAllUsers } = require("../models/users");
+const { getQualifiers } = require("../utils/helper");
+const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -18,9 +26,13 @@ const verifyUser = async (req, res) => {
     await userQuery.addOrUpdate({ profileStatus: "PENDING" }, userId);
   } catch (error) {
     logger.error(`Error while verifying user: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
-  fetch(process.env.IDENTITY_SERVICE_URL, "POST", null, { userId }, { "Content-Type": "application/json" });
+  fetch(process.env.IDENTITY_SERVICE_URL, {
+    method: "POST",
+    body: { userId },
+    headers: { "Content-Type": "application/json" },
+  });
   return res.json({
     message: "Your request has been queued successfully",
   });
@@ -32,7 +44,7 @@ const getUserById = async (req, res) => {
     result = await userQuery.fetchUser({ userId: req.params.userId });
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 
   if (!result.userExists) {
@@ -63,15 +75,52 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const allUsers = await userQuery.fetchUsers(req.query);
+    // getting user details by id if present.
+    const query = req.query?.query ?? "";
+    const qualifiers = getQualifiers(query);
 
+    // getting user details by id if present.
+    if (req.query.id) {
+      const id = req.query.id;
+      let result;
+      try {
+        result = await dataAccess.retrieveUsers({ id: id });
+      } catch (error) {
+        logger.error(`Error while fetching user: ${error}`);
+        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+      }
+      if (!result.userExists) {
+        return res.boom.notFound("User doesn't exist");
+      }
+      const user = result.user;
+      return res.json({
+        message: "User returned successfully!",
+        user,
+      });
+    }
+
+    if (qualifiers?.filterBy) {
+      const allPRs = await getFilteredPRsOrIssues(qualifiers);
+      const usernames = getUsernamesFromPRs(allPRs);
+      const users = await dataAccess.retrieveUsers({ usernames: usernames });
+      return res.json({
+        message: "Users returned successfully!",
+        users,
+      });
+    }
+
+    const data = await dataAccess.retrieveUsers({ query: req.query });
     return res.json({
       message: "Users returned successfully!",
-      users: allUsers,
+      users: data.allUsers,
+      links: {
+        next: data.nextId ? getPaginationLink(req.query, "next", data.nextId) : "",
+        prev: data.prevId ? getPaginationLink(req.query, "prev", data.prevId) : "",
+      },
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -97,7 +146,43 @@ const getUser = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
+const getUserSkills = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { skills } = await userQuery.fetchUserSkills(id);
+
+    return res.json({
+      message: "Skills returned successfully",
+      skills,
+    });
+  } catch (err) {
+    logger.error(`Error fetching skills ${err}`);
+    return res.boom.badImplementation("Internal server error");
+  }
+};
+
+/**
+ * Fetches users based on given skill
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getSuggestedUsers = async (req, res) => {
+  try {
+    const { users } = await userQuery.getSuggestedUsers(req.params.skillId);
+
+    return res.json({
+      message: "Users returned successfully!",
+      users,
+    });
+  } catch (err) {
+    logger.error(`Error while fetching suggested users: ${err}`);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -116,7 +201,7 @@ const getUsernameAvailabilty = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while checking user: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -139,7 +224,7 @@ const getSelfDetails = (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -172,7 +257,7 @@ const updateSelf = async (req, res) => {
     return res.boom.notFound("User not found");
   } catch (error) {
     logger.error(`Error while updating user: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -183,19 +268,108 @@ const updateSelf = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const postUserPicture = async (req, res) => {
+  const { file } = req;
+  const { id: userId, discordId } = req.userData;
+  const { coordinates } = req.body;
+  let discordAvatarUrl = "";
+  let imageData;
+  let verificationResult;
   try {
-    const { file } = req;
-    const { id: userId } = req.userData;
-    const { coordinates } = req.body;
-    const coordinatesObject = coordinates && JSON.parse(coordinates);
-    const imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
-    return res.json({
-      message: "Profile picture uploaded successfully!",
-      image: imageData,
-    });
+    discordAvatarUrl = await generateDiscordProfileImageUrl(discordId);
   } catch (error) {
     logger.error(`Error while adding profile picture of user: ${error}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+  try {
+    const coordinatesObject = coordinates && JSON.parse(coordinates);
+    imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
+  } catch (error) {
+    logger.error(`Error while adding profile picture of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+  try {
+    verificationResult = await userQuery.addForVerification(userId, discordId, imageData.url, discordAvatarUrl);
+  } catch (error) {
+    logger.error(`Error while adding profile picture of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+  return res.status(201).json({
+    message: `Profile picture uploaded successfully! ${verificationResult.message}`,
+    image: imageData,
+  });
+};
+
+/**
+ * Updates the user data
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const verifyUserImage = async (req, res) => {
+  try {
+    const { type: imageType } = req.query;
+    const { id: userId } = req.params;
+    await userQuery.markAsVerified(userId, imageType);
+    return res.json({
+      message: `${imageType} image was verified successfully!`,
+    });
+  } catch (error) {
+    logger.error(`Error while verifying image of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const markUnverified = async (req, res) => {
+  try {
+    const [usersInRdsDiscordServer, allRdsLoggedInUsers] = await Promise.all([getDiscordMembers(), fetchAllUsers()]);
+    const rdsUserMap = {};
+    const unverifiedRoleId = config.get("discordUnverifiedRoleId");
+    const usersToApplyUnverifiedRole = [];
+    const addRolePromises = [];
+    const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+
+    allRdsLoggedInUsers.forEach((user) => {
+      rdsUserMap[user.discordId] = true;
+    });
+
+    usersInRdsDiscordServer.forEach((discordUser) => {
+      const found = discordUser.roles.find((role) => role === discordDeveloperRoleId);
+      if (found && !rdsUserMap[discordUser.user.id]) {
+        usersToApplyUnverifiedRole.push(discordUser.user.id);
+      }
+    });
+
+    usersToApplyUnverifiedRole.forEach((id) => {
+      addRolePromises.push(addRoleToUser(id, unverifiedRoleId));
+    });
+
+    await Promise.all(addRolePromises);
+    return res.json({ message: "ROLES APPLIED SUCCESSFULLY" });
+  } catch (err) {
+    logger.error(err);
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
+/**
+ * Updates the user data
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getUserImageForVerification = async (req, res) => {
+  try {
+    const { id: userId } = req.params;
+    const userImageVerificationData = await userQuery.getUserImageForVerification(userId);
+    return res.json({
+      message: "User image verification record fetched successfully!",
+      data: userImageVerificationData,
+    });
+  } catch (error) {
+    logger.error(`Error while verifying image of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -233,7 +407,7 @@ const updateUser = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while updating user data: ${error}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -248,7 +422,7 @@ const generateChaincode = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while generating chaincode: ${error}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -262,7 +436,7 @@ const profileURL = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Internal Server Error: ${error}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -288,7 +462,159 @@ const rejectProfileDiff = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while rejecting profile diff: ${error}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const addUserIntro = async (req, res) => {
+  try {
+    const rawData = req.body;
+    const joinData = await userQuery.getJoinData(req.userData.id);
+
+    if (joinData.length === 1) {
+      return res.status(409).json({
+        message: "User data is already present!",
+      });
+    }
+
+    const data = {
+      userId: req.userData.id,
+      biodata: {
+        firstName: rawData.firstName,
+        lastName: rawData.lastName,
+      },
+      location: {
+        city: rawData.city,
+        state: rawData.state,
+        country: rawData.country,
+      },
+      professional: {
+        institution: rawData.college,
+        skills: rawData.skills,
+      },
+      intro: {
+        introduction: rawData.introduction,
+        funFact: rawData.funFact,
+        forFun: rawData.forFun,
+        whyRds: rawData.whyRds,
+        numberOfHours: rawData.numberOfHours,
+      },
+      foundFrom: rawData.foundFrom,
+    };
+    await userQuery.addJoinData(data);
+
+    return res.status(201).json({
+      message: "User join data and newstatus data added and updated successfully",
+    });
+  } catch (err) {
+    logger.error("Could not save user data");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const getUserIntro = async (req, res) => {
+  try {
+    const data = await userQuery.getJoinData(req.params.userId);
+    if (data.length) {
+      return res.json({
+        message: "User data returned",
+        data: data,
+      });
+    } else {
+      return res.status(404).json({
+        message: "Data Not Found",
+      });
+    }
+  } catch (err) {
+    logger.error("Could Not Get User Data", err);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
+ * Returns the lists of usernames where default archived role was added
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const addDefaultArchivedRole = async (req, res) => {
+  try {
+    const addedDefaultArchivedRoleData = await userQuery.addDefaultArchivedRole();
+    return res.json({
+      message: "Users default archived role added successfully!",
+      ...addedDefaultArchivedRoleData,
+    });
+  } catch (error) {
+    logger.error(`Error adding default archived role: ${error}`);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+  }
+};
+
+/**
+ * Returns the lists of users who match the specified query params
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const filterUsers = async (req, res) => {
+  try {
+    if (!Object.keys(req.query).length) {
+      return res.boom.badRequest("filter for item not provided");
+    }
+    const users = await userQuery.getUsersBasedOnFilter(req.query);
+    const sanitizedUsers = users.map((user) => {
+      delete user.tokens;
+      delete user.email;
+      delete user.phone;
+      return user;
+    });
+    return res.json({
+      message: users.length ? "Users found successfully!" : "No users found",
+      users: sanitizedUsers,
+      count: users.length,
+    });
+  } catch (error) {
+    logger.error(`Error while fetching all users: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
+const nonVerifiedDiscordUsers = async (req, res) => {
+  const data = await userQuery.getDiscordUsers();
+  return res.json(data);
+};
+
+const setInDiscordScript = async (req, res) => {
+  try {
+    await setInDiscordFalseScript();
+    return res.json({ message: "Successfully added the in_discord field to false for all users" });
+  } catch (err) {
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
+const updateRoles = async (req, res) => {
+  try {
+    const result = await userQuery.fetchUser({ userId: req.params.id });
+    if (result?.userExists) {
+      const dataToUpdate = req.body;
+      const response = await getRoleToUpdate(result.user, dataToUpdate);
+      if (response.updateRole) {
+        await userQuery.addOrUpdate(response.newUserRoles, result.user.id);
+        return res.json({
+          message: "role updated successfully!",
+        });
+      } else {
+        return res.boom.conflict("Role already exist!");
+      }
+    } else {
+      return res.boom.notFound("User not found");
+    }
+  } catch (error) {
+    logger.error(`Error while updateRoles: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -300,9 +626,21 @@ module.exports = {
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
+  getSuggestedUsers,
   postUserPicture,
   updateUser,
   rejectProfileDiff,
   getUserById,
   profileURL,
+  addUserIntro,
+  getUserIntro,
+  addDefaultArchivedRole,
+  getUserSkills,
+  filterUsers,
+  verifyUserImage,
+  getUserImageForVerification,
+  nonVerifiedDiscordUsers,
+  setInDiscordScript,
+  markUnverified,
+  updateRoles,
 };

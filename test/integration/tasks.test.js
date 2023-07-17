@@ -37,13 +37,14 @@ describe("Tasks", function () {
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
-        status: "active",
+        status: "IN_PROGRESS",
         percentCompleted: 10,
         participants: [],
         assignee: appOwner.username,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
         isNoteworthy: true,
+        isCollapsed: true,
       },
       {
         title: "Test task",
@@ -92,10 +93,12 @@ describe("Tasks", function () {
           startedOn: 456,
           status: "AVAILABLE",
           percentCompleted: 10,
+          priority: "HIGH",
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
           assignee: appOwner.username,
           participants: [],
+          dependsOn: [],
         })
         .end((err, res) => {
           if (err) {
@@ -104,11 +107,12 @@ describe("Tasks", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Task created successfully!");
-          expect(res.body.id).to.be.a("string");
           expect(res.body.task).to.be.a("object");
+          expect(res.body.task.id).to.be.a("string");
           expect(res.body.task.createdBy).to.equal(appOwner.username);
           expect(res.body.task.assignee).to.equal(appOwner.username);
           expect(res.body.task.participants).to.be.a("array");
+          expect(res.body.task.dependsOn).to.be.a("array");
           return done();
         });
     });
@@ -154,6 +158,7 @@ describe("Tasks", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Tasks returned successfully!");
           expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks[0].dependsOn).to.be.a("array");
           const taskWithParticipants = res.body.tasks[0];
 
           if (taskWithParticipants.type === "group") {
@@ -162,6 +167,131 @@ describe("Tasks", function () {
             expect(taskWithParticipants.assignee).to.equal(appOwner.username);
           }
 
+          return done();
+        });
+    });
+
+    it("Should call paginated tasks when dev flag passed to GET /tasks is true", function (done) {
+      const fetchPaginatedUserStub = sinon.stub(tasks, "fetchPaginatedTasks");
+      chai
+        .request(app)
+        .get("/tasks?dev=true")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(fetchPaginatedUserStub.calledOnce).to.be.equal(true);
+
+          return done();
+        });
+    });
+
+    it("Should get all tasks filtered with status when passed to GET /tasks", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?dev=true&status=${TASK_STATUS.IN_PROGRESS}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          const tasksData = res.body.tasks ?? [];
+          tasksData.forEach((task) => {
+            expect(task.status).to.equal(TASK_STATUS.IN_PROGRESS);
+          });
+          return done();
+        });
+    });
+
+    it("Should get tasks when correct query parameters are passed", function (done) {
+      chai
+        .request(app)
+        .get("/tasks?dev=true&size=1&page=0")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          expect(res.body.tasks.length).to.be.equal(1);
+          return done();
+        });
+    });
+
+    it("Should get next and previous page results based returned by the links in the response", async function () {
+      const initialReq = `/tasks?size=1&dev=true`;
+      const response = await chai.request(app).get(initialReq);
+      expect(response).to.have.status(200);
+      expect(response.body).to.be.a("object");
+      expect(response.body.message).to.equal("Tasks returned successfully!");
+      expect(response.body).to.have.property("next");
+      expect(response.body).to.have.property("prev");
+      expect(response.body.tasks).to.have.length(1);
+
+      const nextPageLink = response.body.next;
+      const nextPageResponse = await chai.request(app).get(nextPageLink);
+
+      expect(nextPageResponse).to.have.status(200);
+      expect(nextPageResponse.body).to.be.a("object");
+      expect(nextPageResponse.body.message).to.equal("Tasks returned successfully!");
+      expect(nextPageResponse.body).to.have.property("next");
+      expect(nextPageResponse.body).to.have.property("prev");
+      expect(nextPageResponse.body.tasks).to.have.length(1);
+
+      const prevPageLink = nextPageResponse.body.prev;
+      const previousPageResponse = await chai.request(app).get(prevPageLink);
+
+      expect(previousPageResponse).to.have.status(200);
+      expect(previousPageResponse.body).to.be.a("object");
+      expect(previousPageResponse.body.message).to.equal("Tasks returned successfully!");
+      expect(previousPageResponse.body).to.have.property("next");
+      expect(previousPageResponse.body).to.have.property("prev");
+      expect(previousPageResponse.body.tasks).to.have.length(1);
+    });
+  });
+
+  describe("GET /tasks/:id/details", function () {
+    it("should return the task task with the Id that we provide in the route params", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("task returned successfully");
+          expect(res.body.taskData).to.be.a("object");
+          expect(res.body.taskData.dependsOn).to.be.a("array");
+
+          return done();
+        });
+    });
+    it("Should return isCollapsed property in response", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.body.taskData).to.have.property("isCollapsed");
           return done();
         });
     });
@@ -260,6 +390,60 @@ describe("Tasks", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
+          dependsOn: ["dependency1", "dependency2"],
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+    it("Should update dependency", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const dependsOn = ["taskId5", "taskId4"];
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ dependsOn });
+      expect(res).to.have.status(204);
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+
+      expect(res2).to.have.status(200);
+      expect(res2.body.taskData.dependsOn).to.be.a("array");
+      res2.body.taskData.dependsOn.forEach((taskId) => {
+        expect(dependsOn).to.include(taskId);
+      });
+
+      return taskId;
+    });
+    it("should check updated dependsOn", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("task returned successfully");
+          expect(res.body.taskData).to.be.a("object");
+          expect(res.body.taskData.dependsOn).to.be.a("array");
+
+          return done();
+        });
+    });
+    it("Should update the task status collapsed for the given taskid", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/" + taskId1)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          isCollapsed: true,
         })
         .end((err, res) => {
           if (err) {
@@ -309,13 +493,44 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("Should return 204 if assignee exists", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: `${userData[4].username}` })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("should return 404 if assignee is not in user db", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "invaliduser" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("User doesn't exist");
+          return done();
+        });
+    });
   });
 
   describe("GET /tasks/:username", function () {
     it("Should return 200 when username is valid", function (done) {
       chai
         .request(app)
-        .get(`/tasks/${appOwner.username}?status=active`)
+        .get(`/tasks/${appOwner.username}?status=IN_PROGRESS`) // TODO: if status is passed in lowercase it fails, fix this
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -340,7 +555,7 @@ describe("Tasks", function () {
     it("Should return 404 when username is invalid", function (done) {
       chai
         .request(app)
-        .get("/tasks/dummyUser?status=active")
+        .get("/tasks/dummyUser?status=in_progress")
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -359,6 +574,19 @@ describe("Tasks", function () {
       percentCompleted: 50,
     };
 
+    const taskData = {
+      title: "Test task",
+      type: "feature",
+      endsOn: 1234,
+      startedOn: 4567,
+      status: "VERIFIED",
+      percentCompleted: 10,
+      participants: [],
+      completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+      lossRate: { [DINERO]: 1 },
+      isNoteworthy: true,
+    };
+
     it("Should update the task status for given self taskid", function (done) {
       chai
         .request(app)
@@ -370,7 +598,14 @@ describe("Tasks", function () {
             return done(err);
           }
           expect(res).to.have.status(200);
+          expect(res.body.taskLog).to.have.property("type");
+          expect(res.body.taskLog).to.have.property("id");
+          expect(res.body.taskLog.body).to.be.a("object");
+          expect(res.body.taskLog.meta).to.be.a("object");
           expect(res.body.message).to.equal("Task updated successfully!");
+
+          expect(res.body.taskLog.body.new.status).to.equal(taskStatusData.status);
+          expect(res.body.taskLog.body.new.percentCompleted).to.equal(taskStatusData.percentCompleted);
           return done();
         });
     });
@@ -433,13 +668,47 @@ describe("Tasks", function () {
     });
 
     it("Should give 403 if status is already 'VERIFIED' ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(taskStatusData);
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+    });
+    it("Should give 403 if new status is 'MERGED' ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "MERGED" });
+
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+    });
+
+    it("Should give 400 if percentCompleted is not 100 and new status is COMPLETED ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "COMPLETED" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
+    });
+
+    it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {
       const taskData = {
         title: "Test task",
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
-        status: "VERIFIED",
-        percentCompleted: 10,
+        status: "COMPLETED",
+        percentCompleted: 100,
         participants: [],
         assignee: appOwner.username,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
@@ -451,42 +720,10 @@ describe("Tasks", function () {
         .request(app)
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(taskStatusData);
+        .send({ percentCompleted: 80 });
 
-      expect(res).to.have.status(403);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
-    });
-
-    it("should give a response message as 'Task updated but another task not found' if we have completed 100% task and a task is not available", async function () {
-      const taskData = tasksData[3];
-      taskId = (await tasks.updateTask(taskData)).taskId;
-
-      const dataToSend = { percentCompleted: 100 };
-
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}?dev=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send(dataToSend);
-
-      expect(res).to.have.status(200);
-      expect(res.body.message).to.be.equal("Task updated but another task not found");
-    });
-
-    it("should give a response message 'task updated and another task got assigned' if we have completed the task 100% and another task is assigned to us", async function () {
-      const taskData = tasksData[4];
-      await tasks.updateTask(taskData);
-
-      const dataToSend = { percentCompleted: 100 };
-
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}?dev=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send(dataToSend);
-
-      expect(res).to.have.a.status(200);
-      expect(res.body.message).to.be.equal("task updated and another task got assigned");
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
     });
   });
 

@@ -10,6 +10,10 @@ const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
+const { addDependency, updateTask } = require("../../../models/tasks");
+const firestore = require("../../../utils/firestore");
+const { TASK_STATUS } = require("../../../constants/tasks");
+const dependencyModel = firestore.collection("TaskDependencies");
 
 describe("tasks", function () {
   afterEach(async function () {
@@ -38,6 +42,114 @@ describe("tasks", function () {
         expect(startedOn).to.equal(null);
         expect(endsOn).to.equal(null);
       });
+    });
+  });
+
+  describe("addDependency", function () {
+    it("should add dependencies to firestore and return dependsOn array", async function () {
+      const data = {
+        taskId: "taskId1",
+        dependsOn: ["taskId2", "taskId3"],
+      };
+      const result = await addDependency(data);
+      expect(result).to.deep.equal(data.dependsOn);
+    });
+
+    it("should throw an error if there is an error while creating dependencies", async function () {
+      const data = {
+        taskId: "taskId1",
+        dependsOn: ["taskId2", "taskId3"],
+      };
+      const expectedError = new Error("test error");
+      dependencyModel.doc = () => {
+        throw expectedError;
+      };
+      try {
+        await addDependency(data);
+      } catch (err) {
+        expect(err).to.deep.equal(expectedError);
+      }
+    });
+  });
+
+  describe("fetchTasks", function () {
+    beforeEach(async function () {
+      const tasksPromise = tasksData.map(async (task) => {
+        await tasks.updateTask(task);
+      });
+      await Promise.all(tasksPromise);
+    });
+
+    it("should fetch all tasks", async function () {
+      const result = await tasks.fetchTasks();
+
+      expect(result).to.have.length(tasksData.length);
+      result.forEach((task) => {
+        const sameTask = tasksData.find((t) => t.title === task.title);
+        expect(task).to.contain.all.keys(sameTask);
+      });
+    });
+  });
+
+  describe("paginatedTasks", function () {
+    beforeEach(async function () {
+      const tasksPromise = tasksData.map(async (task) => {
+        await tasks.updateTask(task);
+      });
+      await Promise.all(tasksPromise);
+    });
+
+    it("should return allTasks, next and prev parameters", async function () {
+      const result = await tasks.fetchPaginatedTasks({});
+
+      expect(result).to.have.property("allTasks");
+      expect(result).to.have.property("next");
+      expect(result).to.have.property("prev");
+    });
+
+    it("should paginate and fetch all tasks when no status is passed", async function () {
+      const SIZE = 5;
+      const result = await tasks.fetchPaginatedTasks({});
+
+      expect(result).to.have.property("allTasks");
+      expect(result.allTasks).to.have.length(SIZE);
+    });
+
+    it("should paginate and fetch tasks with the passed size", async function () {
+      const SIZE = 3;
+      const result = await tasks.fetchPaginatedTasks({
+        size: SIZE,
+      });
+
+      expect(result).to.have.property("allTasks");
+      expect(result.allTasks).to.have.length(SIZE);
+    });
+
+    it("should fetch all tasks filtered by the status passed", async function () {
+      const status = TASK_STATUS.ASSIGNED;
+      const SIZE = 5;
+      const result = await tasks.fetchPaginatedTasks({ status });
+
+      const filteredTasks = tasksData.filter((task) => task.status === status);
+      const tasksLength = filteredTasks.length > SIZE ? SIZE : filteredTasks.length;
+
+      expect(result).to.have.property("allTasks");
+
+      expect(result.allTasks).to.have.length(tasksLength);
+      result.allTasks.forEach((task) => expect(task.status).to.be.equal(status));
+    });
+  });
+
+  describe("updateDependency", function () {
+    it("should add dependencies to firestore", async function () {
+      const data = {
+        taskId: "taskId1",
+        dependsOn: ["taskId2", "taskId3"],
+      };
+      const result = await updateTask(data);
+
+      expect(result.taskDetails.taskId).to.equal(data.taskId);
+      expect(result.taskDetails.dependsOn).to.equal(data.dependsOn);
     });
   });
 });

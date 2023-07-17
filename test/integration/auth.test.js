@@ -3,9 +3,10 @@ const sinon = require("sinon");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 const passport = require("passport");
-
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
+const { addUserToDBForTest } = require("../../utils/users");
+const userData = require("../fixtures/user/user")();
 
 chai.use(chaiHttp);
 
@@ -19,31 +20,38 @@ describe("auth", function () {
     sinon.restore();
   });
 
-  it("should redirect the request to the goto page on successful login", function (done) {
-    const authRedirectionUrl = `${config.get("services.rdsUi.baseUrl")}${config.get(
-      "services.rdsUi.routes.authRedirection"
-    )}`;
+  it("should redirect the user to new sign up flow if they are have incomplte user details true", async function () {
+    const redirectURL = "https://my.realdevsquad.com/new-signup";
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      callback(null, "accessToken", githubUserInfo[0]);
+      return (req, res, next) => {};
+    });
+
+    const res = await chai
+      .request(app)
+      .get("/auth/github/callback")
+      .query({ code: "codeReturnedByGithub" })
+      .redirects(0);
+    expect(res).to.have.status(302);
+    expect(res.headers.location).to.equal(redirectURL);
+  });
+  // same data should be return from github and same data should be added there
+  it("should redirect the request to the goto page on successful login, if user has incomplete user details false", async function () {
+    await addUserToDBForTest(userData[0]);
+    const rdsUiUrl = config.get("services.rdsUi.baseUrl");
 
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
       callback(null, "accessToken", githubUserInfo[0]);
       return (req, res, next) => {};
     });
 
-    chai
+    const res = await chai
       .request(app)
       .get("/auth/github/callback")
-      .query({ code: "codeReturnedByGithub" })
-      .redirects(0)
-      .end((err, res) => {
-        if (err) {
-          return done(err);
-        }
-
-        expect(res).to.have.status(302);
-        expect(res.headers.location).to.equal(authRedirectionUrl);
-
-        return done();
-      });
+      .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
+      .redirects(0);
+    expect(res).to.have.status(302);
+    expect(res.headers.location).to.equal(rdsUiUrl);
   });
 
   it("should send a cookie with JWT in the response", function (done) {

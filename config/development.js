@@ -24,10 +24,6 @@ module.exports = {
     },
   },
 
-  cors: {
-    allowedOrigins: /(\.realdevsquad\.com$)|(localhost)/, // Allow *.realdevsquad.com and localhost for non-production envs
-  },
-
   userToken: {
     publicKey:
       "-----BEGIN PUBLIC KEY-----\n" +
@@ -52,6 +48,19 @@ module.exports = {
       "QnrvpfRSihRktA2dDQJAH+dQBx3nG3bZ9khVAZQ1jTJ7j0cKixaGndFuYS1TJvJ2\n" +
       "Zzn584h/xbSIcP9/4SXmEK3wtoueUtMkvS3yKTvk+w==\n" +
       "-----END RSA PRIVATE KEY-----",
+  },
+
+  botToken: {
+    botPublicKey:
+      "-----BEGIN PUBLIC KEY-----\n" +
+      "MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQBK3CkprcpAYxme7vtdjpWO\n" +
+      "gFFjoYsqU3OmhMEty/s1gnW5tgbK4ief4xk+cU+mu3YvjzWudT/SV17tAWxL4Y+G\n" +
+      "incJwL5gpQwlnw9qOAdRGkpBriQLec7kNVIydZXbUitziy+iSimxNzdDmjvlK9ZG\n" +
+      "miVLZm+MePbUtgaIpfgd+4bRWzudlITiNmWY7HppLzyBw+037iEICM4kwPPFI+SO\n" +
+      "GJhpAAmD6vk0MeZk1NeQmyQp/uOPpWmVRzgyK+XVc6AwZHV+/n6xAIT91/DjJlD1\n" +
+      "N+nS7Sqo3RJ04+KlNRUclzINOC7JBYkKtG7YQ0U9nNLkRrRlON+O6tY4OT86T1O1\n" +
+      "AgMBAAE=\n" +
+      "-----END PUBLIC KEY-----",
   },
 
   integrations: {
