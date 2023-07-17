@@ -8,7 +8,16 @@ describe("Middleware | Validators | massUpdateUserStatus", function () {
       const res = {};
       const req = {
         body: {
-          users: ["W861F6GY6leVijLrNb9B", "4kAkRv9TBlOfR6WEUhoQ"],
+          users: [
+            {
+              userId: "4kAkRv9TBlOfR6WEUhoQ",
+              expectedState: "IDLE",
+            },
+            {
+              userId: "SooJK37gzjIZfFNH0tlL",
+              expectedState: "ACTIVE",
+            },
+          ],
         },
       };
       const nextSpy = Sinon.spy();
