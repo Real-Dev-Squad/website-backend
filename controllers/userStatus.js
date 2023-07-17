@@ -2,6 +2,13 @@ const userStatusModel = require("../models/userStatus");
 const { getUserIdBasedOnRoute } = require("../utils/userStatus");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const dataAccess = require("../services/dataAccessLayer");
+const { Forbidden, NotFound } = require("http-errors");
+const { fetchUser } = require("../models/users");
+const userStatusModel = require("../models/userStatus");
+const { getUserIdBasedOnRoute } = require("../utils/userStatus");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { userState, CANCEL_OOO } = require("../constants/userStatus");
+
 /**
  * Deletes a new User Status
  *
@@ -192,6 +199,47 @@ const massUpdateIdleUsers = async (req, res) => {
   }
 };
 
+const cancelOOOStatus = async (req, res) => {
+  const userId = req.userData.id;
+  try {
+    const responseObject = await userStatusModel.cancelOooStatus(userId);
+    return res.status(200).json(responseObject);
+  } catch (error) {
+    logger.error(`Error while cancelling the ${userState.OOO} Status : ${error}`);
+    if (error instanceof Forbidden) {
+      return res.status(403).json({
+        statusCode: 403,
+        error: "Forbidden",
+        message: error.message,
+      });
+    } else if (error instanceof NotFound) {
+      return res.status(404).json({
+        statusCode: 404,
+        error: "NotFound",
+        message: error.message,
+      });
+    }
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
+ * Controller function for updating a user's status.
+ *
+ * @param req {Object} - The express request object.
+ * @param res {Object} - The express response object.
+ * @param next {Object} - The express next middleware function.
+ * @returns {Promise<void>}
+ */
+
+const updateUserStatusController = async (req, res, next) => {
+  if (Object.keys(req.body).includes(CANCEL_OOO)) {
+    await cancelOOOStatus(req, res, next);
+  } else {
+    await updateUserStatus(req, res, next);
+  }
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -201,4 +249,5 @@ module.exports = {
   getIdleUsers,
   getUserStatusControllers,
   massUpdateIdleUsers,
+  updateUserStatusController,
 };
