@@ -603,7 +603,7 @@ const setInDiscordScript = async (req, res) => {
     await setInDiscordFalseScript();
     return res.json({ message: "Successfully added the in_discord field to false for all users" });
   } catch (err) {
-    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -622,7 +622,7 @@ const removeTokens = async (req, res) => {
       usersFound: users.length,
     });
   } catch (err) {
-    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
   }
 };
 
