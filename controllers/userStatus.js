@@ -1,8 +1,7 @@
-const { fetchUser } = require("../models/users");
 const userStatusModel = require("../models/userStatus");
 const { getUserIdBasedOnRoute } = require("../utils/userStatus");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-
+const dataAccess = require("../services/dataAccessLayer");
 /**
  * Deletes a new User Status
  *
@@ -74,7 +73,7 @@ const getAllUserStatus = async (req, res) => {
     const activeUsers = [];
     for (const status of allUserStatus) {
       //  fetching users from users collection by userID in userStatus collection
-      const result = await fetchUser({ userId: status.userId });
+      const result = await dataAccess.retrieveUsers({ id: status.userId });
       if (!result.user?.roles?.archived) {
         status.full_name = `${result.user.first_name} ${result.user.last_name}`;
         status.picture = result.user.picture;

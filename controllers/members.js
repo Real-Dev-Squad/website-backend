@@ -1,9 +1,8 @@
 const ROLES = require("../constants/roles");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
-const { fetchUser } = require("../models/users");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-
+const dataAccess = require("../services/dataAccessLayer");
 /**
  * Fetches the data about our members
  *
@@ -59,7 +58,7 @@ const getIdleMembers = async (req, res) => {
 const moveToMembers = async (req, res) => {
   try {
     const { username } = req.params;
-    const result = await fetchUser({ username });
+    const result = await dataAccess.retrieveUsers({ username });
     if (result.userExists) {
       const successObject = await members.moveToMembers(result.user.id);
       if (successObject.isAlreadyMember) {
@@ -84,7 +83,7 @@ const moveToMembers = async (req, res) => {
 const archiveMembers = async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await fetchUser({ username });
+    const user = await dataAccess.retrieveUsers({ username });
     if (user?.userExists) {
       const successObject = await members.addArchiveRoleToMembers(user.user.id);
       if (successObject.isArchived) {

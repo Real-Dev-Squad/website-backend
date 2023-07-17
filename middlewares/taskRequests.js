@@ -1,8 +1,7 @@
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const { userState } = require("../constants/userStatus");
-const userModel = require("../models/users.js");
 const userStatusModel = require("../models/userStatus.js");
-
+const dataAccess = require("../services/dataAccessLayer");
 /**
  * Validates user id for task request
  *
@@ -16,7 +15,7 @@ async function validateUser(req, res, next) {
       return res.boom.badRequest("userId not provided");
     }
 
-    const { userExists, user } = await userModel.fetchUser({ userId });
+    const { userExists, user } = await dataAccess.retrieveUsers({ id: userId });
     if (!userExists) {
       return res.boom.conflict("User does not exist");
     }
