@@ -167,7 +167,7 @@ const getIdleUsers = async (req, res) => {
 };
 
 const getUserStatusControllers = async (req, res, next) => {
-  if (Object.keys(req.query).includes("taskStatus")) {
+  if (Object.keys(req.query).includes("batch")) {
     await getIdleUsers(req, res, next);
   } else {
     await getAllUserStatus(req, res, next);
