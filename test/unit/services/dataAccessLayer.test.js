@@ -62,14 +62,12 @@ describe("Data Access Layer", function () {
 
     it("should return /users/self data and remove sensitive info", async function () {
       const userdata = userData[12];
-      const result = await retrieveUsers({ userdata });
+      await retrieveUsers({ userdata });
       removeSensitiveInfo(userData[12]);
       USER_SENSITIVE_DATA.forEach((key) => {
         expect(userdata).to.not.have.property(key);
       });
     });
-
-    
   });
 
   describe("removeSensitiveInfo", function () {

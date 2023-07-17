@@ -1,12 +1,8 @@
-const userStatusModel = require("../models/userStatus");
 const { getUserIdBasedOnRoute } = require("../utils/userStatus");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const dataAccess = require("../services/dataAccessLayer");
 const { Forbidden, NotFound } = require("http-errors");
-const { fetchUser } = require("../models/users");
 const userStatusModel = require("../models/userStatus");
-const { getUserIdBasedOnRoute } = require("../utils/userStatus");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { userState, CANCEL_OOO } = require("../constants/userStatus");
 
 /**
