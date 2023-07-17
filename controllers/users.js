@@ -144,7 +144,6 @@ const getUser = async (req, res) => {
 const getUserSkills = async (req, res) => {
   try {
     const { id } = req.params;
-    // for below line use a new func in dataAccessLayer.js
     const { skills } = await userQuery.fetchUserSkills(id);
 
     return res.json({
@@ -187,7 +186,7 @@ const getSuggestedUsers = async (req, res) => {
 
 const getUsernameAvailabilty = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username }); // retrieveUsers(id)
+    const result = await userQuery.fetchUser({ username: req.params.username }); 
     return res.json({
       isUsernameAvailable: !result.userExists,
     });
@@ -406,7 +405,6 @@ const updateUser = async (req, res) => {
 const generateChaincode = async (req, res) => {
   try {
     const { id } = req.userData;
-    // modify next 2 lines to a serviceLayer func if needed
     const chaincode = await chaincodeQuery.storeChaincode(id);
     await userQuery.addOrUpdate({ chaincode }, id);
     return res.json({
@@ -507,7 +505,6 @@ const addUserIntro = async (req, res) => {
 
 const getUserIntro = async (req, res) => {
   try {
-    // write new function in dataAccessLayer for this below line
     const data = await userQuery.getJoinData(req.params.userId);
     if (data.length) {
       return res.json({
