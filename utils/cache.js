@@ -178,16 +178,18 @@ const generateCacheKey = (request) => {
 const invalidateCache = (options = {}) => {
   const keys = options.invalidationKeys;
 
+  if (!Array.isArray(keys)) {
+    throw new Error("Invalidation keys must be an array");
+  }
+
   return async (req, res, next) => {
     try {
-      if (Array.isArray(keys)) {
-        for (const key of keys) {
-          const cachedKeysList = cachedKeys.getCachedKeys(key);
-          for (const ck of cachedKeysList) {
-            pool.evict(ck);
-          }
-          cachedKeys.removeModelKey(key);
+      for (const key of keys) {
+        const cachedKeysList = cachedKeys.getCachedKeys(key);
+        for (const ck of cachedKeysList) {
+          pool.evict(ck);
         }
+        cachedKeys.removeModelKey(key);
       }
     } catch (err) {
       logger.error(`Error while removing cached response ${err}`);
