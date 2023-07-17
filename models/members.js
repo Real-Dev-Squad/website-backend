@@ -103,14 +103,15 @@ const addArchiveRoleToMembers = async (userId, currentUserId, reason) => {
   try {
     const userDoc = await userModel.doc(userId).get();
     const user = userDoc.data();
+    const archivedDetails = user.archivedDetails || [];
     if (user?.roles && user.roles[ROLES.ARCHIVED]) return { isArchived: true };
     const roles = { ...user.roles, [ROLES.ARCHIVED]: true };
-    const archivedDetails = {
+    const detail = {
       archived_at: Math.floor(Date.now() / 1000),
       reason: reason || "",
       super_user_id: currentUserId,
-      archived_user_id: userId,
     };
+    archivedDetails.push(detail);
     await userModel.doc(userId).set(
       {
         roles,
