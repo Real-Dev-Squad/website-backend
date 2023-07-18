@@ -71,18 +71,31 @@ const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
 
   return { get, set, evict, hits, cacheStore };
 };
-
+/**
+ * A MultiMap implementation where each key maps to set of unique values
+ *
+ */
 const cachedKeysStore = () => {
   const keyStore = new Map();
 
+  /**
+   * Returns set of values mapped to given key
+   * @param {string} modelKey key for the map
+   * @returns {Set} set of values
+   */
   const getCachedKeys = (modelKey) => {
     if (keyStore.has(modelKey)) {
-      return [...keyStore.get(modelKey).keys()];
-    } else {
-      return [];
+      return keyStore.get(modelKey);
     }
+    return new Set();
   };
 
+  /**
+   * Adds a value(cachedKey) for the given key(modelKey)
+   * @param {string} modelKey key for the map
+   * @param {string} cachedKey value for the given key
+   *
+   */
   const addCachedKey = (modelKey, cachedKey) => {
     if (keyStore.has(modelKey)) {
       keyStore.get(modelKey).add(cachedKey);
@@ -92,11 +105,21 @@ const cachedKeysStore = () => {
       keyStore.set(modelKey, set);
     }
   };
-
+  /**
+   * removes the given key(modelKey) and all of its associated values
+   * @param {string} modelKey key for the map
+   *
+   */
   const removeModelKey = (modelKey) => {
     keyStore.delete(modelKey);
   };
 
+  /**
+   * remove a value(cachedKey) for the given key(modelKey)
+   * @param {string} modelKey key for the map
+   * @param {string} cachedKey value for the given key
+   *
+   */
   const removeCachedKey = (modelKey, cachedKey) => {
     if (keyStore.has(modelKey)) {
       keyStore.get(modelKey).delete(cachedKey);
@@ -119,7 +142,7 @@ const cachedKeys = cachedKeysStore();
  * @param {number} options.invalidationKey key to be used while using the invalidateCache middleware.
  * @returns {function} middleware function to help cache api response.
  */
-const cache = (options = {}) => {
+const cacheResponse = (options = {}) => {
   const priority = options.priority || 2;
   const expiry = options.expiry || CACHE_EXPIRY_TIME_MIN;
   const modelKey = options.invalidationKey;
@@ -185,8 +208,8 @@ const invalidateCache = (options = {}) => {
   return async (req, res, next) => {
     try {
       for (const key of keys) {
-        const cachedKeysList = cachedKeys.getCachedKeys(key);
-        for (const ck of cachedKeysList) {
+        const cachedKeysSet = cachedKeys.getCachedKeys(key);
+        for (const ck of cachedKeysSet) {
           pool.evict(ck);
         }
         cachedKeys.removeModelKey(key);
@@ -199,4 +222,4 @@ const invalidateCache = (options = {}) => {
   };
 };
 
-module.exports = { cache, invalidateCache, generateCacheKey, cachedKeysStore };
+module.exports = { cacheResponse, invalidateCache, generateCacheKey, cachedKeysStore };

@@ -10,14 +10,14 @@ describe("cachedKeysStore", function () {
 
   describe("getCachedKeys", function () {
     it("should return an array of cached keys for a model key", function () {
-      const cachedKeys = ["key1", "key2", "key3"];
+      const cachedKeys = new Set(["key1", "key2", "key3"]);
       keyStore.addCachedKey(modelKey, "key1");
       keyStore.addCachedKey(modelKey, "key2");
       keyStore.addCachedKey(modelKey, "key3");
 
       const result = keyStore.getCachedKeys(modelKey);
 
-      expect(result).to.be.an("array");
+      expect(result).to.be.an("set");
       expect(result).to.be.deep.equal(cachedKeys);
     });
   });
@@ -29,7 +29,7 @@ describe("cachedKeysStore", function () {
       keyStore.addCachedKey(modelKey, cachedKey);
 
       const result = keyStore.getCachedKeys(modelKey);
-      expect(result).to.have.members([cachedKey]);
+      expect(result).to.deep.equal(new Set([cachedKey]));
     });
   });
 
@@ -42,8 +42,8 @@ describe("cachedKeysStore", function () {
       keyStore.removeModelKey(modelKey);
 
       const result = keyStore.getCachedKeys(modelKey);
-      expect(result).to.be.an("array");
-      expect(result).to.deep.equal([]);
+      expect(result).to.be.an("set");
+      expect(result).to.deep.equal(new Set());
     });
   });
 
@@ -55,8 +55,8 @@ describe("cachedKeysStore", function () {
       keyStore.removeCachedKey(modelKey, cachedKey);
 
       const result = keyStore.getCachedKeys(modelKey);
-      expect(result).to.be.an("array");
-      expect(result).to.deep.equal([]);
+      expect(result).to.be.an("set");
+      expect(result).to.deep.equal(new Set());
     });
 
     it("should not remove other cached keys for the same model key", function () {
@@ -67,7 +67,7 @@ describe("cachedKeysStore", function () {
       keyStore.removeCachedKey(modelKey, "key2");
 
       const result = keyStore.getCachedKeys(modelKey);
-      expect(result).to.have.members(["key1", "key3"]);
+      expect(result).to.deep.equal(new Set(["key1", "key3"]));
     });
   });
 });

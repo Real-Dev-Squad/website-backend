@@ -1,6 +1,6 @@
 const sinon = require("sinon");
 const { expect } = require("chai");
-const { cache, invalidateCache } = require("../../../utils/cache");
+const { cacheResponse, invalidateCache } = require("../../../utils/cache");
 
 const { dummyResponse } = require("../../fixtures/cache/cache");
 
@@ -24,7 +24,7 @@ describe("Middleware | Utils | cache", function () {
 
     const nextSpy = sinon.spy();
 
-    const cacheMiddleware = cache({ invalidationKey: cacheTestKey });
+    const cacheMiddleware = cacheResponse({ invalidationKey: cacheTestKey });
 
     cacheMiddleware(request, response, nextSpy);
 
@@ -52,7 +52,7 @@ describe("Middleware | Utils | cache", function () {
 
     const nextSpy = sinon.spy();
 
-    const cacheMiddlewareForCache = cache({ invalidationKey: cacheTestKey });
+    const cacheMiddlewareForCache = cacheResponse({ invalidationKey: cacheTestKey });
 
     cacheMiddlewareForCache(request, response, nextSpy);
 
