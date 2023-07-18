@@ -178,26 +178,26 @@ describe("QrCodeAuth", function () {
     });
 
     it("should successfully fetch the user device info", function (done) {
-      qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoData);
+      qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoData).then((response) => {
+        chai
+          .request(app)
+          .get(`/auth/qr-code-auth?device_id=${response.userDeviceInfoData.device_id}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.a("object");
+            expect(res.body.data.user_id).to.be.a("string");
+            expect(res.body.data.device_info).to.be.a("string");
+            expect(res.body.data.device_id).to.be.a("string");
+            expect(res.body.data.authorization_status).to.be.a("string");
+            expect(res.body.data.access_token).to.be.a("string");
+            expect(res.body.message).to.equal(`Authentication document retrieved successfully.`);
 
-      chai
-        .request(app)
-        .get(`/auth/qr-code-auth?device_id=${userDeviceInfoData.device_id}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.data.user_id).to.be.a("string");
-          expect(res.body.data.device_info).to.be.a("string");
-          expect(res.body.data.device_id).to.be.a("string");
-          expect(res.body.data.authorization_status).to.be.a("string");
-          expect(res.body.data.access_token).to.be.a("string");
-          expect(res.body.message).to.equal(`Authentication document retrieved successfully.`);
-
-          return done();
-        });
+            return done();
+          });
+      });
     });
 
     it("should fail with 404, when the document is not found", function (done) {
