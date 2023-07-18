@@ -28,6 +28,14 @@ const updateUser = async (req, res, next) => {
         .valid(...Object.values(USER_STATUS))
         .optional(),
       discordId: joi.string().optional(),
+      roles: joi.object().keys({
+        archived: joi.boolean().required(),
+        in_discord: joi.boolean().required(),
+        developer: joi.boolean().optional(),
+        designer: joi.boolean().optional(),
+        mavens: joi.boolean().optional(),
+        productManager: joi.boolean().optional(),
+      }),
     });
 
   try {
