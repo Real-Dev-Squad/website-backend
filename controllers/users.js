@@ -230,7 +230,7 @@ const updateSelf = async (req, res) => {
   try {
     const { id: userId } = req.userData;
     if (req.body.username) {
-      const { user } = await dataAccess.retrieveUsers({ id:userId });
+      const { user } = await dataAccess.retrieveUsers({ id: userId });
       if (!user.incompleteUserDetails) {
         return res.boom.forbidden("Cannot update username again");
       }
@@ -379,7 +379,7 @@ const updateUser = async (req, res) => {
 
     const { approval, timestamp, userId, ...profileDiff } = profileDiffData;
 
-    const user = await dataAccess.retrieveUsers({ id:userId });
+    const user = await dataAccess.retrieveUsers({ id: userId });
     if (!user.userExists) return res.boom.notFound("User doesn't exist");
 
     await profileDiffsQuery.updateProfileDiff({ approval: profileDiffStatus.APPROVED }, profileDiffId);
