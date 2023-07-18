@@ -8,8 +8,14 @@ module.exports = {
     node: true,
     mocha: true,
   },
-  extends: ["standard", "plugin:mocha/recommended", "plugin:security/recommended", "plugin:prettier/recommended"],
-  plugins: ["mocha", "security", "prettier"],
+  extends: [
+    "standard",
+    "prettier",
+    "plugin:mocha/recommended",
+    "plugin:security/recommended",
+    "plugin:prettier/recommended",
+  ],
+  plugins: ["prettier", "mocha", "security"],
   parserOptions: {
     ecmaVersion: 13,
   },
