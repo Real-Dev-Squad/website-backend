@@ -16,7 +16,6 @@ const dependencyModel = firestore.collection("TaskDependencies");
 const tasksModel = firestore.collection("tasks");
 const userData = require("../../fixtures/user/user");
 const addUser = require("../../utils/addUser");
-// const userModel = firestore.collection("users");
 
 describe("tasks", function () {
   afterEach(async function () {
