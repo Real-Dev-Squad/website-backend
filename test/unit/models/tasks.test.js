@@ -158,11 +158,11 @@ describe("tasks", function () {
       await updateTask(data, taskId);
 
       const modalResult = await tasks.fetchTask(taskId);
-      expect(modalResult.taskData.status).to.be.equal("ASSIGNED");
+      expect(modalResult.taskData.status).to.be.equal(TASK_STATUS.ASSIGNED);
       expect(modalResult.taskData.assignee).to.be.equal("sagar");
 
       const firestoreResult = (await tasksModel.doc(taskId).get()).data();
-      expect(firestoreResult.status).to.be.equal("ASSIGNED");
+      expect(firestoreResult.status).to.be.equal(TASK_STATUS.ASSIGNED);
       expect(firestoreResult.assignee).to.be.equal(userId1);
     });
   });

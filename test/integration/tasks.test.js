@@ -340,7 +340,7 @@ describe("Tasks", function () {
       expect(res2).to.have.status(200);
       expect(res2.body.taskData.assignee).to.be.equal("sagar");
 
-      expect(res2.body.taskData.status).to.be.equal("ASSIGNED");
+      expect(res2.body.taskData.status).to.be.equal(TASK_STATUS.ASSIGNED);
 
       return taskId;
     });
