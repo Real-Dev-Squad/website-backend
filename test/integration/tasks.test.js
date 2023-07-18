@@ -559,7 +559,7 @@ describe("Tasks", function () {
         .request(app)
         .patch(`/tasks/self/${taskId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send({ ...taskStatusData, percentCompleted: 150 })
+        .send({ ...taskStatusData, percentCompleted: -10 })
         .end((err, res) => {
           if (err) {
             return done(err);
