@@ -11,11 +11,6 @@ const userStatusModel = require("../models/userStatus.js");
 async function validateUser(req, res, next) {
   try {
     const { userId } = req.body;
-
-    if (!userId) {
-      return res.boom.badRequest("userId not provided");
-    }
-
     const { userExists, user } = await userModel.fetchUser({ userId });
     if (!userExists) {
       return res.boom.conflict("User does not exist");
