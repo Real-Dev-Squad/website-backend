@@ -208,7 +208,7 @@ const updateTask = async (req, res) => {
 
     return res.status(204).send();
   } catch (err) {
-    if (err.message.includes("Invalid dependency taskId")) {
+    if (err.message.includes("Invalid dependency passed")) {
       const errorMessage = "Invalid dependency";
       logger.error(`Error while updating task: ${errorMessage}`);
       return res.boom.badRequest(errorMessage);

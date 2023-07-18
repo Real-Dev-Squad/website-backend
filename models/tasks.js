@@ -18,7 +18,9 @@ const updateTask = async (taskData, taskId = null) => {
   try {
     taskData = await toFirestoreData(taskData);
     if (taskId) {
+      // console.log("taskid", taskId);
       const task = await tasksModel.doc(taskId).get();
+      // console.log("task", task);
       if (taskData.status === "VERIFIED") {
         taskData = { ...taskData, endsOn: Math.floor(Date.now() / 1000) };
       }
@@ -28,11 +30,13 @@ const updateTask = async (taskData, taskId = null) => {
         ...taskWithoutDependsOn,
       });
       if (dependsOn) {
+        // console.log("depends", dependsOn);
         await firestore.runTransaction(async (transaction) => {
           const dependencyQuery = dependencyModel.where("taskId", "==", taskId);
           const existingDependenciesSnapshot = await transaction.get(dependencyQuery);
           const existingDependsOnIds = existingDependenciesSnapshot.docs.map((doc) => doc.data().dependsOn);
           const newDependencies = dependsOn.filter((dependency) => !existingDependsOnIds.includes(dependency));
+          // console.log("dependsnew", newDependencies);
           if (newDependencies.length > 0) {
             for (const dependency of newDependencies) {
               const dependencyDoc = await tasksModel.doc(dependency).get();
@@ -44,7 +48,7 @@ const updateTask = async (taskData, taskId = null) => {
                 const docRef = dependencyModel.doc();
                 transaction.set(docRef, taskDependsOn);
               } else {
-                throw new Error("Invalid dependency taskId");
+                throw new Error("Invalid dependency passed");
               }
             }
           }
