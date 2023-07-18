@@ -67,6 +67,7 @@
     "node": "18.x"
   },
   "pre-commit": [
+    "prettier",
     "lint"
   ],
   "volta": {
