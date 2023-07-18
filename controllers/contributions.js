@@ -9,7 +9,7 @@ const dataAccess = require("../services/dataAccessLayer");
 
 const getUserContributions = async (req, res) => {
   try {
-    const username = req.params.username;
+    const { username } = req.params;
     const result = await dataAccess.retrieveUsers({ username: req.params.username });
     if (result.userExists) {
       const contributions = await contributionsService.getUserContributions(username);
