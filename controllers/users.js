@@ -186,7 +186,7 @@ const getSuggestedUsers = async (req, res) => {
 
 const getUsernameAvailabilty = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username }); 
+    const result = await userQuery.fetchUser({ username: req.params.username });
     return res.json({
       isUsernameAvailable: !result.userExists,
     });
@@ -554,7 +554,7 @@ const filterUsers = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    
+
     const users = await userQuery.getUsersBasedOnFilter(req.query);
     const sanitizedUsers = users.map((user) => {
       delete user.tokens;
