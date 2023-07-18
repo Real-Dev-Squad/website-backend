@@ -178,7 +178,7 @@ describe("QrCodeAuth", function () {
     });
 
     it("should successfully fetch the user device info", function (done) {
-      qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoData).then((res) => console.log(res));
+      qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoData);
 
       chai
         .request(app)
