@@ -41,7 +41,6 @@ const checkRestricted = async (req, res, next) => {
 module.exports = async (req, res, next) => {
   try {
     let token = req.cookies[config.get("userToken.cookieName")];
-
     /**
      * Enable Bearer Token authentication for NON-PRODUCTION environments
      * This is enabled as Swagger UI does not support cookie authe
@@ -49,13 +48,10 @@ module.exports = async (req, res, next) => {
     if (process.env.NODE_ENV !== "production" && !token) {
       token = req.headers.authorization.split(" ")[1];
     }
-
     const { userId } = authService.verifyAuthToken(token);
-
     // add user data to `req.userData` for further use
     const userData = await dataAccess.retrieveUsers({ id: userId });
     req.userData = userData.user;
-
     return checkRestricted(req, res, next);
   } catch (err) {
     logger.error(err);
@@ -84,7 +80,6 @@ module.exports = async (req, res, next) => {
         return res.boom.unauthorized("Unauthenticated User");
       }
     } else {
-      
       return res.boom.unauthorized("Unauthenticated User");
     }
   }

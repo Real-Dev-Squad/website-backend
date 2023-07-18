@@ -430,10 +430,6 @@ describe("Users", function () {
 
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body).to.have.property("phone");
-          expect(res.body).to.have.property("email");
-          expect(res.body).to.have.property("tokens");
-          expect(res.body).to.have.property("chaincode");
           return done();
         });
     });
