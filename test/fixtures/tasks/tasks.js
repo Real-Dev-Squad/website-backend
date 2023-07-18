@@ -66,6 +66,7 @@ module.exports = () => {
       lossRate: { [DINERO]: 1 },
       priority: "HIGH",
       isNoteworthy: true,
+      assignee: false,
     },
     {
       title: "Test task-dependency",
