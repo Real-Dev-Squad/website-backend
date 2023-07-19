@@ -1,3 +1,3 @@
-const ALL_TASKS = "__cache__ALL_TASKS";
+const ALL_TASKS = "cache:ALL-TASKS";
 
 module.exports = { ALL_TASKS };

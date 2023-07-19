@@ -189,7 +189,7 @@ const cacheResponse = (options = {}) => {
  * @returns {string} cache key.
  */
 const generateCacheKey = (request) => {
-  return "__cache__" + request.method + request.originalUrl;
+  return "cache:" + request.method + ":" + request.originalUrl;
 };
 
 /**
@@ -209,8 +209,8 @@ const invalidateCache = (options = {}) => {
     try {
       for (const key of keys) {
         const cachedKeysSet = cachedKeys.getCachedKeys(key);
-        for (const ck of cachedKeysSet) {
-          pool.evict(ck);
+        for (const cachedKey of cachedKeysSet) {
+          pool.evict(cachedKey);
         }
         cachedKeys.removeModelKey(key);
       }
