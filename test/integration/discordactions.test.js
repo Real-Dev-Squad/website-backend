@@ -16,6 +16,11 @@ const cookieName = config.get("userToken.cookieName");
 const firestore = require("../../utils/firestore");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const photoVerificationModel = firestore.collection("photo-verification");
+const discordRoleModel = firestore.collection("discord-roles");
+const userModel = firestore.collection("users");
+
+const { groupData } = require("../fixtures/discordactions/discordactions");
+const { addGroupRoleToMember } = require("../../models/discordactions");
 chai.use(chaiHttp);
 
 describe("Discord actions", function () {
@@ -81,6 +86,56 @@ describe("Discord actions", function () {
           expect(res).to.have.status(500);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("An internal server error occurred");
+          return done();
+        });
+    });
+  });
+
+  describe("GET /discord-actions/groups", function () {
+    before(async function () {
+      let allIds = [];
+
+      const addUsersPromises = userData.map((user) => userModel.add({ ...user }));
+      const responses = await Promise.all(addUsersPromises);
+      allIds = responses.map((response) => response.id);
+
+      const addRolesPromises = [
+        discordRoleModel.add({ roleid: groupData[0].roleid, rolename: groupData[0].rolename, createdBy: allIds[1] }),
+        discordRoleModel.add({ roleid: groupData[1].roleid, rolename: groupData[1].rolename, createdBy: allIds[0] }),
+      ];
+      await Promise.all(addRolesPromises);
+
+      const addGroupRolesPromises = [
+        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: allIds[0] }),
+        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: allIds[1] }),
+        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: allIds[1] }),
+        addGroupRoleToMember({ roleid: groupData[1].roleid, userid: allIds[0] }),
+      ];
+      await Promise.all(addGroupRolesPromises);
+    });
+
+    after(async function () {
+      await cleanDb();
+    });
+
+    it("should successfully return all groups detail", function (done) {
+      chai
+        .request(app)
+        .get(`/discord-actions/groups`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          // Verify presence of specific properties in each group
+          const expectedProps = ["roleid", "rolename", "count", "firstName", "lastName", "image"];
+          res.body.groups.forEach((group) => {
+            expect(group).to.include.all.keys(expectedProps);
+          });
+          expect(res.body.message).to.equal("Roles fetched successfully!");
           return done();
         });
     });

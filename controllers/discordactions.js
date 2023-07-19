@@ -3,6 +3,7 @@ const admin = require("firebase-admin");
 const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
+const { retrieveUsers } = require("../services/dataAccessLayer");
 
 /**
  * Creates a role
@@ -66,9 +67,24 @@ const createGroupRole = async (req, res) => {
 const getAllGroupRoles = async (req, res) => {
   try {
     const { groups } = await discordRolesModel.getAllGroupRoles();
+    const groupsWithMemberCount = await discordRolesModel.getNumberOfMemberForGroups(groups);
+    const groupCreatorIds = groupsWithMemberCount.reduce((ids, group) => {
+      ids.add(group.createdBy);
+      return ids;
+    }, new Set());
+    const groupCreatorsDetails = await retrieveUsers({ userIds: Array.from(groupCreatorIds) });
+    const groupsWithUserDetails = groupsWithMemberCount.map((group) => {
+      return {
+        ...group,
+        firstName: groupCreatorsDetails[group.createdBy].first_name,
+        lastName: groupCreatorsDetails[group.createdBy].last_name,
+        image: groupCreatorsDetails[group.createdBy].picture?.url,
+      };
+    });
+
     return res.json({
       message: "Roles fetched successfully!",
-      groups,
+      groups: groupsWithUserDetails,
     });
   } catch (err) {
     logger.error(`Error while getting roles: ${err}`);
