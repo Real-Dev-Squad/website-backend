@@ -26,6 +26,14 @@ const retrieveUsers = async ({ id = null, username = null, usernames = null, que
   }
 };
 
+const retreiveFilteredUsers = async (query) => {
+  const users = await userQuery.getUsersBasedOnFilter(query);
+  users.forEach((element) => {
+    removeSensitiveInfo(element);
+  });
+  return users;
+};
+
 const removeSensitiveInfo = function (obj) {
   for (let i = 0; i < USER_SENSITIVE_DATA.length; i++) {
     if (USER_SENSITIVE_DATA[i] in obj) {
@@ -37,4 +45,5 @@ const removeSensitiveInfo = function (obj) {
 module.exports = {
   retrieveUsers,
   removeSensitiveInfo,
+  retreiveFilteredUsers,
 };

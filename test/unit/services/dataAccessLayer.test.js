@@ -3,7 +3,7 @@ const chaiHttp = require("chai-http");
 
 const userQuery = require("../../../models/users");
 const sinon = require("sinon");
-const { retrieveUsers, removeSensitiveInfo } = require("../../../services/dataAccessLayer");
+const { retrieveUsers, removeSensitiveInfo, retreiveFilteredUsers } = require("../../../services/dataAccessLayer");
 const userData = require("../../fixtures/user/user")();
 const { USER_SENSITIVE_DATA } = require("../../../constants/users");
 chai.use(chaiHttp);
@@ -55,6 +55,21 @@ describe("Data Access Layer", function () {
         expect(element).to.deep.equal(userData[12]);
         USER_SENSITIVE_DATA.forEach((key) => {
           expect(userData[12]).to.not.have.property(key);
+        });
+      });
+    });
+  });
+
+  describe("retrieveFilteredUsers", function () {
+    it("should fetch query based filtered users and remove sensitive info", async function () {
+      const fetchUserStub = sinon.stub(userQuery, "getUsersBasedOnFilter");
+      fetchUserStub.returns(Promise.resolve([userData[12]]));
+      const query = { state: "ACTIVE" };
+      const result = await retreiveFilteredUsers(query);
+      result.forEach((element) => {
+        expect(element).to.deep.equal(userData[12]);
+        USER_SENSITIVE_DATA.forEach((key) => {
+          expect(element).to.not.have.property(key);
         });
       });
     });
