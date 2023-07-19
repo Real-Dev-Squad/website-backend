@@ -3,7 +3,7 @@ const chaiHttp = require("chai-http");
 
 const userQuery = require("../../../models/users");
 const sinon = require("sinon");
-const { retrieveUsers, removeSensitiveInfo } = require("../../../services/dataAccessLayer");
+const { retrieveUsers, removeSensitiveInfo, retrieveDiscordUsers } = require("../../../services/dataAccessLayer");
 const userData = require("../../fixtures/user/user")();
 const { USER_SENSITIVE_DATA } = require("../../../constants/users");
 chai.use(chaiHttp);
@@ -66,6 +66,20 @@ describe("Data Access Layer", function () {
       removeSensitiveInfo(userData[12]);
       USER_SENSITIVE_DATA.forEach((key) => {
         expect(userdata).to.not.have.property(key);
+      });
+    });
+  });
+  
+  describe("retrieveDiscordUsers", function () {
+    it("should fetch discord users and remove sensitive info", async function () {
+      const fetchUserStub = sinon.stub(userQuery, "getDiscordUsers");
+      fetchUserStub.returns(Promise.resolve([userData[12]]));
+      const result = await retrieveDiscordUsers();
+      result.forEach((element) => {
+        expect(element).to.deep.equal(userData[12]);
+        USER_SENSITIVE_DATA.forEach((key) => {
+          expect(element).to.not.have.property(key);
+        });
       });
     });
   });

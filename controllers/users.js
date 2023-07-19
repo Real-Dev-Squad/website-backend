@@ -573,7 +573,7 @@ const filterUsers = async (req, res) => {
 };
 
 const nonVerifiedDiscordUsers = async (req, res) => {
-  const data = await userQuery.getDiscordUsers();
+  const data = await dataAccess.retrieveDiscordUsers();
   return res.json(data);
 };
 
