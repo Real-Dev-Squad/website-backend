@@ -72,8 +72,8 @@ const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
   return { get, set, evict, hits, cacheStore };
 };
 /**
- * A MultiMap implementation where each key maps to set of unique values
- *
+ * A MultiMap implementation where each key maps to set of unique values.
+ * It internally uses Map to store keys and values and to save multiple values it uses Set. Map<string,Set<string>>
  */
 const cachedKeysStore = () => {
   const keyStore = new Map();
