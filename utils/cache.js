@@ -1,4 +1,4 @@
-const CACHE_EXPIRY_TIME_MIN = 2;
+const CACHE_EXPIRY_TIME_MIN = 0.1;
 const CACHE_SIZE_MB = 10;
 const minutesToMilliseconds = (minutes) => minutes * 60000;
 

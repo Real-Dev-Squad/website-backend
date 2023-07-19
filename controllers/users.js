@@ -5,17 +5,17 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
-
+const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
-const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
-const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
+const { getQualifiers } = require("../utils/helper");
+const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -73,13 +73,9 @@ const getUserById = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const removePersonalDetails = (user) => {
-  const { phone, email, ...safeUser } = user;
-  return safeUser;
-};
-
 const getUsers = async (req, res) => {
   try {
+    // getting user details by id if present.
     const query = req.query?.query ?? "";
     const qualifiers = getQualifiers(query);
 
@@ -88,19 +84,15 @@ const getUsers = async (req, res) => {
       const id = req.query.id;
       let result;
       try {
-        result = await userQuery.fetchUser({ userId: id });
+        result = await dataAccess.retrieveUsers({ id: id });
       } catch (error) {
         logger.error(`Error while fetching user: ${error}`);
         return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
       }
-
       if (!result.userExists) {
         return res.boom.notFound("User doesn't exist");
       }
-
-      const User = { ...result.user };
-      const user = removePersonalDetails(User);
-
+      const user = result.user;
       return res.json({
         message: "User returned successfully!",
         user,
@@ -109,25 +101,21 @@ const getUsers = async (req, res) => {
 
     if (qualifiers?.filterBy) {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);
-
       const usernames = getUsernamesFromPRs(allPRs);
-
-      const { users } = await userQuery.fetchUsers(usernames);
-
+      const users = await dataAccess.retrieveUsers({ usernames: usernames });
       return res.json({
         message: "Users returned successfully!",
         users,
       });
     }
 
-    const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(req.query);
-
+    const data = await dataAccess.retrieveUsers({ query: req.query });
     return res.json({
       message: "Users returned successfully!",
-      users: allUsers,
+      users: data.allUsers,
       links: {
-        next: nextId ? getPaginationLink(req.query, "next", nextId) : "",
-        prev: prevId ? getPaginationLink(req.query, "prev", prevId) : "",
+        next: data.nextId ? getPaginationLink(req.query, "next", data.nextId) : "",
+        prev: data.prevId ? getPaginationLink(req.query, "prev", data.prevId) : "",
       },
     });
   } catch (error) {
@@ -145,8 +133,8 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
-    const { phone, email, ...user } = result.user;
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
+    const user = result.user;
 
     if (result.userExists) {
       return res.json({
@@ -207,7 +195,7 @@ const getSuggestedUsers = async (req, res) => {
 
 const getUsernameAvailabilty = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
     return res.json({
       isUsernameAvailable: !result.userExists,
     });
@@ -575,16 +563,11 @@ const filterUsers = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    const users = await userQuery.getUsersBasedOnFilter(req.query);
-    const sanitizedUsers = users.map((user) => {
-      delete user.tokens;
-      delete user.email;
-      delete user.phone;
-      return user;
-    });
+    const users = await dataAccess.retreiveFilteredUsers(req.query);
+
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
-      users: sanitizedUsers,
+      users: users,
       count: users.length,
     });
   } catch (error) {
@@ -626,6 +609,29 @@ const removeTokens = async (req, res) => {
   }
 };
 
+const updateRoles = async (req, res) => {
+  try {
+    const result = await userQuery.fetchUser({ userId: req.params.id });
+    if (result?.userExists) {
+      const dataToUpdate = req.body;
+      const response = await getRoleToUpdate(result.user, dataToUpdate);
+      if (response.updateRole) {
+        await userQuery.addOrUpdate(response.newUserRoles, result.user.id);
+        return res.json({
+          message: "role updated successfully!",
+        });
+      } else {
+        return res.boom.conflict("Role already exist!");
+      }
+    } else {
+      return res.boom.notFound("User not found");
+    }
+  } catch (error) {
+    logger.error(`Error while updateRoles: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -651,4 +657,5 @@ module.exports = {
   setInDiscordScript,
   markUnverified,
   removeTokens,
+  updateRoles,
 };

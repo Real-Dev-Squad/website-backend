@@ -1,14 +1,23 @@
 const Joi = require("joi");
-const { userState } = require("../../constants/userStatus");
+const { userState, CANCEL_OOO } = require("../../constants/userStatus");
 const threeDaysInMilliseconds = 172800000;
 
 const validateUserStatusData = async (todaysTime, req, res, next) => {
-  const schema = Joi.object({
+  // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
+  const { userStatusFlag } = req.query;
+  const isUserStatusEnabled = userStatusFlag === "true";
+  let validUserStates = [userState.OOO, userState.ONBOARDING, userState.IDLE, userState.ACTIVE];
+
+  if (isUserStatusEnabled) {
+    validUserStates = [userState.OOO, userState.ONBOARDING];
+  }
+
+  const statusSchema = Joi.object({
     currentStatus: Joi.object().keys({
       state: Joi.string()
         .trim()
-        .valid(userState.IDLE, userState.ACTIVE, userState.OOO, userState.ONBOARDING)
-        .error(new Error(`Invalid State. State must be either IDLE, ACTIVE, OOO, or ONBOARDING`)),
+        .valid(...validUserStates)
+        .error(new Error(`Invalid State. the acceptable states are ${validUserStates}`)),
       updatedAt: Joi.number().required(),
       from: Joi.number()
         .min(todaysTime)
@@ -54,9 +63,21 @@ const validateUserStatusData = async (todaysTime, req, res, next) => {
       committed: Joi.number().required(),
       updatedAt: Joi.number().required(),
     }),
-  }).or("currentStatus", "monthlyHours");
+  });
 
+  const cancelOooSchema = Joi.object()
+    .keys({
+      cancelOoo: Joi.boolean().valid(true).required(),
+    })
+    .unknown(false);
+
+  let schema;
   try {
+    if (Object.keys(req.body).includes(CANCEL_OOO)) {
+      schema = cancelOooSchema;
+    } else {
+      schema = statusSchema;
+    }
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
@@ -72,6 +93,55 @@ const validateUserStatus = (req, res, next) => {
   validateUserStatusData(todaysTime, req, res, next);
 };
 
+const validateMassUpdate = async (req, res, next) => {
+  const schema = Joi.object()
+    .keys({
+      users: Joi.array()
+        .items(Joi.string().trim())
+        .min(1)
+        .required()
+        .error(new Error(`Invalid state value passed for users.`)),
+    })
+    .messages({
+      "object.unknown": "Invalid key in Request payload.",
+    });
+
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error(`Error validating Query Params for GET ${error.message}`);
+    res.boom.badRequest(error);
+  }
+};
+
+const validateGetQueryParams = async (req, res, next) => {
+  const schema = Joi.object()
+    .keys({
+      taskStatus: Joi.string()
+        .trim()
+        .valid(userState.IDLE)
+        .error(new Error(`Invalid state value passed for taskStatus.`)),
+      state: Joi.string()
+        .trim()
+        .valid(userState.IDLE, userState.ACTIVE, userState.OOO, userState.ONBOARDING)
+        .error(new Error(`Invalid State. State must be either IDLE, ACTIVE, OOO, or ONBOARDING`)),
+    })
+    .messages({
+      "object.unknown": "Invalid query param provided.",
+    });
+
+  try {
+    await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    logger.error(`Error validating Query Params for GET ${error.message}`);
+    res.boom.badRequest(error);
+  }
+};
+
 module.exports = {
   validateUserStatus,
+  validateMassUpdate,
+  validateGetQueryParams,
 };

@@ -24,6 +24,14 @@ const {
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
 
+const userRoleUpdate = userData[4];
+const userRoleUnArchived = userData[13];
+const userAlreadyMember = userData[0];
+const userAlreadyNotMember = userData[13];
+const userAlreadyArchived = userData[5];
+const userAlreadyUnArchived = userData[4];
+const nonSuperUser = userData[0];
+
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const Sinon = require("sinon");
@@ -145,6 +153,8 @@ describe("Users", function () {
           expect(res.body.users).to.be.a("array");
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
+          expect(res.body.users[0]).to.not.have.property("tokens");
+          expect(res.body.users[0]).to.not.have.property("chaincode");
 
           return done();
         });
@@ -190,7 +200,8 @@ describe("Users", function () {
           expect(res.body.users.length).to.equal(1);
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
-
+          expect(res.body.users[0]).to.not.have.property("tokens");
+          expect(res.body.users[0]).to.not.have.property("chaincode");
           return done();
         });
     });
@@ -633,7 +644,7 @@ describe("Users", function () {
         "isMember",
         "roles",
       ]);
-      expect(Object.keys(res.body.user)).to.not.include.members(["phone", "email"]);
+      expect(Object.keys(res.body.user)).to.not.include.members(["phone", "email", "tokens", "chaincode"]);
       expect(res.body.user.id).to.equal(userId);
     });
 
@@ -1165,7 +1176,6 @@ describe("Users", function () {
         });
     });
   });
-
   describe("POST /update-in-discord", function () {
     it("it returns proper response", function (done) {
       chai
@@ -1228,6 +1238,259 @@ describe("Users", function () {
           expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
           return done();
         });
+    });
+  });
+
+  describe("PATCH /users/:id/temporary/data", function () {
+    it("Should make the user a member", function (done) {
+      addUser(userRoleUpdate).then((userRoleUpdateId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUpdateId}/temporary/data`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("role updated successfully!");
+            return done();
+          });
+      });
+    });
+
+    it("Should make the member a user", function (done) {
+      addUser(userRoleUpdate).then((userRoleUpdateId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUpdateId}/temporary/data`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: false,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("role updated successfully!");
+            return done();
+          });
+      });
+    });
+
+    it("Should archive the user", function (done) {
+      addUser(userRoleUpdate).then((userRoleUpdateId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUpdateId}/temporary/data`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            archived: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("role updated successfully!");
+            return done();
+          });
+      });
+    });
+
+    it("Should un-archive the user", function (done) {
+      addUser(userRoleUnArchived).then((userRoleUnArchivedId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUnArchivedId}/temporary/data`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            archived: false,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("role updated successfully!");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 400 if invalid role", function (done) {
+      addUser(userRoleUpdate).then((userRoleUpdateId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUpdateId}/temporary/data`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: true,
+            archived: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body.message).to.be.equal("we only allow either role member or archieve");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 400 if we pass in_discord role", function (done) {
+      addUser(userRoleUpdate).then((userRoleUpdateId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userRoleUpdateId}/temporary/data`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            in_discord: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body.message).to.be.equal("we only allow either role member or archieve");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 409 if user is already a member", function (done) {
+      addUser(userAlreadyMember).then((userAlreadyMemberId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userAlreadyMemberId}/temporary/data`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.be.equal("Role already exist!");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 409 if user is already not a member", function (done) {
+      addUser(userAlreadyNotMember).then((userAlreadyNotMemberId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userAlreadyNotMemberId}/temporary/data`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            member: false,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.be.equal("Role already exist!");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 409 if user is already archived", function (done) {
+      addUser(userAlreadyArchived).then((userAlreadyArchivedId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userAlreadyArchivedId}/temporary/data`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            archived: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.be.equal("Role already exist!");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 409 if user is already un-archived", function (done) {
+      addUser(userAlreadyUnArchived).then((userAlreadyUnArchivedId) => {
+        chai
+          .request(app)
+          .patch(`/users/${userAlreadyUnArchivedId}/temporary/data`)
+          .set("cookie", `${cookieName}=${superUserAuthToken}`)
+          .send({
+            archived: false,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res).to.have.status(409);
+            expect(res.body.message).to.be.equal("Role already exist!");
+            return done();
+          });
+      });
+    });
+
+    it("Should return 404 if user not found", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/111111111111/temporary/data`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({
+          archived: true,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("User not found");
+          return done();
+        });
+    });
+
+    it("Should return 401 if user is not a super user", function (done) {
+      addUser(nonSuperUser).then((nonSuperUserId) => {
+        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+        chai
+          .request(app)
+          .patch(`/users/${nonSuperUserId}/temporary/data`)
+          .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
+          .send({
+            archived: true,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(401);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal("You are not authorized for this action.");
+            return done();
+          });
+      });
     });
   });
 

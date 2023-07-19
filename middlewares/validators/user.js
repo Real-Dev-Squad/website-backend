@@ -1,3 +1,5 @@
+const { customWordCountValidator } = require("../../utils/customWordCountValidator");
+
 const joi = require("joi");
 const { USER_STATUS } = require("../../constants/users");
 const ROLES = require("../../constants/roles");
@@ -66,9 +68,18 @@ const validateJoinData = async (req, res, next) => {
       country: joi.string().min(1).required(),
       foundFrom: joi.string().min(1).required(),
       introduction: joi.string().min(1).required(),
-      forFun: joi.string().min(100).required(),
-      funFact: joi.string().min(100).required(),
-      whyRds: joi.string().min(100).required(),
+      forFun: joi
+        .string()
+        .custom((value, helpers) => customWordCountValidator(value, helpers, 100))
+        .required(),
+      funFact: joi
+        .string()
+        .custom((value, helpers) => customWordCountValidator(value, helpers, 100))
+        .required(),
+      whyRds: joi
+        .string()
+        .custom((value, helpers) => customWordCountValidator(value, helpers, 100))
+        .required(),
       flowState: joi.string().optional(),
       numberOfHours: joi.number().min(1).max(100).required(),
     });
@@ -177,7 +188,7 @@ async function validateUserQueryParams(req, res, next) {
           joi.array().items(joi.string().valid("IDLE", "OOO", "ACTIVE"))
         )
         .optional(),
-      role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD).optional(),
+      role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD, ROLES.ARCHIVED).optional(),
       verified: joi.string().optional(),
     })
     .messages({
@@ -213,6 +224,21 @@ const validateImageVerificationQuery = async (req, res, next) => {
   }
 };
 
+async function validateUpdateRoles(req, res, next) {
+  const schema = joi.object().strict().min(1).max(1).keys({
+    member: joi.boolean(),
+    archived: joi.boolean(),
+  });
+
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error(`Error validating updateRoles query params : ${error}`);
+    res.boom.badRequest("we only allow either role member or archieve");
+  }
+}
+
 module.exports = {
   updateUser,
   updateProfileURL,
@@ -220,4 +246,5 @@ module.exports = {
   getUsers,
   validateUserQueryParams,
   validateImageVerificationQuery,
+  validateUpdateRoles,
 };
