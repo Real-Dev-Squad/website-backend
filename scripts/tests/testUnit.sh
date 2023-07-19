@@ -9,3 +9,4 @@ project_id=$(echo $json | grep -o '"project_id":[^,}]*' | cut -d':' -f2 | tr -d 
 
 echo 'Start firestore emulator and run unit tests:'
 firebase emulators:exec 'nyc --x=controllers --x=test --x=docs --x=mockdata mocha test/unit/**' --project=$project_id
+
