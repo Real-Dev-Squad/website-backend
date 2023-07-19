@@ -29,6 +29,7 @@ const { userPhotoVerificationData } = require("../fixtures/user/photo-verificati
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const photoVerificationModel = firestore.collection("photo-verification");
+
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -1231,17 +1232,16 @@ describe("Users", function () {
   });
 
   describe("PATCH /users/remove-tokens", function () {
+    before(async function () {
+      await addOrUpdate(userData[0]);
+      await addOrUpdate(userData[1]);
+      await addOrUpdate(userData[2]);
+      await addOrUpdate(userData[3]);
+    });
+    after(async function () {
+      await cleanDb();
+    });
     it("should remove all the users with token field", function (done) {
-      before(async function () {
-        await addOrUpdate(userData[0]);
-        await addOrUpdate(userData[1]);
-        await addOrUpdate(userData[2]);
-        await addOrUpdate(userData[3]);
-      });
-      after(async function () {
-        await cleanDb();
-      });
-
       chai
         .request(app)
         .patch("/users/remove-tokens")
@@ -1252,6 +1252,7 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.be.equal("Github Token removed from all users!");
+          expect(res.body.usersFound).to.be.equal(3);
           return done();
         });
     });
