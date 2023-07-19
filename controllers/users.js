@@ -9,7 +9,7 @@ const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
+const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
@@ -595,6 +595,29 @@ const setInDiscordScript = async (req, res) => {
   }
 };
 
+const updateRoles = async (req, res) => {
+  try {
+    const result = await userQuery.fetchUser({ userId: req.params.id });
+    if (result?.userExists) {
+      const dataToUpdate = req.body;
+      const response = await getRoleToUpdate(result.user, dataToUpdate);
+      if (response.updateRole) {
+        await userQuery.addOrUpdate(response.newUserRoles, result.user.id);
+        return res.json({
+          message: "role updated successfully!",
+        });
+      } else {
+        return res.boom.conflict("Role already exist!");
+      }
+    } else {
+      return res.boom.notFound("User not found");
+    }
+  } catch (error) {
+    logger.error(`Error while updateRoles: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -619,4 +642,5 @@ module.exports = {
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
+  updateRoles,
 };
