@@ -330,87 +330,97 @@ const updateStatusOnTaskCompletion = async (userId) => {
 const massUpdateIdleUsers = async (users) => {
   const currentTimeStamp = new Date().getTime();
   const batch = firestore.batch();
-  let usersWithStatusUnchanged = 0;
+  const summary = {
+    totalUsers: users.length,
+    totalUnprocessedUsers: 0,
+    totalOnboardingUsersAltered: 0,
+    totalOnboardingUsersUnAltered: 0,
+    totalActiveUsersAltered: 0,
+    totalActiveUsersUnAltered: 0,
+    totalIdleUsersAltered: 0,
+    totalIdleUsersUnAltered: 0,
+  };
 
-  await Promise.all(
-    users.map(async (userId) => {
-      let latestStatusData;
-      try {
-        latestStatusData = await getUserStatus(userId);
-      } catch (error) {
-        usersWithStatusUnchanged++;
-        return batch;
-      }
-      const { id, userStatusExists, data } = latestStatusData;
+  for (const { userId, expectedState } of users) {
+    let latestStatusData;
+    try {
+      latestStatusData = await getUserStatus(userId);
+    } catch (error) {
+      summary.totalUnprocessedUsers++;
+      return batch;
+    }
+    const { id, userStatusExists, data } = latestStatusData;
+    const statusToUpdate = {
+      state: expectedState,
+      message: "",
+      from: currentTimeStamp,
+      until: "",
+      updatedAt: currentTimeStamp,
+    };
 
-      if (!userStatusExists || !data?.currentStatus) {
-        const newUserStatusRef = userStatusModel.doc();
-        const newUserStatusData = {
-          userId,
-          currentStatus: {
-            state: userState.IDLE,
-            message: "",
-            from: currentTimeStamp,
-            until: "",
-            updatedAt: currentTimeStamp,
-          },
-        };
-        batch.set(newUserStatusRef, newUserStatusData);
+    if (!userStatusExists || !data?.currentStatus) {
+      const newUserStatusRef = userStatusModel.doc();
+      const newUserStatusData = {
+        userId,
+        currentStatus: statusToUpdate,
+      };
+      expectedState === userState.ACTIVE ? summary.totalActiveUsersAltered++ : summary.totalIdleUsersAltered++;
+      batch.set(newUserStatusRef, newUserStatusData);
+    } else {
+      const {
+        currentStatus: { state, until },
+      } = data;
+      if (state === expectedState) {
+        state === userState.ACTIVE ? summary.totalActiveUsersUnAltered++ : summary.totalIdleUsersUnAltered++;
       } else {
-        const {
-          currentStatus: { state, until },
-        } = data;
-
-        if (state === userState.OOO || state === userState.ACTIVE) {
+        if (state === userState.ONBOARDING) {
+          const docRef = userStatusModel.doc(id);
+          if (expectedState === userState.ACTIVE) {
+            const updatedStatusData = {
+              currentStatus: statusToUpdate,
+            };
+            summary.totalOnboardingUsersAltered++;
+            batch.update(docRef, updatedStatusData);
+          } else {
+            summary.totalOnboardingUsersUnAltered++;
+          }
+        } else {
+          expectedState === userState.ACTIVE ? summary.totalActiveUsersAltered++ : summary.totalIdleUsersAltered++;
           const docRef = userStatusModel.doc(id);
           const updatedStatusData =
             state === userState.OOO
               ? {
                   futureStatus: {
-                    state: userState.IDLE,
-                    message: "",
+                    ...statusToUpdate,
                     from: until,
-                    until: "",
-                    updatedAt: currentTimeStamp,
                   },
                 }
               : {
-                  currentStatus: {
-                    state: userState.IDLE,
-                    message: "",
-                    from: currentTimeStamp,
-                    until: "",
-                    updatedAt: currentTimeStamp,
-                  },
+                  currentStatus: statusToUpdate,
                 };
           batch.update(docRef, updatedStatusData);
-        } else {
-          usersWithStatusUnchanged++;
         }
       }
-      return batch;
-    })
-  );
+    }
+  }
 
   try {
     await batch.commit();
-    return {
-      totalUsers: users.length,
-      usersWithStatusUpdated: users.length - usersWithStatusUnchanged,
-      usersOnboardingOrAlreadyIdle: usersWithStatusUnchanged,
-    };
+    return summary;
   } catch (error) {
     throw new Error("Batch operation failed");
   }
 };
 
 const getIdleUsers = async () => {
-  const idleUsers = [];
-  const usersNotProcessed = [];
+  const users = [];
+  let totalIdleUsers = 0;
+  let totalActiveUsers = 0;
+  const unprocessedUsers = [];
   let errorCount = 0;
-  let discordActiveNonArchivedUsersQuerySnapshot;
+  let usersSnapshot;
   try {
-    discordActiveNonArchivedUsersQuerySnapshot = await usersCollection
+    usersSnapshot = await usersCollection
       .where("roles.in_discord", "==", true)
       .where("roles.archived", "==", false)
       .get();
@@ -418,10 +428,10 @@ const getIdleUsers = async () => {
     logger.error(`unable to get users ${error.message}`);
     throw new Error("unable to get users");
   }
-  const totalValidUsersCount = discordActiveNonArchivedUsersQuerySnapshot.size;
-  if (totalValidUsersCount) {
+  const totalUsers = usersSnapshot.size;
+  if (totalUsers) {
     await Promise.all(
-      discordActiveNonArchivedUsersQuerySnapshot.docs.map(async (userDoc) => {
+      usersSnapshot.docs.map(async (userDoc) => {
         const assigneeId = userDoc.id;
         try {
           const tasksQuerySnapshot = await firestore
@@ -430,11 +440,15 @@ const getIdleUsers = async () => {
             .where("status", "in", [TASK_STATUS.ASSIGNED, TASK_STATUS.IN_PROGRESS])
             .get();
           if (tasksQuerySnapshot.empty) {
-            idleUsers.push(assigneeId);
+            totalIdleUsers++;
+            users.push({ userId: assigneeId, expectedState: userState.IDLE });
+          } else {
+            totalActiveUsers++;
+            users.push({ userId: assigneeId, expectedState: userState.ACTIVE });
           }
         } catch (error) {
           errorCount++;
-          usersNotProcessed.push(assigneeId);
+          unprocessedUsers.push(assigneeId);
           logger.error(`Error retrieving tasks for user ${assigneeId}: ${error.message}`);
         }
       })
@@ -442,11 +456,12 @@ const getIdleUsers = async () => {
   }
 
   return {
-    totalValidUsersCount,
-    idleUsersCount: idleUsers.length,
-    idleUsers,
-    usersNotProcessedCount: errorCount,
-    usersNotProcessed,
+    totalUsers,
+    totalIdleUsers,
+    totalActiveUsers,
+    totalUnprocessedUsers: errorCount,
+    unprocessedUsers,
+    users,
   };
 };
 
