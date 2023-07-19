@@ -6,7 +6,6 @@
 
 const chai = require("chai");
 const { expect } = chai;
-
 const cleanDb = require("../../utils/cleanDb");
 const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
@@ -14,6 +13,9 @@ const { addDependency, updateTask } = require("../../../models/tasks");
 const firestore = require("../../../utils/firestore");
 const { TASK_STATUS } = require("../../../constants/tasks");
 const dependencyModel = firestore.collection("TaskDependencies");
+const tasksModel = firestore.collection("tasks");
+const userData = require("../../fixtures/user/user");
+const addUser = require("../../utils/addUser");
 
 describe("tasks", function () {
   afterEach(async function () {
@@ -150,6 +152,30 @@ describe("tasks", function () {
 
       expect(result.taskDetails.taskId).to.equal(data.taskId);
       expect(result.taskDetails.dependsOn).to.equal(data.dependsOn);
+    });
+  });
+  describe("update tasks", function () {
+    it("should update status when assignee pass as payload", async function () {
+      const data = {
+        assignee: "sagar",
+      };
+      const taskId = (await tasks.updateTask(tasksData[4])).taskId;
+
+      const userArr = userData();
+      const userId1 = await addUser(userArr[3]);
+
+      await firestore.collection("tasks").doc(taskId).set(tasksData[4]);
+      await firestore.collection("users").doc(userId1).set(userArr[3]);
+
+      await updateTask(data, taskId);
+
+      const modalResult = await tasks.fetchTask(taskId);
+      expect(modalResult.taskData.status).to.be.equal(TASK_STATUS.ASSIGNED);
+      expect(modalResult.taskData.assignee).to.be.equal("sagar");
+
+      const firestoreResult = (await tasksModel.doc(taskId).get()).data();
+      expect(firestoreResult.status).to.be.equal(TASK_STATUS.ASSIGNED);
+      expect(firestoreResult.assignee).to.be.equal(userId1);
     });
   });
 });
