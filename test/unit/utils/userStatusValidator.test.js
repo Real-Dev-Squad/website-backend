@@ -4,8 +4,7 @@ const { validateMassUpdate } = require("../../../middlewares/validators/userStat
 
 describe("Middleware | Validators | massUpdateUserStatus", function () {
   describe("validateMassUpdate", function () {
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip("lets the request pass to the next function for a valid query", async function () {
+    it("lets the request pass to the next function for a valid query", async function () {
       const res = {};
       const req = {
         body: {

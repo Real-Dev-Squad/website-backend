@@ -277,8 +277,7 @@ describe("Update Status based on task update", function () {
       sinon.restore();
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip("should return the correct results when there are no errors", async function () {
+    it("should return the correct results when there are no errors", async function () {
       const result = await massUpdateIdleUsers(listUsers);
       expect(result).to.have.all.keys(
         "totalUsers",
@@ -370,8 +369,7 @@ describe("Update Status based on task update", function () {
       await cleanDb();
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip("should return the correct results when there are no errors", async function () {
+    it("should return the correct results when there are no errors", async function () {
       const result = await getIdleUsers();
       expect(result).to.deep.include({
         totalUsers: 3,

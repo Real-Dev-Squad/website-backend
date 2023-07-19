@@ -340,8 +340,7 @@ describe("Task Based Status Updates", function () {
       await cleanDb();
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip("should return the correct results when there are no errors", async function () {
+    it("should return the correct results when there are no errors", async function () {
       const res = await chai
         .request(app)
         .patch(`/users/status/batch`)
@@ -396,8 +395,7 @@ describe("Task Based Status Updates", function () {
       expect(userStatus009Data.currentStatus.state).to.equal(userState.ACTIVE);
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip("should throw an error if users firestore batch operations fail", async function () {
+    it("should throw an error if users firestore batch operations fail", async function () {
       sinon.stub(firestore, "batch").throws(new Error("something went wrong"));
 
       const res = await chai
@@ -450,8 +448,7 @@ describe("Task Based Status Updates", function () {
     afterEach(async function () {
       await cleanDb();
     });
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip("should get the users who without Assigned Or InProgress Tasks", async function () {
+    it("should get the users who without Assigned Or InProgress Tasks", async function () {
       const response = await chai
         .request(app)
         .get(`/users/status?batch=true`)
@@ -473,8 +470,7 @@ describe("Task Based Status Updates", function () {
         ]);
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip("should throw an error when an error occurs", async function () {
+    it("should throw an error when an error occurs", async function () {
       sinon
         .stub(userStatusModelFunction, "getIdleUsers")
         .throws(
