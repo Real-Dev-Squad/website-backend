@@ -84,10 +84,10 @@ const cachedKeysStore = () => {
    * @returns {Set} set of values
    */
   const getCachedKeys = (modelKey) => {
-    if (keyStore.has(modelKey)) {
-      return keyStore.get(modelKey);
+    if (!keyStore.has(modelKey)) {
+      return new Set();
     }
-    return new Set();
+    return keyStore.get(modelKey);
   };
 
   /**
