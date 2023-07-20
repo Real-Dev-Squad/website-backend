@@ -1,4 +1,5 @@
 const userQuery = require("../models/users");
+const members = require("../models/members");
 const { USER_SENSITIVE_DATA } = require("../constants/users");
 
 const retrieveUsers = async ({ id = null, username = null, usernames = null, query = null, userdata }) => {
@@ -37,6 +38,22 @@ const retrieveDiscordUsers = async() =>{
   return users;
 }
 
+const retrieveMembers = async(query) =>{
+  const allUsers = await members.fetchUsers(query);
+  allUsers.forEach((element) => {
+    removeSensitiveInfo(element);
+  });
+  return allUsers;
+}
+
+const retrieveUsersWithRole = async(role) =>{
+  const users = await members.fetchUsersWithRole(role);
+  users.forEach((element) => {
+    removeSensitiveInfo(element);
+  });
+  return users;
+}
+
 const removeSensitiveInfo = function (obj) {
   for (let i = 0; i < USER_SENSITIVE_DATA.length; i++) {
     if (USER_SENSITIVE_DATA[i] in obj) {
@@ -48,5 +65,7 @@ const removeSensitiveInfo = function (obj) {
 module.exports = {
   retrieveUsers,
   removeSensitiveInfo,
-  retrieveDiscordUsers
+  retrieveDiscordUsers,
+  retrieveMembers,
+  retrieveUsersWithRole 
 };

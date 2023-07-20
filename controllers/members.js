@@ -12,8 +12,7 @@ const dataAccess = require("../services/dataAccessLayer");
 
 const getMembers = async (req, res) => {
   try {
-    const allUsers = await members.fetchUsers(req.query);
-
+    const allUsers = await dataAccess.retrieveMembers(req.query);
     return res.json({
       message: allUsers.length ? "Members returned successfully!" : "No member found",
       members: allUsers,
@@ -33,7 +32,7 @@ const getMembers = async (req, res) => {
 
 const getIdleMembers = async (req, res) => {
   try {
-    const onlyMembers = await members.fetchUsersWithRole(ROLES.MEMBER);
+    const onlyMembers = await dataAccess.retrieveUsersWithRole(ROLES.MEMBER);
     const taskParticipants = await tasks.fetchActiveTaskMembers();
     const idleMembers = onlyMembers?.filter(({ id }) => !taskParticipants.has(id));
     const idleMemberUserNames = idleMembers?.map((member) => member.username);

@@ -2,8 +2,9 @@ const chai = require("chai");
 const chaiHttp = require("chai-http");
 
 const userQuery = require("../../../models/users");
+const members = require("../../../models/members");
 const sinon = require("sinon");
-const { retrieveUsers, removeSensitiveInfo, retrieveDiscordUsers } = require("../../../services/dataAccessLayer");
+const { retrieveUsers, removeSensitiveInfo, retrieveDiscordUsers, retrieveUsersWithRole, retrieveMembers } = require("../../../services/dataAccessLayer");
 const userData = require("../../fixtures/user/user")();
 const { USER_SENSITIVE_DATA } = require("../../../constants/users");
 chai.use(chaiHttp);
@@ -83,6 +84,35 @@ describe("Data Access Layer", function () {
       });
     });
   });
+
+  describe("retrieveUsersWithRole", function () {
+    it("should fetch users with role and remove sensitive info", async function () {
+      const fetchUserStub = sinon.stub(members, "fetchUsersWithRole");
+      fetchUserStub.returns(Promise.resolve([userData[12]]));
+      const query = {showArchived : true};
+      const result = await retrieveUsersWithRole(query);
+      result.forEach((element) => {
+        expect(element).to.deep.equal(userData[12]);
+        USER_SENSITIVE_DATA.forEach((key) => {
+          expect(element).to.not.have.property(key);
+        });
+      });
+    });
+  });
+
+  describe("retrieveMembers", function () {
+    it("should fetch members and remove sensitive info", async function () {
+      const fetchUserStub = sinon.stub(members, "fetchUsers");
+      fetchUserStub.returns(Promise.resolve([userData[12]]));
+      const result = await retrieveMembers();
+      result.forEach((element) => {
+        expect(element).to.deep.equal(userData[12]);
+        USER_SENSITIVE_DATA.forEach((key) => {
+          expect(element).to.not.have.property(key);
+        });
+      });
+    });
+   });
 
   describe("removeSensitiveInfo", function () {
     it("should remove sensitive information from the users object", function () {
