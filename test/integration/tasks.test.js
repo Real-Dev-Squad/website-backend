@@ -390,7 +390,6 @@ describe("Tasks", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
-          dependsOn: ["dependency1", "dependency2"],
         })
         .end((err, res) => {
           if (err) {
@@ -402,7 +401,10 @@ describe("Tasks", function () {
     });
     it("Should update dependency", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
-      const dependsOn = ["taskId5", "taskId4"];
+      const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId2 = (await tasks.updateTask(tasksData[5])).taskId;
+
+      const dependsOn = [taskId1, taskId2];
       const res = await chai
         .request(app)
         .patch(`/tasks/${taskId}`)
@@ -410,7 +412,6 @@ describe("Tasks", function () {
         .send({ dependsOn });
       expect(res).to.have.status(204);
       const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
-
       expect(res2).to.have.status(200);
       expect(res2.body.taskData.dependsOn).to.be.a("array");
       res2.body.taskData.dependsOn.forEach((taskId) => {
@@ -419,6 +420,20 @@ describe("Tasks", function () {
 
       return taskId;
     });
+
+    it("Should return 400 if any of taskid is not exist", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
+      const dependsOn = ["taskId5", "taskId6", taskId1];
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ dependsOn });
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.equal("Invalid dependency");
+    });
+
     it("Should update status when assignee pass as a payload", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
       const res = await chai
