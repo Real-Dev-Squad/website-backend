@@ -100,7 +100,7 @@ const validateMassUpdate = async (req, res, next) => {
         .items(
           Joi.object({
             userId: Joi.string().trim().required(),
-            expectedState: Joi.string().valid("IDLE", "ACTIVE").required(),
+            expectedState: Joi.string().valid(userState.IDLE, userState.ACTIVE).required(),
           })
         )
         .min(1)

@@ -151,9 +151,9 @@ const updateAllUserStatus = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getIdleUsers = async (req, res) => {
+const getExpectedUsersStatus = async (req, res) => {
   try {
-    const data = await userStatusModel.getIdleUsers();
+    const data = await userStatusModel.getExpectedUsersStatus();
     return res.json({
       message: "All idle users found successfully.",
       data,
@@ -168,7 +168,7 @@ const getIdleUsers = async (req, res) => {
 
 const getUserStatusControllers = async (req, res, next) => {
   if (Object.keys(req.query).includes("batch")) {
-    await getIdleUsers(req, res, next);
+    await getExpectedUsersStatus(req, res, next);
   } else {
     await getAllUserStatus(req, res, next);
   }
@@ -180,9 +180,9 @@ const getUserStatusControllers = async (req, res, next) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const massUpdateIdleUsers = async (req, res) => {
+const batchUpdateUsersStatus = async (req, res) => {
   try {
-    const data = await userStatusModel.massUpdateIdleUsers(req.body.users);
+    const data = await userStatusModel.batchUpdateUsersStatus(req.body.users);
     return res.json({
       message: "users status updated successfully.",
       data,
@@ -242,8 +242,8 @@ module.exports = {
   getAllUserStatus,
   updateUserStatus,
   updateAllUserStatus,
-  getIdleUsers,
+  getExpectedUsersStatus,
   getUserStatusControllers,
-  massUpdateIdleUsers,
+  batchUpdateUsersStatus,
   updateUserStatusController,
 };

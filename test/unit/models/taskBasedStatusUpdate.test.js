@@ -8,8 +8,8 @@ const {
   updateStatusOnTaskCompletion,
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
-  massUpdateIdleUsers,
-  getIdleUsers,
+  batchUpdateUsersStatus,
+  getExpectedUsersStatus,
 } = require("../../../models/userStatus");
 const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
@@ -278,7 +278,7 @@ describe("Update Status based on task update", function () {
     });
 
     it("should return the correct results when there are no errors", async function () {
-      const result = await massUpdateIdleUsers(listUsers);
+      const result = await batchUpdateUsersStatus(listUsers);
       expect(result).to.have.all.keys(
         "totalUsers",
         "totalUnprocessedUsers",
@@ -328,14 +328,14 @@ describe("Update Status based on task update", function () {
     it("should throw an error if users firestore batch operations fail", async function () {
       sinon.stub(firestore, "batch").throws(new Error("something went wrong"));
 
-      await massUpdateIdleUsers().catch((err) => {
+      await batchUpdateUsersStatus().catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("something went wrong");
       });
     });
   });
 
-  describe("getIdleUsers", function () {
+  describe("getExpectedUsersStatus", function () {
     let userId1;
     let userId2;
     let userId3;
@@ -370,7 +370,7 @@ describe("Update Status based on task update", function () {
     });
 
     it("should return the correct results when there are no errors", async function () {
-      const result = await getIdleUsers();
+      const result = await getExpectedUsersStatus();
       expect(result).to.deep.include({
         totalUsers: 3,
         totalIdleUsers: 1,
@@ -391,7 +391,7 @@ describe("Update Status based on task update", function () {
       const usersCollection = firestore.collection("users");
       sinon.stub(usersCollection, "where").returns(usersCollection);
       sinon.stub(usersCollection, "get").throws(new Error("unable to get users"));
-      await getIdleUsers().catch((err) => {
+      await getExpectedUsersStatus().catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.be.equal("unable to get users");
       });

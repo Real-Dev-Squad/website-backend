@@ -327,7 +327,7 @@ const updateStatusOnTaskCompletion = async (userId) => {
   }
 };
 
-const massUpdateIdleUsers = async (users) => {
+const batchUpdateUsersStatus = async (users) => {
   const currentTimeStamp = new Date().getTime();
   const batch = firestore.batch();
   const summary = {
@@ -372,34 +372,34 @@ const massUpdateIdleUsers = async (users) => {
       } = data;
       if (state === expectedState) {
         state === userState.ACTIVE ? summary.totalActiveUsersUnAltered++ : summary.totalIdleUsersUnAltered++;
-      } else {
-        if (state === userState.ONBOARDING) {
-          const docRef = userStatusModel.doc(id);
-          if (expectedState === userState.ACTIVE) {
-            const updatedStatusData = {
-              currentStatus: statusToUpdate,
-            };
-            summary.totalOnboardingUsersAltered++;
-            batch.update(docRef, updatedStatusData);
-          } else {
-            summary.totalOnboardingUsersUnAltered++;
-          }
-        } else {
-          expectedState === userState.ACTIVE ? summary.totalActiveUsersAltered++ : summary.totalIdleUsersAltered++;
-          const docRef = userStatusModel.doc(id);
-          const updatedStatusData =
-            state === userState.OOO
-              ? {
-                  futureStatus: {
-                    ...statusToUpdate,
-                    from: until,
-                  },
-                }
-              : {
-                  currentStatus: statusToUpdate,
-                };
+        continue;
+      }
+      if (state === userState.ONBOARDING) {
+        const docRef = userStatusModel.doc(id);
+        if (expectedState === userState.ACTIVE) {
+          const updatedStatusData = {
+            currentStatus: statusToUpdate,
+          };
+          summary.totalOnboardingUsersAltered++;
           batch.update(docRef, updatedStatusData);
+        } else {
+          summary.totalOnboardingUsersUnAltered++;
         }
+      } else {
+        expectedState === userState.ACTIVE ? summary.totalActiveUsersAltered++ : summary.totalIdleUsersAltered++;
+        const docRef = userStatusModel.doc(id);
+        const updatedStatusData =
+          state === userState.OOO
+            ? {
+                futureStatus: {
+                  ...statusToUpdate,
+                  from: until,
+                },
+              }
+            : {
+                currentStatus: statusToUpdate,
+              };
+        batch.update(docRef, updatedStatusData);
       }
     }
   }
@@ -412,7 +412,7 @@ const massUpdateIdleUsers = async (users) => {
   }
 };
 
-const getIdleUsers = async () => {
+const getExpectedUsersStatus = async () => {
   const users = [];
   let totalIdleUsers = 0;
   let totalActiveUsers = 0;
@@ -518,7 +518,7 @@ module.exports = {
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
   updateStatusOnTaskCompletion,
-  massUpdateIdleUsers,
-  getIdleUsers,
+  batchUpdateUsersStatus,
+  getExpectedUsersStatus,
   cancelOooStatus,
 };

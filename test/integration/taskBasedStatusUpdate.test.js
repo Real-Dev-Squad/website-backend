@@ -472,7 +472,7 @@ describe("Task Based Status Updates", function () {
 
     it("should throw an error when an error occurs", async function () {
       sinon
-        .stub(userStatusModelFunction, "getIdleUsers")
+        .stub(userStatusModelFunction, "getExpectedUsersStatus")
         .throws(
           new Error(
             "The server has encountered an unexpected error. Please contact the administrator for more information."
