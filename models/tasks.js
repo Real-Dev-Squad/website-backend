@@ -7,6 +7,7 @@ const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tas
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
+
 /**
  * Adds and Updates tasks
  *
@@ -19,6 +20,9 @@ const updateTask = async (taskData, taskId = null) => {
     taskData = await toFirestoreData(taskData);
     if (taskId) {
       const task = await tasksModel.doc(taskId).get();
+      if (taskData?.assignee && task.data().status === TASK_STATUS.AVAILABLE) {
+        taskData = { ...taskData, status: TASK_STATUS.ASSIGNED };
+      }
       if (taskData.status === "VERIFIED") {
         taskData = { ...taskData, endsOn: Math.floor(Date.now() / 1000) };
       }
@@ -33,20 +37,23 @@ const updateTask = async (taskData, taskId = null) => {
           const existingDependenciesSnapshot = await transaction.get(dependencyQuery);
           const existingDependsOnIds = existingDependenciesSnapshot.docs.map((doc) => doc.data().dependsOn);
           const newDependencies = dependsOn.filter((dependency) => !existingDependsOnIds.includes(dependency));
-
           if (newDependencies.length > 0) {
             for (const dependency of newDependencies) {
-              const taskDependsOn = {
-                taskId: taskId,
-                dependsOn: dependency,
-              };
-              const docRef = dependencyModel.doc();
-              transaction.set(docRef, taskDependsOn);
+              const dependencyDoc = await tasksModel.doc(dependency).get();
+              if (dependencyDoc.exists) {
+                const taskDependsOn = {
+                  taskId: taskId,
+                  dependsOn: dependency,
+                };
+                const docRef = dependencyModel.doc();
+                transaction.set(docRef, taskDependsOn);
+              } else {
+                throw new Error("Invalid dependency passed");
+              }
             }
           }
         });
       }
-
       return { taskId };
     }
     const taskInfo = await tasksModel.add(taskData);

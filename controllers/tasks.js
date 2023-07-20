@@ -258,8 +258,14 @@ const updateTask = async (req, res) => {
     if (isUserStatusEnabled && req.body.assignee) {
       await updateUserStatusOnTaskUpdate(req.body.assignee);
     }
+
     return res.status(204).send();
   } catch (err) {
+    if (err.message.includes("Invalid dependency passed")) {
+      const errorMessage = "Invalid dependency";
+      logger.error(`Error while updating task: ${errorMessage}`);
+      return res.boom.badRequest(errorMessage);
+    }
     logger.error(`Error while updating task: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
