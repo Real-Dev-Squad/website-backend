@@ -93,4 +93,44 @@ describe("users", function () {
       expect(usernames).to.have.members(expectedUsernames);
     });
   });
+
+  describe("getRoleToUpdate", function () {
+    it("should return updateRole as false when the role already exists in userData", async function () {
+      const userData = {
+        roles: {
+          member: true,
+        },
+      };
+
+      const newRoles = {
+        member: true,
+      };
+
+      const result = await usersUtils.getRoleToUpdate(userData, newRoles);
+
+      expect(result).to.deep.equal({ updateRole: false });
+    });
+  });
+
+  it("should return updateRole as true and new user roles when the role doesn't exist in userData", async function () {
+    const userData = {
+      roles: {
+        member: true,
+      },
+    };
+    const newRoles = {
+      member: false,
+    };
+
+    const result = await usersUtils.getRoleToUpdate(userData, newRoles);
+
+    expect(result).to.deep.equal({
+      updateRole: true,
+      newUserRoles: {
+        roles: {
+          member: false,
+        },
+      },
+    });
+  });
 });

@@ -4,9 +4,10 @@ const ItemModel = firestore.collection("itemTags");
 const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
-const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
+const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
+
 /**
  * Adds and Updates tasks
  *
@@ -19,6 +20,9 @@ const updateTask = async (taskData, taskId = null) => {
     taskData = await toFirestoreData(taskData);
     if (taskId) {
       const task = await tasksModel.doc(taskId).get();
+      if (taskData?.assignee && task.data().status === TASK_STATUS.AVAILABLE) {
+        taskData = { ...taskData, status: TASK_STATUS.ASSIGNED };
+      }
       if (taskData.status === "VERIFIED") {
         taskData = { ...taskData, endsOn: Math.floor(Date.now() / 1000) };
       }
@@ -33,20 +37,23 @@ const updateTask = async (taskData, taskId = null) => {
           const existingDependenciesSnapshot = await transaction.get(dependencyQuery);
           const existingDependsOnIds = existingDependenciesSnapshot.docs.map((doc) => doc.data().dependsOn);
           const newDependencies = dependsOn.filter((dependency) => !existingDependsOnIds.includes(dependency));
-
           if (newDependencies.length > 0) {
             for (const dependency of newDependencies) {
-              const taskDependsOn = {
-                taskId: taskId,
-                dependsOn: dependency,
-              };
-              const docRef = dependencyModel.doc();
-              transaction.set(docRef, taskDependsOn);
+              const dependencyDoc = await tasksModel.doc(dependency).get();
+              if (dependencyDoc.exists) {
+                const taskDependsOn = {
+                  taskId: taskId,
+                  dependsOn: dependency,
+                };
+                const docRef = dependencyModel.doc();
+                transaction.set(docRef, taskDependsOn);
+              } else {
+                throw new Error("Invalid dependency passed");
+              }
             }
           }
         });
       }
-
       return { taskId };
     }
     const taskInfo = await tasksModel.add(taskData);
@@ -88,25 +95,74 @@ const addDependency = async (data) => {
  *
  * @return {Promise<tasks|Array>}
  */
-const fetchTasks = async (dev = false, status = "") => {
-  try {
-    const tasksSnapshot = dev && status ? await tasksModel.where("status", "==", status).get() : await tasksModel.get();
 
-    const tasks = buildTasks(tasksSnapshot);
-    const promises = tasks.map(async (task) => fromFirestoreData(task));
-    const updatedTasks = await Promise.all(promises);
-    const taskPromises = updatedTasks.map(async (task) => {
-      task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
-      const taskId = task.id;
-      const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
-      task.dependsOn = [];
-      dependencySnapshot.docs.forEach((doc) => {
-        const dependency = doc.get("dependsOn");
-        task.dependsOn.push(dependency);
-      });
-      return task;
+const getBuiltTasks = async (tasksSnapshot) => {
+  const tasks = buildTasks(tasksSnapshot);
+  const promises = tasks.map(async (task) => fromFirestoreData(task));
+  const updatedTasks = await Promise.all(promises);
+  const taskPromises = updatedTasks.map(async (task) => {
+    task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
+    const taskId = task.id;
+    const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
+    task.dependsOn = [];
+    dependencySnapshot.docs.forEach((doc) => {
+      const dependency = doc.get("dependsOn");
+      task.dependsOn.push(dependency);
     });
-    const taskList = await Promise.all(taskPromises);
+    return task;
+  });
+  const taskList = await Promise.all(taskPromises);
+  return taskList;
+};
+
+const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, prev }) => {
+  try {
+    const initialQuery = status
+      ? tasksModel.where("status", "==", status).orderBy("title")
+      : tasksModel.orderBy("title");
+    let queryDoc = initialQuery;
+
+    if (prev) {
+      queryDoc = queryDoc.limitToLast(size);
+    } else {
+      queryDoc = queryDoc.limit(size);
+    }
+
+    if (page) {
+      const startAfter = size * page;
+      queryDoc = queryDoc.offset(startAfter);
+    } else if (next) {
+      const doc = await tasksModel.doc(next).get();
+      queryDoc = queryDoc.startAt(doc);
+    } else if (prev) {
+      const doc = await tasksModel.doc(prev).get();
+      queryDoc = queryDoc.endAt(doc);
+    }
+
+    const snapshot = await queryDoc.get();
+
+    const first = snapshot.docs[0];
+    const prevDoc = await initialQuery.endBefore(first).limitToLast(1).get();
+
+    const last = snapshot.docs[snapshot.docs.length - 1];
+    const nextDoc = await initialQuery.startAfter(last).limit(1).get();
+
+    const allTasks = await getBuiltTasks(snapshot);
+    return {
+      allTasks,
+      next: nextDoc.docs[0]?.id ?? "",
+      prev: prevDoc.docs[0]?.id ?? "",
+    };
+  } catch (err) {
+    logger.error("Error retrieving user data", err);
+    throw err;
+  }
+};
+
+const fetchTasks = async () => {
+  try {
+    const tasksSnapshot = await tasksModel.get();
+    const taskList = await getBuiltTasks(tasksSnapshot);
     return taskList;
   } catch (err) {
     logger.error("error getting tasks", err);
@@ -412,4 +468,5 @@ module.exports = {
   overdueTasks,
   addDependency,
   fetchTaskByIssueId,
+  fetchPaginatedTasks,
 };

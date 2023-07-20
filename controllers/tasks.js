@@ -9,6 +9,7 @@ const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/er
 const dependencyModel = require("../models/tasks");
 const userQuery = require("../models/users");
 const { transformQuery } = require("../utils/tasks");
+const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 
 /**
@@ -60,35 +61,88 @@ const addNewTask = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
+
+const fetchTasksWithRdsAssigneeInfo = async (allTasks) => {
+  const tasksWithRdsAssigneeInfo = allTasks.map(async (task) => {
+    /*
+     If the issue has a "github.issue" inner object and a property "assignee",
+     then fetch the RDS user information with GitHub username in "assignee"
+    */
+    if (Object.keys(task).includes("github")) {
+      if (Object.keys(task.github.issue).includes("assignee")) {
+        return {
+          ...task,
+          github: {
+            ...task.github,
+            issue: {
+              ...task.github.issue,
+              assigneeRdsInfo: await getRdsUserInfoByGitHubUsername(task.github.issue.assignee),
+            },
+          },
+        };
+      }
+    }
+    return task;
+  });
+  const tasks = await Promise.all(tasksWithRdsAssigneeInfo);
+  return tasks;
+};
+
+const fetchPaginatedTasks = async (query) => {
+  try {
+    const tasksData = await tasks.fetchPaginatedTasks(query);
+    const { allTasks, next, prev } = tasksData;
+    const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
+
+    const result = {
+      tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
+      prev,
+      next,
+    };
+
+    if (next) {
+      const nextLink = getPaginatedLink({
+        endpoint: "/tasks",
+        query,
+        cursorKey: "next",
+        docId: next,
+      });
+      result.next = nextLink;
+    }
+
+    if (prev) {
+      const prevLink = getPaginatedLink({
+        endpoint: "/tasks",
+        query,
+        cursorKey: "prev",
+        docId: prev,
+      });
+      result.prev = prevLink;
+    }
+
+    return result;
+  } catch (err) {
+    logger.error(`Error while fetching paginated tasks ${err}`);
+    return err;
+  }
+};
+
 const fetchTasks = async (req, res) => {
   try {
-    const { dev, status } = req.query;
-    const { dev: transformedDev, status: transformedStatus } = transformQuery(dev, status);
+    const { dev, status, page, size, prev, next } = req.query;
+    const transformedQuery = transformQuery(dev, status, size, page);
 
-    const allTasks = await tasks.fetchTasks(transformedDev, transformedStatus);
-    const fetchTasksWithRdsAssigneeInfo = allTasks.map(async (task) => {
-      /*
-       If the issue has a "github.issue" inner object and a property "assignee",
-       then fetch the RDS user information with GitHub username in "assignee"
-      */
-      if (Object.keys(task).includes("github")) {
-        if (Object.keys(task.github.issue).includes("assignee")) {
-          return {
-            ...task,
-            github: {
-              ...task.github,
-              issue: {
-                ...task.github.issue,
-                assigneeRdsInfo: await getRdsUserInfoByGitHubUsername(task.github.issue.assignee),
-              },
-            },
-          };
-        }
-      }
-      return task;
-    });
+    if (dev) {
+      const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next });
+      return res.json({
+        message: "Tasks returned successfully!",
+        ...paginatedTasks,
+      });
+    }
 
-    const tasksWithRdsAssigneeInfo = await Promise.all(fetchTasksWithRdsAssigneeInfo);
+    const allTasks = await tasks.fetchTasks();
+    const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
+
     return res.json({
       message: "Tasks returned successfully!",
       tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
@@ -205,8 +259,14 @@ const updateTask = async (req, res) => {
     if (isUserStatusEnabled && req.body.assignee) {
       await updateUserStatusOnTaskUpdate(req.body.assignee);
     }
+
     return res.status(204).send();
   } catch (err) {
+    if (err.message.includes("Invalid dependency passed")) {
+      const errorMessage = "Invalid dependency";
+      logger.error(`Error while updating task: ${errorMessage}`);
+      return res.boom.badRequest(errorMessage);
+    }
     logger.error(`Error while updating task: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
