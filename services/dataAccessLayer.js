@@ -44,24 +44,23 @@ const retreiveFilteredUsers = async (query) => {
     removeSensitiveInfo(element);
   });
   return users;
-}
+};
 
-const retrieveMembers = async(query) =>{
+const retrieveMembers = async (query) => {
   const allUsers = await members.fetchUsers(query);
   allUsers.forEach((element) => {
     removeSensitiveInfo(element);
   });
   return allUsers;
-}
+};
 
-const retrieveUsersWithRole = async(role) =>{
+const retrieveUsersWithRole = async (role) => {
   const users = await members.fetchUsersWithRole(role);
   users.forEach((element) => {
     removeSensitiveInfo(element);
   });
   return users;
-}
-
+};
 
 const removeSensitiveInfo = function (obj) {
   for (let i = 0; i < USER_SENSITIVE_DATA.length; i++) {
@@ -76,6 +75,6 @@ module.exports = {
   removeSensitiveInfo,
   retrieveDiscordUsers,
   retrieveMembers,
-  retrieveUsersWithRole, 
+  retrieveUsersWithRole,
   retreiveFilteredUsers,
 };

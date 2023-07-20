@@ -5,7 +5,14 @@ const userQuery = require("../../../models/users");
 const members = require("../../../models/members");
 const sinon = require("sinon");
 
-const { retrieveUsers, removeSensitiveInfo, retrieveDiscordUsers, retrieveUsersWithRole, retrieveMembers, retreiveFilteredUsers } = require("../../../services/dataAccessLayer");
+const {
+  retrieveUsers,
+  removeSensitiveInfo,
+  retrieveDiscordUsers,
+  retrieveUsersWithRole,
+  retrieveMembers,
+  retreiveFilteredUsers,
+} = require("../../../services/dataAccessLayer");
 
 const userData = require("../../fixtures/user/user")();
 const { USER_SENSITIVE_DATA } = require("../../../constants/users");
@@ -71,7 +78,7 @@ describe("Data Access Layer", function () {
       });
     });
   });
-  
+
   describe("retrieveDiscordUsers", function () {
     it("should fetch discord users and remove sensitive info", async function () {
       const fetchUserStub = sinon.stub(userQuery, "getDiscordUsers");
@@ -90,7 +97,7 @@ describe("Data Access Layer", function () {
     it("should fetch users with role and remove sensitive info", async function () {
       const fetchUserStub = sinon.stub(members, "fetchUsersWithRole");
       fetchUserStub.returns(Promise.resolve([userData[12]]));
-      const query = {showArchived : true};
+      const query = { showArchived: true };
       const result = await retrieveUsersWithRole(query);
       result.forEach((element) => {
         expect(element).to.deep.equal(userData[12]);
@@ -113,7 +120,7 @@ describe("Data Access Layer", function () {
         });
       });
     });
-   });
+  });
 
   describe("retrieveFilteredUsers", function () {
     it("should fetch query based filtered users and remove sensitive info", async function () {
