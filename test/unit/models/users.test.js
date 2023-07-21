@@ -21,6 +21,14 @@ const photoVerificationModel = firestore.collection("photo-verification");
  * Test the model functions and validate the data stored
  */
 
+const fetchPaginatedUsersFn = async ({ query = {}, role = "members", included = true, excluded = true }) => {
+  const userRes = await users.fetchPaginatedUsers(query);
+  const allUsers = userRes.allUsers;
+  expect(allUsers).to.be.an("array");
+  expect(allUsers).to.deep.include({ role: included });
+  expect(allUsers).to.deep.include({ role: excluded });
+};
+
 describe("users", function () {
   afterEach(async function () {
     await cleanDb();
@@ -218,6 +226,36 @@ describe("users", function () {
       const data = await users.getJoinData("12345");
       expect(data.length).to.be.equal(1);
       expect(data[0]).to.have.all.keys([...Object.keys(joinData[0]), "id"]);
+    });
+  });
+
+  describe("fetchPaginatedUsers", function () {
+    describe("members", function () {
+      it("and non-members should be fetched when query is not included", async function () {
+        await fetchPaginatedUsersFn({ excluded: false });
+      });
+
+      it("only fetched when query has members to true", async function () {
+        await fetchPaginatedUsersFn({ query: { members: "true" } });
+      });
+
+      it("excluded when query has members to false", async function () {
+        await fetchPaginatedUsersFn({ query: { members: "false" }, included: false, excluded: true });
+      });
+    });
+
+    describe("archived users", function () {
+      it("excluded when query has no archived param", async function () {
+        await fetchPaginatedUsersFn({ role: "archived", included: false });
+      });
+
+      it("only be fetched when archived param is set to true", async function () {
+        await fetchPaginatedUsersFn({ query: { archived: "true" }, role: "archived", excluded: false });
+      });
+
+      it("excluded when archived param set to false", async function () {
+        await fetchPaginatedUsersFn({ query: { archived: "false" }, role: "archived", included: false });
+      });
     });
   });
 });
