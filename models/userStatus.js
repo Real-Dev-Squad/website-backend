@@ -347,7 +347,7 @@ const batchUpdateUsersStatus = async (users) => {
       latestStatusData = await getUserStatus(userId);
     } catch (error) {
       summary.totalUnprocessedUsers++;
-      return batch;
+      continue;
     }
     const { id, userStatusExists, data } = latestStatusData;
     const statusToUpdate = {

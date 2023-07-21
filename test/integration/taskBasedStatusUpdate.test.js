@@ -287,21 +287,19 @@ describe("Task Based Status Updates", function () {
   });
 
   describe("PATCH Integration tests for Changing the status to IDLE based on users list passed", function () {
-    let userId0;
-    let userId1;
-    let userId2;
-    let userId3;
-    let userId4;
-    let userId5;
-    let userId6;
-    let userId7;
-    let userId8;
-    let userId9;
+    let [userId0, userId1, userId2, userId3, userId4, userId5, userId6, userId7, userId8, userId9] = [];
     let superUserJwt;
     let listUsers;
     const reqBody = {};
 
     beforeEach(async function () {
+      const allUsers = [];
+      for (let i = 0; i < 10; i++) {
+        const user = await addUser(userData[i]);
+        allUsers.push(user);
+      }
+      [userId0, userId1, userId2, userId3, userId4, userId5, userId6, userId7, userId8, userId9] = allUsers;
+
       userId0 = await addUser(userData[0]);
       userId1 = await addUser(userData[1]);
       userId2 = await addUser(userData[2]);
