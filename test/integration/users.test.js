@@ -1492,4 +1492,6 @@ describe("Users", function () {
       });
     });
   });
+
+  describe("PATCH /update-archived", function () {});
 });
