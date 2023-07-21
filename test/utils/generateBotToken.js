@@ -13,4 +13,12 @@ const generateToken = (data) => {
   });
 };
 
-module.exports = { generateToken };
+const generateCronJobToken = (data) => {
+  const token = jwt.sign(data, config.get("cronJobHandler.privateKey"), {
+    algorithm: "RS256",
+    expiresIn: "1m",
+  });
+  return token;
+};
+
+module.exports = { generateToken, generateCronJobToken };

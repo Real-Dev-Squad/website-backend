@@ -305,5 +305,29 @@ module.exports = () => {
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
     },
+    {
+      username: "ram",
+      github_id: "Ram123",
+      first_name: "Ram",
+      yoe: 1,
+      picture: {
+        publicId: "profile/abc/abc",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/123.jpg",
+      },
+      incompleteUserDetails: false,
+      status: "active",
+      last_name: "Singh",
+      github_display_name: "Ram Singh",
+      website: "Ramsingh123.github.io/portfolio",
+      designation: "SDE",
+      company: "XYZ",
+      instagram_id: "ramsingh",
+      roles: {
+        archived: true,
+        member: false,
+      },
+      twitter_id: "ramsingh123",
+      linkedin_id: "ramsingh123",
+    },
   ];
 };

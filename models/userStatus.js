@@ -1,8 +1,7 @@
-const { NotFound } = require("http-errors");
-const { userState } = require("../constants/userStatus");
+const { Forbidden, NotFound } = require("http-errors");
 const firestore = require("../utils/firestore");
 const {
-  getTommorowTimeStamp,
+  getTomorrowTimeStamp,
   filterStatusData,
   generateAlreadyExistingStatusResponse,
   updateCurrentStatusToState,
@@ -11,10 +10,12 @@ const {
   getUserIdFromUserName,
   checkIfUserHasLiveTasks,
   generateErrorResponse,
+  generateNewStatus,
 } = require("../utils/userStatus");
 const { TASK_STATUS } = require("../constants/tasks");
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
+const { userState } = require("../constants/userStatus");
 const usersCollection = firestore.collection("users");
 
 /**
@@ -100,7 +101,7 @@ const updateUserStatus = async (userId, newStatusData) => {
   try {
     const userStatusDocs = await userStatusModel.where("userId", "==", userId).limit(1).get();
     const [userStatusDoc] = userStatusDocs.docs;
-    const tommorow = getTommorowTimeStamp();
+    const tommorow = getTomorrowTimeStamp();
     if (userStatusDoc) {
       const docId = userStatusDoc.id;
       const userStatusData = userStatusDoc.data();
@@ -449,6 +450,50 @@ const getIdleUsers = async () => {
   };
 };
 
+/**
+ * Cancels the Out-of-Office (OOO) status for a user.
+ * @param {string} userId - The ID of the user.
+ * @returns {Promise<object>} - A promise that resolves to an object with cancellation details.
+ * @throws {Error} - If there is an error fetching the user status document or updating the status.
+ */
+
+const cancelOooStatus = async (userId) => {
+  try {
+    let userStatusDoc;
+    let isActive;
+    try {
+      userStatusDoc = await userStatusModel.where("userId", "==", userId).get();
+    } catch (error) {
+      logger.error(`Unable to fetch user status document from the firestore : ${error.message}`);
+      throw error;
+    }
+    if (!userStatusDoc.size) {
+      throw new NotFound("No User status document found");
+    }
+    const [userStatusDocument] = userStatusDoc.docs;
+    const docId = userStatusDocument.id;
+    const { futureStatus, ...docData } = userStatusDocument.data();
+    if (docData.currentStatus.state !== userState.OOO) {
+      throw new Forbidden(
+        `The ${userState.OOO} Status cannot be canceled because the current status is ${docData.currentStatus.state}.`
+      );
+    }
+    try {
+      isActive = await checkIfUserHasLiveTasks(userId, tasksModel);
+    } catch (error) {
+      logger.error(`Unable to fetch user status based on the task : ${error.message}`);
+      throw error;
+    }
+    const updatedStatus = generateNewStatus(isActive);
+    const newStatusData = { ...docData, ...updatedStatus };
+    await userStatusModel.doc(docId).update(newStatusData);
+    return { id: docId, userStatusExists: true, data: newStatusData };
+  } catch (error) {
+    logger.error(`Error while canceling ${userState.OOO} status: ${error.message}`);
+    throw error;
+  }
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -460,4 +505,5 @@ module.exports = {
   updateStatusOnTaskCompletion,
   massUpdateIdleUsers,
   getIdleUsers,
+  cancelOooStatus,
 };

@@ -9,7 +9,7 @@ const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
 const obfuscate = require("../utils/obfuscate");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
+const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
@@ -133,8 +133,8 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
-    const { phone, email, ...user } = result.user;
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
+    const user = result.user;
 
     if (result.userExists) {
       return res.json({
@@ -195,7 +195,7 @@ const getSuggestedUsers = async (req, res) => {
 
 const getUsernameAvailabilty = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
     return res.json({
       isUsernameAvailable: !result.userExists,
     });
@@ -563,16 +563,11 @@ const filterUsers = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    const users = await userQuery.getUsersBasedOnFilter(req.query);
-    const sanitizedUsers = users.map((user) => {
-      delete user.tokens;
-      delete user.email;
-      delete user.phone;
-      return user;
-    });
+    const users = await dataAccess.retreiveFilteredUsers(req.query);
+
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
-      users: sanitizedUsers,
+      users: users,
       count: users.length,
     });
   } catch (error) {
@@ -592,6 +587,29 @@ const setInDiscordScript = async (req, res) => {
     return res.json({ message: "Successfully added the in_discord field to false for all users" });
   } catch (err) {
     return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
+const updateRoles = async (req, res) => {
+  try {
+    const result = await userQuery.fetchUser({ userId: req.params.id });
+    if (result?.userExists) {
+      const dataToUpdate = req.body;
+      const response = await getRoleToUpdate(result.user, dataToUpdate);
+      if (response.updateRole) {
+        await userQuery.addOrUpdate(response.newUserRoles, result.user.id);
+        return res.json({
+          message: "role updated successfully!",
+        });
+      } else {
+        return res.boom.conflict("Role already exist!");
+      }
+    } else {
+      return res.boom.notFound("User not found");
+    }
+  } catch (error) {
+    logger.error(`Error while updateRoles: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -619,4 +637,5 @@ module.exports = {
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
+  updateRoles,
 };
