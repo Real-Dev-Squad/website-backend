@@ -117,7 +117,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: '"status" must be one of [ooo, idle, active]',
+            message: '"status" must be one of [ooo, idle, active, onboarding]',
           });
 
           return done();
