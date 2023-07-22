@@ -38,7 +38,7 @@ const verifyUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-  let result,user;
+  let result, user;
   try {
     result = await dataAccess.retrieveUsers({ id: req.params.userId });
     user = result.user;
@@ -73,7 +73,7 @@ const getUsers = async (req, res) => {
     // getting user details by id if present.
     if (req.query.id) {
       const id = req.query.id;
-      let result,user;
+      let result, user;
       try {
         result = await dataAccess.retrieveUsers({ id: id });
         user = result.user;
