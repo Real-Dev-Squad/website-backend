@@ -231,12 +231,16 @@ describe("Update Status based on task update", function () {
 
     beforeEach(async function () {
       const userArr = userData();
-      const allUsers = [];
-      for (let i = 0; i < 10; i++) {
-        const user = await addUser(userArr[i]);
-        allUsers.push(user);
-      }
-      [userId0, userId1, userId2, userId3, userId4, userId5, userId6, userId7, userId8, userId9] = allUsers;
+      userId0 = await addUser(userArr[0]);
+      userId1 = await addUser(userArr[1]);
+      userId2 = await addUser(userArr[2]);
+      userId3 = await addUser(userArr[3]);
+      userId4 = await addUser(userArr[4]);
+      userId5 = await addUser(userArr[5]);
+      userId6 = await addUser(userArr[6]);
+      userId7 = await addUser(userArr[7]);
+      userId8 = await addUser(userArr[8]);
+      userId9 = await addUser(userArr[9]);
       await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.ACTIVE));
       await userStatusModel.doc("userStatus001").set(generateStatusDataForState(userId1, userState.OOO));
       await userStatusModel.doc("userStatus002").set(generateStatusDataForState(userId2, userState.IDLE));

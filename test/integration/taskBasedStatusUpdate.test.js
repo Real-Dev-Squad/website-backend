@@ -293,13 +293,6 @@ describe("Task Based Status Updates", function () {
     const reqBody = {};
 
     beforeEach(async function () {
-      const allUsers = [];
-      for (let i = 0; i < 10; i++) {
-        const user = await addUser(userData[i]);
-        allUsers.push(user);
-      }
-      [userId0, userId1, userId2, userId3, userId4, userId5, userId6, userId7, userId8, userId9] = allUsers;
-
       userId0 = await addUser(userData[0]);
       userId1 = await addUser(userData[1]);
       userId2 = await addUser(userData[2]);
