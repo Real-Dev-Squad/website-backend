@@ -12,11 +12,11 @@ describe("Middleware | Validators | massUpdateUserStatus", function () {
           users: [
             {
               userId: "4kAkRv9TBlOfR6WEUhoQ",
-              expectedState: "IDLE",
+              state: "IDLE",
             },
             {
               userId: "SooJK37gzjIZfFNH0tlL",
-              expectedState: "ACTIVE",
+              state: "ACTIVE",
             },
           ],
         },

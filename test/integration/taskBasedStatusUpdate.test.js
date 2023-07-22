@@ -287,16 +287,7 @@ describe("Task Based Status Updates", function () {
   });
 
   describe("PATCH Integration tests for Changing the status to IDLE based on users list passed", function () {
-    let userId0;
-    let userId1;
-    let userId2;
-    let userId3;
-    let userId4;
-    let userId5;
-    let userId6;
-    let userId7;
-    let userId8;
-    let userId9;
+    let [userId0, userId1, userId2, userId3, userId4, userId5, userId6, userId7, userId8, userId9] = [];
     let superUserJwt;
     let listUsers;
     const reqBody = {};
@@ -314,16 +305,16 @@ describe("Task Based Status Updates", function () {
       userId9 = await addUser(userData[9]);
       superUserJwt = authService.generateAuthToken({ userId: userId4 });
       listUsers = [
-        { userId: userId0, expectedState: "IDLE" },
-        { userId: userId1, expectedState: "IDLE" },
-        { userId: userId2, expectedState: "IDLE" },
-        { userId: userId3, expectedState: "IDLE" },
-        { userId: userId4, expectedState: "IDLE" },
-        { userId: userId5, expectedState: "ACTIVE" },
-        { userId: userId6, expectedState: "ACTIVE" },
-        { userId: userId7, expectedState: "ACTIVE" },
-        { userId: userId8, expectedState: "ACTIVE" },
-        { userId: userId9, expectedState: "ACTIVE" },
+        { userId: userId0, state: "IDLE" },
+        { userId: userId1, state: "IDLE" },
+        { userId: userId2, state: "IDLE" },
+        { userId: userId3, state: "IDLE" },
+        { userId: userId4, state: "IDLE" },
+        { userId: userId5, state: "ACTIVE" },
+        { userId: userId6, state: "ACTIVE" },
+        { userId: userId7, state: "ACTIVE" },
+        { userId: userId8, state: "ACTIVE" },
+        { userId: userId9, state: "ACTIVE" },
       ];
       reqBody.users = listUsers;
       await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.ACTIVE));
@@ -450,14 +441,13 @@ describe("Task Based Status Updates", function () {
     afterEach(async function () {
       await cleanDb();
     });
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip("should get the users who without Assigned Or InProgress Tasks", async function () {
+    it("should get the users who without Assigned Or InProgress Tasks", async function () {
       const response = await chai
         .request(app)
-        .get(`/users/status?batch=true`)
+        .get(`/users/status?aggregate=true`)
         .set("cookie", `${cookieName}=${superUserJwt}`);
       expect(response.status).to.equal(200);
-      expect(response.body.message).to.equal("All idle users found successfully.");
+      expect(response.body.message).to.equal("All users based on tasks found successfully.");
       expect(response.body.data.totalUsers).to.equal(4);
       expect(response.body.data.totalIdleUsers).to.equal(2);
       expect(response.body.data.totalActiveUsers).to.equal(2);
@@ -466,17 +456,17 @@ describe("Task Based Status Updates", function () {
       expect(response.body.data)
         .to.have.deep.property("users")
         .that.has.deep.members([
-          { userId: userId1, expectedState: "ACTIVE" },
-          { userId: userId2, expectedState: "ACTIVE" },
-          { userId: userId3, expectedState: "IDLE" },
-          { userId: superUserId, expectedState: "IDLE" },
+          { userId: userId1, state: "ACTIVE" },
+          { userId: userId2, state: "ACTIVE" },
+          { userId: userId3, state: "IDLE" },
+          { userId: superUserId, state: "IDLE" },
         ]);
     });
 
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should throw an error when an error occurs", async function () {
       sinon
-        .stub(userStatusModelFunction, "getIdleUsers")
+        .stub(userStatusModelFunction, "getTaskBasedUsersStatus")
         .throws(
           new Error(
             "The server has encountered an unexpected error. Please contact the administrator for more information."
