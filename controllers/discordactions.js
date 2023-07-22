@@ -74,11 +74,12 @@ const getAllGroupRoles = async (req, res) => {
     }, new Set());
     const groupCreatorsDetails = await retrieveUsers({ userIds: Array.from(groupCreatorIds) });
     const groupsWithUserDetails = groupsWithMemberCount.map((group) => {
+      const groupCreator = groupCreatorsDetails[group.createdBy];
       return {
         ...group,
-        firstName: groupCreatorsDetails[group.createdBy].first_name,
-        lastName: groupCreatorsDetails[group.createdBy].last_name,
-        image: groupCreatorsDetails[group.createdBy].picture?.url,
+        firstName: groupCreator.first_name,
+        lastName: groupCreator.last_name,
+        image: groupCreator.picture?.url,
       };
     });
 
