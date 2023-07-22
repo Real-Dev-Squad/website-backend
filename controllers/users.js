@@ -38,9 +38,10 @@ const verifyUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-  let result;
+  let result, user;
   try {
     result = await dataAccess.retrieveUsers({ id: req.params.userId });
+    user = result.user;
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -50,7 +51,6 @@ const getUserById = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   }
 
-  const user = result.user;
   return res.json({
     message: "User returned successfully!",
     user,
@@ -73,9 +73,10 @@ const getUsers = async (req, res) => {
     // getting user details by id if present.
     if (req.query.id) {
       const id = req.query.id;
-      let result;
+      let result, user;
       try {
         result = await dataAccess.retrieveUsers({ id: id });
+        user = result.user;
       } catch (error) {
         logger.error(`Error while fetching user: ${error}`);
         return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -83,7 +84,6 @@ const getUsers = async (req, res) => {
       if (!result.userExists) {
         return res.boom.notFound("User doesn't exist");
       }
-      const user = result.user;
       return res.json({
         message: "User returned successfully!",
         user,
