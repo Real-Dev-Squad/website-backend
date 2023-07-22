@@ -452,7 +452,7 @@ describe("Task Based Status Updates", function () {
     it("should get the users who without Assigned Or InProgress Tasks", async function () {
       const response = await chai
         .request(app)
-        .get(`/users/status?batch=true`)
+        .get(`/users/status?aggregate=true`)
         .set("cookie", `${cookieName}=${superUserJwt}`);
       expect(response.status).to.equal(200);
       expect(response.body.message).to.equal("All idle users found successfully.");
