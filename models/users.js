@@ -148,6 +148,8 @@ const fetchPaginatedUsers = async (query) => {
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
 
     let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+    // eslint-disable-next-line no-console
+    console.log("the users are", query);
 
     if (query.prev) {
       dbQuery = dbQuery.limitToLast(size);
@@ -589,8 +591,6 @@ const archiveUserIfNotInDiscord = async () => {
       };
       updateUserPromises.push(userModel.doc(id).update(userData));
     }
-    // eslint-disable-next-line no-console
-    console.log("the token is", user);
   });
 
   await Promise.all(updateUserPromises);
