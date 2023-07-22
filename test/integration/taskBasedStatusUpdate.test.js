@@ -331,8 +331,7 @@ describe("Task Based Status Updates", function () {
       await cleanDb();
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip("should return the correct results when there are no errors", async function () {
+    it("should return the correct results when there are no errors", async function () {
       const res = await chai
         .request(app)
         .patch(`/users/status/batch`)
@@ -387,8 +386,7 @@ describe("Task Based Status Updates", function () {
       expect(userStatus009Data.currentStatus.state).to.equal(userState.ACTIVE);
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip("should throw an error if users firestore batch operations fail", async function () {
+    it("should throw an error if users firestore batch operations fail", async function () {
       sinon.stub(firestore, "batch").throws(new Error("something went wrong"));
 
       const res = await chai
@@ -463,8 +461,7 @@ describe("Task Based Status Updates", function () {
         ]);
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
-    it.skip("should throw an error when an error occurs", async function () {
+    it("should throw an error when an error occurs", async function () {
       sinon
         .stub(userStatusModelFunction, "getTaskBasedUsersStatus")
         .throws(
@@ -474,7 +471,7 @@ describe("Task Based Status Updates", function () {
         );
       const response = await chai
         .request(app)
-        .get(`/users/status?batch=true`)
+        .get(`/users/status?aggregate=true`)
         .set("cookie", `${cookieName}=${superUserJwt}`);
       expect(response.status).to.equal(500);
       expect(response.body.message).to.equal(
