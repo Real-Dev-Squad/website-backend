@@ -142,16 +142,40 @@ describe("tasks", function () {
     });
   });
 
-  describe("updateDependency", function () {
+  describe("update Dependency", function () {
     it("should add dependencies to firestore", async function () {
-      const data = {
-        taskId: "taskId1",
-        dependsOn: ["taskId2", "taskId3"],
-      };
-      const result = await updateTask(data);
+      const taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      await firestore.collection("tasks").doc(taskId).set(tasksData[5]);
 
-      expect(result.taskDetails.taskId).to.equal(data.taskId);
-      expect(result.taskDetails.dependsOn).to.equal(data.dependsOn);
+      const taskId1 = (await tasks.updateTask(tasksData[3])).taskId;
+      const taskId2 = (await tasks.updateTask(tasksData[4])).taskId;
+      const dependsOn = [taskId1, taskId2];
+      const data = {
+        dependsOn,
+      };
+
+      await updateTask(data, taskId);
+      const taskData = await tasks.fetchTask(taskId);
+      taskData.dependencyDocReference.forEach((taskId) => {
+        expect(dependsOn).to.include(taskId);
+      });
+    });
+    it("should throw error when wrong id is passed", async function () {
+      const taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      await firestore.collection("tasks").doc(taskId).set(tasksData[5]);
+
+      const dependsOn = ["taskId1", "taskId2"];
+      const data = {
+        dependsOn,
+      };
+
+      try {
+        await updateTask(data, taskId);
+        expect.fail("Something went wrong");
+      } catch (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal("Invalid dependency passed");
+      }
     });
   });
   describe("update tasks", function () {

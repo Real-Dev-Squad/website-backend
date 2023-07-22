@@ -74,7 +74,6 @@ module.exports = () => {
       endsOn: 1234,
       startedOn: 4567,
       status: "AVAILABLE",
-      dependsOn: ["taskId2", "taskId3"],
       percentCompleted: 100,
       participants: [],
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },

@@ -37,20 +37,23 @@ const updateTask = async (taskData, taskId = null) => {
           const existingDependenciesSnapshot = await transaction.get(dependencyQuery);
           const existingDependsOnIds = existingDependenciesSnapshot.docs.map((doc) => doc.data().dependsOn);
           const newDependencies = dependsOn.filter((dependency) => !existingDependsOnIds.includes(dependency));
-
           if (newDependencies.length > 0) {
             for (const dependency of newDependencies) {
-              const taskDependsOn = {
-                taskId: taskId,
-                dependsOn: dependency,
-              };
-              const docRef = dependencyModel.doc();
-              transaction.set(docRef, taskDependsOn);
+              const dependencyDoc = await tasksModel.doc(dependency).get();
+              if (dependencyDoc.exists) {
+                const taskDependsOn = {
+                  taskId: taskId,
+                  dependsOn: dependency,
+                };
+                const docRef = dependencyModel.doc();
+                transaction.set(docRef, taskDependsOn);
+              } else {
+                throw new Error("Invalid dependency passed");
+              }
             }
           }
         });
       }
-
       return { taskId };
     }
     const taskInfo = await tasksModel.add(taskData);
