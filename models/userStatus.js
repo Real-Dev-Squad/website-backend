@@ -341,7 +341,7 @@ const batchUpdateUsersStatus = async (users) => {
     totalIdleUsersUnAltered: 0,
   };
 
-  for (const { userId, expectedState } of users) {
+  for (const { userId, state } of users) {
     let latestStatusData;
     try {
       latestStatusData = await getUserStatus(userId);
@@ -351,7 +351,7 @@ const batchUpdateUsersStatus = async (users) => {
     }
     const { id, userStatusExists, data } = latestStatusData;
     const statusToUpdate = {
-      state: expectedState,
+      state,
       message: "",
       from: currentTimeStamp,
       until: "",
@@ -364,19 +364,19 @@ const batchUpdateUsersStatus = async (users) => {
         userId,
         currentStatus: statusToUpdate,
       };
-      expectedState === userState.ACTIVE ? summary.totalActiveUsersAltered++ : summary.totalIdleUsersAltered++;
+      state === userState.ACTIVE ? summary.totalActiveUsersAltered++ : summary.totalIdleUsersAltered++;
       batch.set(newUserStatusRef, newUserStatusData);
     } else {
       const {
-        currentStatus: { state, until },
+        currentStatus: { state: currentState, until },
       } = data;
-      if (state === expectedState) {
-        state === userState.ACTIVE ? summary.totalActiveUsersUnAltered++ : summary.totalIdleUsersUnAltered++;
+      if (currentState === state) {
+        currentState === userState.ACTIVE ? summary.totalActiveUsersUnAltered++ : summary.totalIdleUsersUnAltered++;
         continue;
       }
-      if (state === userState.ONBOARDING) {
+      if (currentState === userState.ONBOARDING) {
         const docRef = userStatusModel.doc(id);
-        if (expectedState === userState.ACTIVE) {
+        if (state === userState.ACTIVE) {
           const updatedStatusData = {
             currentStatus: statusToUpdate,
           };
@@ -386,10 +386,10 @@ const batchUpdateUsersStatus = async (users) => {
           summary.totalOnboardingUsersUnAltered++;
         }
       } else {
-        expectedState === userState.ACTIVE ? summary.totalActiveUsersAltered++ : summary.totalIdleUsersAltered++;
+        state === userState.ACTIVE ? summary.totalActiveUsersAltered++ : summary.totalIdleUsersAltered++;
         const docRef = userStatusModel.doc(id);
         const updatedStatusData =
-          state === userState.OOO
+          currentState === userState.OOO
             ? {
                 futureStatus: {
                   ...statusToUpdate,
@@ -412,7 +412,7 @@ const batchUpdateUsersStatus = async (users) => {
   }
 };
 
-const getExpectedUsersStatus = async () => {
+const getTaskBasedUsersStatus = async () => {
   const users = [];
   let totalIdleUsers = 0;
   let totalActiveUsers = 0;
@@ -441,10 +441,10 @@ const getExpectedUsersStatus = async () => {
             .get();
           if (tasksQuerySnapshot.empty) {
             totalIdleUsers++;
-            users.push({ userId: assigneeId, expectedState: userState.IDLE });
+            users.push({ userId: assigneeId, state: userState.IDLE });
           } else {
             totalActiveUsers++;
-            users.push({ userId: assigneeId, expectedState: userState.ACTIVE });
+            users.push({ userId: assigneeId, state: userState.ACTIVE });
           }
         } catch (error) {
           errorCount++;
@@ -519,6 +519,6 @@ module.exports = {
   updateUserStatusOnTaskUpdate,
   updateStatusOnTaskCompletion,
   batchUpdateUsersStatus,
-  getExpectedUsersStatus,
+  getTaskBasedUsersStatus,
   cancelOooStatus,
 };

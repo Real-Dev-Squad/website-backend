@@ -305,16 +305,16 @@ describe("Task Based Status Updates", function () {
       userId9 = await addUser(userData[9]);
       superUserJwt = authService.generateAuthToken({ userId: userId4 });
       listUsers = [
-        { userId: userId0, expectedState: "IDLE" },
-        { userId: userId1, expectedState: "IDLE" },
-        { userId: userId2, expectedState: "IDLE" },
-        { userId: userId3, expectedState: "IDLE" },
-        { userId: userId4, expectedState: "IDLE" },
-        { userId: userId5, expectedState: "ACTIVE" },
-        { userId: userId6, expectedState: "ACTIVE" },
-        { userId: userId7, expectedState: "ACTIVE" },
-        { userId: userId8, expectedState: "ACTIVE" },
-        { userId: userId9, expectedState: "ACTIVE" },
+        { userId: userId0, state: "IDLE" },
+        { userId: userId1, state: "IDLE" },
+        { userId: userId2, state: "IDLE" },
+        { userId: userId3, state: "IDLE" },
+        { userId: userId4, state: "IDLE" },
+        { userId: userId5, state: "ACTIVE" },
+        { userId: userId6, state: "ACTIVE" },
+        { userId: userId7, state: "ACTIVE" },
+        { userId: userId8, state: "ACTIVE" },
+        { userId: userId9, state: "ACTIVE" },
       ];
       reqBody.users = listUsers;
       await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.ACTIVE));
@@ -464,17 +464,17 @@ describe("Task Based Status Updates", function () {
       expect(response.body.data)
         .to.have.deep.property("users")
         .that.has.deep.members([
-          { userId: userId1, expectedState: "ACTIVE" },
-          { userId: userId2, expectedState: "ACTIVE" },
-          { userId: userId3, expectedState: "IDLE" },
-          { userId: superUserId, expectedState: "IDLE" },
+          { userId: userId1, state: "ACTIVE" },
+          { userId: userId2, state: "ACTIVE" },
+          { userId: userId3, state: "IDLE" },
+          { userId: superUserId, state: "IDLE" },
         ]);
     });
 
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should throw an error when an error occurs", async function () {
       sinon
-        .stub(userStatusModelFunction, "getExpectedUsersStatus")
+        .stub(userStatusModelFunction, "getTaskBasedUsersStatus")
         .throws(
           new Error(
             "The server has encountered an unexpected error. Please contact the administrator for more information."

@@ -100,7 +100,7 @@ const validateMassUpdate = async (req, res, next) => {
         .items(
           Joi.object({
             userId: Joi.string().trim().required(),
-            expectedState: Joi.string().valid(userState.IDLE, userState.ACTIVE).required(),
+            state: Joi.string().valid(userState.IDLE, userState.ACTIVE).required(),
           })
         )
         .min(1)
@@ -123,7 +123,7 @@ const validateMassUpdate = async (req, res, next) => {
 const validateGetQueryParams = async (req, res, next) => {
   const schema = Joi.object()
     .keys({
-      batch: Joi.boolean().valid(true).error(new Error(`Invalid boolean value passed for batch.`)),
+      aggregate: Joi.boolean().valid(true).error(new Error(`Invalid boolean value passed for aggregate.`)),
       state: Joi.string()
         .trim()
         .valid(userState.IDLE, userState.ACTIVE, userState.OOO, userState.ONBOARDING)

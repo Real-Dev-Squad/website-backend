@@ -9,7 +9,7 @@ const {
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
   batchUpdateUsersStatus,
-  getExpectedUsersStatus,
+  getTaskBasedUsersStatus,
 } = require("../../../models/userStatus");
 const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
@@ -250,16 +250,16 @@ describe("Update Status based on task update", function () {
       await userStatusModel.doc("userStatus007").set(generateStatusDataForState(userId7, userState.IDLE));
       await userStatusModel.doc("userStatus008").set(generateStatusDataForState(userId8, userState.ONBOARDING));
       listUsers = [
-        { userId: userId0, expectedState: "IDLE" },
-        { userId: userId1, expectedState: "IDLE" },
-        { userId: userId2, expectedState: "IDLE" },
-        { userId: userId3, expectedState: "IDLE" },
-        { userId: userId4, expectedState: "IDLE" },
-        { userId: userId5, expectedState: "ACTIVE" },
-        { userId: userId6, expectedState: "ACTIVE" },
-        { userId: userId7, expectedState: "ACTIVE" },
-        { userId: userId8, expectedState: "ACTIVE" },
-        { userId: userId9, expectedState: "ACTIVE" },
+        { userId: userId0, state: "IDLE" },
+        { userId: userId1, state: "IDLE" },
+        { userId: userId2, state: "IDLE" },
+        { userId: userId3, state: "IDLE" },
+        { userId: userId4, state: "IDLE" },
+        { userId: userId5, state: "ACTIVE" },
+        { userId: userId6, state: "ACTIVE" },
+        { userId: userId7, state: "ACTIVE" },
+        { userId: userId8, state: "ACTIVE" },
+        { userId: userId9, state: "ACTIVE" },
       ];
       userId0 = await addUser(userArr[0]);
       userId1 = await addUser(userArr[1]);
@@ -280,16 +280,16 @@ describe("Update Status based on task update", function () {
       await userStatusModel.doc("userStatus007").set(generateStatusDataForState(userId7, userState.IDLE));
       await userStatusModel.doc("userStatus008").set(generateStatusDataForState(userId8, userState.ONBOARDING));
       listUsers = [
-        { userId: userId0, expectedState: "IDLE" },
-        { userId: userId1, expectedState: "IDLE" },
-        { userId: userId2, expectedState: "IDLE" },
-        { userId: userId3, expectedState: "IDLE" },
-        { userId: userId4, expectedState: "IDLE" },
-        { userId: userId5, expectedState: "ACTIVE" },
-        { userId: userId6, expectedState: "ACTIVE" },
-        { userId: userId7, expectedState: "ACTIVE" },
-        { userId: userId8, expectedState: "ACTIVE" },
-        { userId: userId9, expectedState: "ACTIVE" },
+        { userId: userId0, state: "IDLE" },
+        { userId: userId1, state: "IDLE" },
+        { userId: userId2, state: "IDLE" },
+        { userId: userId3, state: "IDLE" },
+        { userId: userId4, state: "IDLE" },
+        { userId: userId5, state: "ACTIVE" },
+        { userId: userId6, state: "ACTIVE" },
+        { userId: userId7, state: "ACTIVE" },
+        { userId: userId8, state: "ACTIVE" },
+        { userId: userId9, state: "ACTIVE" },
       ];
     });
 
@@ -356,7 +356,7 @@ describe("Update Status based on task update", function () {
     });
   });
 
-  describe("getExpectedUsersStatus", function () {
+  describe("getTaskBasedUsersStatus", function () {
     let userId1;
     let userId2;
     let userId3;
@@ -391,7 +391,7 @@ describe("Update Status based on task update", function () {
     });
 
     it("should return the correct results when there are no errors", async function () {
-      const result = await getExpectedUsersStatus();
+      const result = await getTaskBasedUsersStatus();
       expect(result).to.deep.include({
         totalUsers: 3,
         totalIdleUsers: 1,
@@ -402,9 +402,9 @@ describe("Update Status based on task update", function () {
       expect(result)
         .to.have.deep.property("users")
         .that.has.deep.members([
-          { userId: userId1, expectedState: "ACTIVE" },
-          { userId: userId3, expectedState: "IDLE" },
-          { userId: userId2, expectedState: "ACTIVE" },
+          { userId: userId1, state: "ACTIVE" },
+          { userId: userId3, state: "IDLE" },
+          { userId: userId2, state: "ACTIVE" },
         ]);
     });
 
@@ -412,7 +412,7 @@ describe("Update Status based on task update", function () {
       const usersCollection = firestore.collection("users");
       sinon.stub(usersCollection, "where").returns(usersCollection);
       sinon.stub(usersCollection, "get").throws(new Error("unable to get users"));
-      await getExpectedUsersStatus().catch((err) => {
+      await getTaskBasedUsersStatus().catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.be.equal("unable to get users");
       });

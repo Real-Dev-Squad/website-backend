@@ -146,16 +146,16 @@ const updateAllUserStatus = async (req, res) => {
 };
 
 /**
- * Retrieve idle users based on task status where the status is not assigned and in progress
+ * Retrieve users status based on task status
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
 
-const getExpectedUsersStatus = async (req, res) => {
+const getTaskBasedUsersStatus = async (req, res) => {
   try {
-    const data = await userStatusModel.getExpectedUsersStatus();
+    const data = await userStatusModel.getTaskBasedUsersStatus();
     return res.json({
-      message: "All idle users found successfully.",
+      message: "All users based on tasks found successfully.",
       data,
     });
   } catch (error) {
@@ -167,8 +167,8 @@ const getExpectedUsersStatus = async (req, res) => {
 };
 
 const getUserStatusControllers = async (req, res, next) => {
-  if (Object.keys(req.query).includes("batch")) {
-    await getExpectedUsersStatus(req, res, next);
+  if (Object.keys(req.query).includes("aggregate")) {
+    await getTaskBasedUsersStatus(req, res, next);
   } else {
     await getAllUserStatus(req, res, next);
   }
@@ -242,7 +242,7 @@ module.exports = {
   getAllUserStatus,
   updateUserStatus,
   updateAllUserStatus,
-  getExpectedUsersStatus,
+  getTaskBasedUsersStatus,
   getUserStatusControllers,
   batchUpdateUsersStatus,
   updateUserStatusController,
