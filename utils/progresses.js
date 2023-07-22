@@ -172,7 +172,10 @@ const getProgressRecords = async (query, queryParams) => {
   const currentDate = new Date(startDate);
   while (currentDate <= new Date(endDate)) {
     const date = currentDate.toISOString().slice(0, 10);
-    progressRecords[date] = Boolean(docsData[date]);
+    // to ignore counting Sundays
+    if (currentDate.getDay() !== 0) {
+      progressRecords[date] = Boolean(docsData[date]);
+    }
     currentDate.setDate(currentDate.getDate() + 1);
   }
   return progressRecords;

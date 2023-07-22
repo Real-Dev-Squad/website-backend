@@ -48,6 +48,12 @@ const createProgress = async (req, res) => {
     body: { type },
   } = req;
   try {
+    const date = new Date();
+    if (date.getDay() === 0) {
+      return res.status(500).json({
+        message: "Progress document cannot be created on a Sunday",
+      });
+    }
     const data = await createProgressDocument({ ...req.body, userId: req.userData.id });
     return res.status(201).json({
       data,
