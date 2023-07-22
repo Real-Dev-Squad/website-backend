@@ -61,6 +61,7 @@ describe("Tasks", function () {
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
         isNoteworthy: false,
+        assignee: appOwner.username,
       },
     ];
 
