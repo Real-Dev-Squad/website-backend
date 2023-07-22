@@ -8,8 +8,8 @@ const {
   updateStatusOnTaskCompletion,
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
-  massUpdateIdleUsers,
-  getIdleUsers,
+  batchUpdateUsersStatus,
+  getTaskBasedUsersStatus,
 } = require("../../../models/userStatus");
 const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
@@ -226,25 +226,41 @@ describe("Update Status based on task update", function () {
   });
 
   describe("Test the Model Function for Changing the status to IDLE based on users list passed", function () {
-    let userId1;
-    let userId2;
-    let userId3;
-    let userId4;
-    let userId5;
+    let [userId0, userId1, userId2, userId3, userId4, userId5, userId6, userId7, userId8, userId9] = [];
     let listUsers;
 
     beforeEach(async function () {
       const userArr = userData();
-      userId1 = await addUser(userArr[6]);
-      userId2 = await addUser(userArr[8]);
-      userId3 = await addUser(userArr[9]);
-      userId4 = await addUser(userArr[0]);
-      userId5 = await addUser(userArr[1]);
-      listUsers = [userId1, userId2, userId3, userId4, userId5];
-      await userStatusModel.doc("userStatus001").set(generateStatusDataForState(userId1, userState.ACTIVE));
-      await userStatusModel.doc("userStatus002").set(generateStatusDataForState(userId2, userState.OOO));
-      await userStatusModel.doc("userStatus003").set(generateStatusDataForState(userId3, userState.IDLE));
-      await userStatusModel.doc("userStatus004").set(generateStatusDataForState(userId4, userState.ONBOARDING));
+      userId0 = await addUser(userArr[0]);
+      userId1 = await addUser(userArr[1]);
+      userId2 = await addUser(userArr[2]);
+      userId3 = await addUser(userArr[3]);
+      userId4 = await addUser(userArr[4]);
+      userId5 = await addUser(userArr[5]);
+      userId6 = await addUser(userArr[6]);
+      userId7 = await addUser(userArr[7]);
+      userId8 = await addUser(userArr[8]);
+      userId9 = await addUser(userArr[9]);
+      await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.ACTIVE));
+      await userStatusModel.doc("userStatus001").set(generateStatusDataForState(userId1, userState.OOO));
+      await userStatusModel.doc("userStatus002").set(generateStatusDataForState(userId2, userState.IDLE));
+      await userStatusModel.doc("userStatus003").set(generateStatusDataForState(userId3, userState.ONBOARDING));
+      await userStatusModel.doc("userStatus005").set(generateStatusDataForState(userId5, userState.ACTIVE));
+      await userStatusModel.doc("userStatus006").set(generateStatusDataForState(userId6, userState.OOO));
+      await userStatusModel.doc("userStatus007").set(generateStatusDataForState(userId7, userState.IDLE));
+      await userStatusModel.doc("userStatus008").set(generateStatusDataForState(userId8, userState.ONBOARDING));
+      listUsers = [
+        { userId: userId0, state: "IDLE" },
+        { userId: userId1, state: "IDLE" },
+        { userId: userId2, state: "IDLE" },
+        { userId: userId3, state: "IDLE" },
+        { userId: userId4, state: "IDLE" },
+        { userId: userId5, state: "ACTIVE" },
+        { userId: userId6, state: "ACTIVE" },
+        { userId: userId7, state: "ACTIVE" },
+        { userId: userId8, state: "ACTIVE" },
+        { userId: userId9, state: "ACTIVE" },
+      ];
     });
 
     afterEach(async function () {
@@ -253,39 +269,64 @@ describe("Update Status based on task update", function () {
     });
 
     it("should return the correct results when there are no errors", async function () {
-      const result = await massUpdateIdleUsers(listUsers);
-      expect(result).to.have.property("totalUsers");
-      expect(result).to.have.property("usersWithStatusUpdated");
-      expect(result).to.have.property("usersOnboardingOrAlreadyIdle");
-      expect(result.totalUsers).to.equal(5);
-      expect(result.usersWithStatusUpdated).to.deep.equal(3);
-      expect(result.usersOnboardingOrAlreadyIdle).to.equal(2);
+      const result = await batchUpdateUsersStatus(listUsers);
+      expect(result).to.have.all.keys(
+        "totalUsers",
+        "totalUnprocessedUsers",
+        "totalOnboardingUsersAltered",
+        "totalOnboardingUsersUnAltered",
+        "totalActiveUsersAltered",
+        "totalActiveUsersUnAltered",
+        "totalIdleUsersAltered",
+        "totalIdleUsersUnAltered"
+      );
+      expect(result.totalUsers).to.equal(10);
+      expect(result.totalUnprocessedUsers).to.equal(0);
+      expect(result.totalOnboardingUsersAltered).to.equal(1);
+      expect(result.totalOnboardingUsersUnAltered).to.equal(1);
+      expect(result.totalActiveUsersAltered).to.equal(3);
+      expect(result.totalActiveUsersUnAltered).to.equal(1);
+      expect(result.totalIdleUsersAltered).to.equal(3);
+      expect(result.totalIdleUsersUnAltered).to.equal(1);
+      const userStatus000Data = (await userStatusModel.doc("userStatus000").get()).data();
+      expect(userStatus000Data.currentStatus.state).to.equal(userState.IDLE);
       const userStatus001Data = (await userStatusModel.doc("userStatus001").get()).data();
-      expect(userStatus001Data.currentStatus.state).to.equal(userState.IDLE);
+      expect(userStatus001Data.currentStatus.state).to.equal(userState.OOO);
+      expect(userStatus001Data.futureStatus.state).to.equal(userState.IDLE);
       const userStatus002Data = (await userStatusModel.doc("userStatus002").get()).data();
-      expect(userStatus002Data.currentStatus.state).to.equal(userState.OOO);
-      expect(userStatus002Data.futureStatus.state).to.equal(userState.IDLE);
+      expect(userStatus002Data.currentStatus.state).to.equal(userState.IDLE);
       const userStatus003Data = (await userStatusModel.doc("userStatus003").get()).data();
-      expect(userStatus003Data.currentStatus.state).to.equal(userState.IDLE);
-      const userStatus004Data = (await userStatusModel.doc("userStatus004").get()).data();
-      expect(userStatus004Data.currentStatus.state).to.equal(userState.ONBOARDING);
-      const userStatus005SnapShot = await userStatusModel.where("userId", "==", userId5).limit(1).get();
-      const [userStatus005Doc] = userStatus005SnapShot.docs;
-      const userStatus005Data = userStatus005Doc.data();
-      expect(userStatus005Data.currentStatus.state).to.equal(userState.IDLE);
+      expect(userStatus003Data.currentStatus.state).to.equal(userState.ONBOARDING);
+      const userStatus004SnapShot = await userStatusModel.where("userId", "==", userId4).limit(1).get();
+      const [userStatus004Doc] = userStatus004SnapShot.docs;
+      const userStatus004Data = userStatus004Doc.data();
+      expect(userStatus004Data.currentStatus.state).to.equal(userState.IDLE);
+      const userStatus005Data = (await userStatusModel.doc("userStatus005").get()).data();
+      expect(userStatus005Data.currentStatus.state).to.equal(userState.ACTIVE);
+      const userStatus006Data = (await userStatusModel.doc("userStatus006").get()).data();
+      expect(userStatus006Data.currentStatus.state).to.equal(userState.OOO);
+      expect(userStatus006Data.futureStatus.state).to.equal(userState.ACTIVE);
+      const userStatus007Data = (await userStatusModel.doc("userStatus007").get()).data();
+      expect(userStatus007Data.currentStatus.state).to.equal(userState.ACTIVE);
+      const userStatus008Data = (await userStatusModel.doc("userStatus008").get()).data();
+      expect(userStatus008Data.currentStatus.state).to.equal(userState.ACTIVE);
+      const userStatus009SnapShot = await userStatusModel.where("userId", "==", userId9).limit(1).get();
+      const [userStatus009Doc] = userStatus009SnapShot.docs;
+      const userStatus009Data = userStatus009Doc.data();
+      expect(userStatus009Data.currentStatus.state).to.equal(userState.ACTIVE);
     });
 
     it("should throw an error if users firestore batch operations fail", async function () {
       sinon.stub(firestore, "batch").throws(new Error("something went wrong"));
 
-      await massUpdateIdleUsers().catch((err) => {
+      await batchUpdateUsersStatus().catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("something went wrong");
       });
     });
   });
 
-  describe("getIdleUsers", function () {
+  describe("getTaskBasedUsersStatus", function () {
     let userId1;
     let userId2;
     let userId3;
@@ -320,19 +361,28 @@ describe("Update Status based on task update", function () {
     });
 
     it("should return the correct results when there are no errors", async function () {
-      const result = await getIdleUsers();
-      expect(result.totalValidUsersCount).to.equal(3);
-      expect(result.idleUsersCount).to.equal(1);
-      expect(result.idleUsers).to.deep.equal([userId3]);
-      expect(result.usersNotProcessedCount).to.equal(0);
-      expect(result.usersNotProcessed).to.deep.equal([]);
+      const result = await getTaskBasedUsersStatus();
+      expect(result).to.deep.include({
+        totalUsers: 3,
+        totalIdleUsers: 1,
+        totalActiveUsers: 2,
+        totalUnprocessedUsers: 0,
+        unprocessedUsers: [],
+      });
+      expect(result)
+        .to.have.deep.property("users")
+        .that.has.deep.members([
+          { userId: userId1, state: "ACTIVE" },
+          { userId: userId3, state: "IDLE" },
+          { userId: userId2, state: "ACTIVE" },
+        ]);
     });
 
     it("should throw an error if users query fail", async function () {
       const usersCollection = firestore.collection("users");
       sinon.stub(usersCollection, "where").returns(usersCollection);
       sinon.stub(usersCollection, "get").throws(new Error("unable to get users"));
-      await getIdleUsers().catch((err) => {
+      await getTaskBasedUsersStatus().catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.be.equal("unable to get users");
       });

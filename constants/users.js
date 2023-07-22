@@ -10,6 +10,7 @@ const USER_STATUS = {
   OOO: "ooo",
   IDLE: "idle",
   ACTIVE: "active",
+  ONBOARDING: "onboarding",
 };
 
 const ALLOWED_FILTER_PARAMS = {

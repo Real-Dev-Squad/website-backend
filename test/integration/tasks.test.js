@@ -390,7 +390,6 @@ describe("Tasks", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
-          dependsOn: ["dependency1", "dependency2"],
         })
         .end((err, res) => {
           if (err) {
@@ -402,7 +401,10 @@ describe("Tasks", function () {
     });
     it("Should update dependency", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
-      const dependsOn = ["taskId5", "taskId4"];
+      const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId2 = (await tasks.updateTask(tasksData[5])).taskId;
+
+      const dependsOn = [taskId1, taskId2];
       const res = await chai
         .request(app)
         .patch(`/tasks/${taskId}`)
@@ -410,12 +412,41 @@ describe("Tasks", function () {
         .send({ dependsOn });
       expect(res).to.have.status(204);
       const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
-
       expect(res2).to.have.status(200);
       expect(res2.body.taskData.dependsOn).to.be.a("array");
       res2.body.taskData.dependsOn.forEach((taskId) => {
         expect(dependsOn).to.include(taskId);
       });
+
+      return taskId;
+    });
+
+    it("Should return 400 if any of taskid is not exist", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
+      const dependsOn = ["taskId5", "taskId6", taskId1];
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ dependsOn });
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.equal("Invalid dependency");
+    });
+
+    it("Should update status when assignee pass as a payload", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "sagar" });
+      expect(res).to.have.status(204);
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      expect(res2).to.have.status(200);
+      expect(res2.body.taskData.assignee).to.be.equal("sagar");
+
+      expect(res2.body.taskData.status).to.be.equal(TASK_STATUS.ASSIGNED);
 
       return taskId;
     });
@@ -462,6 +493,25 @@ describe("Tasks", function () {
         .send({
           title: "new-title",
           status: "invalidStatus",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          return done();
+        });
+    });
+    it("Should return fail response if percent completed is < 0 or > 100", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/" + taskId1)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          status: TASK_STATUS.IN_REVIEW,
+          percentCompleted: 120,
         })
         .end((err, res) => {
           if (err) {
@@ -615,6 +665,23 @@ describe("Tasks", function () {
         .patch(`/tasks/self/${taskId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "invalidStatus" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          return done();
+        });
+    });
+
+    it("Should return fail response if percentage is < 0 or  > 100", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, percentCompleted: -10 })
         .end((err, res) => {
           if (err) {
             return done(err);

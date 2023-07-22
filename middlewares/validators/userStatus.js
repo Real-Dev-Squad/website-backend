@@ -97,10 +97,15 @@ const validateMassUpdate = async (req, res, next) => {
   const schema = Joi.object()
     .keys({
       users: Joi.array()
-        .items(Joi.string().trim())
+        .items(
+          Joi.object({
+            userId: Joi.string().trim().required(),
+            state: Joi.string().valid(userState.IDLE, userState.ACTIVE).required(),
+          })
+        )
         .min(1)
         .required()
-        .error(new Error(`Invalid state value passed for users.`)),
+        .error(new Error(`Invalid object passed in users.`)),
     })
     .messages({
       "object.unknown": "Invalid key in Request payload.",
@@ -118,10 +123,7 @@ const validateMassUpdate = async (req, res, next) => {
 const validateGetQueryParams = async (req, res, next) => {
   const schema = Joi.object()
     .keys({
-      taskStatus: Joi.string()
-        .trim()
-        .valid(userState.IDLE)
-        .error(new Error(`Invalid state value passed for taskStatus.`)),
+      aggregate: Joi.boolean().valid(true).error(new Error(`Invalid boolean value passed for aggregate.`)),
       state: Joi.string()
         .trim()
         .valid(userState.IDLE, userState.ACTIVE, userState.OOO, userState.ONBOARDING)

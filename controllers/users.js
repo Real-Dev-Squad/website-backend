@@ -133,8 +133,8 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
-    const { phone, email, ...user } = result.user;
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
+    const user = result.user;
 
     if (result.userExists) {
       return res.json({
@@ -195,7 +195,7 @@ const getSuggestedUsers = async (req, res) => {
 
 const getUsernameAvailabilty = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
     return res.json({
       isUsernameAvailable: !result.userExists,
     });
@@ -563,16 +563,11 @@ const filterUsers = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    const users = await userQuery.getUsersBasedOnFilter(req.query);
-    const sanitizedUsers = users.map((user) => {
-      delete user.tokens;
-      delete user.email;
-      delete user.phone;
-      return user;
-    });
+    const users = await dataAccess.retreiveFilteredUsers(req.query);
+
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
-      users: sanitizedUsers,
+      users: users,
       count: users.length,
     });
   } catch (error) {
