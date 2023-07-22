@@ -261,36 +261,6 @@ describe("Update Status based on task update", function () {
         { userId: userId8, state: "ACTIVE" },
         { userId: userId9, state: "ACTIVE" },
       ];
-      userId0 = await addUser(userArr[0]);
-      userId1 = await addUser(userArr[1]);
-      userId2 = await addUser(userArr[2]);
-      userId3 = await addUser(userArr[3]);
-      userId4 = await addUser(userArr[4]);
-      userId5 = await addUser(userArr[5]);
-      userId6 = await addUser(userArr[6]);
-      userId7 = await addUser(userArr[7]);
-      userId8 = await addUser(userArr[8]);
-      userId9 = await addUser(userArr[9]);
-      await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.ACTIVE));
-      await userStatusModel.doc("userStatus001").set(generateStatusDataForState(userId1, userState.OOO));
-      await userStatusModel.doc("userStatus002").set(generateStatusDataForState(userId2, userState.IDLE));
-      await userStatusModel.doc("userStatus003").set(generateStatusDataForState(userId3, userState.ONBOARDING));
-      await userStatusModel.doc("userStatus005").set(generateStatusDataForState(userId5, userState.ACTIVE));
-      await userStatusModel.doc("userStatus006").set(generateStatusDataForState(userId6, userState.OOO));
-      await userStatusModel.doc("userStatus007").set(generateStatusDataForState(userId7, userState.IDLE));
-      await userStatusModel.doc("userStatus008").set(generateStatusDataForState(userId8, userState.ONBOARDING));
-      listUsers = [
-        { userId: userId0, state: "IDLE" },
-        { userId: userId1, state: "IDLE" },
-        { userId: userId2, state: "IDLE" },
-        { userId: userId3, state: "IDLE" },
-        { userId: userId4, state: "IDLE" },
-        { userId: userId5, state: "ACTIVE" },
-        { userId: userId6, state: "ACTIVE" },
-        { userId: userId7, state: "ACTIVE" },
-        { userId: userId8, state: "ACTIVE" },
-        { userId: userId9, state: "ACTIVE" },
-      ];
     });
 
     afterEach(async function () {
