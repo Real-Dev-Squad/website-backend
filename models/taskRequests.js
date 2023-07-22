@@ -59,11 +59,12 @@ const fetchTaskRequestById = async (taskRequestId) => {
     if (taskRequestData) {
       taskRequestData.id = taskRequestSnapshot.id;
       taskRequestData.url = new URL(`/taskRequests/${taskRequestData.id}`, config.get("services.rdsUi.baseUrl"));
+
+      return {
+        taskRequestData,
+        taskRequestExists: true,
+      };
     }
-    return {
-      taskRequestData,
-      taskRequestExists: true,
-    };
   } catch (err) {
     logger.error("Error in updating task", err);
   }
@@ -130,15 +131,16 @@ const addOrUpdate = async (taskId, userId) => {
 const approveTaskRequest = async (taskRequestId, user) => {
   try {
     const taskRequest = await taskRequestsCollection.doc(taskRequestId).get();
+    const taskRequestData = taskRequest.data();
 
     const updatedTaskRequest = {
-      ...taskRequest.data(),
+      ...taskRequestData,
       approvedTo: user.id,
       status: TASK_REQUEST_STATUS.APPROVED,
     };
 
     await taskRequestsCollection.doc(taskRequestId).set(updatedTaskRequest);
-    await tasksModel.updateTask({ assignee: user.id, status: TASK_STATUS.ASSIGNED }, taskRequestId);
+    await tasksModel.updateTask({ assignee: user.username, status: TASK_STATUS.ASSIGNED }, taskRequestData.taskId);
 
     return {
       approvedTo: user.username,
