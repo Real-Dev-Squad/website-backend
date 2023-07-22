@@ -157,11 +157,8 @@ describe("Task Requests", function () {
       });
 
       it("should return 404 if the resource is not found", function (done) {
-<<<<<<< HEAD
         sinon.stub(taskRequestsModel, "fetchTaskRequestById").callsFake(() => []);
 
-=======
->>>>>>> 962ea45 (feat: Add fetchTaskRequestById)
         chai
           .request(app)
           .get(`/taskRequests/taskRequestId`)
