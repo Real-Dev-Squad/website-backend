@@ -220,4 +220,34 @@ describe("users", function () {
       expect(data[0]).to.have.all.keys([...Object.keys(joinData[0]), "id"]);
     });
   });
+
+  describe("archive user if not in discord", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        const userData = {
+          ...user,
+          roles: {
+            ...user.roles,
+            in_discord: false,
+            archived: user?.roles?.archived || false,
+          },
+        };
+        addUsersPromises.push(userModel.add(userData));
+      });
+
+      await Promise.all(addUsersPromises);
+    });
+
+    it("should update archived role to true if in_discord is false", async function () {
+      await users.archiveUserIfNotInDiscord();
+
+      const updatedUsers = await users.fetchAllUsers();
+
+      updatedUsers.forEach((user) => {
+        expect(user.roles.in_discord).to.be.equal(false);
+        expect(user.roles.archived).to.be.equal(true);
+      });
+    });
+  });
 });
