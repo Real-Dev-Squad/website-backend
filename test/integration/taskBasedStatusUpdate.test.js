@@ -447,7 +447,7 @@ describe("Task Based Status Updates", function () {
         .get(`/users/status?aggregate=true`)
         .set("cookie", `${cookieName}=${superUserJwt}`);
       expect(response.status).to.equal(200);
-      expect(response.body.message).to.equal("All idle users found successfully.");
+      expect(response.body.message).to.equal("All users based on tasks found successfully.");
       expect(response.body.data.totalUsers).to.equal(4);
       expect(response.body.data.totalIdleUsers).to.equal(2);
       expect(response.body.data.totalActiveUsers).to.equal(2);
