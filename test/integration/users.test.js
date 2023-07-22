@@ -1493,5 +1493,23 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /update-archived", function () {});
+  describe("PATCH /update-archived", function () {
+    it("returns successful response", function (done) {
+      chai
+        .request(app)
+        .patch("/users/update-archived")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal(
+            "Successfully updated users archived role to true if in_discord role is false"
+          );
+          return done();
+        });
+    });
+  });
 });
