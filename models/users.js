@@ -572,6 +572,30 @@ const fetchAllUsers = async () => {
   return users;
 };
 
+const archiveUserIfNotInDiscord = async () => {
+  const users = await fetchAllUsers();
+  const updateUserPromises = [];
+
+  users.forEach((user) => {
+    const isUserInDiscord = user?.roles?.in_discord;
+    const id = user.id;
+    if (!isUserInDiscord) {
+      const userData = {
+        ...user,
+        roles: {
+          ...user.roles,
+          archived: true,
+        },
+      };
+      updateUserPromises.push(userModel.doc(id).update(userData));
+    }
+    // eslint-disable-next-line no-console
+    console.log("the token is", user);
+  });
+
+  await Promise.all(updateUserPromises);
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -592,4 +616,5 @@ module.exports = {
   getUserImageForVerification,
   getDiscordUsers,
   fetchAllUsers,
+  archiveUserIfNotInDiscord,
 };

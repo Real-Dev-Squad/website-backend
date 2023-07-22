@@ -32,6 +32,7 @@ router.patch(
   userValidator.validateUpdateRoles,
   users.updateRoles
 );
+router.patch("/update-archived", authenticate, authorizeRoles([SUPERUSER]), users.archiveUserIfNotInDiscord);
 
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post("/picture", authenticate, checkIsVerifiedDiscord, upload.single("profile"), users.postUserPicture);
