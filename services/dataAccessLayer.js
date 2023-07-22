@@ -64,7 +64,7 @@ const retrieveUsersWithRole = async (role) => {
 
 const removeSensitiveInfo = function (obj) {
   for (let i = 0; i < USER_SENSITIVE_DATA.length; i++) {
-    if (USER_SENSITIVE_DATA[i] in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, USER_SENSITIVE_DATA[i])) {
       delete obj[USER_SENSITIVE_DATA[i]];
     }
   }
