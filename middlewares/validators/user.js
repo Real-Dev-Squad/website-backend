@@ -50,7 +50,7 @@ const updateUser = async (req, res, next) => {
         .string()
         .optional()
         .regex(/^[^@]*$/)
-        .message("Social Id must not contain the @ symbol."),
+        .message("Social Id's must not contain the @ symbol."),
     });
 
   try {
