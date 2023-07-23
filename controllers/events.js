@@ -193,6 +193,52 @@ const endActiveEvent = async (req, res) => {
   }
 };
 
+/**
+ * Creates room codes
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with a message indicating the room codes are created.
+ * @throws {Object} The JSON response with an error message if an error occurred while ending the event.
+ */
+const createRoomCodes = async (req, res) => {
+  try {
+    const { data } = await apiService.post(`/room-codes/room/${req.body.room_id}`);
+    return res.status(200).json({ message: `Room codes created successfully.`, data });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Couldn't create the room codes. Please try again later",
+    });
+  }
+};
+
+/**
+ * Get room codes
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with room codes.
+ * @throws {Object} The JSON response with an error message if an error occurred.
+ */
+const getRoomCodes = async (req, res) => {
+  try {
+    const { data } = await apiService.get(`/room-codes/room/${req.query.room_id}`);
+    return res.status(200).json({ data });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Couldn't get the room codes. Please try again later",
+    });
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -200,4 +246,6 @@ module.exports = {
   getEventById,
   updateEvent,
   endActiveEvent,
+  createRoomCodes,
+  getRoomCodes,
 };
