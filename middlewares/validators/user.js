@@ -13,22 +13,44 @@ const updateUser = async (req, res, next) => {
     .keys({
       phone: joi.string().optional(),
       email: joi.string().optional(),
-      username: joi.string().optional(),
+      username: joi
+        .string()
+        .optional()
+        .min(4)
+        .max(20)
+        .regex(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]+$/)
+        .message("Username must be between 4 and 20 characters long and contain only letters and numbers."),
       first_name: joi.string().optional(),
       last_name: joi.string().optional(),
       yoe: joi.number().min(0).optional(),
       company: joi.string().optional(),
       designation: joi.string().optional(),
       img: joi.string().optional(),
-      linkedin_id: joi.string().optional(),
-      twitter_id: joi.string().optional(),
-      instagram_id: joi.string().optional(),
+      linkedin_id: joi
+        .string()
+        .optional()
+        .regex(/^[^@]*$/)
+        .message("Social Id must not contain the @ symbol."),
+      twitter_id: joi
+        .string()
+        .optional()
+        .regex(/^[^@]*$/)
+        .message("Social Id must not contain the @ symbol."),
+      instagram_id: joi
+        .string()
+        .optional()
+        .regex(/^[^@]*$/)
+        .message("Social Id must not contain the @ symbol."),
       website: joi.string().optional(),
       status: joi
         .any()
         .valid(...Object.values(USER_STATUS))
         .optional(),
-      discordId: joi.string().optional(),
+      discordId: joi
+        .string()
+        .optional()
+        .regex(/^[^@]*$/)
+        .message("Social Id must not contain the @ symbol."),
     });
 
   try {
