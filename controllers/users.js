@@ -7,7 +7,6 @@ const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
 const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
-const obfuscate = require("../utils/obfuscate");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript } = require("../services/discordService");
@@ -39,9 +38,10 @@ const verifyUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-  let result;
+  let result, user;
   try {
-    result = await userQuery.fetchUser({ userId: req.params.userId });
+    result = await dataAccess.retrieveUsers({ id: req.params.userId });
+    user = result.user;
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -49,15 +49,6 @@ const getUserById = async (req, res) => {
 
   if (!result.userExists) {
     return res.boom.notFound("User doesn't exist");
-  }
-
-  const { phone = "", email = "", ...user } = result.user;
-  try {
-    user.phone = obfuscate.obfuscatePhone(phone);
-    user.email = obfuscate.obfuscateMail(email);
-  } catch (error) {
-    logger.error(`Error while formatting phone and email: ${error}`);
-    return res.boom.badImplementation("Error while formatting phone and email");
   }
 
   return res.json({
@@ -82,9 +73,10 @@ const getUsers = async (req, res) => {
     // getting user details by id if present.
     if (req.query.id) {
       const id = req.query.id;
-      let result;
+      let result, user;
       try {
         result = await dataAccess.retrieveUsers({ id: id });
+        user = result.user;
       } catch (error) {
         logger.error(`Error while fetching user: ${error}`);
         return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -92,7 +84,6 @@ const getUsers = async (req, res) => {
       if (!result.userExists) {
         return res.boom.notFound("User doesn't exist");
       }
-      const user = result.user;
       return res.json({
         message: "User returned successfully!",
         user,
@@ -212,14 +203,14 @@ const getUsernameAvailabilty = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getSelfDetails = (req, res) => {
+const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
       if (req.query.private) {
         return res.send(req.userData);
       }
-      const { phone, email, ...userData } = req.userData;
-      return res.send(userData);
+      const user = await dataAccess.retrieveUsers({ userdata: req.userData });
+      return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
@@ -563,8 +554,8 @@ const filterUsers = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    const users = await dataAccess.retreiveFilteredUsers(req.query);
 
+    const users = await dataAccess.retreiveFilteredUsers(req.query);
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
       users: users,

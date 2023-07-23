@@ -6,6 +6,7 @@ const sinon = require("sinon");
 const { retrieveUsers, removeSensitiveInfo, retreiveFilteredUsers } = require("../../../services/dataAccessLayer");
 const userData = require("../../fixtures/user/user")();
 const { USER_SENSITIVE_DATA } = require("../../../constants/users");
+
 chai.use(chaiHttp);
 const expect = chai.expect;
 let fetchUserStub;
@@ -56,6 +57,15 @@ describe("Data Access Layer", function () {
         USER_SENSITIVE_DATA.forEach((key) => {
           expect(userData[12]).to.not.have.property(key);
         });
+      });
+    });
+
+    it("should return /users/self data and remove sensitive info", async function () {
+      const userdata = userData[12];
+      await retrieveUsers({ userdata });
+      removeSensitiveInfo(userData[12]);
+      USER_SENSITIVE_DATA.forEach((key) => {
+        expect(userData[12]).to.not.have.property(key);
       });
     });
   });
