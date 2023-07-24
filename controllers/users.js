@@ -553,8 +553,8 @@ const filterUsers = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    const users = await dataAccess.retreiveFilteredUsers(req.query);
 
+    const users = await dataAccess.retreiveFilteredUsers(req.query);
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
       users: users,
@@ -576,7 +576,26 @@ const setInDiscordScript = async (req, res) => {
     await setInDiscordFalseScript();
     return res.json({ message: "Successfully added the in_discord field to false for all users" });
   } catch (err) {
-    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
+const removeTokens = async (req, res) => {
+  try {
+    const users = await userQuery.fetchUsersWithToken();
+
+    if (!users.length) {
+      return res.status(404).json({ message: "No users found with github Token!" });
+    }
+
+    await userQuery.removeGitHubToken(users);
+
+    return res.status(200).json({
+      message: "Github Token removed from all users!",
+      usersFound: users.length,
+    });
+  } catch (err) {
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -627,5 +646,6 @@ module.exports = {
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
+  removeTokens,
   updateRoles,
 };

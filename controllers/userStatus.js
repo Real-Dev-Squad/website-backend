@@ -146,16 +146,16 @@ const updateAllUserStatus = async (req, res) => {
 };
 
 /**
- * Retrieve idle users based on task status where the status is not assigned and in progress
+ * Retrieve users status based on task status
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
 
-const getIdleUsers = async (req, res) => {
+const getTaskBasedUsersStatus = async (req, res) => {
   try {
-    const data = await userStatusModel.getIdleUsers();
+    const data = await userStatusModel.getTaskBasedUsersStatus();
     return res.json({
-      message: "All idle users found successfully.",
+      message: "All users based on tasks found successfully.",
       data,
     });
   } catch (error) {
@@ -167,8 +167,8 @@ const getIdleUsers = async (req, res) => {
 };
 
 const getUserStatusControllers = async (req, res, next) => {
-  if (Object.keys(req.query).includes("taskStatus")) {
-    await getIdleUsers(req, res, next);
+  if (Object.keys(req.query).includes("aggregate")) {
+    await getTaskBasedUsersStatus(req, res, next);
   } else {
     await getAllUserStatus(req, res, next);
   }
@@ -180,9 +180,9 @@ const getUserStatusControllers = async (req, res, next) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const massUpdateIdleUsers = async (req, res) => {
+const batchUpdateUsersStatus = async (req, res) => {
   try {
-    const data = await userStatusModel.massUpdateIdleUsers(req.body.users);
+    const data = await userStatusModel.batchUpdateUsersStatus(req.body.users);
     return res.json({
       message: "users status updated successfully.",
       data,
@@ -242,8 +242,8 @@ module.exports = {
   getAllUserStatus,
   updateUserStatus,
   updateAllUserStatus,
-  getIdleUsers,
+  getTaskBasedUsersStatus,
   getUserStatusControllers,
-  massUpdateIdleUsers,
+  batchUpdateUsersStatus,
   updateUserStatusController,
 };

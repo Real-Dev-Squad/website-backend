@@ -16,6 +16,7 @@ const {
 
 const userData = require("../../fixtures/user/user")();
 const { USER_SENSITIVE_DATA } = require("../../../constants/users");
+
 chai.use(chaiHttp);
 const expect = chai.expect;
 let fetchUserStub;
@@ -28,7 +29,7 @@ describe("Data Access Layer", function () {
       removeSensitiveInfo(userData[12]);
       expect(result.user).to.deep.equal(userData[12]);
       USER_SENSITIVE_DATA.forEach((key) => {
-        expect(userData[12]).to.not.have.property(key);
+        expect(result.user).to.not.have.property(key);
       });
     });
 
@@ -50,7 +51,7 @@ describe("Data Access Layer", function () {
       result.forEach((element) => {
         expect(element).to.deep.equal(userData[12]);
         USER_SENSITIVE_DATA.forEach((key) => {
-          expect(userData[12]).to.not.have.property(key);
+          expect(element).to.not.have.property(key);
         });
       });
     });
@@ -64,7 +65,7 @@ describe("Data Access Layer", function () {
       result.allUsers.forEach((element) => {
         expect(element).to.deep.equal(userData[12]);
         USER_SENSITIVE_DATA.forEach((key) => {
-          expect(userData[12]).to.not.have.property(key);
+          expect(element).to.not.have.property(key);
         });
       });
     });
