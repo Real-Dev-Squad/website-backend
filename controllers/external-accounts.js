@@ -62,6 +62,21 @@ const syncExternalAccountData = async (req, res) => {
       };
     });
 
+    rdsUserData.forEach((rdsUser) => {
+      if (
+        rdsUser.roles?.in_discord === true &&
+        !discordUserData.some((discordUser) => discordUser.user.id === rdsUser.discordId)
+      ) {
+        const userData = {
+          roles: {
+            ...rdsUser.roles,
+            in_discord: false,
+          },
+        };
+        updateUserDataPromises.push(addOrUpdate(userData, rdsUser.id));
+      }
+    });
+
     discordUserData.forEach((discordUser) => {
       const mappedRdsUser = rdsUserDataMap[discordUser.user.id];
       if (mappedRdsUser) {
