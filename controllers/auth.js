@@ -17,7 +17,7 @@ const githubAuth = (req, res, next) => {
   let authRedirectionUrl = req.query.state ?? rdsUiUrl;
 
   try {
-    return passport.authenticate("github", { session: false }, async (err, accessToken, user) => {
+    return passport.authenticate("github", { session: false }, async (err, user) => {
       if (err) {
         logger.error(err);
         return res.boom.unauthorized("User cannot be authenticated");
