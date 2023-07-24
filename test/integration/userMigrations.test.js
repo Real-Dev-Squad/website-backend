@@ -64,7 +64,6 @@ describe("userColorMigrations", function () {
           expect(res).to.have.status(200);
           expect(res.body.usersDetails.count).to.be.equal(colorBearingUsernames.length);
           const migratedUsernames = res.body.usersDetails.users;
-
           expect(migratedUsernames).to.include(
             colorBearingUsernames[0],
             "Should add default color property to user without color property"
