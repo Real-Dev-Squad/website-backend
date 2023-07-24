@@ -30,17 +30,17 @@ const updateUser = async (req, res, next) => {
         .string()
         .optional()
         .regex(/^[^@]*$/)
-        .message("Social Id must not contain the @ symbol."),
+        .message("Linkedin Id must not contain the @ symbol."),
       twitter_id: joi
         .string()
         .optional()
         .regex(/^[^@]*$/)
-        .message("Social Id must not contain the @ symbol."),
+        .message("Twitter Id must not contain the @ symbol."),
       instagram_id: joi
         .string()
         .optional()
         .regex(/^[^@]*$/)
-        .message("Social Id must not contain the @ symbol."),
+        .message("Instagram Id must not contain the @ symbol."),
       website: joi.string().optional(),
       status: joi
         .any()
@@ -50,7 +50,7 @@ const updateUser = async (req, res, next) => {
         .string()
         .optional()
         .regex(/^[^@]*$/)
-        .message("Social Id's must not contain the @ symbol."),
+        .message("Discord Id must not contain the @ symbol."),
     });
 
   try {
