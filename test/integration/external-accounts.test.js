@@ -264,6 +264,7 @@ describe("External Accounts", function () {
           expect(res.body).to.deep.equal({
             rdsUsers: 3,
             discordUsers: 2,
+            userUpdatedWithInDiscordFalse: 1,
             message: "Data Sync Complete",
           });
           return done();

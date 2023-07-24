@@ -54,6 +54,7 @@ const syncExternalAccountData = async (req, res) => {
     const [discordUserData, rdsUserData] = await Promise.all([getDiscordMembers(), getDiscordUsers()]);
     const rdsUserDataMap = {};
     const updateUserDataPromises = [];
+    const userUpdatedWithInDiscordFalse = [];
 
     rdsUserData.forEach((rdsUser) => {
       rdsUserDataMap[rdsUser.discordId] = {
@@ -73,6 +74,7 @@ const syncExternalAccountData = async (req, res) => {
             in_discord: false,
           },
         };
+        userUpdatedWithInDiscordFalse.push(rdsUser);
         updateUserDataPromises.push(addOrUpdate(userData, rdsUser.id));
       }
     });
@@ -96,6 +98,7 @@ const syncExternalAccountData = async (req, res) => {
     return res.json({
       rdsUsers: rdsUserData.length,
       discordUsers: discordUserData.length,
+      userUpdatedWithInDiscordFalse: userUpdatedWithInDiscordFalse.length,
       message: "Data Sync Complete",
     });
   } catch (err) {
