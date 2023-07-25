@@ -84,7 +84,7 @@ const syncExternalAccountData = async (req, res) => {
           },
         };
       }
-      updateUserDataPromises.push(addOrUpdate(rdsUser.id, userData));
+      updateUserDataPromises.push(addOrUpdate(userData, rdsUser.id));
     }
 
     await Promise.all(updateUserDataPromises);
