@@ -96,10 +96,12 @@ const addDependency = async (data) => {
  * @return {Promise<tasks|Array>}
  */
 
-const getBuiltTasks = async (tasksSnapshot) => {
+const getBuiltTasks = async (tasksSnapshot, searchTerm) => {
   const tasks = buildTasks(tasksSnapshot);
   const promises = tasks.map(async (task) => fromFirestoreData(task));
-  const updatedTasks = await Promise.all(promises);
+  let updatedTasks = await Promise.all(promises);
+  updatedTasks = updatedTasks.filter((task) => task.title.toLowerCase().includes(searchTerm.toLowerCase()));
+
   const taskPromises = updatedTasks.map(async (task) => {
     task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
     const taskId = task.id;
@@ -159,10 +161,10 @@ const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, 
   }
 };
 
-const fetchTasks = async () => {
+const fetchTasks = async (searchTerm) => {
   try {
     const tasksSnapshot = await tasksModel.get();
-    const taskList = await getBuiltTasks(tasksSnapshot);
+    const taskList = await getBuiltTasks(tasksSnapshot, searchTerm);
     return taskList;
   } catch (err) {
     logger.error("error getting tasks", err);

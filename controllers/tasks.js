@@ -128,9 +128,9 @@ const fetchPaginatedTasks = async (query) => {
 
 const fetchTasks = async (req, res) => {
   try {
-    const { dev, status, page, size, prev, next } = req.query;
+    const { dev, status, page, size, prev, next, q: queryString } = req.query;
     const transformedQuery = transformQuery(dev, status, size, page);
-
+    const searchTerm = queryString || "";
     if (dev) {
       const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next });
       return res.json({
@@ -139,7 +139,7 @@ const fetchTasks = async (req, res) => {
       });
     }
 
-    const allTasks = await tasks.fetchTasks();
+    const allTasks = await tasks.fetchTasks(searchTerm);
     const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
 
     return res.json({

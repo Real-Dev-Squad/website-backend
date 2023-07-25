@@ -164,6 +164,7 @@ const getTasksValidator = async (req, res, next) => {
         })
       ),
     size: joi.number().integer().positive().min(1).max(100).optional(),
+    q: joi.string().optional(),
   });
 
   try {
