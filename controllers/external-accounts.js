@@ -67,7 +67,7 @@ const syncExternalAccountData = async (req, res) => {
       const discordUser = discordUserData.find((discordUser) => discordUser.user.id === rdsUser.discordId);
 
       let userData = {};
-      if (rdsUser.roles?.in_discord === true && !discordUser) {
+      if (rdsUser.roles?.in_discord && !discordUser) {
         userData = {
           roles: {
             ...rdsUser.roles,
