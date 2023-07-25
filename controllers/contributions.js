@@ -1,7 +1,6 @@
 const contributionsService = require("../services/contributions");
-const { fetchUser } = require("../models/users");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-
+const dataAccess = require("../services/dataAccessLayer");
 /**
  * Get the  contributions of the user
  * @param {Object} req - Express request object
@@ -10,8 +9,8 @@ const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 const getUserContributions = async (req, res) => {
   try {
-    const username = req.params.username;
-    const result = await fetchUser({ username: req.params.username });
+    const { username } = req.params;
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
     if (result.userExists) {
       const contributions = await contributionsService.getUserContributions(username);
       return res.json(contributions);

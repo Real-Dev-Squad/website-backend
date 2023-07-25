@@ -1,7 +1,8 @@
 const externalAccountsModel = require("../models/external-accounts");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getDiscordMembers } = require("../services/discordService");
-const { getDiscordUsers, addOrUpdate } = require("../models/users");
+const { addOrUpdate } = require("../models/users");
+const { retrieveDiscordUsers } = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
 
 const addExternalAccountData = async (req, res) => {
@@ -51,7 +52,7 @@ const getExternalAccountData = async (req, res) => {
  */
 const syncExternalAccountData = async (req, res) => {
   try {
-    const [discordUserData, rdsUserData] = await Promise.all([getDiscordMembers(), getDiscordUsers()]);
+    const [discordUserData, rdsUserData] = await Promise.all([getDiscordMembers(), retrieveDiscordUsers()]);
     const rdsUserDataMap = {};
     const updateUserDataPromises = [];
 

@@ -436,7 +436,6 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body).to.have.property("phone");
           expect(res.body).to.have.property("email");
-
           return done();
         });
     });
@@ -480,7 +479,8 @@ describe("Users", function () {
           expect(res.body.user).to.be.a("object");
           expect(res.body.user).to.not.have.property("phone");
           expect(res.body.user).to.not.have.property("email");
-
+          expect(res.body.user).to.not.have.property("tokens");
+          expect(res.body.user).to.not.have.property("chaincode");
           return done();
         });
     });
@@ -523,7 +523,6 @@ describe("Users", function () {
           expect(res.body.user).to.not.have.property("email");
           expect(res.body.user).to.not.have.property("tokens");
           expect(res.body.user).to.not.have.property("chaincode");
-
           return done();
         });
     });
