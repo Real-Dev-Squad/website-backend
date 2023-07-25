@@ -552,7 +552,7 @@ const getDiscordUsers = async () => {
     const users = [];
     usersRef.forEach((user) => {
       const userData = user.data();
-      if (userData?.discordId && userData.roles?.in_discord === false)
+      if (userData?.discordId)
         users.push({
           id: user.id,
           ...userData,

@@ -55,6 +55,7 @@ const syncExternalAccountData = async (req, res) => {
     const [discordUserData, rdsUserData] = await Promise.all([getDiscordMembers(), retrieveDiscordUsers()]);
     const rdsUserDataMap = {};
     const updateUserDataPromises = [];
+    const userUpdatedWithInDiscordFalse = [];
 
     rdsUserData.forEach((rdsUser) => {
       rdsUserDataMap[rdsUser.discordId] = {
@@ -63,25 +64,36 @@ const syncExternalAccountData = async (req, res) => {
       };
     });
 
-    discordUserData.forEach((discordUser) => {
-      const mappedRdsUser = rdsUserDataMap[discordUser.user.id];
-      if (mappedRdsUser) {
-        const userData = {
+    for (const rdsUser of rdsUserData) {
+      const discordUser = discordUserData.find((discordUser) => discordUser.user.id === rdsUser.discordId);
+
+      let userData = {};
+      if (rdsUser.roles?.in_discord && !discordUser) {
+        userData = {
+          roles: {
+            ...rdsUser.roles,
+            in_discord: false,
+          },
+        };
+        userUpdatedWithInDiscordFalse.push(rdsUser);
+      } else if (discordUser) {
+        userData = {
           discordJoinedAt: discordUser.joined_at,
           roles: {
-            ...mappedRdsUser.roles,
+            ...rdsUser.roles,
             in_discord: true,
           },
         };
-        updateUserDataPromises.push(addOrUpdate(userData, mappedRdsUser.id));
       }
-    });
+      updateUserDataPromises.push(addOrUpdate(userData, rdsUser.id));
+    }
 
     await Promise.all(updateUserDataPromises);
 
     return res.json({
       rdsUsers: rdsUserData.length,
       discordUsers: discordUserData.length,
+      userUpdatedWithInDiscordFalse: userUpdatedWithInDiscordFalse.length,
       message: "Data Sync Complete",
     });
   } catch (err) {
