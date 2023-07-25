@@ -415,10 +415,10 @@ const updateOldTaskStatus = async (req, res) => {
         updatedTasks.push(await tasks.updateTask({ status: "UNASSIGNED" }, task.id));
       }
     }
-    res.json({ message: `Updated ${updatedTasks.length} tasks`, updatedTasks });
+    return res.json({ message: `Updated ${updatedTasks.length} tasks`, updatedTasks });
   } catch {
     return res.json({
-      message: "error while updating tasks",
+      message: "error while updating old task's status",
     });
   }
 };
