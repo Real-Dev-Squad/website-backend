@@ -25,7 +25,7 @@ describe("Task Request", function () {
       task = await taskModel.updateTask(taskData[4]);
     });
 
-    it("should add the task if no taskRequest is present for taskId", async function () {
+    it("should add the taskRequest if no taskRequest is present for taskId", async function () {
       const result = await taskRequestModel.addOrUpdate(task.taskId, user0);
 
       expect(result).to.be.an("object");
