@@ -89,6 +89,10 @@ describe("Members", function () {
             expect(res.body.message).to.equal("Members returned successfully!");
             expect(res.body.members).to.be.a("array");
             expect(res.body.members.length).to.be.equal(unarchivedUsersGithubIds.length);
+            expect(res.body.members).to.not.have.property("phone");
+            expect(res.body.members).to.not.have.property("email");
+            expect(res.body.members).to.not.have.property("tokens");
+            expect(res.body.members).to.not.have.property("chaincode");
             const memberGithubIds = res.body.members.map((member) => member.github_id);
             expect(memberGithubIds).to.include.all.members(unarchivedUsersGithubIds);
             expect(memberGithubIds).to.not.include.any.members(archivedUsersGithubIds);
@@ -110,6 +114,10 @@ describe("Members", function () {
             expect(res.body.message).to.equal("Members returned successfully!");
             expect(res.body.members).to.be.a("array");
             expect(res.body.members.length).to.be.equal(totalUsersCount);
+            expect(res.body.members).to.not.have.property("phone");
+            expect(res.body.members).to.not.have.property("email");
+            expect(res.body.members).to.not.have.property("tokens");
+            expect(res.body.members).to.not.have.property("chaincode");
             const memberGithubIds = res.body.members.map((member) => member.github_id);
             expect(memberGithubIds).to.include.all.members([...unarchivedUsersGithubIds, ...archivedUsersGithubIds]);
             return done();
@@ -152,6 +160,10 @@ describe("Members", function () {
             expect(res.body.message).to.equal("Idle members returned successfully!");
             expect(res.body.idleMemberUserNames).to.be.a("array");
             expect(res.body.idleMemberUserNames[0]).to.be.a("string");
+            expect(res.body.idleMemberUserNames[0]).to.not.have.property("phone");
+            expect(res.body.idleMemberUserNames[0]).to.not.have.property("email");
+            expect(res.body.idleMemberUserNames[0]).to.not.have.property("tokens");
+            expect(res.body.idleMemberUserNames[0]).to.not.have.property("chaincode");
 
             return done();
           });
