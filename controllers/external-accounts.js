@@ -66,25 +66,25 @@ const syncExternalAccountData = async (req, res) => {
     for (const rdsUser of rdsUserData) {
       const discordUser = discordUserData.find((discordUser) => discordUser.user.id === rdsUser.discordId);
 
+      let userData = {};
       if (rdsUser.roles?.in_discord === true && !discordUser) {
-        const userData = {
+        userData = {
           roles: {
             ...rdsUser.roles,
             in_discord: false,
           },
         };
         userUpdatedWithInDiscordFalse.push(rdsUser);
-        updateUserDataPromises.push(addOrUpdate(userData, rdsUser.id));
       } else if (discordUser) {
-        const userData = {
+        userData = {
           discordJoinedAt: discordUser.joined_at,
           roles: {
             ...rdsUser.roles,
             in_discord: true,
           },
         };
-        updateUserDataPromises.push(addOrUpdate(userData, rdsUser.id));
       }
+      updateUserDataPromises.push(addOrUpdate(rdsUser.id, userData));
     }
 
     await Promise.all(updateUserDataPromises);
