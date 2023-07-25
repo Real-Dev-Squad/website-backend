@@ -404,14 +404,12 @@ const assignTask = async (req, res) => {
 const updateOldTaskStatus = async (req, res) => {
   try {
     const allTasks = await tasks.fetchTasks();
-    const allOldTasks = allTasks.filter(
-      (task) => task.status === "COMPLETED" || task.status === "AVAILABLE" || task.status === "unassigned"
-    );
+    const allOldTasks = allTasks.filter((task) => task.status === "COMPLETED" || task.status === "unassigned");
     const updatedTasks = [];
     for (const task of allOldTasks) {
       if (task.status === "COMPLETED") {
         updatedTasks.push(await tasks.updateTask({ status: "DONE" }, task.id));
-      } else {
+      } else if (task.status === "unassigned") {
         updatedTasks.push(await tasks.updateTask({ status: "UNASSIGNED" }, task.id));
       }
     }
