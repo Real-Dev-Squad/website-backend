@@ -39,5 +39,6 @@ router.patch(
   assignTask
 );
 router.patch("/assign/self", authenticate, invalidateCache({ invalidationKeys: [ALL_TASKS] }), tasks.assignTask);
+router.patch("/updateOldTaskStatus/all", authenticate, authorizeRoles([SUPERUSER]), tasks.updateOldTaskStatus );
 
 module.exports = router;
