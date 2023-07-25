@@ -1547,6 +1547,6 @@ describe("Users", function () {
           expect(res.body.usersFound).to.be.equal(3);
           return done();
         });
-     });
+    });
   });
 });
