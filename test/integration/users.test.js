@@ -186,7 +186,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: 'Invalid Instagram ID. ID should not contain special character "@".',
+            message: "Invalid Instagram ID. ID should not contain special character @",
           });
 
           return done();
@@ -210,7 +210,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: 'Invalid Twitter ID. ID should not contain special character "@".',
+            message: "Invalid Twitter ID. ID should not contain special character @",
           });
 
           return done();
@@ -235,7 +235,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: 'Invalid Discord ID. ID should not contain special character "@".',
+            message: "Invalid Discord ID. ID should not contain special character @",
           });
 
           return done();

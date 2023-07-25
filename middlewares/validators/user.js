@@ -30,17 +30,17 @@ const updateUser = async (req, res, next) => {
         .string()
         .optional()
         .regex(/^[^@]*$/)
-        .message("Invalid Linkedin ID. ID should not contain special character '@'."),
+        .message("Invalid Linkedin ID. ID should not contain special character @"),
       twitter_id: joi
         .string()
         .optional()
         .regex(/^[^@]*$/)
-        .message("Invalid Twitter ID. ID should not contain special character '@'."),
+        .message("Invalid Twitter ID. ID should not contain special character @"),
       instagram_id: joi
         .string()
         .optional()
         .regex(/^[^@]*$/)
-        .message("Invalid Instagram ID. ID should not contain special character '@'."),
+        .message("Invalid Instagram ID. ID should not contain special character @"),
       website: joi.string().optional(),
       status: joi
         .any()
@@ -50,7 +50,7 @@ const updateUser = async (req, res, next) => {
         .string()
         .optional()
         .regex(/^[^@]*$/)
-        .message("Invalid Discord ID. ID should not contain special character '@'."),
+        .message("Invalid Discord ID. ID should not contain special character @"),
     });
 
   try {
