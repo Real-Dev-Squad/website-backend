@@ -5,6 +5,8 @@
 /* eslint-disable security/detect-object-injection */
 
 const chai = require("chai");
+const chaiSubset = require("chai-subset");
+chai.use(chaiSubset);
 const { expect } = chai;
 
 const cleanDb = require("../../utils/cleanDb");
@@ -21,12 +23,25 @@ const photoVerificationModel = firestore.collection("photo-verification");
  * Test the model functions and validate the data stored
  */
 
-const fetchPaginatedUsersFn = async ({ query = {}, role = "members", included = true, excluded = true }) => {
+const fetchPaginatedUsersFn = async ({ query = {}, role = "member", included = true, excluded = true }) => {
   const userRes = await users.fetchPaginatedUsers(query);
   const allUsers = userRes.allUsers;
-  expect(allUsers).to.be.an("array");
-  expect(allUsers).to.deep.include({ role: included });
-  expect(allUsers).to.deep.include({ role: excluded });
+  expect(allUsers).to.be.a("array");
+  expect(allUsers.length).to.be.above(0);
+  expect(allUsers).to.containSubset([
+    {
+      roles: {
+        [role]: included,
+      },
+    },
+  ]);
+  expect(allUsers).to.containSubset([
+    {
+      roles: {
+        [role]: excluded,
+      },
+    },
+  ]);
 };
 
 describe("users", function () {
@@ -230,31 +245,78 @@ describe("users", function () {
   });
 
   describe("fetchPaginatedUsers", function () {
-    describe("members", function () {
-      it("and non-members should be fetched when query is not included", async function () {
-        await fetchPaginatedUsersFn({ excluded: false });
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
       });
+      await Promise.all(addUsersPromises);
+    });
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("and non-members should be fetched when query is not included", async function () {
+      await fetchPaginatedUsersFn({ excluded: false });
+    });
 
-      it("only fetched when query has members to true", async function () {
-        await fetchPaginatedUsersFn({ query: { members: "true" } });
-      });
-
-      it("excluded when query has members to false", async function () {
-        await fetchPaginatedUsersFn({ query: { members: "false" }, included: false, excluded: true });
+    it("only fetched when query has members to true", async function () {
+      await fetchPaginatedUsersFn({
+        query: {
+          members: "true",
+        },
       });
     });
 
-    describe("archived users", function () {
-      it("excluded when query has no archived param", async function () {
-        await fetchPaginatedUsersFn({ role: "archived", included: false });
+    it("excluded when query has members to false", async function () {
+      await fetchPaginatedUsersFn({
+        query: {
+          members: "false",
+        },
+        included: false,
+        excluded: true,
       });
+    });
+  });
 
-      it("only be fetched when archived param is set to true", async function () {
-        await fetchPaginatedUsersFn({ query: { archived: "true" }, role: "archived", excluded: false });
+  describe("archived users", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
       });
+      await Promise.all(addUsersPromises);
+    });
+    afterEach(async function () {
+      await cleanDb();
+    });
 
-      it("excluded when archived param set to false", async function () {
-        await fetchPaginatedUsersFn({ query: { archived: "false" }, role: "archived", included: false });
+    it("excluded when query has no archived param", async function () {
+      await fetchPaginatedUsersFn({
+        role: "archived",
+        included: false,
+        excluded: false,
+      });
+    });
+
+    it("only be fetched when archived param is set to true", async function () {
+      await fetchPaginatedUsersFn({
+        query: {
+          archived: "true",
+        },
+        role: "archived",
+        included: true,
+        excluded: false,
+      });
+    });
+
+    it("excluded when archived param set to false", async function () {
+      await fetchPaginatedUsersFn({
+        query: {
+          archived: "false",
+        },
+        role: "archived",
+        included: false,
+        excluded: false,
       });
     });
   });
