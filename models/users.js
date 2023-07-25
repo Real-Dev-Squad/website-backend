@@ -573,25 +573,35 @@ const fetchAllUsers = async () => {
 };
 
 const archiveUserIfNotInDiscord = async () => {
-  const users = await fetchAllUsers();
-  const updateUserPromises = [];
+  try {
+    const snapshot = await userModel.where("roles.in_discord", "==", false).get();
+    const batch = firestore.batch();
+    const summary = {
+      totalUsersWithArchivedRoleUpdated: 0,
+    };
 
-  users.forEach((user) => {
-    const isUserInDiscord = user?.roles?.in_discord;
-    const id = user.id;
-    if (!isUserInDiscord) {
-      const userData = {
-        ...user,
+    snapshot.forEach((user) => {
+      const id = user.id;
+      const userData = user.data();
+
+      const updatedUserData = {
+        ...userData,
         roles: {
-          ...user.roles,
+          ...userData.roles,
           archived: true,
         },
       };
-      updateUserPromises.push(userModel.doc(id).update(userData));
-    }
-  });
 
-  await Promise.all(updateUserPromises);
+      batch.update(userModel.doc(id), updatedUserData);
+      summary.totalUsersWithArchivedRoleUpdated++;
+    });
+
+    await batch.commit();
+    return summary;
+  } catch (error) {
+    logger.error(`error in updating Users archived role ${error}`);
+    return { status: 500, message: "Users archived role couldn't be updated Successfully." };
+  }
 };
 
 module.exports = {

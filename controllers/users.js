@@ -615,8 +615,11 @@ const updateRoles = async (req, res) => {
 
 const archiveUserIfNotInDiscord = async (req, res) => {
   try {
-    await userQuery.archiveUserIfNotInDiscord();
-    return res.json({ message: "Successfully updated users archived role to true if in_discord role is false" });
+    const data = await userQuery.archiveUserIfNotInDiscord();
+    return res.json({
+      message: "Successfully updated users archived role to true if in_discord role is false",
+      data,
+    });
   } catch (error) {
     return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
   }
