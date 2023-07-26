@@ -101,7 +101,6 @@ const getBuiltTasks = async (tasksSnapshot) => {
   const promises = tasks.map(async (task) => fromFirestoreData(task));
   const updatedTasks = await Promise.all(promises);
   const taskPromises = updatedTasks.map(async (task) => {
-    // task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
     const taskId = task.id;
     const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
     task.dependsOn = [];
