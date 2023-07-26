@@ -124,6 +124,25 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
+    it("throw 404 if task progress is updated on a non working day (Sunday)", function (done) {
+      // Set the current date to a Sunday (e.g., 2023-07-30) using sinon.
+      const clock = sinon.useFakeTimers(new Date("2023-07-22").getTime());
+
+      chai
+        .request(app)
+        .post(`/progresses`)
+        .set("cookie", `${cookieName}=${userToken}`)
+        .send(taskProgressDay1(taskId1))
+        .end((err, res) => {
+          clock.restore(); // Restore the original clock after the request is made.
+          if (err) return done(err);
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.key("message");
+          expect(res.body.message).to.be.equal("Progress document cannot be created on non working days (Sundays)");
+          return done();
+        });
+    });
+
     it("Gives 400 for invalid request body", function (done) {
       const incompleteProgressArray = incompleteTaskProgress(taskId1);
       const requests = incompleteProgressArray.map((progress) => {
