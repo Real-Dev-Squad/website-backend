@@ -125,11 +125,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("throw 404 if task progress is updated on a non working day (Sunday)", function (done) {
-      // Set the current date to a Sunday (e.g., 2023-07-30) using sinon.
-      clock = sinon.useFakeTimers({
-        now: new Date("2023-07-22").getTime(), // UTC time equivalent to 5:55 AM IST
-        toFake: ["Date"],
-      });
+      // Set the current date to a Sunday (e.g., 2023-07-22) using sinon.
+      clock.setSystemTime("2023-07-22").getTime();
       chai
         .request(app)
         .post(`/progresses`)
