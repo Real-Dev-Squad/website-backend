@@ -404,6 +404,11 @@ const assignTask = async (req, res) => {
 const updateOldTaskStatus = async (req, res) => {
   try {
     const allTasks = await tasks.fetchTasks();
+    if (!Array.isArray(allTasks)) {
+      return res.json({
+        message: "Invalid data received",
+      });
+    }
     const allOldTasks = allTasks.filter((task) => task.status === "COMPLETED" || task.status === "unassigned");
     const updatedTasks = [];
     for (const task of allOldTasks) {
@@ -414,9 +419,10 @@ const updateOldTaskStatus = async (req, res) => {
       }
     }
     return res.json({ message: `Updated ${updatedTasks.length} tasks`, updatedTasks });
-  } catch {
+  } catch (error) {
     return res.json({
       message: "error while updating old task's status",
+      error: error,
     });
   }
 };
