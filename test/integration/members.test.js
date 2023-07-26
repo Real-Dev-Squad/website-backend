@@ -256,6 +256,7 @@ describe("Members", function () {
         .request(app)
         .patch(`/members/archiveMembers/${userDoesNotExists.username}`)
         .set("cookie", `${cookieName}=${jwt}`)
+        .send({ reason: "some reason" })
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -273,6 +274,7 @@ describe("Members", function () {
           .request(app)
           .patch(`/members/archiveMembers/${userToBeArchived.username}`)
           .set("cookie", `${cookieName}=${jwt}`)
+          .send({ reason: "some reason" })
           .end((err, res) => {
             if (err) {
               return done(err);
@@ -293,6 +295,7 @@ describe("Members", function () {
           .request(app)
           .patch(`/members/archiveMembers/${userAlreadyArchived.username}`)
           .set("cookie", `${cookieName}=${jwt}`)
+          .send({ reason: "some reason" })
           .end((err, res) => {
             if (err) {
               return done(err);

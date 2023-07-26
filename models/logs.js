@@ -42,14 +42,27 @@ const fetchLogs = async (query, param) => {
       }
     });
 
-    const { limit, lastDocId } = query;
+    const { limit, lastDocId, username } = query;
     let lastDoc;
     const limitDocuments = Number(limit);
 
     if (lastDocId) {
       lastDoc = await logsModel.doc(lastDocId).get();
     }
-
+    if (username) {
+      const logsSnapshot = await logsModel
+        .where("type", "==", param)
+        .where("meta.username", "==", username)
+        .orderBy("timestamp", "desc")
+        .get();
+      const logs = [];
+      logsSnapshot.forEach((doc) => {
+        logs.push({
+          ...doc.data(),
+        });
+      });
+      return logs;
+    }
     const logsSnapshotQuery = call.orderBy("timestamp", "desc").startAfter(lastDoc ?? "");
     const snapshot = limit
       ? await logsSnapshotQuery.limit(limitDocuments).get()
