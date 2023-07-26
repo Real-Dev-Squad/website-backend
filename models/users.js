@@ -577,7 +577,7 @@ const archiveUserIfNotInDiscord = async () => {
     const snapshot = await userModel.where("roles.in_discord", "==", false).get();
     const batch = firestore.batch();
     const summary = {
-      totalUsersWithArchivedRoleUpdated: 0,
+      totalUsersArchived: 0,
     };
 
     snapshot.forEach((user) => {
@@ -595,7 +595,7 @@ const archiveUserIfNotInDiscord = async () => {
         };
 
         batch.update(userModel.doc(id), updatedUserData);
-        summary.totalUsersWithArchivedRoleUpdated++;
+        summary.totalUsersArchived++;
       }
     });
 
