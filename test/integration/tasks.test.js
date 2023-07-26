@@ -822,7 +822,7 @@ describe("Tasks", function () {
   });
 
   describe("PATCH /tasks/updateOldTaskStatus/all", function () {
-    it("Should update old tasks with statuses when authenticated as SUPERUSER", function (done) {
+    it("Should successfully update old tasks with 'DONE' and 'UNASSIGNED' statuses when authenticated as SUPERUSER", function (done) {
       chai
         .request(app)
         .patch("/tasks/updateOldTaskStatus/all")
@@ -841,7 +841,7 @@ describe("Tasks", function () {
     it("should return an error when trying to update old task statuses without SUPERUSER role", function (done) {
       chai
         .request(app)
-        .patch("tasks/updateOldTaskStatus/all")
+        .patch("/tasks/updateOldTaskStatus/all")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
