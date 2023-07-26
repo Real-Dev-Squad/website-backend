@@ -1263,7 +1263,7 @@ describe("Users", function () {
       Sinon.restore();
     });
 
-    it("Should update the user", async function () {
+    it("Should add github_user_id to the user", async function () {
       fetchStub.resolves({
         data: githubUserInfo[0]._json,
       });
@@ -1272,7 +1272,7 @@ describe("Users", function () {
         .post(`/users/migrate`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`);
       expect(usersMigrateResponse).to.have.status(200);
-      expect(usersMigrateResponse.body).to.eql({
+      expect(usersMigrateResponse.body).to.deep.equal({
         message: "Result of migration",
         data: {
           totalUsers: 2,
