@@ -1,0 +1,22 @@
+{ "ts-node": {
+    "transpileOnly": true
+    },
+    "compilerOptions": {
+      "target": "es5",
+      "module": "commonjs",
+      "lib": ["dom", "es6", "es2017", "esnext.asynciterable"],
+      "allowJs": true,
+      "sourceMap": true,
+      "outDir": "./dist",
+      "strict": true,
+      "noImplicitAny": true,
+      "allowSyntheticDefaultImports": false,
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "checkJs": false,
+      "skipLibCheck": true
+    },
+    "exclude": ["node_modules", "dist"],
+    "typeRoots": ["@types", "./node_modules/@types"]
+  }
+  
