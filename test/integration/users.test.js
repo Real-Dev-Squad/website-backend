@@ -1503,7 +1503,7 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /update-archived", function () {
+  describe("PATCH /archived", function () {
     beforeEach(async function () {
       const rolesToBeAdded = {
         archived: false,
@@ -1519,7 +1519,7 @@ describe("Users", function () {
     it("returns successful response", function (done) {
       chai
         .request(app)
-        .patch("/users/update-archived")
+        .patch("/users/archived")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
