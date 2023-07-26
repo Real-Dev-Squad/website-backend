@@ -257,4 +257,41 @@ describe("users", function () {
       expect(data[0]).to.have.all.keys([...Object.keys(joinData[0]), "id"]);
     });
   });
+
+  describe("remove github token from users", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("return array of users", async function () {
+      const data = await users.fetchUsersWithToken();
+      expect(data).to.be.not.equal(null);
+    });
+    it('removes token field from user"s data', async function () {
+      const userRef = await users.fetchUsersWithToken();
+      const dataBefore = await userRef[1].get();
+      const beforeRemoval = Object.keys(dataBefore.data()).includes("tokens");
+      expect(beforeRemoval).to.be.equal(true);
+      await users.removeGitHubToken(userRef);
+      const dataAfter = await userRef[1].get();
+      const afterRemoval = Object.keys(dataAfter.data()).includes("tokens");
+      expect(afterRemoval).to.be.equal(false);
+    });
+
+    it("throws error if id is not found in db", async function () {
+      try {
+        await users.removeGitHubToken("1223");
+      } catch (error) {
+        expect(error).to.be.instanceOf(Error);
+      }
+    });
+  });
 });

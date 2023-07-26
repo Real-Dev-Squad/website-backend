@@ -86,6 +86,46 @@ const generateUserStatusData = (state, updatedAt, from, until = "", message = ""
   };
 };
 
+const generateStatusDataForState = (userId, state) => {
+  const now = new Date();
+  let until = "";
+  const nowTimeStamp = new Date().setUTCHours(0, 0, 0, 0);
+  const fiveDaysFromNowTimeStamp = new Date(now.setUTCHours(0, 0, 0, 0) + 5 * 24 * 60 * 60 * 1000);
+  if (state === userState.OOO) {
+    until = fiveDaysFromNowTimeStamp;
+  }
+  return {
+    userId,
+    currentStatus: {
+      message: "",
+      from: nowTimeStamp,
+      until,
+      updatedAt: nowTimeStamp,
+      state,
+    },
+  };
+};
+
+const generateStatusDataForCancelOOO = (userId, state) => {
+  const now = new Date();
+  let until = "";
+  const nowTimeStamp = new Date().setUTCHours(0, 0, 0, 0);
+  const fiveDaysFromNowTimeStamp = new Date(now.setUTCHours(0, 0, 0, 0) + 5 * 24 * 60 * 60 * 1000);
+  if (state === userState.OOO) {
+    until = fiveDaysFromNowTimeStamp;
+  }
+  return {
+    userId,
+    currentStatus: {
+      message: "",
+      from: nowTimeStamp,
+      until,
+      updatedAt: nowTimeStamp,
+      state,
+    },
+  };
+};
+
 module.exports = {
   userStatusDataForNewUser,
   userStatusDataAfterSignup,
@@ -95,4 +135,6 @@ module.exports = {
   generateUserStatusData,
   idleStatus,
   activeStatus,
+  generateStatusDataForCancelOOO,
+  generateStatusDataForState,
 };

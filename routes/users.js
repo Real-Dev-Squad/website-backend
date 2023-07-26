@@ -19,12 +19,21 @@ router.get("/self", authenticate, users.getSelfDetails);
 router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
 router.get("/chaincode", authenticate, users.generateChaincode);
 router.get("/search", userValidator.validateUserQueryParams, users.filterUsers);
+router.patch("/remove-tokens", authenticate, authorizeRoles([SUPERUSER]), users.removeTokens);
+
 router.get("/:username", users.getUser);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
 router.put("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);
 router.get("/:id/skills", users.getUserSkills);
 router.get("/:id/badges", getUserBadges);
 router.patch("/", authenticate, authorizeRoles([SUPERUSER]), users.nonVerifiedDiscordUsers);
+router.patch(
+  "/:id/temporary/data",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  userValidator.validateUpdateRoles,
+  users.updateRoles
+);
 
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post("/picture", authenticate, checkIsVerifiedDiscord, upload.single("profile"), users.postUserPicture);
