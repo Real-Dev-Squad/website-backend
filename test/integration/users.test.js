@@ -32,6 +32,7 @@ const userAlreadyNotMember = userData[13];
 const userAlreadyArchived = userData[5];
 const userAlreadyUnArchived = userData[4];
 const nonSuperUser = userData[0];
+const userWithoutGithubUserId = userData[14];
 
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
@@ -1256,6 +1257,7 @@ describe("Users", function () {
     let fetchStub;
 
     beforeEach(async function () {
+      await addUser(userWithoutGithubUserId);
       fetchStub = Sinon.stub(axios, "get");
     });
 
@@ -1275,8 +1277,8 @@ describe("Users", function () {
       expect(usersMigrateResponse.body).to.deep.equal({
         message: "Result of migration",
         data: {
-          totalUsers: 2,
-          usersUpdated: 2,
+          totalUsers: 3,
+          usersUpdated: 3,
           usersNotUpdated: 0,
           invalidUsersDetails: [],
         },
@@ -1296,17 +1298,17 @@ describe("Users", function () {
       expect(usersMigrateResponse).to.have.status(200);
       expect(usersMigrateResponse.body.message).to.be.equal("Result of migration");
       expect(usersMigrateResponse.body).to.have.property("data");
-      expect(usersMigrateResponse.body.data).to.have.property("totalUsers");
-      expect(usersMigrateResponse.body.data.totalUsers).to.be.equal(2);
-      expect(usersMigrateResponse.body.data).to.have.property("usersUpdated");
+      expect(usersMigrateResponse.body.data).to.have.all.keys(
+        "totalUsers",
+        "usersUpdated",
+        "usersNotUpdated",
+        "invalidUsersDetails"
+      );
+      expect(usersMigrateResponse.body.data.totalUsers).to.be.equal(3);
       expect(usersMigrateResponse.body.data.usersUpdated).to.be.equal(0);
-      expect(usersMigrateResponse.body.data).to.have.property("usersNotUpdated");
-      expect(usersMigrateResponse.body.data.usersNotUpdated).to.be.equal(2);
-      expect(usersMigrateResponse.body.data).to.have.property("invalidUsersDetails");
+      expect(usersMigrateResponse.body.data.usersNotUpdated).to.be.equal(3);
       usersMigrateResponse.body.data.invalidUsersDetails.forEach((document) => {
-        expect(document).to.have.property("userId");
-        expect(document).to.have.property("username");
-        expect(document).to.have.property("githubUsername");
+        expect(document).to.have.all.keys("userId", "username", "githubUsername");
       });
     });
     it("Should return unauthorized error when not logged in", function (done) {

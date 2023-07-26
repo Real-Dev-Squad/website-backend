@@ -45,15 +45,17 @@ const addOrUpdate = async (userData, userId = null) => {
     }
 
     // userId is null, Add or Update user
-    const user = await userModel.where("github_user_id", "==", userData.github_user_id).limit(1).get();
-    if (!user.empty) {
-      await userModel.doc(user.docs[0].id).set(userData, { merge: true });
+    if (userData.github_user_id) {
+      const user = await userModel.where("github_user_id", "==", userData.github_user_id).limit(1).get();
+      if (!user.empty) {
+        await userModel.doc(user.docs[0].id).set(userData, { merge: true });
 
-      return {
-        isNewUser: false,
-        userId: user.docs[0].id,
-        incompleteUserDetails: user.docs[0].data().incompleteUserDetails,
-      };
+        return {
+          isNewUser: false,
+          userId: user.docs[0].id,
+          incompleteUserDetails: user.docs[0].data().incompleteUserDetails,
+        };
+      }
     }
 
     // Add new user

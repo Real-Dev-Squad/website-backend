@@ -343,5 +343,26 @@ module.exports = () => {
       twitter_id: "ramsingh123",
       linkedin_id: "ramsingh123",
     },
+    {
+      username: "testuser2",
+      first_name: "test2",
+      last_name: "user2",
+      yoe: 1,
+      img: "./img.png",
+      linkedin_id: "testuser1",
+      github_id: "testuser1",
+      github_display_name: "Test User",
+      phone: "1234567890",
+      email: "tu@gmail.com",
+      chaincode: "12345",
+
+      roles: {
+        member: true,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
+    },
   ];
 };
