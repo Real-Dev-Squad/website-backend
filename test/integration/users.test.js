@@ -1515,6 +1515,7 @@ describe("Users", function () {
           }
 
           expect(res).to.have.status(200);
+          expect(res.body.data).to.have.property("totalUsersWithArchivedRoleUpdated");
           expect(res.body.message).to.equal(
             "Successfully updated users archived role to true if in_discord role is false"
           );
