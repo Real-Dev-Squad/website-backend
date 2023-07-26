@@ -29,16 +29,13 @@ describe("Task Request", function () {
       const result = await taskRequestModel.addOrUpdate(task.taskId, user0);
 
       expect(result).to.be.an("object");
-      expect(result).to.have.property("isCreate");
+      expect(result).to.have.all.keys("isCreate", "id", "taskRequest");
       expect(result.isCreate).to.be.eq(true);
-      expect(result).to.have.property("taskRequest");
       expect(result.taskRequest).to.be.an("object");
-      expect(result.taskRequest).to.have.property("requestors");
+      expect(result.taskRequest).to.have.all.keys("requestors", "status", "taskId");
       expect(result.taskRequest.requestors).to.have.length(1);
       expect(result.taskRequest.requestors[0]).to.be.eq(user0);
-      expect(result.taskRequest).to.have.property("status");
       expect(result.taskRequest.status).to.be.eq(TASK_REQUEST_STATUS.WAITING);
-      expect(result).to.have.property("id");
     });
 
     it("should update requestors if a new user requests for existing task", async function () {
@@ -46,9 +43,9 @@ describe("Task Request", function () {
       const result = await taskRequestModel.addOrUpdate(task.taskId, user1);
 
       expect(result).to.be.an("object");
+      expect(result).to.have.all.keys("isCreate", "requestors");
       expect(result).to.have.property("isCreate");
       expect(result.isCreate).to.be.eq(false);
-      expect(result).to.have.property("requestors");
       expect(result.requestors).to.have.length(2);
       expect(result.requestors).to.be.eql([user0, user1]);
     });
@@ -83,12 +80,10 @@ describe("Task Request", function () {
 
       expect(result).to.be.an("Array");
       expect(result).to.have.length(1);
-      expect(result[0]).to.have.property("requestors");
+      expect(result[0]).to.have.all.keys("requestors", "task", "id", "status", "taskId", "url");
       expect(result[0].requestors).to.be.an("Array");
       expect(result[0].requestors).to.have.length(1);
-      expect(result[0]).to.have.property("task");
       expect(result[0].task).to.be.an("object");
-      expect(result[0]).to.have.property("id");
     });
   });
 
@@ -114,19 +109,14 @@ describe("Task Request", function () {
       const result = await taskRequestModel.fetchTaskRequestById(taskRequestId);
 
       expect(result).to.be.an("object");
-      expect(result).to.have.property("taskRequestExists");
+      expect(result).to.have.all.keys("taskRequestExists", "taskRequestData");
       expect(result.taskRequestExists).to.be.eq(true);
-      expect(result).to.have.property("taskRequestData");
       expect(result.taskRequestData).to.be.an("object");
-      expect(result.taskRequestData).to.have.property("requestors");
+      expect(result.taskRequestData).to.have.all.keys("requestors", "taskId", "status", "id", "url");
       expect(result.taskRequestData.requestors).to.be.eql([user]);
-      expect(result.taskRequestData).to.have.property("taskId");
       expect(result.taskRequestData.taskId).to.be.eq(task.taskId);
-      expect(result.taskRequestData).to.have.property("status");
       expect(result.taskRequestData.status).to.be.eq(TASK_REQUEST_STATUS.WAITING);
-      expect(result.taskRequestData).to.have.property("id");
       expect(result.taskRequestData.id).to.be.eq(taskRequestId);
-      expect(result.taskRequestData).to.have.property("url");
     });
   });
 
@@ -147,9 +137,8 @@ describe("Task Request", function () {
       const resultTask = await taskModel.fetchTask(task.taskId);
 
       expect(resultTaskRequest).to.be.an("object");
-      expect(resultTaskRequest).to.have.property("taskRequestExists");
+      expect(resultTaskRequest).to.have.all.keys("taskRequestExists", "taskRequestData");
       expect(resultTaskRequest.taskRequestExists).to.be.eq(true);
-      expect(resultTaskRequest).to.have.property("taskRequestData");
       expect(resultTaskRequest.taskRequestData).to.have.property("status");
       expect(resultTaskRequest.taskRequestData.status).to.be.eq(TASK_REQUEST_STATUS.APPROVED);
       expect(resultTaskRequest.taskRequestData).to.have.property("approvedTo");
