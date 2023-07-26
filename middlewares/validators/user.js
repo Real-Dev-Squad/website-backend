@@ -33,8 +33,8 @@ const updateUser = async (req, res, next) => {
         in_discord: joi.boolean().required(),
         developer: joi.boolean().optional(),
         designer: joi.boolean().optional(),
-        mavens: joi.boolean().optional(),
-        productManager: joi.boolean().optional(),
+        maven: joi.boolean().optional(),
+        productmanager: joi.boolean().optional(),
       }),
     });
 
