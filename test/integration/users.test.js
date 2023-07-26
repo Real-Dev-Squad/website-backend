@@ -1504,6 +1504,18 @@ describe("Users", function () {
   });
 
   describe("PATCH /update-archived", function () {
+    beforeEach(async function () {
+      const rolesToBeAdded = {
+        archived: false,
+        in_discord: false,
+      };
+      await addUser({ ...userData[0], roles: rolesToBeAdded });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
     it("returns successful response", function (done) {
       chai
         .request(app)
@@ -1515,7 +1527,8 @@ describe("Users", function () {
           }
 
           expect(res).to.have.status(200);
-          expect(res.body.data).to.have.property("totalUsersWithArchivedRoleUpdated");
+          expect(res.body.data).to.have.property("totalUsersArchived");
+          expect(res.body.data.totalUsersArchived).to.be.greaterThan(0);
           expect(res.body.message).to.equal(
             "Successfully updated users archived role to true if in_discord role is false"
           );
