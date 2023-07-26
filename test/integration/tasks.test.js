@@ -820,4 +820,38 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("No overdue tasks found");
     });
   });
+
+  describe("PATCH /tasks/updateOldTaskStatus/all", function () {
+    it("Should update old tasks with statuses when authenticated as SUPERUSER", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/updateOldTaskStatus/all")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Updated Old tasks");
+          expect(res.body.tasks).to.be.a("array");
+          return done();
+        });
+    });
+    it("should return an error when trying to update old task statuses without SUPERUSER role", function (done) {
+      chai
+        .request(app)
+        .patch("tasks/updateOldTaskStatus/all")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
 });

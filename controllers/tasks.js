@@ -404,11 +404,6 @@ const assignTask = async (req, res) => {
 const updateOldTaskStatus = async (req, res) => {
   try {
     const allTasks = await tasks.fetchTasks();
-    if (!Array.isArray(allTasks)) {
-      return res.json({
-        message: "Invalid data received",
-      });
-    }
     const allOldTasks = allTasks.filter((task) => task.status === "COMPLETED" || task.status === "unassigned");
     const updatedTasks = [];
     for (const task of allOldTasks) {
@@ -418,12 +413,10 @@ const updateOldTaskStatus = async (req, res) => {
         updatedTasks.push(await tasks.updateTask({ status: "UNASSIGNED" }, task.id));
       }
     }
-    return res.json({ message: `Updated ${updatedTasks.length} tasks`, updatedTasks });
+    return res.json({ message: `Updated Old tasks`, tasks: updatedTasks });
   } catch (error) {
-    return res.json({
-      message: "error while updating old task's status",
-      error: error,
-    });
+    logger.error(`Error while Updating tasks ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
