@@ -51,6 +51,6 @@ router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.update
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
 
 // WARNING!! - One time Script/Route to do migration.
-router.post("/migrate", authenticate, authorizeRoles([SUPERUSER]), users.migrate);
+router.post("/migrate", authenticate, authorizeRoles([SUPERUSER]), users.addGithubId);
 
 module.exports = router;

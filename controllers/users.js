@@ -569,7 +569,7 @@ const filterUsers = async (req, res) => {
 };
 
 // one time script function to perform the migration - adding github_user_id field to the document
-const migrate = async (req, res) => {
+const addGithubId = async (req, res) => {
   const usersNotFound = [];
   let countUserFound = 0;
   let countUserNotFound = 0;
@@ -711,7 +711,7 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
-  migrate,
+  addGithubId,
   verifyUserImage,
   getUserImageForVerification,
   nonVerifiedDiscordUsers,
