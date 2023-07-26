@@ -552,7 +552,7 @@ const getDiscordUsers = async () => {
     const users = [];
     usersRef.forEach((user) => {
       const userData = user.data();
-      if (userData?.discordId && userData.roles?.in_discord === false)
+      if (userData?.discordId)
         users.push({
           id: user.id,
           ...userData,
@@ -572,6 +572,56 @@ const fetchAllUsers = async () => {
   return users;
 };
 
+const fetchUsersWithToken = async () => {
+  try {
+    const users = [];
+    const usersRef = await userModel.where("tokens", "!=", false).get();
+    usersRef.forEach((user) => {
+      users.push(userModel.doc(user.id));
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Error while fetching all users with tokens field: ${err}`);
+    throw err;
+  }
+};
+
+const removeGitHubToken = async (users) => {
+  try {
+    const length = users.length;
+
+    let numberOfBatches = length / 500;
+    const remainder = length % 500;
+
+    if (remainder) {
+      numberOfBatches = numberOfBatches + 1;
+    }
+
+    const batchArray = [];
+    for (let i = 0; i < numberOfBatches; i++) {
+      const batch = firestore.batch();
+      batchArray.push(batch);
+    }
+
+    let batchIndex = 0;
+    let operations = 0;
+
+    for (let i = 0; i < length; i++) {
+      batchArray[batchIndex].update(users[i], { tokens: admin.firestore.FieldValue.delete() });
+      operations++;
+
+      if (operations === 500) {
+        batchIndex++;
+        operations = 0;
+      }
+    }
+
+    await Promise.all(batchArray.map(async (batch) => await batch.commit()));
+  } catch (err) {
+    logger.error(`Error while deleting tokens field: ${err}`);
+    throw err;
+  }
+};
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -592,4 +642,6 @@ module.exports = {
   getUserImageForVerification,
   getDiscordUsers,
   fetchAllUsers,
+  fetchUsersWithToken,
+  removeGitHubToken,
 };

@@ -7,11 +7,10 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
-const userQuery = require("../models/users");
 const { transformQuery } = require("../utils/tasks");
 const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
-
+const dataAccess = require("../services/dataAccessLayer");
 /**
  * Creates new task
  *
@@ -250,7 +249,7 @@ const updateTask = async (req, res) => {
       return res.boom.notFound("Task not found");
     }
     if (req.body?.assignee) {
-      const user = await userQuery.fetchUser({ username: req.body.assignee });
+      const user = await dataAccess.retrieveUsers({ username: req.body.assignee });
       if (!user.userExists) {
         return res.boom.notFound("User doesn't exist");
       }
@@ -259,8 +258,14 @@ const updateTask = async (req, res) => {
     if (isUserStatusEnabled && req.body.assignee) {
       await updateUserStatusOnTaskUpdate(req.body.assignee);
     }
+
     return res.status(204).send();
   } catch (err) {
+    if (err.message.includes("Invalid dependency passed")) {
+      const errorMessage = "Invalid dependency";
+      logger.error(`Error while updating task: ${errorMessage}`);
+      return res.boom.badRequest(errorMessage);
+    }
     logger.error(`Error while updating task: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
