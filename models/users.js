@@ -583,17 +583,20 @@ const archiveUserIfNotInDiscord = async () => {
     snapshot.forEach((user) => {
       const id = user.id;
       const userData = user.data();
+      const isArchived = userData?.roles?.archived;
 
-      const updatedUserData = {
-        ...userData,
-        roles: {
-          ...userData.roles,
-          archived: true,
-        },
-      };
+      if (!isArchived) {
+        const updatedUserData = {
+          ...userData,
+          roles: {
+            ...userData.roles,
+            archived: true,
+          },
+        };
 
-      batch.update(userModel.doc(id), updatedUserData);
-      summary.totalUsersWithArchivedRoleUpdated++;
+        batch.update(userModel.doc(id), updatedUserData);
+        summary.totalUsersWithArchivedRoleUpdated++;
+      }
     });
 
     await batch.commit();
