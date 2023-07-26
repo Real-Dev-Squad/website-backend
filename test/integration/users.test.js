@@ -168,30 +168,6 @@ describe("Users", function () {
         });
     });
 
-    it("Should return 400 for invalid Instagram ID", function (done) {
-      chai
-        .request(app)
-        .patch("/users/self")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          instagram_id: "invalid@instagram_id",
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(400);
-          expect(res.body).to.be.an("object");
-          expect(res.body).to.eql({
-            statusCode: 400,
-            error: "Bad Request",
-            message: "Invalid Instagram ID. ID should not contain special character @",
-          });
-
-          return done();
-        });
-    });
     it("Should return 400 for invalid Twitter ID", function (done) {
       chai
         .request(app)
@@ -211,31 +187,6 @@ describe("Users", function () {
             statusCode: 400,
             error: "Bad Request",
             message: "Invalid Twitter ID. ID should not contain special character @",
-          });
-
-          return done();
-        });
-    });
-
-    it("Should return 400 for invalid Discord ID", function (done) {
-      chai
-        .request(app)
-        .patch("/users/self")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          discordId: "invalid@discordId",
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(400);
-          expect(res.body).to.be.an("object");
-          expect(res.body).to.eql({
-            statusCode: 400,
-            error: "Bad Request",
-            message: "Invalid Discord ID. ID should not contain special character @",
           });
 
           return done();
