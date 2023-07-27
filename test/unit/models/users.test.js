@@ -187,7 +187,8 @@ describe("users", function () {
     beforeEach(async function () {
       const addUsersPromises = [];
       userDataArray.forEach((user) => {
-        addUsersPromises.push(userModel.add(user));
+        const id = String(user.id);
+        addUsersPromises.push(userModel.add({ ...user, id }));
       });
       await Promise.all(addUsersPromises);
     });
@@ -230,7 +231,7 @@ describe("users", function () {
           roles: {
             ...user.roles,
             in_discord: false,
-            archived: user?.roles?.archived || false,
+            archived: false,
           },
         };
         addUsersPromises.push(userModel.add(userData));
