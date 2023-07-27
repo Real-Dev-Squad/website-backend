@@ -849,7 +849,7 @@ describe("Tasks", function () {
           }
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Unauthenticated User");
+          expect(res.body.message).to.equal("You are not authorized for this action.");
           return done();
         });
     });
