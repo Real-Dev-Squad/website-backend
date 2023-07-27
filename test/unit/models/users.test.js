@@ -187,8 +187,7 @@ describe("users", function () {
     beforeEach(async function () {
       const addUsersPromises = [];
       userDataArray.forEach((user) => {
-        const id = String(user.id);
-        addUsersPromises.push(userModel.add({ ...user, id }));
+        addUsersPromises.push(userModel.add(user));
       });
       await Promise.all(addUsersPromises);
     });
