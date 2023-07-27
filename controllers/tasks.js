@@ -138,8 +138,16 @@ const fetchTasks = async (req, res) => {
         ...paginatedTasks,
       });
     }
+    if (queryString) {
+      const filterTasks = await tasks.fetchTasks(searchTerm);
+      const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(filterTasks);
+      return res.json({
+        message: "Filter tasks returned successfully!",
+        ...tasksWithRdsAssigneeInfo,
+      });
+    }
 
-    const allTasks = await tasks.fetchTasks(searchTerm);
+    const allTasks = await tasks.fetchTasks();
     const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
 
     return res.json({

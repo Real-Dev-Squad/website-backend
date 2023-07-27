@@ -100,7 +100,10 @@ const getBuiltTasks = async (tasksSnapshot, searchTerm) => {
   const tasks = buildTasks(tasksSnapshot);
   const promises = tasks.map(async (task) => fromFirestoreData(task));
   let updatedTasks = await Promise.all(promises);
-  updatedTasks = updatedTasks.filter((task) => task.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  if (searchTerm) {
+    updatedTasks = updatedTasks.filter((task) => task.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  }
+  // updatedTasks = updatedTasks.filter((task) => task.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const taskPromises = updatedTasks.map(async (task) => {
     task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
