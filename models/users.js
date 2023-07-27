@@ -578,6 +578,7 @@ const archiveUserIfNotInDiscord = async () => {
     const usersNotInDiscord = [];
     const summary = {
       totalUsersArchived: 0,
+      totalOperationsFailed: 0,
     };
 
     snapshot.forEach((user) => {
@@ -603,24 +604,24 @@ const archiveUserIfNotInDiscord = async () => {
           };
 
           batch.update(userModel.doc(id), updatedUserData);
-          summary.totalUsersArchived++;
         }
       });
       return batch;
     });
 
-    const batchUpdatedPromise = [];
-
-    batchUpdateArchived.forEach((batch) => {
-      const result = batch.commit();
-      batchUpdatedPromise.push(result);
-    });
-
-    await Promise.all(batchUpdatedPromise);
+    for (const batch of batchUpdateArchived) {
+      try {
+        await batch.commit();
+        summary.totalUsersArchived += batch._ops.length;
+      } catch (err) {
+        summary.totalOperationsFailed += batch._ops.length;
+        logger.error("Firebase batch Operation Failed!");
+      }
+    }
     return summary;
   } catch (error) {
     logger.error(`error in updating Users archived role ${error}`);
-    return { status: 500, message: `${error} Users archived role couldn't be updated Successfully.` };
+    throw error;
   }
 };
 
