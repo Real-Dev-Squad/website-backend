@@ -1528,7 +1528,9 @@ describe("Users", function () {
 
           expect(res).to.have.status(200);
           expect(res.body.data).to.have.property("totalUsersArchived");
+          expect(res.body.data).to.have.property("totalOperationsFailed");
           expect(res.body.data.totalUsersArchived).to.be.greaterThan(0);
+          expect(res.body.data.totalOperationsFailed).to.be.equal(0);
           expect(res.body.message).to.equal(
             "Successfully updated users archived role to true if in_discord role is false"
           );
