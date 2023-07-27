@@ -257,4 +257,26 @@ describe("users", function () {
       }
     });
   });
+
+  describe("get users by roles", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+    it("returns users with member role", async function () {
+      const members = await users.getUsersByRole("member");
+      expect(members.length).to.be.equal(6);
+      members.forEach((member) => {
+        expect(member.roles.member).to.be.equal(true);
+      });
+    });
+    it("throws an error", async function () {
+      await users.getUsersByRole(32389434).catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+      });
+    });
+  });
 });
