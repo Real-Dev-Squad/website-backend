@@ -19,9 +19,12 @@ const ALLOWED_FILTER_PARAMS = {
   ROLE: ["role"],
 };
 
+const DOCUMENT_WRITE_SIZE = 500;
+
 module.exports = {
   profileStatus,
   USER_STATUS,
   ALLOWED_FILTER_PARAMS,
   USER_SENSITIVE_DATA,
+  DOCUMENT_WRITE_SIZE,
 };

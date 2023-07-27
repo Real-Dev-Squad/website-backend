@@ -7,8 +7,8 @@ const walletConstants = require("../constants/wallets");
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
-const { arraysHaveCommonItem } = require("../utils/array");
-const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
+const { arraysHaveCommonItem, chunks } = require("../utils/array");
+const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const ROLES = require("../constants/roles");
@@ -575,7 +575,7 @@ const fetchAllUsers = async () => {
 const archiveUserIfNotInDiscord = async () => {
   try {
     const snapshot = await userModel.where("roles.in_discord", "==", false).get();
-    const batch = firestore.batch();
+    const usersNotInDiscord = [];
     const summary = {
       totalUsersArchived: 0,
     };
@@ -583,27 +583,44 @@ const archiveUserIfNotInDiscord = async () => {
     snapshot.forEach((user) => {
       const id = user.id;
       const userData = user.data();
-      const isArchived = userData?.roles?.archived;
-
-      if (!isArchived) {
-        const updatedUserData = {
-          ...userData,
-          roles: {
-            ...userData.roles,
-            archived: true,
-          },
-        };
-
-        batch.update(userModel.doc(id), updatedUserData);
-        summary.totalUsersArchived++;
-      }
+      usersNotInDiscord.push({ ...userData, id });
     });
 
-    await batch.commit();
+    const userNotInDiscordChunks = chunks(usersNotInDiscord, DOCUMENT_WRITE_SIZE);
+    const batchUpdateArchived = userNotInDiscordChunks.map((users) => {
+      const batch = firestore.batch();
+      users.forEach((user) => {
+        const id = user.id;
+        const isArchived = user?.roles?.archived;
+
+        if (!isArchived) {
+          const updatedUserData = {
+            ...user,
+            roles: {
+              ...user.roles,
+              archived: true,
+            },
+          };
+
+          batch.update(userModel.doc(id), updatedUserData);
+          summary.totalUsersArchived++;
+        }
+      });
+      return batch;
+    });
+
+    const batchUpdatedPromise = [];
+
+    batchUpdateArchived.forEach((batch) => {
+      const result = batch.commit();
+      batchUpdatedPromise.push(result);
+    });
+
+    await Promise.all(batchUpdatedPromise);
     return summary;
   } catch (error) {
     logger.error(`error in updating Users archived role ${error}`);
-    return { status: 500, message: "Users archived role couldn't be updated Successfully." };
+    return { status: 500, message: `${error} Users archived role couldn't be updated Successfully.` };
   }
 };
 
