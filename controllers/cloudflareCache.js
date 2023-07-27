@@ -1,9 +1,9 @@
 const logsQuery = require("../models/logs");
-const userQuery = require("../models/users");
 const cloudflare = require("../services/cloudflareService");
 const { logType } = require("../constants/logs");
 const { MAX_CACHE_PURGE_COUNT } = require("../constants/cloudflareCache");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const dataAccess = require("../services/dataAccessLayer");
 
 /**
  * Purges the Cache of Members Profile Page
@@ -21,7 +21,7 @@ const purgeCache = async (req, res) => {
     if (req.body.user) {
       if (roles.super_user) {
         const { user } = req.body;
-        const userDetails = await userQuery.fetchUser({ username: user });
+        const userDetails = await dataAccess.retrieveUsers({ username: user });
         if (!userDetails.userExists) {
           return res.boom.badRequest();
         }
