@@ -54,7 +54,28 @@ const storeUserDeviceInfo = async (userDeviceInfoData) => {
   }
 };
 
+const retrieveUserDeviceInfo = async (deviceId) => {
+  try {
+    const queryDocument = await QrCodeAuthModel.where("device_id", "==", deviceId).get();
+    const userData = queryDocument.docs[0];
+
+    if (!userData) {
+      return {
+        userExists: false,
+      };
+    }
+    return {
+      userExists: true,
+      data: userData.data(),
+    };
+  } catch (err) {
+    logger.error("Error in retrieving user device info", err);
+    throw err;
+  }
+};
+
 module.exports = {
   updateStatus,
   storeUserDeviceInfo,
+  retrieveUserDeviceInfo,
 };
