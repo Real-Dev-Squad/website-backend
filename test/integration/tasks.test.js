@@ -821,37 +821,37 @@ describe("Tasks", function () {
     });
   });
 
-  // describe("PATCH /tasks/updateOldTaskStatus/all", function () {
-  //   it("Should successfully update old tasks with 'DONE' and 'UNASSIGNED' statuses when authenticated as SUPERUSER", function (done) {
-  //     chai
-  //       .request(app)
-  //       .patch("/tasks/updateOldTaskStatus/all")
-  //       .set("cookie", `${cookieName}=${superUserJwt}`)
-  //       .end((err, res) => {
-  //         if (err) {
-  //           return done(err);
-  //         }
-  //         expect(res).to.have.status(200);
-  //         expect(res.body).to.be.a("object");
-  //         expect(res.body.message).to.equal("Updated Old tasks");
-  //         expect(res.body.tasks).to.be.a("array");
-  //         return done();
-  //       });
-  //   });
-  //   it("should return an error when trying to update old task statuses without SUPERUSER role", function (done) {
-  //     chai
-  //       .request(app)
-  //       .patch("/tasks/updateOldTaskStatus/all")
-  //       .set("cookie", `${cookieName}=${jwt}`)
-  //       .end((err, res) => {
-  //         if (err) {
-  //           return done(err);
-  //         }
-  //         expect(res).to.have.status(401);
-  //         expect(res.body).to.be.a("object");
-  //         expect(res.body.message).to.equal("You are not authorized for this action.");
-  //         return done();
-  //       });
-  //   });
-  // });
+  describe("PATCH /tasks/updateOldTaskStatus/all", function () {
+    it("Should successfully update old tasks with 'DONE' and 'UNASSIGNED' statuses when authenticated as SUPERUSER", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/updateOldTaskStatus/all")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Updated Old tasks");
+          expect(res.body.tasks).to.be.a("array");
+          return done();
+        });
+    });
+    it("should return an error when trying to update old task statuses without SUPERUSER role", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/updateOldTaskStatus/all")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("You are not authorized for this action.");
+          return done();
+        });
+    });
+  });
 });

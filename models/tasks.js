@@ -274,7 +274,6 @@ const fetchSelfTask = async (taskId, userId) => {
  */
 
 const fetchUserTasks = async (username, statuses = [], field, order) => {
-  console.log("In fetchusertasks",statuses);
   try {
     const userId = await userUtils.getUserId(username);
 
