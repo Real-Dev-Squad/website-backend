@@ -398,23 +398,23 @@ describe("Task Based Status Updates", function () {
       expect(res.status).to.equal(200);
       const response = res.body.data;
       expect(response).to.have.all.keys(
-        "totalUsers",
-        "totalUnprocessedUsers",
-        "totalOnboardingUsersAltered",
-        "totalOnboardingUsersUnAltered",
-        "totalActiveUsersAltered",
-        "totalActiveUsersUnAltered",
-        "totalIdleUsersAltered",
-        "totalIdleUsersUnAltered"
+        "usersCount",
+        "unprocessedUsers",
+        "onboardingUsersAltered",
+        "onboardingUsersUnaltered",
+        "activeUsersAltered",
+        "activeUsersUnaltered",
+        "idleUsersAltered",
+        "idleUsersUnaltered"
       );
-      expect(response.totalUsers).to.equal(10);
-      expect(response.totalUnprocessedUsers).to.equal(0);
-      expect(response.totalOnboardingUsersAltered).to.equal(1);
-      expect(response.totalOnboardingUsersUnAltered).to.equal(1);
-      expect(response.totalActiveUsersAltered).to.equal(3);
-      expect(response.totalActiveUsersUnAltered).to.equal(1);
-      expect(response.totalIdleUsersAltered).to.equal(3);
-      expect(response.totalIdleUsersUnAltered).to.equal(1);
+      expect(response.usersCount).to.equal(10);
+      expect(response.unprocessedUsers).to.equal(0);
+      expect(response.onboardingUsersAltered).to.equal(1);
+      expect(response.onboardingUsersUnaltered).to.equal(1);
+      expect(response.activeUsersAltered).to.equal(3);
+      expect(response.activeUsersUnaltered).to.equal(1);
+      expect(response.idleUsersAltered).to.equal(3);
+      expect(response.idleUsersUnaltered).to.equal(1);
 
       const userStatus000Data = (await userStatusModel.doc("userStatus000").get()).data();
       expect(userStatus000Data.currentStatus.state).to.equal(userState.IDLE);

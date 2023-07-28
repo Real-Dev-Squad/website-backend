@@ -331,14 +331,14 @@ const batchUpdateUsersStatus = async (users) => {
   const currentTimeStamp = new Date().getTime();
   const batch = firestore.batch();
   const summary = {
-    totalUsers: users.length,
-    totalUnprocessedUsers: 0,
-    totalOnboardingUsersAltered: 0,
-    totalOnboardingUsersUnAltered: 0,
-    totalActiveUsersAltered: 0,
-    totalActiveUsersUnAltered: 0,
-    totalIdleUsersAltered: 0,
-    totalIdleUsersUnAltered: 0,
+    usersCount: users.length,
+    unprocessedUsers: 0,
+    onboardingUsersAltered: 0,
+    onboardingUsersUnaltered: 0,
+    activeUsersAltered: 0,
+    activeUsersUnaltered: 0,
+    idleUsersAltered: 0,
+    idleUsersUnaltered: 0,
   };
 
   for (const { userId, state } of users) {
@@ -346,7 +346,7 @@ const batchUpdateUsersStatus = async (users) => {
     try {
       latestStatusData = await getUserStatus(userId);
     } catch (error) {
-      summary.totalUnprocessedUsers++;
+      summary.unprocessedUsers++;
       continue;
     }
     const { id, userStatusExists, data } = latestStatusData;
@@ -364,14 +364,14 @@ const batchUpdateUsersStatus = async (users) => {
         userId,
         currentStatus: statusToUpdate,
       };
-      state === userState.ACTIVE ? summary.totalActiveUsersAltered++ : summary.totalIdleUsersAltered++;
+      state === userState.ACTIVE ? summary.activeUsersAltered++ : summary.idleUsersAltered++;
       batch.set(newUserStatusRef, newUserStatusData);
     } else {
       const {
         currentStatus: { state: currentState, until },
       } = data;
       if (currentState === state) {
-        currentState === userState.ACTIVE ? summary.totalActiveUsersUnAltered++ : summary.totalIdleUsersUnAltered++;
+        currentState === userState.ACTIVE ? summary.activeUsersUnaltered++ : summary.idleUsersUnaltered++;
         continue;
       }
       if (currentState === userState.ONBOARDING) {
@@ -380,13 +380,13 @@ const batchUpdateUsersStatus = async (users) => {
           const updatedStatusData = {
             currentStatus: statusToUpdate,
           };
-          summary.totalOnboardingUsersAltered++;
+          summary.onboardingUsersAltered++;
           batch.update(docRef, updatedStatusData);
         } else {
-          summary.totalOnboardingUsersUnAltered++;
+          summary.onboardingUsersUnaltered++;
         }
       } else {
-        state === userState.ACTIVE ? summary.totalActiveUsersAltered++ : summary.totalIdleUsersAltered++;
+        state === userState.ACTIVE ? summary.activeUsersAltered++ : summary.idleUsersAltered++;
         const docRef = userStatusModel.doc(id);
         const updatedStatusData =
           currentState === userState.OOO
