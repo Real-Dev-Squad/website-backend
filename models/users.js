@@ -147,9 +147,9 @@ const fetchPaginatedUsers = async (query) => {
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
 
-    let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
-    query.members && (dbQuery = dbQuery.where("roles.members", "==", query.members === "true"));
-    query.archived && (dbQuery = dbQuery.where("roles.archived", "==", query.archived === "true"));
+    let dbQuery = userModel.orderBy("username");
+    query.member && (dbQuery = dbQuery.where("roles.member", "==", /true/i.test(query.member)));
+    dbQuery = dbQuery.where("roles.archived", "==", /true/i.test(query.archived));
 
     if (query.prev) {
       dbQuery = dbQuery.limitToLast(size);

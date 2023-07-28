@@ -23,7 +23,7 @@ const photoVerificationModel = firestore.collection("photo-verification");
  * Test the model functions and validate the data stored
  */
 
-const fetchPaginatedUsersFn = async ({ query = {}, role = "member", included = true, excluded = true }) => {
+const fetchPaginatedUsersFn = async ({ query = {}, role = "member", included = true, excluded = false }) => {
   const userRes = await users.fetchPaginatedUsers(query);
   const allUsers = userRes.allUsers;
   expect(allUsers).to.be.a("array");
@@ -38,7 +38,7 @@ const fetchPaginatedUsersFn = async ({ query = {}, role = "member", included = t
   expect(allUsers).to.containSubset([
     {
       roles: {
-        [role]: excluded,
+        [role]: !excluded,
       },
     },
   ]);
@@ -256,7 +256,7 @@ describe("users", function () {
       await cleanDb();
     });
     it("and non-members should be fetched when query is not included", async function () {
-      await fetchPaginatedUsersFn({ excluded: false });
+      await fetchPaginatedUsersFn({ excluded: true });
     });
 
     it("only fetched when query has members to true", async function () {
@@ -294,7 +294,7 @@ describe("users", function () {
       await fetchPaginatedUsersFn({
         role: "archived",
         included: false,
-        excluded: false,
+        excluded: true,
       });
     });
 
@@ -316,7 +316,7 @@ describe("users", function () {
         },
         role: "archived",
         included: false,
-        excluded: false,
+        excluded: true,
       });
     });
   });
