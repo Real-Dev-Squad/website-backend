@@ -401,24 +401,26 @@ const assignTask = async (req, res) => {
   }
 };
 
-// const updateOldTaskStatus = async (req, res) => {
-//   try {
-//     const allTasks = await tasks.fetchTasks();
-//     const allOldTasks = allTasks.filter((task) => task.status === "COMPLETED" || task.status === "unassigned");
-//     const updatedTasks = [];
-//     for (const task of allOldTasks) {
-//       if (task.status === "COMPLETED") {
-//         updatedTasks.push(await tasks.updateTask({ status: "DONE" }, task.id));
-//       } else if (task.status === "unassigned") {
-//         updatedTasks.push(await tasks.updateTask({ status: "UNASSIGNED" }, task.id));
-//       }
-//     }
-//     return res.json({ message: `Updated Old tasks`, tasks: updatedTasks });
-//   } catch (error) {
-//     logger.error(`Error while Updating tasks ${error}`);
-//     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-//   }
-// };
+const updateOldTaskStatus = async (req, res) => {
+  try {
+    const allTasks = await tasks.fetchTasks();
+    const allOldTasks = allTasks.filter(
+      (task) => task.status.toUpperCase() === "COMPLETED" || task.status === "unassigned"
+    );
+    const updatedTasks = [];
+    for (const task of allOldTasks) {
+      if (task.status.toUpperCase() === "COMPLETED") {
+        updatedTasks.push(await tasks.updateTask({ status: "DONE" }, task.id));
+      } else if (task.status === "unassigned") {
+        updatedTasks.push(await tasks.updateTask({ status: "UNASSIGNED" }, task.id));
+      }
+    }
+    return res.json({ message: `Updated Old tasks`, tasks: updatedTasks });
+  } catch (error) {
+    logger.error(`Error while Updating tasks ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
 
 module.exports = {
   addNewTask,
@@ -430,5 +432,5 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
-  // updateOldTaskStatus,
+  updateOldTaskStatus,
 };
