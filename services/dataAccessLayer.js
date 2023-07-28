@@ -2,7 +2,14 @@ const userQuery = require("../models/users");
 const members = require("../models/members");
 const { USER_SENSITIVE_DATA } = require("../constants/users");
 
-const retrieveUsers = async ({ id = null, username = null, usernames = null, query = null, userdata ,userIds = []}) => {
+const retrieveUsers = async ({
+  id = null,
+  username = null,
+  usernames = null,
+  query = null,
+  userdata,
+  userIds = [],
+}) => {
   if (id || username) {
     let result;
     if (id != null) {

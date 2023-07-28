@@ -582,6 +582,7 @@ const fetchUsersWithToken = async () => {
     return users;
   } catch (err) {
     logger.error(`Error while fetching all users with tokens field: ${err}`);
+    return [];
   }
 };
 /**
