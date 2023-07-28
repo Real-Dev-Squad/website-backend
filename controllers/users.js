@@ -325,7 +325,8 @@ const markUnverified = async (req, res) => {
 
     usersInRdsDiscordServer.forEach((discordUser) => {
       const found = discordUser.roles.find((role) => role === discordDeveloperRoleId);
-      if (found && !rdsUserMap[discordUser.user.id]) {
+      const isUnverified = discordUser.roles.find((role) => role === unverifiedRoleId);
+      if (found && !rdsUserMap[discordUser.user.id] && !isUnverified) {
         usersToApplyUnverifiedRole.push(discordUser.user.id);
       }
     });
