@@ -143,7 +143,7 @@ const fetchTasks = async (req, res) => {
       const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(filterTasks);
       return res.json({
         message: "Filter tasks returned successfully!",
-        ...tasksWithRdsAssigneeInfo,
+        tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
       });
     }
 
