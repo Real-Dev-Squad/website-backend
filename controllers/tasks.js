@@ -203,7 +203,7 @@ const getSelfTasks = async (req, res) => {
     const { username } = req.userData;
 
     if (username) {
-      if (req.query.completed) {
+      if (req.query.done) {
         const allCompletedTasks = await tasks.fetchUserCompletedTasks(username);
         return res.json(allCompletedTasks);
       } else {
@@ -292,15 +292,15 @@ const updateTaskStatus = async (req, res, next) => {
     if (task.taskData.status === TASK_STATUS.VERIFIED || req.body.status === TASK_STATUS.MERGED)
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
-    if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
-      if (req.body.status === TASK_STATUS.COMPLETED || !req.body.status) {
-        return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
+    if (task.taskData.status === TASK_STATUS.DONE && req.body.percentCompleted < 100) {
+      if (req.body.status === TASK_STATUS.DONE || !req.body.status) {
+        return res.boom.badRequest("Task percentCompleted can't updated as status is DONE");
       }
     }
 
-    if (req.body.status === TASK_STATUS.COMPLETED && task.taskData.percentCompleted !== 100) {
+    if (req.body.status === TASK_STATUS.DONE && task.taskData.percentCompleted !== 100) {
       if (req.body.percentCompleted !== 100) {
-        return res.boom.badRequest("Status cannot be updated. Task is not completed yet");
+        return res.boom.badRequest("Status cannot be updated. Task is not done yet");
       }
     }
 
@@ -341,7 +341,7 @@ const updateTaskStatus = async (req, res, next) => {
       }
     }
 
-    if (isUserStatusEnabled && req.body.status === TASK_STATUS.COMPLETED && req.body.percentCompleted === 100) {
+    if (isUserStatusEnabled && req.body.status === TASK_STATUS.DONE && req.body.percentCompleted === 100) {
       userStatusUpdate = await updateStatusOnTaskCompletion(userId);
     }
     return res.json({
@@ -401,24 +401,24 @@ const assignTask = async (req, res) => {
   }
 };
 
-const updateOldTaskStatus = async (req, res) => {
-  try {
-    const allTasks = await tasks.fetchTasks();
-    const allOldTasks = allTasks.filter((task) => task.status === "COMPLETED" || task.status === "unassigned");
-    const updatedTasks = [];
-    for (const task of allOldTasks) {
-      if (task.status === "COMPLETED") {
-        updatedTasks.push(await tasks.updateTask({ status: "DONE" }, task.id));
-      } else if (task.status === "unassigned") {
-        updatedTasks.push(await tasks.updateTask({ status: "UNASSIGNED" }, task.id));
-      }
-    }
-    return res.json({ message: `Updated Old tasks`, tasks: updatedTasks });
-  } catch (error) {
-    logger.error(`Error while Updating tasks ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-  }
-};
+// const updateOldTaskStatus = async (req, res) => {
+//   try {
+//     const allTasks = await tasks.fetchTasks();
+//     const allOldTasks = allTasks.filter((task) => task.status === "COMPLETED" || task.status === "unassigned");
+//     const updatedTasks = [];
+//     for (const task of allOldTasks) {
+//       if (task.status === "COMPLETED") {
+//         updatedTasks.push(await tasks.updateTask({ status: "DONE" }, task.id));
+//       } else if (task.status === "unassigned") {
+//         updatedTasks.push(await tasks.updateTask({ status: "UNASSIGNED" }, task.id));
+//       }
+//     }
+//     return res.json({ message: `Updated Old tasks`, tasks: updatedTasks });
+//   } catch (error) {
+//     logger.error(`Error while Updating tasks ${error}`);
+//     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+//   }
+// };
 
 module.exports = {
   addNewTask,
@@ -430,5 +430,5 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
-  updateOldTaskStatus,
+  // updateOldTaskStatus,
 };

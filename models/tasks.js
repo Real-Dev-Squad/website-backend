@@ -5,7 +5,7 @@ const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
+const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, DONE } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 
 /**
@@ -274,6 +274,7 @@ const fetchSelfTask = async (taskId, userId) => {
  */
 
 const fetchUserTasks = async (username, statuses = [], field, order) => {
+  console.log("In fetchusertasks",statuses);
   try {
     const userId = await userUtils.getUserId(username);
 
@@ -283,7 +284,6 @@ const fetchUserTasks = async (username, statuses = [], field, order) => {
 
     let groupTasksSnapshot = [];
     let featureTasksSnapshot = [];
-
     if (statuses && statuses.length) {
       if (field) {
         groupTasksSnapshot = await tasksModel
@@ -422,7 +422,8 @@ const fetchSelfTasks = async (username) => {
  */
 
 const fetchUserCompletedTasks = async (username) => {
-  return await fetchUserTasks(username, [OLD_COMPLETED, COMPLETED]);
+  const subres = await fetchUserTasks(username, [OLD_COMPLETED, DONE]);
+  return subres;
 };
 
 /**

@@ -21,7 +21,7 @@ describe("Task Based Status Updates", function () {
     let userJwt;
     let taskArr;
     const reqBody = {
-      status: "COMPLETED",
+      status: "DONE",
       percentCompleted: 100,
     };
 
