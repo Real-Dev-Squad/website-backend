@@ -324,9 +324,11 @@ const markUnverified = async (req, res) => {
     });
 
     usersInRdsDiscordServer.forEach((discordUser) => {
-      const found = discordUser.roles.find((role) => role === discordDeveloperRoleId);
-      const isUnverified = discordUser.roles.find((role) => role === unverifiedRoleId);
-      if (found && !rdsUserMap[discordUser.user.id] && !isUnverified) {
+      const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
+      const isMissingUnverifiedRole = !discordUser.roles.includes(unverifiedRoleId);
+      const isUserUnverified = !rdsUserMap[discordUser.user.id]; // Doesn't have discordId in RDS user object
+      
+      if (isDeveloper && isUserUnverified && isMissingUnverifiedRole) {
         usersToApplyUnverifiedRole.push(discordUser.user.id);
       }
     });
