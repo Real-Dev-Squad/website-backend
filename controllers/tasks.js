@@ -341,7 +341,6 @@ const updateTaskStatus = async (req, res, next) => {
       }
     }
 
-
     if (isUserStatusEnabled && req.body.status) {
       userStatusUpdate = await updateStatusOnTaskCompletion(userId);
     }
