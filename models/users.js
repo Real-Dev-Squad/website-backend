@@ -660,6 +660,24 @@ const removeGitHubToken = async (users) => {
   }
 };
 
+const getUsersByRole = async (role) => {
+  try {
+    const usersRef = await userModel.where(`roles.${role}`, "==", true).get();
+    const users = [];
+    usersRef.docs.forEach((user) => {
+      const userData = user.data();
+      users.push({
+        id: user.id,
+        ...userData,
+      });
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Fetching users with role: ${role} exitted with an error: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -683,4 +701,5 @@ module.exports = {
   archiveUserIfNotInDiscord,
   fetchUsersWithToken,
   removeGitHubToken,
+  getUsersByRole,
 };

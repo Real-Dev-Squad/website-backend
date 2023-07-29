@@ -83,9 +83,38 @@ describe("Task Based Status Updates", function () {
         expect(res.body.userStatus.data.currentStatus).to.equal(userState.IDLE);
       });
 
-      it("Should not change the ACTIVE state to IDLE if no other task is assigned to the user.", async function () {
+      it("Should change the ACTIVE state to IDLE if no other task is assigned to the user.", async function () {
         const statusData = generateStatusDataForState(userId, userState.ACTIVE);
         await firestore.collection("usersStatus").doc("userStatus").set(statusData);
+        const res = await chai
+          .request(app)
+          .patch(`/tasks/self/taskid123?userStatusFlag=true`)
+          .set("cookie", `${cookieName}=${userJwt}`)
+          .send(reqBody);
+        expect(res.body.userStatus.status).to.equal("success");
+        expect(res.body.userStatus.message).to.equal("The status has been updated to IDLE");
+        expect(res.body.userStatus.data.previousStatus).to.equal(userState.ACTIVE);
+        expect(res.body.userStatus.data.currentStatus).to.equal(userState.IDLE);
+      });
+
+      it("Should not change the IDLE state if no other task is assigned to the user. & current task status is updated (excluding completed, e.g., in progress).", async function () {
+        const statusData = generateStatusDataForState(userId, userState.IDLE);
+        await firestore.collection("usersStatus").doc("userStatus").set(statusData);
+        reqBody.status = "NEEDS_REVIEW";
+        const res = await chai
+          .request(app)
+          .patch(`/tasks/self/taskid123?userStatusFlag=true`)
+          .set("cookie", `${cookieName}=${userJwt}`)
+          .send(reqBody);
+        expect(res.body.userStatus.status).to.equal("success");
+        expect(res.body.userStatus.message).to.equal("The status is already IDLE");
+        expect(res.body.userStatus.data.currentStatus).to.equal(userState.IDLE);
+      });
+
+      it("Should change the ACTIVE state to IDLE if no other task is assigned to the user. & current task status is updated (excluding completed, e.g., in progress).", async function () {
+        const statusData = generateStatusDataForState(userId, userState.ACTIVE);
+        await firestore.collection("usersStatus").doc("userStatus").set(statusData);
+        reqBody.status = "NEEDS_REVIEW";
         const res = await chai
           .request(app)
           .patch(`/tasks/self/taskid123?userStatusFlag=true`)
@@ -148,9 +177,38 @@ describe("Task Based Status Updates", function () {
         expect(res.body.userStatus.data.currentStatus).to.equal(userState.ACTIVE);
       });
 
-      it("Should change to ACTIVE state if the user is not ACTIVE.", async function () {
+      it("Should change to ACTIVE state if the user is not ACTIVE. ", async function () {
         const statusData = generateStatusDataForState(userId, userState.IDLE);
         await firestore.collection("usersStatus").doc("userStatus").set(statusData);
+        const res = await chai
+          .request(app)
+          .patch(`/tasks/self/taskid123?userStatusFlag=true`)
+          .set("cookie", `${cookieName}=${userJwt}`)
+          .send(reqBody);
+        expect(res.body.userStatus.status).to.equal("success");
+        expect(res.body.userStatus.message).to.equal("The status has been updated to ACTIVE");
+        expect(res.body.userStatus.data.previousStatus).to.equal(userState.IDLE);
+        expect(res.body.userStatus.data.currentStatus).to.equal(userState.ACTIVE);
+      });
+
+      it("Should not change the ACTIVE state if the user is already ACTIVE. & current task status is updated (excluding completed, e.g., in progress).", async function () {
+        const statusData = generateStatusDataForState(userId, userState.ACTIVE);
+        await firestore.collection("usersStatus").doc("userStatus").set(statusData);
+        reqBody.status = "NEEDS_REVIEW";
+        const res = await chai
+          .request(app)
+          .patch(`/tasks/self/taskid123?userStatusFlag=true`)
+          .set("cookie", `${cookieName}=${userJwt}`)
+          .send(reqBody);
+        expect(res.body.userStatus.status).to.equal("success");
+        expect(res.body.userStatus.message).to.equal("The status is already ACTIVE");
+        expect(res.body.userStatus.data.currentStatus).to.equal(userState.ACTIVE);
+      });
+
+      it("Should change to ACTIVE state if the user is not ACTIVE. & current task status is updated (excluding completed, e.g., in progress).", async function () {
+        const statusData = generateStatusDataForState(userId, userState.IDLE);
+        await firestore.collection("usersStatus").doc("userStatus").set(statusData);
+        reqBody.status = "NEEDS_REVIEW";
         const res = await chai
           .request(app)
           .patch(`/tasks/self/taskid123?userStatusFlag=true`)
@@ -340,23 +398,23 @@ describe("Task Based Status Updates", function () {
       expect(res.status).to.equal(200);
       const response = res.body.data;
       expect(response).to.have.all.keys(
-        "totalUsers",
-        "totalUnprocessedUsers",
-        "totalOnboardingUsersAltered",
-        "totalOnboardingUsersUnAltered",
-        "totalActiveUsersAltered",
-        "totalActiveUsersUnAltered",
-        "totalIdleUsersAltered",
-        "totalIdleUsersUnAltered"
+        "usersCount",
+        "unprocessedUsers",
+        "onboardingUsersAltered",
+        "onboardingUsersUnaltered",
+        "activeUsersAltered",
+        "activeUsersUnaltered",
+        "idleUsersAltered",
+        "idleUsersUnaltered"
       );
-      expect(response.totalUsers).to.equal(10);
-      expect(response.totalUnprocessedUsers).to.equal(0);
-      expect(response.totalOnboardingUsersAltered).to.equal(1);
-      expect(response.totalOnboardingUsersUnAltered).to.equal(1);
-      expect(response.totalActiveUsersAltered).to.equal(3);
-      expect(response.totalActiveUsersUnAltered).to.equal(1);
-      expect(response.totalIdleUsersAltered).to.equal(3);
-      expect(response.totalIdleUsersUnAltered).to.equal(1);
+      expect(response.usersCount).to.equal(10);
+      expect(response.unprocessedUsers).to.equal(0);
+      expect(response.onboardingUsersAltered).to.equal(1);
+      expect(response.onboardingUsersUnaltered).to.equal(1);
+      expect(response.activeUsersAltered).to.equal(3);
+      expect(response.activeUsersUnaltered).to.equal(1);
+      expect(response.idleUsersAltered).to.equal(3);
+      expect(response.idleUsersUnaltered).to.equal(1);
 
       const userStatus000Data = (await userStatusModel.doc("userStatus000").get()).data();
       expect(userStatus000Data.currentStatus.state).to.equal(userState.IDLE);

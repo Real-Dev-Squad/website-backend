@@ -5,6 +5,7 @@ const chaiHttp = require("chai-http");
 const passport = require("passport");
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
+const { generateGithubAuthRedirectUrl } = require("..//utils/github");
 const { addUserToDBForTest } = require("../../utils/users");
 const userData = require("../fixtures/user/user")();
 
@@ -18,6 +19,25 @@ describe("auth", function () {
     await cleanDb();
 
     sinon.restore();
+  });
+
+  it("should return github call back URL", async function () {
+    const githubOauthURL = generateGithubAuthRedirectUrl({});
+    const res = await chai.request(app).get("/auth/github/login").redirects(0);
+    expect(res).to.have.status(302);
+    expect(res.headers.location).to.equal(githubOauthURL);
+  });
+
+  it("should return github call back URL with redirectUrl", async function () {
+    const RDS_MEMBERS_SITE_URL = "https://members.realdevsquad.com";
+    const githubOauthURL = generateGithubAuthRedirectUrl({ state: RDS_MEMBERS_SITE_URL });
+    const res = await chai
+      .request(app)
+      .get("/auth/github/login")
+      .query({ redirectURL: RDS_MEMBERS_SITE_URL })
+      .redirects(0);
+    expect(res).to.have.status(302);
+    expect(res.headers.location).to.equal(githubOauthURL);
   });
 
   it("should redirect the user to new sign up flow if they are have incomplte user details true", async function () {
@@ -38,8 +58,7 @@ describe("auth", function () {
   // same data should be return from github and same data should be added there
   it("should redirect the request to the goto page on successful login, if user has incomplete user details false", async function () {
     await addUserToDBForTest(userData[0]);
-    const rdsUiUrl = config.get("services.rdsUi.baseUrl");
-
+    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
       callback(null, "accessToken", githubUserInfo[0]);
       return (req, res, next) => {};
@@ -49,6 +68,59 @@ describe("auth", function () {
       .request(app)
       .get("/auth/github/callback")
       .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
+      .redirects(0);
+    expect(res).to.have.status(302);
+    expect(res.headers.location).to.equal(rdsUiUrl);
+  });
+
+  it("should redirect the request to the redirect URL provided on successful login, if user has incomplete user details false", async function () {
+    await addUserToDBForTest(userData[0]);
+    const rdsUrl = new URL("https://dashboard.realdevsquad.com").href;
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      callback(null, "accessToken", githubUserInfo[0]);
+      return (req, res, next) => {};
+    });
+
+    const res = await chai
+      .request(app)
+      .get(`/auth/github/callback`)
+      .query({ code: "codeReturnedByGithub", state: rdsUrl })
+      .redirects(0);
+    expect(res).to.have.status(302);
+    expect(res.headers.location).to.equal(rdsUrl);
+  });
+
+  it("should redirect the realdevsquad.com if non RDS URL provided, any url that is other than *.realdevsqud.com is invalid", async function () {
+    await addUserToDBForTest(userData[0]);
+    const invalidRedirectUrl = new URL("https://google.com").href;
+    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      callback(null, "accessToken", githubUserInfo[0]);
+      return (req, res, next) => {};
+    });
+
+    const res = await chai
+      .request(app)
+      .get(`/auth/github/callback`)
+      .query({ code: "codeReturnedByGithub", state: invalidRedirectUrl })
+      .redirects(0);
+    expect(res).to.have.status(302);
+    expect(res.headers.location).to.equal(rdsUiUrl);
+  });
+
+  it("should redirect the realdevsquad.com if invalid redirect URL provided", async function () {
+    await addUserToDBForTest(userData[0]);
+    const invalidRedirectUrl = "invalidURL";
+    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      callback(null, "accessToken", githubUserInfo[0]);
+      return (req, res, next) => {};
+    });
+
+    const res = await chai
+      .request(app)
+      .get(`/auth/github/callback`)
+      .query({ code: "codeReturnedByGithub", state: invalidRedirectUrl })
       .redirects(0);
     expect(res).to.have.status(302);
     expect(res.headers.location).to.equal(rdsUiUrl);
