@@ -160,6 +160,11 @@ const cacheResponse = (options = {}) => {
         const oldSend = res.send;
 
         res.send = (body) => {
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            res.send = oldSend;
+            return res.send(body);
+          }
+
           const cacheValue = {
             priority: priority,
             response: body,
@@ -206,19 +211,23 @@ const invalidateCache = (options = {}) => {
   }
 
   return async (req, res, next) => {
-    try {
-      for (const key of keys) {
-        const cachedKeysSet = cachedKeys.getCachedKeys(key);
-        for (const cachedKey of cachedKeysSet) {
-          pool.evict(cachedKey);
-        }
-        cachedKeys.removeModelKey(key);
+    res.on("finish", () => {
+      if (res.statusCode < 200 || res.statusCode >= 300) {
+        return;
       }
-    } catch (err) {
-      logger.error(`Error while removing cached response ${err}`);
-    } finally {
-      next();
-    }
+      try {
+        for (const key of keys) {
+          const cachedKeysSet = cachedKeys.getCachedKeys(key);
+          for (const cachedKey of cachedKeysSet) {
+            pool.evict(cachedKey);
+          }
+          cachedKeys.removeModelKey(key);
+        }
+      } catch (err) {
+        logger.error(`Error while removing cached response ${err}`);
+      }
+    });
+    next();
   };
 };
 

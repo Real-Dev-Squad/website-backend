@@ -1,7 +1,7 @@
 const externalAccountsModel = require("../models/external-accounts");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getDiscordMembers } = require("../services/discordService");
-const { addOrUpdate } = require("../models/users");
+const { addOrUpdate, getUsersByRole } = require("../models/users");
 const { retrieveDiscordUsers } = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
 
@@ -56,6 +56,7 @@ const syncExternalAccountData = async (req, res) => {
     const rdsUserDataMap = {};
     const updateUserDataPromises = [];
     const userUpdatedWithInDiscordFalse = [];
+    const updateArchivedPromises = [];
 
     rdsUserData.forEach((rdsUser) => {
       rdsUserDataMap[rdsUser.discordId] = {
@@ -90,10 +91,26 @@ const syncExternalAccountData = async (req, res) => {
 
     await Promise.all(updateUserDataPromises);
 
+    const inDiscordUsers = await getUsersByRole("in_discord");
+    inDiscordUsers.forEach((user) => {
+      if (user.roles.archived === true) {
+        const userData = {
+          roles: {
+            ...user.roles,
+            archived: false,
+          },
+        };
+        updateArchivedPromises.push(addOrUpdate(userData, user.id));
+      }
+    });
+
+    await Promise.all(updateArchivedPromises);
+
     return res.json({
       rdsUsers: rdsUserData.length,
       discordUsers: discordUserData.length,
       userUpdatedWithInDiscordFalse: userUpdatedWithInDiscordFalse.length,
+      usersMarkedUnArchived: updateArchivedPromises.length,
       message: "Data Sync Complete",
     });
   } catch (err) {
