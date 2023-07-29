@@ -37,6 +37,8 @@ module.exports = () => {
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
       incompleteUserDetails: false,
+      created_at: 1609459200000,
+      updated_at: 1609459200000,
     },
     {
       username: "nikhil",
