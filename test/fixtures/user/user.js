@@ -37,8 +37,6 @@ module.exports = () => {
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
       incompleteUserDetails: false,
-      created_at: 1609459200000,
-      updated_at: 1609459200000,
     },
     {
       username: "nikhil",
@@ -330,6 +328,20 @@ module.exports = () => {
       },
       twitter_id: "ramsingh123",
       linkedin_id: "ramsingh123",
+    },
+    {
+      username: "ankur",
+      first_name: "Ankur",
+      last_name: "Narkhede",
+      github_id: githubUserInfo[0].username,
+      github_display_name: githubUserInfo[0].displayName,
+      roles: {
+        member: true,
+        in_discord: true,
+      },
+      incompleteUserDetails: false,
+      updated_at: Date.now(),
+      created_at: Date.now(),
     },
   ];
 };

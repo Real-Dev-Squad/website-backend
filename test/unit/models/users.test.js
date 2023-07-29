@@ -94,7 +94,7 @@ describe("users", function () {
     });
 
     it("It should have created_At and updated_At fields", async function () {
-      const userData = userDataArray[0];
+      const userData = userDataArray[14];
       await users.addOrUpdate(userData);
       const githubUsername = "ankur";
       const { user, userExists } = await users.fetchUser({ githubUsername });
