@@ -242,11 +242,12 @@ describe("users", function () {
     it("should update archived role to true if in_discord is false", async function () {
       await users.archiveUserIfNotInDiscord();
 
-      const updatedUsers = await users.fetchAllUsers();
+      const updatedUsers = await userModel.where("roles.in_discord", "==", false).get();
 
       updatedUsers.forEach((user) => {
-        expect(user.roles.in_discord).to.be.equal(false);
-        expect(user.roles.archived).to.be.equal(true);
+        const userData = user.data();
+        expect(userData.roles.in_discord).to.be.equal(false);
+        expect(userData.roles.archived).to.be.equal(true);
       });
     });
   });
