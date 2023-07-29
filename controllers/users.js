@@ -625,12 +625,25 @@ const updateRoles = async (req, res) => {
 const archiveUserIfNotInDiscord = async (req, res) => {
   try {
     const data = await userQuery.archiveUserIfNotInDiscord();
-    return res.json({
+
+    if (data.totalUsers === 0) {
+      return res.status(200).json({
+        message: "Couldn't find any users currently inactive in Discord but not archived.",
+        data,
+      });
+    }
+
+    if (data.totalOperationsFailed === data.totalUsers) {
+      return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    }
+
+    return res.status(200).json({
       message: "Successfully updated users archived role to true if in_discord role is false",
       data,
     });
   } catch (error) {
-    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+    logger.error(`Error while updating the archived role: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 

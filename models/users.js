@@ -8,6 +8,7 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
+const { archiveInactiveDiscordUsersInBulk } = require("../services/discordService");
 const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
@@ -574,12 +575,17 @@ const fetchAllUsers = async () => {
 
 const archiveUserIfNotInDiscord = async () => {
   try {
-    const snapshot = await userModel.where("roles.in_discord", "==", false).get();
+    const snapshot = await userModel.where("roles.in_discord", "==", false).where("roles.archived", "==", false).get();
     const usersNotInDiscord = [];
-    const summary = {
+    let summary = {
+      totalUsers: snapshot.size,
       totalUsersArchived: 0,
       totalOperationsFailed: 0,
     };
+
+    if (snapshot.size === 0) {
+      return summary;
+    }
 
     snapshot.forEach((user) => {
       const id = user.id;
@@ -588,39 +594,17 @@ const archiveUserIfNotInDiscord = async () => {
     });
 
     const userNotInDiscordChunks = chunks(usersNotInDiscord, DOCUMENT_WRITE_SIZE);
-    const batchUpdateArchived = userNotInDiscordChunks.map((users) => {
-      const batch = firestore.batch();
-      users.forEach((user) => {
-        const id = user.id;
-        const isArchived = user?.roles?.archived;
-
-        if (!isArchived) {
-          const updatedUserData = {
-            ...user,
-            roles: {
-              ...user.roles,
-              archived: true,
-            },
-          };
-
-          batch.update(userModel.doc(id), updatedUserData);
-        }
-      });
-      return batch;
-    });
-
-    for (const batch of batchUpdateArchived) {
-      try {
-        await batch.commit();
-        summary.totalUsersArchived += batch._ops.length;
-      } catch (err) {
-        summary.totalOperationsFailed += batch._ops.length;
-        logger.error("Firebase batch Operation Failed!");
-      }
+    for (const users of userNotInDiscordChunks) {
+      const res = await archiveInactiveDiscordUsersInBulk(users);
+      summary = {
+        ...summary,
+        totalUsersArchived: (summary.totalUsersArchived += res.totalUsersArchived),
+        totalOperationsFailed: (summary.totalOperationsFailed += res.totalOperationsFailed),
+      };
     }
     return summary;
   } catch (error) {
-    logger.error(`error in updating Users archived role ${error}`);
+    logger.error(`Error in updating Users archived role:  ${error}`);
     throw error;
   }
 };
