@@ -1522,6 +1522,7 @@ describe("Users", function () {
 
     afterEach(async function () {
       await cleanDb();
+      Sinon.restore();
     });
 
     it("should returns successful response", function (done) {
