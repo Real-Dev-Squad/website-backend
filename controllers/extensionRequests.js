@@ -1,7 +1,7 @@
 const extensionRequestsQuery = require("../models/extensionRequests");
 const { addLog } = require("../models/logs");
 const tasks = require("../models/tasks");
-const { getUsername, getUserId } = require("../utils/users");
+const { getUsername, getUsernameElseUndefined, getUserIdElseUndefined } = require("../utils/users");
 const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 /**
@@ -14,11 +14,22 @@ const createTaskExtensionRequest = async (req, res) => {
   try {
     const extensionBody = req.body;
 
+    let assigneeUsername = await getUsernameElseUndefined(extensionBody.assignee);
+    let assigneeId = extensionBody.assignee;
+    if (!assigneeUsername) {
+      assigneeId = await getUserIdElseUndefined(extensionBody.assignee);
+      assigneeUsername = extensionBody.assignee;
+      extensionBody.assignee = assigneeId;
+    }
+
+    if (!assigneeId) {
+      return res.boom.badRequest("User with this id or username doesn't exist.");
+    }
+
     if (req.userData.id !== extensionBody.assignee && !req.userData.roles?.super_user) {
       return res.boom.forbidden("Only Super User can create an extension request for this task.");
     }
 
-    const assigneeUsername = await getUsername(extensionBody.assignee);
     const { taskData: task } = await tasks.fetchTask(extensionBody.taskId);
     if (!task) {
       return res.boom.badRequest("Task with this id or taskid doesn't exist.");
@@ -225,74 +236,6 @@ const updateExtensionRequestStatus = async (req, res) => {
   }
 };
 
-/**
- * Create ETA extension Request by Admin
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-const createTaskExtensionRequestAdmin = async (req, res) => {
-  try {
-    const extensionBody = req.body;
-
-    if (!req.userData.roles?.super_user) {
-      return res.boom.forbidden("Only Super User can create an extension request for this task.");
-    }
-
-    const assigneeUsername = extensionBody.assignee;
-    const assigneeId = await getUserId(extensionBody.assignee);
-    extensionBody.assignee = assigneeId;
-    const { taskData: task } = await tasks.fetchTask(extensionBody.taskId);
-    if (!task) {
-      return res.boom.badRequest("Task with this id or taskid doesn't exist.");
-    }
-    if (task.endsOn >= extensionBody.newEndsOn) {
-      return res.boom.badRequest("The value for newEndsOn should be greater than the previous ETA");
-    }
-    if (extensionBody.oldEndsOn !== task.endsOn) {
-      extensionBody.oldEndsOn = task.endsOn;
-    }
-    if (task.assignee !== assigneeUsername) {
-      return res.boom.badRequest("This task is assigned to some different user");
-    }
-
-    const prevExtensionRequest = await extensionRequestsQuery.fetchExtensionRequests({
-      taskId: extensionBody.taskId,
-      assignee: extensionBody.assignee,
-    });
-    if (prevExtensionRequest.length) {
-      return res.boom.forbidden("An extension request for this task already exists.");
-    }
-
-    const extensionRequest = await extensionRequestsQuery.createExtensionRequest(extensionBody);
-
-    const extensionLog = {
-      type: "extensionRequests",
-      meta: {
-        taskId: extensionBody.taskId,
-        createdBy: req.userData.id,
-      },
-      body: {
-        extensionRequestId: extensionRequest.id,
-        oldEndsOn: task.endsOn,
-        newEndsOn: extensionBody.newEndsOn,
-        assignee: extensionBody.assignee,
-        status: EXTENSION_REQUEST_STATUS.PENDING,
-      },
-    };
-
-    await addLog(extensionLog.type, extensionLog.meta, extensionLog.body);
-
-    return res.json({
-      message: "Extension Request created successfully!",
-      extensionRequest: { ...extensionBody, id: extensionRequest.id },
-    });
-  } catch (err) {
-    logger.error(`Error while creating new extension request: ${err}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-  }
-};
-
 module.exports = {
   createTaskExtensionRequest,
   fetchExtensionRequests,
@@ -300,5 +243,4 @@ module.exports = {
   getSelfExtensionRequests,
   updateExtensionRequest,
   updateExtensionRequestStatus,
-  createTaskExtensionRequestAdmin,
 };

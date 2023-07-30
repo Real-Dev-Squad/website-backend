@@ -24,7 +24,7 @@ const superUser = userData[4];
 let appOwnerjwt, superUserJwt, jwt;
 
 describe("Extension Requests", function () {
-  let taskId1, taskId2, taskId3, extensionRequestId1, extensionRequestId2;
+  let taskId0, taskId1, taskId2, taskId3, extensionRequestId1, extensionRequestId2;
 
   before(async function () {
     const userId = await addUser(user);
@@ -37,6 +37,19 @@ describe("Extension Requests", function () {
     jwt = authService.generateAuthToken({ userId: userId });
 
     const taskData = [
+      {
+        title: "Test task 1",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "active",
+        percentCompleted: 10,
+        participants: [],
+        assignee: appOwner.username,
+        isNoteworthy: true,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+      },
       {
         title: "Test task",
         type: "feature",
@@ -83,13 +96,14 @@ describe("Extension Requests", function () {
     ];
 
     // Add the active task
-    taskId1 = (await tasks.updateTask(taskData[0])).taskId;
+    taskId0 = (await tasks.updateTask(taskData[0])).taskId;
+    taskId1 = (await tasks.updateTask(taskData[1])).taskId;
 
     // Add the completed task
-    taskId2 = (await tasks.updateTask(taskData[1])).taskId;
+    taskId2 = (await tasks.updateTask(taskData[2])).taskId;
 
     // Add the completed task
-    taskId3 = (await tasks.updateTask(taskData[2])).taskId;
+    taskId3 = (await tasks.updateTask(taskData[3])).taskId;
 
     const extensionRequest = {
       taskId: taskId3,
@@ -196,6 +210,33 @@ describe("Extension Requests", function () {
           taskId: taskId1,
           title: "change ETA",
           assignee: appOwner.id,
+          oldEndsOn: 1234,
+          newEndsOn: 1235,
+          reason: "family event",
+          status: "PENDING",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Extension Request created successfully!");
+          expect(res.body.extensionRequest).to.be.a("object");
+          expect(res.body.extensionRequest.assignee).to.equal(appOwner.id);
+          expect(res.body.extensionRequest.status).to.equal(EXTENSION_REQUEST_STATUS.PENDING);
+          return done();
+        });
+    });
+    it("Should return success response after adding the extension request (sending assignee username)", function (done) {
+      chai
+        .request(app)
+        .post("/extension-requests")
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .send({
+          taskId: taskId0,
+          title: "change ETA",
+          assignee: appOwner.username,
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
