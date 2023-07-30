@@ -7,7 +7,7 @@ const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
 const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
-const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR, BAD_REQUEST } = require("../constants/errorMessages");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
@@ -137,6 +137,25 @@ const getUser = async (req, res) => {
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
+const userGithubInfo = async (req, res) => {
+  const {
+    params: { userId },
+  } = req;
+  try {
+    if (!userId) {
+      return res.boom.notAcceptable(BAD_REQUEST);
+    }
+    const githubInfo = await userQuery.fetchGithubInfoByUserId(userId);
+    if (!githubInfo.id) {
+      return res.boom.notFound("Error in faching user data");
+    }
+    return res.json(githubInfo);
+  } catch (err) {
+    logger.error(`Error while fetching data: ${err}`);
+    return res.boom.serverUnavailable(err);
   }
 };
 
@@ -642,6 +661,7 @@ module.exports = {
   addUserIntro,
   getUserIntro,
   addDefaultArchivedRole,
+  userGithubInfo,
   getUserSkills,
   filterUsers,
   verifyUserImage,

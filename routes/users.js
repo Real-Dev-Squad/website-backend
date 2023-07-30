@@ -21,6 +21,7 @@ router.get("/chaincode", authenticate, users.generateChaincode);
 router.get("/search", userValidator.validateUserQueryParams, users.filterUsers);
 router.patch("/remove-tokens", authenticate, authorizeRoles([SUPERUSER]), users.removeTokens);
 
+router.get("/githubInfo/:userId", users.userGithubInfo);
 router.get("/:username", users.getUser);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
 router.put("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);

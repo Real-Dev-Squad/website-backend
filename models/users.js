@@ -19,6 +19,7 @@ const userStatusModel = firestore.collection("usersStatus");
 const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
+const { fetchUserGithubInfo } = require("../services/githubService");
 
 /**
  * Adds or updates the user data
@@ -266,6 +267,25 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
   } catch (err) {
     logger.error("Error retrieving user data", err);
     throw err;
+  }
+};
+
+const fetchGithubInfoByUserId = async (userId) => {
+  if (!userId) {
+    throw new Error("User Id is missing");
+  }
+  try {
+    const userData = await fetchUser({ userId: userId });
+    const { userExists, user } = userData;
+    if (!userExists || !user.github_id) {
+      throw new Error("User not found");
+    }
+    const githubData = await fetchUserGithubInfo(user.github_id);
+    const { data } = githubData;
+    return data;
+  } catch (err) {
+    logger.error(`Error while fetching user github information: ${err}`);
+    throw new Error(err);
   }
 };
 
@@ -645,6 +665,7 @@ module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
   fetchUser,
+  fetchGithubInfoByUserId,
   setIncompleteUserDetails,
   initializeUser,
   updateUserPicture,

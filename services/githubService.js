@@ -106,6 +106,25 @@ function getFetch(url) {
 function getFetchWithAuthToken(url, params = null, headers = null) {
   return utils.fetch(url, "get", params, null, headers);
 }
+
+/**
+ * Fetches the user github informations by userId using GitHub API
+ * @param githubUsername {string} - githubUsername String
+ */
+
+const fetchUserGithubInfo = async (githubUsername) => {
+  try {
+    if (!githubUsername) {
+      throw new Error("github username missing");
+    }
+    const url = `https://api.github.com/users/${githubUsername}`;
+    return await getFetch(url);
+  } catch (err) {
+    logger.error(`Error while fetching user github information: ${err.response.data.message}`);
+    throw new Error(err);
+  }
+};
+
 /**
  * Fetches the pull requests in Real-Dev-Squad by user using GitHub API
  * @param username {string} - Username String
@@ -265,6 +284,7 @@ module.exports = {
   fetchOpenPRs,
   fetchMergedPRs,
   getFetch,
+  fetchUserGithubInfo,
   extractPRdetails,
   fetchIssues,
   fetchOpenIssues,
