@@ -421,8 +421,7 @@ const fetchSelfTasks = async (username) => {
  */
 
 const fetchUserCompletedTasks = async (username) => {
-  const subres = await fetchUserTasks(username, [OLD_COMPLETED, DONE]);
-  return subres;
+  return await fetchUserTasks(username, [OLD_COMPLETED, DONE]);
 };
 
 /**
@@ -455,6 +454,29 @@ const overdueTasks = async (overDueTasks) => {
   }
 };
 
+const updateOldTaskStatus = async (oldToNewMapping) => {
+  try {
+    const allTasks = await fetchTasks();
+    const allOldTasks = allTasks.filter((task) => {
+      return task.status in oldToNewMapping;
+    });
+    const updatedTasks = {};
+    const oldStatus = new Set();
+    for (const task of allOldTasks) {
+      oldStatus.add(task.status);
+      const newStatus = oldToNewMapping[task.status];
+      if (newStatus) {
+        await updateTask({ status: newStatus }, task.id);
+        updatedTasks[task.id] = newStatus;
+      }
+    }
+    return { updatedTasks, oldStatus };
+  } catch (err) {
+    logger.error("Error updating tasks to new status", err);
+    throw err;
+  }
+};
+
 module.exports = {
   updateTask,
   fetchTasks,
@@ -469,4 +491,5 @@ module.exports = {
   addDependency,
   fetchTaskByIssueId,
   fetchPaginatedTasks,
+  updateOldTaskStatus,
 };

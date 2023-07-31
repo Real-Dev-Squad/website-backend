@@ -3,8 +3,8 @@ const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
 const { addLog } = require("../models/logs");
 const { USER_STATUS } = require("../constants/users");
 const { addOrUpdate, getRdsUserInfoByGitHubUsername } = require("../models/users");
-const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
+const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
+const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED, DONE } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
 const { transformQuery } = require("../utils/tasks");
@@ -401,21 +401,23 @@ const assignTask = async (req, res) => {
   }
 };
 
-const updateOldTaskStatus = async (req, res) => {
+const updateOldTaskStatusController = async (req, res) => {
+  const oldToNewStatusMapping = {
+    [OLD_COMPLETED]: DONE,
+    COMPLETED: DONE,
+    unassigned: "UNASSIGNED",
+  };
   try {
-    const allTasks = await tasks.fetchTasks();
-    const allOldTasks = allTasks.filter(
-      (task) => task.status.toUpperCase() === "COMPLETED" || task.status === "unassigned"
-    );
-    const updatedTasks = [];
-    for (const task of allOldTasks) {
-      if (task.status.toUpperCase() === "COMPLETED") {
-        updatedTasks.push(await tasks.updateTask({ status: "DONE" }, task.id));
-      } else if (task.status === "unassigned") {
-        updatedTasks.push(await tasks.updateTask({ status: "UNASSIGNED" }, task.id));
-      }
+    const { updatedTasks, oldStatus } = await tasks.updateOldTaskStatus(oldToNewStatusMapping);
+    let message = "No tasks are found to update.";
+    const updatedTasksCount = Object.keys(updatedTasks).length;
+    if (updatedTasksCount === 0) {
+      return res.json({ message: message });
     }
-    return res.json({ message: `Updated Old tasks`, tasks: updatedTasks });
+    if (updatedTasksCount > 0) {
+      message = `Updated ${updatedTasksCount} task(s) with old status as ${Array.from(oldStatus).join(", ")}`;
+    }
+    return res.json({ message: message, tasks: updatedTasks });
   } catch (error) {
     logger.error(`Error while Updating tasks ${error}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
@@ -432,5 +434,5 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
-  updateOldTaskStatus,
+  updateOldTaskStatusController,
 };

@@ -821,11 +821,49 @@ describe("Tasks", function () {
     });
   });
 
-  describe("PATCH /tasks/updateOldTaskStatus/all", function () {
+  describe("PATCH /tasks/oldtasks/all", function () {
     it("Should successfully update old tasks with 'DONE' and 'UNASSIGNED' statuses when authenticated as SUPERUSER", function (done) {
+      const updateOldTaskStatusStub = sinon.stub(tasks, "updateOldTaskStatus").callsFake(() => {
+        const updatedTasks = {
+          1: "DONE",
+          2: "DONE",
+          3: "UNASSIGNED",
+        };
+        const oldStatus = new Set(["completed", "COMPLETED", "unassigned"]);
+
+        return {
+          updatedTasks: updatedTasks,
+          oldStatus: oldStatus,
+        };
+      });
+
       chai
         .request(app)
-        .patch("/tasks/updateOldTaskStatus/all")
+        .patch("/tasks/oldtasks/all")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(updateOldTaskStatusStub.calledOnce).to.be.equal(true);
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.tasks).to.be.a("object");
+          expect(res.body).to.deep.equal({
+            message: `Updated 3 task(s) with old status as completed, COMPLETED, unassigned`,
+            tasks: {
+              1: "DONE",
+              2: "DONE",
+              3: "UNASSIGNED",
+            },
+          });
+          return done();
+        });
+    });
+    it("Should return no tasks are found to update if there are no tasks to update", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/oldtasks/all")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
@@ -833,15 +871,16 @@ describe("Tasks", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Updated Old tasks");
-          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.deep.equal({
+            message: "No tasks are found to update.",
+          });
           return done();
         });
     });
     it("should return an error when trying to update old task statuses without SUPERUSER role", function (done) {
       chai
         .request(app)
-        .patch("/tasks/updateOldTaskStatus/all")
+        .patch("/tasks/oldtasks/all")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
