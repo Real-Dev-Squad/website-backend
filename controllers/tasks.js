@@ -256,7 +256,12 @@ const updateTask = async (req, res) => {
     }
     await tasks.updateTask(req.body, req.params.id);
     if (isUserStatusEnabled && req.body.assignee) {
+      // New Assignee Status Update
       await updateUserStatusOnTaskUpdate(req.body.assignee);
+      // Old Assignee Status Update if available
+      if (task.taskData.assigneeId) {
+        await updateStatusOnTaskCompletion(task.taskData.assigneeId);
+      }
     }
 
     return res.status(204).send();
