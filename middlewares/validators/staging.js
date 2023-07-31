@@ -1,11 +1,12 @@
 const joi = require("joi");
 
 const validateUserRoles = async (req, res, next) => {
-  const config = {
+  const schema = joi.object().strict().keys({
     super_user: joi.boolean().optional(),
     member: joi.boolean().optional(),
-  };
-  const schema = joi.object(config).xor("super_user", "member");
+    archive: joi.boolean().optional(),
+    in_discord: joi.boolean().optional(),
+  });
 
   try {
     await schema.validateAsync(req.body);
