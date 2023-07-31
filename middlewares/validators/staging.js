@@ -17,6 +17,23 @@ const validateUserRoles = async (req, res, next) => {
   }
 };
 
+const validateRevokePrivileges = async (req, res, next) => {
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      action: joi.string().equal("revoke"),
+    });
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (err) {
+    logger.error(`Error validating validateUserRoles payload : ${err}`);
+    res.boom.badRequest(JSON.stringify({ allowedParameters: { action: "revoke" } }));
+  }
+};
+
 module.exports = {
   validateUserRoles,
+  validateRevokePrivileges,
 };
