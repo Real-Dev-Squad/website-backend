@@ -9,27 +9,15 @@ const updateRoles = async (req, res) => {
       });
     }
     const userId = req.userData.id;
-    if (req.body.super_user) {
-      await addOrUpdate(
-        {
-          roles: {
-            ...userData.roles,
-            super_user: req.body.super_user,
-          },
+    await addOrUpdate(
+      {
+        roles: {
+          ...userData.roles,
+          ...req.body,
         },
-        userId
-      );
-    } else if (req.body.member) {
-      await addOrUpdate(
-        {
-          roles: {
-            ...userData.roles,
-            member: req.body.member,
-          },
-        },
-        userId
-      );
-    }
+      },
+      userId
+    );
     return res.status(200).json({
       message: "Roles Updated successfully",
     });
