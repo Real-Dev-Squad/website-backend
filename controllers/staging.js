@@ -3,7 +3,7 @@ const { addOrUpdate } = require("../models/users");
 const updateRoles = async (req, res) => {
   try {
     const userData = await req.userData;
-    if (process.env.NODE_ENV !== "staging" || process.env.NODE_ENV !== "development") {
+    if (process.env.NODE_ENV !== "production") {
       return res.status(403).json({
         message: "FORBIDDEN | To be used only in staging and development",
       });
