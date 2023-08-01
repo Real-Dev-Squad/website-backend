@@ -330,11 +330,11 @@ module.exports = () => {
       linkedin_id: "ramsingh123",
     },
     {
-      username: "ankur",
-      first_name: "Ankur",
-      last_name: "Narkhede",
-      github_id: githubUserInfo[0].username,
-      github_display_name: githubUserInfo[0].displayName,
+      username: "sahsisunny",
+      first_name: "sunny",
+      last_name: "sahsi",
+      github_id: githubUserInfo[1].username,
+      github_display_name: githubUserInfo[1].displayName,
       roles: {
         member: true,
         in_discord: true,

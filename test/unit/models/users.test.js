@@ -96,7 +96,7 @@ describe("users", function () {
     it("It should have created_At and updated_At fields", async function () {
       const userData = userDataArray[14];
       await users.addOrUpdate(userData);
-      const githubUsername = "ankur";
+      const githubUsername = "sahsisunny";
       const { user, userExists } = await users.fetchUser({ githubUsername });
       expect(user).to.haveOwnProperty("created_at");
       expect(user).to.haveOwnProperty("updated_at");
