@@ -6,7 +6,7 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
-const { updateUserStatus } = require("../models/userStatus");
+const { updateUserStatus, getAllUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem } = require("../utils/array");
 const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
@@ -19,6 +19,7 @@ const userStatusModel = firestore.collection("usersStatus");
 const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
+const { filterUsersWithOnboardingState } = require("../utils/userStatus");
 
 /**
  * Adds or updates the user data
@@ -458,6 +459,10 @@ const getRdsUserInfoByGitHubUsername = async (githubUsername) => {
  */
 
 const getUsersBasedOnFilter = async (query) => {
+  if (query.state === "ONBOARDING" && query.day) {
+    const fetchUsersWithOnBoardingState = await getUsersWithOnboardingState(query);
+    return fetchUsersWithOnBoardingState;
+  }
   const allQueryKeys = Object.keys(query);
   const doesTagQueryExist = arraysHaveCommonItem(ITEM_TAG, allQueryKeys);
   const doesStateQueryExist = arraysHaveCommonItem(USER_STATE, allQueryKeys);
@@ -540,6 +545,29 @@ const getUsersBasedOnFilter = async (query) => {
   return [];
 };
 
+const getUsersWithOnboardingState = async (query) => {
+  const range = Number(query.day);
+  const { allUserStatus } = await getAllUserStatus(query);
+  const allUsersWithOnboardingState = filterUsersWithOnboardingState(allUserStatus);
+  const updatedOnboardingUsersWithDate = [];
+  const filteredUsers = [];
+  for (const user of allUsersWithOnboardingState) {
+    const result = await userModel.doc(user.userId).get();
+    filteredUsers.push(result.data());
+  }
+  filteredUsers.map((element) => {
+    if (element.discordJoinedAt) {
+      const userDiscordJoinedDate = new Date(element.discordJoinedAt);
+      const currentTimeStamp = new Date().getTime();
+      const timeDifferenceInMilliseconds = currentTimeStamp - userDiscordJoinedDate.getTime();
+      const currentAndUserJoinedDateDifference = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+      if (currentAndUserJoinedDateDifference > range) {
+        updatedOnboardingUsersWithDate.push(element);
+      }
+    }
+    return updatedOnboardingUsersWithDate;
+  });
+};
 /**
  * Fetch all users
  *

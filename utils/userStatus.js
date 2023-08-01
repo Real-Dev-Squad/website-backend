@@ -294,6 +294,10 @@ const generateErrorResponse = (message) => {
   };
 };
 
+const filterUsersWithOnboardingState = (data) => {
+  return data.filter((item) => item.currentStatus.state === userState.ONBOARDING);
+};
+
 module.exports = {
   getUserIdBasedOnRoute,
   getTomorrowTimeStamp,
@@ -307,4 +311,5 @@ module.exports = {
   checkIfUserHasLiveTasks,
   generateErrorResponse,
   generateNewStatus,
+  filterUsersWithOnboardingState,
 };
