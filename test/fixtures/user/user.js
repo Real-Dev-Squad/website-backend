@@ -333,8 +333,8 @@ module.exports = () => {
       username: "sahsisunny",
       first_name: "sunny",
       last_name: "sahsi",
-      github_id: githubUserInfo[1].username,
-      github_display_name: githubUserInfo[1].displayName,
+      github_id: githubUserInfo[1].login,
+      github_display_name: githubUserInfo[1].name,
       roles: {
         member: true,
         in_discord: true,
