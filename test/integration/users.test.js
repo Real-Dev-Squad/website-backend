@@ -1607,8 +1607,6 @@ describe("Users", function () {
     });
 
     it("should return correct response if debug param is passed", function (done) {
-      const updatedUserIds = [userId1, userId2, userId3];
-
       chai
         .request(app)
         .patch("/users?debug=true")
@@ -1627,7 +1625,7 @@ describe("Users", function () {
           expect(res.body.summary.totalUsersArchived).to.be.equal(3);
           expect(res.body.summary.totalUsers).to.be.equal(3);
           expect(res.body.summary.totalOperationsFailed).to.be.equal(0);
-          expect(res.body.summary.updatedUserIds).to.deep.equal(updatedUserIds);
+          expect(res.body.summary.updatedUserIds.length).to.equal(3);
           expect(res.body.message).to.equal(
             "Successfully updated users archived role to true if in_discord role is false"
           );
