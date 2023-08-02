@@ -5,12 +5,15 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
-const { fetch } = require("../utils/fetch");
+const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
-const obfuscate = require("../utils/obfuscate");
-const { getPaginationLink, getUsernamesFromPRs } = require("../utils/users");
-const { getQualifiers } = require("../utils/helper");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
+const { setInDiscordFalseScript } = require("../services/discordService");
+const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
+const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
+const { fetchAllUsers } = require("../models/users");
+const { getQualifiers } = require("../utils/helper");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 
 const verifyUser = async (req, res) => {
@@ -24,16 +27,21 @@ const verifyUser = async (req, res) => {
     logger.error(`Error while verifying user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
-  fetch(process.env.IDENTITY_SERVICE_URL, "POST", null, { userId }, { "Content-Type": "application/json" });
+  fetch(process.env.IDENTITY_SERVICE_URL, {
+    method: "POST",
+    body: { userId },
+    headers: { "Content-Type": "application/json" },
+  });
   return res.json({
     message: "Your request has been queued successfully",
   });
 };
 
 const getUserById = async (req, res) => {
-  let result;
+  let result, user;
   try {
-    result = await userQuery.fetchUser({ userId: req.params.userId });
+    result = await dataAccess.retrieveUsers({ id: req.params.userId });
+    user = result.user;
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -41,15 +49,6 @@ const getUserById = async (req, res) => {
 
   if (!result.userExists) {
     return res.boom.notFound("User doesn't exist");
-  }
-
-  const { phone = "", email = "", ...user } = result.user;
-  try {
-    user.phone = obfuscate.obfuscatePhone(phone);
-    user.email = obfuscate.obfuscateMail(email);
-  } catch (error) {
-    logger.error(`Error while formatting phone and email: ${error}`);
-    return res.boom.badImplementation("Error while formatting phone and email");
   }
 
   return res.json({
@@ -67,30 +66,47 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
+    // getting user details by id if present.
     const query = req.query?.query ?? "";
     const qualifiers = getQualifiers(query);
 
+    // getting user details by id if present.
+    if (req.query.id) {
+      const id = req.query.id;
+      let result, user;
+      try {
+        result = await dataAccess.retrieveUsers({ id: id });
+        user = result.user;
+      } catch (error) {
+        logger.error(`Error while fetching user: ${error}`);
+        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+      }
+      if (!result.userExists) {
+        return res.boom.notFound("User doesn't exist");
+      }
+      return res.json({
+        message: "User returned successfully!",
+        user,
+      });
+    }
+
     if (qualifiers?.filterBy) {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);
-
       const usernames = getUsernamesFromPRs(allPRs);
-
-      const { users } = await userQuery.fetchUsers(usernames);
-
+      const users = await dataAccess.retrieveUsers({ usernames: usernames });
       return res.json({
         message: "Users returned successfully!",
         users,
       });
     }
 
-    const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(req.query);
-
+    const data = await dataAccess.retrieveUsers({ query: req.query });
     return res.json({
       message: "Users returned successfully!",
-      users: allUsers,
+      users: data.allUsers,
       links: {
-        next: nextId ? getPaginationLink(req.query, "next", nextId) : "",
-        prev: prevId ? getPaginationLink(req.query, "prev", prevId) : "",
+        next: data.nextId ? getPaginationLink(req.query, "next", data.nextId) : "",
+        prev: data.prevId ? getPaginationLink(req.query, "prev", data.prevId) : "",
       },
     });
   } catch (error) {
@@ -108,9 +124,8 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
-    const { phone, email, ...user } = result.user;
-
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
+    const user = result.user;
     if (result.userExists) {
       return res.json({
         message: "User returned successfully!",
@@ -170,7 +185,7 @@ const getSuggestedUsers = async (req, res) => {
 
 const getUsernameAvailabilty = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
     return res.json({
       isUsernameAvailable: !result.userExists,
     });
@@ -187,14 +202,14 @@ const getUsernameAvailabilty = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getSelfDetails = (req, res) => {
+const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
       if (req.query.private) {
         return res.send(req.userData);
       }
-      const { phone, email, ...userData } = req.userData;
-      return res.send(userData);
+      const user = await dataAccess.retrieveUsers({ userdata: req.userData });
+      return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
@@ -214,7 +229,7 @@ const updateSelf = async (req, res) => {
   try {
     const { id: userId } = req.userData;
     if (req.body.username) {
-      const { user } = await userQuery.fetchUser({ userId });
+      const { user } = await dataAccess.retrieveUsers({ id: userId });
       if (!user.incompleteUserDetails) {
         return res.boom.forbidden("Cannot update username again");
       }
@@ -243,18 +258,110 @@ const updateSelf = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const postUserPicture = async (req, res) => {
+  const { file } = req;
+  const { id: userId, discordId } = req.userData;
+  const { coordinates } = req.body;
+  let discordAvatarUrl = "";
+  let imageData;
+  let verificationResult;
   try {
-    const { file } = req;
-    const { id: userId } = req.userData;
-    const { coordinates } = req.body;
-    const coordinatesObject = coordinates && JSON.parse(coordinates);
-    const imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
-    return res.json({
-      message: "Profile picture uploaded successfully!",
-      image: imageData,
-    });
+    discordAvatarUrl = await generateDiscordProfileImageUrl(discordId);
   } catch (error) {
     logger.error(`Error while adding profile picture of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+  try {
+    const coordinatesObject = coordinates && JSON.parse(coordinates);
+    imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
+  } catch (error) {
+    logger.error(`Error while adding profile picture of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+  try {
+    verificationResult = await userQuery.addForVerification(userId, discordId, imageData.url, discordAvatarUrl);
+  } catch (error) {
+    logger.error(`Error while adding profile picture of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+  return res.status(201).json({
+    message: `Profile picture uploaded successfully! ${verificationResult.message}`,
+    image: imageData,
+  });
+};
+
+/**
+ * Updates the user data
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const verifyUserImage = async (req, res) => {
+  try {
+    const { type: imageType } = req.query;
+    const { id: userId } = req.params;
+    await userQuery.markAsVerified(userId, imageType);
+    return res.json({
+      message: `${imageType} image was verified successfully!`,
+    });
+  } catch (error) {
+    logger.error(`Error while verifying image of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const markUnverified = async (req, res) => {
+  try {
+    const [usersInRdsDiscordServer, allRdsLoggedInUsers] = await Promise.all([getDiscordMembers(), fetchAllUsers()]);
+    const rdsUserMap = {};
+    const unverifiedRoleId = config.get("discordUnverifiedRoleId");
+    const usersToApplyUnverifiedRole = [];
+    const addRolePromises = [];
+    const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+
+    allRdsLoggedInUsers.forEach((user) => {
+      rdsUserMap[user.discordId] = true;
+    });
+
+    usersInRdsDiscordServer.forEach((discordUser) => {
+      const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
+      const isMissingUnverifiedRole = !discordUser.roles.includes(unverifiedRoleId);
+      const isUserUnverified = !rdsUserMap[discordUser.user.id]; // Doesn't have discordId in RDS user object
+
+      if (isDeveloper && isUserUnverified && isMissingUnverifiedRole) {
+        usersToApplyUnverifiedRole.push(discordUser.user.id);
+      }
+    });
+
+    usersToApplyUnverifiedRole.forEach((id) => {
+      addRolePromises.push(addRoleToUser(id, unverifiedRoleId));
+    });
+
+    await Promise.all(addRolePromises);
+    return res.json({ message: "ROLES APPLIED SUCCESSFULLY" });
+  } catch (err) {
+    logger.error(err);
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
+/**
+ * Updates the user data
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getUserImageForVerification = async (req, res) => {
+  try {
+    const { id: userId } = req.params;
+    const userImageVerificationData = await userQuery.getUserImageForVerification(userId);
+    return res.json({
+      message: "User image verification record fetched successfully!",
+      data: userImageVerificationData,
+    });
+  } catch (error) {
+    logger.error(`Error while verifying image of user: ${error}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
@@ -274,7 +381,7 @@ const updateUser = async (req, res) => {
 
     const { approval, timestamp, userId, ...profileDiff } = profileDiffData;
 
-    const user = await userQuery.fetchUser({ userId });
+    const user = await dataAccess.retrieveUsers({ id: userId });
     if (!user.userExists) return res.boom.notFound("User doesn't exist");
 
     await profileDiffsQuery.updateProfileDiff({ approval: profileDiffStatus.APPROVED }, profileDiffId);
@@ -390,7 +497,7 @@ const addUserIntro = async (req, res) => {
     await userQuery.addJoinData(data);
 
     return res.status(201).json({
-      message: "User data added successfully",
+      message: "User join data and newstatus data added and updated successfully",
     });
   } catch (err) {
     logger.error("Could not save user data");
@@ -449,16 +556,72 @@ const filterUsers = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    const users = await userQuery.getUsersBasedOnFilter(req.query);
 
+    const users = await dataAccess.retreiveFilteredUsers(req.query);
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
-      users,
+      users: users,
       count: users.length,
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
     return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
+const nonVerifiedDiscordUsers = async (req, res) => {
+  const data = await dataAccess.retrieveDiscordUsers();
+  return res.json(data);
+};
+
+const setInDiscordScript = async (req, res) => {
+  try {
+    await setInDiscordFalseScript();
+    return res.json({ message: "Successfully added the in_discord field to false for all users" });
+  } catch (err) {
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
+const removeTokens = async (req, res) => {
+  try {
+    const users = await userQuery.fetchUsersWithToken();
+
+    if (!users.length) {
+      return res.status(404).json({ message: "No users found with github Token!" });
+    }
+
+    await userQuery.removeGitHubToken(users);
+
+    return res.status(200).json({
+      message: "Github Token removed from all users!",
+      usersFound: users.length,
+    });
+  } catch (err) {
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
+const updateRoles = async (req, res) => {
+  try {
+    const result = await dataAccess.retrieveUsers({ id: req.params.id });
+    if (result?.userExists) {
+      const dataToUpdate = req.body;
+      const response = await getRoleToUpdate(result.user, dataToUpdate);
+      if (response.updateRole) {
+        await userQuery.addOrUpdate(response.newUserRoles, result.user.id);
+        return res.json({
+          message: "role updated successfully!",
+        });
+      } else {
+        return res.boom.conflict("Role already exist!");
+      }
+    } else {
+      return res.boom.notFound("User not found");
+    }
+  } catch (error) {
+    logger.error(`Error while updateRoles: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -481,4 +644,11 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
+  verifyUserImage,
+  getUserImageForVerification,
+  nonVerifiedDiscordUsers,
+  setInDiscordScript,
+  markUnverified,
+  removeTokens,
+  updateRoles,
 };

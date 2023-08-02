@@ -1,11 +1,13 @@
 const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
 const ItemModel = firestore.collection("itemTags");
+const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
-const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
+const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
+
 /**
  * Adds and Updates tasks
  *
@@ -18,13 +20,40 @@ const updateTask = async (taskData, taskId = null) => {
     taskData = await toFirestoreData(taskData);
     if (taskId) {
       const task = await tasksModel.doc(taskId).get();
+      if (taskData?.assignee && task.data().status === TASK_STATUS.AVAILABLE) {
+        taskData = { ...taskData, status: TASK_STATUS.ASSIGNED };
+      }
       if (taskData.status === "VERIFIED") {
         taskData = { ...taskData, endsOn: Math.floor(Date.now() / 1000) };
       }
+      const { dependsOn, ...taskWithoutDependsOn } = taskData;
       await tasksModel.doc(taskId).set({
         ...task.data(),
-        ...taskData,
+        ...taskWithoutDependsOn,
       });
+      if (dependsOn) {
+        await firestore.runTransaction(async (transaction) => {
+          const dependencyQuery = dependencyModel.where("taskId", "==", taskId);
+          const existingDependenciesSnapshot = await transaction.get(dependencyQuery);
+          const existingDependsOnIds = existingDependenciesSnapshot.docs.map((doc) => doc.data().dependsOn);
+          const newDependencies = dependsOn.filter((dependency) => !existingDependsOnIds.includes(dependency));
+          if (newDependencies.length > 0) {
+            for (const dependency of newDependencies) {
+              const dependencyDoc = await tasksModel.doc(dependency).get();
+              if (dependencyDoc.exists) {
+                const taskDependsOn = {
+                  taskId: taskId,
+                  dependsOn: dependency,
+                };
+                const docRef = dependencyModel.doc();
+                transaction.set(docRef, taskDependsOn);
+              } else {
+                throw new Error("Invalid dependency passed");
+              }
+            }
+          }
+        });
+      }
       return { taskId };
     }
     const taskInfo = await tasksModel.add(taskData);
@@ -32,10 +61,31 @@ const updateTask = async (taskData, taskId = null) => {
       taskId: taskInfo.id,
       taskDetails: await fromFirestoreData(taskData),
     };
-
     return result;
   } catch (err) {
     logger.error("Error in updating task", err);
+    throw err;
+  }
+};
+const addDependency = async (data) => {
+  try {
+    const { taskId, dependsOn } = data;
+    const batch = firestore.batch();
+    if (dependsOn.length > 500) {
+      throw new Error("Error cannot add more than 500 taskId");
+    }
+    for (const dependency of dependsOn) {
+      const taskDependOn = {
+        taskId: taskId,
+        dependsOn: dependency,
+      };
+      const docid = dependencyModel.doc();
+      batch.set(docid, taskDependOn);
+    }
+    await batch.commit();
+    return data.dependsOn;
+  } catch (err) {
+    logger.error("Error in creating dependency");
     throw err;
   }
 };
@@ -45,16 +95,74 @@ const updateTask = async (taskData, taskId = null) => {
  *
  * @return {Promise<tasks|Array>}
  */
+
+const getBuiltTasks = async (tasksSnapshot) => {
+  const tasks = buildTasks(tasksSnapshot);
+  const promises = tasks.map(async (task) => fromFirestoreData(task));
+  const updatedTasks = await Promise.all(promises);
+  const taskPromises = updatedTasks.map(async (task) => {
+    task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
+    const taskId = task.id;
+    const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
+    task.dependsOn = [];
+    dependencySnapshot.docs.forEach((doc) => {
+      const dependency = doc.get("dependsOn");
+      task.dependsOn.push(dependency);
+    });
+    return task;
+  });
+  const taskList = await Promise.all(taskPromises);
+  return taskList;
+};
+
+const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, prev }) => {
+  try {
+    const initialQuery = status
+      ? tasksModel.where("status", "==", status).orderBy("title")
+      : tasksModel.orderBy("title");
+    let queryDoc = initialQuery;
+
+    if (prev) {
+      queryDoc = queryDoc.limitToLast(size);
+    } else {
+      queryDoc = queryDoc.limit(size);
+    }
+
+    if (page) {
+      const startAfter = size * page;
+      queryDoc = queryDoc.offset(startAfter);
+    } else if (next) {
+      const doc = await tasksModel.doc(next).get();
+      queryDoc = queryDoc.startAt(doc);
+    } else if (prev) {
+      const doc = await tasksModel.doc(prev).get();
+      queryDoc = queryDoc.endAt(doc);
+    }
+
+    const snapshot = await queryDoc.get();
+
+    const first = snapshot.docs[0];
+    const prevDoc = await initialQuery.endBefore(first).limitToLast(1).get();
+
+    const last = snapshot.docs[snapshot.docs.length - 1];
+    const nextDoc = await initialQuery.startAfter(last).limit(1).get();
+
+    const allTasks = await getBuiltTasks(snapshot);
+    return {
+      allTasks,
+      next: nextDoc.docs[0]?.id ?? "",
+      prev: prevDoc.docs[0]?.id ?? "",
+    };
+  } catch (err) {
+    logger.error("Error retrieving user data", err);
+    throw err;
+  }
+};
+
 const fetchTasks = async () => {
   try {
     const tasksSnapshot = await tasksModel.get();
-    const tasks = buildTasks(tasksSnapshot);
-    const promises = tasks.map(async (task) => fromFirestoreData(task));
-    const updatedTasks = await Promise.all(promises);
-    const taskList = updatedTasks.map((task) => {
-      task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
-      return task;
-    });
+    const taskList = await getBuiltTasks(tasksSnapshot);
     return taskList;
   } catch (err) {
     logger.error("error getting tasks", err);
@@ -94,11 +202,16 @@ const fetchActiveTaskMembers = async () => {
 const fetchTask = async (taskId) => {
   try {
     const task = await tasksModel.doc(taskId).get();
+    const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
+    const dependencyDocReference = dependencySnapshot.docs.map((doc) => {
+      const dependency = doc.get("dependsOn");
+      return dependency;
+    });
     const taskData = await fromFirestoreData(task.data());
     if (taskData?.status) {
       taskData.status = TASK_STATUS[taskData.status.toUpperCase()] || task.status;
     }
-    return { taskData };
+    return { taskData, dependencyDocReference };
   } catch (err) {
     logger.error("Error retrieving task data", err);
     throw err;
@@ -299,7 +412,8 @@ const fetchSkillLevelTask = async (userId) => {
  * @returns {Promise<tasks>|Array}
  */
 const fetchSelfTasks = async (username) => {
-  return await fetchUserTasks(username, [], "startedOn", "desc");
+  return await fetchUserTasks(username, []);
+  // Removed `startedOn` field since we are getting issues with some of the documents in the tasks collection as some of the documents dont have `startedOn` present.
 };
 
 /**
@@ -372,6 +486,8 @@ module.exports = {
   fetchSelfTask,
   fetchSkillLevelTask,
   overdueTasks,
+  addDependency,
   fetchTaskByIssueId,
   getAllOverDueTasks,
+  fetchPaginatedTasks,
 };

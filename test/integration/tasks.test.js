@@ -37,7 +37,7 @@ describe("Tasks", function () {
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
-        status: "active",
+        status: "IN_PROGRESS",
         percentCompleted: 10,
         participants: [],
         assignee: appOwner.username,
@@ -139,6 +139,7 @@ describe("Tasks", function () {
           lossRate: { [DINERO]: 1 },
           assignee: appOwner.username,
           participants: [],
+          dependsOn: [],
         })
         .end((err, res) => {
           if (err) {
@@ -147,11 +148,12 @@ describe("Tasks", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Task created successfully!");
-          expect(res.body.id).to.be.a("string");
           expect(res.body.task).to.be.a("object");
+          expect(res.body.task.id).to.be.a("string");
           expect(res.body.task.createdBy).to.equal(appOwner.username);
           expect(res.body.task.assignee).to.equal(appOwner.username);
           expect(res.body.task.participants).to.be.a("array");
+          expect(res.body.task.dependsOn).to.be.a("array");
           return done();
         });
     });
@@ -197,6 +199,7 @@ describe("Tasks", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Tasks returned successfully!");
           expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks[0].dependsOn).to.be.a("array");
           const taskWithParticipants = res.body.tasks[0];
 
           if (taskWithParticipants.type === "group") {
@@ -207,6 +210,97 @@ describe("Tasks", function () {
 
           return done();
         });
+    });
+
+    it("Should call paginated tasks when dev flag passed to GET /tasks is true", function (done) {
+      const fetchPaginatedUserStub = sinon.stub(tasks, "fetchPaginatedTasks");
+      chai
+        .request(app)
+        .get("/tasks?dev=true")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(fetchPaginatedUserStub.calledOnce).to.be.equal(true);
+
+          return done();
+        });
+    });
+
+    it("Should get all tasks filtered with status when passed to GET /tasks", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?dev=true&status=${TASK_STATUS.IN_PROGRESS}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          const tasksData = res.body.tasks ?? [];
+          tasksData.forEach((task) => {
+            expect(task.status).to.equal(TASK_STATUS.IN_PROGRESS);
+          });
+          return done();
+        });
+    });
+
+    it("Should get tasks when correct query parameters are passed", function (done) {
+      chai
+        .request(app)
+        .get("/tasks?dev=true&size=1&page=0")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          expect(res.body.tasks.length).to.be.equal(1);
+          return done();
+        });
+    });
+
+    it("Should get next and previous page results based returned by the links in the response", async function () {
+      const initialReq = `/tasks?size=1&dev=true`;
+      const response = await chai.request(app).get(initialReq);
+      expect(response).to.have.status(200);
+      expect(response.body).to.be.a("object");
+      expect(response.body.message).to.equal("Tasks returned successfully!");
+      expect(response.body).to.have.property("next");
+      expect(response.body).to.have.property("prev");
+      expect(response.body.tasks).to.have.length(1);
+
+      const nextPageLink = response.body.next;
+      const nextPageResponse = await chai.request(app).get(nextPageLink);
+
+      expect(nextPageResponse).to.have.status(200);
+      expect(nextPageResponse.body).to.be.a("object");
+      expect(nextPageResponse.body.message).to.equal("Tasks returned successfully!");
+      expect(nextPageResponse.body).to.have.property("next");
+      expect(nextPageResponse.body).to.have.property("prev");
+      expect(nextPageResponse.body.tasks).to.have.length(1);
+
+      const prevPageLink = nextPageResponse.body.prev;
+      const previousPageResponse = await chai.request(app).get(prevPageLink);
+
+      expect(previousPageResponse).to.have.status(200);
+      expect(previousPageResponse.body).to.be.a("object");
+      expect(previousPageResponse.body.message).to.equal("Tasks returned successfully!");
+      expect(previousPageResponse.body).to.have.property("next");
+      expect(previousPageResponse.body).to.have.property("prev");
+      expect(previousPageResponse.body.tasks).to.have.length(1);
     });
   });
 
@@ -224,6 +318,8 @@ describe("Tasks", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal("task returned successfully");
           expect(res.body.taskData).to.be.a("object");
+          expect(res.body.taskData.dependsOn).to.be.a("array");
+
           return done();
         });
     });
@@ -341,6 +437,74 @@ describe("Tasks", function () {
             return done(err);
           }
           expect(res).to.have.status(204);
+          return done();
+        });
+    });
+    it("Should update dependency", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId2 = (await tasks.updateTask(tasksData[5])).taskId;
+
+      const dependsOn = [taskId1, taskId2];
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ dependsOn });
+      expect(res).to.have.status(204);
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      expect(res2).to.have.status(200);
+      expect(res2.body.taskData.dependsOn).to.be.a("array");
+      res2.body.taskData.dependsOn.forEach((taskId) => {
+        expect(dependsOn).to.include(taskId);
+      });
+
+      return taskId;
+    });
+
+    it("Should return 400 if any of taskid is not exist", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
+      const dependsOn = ["taskId5", "taskId6", taskId1];
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ dependsOn });
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.equal("Invalid dependency");
+    });
+
+    it("Should update status when assignee pass as a payload", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "sagar" });
+      expect(res).to.have.status(204);
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      expect(res2).to.have.status(200);
+      expect(res2.body.taskData.assignee).to.be.equal("sagar");
+
+      expect(res2.body.taskData.status).to.be.equal(TASK_STATUS.ASSIGNED);
+
+      return taskId;
+    });
+    it("should check updated dependsOn", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("task returned successfully");
+          expect(res.body.taskData).to.be.a("object");
+          expect(res.body.taskData.dependsOn).to.be.a("array");
 
           return done();
         });
@@ -381,6 +545,25 @@ describe("Tasks", function () {
           return done();
         });
     });
+    it("Should return fail response if percent completed is < 0 or > 100", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/" + taskId1)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          status: TASK_STATUS.IN_REVIEW,
+          percentCompleted: 120,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          return done();
+        });
+    });
 
     it("Should return 404 if task does not exist", function (done) {
       chai
@@ -401,13 +584,44 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("Should return 204 if assignee exists", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: `${userData[4].username}` })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("should return 404 if assignee is not in user db", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "invaliduser" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.be.equal("User doesn't exist");
+          return done();
+        });
+    });
   });
 
   describe("GET /tasks/:username", function () {
     it("Should return 200 when username is valid", function (done) {
       chai
         .request(app)
-        .get(`/tasks/${appOwner.username}?status=active`)
+        .get(`/tasks/${appOwner.username}?status=IN_PROGRESS`) // TODO: if status is passed in lowercase it fails, fix this
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -432,7 +646,7 @@ describe("Tasks", function () {
     it("Should return 404 when username is invalid", function (done) {
       chai
         .request(app)
-        .get("/tasks/dummyUser?status=active")
+        .get("/tasks/dummyUser?status=in_progress")
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -503,6 +717,23 @@ describe("Tasks", function () {
         });
     });
 
+    it("Should return fail response if percentage is < 0 or  > 100", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, percentCompleted: -10 })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          return done();
+        });
+    });
+
     it("Should return 404 if task doesnt exist", function (done) {
       chai
         .request(app)
@@ -520,7 +751,7 @@ describe("Tasks", function () {
     });
 
     it("Should return Forbidden error if task is not assigned to self", async function () {
-      const { userId } = await addUser(userData[1]);
+      const { userId } = await addUser(userData[0]);
       const jwt = authService.generateAuthToken({ userId });
 
       const res = await chai.request(app).patch(`/tasks/self/${taskId1}`).set("cookie", `${cookieName}=${jwt}`);

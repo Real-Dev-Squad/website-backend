@@ -9,7 +9,8 @@ module.exports = {
   enableFileLogs: false,
   // Console logs are set to avoid the winston error of no defined transports
   enableConsoleLogs: true,
-
+  discordUnverifiedRoleId: "1234567890",
+  discordDeveloperRoleId: "9876543210",
   githubOauth: {
     clientId: "clientId",
     clientSecret: "clientSecret",
@@ -107,8 +108,90 @@ module.exports = {
   },
 
   rdsServerlessBot: {
-    rdsServerLessPublicKey: "RSA PUBLIC KEY",
-    rdsServerLessPrivateKey: "RSA PRIVATE KEY",
+    rdsServerLessPublicKey:
+      "-----BEGIN PUBLIC KEY-----\n" +
+      "MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQBK3CkprcpAYxme7vtdjpWO\n" +
+      "gFFjoYsqU3OmhMEty/s1gnW5tgbK4ief4xk+cU+mu3YvjzWudT/SV17tAWxL4Y+G\n" +
+      "incJwL5gpQwlnw9qOAdRGkpBriQLec7kNVIydZXbUitziy+iSimxNzdDmjvlK9ZG\n" +
+      "miVLZm+MePbUtgaIpfgd+4bRWzudlITiNmWY7HppLzyBw+037iEICM4kwPPFI+SO\n" +
+      "GJhpAAmD6vk0MeZk1NeQmyQp/uOPpWmVRzgyK+XVc6AwZHV+/n6xAIT91/DjJlD1\n" +
+      "N+nS7Sqo3RJ04+KlNRUclzINOC7JBYkKtG7YQ0U9nNLkRrRlON+O6tY4OT86T1O1\n" +
+      "AgMBAAE=\n" +
+      "-----END PUBLIC KEY-----",
+    rdsServerLessPrivateKey:
+      "-----BEGIN RSA PRIVATE KEY-----\n" +
+      "MIIEoQIBAAKCAQBK3CkprcpAYxme7vtdjpWOgFFjoYsqU3OmhMEty/s1gnW5tgbK\n" +
+      "4ief4xk+cU+mu3YvjzWudT/SV17tAWxL4Y+GincJwL5gpQwlnw9qOAdRGkpBriQL\n" +
+      "ec7kNVIydZXbUitziy+iSimxNzdDmjvlK9ZGmiVLZm+MePbUtgaIpfgd+4bRWzud\n" +
+      "lITiNmWY7HppLzyBw+037iEICM4kwPPFI+SOGJhpAAmD6vk0MeZk1NeQmyQp/uOP\n" +
+      "pWmVRzgyK+XVc6AwZHV+/n6xAIT91/DjJlD1N+nS7Sqo3RJ04+KlNRUclzINOC7J\n" +
+      "BYkKtG7YQ0U9nNLkRrRlON+O6tY4OT86T1O1AgMBAAECggEAAhInHV0ObEuRiOEJ\n" +
+      "mSP5pTCNj9kHNYuLdn7TrUWoVGmgghu0AmbRO84Xg6+0yWMEOPqYPJRHyLTcDmhs\n" +
+      "q4i45Lrt4hov6hKGzH+i+IhGQ4sbpMeBfcPH4m5LMNQp6iBSzWZ7Ud0FXD6vy7H3\n" +
+      "mDZnPhrDj1ttGJC8G1RRx/P3cjTccU3lsae6wNjkXaSveWGgPS3m0x95eOPPwa2C\n" +
+      "KvVLx+kYr2r0uLF5vHN6H9uWqUTWo1GVX3nO+obapYbtcIqCbGQI4eTkvgq0qG7J\n" +
+      "Nh5IwYJz0bzYFfSQSRwRz9JaCzFRiP55aZnJgk2um5JdbxYCHpw5E1NV/7OsPXlE\n" +
+      "e4vGHQKBgQCSD/ZQu/1TeyqBF8RRdl9YtOhVAFJDiHTPFNNz9V8eak+x6hFOOGOf\n" +
+      "QHnbg0X4meYuilaBwXiEsSswPuVAW87VnRHrR2yyyC8knCMcvii3g9q+ed0+ri2+\n" +
+      "cslDPaDkcvl98qoZEfv/lk7BA7jPFToLMNfNdoHrZXVezZxetVbsuwKBgQCDNJFB\n" +
+      "XDxXlkIVkT8ozD/qvyQsDXz/wlOob6AkY0J7IdND5jPCi799Q1O1H7pJu50cAi+O\n" +
+      "ar5EuFxA8TfTKJnIVJBZFrN0O1un86WhCvB8PjgguxqtmJlEPVveiZXnTTfvXVeq\n" +
+      "G6+3eU/yRw9VDX61iidbWNc+SbMJ9sFQPKNyTwKBgFoaFqx/CyqwU+wGqUhHaVHj\n" +
+      "Z17oL9cRGl2UT0y9FMxCcJ8j8UD7cBkRQRq0xDkzVtdm5y5sFthkImxEoE8vU0xa\n" +
+      "9G7bRKaU7t/6oX5dn+h1Ij9WFbFQ6U8OqDEel13Vvyp+w4drnLRyGGrgzOSSB5hX\n" +
+      "rQhGDqcTk2/EDq4t1015AoGAWDnv9vhz5x22AFS0GNYHoO25ABpt1Hmy0Y+GKxHH\n" +
+      "8Y6URpM0ePyJ3kx4rFHSbaRICD58BhNHMGScPFs4A7jIeApNKmr2bxE/F9fhp0H4\n" +
+      "5kLccT3/uX3kihuMfD8eWvP0yfOFcHC/nutnU+5uo+24J5Dn2CgMTOk4CFoyMack\n" +
+      "7UcCgYBHdbFcXWGHfEqLJZChRrKhWLxn9jkJ0apvnO1j6c5yiAo3yJkSV5Z9IdAc\n" +
+      "lgOC/dJBTZLcBtixdERqcJ+o4P7oFRS6hz/9n4s+kkzxXVqEmtJmBQvHUo3I/Qgc\n" +
+      "Ba+XMCP64pXPC3r1llhKRwIl+6UFn+QlpbxtgQjhbULnSbc7fw==\n" +
+      "-----END RSA PRIVATE KEY-----",
     ttl: 60,
+  },
+
+  cronJobHandler: {
+    privateKey:
+      "-----BEGIN RSA PRIVATE KEY-----\n" +
+      "MIIEowIBAAKCAQEAqjkUS3EGyuh64eITS/n5MX7G4z5MIv99DNqZezqCSRD/QIXO\n" +
+      "1QtDrj/OKAB5a+4GAJSxIO8HgRFocdiKauxako3UagNSabiI+/H5zXjtnbPKwMBd\n" +
+      "CoJ3r1+OzyMT4zL+SVlIMHkxYbRgMYJvNTyie/rIpjcpQhaBJxyBkaT2Imy9luGC\n" +
+      "Rhd5wupx9+rhd8xOYu+hqSWfP4zIcEGCs86OXFFmNp6sqcQD1P15HkJtleodzcKg\n" +
+      "msqo8RTk8t+urdWIdoLFAugwqFE9jor8UxApwT5xr8c84VDfbPgc10V2XTda4SXa\n" +
+      "IRP7QY+9agGmZIYp0LWxUOhB37PNFDhUEw9dVwIDAQABAoIBAH9rJJ7oJz6B0WH+\n" +
+      "WZV4s6jyDiySOGnGNzQE+fh9LoNFHtyMjOt6eBoaFtZorHs2+/U5WHGfm01o23bE\n" +
+      "sbAh5hZn5kXI4MrUYG2/js7Yo3111OJ92+d/C9oRvJOe3Ucnp6L+GwR145oQbCUD\n" +
+      "Tv1ZuwL1EXciOVcIA3tkYjTEd54B8UTfEMpRMdlkPohYL96kizqbe6peG9hlLMXS\n" +
+      "AeVr2y0ueDR+fYte6TmejpfxnD16/PksMGH5ALHQ6AonCngvDO3mnGLaFuwHkRnY\n" +
+      "1vMkni+6J57MQz+GAWI7p1EKbEzl9Z+1a6NDxALabVxYuQFc5pa7wXr97/9SAC5x\n" +
+      "NvZ/EekCgYEA1CcCDXhi6ztK+BhnYCKZKR9GxP9CReNm9FVIB4cVGKduCuaJrcGk\n" +
+      "qKPSGkaMaJat23WDxr9GUhR1IThK+/dLg+Ud9GPvWN710LT+Wm9cuwuyPbyAet8J\n" +
+      "2G+IKbCsr62okI/XVBnfPrGA2tQZRMgia7lEz/ZKx/7oOpN/FyPpG+UCgYEAzWeV\n" +
+      "k12md1YIJcPHfVofsnqpy22PIhLJgN3LgM2aubPQoYg1LBwBwRWLU16zNLFhbsyx\n" +
+      "leMA3OsyLFzw7NmsCpXE7SB1nH0xFmTi/ONqiN4Hx0w+72kG3LLcVWDwqGF3zj+x\n" +
+      "v/75dYgWW1SeofwgkkDnmnqMuESnprojyRzk2IsCgYAb3lftrw/HeM17U7FYtpLK\n" +
+      "DRq9zA5HofynQgCpRHxn9a6F7gzN728S3BpAa14MaybBemlqFTxGkftk9sEa4jxg\n" +
+      "QhuyO+J4GSnPVcdH1/Mlev7aD0YNXfksHlKTr2qv1S8cdljB6ngiAy07EbuUBnpH\n" +
+      "DlpUuzTNmtWkxDVgs83uZQKBgQCbo+Cv4Gdxx2u3CelQL4kTGWUtct/hJrEvB2Db\n" +
+      "QW/7RKhSrb30pWgi4WtICdrqk3nLlij99RtDSqgi+23HWozFHIUyVMUphac7W8iv\n" +
+      "bLbd7LeiKUEK8d80Pgc8Xo8cV3aLfrH2VIK7rxmZrL3i6gPYLnwQDsowGj2a1TKm\n" +
+      "glFZTwKBgDr/Lf4P8V7s+RyIKea0AKMM9xAqbvZRdKFFNTq5SXUtVFi130F3ozHV\n" +
+      "o6x/R8X3QuyNeyZ8SI7eKJ+oo1jF97WgRWBiE66IHGziUZc4+gFAmHzdeZft0xtJ\n" +
+      "AIvluPVA3HOHFj4US3LMxbxDsPr+gkTpkVGIfK0rk8Za3dN3mZJw\n" +
+      "-----END RSA PRIVATE KEY-----",
+    publicKey:
+      "-----BEGIN PUBLIC KEY-----\n" +
+      "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqjkUS3EGyuh64eITS/n5\n" +
+      "MX7G4z5MIv99DNqZezqCSRD/QIXO1QtDrj/OKAB5a+4GAJSxIO8HgRFocdiKauxa\n" +
+      "ko3UagNSabiI+/H5zXjtnbPKwMBdCoJ3r1+OzyMT4zL+SVlIMHkxYbRgMYJvNTyi\n" +
+      "e/rIpjcpQhaBJxyBkaT2Imy9luGCRhd5wupx9+rhd8xOYu+hqSWfP4zIcEGCs86O\n" +
+      "XFFmNp6sqcQD1P15HkJtleodzcKgmsqo8RTk8t+urdWIdoLFAugwqFE9jor8UxAp\n" +
+      "wT5xr8c84VDfbPgc10V2XTda4SXaIRP7QY+9agGmZIYp0LWxUOhB37PNFDhUEw9d\n" +
+      "VwIDAQAB\n" +
+      "-----END PUBLIC KEY-----",
+  },
+
+  Event100ms: {
+    APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
+    APP_SECRET: "EVENT_100MS_APP_SECREt",
   },
 };

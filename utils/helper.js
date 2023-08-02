@@ -1,3 +1,5 @@
+const { TASK_SIZE } = require("../constants/tasks");
+
 /**
  * Returns an object containing key value pairs of qualifiers with their values
  * @param query {string}
@@ -44,7 +46,29 @@ const getDateTimeRangeForPRs = (startDate, endDate) => {
   return "";
 };
 
+const getPaginatedLink = ({
+  endpoint = "/",
+  query = {},
+  paramsToExclude = ["page", "next", "prev"],
+  cursorKey,
+  docId,
+}) => {
+  let paginatedLink = endpoint + "?";
+
+  Object.entries(query).forEach(([key, value]) => {
+    if (!paramsToExclude.includes(key) && value) paginatedLink += `${key}=${value}&`;
+  });
+
+  if (!query.size) {
+    paginatedLink += `size=${TASK_SIZE}&`;
+  }
+
+  paginatedLink += `${cursorKey}=${docId}`;
+  return paginatedLink;
+};
+
 module.exports = {
   getQualifiers,
   getDateTimeRangeForPRs,
+  getPaginatedLink,
 };

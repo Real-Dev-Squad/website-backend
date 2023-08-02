@@ -2,6 +2,9 @@ const userState = {
   ACTIVE: "ACTIVE",
   IDLE: "IDLE",
   OOO: "OOO",
+  ONBOARDING: "ONBOARDING",
 };
 
-module.exports = { userState };
+const CANCEL_OOO = "cancelOoo";
+
+module.exports = { userState, CANCEL_OOO };

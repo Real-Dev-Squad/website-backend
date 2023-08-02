@@ -6,14 +6,20 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
+const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem } = require("../utils/array");
 const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
+const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
+const ROLES = require("../constants/roles");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
 const userStatusModel = firestore.collection("usersStatus");
+const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
+const admin = require("firebase-admin");
+
 /**
  * Adds or updates the user data
  *
@@ -56,7 +62,7 @@ const addOrUpdate = async (userData, userId = null) => {
        the unarchived users in the /members endpoint
        For more info : https://github.com/Real-Dev-Squad/website-backend/issues/651
      */
-    userData.roles = { archived: false };
+    userData.roles = { archived: false, in_discord: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
     return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true };
@@ -69,6 +75,10 @@ const addOrUpdate = async (userData, userId = null) => {
 const addJoinData = async (userData) => {
   try {
     await joinModel.add(userData);
+    await updateUserStatus(userData.userId, {
+      currentStatus: { state: userState.ONBOARDING },
+      monthlyHours: { committed: 4 * userData.intro.numberOfHours },
+    });
   } catch (err) {
     logger.error("Error in adding data", err);
     throw err;
@@ -136,7 +146,15 @@ const fetchPaginatedUsers = async (query) => {
     // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
-    let dbQuery = (query.prev ? userModel.limitToLast(size) : userModel.limit(size)).orderBy("username");
+
+    let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+
+    if (query.prev) {
+      dbQuery = dbQuery.limitToLast(size);
+    } else {
+      dbQuery = dbQuery.limit(size);
+    }
+
     if (Object.keys(query).length) {
       if (query.search) {
         dbQuery = dbQuery
@@ -153,6 +171,7 @@ const fetchPaginatedUsers = async (query) => {
       }
     }
     const snapshot = await dbQuery.get();
+
     const firstDoc = snapshot.docs[0];
     const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
@@ -162,12 +181,9 @@ const fetchPaginatedUsers = async (query) => {
       allUsers.push({
         id: doc.id,
         ...doc.data(),
-        phone: undefined,
-        email: undefined,
-        tokens: undefined,
-        chaincode: undefined,
       });
     });
+
     return {
       allUsers,
       nextId: lastDoc?.id ?? "",
@@ -201,10 +217,6 @@ const fetchUsers = async (usernames = []) => {
         users.push({
           id: doc.id,
           ...doc.data(),
-          phone: undefined,
-          email: undefined,
-          tokens: undefined,
-          chaincode: undefined,
         });
       });
     });
@@ -229,7 +241,6 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
     let userData, id;
     if (username) {
       const user = await userModel.where("username", "==", username).limit(1).get();
-
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
@@ -250,8 +261,6 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       user: {
         id,
         ...userData,
-        tokens: undefined,
-        chaincode: undefined,
       },
     };
   } catch (err) {
@@ -288,8 +297,91 @@ const initializeUser = async (userId) => {
   if (!userWallet) {
     await createWallet(userId, walletConstants.INITIAL_WALLET);
   }
-
+  await updateUserStatus(userId, { currentStatus: { state: userState.ONBOARDING }, monthlyHours: { committed: 0 } });
   return true;
+};
+
+/**
+ * Adds user data for verification by moderators
+ * @param userId {String} - RDS User Id
+ * @param discordId {String} - Discord id of RDS user
+ * @param profileImageUrl {String} - profile image URL of user
+ * @param discordImageUrl {String} - discord image URL of user
+ * @return {Promise<{message: string}|{message: string}>}
+ * @throws {Error} - If error occurs while creating Verification Entry
+ */
+const addForVerification = async (userId, discordId, profileImageUrl, discordImageUrl) => {
+  let isNotVerifiedSnapshot;
+  try {
+    isNotVerifiedSnapshot = await photoVerificationModel.where("userId", "==", userId).get();
+  } catch (err) {
+    logger.error("Error in creating Verification Entry", err);
+    throw err;
+  }
+  const unverifiedUserData = {
+    userId,
+    discordId,
+    discord: { url: discordImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+    profile: { url: profileImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+  };
+  try {
+    if (!isNotVerifiedSnapshot.empty) {
+      const unVerifiedDocument = isNotVerifiedSnapshot.docs[0];
+      const documentRef = unVerifiedDocument.ref;
+      // DOESN"T CHANGE THE APPROVAL STATE OF DISCORD IMAGE IF ALREADY VERIFIED
+      unverifiedUserData.discord.approved = unVerifiedDocument.data().discord.approved || false;
+
+      await documentRef.update(unverifiedUserData);
+    } else await photoVerificationModel.add(unverifiedUserData);
+  } catch (err) {
+    logger.error("Error in creating Verification Entry", err);
+    throw err;
+  }
+  return { message: "Profile data added for verification successfully" };
+};
+
+/**
+ * Removes if user passed a valid image; ignores if no unverified record
+ * @param userId {String} - RDS user Id
+ * @param type {String} - type of image that was verified
+ * @return {Promise<{message: string}|{message: string}>}
+ * @throws {Error} - If error occurs while verifying user's image
+ */
+const markAsVerified = async (userId, imageType) => {
+  try {
+    const verificationUserDataSnapshot = await photoVerificationModel.where("userId", "==", userId).get();
+    // THROWS ERROR IF NO DOCUMENT FOUND
+    if (verificationUserDataSnapshot.empty) {
+      throw new Error("No verification document record data for user was found");
+    }
+    // VERIFIES BASED ON THE TYPE OF IMAGE
+    const imageVerificationType = imageType === "discord" ? "discord.approved" : "profile.approved";
+    const documentRef = verificationUserDataSnapshot.docs[0].ref;
+    await documentRef.update({ [imageVerificationType]: true });
+    return { message: "User image data verified successfully" };
+  } catch (err) {
+    logger.error("Error while Removing Verification Entry", err);
+    throw err;
+  }
+};
+
+/**
+ * Removes if user passed a valid image; ignores if no unverified record
+ * @param userId {String} - RDS user Id
+ * @return {Promise<{Object}|{Object}>}
+ * @throws {Error} - If error occurs while fetching user's image verification entry
+ */
+const getUserImageForVerification = async (userId) => {
+  try {
+    const verificationImagesSnapshot = await photoVerificationModel.where("userId", "==", userId).get();
+    if (verificationImagesSnapshot.empty) {
+      throw new Error(`No document with userId: ${userId} was found!`);
+    }
+    return verificationImagesSnapshot.docs[0].data();
+  } catch (err) {
+    logger.error("Error while Removing Verification Entry", err);
+    throw err;
+  }
 };
 
 /**
@@ -360,6 +452,8 @@ const getRdsUserInfoByGitHubUsername = async (githubUsername) => {
  * @param {Array} query.levelNumber - Array of levelNumbers to filter the users on
  * @param {Array} query.tagId - Array of tagIds to filter the users on
  * @param {Array} query.state - Array of states to filter the users on
+ * @param {String} query.role - filter the users on role
+ * @param {String} query.verified - filter the users on verified i.e, discordId data
  * @return {Promise<Array>} - Array of user documents that match the filter criteria
  */
 
@@ -412,7 +506,139 @@ const getUsersBasedOnFilter = async (query) => {
     const filteredUserDocs = userDocs.filter((doc) => !doc.roles?.archived);
     return filteredUserDocs;
   }
+
+  const { role: roleQuery, verified: verifiedQuery } = query;
+
+  if (roleQuery) {
+    const filteredUsers = [];
+    const snapshot = await userModel.where(`roles.${roleQuery}`, "==", true).get();
+    snapshot.forEach((doc) => {
+      filteredUsers.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    if (roleQuery === ROLES.ARCHIVED) {
+      return filteredUsers;
+    }
+
+    return filteredUsers.filter((user) => !user.roles?.archived);
+  }
+  if (verifiedQuery === "true") {
+    const filteredUsers = [];
+    const snapshot = await userModel.where("discordId", "!=", null).get();
+    snapshot.forEach((doc) => {
+      filteredUsers.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    return filteredUsers.filter((user) => !user.roles?.archived);
+  }
   return [];
+};
+
+/**
+ * Fetch all users
+ *
+ * @return {Promise<users>}
+ */
+
+const getDiscordUsers = async () => {
+  try {
+    const usersRef = await userModel.where("roles.archived", "==", false).get();
+    const users = [];
+    usersRef.forEach((user) => {
+      const userData = user.data();
+      if (userData?.discordId)
+        users.push({
+          id: user.id,
+          ...userData,
+        });
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Error while fetching all users: ${err}`);
+    throw err;
+  }
+};
+
+const fetchAllUsers = async () => {
+  const users = [];
+  const usersQuerySnapshot = await userModel.get();
+  usersQuerySnapshot.forEach((user) => users.push({ ...user.data(), id: user.id }));
+  return users;
+};
+
+const fetchUsersWithToken = async () => {
+  try {
+    const users = [];
+    const usersRef = await userModel.where("tokens", "!=", false).get();
+    usersRef.forEach((user) => {
+      users.push(userModel.doc(user.id));
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Error while fetching all users with tokens field: ${err}`);
+    throw err;
+  }
+};
+
+const removeGitHubToken = async (users) => {
+  try {
+    const length = users.length;
+
+    let numberOfBatches = length / 500;
+    const remainder = length % 500;
+
+    if (remainder) {
+      numberOfBatches = numberOfBatches + 1;
+    }
+
+    const batchArray = [];
+    for (let i = 0; i < numberOfBatches; i++) {
+      const batch = firestore.batch();
+      batchArray.push(batch);
+    }
+
+    let batchIndex = 0;
+    let operations = 0;
+
+    for (let i = 0; i < length; i++) {
+      batchArray[batchIndex].update(users[i], { tokens: admin.firestore.FieldValue.delete() });
+      operations++;
+
+      if (operations === 500) {
+        batchIndex++;
+        operations = 0;
+      }
+    }
+
+    await Promise.all(batchArray.map(async (batch) => await batch.commit()));
+  } catch (err) {
+    logger.error(`Error while deleting tokens field: ${err}`);
+    throw err;
+  }
+};
+
+const getUsersByRole = async (role) => {
+  try {
+    const usersRef = await userModel.where(`roles.${role}`, "==", true).get();
+    const users = [];
+    usersRef.docs.forEach((user) => {
+      const userData = user.data();
+      users.push({
+        id: user.id,
+        ...userData,
+      });
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Fetching users with role: ${role} exitted with an error: ${err}`);
+    throw err;
+  }
 };
 
 module.exports = {
@@ -430,4 +656,12 @@ module.exports = {
   getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
+  markAsVerified,
+  addForVerification,
+  getUserImageForVerification,
+  getDiscordUsers,
+  fetchAllUsers,
+  fetchUsersWithToken,
+  removeGitHubToken,
+  getUsersByRole,
 };

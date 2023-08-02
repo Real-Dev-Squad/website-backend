@@ -13,6 +13,7 @@ module.exports = () => {
       username: "ankur",
       first_name: "Ankur",
       last_name: "Narkhede",
+      discordId: "12345",
       yoe: 0,
       img: "./img.png",
       linkedin_id: "ankurnarkhede",
@@ -21,8 +22,10 @@ module.exports = () => {
       isMember: true,
       phone: "1234567890",
       email: "abc@gmail.com",
+      joined_discord: "2023-01-13T18:21:09.278000+00:00",
       roles: {
         member: true,
+        in_discord: true,
       },
       tokens: {
         githubAccessToken: "githubAccessToken",
@@ -98,6 +101,7 @@ module.exports = () => {
       username: "ankush",
       first_name: "Ankush",
       last_name: "Dharkar",
+      discordId: "123456",
       yoe: 10,
       img: "./img.png",
       linkedin_id: "ankushdharkar",
@@ -105,6 +109,7 @@ module.exports = () => {
       github_display_name: "Ankush Dharkar",
       phone: "1234567890",
       email: "ad@amazon.com",
+      joined_discord: "2023-01-13T18:21:09.278000+00:00",
       status: "idle",
       tokens: {
         githubAccessToken: "githubAccessToken",
@@ -112,6 +117,7 @@ module.exports = () => {
       roles: {
         super_user: true,
         archived: false,
+        in_discord: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
@@ -161,6 +167,7 @@ module.exports = () => {
       roles: {
         member: true,
         archived: false,
+        in_discord: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
@@ -199,9 +206,128 @@ module.exports = () => {
       roles: {
         archived: false,
         member: true,
+        in_discord: true,
       },
       twitter_id: "RitvikJamwal4u",
       linkedin_id: "ritvik-jamwal4u",
+    },
+    {
+      username: "Tanishq",
+      first_name: "Tanishq",
+      last_name: "Singla",
+      yoe: 1,
+      img: "./img.png",
+      linkedin_id: "tanishqsingla",
+      github_id: "tanishqsingla",
+      github_display_name: "Tanishq Singla",
+      phone: "1234567890",
+      email: "ts@gmail.com",
+      tokens: {
+        githubAccessToken: "githubAccessToken",
+      },
+      roles: {
+        member: true,
+        archived: false,
+        in_discord: true,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
+    },
+    {
+      username: "darthvader",
+      first_name: "Darth",
+      last_name: "Vader",
+      yoe: 1,
+      img: "./img.png",
+      linkedin_id: "darthvader",
+      github_id: "darthvader",
+      github_display_name: "Darth Vader",
+      phone: "1234567890",
+      email: "dv@gmail.com",
+      tokens: {
+        githubAccessToken: "githubAccessToken",
+      },
+      roles: {
+        member: true,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
+    },
+    {
+      id: 11,
+      username: "testuser1",
+      first_name: "test1",
+      last_name: "user1",
+      yoe: 1,
+      img: "./img.png",
+      linkedin_id: "testuser1",
+      github_id: "testuser1",
+      github_display_name: "Test User",
+      phone: "1234567890",
+      email: "tu@gmail.com",
+      chaincode: "1234",
+      tokens: {
+        githubAccessToken: "githubAccessToken",
+      },
+      roles: {
+        member: true,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
+    },
+    {
+      id: 12,
+      username: "testuser2",
+      first_name: "test2",
+      last_name: "user2",
+      yoe: 1,
+      img: "./img.png",
+      linkedin_id: "testuser1",
+      github_id: "testuser1",
+      github_display_name: "Test User",
+      phone: "1234567890",
+      email: "tu@gmail.com",
+      chaincode: "12345",
+      tokens: {
+        githubAccessToken: "githubAccessToken",
+      },
+      roles: {
+        member: true,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
+    },
+    {
+      username: "ram",
+      github_id: "Ram123",
+      first_name: "Ram",
+      yoe: 1,
+      picture: {
+        publicId: "profile/abc/abc",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/123.jpg",
+      },
+      incompleteUserDetails: false,
+      status: "active",
+      last_name: "Singh",
+      github_display_name: "Ram Singh",
+      website: "Ramsingh123.github.io/portfolio",
+      designation: "SDE",
+      company: "XYZ",
+      instagram_id: "ramsingh",
+      roles: {
+        archived: true,
+        member: false,
+      },
+      twitter_id: "ramsingh123",
+      linkedin_id: "ramsingh123",
     },
   ];
 };

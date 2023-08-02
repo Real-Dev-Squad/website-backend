@@ -9,8 +9,15 @@ const { BAD_TOKEN, CLOUDFLARE_WORKER } = require("../../constants/bot");
 const authService = require("../../services/authService");
 const externalAccountData = require("../fixtures/external-accounts/external-accounts")();
 const externalAccountsModel = require("../../models/external-accounts");
+const { usersFromRds, getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
+const Sinon = require("sinon");
+const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
+const firestore = require("../../utils/firestore");
+const userData = require("../fixtures/user/user")();
+const userModel = firestore.collection("users");
 
 chai.use(chaiHttp);
+const cookieName = config.get("userToken.cookieName");
 
 describe("External Accounts", function () {
   describe("POST /external-accounts", function () {
@@ -216,6 +223,69 @@ describe("External Accounts", function () {
             message: "Unauthenticated User",
           });
 
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /external-accounts/discord-sync", function () {
+    let superUserJwt, fetchStub;
+
+    beforeEach(async function () {
+      // userData[4] is a super user
+      const userId = await addUser(userData[4]);
+      superUserJwt = authService.generateAuthToken({ userId });
+      await userModel.add(usersFromRds[0]);
+      await userModel.add(usersFromRds[1]);
+      await userModel.add(usersFromRds[2]);
+      fetchStub = Sinon.stub(global, "fetch");
+    });
+
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
+    });
+
+    it("updates user and adds discord related data", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+      chai
+        .request(app)
+        .patch("/external-accounts/discord-sync")
+        .set("Cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.deep.equal({
+            rdsUsers: 3,
+            discordUsers: 2,
+            userUpdatedWithInDiscordFalse: 1,
+            usersMarkedUnArchived: 1,
+            message: "Data Sync Complete",
+          });
+          return done();
+        });
+    });
+
+    it("returns 5xx errors", function (done) {
+      fetchStub.throws(new Error("Some Internal Error"));
+      chai
+        .request(app)
+        .patch("/external-accounts/discord-sync")
+        .set("Cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.deep.equal({
+            message: INTERNAL_SERVER_ERROR,
+          });
           return done();
         });
     });

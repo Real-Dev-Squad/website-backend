@@ -11,7 +11,7 @@ module.exports = {
   extends: ["standard", "plugin:mocha/recommended", "plugin:security/recommended", "plugin:prettier/recommended"],
   plugins: ["mocha", "security", "prettier"],
   parserOptions: {
-    ecmaVersion: 12,
+    ecmaVersion: 13,
   },
   globals: {
     config: "readonly",
@@ -30,5 +30,5 @@ module.exports = {
     // Prettier for formatting
     "prettier/prettier": "error",
   },
-  ignorePatterns: ["public/*"],
+  ignorePatterns: ["public/*", "dist/*"],
 };
