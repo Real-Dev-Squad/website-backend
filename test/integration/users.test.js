@@ -1503,11 +1503,10 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /archived", function () {
+  describe("PATCH /users", function () {
     let userId1;
     let userId2;
     let userId3;
-    let userId4;
 
     beforeEach(async function () {
       const rolesToBeAdded = {
@@ -1517,7 +1516,6 @@ describe("Users", function () {
       userId1 = await addUser({ ...userData[0], roles: rolesToBeAdded });
       userId2 = await addUser({ ...userData[1], roles: rolesToBeAdded });
       userId3 = await addUser({ ...userData[2], roles: rolesToBeAdded });
-      userId4 = await addUser({ ...userData[3], roles: rolesToBeAdded });
     });
 
     afterEach(async function () {
@@ -1525,23 +1523,42 @@ describe("Users", function () {
       Sinon.restore();
     });
 
-    it("should returns successful response", function (done) {
+    it("should return 400 if payload is not passed correctly", function (done) {
       chai
         .request(app)
-        .patch("/users/archived")
+        .patch("/users")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send()
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("Invalid payload");
+          return done();
+        });
+    });
+
+    it("should returns successful response for api archiveUsersIfNotInDiscord", function (done) {
+      chai
+        .request(app)
+        .patch("/users")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({ action: "archiveUsersIfNotInDiscord" })
         .end((err, res) => {
           if (err) {
             return done(err);
           }
 
           expect(res).to.have.status(200);
-          expect(res.body.data).to.have.property("totalUsersArchived");
-          expect(res.body.data).to.have.property("totalOperationsFailed");
-          expect(res.body.data).to.have.property("totalUsers");
-          expect(res.body.data.totalUsersArchived).to.be.equal(4);
-          expect(res.body.data.totalUsers).to.be.equal(4);
-          expect(res.body.data.totalOperationsFailed).to.be.equal(0);
+          expect(res.body.summary).to.have.property("totalUsersArchived");
+          expect(res.body.summary).to.have.property("totalOperationsFailed");
+          expect(res.body.summary).to.have.property("totalUsers");
+          expect(res.body.summary).to.not.have.property("updatedUserIds");
+          expect(res.body.summary.totalUsersArchived).to.be.equal(3);
+          expect(res.body.summary.totalUsers).to.be.equal(3);
+          expect(res.body.summary.totalOperationsFailed).to.be.equal(0);
           expect(res.body.message).to.equal(
             "Successfully updated users archived role to true if in_discord role is false"
           );
@@ -1549,7 +1566,7 @@ describe("Users", function () {
         });
     });
 
-    it("should return proper response if no documents are found to update", async function () {
+    it("should return proper response if no documents are found to update for api archiveUsersIfNotInDiscord", async function () {
       const roles = {
         archived: true,
         in_discord: false,
@@ -1557,28 +1574,65 @@ describe("Users", function () {
       await addOrUpdate({ ...userData[0], roles }, userId1);
       await addOrUpdate({ ...userData[1], roles }, userId2);
       await addOrUpdate({ ...userData[2], roles }, userId3);
-      await addOrUpdate({ ...userData[3], roles }, userId4);
 
-      const res = await chai.request(app).patch("/users/archived").set("cookie", `${cookieName}=${superUserAuthToken}`);
+      const res = await chai
+        .request(app)
+        .patch("/users")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({ action: "archiveUsersIfNotInDiscord" });
 
       expect(res).to.have.status(200);
-      expect(res.body.data).to.have.property("totalUsersArchived");
-      expect(res.body.data).to.have.property("totalOperationsFailed");
-      expect(res.body.data).to.have.property("totalUsers");
-      expect(res.body.data.totalUsers).to.be.equal(0);
-      expect(res.body.data.totalUsersArchived).to.be.equal(0);
-      expect(res.body.data.totalOperationsFailed).to.be.equal(0);
+      expect(res.body.summary).to.have.property("totalUsersArchived");
+      expect(res.body.summary).to.have.property("totalOperationsFailed");
+      expect(res.body.summary).to.have.property("totalUsers");
+      expect(res.body.summary).to.not.have.property("updatedUserIds");
+      expect(res.body.summary.totalUsers).to.be.equal(0);
+      expect(res.body.summary.totalUsersArchived).to.be.equal(0);
+      expect(res.body.summary.totalOperationsFailed).to.be.equal(0);
       expect(res.body.message).to.equal("Couldn't find any users currently inactive in Discord but not archived.");
     });
 
-    it("should throw an error if firestore batch operations fail", async function () {
+    it("should throw an error if firestore batch operations fail for api archiveUsersIfNotInDiscord", async function () {
       Sinon.stub(firestore, "batch").throws(new Error("something went wrong"));
 
-      const res = await chai.request(app).patch(`/users/archived`).set("cookie", `${cookieName}=${superUserAuthToken}`);
+      const res = await chai
+        .request(app)
+        .patch(`/users`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({ action: "archiveUsersIfNotInDiscord" });
 
       expect(res.status).to.equal(500);
       const response = res.body;
       expect(response.message).to.be.equal("An internal server error occurred");
+    });
+
+    it("should return correct response if debug param is passed", function (done) {
+      const updatedUserIds = [userId1, userId2, userId3];
+
+      chai
+        .request(app)
+        .patch("/users?debug=true")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({ action: "archiveUsersIfNotInDiscord" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.summary).to.have.property("totalUsersArchived");
+          expect(res.body.summary).to.have.property("totalOperationsFailed");
+          expect(res.body.summary).to.have.property("totalUsers");
+          expect(res.body.summary).to.have.property("updatedUserIds");
+          expect(res.body.summary.totalUsersArchived).to.be.equal(3);
+          expect(res.body.summary.totalUsers).to.be.equal(3);
+          expect(res.body.summary.totalOperationsFailed).to.be.equal(0);
+          expect(res.body.summary.updatedUserIds).to.deep.equal(updatedUserIds);
+          expect(res.body.message).to.equal(
+            "Successfully updated users archived role to true if in_discord role is false"
+          );
+          return done();
+        });
     });
   });
 

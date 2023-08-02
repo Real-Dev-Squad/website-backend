@@ -10,6 +10,7 @@ const { archiveInactiveDiscordUsersInBulk } = require("../../../services/users")
 describe("Users services", function () {
   describe("archive inactive discord users in bulk", function () {
     const users = [];
+    const userIds = [];
     beforeEach(async function () {
       const addUsersPromises = [];
       userDataArray.forEach((user) => {
@@ -36,6 +37,7 @@ describe("Users services", function () {
         const id = user.id;
         const userData = user.data();
         users.push({ ...userData, id });
+        userIds.push(id);
       });
     });
 
@@ -51,6 +53,7 @@ describe("Users services", function () {
         message: "Successfully completed batch updates",
         totalUsersArchived: 14,
         totalOperationsFailed: 0,
+        updatedUserIds: userIds,
       });
     });
 
@@ -66,6 +69,7 @@ describe("Users services", function () {
         message: "Firebase batch operation failed",
         totalUsersArchived: 0,
         totalOperationsFailed: 14,
+        updatedUserIds: [],
       });
     });
   });
