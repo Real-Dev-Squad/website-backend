@@ -26,7 +26,7 @@ router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.ge
 router.put("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);
 router.get("/:id/skills", users.getUserSkills);
 router.get("/:id/badges", getUserBadges);
-router.patch("/", authenticate, authorizeRoles([SUPERUSER]), users.nonVerifiedDiscordUsers);
+router.patch("/", authenticate, authorizeRoles([SUPERUSER]), users.usersPatchHandler);
 router.patch(
   "/:id/temporary/data",
   authenticate,
@@ -34,7 +34,6 @@ router.patch(
   userValidator.validateUpdateRoles,
   users.updateRoles
 );
-router.patch("/archived", authenticate, authorizeRoles([SUPERUSER]), users.archiveUserIfNotInDiscord);
 
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post("/picture", authenticate, checkIsVerifiedDiscord, upload.single("profile"), users.postUserPicture);

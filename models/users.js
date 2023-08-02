@@ -581,6 +581,7 @@ const archiveUserIfNotInDiscord = async () => {
       totalUsers: snapshot.size,
       totalUsersArchived: 0,
       totalOperationsFailed: 0,
+      updatedUserIds: [],
     };
 
     if (snapshot.size === 0) {
@@ -600,6 +601,7 @@ const archiveUserIfNotInDiscord = async () => {
         ...summary,
         totalUsersArchived: (summary.totalUsersArchived += res.totalUsersArchived),
         totalOperationsFailed: (summary.totalOperationsFailed += res.totalOperationsFailed),
+        updatedUserIds: [...summary.updatedUserIds, ...res.updatedUserIds],
       };
     }
     return summary;

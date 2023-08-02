@@ -3,9 +3,11 @@ const userModel = firestore.collection("users");
 
 const archiveInactiveDiscordUsersInBulk = async (usersData) => {
   const batch = firestore.batch();
+  const updatedUsers = [];
   const summary = {
     totalUsersArchived: 0,
     totalOperationsFailed: 0,
+    updatedUserIds: [],
   };
 
   usersData.forEach((user) => {
@@ -18,11 +20,13 @@ const archiveInactiveDiscordUsersInBulk = async (usersData) => {
       },
     };
     batch.update(userModel.doc(id), updatedUserData);
+    updatedUsers.push(id);
   });
 
   try {
     await batch.commit();
     summary.totalUsersArchived += usersData.length;
+    summary.updatedUserIds = [...updatedUsers];
     return { message: "Successfully completed batch updates", ...summary };
   } catch (err) {
     logger.error("Firebase batch Operation Failed!");

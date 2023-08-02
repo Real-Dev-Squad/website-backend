@@ -569,9 +569,9 @@ const filterUsers = async (req, res) => {
   }
 };
 
-const nonVerifiedDiscordUsers = async (req, res) => {
+const nonVerifiedDiscordUsers = async () => {
   const data = await dataAccess.retrieveDiscordUsers();
-  return res.json(data);
+  return data;
 };
 
 const setInDiscordScript = async (req, res) => {
@@ -625,30 +625,62 @@ const updateRoles = async (req, res) => {
   }
 };
 
-const archiveUserIfNotInDiscord = async (req, res) => {
+const archiveUserIfNotInDiscord = async () => {
   try {
     const data = await userQuery.archiveUserIfNotInDiscord();
 
     if (data.totalUsers === 0) {
-      return res.status(200).json({
+      return {
         message: "Couldn't find any users currently inactive in Discord but not archived.",
-        data,
-      });
+        summary: data,
+      };
     }
 
     if (data.totalOperationsFailed === data.totalUsers) {
-      return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+      throw Error("Internal server error occured");
     }
 
-    return res.status(200).json({
+    return {
       message: "Successfully updated users archived role to true if in_discord role is false",
-      data,
-    });
+      summary: data,
+    };
   } catch (error) {
     logger.error(`Error while updating the archived role: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    throw Error("Internal server error occured");
   }
 };
+
+async function usersPatchHandler(req, res) {
+  try {
+    if (!req.body && !req.body.action) {
+      return res.boom.badRequest("Invalid payload");
+    }
+
+    const { action } = req.body;
+
+    if (action === "nonVerifiedDiscordUsers") {
+      const data = await nonVerifiedDiscordUsers();
+      return res.status(200).json(data);
+    } else if (action === "archiveUsersIfNotInDiscord") {
+      const debugParam = req.query.debug?.toLowerCase();
+      const data = await archiveUserIfNotInDiscord();
+
+      if (debugParam === "true") {
+        data.summary.updatedUserIds = data.summary.updatedUserIds.slice(-3);
+        return res.status(200).json(data);
+      } else {
+        delete data.summary.updatedUserIds;
+      }
+
+      return res.status(200).json(data);
+    } else {
+      return res.boom.badRequest("Invalid payload");
+    }
+  } catch (error) {
+    logger.error("Error while handling the common route:", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+}
 
 module.exports = {
   verifyUser,
@@ -677,4 +709,5 @@ module.exports = {
   removeTokens,
   updateRoles,
   archiveUserIfNotInDiscord,
+  usersPatchHandler,
 };
