@@ -459,7 +459,7 @@ const getRdsUserInfoByGitHubUsername = async (githubUsername) => {
  */
 
 const getUsersBasedOnFilter = async (query) => {
-  if (query.state === "ONBOARDING" && query.day) {
+  if (query.state === "ONBOARDING" && query.time) {
     const fetchUsersWithOnBoardingState = await getUsersWithOnboardingState(query);
     return fetchUsersWithOnBoardingState;
   }
@@ -546,7 +546,8 @@ const getUsersBasedOnFilter = async (query) => {
 };
 
 const getUsersWithOnboardingState = async (query) => {
-  const range = Number(query.day);
+  const time = query.time;
+  const range = Number(time.split("d")[0]);
   const { allUserStatus } = await getAllUserStatus(query);
   const allUsersWithOnboardingState = filterUsersWithOnboardingState(allUserStatus);
   const updatedOnboardingUsersWithDate = [];
@@ -555,7 +556,7 @@ const getUsersWithOnboardingState = async (query) => {
     const result = await userModel.doc(user.userId).get();
     filteredUsers.push(result.data());
   }
-  filteredUsers.map((element) => {
+  filteredUsers.forEach((element) => {
     if (element.discordJoinedAt) {
       const userDiscordJoinedDate = new Date(element.discordJoinedAt);
       const currentTimeStamp = new Date().getTime();
@@ -565,8 +566,8 @@ const getUsersWithOnboardingState = async (query) => {
         updatedOnboardingUsersWithDate.push(element);
       }
     }
-    return updatedOnboardingUsersWithDate;
   });
+  return updatedOnboardingUsersWithDate;
 };
 /**
  * Fetch all users
