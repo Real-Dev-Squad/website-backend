@@ -539,11 +539,7 @@ describe("Task Based Status Updates", function () {
   });
 
   describe("PATCH Update User Status on Task Assignment by SuperUser", function () {
-    let userId1;
-    let user2Name;
-    let superUserId;
-    let superUserJwt;
-    let taskArr;
+    let userId1, user2Name, superUserId, superUserJwt, taskArr;
     const reqBody = {};
 
     beforeEach(async function () {
