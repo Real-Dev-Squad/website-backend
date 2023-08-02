@@ -20,6 +20,7 @@ router.post(
   createTask,
   tasks.addNewTask
 );
+router.patch("/migrate", authenticate, authorizeRoles([SUPERUSER]), tasks.updateOldTaskStatus);
 router.patch(
   "/:id",
   authenticate,
@@ -39,6 +40,5 @@ router.patch(
   assignTask
 );
 router.patch("/assign/self", authenticate, invalidateCache({ invalidationKeys: [ALL_TASKS] }), tasks.assignTask);
-router.patch("/oldtasks/all", authenticate, authorizeRoles([SUPERUSER]), tasks.updateOldTaskStatusController);
 
 module.exports = router;

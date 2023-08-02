@@ -821,31 +821,26 @@ describe("Tasks", function () {
     });
   });
 
-  describe("PATCH /tasks/oldtasks/all", function () {
+  describe("PATCH /tasks/migrate", function () {
     it("Should successfully update old tasks with 'DONE' and 'UNASSIGNED' statuses when authenticated as SUPERUSER", function (done) {
-      const updateOldTaskStatusStub = sinon.stub(tasks, "updateOldTaskStatus").callsFake(() => {
-        const updatedTasks = {
+      const fetchAndUpdateOldTaskStatusStub = sinon.stub(tasks, "fetchAndUpdateOldTaskStatus").returns({
+        updatedTasks: {
           1: "DONE",
           2: "DONE",
           3: "UNASSIGNED",
-        };
-        const oldStatus = new Set(["completed", "COMPLETED", "unassigned"]);
-
-        return {
-          updatedTasks: updatedTasks,
-          oldStatus: oldStatus,
-        };
+        },
+        oldStatus: new Set(["completed", "COMPLETED", "unassigned"]),
       });
 
       chai
         .request(app)
-        .patch("/tasks/oldtasks/all")
+        .patch("/tasks/migrate")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
-          expect(updateOldTaskStatusStub.calledOnce).to.be.equal(true);
+          expect(fetchAndUpdateOldTaskStatusStub.calledOnce).to.be.equal(true);
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.tasks).to.be.a("object");
@@ -861,14 +856,23 @@ describe("Tasks", function () {
         });
     });
     it("Should return no tasks are found to update if there are no tasks to update", function (done) {
+      const fetchAndUpdateOldTaskStatusStub = sinon.stub(tasks, "fetchAndUpdateOldTaskStatus").callsFake(() => {
+        const updatedTasks = {};
+        const oldStatus = new Set();
+        return {
+          updatedTasks: updatedTasks,
+          oldStatus: oldStatus,
+        };
+      });
       chai
         .request(app)
-        .patch("/tasks/oldtasks/all")
+        .patch("/tasks/migrate")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
+          expect(fetchAndUpdateOldTaskStatusStub.calledOnce).to.be.equal(true);
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body).to.deep.equal({
@@ -880,7 +884,7 @@ describe("Tasks", function () {
     it("should return an error when trying to update old task statuses without SUPERUSER role", function (done) {
       chai
         .request(app)
-        .patch("/tasks/oldtasks/all")
+        .patch("/tasks/migrate")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {

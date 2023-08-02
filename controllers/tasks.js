@@ -401,14 +401,14 @@ const assignTask = async (req, res) => {
   }
 };
 
-const updateOldTaskStatusController = async (req, res) => {
+const updateOldTaskStatus = async (req, res) => {
   const oldToNewStatusMapping = {
     [OLD_COMPLETED]: DONE,
     COMPLETED: DONE,
     unassigned: "UNASSIGNED",
   };
   try {
-    const { updatedTasks, oldStatus } = await tasks.updateOldTaskStatus(oldToNewStatusMapping);
+    const { updatedTasks, oldStatus } = await tasks.fetchAndUpdateOldTaskStatus(oldToNewStatusMapping);
     let message = "No tasks are found to update.";
     const updatedTasksCount = Object.keys(updatedTasks).length;
     if (updatedTasksCount === 0) {
@@ -434,5 +434,5 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
-  updateOldTaskStatusController,
+  updateOldTaskStatus,
 };

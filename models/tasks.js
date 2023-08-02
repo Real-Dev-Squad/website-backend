@@ -454,7 +454,7 @@ const overdueTasks = async (overDueTasks) => {
   }
 };
 
-const updateOldTaskStatus = async (oldToNewMapping) => {
+const fetchAndUpdateOldTaskStatus = async (oldToNewMapping) => {
   try {
     const allTasks = await fetchTasks();
     const allOldTasks = allTasks.filter((task) => {
@@ -491,5 +491,5 @@ module.exports = {
   addDependency,
   fetchTaskByIssueId,
   fetchPaginatedTasks,
-  updateOldTaskStatus,
+  fetchAndUpdateOldTaskStatus,
 };
