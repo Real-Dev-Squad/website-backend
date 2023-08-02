@@ -20,9 +20,6 @@ const dataAccess = require("../services/dataAccessLayer");
  */
 const addNewTask = async (req, res) => {
   try {
-    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
-    const { userStatusFlag } = req.query;
-    const isUserStatusEnabled = userStatusFlag === "true";
     const { id: createdBy } = req.userData;
     const dependsOn = req.body.dependsOn;
     let userStatusUpdate;
@@ -37,7 +34,7 @@ const addNewTask = async (req, res) => {
       dependsOn,
     };
     const taskDependency = dependsOn && (await dependencyModel.addDependency(data));
-    if (isUserStatusEnabled && req.body.assignee) {
+    if (req.body.assignee) {
       userStatusUpdate = await updateUserStatusOnTaskUpdate(req.body.assignee);
     }
     return res.json({
@@ -241,9 +238,6 @@ const getTask = async (req, res) => {
  */
 const updateTask = async (req, res) => {
   try {
-    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
-    const { userStatusFlag } = req.query;
-    const isUserStatusEnabled = userStatusFlag === "true";
     const task = await tasks.fetchTask(req.params.id);
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
@@ -255,7 +249,7 @@ const updateTask = async (req, res) => {
       }
     }
     await tasks.updateTask(req.body, req.params.id);
-    if (isUserStatusEnabled && req.body.assignee) {
+    if (req.body.assignee) {
       await updateUserStatusOnTaskUpdate(req.body.assignee);
     }
 
@@ -278,9 +272,6 @@ const updateTask = async (req, res) => {
  */
 const updateTaskStatus = async (req, res, next) => {
   try {
-    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
-    const { userStatusFlag } = req.query;
-    const isUserStatusEnabled = userStatusFlag === "true";
     let userStatusUpdate;
     const taskId = req.params.id;
     const { dev } = req.query;
@@ -341,7 +332,7 @@ const updateTaskStatus = async (req, res, next) => {
       }
     }
 
-    if (isUserStatusEnabled && req.body.status) {
+    if (req.body.status) {
       userStatusUpdate = await updateStatusOnTaskCompletion(userId);
     }
     return res.json({
