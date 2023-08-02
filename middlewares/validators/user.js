@@ -155,6 +155,7 @@ async function getUsers(req, res, next) {
           "string.empty": "prev value cannot be empty",
         }),
       query: joi.string().optional(),
+      q: joi.string().optional(),
     });
   try {
     await schema.validateAsync(req.query);

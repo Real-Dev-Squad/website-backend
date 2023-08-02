@@ -2,6 +2,7 @@
  * This file contains wrapper functions to interact with the DB.
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
+const { splitQuery, getQueryParams } = require("../utils/querySplitter");
 const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
@@ -148,8 +149,21 @@ const fetchPaginatedUsers = async (query) => {
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
 
     let dbQuery = userModel.orderBy("username");
-    query.member && (dbQuery = dbQuery.where("roles.member", "==", /true/i.test(query.member)));
-    dbQuery = dbQuery.where("roles.archived", "==", /true/i.test(query.archived));
+    const rolesObj = splitQuery(query.q).get("roles");
+    if (rolesObj) {
+      const roles = getQueryParams(rolesObj);
+      for (const role of roles.included) {
+        if (role === "") continue;
+        dbQuery = dbQuery.where(`roles.${role}`, "==", true);
+      }
+      for (const role of roles.excluded) {
+        if (role === "") continue;
+        dbQuery = dbQuery.where(`roles.${role}`, "==", false);
+      }
+      !roles.included.archived && (dbQuery = dbQuery.where("roles.archived", "==", false));
+    }
+    // query.member && (dbQuery = dbQuery.where("roles.member", "==", /true/i.test(query.member)));
+    // dbQuery = dbQuery.where("roles.archived", "==", /true/i.test(query.archived));
 
     if (query.prev) {
       dbQuery = dbQuery.limitToLast(size);

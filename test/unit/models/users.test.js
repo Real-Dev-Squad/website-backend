@@ -262,7 +262,9 @@ describe("users", function () {
     it("only fetched when query has members to true", async function () {
       await fetchPaginatedUsersFn({
         query: {
-          members: "true",
+          q: {
+            members: "true",
+          },
         },
       });
     });
@@ -270,7 +272,9 @@ describe("users", function () {
     it("excluded when query has members to false", async function () {
       await fetchPaginatedUsersFn({
         query: {
-          members: "false",
+          q: {
+            member: "false",
+          },
         },
         included: false,
         excluded: true,
@@ -301,7 +305,9 @@ describe("users", function () {
     it("only be fetched when archived param is set to true", async function () {
       await fetchPaginatedUsersFn({
         query: {
-          archived: "true",
+          q: {
+            archived: "true",
+          },
         },
         role: "archived",
         included: true,
@@ -312,7 +318,9 @@ describe("users", function () {
     it("excluded when archived param set to false", async function () {
       await fetchPaginatedUsersFn({
         query: {
-          archived: "false",
+          q: {
+            archived: "false",
+          },
         },
         role: "archived",
         included: false,
