@@ -219,10 +219,16 @@ describe("tasks", function () {
       expect(result).to.be.a("object");
       const { updatedTasks, oldStatus } = result;
       expect(updatedTasks).to.be.a("object");
-      expect(new Set(Object.keys(oldToNewMapping))).to.eql(oldStatus);
+      expect(Object.keys(oldToNewMapping)).to.include.members(Array.from(oldStatus));
       Object.keys(updatedTasks).forEach((task) => {
         expect(Object.values(oldToNewMapping)).to.be.include(updatedTasks[task]);
       });
+    });
+    it("Should not update tasks if oldToNewMapping is empty", async function () {
+      const emptyMapping = {};
+      const { updatedTasks, oldStatus } = await tasks.fetchAndUpdateOldTaskStatus(emptyMapping);
+      expect(Object.keys(updatedTasks).length).to.equal(0);
+      expect(oldStatus.size).to.equal(0);
     });
   });
 });

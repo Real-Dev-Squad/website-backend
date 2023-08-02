@@ -856,13 +856,9 @@ describe("Tasks", function () {
         });
     });
     it("Should return no tasks are found to update if there are no tasks to update", function (done) {
-      const fetchAndUpdateOldTaskStatusStub = sinon.stub(tasks, "fetchAndUpdateOldTaskStatus").callsFake(() => {
-        const updatedTasks = {};
-        const oldStatus = new Set();
-        return {
-          updatedTasks: updatedTasks,
-          oldStatus: oldStatus,
-        };
+      const fetchAndUpdateOldTaskStatusStub = sinon.stub(tasks, "fetchAndUpdateOldTaskStatus").returns({
+        updatedTasks: {},
+        oldStatus: new Set(),
       });
       chai
         .request(app)
