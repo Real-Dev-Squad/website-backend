@@ -662,10 +662,10 @@ async function usersPatchHandler(req, res) {
       const data = await nonVerifiedDiscordUsers();
       return res.status(200).json(data);
     } else if (action === "archiveUsersIfNotInDiscord") {
-      const debugParam = req.query.debug?.toLowerCase();
+      const debugQuery = req.query.debug?.toLowerCase();
       const data = await archiveUserIfNotInDiscord();
 
-      if (debugParam === "true") {
+      if (debugQuery === "true") {
         data.summary.updatedUserIds = data.summary.updatedUserIds.slice(-3);
         return res.status(200).json(data);
       } else {

@@ -1606,7 +1606,7 @@ describe("Users", function () {
       expect(response.message).to.be.equal("An internal server error occurred");
     });
 
-    it("should return correct response if debug param is passed", function (done) {
+    it("should return correct response if debug query is passed for api archiveUsersIfNotInDiscord", function (done) {
       chai
         .request(app)
         .patch("/users?debug=true")
