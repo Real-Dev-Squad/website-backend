@@ -252,7 +252,8 @@ describe("users", function () {
       });
       await Promise.all(addUsersPromises);
     });
-    afterEach(async function () {
+    
+        afterEach(async function () {
       await cleanDb();
     });
     it("and non-members should be fetched when query is not included", async function () {
@@ -283,6 +284,7 @@ describe("users", function () {
   });
 
   describe("archived users", function () {
+    
     beforeEach(async function () {
       const addUsersPromises = [];
       userDataArray.forEach((user) => {
@@ -290,7 +292,8 @@ describe("users", function () {
       });
       await Promise.all(addUsersPromises);
     });
-    afterEach(async function () {
+    
+        afterEach(async function () {
       await cleanDb();
     });
 
@@ -325,6 +328,65 @@ describe("users", function () {
         role: "archived",
         included: false,
         excluded: true,
+      });
+    });
+  });
+  describe("remove github token from users", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("return array of users", async function () {
+      const data = await users.fetchUsersWithToken();
+      expect(data).to.be.not.equal(null);
+    });
+    it('removes token field from user"s data', async function () {
+      const userRef = await users.fetchUsersWithToken();
+      const dataBefore = await userRef[1].get();
+      const beforeRemoval = Object.keys(dataBefore.data()).includes("tokens");
+      expect(beforeRemoval).to.be.equal(true);
+      await users.removeGitHubToken(userRef);
+      const dataAfter = await userRef[1].get();
+      const afterRemoval = Object.keys(dataAfter.data()).includes("tokens");
+      expect(afterRemoval).to.be.equal(false);
+    });
+
+    it("throws error if id is not found in db", async function () {
+      try {
+        await users.removeGitHubToken("1223");
+      } catch (error) {
+        expect(error).to.be.instanceOf(Error);
+      }
+    });
+  });
+
+  describe("get users by roles", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+    
+    it("returns users with member role", async function () {
+      const members = await users.getUsersByRole("member");
+      expect(members.length).to.be.equal(6);
+      members.forEach((member) => {
+        expect(member.roles.member).to.be.equal(true);
+      });
+    });
+    it("throws an error", async function () {
+      await users.getUsersByRole(32389434).catch((err) => {
+        expect(err).to.be.instanceOf(Error);
       });
     });
   });

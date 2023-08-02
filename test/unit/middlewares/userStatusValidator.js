@@ -16,7 +16,7 @@ describe("Middleware | Validators | userStatus", function () {
       expect(nextSpy.calledOnce).to.be.equal(true);
 
       delete req.query.state;
-      req.query.taskStatus = "IDLE";
+      req.query.aggregate = true;
       await validateGetQueryParams(req, res, nextSpy);
       expect(nextSpy.calledTwice).to.be.equal(true);
     });

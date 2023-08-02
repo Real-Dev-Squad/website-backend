@@ -1,8 +1,8 @@
 const { Forbidden, NotFound } = require("http-errors");
-const { fetchUser } = require("../models/users");
-const userStatusModel = require("../models/userStatus");
 const { getUserIdBasedOnRoute } = require("../utils/userStatus");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const dataAccess = require("../services/dataAccessLayer");
+const userStatusModel = require("../models/userStatus");
 const { userState, CANCEL_OOO } = require("../constants/userStatus");
 
 /**
@@ -76,7 +76,7 @@ const getAllUserStatus = async (req, res) => {
     const activeUsers = [];
     for (const status of allUserStatus) {
       //  fetching users from users collection by userID in userStatus collection
-      const result = await fetchUser({ userId: status.userId });
+      const result = await dataAccess.retrieveUsers({ id: status.userId });
       if (!result.user?.roles?.archived) {
         status.full_name = `${result.user.first_name} ${result.user.last_name}`;
         status.picture = result.user.picture;
@@ -135,9 +135,10 @@ const updateUserStatus = async (req, res) => {
  */
 const updateAllUserStatus = async (req, res) => {
   try {
-    await userStatusModel.updateAllUserStatus();
+    const data = await userStatusModel.updateAllUserStatus();
     return res.status(200).json({
       message: "All User Status updated successfully.",
+      data,
     });
   } catch (err) {
     logger.error(`Error while updating the User Data: ${err}`);
@@ -146,16 +147,16 @@ const updateAllUserStatus = async (req, res) => {
 };
 
 /**
- * Retrieve idle users based on task status where the status is not assigned and in progress
+ * Retrieve users status based on task status
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
 
-const getIdleUsers = async (req, res) => {
+const getTaskBasedUsersStatus = async (req, res) => {
   try {
-    const data = await userStatusModel.getIdleUsers();
+    const data = await userStatusModel.getTaskBasedUsersStatus();
     return res.json({
-      message: "All idle users found successfully.",
+      message: "All users based on tasks found successfully.",
       data,
     });
   } catch (error) {
@@ -167,8 +168,8 @@ const getIdleUsers = async (req, res) => {
 };
 
 const getUserStatusControllers = async (req, res, next) => {
-  if (Object.keys(req.query).includes("taskStatus")) {
-    await getIdleUsers(req, res, next);
+  if (Object.keys(req.query).includes("aggregate")) {
+    await getTaskBasedUsersStatus(req, res, next);
   } else {
     await getAllUserStatus(req, res, next);
   }
@@ -180,9 +181,9 @@ const getUserStatusControllers = async (req, res, next) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const massUpdateIdleUsers = async (req, res) => {
+const batchUpdateUsersStatus = async (req, res) => {
   try {
-    const data = await userStatusModel.massUpdateIdleUsers(req.body.users);
+    const data = await userStatusModel.batchUpdateUsersStatus(req.body.users);
     return res.json({
       message: "users status updated successfully.",
       data,
@@ -242,8 +243,8 @@ module.exports = {
   getAllUserStatus,
   updateUserStatus,
   updateAllUserStatus,
-  getIdleUsers,
+  getTaskBasedUsersStatus,
   getUserStatusControllers,
-  massUpdateIdleUsers,
+  batchUpdateUsersStatus,
   updateUserStatusController,
 };

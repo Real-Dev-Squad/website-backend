@@ -242,7 +242,7 @@ Tests are written using:
 - `scripts` : For different scripts needed for development & others
 - `Dependencies` : Modules needed for the project to work/ be functional
 - `devDependencies` : Dependencies only needed for the devlopment purpose
- 
+
 <br>
 
 ---
