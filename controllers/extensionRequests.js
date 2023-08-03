@@ -27,7 +27,7 @@ const createTaskExtensionRequest = async (req, res) => {
     }
 
     if (req.userData.id !== extensionBody.assignee && !req.userData.roles?.super_user) {
-      return res.boom.forbidden("Only Super User can create an extension request for this task.");
+      return res.boom.forbidden("Only assigned user and super user can create an extension request for this task.");
     }
 
     const { taskData: task } = await tasks.fetchTask(extensionBody.taskId);
