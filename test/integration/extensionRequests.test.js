@@ -255,6 +255,29 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+    it("Should return failure response after adding the extension request (sending wrong assignee info)", function (done) {
+      chai
+        .request(app)
+        .post("/extension-requests")
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .send({
+          taskId: taskId0,
+          title: "change ETA",
+          assignee: "hello",
+          oldEndsOn: 1234,
+          newEndsOn: 1235,
+          reason: "family event",
+          status: "PENDING",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal("User with this id or username doesn't exist.");
+          return done();
+        });
+    });
     it("Should return fail response if someone try to create a extension request for someone else and is not a super user", function (done) {
       chai
         .request(app)
@@ -276,7 +299,9 @@ describe("Extension Requests", function () {
 
           expect(res).to.have.status(403);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Only Super User can create an extension request for this task.");
+          expect(res.body.message).to.equal(
+            "Only assigned user and super user can create an extension request for this task."
+          );
           return done();
         });
     });
