@@ -11,7 +11,7 @@ const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
 const { addDependency, updateTask } = require("../../../models/tasks");
 const firestore = require("../../../utils/firestore");
-const { TASK_STATUS } = require("../../../constants/tasks");
+const { TASK_STATUS, TASK_STATUS_OLD } = require("../../../constants/tasks");
 const dependencyModel = firestore.collection("TaskDependencies");
 const tasksModel = firestore.collection("tasks");
 const userData = require("../../fixtures/user/user");
@@ -200,6 +200,46 @@ describe("tasks", function () {
       const firestoreResult = (await tasksModel.doc(taskId).get()).data();
       expect(firestoreResult.status).to.be.equal(TASK_STATUS.ASSIGNED);
       expect(firestoreResult.assignee).to.be.equal(userId1);
+    });
+  });
+  describe("fetch and update old task status", function () {
+    beforeEach(async function () {
+      const tasksPromise = tasksData.map(async (task) => {
+        await tasks.updateTask(task);
+      });
+      await Promise.all(tasksPromise);
+    });
+    it("Should fetch and update old task status", async function () {
+      const oldToNewMapping = {
+        [TASK_STATUS_OLD.OLD_COMPLETED]: TASK_STATUS.DONE,
+        COMPLETED: TASK_STATUS.DONE,
+        unassigned: "UNASSIGNED",
+      };
+      const result = await tasks.fetchAndUpdateOldTaskStatus(oldToNewMapping);
+      expect(result).to.be.a("object");
+      const { updatedTasks, oldStatus } = result;
+      expect(updatedTasks).to.be.a("object");
+      expect(Object.keys(oldToNewMapping)).to.include.members(Array.from(oldStatus));
+      Object.keys(updatedTasks).forEach((task) => {
+        expect(Object.values(oldToNewMapping)).to.be.include(updatedTasks[task]);
+      });
+    });
+    it("Should not update tasks if oldToNewMapping is empty", async function () {
+      const emptyMapping = {};
+      const { updatedTasks, oldStatus } = await tasks.fetchAndUpdateOldTaskStatus(emptyMapping);
+      expect(Object.keys(updatedTasks).length).to.equal(0);
+      expect(oldStatus.size).to.equal(0);
+    });
+    it("Should return error when there's an error updating task status", async function () {
+      const expectedError = new Error("Error updating tasks to new status");
+      tasks.fetchAndUpdateOldTaskStatus = async (oldToNewMapping) => {
+        throw expectedError;
+      };
+      try {
+        await tasks.fetchAndUpdateOldTaskStatus();
+      } catch (err) {
+        expect(err).to.deep.equal(expectedError);
+      }
     });
   });
 });

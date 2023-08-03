@@ -54,7 +54,7 @@ describe("Tasks", function () {
         links: ["test1"],
         endsOn: 1234,
         startedOn: 54321,
-        status: "completed",
+        status: "DONE",
         percentCompleted: 10,
         dependsOn: ["d12", "d23"],
         participants: [appOwner.username],
@@ -298,11 +298,11 @@ describe("Tasks", function () {
   });
 
   describe("GET /tasks/self", function () {
-    it("Should return all the completed tasks of the user when query 'completed' is true", function (done) {
-      const { COMPLETED } = TASK_STATUS;
+    it("Should return all the completed tasks of the user when query 'DONE' is true", function (done) {
+      const { DONE } = TASK_STATUS;
       chai
         .request(app)
-        .get("/tasks/self?completed=true")
+        .get("/tasks/self?done=true")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -310,7 +310,7 @@ describe("Tasks", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("array");
-          expect(res.body[0].status).to.equal(COMPLETED);
+          expect(res.body[0].status).to.equal(DONE);
 
           return done();
         });
@@ -756,25 +756,25 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
 
-    it("Should give 400 if percentCompleted is not 100 and new status is COMPLETED ", async function () {
+    it("Should give 400 if percentCompleted is not 100 and new status is DONE ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send({ ...taskStatusData, status: "COMPLETED" });
+        .send({ ...taskStatusData, status: "DONE" });
 
       expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
+      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
     });
 
-    it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {
+    it("Should give 400 if status is DONE and newpercent is less than 100", async function () {
       const taskData = {
         title: "Test task",
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
-        status: "COMPLETED",
+        status: "DONE",
         percentCompleted: 100,
         participants: [],
         assignee: appOwner.username,
@@ -790,7 +790,7 @@ describe("Tasks", function () {
         .send({ percentCompleted: 80 });
 
       expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
+      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is DONE");
     });
   });
 
@@ -818,6 +818,100 @@ describe("Tasks", function () {
       expect(res).to.have.status(200);
       expect(res.body.newAvailableTasks).to.have.lengthOf(0);
       expect(res.body.message).to.be.equal("No overdue tasks found");
+    });
+  });
+
+  describe("PATCH /tasks/migrate", function () {
+    it("Should successfully update old tasks with 'DONE' and 'UNASSIGNED' statuses when authenticated as SUPERUSER", function (done) {
+      const fetchAndUpdateOldTaskStatusStub = sinon.stub(tasks, "fetchAndUpdateOldTaskStatus").returns({
+        updatedTasks: {
+          1: "DONE",
+          2: "DONE",
+          3: "UNASSIGNED",
+        },
+        oldStatus: new Set(["completed", "COMPLETED", "unassigned"]),
+      });
+
+      chai
+        .request(app)
+        .patch("/tasks/migrate")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(fetchAndUpdateOldTaskStatusStub.calledOnce).to.be.equal(true);
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.tasks).to.be.a("object");
+          expect(res.body).to.deep.equal({
+            message: `Updated 3 task(s) with old status as completed, COMPLETED, unassigned`,
+            tasks: {
+              1: "DONE",
+              2: "DONE",
+              3: "UNASSIGNED",
+            },
+          });
+          return done();
+        });
+    });
+    it("Should return no tasks are found to update if there are no tasks to update", function (done) {
+      const fetchAndUpdateOldTaskStatusStub = sinon.stub(tasks, "fetchAndUpdateOldTaskStatus").returns({
+        updatedTasks: {},
+        oldStatus: new Set(),
+      });
+      chai
+        .request(app)
+        .patch("/tasks/migrate")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(fetchAndUpdateOldTaskStatusStub.calledOnce).to.be.equal(true);
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.deep.equal({
+            message: "No tasks are found to update.",
+          });
+          return done();
+        });
+    });
+    it("should return an error when trying to update old task statuses without SUPERUSER role", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/migrate")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("You are not authorized for this action.");
+          return done();
+        });
+    });
+    it("Should return an error when there is an error during task status update", function (done) {
+      const errorMessage = "An error occurred while updating task statuses.";
+      const fetchAndUpdateOldTaskStatusStub = sinon
+        .stub(tasks, "fetchAndUpdateOldTaskStatus")
+        .throws(new Error(errorMessage));
+
+      chai
+        .request(app)
+        .patch("/tasks/migrate")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(fetchAndUpdateOldTaskStatusStub.calledOnce).to.be.equal(true);
+          expect(res).to.have.status(500);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("An internal server error occurred");
+          return done();
+        });
     });
   });
 });

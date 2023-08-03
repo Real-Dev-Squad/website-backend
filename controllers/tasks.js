@@ -3,8 +3,8 @@ const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
 const { addLog } = require("../models/logs");
 const { USER_STATUS } = require("../constants/users");
 const { addOrUpdate, getRdsUserInfoByGitHubUsername } = require("../models/users");
-const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
+const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
+const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED, DONE } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
 const { transformQuery } = require("../utils/tasks");
@@ -203,7 +203,7 @@ const getSelfTasks = async (req, res) => {
     const { username } = req.userData;
 
     if (username) {
-      if (req.query.completed) {
+      if (req.query.done) {
         const allCompletedTasks = await tasks.fetchUserCompletedTasks(username);
         return res.json(allCompletedTasks);
       } else {
@@ -297,15 +297,15 @@ const updateTaskStatus = async (req, res, next) => {
     if (task.taskData.status === TASK_STATUS.VERIFIED || req.body.status === TASK_STATUS.MERGED)
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
-    if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
-      if (req.body.status === TASK_STATUS.COMPLETED || !req.body.status) {
-        return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
+    if (task.taskData.status === TASK_STATUS.DONE && req.body.percentCompleted < 100) {
+      if (req.body.status === TASK_STATUS.DONE || !req.body.status) {
+        return res.boom.badRequest("Task percentCompleted can't updated as status is DONE");
       }
     }
 
-    if (req.body.status === TASK_STATUS.COMPLETED && task.taskData.percentCompleted !== 100) {
+    if (req.body.status === TASK_STATUS.DONE && task.taskData.percentCompleted !== 100) {
       if (req.body.percentCompleted !== 100) {
-        return res.boom.badRequest("Status cannot be updated. Task is not completed yet");
+        return res.boom.badRequest("Status cannot be updated. Task is not done yet");
       }
     }
 
@@ -406,6 +406,29 @@ const assignTask = async (req, res) => {
   }
 };
 
+const updateOldTaskStatus = async (req, res) => {
+  const oldToNewStatusMapping = {
+    [OLD_COMPLETED]: DONE,
+    COMPLETED: DONE,
+    unassigned: "UNASSIGNED",
+  };
+  try {
+    const { updatedTasks, oldStatus } = await tasks.fetchAndUpdateOldTaskStatus(oldToNewStatusMapping);
+    let message = "No tasks are found to update.";
+    const updatedTasksCount = Object.keys(updatedTasks).length;
+    if (updatedTasksCount === 0) {
+      return res.json({ message: message });
+    }
+    if (updatedTasksCount > 0) {
+      message = `Updated ${updatedTasksCount} task(s) with old status as ${Array.from(oldStatus).join(", ")}`;
+    }
+    return res.json({ message: message, tasks: updatedTasks });
+  } catch (error) {
+    logger.error(`Error while Updating tasks ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   addNewTask,
   fetchTasks,
@@ -416,4 +439,5 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
+  updateOldTaskStatus,
 };

@@ -20,6 +20,7 @@ router.post(
   createTask,
   tasks.addNewTask
 );
+router.patch("/migrate", authenticate, authorizeRoles([SUPERUSER]), tasks.updateOldTaskStatus);
 router.patch(
   "/:id",
   authenticate,

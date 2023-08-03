@@ -5,7 +5,7 @@ const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
+const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, DONE } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 
 /**
@@ -101,7 +101,6 @@ const getBuiltTasks = async (tasksSnapshot) => {
   const promises = tasks.map(async (task) => fromFirestoreData(task));
   const updatedTasks = await Promise.all(promises);
   const taskPromises = updatedTasks.map(async (task) => {
-    task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
     const taskId = task.id;
     const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
     task.dependsOn = [];
@@ -284,7 +283,6 @@ const fetchUserTasks = async (username, statuses = [], field, order) => {
 
     let groupTasksSnapshot = [];
     let featureTasksSnapshot = [];
-
     if (statuses && statuses.length) {
       if (field) {
         groupTasksSnapshot = await tasksModel
@@ -423,7 +421,7 @@ const fetchSelfTasks = async (username) => {
  */
 
 const fetchUserCompletedTasks = async (username) => {
-  return await fetchUserTasks(username, [OLD_COMPLETED, COMPLETED]);
+  return await fetchUserTasks(username, [OLD_COMPLETED, DONE]);
 };
 
 /**
@@ -455,6 +453,30 @@ const overdueTasks = async (overDueTasks) => {
     throw err;
   }
 };
+
+const fetchAndUpdateOldTaskStatus = async (oldToNewMapping) => {
+  try {
+    const allTasks = await fetchTasks();
+    const allOldTasks = allTasks.filter((task) => {
+      return task.status in oldToNewMapping;
+    });
+    const updatedTasks = {};
+    const oldStatus = new Set();
+    for (const task of allOldTasks) {
+      oldStatus.add(task.status);
+      const newStatus = oldToNewMapping[task.status];
+      if (newStatus) {
+        await updateTask({ status: newStatus }, task.id);
+        updatedTasks[task.id] = newStatus;
+      }
+    }
+    return { updatedTasks, oldStatus };
+  } catch (err) {
+    logger.error("Error updating tasks to new status", err);
+    throw err;
+  }
+};
+
 module.exports = {
   updateTask,
   fetchTasks,
@@ -469,4 +491,5 @@ module.exports = {
   addDependency,
   fetchTaskByIssueId,
   fetchPaginatedTasks,
+  fetchAndUpdateOldTaskStatus,
 };
