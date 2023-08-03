@@ -333,13 +333,14 @@ describe("getTasks validator", function () {
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
-  it("should pass the request when correct parameters are passed: page, dev, status and size", async function () {
+  it("should pass the request when correct parameters are passed: page, dev, status, sixe and searchterm", async function () {
     const req = {
       query: {
         dev: "true",
         size: 3,
         page: 0,
         status: TASK_STATUS.ASSIGNED,
+        q: "searchterm",
       },
     };
     const res = {};
