@@ -267,12 +267,6 @@ module.exports = () => {
       linkedin_id: "testuser1",
       github_id: "testuser1",
       github_display_name: "Test User",
-      phone: "1234567890",
-      email: "tu@gmail.com",
-      chaincode: "1234",
-      tokens: {
-        githubAccessToken: "githubAccessToken",
-      },
       roles: {
         member: true,
       },

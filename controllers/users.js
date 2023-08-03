@@ -67,6 +67,7 @@ const getUserById = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     // getting user details by id if present.
+
     const query = req.query?.query ?? "";
     const qualifiers = getQualifiers(query);
 
@@ -101,9 +102,10 @@ const getUsers = async (req, res) => {
     }
 
     const data = await dataAccess.retrieveUsers({ query: req.query });
+
     return res.json({
       message: "Users returned successfully!",
-      users: data.allUsers,
+      users: data.users,
       links: {
         next: data.nextId ? getPaginationLink(req.query, "next", data.nextId) : "",
         prev: data.prevId ? getPaginationLink(req.query, "prev", data.prevId) : "",
@@ -205,10 +207,11 @@ const getUsernameAvailabilty = async (req, res) => {
 const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
-      if (req.query.private) {
-        return res.send(req.userData);
-      }
-      const user = await dataAccess.retrieveUsers({ userdata: req.userData });
+      const user = await dataAccess.retrieveUsers({
+        userdata: req.userData,
+        level: "private",
+        role: req.userData.roles,
+      });
       return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");
@@ -225,8 +228,9 @@ const getSelfDetails = async (req, res) => {
  * @param req.body {Object} - User object
  * @param res {Object} - Express response object
  */
-const updateSelf = async (req, res) => {
+const updateSelf = async (req, res, level) => {
   try {
+    // if req.userData.roles.super_user=true then level>0 allowed else return 403
     const { id: userId } = req.userData;
     if (req.body.username) {
       const { user } = await dataAccess.retrieveUsers({ id: userId });
@@ -407,6 +411,7 @@ const updateUser = async (req, res) => {
 const generateChaincode = async (req, res) => {
   try {
     const { id } = req.userData;
+
     const chaincode = await chaincodeQuery.storeChaincode(id);
     await userQuery.addOrUpdate({ chaincode }, id);
     return res.json({

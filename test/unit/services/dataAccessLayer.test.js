@@ -12,6 +12,9 @@ const {
   retrieveUsersWithRole,
   retrieveMembers,
   retreiveFilteredUsers,
+  privilegedAccess,
+  levelSpecificAccess,
+  AccessLevel,
 } = require("../../../services/dataAccessLayer");
 
 const userData = require("../../fixtures/user/user")();
@@ -62,7 +65,7 @@ describe("Data Access Layer", function () {
       const query = { page: 1 };
       const result = await retrieveUsers({ query });
       removeSensitiveInfo(userData[12]);
-      result.allUsers.forEach((element) => {
+      result.users.forEach((element) => {
         expect(element).to.deep.equal(userData[12]);
         USER_SENSITIVE_DATA.forEach((key) => {
           expect(element).to.not.have.property(key);
@@ -144,6 +147,55 @@ describe("Data Access Layer", function () {
       USER_SENSITIVE_DATA.forEach((key) => {
         expect(userData[12]).to.not.have.property(key);
       });
+    });
+  });
+
+  describe("privilegedAccess", function () {
+    const data = {
+      email: "test@test.com",
+      phone: "1234567890",
+      chaincode: "abc7896",
+    };
+    it("should set only email for INTERNAL access", function () {
+      const result = privilegedAccess(userData[11], data, AccessLevel.INTERNAL);
+      expect(result).to.have.property("email");
+    });
+
+    it("should set email and phone for PRIVATE access", function () {
+      const result = privilegedAccess(userData[11], data, AccessLevel.PRIVATE);
+      expect(result).to.have.property("email");
+      expect(result).to.have.property("phone");
+    });
+
+    it("should set email, phone, and chaincode for CONFIDENTIAL access", function () {
+      const result = privilegedAccess(userData[11], data, AccessLevel.CONFIDENTIAL);
+      expect(result).to.have.property("email");
+      expect(result).to.have.property("phone");
+      expect(result).to.have.property("chaincode");
+    });
+  });
+
+  describe("levelSpecificAccess", function () {
+    it("should return the user object for PUBLIC level after removing all sensitive info", function () {
+      const result = levelSpecificAccess(userData[12], AccessLevel.PUBLIC);
+      USER_SENSITIVE_DATA.forEach((key) => {
+        expect(result).to.not.have.property(key);
+      });
+    });
+
+    it('should return "unauthorized" for non-superuser role', function () {
+      const unauthorizedRole = { role: { super_user: false } };
+      const result = levelSpecificAccess(userData[12], AccessLevel.PRIVATE, unauthorizedRole);
+      expect(result).to.equal("unauthorized");
+    });
+
+    it("should call privilegedAccess for PRIVATE level and super_user role", function () {
+      userData.email = "test@test.com";
+      userData.phone = "8976509889";
+      const role = { super_user: true };
+      const user = levelSpecificAccess(userData[11], AccessLevel.PRIVATE, role);
+      expect(user).to.have.property("email");
+      expect(user).to.have.property("phone");
     });
   });
 });
