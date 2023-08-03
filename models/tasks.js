@@ -473,4 +473,5 @@ module.exports = {
   addDependency,
   fetchTaskByIssueId,
   fetchPaginatedTasks,
+  getBuiltTasks,
 };

@@ -9,7 +9,7 @@ const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
-const { addDependency, updateTask } = require("../../../models/tasks");
+const { addDependency, updateTask, getBuiltTasks } = require("../../../models/tasks");
 const firestore = require("../../../utils/firestore");
 const { TASK_STATUS } = require("../../../constants/tasks");
 const dependencyModel = firestore.collection("TaskDependencies");
@@ -89,6 +89,14 @@ describe("tasks", function () {
       result.forEach((task) => {
         const sameTask = tasksData.find((t) => t.title === task.title);
         expect(task).to.contain.all.keys(sameTask);
+      });
+    });
+    it("should fetch tasks filtered by search term", async function () {
+      const searchTerm = "task";
+      const tasksSnapshot = await tasksModel.get();
+      const result = await getBuiltTasks(tasksSnapshot, searchTerm);
+      result.forEach((task) => {
+        expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
       });
     });
   });
