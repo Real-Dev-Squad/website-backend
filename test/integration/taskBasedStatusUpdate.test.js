@@ -541,7 +541,7 @@ describe("Task Based Status Updates", function () {
       reqBody.assignee = user2Name;
       const res = await chai
         .request(app)
-        .patch(`/tasks/taskid123?userStatusFlag=true`)
+        .patch(`/tasks/taskid123`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send(reqBody);
       expect(res.status).to.equal(204);
@@ -559,7 +559,7 @@ describe("Task Based Status Updates", function () {
       reqBody.assignee = user2Name;
       const res = await chai
         .request(app)
-        .patch(`/tasks/taskid123?userStatusFlag=true`)
+        .patch(`/tasks/taskid123`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send(reqBody);
       expect(res.status).to.equal(204);
