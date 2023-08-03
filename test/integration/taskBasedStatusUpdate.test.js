@@ -537,4 +537,59 @@ describe("Task Based Status Updates", function () {
       );
     });
   });
+
+  describe("PATCH Update User Status on Task Assignment by SuperUser", function () {
+    let userId1, user2Name, superUserId, superUserJwt, taskArr;
+    const reqBody = {};
+
+    beforeEach(async function () {
+      userId1 = await addUser(userData[6]);
+      superUserId = await addUser(userData[4]);
+      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+      await addUser(userData[0]);
+      user2Name = userData[0].username;
+      taskArr = allTasks();
+      const sampleTask1 = taskArr[0];
+      sampleTask1.assignee = userId1;
+      sampleTask1.createdBy = superUserId;
+      await firestore.collection("tasks").doc("taskid123").set(sampleTask1);
+      const statusData = generateStatusDataForState(userId1, userState.ACTIVE);
+      await firestore.collection("usersStatus").doc("userStatusDoc001").set(statusData);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("Update the old assignee status to IDLE on task reassignment if no tasks is in progress in their name", async function () {
+      reqBody.assignee = user2Name;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/taskid123?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send(reqBody);
+      expect(res.status).to.equal(204);
+      const userStatus002Data = (await userStatusModel.doc("userStatusDoc001").get()).data();
+      expect(userStatus002Data).to.have.keys(["userId", "currentStatus"]);
+      expect(userStatus002Data.currentStatus.state).to.equal(userState.IDLE);
+    });
+
+    it("Should maintain the old assignee status to ACTIVE on task reassignment if another task is in progress in their name", async function () {
+      const sampleTask2 = taskArr[1];
+      sampleTask2.assignee = userId1;
+      sampleTask2.createdBy = superUserId;
+      await firestore.collection("tasks").doc("taskid234").set(sampleTask2);
+
+      reqBody.assignee = user2Name;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/taskid123?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send(reqBody);
+      expect(res.status).to.equal(204);
+      const userStatus002Data = (await userStatusModel.doc("userStatusDoc001").get()).data();
+      expect(userStatus002Data).to.have.keys(["userId", "currentStatus"]);
+      expect(userStatus002Data.currentStatus.state).to.equal(userState.ACTIVE);
+    });
+  });
 });
