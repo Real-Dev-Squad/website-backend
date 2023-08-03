@@ -892,5 +892,26 @@ describe("Tasks", function () {
           return done();
         });
     });
+    it("Should return an error when there is an error during task status update", function (done) {
+      const errorMessage = "An error occurred while updating task statuses.";
+      const fetchAndUpdateOldTaskStatusStub = sinon
+        .stub(tasks, "fetchAndUpdateOldTaskStatus")
+        .throws(new Error(errorMessage));
+
+      chai
+        .request(app)
+        .patch("/tasks/migrate")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(fetchAndUpdateOldTaskStatusStub.calledOnce).to.be.equal(true);
+          expect(res).to.have.status(500);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("An internal server error occurred");
+          return done();
+        });
+    });
   });
 });

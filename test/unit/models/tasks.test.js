@@ -230,5 +230,16 @@ describe("tasks", function () {
       expect(Object.keys(updatedTasks).length).to.equal(0);
       expect(oldStatus.size).to.equal(0);
     });
+    it("Should return error when there's an error updating task status", async function () {
+      const expectedError = new Error("Error updating tasks to new status");
+      tasks.fetchAndUpdateOldTaskStatus = async (oldToNewMapping) => {
+        throw expectedError;
+      };
+      try {
+        await tasks.fetchAndUpdateOldTaskStatus();
+      } catch (err) {
+        expect(err).to.deep.equal(expectedError);
+      }
+    });
   });
 });
