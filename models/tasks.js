@@ -104,7 +104,6 @@ const getBuiltTasks = async (tasksSnapshot, searchTerm) => {
   if (searchTerm) {
     updatedTasks = updatedTasks.filter((task) => task.title.toLowerCase().includes(searchTerm.toLowerCase()));
   }
-
   const taskPromises = updatedTasks.map(async (task) => {
     task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
     const taskId = task.id;

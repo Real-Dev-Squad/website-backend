@@ -264,6 +264,29 @@ describe("Tasks", function () {
   });
 
   describe("GET /tasks/:id/details", function () {
+    it("Should get tasks filtered by search term", function (done) {
+      const searchTerm = "search";
+      chai
+        .request(app)
+        .get(`/tasks?q=${encodeURIComponent(searchTerm)}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Filter tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+
+          const matchingTasks = res.body.tasks;
+          matchingTasks.forEach((task) => {
+            expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
+          });
+
+          return done();
+        });
+    });
     it("should return the task task with the Id that we provide in the route params", function (done) {
       chai
         .request(app)
