@@ -226,9 +226,8 @@ const getSelfDetails = async (req, res) => {
  * @param req.body {Object} - User object
  * @param res {Object} - Express response object
  */
-const updateSelf = async (req, res, level) => {
+const updateSelf = async (req, res) => {
   try {
-    // if req.userData.roles.super_user=true then level>0 allowed else return 403
     const { id: userId } = req.userData;
     if (req.body.username) {
       const { user } = await dataAccess.retrieveUsers({ id: userId });
