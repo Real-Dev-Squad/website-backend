@@ -21,10 +21,33 @@ const ALLOWED_FILTER_PARAMS = {
 
 const DOCUMENT_WRITE_SIZE = 500;
 
+const USERS_PATCH_HANDLER_ACTIONS = {
+  ARCHIVE_USERS: "archiveUsers",
+  NON_VERFIED_DISCORD_USERS: "nonVerifiedDiscordUsers",
+};
+
+const USERS_PATCH_HANDLER_ERROR_MESSAGES = {
+  VALIDATE_PAYLOAD: "Invalid Payload",
+  ARCHIVE_USERS: {
+    NO_USERS_DATA_TO_UPDATE: "Couldn't find any users currently inactive in Discord but not archived.",
+    BATCH_DATA_UPDATED_FAILED: "Firebase batch operation failed",
+  },
+};
+
+const USERS_PATCH_HANDLER_SUCCESS_MESSAGES = {
+  ARCHIVE_USERS: {
+    SUCCESSFULLY_UPDATED_DATA: "Successfully updated users archived role to true if in_discord role is false",
+    SUCCESSFULLY_COMPLETED_BATCH_UPDATES: "Successfully completed batch updates",
+  },
+};
+
 module.exports = {
   profileStatus,
   USER_STATUS,
   ALLOWED_FILTER_PARAMS,
   USER_SENSITIVE_DATA,
   DOCUMENT_WRITE_SIZE,
+  USERS_PATCH_HANDLER_ACTIONS,
+  USERS_PATCH_HANDLER_ERROR_MESSAGES,
+  USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
 };
