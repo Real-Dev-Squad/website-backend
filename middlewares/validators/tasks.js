@@ -170,7 +170,7 @@ const getTasksValidator = async (req, res, next) => {
       .custom((value, helpers) => {
         if (value && value.includes(":")) {
           const [key] = value.split(":");
-          const allowedKeywords = ["searchterm", "assignee", "status"];
+          const allowedKeywords = ["searchterm"];
           if (!allowedKeywords.includes(key.toLowerCase())) {
             return helpers.error("any.invalid");
           }

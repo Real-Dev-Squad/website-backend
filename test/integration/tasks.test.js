@@ -279,6 +279,7 @@ describe("Tasks", function () {
           matchingTasks.forEach((task) => {
             expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
           });
+          expect(matchingTasks).to.have.length(2);
 
           return done();
         });
