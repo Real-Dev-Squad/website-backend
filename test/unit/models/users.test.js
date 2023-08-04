@@ -5,6 +5,7 @@
 /* eslint-disable security/detect-object-injection */
 
 const chai = require("chai");
+const sinon = require("sinon");
 const { expect } = chai;
 
 const cleanDb = require("../../utils/cleanDb");
@@ -239,15 +240,50 @@ describe("users", function () {
       await Promise.all(addUsersPromises);
     });
 
+    afterEach(function () {
+      sinon.restore();
+    });
+
     it("should update archived role to true if in_discord is false", async function () {
       await users.archiveUserIfNotInDiscord();
 
-      const updatedUsers = await userModel.where("roles.in_discord", "==", false).get();
+      const updatedUsers = await userModel
+        .where("roles.in_discord", "==", false)
+        .where("roles.archived", "==", false)
+        .get();
 
       updatedUsers.forEach((user) => {
         const userData = user.data();
         expect(userData.roles.in_discord).to.be.equal(false);
         expect(userData.roles.archived).to.be.equal(true);
+      });
+    });
+
+    it("should throw an error if firebase batch operation fails", async function () {
+      const stub = sinon.stub(firestore, "batch");
+      stub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("Firestore batch update failed");
+        },
+      });
+
+      try {
+        await users.archiveUserIfNotInDiscord();
+      } catch (error) {
+        expect(error).to.be.an.instanceOf(Error);
+        expect(error.message).to.equal("An internal server error occurred");
+      }
+
+      const updatedUsers = await userModel
+        .where("roles.in_discord", "==", false)
+        .where("roles.archived", "==", false)
+        .get();
+
+      updatedUsers.forEach((user) => {
+        const userData = user.data();
+        expect(userData.roles.in_discord).to.be.equal(false);
+        expect(userData.roles.archived).to.be.not.equal(true);
       });
     });
   });
