@@ -53,7 +53,7 @@ describe("Users services", function () {
 
       expect(res).to.deep.equal({
         message: "Successfully completed batch updates",
-        totalUsersArchived: 14,
+        totalUsersArchived: 15,
         totalOperationsFailed: 0,
         updatedUserDetails: userDetails,
         failedUserDetails: [],
@@ -64,6 +64,9 @@ describe("Users services", function () {
       const batchStub = Sinon.stub(firestore, "batch");
       batchStub.returns({
         update: function () {},
+        commit: function () {
+          throw new Error("Firebase batch operation failed");
+        },
       });
 
       const res = await archiveUsers(users);
@@ -71,7 +74,7 @@ describe("Users services", function () {
       expect(res).to.deep.equal({
         message: "Firebase batch operation failed",
         totalUsersArchived: 0,
-        totalOperationsFailed: 14,
+        totalOperationsFailed: 15,
         updatedUserDetails: [],
         failedUserDetails: userDetails,
       });
