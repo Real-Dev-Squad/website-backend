@@ -5,12 +5,12 @@ const firestore = require("../../../utils/firestore");
 const userModel = firestore.collection("users");
 const cleanDb = require("../../utils/cleanDb");
 const userDataArray = require("../../fixtures/user/user")();
-const { archiveInactiveDiscordUsersInBulk } = require("../../../services/users");
+const { archiveUsers } = require("../../../services/users");
 
 describe("Users services", function () {
   describe("archive inactive discord users in bulk", function () {
     const users = [];
-    const userIds = [];
+    const userDetails = [];
     beforeEach(async function () {
       const addUsersPromises = [];
       userDataArray.forEach((user) => {
@@ -27,6 +27,7 @@ describe("Users services", function () {
       await Promise.all(addUsersPromises);
 
       users.length = 0;
+      userDetails.length = 0;
 
       const snapshot = await userModel
         .where("roles.in_discord", "==", false)
@@ -36,8 +37,9 @@ describe("Users services", function () {
       snapshot.forEach((user) => {
         const id = user.id;
         const userData = user.data();
+        const { first_name: firstName, last_name: lastName } = userData;
         users.push({ ...userData, id });
-        userIds.push(id);
+        userDetails.push({ id, firstName, lastName });
       });
     });
 
@@ -47,13 +49,14 @@ describe("Users services", function () {
     });
 
     it("Should return successful response", async function () {
-      const res = await archiveInactiveDiscordUsersInBulk(users);
+      const res = await archiveUsers(users);
 
-      expect(res).deep.equal({
+      expect(res).to.deep.equal({
         message: "Successfully completed batch updates",
         totalUsersArchived: 14,
         totalOperationsFailed: 0,
-        updatedUserIds: userIds,
+        updatedUserDetails: userDetails,
+        failedUserDetails: [],
       });
     });
 
@@ -63,13 +66,14 @@ describe("Users services", function () {
         update: function () {},
       });
 
-      const res = await archiveInactiveDiscordUsersInBulk(users);
+      const res = await archiveUsers(users);
 
-      expect(res).deep.equal({
+      expect(res).to.deep.equal({
         message: "Firebase batch operation failed",
         totalUsersArchived: 0,
         totalOperationsFailed: 14,
-        updatedUserIds: [],
+        updatedUserDetails: [],
+        failedUserDetails: userDetails,
       });
     });
   });

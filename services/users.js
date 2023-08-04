@@ -1,17 +1,19 @@
+const { USERS_PATCH_HANDLER_SUCCESS_MESSAGES, USERS_PATCH_HANDLER_ERROR_MESSAGES } = require("../constants/users");
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 
-const archiveInactiveDiscordUsersInBulk = async (usersData) => {
+const archiveUsers = async (usersData) => {
   const batch = firestore.batch();
-  const updatedUsers = [];
+  const usersBatch = [];
   const summary = {
     totalUsersArchived: 0,
     totalOperationsFailed: 0,
-    updatedUserIds: [],
+    updatedUserDetails: [],
+    failedUserDetails: [],
   };
 
   usersData.forEach((user) => {
-    const id = user.id;
+    const { id, first_name: firstName, last_name: lastName } = user;
     const updatedUserData = {
       ...user,
       roles: {
@@ -20,21 +22,25 @@ const archiveInactiveDiscordUsersInBulk = async (usersData) => {
       },
     };
     batch.update(userModel.doc(id), updatedUserData);
-    updatedUsers.push(id);
+    usersBatch.push({ id, firstName, lastName });
   });
 
   try {
     await batch.commit();
     summary.totalUsersArchived += usersData.length;
-    summary.updatedUserIds = [...updatedUsers];
-    return { message: "Successfully completed batch updates", ...summary };
+    summary.updatedUserDetails = [...usersBatch];
+    return {
+      message: USERS_PATCH_HANDLER_SUCCESS_MESSAGES.ARCHIVE_USERS.SUCCESSFULLY_COMPLETED_BATCH_UPDATES,
+      ...summary,
+    };
   } catch (err) {
     logger.error("Firebase batch Operation Failed!");
     summary.totalOperationsFailed += usersData.length;
-    return { message: "Firebase batch operation failed", ...summary };
+    summary.failedUserDetails = [...usersBatch];
+    return { message: USERS_PATCH_HANDLER_ERROR_MESSAGES.ARCHIVE_USERS.BATCH_DATA_UPDATED_FAILED, ...summary };
   }
 };
 
 module.exports = {
-  archiveInactiveDiscordUsersInBulk,
+  archiveUsers,
 };
