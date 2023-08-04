@@ -271,23 +271,23 @@ describe("Update Status based on task update", function () {
     it("should return the correct results when there are no errors", async function () {
       const result = await batchUpdateUsersStatus(listUsers);
       expect(result).to.have.all.keys(
-        "totalUsers",
-        "totalUnprocessedUsers",
-        "totalOnboardingUsersAltered",
-        "totalOnboardingUsersUnAltered",
-        "totalActiveUsersAltered",
-        "totalActiveUsersUnAltered",
-        "totalIdleUsersAltered",
-        "totalIdleUsersUnAltered"
+        "usersCount",
+        "unprocessedUsers",
+        "onboardingUsersAltered",
+        "onboardingUsersUnaltered",
+        "activeUsersAltered",
+        "activeUsersUnaltered",
+        "idleUsersAltered",
+        "idleUsersUnaltered"
       );
-      expect(result.totalUsers).to.equal(10);
-      expect(result.totalUnprocessedUsers).to.equal(0);
-      expect(result.totalOnboardingUsersAltered).to.equal(1);
-      expect(result.totalOnboardingUsersUnAltered).to.equal(1);
-      expect(result.totalActiveUsersAltered).to.equal(3);
-      expect(result.totalActiveUsersUnAltered).to.equal(1);
-      expect(result.totalIdleUsersAltered).to.equal(3);
-      expect(result.totalIdleUsersUnAltered).to.equal(1);
+      expect(result.usersCount).to.equal(10);
+      expect(result.unprocessedUsers).to.equal(0);
+      expect(result.onboardingUsersAltered).to.equal(1);
+      expect(result.onboardingUsersUnaltered).to.equal(1);
+      expect(result.activeUsersAltered).to.equal(3);
+      expect(result.activeUsersUnaltered).to.equal(1);
+      expect(result.idleUsersAltered).to.equal(3);
+      expect(result.idleUsersUnaltered).to.equal(1);
       const userStatus000Data = (await userStatusModel.doc("userStatus000").get()).data();
       expect(userStatus000Data.currentStatus.state).to.equal(userState.IDLE);
       const userStatus001Data = (await userStatusModel.doc("userStatus001").get()).data();

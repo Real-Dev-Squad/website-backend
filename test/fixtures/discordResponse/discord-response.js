@@ -74,6 +74,19 @@ const usersFromRds = [
       archived: false,
     },
   },
+  {
+    username: "",
+    first_name: "",
+    last_name: "",
+    github_id: "",
+    github_display_name: "",
+    incompleteUserDetails: false,
+    discordId: "12345678909867666",
+    roles: {
+      in_discord: true,
+      archived: true,
+    },
+  },
 ];
 
 module.exports = {

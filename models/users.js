@@ -38,6 +38,7 @@ const addOrUpdate = async (userData, userId = null) => {
         await userModel.doc(userId).set({
           ...user.data(),
           ...userData,
+          updated_at: Date.now(),
         });
       }
 
@@ -53,6 +54,7 @@ const addOrUpdate = async (userData, userId = null) => {
         isNewUser: false,
         userId: user.docs[0].id,
         incompleteUserDetails: user.docs[0].data().incompleteUserDetails,
+        updated_at: Date.now(),
       };
     }
 
@@ -65,7 +67,7 @@ const addOrUpdate = async (userData, userId = null) => {
     userData.roles = { archived: false, in_discord: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
-    return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true };
+    return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true, updated_at: Date.now() };
   } catch (err) {
     logger.error("Error in adding or updating user", err);
     throw err;
@@ -622,6 +624,25 @@ const removeGitHubToken = async (users) => {
     throw err;
   }
 };
+
+const getUsersByRole = async (role) => {
+  try {
+    const usersRef = await userModel.where(`roles.${role}`, "==", true).get();
+    const users = [];
+    usersRef.docs.forEach((user) => {
+      const userData = user.data();
+      users.push({
+        id: user.id,
+        ...userData,
+      });
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Fetching users with role: ${role} exitted with an error: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -644,4 +665,5 @@ module.exports = {
   fetchAllUsers,
   fetchUsersWithToken,
   removeGitHubToken,
+  getUsersByRole,
 };

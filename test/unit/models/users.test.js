@@ -92,7 +92,18 @@ describe("users", function () {
       expect(user.last_name).to.equal(userData.last_name);
       expect(userExists).to.equal(true);
     });
+
+    it("It should have created_At and updated_At fields", async function () {
+      const userData = userDataArray[14];
+      await users.addOrUpdate(userData);
+      const githubUsername = "sahsisunny";
+      const { user, userExists } = await users.fetchUser({ githubUsername });
+      expect(user).to.haveOwnProperty("created_at");
+      expect(user).to.haveOwnProperty("updated_at");
+      expect(userExists).to.equal(true);
+    });
   });
+
   describe("user image verification", function () {
     let userId, discordId, profileImageUrl, discordImageUrl;
     beforeEach(async function () {
@@ -255,6 +266,28 @@ describe("users", function () {
       } catch (error) {
         expect(error).to.be.instanceOf(Error);
       }
+    });
+  });
+
+  describe("get users by roles", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+    it("returns users with member role", async function () {
+      const members = await users.getUsersByRole("member");
+      expect(members.length).to.be.equal(6);
+      members.forEach((member) => {
+        expect(member.roles.member).to.be.equal(true);
+      });
+    });
+    it("throws an error", async function () {
+      await users.getUsersByRole(32389434).catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+      });
     });
   });
 });
