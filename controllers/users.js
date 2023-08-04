@@ -209,8 +209,6 @@ const getSelfDetails = async (req, res) => {
     if (req.userData) {
       const user = await dataAccess.retrieveUsers({
         userdata: req.userData,
-        level: "private",
-        role: req.userData.roles,
       });
       return res.send(user);
     }
