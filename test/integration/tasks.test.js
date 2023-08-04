@@ -265,7 +265,7 @@ describe("Tasks", function () {
       const searchTerm = "task";
       chai
         .request(app)
-        .get(`/tasks?q=${encodeURIComponent(searchTerm)}`)
+        .get(`/tasks?q=searchTerm:"${encodeURIComponent(searchTerm)}"`)
         .end((err, res) => {
           if (err) {
             return done(err);
