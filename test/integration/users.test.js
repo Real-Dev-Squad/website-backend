@@ -1535,7 +1535,7 @@ describe("Users", function () {
           }
 
           expect(res).to.have.status(400);
-          expect(res.body.message).to.equal("Invalid payload");
+          expect(res.body.message).to.equal('Invalid Payload: "action" is required');
           return done();
         });
     });
@@ -1545,16 +1545,14 @@ describe("Users", function () {
         .request(app)
         .patch("/users")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .send({ action: "archiveUsersIfNotInDiscord" })
+        .send({ action: "archiveUsers" })
         .end((err, res) => {
           if (err) {
             return done(err);
           }
 
           expect(res).to.have.status(200);
-          expect(res.body.summary).to.have.property("totalUsersArchived");
-          expect(res.body.summary).to.have.property("totalOperationsFailed");
-          expect(res.body.summary).to.have.property("totalUsers");
+          expect(res.body.summary).to.have.all.keys(["totalUsersArchived", "totalOperationsFailed", "totalUsers"]);
           expect(res.body.summary).to.not.have.property("updatedUserIds");
           expect(res.body.summary.totalUsersArchived).to.be.equal(3);
           expect(res.body.summary.totalUsers).to.be.equal(3);
@@ -1579,12 +1577,10 @@ describe("Users", function () {
         .request(app)
         .patch("/users")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .send({ action: "archiveUsersIfNotInDiscord" });
+        .send({ action: "archiveUsers" });
 
       expect(res).to.have.status(200);
-      expect(res.body.summary).to.have.property("totalUsersArchived");
-      expect(res.body.summary).to.have.property("totalOperationsFailed");
-      expect(res.body.summary).to.have.property("totalUsers");
+      expect(res.body.summary).to.have.all.keys(["totalUsersArchived", "totalOperationsFailed", "totalUsers"]);
       expect(res.body.summary).to.not.have.property("updatedUserIds");
       expect(res.body.summary.totalUsers).to.be.equal(0);
       expect(res.body.summary.totalUsersArchived).to.be.equal(0);
@@ -1593,13 +1589,19 @@ describe("Users", function () {
     });
 
     it("should throw an error if firestore batch operations fail for api archiveUsersIfNotInDiscord", async function () {
-      Sinon.stub(firestore, "batch").throws(new Error("something went wrong"));
+      const stub = Sinon.stub(firestore, "batch");
+      stub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("Firestore batch commit failed!");
+        },
+      });
 
       const res = await chai
         .request(app)
         .patch(`/users`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .send({ action: "archiveUsersIfNotInDiscord" });
+        .send({ action: "archiveUsers" });
 
       expect(res.status).to.equal(500);
       const response = res.body;
@@ -1611,21 +1613,25 @@ describe("Users", function () {
         .request(app)
         .patch("/users?debug=true")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .send({ action: "archiveUsersIfNotInDiscord" })
+        .send({ action: "archiveUsers" })
         .end((err, res) => {
           if (err) {
             return done(err);
           }
 
           expect(res).to.have.status(200);
-          expect(res.body.summary).to.have.property("totalUsersArchived");
-          expect(res.body.summary).to.have.property("totalOperationsFailed");
-          expect(res.body.summary).to.have.property("totalUsers");
-          expect(res.body.summary).to.have.property("updatedUserIds");
+          expect(res.body.summary).to.have.all.keys([
+            "totalUsersArchived",
+            "totalOperationsFailed",
+            "totalUsers",
+            "updatedUserDetails",
+            "failedUserDetails",
+          ]);
           expect(res.body.summary.totalUsersArchived).to.be.equal(3);
           expect(res.body.summary.totalUsers).to.be.equal(3);
           expect(res.body.summary.totalOperationsFailed).to.be.equal(0);
-          expect(res.body.summary.updatedUserIds.length).to.equal(3);
+          expect(res.body.summary.updatedUserDetails.length).to.equal(3);
+          expect(res.body.summary.failedUserDetails.length).to.equal(0);
           expect(res.body.message).to.equal(
             "Successfully updated users archived role to true if in_discord role is false"
           );

@@ -8,7 +8,7 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
-const { archiveInactiveDiscordUsersInBulk } = require("../services/users");
+const { archiveUsers } = require("../services/users");
 const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
@@ -20,6 +20,7 @@ const userStatusModel = firestore.collection("usersStatus");
 const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Adds or updates the user data
@@ -581,7 +582,8 @@ const archiveUserIfNotInDiscord = async () => {
       totalUsers: snapshot.size,
       totalUsersArchived: 0,
       totalOperationsFailed: 0,
-      updatedUserIds: [],
+      updatedUserDetails: [],
+      failedUserDetails: [],
     };
 
     if (snapshot.size === 0) {
@@ -596,14 +598,20 @@ const archiveUserIfNotInDiscord = async () => {
 
     const userNotInDiscordChunks = chunks(usersNotInDiscord, DOCUMENT_WRITE_SIZE);
     for (const users of userNotInDiscordChunks) {
-      const res = await archiveInactiveDiscordUsersInBulk(users);
+      const res = await archiveUsers(users);
       summary = {
         ...summary,
         totalUsersArchived: (summary.totalUsersArchived += res.totalUsersArchived),
         totalOperationsFailed: (summary.totalOperationsFailed += res.totalOperationsFailed),
-        updatedUserIds: [...summary.updatedUserIds, ...res.updatedUserIds],
+        updatedUserDetails: [...summary.updatedUserDetails, ...res.updatedUserDetails],
+        failedUserDetails: [...summary.failedUserDetails, ...res.failedUserDetails],
       };
     }
+
+    if (summary.totalOperationsFailed === summary.totalUsers) {
+      throw Error(INTERNAL_SERVER_ERROR);
+    }
+
     return summary;
   } catch (error) {
     logger.error(`Error in updating Users archived role:  ${error}`);

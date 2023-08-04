@@ -15,6 +15,11 @@ const { addRoleToUser, getDiscordMembers } = require("../services/discordService
 const { fetchAllUsers } = require("../models/users");
 const { getQualifiers } = require("../utils/helper");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+const {
+  USERS_PATCH_HANDLER_ACTIONS,
+  USERS_PATCH_HANDLER_ERROR_MESSAGES,
+  USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
+} = require("../constants/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -631,53 +636,48 @@ const archiveUserIfNotInDiscord = async () => {
 
     if (data.totalUsers === 0) {
       return {
-        message: "Couldn't find any users currently inactive in Discord but not archived.",
+        message: USERS_PATCH_HANDLER_ERROR_MESSAGES.ARCHIVE_USERS.NO_USERS_DATA_TO_UPDATE,
         summary: data,
       };
     }
 
-    if (data.totalOperationsFailed === data.totalUsers) {
-      throw Error("Internal server error occured");
-    }
-
     return {
-      message: "Successfully updated users archived role to true if in_discord role is false",
+      message: USERS_PATCH_HANDLER_SUCCESS_MESSAGES.ARCHIVE_USERS.SUCCESSFULLY_UPDATED_DATA,
       summary: data,
     };
   } catch (error) {
     logger.error(`Error while updating the archived role: ${error}`);
-    throw Error("Internal server error occured");
+    throw Error(INTERNAL_SERVER_ERROR);
   }
 };
 
 async function usersPatchHandler(req, res) {
   try {
-    if (!req.body && !req.body.action) {
-      return res.boom.badRequest("Invalid payload");
+    const { action } = req.body;
+    let response;
+
+    if (action === USERS_PATCH_HANDLER_ACTIONS.NON_VERFIED_DISCORD_USERS) {
+      const data = await nonVerifiedDiscordUsers();
+      response = data;
     }
 
-    const { action } = req.body;
-
-    if (action === "nonVerifiedDiscordUsers") {
-      const data = await nonVerifiedDiscordUsers();
-      return res.status(200).json(data);
-    } else if (action === "archiveUsersIfNotInDiscord") {
+    if (action === USERS_PATCH_HANDLER_ACTIONS.ARCHIVE_USERS) {
       const debugQuery = req.query.debug?.toLowerCase();
       const data = await archiveUserIfNotInDiscord();
 
       if (debugQuery === "true") {
-        data.summary.updatedUserIds = data.summary.updatedUserIds.slice(-3);
-        return res.status(200).json(data);
+        data.summary.updatedUserDetails = data.summary.updatedUserDetails.slice(-3);
+        response = data;
       } else {
-        delete data.summary.updatedUserIds;
+        delete data.summary.updatedUserDetails;
+        delete data.summary.failedUserDetails;
+        response = data;
       }
-
-      return res.status(200).json(data);
-    } else {
-      return res.boom.badRequest("Invalid payload");
     }
+
+    return res.status(200).json(response);
   } catch (error) {
-    logger.error("Error while handling the common route:", error);
+    logger.error("Error while handling the users common patch route:", error);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 }
