@@ -1572,7 +1572,7 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /users/remove-tokens", function () {
+  describe("POST /users/tokens", function () {
     before(async function () {
       await addOrUpdate(userData[0]);
       await addOrUpdate(userData[1]);
@@ -1585,7 +1585,7 @@ describe("Users", function () {
     it("should remove all the users with token field", function (done) {
       chai
         .request(app)
-        .patch("/users/remove-tokens")
+        .post("/users/tokens")
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
