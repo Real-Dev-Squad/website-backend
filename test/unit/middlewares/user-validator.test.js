@@ -72,13 +72,13 @@ describe("Middleware | Validators | User", function () {
           action: "",
         },
       };
-      
+
       const res = {
         boom: {
           badRequest: () => {},
         },
       };
-      
+
       const next = sinon.spy();
       await validateUsersPatchHandler(req, res, next).catch((error) => {
         expect(error).to.be.an.instanceOf(Error);
