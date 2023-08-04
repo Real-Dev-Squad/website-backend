@@ -92,6 +92,43 @@ describe("users", function () {
       expect(user.last_name).to.equal(userData.last_name);
       expect(userExists).to.equal(true);
     });
+
+    it("should add the github_user_id to the user collection", async function () {
+      const userData = userDataArray[0];
+      userData.github_user_id = "12345678";
+
+      const { isNewUser, userId } = await users.addOrUpdate(userData);
+
+      const data = (await userModel.doc(userId).get()).data();
+
+      expect(data.github_user_id).to.equal(userData.github_user_id);
+      expect(isNewUser).to.equal(true);
+    });
+
+    it("should update the github_id in the user collection", async function () {
+      const userData = userDataArray[0];
+      userData.github_id = "Yash Sinha";
+
+      // Add the user the first time
+      const { userId } = await users.addOrUpdate(userData);
+
+      // Update the user with same data and new github_user_id
+      userData.github_id = "Ankush Dharkar";
+      await users.addOrUpdate(userData, userId);
+
+      const data = (await userModel.doc(userId).get()).data();
+
+      expect(data.github_id).to.equal(userData.github_id);
+    });
+
+    it("should be stored correctly in the database", async function () {
+      const userData = { ...userDataArray[0], github_id: "my_github_id" };
+
+      const { userId } = await users.addOrUpdate(userData);
+      const data = (await userModel.doc(userId).get()).data();
+
+      expect(data.github_id).to.equal("my_github_id");
+    });
   });
   describe("user image verification", function () {
     let userId, discordId, profileImageUrl, discordImageUrl;

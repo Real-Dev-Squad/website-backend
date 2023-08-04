@@ -1,4 +1,5 @@
 const chai = require("chai");
+const axios = require("axios");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 
@@ -31,9 +32,11 @@ const userAlreadyNotMember = userData[13];
 const userAlreadyArchived = userData[5];
 const userAlreadyUnArchived = userData[4];
 const nonSuperUser = userData[0];
+const userWithoutGithubUserId = userData[14];
 
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
+const githubUserInfo = require("../fixtures/auth/githubUserInfo")();
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const photoVerificationModel = firestore.collection("photo-verification");
@@ -1314,6 +1317,83 @@ describe("Users", function () {
           }
           expect(res).to.have.status(500);
           expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
+          return done();
+        });
+    });
+  });
+
+  describe("POST /users/migrate", function () {
+    let fetchStub;
+
+    beforeEach(async function () {
+      await addUser(userWithoutGithubUserId);
+      fetchStub = Sinon.stub(axios, "get");
+    });
+
+    afterEach(async function () {
+      Sinon.restore();
+    });
+
+    it("Should add github_user_id to the user", async function () {
+      fetchStub.resolves({
+        data: githubUserInfo[0]._json,
+      });
+      const usersMigrateResponse = await chai
+        .request(app)
+        .post(`/users/migrate`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`);
+      expect(usersMigrateResponse).to.have.status(200);
+      expect(usersMigrateResponse.body).to.deep.equal({
+        message: "Result of migration",
+        data: {
+          totalUsers: 3,
+          usersUpdated: 3,
+          usersNotUpdated: 0,
+          invalidUsersDetails: [],
+        },
+      });
+      const usersResponse = await chai.request(app).get(`/users`).set("cookie", `${cookieName}=${superUserAuthToken}`);
+      expect(usersResponse).to.have.status(200);
+      usersResponse.body.users.forEach((document) => {
+        expect(document).to.have.property(`github_user_id`);
+      });
+    });
+    it("Should return details of users with invalid github username", async function () {
+      fetchStub.rejects({ response: { status: 404 } });
+      const usersMigrateResponse = await chai
+        .request(app)
+        .post(`/users/migrate`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`);
+      expect(usersMigrateResponse).to.have.status(200);
+      expect(usersMigrateResponse.body.message).to.be.equal("Result of migration");
+      expect(usersMigrateResponse.body).to.have.property("data");
+      expect(usersMigrateResponse.body.data).to.have.all.keys(
+        "totalUsers",
+        "usersUpdated",
+        "usersNotUpdated",
+        "invalidUsersDetails"
+      );
+      expect(usersMigrateResponse.body.data.totalUsers).to.be.equal(3);
+      expect(usersMigrateResponse.body.data.usersUpdated).to.be.equal(0);
+      expect(usersMigrateResponse.body.data.usersNotUpdated).to.be.equal(3);
+      usersMigrateResponse.body.data.invalidUsersDetails.forEach((document) => {
+        expect(document).to.have.all.keys("userId", "username", "githubUsername");
+      });
+    });
+    it("Should return unauthorized error when not logged in", function (done) {
+      chai
+        .request(app)
+        .post(`/users/migrate`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
           return done();
         });
     });

@@ -53,6 +53,7 @@ const githubAuthCallback = (req, res, next) => {
       userData = {
         github_id: user.username,
         github_display_name: user.displayName,
+        github_user_id: user.id,
       };
 
       const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);

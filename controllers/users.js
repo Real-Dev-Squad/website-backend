@@ -1,3 +1,5 @@
+const axios = require("axios");
+const firestore = require("../utils/firestore");
 const chaincodeQuery = require("../models/chaincodes");
 const userQuery = require("../models/users");
 const profileDiffsQuery = require("../models/profileDiffs");
@@ -569,6 +571,74 @@ const filterUsers = async (req, res) => {
   }
 };
 
+// one time script function to perform the migration - adding github_user_id field to the document
+const addGithubId = async (req, res) => {
+  const usersNotFound = [];
+  let countUserFound = 0;
+  let countUserNotFound = 0;
+  try {
+    // Fetch user data from GitHub API for each document in the users collection
+    // divided by 500 because firestore api guarantee that we can process in batch of 500.
+    const usersSnapshot = await firestore.collection("users").get();
+    const totalUsers = usersSnapshot.docs.length;
+    const batchCount = Math.ceil(totalUsers / 500);
+    // Create batch write operations for each batch of documents
+    for (let i = 0; i < batchCount; i++) {
+      const batchDocs = usersSnapshot.docs.slice(i * 500, (i + 1) * 500);
+      const batchWrite = firestore.batch();
+      const batchWrites = [];
+      for (const userDoc of batchDocs) {
+        const githubUsername = userDoc.data().github_id;
+        const username = userDoc.data().username;
+        const userId = userDoc.id;
+        batchWrite.update(userDoc.ref, { github_user_id: null });
+        batchWrites.push(
+          axios
+            .get(`https://api.github.com/users/${githubUsername}`, {
+              headers: {
+                "Content-Type": "application/json",
+              },
+              auth: {
+                username: config.get("githubOauth.clientId"),
+                password: config.get("githubOauth.clientSecret"),
+              },
+            })
+            .then((response) => {
+              const githubUserId = response.data.id;
+              batchWrite.update(userDoc.ref, { github_user_id: `${githubUserId}` });
+              countUserFound++;
+            })
+            .catch((error) => {
+              countUserNotFound++;
+              const invalidUsers = { userId, username, githubUsername };
+              usersNotFound.push(invalidUsers);
+              if (error.response && error.response.status === 404) {
+                logger.error("GitHub user not found", error);
+              } else {
+                logger.error("An error occurred at axios.get:", error);
+              }
+            })
+        );
+      }
+      await Promise.all(batchWrites);
+      await batchWrite.commit();
+    }
+
+    return res.status(200).json({
+      message: "Result of migration",
+      data: {
+        totalUsers: totalUsers,
+        usersUpdated: countUserFound,
+        usersNotUpdated: countUserNotFound,
+        invalidUsersDetails: usersNotFound,
+      },
+    });
+  } catch (error) {
+    logger.error(`Error while Updating all users: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 const nonVerifiedDiscordUsers = async (req, res) => {
   const data = await dataAccess.retrieveDiscordUsers();
   return res.json(data);
@@ -644,6 +714,7 @@ module.exports = {
   addDefaultArchivedRole,
   getUserSkills,
   filterUsers,
+  addGithubId,
   verifyUserImage,
   getUserImageForVerification,
   nonVerifiedDiscordUsers,
