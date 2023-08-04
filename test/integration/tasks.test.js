@@ -265,12 +265,11 @@ describe("Tasks", function () {
       const searchTerm = "task";
       chai
         .request(app)
-        .get(`/tasks?q=searchTerm:"${encodeURIComponent(searchTerm)}"`)
+        .get("/tasks?q=searchTerm:task")
         .end((err, res) => {
           if (err) {
             return done(err);
           }
-
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Filter tasks returned successfully!");
@@ -285,10 +284,9 @@ describe("Tasks", function () {
         });
     });
     it("Should get tasks filtered by search term and handle no tasks found", function (done) {
-      const searchTerm = " ";
       chai
         .request(app)
-        .get(`/tasks?q=searchTerm:"${encodeURIComponent(searchTerm)}"`)
+        .get(`/tasks?q=searchTerm:random1`)
         .end((err, res) => {
           if (err) {
             return done(err);
