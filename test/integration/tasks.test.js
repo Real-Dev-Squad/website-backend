@@ -261,11 +261,8 @@ describe("Tasks", function () {
       expect(previousPageResponse.body).to.have.property("prev");
       expect(previousPageResponse.body.tasks).to.have.length(1);
     });
-  });
-
-  describe("GET /tasks/:id/details", function () {
     it("Should get tasks filtered by search term", function (done) {
-      const searchTerm = "search";
+      const searchTerm = "task";
       chai
         .request(app)
         .get(`/tasks?q=${encodeURIComponent(searchTerm)}`)
@@ -287,6 +284,27 @@ describe("Tasks", function () {
           return done();
         });
     });
+    it("Should get tasks filtered by search term and handle no tasks found", function (done) {
+      const searchTerm = " ";
+      chai
+        .request(app)
+        .get(`/tasks?q=searchTerm:"${encodeURIComponent(searchTerm)}"`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("No tasks found");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks).to.have.lengthOf(0);
+          return done();
+        });
+    });
+  });
+
+  describe("GET /tasks/:id/details", function () {
     it("should return the task task with the Id that we provide in the route params", function (done) {
       chai
         .request(app)

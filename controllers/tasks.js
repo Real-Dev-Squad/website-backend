@@ -11,6 +11,7 @@ const { transformQuery } = require("../utils/tasks");
 const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 const dataAccess = require("../services/dataAccessLayer");
+const { parseSearchQuery } = require("../utils/tasks");
 /**
  * Creates new task
  *
@@ -130,7 +131,7 @@ const fetchTasks = async (req, res) => {
   try {
     const { dev, status, page, size, prev, next, q: queryString } = req.query;
     const transformedQuery = transformQuery(dev, status, size, page);
-    const searchTerm = queryString || "";
+
     if (dev) {
       const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next });
       return res.json({
@@ -138,21 +139,34 @@ const fetchTasks = async (req, res) => {
         ...paginatedTasks,
       });
     }
-    if (queryString) {
-      const filterTasks = await tasks.fetchTasks(searchTerm);
+
+    if (queryString !== undefined) {
+      const searchParams = parseSearchQuery(queryString);
+      const filterTasks = await tasks.fetchTasks(searchParams.searchTerm);
       const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(filterTasks);
+      if (tasksWithRdsAssigneeInfo.length === 0) {
+        return res.status(404).json({
+          message: "No tasks found.",
+          tasks: [],
+        });
+      }
       return res.json({
         message: "Filter tasks returned successfully!",
-        tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
+        tasks: tasksWithRdsAssigneeInfo,
       });
     }
 
     const allTasks = await tasks.fetchTasks();
     const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
-
+    if (tasksWithRdsAssigneeInfo.length === 0) {
+      return res.status(404).json({
+        message: "No tasks found",
+        tasks: [],
+      });
+    }
     return res.json({
       message: "Tasks returned successfully!",
-      tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
+      tasks: tasksWithRdsAssigneeInfo,
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);

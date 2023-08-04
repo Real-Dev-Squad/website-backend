@@ -164,7 +164,19 @@ const getTasksValidator = async (req, res, next) => {
         })
       ),
     size: joi.number().integer().positive().min(1).max(100).optional(),
-    q: joi.string().optional(),
+    q: joi
+      .string()
+      .optional()
+      .custom((value, helpers) => {
+        if (value && value.includes(":")) {
+          const [key] = value.split(":");
+          const allowedKeywords = ["searchterm", "assignee", "status"];
+          if (!allowedKeywords.includes(key.toLowerCase())) {
+            return helpers.error("any.invalid");
+          }
+        }
+        return value;
+      }, "Invalid query format"),
   });
 
   try {

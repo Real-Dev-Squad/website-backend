@@ -333,19 +333,54 @@ describe("getTasks validator", function () {
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
-  it("should pass the request when correct parameters are passed: page, dev, status, sixe and searchterm", async function () {
+  it("should pass the request when correct parameters are passed: page, dev, status and size", async function () {
     const req = {
       query: {
         dev: "true",
         size: 3,
         page: 0,
         status: TASK_STATUS.ASSIGNED,
-        q: "searchterm",
       },
     };
     const res = {};
     const nextMiddlewareSpy = Sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
+  it("should pass the request when a valid query is provided", async function () {
+    const req = {
+      query: {
+        dev: "true",
+        size: 3,
+        page: 0,
+        status: TASK_STATUS.ASSIGNED,
+        q: "searchterm:apple",
+      },
+    };
+    const res = {};
+    const nextMiddlewareSpy = Sinon.spy();
+    await getTasksValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
+  it("should fail the request when an invalid query is provided", async function () {
+    const req = {
+      query: {
+        dev: "true",
+        size: 3,
+        page: 0,
+        status: TASK_STATUS.ASSIGNED,
+        q: "invalidkey:value",
+      },
+    };
+    const res = {
+      boom: {
+        badRequest: (message) => {
+          expect(message).to.equal('"q" contains an invalid value');
+        },
+      },
+    };
+    const nextMiddlewareSpy = Sinon.spy();
+    await getTasksValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 });

@@ -73,9 +73,32 @@ const transformQuery = (dev = false, status = "", size, page) => {
   return { status: transformedStatus, dev: transformedDev, ...query };
 };
 
+const parseSearchQuery = (queryString) => {
+  const searchParams = {};
+  const queryParts = queryString.split("+");
+  queryParts.forEach((part) => {
+    const [key, value] = part.split(":");
+    switch (key.toLowerCase()) {
+      case "searchterm":
+        searchParams.searchTerm = value.toLowerCase();
+        break;
+      case "assignee":
+        searchParams.assignee = value.toLowerCase();
+        break;
+      case "status":
+        searchParams.status = value.toLowerCase();
+        break;
+      default:
+        break;
+    }
+  });
+  return searchParams;
+};
+
 module.exports = {
   fromFirestoreData,
   toFirestoreData,
   buildTasks,
   transformQuery,
+  parseSearchQuery,
 };
