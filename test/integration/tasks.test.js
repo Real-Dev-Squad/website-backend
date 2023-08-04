@@ -296,7 +296,7 @@ describe("Tasks", function () {
 
           expect(res).to.have.status(404);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("No tasks found");
+          expect(res.body.message).to.equal("No tasks found.");
           expect(res.body.tasks).to.be.a("array");
           expect(res.body.tasks).to.have.lengthOf(0);
           return done();
