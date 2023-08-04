@@ -38,6 +38,7 @@ const addOrUpdate = async (userData, userId = null) => {
         await userModel.doc(userId).set({
           ...user.data(),
           ...userData,
+          updated_at: Date.now(),
         });
       }
 
@@ -53,6 +54,7 @@ const addOrUpdate = async (userData, userId = null) => {
         isNewUser: false,
         userId: user.docs[0].id,
         incompleteUserDetails: user.docs[0].data().incompleteUserDetails,
+        updated_at: Date.now(),
       };
     }
 
@@ -65,7 +67,7 @@ const addOrUpdate = async (userData, userId = null) => {
     userData.roles = { archived: false, in_discord: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
-    return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true };
+    return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true, updated_at: Date.now() };
   } catch (err) {
     logger.error("Error in adding or updating user", err);
     throw err;

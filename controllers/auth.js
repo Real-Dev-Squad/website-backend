@@ -53,6 +53,8 @@ const githubAuthCallback = (req, res, next) => {
         github_id: user.username,
         github_display_name: user.displayName,
         github_created_at: Number((new Date(user._json.created_at).getTime() / 1000).toFixed(0)),
+        created_at: Date.now(),
+        updated_at: Date.now(),
       };
 
       const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);

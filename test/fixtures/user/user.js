@@ -329,5 +329,19 @@ module.exports = () => {
       twitter_id: "ramsingh123",
       linkedin_id: "ramsingh123",
     },
+    {
+      username: "sahsisunny",
+      first_name: "sunny",
+      last_name: "sahsi",
+      github_id: githubUserInfo[1].login,
+      github_display_name: githubUserInfo[1].name,
+      roles: {
+        member: true,
+        in_discord: true,
+      },
+      incompleteUserDetails: false,
+      updated_at: Date.now(),
+      created_at: Date.now(),
+    },
   ];
 };
