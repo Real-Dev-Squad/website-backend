@@ -1,5 +1,5 @@
 const sinon = require("sinon");
-const { validateJoinData } = require("./../../../middlewares/validators/user");
+const { validateJoinData, validateUsersPatchHandler } = require("./../../../middlewares/validators/user");
 const joinData = require("./../../fixtures/user/join");
 const { expect } = require("chai");
 
@@ -32,6 +32,56 @@ describe("Middleware | Validators | User", function () {
         expect(err).to.be.an.instanceOf(Error);
       });
       expect(nextSpy.calledOnce).to.be.equal(false);
+    });
+  });
+
+  describe("User validator for usersPatchHandler", function () {
+    it("should call the next for api archiveUsers", async function () {
+      const req = {};
+
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+
+      const next = sinon.spy();
+      await validateUsersPatchHandler(req, res, next);
+      expect(next.calledOnce).to.be.equal(true);
+    });
+
+    it("should call the next for api nonVerifiedDiscordUsers", async function () {
+      const req = {
+        body: {
+          action: "nonVerifiedDiscordUsers",
+        },
+      };
+
+      const res = {};
+
+      const next = sinon.spy();
+      await validateUsersPatchHandler(req, res, next);
+      expect(next.calledOnce).to.be.equal(true);
+    });
+
+    it("should stop the propagation of next", async function () {
+      const req = {
+        body: {
+          action: "",
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+
+      const next = sinon.spy();
+      await validateUsersPatchHandler(req, res, next).catch((error) => {
+        expect(error).to.be.an.instanceOf(Error);
+      });
+      expect(next.calledOnce).to.be.equal(false);
     });
   });
 });
