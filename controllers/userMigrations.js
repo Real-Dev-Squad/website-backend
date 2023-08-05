@@ -1,4 +1,5 @@
 const firestore = require("../utils/firestore");
+const userModel = firestore.collection("users");
 const userQuery = require("../models/userMigrations");
 const logger = require("../utils/logger");
 const { getRandomIndex } = require("../utils/helpers");
@@ -14,7 +15,7 @@ const MAX_TRANSACTION_WRITES = 499;
 
 const addDefaultColors = async (req, res) => {
   try {
-    const { usersArr, userModel } = await userQuery.addDefaultColors();
+    const { usersArr } = await userQuery.returnUsers();
 
     const batchArray = [];
     const users = [];
