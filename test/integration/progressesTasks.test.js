@@ -304,7 +304,7 @@ describe("Test Progress Updates API for Tasks", function () {
       taskId2 = taskObject2.taskId;
       const progressData1 = stubbedModelTaskProgressData(userId, taskId1, 1683626400000, 1683590400000); // 2023-05-09
       const progressData2 = stubbedModelTaskProgressData(userId, taskId1, 1683885600000, 1683849600000); // 2023-05-12
-      const progressData3 = stubbedModelTaskProgressData(userId, taskId1, 1684153600000, 1684153600000); // 2023-05-15
+      const progressData3 = stubbedModelTaskProgressData(userId, taskId1, 1684153600000, 1684108800000); // 2023-05-15
       await firestore.collection("progresses").doc("taskProgressDocument1").set(progressData1);
       await firestore.collection("progresses").doc("taskProgressDocument2").set(progressData2);
       await firestore.collection("progresses").doc("taskProgressDocument3").set(progressData3);
@@ -332,7 +332,7 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
-    it("Verifies the progress records for a task within the specified date range ignoring sunday", function (done) {
+    it("Verifies the progress records for a task within the specified date range ignoring non working day ( Sunday )", function (done) {
       chai
         .request(app)
         .get(`/progresses/range?taskId=${taskId1}&startDate=2023-05-09&endDate=2023-05-15`)
