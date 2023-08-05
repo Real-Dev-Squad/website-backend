@@ -304,8 +304,10 @@ describe("Test Progress Updates API for Tasks", function () {
       taskId2 = taskObject2.taskId;
       const progressData1 = stubbedModelTaskProgressData(userId, taskId1, 1683626400000, 1683590400000); // 2023-05-09
       const progressData2 = stubbedModelTaskProgressData(userId, taskId1, 1683885600000, 1683849600000); // 2023-05-12
+      const progressData3 = stubbedModelTaskProgressData(userId, taskId1, 1684153600000, 1684153600000); // 2023-05-15
       await firestore.collection("progresses").doc("taskProgressDocument1").set(progressData1);
       await firestore.collection("progresses").doc("taskProgressDocument2").set(progressData2);
+      await firestore.collection("progresses").doc("taskProgressDocument3").set(progressData3);
     });
 
     it("Verifies the progress records for a task within the specified date range.", function (done) {
@@ -326,6 +328,37 @@ describe("Test Progress Updates API for Tasks", function () {
           expect(res.body.data.progressRecords["2023-05-10"]).to.be.equal(false);
           expect(res.body.data.progressRecords["2023-05-11"]).to.be.equal(false);
           expect(res.body.data.progressRecords["2023-05-12"]).to.be.equal(true);
+          return done();
+        });
+    });
+
+    it("Verifies the progress records for a task within the specified date range ignoring sunday", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/range?taskId=${taskId1}&startDate=2023-05-09&endDate=2023-05-16`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body.data).to.be.an("object");
+          expect(res.body).to.have.keys(["message", "data"]);
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.data).to.have.keys(["startDate", "endDate", "progressRecords"]);
+          expect(res.body.data.startDate).to.be.equal("2023-05-09");
+          expect(res.body.data.endDate).to.be.equal("2023-05-12");
+          expect(res.body.data.progressRecords).to.have.key([
+            "2023-05-09",
+            "2023-05-10",
+            "2023-05-11",
+            "2023-05-12",
+            "2023-05-13",
+            "2023-05-15",
+          ]);
+          expect(res.body.data.progressRecords["2023-05-09"]).to.be.equal(true);
+          expect(res.body.data.progressRecords["2023-05-10"]).to.be.equal(false);
+          expect(res.body.data.progressRecords["2023-05-11"]).to.be.equal(false);
+          expect(res.body.data.progressRecords["2023-05-12"]).to.be.equal(false);
+          expect(res.body.data.progressRecords["2023-05-13"]).to.be.equal(false);
+          expect(res.body.data.progressRecords["2023-05-15"]).to.be.equal(true);
           return done();
         });
     });
