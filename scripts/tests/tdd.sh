@@ -18,7 +18,7 @@ export NODE_ENV='test'
 echo '\nStart firestore emulator and run tests during TDD only:\n'
 
 # Read config meanings here: https://github.com/istanbuljs/nyc#common-configuration-options
-firebase emulators:exec "nyc --check-coverage=true --all=false --skip-full=true --per-file=true mocha --watch $allPaths"
+firebase emulators:exec "nyc --check-coverage=true --all=false --skip-full=true  --recursive --per-file=true mocha --watch $allPaths"
 
 # Aim to achieve these results when you exit:
 # =============================== Coverage summary ===============================

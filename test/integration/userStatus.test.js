@@ -175,6 +175,13 @@ describe("UserStatus", function () {
         .send();
       expect(response3).to.have.status(200);
       expect(response3.body.message).to.equal("All User Status updated successfully.");
+      expect(response3.body.data).to.deep.equal({
+        usersCount: 1,
+        oooUsersAltered: 0,
+        oooUsersUnaltered: 0,
+        nonOooUsersAltered: 1,
+        nonOooUsersUnaltered: 0,
+      });
 
       // Checking the current status
       const response4 = await chai.request(app).get(`/users/status/self`).set("Cookie", `${cookieName}=${testUserJwt}`);
@@ -195,6 +202,13 @@ describe("UserStatus", function () {
         .send();
       expect(response5).to.have.status(200);
       expect(response5.body.message).to.equal("All User Status updated successfully.");
+      expect(response5.body.data).to.deep.equal({
+        usersCount: 1,
+        oooUsersAltered: 1,
+        oooUsersUnaltered: 0,
+        nonOooUsersAltered: 0,
+        nonOooUsersUnaltered: 0,
+      });
 
       const response6 = await chai.request(app).get(`/users/status/self`).set("Cookie", `${cookieName}=${testUserJwt}`);
       expect(response6).to.have.status(200);
@@ -236,6 +250,13 @@ describe("UserStatus", function () {
         .send();
       expect(response3).to.have.status(200);
       expect(response3.body.message).to.equal("All User Status updated successfully.");
+      expect(response3.body.data).to.deep.equal({
+        usersCount: 1,
+        oooUsersAltered: 0,
+        oooUsersUnaltered: 0,
+        nonOooUsersAltered: 1,
+        nonOooUsersUnaltered: 0,
+      });
 
       // Checking the current status
       const response4 = await chai.request(app).get(`/users/status/self`).set("Cookie", `${cookieName}=${testUserJwt}`);

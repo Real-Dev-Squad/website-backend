@@ -261,6 +261,46 @@ describe("Tasks", function () {
       expect(previousPageResponse.body).to.have.property("prev");
       expect(previousPageResponse.body.tasks).to.have.length(1);
     });
+    it("Should get tasks filtered by search term", function (done) {
+      const searchTerm = "task";
+      chai
+        .request(app)
+        .get("/tasks?q=searchTerm:task")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Filter tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+
+          const matchingTasks = res.body.tasks;
+          matchingTasks.forEach((task) => {
+            expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
+          });
+          expect(matchingTasks).to.have.length(3);
+
+          return done();
+        });
+    });
+    it("Should get tasks filtered by search term and handle no tasks found", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?q=searchTerm:random1`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("No tasks found.");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks).to.have.lengthOf(0);
+          return done();
+        });
+    });
   });
 
   describe("GET /tasks/:id/details", function () {
@@ -710,7 +750,7 @@ describe("Tasks", function () {
     });
 
     it("Should return Forbidden error if task is not assigned to self", async function () {
-      const { userId } = await addUser(userData[1]);
+      const { userId } = await addUser(userData[0]);
       const jwt = authService.generateAuthToken({ userId });
 
       const res = await chai.request(app).patch(`/tasks/self/${taskId1}`).set("cookie", `${cookieName}=${jwt}`);
