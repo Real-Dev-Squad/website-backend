@@ -18,7 +18,7 @@ const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
-describe.only("userColorMigrations", function () {
+describe("userColorMigrations", function () {
   let superUserId;
   let superUserAuthToken;
   let userId = "";
