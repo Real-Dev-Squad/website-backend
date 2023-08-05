@@ -40,7 +40,11 @@ describe("qrCodeAuth", function () {
         },
       };
 
-      const res = {};
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
 
       const nextSpy = Sinon.spy();
       await validateAuthStatus(req, res, nextSpy);
