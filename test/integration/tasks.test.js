@@ -211,6 +211,21 @@ describe("Tasks", function () {
         });
     });
 
+    it("Should get all overdue tasks GET /tasks", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?dev=true&status=overdue`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.tasks[0].id).to.be.oneOf([taskId, taskId1]);
+          return done();
+        });
+    });
+
     it("Should get tasks when correct query parameters are passed", function (done) {
       chai
         .request(app)
