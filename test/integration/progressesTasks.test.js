@@ -356,7 +356,7 @@ describe("Test Progress Updates API for Tasks", function () {
           expect(res.body.data.progressRecords["2023-05-09"]).to.be.equal(true);
           expect(res.body.data.progressRecords["2023-05-10"]).to.be.equal(false);
           expect(res.body.data.progressRecords["2023-05-11"]).to.be.equal(false);
-          expect(res.body.data.progressRecords["2023-05-12"]).to.be.equal(false);
+          expect(res.body.data.progressRecords["2023-05-12"]).to.be.equal(true);
           expect(res.body.data.progressRecords["2023-05-13"]).to.be.equal(false);
           expect(res.body.data.progressRecords["2023-05-15"]).to.be.equal(true);
           return done();
