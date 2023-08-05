@@ -3,6 +3,7 @@ const members = require("../models/members");
 const tasks = require("../models/tasks");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dataAccess = require("../services/dataAccessLayer");
+const { addLog } = require("../models/logs");
 /**
  * Fetches the data about our members
  *
@@ -82,18 +83,23 @@ const moveToMembers = async (req, res) => {
 const archiveMembers = async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await fetchUser({ username });
-    const userId = user.user.id;
+    const user = await dataAccess.retrieveUsers({ username });
     const superUserId = req.userData.id;
     const body = req.body;
+    const meta = {
+      userId: user?.user?.id,
+      superUserId: superUserId,
+      username: username,
+    };
     if (!body?.reason || /^\s*$/.test(body?.reason)) {
       return res.boom.badRequest("Reason is required");
     }
     if (user?.userExists) {
-      const successObject = await members.addArchiveRoleToMembers(userId, username, superUserId, body?.reason);
+      const successObject = await members.addArchiveRoleToMembers(user.user.id);
       if (successObject.isArchived) {
         return res.boom.badRequest("User is already archived");
       }
+      addLog("archiveDetails", meta, { body: body?.reason });
       return res.status(204).send();
     }
     return res.boom.notFound("User doesn't exist");

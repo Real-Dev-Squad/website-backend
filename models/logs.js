@@ -42,17 +42,17 @@ const fetchLogs = async (query, param) => {
       }
     });
 
-    const { limit, lastDocId, username } = query;
+    const { limit, lastDocId, userId } = query;
     let lastDoc;
     const limitDocuments = Number(limit);
 
     if (lastDocId) {
       lastDoc = await logsModel.doc(lastDocId).get();
     }
-    if (username) {
+    if (userId) {
       const logsSnapshot = await logsModel
         .where("type", "==", param)
-        .where("meta.username", "==", username)
+        .where("meta.userId", "==", userId)
         .orderBy("timestamp", "desc")
         .get();
       const logs = [];

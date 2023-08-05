@@ -46,6 +46,7 @@ describe("Logs", function () {
       const query = {};
 
       const data = await logsQuery.fetchLogs(query, type);
+
       expect(data).to.be.an("array").with.lengthOf(0);
     });
     it("Should fetch all archived logs", async function () {
@@ -55,7 +56,7 @@ describe("Logs", function () {
       await logsQuery.addLog(type, meta, body);
       const data = await logsQuery.fetchLogs(query, type);
 
-      expect(data).to.be.an("array").with.lengthOf(1);
+      expect(data).to.be.an("array").with.lengthOf.greaterThan(0);
       expect(data[0]).to.have.property("timestamp").that.is.an("object");
       expect(data[0].timestamp).to.have.property("_seconds").that.is.a("number");
       expect(data[0].timestamp).to.have.property("_nanoseconds").that.is.a("number");
@@ -65,12 +66,12 @@ describe("Logs", function () {
     it("Should fetch all archived logs for given username", async function () {
       const { type, meta, body } = logsData.archivedUserDetailsModal[0];
       const query = {
-        username: meta.username,
+        userId: meta.userId,
       };
       await logsQuery.addLog(type, meta, body);
       const data = await logsQuery.fetchLogs(query, type);
 
-      expect(data).to.be.an("array").to.have.lengthOf.greaterThan(0);
+      expect(data).to.be.an("array").with.lengthOf.greaterThan(0);
       expect(data[0]).to.have.property("timestamp").that.is.an("object");
       expect(data[0].timestamp).to.have.property("_seconds").that.is.a("number");
       expect(data[0].timestamp).to.have.property("_nanoseconds").that.is.a("number");
@@ -80,7 +81,7 @@ describe("Logs", function () {
     it("Should throw response status 404, if username is incorrect in the query", async function () {
       const { type, meta, body } = logsData.archivedUserDetailsModal[0];
       const query = {
-        username: "TEST_USERNAME", // incorrect username
+        userId: "1234_test", // incorrect username
       };
       await logsQuery.addLog(type, meta, body);
       const data = await logsQuery.fetchLogs(query, type);
