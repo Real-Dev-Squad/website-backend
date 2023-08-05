@@ -18,7 +18,7 @@ const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
-describe("userColorMigrations", function () {
+describe.only("userColorMigrations", function () {
   let superUserId;
   let superUserAuthToken;
   let userId = "";
@@ -34,12 +34,12 @@ describe("userColorMigrations", function () {
     await cleanDb();
   });
 
-  describe("PATCH /migrations/addDefaultColorProperty", function () {
+  describe("PATCH /migrations/userDefaultColor", function () {
     it("Should return 401 if user is not a super user", function (done) {
       const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
       chai
         .request(app)
-        .patch(`/migrations/addDefaultColorProperty`)
+        .patch(`/migrations/userDefaultColor`)
         .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
         .end((err, res) => {
           if (err) {
@@ -54,7 +54,7 @@ describe("userColorMigrations", function () {
     it("Should add default color property to all users,using authorized user (super_user)", function (done) {
       chai
         .request(app)
-        .patch(`/migrations/addDefaultColorProperty`)
+        .patch(`/migrations/userDefaultColor`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
