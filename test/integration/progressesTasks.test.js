@@ -124,9 +124,9 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
-    it("throw 404 if task progress is updated on a non working day (Sunday)", function (done) {
+    it("throw 400 if task progress is updated on a non working day (Sunday)", function (done) {
       // Set the current date to a Sunday (e.g., 2023-07-22) using sinon.
-      clock.setSystemTime(new Date(Date.UTC(2023, 6, 22, 6, 29)).getTime()); // 2nd May 2023 05:59 am IST
+      clock.setSystemTime(new Date(Date.UTC(2023, 6, 23, 4, 29)).getTime()); // 2nd May 2023 05:59 am IST
       chai
         .request(app)
         .post(`/progresses`)
