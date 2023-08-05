@@ -335,7 +335,7 @@ describe("Test Progress Updates API for Tasks", function () {
     it("Verifies the progress records for a task within the specified date range ignoring sunday", function (done) {
       chai
         .request(app)
-        .get(`/progresses/range?taskId=${taskId1}&startDate=2023-05-09&endDate=2023-05-16`)
+        .get(`/progresses/range?taskId=${taskId1}&startDate=2023-05-09&endDate=2023-05-15`)
         .end((err, res) => {
           if (err) return done(err);
           expect(res).to.have.status(200);
