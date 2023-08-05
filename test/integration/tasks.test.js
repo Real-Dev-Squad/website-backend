@@ -301,6 +301,23 @@ describe("Tasks", function () {
           return done();
         });
     });
+    it("Should return no task found when there is no searchterm", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?q=searchTerm:`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("No tasks found.");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks).to.have.lengthOf(0);
+          return done();
+        });
+    });
   });
 
   describe("GET /tasks/:id/details", function () {

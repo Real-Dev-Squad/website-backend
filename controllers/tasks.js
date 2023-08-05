@@ -142,6 +142,12 @@ const fetchTasks = async (req, res) => {
 
     if (queryString !== undefined) {
       const searchParams = parseSearchQuery(queryString);
+      if (!searchParams.searchTerm) {
+        return res.status(404).json({
+          message: "No tasks found.",
+          tasks: [],
+        });
+      }
       const filterTasks = await tasks.fetchTasks(searchParams.searchTerm);
       const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(filterTasks);
       if (tasksWithRdsAssigneeInfo.length === 0) {
