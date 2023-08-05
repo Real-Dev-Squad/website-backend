@@ -2,7 +2,7 @@ const passport = require("passport");
 const users = require("../models/users");
 const QrCodeAuthModel = require("../models/qrCodeAuth");
 const authService = require("../services/authService");
-const { SOMETHING_WENT_WRONG, DATA_ADDED_SUCCESSFULLY, BAD_REQUEST } = require("../constants/errorMessages");
+const { SOMETHING_WENT_WRONG, DATA_ADDED_SUCCESSFULLY } = require("../constants/errorMessages");
 
 /**
  * Fetches the user info from GitHub and authenticates User
@@ -86,10 +86,8 @@ const storeUserDeviceInfo = async (req, res) => {
 
     const userInfo = await QrCodeAuthModel.storeUserDeviceInfo(userJson);
 
-    if (!userInfo) {
-      return res.status(404).json({
-        message: BAD_REQUEST,
-      });
+    if (userInfo.userExists !== undefined && !userInfo.userExists) {
+      return res.boom.notFound("Document not found!");
     }
 
     return res.status(201).json({
