@@ -344,7 +344,7 @@ describe("Test Progress Updates API for Tasks", function () {
           expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
           expect(res.body.data).to.have.keys(["startDate", "endDate", "progressRecords"]);
           expect(res.body.data.startDate).to.be.equal("2023-05-09");
-          expect(res.body.data.endDate).to.be.equal("2023-05-12");
+          expect(res.body.data.endDate).to.be.equal("2023-05-15");
           expect(res.body.data.progressRecords).to.have.key([
             "2023-05-09",
             "2023-05-10",
