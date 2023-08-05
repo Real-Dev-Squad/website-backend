@@ -550,24 +550,24 @@ const getUsersWithOnboardingState = async (query) => {
   const range = Number(time.split("d")[0]);
   const { allUserStatus } = await getAllUserStatus(query);
   const allUsersWithOnboardingState = filterUsersWithOnboardingState(allUserStatus);
-  const updatedOnboardingUsersWithDate = [];
+  const onboardedUsersInRange = [];
   const filteredUsers = [];
   for (const user of allUsersWithOnboardingState) {
     const result = await userModel.doc(user.userId).get();
     filteredUsers.push(result.data());
   }
-  filteredUsers.forEach((element) => {
-    if (element.discordJoinedAt) {
-      const userDiscordJoinedDate = new Date(element.discordJoinedAt);
+  filteredUsers.forEach((user) => {
+    if (user.discordJoinedAt) {
+      const userDiscordJoinedDate = new Date(user.discordJoinedAt);
       const currentTimeStamp = new Date().getTime();
       const timeDifferenceInMilliseconds = currentTimeStamp - userDiscordJoinedDate.getTime();
       const currentAndUserJoinedDateDifference = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
       if (currentAndUserJoinedDateDifference > range) {
-        updatedOnboardingUsersWithDate.push(element);
+        onboardedUsersInRange.push(user);
       }
     }
   });
-  return updatedOnboardingUsersWithDate;
+  return onboardedUsersInRange;
 };
 /**
  * Fetch all users
