@@ -12,7 +12,6 @@ const { ALL_TASKS } = require("../constants/cacheKeys");
 router.get("/", getTasksValidator, cacheResponse({ invalidationKey: ALL_TASKS, expiry: 10 }), tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);
 router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasks);
-router.get("/overdue/current", authenticate, authorizeRoles([SUPERUSER]), tasks.currentOverdueTasks);
 router.post(
   "/",
   authenticate,
