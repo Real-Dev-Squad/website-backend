@@ -6,7 +6,7 @@ const walletConstants = require("../constants/wallets");
 
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
-const { updateUserStatus, getAllUserStatus } = require("../models/userStatus");
+const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem } = require("../utils/array");
 const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
@@ -19,7 +19,6 @@ const userStatusModel = firestore.collection("usersStatus");
 const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
-const { filterUsersWithOnboardingState } = require("../utils/userStatus");
 
 /**
  * Adds or updates the user data
@@ -546,13 +545,25 @@ const getUsersBasedOnFilter = async (query) => {
 };
 
 const getUsersWithOnboardingState = async (query) => {
-  const time = query.time;
-  const range = Number(time.split("d")[0]);
-  const { allUserStatus } = await getAllUserStatus(query);
-  const allUsersWithOnboardingState = filterUsersWithOnboardingState(allUserStatus);
+  const allUserStatus = [];
   const onboardedUsersInRange = [];
   const filteredUsers = [];
-  for (const user of allUsersWithOnboardingState) {
+
+  const time = query.time;
+  const range = Number(time.split("d")[0]);
+
+  const data = await userStatusModel.where("currentStatus.state", "==", query.state).get();
+  data.forEach((doc) => {
+    const currentUserStatus = {
+      id: doc.id,
+      userId: doc.data().userId,
+      currentStatus: doc.data().currentStatus,
+      monthlyHours: doc.data().monthlyHours,
+    };
+    allUserStatus.push(currentUserStatus);
+  });
+
+  for (const user of allUserStatus) {
     const result = await userModel.doc(user.userId).get();
     filteredUsers.push(result.data());
   }
