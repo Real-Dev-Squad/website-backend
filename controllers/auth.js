@@ -52,7 +52,7 @@ const githubAuthCallback = (req, res, next) => {
       userData = {
         github_id: user.username,
         github_display_name: user.displayName,
-        github_created_at: Number((new Date(user._json.created_at).getTime() / 1000).toFixed(0)),
+        github_created_at: Number(new Date(user._json.created_at).getTime()),
         created_at: Date.now(),
         updated_at: Date.now(),
       };
