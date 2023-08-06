@@ -343,5 +343,20 @@ module.exports = () => {
       updated_at: Date.now(),
       created_at: Date.now(),
     },
+    {
+      username: "ravikumar1002",
+      first_name: "ravi",
+      last_name: "kumar",
+      github_id: githubUserInfo[2].username,
+      github_display_name: githubUserInfo[2].displayName,
+      github_created_at: Number(new Date(githubUserInfo[2]._json.created_at).getTime()),
+      roles: {
+        member: false,
+        in_discord: true,
+      },
+      incompleteUserDetails: false,
+      updated_at: Date.now(),
+      created_at: Date.now(),
+    },
   ];
 };

@@ -102,6 +102,14 @@ describe("users", function () {
       expect(user).to.haveOwnProperty("updated_at");
       expect(userExists).to.equal(true);
     });
+
+    it("It should have github_created_at fields", async function () {
+      const userData = userDataArray[15];
+      await users.addOrUpdate(userData);
+      const githubUsername = "ravikumar1002";
+      const { user } = await users.fetchUser({ githubUsername });
+      expect(user).to.haveOwnProperty("github_created_at");
+    });
   });
 
   describe("user image verification", function () {
