@@ -170,6 +170,154 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("Should call paginated tasks when dev flag passed to GET /tasks is true", function (done) {
+      const fetchPaginatedUserStub = sinon.stub(tasks, "fetchPaginatedTasks");
+      chai
+        .request(app)
+        .get("/tasks?dev=true")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(fetchPaginatedUserStub.calledOnce).to.be.equal(true);
+
+          return done();
+        });
+    });
+
+    it("Should get all tasks filtered with status when passed to GET /tasks", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?dev=true&status=${TASK_STATUS.IN_PROGRESS}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          const tasksData = res.body.tasks ?? [];
+          tasksData.forEach((task) => {
+            expect(task.status).to.equal(TASK_STATUS.IN_PROGRESS);
+          });
+          return done();
+        });
+    });
+
+    it("Should get tasks when correct query parameters are passed", function (done) {
+      chai
+        .request(app)
+        .get("/tasks?dev=true&size=1&page=0")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          expect(res.body.tasks.length).to.be.equal(1);
+          return done();
+        });
+    });
+
+    it("Should get next and previous page results based returned by the links in the response", async function () {
+      const initialReq = `/tasks?size=1&dev=true`;
+      const response = await chai.request(app).get(initialReq);
+      expect(response).to.have.status(200);
+      expect(response.body).to.be.a("object");
+      expect(response.body.message).to.equal("Tasks returned successfully!");
+      expect(response.body).to.have.property("next");
+      expect(response.body).to.have.property("prev");
+      expect(response.body.tasks).to.have.length(1);
+
+      const nextPageLink = response.body.next;
+      const nextPageResponse = await chai.request(app).get(nextPageLink);
+
+      expect(nextPageResponse).to.have.status(200);
+      expect(nextPageResponse.body).to.be.a("object");
+      expect(nextPageResponse.body.message).to.equal("Tasks returned successfully!");
+      expect(nextPageResponse.body).to.have.property("next");
+      expect(nextPageResponse.body).to.have.property("prev");
+      expect(nextPageResponse.body.tasks).to.have.length(1);
+
+      const prevPageLink = nextPageResponse.body.prev;
+      const previousPageResponse = await chai.request(app).get(prevPageLink);
+
+      expect(previousPageResponse).to.have.status(200);
+      expect(previousPageResponse.body).to.be.a("object");
+      expect(previousPageResponse.body.message).to.equal("Tasks returned successfully!");
+      expect(previousPageResponse.body).to.have.property("next");
+      expect(previousPageResponse.body).to.have.property("prev");
+      expect(previousPageResponse.body.tasks).to.have.length(1);
+    });
+    it("Should get tasks filtered by search term", function (done) {
+      const searchTerm = "task";
+      chai
+        .request(app)
+        .get("/tasks?q=searchTerm:task")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Filter tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+
+          const matchingTasks = res.body.tasks;
+          matchingTasks.forEach((task) => {
+            expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
+          });
+          expect(matchingTasks).to.have.length(3);
+
+          return done();
+        });
+    });
+    it("Should get tasks filtered by search term and handle no tasks found", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?q=searchTerm:random1`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("No tasks found.");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks).to.have.lengthOf(0);
+          return done();
+        });
+    });
+    it("Should return no task found when there is no searchterm", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?q=searchTerm:`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("No tasks found.");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body.tasks).to.have.lengthOf(0);
+          return done();
+        });
+    });
   });
 
   describe("GET /tasks/:id/details", function () {
@@ -305,6 +453,74 @@ describe("Tasks", function () {
             return done(err);
           }
           expect(res).to.have.status(204);
+          return done();
+        });
+    });
+    it("Should update dependency", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId2 = (await tasks.updateTask(tasksData[5])).taskId;
+
+      const dependsOn = [taskId1, taskId2];
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ dependsOn });
+      expect(res).to.have.status(204);
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      expect(res2).to.have.status(200);
+      expect(res2.body.taskData.dependsOn).to.be.a("array");
+      res2.body.taskData.dependsOn.forEach((taskId) => {
+        expect(dependsOn).to.include(taskId);
+      });
+
+      return taskId;
+    });
+
+    it("Should return 400 if any of taskid is not exist", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
+      const dependsOn = ["taskId5", "taskId6", taskId1];
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ dependsOn });
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.equal("Invalid dependency");
+    });
+
+    it("Should update status when assignee pass as a payload", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "sagar" });
+      expect(res).to.have.status(204);
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      expect(res2).to.have.status(200);
+      expect(res2.body.taskData.assignee).to.be.equal("sagar");
+
+      expect(res2.body.taskData.status).to.be.equal(TASK_STATUS.ASSIGNED);
+
+      return taskId;
+    });
+    it("should check updated dependsOn", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("task returned successfully");
+          expect(res.body.taskData).to.be.a("object");
+          expect(res.body.taskData.dependsOn).to.be.a("array");
 
           return done();
         });
@@ -334,6 +550,25 @@ describe("Tasks", function () {
         .send({
           title: "new-title",
           status: "invalidStatus",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          return done();
+        });
+    });
+    it("Should return fail response if percent completed is < 0 or > 100", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/" + taskId1)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          status: TASK_STATUS.IN_REVIEW,
+          percentCompleted: 120,
         })
         .end((err, res) => {
           if (err) {
@@ -498,6 +733,23 @@ describe("Tasks", function () {
         });
     });
 
+    it("Should return fail response if percentage is < 0 or  > 100", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, percentCompleted: -10 })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          return done();
+        });
+    });
+
     it("Should return 404 if task doesnt exist", function (done) {
       chai
         .request(app)
@@ -515,7 +767,7 @@ describe("Tasks", function () {
     });
 
     it("Should return Forbidden error if task is not assigned to self", async function () {
-      const { userId } = await addUser(userData[1]);
+      const { userId } = await addUser(userData[0]);
       const jwt = authService.generateAuthToken({ userId });
 
       const res = await chai.request(app).patch(`/tasks/self/${taskId1}`).set("cookie", `${cookieName}=${jwt}`);

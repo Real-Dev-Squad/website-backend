@@ -9,7 +9,8 @@ module.exports = {
   enableFileLogs: false,
   // Console logs are set to avoid the winston error of no defined transports
   enableConsoleLogs: true,
-
+  discordUnverifiedRoleId: "1234567890",
+  discordDeveloperRoleId: "9876543210",
   githubOauth: {
     clientId: "clientId",
     clientSecret: "clientSecret",
@@ -146,6 +147,47 @@ module.exports = {
       "Ba+XMCP64pXPC3r1llhKRwIl+6UFn+QlpbxtgQjhbULnSbc7fw==\n" +
       "-----END RSA PRIVATE KEY-----",
     ttl: 60,
+  },
+
+  cronJobHandler: {
+    privateKey:
+      "-----BEGIN RSA PRIVATE KEY-----\n" +
+      "MIIEowIBAAKCAQEAqjkUS3EGyuh64eITS/n5MX7G4z5MIv99DNqZezqCSRD/QIXO\n" +
+      "1QtDrj/OKAB5a+4GAJSxIO8HgRFocdiKauxako3UagNSabiI+/H5zXjtnbPKwMBd\n" +
+      "CoJ3r1+OzyMT4zL+SVlIMHkxYbRgMYJvNTyie/rIpjcpQhaBJxyBkaT2Imy9luGC\n" +
+      "Rhd5wupx9+rhd8xOYu+hqSWfP4zIcEGCs86OXFFmNp6sqcQD1P15HkJtleodzcKg\n" +
+      "msqo8RTk8t+urdWIdoLFAugwqFE9jor8UxApwT5xr8c84VDfbPgc10V2XTda4SXa\n" +
+      "IRP7QY+9agGmZIYp0LWxUOhB37PNFDhUEw9dVwIDAQABAoIBAH9rJJ7oJz6B0WH+\n" +
+      "WZV4s6jyDiySOGnGNzQE+fh9LoNFHtyMjOt6eBoaFtZorHs2+/U5WHGfm01o23bE\n" +
+      "sbAh5hZn5kXI4MrUYG2/js7Yo3111OJ92+d/C9oRvJOe3Ucnp6L+GwR145oQbCUD\n" +
+      "Tv1ZuwL1EXciOVcIA3tkYjTEd54B8UTfEMpRMdlkPohYL96kizqbe6peG9hlLMXS\n" +
+      "AeVr2y0ueDR+fYte6TmejpfxnD16/PksMGH5ALHQ6AonCngvDO3mnGLaFuwHkRnY\n" +
+      "1vMkni+6J57MQz+GAWI7p1EKbEzl9Z+1a6NDxALabVxYuQFc5pa7wXr97/9SAC5x\n" +
+      "NvZ/EekCgYEA1CcCDXhi6ztK+BhnYCKZKR9GxP9CReNm9FVIB4cVGKduCuaJrcGk\n" +
+      "qKPSGkaMaJat23WDxr9GUhR1IThK+/dLg+Ud9GPvWN710LT+Wm9cuwuyPbyAet8J\n" +
+      "2G+IKbCsr62okI/XVBnfPrGA2tQZRMgia7lEz/ZKx/7oOpN/FyPpG+UCgYEAzWeV\n" +
+      "k12md1YIJcPHfVofsnqpy22PIhLJgN3LgM2aubPQoYg1LBwBwRWLU16zNLFhbsyx\n" +
+      "leMA3OsyLFzw7NmsCpXE7SB1nH0xFmTi/ONqiN4Hx0w+72kG3LLcVWDwqGF3zj+x\n" +
+      "v/75dYgWW1SeofwgkkDnmnqMuESnprojyRzk2IsCgYAb3lftrw/HeM17U7FYtpLK\n" +
+      "DRq9zA5HofynQgCpRHxn9a6F7gzN728S3BpAa14MaybBemlqFTxGkftk9sEa4jxg\n" +
+      "QhuyO+J4GSnPVcdH1/Mlev7aD0YNXfksHlKTr2qv1S8cdljB6ngiAy07EbuUBnpH\n" +
+      "DlpUuzTNmtWkxDVgs83uZQKBgQCbo+Cv4Gdxx2u3CelQL4kTGWUtct/hJrEvB2Db\n" +
+      "QW/7RKhSrb30pWgi4WtICdrqk3nLlij99RtDSqgi+23HWozFHIUyVMUphac7W8iv\n" +
+      "bLbd7LeiKUEK8d80Pgc8Xo8cV3aLfrH2VIK7rxmZrL3i6gPYLnwQDsowGj2a1TKm\n" +
+      "glFZTwKBgDr/Lf4P8V7s+RyIKea0AKMM9xAqbvZRdKFFNTq5SXUtVFi130F3ozHV\n" +
+      "o6x/R8X3QuyNeyZ8SI7eKJ+oo1jF97WgRWBiE66IHGziUZc4+gFAmHzdeZft0xtJ\n" +
+      "AIvluPVA3HOHFj4US3LMxbxDsPr+gkTpkVGIfK0rk8Za3dN3mZJw\n" +
+      "-----END RSA PRIVATE KEY-----",
+    publicKey:
+      "-----BEGIN PUBLIC KEY-----\n" +
+      "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqjkUS3EGyuh64eITS/n5\n" +
+      "MX7G4z5MIv99DNqZezqCSRD/QIXO1QtDrj/OKAB5a+4GAJSxIO8HgRFocdiKauxa\n" +
+      "ko3UagNSabiI+/H5zXjtnbPKwMBdCoJ3r1+OzyMT4zL+SVlIMHkxYbRgMYJvNTyi\n" +
+      "e/rIpjcpQhaBJxyBkaT2Imy9luGCRhd5wupx9+rhd8xOYu+hqSWfP4zIcEGCs86O\n" +
+      "XFFmNp6sqcQD1P15HkJtleodzcKgmsqo8RTk8t+urdWIdoLFAugwqFE9jor8UxAp\n" +
+      "wT5xr8c84VDfbPgc10V2XTda4SXaIRP7QY+9agGmZIYp0LWxUOhB37PNFDhUEw9d\n" +
+      "VwIDAQAB\n" +
+      "-----END PUBLIC KEY-----",
   },
 
   Event100ms: {
