@@ -108,7 +108,7 @@ const levelSpecificAccess = (user, level = AccessLevel.PUBLIC, role = null) => {
   if (level === AccessLevel.PUBLIC) {
     return user;
   }
-  if (!role.super_user) {
+  if (role === null || !role.super_user) {
     return "unauthorized";
   }
   return privilegedAccess(user, unFilteredData, level);
