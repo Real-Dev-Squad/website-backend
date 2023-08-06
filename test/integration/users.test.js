@@ -142,7 +142,6 @@ describe("Users", function () {
         });
     });
 
-
     it("Should return 400 for invalid status value", function (done) {
       chai
         .request(app)
@@ -167,7 +166,6 @@ describe("Users", function () {
           return done();
         });
     });
-
 
     it("Should return 400 if required roles is missing", function (done) {
       chai
