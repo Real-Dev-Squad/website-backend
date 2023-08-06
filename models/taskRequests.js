@@ -13,30 +13,64 @@ const userModel = require("./users");
 const fetchTaskRequests = async () => {
   const taskRequests = [];
 
-  const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
+  try {
+    const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
 
-  const taskPromises = [];
-  const userPromises = [];
+    const taskPromises = [];
+    const userPromises = [];
 
-  taskRequestsSnapshots.forEach((taskRequestsSnapshot) => {
-    const taskRequestData = taskRequestsSnapshot.data();
-    const { requestors } = taskRequestData;
+    taskRequestsSnapshots.forEach((taskRequestsSnapshot) => {
+      const taskRequestData = taskRequestsSnapshot.data();
+      taskRequestData.id = taskRequestsSnapshot.id;
+      taskRequestData.url = new URL(`/taskRequests/${taskRequestData.id}`, config.get("services.rdsUi.baseUrl"));
+      const { requestors } = taskRequestData;
 
-    taskPromises.push(tasksModel.fetchTask(taskRequestData.taskId));
-    userPromises.push(Promise.all(requestors.map((requestor) => userModel.fetchUser({ userId: requestor }))));
+      taskPromises.push(tasksModel.fetchTask(taskRequestData.taskId));
+      userPromises.push(Promise.all(requestors.map((requestor) => userModel.fetchUser({ userId: requestor }))));
 
-    taskRequests.push(taskRequestData);
-  });
+      taskRequests.push(taskRequestData);
+    });
 
-  const tasks = await Promise.all(taskPromises);
-  const users = await Promise.all(userPromises);
+    const tasks = await Promise.all(taskPromises);
+    const users = await Promise.all(userPromises);
 
-  taskRequests.forEach((taskRequest, index) => {
-    taskRequest.task = tasks[+index].taskData;
-    taskRequest.requestors = users[+index];
-  });
+    taskRequests.forEach((taskRequest, index) => {
+      taskRequest.task = tasks[+index].taskData;
+      taskRequest.requestors = users[+index];
+    });
+  } catch (err) {
+    logger.error("Error in updating task", err);
+  }
 
   return taskRequests;
+};
+
+/**
+ * Fetches task request by id
+ *
+ * @param taskRequestId { string }: id of task request
+ * @return Promise<{taskRequest: Object}>
+ */
+const fetchTaskRequestById = async (taskRequestId) => {
+  try {
+    const taskRequestSnapshot = await taskRequestsCollection.doc(taskRequestId).get();
+    const taskRequestData = taskRequestSnapshot.data();
+
+    if (taskRequestData) {
+      taskRequestData.id = taskRequestSnapshot.id;
+      taskRequestData.url = new URL(`/taskRequests/${taskRequestData.id}`, config.get("services.rdsUi.baseUrl"));
+    }
+    return {
+      taskRequestData,
+      taskRequestExists: true,
+    };
+  } catch (err) {
+    logger.error("Error in updating task", err);
+  }
+
+  return {
+    taskRequestExists: false,
+  };
 };
 
 /**
@@ -73,11 +107,12 @@ const addOrUpdate = async (taskId, userId) => {
       taskId,
     };
 
-    await taskRequestsCollection.add(newTaskRequest);
+    const newTaskRequestRef = await taskRequestsCollection.add(newTaskRequest);
 
     return {
       isCreate: true,
       taskRequest: newTaskRequest,
+      id: newTaskRequestRef.id,
     };
   } catch (err) {
     logger.error("Error in updating task", err);
@@ -117,6 +152,7 @@ const approveTaskRequest = async (taskRequestId, user) => {
 
 module.exports = {
   fetchTaskRequests,
+  fetchTaskRequestById,
   addOrUpdate,
   approveTaskRequest,
 };
