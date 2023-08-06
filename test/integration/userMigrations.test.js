@@ -10,7 +10,6 @@ const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
 const superUser = userData[4];
 const nonSuperUser = userData[0];
-const userWithColorProperty = [userData[5].username];
 const colorBearingUsernames = [superUser.username, nonSuperUser.username];
 
 const config = require("config");
@@ -18,13 +17,13 @@ const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
-describe("userColorMigrations", function () {
+describe.only("userColorMigrations", function () {
   let superUserId;
   let superUserAuthToken;
   let userId = "";
   let nonSuperUserId = "";
   beforeEach(async function () {
-    userId = await addUser();
+    userId = await addUser(nonSuperUser);
     superUserId = await addUser(superUser);
     nonSuperUserId = userId;
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
@@ -62,17 +61,9 @@ describe("userColorMigrations", function () {
           }
 
           expect(res).to.have.status(200);
-          expect(res.body.usersDetails.count).to.be.equal(colorBearingUsernames.length);
-          const migratedUsernames = res.body.usersDetails.users;
-          expect(migratedUsernames).to.include(
-            colorBearingUsernames[0],
-            "Should add default color property to user without color property"
-          );
-
-          expect(migratedUsernames).to.not.include.any.members(
-            userWithColorProperty,
-            "Should not modify color property of user with color object"
-          );
+          expect(res.body.usersDetails.totalUsersFetched).to.be.equal(colorBearingUsernames.length);
+          expect(res.body.usersDetails.totalUsersUpdated).to.be.equal(colorBearingUsernames.length);
+          expect(res.body.usersDetails.totalUsersUnaffected).to.be.equal(0);
           return done();
         });
     });

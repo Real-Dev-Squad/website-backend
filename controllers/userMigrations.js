@@ -1,7 +1,6 @@
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 const userQuery = require("../models/userMigrations");
-const logger = require("../utils/logger");
 const { getRandomIndex } = require("../utils/helpers");
 const USER_COLORS = 10;
 const MAX_TRANSACTION_WRITES = 499;
@@ -45,7 +44,11 @@ const addDefaultColors = async (req, res) => {
 
     return res.json({
       message: "User colors updated successfully!",
-      usersDetails: { count: totalCount, users },
+      usersDetails: {
+        totalUsersFetched: usersArr.length,
+        totalUsersUpdated: totalCount,
+        totalUsersUnaffected: usersArr.length - totalCount,
+      },
     });
   } catch (error) {
     logger.error(`Error adding default colors to users: ${error}`);
