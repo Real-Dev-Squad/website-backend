@@ -86,7 +86,7 @@ describe("Middleware | Validators | User", function () {
       });
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
-
+    
     it("Stops the propagation of the next if twitter_id is invalid", async function () {
       const req = {
         body: {
