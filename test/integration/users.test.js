@@ -255,7 +255,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Invalid Twitter ID. ID should not contain special character @",
+            message: "Invalid Twitter ID. ID should not contain special character @ or spaces",
           });
 
           return done();
@@ -280,7 +280,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Invalid Linkedin ID. ID should not contain special character @",
+            message: "Invalid Linkedin ID. ID should not contain special character @ or spaces",
           });
 
           return done();
@@ -305,7 +305,32 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Invalid Instagram ID. ID should not contain special character @",
+            message: "Invalid Instagram ID. ID should not contain special character @ or spaces",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 is space is included in the social ID", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          linkedin_id: "Linkedin 123",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Linkedin ID. ID should not contain special character @ or spaces",
           });
 
           return done();
