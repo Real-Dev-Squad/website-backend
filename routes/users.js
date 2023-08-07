@@ -17,6 +17,7 @@ router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
 router.get("/", userValidator.getUsers, users.getUsers);
 router.get("/self", authenticate, users.getSelfDetails);
 router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
+router.get("/generateusername", authenticate, users.getUsername);
 router.get("/chaincode", authenticate, users.generateChaincode);
 router.get("/search", userValidator.validateUserQueryParams, users.filterUsers);
 router.post("/tokens", authenticate, authorizeRoles([SUPERUSER]), users.removeTokens);

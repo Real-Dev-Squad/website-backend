@@ -195,6 +195,37 @@ const getUsernameAvailabilty = async (req, res) => {
   }
 };
 
+const getUsername = async (req, res) => {
+  try {
+    const { firstname, lastname, dev } = req.query;
+    if (dev) {
+      const baseUsername = `${firstname.toLowerCase()}-${lastname.toLowerCase()}`;
+      let newUsername = baseUsername;
+      let count = 1;
+
+      while (true) {
+        const existingUser = await dataAccess.retrieveUsers({ username: newUsername });
+        if (!existingUser) {
+          break;
+        }
+        newUsername = `${baseUsername}-${count}`;
+        count++;
+      }
+
+      return res.json({
+        username: newUsername,
+      });
+    } else {
+      return res.status(404).json({
+        message: "Data Not Found",
+      });
+    }
+  } catch (error) {
+    logger.error(`Error while checking user: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
 /**
  * Fetches the data about logged in user
  *
@@ -633,6 +664,7 @@ module.exports = {
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
+  getUsername,
   getSuggestedUsers,
   postUserPicture,
   updateUser,
