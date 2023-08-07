@@ -11,6 +11,7 @@ const {
   createUserStatusWithState,
   updateCurrentStatusToState,
   updateFutureStatusToState,
+  getNextDayTimeStamp,
 } = require("../../../utils/userStatus");
 
 describe("Task Based User Status Update Util Functions", function () {
@@ -282,6 +283,15 @@ describe("Task Based User Status Update Util Functions", function () {
         expect(error).to.be.an.instanceof(Error);
         expect(error.message).to.equal("error updating the future status.");
       }
+    });
+  });
+
+  describe("getNextDayTimeStamp", function () {
+    it("should return the correct timestamp for the next day", function () {
+      const inputTimestamp = new Date("2023-08-07T12:00:00Z").getTime();
+      const expectedTimestamp = new Date("2023-08-08T00:00:00Z").getTime();
+      const result = getNextDayTimeStamp(inputTimestamp);
+      expect(result).to.equal(expectedTimestamp);
     });
   });
 });
