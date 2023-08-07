@@ -204,8 +204,8 @@ const getUsername = async (req, res) => {
       let count = 1;
 
       while (true) {
-        const existingUser = await dataAccess.retrieveUsers({ username: newUsername });
-        if (!existingUser) {
+        const result = await dataAccess.retrieveUsers({ username: newUsername });
+        if (!result.userExists) {
           break;
         }
         newUsername = `${baseUsername}-${count}`;

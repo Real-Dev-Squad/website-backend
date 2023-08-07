@@ -719,6 +719,27 @@ describe("Users", function () {
     });
   });
 
+  describe("GET /users/generateusername", function () {
+    const firstname = "Ankur";
+    const lastname = "Narkhede";
+    it("Should return unique username when passing firstname and lastname", function (done) {
+      chai
+        .request(app)
+        .get(`/users/generateusername?firstname=${firstname}&lastname=${lastname}&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.username).to.equal("ankur-narkhede");
+
+          return done();
+        });
+    });
+  });
+
   describe("GET /users/:userId/intro", function () {
     beforeEach(async function () {
       await addJoinData(joinData(userId)[0]);
