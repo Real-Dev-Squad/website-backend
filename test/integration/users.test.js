@@ -230,7 +230,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Username must be lowercase only hypen, numbers are allowed",
+            message: "Username must be lowercase only hypen, numbers are allowed.",
           });
 
           return done();
