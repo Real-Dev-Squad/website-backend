@@ -261,6 +261,31 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should return 400 for invalid Linkedin ID", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          twitter_id: "invalid@linkedin_id",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Linkedin ID. ID should not contain special character @",
+          });
+
+          return done();
+        });
+    });
   });
 
   describe("GET /users", function () {
