@@ -92,12 +92,18 @@ const removeSensitiveInfo = function (obj) {
 };
 
 const privilegedAccess = (user, data, level) => {
-  user.email = data.email;
+  if ("email" in data) {
+    user.email = data.email;
+  }
   if (level === ACCESS_LEVEL.PRIVATE || level === ACCESS_LEVEL.CONFIDENTIAL) {
-    user.phone = data.phone;
+    if ("phone" in data) {
+      user.phone = data.phone;
+    }
   }
   if (level === ACCESS_LEVEL.CONFIDENTIAL) {
-    user.chaincode = data.chaincode;
+    if ("chaincode" in data) {
+      user.chaincode = data.chaincode;
+    }
   }
   return user;
 };
@@ -111,6 +117,7 @@ const levelSpecificAccess = (user, level = ACCESS_LEVEL.PUBLIC, role = null) => 
   if (role === null || !role.super_user) {
     return "unauthorized";
   }
+
   return privilegedAccess(user, unFilteredData, level);
 };
 

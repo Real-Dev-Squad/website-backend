@@ -151,23 +151,36 @@ describe("Data Access Layer", function () {
   });
 
   describe("privilegedAccess", function () {
-    const data = {
-      email: "test@test.com",
-      phone: "1234567890",
-      chaincode: "abc7896",
-    };
-    it("should set only email for INTERNAL access", function () {
+    it("should return default user fields if email does not exist in userdata and INTERNAL access requested", function () {
+      const data = {};
+      const result = privilegedAccess(userData[11], data, ACCESS_LEVEL.INTERNAL);
+      expect(result.email).to.equal(undefined);
+    });
+
+    it("should set only email for INTERNAL access if email exists", function () {
+      const data = {
+        email: "test@test.com",
+      };
       const result = privilegedAccess(userData[11], data, ACCESS_LEVEL.INTERNAL);
       expect(result).to.have.property("email");
     });
 
-    it("should set email and phone for PRIVATE access", function () {
+    it("should set email and phone for PRIVATE access if email and phone exists", function () {
+      const data = {
+        email: "test@test.com",
+        phone: "1234567890",
+      };
       const result = privilegedAccess(userData[11], data, ACCESS_LEVEL.PRIVATE);
       expect(result).to.have.property("email");
       expect(result).to.have.property("phone");
     });
 
-    it("should set email, phone, and chaincode for CONFIDENTIAL access", function () {
+    it("should set email, phone, and chaincode for CONFIDENTIAL access if email,phone and chaincode exists", function () {
+      const data = {
+        email: "test@test.com",
+        phone: "1234567890",
+        chaincode: "abc7896",
+      };
       const result = privilegedAccess(userData[11], data, ACCESS_LEVEL.CONFIDENTIAL);
       expect(result).to.have.property("email");
       expect(result).to.have.property("phone");
@@ -189,13 +202,31 @@ describe("Data Access Layer", function () {
       expect(result).to.equal("unauthorized");
     });
 
+    it("should call privilegedAccess for INTERNAL level and super_user role", function () {
+      userData[11].email = "test@test.com";
+      const role = { super_user: true };
+      const result = levelSpecificAccess(userData[11], ACCESS_LEVEL.INTERNAL, role);
+      expect(result).to.have.property("email");
+    });
+
     it("should call privilegedAccess for PRIVATE level and super_user role", function () {
-      userData.email = "test@test.com";
-      userData.phone = "8976509889";
+      userData[11].email = "test@test.com";
+      userData[11].phone = "8976509889";
       const role = { super_user: true };
       const user = levelSpecificAccess(userData[11], ACCESS_LEVEL.PRIVATE, role);
       expect(user).to.have.property("email");
       expect(user).to.have.property("phone");
+    });
+
+    it("should call privilegedAccess for CONFIDENTIAL level and super_user role", function () {
+      userData[11].email = "test@test.com";
+      userData[11].phone = "8976509889";
+      userData[11].chaincode = "1234567";
+      const role = { super_user: true };
+      const user = levelSpecificAccess(userData[11], ACCESS_LEVEL.CONFIDENTIAL, role);
+      expect(user).to.have.property("email");
+      expect(user).to.have.property("phone");
+      expect(user).to.have.property("chaincode");
     });
   });
 });
