@@ -131,9 +131,48 @@ const addPeerToEvent = async (peerData) => {
   }
 };
 
+const kickoutPeer = async ({ eventId, peerId }) => {
+  try {
+    const batch = firestore.batch();
+
+    const peerRef = peerModel.doc(peerId);
+    const peerSnapshot = await peerRef.get();
+
+    if (!peerSnapshot.exists) {
+      throw new Error("Peer not found");
+    }
+
+    const peerData = peerSnapshot.data();
+    const joinedEvents = peerData.joinedEvents;
+
+    const eventIndex = joinedEvents.findIndex((event) => event.event_id === eventId);
+    if (eventIndex === -1) {
+      throw new Error("Peer is not part of the specified event");
+    }
+
+    joinedEvents[eventIndex].left_at = new Date();
+
+    batch.update(peerRef, { joinedEvents });
+
+    const eventRef = eventModel.doc(eventId);
+    batch.update(eventRef, {
+      peers: Firestore.FieldValue.arrayRemove(peerId),
+    });
+
+    await batch.commit();
+
+    const updatedPeerSnapshot = await peerRef.get();
+    return updatedPeerSnapshot.data();
+  } catch (error) {
+    logger.error("Error in removing peer from the event.", error);
+    throw error;
+  }
+};
+
 module.exports = {
   createEvent,
   updateEvent,
   endActiveEvent,
   addPeerToEvent,
+  kickoutPeer,
 };

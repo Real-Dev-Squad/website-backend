@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable camelcase */
 const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS } = require("../constants/events");
 const { EventTokenService, EventAPIService } = require("../services");
@@ -225,6 +226,28 @@ const addPeerToEvent = async (req, res) => {
   }
 };
 
+const kickoutPeer = async (req, res) => {
+  const { id } = req.params;
+  const payload = {
+    peer_id: req.body.peerId,
+    reason: req.body.reason,
+  };
+
+  try {
+    await apiService.post(`/active-rooms/${id}/remove-peers`, payload);
+    await eventQuery.kickoutPeer({ eventId: id, peerId: payload.peer_id });
+    return res.status(200).json({
+      message: `Peer is kicked out from the event`,
+    });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Couldn't kickout peer from the event. Please try again later",
+    });
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -233,4 +256,5 @@ module.exports = {
   updateEvent,
   endActiveEvent,
   addPeerToEvent,
+  kickoutPeer,
 };

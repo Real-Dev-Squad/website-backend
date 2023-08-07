@@ -122,6 +122,27 @@ const addPeerToEvent = async (req, res, next) => {
   }
 };
 
+const kickoutPeer = async (req, res, next) => {
+  const { id } = req.params;
+  const { peerId, reason } = req.body;
+
+  const schema = joi.object({
+    peerId: joi.string().required(),
+    reason: joi.string().required(),
+  });
+
+  const validationOptions = { abortEarly: false };
+
+  try {
+    await schema.validateAsync({ id, peerId, reason }, validationOptions);
+
+    next();
+  } catch (error) {
+    logger.error(`Error while removing a peer from the event: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -130,4 +151,5 @@ module.exports = {
   updateEvent,
   endActiveEvent,
   addPeerToEvent,
+  kickoutPeer,
 };
