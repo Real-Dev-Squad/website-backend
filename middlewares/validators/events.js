@@ -102,9 +102,10 @@ const endActiveEvent = async (req, res, next) => {
 
 const addPeerToEvent = async (req, res, next) => {
   const { id } = req.params;
-  const { name, role, joinedAt } = req.body;
+  const { peerId, name, role, joinedAt } = req.body;
 
   const schema = joi.object({
+    peerId: joi.string().required(),
     name: joi.string().required(),
     id: joi.string().required(),
     role: joi.string().required(),
@@ -114,7 +115,7 @@ const addPeerToEvent = async (req, res, next) => {
   const validationOptions = { abortEarly: false };
 
   try {
-    await schema.validateAsync({ name, id, role, joinedAt }, validationOptions);
+    await schema.validateAsync({ peerId, name, id, role, joinedAt }, validationOptions);
     next();
   } catch (error) {
     logger.error(`Error while adding a peer to the event: ${error}`);
@@ -127,6 +128,7 @@ const kickoutPeer = async (req, res, next) => {
   const { peerId, reason } = req.body;
 
   const schema = joi.object({
+    id: joi.string().required(),
     peerId: joi.string().required(),
     reason: joi.string().required(),
   });
@@ -135,7 +137,6 @@ const kickoutPeer = async (req, res, next) => {
 
   try {
     await schema.validateAsync({ id, peerId, reason }, validationOptions);
-
     next();
   } catch (error) {
     logger.error(`Error while removing a peer from the event: ${error}`);

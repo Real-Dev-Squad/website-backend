@@ -85,14 +85,13 @@ const addPeerToEvent = async (peerData) => {
   try {
     const batch = firestore.batch();
 
-    const peerQuerySnapshot = await peerModel.where("name", "==", peerData.name).limit(1).get();
-    let peerRef;
+    const peerRef = peerModel.doc(peerData.peerId);
+    const peerDocSnapshot = await peerRef.get();
 
-    if (peerQuerySnapshot.empty) {
+    if (!peerDocSnapshot.exists) {
       // If the peer document doesn't exist, create a new one
-      peerRef = peerModel.doc();
       const peerDocData = {
-        id: peerRef.id,
+        peerId: peerData.peerId,
         name: peerData.name,
         joinedEvents: [
           {
@@ -105,8 +104,6 @@ const addPeerToEvent = async (peerData) => {
       batch.set(peerRef, peerDocData);
     } else {
       // If the peer document exists, update the joinedEvents array
-      const doc = peerQuerySnapshot.docs[0];
-      peerRef = doc.ref;
       batch.update(peerRef, {
         joinedEvents: Firestore.FieldValue.arrayUnion({
           event_id: peerData.eventId,
@@ -123,7 +120,6 @@ const addPeerToEvent = async (peerData) => {
 
     await batch.commit();
 
-    const peerDocSnapshot = await peerRef.get();
     return peerDocSnapshot.data();
   } catch (error) {
     logger.error("Error in adding peer to the event", error);
@@ -131,10 +127,8 @@ const addPeerToEvent = async (peerData) => {
   }
 };
 
-const kickoutPeer = async ({ eventId, peerId }) => {
+const kickoutPeer = async ({ eventId, peerId, reason }) => {
   try {
-    const batch = firestore.batch();
-
     const peerRef = peerModel.doc(peerId);
     const peerSnapshot = await peerRef.get();
 
@@ -150,16 +144,11 @@ const kickoutPeer = async ({ eventId, peerId }) => {
       throw new Error("Peer is not part of the specified event");
     }
 
-    joinedEvents[eventIndex].left_at = new Date();
+    const updatedJoinedEvents = joinedEvents.map((event, index) =>
+      index === eventIndex ? { ...event, left_at: new Date(), reason: reason, isKickedout: true } : event
+    );
 
-    batch.update(peerRef, { joinedEvents });
-
-    const eventRef = eventModel.doc(eventId);
-    batch.update(eventRef, {
-      peers: Firestore.FieldValue.arrayRemove(peerId),
-    });
-
-    await batch.commit();
+    await peerRef.update({ joinedEvents: updatedJoinedEvents });
 
     const updatedPeerSnapshot = await peerRef.get();
     return updatedPeerSnapshot.data();

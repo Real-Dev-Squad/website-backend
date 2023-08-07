@@ -208,6 +208,7 @@ const endActiveEvent = async (req, res) => {
 const addPeerToEvent = async (req, res) => {
   try {
     const data = await eventQuery.addPeerToEvent({
+      peerId: req.body.peerId,
       name: req.body.name,
       role: req.body.role,
       joinedAt: req.body.joinedAt,
@@ -235,7 +236,7 @@ const kickoutPeer = async (req, res) => {
 
   try {
     await apiService.post(`/active-rooms/${id}/remove-peers`, payload);
-    await eventQuery.kickoutPeer({ eventId: id, peerId: payload.peer_id });
+    await eventQuery.kickoutPeer({ eventId: id, peerId: payload.peer_id, reason: req.body.reason });
     return res.status(200).json({
       message: `Peer is kicked out from the event`,
     });
