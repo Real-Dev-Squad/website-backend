@@ -339,7 +339,7 @@ module.exports = () => {
         githubAccessToken: "githubAccessToken",
       },
       roles: {
-        member: false,
+        member: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
