@@ -119,6 +119,29 @@ describe("Users", function () {
         });
     });
 
+    it("Should update the user roles", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          roles: {
+            archived: false,
+            in_discord: false,
+            developer: true,
+          },
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+
+          return done();
+        });
+    });
+
     it("Should return 400 for invalid status value", function (done) {
       chai
         .request(app)
@@ -139,6 +162,51 @@ describe("Users", function () {
             error: "Bad Request",
             message: '"status" must be one of [ooo, idle, active, onboarding]',
           });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 if required roles is missing", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          roles: {
+            in_discord: false,
+            developer: true,
+          },
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+
+          return done();
+        });
+    });
+
+    it("Should return 400 if invalid roles", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          roles: {
+            archived: "false",
+            in_discord: false,
+            developer: true,
+          },
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
 
           return done();
         });
@@ -1553,7 +1621,7 @@ describe("Users", function () {
     });
   });
 
-  describe("PATCH /users/remove-tokens", function () {
+  describe("POST /users/tokens", function () {
     before(async function () {
       await addOrUpdate(userData[0]);
       await addOrUpdate(userData[1]);
@@ -1566,7 +1634,7 @@ describe("Users", function () {
     it("should remove all the users with token field", function (done) {
       chai
         .request(app)
-        .patch("/users/remove-tokens")
+        .post("/users/tokens")
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {

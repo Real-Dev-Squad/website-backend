@@ -157,8 +157,16 @@ const updateUserStatus = async (userId, newStatusData) => {
  */
 
 const updateAllUserStatus = async () => {
+  const summary = {
+    usersCount: 0,
+    oooUsersAltered: 0,
+    oooUsersUnaltered: 0,
+    nonOooUsersAltered: 0,
+    nonOooUsersUnaltered: 0,
+  };
   try {
     const userStatusDocs = await userStatusModel.where("futureStatus.state", "in", ["ACTIVE", "IDLE", "OOO"]).get();
+    summary.usersCount = userStatusDocs._size;
     const batch = firestore.batch();
     const today = new Date().getTime();
     userStatusDocs.forEach(async (document) => {
@@ -170,15 +178,23 @@ const updateAllUserStatus = async () => {
       const { state: futureState } = futureStatus;
       if (futureState === "ACTIVE" || futureState === "IDLE") {
         if (today >= futureStatus.from) {
+          // OOO period is over and we need to update their current status
           newStatusData.currentStatus = { ...futureStatus, until: "", updatedAt: today };
-          newStatusData.futureStatus = {};
+          delete newStatusData.futureStatus;
           toUpdate = !toUpdate;
+          summary.oooUsersAltered++;
+        } else {
+          summary.oooUsersUnaltered++;
         }
       } else {
+        // futureState is OOO
         if (today > futureStatus.until) {
-          newStatusData.futureStatus = {};
+          // the OOO period is over
+          delete newStatusData.futureStatus;
           toUpdate = !toUpdate;
+          summary.nonOooUsersAltered++;
         } else if (today <= doc.futureStatus.until && today >= doc.futureStatus.from) {
+          // the current date i.e today lies in between the from and until so we need to swap the status
           let newCurrentStatus = {};
           let newFutureStatus = {};
           newCurrentStatus = { ...futureStatus, updatedAt: today };
@@ -188,6 +204,9 @@ const updateAllUserStatus = async () => {
           newStatusData.currentStatus = newCurrentStatus;
           newStatusData.futureStatus = newFutureStatus;
           toUpdate = !toUpdate;
+          summary.nonOooUsersAltered++;
+        } else {
+          summary.nonOooUsersUnaltered++;
         }
       }
       if (toUpdate) {
@@ -200,13 +219,12 @@ const updateAllUserStatus = async () => {
       );
     }
     await batch.commit();
-    return { status: 204, message: "User Status updated Successfully." };
+    return summary;
   } catch (error) {
     logger.error(`error in updating User Status Documents ${error}`);
     return { status: 500, message: "User Status couldn't be updated Successfully." };
   }
 };
-
 /**
  * Updates the user status based on a new task assignment.
  * @param {string} userId - The ID of the user.

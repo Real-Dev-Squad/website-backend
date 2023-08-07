@@ -58,10 +58,9 @@ describe("Task Requests", function () {
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
-        await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
-      it("should fetch taskRequests", function (done) {
+      it("should fetch 404 when taskRequests are empty", function (done) {
         chai
           .request(app)
           .get("/taskRequests")
@@ -71,13 +70,30 @@ describe("Task Requests", function () {
               return done(err);
             }
 
+            expect(res).to.have.status(404);
+            return done();
+          });
+      });
+
+      it("should fetch taskRequests", async function () {
+        await taskRequestsModel.addOrUpdate(taskId, userId);
+
+        chai
+          .request(app)
+          .get("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .then(function (err, res) {
+            if (err) {
+              return err;
+            }
+
             expect(res).to.have.status(200);
             expect(res.body.message).to.equal("Task requests returned successfully");
             expect(res.body.data).to.be.a("Array");
             expect(res.body.data.length).to.equal(1);
             expect(res.body.data[0]).to.have.property("requestors");
             expect(res.body.data[0].requestors.length).to.equal(1);
-            return done();
+            return res;
           });
       });
     });
@@ -98,6 +114,83 @@ describe("Task Requests", function () {
         chai
           .request(app)
           .get("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(401);
+            return done();
+          });
+      });
+    });
+  });
+
+  describe("GET /taskRequest/:id - fetches task request by id", function () {
+    describe("When the user is super user", function () {
+      let taskRequestId;
+      before(async function () {
+        superUserId = await addUser(superUser);
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
+        jwt = authService.generateAuthToken({ userId: superUserId });
+
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+        taskRequestId = (await taskRequestsModel.addOrUpdate(taskId, userId)).id;
+      });
+
+      it("should fetch the task request", function (done) {
+        chai
+          .request(app)
+          .get(`/taskRequests/${taskRequestId}`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.be.equal("Task request returned successfully");
+            expect(res.body.data).to.be.a("object");
+            return done();
+          });
+      });
+
+      it("should return 404 if the resource is not found", function (done) {
+        sinon.stub(taskRequestsModel, "fetchTaskRequestById").callsFake(() => []);
+
+        chai
+          .request(app)
+          .get(`/taskRequests/taskRequestId`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(404);
+            expect(res.body.message).to.be.equal("Task request not found");
+            return done();
+          });
+      });
+    });
+
+    describe("When the user is not a super user", function () {
+      before(async function () {
+        userId = await addUser(member);
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
+        jwt = authService.generateAuthToken({ userId });
+
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+
+        await userStatusModel.updateUserStatus(userId, idleUserStatus);
+        await taskRequestsModel.addOrUpdate(taskId, userId);
+      });
+
+      it("should return 401 status code", function (done) {
+        chai
+          .request(app)
+          .get(`/taskRequests/taskrequstid`)
           .set("cookie", `${cookieName}=${jwt}`)
           .end((err, res) => {
             if (err) {
