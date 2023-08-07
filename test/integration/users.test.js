@@ -268,7 +268,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          twitter_id: "invalid@linkedin_id",
+          linkedin_id: "invalid@linkedin_id",
         })
         .end((err, res) => {
           if (err) {
