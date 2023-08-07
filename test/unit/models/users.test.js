@@ -104,9 +104,9 @@ describe("users", function () {
     });
 
     it("It should have github_created_at fields", async function () {
-      const userData = userDataArray[15];
+      const userData = userDataArray[0];
       await users.addOrUpdate(userData);
-      const githubUsername = "ravikumar1002";
+      const githubUsername = "ankur";
       const { user } = await users.fetchUser({ githubUsername });
       expect(user).to.haveOwnProperty("github_created_at");
     });
