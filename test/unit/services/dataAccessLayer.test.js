@@ -14,7 +14,7 @@ const {
   retreiveFilteredUsers,
   privilegedAccess,
   levelSpecificAccess,
-  AccessLevel,
+  ACCESS_LEVEL,
 } = require("../../../services/dataAccessLayer");
 
 const userData = require("../../fixtures/user/user")();
@@ -51,10 +51,10 @@ describe("Data Access Layer", function () {
       fetchUserStub.returns(Promise.resolve({ users: [userData[12]] }));
       const result = await retrieveUsers({ usernames: [userData[12].username] });
       removeSensitiveInfo(userData[12]);
-      result.forEach((element) => {
-        expect(element).to.deep.equal(userData[12]);
+      result.forEach((user) => {
+        expect(user).to.deep.equal(userData[12]);
         USER_SENSITIVE_DATA.forEach((key) => {
-          expect(element).to.not.have.property(key);
+          expect(user).to.not.have.property(key);
         });
       });
     });
@@ -65,10 +65,10 @@ describe("Data Access Layer", function () {
       const query = { page: 1 };
       const result = await retrieveUsers({ query });
       removeSensitiveInfo(userData[12]);
-      result.users.forEach((element) => {
-        expect(element).to.deep.equal(userData[12]);
+      result.users.forEach((user) => {
+        expect(user).to.deep.equal(userData[12]);
         USER_SENSITIVE_DATA.forEach((key) => {
-          expect(element).to.not.have.property(key);
+          expect(user).to.not.have.property(key);
         });
       });
     });
@@ -88,10 +88,10 @@ describe("Data Access Layer", function () {
       const fetchUserStub = sinon.stub(userQuery, "getDiscordUsers");
       fetchUserStub.returns(Promise.resolve([userData[12]]));
       const result = await retrieveDiscordUsers();
-      result.forEach((element) => {
-        expect(element).to.deep.equal(userData[12]);
+      result.forEach((user) => {
+        expect(user).to.deep.equal(userData[12]);
         USER_SENSITIVE_DATA.forEach((key) => {
-          expect(element).to.not.have.property(key);
+          expect(user).to.not.have.property(key);
         });
       });
     });
@@ -103,10 +103,10 @@ describe("Data Access Layer", function () {
       fetchUserStub.returns(Promise.resolve([userData[12]]));
       const query = { showArchived: true };
       const result = await retrieveUsersWithRole(query);
-      result.forEach((element) => {
-        expect(element).to.deep.equal(userData[12]);
+      result.forEach((user) => {
+        expect(user).to.deep.equal(userData[12]);
         USER_SENSITIVE_DATA.forEach((key) => {
-          expect(element).to.not.have.property(key);
+          expect(user).to.not.have.property(key);
         });
       });
     });
@@ -117,10 +117,10 @@ describe("Data Access Layer", function () {
       const fetchUserStub = sinon.stub(members, "fetchUsers");
       fetchUserStub.returns(Promise.resolve([userData[12]]));
       const result = await retrieveMembers();
-      result.forEach((element) => {
-        expect(element).to.deep.equal(userData[12]);
+      result.forEach((user) => {
+        expect(user).to.deep.equal(userData[12]);
         USER_SENSITIVE_DATA.forEach((key) => {
-          expect(element).to.not.have.property(key);
+          expect(user).to.not.have.property(key);
         });
       });
     });
@@ -132,10 +132,10 @@ describe("Data Access Layer", function () {
       fetchUserStub.returns(Promise.resolve([userData[12]]));
       const query = { state: "ACTIVE" };
       const result = await retreiveFilteredUsers(query);
-      result.forEach((element) => {
-        expect(element).to.deep.equal(userData[12]);
+      result.forEach((user) => {
+        expect(user).to.deep.equal(userData[12]);
         USER_SENSITIVE_DATA.forEach((key) => {
-          expect(element).to.not.have.property(key);
+          expect(user).to.not.have.property(key);
         });
       });
     });
@@ -157,18 +157,18 @@ describe("Data Access Layer", function () {
       chaincode: "abc7896",
     };
     it("should set only email for INTERNAL access", function () {
-      const result = privilegedAccess(userData[11], data, AccessLevel.INTERNAL);
+      const result = privilegedAccess(userData[11], data, ACCESS_LEVEL.INTERNAL);
       expect(result).to.have.property("email");
     });
 
     it("should set email and phone for PRIVATE access", function () {
-      const result = privilegedAccess(userData[11], data, AccessLevel.PRIVATE);
+      const result = privilegedAccess(userData[11], data, ACCESS_LEVEL.PRIVATE);
       expect(result).to.have.property("email");
       expect(result).to.have.property("phone");
     });
 
     it("should set email, phone, and chaincode for CONFIDENTIAL access", function () {
-      const result = privilegedAccess(userData[11], data, AccessLevel.CONFIDENTIAL);
+      const result = privilegedAccess(userData[11], data, ACCESS_LEVEL.CONFIDENTIAL);
       expect(result).to.have.property("email");
       expect(result).to.have.property("phone");
       expect(result).to.have.property("chaincode");
@@ -177,7 +177,7 @@ describe("Data Access Layer", function () {
 
   describe("levelSpecificAccess", function () {
     it("should return the user object for PUBLIC level after removing all sensitive info", function () {
-      const result = levelSpecificAccess(userData[12], AccessLevel.PUBLIC);
+      const result = levelSpecificAccess(userData[12], ACCESS_LEVEL.PUBLIC);
       USER_SENSITIVE_DATA.forEach((key) => {
         expect(result).to.not.have.property(key);
       });
@@ -185,7 +185,7 @@ describe("Data Access Layer", function () {
 
     it('should return "unauthorized" for non-superuser role', function () {
       const unauthorizedRole = { role: { super_user: false } };
-      const result = levelSpecificAccess(userData[12], AccessLevel.PRIVATE, unauthorizedRole);
+      const result = levelSpecificAccess(userData[12], ACCESS_LEVEL.PRIVATE, unauthorizedRole);
       expect(result).to.equal("unauthorized");
     });
 
@@ -193,7 +193,7 @@ describe("Data Access Layer", function () {
       userData.email = "test@test.com";
       userData.phone = "8976509889";
       const role = { super_user: true };
-      const user = levelSpecificAccess(userData[11], AccessLevel.PRIVATE, role);
+      const user = levelSpecificAccess(userData[11], ACCESS_LEVEL.PRIVATE, role);
       expect(user).to.have.property("email");
       expect(user).to.have.property("phone");
     });

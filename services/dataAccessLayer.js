@@ -1,7 +1,7 @@
 const userQuery = require("../models/users");
 const members = require("../models/members");
 const { USER_SENSITIVE_DATA } = require("../constants/users");
-const AccessLevel = {
+const ACCESS_LEVEL = {
   PUBLIC: "public",
   INTERNAL: "internal",
   PRIVATE: "private",
@@ -14,7 +14,7 @@ const retrieveUsers = async ({
   usernames = null,
   query = null,
   userdata,
-  level = AccessLevel.PUBLIC,
+  level = ACCESS_LEVEL.PUBLIC,
   role = null,
 }) => {
   if (id || username) {
@@ -30,16 +30,16 @@ const retrieveUsers = async ({
   } else if (usernames) {
     const { users } = await userQuery.fetchUsers(usernames);
     const result = [];
-    users.forEach((element) => {
-      const user = levelSpecificAccess(element, level, role);
+    users.forEach((userdata) => {
+      const user = levelSpecificAccess(userdata, level, role);
       result.push(user);
     });
     return result;
   } else if (query) {
     const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(query);
     const users = [];
-    allUsers.forEach((element) => {
-      const user = levelSpecificAccess(element, level, role);
+    allUsers.forEach((userdata) => {
+      const user = levelSpecificAccess(userdata, level, role);
       users.push(user);
     });
     return { users, nextId, prevId };
@@ -49,36 +49,36 @@ const retrieveUsers = async ({
   }
 };
 
-const retrieveDiscordUsers = async (level = AccessLevel.PUBLIC, role = null) => {
+const retrieveDiscordUsers = async (level = ACCESS_LEVEL.PUBLIC, role = null) => {
   const users = await userQuery.getDiscordUsers();
-  const userdata = [];
-  users.forEach((element) => {
-    const user = levelSpecificAccess(element, level, role);
-    userdata.push(user);
+  const usersData = [];
+  users.forEach((userdata) => {
+    const user = levelSpecificAccess(userdata, level, role);
+    usersData.push(user);
   });
-  return userdata;
+  return usersData;
 };
 
 const retreiveFilteredUsers = async (query) => {
   const users = await userQuery.getUsersBasedOnFilter(query);
-  users.forEach((element) => {
-    removeSensitiveInfo(element);
+  users.forEach((userdata) => {
+    removeSensitiveInfo(userdata);
   });
   return users;
 };
 
 const retrieveMembers = async (query) => {
   const allUsers = await members.fetchUsers(query);
-  allUsers.forEach((element) => {
-    removeSensitiveInfo(element);
+  allUsers.forEach((userdata) => {
+    removeSensitiveInfo(userdata);
   });
   return allUsers;
 };
 
 const retrieveUsersWithRole = async (role) => {
   const users = await members.fetchUsersWithRole(role);
-  users.forEach((element) => {
-    removeSensitiveInfo(element);
+  users.forEach((userdata) => {
+    removeSensitiveInfo(userdata);
   });
   return users;
 };
@@ -93,19 +93,19 @@ const removeSensitiveInfo = function (obj) {
 
 const privilegedAccess = (user, data, level) => {
   user.email = data.email;
-  if (level === AccessLevel.PRIVATE || level === AccessLevel.CONFIDENTIAL) {
+  if (level === ACCESS_LEVEL.PRIVATE || level === ACCESS_LEVEL.CONFIDENTIAL) {
     user.phone = data.phone;
   }
-  if (level === AccessLevel.CONFIDENTIAL) {
+  if (level === ACCESS_LEVEL.CONFIDENTIAL) {
     user.chaincode = data.chaincode;
   }
   return user;
 };
 
-const levelSpecificAccess = (user, level = AccessLevel.PUBLIC, role = null) => {
+const levelSpecificAccess = (user, level = ACCESS_LEVEL.PUBLIC, role = null) => {
   const unFilteredData = JSON.parse(JSON.stringify(user));
   removeSensitiveInfo(user);
-  if (level === AccessLevel.PUBLIC) {
+  if (level === ACCESS_LEVEL.PUBLIC) {
     return user;
   }
   if (role === null || !role.super_user) {
@@ -123,5 +123,5 @@ module.exports = {
   retreiveFilteredUsers,
   privilegedAccess,
   levelSpecificAccess,
-  AccessLevel,
+  ACCESS_LEVEL,
 };
