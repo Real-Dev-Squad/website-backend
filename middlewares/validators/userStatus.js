@@ -3,14 +3,7 @@ const { userState, CANCEL_OOO } = require("../../constants/userStatus");
 const threeDaysInMilliseconds = 172800000;
 
 const validateUserStatusData = async (todaysTime, req, res, next) => {
-  // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
-  const { userStatusFlag } = req.query;
-  const isUserStatusEnabled = userStatusFlag === "true";
-  let validUserStates = [userState.OOO, userState.ONBOARDING, userState.IDLE, userState.ACTIVE];
-
-  if (isUserStatusEnabled) {
-    validUserStates = [userState.OOO, userState.ONBOARDING];
-  }
+  const validUserStates = [userState.OOO, userState.ONBOARDING];
 
   const statusSchema = Joi.object({
     currentStatus: Joi.object().keys({
