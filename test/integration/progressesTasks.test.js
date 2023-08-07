@@ -136,7 +136,6 @@ describe("Test Progress Updates API for Tasks", function () {
           clock.restore(); // Restore the original clock after the request is made.
           if (err) return done(err);
           expect(res).to.have.status(400);
-          expect(res.body).to.have.key("message");
           expect(res.body.message).to.be.equal("Progress document cannot be created on non working days (Sundays)");
           return done();
         });

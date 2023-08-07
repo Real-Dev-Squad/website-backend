@@ -1,7 +1,14 @@
 const joi = require("joi");
-const { VALID_PROGRESS_TYPES } = require("../../constants/progresses");
+const { VALID_PROGRESS_TYPES, RESPONSE_MESSAGES } = require("../../constants/progresses");
 
 const validateCreateProgressRecords = async (req, res, next) => {
+  // Check if the request is being made on a Sunday
+  const today = new Date();
+  if (today.getDay() === 0) {
+    // Sunday corresponds to day index 0
+    res.boom.badRequest(RESPONSE_MESSAGES.PROGRESS_DOCUMENT_NON_WORKING_DAYS);
+  }
+
   const baseSchema = joi
     .object()
     .strict()

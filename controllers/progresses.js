@@ -6,11 +6,7 @@ const {
   getProgressByDate,
 } = require("../models/progresses");
 const { RESPONSE_MESSAGES, INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
-const {
-  PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
-  PROGRESS_DOCUMENT_CREATED_SUCCEEDED,
-  PROGRESS_DOCUMENT_NON_WORKING_DAYS,
-} = RESPONSE_MESSAGES;
+const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEEDED } = RESPONSE_MESSAGES;
 
 /**
  * @typedef {Object} ProgressRequestBody
@@ -52,12 +48,6 @@ const createProgress = async (req, res) => {
     body: { type },
   } = req;
   try {
-    const date = new Date();
-    if (date.getDay() === 0) {
-      return res.status(400).json({
-        message: PROGRESS_DOCUMENT_NON_WORKING_DAYS,
-      });
-    }
     const data = await createProgressDocument({ ...req.body, userId: req.userData.id });
     return res.status(201).json({
       data,
