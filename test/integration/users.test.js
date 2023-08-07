@@ -286,6 +286,31 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should return 400 for invalid instagram ID", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          instagram_id: "invalid@instagram_id",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Instagram ID. ID should not contain special character @",
+          });
+
+          return done();
+        });
+    });
   });
 
   describe("GET /users", function () {

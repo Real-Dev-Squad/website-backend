@@ -29,17 +29,17 @@ const updateUser = async (req, res, next) => {
       linkedin_id: joi
         .string()
         .optional()
-        .regex(/^[^@]*$/)
+        .regex(/^[^@\s]*$/)
         .message("Invalid Linkedin ID. ID should not contain special character @"),
       twitter_id: joi
         .string()
         .optional()
-        .regex(/^[^@]*$/)
+        .regex(/^[^@\s]*$/)
         .message("Invalid Twitter ID. ID should not contain special character @"),
       instagram_id: joi
         .string()
         .optional()
-        .regex(/^[^@]*$/)
+        .regex(/^[^@\s]*$/)
         .message("Invalid Instagram ID. ID should not contain special character @"),
       website: joi.string().optional(),
       status: joi
