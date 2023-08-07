@@ -207,6 +207,7 @@ const endActiveEvent = async (req, res) => {
 const addPeerToEvent = async (req, res) => {
   try {
     const data = await eventQuery.addPeerToEvent({
+      peerId: req.body.peerId,
       name: req.body.name,
       role: req.body.role,
       joinedAt: req.body.joinedAt,
