@@ -218,7 +218,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          username: "InvalidUser-name@",
+          username: "InvalidUser-name",
         })
         .end((err, res) => {
           if (err) {

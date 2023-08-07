@@ -17,7 +17,7 @@ const updateUser = async (req, res, next) => {
         .string()
         .optional()
         .regex(/^[a-z0-9-]+$/)
-        .message("Username must be lowercase only hypen, numbers are allowed"),
+        .message("Username must be lowercase only hypen, numbers are allowed."),
       first_name: joi.string().optional(),
       last_name: joi.string().optional(),
       yoe: joi.number().min(0).optional(),
