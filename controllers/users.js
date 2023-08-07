@@ -309,7 +309,9 @@ const verifyUserImage = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
-
+const sampleFunc = async (req, res) => {
+  return res.json({ message: "I m working!!!" });
+};
 const markUnverified = async (req, res) => {
   try {
     const [usersInRdsDiscordServer, allRdsLoggedInUsers] = await Promise.all([getDiscordMembers(), fetchAllUsers()]);
@@ -651,4 +653,6 @@ module.exports = {
   markUnverified,
   removeTokens,
   updateRoles,
+  // updateUsername
+  sampleFunc,
 };
