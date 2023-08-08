@@ -216,7 +216,7 @@ const addPeerToEvent = async (req, res) => {
     });
     return res.status(200).json({
       data,
-      message: `Selected Participant is removed from event`,
+      message: `Selected participant is removed from event`,
     });
   } catch (error) {
     logger.error({ error });
