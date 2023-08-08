@@ -248,7 +248,7 @@ const kickoutPeer = async (req, res) => {
     await apiService.post(`/active-rooms/${id}/remove-peers`, payload);
     await eventQuery.kickoutPeer({ eventId: id, peerId: payload.peer_id, reason: req.body.reason });
     return res.status(200).json({
-      message: `Peer is kicked out from the event`,
+      message: `Selected Participant is removed from event.`,
     });
   } catch (error) {
     logger.error({ error });
