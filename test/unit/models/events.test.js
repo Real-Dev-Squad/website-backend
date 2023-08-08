@@ -114,4 +114,68 @@ describe("Events", function () {
       expect(data.joinedEvents[0].role).to.equal(peerData.role);
     });
   });
+
+  describe("kickoutPeer", function () {
+    it("should kick out a peer from an event", async function () {
+      const docRef = await eventModel.add(eventData);
+
+      const peerData = {
+        peerId: "peer123",
+        name: "TestPeer",
+        eventId: docRef.id,
+        role: "participant",
+        joinedAt: new Date(),
+      };
+
+      await eventQuery.addPeerToEvent(peerData);
+
+      const reason = "test reason";
+      const kickedOutPeer = await eventQuery.kickoutPeer({
+        eventId: peerData.eventId,
+        peerId: peerData.peerId,
+        reason,
+      });
+
+      expect(kickedOutPeer.joinedEvents[0].isKickedout).to.equal(true);
+      expect(kickedOutPeer.joinedEvents[0].reason).to.equal(reason);
+
+      const leftAtDate = kickedOutPeer.joinedEvents[0].left_at.toDate();
+      expect(leftAtDate).to.be.an.instanceOf(Date);
+    });
+
+    it("should throw an error if the peer is not found", async function () {
+      const peerId = "nonExistentPeer";
+      const eventId = "event456";
+      const reason = "test reason";
+
+      try {
+        await eventQuery.kickoutPeer({ eventId, peerId, reason });
+      } catch (error) {
+        expect(error.message).to.equal("Peer not found");
+      }
+    });
+
+    it("should throw an error if the peer is not part of the specified event", async function () {
+      const docRef = await eventModel.add(eventData);
+
+      const peerData = {
+        peerId: "peer123",
+        name: "TestPeer",
+        eventId: docRef.id,
+        role: "participant",
+        joinedAt: new Date(),
+      };
+
+      await eventQuery.addPeerToEvent(peerData);
+
+      const nonExistentEventId = "nonExistentEvent";
+      const reason = "test reason";
+
+      try {
+        await eventQuery.kickoutPeer({ eventId: nonExistentEventId, peerId: peerData.peerId, reason });
+      } catch (error) {
+        expect(error.message).to.equal("Peer is not part of the specified event");
+      }
+    });
+  });
 });
