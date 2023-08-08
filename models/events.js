@@ -120,7 +120,8 @@ const addPeerToEvent = async (peerData) => {
 
     await batch.commit();
 
-    return peerDocSnapshot.data();
+    const updatedPeerSnapshot = await peerRef.get();
+    return updatedPeerSnapshot.data();
   } catch (error) {
     logger.error("Error in adding peer to the event", error);
     throw error;

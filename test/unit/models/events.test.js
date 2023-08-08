@@ -69,6 +69,7 @@ describe("Events", function () {
       const docRef = await eventModel.add(eventData);
 
       const peerData = {
+        peerId: "someid",
         name: "NonExistingPeer",
         eventId: docRef.id,
         role: "participant",
@@ -77,7 +78,7 @@ describe("Events", function () {
 
       const result = await eventQuery.addPeerToEvent(peerData);
 
-      const docSnapshot = await peerModel.doc(result.id).get();
+      const docSnapshot = await peerModel.doc(result.peerId).get();
       const data = docSnapshot.data();
 
       expect(data.name).to.equal(peerData.name);
@@ -90,20 +91,22 @@ describe("Events", function () {
       const docRef = await eventModel.add(eventData);
 
       const peerData = {
+        peerId: "someid",
         name: "ExistingPeer",
         eventId: docRef.id,
         role: "participant",
         joinedAt: new Date(),
       };
 
-      const existingPeerDoc = await peerModel.add({
+      await peerModel.add({
+        peerId: peerData.peerId,
         name: peerData.name,
         joinedEvents: [],
       });
 
       await eventQuery.addPeerToEvent(peerData);
 
-      const docSnapshot = await peerModel.doc(existingPeerDoc.id).get();
+      const docSnapshot = await peerModel.doc(peerData.peerId).get();
       const data = docSnapshot.data();
 
       expect(data.joinedEvents).to.have.lengthOf(1);
