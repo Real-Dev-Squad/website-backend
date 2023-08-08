@@ -139,7 +139,7 @@ const kickoutPeer = async (req, res, next) => {
     await schema.validateAsync({ id, peerId, reason }, validationOptions);
     next();
   } catch (error) {
-    logger.error(`Error while removing a peer from the event: ${error}`);
+    logger.error(`We encountered some error while removing selected Participant from event: ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };
