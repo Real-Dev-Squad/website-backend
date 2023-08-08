@@ -63,6 +63,7 @@ module.exports = () => {
       github_id: "cartmanishere",
       linkedin_id: "pranav-gajjewar",
       twitter_id: "PGajjewar",
+      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567891",
       email: "pgajjewar@gmail.com",
       roles: {
