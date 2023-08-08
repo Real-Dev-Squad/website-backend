@@ -153,7 +153,7 @@ const kickoutPeer = async ({ eventId, peerId, reason }) => {
 
     const eventIndex = joinedEvents.findIndex((event) => event.event_id === eventId);
     if (eventIndex === -1) {
-      throw new Error("Participants is not part of the specified event.");
+      throw new Error("Participant is not part of the specified event.");
     }
 
     const updatedJoinedEvents = joinedEvents.map((event, index) =>
