@@ -127,6 +127,17 @@ const addPeerToEvent = async (peerData) => {
   }
 };
 
+/**
+ * Removes a peer from an event and marks them as kicked out in the Firestore database.
+ * @async
+ * @function
+ * @param {Object} params - The parameters for kicking out the peer.
+ * @param {string} params.eventId - The unique identifier of the event from which the peer is being kicked out.
+ * @param {string} params.peerId - The unique identifier of the peer being kicked out.
+ * @param {string} params.reason - The reason for kicking out the peer from the event.
+ * @returns {Promise<Object>} The updated data of the kicked-out peer.
+ * @throws {Error} If the peer is not found or is not part of the specified event.
+ */
 const kickoutPeer = async ({ eventId, peerId, reason }) => {
   try {
     const peerRef = peerModel.doc(peerId);

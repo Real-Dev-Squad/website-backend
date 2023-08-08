@@ -227,6 +227,16 @@ const addPeerToEvent = async (req, res) => {
   }
 };
 
+/**
+ * Kicks out a peer from an event.
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with a success message if the peer is successfully kicked out.
+ * @throws {Object} The JSON response with an error message if an error occurred while kicking out the peer.
+ */
 const kickoutPeer = async (req, res) => {
   const { id } = req.params;
   const payload = {
