@@ -551,7 +551,6 @@ const getUsersWithOnboardingState = async (query) => {
 
   const time = query.time;
   const range = Number(time.split("d")[0]);
-
   const data = await userStatusModel.where("currentStatus.state", "==", query.state).get();
   data.forEach((doc) => {
     const currentUserStatus = {

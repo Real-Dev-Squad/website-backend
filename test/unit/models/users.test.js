@@ -11,7 +11,9 @@ const cleanDb = require("../../utils/cleanDb");
 const users = require("../../../models/users");
 const firestore = require("../../../utils/firestore");
 const { userPhotoVerificationData, newUserPhotoVerificationData } = require("../../fixtures/user/photo-verification");
+const { allUserStatus, usersData, allUserStatusWithOnBoardingStatus } = require("../../fixtures/userStatus/userStatus");
 const userModel = firestore.collection("users");
+const userStatusModel = firestore.collection("userStatus");
 const joinModel = firestore.collection("applicants");
 const userDataArray = require("../../fixtures/user/user")();
 const joinData = require("../../fixtures/user/join")();
@@ -277,6 +279,41 @@ describe("users", function () {
       await users.getUsersByRole(32389434).catch((err) => {
         expect(err).to.be.instanceOf(Error);
       });
+    });
+  });
+  describe("getUsersBasedOnFilter", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      const userStatusPromises = [];
+      for (const user of usersData) {
+        addUsersPromises.push(await userModel.add(user));
+      }
+      for (const element of allUserStatus) {
+        userStatusPromises.push(await userStatusModel.add(element));
+      }
+      await Promise.all([...addUsersPromises, ...userStatusPromises]);
+
+      const allUserDocs = await userModel.get();
+      allUserDocs.forEach(function (doc) {
+        // console.log("doc.data", doc.data());
+      });
+
+      const allStatusDocs = await userStatusModel.get();
+      allStatusDocs.forEach(function (doc) {
+        // console.log("doc.data", doc.data());
+      });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("should render users with onboarding state and time as 31days", async function () {
+      const query = {
+        state: "ONBOARDING",
+        time: "31d",
+      };
+      const result = await users.getUsersBasedOnFilter(query);
+      expect(result).to.deep.equal(allUserStatusWithOnBoardingStatus);
     });
   });
 });
