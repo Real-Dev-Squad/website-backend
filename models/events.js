@@ -145,7 +145,7 @@ const kickoutPeer = async ({ eventId, peerId, reason }) => {
     const peerSnapshot = await peerRef.get();
 
     if (!peerSnapshot.exists) {
-      throw new Error("Peer not found");
+      throw new Error("Participant not found");
     }
 
     const peerData = peerSnapshot.data();
