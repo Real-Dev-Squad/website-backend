@@ -415,4 +415,58 @@ describe("events", function () {
         });
     });
   });
+
+  describe("PATCH /events/:id/peers/kickout", function () {
+    let service;
+
+    afterEach(function () {
+      service.restore();
+      sinon.restore();
+    });
+
+    it("returns a success message when the request is successful", function (done) {
+      const payload = {
+        peerId: "peer123",
+        reason: "Kicked out for a reason",
+      };
+
+      service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "peer remove request submitted" });
+
+      sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Peer is kicked out from the event" });
+
+      chai
+        .request(app)
+        .patch(`/events/${event1Data.room_id}/peers/kickout`)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(payload)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(200);
+          expect(response.body.message).to.be.a("string");
+          expect(response.body.message).to.equal("Peer is kicked out from the event");
+
+          return done();
+        });
+    });
+
+    it("should return unauthorized error if user is not authenticated", function (done) {
+      chai
+        .request(app)
+        .patch(`/events/${event1Data.room_id}/peers/kickout`)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(401);
+          expect(response.body.error).to.be.equal("Unauthorized");
+          expect(response.body.message).to.be.equal("Unauthenticated User");
+
+          return done();
+        });
+    });
+  });
 });
