@@ -33,12 +33,12 @@ describe("userColorMigrations", function () {
     await cleanDb();
   });
 
-  describe("PATCH /migrations/userDefaultColor", function () {
+  describe("PATCH /migrations/user-default-color", function () {
     it("Should return 401 if user is not a super user", function (done) {
       const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
       chai
         .request(app)
-        .patch(`/migrations/userDefaultColor`)
+        .patch(`/migrations/user-default-color`)
         .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
         .end((err, res) => {
           if (err) {
@@ -53,7 +53,7 @@ describe("userColorMigrations", function () {
     it("Should add default color property to all users,using authorized user (super_user)", function (done) {
       chai
         .request(app)
-        .patch(`/migrations/userDefaultColor`)
+        .patch(`/migrations/user-default-color`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
