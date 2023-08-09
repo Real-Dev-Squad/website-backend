@@ -201,20 +201,16 @@ const getUsername = async (req, res) => {
     if (dev) {
       const baseUsername = `${firstname.toLowerCase()}-${lastname.toLowerCase()}`;
       let newUsername = baseUsername;
-      let count = 1;
 
-      while (true) {
+      for (let count = 1; ; count++) {
         const result = await dataAccess.retrieveUsers({ username: newUsername });
         if (!result.userExists) {
-          break;
+          return res.json({
+            username: newUsername,
+          });
         }
         newUsername = `${baseUsername}-${count}`;
-        count++;
       }
-
-      return res.json({
-        username: newUsername,
-      });
     } else {
       return res.status(404).json({
         message: "Data Not Found",
