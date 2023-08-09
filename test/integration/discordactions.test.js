@@ -131,7 +131,7 @@ describe("Discord actions", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
           // Verify presence of specific properties in each group
-          const expectedProps = ["roleid", "rolename", "count", "firstName", "lastName", "image"];
+          const expectedProps = ["roleid", "rolename", "memberCount", "firstName", "lastName", "image"];
           res.body.groups.forEach((group) => {
             expect(group).to.include.all.keys(expectedProps);
           });

@@ -136,7 +136,7 @@ const getNumberOfMemberForGroups = async (groups = []) => {
 
     return groups.map((group) => ({
       ...group,
-      count: roleCount[group.roleid] || 0,
+      memberCount: roleCount[group.roleid] || 0,
     }));
   } catch (err) {
     logger.error("Error while counting members for each group", err);

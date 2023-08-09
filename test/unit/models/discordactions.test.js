@@ -271,12 +271,12 @@ describe("discordactions", function () {
       expect(result.length).to.equal(0);
     });
 
-    it("should return group details with count details ", async function () {
+    it("should return group details with memberCount details ", async function () {
       const result = await getNumberOfMemberForGroups(groupData);
       expect(result).to.deep.equal([
-        { rolename: groupData[0].rolename, roleid: 1, count: 3 },
-        { rolename: groupData[1].rolename, roleid: 2, count: 1 },
-        { rolename: groupData[2].rolename, roleid: 3, count: 0 },
+        { rolename: groupData[0].rolename, roleid: 1, memberCount: 3 },
+        { rolename: groupData[1].rolename, roleid: 2, memberCount: 1 },
+        { rolename: groupData[2].rolename, roleid: 3, memberCount: 0 },
       ]);
     });
   });
