@@ -4,5 +4,5 @@
  */
 
 module.exports = () => {
-  return { an: "an", AN: "AN", null: "", mu: "mu", number23: 23 };
+  return { an: "an", AN: "AN", null: "", mu: "mu", number23: 23, Ta: "Ta" };
 };

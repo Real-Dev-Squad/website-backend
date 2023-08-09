@@ -814,6 +814,7 @@ describe("Users", function () {
     beforeEach(async function () {
       await addOrUpdate(userData[0]);
       await addOrUpdate(userData[7]);
+      await addOrUpdate({ ...userData[9], username: "Tarun" });
     });
 
     afterEach(async function () {
@@ -911,7 +912,28 @@ describe("Users", function () {
         });
     });
 
-    it("should return", function () {});
+    it("should match the query with username irrespective of the query", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .query({ search: searchParamValues.Ta })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.be.equal(1);
+          res.body.users.forEach((user) => {
+            expect(user.username.slice(0, 2)).to.equal(`${searchParamValues.Ta}`);
+          });
+          return done();
+        });
+    });
   });
 
   describe("PUT /users/self/intro", function () {
