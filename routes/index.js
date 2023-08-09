@@ -30,5 +30,6 @@ app.use("/discord-actions", require("./discordactions.js"));
 app.use("/issues", require("./issues.js"));
 app.use("/progresses", require("./progresses.js"));
 app.use("/monitor", require("./monitor.js"));
+app.use("/applications", require("./applications.js"))
 
 module.exports = app;
