@@ -74,89 +74,6 @@ const activeStatus = {
   },
 };
 
-const usersData = [
-  {
-    id: 0,
-    discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
-    first_name: "Mayank",
-    last_name: "Kumar",
-  },
-  {
-    id: 1,
-    discordJoinedAt: "2023-03-24T01:47:34.488000+00:00",
-    first_name: "Rohan",
-    last_name: "Kumar",
-  },
-  {
-    id: 2,
-    discordJoinedAt: "2023-07-04T01:47:34.488000+00:00",
-    first_name: "Raj",
-    last_name: "Kumar",
-  },
-];
-
-const allUserStatus = [
-  {
-    id: 1,
-    userId: "WxmZvzkPO5R6Fv1BjKdn",
-    currentStatus: {
-      until: "",
-      updatedAt: 1690243200000,
-      from: 1687737600000,
-      state: "ONBOARDING",
-    },
-  },
-  {
-    id: 2,
-    userId: "dKmOiIfCb8oWS6qryrSQ",
-    currentStatus: {
-      from: "1690633905",
-      state: "ONBOARDING",
-      updatedAt: "1690633905",
-    },
-  },
-  {
-    id: 3,
-    userId: "si9xTbdk93jrouu3SZGg",
-    currentStatus: {
-      from: "1690633905",
-      state: "ACTIVE",
-      updatedAt: "1690633905",
-    },
-  },
-];
-
-const allUserStatusWithOnBoardingStatus = [
-  {
-    id: 1,
-    currentStatus: {
-      until: "",
-      updatedAt: 1690243200000,
-      from: 1687737600000,
-      state: "ONBOARDING",
-    },
-  },
-  {
-    id: 2,
-    currentStatus: {
-      from: "1690633905",
-      state: "ONBOARDING",
-      updatedAt: "1690633905",
-    },
-  },
-];
-
-const allUsersWithoutONBOARDINGSTATUS = [
-  {
-    id: 3,
-    currentStatus: {
-      from: "1690633905",
-      state: "ACTIVE",
-      updatedAt: "1690633905",
-    },
-  },
-];
-
 const generateUserStatusData = (state, updatedAt, from, until = "", message = "") => {
   return {
     currentStatus: {
@@ -220,8 +137,4 @@ module.exports = {
   activeStatus,
   generateStatusDataForCancelOOO,
   generateStatusDataForState,
-  usersData,
-  allUserStatus,
-  allUserStatusWithOnBoardingStatus,
-  allUsersWithoutONBOARDINGSTATUS,
 };

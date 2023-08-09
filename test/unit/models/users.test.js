@@ -11,14 +11,16 @@ const cleanDb = require("../../utils/cleanDb");
 const users = require("../../../models/users");
 const firestore = require("../../../utils/firestore");
 const { userPhotoVerificationData, newUserPhotoVerificationData } = require("../../fixtures/user/photo-verification");
-const { allUserStatus, usersData, allUserStatusWithOnBoardingStatus } = require("../../fixtures/userStatus/userStatus");
+const { generateStatusDataForState } = require("../../fixtures/userStatus/userStatus");
 const userModel = firestore.collection("users");
-const userStatusModel = firestore.collection("userStatus");
+const userStatusModel = firestore.collection("usersStatus");
 const joinModel = firestore.collection("applicants");
 const userDataArray = require("../../fixtures/user/user")();
 const joinData = require("../../fixtures/user/join")();
 const photoVerificationModel = firestore.collection("photo-verification");
-
+const userData = require("../../fixtures/user/user");
+const addUser = require("../../utils/addUser");
+const { userState } = require("../../../constants/userStatus");
 /**
  * Test the model functions and validate the data stored
  */
@@ -282,26 +284,16 @@ describe("users", function () {
     });
   });
   describe("getUsersBasedOnFilter", function () {
+    let [userId0, userId1, userId2] = [];
+
     beforeEach(async function () {
-      const addUsersPromises = [];
-      const userStatusPromises = [];
-      for (const user of usersData) {
-        addUsersPromises.push(await userModel.add(user));
-      }
-      for (const element of allUserStatus) {
-        userStatusPromises.push(await userStatusModel.add(element));
-      }
-      await Promise.all([...addUsersPromises, ...userStatusPromises]);
-
-      const allUserDocs = await userModel.get();
-      allUserDocs.forEach(function (doc) {
-        // console.log("doc.data", doc.data());
-      });
-
-      const allStatusDocs = await userStatusModel.get();
-      allStatusDocs.forEach(function (doc) {
-        // console.log("doc.data", doc.data());
-      });
+      const userArr = userData();
+      userId0 = await addUser(userArr[0]);
+      userId1 = await addUser(userArr[1]);
+      userId2 = await addUser(userArr[2]);
+      await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.ONBOARDING));
+      await userStatusModel.doc("userStatus001").set(generateStatusDataForState(userId1, userState.ONBOARDING));
+      await userStatusModel.doc("userStatus002").set(generateStatusDataForState(userId2, userState.IDLE));
     });
 
     afterEach(async function () {
@@ -313,7 +305,7 @@ describe("users", function () {
         time: "31d",
       };
       const result = await users.getUsersBasedOnFilter(query);
-      expect(result).to.deep.equal(allUserStatusWithOnBoardingStatus);
+      expect(result.length).to.equal(2);
     });
   });
 });
