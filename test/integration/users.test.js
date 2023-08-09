@@ -910,6 +910,8 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("should return", function () {});
   });
 
   describe("PUT /users/self/intro", function () {
