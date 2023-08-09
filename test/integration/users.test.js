@@ -814,7 +814,7 @@ describe("Users", function () {
     beforeEach(async function () {
       await addOrUpdate(userData[0]);
       await addOrUpdate(userData[7]);
-      await addOrUpdate({ ...userData[9], username: "Tarun" });
+      await addOrUpdate({ ...userData[4], username: "Tarun" }, superUserId);
     });
 
     afterEach(async function () {
@@ -853,8 +853,9 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Users returned successfully!");
           expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.be.equal(2);
           res.body.users.forEach((user) => {
-            expect(user.username.slice(0, 2)).to.equal(searchParamValues.AN.toLowerCase());
+            expect(user.username).to.include(searchParamValues.AN.toLowerCase());
           });
           return done();
         });
@@ -888,8 +889,9 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Users returned successfully!");
           expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.be.equal(1);
           res.body.users.forEach((user) => {
-            expect(user.username.slice(0, 2)).to.equal(`${searchParamValues.number23}`);
+            expect(user.username).to.include(`${searchParamValues.number23}`);
           });
           return done();
         });
@@ -907,6 +909,7 @@ describe("Users", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users.length).to.be.equal(0);
 
           return done();
         });
@@ -929,7 +932,7 @@ describe("Users", function () {
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.be.equal(1);
           res.body.users.forEach((user) => {
-            expect(user.username.slice(0, 2)).to.equal(`${searchParamValues.Ta}`);
+            expect(user.username).to.include(searchParamValues.Ta);
           });
           return done();
         });
