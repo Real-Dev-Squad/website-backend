@@ -60,6 +60,20 @@ const validateFetchingUserDeviceStatus = async (req, res, next) => {
   }
 };
 
+const validateFetchingUserDeviceStatus = async (req, res, next) => {
+  const schema = joi.object().strict().keys({
+    user_id: joi.string().required(),
+  });
+
+  try {
+    await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    logger.error(`Invalid Query Parameters Passed`);
+    res.boom.badRequest(`Invalid Query Parameters Passed`);
+  }
+};
+
 module.exports = {
   storeUserDeviceInfo,
   validateAuthStatus,
