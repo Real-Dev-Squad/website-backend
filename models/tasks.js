@@ -121,7 +121,10 @@ const getBuiltTasks = async (tasksSnapshot, searchTerm) => {
 
 const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, prev, assignee = "", term = "" }) => {
   try {
-    let initialQuery = status ? tasksModel.where("status", "==", status).orderBy("title") : tasksModel;
+    let initialQuery = tasksModel;
+    if (status) {
+      initialQuery = status ? tasksModel.where("status", "==", status) : tasksModel;
+    }
 
     if (assignee) {
       const user = await userUtils.getUserId(assignee);
@@ -133,11 +136,14 @@ const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, 
     if (term) {
       const allTasks = await initialQuery.get();
       const tasks = await getBuiltTasks(allTasks, term);
-      initialQuery = initialQuery.where(
-        "title",
-        "in",
-        tasks.map((task) => task.title)
-      );
+
+      if (tasks.length > 0) {
+        initialQuery = initialQuery.where(
+          "title",
+          "in",
+          tasks.map((task) => task.title)
+        );
+      }
     }
 
     let queryDoc = initialQuery;
