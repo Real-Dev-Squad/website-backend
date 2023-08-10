@@ -128,9 +128,52 @@ const addPeerToEvent = async (peerData) => {
   }
 };
 
+/**
+ * Removes a peer from an event and marks them as kicked out in the Firestore database.
+ * @async
+ * @function
+ * @param {Object} params - The parameters for kicking out the peer.
+ * @param {string} params.eventId - The unique identifier of the event from which the peer is being kicked out.
+ * @param {string} params.peerId - The unique identifier of the peer being kicked out.
+ * @param {string} params.reason - The reason for kicking out the peer from the event.
+ * @returns {Promise<Object>} The updated data of the kicked-out peer.
+ * @throws {Error} If the peer is not found or is not part of the specified event.
+ */
+const kickoutPeer = async ({ eventId, peerId, reason }) => {
+  try {
+    const peerRef = peerModel.doc(peerId);
+    const peerSnapshot = await peerRef.get();
+
+    if (!peerSnapshot.exists) {
+      throw new Error("Participant not found");
+    }
+
+    const peerData = peerSnapshot.data();
+    const joinedEvents = peerData.joinedEvents;
+
+    const eventIndex = joinedEvents.findIndex((event) => event.event_id === eventId);
+    if (eventIndex === -1) {
+      throw new Error("Participant is not part of the specified event");
+    }
+
+    const updatedJoinedEvents = joinedEvents.map((event, index) =>
+      index === eventIndex ? { ...event, left_at: new Date(), reason: reason, isKickedout: true } : event
+    );
+
+    await peerRef.update({ joinedEvents: updatedJoinedEvents });
+
+    const updatedPeerSnapshot = await peerRef.get();
+    return updatedPeerSnapshot.data();
+  } catch (error) {
+    logger.error("Error in removing peer from the event.", error);
+    throw error;
+  }
+};
+
 module.exports = {
   createEvent,
   updateEvent,
   endActiveEvent,
   addPeerToEvent,
+  kickoutPeer,
 };

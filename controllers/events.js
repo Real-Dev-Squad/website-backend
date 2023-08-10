@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable camelcase */
 const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS } = require("../constants/events");
 const { EventTokenService, EventAPIService } = require("../services");
@@ -215,13 +216,45 @@ const addPeerToEvent = async (req, res) => {
     });
     return res.status(200).json({
       data,
-      message: `Peer is added to the event`,
+      message: `Selected participant is removed from event`,
     });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "Couldn't add peer to the event. Please try again later",
+      message: "You can't remove selected Participant from Remove, Please ask Admin or Host for help.",
+    });
+  }
+};
+
+/**
+ * Kicks out a peer from an event.
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with a success message if the peer is successfully kicked out.
+ * @throws {Object} The JSON response with an error message if an error occurred while kicking out the peer.
+ */
+const kickoutPeer = async (req, res) => {
+  const { id } = req.params;
+  const payload = {
+    peer_id: req.body.peerId,
+    reason: req.body.reason,
+  };
+
+  try {
+    await apiService.post(`/active-rooms/${id}/remove-peers`, payload);
+    await eventQuery.kickoutPeer({ eventId: id, peerId: payload.peer_id, reason: req.body.reason });
+    return res.status(200).json({
+      message: `Selected Participant is removed from event.`,
+    });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "You can't remove selected Participant from Remove, Please ask Admin or Host for help.",
     });
   }
 };
@@ -234,4 +267,5 @@ module.exports = {
   updateEvent,
   endActiveEvent,
   addPeerToEvent,
+  kickoutPeer,
 };
