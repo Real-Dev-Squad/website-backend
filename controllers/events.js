@@ -216,13 +216,13 @@ const addPeerToEvent = async (req, res) => {
     });
     return res.status(200).json({
       data,
-      message: `Selected participant is removed from event`,
+      message: `Selected Participant is added to the event.`,
     });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "You can't remove selected Participant from Remove, Please ask Admin or Host for help.",
+      message: "You can't add selected Participant. Please ask Admin or Host for help.",
     });
   }
 };
