@@ -1,11 +1,11 @@
-/* eslint-disable no-console */
-/* eslint-disable camelcase */
 const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS } = require("../constants/events");
-const { EventTokenService, EventAPIService } = require("../services");
-const { removeUnwantedProperties } = require("../utils/events");
-const eventQuery = require("../models/events");
-const logger = require("../utils/logger");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+
+const { EventTokenService, EventAPIService } = require("../services");
+const eventQuery = require("../models/events");
+
+const logger = require("../utils/logger");
+const { removeUnwantedProperties } = require("../utils/events");
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
