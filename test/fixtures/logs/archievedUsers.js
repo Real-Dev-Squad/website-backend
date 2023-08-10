@@ -1,6 +1,6 @@
 const archivedUserDetailsModal = [
   {
-    type: "archivedUsers",
+    type: "archive-details",
     meta: {
       userId: "TEST_USER_ID_1",
       superUserId: "TEST_SUPER_USER_ID",
@@ -15,7 +15,7 @@ const archivedUserDetailsModal = [
     },
   },
   {
-    type: "archivedUsers",
+    type: "archive-details",
     meta: {
       userId: "TEST_USER_ID_2",
       superUserId: "TEST_SUPER_USER_ID",
@@ -30,7 +30,7 @@ const archivedUserDetailsModal = [
     },
   },
   {
-    type: "archivedUsers",
+    type: "archive-details",
     meta: {
       userId: "TEST_USER_ID_1",
       superUserId: "TEST_SUPER_USER_ID",

@@ -1,7 +1,7 @@
 const ROLES = require("../constants/roles");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const dataAccess = require("../services/dataAccessLayer");
 const { addLog } = require("../models/logs");
 /**
@@ -99,13 +99,13 @@ const archiveMembers = async (req, res) => {
       if (successObject.isArchived) {
         return res.boom.badRequest("User is already archived");
       }
-      addLog("archiveDetails", meta, { body: body?.reason });
+      addLog("archive-details", meta, { body: body?.reason });
       return res.status(204).send();
     }
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while retriving contributions ${err}`);
-    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
   }
 };
 

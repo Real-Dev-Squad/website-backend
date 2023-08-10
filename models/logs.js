@@ -3,6 +3,7 @@ const { getBeforeHourTime } = require("../utils/time");
 const logsModel = firestore.collection("logs");
 const admin = require("firebase-admin");
 const { logType } = require("../constants/logs");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Adds log
@@ -22,7 +23,7 @@ const addLog = async (type, meta, body) => {
     return await logsModel.add(log);
   } catch (err) {
     logger.error("Error in adding log", err);
-    throw err;
+    throw new Error(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -77,7 +78,7 @@ const fetchLogs = async (query, param) => {
     return logs;
   } catch (err) {
     logger.error("Error in adding log", err);
-    throw err;
+    throw new Error(INTERNAL_SERVER_ERROR);
   }
 };
 

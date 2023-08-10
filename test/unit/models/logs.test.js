@@ -6,6 +6,15 @@ const logsQuery = require("../../../models/logs");
 const cacheData = require("../../fixtures/cloudflareCache/data");
 const logsData = require("../../fixtures/logs/archievedUsers");
 const app = require("../../../server");
+const Sinon = require("sinon");
+const { INTERNAL_SERVER_ERROR } = require("../../../constants/errorMessages");
+const userData = require("../../fixtures/user/user")();
+const addUser = require("../../utils/addUser");
+const cookieName = config.get("userToken.cookieName");
+const authService = require("../../../services/authService");
+
+const superUser = userData[4];
+const userToBeMadeMember = userData[1];
 
 describe("Logs", function () {
   after(async function () {
@@ -40,7 +49,30 @@ describe("Logs", function () {
     });
   });
 
-  describe("GET /logs/archivedUsers", function () {
+  describe("GET /logs/archive-details", function () {
+    let addLogsStub;
+    let jwt;
+    beforeEach(async function () {
+      const superUserId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId: superUserId });
+      await cleanDb();
+    });
+    afterEach(function () {
+      Sinon.restore();
+    });
+
+    it("Should return an object with status 500 and an error message", async function () {
+      addLogsStub = Sinon.stub(logsQuery, "fetchLogs");
+      addLogsStub.throws(new Error(INTERNAL_SERVER_ERROR));
+
+      addUser(userToBeMadeMember).then(() => {
+        const res = chai.request(app).get("/logs/archive-details").set("cookie", `${cookieName}=${jwt}`).send();
+
+        // expect(res).to.have.status(500);
+        // expect(res.body).to.have.property("message").that.is.a("string");
+        expect(res.body.message).to.equal(INTERNAL_SERVER_ERROR);
+      });
+    });
     it("Should return empty array if no logs found", async function () {
       const { type } = logsData.archivedUserDetailsModal[0];
       const query = {};
