@@ -208,7 +208,7 @@ const endActiveEvent = async (req, res) => {
  * @param {Object} req - The Express request object.
  * @param {Object} res - The Express response object.
  * @returns {Promise<Object>} The JSON response with the added peer data and a success message.
- * @throws {Object} The JSON response with an error message if an error occurred while adding the peer.
+ * @returns {Promise<Object>} The JSON response with an error message if an error occurred while adding the peer.
  */
 const addPeerToEvent = async (req, res) => {
   try {
@@ -221,13 +221,13 @@ const addPeerToEvent = async (req, res) => {
     });
     return res.status(200).json({
       data,
-      message: `Selected Participant is added to the event.`,
+      message: SUCCESS_MESSAGES.CONTROLLERS.ADD_PEER_TO_EVENT,
     });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "You can't add selected Participant. Please ask Admin or Host for help.",
+      message: ERROR_MESSAGES.CONTROLLERS.ADD_PEER_TO_EVENT,
     });
   }
 };

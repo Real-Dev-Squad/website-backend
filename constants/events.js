@@ -12,12 +12,14 @@ const UNWANTED_PROPERTIES_FROM_100MS = [
 const SUCCESS_MESSAGES = {
   CONTROLLERS: {
     KICKOUT_PEER: "Selected Participant is removed from event.",
+    ADD_PEER_TO_EVENT: "Selected Participant is added to the event.",
   },
 };
 
 const ERROR_MESSAGES = {
   CONTROLLERS: {
     KICKOUT_PEER: "You can't remove selected Participant from Remove, Please ask Admin or Host for help.",
+    ADD_PEER_TO_EVENT: "You can't add selected Participant. Please ask Admin or Host for help.",
   },
   MODELS: {
     KICKOUT_PEER: {
@@ -25,6 +27,7 @@ const ERROR_MESSAGES = {
       PEER_NOT_FOUND_IN_EVENT: "Participant is not part of the specified event.",
       UNABLE_TO_REMOVE_PEER: "Error in removing peer from the event.",
     },
+    ADD_PEER_TO_EVENT: "Error in adding peer to the event.",
   },
   VALIDATORS: {
     KICKOUT_PEER: "We encountered some error while removing selected Participant from event:",

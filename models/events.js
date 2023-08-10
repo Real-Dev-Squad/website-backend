@@ -124,7 +124,7 @@ const addPeerToEvent = async (peerData) => {
     const updatedPeerSnapshot = await peerRef.get();
     return updatedPeerSnapshot.data();
   } catch (error) {
-    logger.error("Error in adding peer to the event", error);
+    logger.error(ERROR_MESSAGES.MODELS.ADD_PEER_TO_EVENT, error);
     throw error;
   }
 };
