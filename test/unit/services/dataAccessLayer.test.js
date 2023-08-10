@@ -15,7 +15,7 @@ const {
   levelSpecificAccess,
 } = require("../../../services/dataAccessLayer");
 
-const { ROLE_ACCESS, ACCESS_LEVEL } = require("../../../constants/userDataLevels");
+const { KEYS_NOT_ALLOWED, ACCESS_LEVEL } = require("../../../constants/userDataLevels");
 
 const userData = require("../../fixtures/user/user")();
 
@@ -31,7 +31,7 @@ describe("Data Access Layer", function () {
       const result = await retrieveUsers({ id: userData[12].id });
       removeSensitiveInfo(userData[12]);
       expect(result.user).to.deep.equal(userData[12]);
-      ROLE_ACCESS[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+      KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
         expect(result.user).to.not.have.property(key);
       });
     });
@@ -41,7 +41,7 @@ describe("Data Access Layer", function () {
       const result = await retrieveUsers({ username: userData[12].username });
       removeSensitiveInfo(userData[12]);
       expect(result.user).to.deep.equal(userData[12]);
-      ROLE_ACCESS[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+      KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
         expect(result.user).to.not.have.property(key);
       });
     });
@@ -53,7 +53,7 @@ describe("Data Access Layer", function () {
       removeSensitiveInfo(userData[12]);
       result.forEach((user) => {
         expect(user).to.deep.equal(userData[12]);
-        ROLE_ACCESS[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+        KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
           expect(user).to.not.have.property(key);
         });
       });
@@ -67,7 +67,7 @@ describe("Data Access Layer", function () {
       removeSensitiveInfo(userData[12]);
       result.users.forEach((user) => {
         expect(user).to.deep.equal(userData[12]);
-        ROLE_ACCESS[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+        KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
           expect(user).to.not.have.property(key);
         });
       });
@@ -77,7 +77,7 @@ describe("Data Access Layer", function () {
       const userdata = userData[12];
       await retrieveUsers({ userdata });
       removeSensitiveInfo(userData[12]);
-      ROLE_ACCESS[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+      KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
         expect(userdata).to.not.have.property(key);
       });
     });
@@ -90,7 +90,7 @@ describe("Data Access Layer", function () {
       const result = await retrieveDiscordUsers();
       result.forEach((user) => {
         expect(user).to.deep.equal(userData[12]);
-        ROLE_ACCESS[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+        KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
           expect(user).to.not.have.property(key);
         });
       });
@@ -105,7 +105,7 @@ describe("Data Access Layer", function () {
       const result = await retrieveUsersWithRole(query);
       result.forEach((user) => {
         expect(user).to.deep.equal(userData[12]);
-        ROLE_ACCESS[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+        KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
           expect(user).to.not.have.property(key);
         });
       });
@@ -119,7 +119,7 @@ describe("Data Access Layer", function () {
       const result = await retrieveMembers();
       result.forEach((user) => {
         expect(user).to.deep.equal(userData[12]);
-        ROLE_ACCESS[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+        KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
           expect(user).to.not.have.property(key);
         });
       });
@@ -134,7 +134,7 @@ describe("Data Access Layer", function () {
       const result = await retreiveFilteredUsers(query);
       result.forEach((user) => {
         expect(user).to.deep.equal(userData[12]);
-        ROLE_ACCESS[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+        KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
           expect(user).to.not.have.property(key);
         });
       });
@@ -144,7 +144,7 @@ describe("Data Access Layer", function () {
   describe("removeSensitiveInfo", function () {
     it("should remove sensitive information from the users object", function () {
       removeSensitiveInfo(userData[12]);
-      ROLE_ACCESS[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+      KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
         expect(userData[12]).to.not.have.property(key);
       });
     });
@@ -153,7 +153,7 @@ describe("Data Access Layer", function () {
   describe("levelSpecificAccess", function () {
     it("should return the user object for PUBLIC level after removing all sensitive info", function () {
       const result = levelSpecificAccess({ ...userData[12] }, ACCESS_LEVEL.PUBLIC);
-      ROLE_ACCESS[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+      KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
         expect(result).to.not.have.property(key);
       });
     });
@@ -169,7 +169,7 @@ describe("Data Access Layer", function () {
       const role = "super_user";
       const level = ACCESS_LEVEL.PRIVATE;
       const result = levelSpecificAccess(user, level, role);
-      ROLE_ACCESS[level].forEach((key) => {
+      KEYS_NOT_ALLOWED[level].forEach((key) => {
         expect(result).to.not.have.property(key);
       });
       expect(result).to.have.property("phone");

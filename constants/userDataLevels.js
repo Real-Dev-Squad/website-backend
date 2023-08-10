@@ -11,11 +11,11 @@ const ROLE_LEVEL = {
   confidential: ["super_user"],
 };
 
-const ROLE_ACCESS = {
+const KEYS_NOT_ALLOWED = {
   public: ["email", "phone", "chaincode"],
   internal: ["phone", "chaincode"],
   private: ["chaincode"],
   confidential: [],
 };
 
-module.exports = { ACCESS_LEVEL, ROLE_ACCESS, ROLE_LEVEL };
+module.exports = { ACCESS_LEVEL, KEYS_NOT_ALLOWED, ROLE_LEVEL };

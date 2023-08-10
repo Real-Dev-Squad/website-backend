@@ -1,6 +1,6 @@
 const userQuery = require("../models/users");
 const members = require("../models/members");
-const { ROLE_LEVEL, ROLE_ACCESS, ACCESS_LEVEL } = require("../constants/userDataLevels");
+const { ROLE_LEVEL, KEYS_NOT_ALLOWED, ACCESS_LEVEL } = require("../constants/userDataLevels");
 
 const retrieveUsers = async ({
   id = null,
@@ -78,9 +78,9 @@ const retrieveUsersWithRole = async (role) => {
 };
 
 const removeSensitiveInfo = function (obj, level = ACCESS_LEVEL.PUBLIC) {
-  for (let i = 0; i < ROLE_ACCESS[level].length; i++) {
-    if (Object.prototype.hasOwnProperty.call(obj, ROLE_ACCESS[level][i])) {
-      delete obj[ROLE_ACCESS[level][i]];
+  for (let i = 0; i < KEYS_NOT_ALLOWED[level].length; i++) {
+    if (Object.prototype.hasOwnProperty.call(obj, KEYS_NOT_ALLOWED[level][i])) {
+      delete obj[KEYS_NOT_ALLOWED[level][i]];
     }
   }
 };
