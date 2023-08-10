@@ -124,7 +124,10 @@ const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, 
     let initialQuery = status ? tasksModel.where("status", "==", status) : tasksModel;
 
     if (assignee) {
-      initialQuery = initialQuery.where("assignee", "==", assignee);
+      const user = await userUtils.getUserId(assignee);
+      if (user) {
+        initialQuery = initialQuery.where("assignee", "==", user);
+      }
     }
 
     if (term) {
