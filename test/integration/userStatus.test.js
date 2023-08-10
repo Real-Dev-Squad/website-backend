@@ -3,6 +3,7 @@ const { expect } = chai;
 const chaiHttp = require("chai-http");
 const sinon = require("sinon");
 
+const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
@@ -19,7 +20,9 @@ const {
 
 const config = require("config");
 const { updateUserStatus } = require("../../models/userStatus");
+const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
+const userStatusModel = require("../../models/userStatus");
 
 chai.use(chaiHttp);
 
@@ -142,13 +145,9 @@ describe("UserStatus", function () {
       const fromDate = updatedAtDate + 12 * 24 * 60 * 60 * 1000; // 24th Nov 2022
       const untilDate = updatedAtDate + 16 * 24 * 60 * 60 * 1000; // 28th Nov 2022
 
-      const response1 = await chai
-        .request(app)
-        .patch(`/users/status/self`)
-        .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate));
-      expect(response1).to.have.status(201);
-      expect(response1.body.data.currentStatus.state).to.equal("ACTIVE");
+      const statusData = generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate);
+      statusData.userId = testUserId;
+      await firestore.collection("usersStatus").doc("userStatus").set(statusData);
 
       // Marking OOO Status from 24th Nov 2022 to 28th Nov 2022
       const response2 = await chai
@@ -176,6 +175,13 @@ describe("UserStatus", function () {
         .send();
       expect(response3).to.have.status(200);
       expect(response3.body.message).to.equal("All User Status updated successfully.");
+      expect(response3.body.data).to.deep.equal({
+        usersCount: 1,
+        oooUsersAltered: 0,
+        oooUsersUnaltered: 0,
+        nonOooUsersAltered: 1,
+        nonOooUsersUnaltered: 0,
+      });
 
       // Checking the current status
       const response4 = await chai.request(app).get(`/users/status/self`).set("Cookie", `${cookieName}=${testUserJwt}`);
@@ -196,6 +202,13 @@ describe("UserStatus", function () {
         .send();
       expect(response5).to.have.status(200);
       expect(response5.body.message).to.equal("All User Status updated successfully.");
+      expect(response5.body.data).to.deep.equal({
+        usersCount: 1,
+        oooUsersAltered: 1,
+        oooUsersUnaltered: 0,
+        nonOooUsersAltered: 0,
+        nonOooUsersUnaltered: 0,
+      });
 
       const response6 = await chai.request(app).get(`/users/status/self`).set("Cookie", `${cookieName}=${testUserJwt}`);
       expect(response6).to.have.status(200);
@@ -211,13 +224,9 @@ describe("UserStatus", function () {
       const fromDate = updatedAtDate + 12 * 24 * 60 * 60 * 1000; // 24th Nov 2022
       const untilDate = updatedAtDate + 16 * 24 * 60 * 60 * 1000; // 28th Nov 2022
 
-      const response1 = await chai
-        .request(app)
-        .patch(`/users/status/self`)
-        .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate));
-      expect(response1).to.have.status(201);
-      expect(response1.body.data.currentStatus.state).to.equal("ACTIVE");
+      const statusData = generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate);
+      statusData.userId = testUserId;
+      await firestore.collection("usersStatus").doc("userStatus").set(statusData);
 
       // Marking OOO Status from 24th Nov 2022 to 28th Nov 2022
       const response2 = await chai
@@ -241,6 +250,13 @@ describe("UserStatus", function () {
         .send();
       expect(response3).to.have.status(200);
       expect(response3.body.message).to.equal("All User Status updated successfully.");
+      expect(response3.body.data).to.deep.equal({
+        usersCount: 1,
+        oooUsersAltered: 0,
+        oooUsersUnaltered: 0,
+        nonOooUsersAltered: 1,
+        nonOooUsersUnaltered: 0,
+      });
 
       // Checking the current status
       const response4 = await chai.request(app).get(`/users/status/self`).set("Cookie", `${cookieName}=${testUserJwt}`);
@@ -251,18 +267,6 @@ describe("UserStatus", function () {
       expect(response4.body.data.currentStatus.state).to.equal("OOO");
       expect(response4.body.data).to.have.property("futureStatus");
       expect(response4.body.data.futureStatus.state).to.equal("ACTIVE");
-
-      // Marking Active From today
-      const response5 = await chai
-        .request(app)
-        .patch(`/users/status/self`)
-        .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("ACTIVE", Date.now(), Date.now()));
-      expect(response5).to.have.status(200);
-      expect(response5.body.message).to.equal("User Status updated successfully.");
-      expect(response5.body.data).to.have.own.property("currentStatus");
-      expect(response5.body.data.currentStatus.state).to.equal("ACTIVE");
-      expect(response5.body.data.futureStatus.state).to.equal(undefined);
     });
   });
 
@@ -320,7 +324,9 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should update the User Status", function (done) {
+    // Skipping this as the users are not allowed to mark them as active or idle. Will remove the test while removing the feature flag.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("Should update the User Status", function (done) {
       chai
         .request(app)
         .patch(`/users/status/self`)
@@ -352,7 +358,9 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should update the User Status when requested by Super User", function (done) {
+    // Skipping this as the users are not allowed to mark them as active or idle. Will remove the test while removing the feature flag.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("Should update the User Status when requested by Super User", function (done) {
       chai
         .request(app)
         .patch(`/users/status/${userId}`)
@@ -398,7 +406,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
           expect(res.body.error).to.equal(`Bad Request`);
-          expect(res.body.message).to.equal(`Invalid State. State must be either IDLE, ACTIVE, OOO, or ONBOARDING`);
+          expect(res.body.message).to.equal(`Invalid State. the acceptable states are OOO,ONBOARDING`);
           return done();
         });
     });
@@ -468,14 +476,10 @@ describe("UserStatus", function () {
     });
 
     it("should replace old future OOO Status with new future OOO Status", async function () {
-      // creating Active Status from 12th Nov 2022
-      const response1 = await chai
-        .request(app)
-        .patch(`/users/status/self`)
-        .set("Cookie", `${cookieName}=${testUserJwt}`)
-        .send(generateUserStatusData("ACTIVE", Date.now(), Date.now()));
-      expect(response1).to.have.status(201);
-      expect(response1.body.data.currentStatus.state).to.equal("ACTIVE");
+      const updatedAtDate = Date.now();
+      const statusData = generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate);
+      statusData.userId = testUserId;
+      await firestore.collection("usersStatus").doc("userStatus").set(statusData);
 
       // Initially Marking OOO Status from 24th Nov 2022 to 28th Nov 2022
       let fromDate = new Date(2022, 10, 24).getTime();
@@ -551,6 +555,135 @@ describe("UserStatus", function () {
       expect(response2.body.data.currentStatus.from).to.equal(fromDate); // 12 Nov 2022
       expect(response2.body.data.currentStatus.until).to.equal(untilDate); // 17 Nov 2022
       expect(response2.body.data.futureStatus.state).to.equal(undefined);
+    });
+  });
+
+  describe("PATCH /users/status/self", function () {
+    let userId;
+    let userJwt;
+
+    before(async function () {
+      userId = await addUser(userData[8]);
+      userJwt = authService.generateAuthToken({ userId });
+    });
+
+    afterEach(async function () {
+      await firestore.collection("tasks").doc("user1AssignedTask").delete();
+      await firestore.collection("usersStatus").doc("user1AssignedStatus").delete();
+    });
+
+    after(async function () {
+      await firestore.collection("users").doc(userId).delete();
+    });
+
+    it("Should Change the status to ACTIVE if user has task assigned.", async function () {
+      const now = new Date();
+      const nowTimeStamp = new Date().setUTCHours(0, 0, 0, 0);
+      const fiveDaysFromNowTimeStamp = new Date(now.setUTCHours(0, 0, 0, 0) + 5 * 24 * 60 * 60 * 1000);
+
+      await firestore.collection("tasks").doc("user1AssignedTask").set({
+        assignee: userId,
+        status: "ASSIGNED",
+      });
+      await firestore
+        .collection("usersStatus")
+        .doc("user1AssignedStatus")
+        .set({
+          userId: userId,
+          currentStatus: {
+            message: "",
+            from: nowTimeStamp,
+            until: fiveDaysFromNowTimeStamp,
+            updatedAt: nowTimeStamp,
+            state: userState.OOO,
+          },
+        });
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${userJwt}`)
+        .send({ cancelOoo: true });
+      expect(res.body.data.currentStatus.state).to.equal(userState.ACTIVE);
+      expect(res.body.data.currentStatus.from).to.be.gt(nowTimeStamp);
+      expect(res.body.data.currentStatus.until).to.equal("");
+      expect(res.body.data.currentStatus.message).to.equal("");
+    });
+
+    it("Should Change the status to IDLE if user doesn't have a task assigned.", async function () {
+      const now = new Date();
+      const nowTimeStamp = new Date().setUTCHours(0, 0, 0, 0);
+      const fiveDaysFromNowTimeStamp = new Date(now.setUTCHours(0, 0, 0, 0) + 5 * 24 * 60 * 60 * 1000);
+
+      await firestore
+        .collection("usersStatus")
+        .doc("user1AssignedStatus")
+        .set({
+          userId: userId,
+          currentStatus: {
+            message: "",
+            from: nowTimeStamp,
+            until: fiveDaysFromNowTimeStamp,
+            updatedAt: nowTimeStamp,
+            state: userState.OOO,
+          },
+        });
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${userJwt}`)
+        .send({ cancelOoo: true });
+      expect(res.body.data.currentStatus.state).to.equal(userState.IDLE);
+      expect(res.body.data.currentStatus.from).to.be.gt(nowTimeStamp);
+      expect(res.body.data.currentStatus.until).to.equal("");
+      expect(res.body.data.currentStatus.message).to.equal("");
+    });
+
+    it("Should throw Not Found when User Status does not exist.", async function () {
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${userJwt}`)
+        .send({ cancelOoo: true });
+      expect(res.body.statusCode).to.equal(404);
+      expect(res.body.error).to.equal("NotFound");
+      expect(res.body.message).to.equal("No User status document found");
+    });
+
+    it("Should throw Forbidden when User Status is not OOO.", async function () {
+      const nowTimeStamp = new Date().setUTCHours(0, 0, 0, 0);
+      await firestore
+        .collection("usersStatus")
+        .doc("user1AssignedStatus")
+        .set({
+          userId: userId,
+          currentStatus: {
+            message: "",
+            from: nowTimeStamp,
+            until: "",
+            updatedAt: nowTimeStamp,
+            state: "ACTIVE",
+          },
+        });
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${userJwt}`)
+        .send({ cancelOoo: true });
+      expect(res.body.statusCode).to.equal(403);
+      expect(res.body.error).to.equal("Forbidden");
+      expect(res.body.message).to.equal("The OOO Status cannot be canceled because the current status is ACTIVE.");
+    });
+
+    it("Should throw an error if firestore error", async function () {
+      sinon.stub(userStatusModel, "cancelOooStatus").throws(new Error("Firestore error"));
+      const res = await chai
+        .request(app)
+        .patch(`/users/status/self`)
+        .set("cookie", `${cookieName}=${userJwt}`)
+        .send({ cancelOoo: true });
+      expect(res.body.statusCode).to.equal(500);
+      expect(res.body.error).to.equal("Internal Server Error");
+      expect(res.body.message).to.equal("An internal server error occurred");
     });
   });
 

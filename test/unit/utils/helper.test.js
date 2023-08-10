@@ -1,5 +1,6 @@
 const chai = require("chai");
-const { getDateTimeRangeForPRs, getQualifiers } = require("../../../utils/helper");
+const { getDateTimeRangeForPRs, getQualifiers, getPaginatedLink } = require("../../../utils/helper");
+const { TASK_STATUS, TASK_SIZE } = require("../../../constants/tasks");
 const { expect } = chai;
 
 describe("helper", function () {
@@ -39,6 +40,57 @@ describe("helper", function () {
         startDate: "2023-01-01",
         endDate: "2023-03-01",
       });
+    });
+  });
+
+  describe("getPaginatedLink", function () {
+    it("should return a string with paginated link", function () {
+      const status = TASK_STATUS.ASSIGNED;
+      const dev = true;
+      const query = {
+        dev,
+        status,
+      };
+      const endpoint = "/tasks";
+      const cursorKey = "next";
+      const docId = "UH2XHmOJKCrgherGODjG";
+      const result = getPaginatedLink({
+        query,
+        endpoint: "/tasks",
+        cursorKey,
+        docId,
+      });
+      expect(result).to.contain(endpoint);
+      expect(result).to.contain(`status=${status}`);
+      expect(result).to.contain(`dev=${dev}`);
+      expect(result).to.contain(`${cursorKey}=${docId}`);
+      expect(result).to.contain(`size=${TASK_SIZE}`);
+    });
+
+    it("should return a string and the return value should not contain cursor key present in the query", function () {
+      const status = TASK_STATUS.ASSIGNED;
+      const dev = true;
+      const nextId = "UH2XHmOJKCrgherGODjG";
+
+      const query = {
+        dev,
+        status,
+        next: nextId,
+      };
+      const endpoint = "/tasks";
+      const cursorKey = "prev";
+      const docId = "SCH3owHWcOQX0jFLurAP";
+      const result = getPaginatedLink({
+        query,
+        endpoint: "/tasks",
+        cursorKey,
+        docId,
+      });
+      expect(result).to.contain(endpoint);
+      expect(result).to.contain(`status=${status}`);
+      expect(result).to.contain(`dev=${dev}`);
+      expect(result).to.contain(`${cursorKey}=${docId}`);
+      expect(result).to.not.contain(`next=${nextId}`);
     });
   });
 });

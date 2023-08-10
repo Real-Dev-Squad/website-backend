@@ -12,7 +12,9 @@ const users = require("../../../models/users");
 const firestore = require("../../../utils/firestore");
 const { userPhotoVerificationData, newUserPhotoVerificationData } = require("../../fixtures/user/photo-verification");
 const userModel = firestore.collection("users");
+const joinModel = firestore.collection("applicants");
 const userDataArray = require("../../fixtures/user/user")();
+const joinData = require("../../fixtures/user/join")();
 const photoVerificationModel = firestore.collection("photo-verification");
 
 /**
@@ -90,7 +92,18 @@ describe("users", function () {
       expect(user.last_name).to.equal(userData.last_name);
       expect(userExists).to.equal(true);
     });
+
+    it("It should have created_At and updated_At fields", async function () {
+      const userData = userDataArray[14];
+      await users.addOrUpdate(userData);
+      const githubUsername = "sahsisunny";
+      const { user, userExists } = await users.fetchUser({ githubUsername });
+      expect(user).to.haveOwnProperty("created_at");
+      expect(user).to.haveOwnProperty("updated_at");
+      expect(userExists).to.equal(true);
+    });
   });
+
   describe("user image verification", function () {
     let userId, discordId, profileImageUrl, discordImageUrl;
     beforeEach(async function () {
@@ -193,6 +206,88 @@ describe("users", function () {
     it("gets all users from user model", async function () {
       const result = await users.fetchAllUsers();
       expect(result).to.have.length(userDataArray.length);
+    });
+  });
+
+  describe("add Join Data", function () {
+    it("adds join data", async function () {
+      joinData[0].userId = "12345";
+      await users.addJoinData(joinData[0]);
+      const savedJoinedData = await joinModel.where("userId", "==", "12345").get();
+      savedJoinedData.forEach((data) => {
+        expect(data.data()).to.have.all.keys(Object.keys(joinData[0]));
+      });
+    });
+  });
+
+  describe("get join data", function () {
+    beforeEach(async function () {
+      joinData[0].userId = "12345";
+      await users.addJoinData(joinData[0]);
+    });
+    it("gets joinData", async function () {
+      const data = await users.getJoinData("12345");
+      expect(data.length).to.be.equal(1);
+      expect(data[0]).to.have.all.keys([...Object.keys(joinData[0]), "id"]);
+    });
+  });
+
+  describe("remove github token from users", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("return array of users", async function () {
+      const data = await users.fetchUsersWithToken();
+      expect(data).to.be.not.equal(null);
+    });
+    it('removes token field from user"s data', async function () {
+      const userRef = await users.fetchUsersWithToken();
+      const dataBefore = await userRef[1].get();
+      const beforeRemoval = Object.keys(dataBefore.data()).includes("tokens");
+      expect(beforeRemoval).to.be.equal(true);
+      await users.removeGitHubToken(userRef);
+      const dataAfter = await userRef[1].get();
+      const afterRemoval = Object.keys(dataAfter.data()).includes("tokens");
+      expect(afterRemoval).to.be.equal(false);
+    });
+
+    it("throws error if id is not found in db", async function () {
+      try {
+        await users.removeGitHubToken("1223");
+      } catch (error) {
+        expect(error).to.be.instanceOf(Error);
+      }
+    });
+  });
+
+  describe("get users by roles", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+    it("returns users with member role", async function () {
+      const members = await users.getUsersByRole("member");
+      expect(members.length).to.be.equal(6);
+      members.forEach((member) => {
+        expect(member.roles.member).to.be.equal(true);
+      });
+    });
+    it("throws an error", async function () {
+      await users.getUsersByRole(32389434).catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+      });
     });
   });
 });

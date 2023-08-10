@@ -91,7 +91,7 @@ const getAllEvents = async (req, res) => {
  */
 const joinEvent = async (req, res) => {
   const { roomId, userId, role } = req.body;
-  const payload = { room_id: roomId, user_id: userId, role };
+  const payload = { roomId, userId, role };
   try {
     const token = tokenService.getAuthToken(payload);
     return res.status(201).json({
