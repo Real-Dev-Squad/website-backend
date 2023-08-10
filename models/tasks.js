@@ -121,7 +121,7 @@ const getBuiltTasks = async (tasksSnapshot, searchTerm) => {
 
 const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, prev, assignee = "", term = "" }) => {
   try {
-    let initialQuery = tasksModel;
+    let initialQuery = tasksModel.orderBy("title");
     if (status) {
       initialQuery = status ? tasksModel.where("status", "==", status) : tasksModel;
     }
