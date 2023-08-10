@@ -91,7 +91,9 @@ const archiveMembers = async (req, res) => {
       superUserId: superUserId,
       username: username,
     };
-    if (!body?.reason || /^\s*$/.test(body?.reason)) {
+    const isReasonNullOrUndefined = !body?.reason;
+    const isReasonEmptyOrWhitespace = /^\s*$/.test(body?.reason);
+    if (isReasonNullOrUndefined || isReasonEmptyOrWhitespace) {
       return res.boom.badRequest("Reason is required");
     }
     if (user?.userExists) {
