@@ -13,7 +13,7 @@ const createEvent = async (req, res, next) => {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
-    logger.error(`Error creating event: ${error}`);
+    logger.error(`${ERROR_MESSAGES.VALIDATORS.CREATE_EVENT} ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };
@@ -29,7 +29,7 @@ const getAllEvents = async (req, res, next) => {
     await schema.validateAsync(req.query);
     next();
   } catch (error) {
-    logger.error(`Error retrieving all events: ${error}`);
+    logger.error(`${ERROR_MESSAGES.VALIDATORS.GET_ALL_EVENTS} ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };
@@ -45,7 +45,7 @@ const joinEvent = async (req, res, next) => {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
-    logger.error(`Error joining event: ${error}`);
+    logger.error(`${ERROR_MESSAGES.VALIDATORS.JOIN_EVENT} ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };
@@ -65,7 +65,7 @@ const getEventById = async (req, res, next) => {
     await schema.validateAsync({ id, isActiveRoom }, validationOptions);
     next();
   } catch (error) {
-    logger.error(`Error retrieving event: ${error}`);
+    logger.error(`${ERROR_MESSAGES.VALIDATORS.GET_EVENT_BY_ID} ${error}`);
     res.boom.badRequest(error.details.map((detail) => detail.message));
   }
 };
@@ -80,7 +80,7 @@ const updateEvent = async (req, res, next) => {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
-    logger.error(`Error updating event: ${error}`);
+    logger.error(`${ERROR_MESSAGES.VALIDATORS.UPDATE_EVENT} ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };
@@ -96,7 +96,7 @@ const endActiveEvent = async (req, res, next) => {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
-    logger.error(`Error while ending the event: ${error}`);
+    logger.error(`${ERROR_MESSAGES.VALIDATORS.END_ACTIVE_EVENT} ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };
@@ -119,7 +119,7 @@ const addPeerToEvent = async (req, res, next) => {
     await schema.validateAsync({ peerId, name, id, role, joinedAt }, validationOptions);
     next();
   } catch (error) {
-    logger.error(`Error while adding a peer to the event: ${error}`);
+    logger.error(`${ERROR_MESSAGES.VALIDATORS.ADD_PEER_TO_EVENT} ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };

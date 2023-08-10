@@ -22,7 +22,7 @@ const createEvent = async (eventData) => {
     const data = docSnapshot.data();
     return data;
   } catch (error) {
-    logger.error("Error in adding data", error);
+    logger.error(ERROR_MESSAGES.MODELS.CREATE_EVENT, error);
     throw error;
   }
 };
@@ -39,7 +39,7 @@ const updateEvent = async (eventData) => {
     const docRef = eventModel.doc(eventData.id);
     await docRef.update({ enabled: eventData.enabled });
   } catch (error) {
-    logger.error("Error in enabling event.", error);
+    logger.error(ERROR_MESSAGES.MODELS.UPDATE_EVENT, error);
     throw error;
   }
 };
@@ -64,7 +64,7 @@ const endActiveEvent = async ({ id, reason, lock }) => {
       status: "inactive",
     });
   } catch (error) {
-    logger.error("Error in ending event.", error);
+    logger.error(ERROR_MESSAGES.MODELS.END_ACTIVE_EVENT, error);
     throw error;
   }
 };

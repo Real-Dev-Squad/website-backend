@@ -21,7 +21,7 @@ const config = require("config");
 const sinon = require("sinon");
 
 const { EventTokenService, EventAPIService } = require("../../services");
-const { SUCCESS_MESSAGES } = require("../../constants/events");
+const { SUCCESS_MESSAGES, ERROR_MESSAGES } = require("../../constants/events");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -96,7 +96,7 @@ describe("events", function () {
           }
           expect(response).to.have.status(500);
           expect(response.body.error).to.equal("ERR_BAD_REQUEST");
-          expect(response.body.message).to.equal("Couldn't create event. Please try again later");
+          expect(response.body.message).to.equal(ERROR_MESSAGES.CONTROLLERS.CREATE_EVENT);
 
           return done();
         });
@@ -192,7 +192,7 @@ describe("events", function () {
           }
           expect(response).to.have.status(500);
           expect(response.body.error).to.equal("ERR_BAD_REQUEST");
-          expect(response.body.message).to.equal("Couldn't get events. Please try again later");
+          expect(response.body.message).to.equal(ERROR_MESSAGES.CONTROLLERS.GET_ALL_EVENTS);
 
           return done();
         });
@@ -263,7 +263,7 @@ describe("events", function () {
 
     it("Should return 500 if an error occurs while retrieving the room information", function (done) {
       const roomId = "invalid-room-id";
-      const mockError = { code: "ERR_BAD_REQUEST", message: "Unable to retrieve event details" };
+      const mockError = { code: "ERR_BAD_REQUEST", message: ERROR_MESSAGES.CONTROLLERS.GET_EVENT_BY_ID };
 
       service = sinon.stub(EventAPIService.prototype, "get").rejects(mockError);
 
@@ -379,7 +379,7 @@ describe("events", function () {
       };
       service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "session is ending" });
 
-      sinon.stub(eventQuery, "endActiveEvent").returns({ message: "Event ended successfully." });
+      sinon.stub(eventQuery, "endActiveEvent").returns({ message: SUCCESS_MESSAGES.CONTROLLERS.END_ACTIVE_EVENT });
 
       chai
         .request(app)
@@ -393,7 +393,7 @@ describe("events", function () {
 
           expect(response).to.have.status(200);
           expect(response.body.message).to.be.a("string");
-          expect(response.body.message).to.equal("Event ended successfully.");
+          expect(response.body.message).to.equal(SUCCESS_MESSAGES.CONTROLLERS.END_ACTIVE_EVENT);
 
           return done();
         });
