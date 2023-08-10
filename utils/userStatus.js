@@ -294,6 +294,14 @@ const generateErrorResponse = (message) => {
   };
 };
 
+const getNextDayTimeStamp = (timeStamp) => {
+  const currentDateTime = new Date(timeStamp);
+  const nextDateDateTime = new Date(currentDateTime);
+  nextDateDateTime.setDate(currentDateTime.getDate() + 1);
+  nextDateDateTime.setUTCHours(0, 0, 0, 0);
+  return nextDateDateTime.getTime();
+};
+
 module.exports = {
   getUserIdBasedOnRoute,
   getTomorrowTimeStamp,
@@ -307,4 +315,5 @@ module.exports = {
   checkIfUserHasLiveTasks,
   generateErrorResponse,
   generateNewStatus,
+  getNextDayTimeStamp,
 };
