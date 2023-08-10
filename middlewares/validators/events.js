@@ -1,4 +1,5 @@
 const joi = require("joi");
+const { ERROR_MESSAGES } = require("../../constants/events");
 
 const createEvent = async (req, res, next) => {
   const schema = joi.object({
@@ -139,7 +140,7 @@ const kickoutPeer = async (req, res, next) => {
     await schema.validateAsync({ id, peerId, reason }, validationOptions);
     next();
   } catch (error) {
-    logger.error(`We encountered some error while removing selected Participant from event: ${error}`);
+    logger.error(`${ERROR_MESSAGES.VALIDATORS.KICKOUT_PEER} ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };

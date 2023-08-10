@@ -5,6 +5,7 @@ const cleanDb = require("../../utils/cleanDb");
 const firestore = require("../../../utils/firestore");
 
 const eventQuery = require("../../../models/events");
+const { ERROR_MESSAGES } = require("../../../constants/events");
 const eventModel = firestore.collection("events");
 const peerModel = firestore.collection("peers");
 
@@ -151,7 +152,7 @@ describe("Events", function () {
       try {
         await eventQuery.kickoutPeer({ eventId, peerId, reason });
       } catch (error) {
-        expect(error.message).to.equal("Peer not found");
+        expect(error.message).to.equal(ERROR_MESSAGES.MODELS.KICKOUT_PEER.PEER_NOT_FOUND);
       }
     });
 
@@ -174,7 +175,7 @@ describe("Events", function () {
       try {
         await eventQuery.kickoutPeer({ eventId: nonExistentEventId, peerId: peerData.peerId, reason });
       } catch (error) {
-        expect(error.message).to.equal("Peer is not part of the specified event");
+        expect(error.message).to.equal(ERROR_MESSAGES.MODELS.KICKOUT_PEER.PEER_NOT_FOUND_IN_EVENT);
       }
     });
   });

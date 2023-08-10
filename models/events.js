@@ -1,6 +1,7 @@
 const Firestore = require("@google-cloud/firestore");
 const firestore = require("../utils/firestore");
 const logger = require("../utils/logger");
+const { ERROR_MESSAGES } = require("../constants/events");
 
 const eventModel = firestore.collection("events");
 const peerModel = firestore.collection("peers");
@@ -145,7 +146,7 @@ const kickoutPeer = async ({ eventId, peerId, reason }) => {
     const peerSnapshot = await peerRef.get();
 
     if (!peerSnapshot.exists) {
-      throw new Error("Peer not found");
+      throw new Error(ERROR_MESSAGES.MODELS.KICKOUT_PEER.PEER_NOT_FOUND);
     }
 
     const peerData = peerSnapshot.data();
@@ -153,7 +154,7 @@ const kickoutPeer = async ({ eventId, peerId, reason }) => {
 
     const eventIndex = joinedEvents.findIndex((event) => event.event_id === eventId);
     if (eventIndex === -1) {
-      throw new Error("Participant is not part of the specified event.");
+      throw new Error(ERROR_MESSAGES.MODELS.KICKOUT_PEER.PEER_NOT_FOUND_IN_EVENT);
     }
 
     const updatedJoinedEvents = joinedEvents.map((event, index) =>
@@ -165,7 +166,7 @@ const kickoutPeer = async ({ eventId, peerId, reason }) => {
     const updatedPeerSnapshot = await peerRef.get();
     return updatedPeerSnapshot.data();
   } catch (error) {
-    logger.error("Error in removing peer from the event.", error);
+    logger.error(ERROR_MESSAGES.MODELS.KICKOUT_PEER.UNABLE_TO_REMOVE_PEER, error);
     throw error;
   }
 };

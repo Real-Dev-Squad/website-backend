@@ -21,6 +21,7 @@ const config = require("config");
 const sinon = require("sinon");
 
 const { EventTokenService, EventAPIService } = require("../../services");
+const { SUCCESS_MESSAGES } = require("../../constants/events");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -432,7 +433,7 @@ describe("events", function () {
 
       service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "peer remove request submitted" });
 
-      sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Peer is kicked out from the event" });
+      sinon.stub(eventQuery, "kickoutPeer").returns({ message: SUCCESS_MESSAGES.CONTROLLERS.KICKOUT_PEER });
 
       chai
         .request(app)
@@ -446,7 +447,7 @@ describe("events", function () {
 
           expect(response).to.have.status(200);
           expect(response.body.message).to.be.a("string");
-          expect(response.body.message).to.equal("Peer is kicked out from the event");
+          expect(response.body.message).to.equal(SUCCESS_MESSAGES.CONTROLLERS.KICKOUT_PEER);
 
           return done();
         });
