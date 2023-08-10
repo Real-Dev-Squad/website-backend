@@ -92,7 +92,7 @@ describe("mobile auth", function () {
       };
 
       await qrCodeAuth.storeUserDeviceInfo(userDeviceInfoData);
-      const response = await qrCodeAuth.retrieveUserDeviceInfo(userDeviceInfoData.device_id);
+      const response = await qrCodeAuth.retrieveUserDeviceInfo({deviceId : userDeviceInfoData.device_id});
       const userDeviceInfo = response.data;
       const {
         user_id: userID,
