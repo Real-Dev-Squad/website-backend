@@ -1,12 +1,6 @@
 const userQuery = require("../models/users");
 const members = require("../models/members");
-const { USER_SENSITIVE_DATA } = require("../constants/users");
-const ACCESS_LEVEL = {
-  PUBLIC: "public",
-  INTERNAL: "internal",
-  PRIVATE: "private",
-  CONFIDENTIAL: "confidential",
-};
+const { ROLE_LEVEL, ROLE_ACCESS, ACCESS_LEVEL } = require("../constants/userDataLevels");
 
 const retrieveUsers = async ({
   id = null,
@@ -83,42 +77,20 @@ const retrieveUsersWithRole = async (role) => {
   return users;
 };
 
-const removeSensitiveInfo = function (obj) {
-  for (let i = 0; i < USER_SENSITIVE_DATA.length; i++) {
-    if (Object.prototype.hasOwnProperty.call(obj, USER_SENSITIVE_DATA[i])) {
-      delete obj[USER_SENSITIVE_DATA[i]];
+const removeSensitiveInfo = function (obj, level = ACCESS_LEVEL.PUBLIC) {
+  for (let i = 0; i < ROLE_ACCESS[level].length; i++) {
+    if (Object.prototype.hasOwnProperty.call(obj, ROLE_ACCESS[level][i])) {
+      delete obj[ROLE_ACCESS[level][i]];
     }
   }
-};
-
-const privilegedAccess = (user, data, level) => {
-  if ("email" in data) {
-    user.email = data.email;
-  }
-  if (level === ACCESS_LEVEL.PRIVATE || level === ACCESS_LEVEL.CONFIDENTIAL) {
-    if ("phone" in data) {
-      user.phone = data.phone;
-    }
-  }
-  if (level === ACCESS_LEVEL.CONFIDENTIAL) {
-    if ("chaincode" in data) {
-      user.chaincode = data.chaincode;
-    }
-  }
-  return user;
 };
 
 const levelSpecificAccess = (user, level = ACCESS_LEVEL.PUBLIC, role = null) => {
-  const unFilteredData = JSON.parse(JSON.stringify(user));
-  removeSensitiveInfo(user);
-  if (level === ACCESS_LEVEL.PUBLIC) {
+  if (level === ACCESS_LEVEL.PUBLIC || ROLE_LEVEL[level].includes(role)) {
+    removeSensitiveInfo(user, level);
     return user;
   }
-  if (role === null || !role.super_user) {
-    return "unauthorized";
-  }
-
-  return privilegedAccess(user, unFilteredData, level);
+  return "unauthorized";
 };
 
 module.exports = {
@@ -128,7 +100,5 @@ module.exports = {
   retrieveMembers,
   retrieveUsersWithRole,
   retreiveFilteredUsers,
-  privilegedAccess,
   levelSpecificAccess,
-  ACCESS_LEVEL,
 };
