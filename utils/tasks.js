@@ -64,10 +64,12 @@ const buildTasks = (tasks, initialTaskArray = []) => {
   return initialTaskArray;
 };
 
-const transformQuery = (dev = false, status = "", size, page) => {
+const transformQuery = (dev = false, status = "", size, page, assignee = "", term = "") => {
   const query = {};
   const transformedDev = JSON.parse(dev);
   const transformedStatus = MAPPED_TASK_STATUS[status.toUpperCase()];
+  const transformedAssignee = assignee.toLowerCase();
+  const transformedTerm = term.toLowerCase();
 
   if (page) {
     query.page = parseInt(page);
@@ -77,7 +79,13 @@ const transformQuery = (dev = false, status = "", size, page) => {
     query.size = parseInt(size);
   }
 
-  return { status: transformedStatus, dev: transformedDev, ...query };
+  return {
+    status: transformedStatus,
+    dev: transformedDev,
+    assignee: transformedAssignee,
+    term: transformedTerm,
+    ...query,
+  };
 };
 
 const parseSearchQuery = (queryString) => {
