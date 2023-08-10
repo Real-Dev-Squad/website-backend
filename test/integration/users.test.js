@@ -37,6 +37,7 @@ const { userPhotoVerificationData } = require("../fixtures/user/photo-verificati
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const photoVerificationModel = firestore.collection("photo-verification");
+
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -99,6 +100,48 @@ describe("Users", function () {
         });
     });
 
+    it("Should update the username with valid username", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          username: "validUsername123",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+
+          return done();
+        });
+    });
+
+    it("Should update the user roles", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          roles: {
+            archived: false,
+            in_discord: false,
+            developer: true,
+          },
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+
+          return done();
+        });
+    });
+
     it("Should return 400 for invalid status value", function (done) {
       chai
         .request(app)
@@ -117,7 +160,102 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: '"status" must be one of [ooo, idle, active]',
+            message: '"status" must be one of [ooo, idle, active, onboarding]',
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 if required roles is missing", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          roles: {
+            in_discord: false,
+            developer: true,
+          },
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+
+          return done();
+        });
+    });
+
+    it("Should return 400 if invalid roles", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          roles: {
+            archived: "false",
+            in_discord: false,
+            developer: true,
+          },
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid username", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          username: "@invalidUser-name",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Username must be between 4 and 20 characters long and contain only letters or numbers.",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid Twitter ID", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          twitter_id: "invalid@twitter_id",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Twitter ID. ID should not contain special character @",
           });
 
           return done();
@@ -175,6 +313,10 @@ describe("Users", function () {
           userData.forEach((user) => {
             expect(user.roles.archived).to.equal(false);
           });
+          expect(res.body.users[0]).to.not.have.property("phone");
+          expect(res.body.users[0]).to.not.have.property("email");
+          expect(res.body.users[0]).to.not.have.property("tokens");
+          expect(res.body.users[0]).to.not.have.property("chaincode");
           return done();
         });
     });
@@ -410,7 +552,8 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body).to.not.have.property("phone");
           expect(res.body).to.not.have.property("email");
-
+          expect(res.body).to.not.have.property("tokens");
+          expect(res.body).to.not.have.property("chaincode");
           return done();
         });
     });
@@ -430,7 +573,6 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body).to.have.property("phone");
           expect(res.body).to.have.property("email");
-
           return done();
         });
     });
@@ -474,7 +616,8 @@ describe("Users", function () {
           expect(res.body.user).to.be.a("object");
           expect(res.body.user).to.not.have.property("phone");
           expect(res.body.user).to.not.have.property("email");
-
+          expect(res.body.user).to.not.have.property("tokens");
+          expect(res.body.user).to.not.have.property("chaincode");
           return done();
         });
     });
@@ -513,6 +656,10 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User returned successfully!");
           expect(res.body.user).to.be.a("object");
+          expect(res.body.user).to.not.have.property("phone");
+          expect(res.body.user).to.not.have.property("email");
+          expect(res.body.user).to.not.have.property("tokens");
+          expect(res.body.user).to.not.have.property("chaincode");
           return done();
         });
     });
@@ -1490,6 +1637,33 @@ describe("Users", function () {
             return done();
           });
       });
+    });
+  });
+
+  describe("POST /users/tokens", function () {
+    before(async function () {
+      await addOrUpdate(userData[0]);
+      await addOrUpdate(userData[1]);
+      await addOrUpdate(userData[2]);
+      await addOrUpdate(userData[3]);
+    });
+    after(async function () {
+      await cleanDb();
+    });
+    it("should remove all the users with token field", function (done) {
+      chai
+        .request(app)
+        .post("/users/tokens")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Github Token removed from all users!");
+          expect(res.body.usersFound).to.be.equal(3);
+          return done();
+        });
     });
   });
 });

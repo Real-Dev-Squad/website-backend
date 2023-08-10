@@ -1,9 +1,8 @@
 const ROLES = require("../constants/roles");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
-const { fetchUser } = require("../models/users");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-
+const dataAccess = require("../services/dataAccessLayer");
 /**
  * Fetches the data about our members
  *
@@ -13,8 +12,7 @@ const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 const getMembers = async (req, res) => {
   try {
-    const allUsers = await members.fetchUsers(req.query);
-
+    const allUsers = await dataAccess.retrieveMembers(req.query);
     return res.json({
       message: allUsers.length ? "Members returned successfully!" : "No member found",
       members: allUsers,
@@ -34,7 +32,7 @@ const getMembers = async (req, res) => {
 
 const getIdleMembers = async (req, res) => {
   try {
-    const onlyMembers = await members.fetchUsersWithRole(ROLES.MEMBER);
+    const onlyMembers = await dataAccess.retrieveUsersWithRole(ROLES.MEMBER);
     const taskParticipants = await tasks.fetchActiveTaskMembers();
     const idleMembers = onlyMembers?.filter(({ id }) => !taskParticipants.has(id));
     const idleMemberUserNames = idleMembers?.map((member) => member.username);
@@ -59,7 +57,7 @@ const getIdleMembers = async (req, res) => {
 const moveToMembers = async (req, res) => {
   try {
     const { username } = req.params;
-    const result = await fetchUser({ username });
+    const result = await dataAccess.retrieveUsers({ username });
     if (result.userExists) {
       const successObject = await members.moveToMembers(result.user.id);
       if (successObject.isAlreadyMember) {
@@ -84,7 +82,7 @@ const moveToMembers = async (req, res) => {
 const archiveMembers = async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await fetchUser({ username });
+    const user = await dataAccess.retrieveUsers({ username });
     if (user?.userExists) {
       const successObject = await members.addArchiveRoleToMembers(user.user.id);
       if (successObject.isArchived) {

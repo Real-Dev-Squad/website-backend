@@ -1,8 +1,7 @@
-const { NotFound } = require("http-errors");
-const { userState } = require("../constants/userStatus");
+const { Forbidden, NotFound } = require("http-errors");
 const firestore = require("../utils/firestore");
 const {
-  getTommorowTimeStamp,
+  getTomorrowTimeStamp,
   filterStatusData,
   generateAlreadyExistingStatusResponse,
   updateCurrentStatusToState,
@@ -11,10 +10,13 @@ const {
   getUserIdFromUserName,
   checkIfUserHasLiveTasks,
   generateErrorResponse,
+  generateNewStatus,
+  getNextDayTimeStamp,
 } = require("../utils/userStatus");
 const { TASK_STATUS } = require("../constants/tasks");
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
+const { userState } = require("../constants/userStatus");
 const usersCollection = firestore.collection("users");
 
 /**
@@ -100,7 +102,7 @@ const updateUserStatus = async (userId, newStatusData) => {
   try {
     const userStatusDocs = await userStatusModel.where("userId", "==", userId).limit(1).get();
     const [userStatusDoc] = userStatusDocs.docs;
-    const tommorow = getTommorowTimeStamp();
+    const tommorow = getTomorrowTimeStamp();
     if (userStatusDoc) {
       const docId = userStatusDoc.id;
       const userStatusData = userStatusDoc.data();
@@ -156,8 +158,16 @@ const updateUserStatus = async (userId, newStatusData) => {
  */
 
 const updateAllUserStatus = async () => {
+  const summary = {
+    usersCount: 0,
+    oooUsersAltered: 0,
+    oooUsersUnaltered: 0,
+    nonOooUsersAltered: 0,
+    nonOooUsersUnaltered: 0,
+  };
   try {
     const userStatusDocs = await userStatusModel.where("futureStatus.state", "in", ["ACTIVE", "IDLE", "OOO"]).get();
+    summary.usersCount = userStatusDocs._size;
     const batch = firestore.batch();
     const today = new Date().getTime();
     userStatusDocs.forEach(async (document) => {
@@ -169,15 +179,23 @@ const updateAllUserStatus = async () => {
       const { state: futureState } = futureStatus;
       if (futureState === "ACTIVE" || futureState === "IDLE") {
         if (today >= futureStatus.from) {
+          // OOO period is over and we need to update their current status
           newStatusData.currentStatus = { ...futureStatus, until: "", updatedAt: today };
-          newStatusData.futureStatus = {};
+          delete newStatusData.futureStatus;
           toUpdate = !toUpdate;
+          summary.oooUsersAltered++;
+        } else {
+          summary.oooUsersUnaltered++;
         }
       } else {
+        // futureState is OOO
         if (today > futureStatus.until) {
-          newStatusData.futureStatus = {};
+          // the OOO period is over
+          delete newStatusData.futureStatus;
           toUpdate = !toUpdate;
+          summary.nonOooUsersAltered++;
         } else if (today <= doc.futureStatus.until && today >= doc.futureStatus.from) {
+          // the current date i.e today lies in between the from and until so we need to swap the status
           let newCurrentStatus = {};
           let newFutureStatus = {};
           newCurrentStatus = { ...futureStatus, updatedAt: today };
@@ -187,6 +205,9 @@ const updateAllUserStatus = async () => {
           newStatusData.currentStatus = newCurrentStatus;
           newStatusData.futureStatus = newFutureStatus;
           toUpdate = !toUpdate;
+          summary.nonOooUsersAltered++;
+        } else {
+          summary.nonOooUsersUnaltered++;
         }
       }
       if (toUpdate) {
@@ -199,13 +220,12 @@ const updateAllUserStatus = async () => {
       );
     }
     await batch.commit();
-    return { status: 204, message: "User Status updated Successfully." };
+    return summary;
   } catch (error) {
     logger.error(`error in updating User Status Documents ${error}`);
     return { status: 500, message: "User Status couldn't be updated Successfully." };
   }
 };
-
 /**
  * Updates the user status based on a new task assignment.
  * @param {string} userId - The ID of the user.
@@ -326,90 +346,114 @@ const updateStatusOnTaskCompletion = async (userId) => {
   }
 };
 
-const massUpdateIdleUsers = async (users) => {
+const batchUpdateUsersStatus = async (users) => {
   const currentTimeStamp = new Date().getTime();
   const batch = firestore.batch();
-  let usersWithStatusUnchanged = 0;
+  const summary = {
+    usersCount: users.length,
+    unprocessedUsers: 0,
+    onboardingUsersAltered: 0,
+    onboardingUsersUnaltered: 0,
+    activeUsersAltered: 0,
+    activeUsersUnaltered: 0,
+    idleUsersAltered: 0,
+    idleUsersUnaltered: 0,
+  };
 
-  await Promise.all(
-    users.map(async (userId) => {
-      let latestStatusData;
-      try {
-        latestStatusData = await getUserStatus(userId);
-      } catch (error) {
-        usersWithStatusUnchanged++;
-        return batch;
-      }
-      const { id, userStatusExists, data } = latestStatusData;
+  for (const { userId, state } of users) {
+    let latestStatusData;
+    try {
+      latestStatusData = await getUserStatus(userId);
+    } catch (error) {
+      summary.unprocessedUsers++;
+      continue;
+    }
+    const { id, userStatusExists, data } = latestStatusData;
+    const statusToUpdate = {
+      state,
+      message: "",
+      from: new Date().setUTCHours(0, 0, 0, 0),
+      until: "",
+      updatedAt: currentTimeStamp,
+    };
 
-      if (!userStatusExists || !data?.currentStatus) {
-        const newUserStatusRef = userStatusModel.doc();
-        const newUserStatusData = {
-          userId,
-          currentStatus: {
-            state: userState.IDLE,
-            message: "",
-            from: currentTimeStamp,
-            until: "",
-            updatedAt: currentTimeStamp,
-          },
-        };
-        batch.set(newUserStatusRef, newUserStatusData);
-      } else {
-        const {
-          currentStatus: { state, until },
-        } = data;
-
-        if (state === userState.OOO || state === userState.ACTIVE) {
-          const docRef = userStatusModel.doc(id);
-          const updatedStatusData =
-            state === userState.OOO
-              ? {
-                  futureStatus: {
-                    state: userState.IDLE,
-                    message: "",
-                    from: until,
-                    until: "",
-                    updatedAt: currentTimeStamp,
-                  },
-                }
-              : {
-                  currentStatus: {
-                    state: userState.IDLE,
-                    message: "",
-                    from: currentTimeStamp,
-                    until: "",
-                    updatedAt: currentTimeStamp,
-                  },
-                };
+    if (!userStatusExists || !data?.currentStatus) {
+      const newUserStatusRef = userStatusModel.doc();
+      const newUserStatusData = {
+        userId,
+        currentStatus: statusToUpdate,
+      };
+      state === userState.ACTIVE ? summary.activeUsersAltered++ : summary.idleUsersAltered++;
+      batch.set(newUserStatusRef, newUserStatusData);
+    } else {
+      const {
+        currentStatus: { state: currentState, until },
+      } = data;
+      if (currentState === state) {
+        currentState === userState.ACTIVE ? summary.activeUsersUnaltered++ : summary.idleUsersUnaltered++;
+        continue;
+      } else if (currentState === userState.ONBOARDING) {
+        const docRef = userStatusModel.doc(id);
+        if (state === userState.ACTIVE) {
+          const updatedStatusData = {
+            currentStatus: statusToUpdate,
+          };
+          summary.onboardingUsersAltered++;
           batch.update(docRef, updatedStatusData);
         } else {
-          usersWithStatusUnchanged++;
+          summary.onboardingUsersUnaltered++;
         }
+      } else if (currentState === userState.OOO) {
+        const docRef = userStatusModel.doc(id);
+        state === userState.ACTIVE ? summary.activeUsersAltered++ : summary.idleUsersAltered++;
+
+        const currentDate = new Date();
+        const untilDate = new Date(until);
+
+        const timeDifferenceMilliseconds = currentDate.setUTCHours(0, 0, 0, 0) - untilDate.setUTCHours(0, 0, 0, 0);
+        const timeDifferenceDays = Math.floor(timeDifferenceMilliseconds / (24 * 60 * 60 * 1000));
+
+        if (timeDifferenceDays >= 1) {
+          batch.update(docRef, {
+            currentStatus: statusToUpdate,
+          });
+        } else {
+          const getNextDayAfterUntil = getNextDayTimeStamp(until);
+          batch.update(docRef, {
+            futureStatus: {
+              ...statusToUpdate,
+              from: getNextDayAfterUntil,
+            },
+          });
+        }
+      } else {
+        const docRef = userStatusModel.doc(id);
+        state === userState.ACTIVE ? summary.activeUsersAltered++ : summary.idleUsersAltered++;
+        const updatedStatusData = {
+          currentStatus: statusToUpdate,
+        };
+        batch.update(docRef, updatedStatusData);
       }
-      return batch;
-    })
-  );
+    }
+  }
 
   try {
     await batch.commit();
-    return {
-      totalUsers: users.length,
-      usersWithStatusUpdated: users.length - usersWithStatusUnchanged,
-      usersOnboardingOrAlreadyIdle: usersWithStatusUnchanged,
-    };
+    return summary;
   } catch (error) {
     throw new Error("Batch operation failed");
   }
 };
 
-const getIdleUsers = async () => {
-  const idleUsers = [];
-  const usersNotProcessed = [];
+const getTaskBasedUsersStatus = async () => {
+  const users = [];
+  let totalIdleUsers = 0;
+  let totalActiveUsers = 0;
+  const unprocessedUsers = [];
   let errorCount = 0;
-  let discordActiveNonArchivedUsersQuerySnapshot;
+  let usersSnapshot;
   try {
-    discordActiveNonArchivedUsersQuerySnapshot = await usersCollection
+    usersSnapshot = await usersCollection
       .where("roles.in_discord", "==", true)
       .where("roles.archived", "==", false)
       .get();
@@ -417,10 +461,10 @@ const getIdleUsers = async () => {
     logger.error(`unable to get users ${error.message}`);
     throw new Error("unable to get users");
   }
-  const totalValidUsersCount = discordActiveNonArchivedUsersQuerySnapshot.size;
-  if (totalValidUsersCount) {
+  const totalUsers = usersSnapshot.size;
+  if (totalUsers) {
     await Promise.all(
-      discordActiveNonArchivedUsersQuerySnapshot.docs.map(async (userDoc) => {
+      usersSnapshot.docs.map(async (userDoc) => {
         const assigneeId = userDoc.id;
         try {
           const tasksQuerySnapshot = await firestore
@@ -429,11 +473,15 @@ const getIdleUsers = async () => {
             .where("status", "in", [TASK_STATUS.ASSIGNED, TASK_STATUS.IN_PROGRESS])
             .get();
           if (tasksQuerySnapshot.empty) {
-            idleUsers.push(assigneeId);
+            totalIdleUsers++;
+            users.push({ userId: assigneeId, state: userState.IDLE });
+          } else {
+            totalActiveUsers++;
+            users.push({ userId: assigneeId, state: userState.ACTIVE });
           }
         } catch (error) {
           errorCount++;
-          usersNotProcessed.push(assigneeId);
+          unprocessedUsers.push(assigneeId);
           logger.error(`Error retrieving tasks for user ${assigneeId}: ${error.message}`);
         }
       })
@@ -441,12 +489,57 @@ const getIdleUsers = async () => {
   }
 
   return {
-    totalValidUsersCount,
-    idleUsersCount: idleUsers.length,
-    idleUsers,
-    usersNotProcessedCount: errorCount,
-    usersNotProcessed,
+    totalUsers,
+    totalIdleUsers,
+    totalActiveUsers,
+    totalUnprocessedUsers: errorCount,
+    unprocessedUsers,
+    users,
   };
+};
+
+/**
+ * Cancels the Out-of-Office (OOO) status for a user.
+ * @param {string} userId - The ID of the user.
+ * @returns {Promise<object>} - A promise that resolves to an object with cancellation details.
+ * @throws {Error} - If there is an error fetching the user status document or updating the status.
+ */
+
+const cancelOooStatus = async (userId) => {
+  try {
+    let userStatusDoc;
+    let isActive;
+    try {
+      userStatusDoc = await userStatusModel.where("userId", "==", userId).get();
+    } catch (error) {
+      logger.error(`Unable to fetch user status document from the firestore : ${error.message}`);
+      throw error;
+    }
+    if (!userStatusDoc.size) {
+      throw new NotFound("No User status document found");
+    }
+    const [userStatusDocument] = userStatusDoc.docs;
+    const docId = userStatusDocument.id;
+    const { futureStatus, ...docData } = userStatusDocument.data();
+    if (docData.currentStatus.state !== userState.OOO) {
+      throw new Forbidden(
+        `The ${userState.OOO} Status cannot be canceled because the current status is ${docData.currentStatus.state}.`
+      );
+    }
+    try {
+      isActive = await checkIfUserHasLiveTasks(userId, tasksModel);
+    } catch (error) {
+      logger.error(`Unable to fetch user status based on the task : ${error.message}`);
+      throw error;
+    }
+    const updatedStatus = generateNewStatus(isActive);
+    const newStatusData = { ...docData, ...updatedStatus };
+    await userStatusModel.doc(docId).update(newStatusData);
+    return { id: docId, userStatusExists: true, data: newStatusData };
+  } catch (error) {
+    logger.error(`Error while canceling ${userState.OOO} status: ${error.message}`);
+    throw error;
+  }
 };
 
 module.exports = {
@@ -458,6 +551,7 @@ module.exports = {
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
   updateStatusOnTaskCompletion,
-  massUpdateIdleUsers,
-  getIdleUsers,
+  batchUpdateUsersStatus,
+  getTaskBasedUsersStatus,
+  cancelOooStatus,
 };

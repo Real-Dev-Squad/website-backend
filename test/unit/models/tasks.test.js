@@ -6,14 +6,16 @@
 
 const chai = require("chai");
 const { expect } = chai;
-
 const cleanDb = require("../../utils/cleanDb");
 const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
-const { addDependency, updateTask } = require("../../../models/tasks");
+const { addDependency, updateTask, getBuiltTasks } = require("../../../models/tasks");
 const firestore = require("../../../utils/firestore");
 const { TASK_STATUS } = require("../../../constants/tasks");
 const dependencyModel = firestore.collection("TaskDependencies");
+const tasksModel = firestore.collection("tasks");
+const userData = require("../../fixtures/user/user");
+const addUser = require("../../utils/addUser");
 
 describe("tasks", function () {
   afterEach(async function () {
@@ -89,6 +91,22 @@ describe("tasks", function () {
         expect(task).to.contain.all.keys(sameTask);
       });
     });
+    it("should fetch tasks filtered by search term", async function () {
+      const searchTerm = "task-dependency";
+      const tasksSnapshot = await tasksModel.get();
+      const result = await getBuiltTasks(tasksSnapshot, searchTerm);
+      expect(result).to.have.lengthOf(1);
+      result.forEach((task) => {
+        expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
+      });
+      expect(tasksData[5].title.includes(searchTerm));
+    });
+    it("should return empty array when no search term is found", async function () {
+      const searchTerm = "random";
+      const tasksSnapshot = await tasksModel.get();
+      const result = await getBuiltTasks(tasksSnapshot, searchTerm);
+      expect(result).to.have.lengthOf(0);
+    });
   });
 
   describe("paginatedTasks", function () {
@@ -140,16 +158,64 @@ describe("tasks", function () {
     });
   });
 
-  describe("updateDependency", function () {
+  describe("update Dependency", function () {
     it("should add dependencies to firestore", async function () {
-      const data = {
-        taskId: "taskId1",
-        dependsOn: ["taskId2", "taskId3"],
-      };
-      const result = await updateTask(data);
+      const taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      await firestore.collection("tasks").doc(taskId).set(tasksData[5]);
 
-      expect(result.taskDetails.taskId).to.equal(data.taskId);
-      expect(result.taskDetails.dependsOn).to.equal(data.dependsOn);
+      const taskId1 = (await tasks.updateTask(tasksData[3])).taskId;
+      const taskId2 = (await tasks.updateTask(tasksData[4])).taskId;
+      const dependsOn = [taskId1, taskId2];
+      const data = {
+        dependsOn,
+      };
+
+      await updateTask(data, taskId);
+      const taskData = await tasks.fetchTask(taskId);
+      taskData.dependencyDocReference.forEach((taskId) => {
+        expect(dependsOn).to.include(taskId);
+      });
+    });
+    it("should throw error when wrong id is passed", async function () {
+      const taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      await firestore.collection("tasks").doc(taskId).set(tasksData[5]);
+
+      const dependsOn = ["taskId1", "taskId2"];
+      const data = {
+        dependsOn,
+      };
+
+      try {
+        await updateTask(data, taskId);
+        expect.fail("Something went wrong");
+      } catch (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal("Invalid dependency passed");
+      }
+    });
+  });
+  describe("update tasks", function () {
+    it("should update status when assignee pass as payload", async function () {
+      const data = {
+        assignee: "sagar",
+      };
+      const taskId = (await tasks.updateTask(tasksData[4])).taskId;
+
+      const userArr = userData();
+      const userId1 = await addUser(userArr[3]);
+
+      await firestore.collection("tasks").doc(taskId).set(tasksData[4]);
+      await firestore.collection("users").doc(userId1).set(userArr[3]);
+
+      await updateTask(data, taskId);
+
+      const modalResult = await tasks.fetchTask(taskId);
+      expect(modalResult.taskData.status).to.be.equal(TASK_STATUS.ASSIGNED);
+      expect(modalResult.taskData.assignee).to.be.equal("sagar");
+
+      const firestoreResult = (await tasksModel.doc(taskId).get()).data();
+      expect(firestoreResult.status).to.be.equal(TASK_STATUS.ASSIGNED);
+      expect(firestoreResult.assignee).to.be.equal(userId1);
     });
   });
 });

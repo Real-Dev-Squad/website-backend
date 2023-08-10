@@ -25,6 +25,7 @@ const getIssues = async (req, res) => {
       const taskData = await tasks.fetchTaskByIssueId(issue.id);
       if (taskData) {
         issue.taskExists = true;
+        issue.taskId = taskData.id;
       }
 
       return issue;

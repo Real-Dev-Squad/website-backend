@@ -1,7 +1,10 @@
+const { customWordCountValidator } = require("../../utils/customWordCountValidator");
+
 const joi = require("joi");
 const { USER_STATUS } = require("../../constants/users");
 const ROLES = require("../../constants/roles");
 const { IMAGE_VERIFICATION_TYPES } = require("../../constants/imageVerificationTypes");
+const { userState } = require("../../constants/userStatus");
 
 const updateUser = async (req, res, next) => {
   const schema = joi
@@ -10,7 +13,13 @@ const updateUser = async (req, res, next) => {
     .keys({
       phone: joi.string().optional(),
       email: joi.string().optional(),
-      username: joi.string().optional(),
+      username: joi
+        .string()
+        .optional()
+        .min(4)
+        .max(20)
+        .regex(/^[a-zA-Z0-9]+$/)
+        .message("Username must be between 4 and 20 characters long and contain only letters or numbers."),
       first_name: joi.string().optional(),
       last_name: joi.string().optional(),
       yoe: joi.number().min(0).optional(),
@@ -18,7 +27,11 @@ const updateUser = async (req, res, next) => {
       designation: joi.string().optional(),
       img: joi.string().optional(),
       linkedin_id: joi.string().optional(),
-      twitter_id: joi.string().optional(),
+      twitter_id: joi
+        .string()
+        .optional()
+        .regex(/^[^@]*$/)
+        .message("Invalid Twitter ID. ID should not contain special character @"),
       instagram_id: joi.string().optional(),
       website: joi.string().optional(),
       status: joi
@@ -26,6 +39,14 @@ const updateUser = async (req, res, next) => {
         .valid(...Object.values(USER_STATUS))
         .optional(),
       discordId: joi.string().optional(),
+      roles: joi.object().keys({
+        archived: joi.boolean().required(),
+        in_discord: joi.boolean().required(),
+        developer: joi.boolean().optional(),
+        designer: joi.boolean().optional(),
+        maven: joi.boolean().optional(),
+        productmanager: joi.boolean().optional(),
+      }),
     });
 
   try {
@@ -66,9 +87,18 @@ const validateJoinData = async (req, res, next) => {
       country: joi.string().min(1).required(),
       foundFrom: joi.string().min(1).required(),
       introduction: joi.string().min(1).required(),
-      forFun: joi.string().min(100).required(),
-      funFact: joi.string().min(100).required(),
-      whyRds: joi.string().min(100).required(),
+      forFun: joi
+        .string()
+        .custom((value, helpers) => customWordCountValidator(value, helpers, 100))
+        .required(),
+      funFact: joi
+        .string()
+        .custom((value, helpers) => customWordCountValidator(value, helpers, 100))
+        .required(),
+      whyRds: joi
+        .string()
+        .custom((value, helpers) => customWordCountValidator(value, helpers, 100))
+        .required(),
       flowState: joi.string().optional(),
       numberOfHours: joi.number().min(1).max(100).required(),
     });
@@ -161,6 +191,7 @@ async function getUsers(req, res, next) {
  * @param next {Object} - Express middleware function
  */
 async function validateUserQueryParams(req, res, next) {
+  const validUserStates = [userState.OOO, userState.ONBOARDING, userState.IDLE, userState.ACTIVE];
   const schema = joi
     .object()
     .strict()
@@ -172,10 +203,7 @@ async function validateUserQueryParams(req, res, next) {
       tagId: joi.array().items(joi.string()).single().optional(),
       state: joi
         .alternatives()
-        .try(
-          joi.string().valid("IDLE", "OOO", "ACTIVE"),
-          joi.array().items(joi.string().valid("IDLE", "OOO", "ACTIVE"))
-        )
+        .try(joi.string().valid(...validUserStates), joi.array().items(joi.string().valid(...validUserStates)))
         .optional(),
       role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD, ROLES.ARCHIVED).optional(),
       verified: joi.string().optional(),
