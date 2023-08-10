@@ -493,6 +493,8 @@ const addUserIntro = async (req, res) => {
         numberOfHours: rawData.numberOfHours,
       },
       foundFrom: rawData.foundFrom,
+      created_at: Date.now(),
+      updated_at: Date.now(),
     };
     await userQuery.addJoinData(data);
 
