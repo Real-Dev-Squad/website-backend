@@ -14,7 +14,7 @@ const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
-const dataAccess = require("../.././services/dataAccessLayer");
+const members = require("../../models/members");
 
 chai.use(chaiHttp);
 
@@ -271,20 +271,22 @@ describe("Members", function () {
       await cleanDb();
     });
     it("Should return an object with status 500 and an error message", function (done) {
-      dataAccessStub = Sinon.stub(dataAccess, "retrieveUsers");
+      dataAccessStub = Sinon.stub(members, "addArchiveRoleToMembers");
       dataAccessStub.throws(new Error(INTERNAL_SERVER_ERROR));
+
       addUser(userToBeArchived).then(() => {
         chai
           .request(app)
           .patch(`/members/archiveMembers/${userToBeArchived.username}`)
-          .set("Cookie", `${cookieName}=${jwt}`)
+          .set("cookie", `${cookieName}=${jwt}`)
           .send({ reason: "some reason" })
           .end((err, res) => {
             if (err) {
               return done(err);
             }
             expect(res).to.have.status(500);
-            expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal(INTERNAL_SERVER_ERROR);
             return done();
           });
       });
