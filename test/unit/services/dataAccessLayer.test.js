@@ -132,7 +132,7 @@ describe("Data Access Layer", function () {
       removeSensitiveInfo(userData[12]);
       Object.keys(result).forEach((id) => {
         expect(result[id]).to.deep.equal(userData[12]);
-        USER_SENSITIVE_DATA.forEach((key) => {
+        KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
           expect(result[id]).to.not.have.property(key);
         });
       });
