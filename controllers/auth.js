@@ -168,14 +168,9 @@ const fetchUserDeviceInfo = async (req, res) => {
 const fetchDeviceDetails = async (req, res) => {
   try {
     const userId = req.query.user_id;
-    const userDeviceInfoData = await QrCodeAuthModel.retrieveUserDeviceInfo({userId});
-    console.log('userDeviceInfoData', userDeviceInfoData);
+    const userDeviceInfoData = await QrCodeAuthModel.retrieveUserDeviceInfo({ userId });
     if (!userDeviceInfoData.userExists) {
-      // return res.boom.notFound(`User with id ${userId} does not exist.`);
-      return res.json({
-        message: "Authentication document does not Exists",
-        // data: { device_info: userDeviceInfoData.data.device_info },
-      });
+      return res.boom.notFound(`User with id ${userId} does not exist.`);
     }
     return res.json({
       message: "Authentication document Exists",
@@ -185,7 +180,7 @@ const fetchDeviceDetails = async (req, res) => {
     logger.error(`Error while fetching user device info: ${error}`);
     return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
-}
+};
 
 module.exports = {
   githubAuthLogin,
