@@ -53,7 +53,7 @@ const fetchLogs = async (query, param) => {
     if (userId) {
       const logsSnapshot = await logsModel
         .where("type", "==", param)
-        .where("meta.userId", "==", userId)
+        .where("body.archived_user.user_id", "==", userId)
         .orderBy("timestamp", "desc")
         .get();
       const logs = [];

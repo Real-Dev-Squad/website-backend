@@ -1,13 +1,19 @@
 const archivedUserDetailsModal = [
   {
-    type: "archive-details",
-    meta: {
-      userId: "TEST_USER_ID_1",
-      superUserId: "TEST_SUPER_USER_ID",
-      username: "TEST_USERNAME_1",
-    },
+    type: "archived-details",
+    meta: {},
     body: {
-      reason: "TEST_REASON_1",
+      reason: "test reason",
+      archived_user: { user_id: "R5kljdsleH4Gr2t7tvr0Z", username: "testUser1" },
+      archived_by: {
+        user_id: "ReMyuklislajwooncVL",
+        roles: {
+          in_discord: true,
+          super_user: false,
+          member: true,
+          archived: false,
+        },
+      },
     },
     timestamp: {
       _seconds: 1657193216,
@@ -15,14 +21,20 @@ const archivedUserDetailsModal = [
     },
   },
   {
-    type: "archive-details",
-    meta: {
-      userId: "TEST_USER_ID_2",
-      superUserId: "TEST_SUPER_USER_ID",
-      username: "TEST_USERNAME_2",
-    },
+    type: "archived-details",
+    meta: {},
     body: {
-      reason: "TEST_REASON_2",
+      reason: "test reason",
+      archived_user: { user_id: "R5kljdsleH4Gr2t7tvr0Z", username: "testUser1" },
+      archived_by: {
+        user_id: "ReMyuklislajwooncVL",
+        roles: {
+          in_discord: true,
+          super_user: false,
+          member: true,
+          archived: false,
+        },
+      },
     },
     timestamp: {
       _seconds: 1657193216,
@@ -30,14 +42,20 @@ const archivedUserDetailsModal = [
     },
   },
   {
-    type: "archive-details",
-    meta: {
-      userId: "TEST_USER_ID_1",
-      superUserId: "TEST_SUPER_USER_ID",
-      username: "TEST_USERNAME_1",
-    },
+    type: "archived-details",
+    meta: {},
     body: {
-      reason: "TEST_REASON_1",
+      reason: "test reason",
+      archived_user: { user_id: "Efskee4Gr2t7tvr0Z", username: "testUser2" },
+      archived_by: {
+        user_id: "ReMyuklislajwooncVL",
+        roles: {
+          in_discord: true,
+          super_user: false,
+          member: true,
+          archived: false,
+        },
+      },
     },
     timestamp: {
       _seconds: 1657193216,

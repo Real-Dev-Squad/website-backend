@@ -85,14 +85,10 @@ const archiveMembers = async (req, res) => {
     const { username } = req.params;
     const user = await dataAccess.retrieveUsers({ username });
     const superUserId = req.userData.id;
-    const body = req.body;
-    const meta = {
-      userId: user?.user?.id,
-      superUserId: superUserId,
-      username: username,
-    };
-    const isReasonNullOrUndefined = !body?.reason;
-    const isReasonEmptyOrWhitespace = /^\s*$/.test(body?.reason);
+    const { reason } = req.body;
+    const roles = req?.userData?.roles;
+    const isReasonNullOrUndefined = !reason;
+    const isReasonEmptyOrWhitespace = /^\s*$/.test(reason);
     if (isReasonNullOrUndefined || isReasonEmptyOrWhitespace) {
       return res.boom.badRequest("Reason is required");
     }
@@ -101,7 +97,19 @@ const archiveMembers = async (req, res) => {
       if (successObject.isArchived) {
         return res.boom.badRequest("User is already archived");
       }
-      addLog("archive-details", meta, { body: body?.reason });
+      const body = {
+        reason: reason,
+        archived_user: {
+          user_id: user.user.id,
+          username: user.user.username,
+        },
+        archived_by: {
+          user_id: superUserId,
+          roles: roles,
+        },
+      };
+
+      addLog("archived-details", {}, body);
       return res.status(204).send();
     }
     return res.boom.notFound("User doesn't exist");

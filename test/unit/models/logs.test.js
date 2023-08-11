@@ -49,7 +49,7 @@ describe("Logs", function () {
     });
   });
 
-  describe("GET /logs/archive-details", function () {
+  describe("GET /logs/archived-details", function () {
     let addLogsStub;
     let jwt;
     beforeEach(async function () {
@@ -61,15 +61,13 @@ describe("Logs", function () {
       Sinon.restore();
     });
 
-    it("Should return an object with status 500 and an error message", async function () {
+    it("Should return an Internal server error message", async function () {
       addLogsStub = Sinon.stub(logsQuery, "fetchLogs");
       addLogsStub.throws(new Error(INTERNAL_SERVER_ERROR));
 
       addUser(userToBeMadeMember).then(() => {
-        const res = chai.request(app).get("/logs/archive-details").set("cookie", `${cookieName}=${jwt}`).send();
+        const res = chai.request(app).get("/logs/archived-details").set("cookie", `${cookieName}=${jwt}`).send();
 
-        // expect(res).to.have.status(500);
-        // expect(res.body).to.have.property("message").that.is.a("string");
         expect(res.body.message).to.equal(INTERNAL_SERVER_ERROR);
       });
     });
@@ -92,13 +90,13 @@ describe("Logs", function () {
       expect(data[0]).to.have.property("timestamp").that.is.an("object");
       expect(data[0].timestamp).to.have.property("_seconds").that.is.a("number");
       expect(data[0].timestamp).to.have.property("_nanoseconds").that.is.a("number");
-      expect(data[0].meta).to.have.property("username").that.is.a("string");
+      expect(data[0].body.archived_user).to.have.property("username").that.is.a("string");
       expect(data[0].body).to.have.property("reason").that.is.a("string");
     });
-    it("Should fetch all archived logs for given username", async function () {
+    it("Should fetch all archived logs for given user_id", async function () {
       const { type, meta, body } = logsData.archivedUserDetailsModal[0];
       const query = {
-        userId: meta.userId,
+        userId: body.archived_user.user_id,
       };
       await logsQuery.addLog(type, meta, body);
       const data = await logsQuery.fetchLogs(query, type);
@@ -107,7 +105,6 @@ describe("Logs", function () {
       expect(data[0]).to.have.property("timestamp").that.is.an("object");
       expect(data[0].timestamp).to.have.property("_seconds").that.is.a("number");
       expect(data[0].timestamp).to.have.property("_nanoseconds").that.is.a("number");
-      expect(data[0].meta).to.have.property("username").that.is.a("string");
       expect(data[0].body).to.have.property("reason").that.is.a("string");
     });
     it("Should throw response status 404, if username is incorrect in the query", async function () {
@@ -117,7 +114,7 @@ describe("Logs", function () {
       };
       await logsQuery.addLog(type, meta, body);
       const data = await logsQuery.fetchLogs(query, type);
-      const response = await chai.request(app).get(`/logs/${type}/${meta.username}`);
+      const response = await chai.request(app).get(`/logs/${type}/${query}`);
 
       expect(data).to.be.an("array").with.lengthOf(0);
       expect(response).to.have.status(404);
