@@ -41,8 +41,8 @@ const validateFetchingUserDocument = async (req, res, next) => {
     await schema.validateAsync(req.query);
     next();
   } catch (error) {
-    logger.error(`Invalid Query Parameters Passed`);
-    res.boom.badRequest(`Invalid Query Parameters Passed`);
+    logger.error("Invalid Query Parameters Passed");
+    res.boom.badRequest("Invalid Query Parameters Passed");
   }
 };
 
@@ -55,8 +55,8 @@ const validateFetchingUserDeviceStatus = async (req, res, next) => {
     await schema.validateAsync(req.query);
     next();
   } catch (error) {
-    logger.error(`Invalid Query Parameters Passed`);
-    res.boom.badRequest(`Invalid Query Parameters Passed`);
+    logger.error("Invalid Query Parameters Passed");
+    res.boom.badRequest("Invalid Query Parameters Passed");
   }
 };
 
