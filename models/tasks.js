@@ -119,10 +119,10 @@ const getBuiltTasks = async (tasksSnapshot, searchTerm) => {
   return taskList;
 };
 
-const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, prev }) => {
+const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, prev, dev = false }) => {
   try {
     let initialQuery;
-    if (status === TASK_STATUS.OVERDUE) {
+    if (status === TASK_STATUS.OVERDUE && dev) {
       const currentTime = Math.floor(Date.now() / 1000);
       initialQuery = tasksModel.where("endsOn", "<", currentTime);
     } else {
@@ -157,7 +157,7 @@ const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, 
 
     const allTasks = await getBuiltTasks(snapshot);
 
-    if (status === TASK_STATUS.OVERDUE) {
+    if (status === TASK_STATUS.OVERDUE && dev) {
       const nonOverdueTasksStatus = [MERGED, COMPLETED, RELEASED, VERIFIED, AVAILABLE];
       const overdueTasks = allTasks.filter((task) => !nonOverdueTasksStatus.includes(task.status) && task.assignee);
       return {
