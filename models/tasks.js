@@ -134,12 +134,12 @@ const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, 
       }
     }
 
-    const increaseCost = true;
-    if (term && !increaseCost) {
+    const mayBeBackendCrash = true;
+    if (term && !mayBeBackendCrash) {
       initialQuery = initialQuery.where("title", "<=", term + "\uf8ff").where("title", ">=", term);
     }
 
-    if (term && increaseCost) {
+    if (term && mayBeBackendCrash) {
       const allTasks = await initialQuery.get();
       const tasks = await getBuiltTasks(allTasks, term);
 
