@@ -59,8 +59,7 @@ const retrieveUserDeviceInfo = async ({ deviceId, userId }) => {
   try {
     if (deviceId) {
       queryDocument = await QrCodeAuthModel.where("device_id", "==", deviceId).get();
-    }
-    else if (userId) {
+    } else if (userId) {
       queryDocument = await QrCodeAuthModel.where("user_id", "==", userId)
         .where("authorization_status", "==", "NOT_INIT")
         .get();

@@ -92,7 +92,45 @@ describe("mobile auth", function () {
       };
 
       await qrCodeAuth.storeUserDeviceInfo(userDeviceInfoData);
-      const response = await qrCodeAuth.retrieveUserDeviceInfo({deviceId : userDeviceInfoData.device_id});
+      const response = await qrCodeAuth.retrieveUserDeviceInfo({ deviceId: userDeviceInfoData.device_id });
+      const userDeviceInfo = response.data;
+      const {
+        user_id: userID,
+        device_info: deviceInfo,
+        device_id: deviceId,
+        authorization_status: authorizationStatus,
+        access_token: accessToken,
+      } = userDeviceInfo;
+
+      const data = (await qrCodeAuthModel.doc(userId).get()).data();
+
+      Object.keys(userDeviceInfo).forEach((key) => {
+        expect(userDeviceInfo[key]).to.deep.equal(data[key]);
+      });
+
+      expect(response).to.be.an("object");
+      expect(userID).to.be.a("string");
+      expect(deviceInfo).to.be.a("string");
+      expect(deviceId).to.be.a("string");
+      expect(authorizationStatus).to.be.a("string");
+      expect(accessToken).to.be.a("string");
+    });
+  });
+
+  describe("retrieveUserDeviceInfo with userId", function () {
+    it("should fetch the user device info for mobile auth", async function () {
+      const userData = userDataArray[0];
+      const { userId } = await users.addOrUpdate(userData);
+
+      const userDeviceInfoData = {
+        ...userDeviceInfoDataArray[0],
+        user_id: userId,
+        authorization_status: "NOT_INIT",
+        access_token: "ACCESS_TOKEN",
+      };
+
+      await qrCodeAuth.storeUserDeviceInfo(userDeviceInfoData);
+      const response = await qrCodeAuth.retrieveUserDeviceInfo({ userId: userDeviceInfoData.user_id });
       const userDeviceInfo = response.data;
       const {
         user_id: userID,
