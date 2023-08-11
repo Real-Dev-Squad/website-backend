@@ -9,7 +9,7 @@ const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
-const { setInDiscordFalseScript } = require("../services/discordService");
+const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
@@ -309,8 +309,42 @@ const verifyUserImage = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
-const sampleFunc = async (req, res) => {
-  return res.json({ message: "I m working!!!" });
+
+/**
+ * Patch Update user nickname
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const updateDiscordUserNickname = async (req, res) => {
+  try {
+    // const token = req.cookies[config.get("userToken.cookieName")];
+    // console.log("TOKEN", token);
+    // console.log("params", req.params.userId);
+    const userToBeUpdated = await dataAccess.retrieveUsers({ id: req.params.userId });
+    // console.log(userToBeUpdated);
+    const { discordId, username: userName } = userToBeUpdated.user;
+    // console.log("DISCORD-ID", discordId, "user-name", userName);
+    if (!discordId) {
+      throw new Error("user not verified");
+    }
+    const response = await setUserDiscordNickname(userName, discordId);
+    // console.log(`discordId:${req.params.discordId} userName:${userToBeUpdated.username}`);
+
+    // Handling errors based on different responses is yet to be implemented after testing with a real user
+    return res.json({
+      userAffected: {
+        userId: req.params.userId,
+        username: userName,
+        discordId,
+      },
+      message: response,
+    });
+  } catch (err) {
+    logger.error(`Error while updating nickname: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
 };
 const markUnverified = async (req, res) => {
   try {
@@ -653,6 +687,5 @@ module.exports = {
   markUnverified,
   removeTokens,
   updateRoles,
-  // updateUsername
-  sampleFunc,
+  updateDiscordUserNickname,
 };
