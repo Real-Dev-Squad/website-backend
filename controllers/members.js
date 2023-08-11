@@ -115,7 +115,7 @@ const archiveMembers = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while retriving contributions ${err}`);
-    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
