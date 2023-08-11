@@ -631,6 +631,31 @@ const fetchUsersWithToken = async () => {
     return users;
   } catch (err) {
     logger.error(`Error while fetching all users with tokens field: ${err}`);
+    return [];
+  }
+};
+/**
+ *
+ * @param {[string]} userIds  Array id's of user
+ * @returns Object containing the details of the users whose userId was provided.
+ */
+const fetchUserByIds = async (userIds = []) => {
+  if (userIds.length === 0) {
+    return {};
+  }
+  try {
+    const users = {};
+    const usersRefs = userIds.map((docId) => userModel.doc(docId));
+    const documents = await firestore.getAll(...usersRefs);
+    documents.forEach((snapshot) => {
+      if (snapshot.exists) {
+        users[snapshot.id] = snapshot.data();
+      }
+    });
+
+    return users;
+  } catch (err) {
+    logger.error("Error retrieving user data", err);
     throw err;
   }
 };
@@ -714,4 +739,5 @@ module.exports = {
   fetchUsersWithToken,
   removeGitHubToken,
   getUsersByRole,
+  fetchUserByIds,
 };

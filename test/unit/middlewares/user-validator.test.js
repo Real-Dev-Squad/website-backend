@@ -99,6 +99,44 @@ describe("Middleware | Validators | User", function () {
       expect(next.calledOnce).to.be.equal(true);
     });
 
+    it("lets roles update request pass to next", async function () {
+      const req = {
+        body: {
+          roles: {
+            archived: false,
+            in_discord: false,
+            developer: true,
+          },
+        },
+      };
+
+      const res = {};
+      const next = sinon.spy();
+      await updateUser(req, res, next);
+      expect(next.calledOnce).to.be.equal(true);
+    });
+
+    it("Stops the propagation of the next if required roles missing", async function () {
+      const req = {
+        body: {
+          roles: {
+            in_discord: false,
+            developer: true,
+          },
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = sinon.spy();
+      await updateUser(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+      expect(nextSpy.calledOnce).to.be.equal(false);
+    });
+
     it("Stops the propagation of the next if twitter_id is invalid", async function () {
       const req = {
         body: {

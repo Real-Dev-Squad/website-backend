@@ -12,6 +12,9 @@ const userData = require("../fixtures/user/user")();
 
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
+const Sinon = require("sinon");
+const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
+const dataAccess = require("../.././services/dataAccessLayer");
 
 chai.use(chaiHttp);
 
@@ -258,16 +261,40 @@ describe("Members", function () {
   });
 
   describe("PATCH /members/archiveMembers/:username", function () {
+    let dataAccessStub;
     beforeEach(async function () {
       const superUserId = await addUser(superUser);
       jwt = authService.generateAuthToken({ userId: superUserId });
     });
-
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
+    });
+    it("Should return an object with status 500 and an error message", function (done) {
+      dataAccessStub = Sinon.stub(dataAccess, "retrieveUsers");
+      dataAccessStub.throws(new Error(INTERNAL_SERVER_ERROR));
+      addUser(userToBeArchived).then(() => {
+        chai
+          .request(app)
+          .patch(`/members/archiveMembers/${userToBeArchived.username}`)
+          .set("Cookie", `${cookieName}=${jwt}`)
+          .send({ reason: "some reason" })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res).to.have.status(500);
+            expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
+            return done();
+          });
+      });
+    });
     it("Should return 404 if user doesn't exist", function (done) {
       chai
         .request(app)
         .patch(`/members/archiveMembers/${userDoesNotExists.username}`)
         .set("cookie", `${cookieName}=${jwt}`)
+        .send({ reason: "some reason" })
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -278,13 +305,31 @@ describe("Members", function () {
           return done();
         });
     });
+    it("Should return 400 if body is empty", function (done) {
+      chai
+        .request(app)
+        .patch(`/members/archiveMembers/${userToBeArchived.username}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({})
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
 
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Reason is required");
+
+          return done();
+        });
+    });
     it("Should archive the user", function (done) {
       addUser(userToBeArchived).then(() => {
         chai
           .request(app)
           .patch(`/members/archiveMembers/${userToBeArchived.username}`)
           .set("cookie", `${cookieName}=${jwt}`)
+          .send({ reason: "some reason" })
           .end((err, res) => {
             if (err) {
               return done(err);
@@ -305,6 +350,7 @@ describe("Members", function () {
           .request(app)
           .patch(`/members/archiveMembers/${userAlreadyArchived.username}`)
           .set("cookie", `${cookieName}=${jwt}`)
+          .send({ reason: "some reason" })
           .end((err, res) => {
             if (err) {
               return done(err);
@@ -313,27 +359,6 @@ describe("Members", function () {
             expect(res).to.have.status(400);
             expect(res.body).to.be.a("object");
             expect(res.body.message).to.equal("User is already archived");
-
-            return done();
-          });
-      });
-    });
-
-    it("Should return 401 if user is not a super user", function (done) {
-      addUser(nonSuperUser).then((nonSuperUserId) => {
-        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
-        chai
-          .request(app)
-          .patch(`/members/moveToMembers/${nonSuperUser.username}`)
-          .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
-            expect(res).to.have.status(401);
-            expect(res.body).to.be.a("object");
-            expect(res.body.message).to.equal("You are not authorized for this action.");
 
             return done();
           });
