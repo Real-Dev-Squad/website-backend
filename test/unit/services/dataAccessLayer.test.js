@@ -124,6 +124,19 @@ describe("Data Access Layer", function () {
         });
       });
     });
+
+    it("should fetch multiple users details based on ids and remove sensitive data", async function () {
+      const fetchUserStub = sinon.stub(userQuery, "fetchUserByIds");
+      fetchUserStub.returns(Promise.resolve({ [userData[12].id]: userData[12] }));
+      const result = await retrieveUsers({ userIds: [userData[12].id] });
+      removeSensitiveInfo(userData[12]);
+      Object.keys(result).forEach((id) => {
+        expect(result[id]).to.deep.equal(userData[12]);
+        USER_SENSITIVE_DATA.forEach((key) => {
+          expect(result[id]).to.not.have.property(key);
+        });
+      });
+    });
   });
 
   describe("retrieveFilteredUsers", function () {
