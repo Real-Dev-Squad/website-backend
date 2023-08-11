@@ -205,5 +205,7 @@ module.exports = {
   getLowestLevelSkill,
   getPaginationLink,
   getUsernamesFromPRs,
+  getUsernameElseUndefined,
+  getUserIdElseUndefined,
   getRoleToUpdate,
 };
