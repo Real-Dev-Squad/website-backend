@@ -1,7 +1,10 @@
+const Firestore = require("@google-cloud/firestore");
 const firestore = require("../utils/firestore");
 const logger = require("../utils/logger");
+const { ERROR_MESSAGES } = require("../constants/events");
 
 const eventModel = firestore.collection("events");
+const peerModel = firestore.collection("peers");
 
 /**
  * Creates a new event document in Firestore and returns the data for the created document.
@@ -19,7 +22,7 @@ const createEvent = async (eventData) => {
     const data = docSnapshot.data();
     return data;
   } catch (error) {
-    logger.error("Error in adding data", error);
+    logger.error(ERROR_MESSAGES.MODELS.CREATE_EVENT, error);
     throw error;
   }
 };
@@ -36,7 +39,7 @@ const updateEvent = async (eventData) => {
     const docRef = eventModel.doc(eventData.id);
     await docRef.update({ enabled: eventData.enabled });
   } catch (error) {
-    logger.error("Error in enabling event.", error);
+    logger.error(ERROR_MESSAGES.MODELS.UPDATE_EVENT, error);
     throw error;
   }
 };
@@ -61,7 +64,109 @@ const endActiveEvent = async ({ id, reason, lock }) => {
       status: "inactive",
     });
   } catch (error) {
-    logger.error("Error in ending event.", error);
+    logger.error(ERROR_MESSAGES.MODELS.END_ACTIVE_EVENT, error);
+    throw error;
+  }
+};
+
+/**
+ * Adds a peer to an event in the Firestore database.
+ * @async
+ * @function
+ * @param {Object} peerData - The data of the peer to be added.
+ * @param {string} peerData.name - The name of the peer.
+ * @param {string} peerData.eventId - The unique identifier of the event the peer is being added to.
+ * @param {string} peerData.role - The role of the peer in the event.
+ * @param {Date} peerData.joinedAt - The timestamp indicating when the peer joined the event.
+ * @returns {Promise<Object>} The data of the added peer.
+ * @throws {Error} If an error occurs while adding the peer to the event.
+ */
+
+const addPeerToEvent = async (peerData) => {
+  try {
+    const batch = firestore.batch();
+
+    const peerRef = peerModel.doc(peerData.peerId);
+    const peerDocSnapshot = await peerRef.get();
+
+    if (!peerDocSnapshot.exists) {
+      // If the peer document doesn't exist, create a new one
+      const peerDocData = {
+        peerId: peerData.peerId,
+        name: peerData.name,
+        joinedEvents: [
+          {
+            event_id: peerData.eventId,
+            role: peerData.role,
+            joined_at: peerData.joinedAt,
+          },
+        ],
+      };
+      batch.set(peerRef, peerDocData);
+    } else {
+      // If the peer document exists, update the joinedEvents array
+      batch.update(peerRef, {
+        joinedEvents: Firestore.FieldValue.arrayUnion({
+          event_id: peerData.eventId,
+          role: peerData.role,
+          joined_at: peerData.joinedAt,
+        }),
+      });
+    }
+
+    const eventRef = eventModel.doc(peerData.eventId);
+    batch.update(eventRef, {
+      peers: Firestore.FieldValue.arrayUnion(peerRef.id),
+    });
+
+    await batch.commit();
+
+    const updatedPeerSnapshot = await peerRef.get();
+    return updatedPeerSnapshot.data();
+  } catch (error) {
+    logger.error(ERROR_MESSAGES.MODELS.ADD_PEER_TO_EVENT, error);
+    throw error;
+  }
+};
+
+/**
+ * Removes a peer from an event and marks them as kicked out in the Firestore database.
+ * @async
+ * @function
+ * @param {Object} params - The parameters for kicking out the peer.
+ * @param {string} params.eventId - The unique identifier of the event from which the peer is being kicked out.
+ * @param {string} params.peerId - The unique identifier of the peer being kicked out.
+ * @param {string} params.reason - The reason for kicking out the peer from the event.
+ * @returns {Promise<Object>} The updated data of the kicked-out peer.
+ * @throws {Error} If the peer is not found or is not part of the specified event.
+ */
+const kickoutPeer = async ({ eventId, peerId, reason }) => {
+  try {
+    const peerRef = peerModel.doc(peerId);
+    const peerSnapshot = await peerRef.get();
+
+    if (!peerSnapshot.exists) {
+      throw new Error(ERROR_MESSAGES.MODELS.KICKOUT_PEER.PEER_NOT_FOUND);
+    }
+
+    const peerData = peerSnapshot.data();
+    const joinedEvents = peerData.joinedEvents;
+
+    const eventIndex = joinedEvents.findIndex((event) => event.event_id === eventId);
+    if (eventIndex === -1) {
+      throw new Error(ERROR_MESSAGES.MODELS.KICKOUT_PEER.PEER_NOT_FOUND_IN_EVENT);
+    }
+
+    const updatedJoinedEvents = joinedEvents.map((event, index) =>
+      index === eventIndex ? { ...event, left_at: new Date(), reason: reason, isKickedout: true } : event
+    );
+
+    await peerRef.update({ joinedEvents: updatedJoinedEvents });
+
+    const updatedPeerSnapshot = await peerRef.get();
+    return updatedPeerSnapshot.data();
+  } catch (error) {
+    logger.error(ERROR_MESSAGES.MODELS.KICKOUT_PEER.UNABLE_TO_REMOVE_PEER, error);
     throw error;
   }
 };
@@ -70,4 +175,6 @@ module.exports = {
   createEvent,
   updateEvent,
   endActiveEvent,
+  addPeerToEvent,
+  kickoutPeer,
 };

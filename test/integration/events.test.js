@@ -21,6 +21,7 @@ const config = require("config");
 const sinon = require("sinon");
 
 const { EventTokenService, EventAPIService } = require("../../services");
+const { SUCCESS_MESSAGES, ERROR_MESSAGES } = require("../../constants/events");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -95,7 +96,7 @@ describe("events", function () {
           }
           expect(response).to.have.status(500);
           expect(response.body.error).to.equal("ERR_BAD_REQUEST");
-          expect(response.body.message).to.equal("Couldn't create event. Please try again later");
+          expect(response.body.message).to.equal(ERROR_MESSAGES.CONTROLLERS.CREATE_EVENT);
 
           return done();
         });
@@ -191,7 +192,7 @@ describe("events", function () {
           }
           expect(response).to.have.status(500);
           expect(response.body.error).to.equal("ERR_BAD_REQUEST");
-          expect(response.body.message).to.equal("Couldn't get events. Please try again later");
+          expect(response.body.message).to.equal(ERROR_MESSAGES.CONTROLLERS.GET_ALL_EVENTS);
 
           return done();
         });
@@ -262,7 +263,7 @@ describe("events", function () {
 
     it("Should return 500 if an error occurs while retrieving the room information", function (done) {
       const roomId = "invalid-room-id";
-      const mockError = { code: "ERR_BAD_REQUEST", message: "Unable to retrieve event details" };
+      const mockError = { code: "ERR_BAD_REQUEST", message: ERROR_MESSAGES.CONTROLLERS.GET_EVENT_BY_ID };
 
       service = sinon.stub(EventAPIService.prototype, "get").rejects(mockError);
 
@@ -378,7 +379,7 @@ describe("events", function () {
       };
       service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "session is ending" });
 
-      sinon.stub(eventQuery, "endActiveEvent").returns({ message: "Event ended successfully." });
+      sinon.stub(eventQuery, "endActiveEvent").returns({ message: SUCCESS_MESSAGES.CONTROLLERS.END_ACTIVE_EVENT });
 
       chai
         .request(app)
@@ -392,7 +393,7 @@ describe("events", function () {
 
           expect(response).to.have.status(200);
           expect(response.body.message).to.be.a("string");
-          expect(response.body.message).to.equal("Event ended successfully.");
+          expect(response.body.message).to.equal(SUCCESS_MESSAGES.CONTROLLERS.END_ACTIVE_EVENT);
 
           return done();
         });
@@ -402,6 +403,60 @@ describe("events", function () {
       chai
         .request(app)
         .patch("/events")
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(401);
+          expect(response.body.error).to.be.equal("Unauthorized");
+          expect(response.body.message).to.be.equal("Unauthenticated User");
+
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /events/:id/peers/kickout", function () {
+    let service;
+
+    afterEach(function () {
+      service.restore();
+      sinon.restore();
+    });
+
+    it("returns a success message when the request is successful", function (done) {
+      const payload = {
+        peerId: "peer123",
+        reason: "Kicked out for a reason",
+      };
+
+      service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "peer remove request submitted" });
+
+      sinon.stub(eventQuery, "kickoutPeer").returns({ message: SUCCESS_MESSAGES.CONTROLLERS.KICKOUT_PEER });
+
+      chai
+        .request(app)
+        .patch(`/events/${event1Data.room_id}/peers/kickout`)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(payload)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(200);
+          expect(response.body.message).to.be.a("string");
+          expect(response.body.message).to.equal(SUCCESS_MESSAGES.CONTROLLERS.KICKOUT_PEER);
+
+          return done();
+        });
+    });
+
+    it("should return unauthorized error if user is not authenticated", function (done) {
+      chai
+        .request(app)
+        .patch(`/events/${event1Data.room_id}/peers/kickout`)
         .end((error, response) => {
           if (error) {
             return done(error);
