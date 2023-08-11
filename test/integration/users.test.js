@@ -106,7 +106,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          username: "valid-username-1",
+          username: "validUsername123",
         })
         .end((err, res) => {
           if (err) {
@@ -218,7 +218,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          username: "InvalidUser-name",
+          username: "@invalidUser-name",
         })
         .end((err, res) => {
           if (err) {
@@ -230,7 +230,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Username must be lowercase only hypen, numbers are allowed.",
+            message: "Username must be between 4 and 20 characters long and contain only letters or numbers.",
           });
 
           return done();
