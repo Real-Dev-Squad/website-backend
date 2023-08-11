@@ -101,9 +101,10 @@ const getUsers = async (req, res) => {
     }
 
     const data = await dataAccess.retrieveUsers({ query: req.query });
+
     return res.json({
       message: "Users returned successfully!",
-      users: data.allUsers,
+      users: data.users,
       links: {
         next: data.nextId ? getPaginationLink(req.query, "next", data.nextId) : "",
         prev: data.prevId ? getPaginationLink(req.query, "prev", data.prevId) : "",
@@ -126,7 +127,6 @@ const getUser = async (req, res) => {
   try {
     const result = await dataAccess.retrieveUsers({ username: req.params.username });
     const user = result.user;
-
     if (result.userExists) {
       return res.json({
         message: "User returned successfully!",
@@ -206,10 +206,9 @@ const getUsernameAvailabilty = async (req, res) => {
 const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
-      if (req.query.private) {
-        return res.send(req.userData);
-      }
-      const user = await dataAccess.retrieveUsers({ userdata: req.userData });
+      const user = await dataAccess.retrieveUsers({
+        userdata: req.userData,
+      });
       return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");
@@ -230,7 +229,7 @@ const updateSelf = async (req, res) => {
   try {
     const { id: userId } = req.userData;
     if (req.body.username) {
-      const { user } = await userQuery.fetchUser({ userId });
+      const { user } = await dataAccess.retrieveUsers({ id: userId });
       if (!user.incompleteUserDetails) {
         return res.boom.forbidden("Cannot update username again");
       }
@@ -325,8 +324,11 @@ const markUnverified = async (req, res) => {
     });
 
     usersInRdsDiscordServer.forEach((discordUser) => {
-      const found = discordUser.roles.find((role) => role === discordDeveloperRoleId);
-      if (found && !rdsUserMap[discordUser.user.id]) {
+      const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
+      const isMissingUnverifiedRole = !discordUser.roles.includes(unverifiedRoleId);
+      const isUserUnverified = !rdsUserMap[discordUser.user.id]; // Doesn't have discordId in RDS user object
+
+      if (isDeveloper && isUserUnverified && isMissingUnverifiedRole) {
         usersToApplyUnverifiedRole.push(discordUser.user.id);
       }
     });
@@ -379,7 +381,7 @@ const updateUser = async (req, res) => {
 
     const { approval, timestamp, userId, ...profileDiff } = profileDiffData;
 
-    const user = await userQuery.fetchUser({ userId });
+    const user = await dataAccess.retrieveUsers({ id: userId });
     if (!user.userExists) return res.boom.notFound("User doesn't exist");
 
     await profileDiffsQuery.updateProfileDiff({ approval: profileDiffStatus.APPROVED }, profileDiffId);
@@ -405,6 +407,7 @@ const updateUser = async (req, res) => {
 const generateChaincode = async (req, res) => {
   try {
     const { id } = req.userData;
+
     const chaincode = await chaincodeQuery.storeChaincode(id);
     await userQuery.addOrUpdate({ chaincode }, id);
     return res.json({
@@ -568,7 +571,7 @@ const filterUsers = async (req, res) => {
 };
 
 const nonVerifiedDiscordUsers = async (req, res) => {
-  const data = await userQuery.getDiscordUsers();
+  const data = await dataAccess.retrieveDiscordUsers();
   return res.json(data);
 };
 
@@ -577,13 +580,32 @@ const setInDiscordScript = async (req, res) => {
     await setInDiscordFalseScript();
     return res.json({ message: "Successfully added the in_discord field to false for all users" });
   } catch (err) {
-    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
+const removeTokens = async (req, res) => {
+  try {
+    const users = await userQuery.fetchUsersWithToken();
+
+    if (!users.length) {
+      return res.status(404).json({ message: "No users found with github Token!" });
+    }
+
+    await userQuery.removeGitHubToken(users);
+
+    return res.status(200).json({
+      message: "Github Token removed from all users!",
+      usersFound: users.length,
+    });
+  } catch (err) {
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
   }
 };
 
 const updateRoles = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ userId: req.params.id });
+    const result = await dataAccess.retrieveUsers({ id: req.params.id });
     if (result?.userExists) {
       const dataToUpdate = req.body;
       const response = await getRoleToUpdate(result.user, dataToUpdate);
@@ -628,5 +650,6 @@ module.exports = {
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
+  removeTokens,
   updateRoles,
 };

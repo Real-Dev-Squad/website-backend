@@ -1,5 +1,9 @@
 const Sinon = require("sinon");
-const { validateAuthStatus, storeUserDeviceInfo } = require("../../../middlewares/validators/qrCodeAuth");
+const {
+  validateAuthStatus,
+  storeUserDeviceInfo,
+  validateFetchingUserDocument,
+} = require("../../../middlewares/validators/qrCodeAuth");
 const { expect } = require("chai");
 const { userDeviceInfoDataArray } = require("../../fixtures/qrCodeAuth/qrCodeAuth");
 describe("qrCodeAuth", function () {
@@ -62,6 +66,41 @@ describe("qrCodeAuth", function () {
 
       const nextSpy = Sinon.spy();
       await validateAuthStatus(req, res, nextSpy);
+      expect(nextSpy.callCount).to.be.equal(0);
+    });
+  });
+
+  describe("test get call validator", function () {
+    it("Allows request to pass on valid params", async function () {
+      const req = {
+        query: {
+          device_id: "DEVICE_ID",
+        },
+      };
+
+      const res = {};
+
+      const nextSpy = Sinon.spy();
+      await validateFetchingUserDocument(req, res, nextSpy);
+      expect(nextSpy.callCount).to.be.equal(1);
+    });
+
+    it("Does not allow request to pass on invalid params", async function () {
+      const req = {
+        query: {
+          user_id: "ID",
+          device_type: "DEVICE_TYPE",
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+
+      const nextSpy = Sinon.spy();
+      await validateFetchingUserDocument(req, res, nextSpy);
       expect(nextSpy.callCount).to.be.equal(0);
     });
   });

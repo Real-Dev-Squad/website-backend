@@ -13,7 +13,11 @@ const updateUser = async (req, res, next) => {
     .keys({
       phone: joi.string().optional(),
       email: joi.string().optional(),
-      username: joi.string().optional(),
+      username: joi
+        .string()
+        .optional()
+        .regex(/^[a-z]+-[a-z]+(-[1-9])?$/)
+        .message("Username must be lowercase only hypen, numbers are allowed."),
       first_name: joi.string().optional(),
       last_name: joi.string().optional(),
       yoe: joi.number().min(0).optional(),
@@ -21,7 +25,11 @@ const updateUser = async (req, res, next) => {
       designation: joi.string().optional(),
       img: joi.string().optional(),
       linkedin_id: joi.string().optional(),
-      twitter_id: joi.string().optional(),
+      twitter_id: joi
+        .string()
+        .optional()
+        .regex(/^[^@]*$/)
+        .message("Invalid Twitter ID. ID should not contain special character @"),
       instagram_id: joi.string().optional(),
       website: joi.string().optional(),
       status: joi
@@ -29,6 +37,14 @@ const updateUser = async (req, res, next) => {
         .valid(...Object.values(USER_STATUS))
         .optional(),
       discordId: joi.string().optional(),
+      roles: joi.object().keys({
+        archived: joi.boolean().required(),
+        in_discord: joi.boolean().required(),
+        developer: joi.boolean().optional(),
+        designer: joi.boolean().optional(),
+        maven: joi.boolean().optional(),
+        productmanager: joi.boolean().optional(),
+      }),
     });
 
   try {

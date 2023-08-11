@@ -6,5 +6,6 @@ module.exports = {
   DATA_ADDED_SUCCESSFULLY: "User Device Info added successfully!",
   USER_DATA_ALREADY_PRESENT: "The authentication document has already been created",
   BAD_REQUEST: "BAD_REQUEST",
+  INVALID_QUERY_PARAM: "Invalid Query Parameters Passed",
   FILE_TOO_LARGE: (size) => `File too large, max accepted size is ${size} MB`,
 };

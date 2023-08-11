@@ -92,7 +92,18 @@ describe("users", function () {
       expect(user.last_name).to.equal(userData.last_name);
       expect(userExists).to.equal(true);
     });
+
+    it("It should have created_At and updated_At fields", async function () {
+      const userData = userDataArray[15];
+      await users.addOrUpdate(userData);
+      const githubUsername = "sahsisunny";
+      const { user, userExists } = await users.fetchUser({ githubUsername });
+      expect(user).to.haveOwnProperty("created_at");
+      expect(user).to.haveOwnProperty("updated_at");
+      expect(userExists).to.equal(true);
+    });
   });
+
   describe("user image verification", function () {
     let userId, discordId, profileImageUrl, discordImageUrl;
     beforeEach(async function () {
@@ -218,6 +229,93 @@ describe("users", function () {
       const data = await users.getJoinData("12345");
       expect(data.length).to.be.equal(1);
       expect(data[0]).to.have.all.keys([...Object.keys(joinData[0]), "id"]);
+    });
+  });
+
+  describe("remove github token from users", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("return array of users", async function () {
+      const data = await users.fetchUsersWithToken();
+      expect(data).to.be.not.equal(null);
+    });
+    it('removes token field from user"s data', async function () {
+      const userRef = await users.fetchUsersWithToken();
+      const dataBefore = await userRef[1].get();
+      const beforeRemoval = Object.keys(dataBefore.data()).includes("tokens");
+      expect(beforeRemoval).to.be.equal(true);
+      await users.removeGitHubToken(userRef);
+      const dataAfter = await userRef[1].get();
+      const afterRemoval = Object.keys(dataAfter.data()).includes("tokens");
+      expect(afterRemoval).to.be.equal(false);
+    });
+
+    it("throws error if id is not found in db", async function () {
+      try {
+        await users.removeGitHubToken("1223");
+      } catch (error) {
+        expect(error).to.be.instanceOf(Error);
+      }
+    });
+  });
+
+  describe("get users by roles", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+    it("returns users with member role", async function () {
+      const members = await users.getUsersByRole("member");
+      expect(members.length).to.be.equal(7);
+      members.forEach((member) => {
+        expect(member.roles.member).to.be.equal(true);
+      });
+    });
+    it("throws an error", async function () {
+      await users.getUsersByRole(32389434).catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+      });
+    });
+  });
+  describe("fetch users by id", function () {
+    let allIds = [];
+    before(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user, index) => {
+        addUsersPromises.push(userModel.add({ ...user }));
+      });
+      const responses = await Promise.all(addUsersPromises);
+      allIds = responses.map((response) => response.id);
+    });
+
+    after(async function () {
+      await cleanDb();
+    });
+
+    it("should fetch the details of users whose ids are present in the array", async function () {
+      const randomIds = allIds.sort(() => 0.5 - Math.random()).slice(0, 3); // Select random ids from allIds
+      const result = await users.fetchUserByIds(randomIds);
+      const fetchedUserIds = Object.keys(result);
+      expect(fetchedUserIds).to.deep.equal(randomIds);
+    });
+
+    it("should return empty object if no ids are passed", async function () {
+      const result = await users.fetchUserByIds();
+      const fetchedUserIds = Object.keys(result);
+      expect(fetchedUserIds).to.deep.equal([]);
     });
   });
 });
