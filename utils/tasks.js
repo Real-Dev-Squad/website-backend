@@ -69,7 +69,7 @@ const transformQuery = (dev = false, status = "", size, page, assignee = "", ter
   const transformedDev = JSON.parse(dev);
   const transformedStatus = MAPPED_TASK_STATUS[status.toUpperCase()];
   const transformedAssignee = assignee.toLowerCase();
-  const transformedTerm = term.toLowerCase();
+  const transformedTerm = term;
 
   if (page) {
     query.page = parseInt(page);
