@@ -5,6 +5,7 @@ const firestore = require("../../../utils/firestore");
 const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
+const userModel = firestore.collection("users");
 
 const {
   createNewRole,
@@ -12,11 +13,12 @@ const {
   isGroupRoleExists,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
-  getNumberOfMemberForGroups,
+  enrichGroupDataWithMembershipInfo,
 } = require("../../../models/discordactions");
 const { groupData, roleData, existingRole } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
 const { userPhotoVerificationData } = require("../../fixtures/user/photo-verification");
+const userData = require("../../fixtures/user/user")();
 
 chai.should();
 
@@ -245,14 +247,34 @@ describe("discordactions", function () {
     });
   });
 
-  describe("getNumberOfMemberForGroups", function () {
+  describe("enrichGroupDataWithMembershipInfo", function () {
+    let newGroupData;
+    let allIds = [];
+
     before(async function () {
-      await Promise.all([
-        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: 1 }),
-        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: 2 }),
-        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: 3 }),
-        addGroupRoleToMember({ roleid: groupData[1].roleid, userid: 1 }),
-      ]);
+      const addUsersPromises = userData.map((user) => userModel.add({ ...user }));
+      const responses = await Promise.all(addUsersPromises);
+      allIds = responses.map((response) => response.id);
+      newGroupData = groupData.map((group, index) => {
+        return {
+          ...group,
+          createdBy: allIds[Math.min(index, allIds.length - 1)],
+        };
+      });
+
+      const addRolesPromises = [
+        discordRoleModel.add(newGroupData[0]),
+        discordRoleModel.add(newGroupData[1]),
+        discordRoleModel.add(newGroupData[2]),
+      ];
+      await Promise.all(addRolesPromises);
+
+      const addGroupRolesPromises = [
+        addGroupRoleToMember({ roleid: newGroupData[0].roleid, userid: userData[0].discordId }),
+        addGroupRoleToMember({ roleid: newGroupData[0].roleid, userid: userData[1].discordId }),
+        addGroupRoleToMember({ roleid: newGroupData[1].roleid, userid: userData[0].discordId }),
+      ];
+      await Promise.all(addGroupRolesPromises);
     });
 
     after(async function () {
@@ -260,24 +282,45 @@ describe("discordactions", function () {
     });
 
     it("should return an empty array if the parameter is an empty array", async function () {
-      const result = await getNumberOfMemberForGroups([]);
+      const result = await enrichGroupDataWithMembershipInfo(userData[0].discordId, []);
       expect(result).to.be.an("array");
       expect(result.length).to.equal(0);
     });
 
     it("should return an empty array if the parameter no parameter is passed", async function () {
-      const result = await getNumberOfMemberForGroups();
+      const result = await enrichGroupDataWithMembershipInfo();
       expect(result).to.be.an("array");
       expect(result.length).to.equal(0);
     });
 
     it("should return group details with memberCount details ", async function () {
-      const result = await getNumberOfMemberForGroups(groupData);
-      expect(result).to.deep.equal([
-        { rolename: groupData[0].rolename, roleid: 1, memberCount: 3 },
-        { rolename: groupData[1].rolename, roleid: 2, memberCount: 1 },
-        { rolename: groupData[2].rolename, roleid: 3, memberCount: 0 },
-      ]);
+      const result = await enrichGroupDataWithMembershipInfo(userData[0].discordId, newGroupData);
+      expect(result[0]).to.deep.equal({
+        ...newGroupData[0],
+        memberCount: 2,
+        firstName: userData[0].first_name,
+        lastName: userData[0].last_name,
+        image: userData[0].picture.url,
+        isMember: true,
+      });
+
+      expect(result[1]).to.deep.equal({
+        ...newGroupData[1],
+        memberCount: 1,
+        firstName: userData[1].first_name,
+        lastName: userData[1].last_name,
+        image: userData[1].picture.url,
+        isMember: true,
+      });
+
+      expect(result[2]).to.deep.equal({
+        ...newGroupData[2],
+        memberCount: 0,
+        firstName: userData[2].first_name,
+        lastName: userData[2].last_name,
+        image: userData[2].picture.url,
+        isMember: false,
+      });
     });
   });
 });

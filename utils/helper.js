@@ -67,8 +67,24 @@ const getPaginatedLink = ({
   return paginatedLink;
 };
 
+/**
+ * Finds and returns a Set of group IDs for which a given Discord ID is a member.
+ *
+ * @param {string} discordId - The Discord ID of the user.
+ * @param {Array<object>} groupToMemberMappings - Array of group-to-member mappings.
+ * @returns {Set<string>} - A Set of group IDs.
+ */
+function findMemberGroupIds(discordId, groupToMemberMappings = []) {
+  return groupToMemberMappings.reduce((memberGroupIds, group) => {
+    if (group.userid === discordId) {
+      memberGroupIds.add(group.roleid);
+    }
+    return memberGroupIds;
+  }, new Set());
+}
 module.exports = {
   getQualifiers,
   getDateTimeRangeForPRs,
   getPaginatedLink,
+  findMemberGroupIds,
 };
