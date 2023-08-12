@@ -365,6 +365,7 @@ describe("Filter Users", function () {
           res.body.users.forEach((user) => {
             expect(user).to.not.have.property("phone");
             expect(user).to.not.have.property("email");
+            expect(user).to.not.have.property("tokens");
           });
           return done();
         });

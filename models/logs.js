@@ -3,7 +3,6 @@ const { getBeforeHourTime } = require("../utils/time");
 const logsModel = firestore.collection("logs");
 const admin = require("firebase-admin");
 const { logType } = require("../constants/logs");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Adds log
@@ -23,7 +22,7 @@ const addLog = async (type, meta, body) => {
     return await logsModel.add(log);
   } catch (err) {
     logger.error("Error in adding log", err);
-    throw new Error(INTERNAL_SERVER_ERROR);
+    throw err;
   }
 };
 
@@ -43,27 +42,14 @@ const fetchLogs = async (query, param) => {
       }
     });
 
-    const { limit, lastDocId, userId } = query;
+    const { limit, lastDocId } = query;
     let lastDoc;
     const limitDocuments = Number(limit);
 
     if (lastDocId) {
       lastDoc = await logsModel.doc(lastDocId).get();
     }
-    if (userId) {
-      const logsSnapshot = await logsModel
-        .where("type", "==", param)
-        .where("body.archived_user.user_id", "==", userId)
-        .orderBy("timestamp", "desc")
-        .get();
-      const logs = [];
-      logsSnapshot.forEach((doc) => {
-        logs.push({
-          ...doc.data(),
-        });
-      });
-      return logs;
-    }
+
     const logsSnapshotQuery = call.orderBy("timestamp", "desc").startAfter(lastDoc ?? "");
     const snapshot = limit
       ? await logsSnapshotQuery.limit(limitDocuments).get()
@@ -78,7 +64,7 @@ const fetchLogs = async (query, param) => {
     return logs;
   } catch (err) {
     logger.error("Error in adding log", err);
-    throw new Error(INTERNAL_SERVER_ERROR);
+    throw err;
   }
 };
 

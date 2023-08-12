@@ -767,7 +767,7 @@ describe("Tasks", function () {
     });
 
     it("Should return Forbidden error if task is not assigned to self", async function () {
-      const userId = await addUser(userData[0]);
+      const { userId } = await addUser(userData[0]);
       const jwt = authService.generateAuthToken({ userId });
 
       const res = await chai.request(app).patch(`/tasks/self/${taskId1}`).set("cookie", `${cookieName}=${jwt}`);
