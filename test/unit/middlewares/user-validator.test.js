@@ -163,7 +163,7 @@ describe("Middleware | Validators | User", function () {
         body: {
           last_name: "patil",
           first_name: "Abhay",
-          username: "Invalidusername-12",
+          username: "@invalidusername-12",
           twitter_id: "abhayisawesome",
         },
       };
