@@ -94,7 +94,7 @@ describe("users", function () {
     });
 
     it("It should have created_At and updated_At fields", async function () {
-      const userData = userDataArray[15];
+      const userData = userDataArray[14];
       await users.addOrUpdate(userData);
       const githubUsername = "sahsisunny";
       const { user, userExists } = await users.fetchUser({ githubUsername });
@@ -279,7 +279,7 @@ describe("users", function () {
     });
     it("returns users with member role", async function () {
       const members = await users.getUsersByRole("member");
-      expect(members.length).to.be.equal(7);
+      expect(members.length).to.be.equal(6);
       members.forEach((member) => {
         expect(member.roles.member).to.be.equal(true);
       });
@@ -288,34 +288,6 @@ describe("users", function () {
       await users.getUsersByRole(32389434).catch((err) => {
         expect(err).to.be.instanceOf(Error);
       });
-    });
-  });
-  describe("fetch users by id", function () {
-    let allIds = [];
-    before(async function () {
-      const addUsersPromises = [];
-      userDataArray.forEach((user, index) => {
-        addUsersPromises.push(userModel.add({ ...user }));
-      });
-      const responses = await Promise.all(addUsersPromises);
-      allIds = responses.map((response) => response.id);
-    });
-
-    after(async function () {
-      await cleanDb();
-    });
-
-    it("should fetch the details of users whose ids are present in the array", async function () {
-      const randomIds = allIds.sort(() => 0.5 - Math.random()).slice(0, 3); // Select random ids from allIds
-      const result = await users.fetchUserByIds(randomIds);
-      const fetchedUserIds = Object.keys(result);
-      expect(fetchedUserIds).to.deep.equal(randomIds);
-    });
-
-    it("should return empty object if no ids are passed", async function () {
-      const result = await users.fetchUserByIds();
-      const fetchedUserIds = Object.keys(result);
-      expect(fetchedUserIds).to.deep.equal([]);
     });
   });
 });

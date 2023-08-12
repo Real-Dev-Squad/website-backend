@@ -1,9 +1,8 @@
 const ROLES = require("../constants/roles");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
-const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dataAccess = require("../services/dataAccessLayer");
-const { addLog } = require("../models/logs");
 /**
  * Fetches the data about our members
  *
@@ -84,38 +83,17 @@ const archiveMembers = async (req, res) => {
   try {
     const { username } = req.params;
     const user = await dataAccess.retrieveUsers({ username });
-    const superUserId = req.userData.id;
-    const { reason } = req.body;
-    const roles = req?.userData?.roles;
-    const isReasonNullOrUndefined = !reason;
-    const isReasonEmptyOrWhitespace = /^\s*$/.test(reason);
-    if (isReasonNullOrUndefined || isReasonEmptyOrWhitespace) {
-      return res.boom.badRequest("Reason is required");
-    }
     if (user?.userExists) {
       const successObject = await members.addArchiveRoleToMembers(user.user.id);
       if (successObject.isArchived) {
         return res.boom.badRequest("User is already archived");
       }
-      const body = {
-        reason: reason,
-        archived_user: {
-          user_id: user.user.id,
-          username: user.user.username,
-        },
-        archived_by: {
-          user_id: superUserId,
-          roles: roles,
-        },
-      };
-
-      addLog("archived-details", {}, body);
       return res.status(204).send();
     }
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while retriving contributions ${err}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
