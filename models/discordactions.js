@@ -114,10 +114,41 @@ const updateDiscordImageForVerification = async (userDiscordId) => {
   }
 };
 
+const getNumberOfMemberForGroups = async (groups = []) => {
+  try {
+    if (!groups.length) {
+      return [];
+    }
+    const roleIds = groups.map((group) => group.roleid);
+
+    const snapshots = await memberRoleModel.where("roleid", "in", roleIds).get();
+    const roleCount = {};
+
+    snapshots.forEach((doc) => {
+      const roleToMemberMapping = doc.data();
+
+      if (roleCount[roleToMemberMapping.roleid]) {
+        roleCount[roleToMemberMapping.roleid] += 1;
+      } else {
+        roleCount[roleToMemberMapping.roleid] = 1;
+      }
+    });
+
+    return groups.map((group) => ({
+      ...group,
+      memberCount: roleCount[group.roleid] || 0,
+    }));
+  } catch (err) {
+    logger.error("Error while counting members for each group", err);
+    throw err;
+  }
+};
+
 module.exports = {
   createNewRole,
   getAllGroupRoles,
   addGroupRoleToMember,
   isGroupRoleExists,
   updateDiscordImageForVerification,
+  getNumberOfMemberForGroups,
 };
