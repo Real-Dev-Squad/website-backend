@@ -31,5 +31,5 @@ app.use("/issues", require("./issues.js"));
 app.use("/progresses", require("./progresses.js"));
 app.use("/monitor", require("./monitor.js"));
 app.use("/staging", require("./staging.js"));
-app.use("/applications", require("./applications.js"));
+app.use("/applications", require("./applications.ts"));
 module.exports = app;
