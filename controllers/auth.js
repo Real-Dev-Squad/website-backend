@@ -2,8 +2,9 @@ const passport = require("passport");
 const users = require("../models/users");
 const QrCodeAuthModel = require("../models/qrCodeAuth");
 const authService = require("../services/authService");
+const dataAccess = require("../services/dataAccessLayer");
 const { SOMETHING_WENT_WRONG, DATA_ADDED_SUCCESSFULLY } = require("../constants/errorMessages");
-
+const USER_DOES_NOT_EXIST_ERROR = "User does not exist!";
 /**
  * Makes authentication call to GitHub statergy
  *
@@ -111,11 +112,12 @@ const storeUserDeviceInfo = async (req, res) => {
       authorization_status: "NOT_INIT",
     };
 
-    const userInfo = await QrCodeAuthModel.storeUserDeviceInfo(userJson);
+    const userInfoData = await dataAccess.retrieveUsers({ id: userJson.user_id });
 
-    if (userInfo.userExists !== undefined && !userInfo.userExists) {
-      return res.boom.notFound("Document not found!");
+    if (!userInfoData.userExists) {
+      return res.boom.notFound(USER_DOES_NOT_EXIST_ERROR);
     }
+    const userInfo = await QrCodeAuthModel.storeUserDeviceInfo(userJson);
 
     return res.status(201).json({
       ...userInfo,
