@@ -79,13 +79,14 @@ const updateApplication = async (req: any, res: any) => {
     const { applicationId } = req.params;
     const { generate_discord_link } = req.query;
     const rawBody = req.body;
-    const channelId = config.get("discordNewComersChannelId");
-    const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
-      algorithm: "RS256",
-      expiresIn: config.get("rdsServerlessBot.ttl"),
-    });
-
+    
     if (generate_discord_link) {
+      const channelId = config.get("discordNewComersChannelId");
+      const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
+        algorithm: "RS256",
+        expiresIn: config.get("rdsServerlessBot.ttl"),
+      });
+
       const inviteOptions = {
         max_uses: 1, // Maximum number of times the invite can be used (optional)
         unique: true, // Whether to create a unique invite or not (optional)
@@ -107,6 +108,7 @@ const updateApplication = async (req: any, res: any) => {
       message: "Application updated successfully!",
     });
   } catch (err) {
+    console.log(err)
     logger.error(`Error while fetching all the intros: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
