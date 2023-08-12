@@ -10,11 +10,12 @@ const qrCodeAuthModel = require("../../models/qrCodeAuth");
 const authService = require("../../services/authService");
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
+const USER_DOES_NOT_EXIST_ERROR = "User does not exist!";
 
 // Import fixtures
 let userDeviceInfoData;
 let wrongUserDeviceInfoData;
-let wrongUserDeviceInfoDataWithWrongDeviceInfo;
+let wrongUserIdDeviceInfo;
 let userId;
 const user = userData[0];
 
@@ -25,7 +26,7 @@ describe("QrCodeAuth", function () {
 
       userDeviceInfoData = { ...userDeviceInfoDataArray[0], user_id: userId };
       wrongUserDeviceInfoData = userDeviceInfoDataArray[0];
-      wrongUserDeviceInfoDataWithWrongDeviceInfo = { ...userDeviceInfoDataArray[0], user_id: userId, device_info: 2 };
+      wrongUserIdDeviceInfo = { ...userDeviceInfoDataArray[0], user_id: userId, device_info: 2 };
     });
     afterEach(async function () {
       await cleanDb();
@@ -63,7 +64,7 @@ describe("QrCodeAuth", function () {
 
           expect(res).to.have.status(404);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Document not found!");
+          expect(res.body.message).to.equal(USER_DOES_NOT_EXIST_ERROR);
           expect(res.body.error).to.equal("Not Found");
 
           return done();
@@ -74,7 +75,7 @@ describe("QrCodeAuth", function () {
       chai
         .request(app)
         .post("/auth/qr-code-auth")
-        .send(wrongUserDeviceInfoDataWithWrongDeviceInfo)
+        .send(wrongUserIdDeviceInfo)
         .end((err, res) => {
           if (err) {
             return done(err);

@@ -17,7 +17,6 @@ describe("mobile auth", function () {
     await cleanDb();
   });
   describe("storeUserDeviceInfo", function () {
-    const WRONG_USER_ID = "xynsasd";
     it("should store user Id and device info of user for mobile auth", async function () {
       const userData = userDataArray[0];
       const { userId } = await users.addOrUpdate(userData);
@@ -46,16 +45,6 @@ describe("mobile auth", function () {
       expect(deviceInfo).to.be.a("string");
       expect(deviceId).to.be.a("string");
       expect(authorizationStatus).to.be.a("string");
-    });
-
-    it("should return userExist as false when the user document is not found", async function () {
-      const userDeviceInfoData = {
-        ...userDeviceInfoDataArray[0],
-        user_id: WRONG_USER_ID,
-        authorization_status: "NOT_INIT",
-      };
-      const response = await qrCodeAuth.storeUserDeviceInfo(userDeviceInfoData);
-      expect(response.userExists).to.be.equal(false);
     });
   });
 
