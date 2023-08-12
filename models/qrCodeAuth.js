@@ -9,7 +9,7 @@ const USER_DOES_NOT_EXIST_ERROR = "User does not exist.";
  * @return {Promise<{userDeviceInfoData|Object}>}
  */
 
-const updateStatus = async (userId, authStatus = "NOT_INIT") => {
+const updateStatus = async (userId, authStatus = "NOT_INIT", token) => {
   try {
     const authData = await QrCodeAuthModel.doc(userId).get();
 
@@ -22,8 +22,8 @@ const updateStatus = async (userId, authStatus = "NOT_INIT") => {
     await QrCodeAuthModel.doc(userId).set({
       ...authData.data(),
       authorization_status: authStatus,
+      token: `${token}`,
     });
-
     return {
       userExists: true,
       data: {
@@ -64,7 +64,7 @@ const retrieveUserDeviceInfo = async ({ deviceId, userId }) => {
         .where("authorization_status", "==", "NOT_INIT")
         .get();
     }
-    const userData = queryDocument.docs[0];
+    const userData = queryDocument?.docs[0];
 
     if (!userData) {
       return {

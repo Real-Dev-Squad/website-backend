@@ -3,6 +3,7 @@ const users = require("../models/users");
 const QrCodeAuthModel = require("../models/qrCodeAuth");
 const authService = require("../services/authService");
 const { SOMETHING_WENT_WRONG, DATA_ADDED_SUCCESSFULLY, BAD_REQUEST } = require("../constants/errorMessages");
+const { generateUniqueToken } = require("../utils/generateUniqueToken");
 
 /**
  * Makes authentication call to GitHub statergy
@@ -132,7 +133,11 @@ const updateAuthStatus = async (req, res) => {
   try {
     const userId = req.userData.id;
     const authStatus = req.params.authorization_status;
-    const result = await QrCodeAuthModel.updateStatus(userId, authStatus);
+    let token;
+    if (authStatus === "AUTHORIZED") {
+      token = await generateUniqueToken();
+    }
+    const result = await QrCodeAuthModel.updateStatus(userId, authStatus, token);
 
     if (!result.userExists) {
       return res.boom.notFound("Document not found!");
@@ -167,7 +172,7 @@ const fetchUserDeviceInfo = async (req, res) => {
 
 const fetchDeviceDetails = async (req, res) => {
   try {
-    const { user_id: userId } = req.query;
+    const userId = req.userData.id;
     const userDeviceInfoData = await QrCodeAuthModel.retrieveUserDeviceInfo({ userId });
     if (!userDeviceInfoData.userExists) {
       return res.boom.notFound(`User with id ${userId} does not exist.`);
