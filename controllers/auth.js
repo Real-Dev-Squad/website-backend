@@ -3,6 +3,7 @@ const users = require("../models/users");
 const QrCodeAuthModel = require("../models/qrCodeAuth");
 const authService = require("../services/authService");
 const { SOMETHING_WENT_WRONG, DATA_ADDED_SUCCESSFULLY, BAD_REQUEST } = require("../constants/errorMessages");
+const { generateUniqueToken } = require("../utils/generateUniqueToken");
 
 /**
  * Makes authentication call to GitHub statergy
@@ -132,7 +133,11 @@ const updateAuthStatus = async (req, res) => {
   try {
     const userId = req.userData.id;
     const authStatus = req.params.authorization_status;
-    const result = await QrCodeAuthModel.updateStatus(userId, authStatus);
+    let token;
+    if (authStatus === "AUTHORIZED") {
+      token = await generateUniqueToken();
+    }
+    const result = await QrCodeAuthModel.updateStatus(userId, authStatus, token);
 
     if (!result.userExists) {
       return res.boom.notFound("Document not found!");
@@ -150,8 +155,8 @@ const updateAuthStatus = async (req, res) => {
 
 const fetchUserDeviceInfo = async (req, res) => {
   try {
-    const deviceId = req.query.device_id;
-    const userDeviceInfoData = await QrCodeAuthModel.retrieveUserDeviceInfo(deviceId);
+    const { device_id: deviceId } = req.query;
+    const userDeviceInfoData = await QrCodeAuthModel.retrieveUserDeviceInfo({ deviceId });
     if (!userDeviceInfoData.userExists) {
       return res.boom.notFound(`User with id ${deviceId} does not exist.`);
     }
@@ -165,6 +170,23 @@ const fetchUserDeviceInfo = async (req, res) => {
   }
 };
 
+const fetchDeviceDetails = async (req, res) => {
+  try {
+    const userId = req.userData.id;
+    const userDeviceInfoData = await QrCodeAuthModel.retrieveUserDeviceInfo({ userId });
+    if (!userDeviceInfoData.userExists) {
+      return res.boom.notFound(`User with id ${userId} does not exist.`);
+    }
+    return res.json({
+      message: "Authentication document Exists",
+      data: { device_info: userDeviceInfoData.data?.device_info },
+    });
+  } catch (error) {
+    logger.error(`Error while fetching user device info: ${error}`);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+  }
+};
+
 module.exports = {
   githubAuthLogin,
   githubAuthCallback,
@@ -172,4 +194,5 @@ module.exports = {
   storeUserDeviceInfo,
   updateAuthStatus,
   fetchUserDeviceInfo,
+  fetchDeviceDetails,
 };
