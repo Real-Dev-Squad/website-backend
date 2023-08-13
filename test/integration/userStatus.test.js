@@ -152,7 +152,7 @@ describe("UserStatus", function () {
       // Marking OOO Status from 24th Nov 2022 to 28th Nov 2022
       const response2 = await chai
         .request(app)
-        .patch(`/users/status/self?userStatusFlag=true`)
+        .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", updatedAtDate, fromDate, untilDate, "Vacation Trip"));
       expect(response2).to.have.status(200);
@@ -175,6 +175,13 @@ describe("UserStatus", function () {
         .send();
       expect(response3).to.have.status(200);
       expect(response3.body.message).to.equal("All User Status updated successfully.");
+      expect(response3.body.data).to.deep.equal({
+        usersCount: 1,
+        oooUsersAltered: 0,
+        oooUsersUnaltered: 0,
+        nonOooUsersAltered: 1,
+        nonOooUsersUnaltered: 0,
+      });
 
       // Checking the current status
       const response4 = await chai.request(app).get(`/users/status/self`).set("Cookie", `${cookieName}=${testUserJwt}`);
@@ -195,6 +202,13 @@ describe("UserStatus", function () {
         .send();
       expect(response5).to.have.status(200);
       expect(response5.body.message).to.equal("All User Status updated successfully.");
+      expect(response5.body.data).to.deep.equal({
+        usersCount: 1,
+        oooUsersAltered: 1,
+        oooUsersUnaltered: 0,
+        nonOooUsersAltered: 0,
+        nonOooUsersUnaltered: 0,
+      });
 
       const response6 = await chai.request(app).get(`/users/status/self`).set("Cookie", `${cookieName}=${testUserJwt}`);
       expect(response6).to.have.status(200);
@@ -217,7 +231,7 @@ describe("UserStatus", function () {
       // Marking OOO Status from 24th Nov 2022 to 28th Nov 2022
       const response2 = await chai
         .request(app)
-        .patch(`/users/status/self?userStatusFlag=true`)
+        .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", updatedAtDate, fromDate, untilDate, "Vacation Trip"));
       expect(response2).to.have.status(200);
@@ -236,6 +250,13 @@ describe("UserStatus", function () {
         .send();
       expect(response3).to.have.status(200);
       expect(response3.body.message).to.equal("All User Status updated successfully.");
+      expect(response3.body.data).to.deep.equal({
+        usersCount: 1,
+        oooUsersAltered: 0,
+        oooUsersUnaltered: 0,
+        nonOooUsersAltered: 1,
+        nonOooUsersUnaltered: 0,
+      });
 
       // Checking the current status
       const response4 = await chai.request(app).get(`/users/status/self`).set("Cookie", `${cookieName}=${testUserJwt}`);
@@ -270,7 +291,7 @@ describe("UserStatus", function () {
     it("Should store the User Status in the collection", function (done) {
       chai
         .request(app)
-        .patch(`/users/status/self?userStatusFlag=true`)
+        .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(userStatusDataForOooState)
         .end((err, res) => {
@@ -288,7 +309,7 @@ describe("UserStatus", function () {
     it("Should store the User Status in the collection when requested by Super User", function (done) {
       chai
         .request(app)
-        .patch(`/users/status/${testUserId}?userStatusFlag=true`)
+        .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .send(userStatusDataForOooState)
         .end((err, res) => {
@@ -324,7 +345,7 @@ describe("UserStatus", function () {
     it("Should update the User Status without reason for short duration", function (done) {
       chai
         .request(app)
-        .patch(`/users/status/self?userStatusFlag=true`)
+        .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(oooStatusDataForShortDuration)
         .end((err, res) => {
@@ -358,7 +379,7 @@ describe("UserStatus", function () {
     it("Should return 401 for unauthorized request", function (done) {
       chai
         .request(app)
-        .patch(`/users/status/${testUserId}?userStatusFlag=true`)
+        .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=""`)
         .send(userStatusDataForOooState)
         .end((err, res) => {
@@ -375,7 +396,7 @@ describe("UserStatus", function () {
     it("Should return 400 for incorrect state value", function (done) {
       chai
         .request(app)
-        .patch(`/users/status/self?userStatusFlag=true`)
+        .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("IN_OFFICE", Date.now(), Date.now()))
         .end((err, res) => {
@@ -395,7 +416,7 @@ describe("UserStatus", function () {
       const untilDate = Date.now() + 4 * 24 * 60 * 60 * 1000;
       chai
         .request(app)
-        .patch(`/users/status/self?userStatusFlag=true`)
+        .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), Date.now(), untilDate, ""))
         .end((err, res) => {
@@ -416,7 +437,7 @@ describe("UserStatus", function () {
       const fromDate = Date.now() - 4 * 24 * 60 * 60 * 1000;
       chai
         .request(app)
-        .patch(`/users/status/self?userStatusFlag=true`)
+        .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), fromDate, "", ""))
         .end((err, res) => {
@@ -438,7 +459,7 @@ describe("UserStatus", function () {
       const untilDate = Date.now() + 5 * 24 * 60 * 60 * 1000;
       chai
         .request(app)
-        .patch(`/users/status/self?userStatusFlag=true`)
+        .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "Semester Exams"))
         .end((err, res) => {
@@ -465,7 +486,7 @@ describe("UserStatus", function () {
       let untilDate = new Date(2022, 10, 28).getTime();
       const response2 = await chai
         .request(app)
-        .patch(`/users/status/self?userStatusFlag=true`)
+        .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "Vacation Trip"));
       expect(response2).to.have.status(200);
@@ -480,7 +501,7 @@ describe("UserStatus", function () {
       untilDate = new Date(2022, 11, 5).getTime();
       const response3 = await chai
         .request(app)
-        .patch(`/users/status/self?userStatusFlag=true`)
+        .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "New plan for vacation Trip"));
       expect(response3).to.have.status(200);
@@ -509,7 +530,7 @@ describe("UserStatus", function () {
       let untilDate = new Date(2022, 10, 28).getTime(); // 28th Nov 2022
       const response1 = await chai
         .request(app)
-        .patch(`/users/status/self?userStatusFlag=true`)
+        .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "Vacation Trip"));
       expect(response1).to.have.status(201);
@@ -524,7 +545,7 @@ describe("UserStatus", function () {
       untilDate = new Date(2022, 10, 17).getTime(); // 17th Nov 2022
       const response2 = await chai
         .request(app)
-        .patch(`/users/status/self?userStatusFlag=true`)
+        .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "Changed plan for vacation Trip"));
       expect(response2).to.have.status(200);
