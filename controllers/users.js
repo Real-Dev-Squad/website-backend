@@ -146,6 +146,24 @@ const getUser = async (req, res) => {
   }
 };
 
+const getUserByDiscordId = async (req, res) => {
+  try {
+    const discordId = Number(req.params.discordId);
+    const result = await userQuery.fetchUser({ discordId });
+    const user = result.user;
+    if (result.userExists) {
+      return res.json({
+        message: "User returned successfully!",
+        user,
+      });
+    }
+    return res.boom.notFound("User doesn't exist");
+  } catch (error) {
+    logger.error(`Error while fetching user: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
 const getUserSkills = async (req, res) => {
   try {
     const { id } = req.params;
@@ -711,4 +729,5 @@ module.exports = {
   updateRoles,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
+  getUserByDiscordId
 };

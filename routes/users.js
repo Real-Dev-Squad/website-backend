@@ -22,6 +22,7 @@ router.get("/search", userValidator.validateUserQueryParams, users.filterUsers);
 router.post("/tokens", authenticate, authorizeRoles([SUPERUSER]), users.removeTokens);
 
 router.get("/:username", users.getUser);
+router.get("/discordId/:discordId", users.getUserByDiscordId);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
 router.put("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);
 router.get("/:id/skills", users.getUserSkills);
