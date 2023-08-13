@@ -15,6 +15,11 @@ const { addRoleToUser, getDiscordMembers } = require("../services/discordService
 const { fetchAllUsers } = require("../models/users");
 const { getQualifiers } = require("../utils/helper");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+const {
+  USERS_PATCH_HANDLER_ACTIONS,
+  USERS_PATCH_HANDLER_ERROR_MESSAGES,
+  USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
+} = require("../constants/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -101,9 +106,10 @@ const getUsers = async (req, res) => {
     }
 
     const data = await dataAccess.retrieveUsers({ query: req.query });
+
     return res.json({
       message: "Users returned successfully!",
-      users: data.allUsers,
+      users: data.users,
       links: {
         next: data.nextId ? getPaginationLink(req.query, "next", data.nextId) : "",
         prev: data.prevId ? getPaginationLink(req.query, "prev", data.prevId) : "",
@@ -232,10 +238,9 @@ const getUsername = async (req, res) => {
 const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
-      if (req.query.private) {
-        return res.send(req.userData);
-      }
-      const user = await dataAccess.retrieveUsers({ userdata: req.userData });
+      const user = await dataAccess.retrieveUsers({
+        userdata: req.userData,
+      });
       return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");
@@ -434,6 +439,7 @@ const updateUser = async (req, res) => {
 const generateChaincode = async (req, res) => {
   try {
     const { id } = req.userData;
+
     const chaincode = await chaincodeQuery.storeChaincode(id);
     await userQuery.addOrUpdate({ chaincode }, id);
     return res.json({
@@ -596,9 +602,9 @@ const filterUsers = async (req, res) => {
   }
 };
 
-const nonVerifiedDiscordUsers = async (req, res) => {
+const nonVerifiedDiscordUsers = async () => {
   const data = await dataAccess.retrieveDiscordUsers();
-  return res.json(data);
+  return data;
 };
 
 const setInDiscordScript = async (req, res) => {
@@ -652,6 +658,58 @@ const updateRoles = async (req, res) => {
   }
 };
 
+const archiveUserIfNotInDiscord = async () => {
+  try {
+    const data = await userQuery.archiveUserIfNotInDiscord();
+
+    if (data.totalUsers === 0) {
+      return {
+        message: USERS_PATCH_HANDLER_ERROR_MESSAGES.ARCHIVE_USERS.NO_USERS_DATA_TO_UPDATE,
+        summary: data,
+      };
+    }
+
+    return {
+      message: USERS_PATCH_HANDLER_SUCCESS_MESSAGES.ARCHIVE_USERS.SUCCESSFULLY_UPDATED_DATA,
+      summary: data,
+    };
+  } catch (error) {
+    logger.error(`Error while updating the archived role: ${error}`);
+    throw Error(INTERNAL_SERVER_ERROR);
+  }
+};
+
+async function usersPatchHandler(req, res) {
+  try {
+    const { action } = req.body;
+    let response;
+
+    if (action === USERS_PATCH_HANDLER_ACTIONS.NON_VERFIED_DISCORD_USERS) {
+      const data = await nonVerifiedDiscordUsers();
+      response = data;
+    }
+
+    if (action === USERS_PATCH_HANDLER_ACTIONS.ARCHIVE_USERS) {
+      const debugQuery = req.query.debug?.toLowerCase();
+      const data = await archiveUserIfNotInDiscord();
+
+      if (debugQuery === "true") {
+        data.summary.updatedUserDetails = data.summary.updatedUserDetails.slice(-3);
+        response = data;
+      } else {
+        delete data.summary.updatedUserDetails;
+        delete data.summary.failedUserDetails;
+        response = data;
+      }
+    }
+
+    return res.status(200).json(response);
+  } catch (error) {
+    logger.error("Error while handling the users common patch route:", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+}
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -679,4 +737,6 @@ module.exports = {
   markUnverified,
   removeTokens,
   updateRoles,
+  archiveUserIfNotInDiscord,
+  usersPatchHandler,
 };

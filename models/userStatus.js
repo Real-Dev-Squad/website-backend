@@ -11,6 +11,7 @@ const {
   checkIfUserHasLiveTasks,
   generateErrorResponse,
   generateNewStatus,
+  getNextDayTimeStamp,
 } = require("../utils/userStatus");
 const { TASK_STATUS } = require("../constants/tasks");
 const userStatusModel = firestore.collection("usersStatus");
@@ -371,7 +372,7 @@ const batchUpdateUsersStatus = async (users) => {
     const statusToUpdate = {
       state,
       message: "",
-      from: currentTimeStamp,
+      from: new Date().setUTCHours(0, 0, 0, 0),
       until: "",
       updatedAt: currentTimeStamp,
     };
@@ -391,8 +392,7 @@ const batchUpdateUsersStatus = async (users) => {
       if (currentState === state) {
         currentState === userState.ACTIVE ? summary.activeUsersUnaltered++ : summary.idleUsersUnaltered++;
         continue;
-      }
-      if (currentState === userState.ONBOARDING) {
+      } else if (currentState === userState.ONBOARDING) {
         const docRef = userStatusModel.doc(id);
         if (state === userState.ACTIVE) {
           const updatedStatusData = {
@@ -403,20 +403,35 @@ const batchUpdateUsersStatus = async (users) => {
         } else {
           summary.onboardingUsersUnaltered++;
         }
-      } else {
-        state === userState.ACTIVE ? summary.activeUsersAltered++ : summary.idleUsersAltered++;
+      } else if (currentState === userState.OOO) {
         const docRef = userStatusModel.doc(id);
-        const updatedStatusData =
-          currentState === userState.OOO
-            ? {
-                futureStatus: {
-                  ...statusToUpdate,
-                  from: until,
-                },
-              }
-            : {
-                currentStatus: statusToUpdate,
-              };
+        state === userState.ACTIVE ? summary.activeUsersAltered++ : summary.idleUsersAltered++;
+
+        const currentDate = new Date();
+        const untilDate = new Date(until);
+
+        const timeDifferenceMilliseconds = currentDate.setUTCHours(0, 0, 0, 0) - untilDate.setUTCHours(0, 0, 0, 0);
+        const timeDifferenceDays = Math.floor(timeDifferenceMilliseconds / (24 * 60 * 60 * 1000));
+
+        if (timeDifferenceDays >= 1) {
+          batch.update(docRef, {
+            currentStatus: statusToUpdate,
+          });
+        } else {
+          const getNextDayAfterUntil = getNextDayTimeStamp(until);
+          batch.update(docRef, {
+            futureStatus: {
+              ...statusToUpdate,
+              from: getNextDayAfterUntil,
+            },
+          });
+        }
+      } else {
+        const docRef = userStatusModel.doc(id);
+        state === userState.ACTIVE ? summary.activeUsersAltered++ : summary.idleUsersAltered++;
+        const updatedStatusData = {
+          currentStatus: statusToUpdate,
+        };
         batch.update(docRef, updatedStatusData);
       }
     }

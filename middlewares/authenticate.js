@@ -1,5 +1,5 @@
 const authService = require("../services/authService");
-const users = require("../models/users");
+const dataAccess = require("../services/dataAccessLayer");
 
 /**
  * Middleware to check if the user has been restricted. If user is restricted,
@@ -54,7 +54,7 @@ module.exports = async (req, res, next) => {
     const { userId } = authService.verifyAuthToken(token);
 
     // add user data to `req.userData` for further use
-    const userData = await users.fetchUser({ userId });
+    const userData = await dataAccess.retrieveUsers({ id: userId });
     req.userData = userData.user;
 
     return checkRestricted(req, res, next);
@@ -79,8 +79,7 @@ module.exports = async (req, res, next) => {
         });
 
         // add user data to `req.userData` for further use
-        req.userData = await users.fetchUser({ userId });
-
+        req.userData = await dataAccess.retrieveUsers({ id: userId });
         return checkRestricted(req, res, next);
       } else {
         return res.boom.unauthorized("Unauthenticated User");
