@@ -124,10 +124,31 @@ describe("Discord actions", function () {
       await cleanDb();
     });
 
-    it("should successfully return all groups detail", function (done) {
+    it("should successfully return old groups detail", function (done) {
       chai
         .request(app)
         .get(`/discord-actions/groups`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          // Verify presence of specific properties in each group
+          const expectedProps = ["roleid", "rolename", "memberCount", "firstName", "lastName", "image", "isMember"];
+          res.body.groups.forEach((group) => {
+            expect(group).not.to.include.all.keys(expectedProps);
+          });
+          expect(res.body.message).to.equal("Roles fetched successfully!");
+          return done();
+        });
+    });
+    it("should successfully return new groups detail when flag is set", function (done) {
+      chai
+        .request(app)
+        .get(`/discord-actions/groups?dev=true`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {

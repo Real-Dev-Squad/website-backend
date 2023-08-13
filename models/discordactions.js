@@ -130,7 +130,9 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
     }
 
     const groupCreatorIds = groups.reduce((ids, group) => {
-      ids.add(group.createdBy);
+      if (group.createdBy) {
+        ids.add(group.createdBy);
+      }
       return ids;
     }, new Set());
 
@@ -143,8 +145,10 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
     const roleCount = {};
     snapshots.forEach((doc) => {
       const groupToMemberMapping = doc.data();
-      groupsToMemberMaps.push(groupToMemberMapping);
-      roleCount[groupToMemberMapping.roleid] = (roleCount[groupToMemberMapping.roleid] ?? 0) + 1;
+      if (groupToMemberMapping) {
+        groupsToMemberMaps.push(groupToMemberMapping);
+        roleCount[groupToMemberMapping.roleid] = (roleCount[groupToMemberMapping.roleid] ?? 0) + 1;
+      }
     });
 
     const userGroupMembershipsIds = findMemberGroupIds(discordId, groupsToMemberMaps);
@@ -153,9 +157,9 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
       const groupCreator = groupCreatorsDetails[group.createdBy];
       return {
         ...group,
-        firstName: groupCreator.first_name,
-        lastName: groupCreator.last_name,
-        image: groupCreator.picture?.url,
+        firstName: groupCreator?.first_name,
+        lastName: groupCreator?.last_name,
+        image: groupCreator?.picture?.url,
         memberCount: roleCount[group.roleid] || 0,
         isMember: userGroupMembershipsIds.has(group.roleid),
       };
