@@ -32,7 +32,7 @@ const retrieveUsers = async ({
     return result;
   } else if (userIds) {
     if (userIds.length === 0) {
-      return [];
+      return {};
     }
     const userDetails = await userQuery.fetchUserByIds(userIds);
     Object.keys(userDetails).forEach((userId) => {

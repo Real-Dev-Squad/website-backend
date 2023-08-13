@@ -137,6 +137,11 @@ describe("Data Access Layer", function () {
         });
       });
     });
+
+    it("should return empty object if array with no userIds are provided", async function () {
+      const result = await retrieveUsers({ userIds: [] });
+      expect(result).to.deep.equal({});
+    });
   });
 
   describe("retrieveFilteredUsers", function () {
