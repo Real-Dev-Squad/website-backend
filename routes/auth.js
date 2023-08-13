@@ -13,7 +13,7 @@ router.get("/signout", auth.signout);
 
 router.get("/qr-code-auth", userDeviceInfoValidator.validateFetchingUserDocument, auth.fetchUserDeviceInfo);
 
-router.get("/device", userDeviceInfoValidator.validateFetchingUserDeviceStatus, authenticate, auth.fetchDeviceDetails);
+router.get("/device", authenticate, userDeviceInfoValidator.validateFetchingUserDeviceStatus, auth.fetchDeviceDetails);
 
 router.post("/qr-code-auth", userDeviceInfoValidator.storeUserDeviceInfo, auth.storeUserDeviceInfo);
 
