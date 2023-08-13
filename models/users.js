@@ -458,10 +458,6 @@ const getRdsUserInfoByGitHubUsername = async (githubUsername) => {
  */
 
 const getUsersBasedOnFilter = async (query) => {
-  if (query.state === "ONBOARDING" && query.time) {
-    const fetchUsersWithOnBoardingState = await getUsersWithOnboardingState(query);
-    return fetchUsersWithOnBoardingState;
-  }
   const allQueryKeys = Object.keys(query);
   const doesTagQueryExist = arraysHaveCommonItem(ITEM_TAG, allQueryKeys);
   const doesStateQueryExist = arraysHaveCommonItem(USER_STATE, allQueryKeys);
@@ -508,6 +504,10 @@ const getUsersBasedOnFilter = async (query) => {
     const userRefs = finalItems.map((itemId) => userModel.doc(itemId));
     const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
     const filteredUserDocs = userDocs.filter((doc) => !doc.roles?.archived);
+    if (query.time) {
+      const fetchUsersWithOnBoardingState = await getUsersWithOnboardingState(filteredUserDocs, stateItems, query.time);
+      return fetchUsersWithOnBoardingState;
+    }
     return filteredUserDocs;
   }
 
@@ -541,31 +541,16 @@ const getUsersBasedOnFilter = async (query) => {
 
     return filteredUsers.filter((user) => !user.roles?.archived);
   }
+
   return [];
 };
 
-const getUsersWithOnboardingState = async (query) => {
-  const allUserStatus = [];
-  const onboardedUsersInRange = [];
-  const filteredUsers = [];
-
-  const time = query.time;
+const getUsersWithOnboardingState = async (filteredUserDocs, stateItems, time) => {
+  const UsersInRange = [];
   const range = Number(time.split("d")[0]);
-  const data = await userStatusModel.where("currentStatus.state", "==", query.state).get();
-  data.forEach((doc) => {
-    const currentUserStatus = {
-      id: doc.id,
-      userId: doc.data().userId,
-      currentStatus: doc.data().currentStatus,
-      monthlyHours: doc.data().monthlyHours,
-    };
-    allUserStatus.push(currentUserStatus);
+  const filteredUsers = filteredUserDocs.filter((userDoc) => {
+    return stateItems.some((stateItem) => stateItem.userId === userDoc.id);
   });
-
-  for (const user of allUserStatus) {
-    const result = await userModel.doc(user.userId).get();
-    filteredUsers.push(result.data());
-  }
   filteredUsers.forEach((user) => {
     if (user.discordJoinedAt) {
       const userDiscordJoinedDate = new Date(user.discordJoinedAt);
@@ -573,11 +558,11 @@ const getUsersWithOnboardingState = async (query) => {
       const timeDifferenceInMilliseconds = currentTimeStamp - userDiscordJoinedDate.getTime();
       const currentAndUserJoinedDateDifference = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
       if (currentAndUserJoinedDateDifference > range) {
-        onboardedUsersInRange.push(user);
+        UsersInRange.push(user);
       }
     }
   });
-  return onboardedUsersInRange;
+  return UsersInRange;
 };
 /**
  * Fetch all users
