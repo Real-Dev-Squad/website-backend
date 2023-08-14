@@ -81,5 +81,20 @@ module.exports = () => {
       isNoteworthy: true,
       assignee: false,
     },
+    {
+      title: "createdAt test",
+      type: "feature",
+      status: "AVAILABLE",
+      priority: "HIGH",
+      percentCompleted: 11,
+    },
+    {
+      title: "createdAt and updatedAt test",
+      createdAt: 1691918779936,
+      type: "feature",
+      status: "AVAILABLE",
+      priority: "HIGH",
+      percentCompleted: 11,
+    },
   ];
 };
