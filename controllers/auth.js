@@ -3,8 +3,12 @@ const users = require("../models/users");
 const QrCodeAuthModel = require("../models/qrCodeAuth");
 const authService = require("../services/authService");
 const dataAccess = require("../services/dataAccessLayer");
-const { SOMETHING_WENT_WRONG, DATA_ADDED_SUCCESSFULLY } = require("../constants/errorMessages");
-const USER_DOES_NOT_EXIST_ERROR = "User does not exist!";
+const {
+  SOMETHING_WENT_WRONG,
+  DATA_ADDED_SUCCESSFULLY,
+  USER_DOES_NOT_EXIST_ERROR,
+} = require("../constants/errorMessages");
+
 /**
  * Makes authentication call to GitHub statergy
  *
