@@ -1,4 +1,5 @@
 const userQuery = require("../models/userMigrations");
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 /**
  * Returns the lists of usernames where default colors were added
@@ -17,7 +18,7 @@ const addDefaultColors = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error adding default colors to users: ${error}`);
-    return res.boom.badImplementation("Something went wrong. Please contact admin");
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
