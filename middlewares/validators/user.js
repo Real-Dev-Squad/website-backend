@@ -1,7 +1,11 @@
 const { customWordCountValidator } = require("../../utils/customWordCountValidator");
 
 const joi = require("joi");
-const { USER_STATUS } = require("../../constants/users");
+const {
+  USER_STATUS,
+  USERS_PATCH_HANDLER_ACTIONS,
+  USERS_PATCH_HANDLER_ERROR_MESSAGES,
+} = require("../../constants/users");
 const ROLES = require("../../constants/roles");
 const { IMAGE_VERIFICATION_TYPES } = require("../../constants/imageVerificationTypes");
 const { userState } = require("../../constants/userStatus");
@@ -256,6 +260,23 @@ async function validateUpdateRoles(req, res, next) {
   }
 }
 
+async function validateUsersPatchHandler(req, res, next) {
+  const requestBodySchema = joi.object({
+    action: joi
+      .string()
+      .valid(USERS_PATCH_HANDLER_ACTIONS.ARCHIVE_USERS, USERS_PATCH_HANDLER_ACTIONS.NON_VERFIED_DISCORD_USERS)
+      .required(),
+  });
+
+  try {
+    await requestBodySchema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error("Error in validating action payload", error);
+    res.boom.badRequest(`${USERS_PATCH_HANDLER_ERROR_MESSAGES.VALIDATE_PAYLOAD}: ${error.message}`);
+  }
+}
+
 module.exports = {
   updateUser,
   updateProfileURL,
@@ -264,4 +285,5 @@ module.exports = {
   validateUserQueryParams,
   validateImageVerificationQuery,
   validateUpdateRoles,
+  validateUsersPatchHandler,
 };

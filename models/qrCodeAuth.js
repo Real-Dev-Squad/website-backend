@@ -8,7 +8,7 @@ const QrCodeAuthModel = firestore.collection("QrCodeAuth");
  * @return {Promise<{userDeviceInfoData|Object}>}
  */
 
-const updateStatus = async (userId, authStatus = "NOT_INIT") => {
+const updateStatus = async (userId, authStatus = "NOT_INIT", token) => {
   try {
     const authData = await QrCodeAuthModel.doc(userId).get();
 
@@ -21,8 +21,8 @@ const updateStatus = async (userId, authStatus = "NOT_INIT") => {
     await QrCodeAuthModel.doc(userId).set({
       ...authData.data(),
       authorization_status: authStatus,
+      token: `${token}`,
     });
-
     return {
       userExists: true,
       data: {
@@ -48,10 +48,17 @@ const storeUserDeviceInfo = async (userDeviceInfoData) => {
   }
 };
 
-const retrieveUserDeviceInfo = async (deviceId) => {
+const retrieveUserDeviceInfo = async ({ deviceId, userId }) => {
+  let queryDocument;
   try {
-    const queryDocument = await QrCodeAuthModel.where("device_id", "==", deviceId).get();
-    const userData = queryDocument.docs[0];
+    if (deviceId) {
+      queryDocument = await QrCodeAuthModel.where("device_id", "==", deviceId).get();
+    } else if (userId) {
+      queryDocument = await QrCodeAuthModel.where("user_id", "==", userId)
+        .where("authorization_status", "==", "NOT_INIT")
+        .get();
+    }
+    const userData = queryDocument?.docs[0];
 
     if (!userData) {
       return {
