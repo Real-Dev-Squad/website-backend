@@ -7,8 +7,9 @@ const walletConstants = require("../constants/wallets");
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
-const { arraysHaveCommonItem } = require("../utils/array");
-const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
+const { arraysHaveCommonItem, chunks } = require("../utils/array");
+const { archiveUsers } = require("../services/users");
+const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const ROLES = require("../constants/roles");
@@ -19,6 +20,7 @@ const userStatusModel = firestore.collection("usersStatus");
 const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Adds or updates the user data
@@ -574,6 +576,51 @@ const fetchAllUsers = async () => {
   return users;
 };
 
+const archiveUserIfNotInDiscord = async () => {
+  try {
+    const snapshot = await userModel.where("roles.in_discord", "==", false).where("roles.archived", "==", false).get();
+    const usersNotInDiscord = [];
+    let summary = {
+      totalUsers: snapshot.size,
+      totalUsersArchived: 0,
+      totalOperationsFailed: 0,
+      updatedUserDetails: [],
+      failedUserDetails: [],
+    };
+
+    if (snapshot.size === 0) {
+      return summary;
+    }
+
+    snapshot.forEach((user) => {
+      const id = user.id;
+      const userData = user.data();
+      usersNotInDiscord.push({ ...userData, id });
+    });
+
+    const userNotInDiscordChunks = chunks(usersNotInDiscord, DOCUMENT_WRITE_SIZE);
+    for (const users of userNotInDiscordChunks) {
+      const res = await archiveUsers(users);
+      summary = {
+        ...summary,
+        totalUsersArchived: (summary.totalUsersArchived += res.totalUsersArchived),
+        totalOperationsFailed: (summary.totalOperationsFailed += res.totalOperationsFailed),
+        updatedUserDetails: [...summary.updatedUserDetails, ...res.updatedUserDetails],
+        failedUserDetails: [...summary.failedUserDetails, ...res.failedUserDetails],
+      };
+    }
+
+    if (summary.totalOperationsFailed === summary.totalUsers) {
+      throw Error(INTERNAL_SERVER_ERROR);
+    }
+
+    return summary;
+  } catch (error) {
+    logger.error(`Error in updating Users archived role:  ${error}`);
+    throw error;
+  }
+};
+
 const fetchUsersWithToken = async () => {
   try {
     const users = [];
@@ -688,6 +735,7 @@ module.exports = {
   getUserImageForVerification,
   getDiscordUsers,
   fetchAllUsers,
+  archiveUserIfNotInDiscord,
   fetchUsersWithToken,
   removeGitHubToken,
   getUsersByRole,

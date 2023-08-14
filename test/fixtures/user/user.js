@@ -19,6 +19,7 @@ module.exports = () => {
       linkedin_id: "ankurnarkhede",
       github_id: githubUserInfo[0].username,
       github_display_name: githubUserInfo[0].displayName,
+      github_created_at: Number(new Date(githubUserInfo[0]._json.created_at).getTime()),
       isMember: true,
       phone: "1234567890",
       email: "abc@gmail.com",

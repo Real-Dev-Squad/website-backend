@@ -49,11 +49,10 @@ const githubAuthCallback = (req, res, next) => {
         logger.error(err);
         return res.boom.unauthorized("User cannot be authenticated");
       }
-
       userData = {
         github_id: user.username,
         github_display_name: user.displayName,
-        // github_account_created_at: user.created_at,
+        github_created_at: Number(new Date(user._json.created_at).getTime()),
         created_at: Date.now(),
         updated_at: Date.now(),
       };
