@@ -8,7 +8,7 @@ const userMigrationModel = require("../../../models/userMigrations");
 const userData = require("../../fixtures/user/user")();
 const addUser = require("../../utils/addUser");
 
-describe.only("userColorMigrations", function () {
+describe("userColorMigrations", function () {
   beforeEach(async function () {
     await addUser(userData[0]);
     await addUser(userData[1]);
@@ -42,7 +42,7 @@ describe.only("userColorMigrations", function () {
     expect(response.totalUsersUpdated).to.equal(5);
     expect(response.totalUsersUnaffected).to.equal(1);
   });
-  it.only("should not affect users already having color property", async function () {
+  it("should not affect users already having color property", async function () {
     // Manually add a color property to a user
     const userId = await addUser(userData[0]);
     await userModel.doc(userId).update({ colors: { color_id: 3 } });
