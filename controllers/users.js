@@ -203,25 +203,9 @@ const getUsernameAvailabilty = async (req, res) => {
 
 const getUsername = async (req, res) => {
   try {
-    const { firstname, lastname, dev } = req.query;
-    if (dev) {
-      const baseUsername = `${firstname.toLowerCase()}-${lastname.toLowerCase()}`;
-      let newUsername = baseUsername;
-
-      for (let count = 1; ; count++) {
-        const result = await dataAccess.retrieveUsers({ username: newUsername });
-        if (!result.userExists) {
-          return res.json({
-            username: newUsername,
-          });
-        }
-        newUsername = `${baseUsername}-${count}`;
-      }
-    } else {
-      return res.status(404).json({
-        message: "Data Not Found",
-      });
-    }
+    const { firstname, lastname } = req.query;
+    const username = await userQuery.generateUniqueUsername(firstname, lastname);
+    return res.json({ username });
   } catch (error) {
     logger.error(`Error while checking user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
