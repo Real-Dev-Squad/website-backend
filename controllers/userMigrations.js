@@ -1,6 +1,6 @@
 const userQuery = require("../models/userMigrations");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-
+const MAX_TRANSACTION_WRITES = 499;
 /**
  * Returns the lists of usernames where default colors were added
  *
@@ -10,7 +10,7 @@ const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 const addDefaultColors = async (req, res) => {
   try {
-    const usersDetails = await userQuery.addDefaultColors();
+    const usersDetails = await userQuery.addDefaultColors(MAX_TRANSACTION_WRITES);
 
     return res.json({
       message: "User colors updated successfully!",

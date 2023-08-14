@@ -1,8 +1,8 @@
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 const { getRandomIndex } = require("../utils/helpers");
+export const MAX_TRANSACTION_WRITES = 499;
 const USER_COLORS = 10;
-const MAX_TRANSACTION_WRITES = 499;
 
 /**
  * Returns the object with details about users to whom user color was added
@@ -11,8 +11,11 @@ const MAX_TRANSACTION_WRITES = 499;
  * @param res {Object} - Express response object
  */
 
-const addDefaultColors = async () => {
+const addDefaultColors = async (batchSize = MAX_TRANSACTION_WRITES) => {
   try {
+    if (batchSize > MAX_TRANSACTION_WRITES) {
+      throw new Error(`Error cannot add more than ${batchSize} users at once .`);
+    }
     const usersSnapshot = await userModel.get();
     const usersArr = [];
 
