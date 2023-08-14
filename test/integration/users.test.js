@@ -694,14 +694,14 @@ describe("Users", function () {
     });
   });
 
-  describe("GET /users/generateusername", function () {
+  describe("GET /users/username", function () {
     const firstname = "shubham";
     const lastname = "sigdar";
 
     it("Should return unique username when passing firstname and lastname", function (done) {
       chai
         .request(app)
-        .get(`/users/generateusername?firstname=${firstname}&lastname=${lastname}`)
+        .get(`/users/username?firstname=${firstname}&lastname=${lastname}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
