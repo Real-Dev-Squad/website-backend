@@ -698,7 +698,7 @@ describe("Users", function () {
     const firstname = "shubham";
     const lastname = "sigdar";
 
-    it.only("Should return unique username when passing firstname and lastname", function (done) {
+    it("Should return unique username when passing firstname and lastname", function (done) {
       chai
         .request(app)
         .get(`/users/generateusername?firstname=${firstname}&lastname=${lastname}`)
