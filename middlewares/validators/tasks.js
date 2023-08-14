@@ -85,7 +85,7 @@ const updateTask = async (req, res, next) => {
         .valid(...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD))
         .optional(),
       assignee: joi.string().optional(),
-      percentCompleted: joi.number().optional(),
+      percentCompleted: joi.number().integer().min(0).max(100).optional(),
       dependsOn: joi.array().items(joi.string()).optional(),
       participants: joi.array().items(joi.string()).optional(),
       completionAward: joi
@@ -123,7 +123,7 @@ const updateSelfTask = async (req, res, next) => {
         .string()
         .valid(...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD))
         .optional(),
-      percentCompleted: joi.number().optional(),
+      percentCompleted: joi.number().integer().min(0).max(100).optional(),
     });
   try {
     await schema.validateAsync(req.body);
@@ -164,6 +164,19 @@ const getTasksValidator = async (req, res, next) => {
         })
       ),
     size: joi.number().integer().positive().min(1).max(100).optional(),
+    q: joi
+      .string()
+      .optional()
+      .custom((value, helpers) => {
+        if (value && value.includes(":")) {
+          const [key] = value.split(":");
+          const allowedKeywords = ["searchterm"];
+          if (!allowedKeywords.includes(key.toLowerCase())) {
+            return helpers.error("any.invalid");
+          }
+        }
+        return value;
+      }, "Invalid query format"),
   });
 
   try {

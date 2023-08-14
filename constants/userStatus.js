@@ -5,4 +5,6 @@ const userState = {
   ONBOARDING: "ONBOARDING",
 };
 
-module.exports = { userState };
+const CANCEL_OOO = "cancelOoo";
+
+module.exports = { userState, CANCEL_OOO };

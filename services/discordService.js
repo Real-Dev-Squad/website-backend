@@ -34,6 +34,7 @@ const setInDiscordFalseScript = async () => {
         ...user.roles,
         in_discord: false,
       },
+      updated_at: Date.now(),
     };
     updateUsersPromises.push(userModel.doc(id).update(userData));
   });

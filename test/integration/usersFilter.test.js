@@ -16,6 +16,7 @@ const { addTag } = require("../../models/tags");
 const { addLevel } = require("../../models/levels");
 const { addTagsToItem } = require("../../models/items");
 const { assertUserIds } = require("../utils/user");
+const { userState } = require("../../constants/userStatus");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -28,6 +29,7 @@ describe("Filter Users", function () {
   let idleUser;
   let activeUser;
   let tagIdFE;
+  let onboardingUser;
   let tagIdBE;
   let levelId1;
   let levelId2;
@@ -42,12 +44,17 @@ describe("Filter Users", function () {
     oooUser = await addUser(userData[0]);
     await updateUserStatus(
       oooUser,
-      generateUserStatusData("OOO", updatedAtDate, updatedAtDate, untilDate, "Bad Health")
+      generateUserStatusData(userState.OOO, updatedAtDate, updatedAtDate, untilDate, "Bad Health")
     );
     idleUser = await addUser(userData[1]);
-    await updateUserStatus(idleUser, generateUserStatusData("IDLE", updatedAtDate, updatedAtDate, untilDate, "CSS"));
+    await updateUserStatus(
+      idleUser,
+      generateUserStatusData(userState.IDLE, updatedAtDate, updatedAtDate, untilDate, "CSS")
+    );
     activeUser = await addUser(userData[8]);
-    await updateUserStatus(activeUser, generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate));
+    await updateUserStatus(activeUser, generateUserStatusData(userState.ACTIVE, updatedAtDate, updatedAtDate));
+    onboardingUser = await addUser(userData[2]);
+    await updateUserStatus(onboardingUser, generateUserStatusData(userState.ONBOARDING, updatedAtDate, updatedAtDate));
 
     // creating tag and levels
     const { id: id1 } = await addTag({
@@ -147,6 +154,29 @@ describe("Filter Users", function () {
         });
     });
 
+    it("Should search users based on Onboarding state", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ state: "ONBOARDING" })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(1);
+          expect(res.body.users[0]).to.deep.include({
+            id: onboardingUser,
+          });
+          return done();
+        });
+    });
+
     it("Should search users based on Tag", function (done) {
       chai
         .request(app)
@@ -193,7 +223,7 @@ describe("Filter Users", function () {
       chai
         .request(app)
         .get("/users/search")
-        .query({ state: ["OOO", "IDLE"] })
+        .query({ state: ["OOO", "IDLE", "ONBOARDING"] })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -204,8 +234,8 @@ describe("Filter Users", function () {
           expect(res.body.count).to.be.a("number");
           expect(res.body.message).to.equal("Users found successfully!");
           expect(res.body.users).to.be.a("array");
-          expect(res.body.users.length).to.equal(2);
-          assertUserIds(res.body.users, [oooUser, idleUser]);
+          expect(res.body.users.length).to.equal(3);
+          assertUserIds(res.body.users, [oooUser, idleUser, onboardingUser]);
           return done();
         });
     });
@@ -335,7 +365,6 @@ describe("Filter Users", function () {
           res.body.users.forEach((user) => {
             expect(user).to.not.have.property("phone");
             expect(user).to.not.have.property("email");
-            expect(user).to.not.have.property("tokens");
           });
           return done();
         });

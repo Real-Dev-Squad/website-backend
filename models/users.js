@@ -7,8 +7,9 @@ const walletConstants = require("../constants/wallets");
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
-const { arraysHaveCommonItem } = require("../utils/array");
-const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
+const { arraysHaveCommonItem, chunks } = require("../utils/array");
+const { archiveUsers } = require("../services/users");
+const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const ROLES = require("../constants/roles");
@@ -19,6 +20,7 @@ const userStatusModel = firestore.collection("usersStatus");
 const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Adds or updates the user data
@@ -38,6 +40,7 @@ const addOrUpdate = async (userData, userId = null) => {
         await userModel.doc(userId).set({
           ...user.data(),
           ...userData,
+          updated_at: Date.now(),
         });
       }
 
@@ -53,6 +56,7 @@ const addOrUpdate = async (userData, userId = null) => {
         isNewUser: false,
         userId: user.docs[0].id,
         incompleteUserDetails: user.docs[0].data().incompleteUserDetails,
+        updated_at: Date.now(),
       };
     }
 
@@ -65,7 +69,7 @@ const addOrUpdate = async (userData, userId = null) => {
     userData.roles = { archived: false, in_discord: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
-    return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true };
+    return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true, updated_at: Date.now() };
   } catch (err) {
     logger.error("Error in adding or updating user", err);
     throw err;
@@ -552,7 +556,7 @@ const getDiscordUsers = async () => {
     const users = [];
     usersRef.forEach((user) => {
       const userData = user.data();
-      if (userData?.discordId && userData.roles?.in_discord === false)
+      if (userData?.discordId)
         users.push({
           id: user.id,
           ...userData,
@@ -570,6 +574,145 @@ const fetchAllUsers = async () => {
   const usersQuerySnapshot = await userModel.get();
   usersQuerySnapshot.forEach((user) => users.push({ ...user.data(), id: user.id }));
   return users;
+};
+
+const archiveUserIfNotInDiscord = async () => {
+  try {
+    const snapshot = await userModel.where("roles.in_discord", "==", false).where("roles.archived", "==", false).get();
+    const usersNotInDiscord = [];
+    let summary = {
+      totalUsers: snapshot.size,
+      totalUsersArchived: 0,
+      totalOperationsFailed: 0,
+      updatedUserDetails: [],
+      failedUserDetails: [],
+    };
+
+    if (snapshot.size === 0) {
+      return summary;
+    }
+
+    snapshot.forEach((user) => {
+      const id = user.id;
+      const userData = user.data();
+      usersNotInDiscord.push({ ...userData, id });
+    });
+
+    const userNotInDiscordChunks = chunks(usersNotInDiscord, DOCUMENT_WRITE_SIZE);
+    for (const users of userNotInDiscordChunks) {
+      const res = await archiveUsers(users);
+      summary = {
+        ...summary,
+        totalUsersArchived: (summary.totalUsersArchived += res.totalUsersArchived),
+        totalOperationsFailed: (summary.totalOperationsFailed += res.totalOperationsFailed),
+        updatedUserDetails: [...summary.updatedUserDetails, ...res.updatedUserDetails],
+        failedUserDetails: [...summary.failedUserDetails, ...res.failedUserDetails],
+      };
+    }
+
+    if (summary.totalOperationsFailed === summary.totalUsers) {
+      throw Error(INTERNAL_SERVER_ERROR);
+    }
+
+    return summary;
+  } catch (error) {
+    logger.error(`Error in updating Users archived role:  ${error}`);
+    throw error;
+  }
+};
+
+const fetchUsersWithToken = async () => {
+  try {
+    const users = [];
+    const usersRef = await userModel.where("tokens", "!=", false).get();
+    usersRef.forEach((user) => {
+      users.push(userModel.doc(user.id));
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Error while fetching all users with tokens field: ${err}`);
+    return [];
+  }
+};
+/**
+ *
+ * @param {[string]} userIds  Array id's of user
+ * @returns Object containing the details of the users whose userId was provided.
+ */
+const fetchUserByIds = async (userIds = []) => {
+  if (userIds.length === 0) {
+    return {};
+  }
+  try {
+    const users = {};
+    const usersRefs = userIds.map((docId) => userModel.doc(docId));
+    const documents = await firestore.getAll(...usersRefs);
+    documents.forEach((snapshot) => {
+      if (snapshot.exists) {
+        users[snapshot.id] = snapshot.data();
+      }
+    });
+
+    return users;
+  } catch (err) {
+    logger.error("Error retrieving user data", err);
+    throw err;
+  }
+};
+
+const removeGitHubToken = async (users) => {
+  try {
+    const length = users.length;
+
+    let numberOfBatches = length / 500;
+    const remainder = length % 500;
+
+    if (remainder) {
+      numberOfBatches = numberOfBatches + 1;
+    }
+
+    const batchArray = [];
+    for (let i = 0; i < numberOfBatches; i++) {
+      const batch = firestore.batch();
+      batchArray.push(batch);
+    }
+
+    let batchIndex = 0;
+    let operations = 0;
+
+    for (let i = 0; i < length; i++) {
+      batchArray[batchIndex].update(users[i], { tokens: admin.firestore.FieldValue.delete() });
+      operations++;
+
+      if (operations === 500) {
+        batchIndex++;
+        operations = 0;
+      }
+    }
+
+    await Promise.all(batchArray.map(async (batch) => await batch.commit()));
+  } catch (err) {
+    logger.error(`Error while deleting tokens field: ${err}`);
+    throw err;
+  }
+};
+
+const getUsersByRole = async (role) => {
+  try {
+    const usersRef = await userModel.where(`roles.${role}`, "==", true).get();
+    const users = [];
+    usersRef.docs.forEach((user) => {
+      const userData = user.data();
+      users.push({
+        id: user.id,
+        ...userData,
+      });
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Fetching users with role: ${role} exitted with an error: ${err}`);
+    throw err;
+  }
 };
 
 module.exports = {
@@ -592,4 +735,9 @@ module.exports = {
   getUserImageForVerification,
   getDiscordUsers,
   fetchAllUsers,
+  archiveUserIfNotInDiscord,
+  fetchUsersWithToken,
+  removeGitHubToken,
+  getUsersByRole,
+  fetchUserByIds,
 };

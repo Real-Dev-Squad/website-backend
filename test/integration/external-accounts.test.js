@@ -237,6 +237,7 @@ describe("External Accounts", function () {
       superUserJwt = authService.generateAuthToken({ userId });
       await userModel.add(usersFromRds[0]);
       await userModel.add(usersFromRds[1]);
+      await userModel.add(usersFromRds[2]);
       fetchStub = Sinon.stub(global, "fetch");
     });
 
@@ -262,8 +263,10 @@ describe("External Accounts", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.deep.equal({
-            rdsUsers: 2,
+            rdsUsers: 3,
             discordUsers: 2,
+            userUpdatedWithInDiscordFalse: 1,
+            usersMarkedUnArchived: 1,
             message: "Data Sync Complete",
           });
           return done();

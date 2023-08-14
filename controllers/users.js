@@ -7,7 +7,6 @@ const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
 const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
-const obfuscate = require("../utils/obfuscate");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript } = require("../services/discordService");
@@ -16,6 +15,11 @@ const { addRoleToUser, getDiscordMembers } = require("../services/discordService
 const { fetchAllUsers } = require("../models/users");
 const { getQualifiers } = require("../utils/helper");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+const {
+  USERS_PATCH_HANDLER_ACTIONS,
+  USERS_PATCH_HANDLER_ERROR_MESSAGES,
+  USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
+} = require("../constants/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -39,9 +43,10 @@ const verifyUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-  let result;
+  let result, user;
   try {
-    result = await userQuery.fetchUser({ userId: req.params.userId });
+    result = await dataAccess.retrieveUsers({ id: req.params.userId });
+    user = result.user;
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -49,15 +54,6 @@ const getUserById = async (req, res) => {
 
   if (!result.userExists) {
     return res.boom.notFound("User doesn't exist");
-  }
-
-  const { phone = "", email = "", ...user } = result.user;
-  try {
-    user.phone = obfuscate.obfuscatePhone(phone);
-    user.email = obfuscate.obfuscateMail(email);
-  } catch (error) {
-    logger.error(`Error while formatting phone and email: ${error}`);
-    return res.boom.badImplementation("Error while formatting phone and email");
   }
 
   return res.json({
@@ -82,9 +78,10 @@ const getUsers = async (req, res) => {
     // getting user details by id if present.
     if (req.query.id) {
       const id = req.query.id;
-      let result;
+      let result, user;
       try {
         result = await dataAccess.retrieveUsers({ id: id });
+        user = result.user;
       } catch (error) {
         logger.error(`Error while fetching user: ${error}`);
         return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -92,7 +89,6 @@ const getUsers = async (req, res) => {
       if (!result.userExists) {
         return res.boom.notFound("User doesn't exist");
       }
-      const user = result.user;
       return res.json({
         message: "User returned successfully!",
         user,
@@ -110,9 +106,10 @@ const getUsers = async (req, res) => {
     }
 
     const data = await dataAccess.retrieveUsers({ query: req.query });
+
     return res.json({
       message: "Users returned successfully!",
-      users: data.allUsers,
+      users: data.users,
       links: {
         next: data.nextId ? getPaginationLink(req.query, "next", data.nextId) : "",
         prev: data.prevId ? getPaginationLink(req.query, "prev", data.prevId) : "",
@@ -133,9 +130,8 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
-    const { phone, email, ...user } = result.user;
-
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
+    const user = result.user;
     if (result.userExists) {
       return res.json({
         message: "User returned successfully!",
@@ -195,7 +191,7 @@ const getSuggestedUsers = async (req, res) => {
 
 const getUsernameAvailabilty = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ username: req.params.username });
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
     return res.json({
       isUsernameAvailable: !result.userExists,
     });
@@ -212,14 +208,13 @@ const getUsernameAvailabilty = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getSelfDetails = (req, res) => {
+const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
-      if (req.query.private) {
-        return res.send(req.userData);
-      }
-      const { phone, email, ...userData } = req.userData;
-      return res.send(userData);
+      const user = await dataAccess.retrieveUsers({
+        userdata: req.userData,
+      });
+      return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
@@ -239,7 +234,7 @@ const updateSelf = async (req, res) => {
   try {
     const { id: userId } = req.userData;
     if (req.body.username) {
-      const { user } = await userQuery.fetchUser({ userId });
+      const { user } = await dataAccess.retrieveUsers({ id: userId });
       if (!user.incompleteUserDetails) {
         return res.boom.forbidden("Cannot update username again");
       }
@@ -334,8 +329,11 @@ const markUnverified = async (req, res) => {
     });
 
     usersInRdsDiscordServer.forEach((discordUser) => {
-      const found = discordUser.roles.find((role) => role === discordDeveloperRoleId);
-      if (found && !rdsUserMap[discordUser.user.id]) {
+      const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
+      const isMissingUnverifiedRole = !discordUser.roles.includes(unverifiedRoleId);
+      const isUserUnverified = !rdsUserMap[discordUser.user.id]; // Doesn't have discordId in RDS user object
+
+      if (isDeveloper && isUserUnverified && isMissingUnverifiedRole) {
         usersToApplyUnverifiedRole.push(discordUser.user.id);
       }
     });
@@ -388,7 +386,7 @@ const updateUser = async (req, res) => {
 
     const { approval, timestamp, userId, ...profileDiff } = profileDiffData;
 
-    const user = await userQuery.fetchUser({ userId });
+    const user = await dataAccess.retrieveUsers({ id: userId });
     if (!user.userExists) return res.boom.notFound("User doesn't exist");
 
     await profileDiffsQuery.updateProfileDiff({ approval: profileDiffStatus.APPROVED }, profileDiffId);
@@ -414,6 +412,7 @@ const updateUser = async (req, res) => {
 const generateChaincode = async (req, res) => {
   try {
     const { id } = req.userData;
+
     const chaincode = await chaincodeQuery.storeChaincode(id);
     await userQuery.addOrUpdate({ chaincode }, id);
     return res.json({
@@ -563,16 +562,11 @@ const filterUsers = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    const users = await userQuery.getUsersBasedOnFilter(req.query);
-    const sanitizedUsers = users.map((user) => {
-      delete user.tokens;
-      delete user.email;
-      delete user.phone;
-      return user;
-    });
+
+    const users = await dataAccess.retreiveFilteredUsers(req.query);
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
-      users: sanitizedUsers,
+      users: users,
       count: users.length,
     });
   } catch (error) {
@@ -581,9 +575,9 @@ const filterUsers = async (req, res) => {
   }
 };
 
-const nonVerifiedDiscordUsers = async (req, res) => {
-  const data = await userQuery.getDiscordUsers();
-  return res.json(data);
+const nonVerifiedDiscordUsers = async () => {
+  const data = await dataAccess.retrieveDiscordUsers();
+  return data;
 };
 
 const setInDiscordScript = async (req, res) => {
@@ -591,13 +585,32 @@ const setInDiscordScript = async (req, res) => {
     await setInDiscordFalseScript();
     return res.json({ message: "Successfully added the in_discord field to false for all users" });
   } catch (err) {
-    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
+const removeTokens = async (req, res) => {
+  try {
+    const users = await userQuery.fetchUsersWithToken();
+
+    if (!users.length) {
+      return res.status(404).json({ message: "No users found with github Token!" });
+    }
+
+    await userQuery.removeGitHubToken(users);
+
+    return res.status(200).json({
+      message: "Github Token removed from all users!",
+      usersFound: users.length,
+    });
+  } catch (err) {
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
   }
 };
 
 const updateRoles = async (req, res) => {
   try {
-    const result = await userQuery.fetchUser({ userId: req.params.id });
+    const result = await dataAccess.retrieveUsers({ id: req.params.id });
     if (result?.userExists) {
       const dataToUpdate = req.body;
       const response = await getRoleToUpdate(result.user, dataToUpdate);
@@ -617,6 +630,58 @@ const updateRoles = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
+
+const archiveUserIfNotInDiscord = async () => {
+  try {
+    const data = await userQuery.archiveUserIfNotInDiscord();
+
+    if (data.totalUsers === 0) {
+      return {
+        message: USERS_PATCH_HANDLER_ERROR_MESSAGES.ARCHIVE_USERS.NO_USERS_DATA_TO_UPDATE,
+        summary: data,
+      };
+    }
+
+    return {
+      message: USERS_PATCH_HANDLER_SUCCESS_MESSAGES.ARCHIVE_USERS.SUCCESSFULLY_UPDATED_DATA,
+      summary: data,
+    };
+  } catch (error) {
+    logger.error(`Error while updating the archived role: ${error}`);
+    throw Error(INTERNAL_SERVER_ERROR);
+  }
+};
+
+async function usersPatchHandler(req, res) {
+  try {
+    const { action } = req.body;
+    let response;
+
+    if (action === USERS_PATCH_HANDLER_ACTIONS.NON_VERFIED_DISCORD_USERS) {
+      const data = await nonVerifiedDiscordUsers();
+      response = data;
+    }
+
+    if (action === USERS_PATCH_HANDLER_ACTIONS.ARCHIVE_USERS) {
+      const debugQuery = req.query.debug?.toLowerCase();
+      const data = await archiveUserIfNotInDiscord();
+
+      if (debugQuery === "true") {
+        data.summary.updatedUserDetails = data.summary.updatedUserDetails.slice(-3);
+        response = data;
+      } else {
+        delete data.summary.updatedUserDetails;
+        delete data.summary.failedUserDetails;
+        response = data;
+      }
+    }
+
+    return res.status(200).json(response);
+  } catch (error) {
+    logger.error("Error while handling the users common patch route:", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+}
 
 module.exports = {
   verifyUser,
@@ -642,5 +707,8 @@ module.exports = {
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
+  removeTokens,
   updateRoles,
+  archiveUserIfNotInDiscord,
+  usersPatchHandler,
 };

@@ -30,5 +30,5 @@ module.exports = {
     // Prettier for formatting
     "prettier/prettier": "error",
   },
-  ignorePatterns: ["public/*"],
+  ignorePatterns: ["public/*", "dist/*"],
 };

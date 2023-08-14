@@ -19,7 +19,7 @@ const getUserIdBasedOnRoute = (req) => {
  *  @param None
  *  @returns timeStamp : timestamp for the next day at midnight
  */
-const getTommorowTimeStamp = () => {
+const getTomorrowTimeStamp = () => {
   const today = new Date();
   today.setDate(today.getDate() + 1);
   today.setHours(0, 0, 0, 0);
@@ -53,6 +53,32 @@ const filterStatusData = (newStatusData) => {
   if (isNewStateActive) {
     newStatusData.currentStatus.message = "";
   }
+};
+
+/**
+ * Generates new status data based on the isActive flag.
+ *
+ * @param {boolean} isActive - Indicates if the user is active or not.
+ * @returns {object} - The generated status data object.
+ */
+const generateNewStatus = (isActive) => {
+  const currentTimeStamp = new Date().getTime();
+
+  const newStatusData = {
+    currentStatus: {
+      message: "",
+      from: currentTimeStamp,
+      until: "",
+      updatedAt: currentTimeStamp,
+    },
+  };
+
+  if (isActive) {
+    newStatusData.currentStatus.state = "ACTIVE";
+  } else {
+    newStatusData.currentStatus.state = "IDLE";
+  }
+  return newStatusData;
 };
 
 /**
@@ -268,9 +294,17 @@ const generateErrorResponse = (message) => {
   };
 };
 
+const getNextDayTimeStamp = (timeStamp) => {
+  const currentDateTime = new Date(timeStamp);
+  const nextDateDateTime = new Date(currentDateTime);
+  nextDateDateTime.setDate(currentDateTime.getDate() + 1);
+  nextDateDateTime.setUTCHours(0, 0, 0, 0);
+  return nextDateDateTime.getTime();
+};
+
 module.exports = {
   getUserIdBasedOnRoute,
-  getTommorowTimeStamp,
+  getTomorrowTimeStamp,
   getTodayTimeStamp,
   filterStatusData,
   generateAlreadyExistingStatusResponse,
@@ -280,4 +314,6 @@ module.exports = {
   getUserIdFromUserName,
   checkIfUserHasLiveTasks,
   generateErrorResponse,
+  generateNewStatus,
+  getNextDayTimeStamp,
 };
