@@ -217,5 +217,38 @@ describe("tasks", function () {
       expect(firestoreResult.status).to.be.equal(TASK_STATUS.ASSIGNED);
       expect(firestoreResult.assignee).to.be.equal(userId1);
     });
+    it("should return task with a createdAt", async function () {
+      const taskId = (await tasks.updateTask(tasksData[6])).taskId;
+
+      const firestoreResult = (await tasksModel.doc(taskId).get()).data();
+      expect(firestoreResult).to.haveOwnProperty("createdAt");
+    });
+
+    it("should update the task with updatedAt but does not have a createdAt", async function () {
+      const data = {
+        percentCompleted: 90,
+      };
+      const taskId = (await tasks.updateTask(tasksData[6])).taskId;
+      await firestore.collection("tasks").doc(taskId).set(tasksData[6]);
+
+      await updateTask(data, taskId);
+
+      const firestoreResult = (await tasksModel.doc(taskId).get()).data();
+      expect(firestoreResult).to.haveOwnProperty("updatedAt");
+    });
+
+    it("should update the task with updatedAt but also contains createdAt", async function () {
+      const data = {
+        percentCompleted: 90,
+      };
+      const taskId = (await tasks.updateTask(tasksData[7])).taskId;
+      await firestore.collection("tasks").doc(taskId).set(tasksData[7]);
+
+      await updateTask(data, taskId);
+
+      const firestoreResult = (await tasksModel.doc(taskId).get()).data();
+      expect(firestoreResult).to.haveOwnProperty("updatedAt");
+      expect(firestoreResult).to.haveOwnProperty("createdAt");
+    });
   });
 });

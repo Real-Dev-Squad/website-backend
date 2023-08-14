@@ -27,9 +27,13 @@ const updateTask = async (taskData, taskId = null) => {
         taskData = { ...taskData, endsOn: Math.floor(Date.now() / 1000) };
       }
       const { dependsOn, ...taskWithoutDependsOn } = taskData;
+      const updatedAt = Date.now();
+      const createdAt = task.data().createdAt ? { createdAt: task.data().createdAt } : {};
       await tasksModel.doc(taskId).set({
         ...task.data(),
         ...taskWithoutDependsOn,
+        ...createdAt,
+        updatedAt,
       });
       if (dependsOn) {
         await firestore.runTransaction(async (transaction) => {
@@ -56,6 +60,7 @@ const updateTask = async (taskData, taskId = null) => {
       }
       return { taskId };
     }
+    taskData.createdAt = Date.now();
     const taskInfo = await tasksModel.add(taskData);
     const result = {
       taskId: taskInfo.id,
