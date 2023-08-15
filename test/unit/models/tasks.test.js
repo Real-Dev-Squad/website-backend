@@ -9,7 +9,7 @@ const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
-const { addDependency, updateTask } = require("../../../models/tasks");
+const { addDependency, updateTask, getBuiltTasks } = require("../../../models/tasks");
 const firestore = require("../../../utils/firestore");
 const { TASK_STATUS } = require("../../../constants/tasks");
 const dependencyModel = firestore.collection("TaskDependencies");
@@ -90,6 +90,22 @@ describe("tasks", function () {
         const sameTask = tasksData.find((t) => t.title === task.title);
         expect(task).to.contain.all.keys(sameTask);
       });
+    });
+    it("should fetch tasks filtered by search term", async function () {
+      const searchTerm = "task-dependency";
+      const tasksSnapshot = await tasksModel.get();
+      const result = await getBuiltTasks(tasksSnapshot, searchTerm);
+      expect(result).to.have.lengthOf(1);
+      result.forEach((task) => {
+        expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
+      });
+      expect(tasksData[5].title.includes(searchTerm));
+    });
+    it("should return empty array when no search term is found", async function () {
+      const searchTerm = "random";
+      const tasksSnapshot = await tasksModel.get();
+      const result = await getBuiltTasks(tasksSnapshot, searchTerm);
+      expect(result).to.have.lengthOf(0);
     });
   });
 

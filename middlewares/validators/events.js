@@ -100,6 +100,50 @@ const endActiveEvent = async (req, res, next) => {
   }
 };
 
+const addPeerToEvent = async (req, res, next) => {
+  const { id } = req.params;
+  const { peerId, name, role, joinedAt } = req.body;
+
+  const schema = joi.object({
+    peerId: joi.string().required(),
+    name: joi.string().required(),
+    id: joi.string().required(),
+    role: joi.string().required(),
+    joinedAt: joi.date().required(),
+  });
+
+  const validationOptions = { abortEarly: false };
+
+  try {
+    await schema.validateAsync({ peerId, name, id, role, joinedAt }, validationOptions);
+    next();
+  } catch (error) {
+    logger.error(`Error while adding a peer to the event: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
+const kickoutPeer = async (req, res, next) => {
+  const { id } = req.params;
+  const { peerId, reason } = req.body;
+
+  const schema = joi.object({
+    id: joi.string().required(),
+    peerId: joi.string().required(),
+    reason: joi.string().required(),
+  });
+
+  const validationOptions = { abortEarly: false };
+
+  try {
+    await schema.validateAsync({ id, peerId, reason }, validationOptions);
+    next();
+  } catch (error) {
+    logger.error(`We encountered some error while removing selected Participant from event: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -107,4 +151,6 @@ module.exports = {
   getEventById,
   updateEvent,
   endActiveEvent,
+  addPeerToEvent,
+  kickoutPeer,
 };
