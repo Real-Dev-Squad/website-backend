@@ -2,7 +2,12 @@ const passport = require("passport");
 const users = require("../models/users");
 const QrCodeAuthModel = require("../models/qrCodeAuth");
 const authService = require("../services/authService");
-const { SOMETHING_WENT_WRONG, DATA_ADDED_SUCCESSFULLY, BAD_REQUEST } = require("../constants/errorMessages");
+const dataAccess = require("../services/dataAccessLayer");
+const {
+  SOMETHING_WENT_WRONG,
+  DATA_ADDED_SUCCESSFULLY,
+  USER_DOES_NOT_EXIST_ERROR,
+} = require("../constants/errorMessages");
 const { generateUniqueToken } = require("../utils/generateUniqueToken");
 
 /**
@@ -111,13 +116,12 @@ const storeUserDeviceInfo = async (req, res) => {
       authorization_status: "NOT_INIT",
     };
 
-    const userInfo = await QrCodeAuthModel.storeUserDeviceInfo(userJson);
+    const userInfoData = await dataAccess.retrieveUsers({ id: userJson.user_id });
 
-    if (!userInfo) {
-      return res.status(404).json({
-        message: BAD_REQUEST,
-      });
+    if (!userInfoData.userExists) {
+      return res.boom.notFound(USER_DOES_NOT_EXIST_ERROR);
     }
+    const userInfo = await QrCodeAuthModel.storeUserDeviceInfo(userJson);
 
     return res.status(201).json({
       ...userInfo,

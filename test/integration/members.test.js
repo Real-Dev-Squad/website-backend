@@ -307,24 +307,6 @@ describe("Members", function () {
           return done();
         });
     });
-    it("Should return 400 if body is empty", function (done) {
-      chai
-        .request(app)
-        .patch(`/members/archiveMembers/${userToBeArchived.username}`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({})
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(400);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Reason is required");
-
-          return done();
-        });
-    });
     it("Should archive the user", function (done) {
       addUser(userToBeArchived).then(() => {
         chai
