@@ -1,5 +1,4 @@
 const { getUsername } = require("./users");
-
 const buildExtensionRequests = (extensionRequests, initialArray = []) => {
   if (!extensionRequests.empty) {
     extensionRequests.forEach((extensionRequests) => {
@@ -25,7 +24,35 @@ const formatExtensionRequest = async (extensionRequest) => {
   return { ...body, id, timestamp, assignee };
 };
 
+const transformQuery = (dev = false, size) => {
+  const transformedDev = JSON.parse(dev);
+
+  let transformedSize;
+  if (size) {
+    transformedSize = parseInt(size);
+  }
+
+  return { transformedDev: transformedDev, transformedSize: transformedSize };
+};
+
+const generateNextLink = (nextPageParams) => {
+  let nextLink = new URLSearchParams();
+  for (const [key, value] of Object.entries(nextPageParams)) {
+    if (value) {
+      if (Array.isArray(value)) {
+        value.forEach((arrayItem) => nextLink.append(key, arrayItem));
+      } else {
+        nextLink.append(key, value);
+      }
+    }
+  }
+  nextLink = `/extension-requests?${nextLink.toString()}`;
+  return nextLink;
+};
+
 module.exports = {
   buildExtensionRequests,
   formatExtensionRequest,
+  transformQuery,
+  generateNextLink,
 };

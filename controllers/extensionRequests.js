@@ -4,6 +4,7 @@ const tasks = require("../models/tasks");
 const { getUsername } = require("../utils/users");
 const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { transformQuery } = require("../utils/extensionRequests");
 /**
  * Create ETA extension Request
  *
@@ -78,8 +79,23 @@ const createTaskExtensionRequest = async (req, res) => {
  */
 const fetchExtensionRequests = async (req, res) => {
   try {
-    const { status, taskId, assignee } = req.query;
-    const allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({ taskId, status, assignee });
+    const { status, taskId, assignee, dev, cursor, size, order } = req.query;
+    const { transformedDev, transformedSize } = transformQuery(dev, size);
+
+    let allExtensionRequests;
+
+    if (transformedDev) {
+      allExtensionRequests = await extensionRequestsQuery.fetchPaginatedExtensionRequests(
+        { taskId, status, assignee },
+        { cursor, order, size: transformedSize, dev }
+      );
+      return res.json({
+        message: "Extension Requests returned successfully!",
+        ...allExtensionRequests,
+      });
+    } else {
+      allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({ taskId, status, assignee });
+    }
 
     return res.json({
       message: "Extension Requests returned successfully!",
