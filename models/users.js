@@ -504,7 +504,7 @@ const getUsersBasedOnFilter = async (query) => {
     const userRefs = finalItems.map((itemId) => userModel.doc(itemId));
     const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
     const filteredUserDocs = userDocs.filter((doc) => !doc.roles?.archived);
-    if (query.time) {
+    if (query.time & (query.state === "ONBOARDING")) {
       const fetchUsersWithOnBoardingState = await getUsersWithOnboardingState(filteredUserDocs, stateItems, query.time);
       return fetchUsersWithOnBoardingState;
     }
