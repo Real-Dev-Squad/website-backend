@@ -393,8 +393,8 @@ describe("users", function () {
       };
       const result = await users.getUsersBasedOnFilter(query);
       expect(result.length).to.equal(2);
-    })
-  })
+    });
+  });
   describe("fetch users by id", function () {
     let allIds = [];
     before(async function () {
