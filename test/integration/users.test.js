@@ -701,7 +701,7 @@ describe("Users", function () {
     it("Should return unique username when passing firstname and lastname", function (done) {
       chai
         .request(app)
-        .get(`/users/username?firstname=${firstname}&lastname=${lastname}`)
+        .get(`/users/username?firstname=${firstname}&lastname=${lastname}&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -711,6 +711,21 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.username).to.equal("shubham-sigdar");
 
+          return done();
+        });
+    });
+
+    it("Should return 404 if feature flag is not pass", function (done) {
+      chai
+        .request(app)
+        .get(`/users/generateusername?firstname=${firstname}&lastname=${lastname}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
           return done();
         });
     });
