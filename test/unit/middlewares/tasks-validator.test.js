@@ -1,5 +1,5 @@
 const Sinon = require("sinon");
-const { getTasksValidator } = require("../../../middlewares/validators/tasks");
+const { getTasksValidator, createTask } = require("../../../middlewares/validators/tasks");
 const { expect } = require("chai");
 const { TASK_STATUS } = require("../../../constants/tasks");
 
@@ -346,5 +346,225 @@ describe("getTasks validator", function () {
     const nextMiddlewareSpy = Sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
+
+  it("should pass when valid request body is provided", async function () {
+    const validRequestBody = {
+      title: "Sample Task",
+      type: "Feature",
+      status: TASK_STATUS.ASSIGNED,
+      priority: "High",
+      percentCompleted: 0,
+    };
+
+    const req = {
+      body: validRequestBody,
+    };
+    const res = {
+      boom: {
+        badRequest: (message) => {
+          throw new Error(message);
+        },
+      },
+    };
+
+    const nextMiddlewareSpy = Sinon.spy();
+
+    try {
+      await createTask(req, res, nextMiddlewareSpy);
+    } catch (error) {
+      expect.fail("Should not have thrown an error");
+    }
+
+    expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
+
+  it("should return a bad request error when empty request body is provided", async function () {
+    const invalidRequestBody = {
+      // Invalid: Missing required fields
+    };
+
+    const req = {
+      body: invalidRequestBody,
+    };
+    const res = {
+      boom: {
+        badRequest: (message) => {
+          return message;
+        },
+      },
+    };
+
+    const nextMiddlewareSpy = Sinon.spy();
+
+    try {
+      await createTask(req, res, nextMiddlewareSpy);
+      expect.fail("Should have thrown a bad request error");
+    } catch (error) {
+      expect(error);
+    }
+
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+
+  it("should return a validation error when percentCompleted is negative", async function () {
+    const invalidRequestBody = {
+      title: "Sample Task",
+      type: "Feature",
+      status: "Assigned",
+      priority: "High",
+      percentCompleted: -10,
+    };
+
+    const req = {
+      body: invalidRequestBody,
+    };
+    const res = {
+      boom: {
+        badRequest: (message) => {
+          return message;
+        },
+      },
+    };
+
+    const nextMiddlewareSpy = Sinon.spy();
+
+    try {
+      await createTask(req, res, nextMiddlewareSpy);
+      expect.fail("Should have thrown a bad request error");
+    } catch (error) {
+      expect(error);
+    }
+
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+
+  it("should return a validation error when status is missing", async function () {
+    const invalidRequestBody = {
+      title: "Sample Task",
+      type: "Feature",
+      priority: "High",
+      percentCompleted: 0,
+    };
+
+    const req = {
+      body: invalidRequestBody,
+    };
+    const res = {
+      boom: {
+        badRequest: (message) => {
+          return message;
+        },
+      },
+    };
+
+    const nextMiddlewareSpy = Sinon.spy();
+
+    try {
+      await createTask(req, res, nextMiddlewareSpy);
+      expect.fail("Should have thrown a bad request error");
+    } catch (error) {
+      expect(error);
+    }
+
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+
+  it("should return a validation error when type is invalid", async function () {
+    const invalidRequestBody = {
+      title: "Sample Task",
+      type: "InvalidType",
+      status: "Assigned",
+      priority: "High",
+      percentCompleted: 0,
+    };
+
+    const req = {
+      body: invalidRequestBody,
+    };
+    const res = {
+      boom: {
+        badRequest: (message) => {
+          return message;
+        },
+      },
+    };
+
+    const nextMiddlewareSpy = Sinon.spy();
+
+    try {
+      await createTask(req, res, nextMiddlewareSpy);
+      expect.fail("Should have thrown a bad request error");
+    } catch (error) {
+      expect(error);
+    }
+
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+
+  it("should return a validation error when title is missing", async function () {
+    const invalidRequestBody = {
+      type: "Feature",
+      status: "Assigned",
+      priority: "High",
+      percentCompleted: 0,
+    };
+
+    const req = {
+      body: invalidRequestBody,
+    };
+    const res = {
+      boom: {
+        badRequest: (message) => {
+          return message;
+        },
+      },
+    };
+
+    const nextMiddlewareSpy = Sinon.spy();
+
+    try {
+      await createTask(req, res, nextMiddlewareSpy);
+      expect.fail("Should have thrown a bad request error");
+    } catch (error) {
+      expect(error);
+    }
+
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+
+  it("should pass when html_url in github request body is a valid URL", async function () {
+    const validRequestBody = {
+      title: "Sample Task",
+      type: "Feature",
+      status: TASK_STATUS.ASSIGNED,
+      priority: "High",
+      percentCompleted: 0,
+      github: {
+        issue: {
+          html_url: "https://github.com/issue-url",
+        },
+      },
+    };
+
+    const req = {
+      body: validRequestBody,
+    };
+    const res = {
+      boom: {
+        badRequest: (message) => {
+          return message;
+        },
+      },
+    };
+
+    const nextMiddlewareSpy = Sinon.spy();
+
+    try {
+      await createTask(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+    } catch (error) {
+      expect.fail("Should not have thrown a validation error");
+    }
   });
 });
