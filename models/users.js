@@ -509,7 +509,11 @@ const getUsersBasedOnFilter = async (query) => {
     const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
     const filteredUserDocs = userDocs.filter((doc) => !doc.roles?.archived);
     if (query.time && query.state === "ONBOARDING") {
-      const fetchUsersWithOnBoardingState = await getUsersWithOnboardingState(filteredUserDocs, stateItems, query.time);
+      const fetchUsersWithOnBoardingState = await getUsersWithOnboardingStateInRange(
+        filteredUserDocs,
+        stateItems,
+        query.time
+      );
       return fetchUsersWithOnBoardingState;
     }
     return filteredUserDocs;
@@ -549,8 +553,8 @@ const getUsersBasedOnFilter = async (query) => {
   return [];
 };
 
-const getUsersWithOnboardingState = async (filteredUserDocs, stateItems, time) => {
-  const UsersInRange = [];
+const getUsersWithOnboardingStateInRange = async (filteredUserDocs, stateItems, time) => {
+  const usersInRange = [];
   const range = Number(time.split("d")[0]);
   const filteredUsers = filteredUserDocs.filter((userDoc) => {
     return stateItems.some((stateItem) => stateItem.userId === userDoc.id);
@@ -562,11 +566,11 @@ const getUsersWithOnboardingState = async (filteredUserDocs, stateItems, time) =
       const timeDifferenceInMilliseconds = currentTimeStamp - userDiscordJoinedDate.getTime();
       const currentAndUserJoinedDateDifference = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
       if (currentAndUserJoinedDateDifference > range) {
-        UsersInRange.push(user);
+        usersInRange.push(user);
       }
     }
   });
-  return UsersInRange;
+  return usersInRange;
 };
 /**
  * Fetch all users
