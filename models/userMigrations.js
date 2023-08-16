@@ -13,9 +13,6 @@ const USER_COLORS = 10;
 
 const addDefaultColors = async (batchSize = MAX_TRANSACTION_WRITES) => {
   try {
-    if (batchSize > MAX_TRANSACTION_WRITES) {
-      throw new Error(`Error cannot add more than ${batchSize} users at once .`);
-    }
     const usersSnapshot = await userModel.get();
     const usersArr = [];
 
