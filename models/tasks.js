@@ -119,14 +119,35 @@ const getBuiltTasks = async (tasksSnapshot, searchTerm) => {
   return taskList;
 };
 
-const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, prev, dev = false }) => {
+const fetchPaginatedTasks = async ({
+  status = "",
+  size = TASK_SIZE,
+  page,
+  next,
+  prev,
+  dev = false,
+  assignee,
+  term,
+}) => {
   try {
     let initialQuery;
     if (status === TASK_STATUS.OVERDUE && dev) {
       const currentTime = Math.floor(Date.now() / 1000);
       initialQuery = tasksModel.where("endsOn", "<", currentTime);
     } else {
-      initialQuery = status ? tasksModel.where("status", "==", status).orderBy("title") : tasksModel.orderBy("title");
+      initialQuery = tasksModel.orderBy("title");
+      initialQuery = status ? tasksModel.where("status", "==", status) : tasksModel;
+
+      if (assignee) {
+        const user = await userUtils.getUserId(assignee);
+        if (user) {
+          initialQuery = initialQuery.where("assignee", "==", user);
+        }
+      }
+
+      if (term) {
+        initialQuery = initialQuery.where("title", ">=", term).where("title", "<=", term + "\uf8ff");
+      }
     }
     let queryDoc = initialQuery;
 
