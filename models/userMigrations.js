@@ -1,7 +1,7 @@
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 const { getRandomIndex } = require("../utils/helpers");
-export const MAX_TRANSACTION_WRITES = 499;
+export const MAX_TRANSACTION_WRITES = 500;
 const USER_COLORS = 10;
 
 /**
@@ -34,7 +34,8 @@ const addDefaultColors = async (batchSize = MAX_TRANSACTION_WRITES) => {
         const userColorIndex = getRandomIndex(USER_COLORS);
         colors.color_id = userColorIndex;
         const docId = userModel.doc(user.id);
-        batchArray[parseInt(batchIndex)].set(docId, { ...user, colors });
+        user.colors = colors;
+        batchArray[parseInt(batchIndex)].set(docId, user);
         operationCounter++;
         totalCount++;
         users.push(user.username);
