@@ -127,7 +127,7 @@ const fetchPaginatedTasks = async ({
   prev,
   dev = false,
   assignee,
-  term,
+  title,
 }) => {
   try {
     let initialQuery = tasksModel.orderBy("title");
@@ -147,8 +147,8 @@ const fetchPaginatedTasks = async ({
         }
       }
 
-      if (term) {
-        initialQuery = initialQuery.where("title", ">=", term).where("title", "<=", term + "\uf8ff");
+      if (title) {
+        initialQuery = initialQuery.where("title", ">=", title).where("title", "<=", title + "\uf8ff");
       }
     }
 

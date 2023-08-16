@@ -143,7 +143,7 @@ const getTasksValidator = async (req, res, next) => {
       .valid(...MAPPED_TASK_STATUS_ENUM)
       .optional(),
     assignee: joi.string().insensitive().optional(),
-    term: joi.string().insensitive().optional(),
+    title: joi.string().insensitive().optional(),
     page: joi.number().integer().min(0),
     next: joi
       .string()
