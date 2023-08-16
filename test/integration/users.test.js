@@ -50,7 +50,6 @@ describe("Users", function () {
     userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
-
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
 
     const userDocRef = photoVerificationModel.doc();
