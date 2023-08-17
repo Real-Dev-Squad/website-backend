@@ -66,7 +66,7 @@ const createGroupRole = async (req, res) => {
 const getAllGroupRoles = async (req, res) => {
   try {
     const { groups } = await discordRolesModel.getAllGroupRoles();
-    const dev = req.query.dev;
+    const dev = req.query.dev === "true";
     if (dev) {
       // Placing the new changes under the feature flag.
       const discordId = req.userData?.discordId;
