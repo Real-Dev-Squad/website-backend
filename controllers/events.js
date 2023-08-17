@@ -1,11 +1,12 @@
-const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS } = require("../constants/events");
+const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS, ROLES } = require("../constants/events");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-
 const { EventTokenService, EventAPIService } = require("../services");
 const eventQuery = require("../models/events");
 
 const logger = require("../utils/logger");
 const { removeUnwantedProperties } = require("../utils/events");
+
+const crypto = require("crypto");
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
@@ -259,6 +260,35 @@ const kickoutPeer = async (req, res) => {
   }
 };
 
+const generateEventCode = async (req, res) => {
+  // this id is for events
+  const { id } = req.params;
+  const { eventCode, role } = req.body;
+  const eventCodeUuid = crypto.randomUUID({ disableEntropyCache: true });
+
+  if (role !== ROLES.MAVEN) {
+    return res.status(400).json({
+      message: "Currently the room codes feature is only for mavens!",
+    });
+  }
+
+  try {
+    const eventCodeObjectFromDB = await eventQuery.createEventCode({
+      id: eventCodeUuid,
+      event_id: id,
+      code: eventCode,
+      role,
+    });
+    return res.status(201).json(eventCodeObjectFromDB);
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Couldn't create event code. Please try again later",
+    });
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -268,4 +298,5 @@ module.exports = {
   endActiveEvent,
   addPeerToEvent,
   kickoutPeer,
+  generateEventCode,
 };

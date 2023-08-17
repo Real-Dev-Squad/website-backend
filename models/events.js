@@ -1,9 +1,11 @@
+const admin = require("firebase-admin");
 const Firestore = require("@google-cloud/firestore");
 const firestore = require("../utils/firestore");
 const logger = require("../utils/logger");
 
 const eventModel = firestore.collection("events");
 const peerModel = firestore.collection("peers");
+const eventCodeModel = firestore.collection("event-codes");
 
 /**
  * Creates a new event document in Firestore and returns the data for the created document.
@@ -169,6 +171,47 @@ const kickoutPeer = async ({ eventId, peerId, reason }) => {
     throw error;
   }
 };
+/**
+ * Creates an events code document in the Firestore database with the given event code data.
+ * @async
+ * @function
+ * @param {object} eventCodeData - The data for the event code to be created.
+ * @throws {Error} If an error occurs while creating the event code document.
+ */
+
+const createEventCode = async (eventCodeData) => {
+  try {
+    const eventRef = eventModel.doc(eventCodeData.event_id);
+    const eventSnapshot = await eventRef.get();
+    const eventSnapshotData = eventSnapshot.data();
+    const createdAndUpdatedAt = admin.firestore.Timestamp.now();
+    const docRef = eventCodeModel.doc(eventCodeData.id);
+
+    await docRef.set({ ...eventCodeData, created_at: createdAndUpdatedAt, updated_at: createdAndUpdatedAt });
+
+    const docSnapshot = await docRef.get();
+    const data = docSnapshot.data();
+
+    if (data) {
+      await eventRef.update({
+        event_codes: {
+          byRole: {
+            mavens: [
+              ...eventSnapshotData?.event_codes?.byRole?.mavens,
+              {
+                ...data,
+              },
+            ],
+          },
+        },
+      });
+    }
+    return data;
+  } catch (error) {
+    logger.error("Error in adding data", error);
+    throw error;
+  }
+};
 
 module.exports = {
   createEvent,
@@ -176,4 +219,5 @@ module.exports = {
   endActiveEvent,
   addPeerToEvent,
   kickoutPeer,
+  createEventCode,
 };
