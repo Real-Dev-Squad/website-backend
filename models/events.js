@@ -192,20 +192,29 @@ const createEventCode = async (eventCodeData) => {
     const docSnapshot = await docRef.get();
     const data = docSnapshot.data();
 
-    if (data) {
+    const previouslyPresentEventCodes = eventSnapshotData?.event_codes?.byRole?.mavens && [
+      ...eventSnapshotData?.event_codes?.byRole?.mavens,
+    ];
+    if (!data) throw new Error();
+
+    if (previouslyPresentEventCodes?.length > 0) {
       await eventRef.update({
         event_codes: {
-          byRole: {
-            mavens: [
-              ...eventSnapshotData?.event_codes?.byRole?.mavens,
-              {
-                ...data,
-              },
-            ],
+          by_role: {
+            mavens: [...previouslyPresentEventCodes, data?.id],
+          },
+        },
+      });
+    } else {
+      await eventRef.update({
+        event_codes: {
+          by_role: {
+            mavens: [data?.id],
           },
         },
       });
     }
+
     return data;
   } catch (error) {
     logger.error("Error in adding data", error);
