@@ -726,7 +726,7 @@ describe("Users", function () {
           }
           expect(res).to.have.status(404);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Data Not Found");
+          expect(res.body.message).to.equal("UserName Not Found");
 
           return done();
         });
