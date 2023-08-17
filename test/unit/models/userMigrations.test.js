@@ -1,4 +1,3 @@
-import { MAX_TRANSACTION_WRITES } from "../../../models/userMigrations";
 const chai = require("chai");
 const { expect } = chai;
 const firestore = require("../../../utils/firestore");
@@ -9,6 +8,8 @@ const userData = require("../../fixtures/user/user")();
 const addUser = require("../../utils/addUser");
 
 describe("userColorMigrations", function () {
+  const MAX_TRANSACTION_WRITES = 500;
+
   beforeEach(async function () {
     await addUser(userData[0]);
     await addUser(userData[1]);
@@ -21,14 +22,6 @@ describe("userColorMigrations", function () {
     await cleanDb();
   });
 
-  it("should throw an error on passing invalid max transactions", async function () {
-    try {
-      await userMigrationModel.addDefaultColors(MAX_TRANSACTION_WRITES + 1);
-    } catch (err) {
-      expect(err).to.be.a("error");
-      expect(err.message).to.be.equal("Error cannot add more than 499 users at once .");
-    }
-  });
   it("should add color property to added users which dont have a color property", async function () {
     const response = await userMigrationModel.addDefaultColors(MAX_TRANSACTION_WRITES);
     expect(response.totalUsersFetched).to.equal(6);

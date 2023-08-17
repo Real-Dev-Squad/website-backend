@@ -1,7 +1,9 @@
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 const { getRandomIndex } = require("../utils/helpers");
-export const MAX_TRANSACTION_WRITES = 500;
+const dataAccess = require("../services/dataAccessLayer");
+const MAX_TRANSACTION_WRITES = 500;
+const MAX_USERS_SIZE = 10_000;
 const USER_COLORS = 10;
 
 /**
@@ -13,10 +15,9 @@ const USER_COLORS = 10;
 
 const addDefaultColors = async (batchSize = MAX_TRANSACTION_WRITES) => {
   try {
-    const usersSnapshot = await userModel.get();
+    const usersSnapshot = await dataAccess.retrieveUsers({ query: { size: MAX_USERS_SIZE } });
     const usersArr = [];
-
-    usersSnapshot.forEach((doc) => usersArr.push({ id: doc.id, ...doc.data() }));
+    usersSnapshot.users.forEach((doc) => usersArr.push({ id: doc.id, ...doc }));
 
     const batchArray = [];
     const users = [];
