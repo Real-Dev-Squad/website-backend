@@ -209,7 +209,7 @@ const getUsername = async (req, res) => {
       return res.json({ username });
     } else {
       return res.status(404).json({
-        message: "Data Not Found",
+        message: "UserName Not Found",
       });
     }
   } catch (error) {
