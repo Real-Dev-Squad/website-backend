@@ -5,18 +5,23 @@
 /* eslint-disable security/detect-object-injection */
 
 const chai = require("chai");
+const sinon = require("sinon");
 const { expect } = chai;
 
 const cleanDb = require("../../utils/cleanDb");
 const users = require("../../../models/users");
 const firestore = require("../../../utils/firestore");
 const { userPhotoVerificationData, newUserPhotoVerificationData } = require("../../fixtures/user/photo-verification");
+const { generateStatusDataForState } = require("../../fixtures/userStatus/userStatus");
 const userModel = firestore.collection("users");
+const userStatusModel = firestore.collection("usersStatus");
 const joinModel = firestore.collection("applicants");
 const userDataArray = require("../../fixtures/user/user")();
 const joinData = require("../../fixtures/user/join")();
 const photoVerificationModel = firestore.collection("photo-verification");
-
+const userData = require("../../fixtures/user/user");
+const addUser = require("../../utils/addUser");
+const { userState } = require("../../../constants/userStatus");
 /**
  * Test the model functions and validate the data stored
  */
@@ -94,13 +99,21 @@ describe("users", function () {
     });
 
     it("It should have created_At and updated_At fields", async function () {
-      const userData = userDataArray[14];
+      const userData = userDataArray[15];
       await users.addOrUpdate(userData);
       const githubUsername = "sahsisunny";
       const { user, userExists } = await users.fetchUser({ githubUsername });
       expect(user).to.haveOwnProperty("created_at");
       expect(user).to.haveOwnProperty("updated_at");
       expect(userExists).to.equal(true);
+    });
+
+    it("It should have github_created_at fields", async function () {
+      const userData = userDataArray[0];
+      await users.addOrUpdate(userData);
+      const githubUsername = "ankur";
+      const { user } = await users.fetchUser({ githubUsername });
+      expect(user).to.haveOwnProperty("github_created_at");
     });
   });
 
@@ -232,6 +245,72 @@ describe("users", function () {
     });
   });
 
+  describe("archive user if not in discord", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        const userData = {
+          ...user,
+          roles: {
+            ...user.roles,
+            in_discord: false,
+            archived: false,
+          },
+        };
+        addUsersPromises.push(userModel.add(userData));
+      });
+
+      await Promise.all(addUsersPromises);
+    });
+
+    afterEach(function () {
+      sinon.restore();
+    });
+
+    it("should update archived role to true if in_discord is false", async function () {
+      await users.archiveUserIfNotInDiscord();
+
+      const updatedUsers = await userModel
+        .where("roles.in_discord", "==", false)
+        .where("roles.archived", "==", false)
+        .get();
+
+      updatedUsers.forEach((user) => {
+        const userData = user.data();
+        expect(userData.roles.in_discord).to.be.equal(false);
+        expect(userData.roles.archived).to.be.equal(true);
+      });
+    });
+
+    it("should throw an error if firebase batch operation fails", async function () {
+      const stub = sinon.stub(firestore, "batch");
+      stub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("Firestore batch update failed");
+        },
+      });
+
+      try {
+        await users.archiveUserIfNotInDiscord();
+      } catch (error) {
+        expect(error).to.be.an.instanceOf(Error);
+        expect(error.message).to.equal("An internal server error occurred");
+      }
+
+      const updatedUsers = await userModel
+        .where("roles.in_discord", "==", false)
+        .where("roles.archived", "==", false)
+        .get();
+
+      updatedUsers.forEach((user) => {
+        const userData = user.data();
+        expect(userData.roles.in_discord).to.be.equal(false);
+        expect(userData.roles.archived).to.be.not.equal(true);
+      });
+    });
+  });
+
   describe("remove github token from users", function () {
     beforeEach(async function () {
       const addUsersPromises = [];
@@ -279,7 +358,7 @@ describe("users", function () {
     });
     it("returns users with member role", async function () {
       const members = await users.getUsersByRole("member");
-      expect(members.length).to.be.equal(6);
+      expect(members.length).to.be.equal(7);
       members.forEach((member) => {
         expect(member.roles.member).to.be.equal(true);
       });
@@ -288,6 +367,60 @@ describe("users", function () {
       await users.getUsersByRole(32389434).catch((err) => {
         expect(err).to.be.instanceOf(Error);
       });
+    });
+  });
+
+  describe("getUsersBasedOnFilter", function () {
+    let [userId0, userId1, userId2] = [];
+
+    beforeEach(async function () {
+      const userArr = userData();
+      userId0 = await addUser(userArr[0]);
+      userId1 = await addUser(userArr[1]);
+      userId2 = await addUser(userArr[2]);
+      await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.ONBOARDING));
+      await userStatusModel.doc("userStatus001").set(generateStatusDataForState(userId1, userState.ONBOARDING));
+      await userStatusModel.doc("userStatus002").set(generateStatusDataForState(userId2, userState.IDLE));
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("should render users with onboarding state and time as 31days", async function () {
+      const query = {
+        state: "ONBOARDING",
+        time: "31d",
+      };
+      const result = await users.getUsersBasedOnFilter(query);
+      expect(result.length).to.equal(2);
+    });
+  });
+  describe("fetch users by id", function () {
+    let allIds = [];
+    before(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user, index) => {
+        addUsersPromises.push(userModel.add({ ...user }));
+      });
+      const responses = await Promise.all(addUsersPromises);
+      allIds = responses.map((response) => response.id);
+    });
+
+    after(async function () {
+      await cleanDb();
+    });
+
+    it("should fetch the details of users whose ids are present in the array", async function () {
+      const randomIds = allIds.sort(() => 0.5 - Math.random()).slice(0, 3); // Select random ids from allIds
+      const result = await users.fetchUserByIds(randomIds);
+      const fetchedUserIds = Object.keys(result);
+      expect(fetchedUserIds).to.deep.equal(randomIds);
+    });
+
+    it("should return empty object if no ids are passed", async function () {
+      const result = await users.fetchUserByIds();
+      const fetchedUserIds = Object.keys(result);
+      expect(fetchedUserIds).to.deep.equal([]);
     });
   });
 });

@@ -19,9 +19,11 @@ module.exports = () => {
       linkedin_id: "ankurnarkhede",
       github_id: githubUserInfo[0].username,
       github_display_name: githubUserInfo[0].displayName,
+      github_created_at: Number(new Date(githubUserInfo[0]._json.created_at).getTime()),
       isMember: true,
       phone: "1234567890",
       email: "abc@gmail.com",
+      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       joined_discord: "2023-01-13T18:21:09.278000+00:00",
       roles: {
         member: true,
@@ -47,6 +49,7 @@ module.exports = () => {
       github_id: "whydonti",
       linkedin_id: "nikhil-bhandarkar",
       twitter_id: "whatifi",
+      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567891",
       email: "abc1@gmail.com",
       picture: {
@@ -63,6 +66,7 @@ module.exports = () => {
       github_id: "cartmanishere",
       linkedin_id: "pranav-gajjewar",
       twitter_id: "PGajjewar",
+      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567891",
       email: "pgajjewar@gmail.com",
       roles: {
@@ -82,6 +86,7 @@ module.exports = () => {
       linkedin_id: "sagarbajpai",
       github_id: "sagarbajpai",
       github_display_name: "Sagar Bajpai",
+      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567890",
       email: "abc@gmail.com",
       status: "active",
@@ -267,12 +272,6 @@ module.exports = () => {
       linkedin_id: "testuser1",
       github_id: "testuser1",
       github_display_name: "Test User",
-      phone: "1234567890",
-      email: "tu@gmail.com",
-      chaincode: "1234",
-      tokens: {
-        githubAccessToken: "githubAccessToken",
-      },
       roles: {
         member: true,
       },
@@ -328,6 +327,29 @@ module.exports = () => {
       },
       twitter_id: "ramsingh123",
       linkedin_id: "ramsingh123",
+    },
+    {
+      username: "testuser3",
+      first_name: "test3",
+      last_name: "user3",
+      yoe: 1,
+      img: "./img.png",
+      linkedin_id: "testuser1",
+      github_id: "testuser",
+      github_display_name: "Test User 3",
+      phone: "1234567890",
+      email: "abcd@gmail.com",
+      chaincode: "12345",
+      tokens: {
+        githubAccessToken: "githubAccessToken",
+      },
+      roles: {
+        member: true,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
     },
     {
       username: "sahsisunny",
