@@ -16,6 +16,7 @@ const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
 const { getQualifiers } = require("../utils/helper");
+const { parseSearchQuery } = require("../utils/users");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 const {
   USERS_PATCH_HANDLER_ACTIONS,
@@ -75,6 +76,7 @@ const getUsers = async (req, res) => {
   try {
     // getting user details by id if present.
     const query = req.query?.query ?? "";
+    const transformedQuery = parseSearchQuery(query);
     const qualifiers = getQualifiers(query);
 
     // getting user details by id if present.
@@ -95,6 +97,37 @@ const getUsers = async (req, res) => {
         message: "User returned successfully!",
         user,
       });
+    }
+    if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
+      return res.boom.badRequest(`Days is required for filterBy ${transformedQuery?.filterBy}`);
+    }
+
+    if (transformedQuery?.filterBy === "unmerged_prs" && transformedQuery?.days) {
+      const days = transformedQuery.days;
+      try {
+        const inDiscordUser = await dataAccess.retrieveUsersWithRole(ROLES.INDISCORD);
+        const users = [];
+
+        for (const user of inDiscordUser) {
+          const username = user.github_id;
+          const isMerged = await isLastPRMergedWithinDays(username, days);
+          if (!isMerged) {
+            users.push({
+              id: user.id,
+              ...user,
+            });
+          }
+        }
+
+        return res.json({
+          message: "Inactive users returned successfully!",
+          count: users.length,
+          users: users,
+        });
+      } catch (error) {
+        logger.error(`Error while fetching all users: ${error}`);
+        return res.boom.serverUnavailable("Something went wrong please contact admin");
+      }
     }
 
     if (qualifiers?.filterBy) {
@@ -685,35 +718,6 @@ async function usersPatchHandler(req, res) {
   }
 }
 
-const getInactiveUsers = async (req, res) => {
-  try {
-    const { days } = req.params;
-    const inDiscordUser = await dataAccess.retrieveUsersWithRole(ROLES.INDISCORD);
-
-    const users = [];
-
-    for (const user of inDiscordUser) {
-      const username = user.github_id;
-      const isMerged = await isLastPRMergedWithinDays(username, days);
-      if (!isMerged) {
-        users.push({
-          id: user.id,
-          ...user,
-        });
-      }
-    }
-
-    return res.json({
-      message: "Users returned successfully!",
-      count: users.length,
-      users: users,
-    });
-  } catch (error) {
-    logger.error(`Error while fetching all users: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
-  }
-};
-
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -742,5 +746,4 @@ module.exports = {
   updateRoles,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
-  getInactiveUsers,
 };
