@@ -226,7 +226,8 @@ describe("Update Status based on task update", function () {
   });
 
   describe("Test the Model Function for Changing the status to IDLE based on users list passed", function () {
-    let [userId0, userId1, userId2, userId3, userId4, userId5, userId6, userId7, userId8, userId9] = [];
+    let [userId0, userId1, userId2, userId3, userId4, userId5, userId6, userId7, userId8, userId9, userId10, userId11] =
+      [];
     let listUsers;
 
     beforeEach(async function () {
@@ -241,6 +242,8 @@ describe("Update Status based on task update", function () {
       userId7 = await addUser(userArr[7]);
       userId8 = await addUser(userArr[8]);
       userId9 = await addUser(userArr[9]);
+      userId10 = await addUser(userArr[10]);
+      userId11 = await addUser(userArr[11]);
       await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.ACTIVE));
       await userStatusModel.doc("userStatus001").set(generateStatusDataForState(userId1, userState.OOO));
       await userStatusModel.doc("userStatus002").set(generateStatusDataForState(userId2, userState.IDLE));
@@ -249,6 +252,16 @@ describe("Update Status based on task update", function () {
       await userStatusModel.doc("userStatus006").set(generateStatusDataForState(userId6, userState.OOO));
       await userStatusModel.doc("userStatus007").set(generateStatusDataForState(userId7, userState.IDLE));
       await userStatusModel.doc("userStatus008").set(generateStatusDataForState(userId8, userState.ONBOARDING));
+
+      const oooStateCompletedStatus = generateStatusDataForState(userId10, userState.OOO);
+      oooStateCompletedStatus.currentStatus.from =
+        oooStateCompletedStatus.currentStatus.from - 20 * 24 * 60 * 60 * 1000;
+      oooStateCompletedStatus.currentStatus.until =
+        oooStateCompletedStatus.currentStatus.until - 10 * 24 * 60 * 60 * 1000;
+      await userStatusModel.doc("userStatus010").set(oooStateCompletedStatus);
+      oooStateCompletedStatus.userId = userId11;
+      await userStatusModel.doc("userStatus011").set(oooStateCompletedStatus);
+
       listUsers = [
         { userId: userId0, state: "IDLE" },
         { userId: userId1, state: "IDLE" },
@@ -260,6 +273,8 @@ describe("Update Status based on task update", function () {
         { userId: userId7, state: "ACTIVE" },
         { userId: userId8, state: "ACTIVE" },
         { userId: userId9, state: "ACTIVE" },
+        { userId: userId10, state: "ACTIVE" },
+        { userId: userId11, state: "IDLE" },
       ];
     });
 
@@ -271,23 +286,23 @@ describe("Update Status based on task update", function () {
     it("should return the correct results when there are no errors", async function () {
       const result = await batchUpdateUsersStatus(listUsers);
       expect(result).to.have.all.keys(
-        "totalUsers",
-        "totalUnprocessedUsers",
-        "totalOnboardingUsersAltered",
-        "totalOnboardingUsersUnAltered",
-        "totalActiveUsersAltered",
-        "totalActiveUsersUnAltered",
-        "totalIdleUsersAltered",
-        "totalIdleUsersUnAltered"
+        "usersCount",
+        "unprocessedUsers",
+        "onboardingUsersAltered",
+        "onboardingUsersUnaltered",
+        "activeUsersAltered",
+        "activeUsersUnaltered",
+        "idleUsersAltered",
+        "idleUsersUnaltered"
       );
-      expect(result.totalUsers).to.equal(10);
-      expect(result.totalUnprocessedUsers).to.equal(0);
-      expect(result.totalOnboardingUsersAltered).to.equal(1);
-      expect(result.totalOnboardingUsersUnAltered).to.equal(1);
-      expect(result.totalActiveUsersAltered).to.equal(3);
-      expect(result.totalActiveUsersUnAltered).to.equal(1);
-      expect(result.totalIdleUsersAltered).to.equal(3);
-      expect(result.totalIdleUsersUnAltered).to.equal(1);
+      expect(result.usersCount).to.equal(12);
+      expect(result.unprocessedUsers).to.equal(0);
+      expect(result.onboardingUsersAltered).to.equal(1);
+      expect(result.onboardingUsersUnaltered).to.equal(1);
+      expect(result.activeUsersAltered).to.equal(4);
+      expect(result.activeUsersUnaltered).to.equal(1);
+      expect(result.idleUsersAltered).to.equal(4);
+      expect(result.idleUsersUnaltered).to.equal(1);
       const userStatus000Data = (await userStatusModel.doc("userStatus000").get()).data();
       expect(userStatus000Data.currentStatus.state).to.equal(userState.IDLE);
       const userStatus001Data = (await userStatusModel.doc("userStatus001").get()).data();
@@ -314,6 +329,10 @@ describe("Update Status based on task update", function () {
       const [userStatus009Doc] = userStatus009SnapShot.docs;
       const userStatus009Data = userStatus009Doc.data();
       expect(userStatus009Data.currentStatus.state).to.equal(userState.ACTIVE);
+      const userStatus010Data = (await userStatusModel.doc("userStatus010").get()).data();
+      expect(userStatus010Data.currentStatus.state).to.equal(userState.ACTIVE);
+      const userStatus011Data = (await userStatusModel.doc("userStatus011").get()).data();
+      expect(userStatus011Data.currentStatus.state).to.equal(userState.IDLE);
     });
 
     it("should throw an error if users firestore batch operations fail", async function () {

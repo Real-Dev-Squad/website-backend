@@ -44,7 +44,7 @@ describe("Task Based Status Updates", function () {
       it("Should Create a new user status Document with status IDLE if the status document doesn't exist & the user is IDLE.", async function () {
         const res = await chai
           .request(app)
-          .patch(`/tasks/self/taskid123?userStatusFlag=true`)
+          .patch(`/tasks/self/taskid123`)
           .set("cookie", `${cookieName}=${userJwt}`)
           .send(reqBody);
         expect(res.body.userStatus.status).to.equal("success");
@@ -59,7 +59,7 @@ describe("Task Based Status Updates", function () {
         await firestore.collection("usersStatus").doc("userStatus").set(statusData);
         const res = await chai
           .request(app)
-          .patch(`/tasks/self/taskid123?userStatusFlag=true`)
+          .patch(`/tasks/self/taskid123`)
           .set("cookie", `${cookieName}=${userJwt}`)
           .send(reqBody);
         expect(res.body.userStatus.status).to.equal("success");
@@ -75,7 +75,7 @@ describe("Task Based Status Updates", function () {
         await firestore.collection("usersStatus").doc("userStatus").set(statusData);
         const res = await chai
           .request(app)
-          .patch(`/tasks/self/taskid123?userStatusFlag=true`)
+          .patch(`/tasks/self/taskid123`)
           .set("cookie", `${cookieName}=${userJwt}`)
           .send(reqBody);
         expect(res.body.userStatus.status).to.equal("success");
@@ -83,12 +83,41 @@ describe("Task Based Status Updates", function () {
         expect(res.body.userStatus.data.currentStatus).to.equal(userState.IDLE);
       });
 
-      it("Should not change the ACTIVE state to IDLE if no other task is assigned to the user.", async function () {
+      it("Should change the ACTIVE state to IDLE if no other task is assigned to the user.", async function () {
         const statusData = generateStatusDataForState(userId, userState.ACTIVE);
         await firestore.collection("usersStatus").doc("userStatus").set(statusData);
         const res = await chai
           .request(app)
-          .patch(`/tasks/self/taskid123?userStatusFlag=true`)
+          .patch(`/tasks/self/taskid123`)
+          .set("cookie", `${cookieName}=${userJwt}`)
+          .send(reqBody);
+        expect(res.body.userStatus.status).to.equal("success");
+        expect(res.body.userStatus.message).to.equal("The status has been updated to IDLE");
+        expect(res.body.userStatus.data.previousStatus).to.equal(userState.ACTIVE);
+        expect(res.body.userStatus.data.currentStatus).to.equal(userState.IDLE);
+      });
+
+      it("Should not change the IDLE state if no other task is assigned to the user. & current task status is updated (excluding completed, e.g., in progress).", async function () {
+        const statusData = generateStatusDataForState(userId, userState.IDLE);
+        await firestore.collection("usersStatus").doc("userStatus").set(statusData);
+        reqBody.status = "NEEDS_REVIEW";
+        const res = await chai
+          .request(app)
+          .patch(`/tasks/self/taskid123`)
+          .set("cookie", `${cookieName}=${userJwt}`)
+          .send(reqBody);
+        expect(res.body.userStatus.status).to.equal("success");
+        expect(res.body.userStatus.message).to.equal("The status is already IDLE");
+        expect(res.body.userStatus.data.currentStatus).to.equal(userState.IDLE);
+      });
+
+      it("Should change the ACTIVE state to IDLE if no other task is assigned to the user. & current task status is updated (excluding completed, e.g., in progress).", async function () {
+        const statusData = generateStatusDataForState(userId, userState.ACTIVE);
+        await firestore.collection("usersStatus").doc("userStatus").set(statusData);
+        reqBody.status = "NEEDS_REVIEW";
+        const res = await chai
+          .request(app)
+          .patch(`/tasks/self/taskid123`)
           .set("cookie", `${cookieName}=${userJwt}`)
           .send(reqBody);
         expect(res.body.userStatus.status).to.equal("success");
@@ -109,7 +138,7 @@ describe("Task Based Status Updates", function () {
       it("Should Create a new user status Document with status ACTIVE if the status document doesn't exist & the user is ACTIVE.", async function () {
         const res = await chai
           .request(app)
-          .patch(`/tasks/self/taskid123?userStatusFlag=true`)
+          .patch(`/tasks/self/taskid123`)
           .set("cookie", `${cookieName}=${userJwt}`)
           .send(reqBody);
         expect(res.body.userStatus.status).to.equal("success");
@@ -124,7 +153,7 @@ describe("Task Based Status Updates", function () {
         await firestore.collection("usersStatus").doc("userStatus").set(statusData);
         const res = await chai
           .request(app)
-          .patch(`/tasks/self/taskid123?userStatusFlag=true`)
+          .patch(`/tasks/self/taskid123`)
           .set("cookie", `${cookieName}=${userJwt}`)
           .send(reqBody);
         expect(res.body.userStatus.status).to.equal("success");
@@ -140,7 +169,7 @@ describe("Task Based Status Updates", function () {
         await firestore.collection("usersStatus").doc("userStatus").set(statusData);
         const res = await chai
           .request(app)
-          .patch(`/tasks/self/taskid123?userStatusFlag=true`)
+          .patch(`/tasks/self/taskid123`)
           .set("cookie", `${cookieName}=${userJwt}`)
           .send(reqBody);
         expect(res.body.userStatus.status).to.equal("success");
@@ -148,12 +177,41 @@ describe("Task Based Status Updates", function () {
         expect(res.body.userStatus.data.currentStatus).to.equal(userState.ACTIVE);
       });
 
-      it("Should change to ACTIVE state if the user is not ACTIVE.", async function () {
+      it("Should change to ACTIVE state if the user is not ACTIVE. ", async function () {
         const statusData = generateStatusDataForState(userId, userState.IDLE);
         await firestore.collection("usersStatus").doc("userStatus").set(statusData);
         const res = await chai
           .request(app)
-          .patch(`/tasks/self/taskid123?userStatusFlag=true`)
+          .patch(`/tasks/self/taskid123`)
+          .set("cookie", `${cookieName}=${userJwt}`)
+          .send(reqBody);
+        expect(res.body.userStatus.status).to.equal("success");
+        expect(res.body.userStatus.message).to.equal("The status has been updated to ACTIVE");
+        expect(res.body.userStatus.data.previousStatus).to.equal(userState.IDLE);
+        expect(res.body.userStatus.data.currentStatus).to.equal(userState.ACTIVE);
+      });
+
+      it("Should not change the ACTIVE state if the user is already ACTIVE. & current task status is updated (excluding completed, e.g., in progress).", async function () {
+        const statusData = generateStatusDataForState(userId, userState.ACTIVE);
+        await firestore.collection("usersStatus").doc("userStatus").set(statusData);
+        reqBody.status = "NEEDS_REVIEW";
+        const res = await chai
+          .request(app)
+          .patch(`/tasks/self/taskid123`)
+          .set("cookie", `${cookieName}=${userJwt}`)
+          .send(reqBody);
+        expect(res.body.userStatus.status).to.equal("success");
+        expect(res.body.userStatus.message).to.equal("The status is already ACTIVE");
+        expect(res.body.userStatus.data.currentStatus).to.equal(userState.ACTIVE);
+      });
+
+      it("Should change to ACTIVE state if the user is not ACTIVE. & current task status is updated (excluding completed, e.g., in progress).", async function () {
+        const statusData = generateStatusDataForState(userId, userState.IDLE);
+        await firestore.collection("usersStatus").doc("userStatus").set(statusData);
+        reqBody.status = "NEEDS_REVIEW";
+        const res = await chai
+          .request(app)
+          .patch(`/tasks/self/taskid123`)
           .set("cookie", `${cookieName}=${userJwt}`)
           .send(reqBody);
         expect(res.body.userStatus.status).to.equal("success");
@@ -195,11 +253,7 @@ describe("Task Based Status Updates", function () {
     });
 
     it("Should Create a new user status Document with status ACTIVE if the status document doesn't exist.", async function () {
-      const res = await chai
-        .request(app)
-        .post(`/tasks?userStatusFlag=true`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send(reqBody);
+      const res = await chai.request(app).post(`/tasks`).set("cookie", `${cookieName}=${superUserJwt}`).send(reqBody);
       expect(res.status).to.equal(200);
       expect(res.body.userStatus.status).to.equal("success");
       expect(res.body.userStatus.message).to.equal(
@@ -211,11 +265,7 @@ describe("Task Based Status Updates", function () {
     it("Should change the Future Status to ACTIVE if the user is currently OOO .", async function () {
       const statusData = await generateStatusDataForState(userId, userState.OOO);
       await firestore.collection("usersStatus").doc("userStatus").set(statusData);
-      const res = await chai
-        .request(app)
-        .post(`/tasks?userStatusFlag=true`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send(reqBody);
+      const res = await chai.request(app).post(`/tasks`).set("cookie", `${cookieName}=${superUserJwt}`).send(reqBody);
       expect(res.status).to.equal(200);
       expect(res.body.userStatus.status).to.equal("success");
       expect(res.body.userStatus.message).to.equal(
@@ -228,11 +278,7 @@ describe("Task Based Status Updates", function () {
     it("Should not change the ACTIVE state if the user is already ACTIVE.", async function () {
       const statusData = await generateStatusDataForState(userId, userState.ACTIVE);
       await firestore.collection("usersStatus").doc("userStatus").set(statusData);
-      const res = await chai
-        .request(app)
-        .post(`/tasks?userStatusFlag=true`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send(reqBody);
+      const res = await chai.request(app).post(`/tasks`).set("cookie", `${cookieName}=${superUserJwt}`).send(reqBody);
       expect(res.status).to.equal(200);
       expect(res.body.userStatus.status).to.equal("success");
       expect(res.body.userStatus.message).to.equal("The status is already ACTIVE");
@@ -242,11 +288,7 @@ describe("Task Based Status Updates", function () {
     it("Should change the status to ACTIVE if the status is not ACTIVE i.e IDLE.", async function () {
       const statusData = await generateStatusDataForState(userId, userState.IDLE);
       await firestore.collection("usersStatus").doc("userStatus").set(statusData);
-      const res = await chai
-        .request(app)
-        .post(`/tasks?userStatusFlag=true`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send(reqBody);
+      const res = await chai.request(app).post(`/tasks`).set("cookie", `${cookieName}=${superUserJwt}`).send(reqBody);
       expect(res.status).to.equal(200);
       expect(res.body.userStatus.status).to.equal("success");
       expect(res.body.userStatus.message).to.equal("The status has been updated to ACTIVE");
@@ -257,11 +299,7 @@ describe("Task Based Status Updates", function () {
     it("Should throw an error to if an invalid state is set in the Status.", async function () {
       const statusData = await generateStatusDataForState(userId, "InvalidState");
       await firestore.collection("usersStatus").doc("userStatus").set(statusData);
-      const res = await chai
-        .request(app)
-        .post(`/tasks?userStatusFlag=true`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send(reqBody);
+      const res = await chai.request(app).post(`/tasks`).set("cookie", `${cookieName}=${superUserJwt}`).send(reqBody);
       expect(res.status).to.equal(200);
       expect(res.body.userStatus.status).to.equal(500);
       expect(res.body.userStatus.error).to.equal("Internal Server Error");
@@ -272,11 +310,7 @@ describe("Task Based Status Updates", function () {
 
     it("Should give NotFound message if the userName is invalid.", async function () {
       reqBody.assignee = "funkeyMonkey123";
-      const res = await chai
-        .request(app)
-        .post(`/tasks?userStatusFlag=true`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send(reqBody);
+      const res = await chai.request(app).post(`/tasks`).set("cookie", `${cookieName}=${superUserJwt}`).send(reqBody);
       expect(res.status).to.equal(200);
       expect(res.body.userStatus.status).to.equal(404);
       expect(res.body.userStatus.error).to.equal("Not Found");
@@ -287,7 +321,8 @@ describe("Task Based Status Updates", function () {
   });
 
   describe("PATCH Integration tests for Changing the status to IDLE based on users list passed", function () {
-    let [userId0, userId1, userId2, userId3, userId4, userId5, userId6, userId7, userId8, userId9] = [];
+    let [userId0, userId1, userId2, userId3, userId4, userId5, userId6, userId7, userId8, userId9, userId10, userId11] =
+      [];
     let superUserJwt;
     let listUsers;
     const reqBody = {};
@@ -303,6 +338,8 @@ describe("Task Based Status Updates", function () {
       userId7 = await addUser(userData[7]);
       userId8 = await addUser(userData[8]);
       userId9 = await addUser(userData[9]);
+      userId10 = await addUser(userData[10]);
+      userId11 = await addUser(userData[11]);
       superUserJwt = authService.generateAuthToken({ userId: userId4 });
       listUsers = [
         { userId: userId0, state: "IDLE" },
@@ -315,6 +352,8 @@ describe("Task Based Status Updates", function () {
         { userId: userId7, state: "ACTIVE" },
         { userId: userId8, state: "ACTIVE" },
         { userId: userId9, state: "ACTIVE" },
+        { userId: userId10, state: "ACTIVE" },
+        { userId: userId11, state: "IDLE" },
       ];
       reqBody.users = listUsers;
       await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.ACTIVE));
@@ -325,6 +364,14 @@ describe("Task Based Status Updates", function () {
       await userStatusModel.doc("userStatus006").set(generateStatusDataForState(userId6, userState.OOO));
       await userStatusModel.doc("userStatus007").set(generateStatusDataForState(userId7, userState.IDLE));
       await userStatusModel.doc("userStatus008").set(generateStatusDataForState(userId8, userState.ONBOARDING));
+      const oooStateCompletedStatus = generateStatusDataForState(userId10, userState.OOO);
+      oooStateCompletedStatus.currentStatus.from =
+        oooStateCompletedStatus.currentStatus.from - 20 * 24 * 60 * 60 * 1000;
+      oooStateCompletedStatus.currentStatus.until =
+        oooStateCompletedStatus.currentStatus.until - 10 * 24 * 60 * 60 * 1000;
+      await userStatusModel.doc("userStatus010").set(oooStateCompletedStatus);
+      oooStateCompletedStatus.userId = userId11;
+      await userStatusModel.doc("userStatus011").set(oooStateCompletedStatus);
     });
 
     afterEach(async function () {
@@ -340,23 +387,23 @@ describe("Task Based Status Updates", function () {
       expect(res.status).to.equal(200);
       const response = res.body.data;
       expect(response).to.have.all.keys(
-        "totalUsers",
-        "totalUnprocessedUsers",
-        "totalOnboardingUsersAltered",
-        "totalOnboardingUsersUnAltered",
-        "totalActiveUsersAltered",
-        "totalActiveUsersUnAltered",
-        "totalIdleUsersAltered",
-        "totalIdleUsersUnAltered"
+        "usersCount",
+        "unprocessedUsers",
+        "onboardingUsersAltered",
+        "onboardingUsersUnaltered",
+        "activeUsersAltered",
+        "activeUsersUnaltered",
+        "idleUsersAltered",
+        "idleUsersUnaltered"
       );
-      expect(response.totalUsers).to.equal(10);
-      expect(response.totalUnprocessedUsers).to.equal(0);
-      expect(response.totalOnboardingUsersAltered).to.equal(1);
-      expect(response.totalOnboardingUsersUnAltered).to.equal(1);
-      expect(response.totalActiveUsersAltered).to.equal(3);
-      expect(response.totalActiveUsersUnAltered).to.equal(1);
-      expect(response.totalIdleUsersAltered).to.equal(3);
-      expect(response.totalIdleUsersUnAltered).to.equal(1);
+      expect(response.usersCount).to.equal(12);
+      expect(response.unprocessedUsers).to.equal(0);
+      expect(response.onboardingUsersAltered).to.equal(1);
+      expect(response.onboardingUsersUnaltered).to.equal(1);
+      expect(response.activeUsersAltered).to.equal(4);
+      expect(response.activeUsersUnaltered).to.equal(1);
+      expect(response.idleUsersAltered).to.equal(4);
+      expect(response.idleUsersUnaltered).to.equal(1);
 
       const userStatus000Data = (await userStatusModel.doc("userStatus000").get()).data();
       expect(userStatus000Data.currentStatus.state).to.equal(userState.IDLE);
@@ -384,6 +431,10 @@ describe("Task Based Status Updates", function () {
       const [userStatus009Doc] = userStatus009SnapShot.docs;
       const userStatus009Data = userStatus009Doc.data();
       expect(userStatus009Data.currentStatus.state).to.equal(userState.ACTIVE);
+      const userStatus010Data = (await userStatusModel.doc("userStatus010").get()).data();
+      expect(userStatus010Data.currentStatus.state).to.equal(userState.ACTIVE);
+      const userStatus011Data = (await userStatusModel.doc("userStatus011").get()).data();
+      expect(userStatus011Data.currentStatus.state).to.equal(userState.IDLE);
     });
 
     it("should throw an error if users firestore batch operations fail", async function () {
@@ -477,6 +528,61 @@ describe("Task Based Status Updates", function () {
       expect(response.body.message).to.equal(
         "The server has encountered an unexpected error. Please contact the administrator for more information."
       );
+    });
+  });
+
+  describe("PATCH Update User Status on Task Assignment by SuperUser", function () {
+    let userId1, user2Name, superUserId, superUserJwt, taskArr;
+    const reqBody = {};
+
+    beforeEach(async function () {
+      userId1 = await addUser(userData[6]);
+      superUserId = await addUser(userData[4]);
+      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+      await addUser(userData[0]);
+      user2Name = userData[0].username;
+      taskArr = allTasks();
+      const sampleTask1 = taskArr[0];
+      sampleTask1.assignee = userId1;
+      sampleTask1.createdBy = superUserId;
+      await firestore.collection("tasks").doc("taskid123").set(sampleTask1);
+      const statusData = generateStatusDataForState(userId1, userState.ACTIVE);
+      await firestore.collection("usersStatus").doc("userStatusDoc001").set(statusData);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("Update the old assignee status to IDLE on task reassignment if no tasks is in progress in their name", async function () {
+      reqBody.assignee = user2Name;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/taskid123`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send(reqBody);
+      expect(res.status).to.equal(204);
+      const userStatus002Data = (await userStatusModel.doc("userStatusDoc001").get()).data();
+      expect(userStatus002Data).to.have.keys(["userId", "currentStatus"]);
+      expect(userStatus002Data.currentStatus.state).to.equal(userState.IDLE);
+    });
+
+    it("Should maintain the old assignee status to ACTIVE on task reassignment if another task is in progress in their name", async function () {
+      const sampleTask2 = taskArr[1];
+      sampleTask2.assignee = userId1;
+      sampleTask2.createdBy = superUserId;
+      await firestore.collection("tasks").doc("taskid234").set(sampleTask2);
+
+      reqBody.assignee = user2Name;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/taskid123`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send(reqBody);
+      expect(res.status).to.equal(204);
+      const userStatus002Data = (await userStatusModel.doc("userStatusDoc001").get()).data();
+      expect(userStatus002Data).to.have.keys(["userId", "currentStatus"]);
+      expect(userStatus002Data.currentStatus.state).to.equal(userState.ACTIVE);
     });
   });
 });

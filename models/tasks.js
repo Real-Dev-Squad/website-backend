@@ -5,7 +5,7 @@ const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
+const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED, MERGED, RELEASED, VERIFIED, AVAILABLE } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 
 /**
@@ -96,10 +96,14 @@ const addDependency = async (data) => {
  * @return {Promise<tasks|Array>}
  */
 
-const getBuiltTasks = async (tasksSnapshot) => {
+const getBuiltTasks = async (tasksSnapshot, searchTerm) => {
   const tasks = buildTasks(tasksSnapshot);
   const promises = tasks.map(async (task) => fromFirestoreData(task));
-  const updatedTasks = await Promise.all(promises);
+  let updatedTasks = await Promise.all(promises);
+
+  if (searchTerm) {
+    updatedTasks = updatedTasks.filter((task) => task.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  }
   const taskPromises = updatedTasks.map(async (task) => {
     task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
     const taskId = task.id;
@@ -115,11 +119,15 @@ const getBuiltTasks = async (tasksSnapshot) => {
   return taskList;
 };
 
-const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, prev }) => {
+const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, prev, dev = false }) => {
   try {
-    const initialQuery = status
-      ? tasksModel.where("status", "==", status).orderBy("title")
-      : tasksModel.orderBy("title");
+    let initialQuery;
+    if (status === TASK_STATUS.OVERDUE && dev) {
+      const currentTime = Math.floor(Date.now() / 1000);
+      initialQuery = tasksModel.where("endsOn", "<", currentTime);
+    } else {
+      initialQuery = status ? tasksModel.where("status", "==", status).orderBy("title") : tasksModel.orderBy("title");
+    }
     let queryDoc = initialQuery;
 
     if (prev) {
@@ -148,6 +156,17 @@ const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, 
     const nextDoc = await initialQuery.startAfter(last).limit(1).get();
 
     const allTasks = await getBuiltTasks(snapshot);
+
+    if (status === TASK_STATUS.OVERDUE && dev) {
+      const nonOverdueTasksStatus = [MERGED, COMPLETED, RELEASED, VERIFIED, AVAILABLE];
+      const overdueTasks = allTasks.filter((task) => !nonOverdueTasksStatus.includes(task.status) && task.assignee);
+      return {
+        allTasks: overdueTasks,
+        next: nextDoc.docs[0]?.id ?? "",
+        prev: prevDoc.docs[0]?.id ?? "",
+      };
+    }
+
     return {
       allTasks,
       next: nextDoc.docs[0]?.id ?? "",
@@ -159,10 +178,10 @@ const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, 
   }
 };
 
-const fetchTasks = async () => {
+const fetchTasks = async (searchTerm) => {
   try {
     const tasksSnapshot = await tasksModel.get();
-    const taskList = await getBuiltTasks(tasksSnapshot);
+    const taskList = await getBuiltTasks(tasksSnapshot, searchTerm);
     return taskList;
   } catch (err) {
     logger.error("error getting tasks", err);
@@ -455,6 +474,7 @@ const overdueTasks = async (overDueTasks) => {
     throw err;
   }
 };
+
 module.exports = {
   updateTask,
   fetchTasks,
@@ -469,4 +489,5 @@ module.exports = {
   addDependency,
   fetchTaskByIssueId,
   fetchPaginatedTasks,
+  getBuiltTasks,
 };

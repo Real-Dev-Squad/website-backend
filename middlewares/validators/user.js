@@ -1,7 +1,11 @@
 const { customWordCountValidator } = require("../../utils/customWordCountValidator");
 
 const joi = require("joi");
-const { USER_STATUS } = require("../../constants/users");
+const {
+  USER_STATUS,
+  USERS_PATCH_HANDLER_ACTIONS,
+  USERS_PATCH_HANDLER_ERROR_MESSAGES,
+} = require("../../constants/users");
 const ROLES = require("../../constants/roles");
 const { IMAGE_VERIFICATION_TYPES } = require("../../constants/imageVerificationTypes");
 const { userState } = require("../../constants/userStatus");
@@ -13,7 +17,13 @@ const updateUser = async (req, res, next) => {
     .keys({
       phone: joi.string().optional(),
       email: joi.string().optional(),
-      username: joi.string().optional(),
+      username: joi
+        .string()
+        .optional()
+        .min(4)
+        .max(20)
+        .regex(/^[a-zA-Z0-9]+$/)
+        .message("Username must be between 4 and 20 characters long and contain only letters or numbers."),
       first_name: joi.string().optional(),
       last_name: joi.string().optional(),
       yoe: joi.number().min(0).optional(),
@@ -21,7 +31,11 @@ const updateUser = async (req, res, next) => {
       designation: joi.string().optional(),
       img: joi.string().optional(),
       linkedin_id: joi.string().optional(),
-      twitter_id: joi.string().optional(),
+      twitter_id: joi
+        .string()
+        .optional()
+        .regex(/^[^@]*$/)
+        .message("Invalid Twitter ID. ID should not contain special character @"),
       instagram_id: joi.string().optional(),
       website: joi.string().optional(),
       status: joi
@@ -29,6 +43,14 @@ const updateUser = async (req, res, next) => {
         .valid(...Object.values(USER_STATUS))
         .optional(),
       discordId: joi.string().optional(),
+      roles: joi.object().keys({
+        archived: joi.boolean().required(),
+        in_discord: joi.boolean().required(),
+        developer: joi.boolean().optional(),
+        designer: joi.boolean().optional(),
+        maven: joi.boolean().optional(),
+        productmanager: joi.boolean().optional(),
+      }),
     });
 
   try {
@@ -238,6 +260,23 @@ async function validateUpdateRoles(req, res, next) {
   }
 }
 
+async function validateUsersPatchHandler(req, res, next) {
+  const requestBodySchema = joi.object({
+    action: joi
+      .string()
+      .valid(USERS_PATCH_HANDLER_ACTIONS.ARCHIVE_USERS, USERS_PATCH_HANDLER_ACTIONS.NON_VERFIED_DISCORD_USERS)
+      .required(),
+  });
+
+  try {
+    await requestBodySchema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error("Error in validating action payload", error);
+    res.boom.badRequest(`${USERS_PATCH_HANDLER_ERROR_MESSAGES.VALIDATE_PAYLOAD}: ${error.message}`);
+  }
+}
+
 module.exports = {
   updateUser,
   updateProfileURL,
@@ -246,4 +285,5 @@ module.exports = {
   validateUserQueryParams,
   validateImageVerificationQuery,
   validateUpdateRoles,
+  validateUsersPatchHandler,
 };

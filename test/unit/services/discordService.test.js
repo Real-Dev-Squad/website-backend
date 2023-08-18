@@ -26,6 +26,7 @@ describe("Discord services", function () {
       const updatedUsers = await fetchAllUsers();
       updatedUsers.forEach((user) => {
         expect(user.roles.in_discord).to.be.equal(false);
+        expect(user.updated_at).to.be.a("number");
       });
     });
   });

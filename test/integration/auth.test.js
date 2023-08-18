@@ -40,7 +40,7 @@ describe("auth", function () {
     expect(res.headers.location).to.equal(githubOauthURL);
   });
 
-  it("should redirect the user to new sign up flow if they are have incomplte user details true", async function () {
+  it("should redirect the user to new sign up flow if they are have incomplete user details true", async function () {
     const redirectURL = "https://my.realdevsquad.com/new-signup";
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
       callback(null, "accessToken", githubUserInfo[0]);
@@ -55,6 +55,7 @@ describe("auth", function () {
     expect(res).to.have.status(302);
     expect(res.headers.location).to.equal(redirectURL);
   });
+
   // same data should be return from github and same data should be added there
   it("should redirect the request to the goto page on successful login, if user has incomplete user details false", async function () {
     await addUserToDBForTest(userData[0]);
@@ -90,7 +91,7 @@ describe("auth", function () {
     expect(res.headers.location).to.equal(rdsUrl);
   });
 
-  it("should redirect the realdevsquad.com if non RDS URL provided, any url that is other than *.realdevsqud.com is invalid", async function () {
+  it("should redirect the realdevsquad.com if non RDS URL provided, any url that is other than *.realdevsquad.com is invalid", async function () {
     await addUserToDBForTest(userData[0]);
     const invalidRedirectUrl = new URL("https://google.com").href;
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
