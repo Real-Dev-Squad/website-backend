@@ -9,6 +9,7 @@ const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
 const { archiveUsers } = require("../services/users");
+const { isLastPRMergedWithinDays } = require("../services/githubService");
 const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
@@ -743,6 +744,30 @@ const getUsersByRole = async (role) => {
   }
 };
 
+const getUnmergedUsers = async (days) => {
+  try {
+    const usersRef = await userModel.where("roles.in_discord", "==", true).get();
+    const users = [];
+
+    for (const userDoc of usersRef.docs) {
+      const userData = userDoc.data();
+      const username = userData.github_id;
+      const isMerged = await isLastPRMergedWithinDays(username, days);
+      if (!isMerged) {
+        users.push({
+          id: userDoc.id,
+          ...userData,
+        });
+      }
+    }
+
+    return users;
+  } catch (err) {
+    logger.error("Error while fetching unmerged users", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -768,4 +793,5 @@ module.exports = {
   removeGitHubToken,
   getUsersByRole,
   fetchUserByIds,
+  getUnmergedUsers,
 };

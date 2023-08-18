@@ -260,6 +260,71 @@ const fetchIssues = async () => {
   }
 };
 
+/**
+ * Fetches the last merged PR by a user
+ * @param username {string} - Username String
+ * @returns {Object} - Object containing the last merged PR
+ **/
+const fetchLastMergedPR = async (username) => {
+  try {
+    const baseURL = config.get("githubApi.baseUrl");
+    const issues = "/search/issues";
+    const urlObj = new URL(baseURL);
+    urlObj.pathname = issues;
+    urlObj.searchParams.append("q", `is:pr is:merged author:${username} org:${config.get("githubApi.org")}`);
+    urlObj.searchParams.append("sort", "merged");
+    urlObj.searchParams.append("order", "desc");
+    urlObj.searchParams.append("per_page", "1");
+    const createdURL = urlObj.href;
+    const headers = {
+      Accept: "application/vnd.github+json",
+      // TODO: replace <AUTH-TOKEN> with RDS org PAT before uncommenting
+      // Authorization: `Bearer <AUTH-TOKEN>`,
+      org: config.get("githubApi.org"),
+    };
+
+    const res = await fetch(createdURL, { headers });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`GitHub API request failed: ${errorText}`);
+    }
+
+    const data = await res.json();
+
+    if (!data || !data.items || data.items.length === 0) {
+      throw new Error(`No merged PRs found for user ${username}`);
+    }
+
+    return data;
+  } catch (err) {
+    logger.error(`Error while fetching merged PRs: ${err}`);
+    throw err;
+  }
+};
+
+/**
+ * Checks if the last PR merged by a user is within the last `days` days
+ * @param username {string} - Username String
+ * @param days {number} - Number of days
+ * @returns {boolean} - True if last PR merged is within the last `days` days else false
+ **/
+const isLastPRMergedWithinDays = async (username, days) => {
+  try {
+    const res = await fetchLastMergedPR(username);
+    const lastPRMergedDate = new Date(res.items[0].pull_request.merged_at);
+    const currentDate = new Date();
+
+    const timeDifferenceInMilliseconds = currentDate - lastPRMergedDate;
+    const timeDifferenceInDays = timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24);
+
+    return timeDifferenceInDays <= days;
+  } catch (err) {
+    logger.error(`Error while checking last PR merged: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
@@ -269,4 +334,5 @@ module.exports = {
   fetchIssues,
   fetchOpenIssues,
   fetchClosedIssues,
+  isLastPRMergedWithinDays,
 };

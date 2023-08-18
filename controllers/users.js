@@ -683,6 +683,21 @@ async function usersPatchHandler(req, res) {
   }
 }
 
+const getUnmergedUsers = async (req, res) => {
+  try {
+    const { days } = req.params;
+    const data = await userQuery.getUnmergedUsers(days);
+    return res.json({
+      message: "Users returned successfully!",
+      count: data.length,
+      users: data,
+    });
+  } catch (error) {
+    logger.error(`Error while fetching all users: ${error}`);
+    return res.boom.serverUnavailable("Something went wrong please contact admin");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -711,4 +726,5 @@ module.exports = {
   updateRoles,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
+  getUnmergedUsers,
 };
