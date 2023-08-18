@@ -532,6 +532,45 @@ describe("Users", function () {
       expect(previousPageResponse.body.links).to.have.property("prev");
       expect(previousPageResponse.body.users).to.have.length(2);
     });
+
+    it("Should get all inactive users in the system", function (done) {
+      chai
+        .request(app)
+        .get("/users?query=filterBy:unmerged_prs+days:10")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Inactive users returned successfully!");
+          expect(res.body.users).to.be.an("array");
+
+          if (res.body.users.length > 0) {
+            const user = res.body.users[0];
+            expect(user).to.not.have.property("phone");
+            expect(user).to.not.have.property("email");
+            expect(user).to.not.have.property("chaincode");
+          }
+
+          return done();
+        });
+    });
+
+    it("Should return 400 if days is not passed for filterBy unmerged_prs", function (done) {
+      chai
+        .request(app)
+        .get("/users?query=filterBy:unmerged_prs")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Days is required for filterBy unmerged_prs");
+          return done();
+        });
+    });
   });
 
   describe("GET /users/self", function () {
