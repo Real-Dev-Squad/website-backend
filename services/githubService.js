@@ -278,8 +278,7 @@ const fetchLastMergedPR = async (username) => {
     const createdURL = urlObj.href;
     const headers = {
       Accept: "application/vnd.github+json",
-      // TODO: replace <AUTH-TOKEN> with RDS org PAT before uncommenting
-      // Authorization: `Bearer <AUTH-TOKEN>`,
+      Authorization: `Bearer ${config.get("githubAccessToken")}`,
       org: config.get("githubApi.org"),
     };
 
