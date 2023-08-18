@@ -5,7 +5,9 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
+const ROLES = require("../constants/roles");
 const dataAccess = require("../services/dataAccessLayer");
+const { isLastPRMergedWithinDays } = require("../services/githubService");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
@@ -683,14 +685,28 @@ async function usersPatchHandler(req, res) {
   }
 }
 
-const getUnmergedUsers = async (req, res) => {
+const getInactiveUsers = async (req, res) => {
   try {
     const { days } = req.params;
-    const data = await userQuery.getUnmergedUsers(days);
+    const inDiscordUser = await dataAccess.retrieveUsersWithRole(ROLES.INDISCORD);
+
+    const users = [];
+
+    for (const user of inDiscordUser) {
+      const username = user.github_id;
+      const isMerged = await isLastPRMergedWithinDays(username, days);
+      if (!isMerged) {
+        users.push({
+          id: user.id,
+          ...user,
+        });
+      }
+    }
+
     return res.json({
       message: "Users returned successfully!",
-      count: data.length,
-      users: data,
+      count: users.length,
+      users: users,
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
@@ -726,5 +742,5 @@ module.exports = {
   updateRoles,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
-  getUnmergedUsers,
+  getInactiveUsers,
 };
