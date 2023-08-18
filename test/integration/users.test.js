@@ -45,6 +45,7 @@ describe("Users", function () {
   let superUserId;
   let superUserAuthToken;
   let userId = "";
+  let fetchStub;
 
   beforeEach(async function () {
     userId = await addUser();
@@ -1774,6 +1775,78 @@ describe("Users", function () {
           expect(res).to.have.status(200);
           expect(res.body.message).to.be.equal("Github Token removed from all users!");
           expect(res.body.usersFound).to.be.equal(3);
+          return done();
+        });
+    });
+  });
+  describe("PATCH /:userId/update-nickname", function () {
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      userId = await addUser(userData[0]);
+    });
+    afterEach(async function () {
+      await cleanDb();
+      Sinon.restore();
+    });
+    it("returns 200 for successfully updating nickname with patch method", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              userAffected: {
+                userId: "X0H3paYveEWh7Q2fPhor",
+                username: "test-name-007",
+                discordId: "1123566257019568232",
+              },
+              message: "User nickname changed successfully",
+            }),
+        })
+      );
+      chai
+        .request(app)
+        .patch(`/users/${userId}/update-nickname`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("User nickname changed successfully");
+          return done();
+        });
+    });
+  });
+  describe("test discord actions of nickname for unverified user", function () {
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      const superUser = userData[4];
+      userId = await addUser(userData[2]);
+      superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    });
+    afterEach(async function () {
+      await cleanDb();
+      Sinon.restore();
+    });
+    it("throw error if discordId is not present and user is not verified", function (done) {
+      fetchStub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("User not verified");
+        },
+      });
+      chai
+        .request(app)
+        .patch(`/users/${userId}/update-nickname`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          const response = res.body;
+          expect(response.message).to.be.equal("An internal server error occurred");
           return done();
         });
     });
