@@ -12,12 +12,16 @@ const cleanDb = require("../../utils/cleanDb");
 const users = require("../../../models/users");
 const firestore = require("../../../utils/firestore");
 const { userPhotoVerificationData, newUserPhotoVerificationData } = require("../../fixtures/user/photo-verification");
+const { generateStatusDataForState } = require("../../fixtures/userStatus/userStatus");
 const userModel = firestore.collection("users");
+const userStatusModel = firestore.collection("usersStatus");
 const joinModel = firestore.collection("applicants");
 const userDataArray = require("../../fixtures/user/user")();
 const joinData = require("../../fixtures/user/join")();
 const photoVerificationModel = firestore.collection("photo-verification");
-
+const userData = require("../../fixtures/user/user");
+const addUser = require("../../utils/addUser");
+const { userState } = require("../../../constants/userStatus");
 /**
  * Test the model functions and validate the data stored
  */
@@ -363,6 +367,32 @@ describe("users", function () {
       await users.getUsersByRole(32389434).catch((err) => {
         expect(err).to.be.instanceOf(Error);
       });
+    });
+  });
+
+  describe("getUsersBasedOnFilter", function () {
+    let [userId0, userId1, userId2] = [];
+
+    beforeEach(async function () {
+      const userArr = userData();
+      userId0 = await addUser(userArr[0]);
+      userId1 = await addUser(userArr[1]);
+      userId2 = await addUser(userArr[2]);
+      await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.ONBOARDING));
+      await userStatusModel.doc("userStatus001").set(generateStatusDataForState(userId1, userState.ONBOARDING));
+      await userStatusModel.doc("userStatus002").set(generateStatusDataForState(userId2, userState.IDLE));
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("should render users with onboarding state and time as 31days", async function () {
+      const query = {
+        state: "ONBOARDING",
+        time: "31d",
+      };
+      const result = await users.getUsersBasedOnFilter(query);
+      expect(result.length).to.equal(2);
     });
   });
   describe("fetch users by id", function () {

@@ -211,6 +211,10 @@ async function validateUserQueryParams(req, res, next) {
         .optional(),
       role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD, ROLES.ARCHIVED).optional(),
       verified: joi.string().optional(),
+      time: joi
+        .string()
+        .regex(/^[1-9]\d*d$/)
+        .optional(),
     })
     .messages({
       "object.min": "Please provide at least one filter criteria",
