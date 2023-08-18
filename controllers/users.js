@@ -319,20 +319,13 @@ const verifyUserImage = async (req, res) => {
 
 const updateDiscordUserNickname = async (req, res) => {
   try {
-    // const token = req.cookies[config.get("userToken.cookieName")];
-    // console.log("TOKEN", token);
-    // console.log("params", req.params.userId);
     const userToBeUpdated = await dataAccess.retrieveUsers({ id: req.params.userId });
-    // console.log(userToBeUpdated);
     const { discordId, username: userName } = userToBeUpdated.user;
-    // console.log("DISCORD-ID", discordId, "user-name", userName);
     if (!discordId) {
       throw new Error("user not verified");
     }
     const response = await setUserDiscordNickname(userName, discordId);
-    // console.log(`discordId:${req.params.discordId} userName:${userToBeUpdated.username}`);
 
-    // Handling errors based on different responses is yet to be implemented after testing with a real user
     return res.json({
       userAffected: {
         userId: req.params.userId,
