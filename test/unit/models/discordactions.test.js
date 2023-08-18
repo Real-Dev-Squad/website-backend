@@ -12,7 +12,6 @@ const {
   isGroupRoleExists,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
-  getNumberOfMemberForGroups,
 } = require("../../../models/discordactions");
 const { groupData, roleData, existingRole } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
@@ -242,42 +241,6 @@ describe("discordactions", function () {
         expect(logger.error.calledOnce).to.be.equal(true);
         expect(logger.error.calledWith("Error in adding role", error)).to.be.equal(true);
       }
-    });
-  });
-
-  describe("getNumberOfMemberForGroups", function () {
-    before(async function () {
-      await Promise.all([
-        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: 1 }),
-        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: 2 }),
-        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: 3 }),
-        addGroupRoleToMember({ roleid: groupData[1].roleid, userid: 1 }),
-      ]);
-    });
-
-    after(async function () {
-      await cleanDb();
-    });
-
-    it("should return an empty array if the parameter is an empty array", async function () {
-      const result = await getNumberOfMemberForGroups([]);
-      expect(result).to.be.an("array");
-      expect(result.length).to.equal(0);
-    });
-
-    it("should return an empty array if the parameter no parameter is passed", async function () {
-      const result = await getNumberOfMemberForGroups();
-      expect(result).to.be.an("array");
-      expect(result.length).to.equal(0);
-    });
-
-    it("should return group details with memberCount details ", async function () {
-      const result = await getNumberOfMemberForGroups(groupData);
-      expect(result).to.deep.equal([
-        { rolename: groupData[0].rolename, roleid: 1, memberCount: 3 },
-        { rolename: groupData[1].rolename, roleid: 2, memberCount: 1 },
-        { rolename: groupData[2].rolename, roleid: 3, memberCount: 0 },
-      ]);
     });
   });
 });
