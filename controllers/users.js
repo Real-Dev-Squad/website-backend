@@ -112,10 +112,7 @@ const getUsers = async (req, res) => {
           const username = user.github_id;
           const isMerged = await isLastPRMergedWithinDays(username, days);
           if (!isMerged) {
-            users.push({
-              id: user.id,
-              ...user,
-            });
+            users.push(user.id);
           }
         }
 

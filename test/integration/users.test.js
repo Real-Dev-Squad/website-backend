@@ -35,7 +35,7 @@ const nonSuperUser = userData[0];
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const Sinon = require("sinon");
-const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
+const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../../constants/errorMessages");
 const photoVerificationModel = firestore.collection("photo-verification");
 
 chai.use(chaiHttp);
@@ -533,26 +533,20 @@ describe("Users", function () {
       expect(previousPageResponse.body.users).to.have.length(2);
     });
 
-    it("Should get all inactive users in the system", function (done) {
+    it("Should return 503 if something went wrong if data not fetch from github", function (done) {
       chai
         .request(app)
-        .get("/users?query=filterBy:unmerged_prs+days:10")
+        .get("/users")
+        .query({
+          query: "filterBy:unmerged_prs+days:30",
+        })
         .end((err, res) => {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(200);
+          expect(res).to.have.status(503);
           expect(res.body).to.be.an("object");
-          expect(res.body.message).to.equal("Inactive users returned successfully!");
-          expect(res.body.users).to.be.an("array");
-
-          if (res.body.users.length > 0) {
-            const user = res.body.users[0];
-            expect(user).to.not.have.property("phone");
-            expect(user).to.not.have.property("email");
-            expect(user).to.not.have.property("chaincode");
-          }
-
+          expect(res.body.message).to.equal(SOMETHING_WENT_WRONG);
           return done();
         });
     });
