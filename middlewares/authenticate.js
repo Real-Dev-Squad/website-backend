@@ -41,7 +41,6 @@ const checkRestricted = async (req, res, next) => {
  */
 module.exports = async (req, res, next) => {
   try {
-    // console.log("from authenticate middleware");
     let token = req.cookies[config.get("userToken.cookieName")];
 
     /**

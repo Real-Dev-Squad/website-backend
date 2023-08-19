@@ -323,18 +323,19 @@ const verifyUserImage = async (req, res) => {
  */
 
 const updateDiscordUserNickname = async (req, res) => {
+  const { userId } = req.params;
   try {
-    const userToBeUpdated = await dataAccess.retrieveUsers({ id: req.params.userId });
-    const { discordId, username: userName } = userToBeUpdated.user;
+    const userToBeUpdated = await dataAccess.retrieveUsers({ id: userId });
+    const { discordId, username } = userToBeUpdated.user;
     if (!discordId) {
       throw new Error("user not verified");
     }
-    const response = await setUserDiscordNickname(userName, discordId);
+    const response = await setUserDiscordNickname(username, discordId);
 
     return res.json({
       userAffected: {
-        userId: req.params.userId,
-        username: userName,
+        userId,
+        username,
         discordId,
       },
       message: response,

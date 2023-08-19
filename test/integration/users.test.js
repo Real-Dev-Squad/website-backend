@@ -15,7 +15,7 @@ const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
-const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
+const { getDiscordMembers, updatedNicknameResponse } = require("../fixtures/discordResponse/discord-response");
 const joinData = require("../fixtures/user/join");
 const {
   userStatusDataAfterSignup,
@@ -1765,15 +1765,7 @@ describe("Users", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () =>
-            Promise.resolve({
-              userAffected: {
-                userId: "X0H3paYveEWh7Q2fPhor",
-                username: "test-name-007",
-                discordId: "1123566257019568232",
-              },
-              message: "User nickname changed successfully",
-            }),
+          json: () => Promise.resolve(updatedNicknameResponse),
         })
       );
       chai
@@ -1790,6 +1782,7 @@ describe("Users", function () {
         });
     });
   });
+
   describe("test discord actions of nickname for unverified user", function () {
     beforeEach(async function () {
       fetchStub = Sinon.stub(global, "fetch");
