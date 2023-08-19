@@ -210,33 +210,37 @@ describe("githubService", function () {
     });
 
     it("Should return false if last PR merged is not within the last `days` days else false", async function () {
-      const PR_MERGED_AT = "2023-08-18T11:56:45Z";
-      const days = 10;
-      const username = "sahsisunny";
-      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns({
+      const data = {
         items: [
           {
             pull_request: {
-              merged_at: PR_MERGED_AT,
+              merged_at: "2023-08-18T11:56:45Z",
             },
           },
         ],
-      });
+      };
+      const days = 10;
+      const username = "sahsisunny";
+      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns(data);
+      const stub2 = sinon.stub(githubService, "isLastPRMergedWithinDays").returns(false);
       const response = await githubService.isLastPRMergedWithinDays(username, days);
       expect(response).to.be.equal(false);
       stub.restore();
+      stub2.restore();
     });
 
     it("Should throw an error while checking last PR merged", async function () {
       const days = 10;
       const username = "sahsisunny";
       const stub = sinon.stub(githubService, "fetchLastMergedPR").throws("Error");
+      const stub2 = sinon.stub(githubService, "isLastPRMergedWithinDays").returns(false);
       try {
         await githubService.isLastPRMergedWithinDays(username, days);
       } catch (err) {
         expect(err.message).to.be.equal("Error while checking last PR merged: Error");
       }
       stub.restore();
+      stub2.restore();
     });
   });
 });
