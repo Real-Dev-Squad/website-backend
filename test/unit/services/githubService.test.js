@@ -155,4 +155,86 @@ describe("githubService", function () {
       expect(response).to.be.equal(url);
     });
   });
+
+  describe("fetchLastMergedPR", function () {
+    it("Should generate the correct url to fetch last merged PR", async function () {
+      const data = {
+        items: [
+          {
+            pull_request: {
+              merged_at: "2023-08-18T11:56:45Z",
+            },
+          },
+        ],
+      };
+      const username = "sahsisunny";
+      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns(data);
+      const response = await githubService.fetchLastMergedPR(username);
+      expect(response).to.be.equal(data);
+      stub.restore();
+    });
+
+    it("Should throw an error if no merged PRs found for user", async function () {
+      const username = "hfghdgfh";
+      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns({
+        items: [],
+      });
+      try {
+        await githubService.fetchLastMergedPR(username);
+      } catch (err) {
+        expect(err.message).to.be.equal(`No merged PRs found for user ${username}`);
+      }
+      stub.restore();
+    });
+  });
+
+  describe("isLastPRMergedWithinDays", function () {
+    it("Should return true if last PR merged is within the last `days` days else false", async function () {
+      const PR_MERGED_AT = "2023-08-18T11:56:45Z";
+      const days = 20;
+      const username = "sahsisunny";
+      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns({
+        items: [
+          {
+            pull_request: {
+              merged_at: PR_MERGED_AT,
+            },
+          },
+        ],
+      });
+      const response = await githubService.isLastPRMergedWithinDays(username, days);
+      expect(response).to.be.equal(true);
+      stub.restore();
+    });
+
+    it("Should return false if last PR merged is not within the last `days` days else false", async function () {
+      const PR_MERGED_AT = "2023-08-18T11:56:45Z";
+      const days = 10;
+      const username = "sahsisunny";
+      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns({
+        items: [
+          {
+            pull_request: {
+              merged_at: PR_MERGED_AT,
+            },
+          },
+        ],
+      });
+      const response = await githubService.isLastPRMergedWithinDays(username, days);
+      expect(response).to.be.equal(false);
+      stub.restore();
+    });
+
+    it("Should throw an error while checking last PR merged", async function () {
+      const days = 10;
+      const username = "sahsisunny";
+      const stub = sinon.stub(githubService, "fetchLastMergedPR").throws("Error");
+      try {
+        await githubService.isLastPRMergedWithinDays(username, days);
+      } catch (err) {
+        expect(err.message).to.be.equal("Error while checking last PR merged: Error");
+      }
+      stub.restore();
+    });
+  });
 });

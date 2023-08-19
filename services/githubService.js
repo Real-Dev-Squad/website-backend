@@ -333,5 +333,6 @@ module.exports = {
   fetchIssues,
   fetchOpenIssues,
   fetchClosedIssues,
+  fetchLastMergedPR,
   isLastPRMergedWithinDays,
 };
