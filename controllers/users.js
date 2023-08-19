@@ -618,25 +618,6 @@ const setInDiscordScript = async (req, res) => {
   }
 };
 
-const removeTokens = async (req, res) => {
-  try {
-    const users = await userQuery.fetchUsersWithToken();
-
-    if (!users.length) {
-      return res.status(404).json({ message: "No users found with github Token!" });
-    }
-
-    await userQuery.removeGitHubToken(users);
-
-    return res.status(200).json({
-      message: "Github Token removed from all users!",
-      usersFound: users.length,
-    });
-  } catch (err) {
-    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
-  }
-};
-
 const updateRoles = async (req, res) => {
   try {
     const result = await dataAccess.retrieveUsers({ id: req.params.id });
@@ -736,7 +717,6 @@ module.exports = {
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
-  removeTokens,
   updateRoles,
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,

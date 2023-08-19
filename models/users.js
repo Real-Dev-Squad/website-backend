@@ -648,20 +648,6 @@ const archiveUserIfNotInDiscord = async () => {
     throw error;
   }
 };
-
-const fetchUsersWithToken = async () => {
-  try {
-    const users = [];
-    const usersRef = await userModel.where("tokens", "!=", false).get();
-    usersRef.forEach((user) => {
-      users.push(userModel.doc(user.id));
-    });
-    return users;
-  } catch (err) {
-    logger.error(`Error while fetching all users with tokens field: ${err}`);
-    return [];
-  }
-};
 /**
  *
  * @param {[string]} userIds  Array id's of user
@@ -764,7 +750,6 @@ module.exports = {
   getDiscordUsers,
   fetchAllUsers,
   archiveUserIfNotInDiscord,
-  fetchUsersWithToken,
   removeGitHubToken,
   getUsersByRole,
   fetchUserByIds,

@@ -19,7 +19,6 @@ router.get("/self", authenticate, users.getSelfDetails);
 router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
 router.get("/chaincode", authenticate, users.generateChaincode);
 router.get("/search", userValidator.validateUserQueryParams, users.filterUsers);
-router.post("/tokens", authenticate, authorizeRoles([SUPERUSER]), users.removeTokens);
 router.patch(
   "/:userId/update-nickname",
   authenticate,
