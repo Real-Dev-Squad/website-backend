@@ -119,24 +119,6 @@ describe("Users", function () {
         });
     });
 
-    it("Should update the social id with valid social id", function (done) {
-      chai
-        .request(app)
-        .patch("/users/self")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          twitter_id: "Valid_twitterId",
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(204);
-          return done();
-        });
-    });
-
     it("Should update the user roles", function (done) {
       chai
         .request(app)
@@ -251,6 +233,24 @@ describe("Users", function () {
             message: "Username must be between 4 and 20 characters long and contain only letters or numbers.",
           });
 
+          return done();
+        });
+    });
+
+    it("Should update the social id with valid social id", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          twitter_id: "Valid_twitterId",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
           return done();
         });
     });

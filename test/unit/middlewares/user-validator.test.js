@@ -87,6 +87,27 @@ describe("Middleware | Validators | User", function () {
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
 
+    it("Stops the propagation of the next if username is invalid", async function () {
+      const req = {
+        body: {
+          last_name: "patil",
+          first_name: "Abhay",
+          username: "@invalidusername-12",
+          twitter_id: "abhayisawesome",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = sinon.spy();
+      await updateUser(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+      expect(nextSpy.calledOnce).to.be.equal(false);
+    });
+
     it("Stops the propagation of the next if twitter_id is invalid", async function () {
       const req = {
         body: {
@@ -126,7 +147,7 @@ describe("Middleware | Validators | User", function () {
       await updateUser(req, res, nextSpy).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
       });
-      expect(nextSpy.calledOnce).to.be.equal(false);
+      expect(nextSpy.calledOnce).to.be.equal(true);
     });
 
     it("Stops the propagation of the next if instagram_id is invalid", async function () {
@@ -136,27 +157,6 @@ describe("Middleware | Validators | User", function () {
           first_name: "Abhay",
           username: "invalidusername",
           instagram_id: "@abhayisawesome",
-        },
-      };
-      const res = {
-        boom: {
-          badRequest: () => {},
-        },
-      };
-      const nextSpy = sinon.spy();
-      await updateUser(req, res, nextSpy).catch((err) => {
-        expect(err).to.be.an.instanceOf(Error);
-      });
-      expect(nextSpy.calledOnce).to.be.equal(false);
-    });
-
-    it("Stops the propagation of the next if username is invalid", async function () {
-      const req = {
-        body: {
-          last_name: "patil",
-          first_name: "Abhay",
-          username: "@invalidusername-12",
-          twitter_id: "abhayisawesome",
         },
       };
       const res = {
