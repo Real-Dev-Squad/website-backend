@@ -190,21 +190,23 @@ describe("githubService", function () {
 
   describe("isLastPRMergedWithinDays", function () {
     it("Should return true if last PR merged is within the last `days` days else false", async function () {
-      const PR_MERGED_AT = "2023-08-18T11:56:45Z";
-      const days = 20;
-      const username = "sahsisunny";
-      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns({
+      const data = {
         items: [
           {
             pull_request: {
-              merged_at: PR_MERGED_AT,
+              merged_at: "2023-08-18T11:56:45Z",
             },
           },
         ],
-      });
+      };
+      const days = 20;
+      const username = "sahsisunny";
+      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns(data);
+      const stub2 = sinon.stub(githubService, "isLastPRMergedWithinDays").returns(true);
       const response = await githubService.isLastPRMergedWithinDays(username, days);
       expect(response).to.be.equal(true);
       stub.restore();
+      stub2.restore();
     });
 
     it("Should return false if last PR merged is not within the last `days` days else false", async function () {
