@@ -259,6 +259,12 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
         id = doc.id;
         userData = doc.data();
       });
+    } else if (discordId) {
+        const user = await userModel.where("discordId", "==", discordId).limit(1).get();
+        user.forEach((doc) => {
+          id = doc.id;
+          userData = doc.data();
+        })
     }
     return {
       userExists: !!userData,

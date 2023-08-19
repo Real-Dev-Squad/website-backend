@@ -21,6 +21,7 @@ router.get("/chaincode", authenticate, users.generateChaincode);
 router.get("/search", userValidator.validateUserQueryParams, users.filterUsers);
 
 router.get("/:username", users.getUser);
+router.get("/discordId/:discordId", users.getUserByDiscordId);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
 router.put("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);
 router.get("/:id/skills", users.getUserSkills);
