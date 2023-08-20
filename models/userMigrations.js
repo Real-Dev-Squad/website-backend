@@ -15,9 +15,9 @@ const USER_COLORS = 10;
 
 const addDefaultColors = async (batchSize = MAX_TRANSACTION_WRITES) => {
   try {
-    const usersSnapshot = await dataAccess.retrieveUsers({ query: { size: MAX_USERS_SIZE } });
-    const usersArr = [];
-    usersSnapshot.users.forEach((doc) => usersArr.push({ id: doc.id, ...doc }));
+    const usersSnapshotArr = await dataAccess.retrieveUsers({ query: { size: MAX_USERS_SIZE } });
+    const usersArr = usersSnapshotArr.users;
+    // usersSnapshot.users.forEach((doc) => usersArr.push({ id: doc.id, ...doc }));
 
     const batchArray = [];
     const users = [];
@@ -28,6 +28,7 @@ const addDefaultColors = async (batchSize = MAX_TRANSACTION_WRITES) => {
 
     for (const user of usersArr) {
       const colors = user.colors ?? {};
+
       if (!user.colors) {
         const userColorIndex = getRandomIndex(USER_COLORS);
         colors.color_id = userColorIndex;
@@ -37,7 +38,7 @@ const addDefaultColors = async (batchSize = MAX_TRANSACTION_WRITES) => {
         operationCounter++;
         totalCount++;
         users.push(user.username);
-        if (operationCounter === MAX_TRANSACTION_WRITES) {
+        if (operationCounter === batchSize) {
           batchArray.push(firestore.batch());
           batchIndex++;
           operationCounter = 0;

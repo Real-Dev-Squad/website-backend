@@ -16,14 +16,15 @@ describe("userColorMigrations", function () {
     await addUser(userData[2]);
     await addUser(userData[3]);
     await addUser(userData[4]);
-    await addUser(userData[5]);
+    await addUser(userData[6]);
   });
   afterEach(async function () {
     await cleanDb();
   });
 
   it("should add color property to added users which dont have a color property", async function () {
-    const response = await userMigrationModel.addDefaultColors(MAX_TRANSACTION_WRITES);
+    const response = await userMigrationModel.addDefaultColors();
+
     expect(response.totalUsersFetched).to.equal(6);
     expect(response.totalUsersUpdated).to.equal(5);
     expect(response.totalUsersUnaffected).to.equal(1);
