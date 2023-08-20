@@ -211,7 +211,7 @@ describe("Tasks", function () {
         });
     });
 
-    it("Should get all tasks filtered with status ,assignee when passed to GET /tasks", function (done) {
+    it("Should get all tasks filtered with status ,assignee, title when passed to GET /tasks", function (done) {
       chai
         .request(app)
         .get(`/tasks?status=${TASK_STATUS.AVAILABLE}&dev=true&assignee=sagar&title=Test`)
