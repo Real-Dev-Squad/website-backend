@@ -279,7 +279,7 @@ const generateEventCode = async (req, res) => {
       code: eventCode,
       role,
     });
-    return res.status(201).json(eventCodeObjectFromDB);
+    return res.status(201).json({ message: "Event code created succesfully!", eventCodeObjectFromDB });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({

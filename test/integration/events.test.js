@@ -399,9 +399,15 @@ describe("events", function () {
     });
 
     it("should return unauthorized error if user is not authenticated", function (done) {
+      const id = event1Data.id;
+      const payload = {
+        eventCode: "test-code",
+        role: "moderator",
+      };
       chai
         .request(app)
-        .patch("/events")
+        .post(`/events/${id}/codes`)
+        .send({ ...payload })
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -414,5 +420,122 @@ describe("events", function () {
           return done();
         });
     });
+  });
+
+  describe("POST /events/:id/codes", function () {
+    it("should return bad request if the role is not maven", function (done) {
+      const id = event1Data.id;
+      const payload = {
+        id: "test-id",
+        eventCode: "test-code",
+        role: "moderator",
+      };
+      chai
+        .request(app)
+        .post(`/events/${id}/codes`)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send({ ...payload })
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(400);
+          expect(response.body).to.be.an("object");
+          expect(response.body.message).to.equal("Currently the room codes feature is only for mavens!");
+          expect(response.body.message).to.be.a("string");
+
+          return done();
+        });
+    });
+    it("should return unauthorized error if user is not authenticated", function (done) {
+      const id = event1Data.id;
+      // const payload = {
+      //   id: "test-id",
+      //   eventCode: "test-code",
+      //   role: "moderator",
+      // };
+      chai
+        .request(app)
+        .post(`/events/${id}/codes`)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(401);
+          expect(response.body.error).to.be.equal("Unauthorized");
+          expect(response.body.message).to.be.equal("Unauthenticated User");
+
+          return done();
+        });
+    });
+    // it('should return room code created successfully', function (done) {
+    //   const id = event1Data.id;
+
+    //   const payload = {
+    //     eventCode: 'test-code', role: 'maven'
+    //   }
+
+    //   const demo = {
+    //     id: 'test-id',
+    //     event_id: event1Data.id,
+    //     code: 'test-code',
+    //     role: 'maven',
+    //   }
+
+    //   const createEventCodeStub = sinon.stub(eventQuery, 'createEventCode');
+    //   createEventCodeStub.resolves(demo);
+
+    //   console.log(createEventCodeStub.callCount)
+
+    //   // Stub eventRef.update method for updating event data
+    //   const eventRefStub = {
+    //     update: sinon.stub().resolves(),
+    //   };
+    //   console.log(eventRefStub.callCount)
+
+    //   eventRefStub.update({
+    //     event_codes: {
+    //       by_role: {
+    //         mavens: ['test-code'],
+    //       },
+    //     },
+    //   });
+
+    //   // Stub eventModel.doc method to return the eventRefStub
+    //   const eventModelStub = {
+    //     doc: sinon.stub().returns(eventRefStub),
+    //   };
+
+    //   // Replace the original eventModel with the stubbed version
+    //   const originalEventModel = eventQuery.eventModel;
+    //   eventQuery.eventModel = eventModelStub;
+    //   // eventQuery.createEventCode(payload);
+    //   chai
+    //     .request(app)
+    //     .post(`/events/${id}/codes`)
+    //     .set("cookie", `${cookieName}=${authToken}`)
+    //     .send({ ...payload })
+    //     .end((error, response) => {
+    //       if (error) {
+    //         console.log({ error })
+    //         return done(error);
+    //       }
+    //       expect(response).to.have.status(201);
+    //       expect(response.body).to.be.an("object");
+    //       expect(response.body.message).to.equal('Event code created succesfully!');
+    //       expect(response.body.message).to.be.a("string");
+    //       expect(response.body.eventCodeObjectFromDB).to.be.an('object');
+    //       // expect(response.body.eventCodeObjectFromDB.id).to.equal('test-id');
+    //       expect(response.body.eventCodeObjectFromDB.event_id).to.equal(id);
+    //       expect(response.body.eventCodeObjectFromDB.code).to.equal('test-code');
+    //       expect(response.body.eventCodeObjectFromDB.role).to.equal('maven');
+
+    //       return done();
+    //     });
+    //   eventQuery.eventModel = originalEventModel;
+    //   createEventCodeStub.restore();
+    // })
   });
 });
