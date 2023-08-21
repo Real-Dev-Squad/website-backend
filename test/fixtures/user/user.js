@@ -361,5 +361,11 @@ module.exports = () => {
       updated_at: Date.now(),
       created_at: Date.now(),
     },
+    {
+      username: "shubham-sigdar",
+      github_id: "shubham123",
+      first_name: "shubham",
+      last_name: "sigdar",
+    },
   ];
 };
