@@ -1,5 +1,5 @@
 const chai = require("chai");
-const { getRandomIndex } = require("../../../utils/helpers");
+const { getRandomIndex } = require("../../../utils/helper");
 const { expect } = chai;
 
 describe("helpers", function () {
