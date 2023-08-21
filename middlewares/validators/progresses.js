@@ -4,8 +4,11 @@ const { VALID_PROGRESS_TYPES, RESPONSE_MESSAGES } = require("../../constants/pro
 const validateCreateProgressRecords = async (req, res, next) => {
   // Check if the request is being made on a Sunday
   const today = new Date();
-  if (today.getDay() === 0) {
-    // Sunday corresponds to day index 0
+  const currentHourIST = today.getUTCHours() + 5.5; // IST offset is UTC+5:30;
+  const isAfter6amISTSunday = today.getDay() === 0 && currentHourIST >= 5.5 && today.getUTCMinutes() > 30;
+  const isBefore6amISTMonday = today.getDay() === 1 && currentHourIST === 5.5 && new Date().getUTCMinutes() <= 30;
+
+  if (isAfter6amISTSunday || isBefore6amISTMonday) {
     res.boom.badRequest(RESPONSE_MESSAGES.PROGRESS_DOCUMENT_NON_WORKING_DAYS);
   }
 
