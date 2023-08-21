@@ -30,6 +30,7 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
  * @return {Promise<{isNewUser: boolean, userId: string}|{isNewUser: boolean, userId: string}>}
  */
 const addOrUpdate = async (userData, userId = null) => {
+  // console.log(userData, userId)
   try {
     // userId exists Update user
     if (userId !== null) {
@@ -50,7 +51,12 @@ const addOrUpdate = async (userData, userId = null) => {
     // userId is null, Add or Update user
     const user = await userModel.where("github_id", "==", userData.github_id).limit(1).get();
     if (!user.empty) {
-      await userModel.doc(user.docs[0].id).set(userData, { merge: true });
+      await userModel.doc(user.docs[0].id).set({
+        ...userData,
+        roles: { archived: false, in_discord: true }, // Update roles here
+        updated_at: Date.now(),
+      }, { merge: true }
+      );
 
       return {
         isNewUser: false,
