@@ -2,11 +2,10 @@ const joi = require("joi");
 const { VALID_PROGRESS_TYPES, RESPONSE_MESSAGES } = require("../../constants/progresses");
 
 const validateCreateProgressRecords = async (req, res, next) => {
-  // Check if the request is being made on a Sunday
   const today = new Date();
   const currentHourIST = today.getUTCHours() + 5.5; // IST offset is UTC+5:30;
-  const isAfter6amISTSunday = today.getDay() === 0 && currentHourIST >= 5.5 && today.getUTCMinutes() > 30;
-  const isBefore6amISTMonday = today.getDay() === 1 && currentHourIST === 5.5 && new Date().getUTCMinutes() <= 30;
+  const isAfter6amISTSunday = today.getDay() === 0 && currentHourIST >= 6 && today.getUTCMinutes() >= 0;
+  const isBefore6amISTMonday = today.getDay() === 1 && currentHourIST < 6;
 
   if (isAfter6amISTSunday || isBefore6amISTMonday) {
     res.boom.badRequest(RESPONSE_MESSAGES.PROGRESS_DOCUMENT_NON_WORKING_DAYS);
