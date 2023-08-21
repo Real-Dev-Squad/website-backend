@@ -68,23 +68,29 @@ const getPaginatedLink = ({
 };
 
 /**
- * Finds and returns a Set of group IDs for which a given Discord ID is a member.
+ * Finds and returns the set of subscribed group IDs for a given Discord user ID based on group-to-user mappings.
  *
- * @param {string} discordId - The Discord ID of the user.
- * @param {Array<object>} groupToMemberMappings - Array of group-to-member mappings.
- * @returns {Set<string>} - A Set of group IDs.
+ * @param {string} discordId - The Discord user ID for which to find subscribed group IDs.
+ * @param {Array} groupToUserMappings - An array of group-to-user mappings containing user and role information.
+ * @returns {Set} - A Set containing the group IDs to which the user is subscribed.
  */
-function findMemberGroupIds(discordId, groupToMemberMappings = []) {
-  return groupToMemberMappings.reduce((memberGroupIds, group) => {
+function findSubscribedGroupIds(discordId, groupToUserMappings = []) {
+  // Initialize a Set to store the subscribed group IDs
+  const subscribedGroupIds = new Set();
+
+  // Iterate through groupToUserMappings to find subscribed group IDs
+  groupToUserMappings.forEach((group) => {
     if (group.userid === discordId) {
-      memberGroupIds.add(group.roleid);
+      subscribedGroupIds.add(group.roleid);
     }
-    return memberGroupIds;
-  }, new Set());
+  });
+
+  return subscribedGroupIds;
 }
+
 module.exports = {
   getQualifiers,
   getDateTimeRangeForPRs,
   getPaginatedLink,
-  findMemberGroupIds,
+  findSubscribedGroupIds,
 };

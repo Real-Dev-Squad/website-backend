@@ -6,6 +6,7 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const userModel = firestore.collection("users");
+const admin = require("firebase-admin");
 
 const {
   createNewRole,
@@ -14,6 +15,7 @@ const {
   addGroupRoleToMember,
   updateDiscordImageForVerification,
   enrichGroupDataWithMembershipInfo,
+  fetchGroupToUserMapping,
 } = require("../../../models/discordactions");
 const { groupData, roleData, existingRole } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
@@ -321,6 +323,45 @@ describe("discordactions", function () {
         image: userData[2].picture.url,
         isMember: false,
       });
+    });
+  });
+
+  describe("fetchGroupToMemberMapping", function () {
+    const roleIds = [];
+    before(async function () {
+      // Add 50 different roles and user mapping
+      const addGroupRolesPromises = Array.from({ length: 65 }).map((_, index) => {
+        const roleId = `role-id-${index}`;
+        roleIds.push(roleId);
+        return addGroupRoleToMember({
+          roleid: roleId,
+          userid: index,
+          date: admin.firestore.Timestamp.fromDate(new Date()),
+        });
+      });
+      await Promise.all(addGroupRolesPromises);
+    });
+
+    after(async function () {
+      await cleanDb();
+    });
+
+    it("should return empty array for empty roleId", async function () {
+      const groupToMemberMappings = await fetchGroupToUserMapping([]);
+      expect(groupToMemberMappings).to.be.an("array");
+      expect(groupToMemberMappings).to.have.lengthOf(0);
+    });
+
+    it("should be able to fetch mapping for less than 30 roleIds", async function () {
+      const groupToMemberMappings = await fetchGroupToUserMapping(roleIds.slice(0, 25));
+      expect(groupToMemberMappings).to.be.an("array");
+      expect(groupToMemberMappings).to.have.lengthOf(25);
+    });
+
+    it("should be able to fetch mapping for more than 30 roleIds", async function () {
+      const groupToMemberMappings = await fetchGroupToUserMapping(roleIds);
+      expect(groupToMemberMappings).to.be.an("array");
+      expect(groupToMemberMappings).to.have.lengthOf(65);
     });
   });
 });

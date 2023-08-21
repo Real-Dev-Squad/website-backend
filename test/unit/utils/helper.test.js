@@ -3,7 +3,7 @@ const {
   getDateTimeRangeForPRs,
   getQualifiers,
   getPaginatedLink,
-  findMemberGroupIds,
+  findSubscribedGroupIds,
 } = require("../../../utils/helper");
 const { TASK_STATUS, TASK_SIZE } = require("../../../constants/tasks");
 const { expect } = chai;
@@ -99,9 +99,9 @@ describe("helper", function () {
     });
   });
 
-  describe("findMemberGroupIds", function () {
+  describe("findSubscribedGroupIds", function () {
     it("should return set of member groupIds", function () {
-      const memberGroupIds = findMemberGroupIds("1234", [
+      const memberGroupIds = findSubscribedGroupIds("1234", [
         { userid: "1234", roleid: "1" },
         { userid: "12345", roleid: "3" },
       ]);
