@@ -73,6 +73,14 @@ const getPaginatedLink = ({
  * @returns random Index number : index between the range 0 to array.length
  */
 const getRandomIndex = (maxLength = 10) => {
+  if (typeof maxLength !== "number") {
+    throw new Error("maxLength must be a number");
+  }
+
+  if (maxLength <= 0) {
+    throw new Error("maxLength must be a positive number");
+  }
+
   return Math.floor(Math.random() * maxLength);
 };
 
