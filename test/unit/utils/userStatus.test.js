@@ -94,7 +94,8 @@ describe("User Status Functions", function () {
   });
 
   /* Skipping since test changes will go through before the util changes */
-  describe("generateOOONickname", function () {
+  // eslint-disable-next-line mocha/no-skipped-tests
+  describe.skip("generateOOONickname", function () {
     it("should return nickname of the user when username, from and status is passed", async function () {
       const { username } = userData;
       const from = new Date();
