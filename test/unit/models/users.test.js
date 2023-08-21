@@ -385,4 +385,10 @@ describe("users", function () {
       expect(fetchedUserIds).to.deep.equal([]);
     });
   });
+  describe("generateUniqueUsername", function () {
+    it("fetch username by firstname and lastname", async function () {
+      const newUsername = await users.generateUniqueUsername("shubham", "sigdar");
+      expect(newUsername).to.deep.equal("shubham-sigdar");
+    });
+  });
 });
