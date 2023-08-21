@@ -1,7 +1,8 @@
 const chai = require("chai");
 const { expect } = chai;
-const { generateNewStatus, checkIfUserHasLiveTasks } = require("../../../utils/userStatus");
-const { userState } = require("../../../constants/userStatus");
+const { generateNewStatus, checkIfUserHasLiveTasks, generateOOONickname } = require("../../../utils/userStatus");
+const { userState, discordNicknameLength, month } = require("../../../constants/userStatus");
+const userData = require("../../fixtures/user/user")()[0];
 
 describe("User Status Functions", function () {
   describe("generateNewStatus", function () {
@@ -89,6 +90,64 @@ describe("User Status Functions", function () {
         expect(error).to.be.instanceOf(Error);
         expect(error.message).to.equal(errorMessage);
       }
+    });
+  });
+
+  /* Skipping since test changes will go through before the util changes */
+  describe("generateOOONickname", function () {
+    it("should return nickname of the user when username, from and status is passed", async function () {
+      const { username } = userData;
+      const from = new Date();
+      const until = new Date();
+      const nickname = generateOOONickname(username, from.getTime(), until.getTime());
+
+      const fromDate = from.getDate();
+      const untilDate = until.getDate();
+      const fromMonth = month[from.getMonth()];
+      const untilMonth = month[until.getMonth()];
+
+      const oooMessage = `(OOO ${fromMonth} ${fromDate} - ${untilMonth} ${untilDate})`;
+      const oooMessageLen = oooMessage.length;
+      const usernameLen = discordNicknameLength - oooMessageLen - 1;
+      expect(nickname).to.be.equal(`${username.substring(0, usernameLen)} ${oooMessage}`);
+    });
+
+    it("should return nickname of the user with from and until date when username, from and until OOO dates are passed", async function () {
+      const { username } = userData;
+      const from = new Date();
+      const until = new Date();
+      const status = {
+        from: from.getTime(),
+        until: from.getTime(),
+      };
+      const nickname = generateOOONickname(username, status.from, status.until);
+
+      const fromDate = from.getDate();
+      const untilDate = until.getDate();
+      const fromMonth = month[from.getMonth()];
+      const untilMonth = month[until.getMonth()];
+
+      const oooMessage = `(OOO ${fromMonth} ${fromDate} - ${untilMonth} ${untilDate})`;
+      const oooMessageLen = oooMessage.length;
+      const usernameLen = discordNicknameLength - oooMessageLen - 1;
+      expect(nickname).to.be.equal(`${username.substring(0, usernameLen)} ${oooMessage}`);
+    });
+
+    it("should return nickname of the user only with until date when username and OOO until are passed, but not OOO from date", async function () {
+      const { username } = userData;
+      const until = new Date();
+      const status = {
+        until: until.getTime(),
+      };
+      const nickname = generateOOONickname(username, status.from, status.until);
+
+      const untilDate = until.getDate();
+      const untilMonth = month[until.getMonth()];
+
+      const oooMessage = `(OOO ${untilMonth} ${untilDate})`;
+      const oooMessageLen = oooMessage.length;
+      const usernameLen = discordNicknameLength - oooMessageLen - 1;
+      expect(nickname).to.be.equal(`${username.substring(0, usernameLen)} ${oooMessage}`);
     });
   });
 });
