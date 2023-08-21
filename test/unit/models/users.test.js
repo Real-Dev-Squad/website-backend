@@ -99,7 +99,7 @@ describe("users", function () {
     });
 
     it("It should have created_At and updated_At fields", async function () {
-      const userData = userDataArray[15];
+      const userData = userDataArray[14];
       await users.addOrUpdate(userData);
       const githubUsername = "sahsisunny";
       const { user, userExists } = await users.fetchUser({ githubUsername });
@@ -320,7 +320,7 @@ describe("users", function () {
     });
     it("returns users with member role", async function () {
       const members = await users.getUsersByRole("member");
-      expect(members.length).to.be.equal(7);
+      expect(members.length).to.be.equal(6);
       members.forEach((member) => {
         expect(member.roles.member).to.be.equal(true);
       });

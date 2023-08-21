@@ -106,10 +106,9 @@ const getUsers = async (req, res) => {
     }
 
     const data = await dataAccess.retrieveUsers({ query: req.query });
-
     return res.json({
       message: "Users returned successfully!",
-      users: data.users,
+      users: data.allUsers,
       links: {
         next: data.nextId ? getPaginationLink(req.query, "next", data.nextId) : "",
         prev: data.prevId ? getPaginationLink(req.query, "prev", data.prevId) : "",
@@ -211,9 +210,10 @@ const getUsernameAvailabilty = async (req, res) => {
 const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
-      const user = await dataAccess.retrieveUsers({
-        userdata: req.userData,
-      });
+      if (req.query.private) {
+        return res.send(req.userData);
+      }
+      const user = await dataAccess.retrieveUsers({ userdata: req.userData });
       return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");
@@ -412,7 +412,6 @@ const updateUser = async (req, res) => {
 const generateChaincode = async (req, res) => {
   try {
     const { id } = req.userData;
-
     const chaincode = await chaincodeQuery.storeChaincode(id);
     await userQuery.addOrUpdate({ chaincode }, id);
     return res.json({

@@ -1,17 +1,8 @@
 const userQuery = require("../models/users");
 const members = require("../models/members");
-const { ROLE_LEVEL, KEYS_NOT_ALLOWED, ACCESS_LEVEL } = require("../constants/userDataLevels");
+const { USER_SENSITIVE_DATA } = require("../constants/users");
 
-const retrieveUsers = async ({
-  id = null,
-  username = null,
-  usernames = null,
-  query = null,
-  userdata,
-  level = ACCESS_LEVEL.PUBLIC,
-  role = null,
-  userIds = [],
-}) => {
+const retrieveUsers = async ({ id = null, username = null, usernames = null, query = null, userdata }) => {
   if (id || username) {
     let result;
     if (id != null) {
@@ -19,85 +10,64 @@ const retrieveUsers = async ({
     } else {
       result = await userQuery.fetchUser({ username: username });
     }
-    const user = levelSpecificAccess(result.user, level, role);
-    result.user = user;
+    removeSensitiveInfo(result.user);
     return result;
   } else if (usernames) {
     const { users } = await userQuery.fetchUsers(usernames);
-    const result = [];
-    users.forEach((userdata) => {
-      const user = levelSpecificAccess(userdata, level, role);
-      result.push(user);
+    users.forEach((element) => {
+      removeSensitiveInfo(element);
     });
-    return result;
-  } else if (userIds.length > 0) {
-    const userDetails = await userQuery.fetchUserByIds(userIds);
-    Object.keys(userDetails).forEach((userId) => {
-      removeSensitiveInfo(userDetails[userId]);
-    });
-    return userDetails;
+    return users;
   } else if (query) {
     const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(query);
-    const users = [];
-    allUsers.forEach((userdata) => {
-      const user = levelSpecificAccess(userdata, level, role);
-      users.push(user);
+    allUsers.forEach((element) => {
+      removeSensitiveInfo(element);
     });
-    return { users, nextId, prevId };
+    return { allUsers, nextId, prevId };
   } else {
-    const result = await userQuery.fetchUser({ userId: userdata.id });
-    return levelSpecificAccess(result.user, level, role);
+    removeSensitiveInfo(userdata);
+    return userdata;
   }
 };
 
-const retrieveDiscordUsers = async (level = ACCESS_LEVEL.PUBLIC, role = null) => {
+const retrieveDiscordUsers = async () => {
   const users = await userQuery.getDiscordUsers();
-  const usersData = [];
-  users.forEach((userdata) => {
-    const user = levelSpecificAccess(userdata, level, role);
-    usersData.push(user);
+  users.forEach((element) => {
+    removeSensitiveInfo(element);
   });
-  return usersData;
+  return users;
 };
 
 const retreiveFilteredUsers = async (query) => {
   const users = await userQuery.getUsersBasedOnFilter(query);
-  users.forEach((userdata) => {
-    removeSensitiveInfo(userdata);
+  users.forEach((element) => {
+    removeSensitiveInfo(element);
   });
   return users;
 };
 
 const retrieveMembers = async (query) => {
   const allUsers = await members.fetchUsers(query);
-  allUsers.forEach((userdata) => {
-    removeSensitiveInfo(userdata);
+  allUsers.forEach((element) => {
+    removeSensitiveInfo(element);
   });
   return allUsers;
 };
 
 const retrieveUsersWithRole = async (role) => {
   const users = await members.fetchUsersWithRole(role);
-  users.forEach((userdata) => {
-    removeSensitiveInfo(userdata);
+  users.forEach((element) => {
+    removeSensitiveInfo(element);
   });
   return users;
 };
 
-const removeSensitiveInfo = function (obj, level = ACCESS_LEVEL.PUBLIC) {
-  for (let i = 0; i < KEYS_NOT_ALLOWED[level].length; i++) {
-    if (Object.prototype.hasOwnProperty.call(obj, KEYS_NOT_ALLOWED[level][i])) {
-      delete obj[KEYS_NOT_ALLOWED[level][i]];
+const removeSensitiveInfo = function (obj) {
+  for (let i = 0; i < USER_SENSITIVE_DATA.length; i++) {
+    if (Object.prototype.hasOwnProperty.call(obj, USER_SENSITIVE_DATA[i])) {
+      delete obj[USER_SENSITIVE_DATA[i]];
     }
   }
-};
-
-const levelSpecificAccess = (user, level = ACCESS_LEVEL.PUBLIC, role = null) => {
-  if (level === ACCESS_LEVEL.PUBLIC || ROLE_LEVEL[level].includes(role)) {
-    removeSensitiveInfo(user, level);
-    return user;
-  }
-  return "unauthorized";
 };
 
 module.exports = {
@@ -107,5 +77,4 @@ module.exports = {
   retrieveMembers,
   retrieveUsersWithRole,
   retreiveFilteredUsers,
-  levelSpecificAccess,
 };

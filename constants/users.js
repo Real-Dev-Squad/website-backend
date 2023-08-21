@@ -4,6 +4,8 @@ const profileStatus = {
   NOT_APPROVED: "NOT APPROVED",
 };
 
+const USER_SENSITIVE_DATA = ["phone", "email", "chaincode", "tokens"];
+
 const USER_STATUS = {
   OOO: "ooo",
   IDLE: "idle",
@@ -47,4 +49,5 @@ module.exports = {
   USERS_PATCH_HANDLER_ACTIONS,
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
+  USER_SENSITIVE_DATA,
 };

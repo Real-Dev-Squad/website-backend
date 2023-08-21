@@ -1,7 +1,7 @@
 const ROLES = require("../constants/roles");
 const members = require("../models/members");
 const tasks = require("../models/tasks");
-const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dataAccess = require("../services/dataAccessLayer");
 const { addLog } = require("../models/logs");
 /**
@@ -110,7 +110,7 @@ const archiveMembers = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while retriving contributions ${err}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
