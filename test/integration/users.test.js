@@ -699,7 +699,7 @@ describe("Users", function () {
     const lastname = "sigdar";
 
     it("Should return unique username when passing firstname and lastname", function (done) {
-      addUser(userData[16]).then((availableUsernameUserId) => {
+      addUser(userData[15]).then((availableUsernameUserId) => {
         const userJwt = authService.generateAuthToken({ userId: availableUsernameUserId });
         chai
           .request(app)

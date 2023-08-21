@@ -352,9 +352,9 @@ module.exports = () => {
       },
     },
     {
-      username: "sahsisunny",
-      first_name: "sunny",
-      last_name: "sahsi",
+      username: "shubham-sigdar",
+      first_name: "shubham",
+      last_name: "sigdar",
       github_id: githubUserInfo[1].login,
       github_display_name: githubUserInfo[1].name,
       roles: {
@@ -364,12 +364,6 @@ module.exports = () => {
       incompleteUserDetails: false,
       updated_at: Date.now(),
       created_at: Date.now(),
-    },
-    {
-      username: "shubham-sigdar",
-      github_id: "shubham123",
-      first_name: "shubham",
-      last_name: "sigdar",
     },
   ];
 };
