@@ -28,7 +28,7 @@ const verifyUser = async (req, res) => {
     if (!req.userData?.profileURL) {
       return res.boom.serverUnavailable("ProfileURL is Missing");
     }
-    await userQuery.addOrUpdate({ profileStatus: "PENDING",roles: { archived: false, in_discord: true },}, userId);
+    await userQuery.addOrUpdate({ profileStatus: "PENDING", roles: { archived: false, in_discord: true } }, userId);
   } catch (error) {
     logger.error(`Error while verifying user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);

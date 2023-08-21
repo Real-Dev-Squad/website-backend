@@ -51,11 +51,13 @@ const addOrUpdate = async (userData, userId = null) => {
     // userId is null, Add or Update user
     const user = await userModel.where("github_id", "==", userData.github_id).limit(1).get();
     if (!user.empty) {
-      await userModel.doc(user.docs[0].id).set({
-        ...userData,
-        roles: { archived: false, in_discord: true }, // Update roles here
-        updated_at: Date.now(),
-      }, { merge: true }
+      await userModel.doc(user.docs[0].id).set(
+        {
+          ...userData,
+          roles: { archived: false, in_discord: true }, // Update roles here
+          updated_at: Date.now(),
+        },
+        { merge: true }
       );
 
       return {
