@@ -23,6 +23,7 @@ module.exports = () => {
       isMember: true,
       phone: "1234567890",
       email: "abc@gmail.com",
+      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       joined_discord: "2023-01-13T18:21:09.278000+00:00",
       roles: {
         member: true,
@@ -48,6 +49,7 @@ module.exports = () => {
       github_id: "whydonti",
       linkedin_id: "nikhil-bhandarkar",
       twitter_id: "whatifi",
+      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567891",
       email: "abc1@gmail.com",
       picture: {
@@ -64,6 +66,7 @@ module.exports = () => {
       github_id: "cartmanishere",
       linkedin_id: "pranav-gajjewar",
       twitter_id: "PGajjewar",
+      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567891",
       email: "pgajjewar@gmail.com",
       roles: {
@@ -83,6 +86,7 @@ module.exports = () => {
       linkedin_id: "sagarbajpai",
       github_id: "sagarbajpai",
       github_display_name: "Sagar Bajpai",
+      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567890",
       email: "abc@gmail.com",
       status: "active",

@@ -20,7 +20,6 @@ router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvai
 router.get("/username", authenticate, users.getUsername);
 router.get("/chaincode", authenticate, users.generateChaincode);
 router.get("/search", userValidator.validateUserQueryParams, users.filterUsers);
-router.post("/tokens", authenticate, authorizeRoles([SUPERUSER]), users.removeTokens);
 
 router.get("/:username", users.getUser);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
