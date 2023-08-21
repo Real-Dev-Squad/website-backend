@@ -4,6 +4,7 @@ const logger = require("../utils/logger");
 
 const eventModel = firestore.collection("events");
 const peerModel = firestore.collection("peers");
+const eventCodeModel = firestore.collection("event-codes");
 
 /**
  * Creates a new event document in Firestore and returns the data for the created document.
@@ -170,10 +171,45 @@ const kickoutPeer = async ({ eventId, peerId, reason }) => {
   }
 };
 
+const getEventById = async ({ id }) => {
+  try {
+    const eventRef = eventModel.doc(id);
+    const eventSnapshot = await eventRef.get();
+    const eventSnapshotData = eventSnapshot.data();
+    return eventSnapshotData;
+  } catch (error) {
+    logger.error("Error in getting event by id from the database.", error);
+    throw error;
+  }
+};
+
+const getEventCodes = async ({ id }) => {
+  try {
+    const eventData = await getEventById({ id });
+    if (!eventData) {
+      throw new Error("Event not found with this id!");
+    }
+    const eventCodesArrayPromises = eventData?.event_codes?.by_role?.mavens.map(async (codeId) => {
+      const eventCodeRef = eventCodeModel.doc(codeId);
+      const eventCodeSnapshot = await eventCodeRef.get();
+      const eventCodeSnapshotData = eventCodeSnapshot.data();
+      return eventCodeSnapshotData;
+    });
+
+    const eventCodesArray = await Promise.all(eventCodesArrayPromises);
+    return eventCodesArray;
+  } catch (error) {
+    logger.error("Error in getting event by id from the database.", error);
+    throw error;
+  }
+};
+
 module.exports = {
   createEvent,
   updateEvent,
   endActiveEvent,
   addPeerToEvent,
   kickoutPeer,
+  getEventById,
+  getEventCodes,
 };
