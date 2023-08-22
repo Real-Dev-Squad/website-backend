@@ -174,6 +174,9 @@ module.exports = () => {
         archived: false,
         in_discord: true,
       },
+      colors: {
+        color_id: 2,
+      },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",

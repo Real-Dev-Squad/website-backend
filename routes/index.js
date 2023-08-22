@@ -19,6 +19,7 @@ app.use("/users/status", require("./userStatus.js"));
 app.use("/users", require("./users.js"));
 app.use("/profileDiffs", require("./profileDiffs.js"));
 app.use("/wallet", require("./wallets.js"));
+app.use("/migrations", require("./userMigrations.js"));
 app.use("/extension-requests", require("./extensionRequests"));
 app.use("/tags", require("./tags.js"));
 app.use("/levels", require("./levels.js"));
