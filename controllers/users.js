@@ -9,7 +9,7 @@ const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
-const { setInDiscordFalseScript } = require("../services/discordService");
+const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
@@ -316,6 +316,36 @@ const verifyUserImage = async (req, res) => {
   }
 };
 
+/**
+ * Patch Update user nickname
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const updateDiscordUserNickname = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const userToBeUpdated = await dataAccess.retrieveUsers({ id: userId });
+    const { discordId, username } = userToBeUpdated.user;
+    if (!discordId) {
+      throw new Error("user not verified");
+    }
+    const response = await setUserDiscordNickname(username, discordId);
+
+    return res.json({
+      userAffected: {
+        userId,
+        username,
+        discordId,
+      },
+      message: response,
+    });
+  } catch (err) {
+    logger.error(`Error while updating nickname: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
 const markUnverified = async (req, res) => {
   try {
     const [usersInRdsDiscordServer, allRdsLoggedInUsers] = await Promise.all([getDiscordMembers(), fetchAllUsers()]);
@@ -590,25 +620,6 @@ const setInDiscordScript = async (req, res) => {
   }
 };
 
-const removeTokens = async (req, res) => {
-  try {
-    const users = await userQuery.fetchUsersWithToken();
-
-    if (!users.length) {
-      return res.status(404).json({ message: "No users found with github Token!" });
-    }
-
-    await userQuery.removeGitHubToken(users);
-
-    return res.status(200).json({
-      message: "Github Token removed from all users!",
-      usersFound: users.length,
-    });
-  } catch (err) {
-    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
-  }
-};
-
 const updateRoles = async (req, res) => {
   try {
     const result = await dataAccess.retrieveUsers({ id: req.params.id });
@@ -708,8 +719,8 @@ module.exports = {
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
-  removeTokens,
   updateRoles,
+  updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
 };
