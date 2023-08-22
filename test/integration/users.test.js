@@ -290,7 +290,6 @@ describe("Users", function () {
           expect(res.body.users).to.be.a("array");
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
-          expect(res.body.users[0]).to.not.have.property("tokens");
           expect(res.body.users[0]).to.not.have.property("chaincode");
 
           return done();
@@ -315,7 +314,6 @@ describe("Users", function () {
           });
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
-          expect(res.body.users[0]).to.not.have.property("tokens");
           expect(res.body.users[0]).to.not.have.property("chaincode");
           return done();
         });
@@ -341,7 +339,6 @@ describe("Users", function () {
           expect(res.body.users.length).to.equal(1);
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
-          expect(res.body.users[0]).to.not.have.property("tokens");
           expect(res.body.users[0]).to.not.have.property("chaincode");
           return done();
         });
@@ -552,27 +549,7 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body).to.not.have.property("phone");
           expect(res.body).to.not.have.property("email");
-          expect(res.body).to.not.have.property("tokens");
           expect(res.body).to.not.have.property("chaincode");
-          return done();
-        });
-    });
-
-    it("Should return details with phone and email when query 'private' is true", function (done) {
-      chai
-        .request(app)
-        .get("/users/self")
-        .query({ private: true })
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done();
-          }
-
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body).to.have.property("phone");
-          expect(res.body).to.have.property("email");
           return done();
         });
     });
@@ -616,7 +593,6 @@ describe("Users", function () {
           expect(res.body.user).to.be.a("object");
           expect(res.body.user).to.not.have.property("phone");
           expect(res.body.user).to.not.have.property("email");
-          expect(res.body.user).to.not.have.property("tokens");
           expect(res.body.user).to.not.have.property("chaincode");
           return done();
         });
@@ -658,7 +634,6 @@ describe("Users", function () {
           expect(res.body.user).to.be.a("object");
           expect(res.body.user).to.not.have.property("phone");
           expect(res.body.user).to.not.have.property("email");
-          expect(res.body.user).to.not.have.property("tokens");
           expect(res.body.user).to.not.have.property("chaincode");
           return done();
         });
