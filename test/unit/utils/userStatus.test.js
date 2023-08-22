@@ -151,4 +151,14 @@ describe("User Status Functions", function () {
       expect(nickname).to.be.equal(`${username.substring(0, usernameLen)} ${oooMessage}`);
     });
   });
+
+  /* Skipping since test changes will go through before the util changes */
+  // eslint-disable-next-line mocha/no-skipped-tests
+  describe.skip("updateNickname", function () {
+    it("should call the user status service to update user's discord nickname successfully", async function () {});
+
+    it("should not call the user status service to update user's discord nickname when there's an error while fetching user details", async function () {});
+
+    it("should throw error when the users status service call to update user's discord nickname fails", async function () {});
+  });
 });
