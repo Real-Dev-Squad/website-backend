@@ -2,6 +2,7 @@ const firestore = require("../utils/firestore");
 const logger = require("../utils/logger");
 
 const eventModel = firestore.collection("events");
+const eventCodeModel = firestore.collection("event-codes");
 
 /**
  * Creates a new event document in Firestore and returns the data for the created document.
@@ -66,8 +67,23 @@ const endActiveEvent = async ({ id, reason, lock }) => {
   }
 };
 
+const getAllEventCodes = async () => {
+  try {
+    const querySnapshot = await eventCodeModel.get();
+    const eventCodes = [];
+    querySnapshot.forEach((doc) => {
+      eventCodes.push(doc.data().code);
+    });
+    return eventCodes;
+  } catch (error) {
+    logger.error("Error in getting event codes", error);
+    throw error;
+  }
+};
+
 module.exports = {
   createEvent,
   updateEvent,
   endActiveEvent,
+  getAllEventCodes,
 };

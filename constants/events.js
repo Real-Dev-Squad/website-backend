@@ -9,4 +9,11 @@ const UNWANTED_PROPERTIES_FROM_100MS = [
   "customer",
 ];
 
-module.exports = { API_100MS_BASE_URL, GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS };
+const ROLES = {
+  HOST: "super_user",
+  MODERATOR: "moderator",
+  MAVEN: "maven",
+  GUEST: "guest",
+};
+
+module.exports = { API_100MS_BASE_URL, GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS, ROLES };
