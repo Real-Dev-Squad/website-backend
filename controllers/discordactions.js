@@ -78,7 +78,7 @@ const getAllGroupRoles = async (req, res) => {
     }
     return res.json({
       message: "Roles fetched successfully!",
-      groups: groups,
+      groups,
     });
   } catch (err) {
     logger.error(`Error while getting roles: ${err}`);
