@@ -6,9 +6,12 @@ const eventQuery = require("../models/events");
 
 const logger = require("../utils/logger");
 const { removeUnwantedProperties } = require("../utils/events");
+const { randomUUID } = require("crypto");
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
+
+const ROOM_CODES = [];
 
 /**
  * Creates a new event document in the Firestore database with the data provided in the HTTP request body.
@@ -305,6 +308,55 @@ const getRoomCodes = async (req, res) => {
   }
 };
 
+/**
+ * Creates codes
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with a message indicating the room codes are created.
+ * @throws {Object} The JSON response with an error message if an error occurred while ending the event.
+ */
+const createCodes = async (req, res) => {
+  try {
+    const { code } = req.body;
+    const newCode = {
+      id: randomUUID(),
+      code,
+    };
+    ROOM_CODES.push(newCode);
+    return res.status(200).json({ message: `Room codes created successfully.`, data: ROOM_CODES });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Couldn't create the room codes. Please try again later",
+    });
+  }
+};
+
+/* Get codes
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with room codes.
+ * @throws {Object} The JSON response with an error message if an error occurred.
+ */
+const getCodes = async (req, res) => {
+  try {
+    return res.status(200).json({ data: ROOM_CODES });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Couldn't get the room codes. Please try again later",
+    });
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -316,4 +368,6 @@ module.exports = {
   kickoutPeer,
   createRoomCodes,
   getRoomCodes,
+  createCodes,
+  getCodes,
 };
