@@ -80,4 +80,45 @@ describe("Users services", function () {
       });
     });
   });
+
+  /* Skipping since test changes will go through before the util changes */
+  // eslint-disable-next-line mocha/no-skipped-tests
+  describe.skip("getUserDiscordIdUsername", function () {
+    const userDetails = [];
+
+    before(async function () {
+      const addedUsers = [];
+
+      userDataArray.forEach((user) => {
+        addedUsers.push(userModel.add(user));
+      });
+      const userInfo = await Promise.all(addedUsers);
+      userDetails.push(userInfo);
+    });
+
+    afterEach(async function () {
+      Sinon.restore();
+    });
+
+    it("Should successfully return the username and discordId of the user whose userId is passed", async function () {});
+
+    it("Should fail to return the data when userId is invalid", async function () {});
+
+    it("Should fail to return the data when userId is valid but username is unavailable", async function () {});
+
+    it("Should fail to return the data when userId is valid but discord id is unavailable", async function () {
+      // const userWithoutUserName = {
+      //   first_name: "John",
+      //   last_name: "Doe",
+      //   discordId: "12345",
+      // };
+    });
+
+    it("Should fail to return the data when userId is valid but both usernam and discord id are unavailable", async function () {
+      // const userWithoutDiscordIdAndUsername = {
+      //   first_name: "Jane",
+      //   last_name: "Doe",
+      // };
+    });
+  });
 });
