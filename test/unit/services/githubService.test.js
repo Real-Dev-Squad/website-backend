@@ -157,6 +157,16 @@ describe("githubService", function () {
   });
 
   describe("fetchLastMergedPR", function () {
+    let stub;
+
+    before(function () {
+      stub = sinon.stub(githubService, "fetchLastMergedPR");
+    });
+
+    after(function () {
+      stub.restore();
+    });
+
     it("Should generate the correct url to fetch last merged PR", async function () {
       const data = {
         items: [
@@ -168,23 +178,23 @@ describe("githubService", function () {
         ],
       };
       const username = "sahsisunny";
-      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns(data);
+      stub.withArgs(username).returns(data);
+
       const response = await githubService.fetchLastMergedPR(username);
       expect(response).to.be.equal(data);
-      stub.restore();
     });
 
     it("Should throw an error if no merged PRs found for user", async function () {
-      const username = "hfghdgfh";
-      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns({
+      const username = "octocat";
+      stub.withArgs(username).returns({
         items: [],
       });
+
       try {
         await githubService.fetchLastMergedPR(username);
       } catch (err) {
         expect(err.message).to.be.equal(`No merged PRs found for user ${username}`);
       }
-      stub.restore();
     });
   });
 
