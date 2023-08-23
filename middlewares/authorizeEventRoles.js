@@ -1,9 +1,7 @@
-/* eslint-disable no-console */
 const { ROLES } = require("../constants/events");
 const { getAllEventCodes } = require("../models/events");
 
 const userHasPermission = (userRoles, allowedRoles) => {
-  console.log({ userRoles, allowedRoles });
   if (typeof userRoles === "object") {
     return allowedRoles.some((role) => userRoles[`${role}`]);
   } else if (typeof userRoles === "string") {
@@ -15,8 +13,6 @@ const userHasPermission = (userRoles, allowedRoles) => {
 
 const authorizeEventRoles = (allowedRoles) => {
   return async (req, res, next) => {
-    console.log({ allowedRoles });
-
     const rolesAreValid = allowedRoles.every((role) => Object.values(ROLES).includes(role));
     if (!rolesAreValid) {
       return res.boom.badImplementation("Route authorization failed. Please contact admin");
