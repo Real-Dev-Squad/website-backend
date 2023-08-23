@@ -383,7 +383,20 @@ describe("getTasks validator", function () {
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
-
+    it("should pass the request when correct parameters are passed: assignee, dev, status and title", async function () {
+    const req = {
+      query: {
+        dev: "true",
+        assignee: "assignee",
+        title: "title",
+        status: TASK_STATUS.ASSIGNED,
+      },
+    };
+    const res = {};
+    const nextMiddlewareSpy = Sinon.spy();
+    await getTasksValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
   it("should pass when valid request body is provided", async function () {
     const validRequestBody = {
       title: "Sample Task",
