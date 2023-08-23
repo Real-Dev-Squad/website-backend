@@ -780,7 +780,7 @@ const addGithubCreatedAtKey = async (users) => {
 
     await Promise.all(batchArray.map(async (batch) => await batch.commit()));
   } catch (err) {
-    logger.error(`Error while deleting tokens field: ${err}`);
+    logger.error(`Error while adding github_created_at field: ${err}`);
     throw err;
   }
 };
