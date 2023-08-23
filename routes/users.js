@@ -26,6 +26,7 @@ router.patch(
   checkIsVerifiedDiscord,
   users.updateDiscordUserNickname
 );
+router.patch("/backfill-github-created-at", authenticate, authorizeRoles([SUPERUSER]), users.addGithubCreatedAtKey);
 
 router.get("/:username", users.getUser);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);

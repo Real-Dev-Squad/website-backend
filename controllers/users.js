@@ -694,6 +694,23 @@ async function usersPatchHandler(req, res) {
   }
 }
 
+const addGithubCreatedAtKey = async (req, res) => {
+  try {
+    const users = await userQuery.fetchUsersWithoutGithubCreatedAtKey();
+    if (!users.length) {
+      return res.status(404).json({ message: "No users found without github created at key!" });
+    }
+    await userQuery.addGithubCreatedAtKey(users);
+
+    return res.status(200).json({
+      message: "Github created at added for all users!",
+      usersFound: users.length,
+    });
+  } catch (err) {
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -722,4 +739,5 @@ module.exports = {
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
+  addGithubCreatedAtKey,
 };
