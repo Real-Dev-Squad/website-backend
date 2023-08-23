@@ -169,8 +169,8 @@ describe("githubService", function () {
 
     it("Should generate the correct url to fetch last merged PR", async function () {
       const data = prDates[0];
-
       const username = "sahsisunny";
+
       stub.withArgs(username).returns(data);
 
       const response = await githubService.fetchLastMergedPR(username);
@@ -179,9 +179,8 @@ describe("githubService", function () {
 
     it("Should throw an error if no merged PRs found for user", async function () {
       const username = "ankurnarkhede";
-      stub.withArgs(username).returns({
-        items: [],
-      });
+
+      stub.withArgs(username).returns({ items: [] });
 
       try {
         await githubService.fetchLastMergedPR(username);
