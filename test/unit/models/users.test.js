@@ -393,4 +393,39 @@ describe("users", function () {
       expect(fetchedUserIds).to.deep.equal([]);
     });
   });
+
+  describe("add github key in DB", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("return array of users", async function () {
+      const data = await users.fetchUsersWithoutGithubCreatedAtKey();
+      expect(data).to.be.not.equal(null);
+    });
+    it("check github_created_at field in users db", async function () {
+      const usersRef = await users.fetchUsersWithoutGithubCreatedAtKey();
+      const userRefBefore = await usersRef[1].get();
+      const dataBefore = await userRefBefore.data();
+      const beforeAdd = Object.keys(dataBefore).includes("github_created_at");
+      expect(beforeAdd).to.be.equal(false);
+    });
+
+    it("add github_created_at field in users db", async function () {
+      const usersRef = await users.fetchUsersWithoutGithubCreatedAtKey();
+      await users.addGithubCreatedAtKey(usersRef);
+      const userRefAfter = await usersRef[1].get();
+      const dataAfter = await userRefAfter.data();
+      const afterAdd = Object.keys(dataAfter).includes("github_created_at");
+      expect(afterAdd).to.be.equal(true);
+    });
+  });
 });

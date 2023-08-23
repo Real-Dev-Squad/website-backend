@@ -1778,4 +1778,31 @@ describe("Users", function () {
         });
     });
   });
+
+  describe("PATCH /users/backfill-github-created-at", function () {
+    before(async function () {
+      await addOrUpdate(userData[0]);
+      await addOrUpdate(userData[1]);
+      await addOrUpdate(userData[2]);
+      await addOrUpdate(userData[3]);
+    });
+    after(async function () {
+      await cleanDb();
+    });
+    it("should add all the users with github_created_at field", function (done) {
+      chai
+        .request(app)
+        .patch("/users/backfill-github-created-at")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Github created at added for all users!");
+          expect(res.body.usersFound).to.be.equal(4);
+          return done();
+        });
+    });
+  });
 });

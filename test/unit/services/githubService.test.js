@@ -155,4 +155,19 @@ describe("githubService", function () {
       expect(response).to.be.equal(url);
     });
   });
+
+  describe("get user github information throught github username", function () {
+    it("it should give the github created_at key in timestamp format", async function () {
+      const username = "sahsisunny";
+      const githubCreatedAt = Number(new Date(githubUserInfo[1].created_at).getTime());
+      const response = await githubService.getGithubCreatedAt(username);
+      expect(response).to.be.equal(githubCreatedAt);
+    });
+    it("it should give the null because username doesn't exist", async function () {
+      const username = "abc123xyz@46";
+      const githubCreatedAt = null;
+      const response = await githubService.getGithubCreatedAt(username);
+      expect(response).to.be.equal(githubCreatedAt);
+    });
+  });
 });
