@@ -16,6 +16,11 @@ module.exports = {
     rdsApi: {
       baseUrl: "https://staging-api.realdevsquad.com",
     },
+    goalAPI: {
+      baseUrl: "",
+      secretKey: "",
+      cookieName: "",
+    },
   },
 
   integrations: {

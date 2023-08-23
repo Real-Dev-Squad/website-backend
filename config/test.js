@@ -34,6 +34,11 @@ module.exports = {
     discordBot: {
       baseUrl: "DISCORD_BASE_URL",
     },
+    goalAPI: {
+      baseUrl: "https://goals-api.realdevsquad.com",
+      secretKey: "123456789",
+      cookieName: "goals_session",
+    },
   },
 
   cors: {

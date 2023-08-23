@@ -22,6 +22,12 @@ module.exports = {
         authRedirection: "/healthcheck",
       },
     },
+
+    goalAPI: {
+      baseUrl: "",
+      secretKey: "",
+      cookieName: "",
+    },
   },
 
   userToken: {
