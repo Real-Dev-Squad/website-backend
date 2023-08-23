@@ -178,15 +178,17 @@ describe("githubService", function () {
     });
 
     it("Should throw an error if no merged PRs found for user", async function () {
-      const username = "ankurnarkhede";
-
-      stub.withArgs(username).returns({ items: [] });
+      const username = "dfgfdgdg";
+      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns({
+        items: [],
+      });
 
       try {
         await githubService.fetchLastMergedPR(username);
       } catch (err) {
         expect(err.message).to.be.equal(`No merged PRs found for user ${username}`);
       }
+      stub.restore();
     });
   });
 
