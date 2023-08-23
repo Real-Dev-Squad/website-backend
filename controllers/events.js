@@ -97,6 +97,7 @@ const joinEvent = async (req, res) => {
       token: token,
       message: "Token generated successfully!",
       success: true,
+      role,
     });
   } catch (error) {
     logger.error({ error });
