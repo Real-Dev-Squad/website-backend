@@ -21,7 +21,7 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-
+const { getGithubCreatedAt } = require("../services/githubService");
 /**
  * Adds or updates the user data
  *
@@ -634,6 +634,63 @@ const fetchUsersWithToken = async () => {
     return [];
   }
 };
+
+const fetchUsersWithoutGithubCreatedAtKey = async () => {
+  try {
+    const users = [];
+    const usersRef = await userModel.get();
+    usersRef.forEach((user) => {
+      const userData = user.data();
+      const githubCreatedAtKey = Object.keys(userData).includes("github_created_at");
+      if (!githubCreatedAtKey) {
+        users.push(userModel.doc(user.id));
+      }
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Error while fetching all users with github created-at key: ${err}`);
+    return [];
+  }
+};
+
+const addGithubCreatedAtKey = async (users) => {
+  try {
+    const length = users.length;
+    let numberOfBatches = length / 500;
+    const remainder = length % 500;
+    if (remainder) {
+      numberOfBatches = numberOfBatches + 1;
+    }
+
+    const batchArray = [];
+    for (let i = 0; i < numberOfBatches; i++) {
+      const batch = firestore.batch();
+      batchArray.push(batch);
+    }
+
+    let batchIndex = 0;
+    let operations = 0;
+    for (let i = 0; i < length; i++) {
+      const userRef = await users[i].get();
+      const userData = await userRef.data();
+      const githubCreatedAt = await getGithubCreatedAt(userData.github_id);
+
+      batchArray[batchIndex].update(users[i], { github_created_at: githubCreatedAt });
+      operations++;
+
+      if (operations === 500) {
+        batchIndex++;
+        operations = 0;
+      }
+    }
+
+    await Promise.all(batchArray.map(async (batch) => await batch.commit()));
+  } catch (err) {
+    logger.error(`Error while deleting tokens field: ${err}`);
+    throw err;
+  }
+};
+
 /**
  *
  * @param {[string]} userIds  Array id's of user
@@ -737,6 +794,8 @@ module.exports = {
   fetchAllUsers,
   archiveUserIfNotInDiscord,
   fetchUsersWithToken,
+  fetchUsersWithoutGithubCreatedAtKey,
+  addGithubCreatedAtKey,
   removeGitHubToken,
   getUsersByRole,
   fetchUserByIds,
