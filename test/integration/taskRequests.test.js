@@ -449,7 +449,7 @@ describe("Task Requests", function () {
   });
 
   describe("PATCH /taskRequests/approve - approves task request", function () {
-    let activeUserId, oooUserId;
+    let activeUserId, oooUserId, taskRequest;
 
     describe("When the user is super user", function () {
       before(async function () {
@@ -466,7 +466,7 @@ describe("Task Requests", function () {
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
         await userStatusModel.updateUserStatus(activeUserId, activeUserStatus);
         await userStatusModel.updateUserStatus(oooUserId, { ...oooUserStatus });
-        await taskRequestsModel.addOrUpdate(taskId, userId);
+        taskRequest = await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
       it("should match response for successfull approval", function (done) {
@@ -475,7 +475,7 @@ describe("Task Requests", function () {
           .patch("/taskRequests/approve")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
-            taskRequestId: taskId,
+            taskRequestId: taskRequest.id,
             userId,
           })
           .end((err, res) => {
