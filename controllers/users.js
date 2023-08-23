@@ -24,7 +24,6 @@ const {
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
   try {
-    // console.log(req.userData);
     if (!req.userData?.profileURL) {
       return res.boom.serverUnavailable("ProfileURL is Missing");
     }

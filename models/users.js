@@ -30,7 +30,6 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
  * @return {Promise<{isNewUser: boolean, userId: string}|{isNewUser: boolean, userId: string}>}
  */
 const addOrUpdate = async (userData, userId = null) => {
-  // console.log(userData, userId)
   try {
     // userId exists Update user
     if (userId !== null) {

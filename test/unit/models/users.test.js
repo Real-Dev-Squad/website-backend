@@ -47,6 +47,22 @@ describe("users", function () {
       expect(data.roles.in_discord).to.equal(false);
     });
 
+    it("should add the user collection with archived property false and in_discord property true in roles", async function () {
+      const userData = userDataArray[16];
+      const { userId } = await users.addOrUpdate(userData);
+
+      const updatedUserData = {
+        profileStatus: "PENDING",
+        roles: { archived: false, in_discord: true },
+      };
+      await users.addOrUpdate(updatedUserData, userId);
+
+      const data = (await userModel.doc(userId).get()).data();
+
+      expect(data.roles.archived).to.equal(false);
+      expect(data.roles.in_discord).to.equal(true);
+    });
+
     it("should update the user collection and unset the flag isNewUser", async function () {
       const userData = userDataArray[0];
 

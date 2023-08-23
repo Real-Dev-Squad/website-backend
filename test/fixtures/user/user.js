@@ -365,5 +365,17 @@ module.exports = () => {
       updated_at: Date.now(),
       created_at: Date.now(),
     },
+    {
+      username: "ankitbajpai",
+      first_name: "ankit",
+      last_name: "bajpai",
+      roles: {
+        archived: true,
+        in_discord: false,
+      },
+      incompleteUserDetails: false,
+      updated_at: Date.now(),
+      created_at: Date.now(),
+    },
   ];
 };
