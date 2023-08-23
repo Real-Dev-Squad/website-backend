@@ -192,9 +192,10 @@ const createEventCode = async (eventCodeData) => {
     const docSnapshot = await docRef.get();
     const data = docSnapshot.data();
 
-    const previouslyPresentEventCodes = eventSnapshotData?.event_codes?.byRole?.mavens && [
-      ...eventSnapshotData?.event_codes?.byRole?.mavens,
+    const previouslyPresentEventCodes = eventSnapshotData?.event_codes?.by_role?.mavens && [
+      ...eventSnapshotData?.event_codes?.by_role?.mavens,
     ];
+
     if (!data) throw new Error();
 
     if (previouslyPresentEventCodes?.length > 0) {
@@ -215,7 +216,21 @@ const createEventCode = async (eventCodeData) => {
       });
     }
 
-    return data;
+    const updatedEventRef = eventModel.doc(eventCodeData.event_id);
+    const updatedEventSnapshot = await updatedEventRef.get();
+    const updatedEventSnapshotData = updatedEventSnapshot.data();
+    const allEventCodesIdsForMavens = updatedEventSnapshotData?.event_codes?.by_role?.mavens;
+
+    const allEventCodesIdsForMavensPromises = allEventCodesIdsForMavens.map(async (eventCodeRefId) => {
+      const eventCodeRef = eventCodeModel.doc(eventCodeRefId);
+      const eventCodeSnapshot = await eventCodeRef.get();
+      const eventCodeData = eventCodeSnapshot.data();
+      return eventCodeData;
+    });
+
+    const allEventCodesForMavens = await Promise.all(allEventCodesIdsForMavensPromises);
+
+    return allEventCodesForMavens;
   } catch (error) {
     logger.error("Error in adding data", error);
     throw error;

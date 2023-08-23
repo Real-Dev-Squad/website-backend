@@ -4,11 +4,13 @@ const chaiHttp = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
-
+const { ROLES } = require("../../constants/events");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 
 const eventData = require("../fixtures/events/events")();
+const eventCodeData = require("../fixtures/events/event-codes");
+const eventCodeDataFirst = [...eventCodeData[0].data];
 const event1Data = eventData[0];
 
 const userData = require("../fixtures/user/user")();
@@ -423,10 +425,48 @@ describe("events", function () {
   });
 
   describe("POST /events/:id/codes", function () {
+    let service;
+
+    afterEach(function () {
+      service.restore();
+      sinon.restore();
+    });
+
+    it("creates an event code when the request is successful", function (done) {
+      const payload = {
+        eventCode: "test-code",
+        role: ROLES.MAVEN,
+      };
+
+      service = sinon
+        .stub(eventQuery, "createEventCode")
+        .returns([
+          ...eventCodeDataFirst,
+          { code: "test-code", role: "maven", id: "test-id", event_id: event1Data.room_id },
+        ]);
+
+      chai
+        .request(app)
+        .post(`/events/${event1Data.room_id}/codes`)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send({ ...payload })
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(201);
+          expect(response.body.message).to.equal("Event code created succesfully!");
+          expect(response.body.data[3].code).to.equal(payload.eventCode);
+          expect(response.body.data[3].role).to.equal(payload.role);
+
+          return done();
+        });
+    });
+
     it("should return bad request if the role is not maven", function (done) {
       const id = event1Data.id;
       const payload = {
-        id: "test-id",
         eventCode: "test-code",
         role: "moderator",
       };
@@ -448,16 +488,44 @@ describe("events", function () {
           return done();
         });
     });
+
+    it("returns an error message when code creation fails", function (done) {
+      const payload = {
+        eventCode: "test-code",
+        role: ROLES.MAVEN,
+      };
+
+      const errorMessage = "Error creating event code.";
+
+      service = sinon.stub(eventQuery, "createEventCode").throws(new Error(errorMessage));
+
+      chai
+        .request(app)
+        .post(`/events/${event1Data.room_id}/codes`)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send({ ...payload })
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(500);
+          expect(response.body.message).to.equal("Couldn't create event code. Please try again later");
+
+          return done();
+        });
+    });
+
     it("should return unauthorized error if user is not authenticated", function (done) {
       const id = event1Data.id;
-      // const payload = {
-      //   id: "test-id",
-      //   eventCode: "test-code",
-      //   role: "moderator",
-      // };
+      const payload = {
+        eventCode: "test-code",
+        role: "moderator",
+      };
       chai
         .request(app)
         .post(`/events/${id}/codes`)
+        .send({ ...payload })
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -470,72 +538,5 @@ describe("events", function () {
           return done();
         });
     });
-    // it('should return room code created successfully', function (done) {
-    //   const id = event1Data.id;
-
-    //   const payload = {
-    //     eventCode: 'test-code', role: 'maven'
-    //   }
-
-    //   const demo = {
-    //     id: 'test-id',
-    //     event_id: event1Data.id,
-    //     code: 'test-code',
-    //     role: 'maven',
-    //   }
-
-    //   const createEventCodeStub = sinon.stub(eventQuery, 'createEventCode');
-    //   createEventCodeStub.resolves(demo);
-
-    //   console.log(createEventCodeStub.callCount)
-
-    //   // Stub eventRef.update method for updating event data
-    //   const eventRefStub = {
-    //     update: sinon.stub().resolves(),
-    //   };
-    //   console.log(eventRefStub.callCount)
-
-    //   eventRefStub.update({
-    //     event_codes: {
-    //       by_role: {
-    //         mavens: ['test-code'],
-    //       },
-    //     },
-    //   });
-
-    //   // Stub eventModel.doc method to return the eventRefStub
-    //   const eventModelStub = {
-    //     doc: sinon.stub().returns(eventRefStub),
-    //   };
-
-    //   // Replace the original eventModel with the stubbed version
-    //   const originalEventModel = eventQuery.eventModel;
-    //   eventQuery.eventModel = eventModelStub;
-    //   // eventQuery.createEventCode(payload);
-    //   chai
-    //     .request(app)
-    //     .post(`/events/${id}/codes`)
-    //     .set("cookie", `${cookieName}=${authToken}`)
-    //     .send({ ...payload })
-    //     .end((error, response) => {
-    //       if (error) {
-    //         console.log({ error })
-    //         return done(error);
-    //       }
-    //       expect(response).to.have.status(201);
-    //       expect(response.body).to.be.an("object");
-    //       expect(response.body.message).to.equal('Event code created succesfully!');
-    //       expect(response.body.message).to.be.a("string");
-    //       expect(response.body.eventCodeObjectFromDB).to.be.an('object');
-    //       // expect(response.body.eventCodeObjectFromDB.id).to.equal('test-id');
-    //       expect(response.body.eventCodeObjectFromDB.event_id).to.equal(id);
-    //       expect(response.body.eventCodeObjectFromDB.code).to.equal('test-code');
-    //       expect(response.body.eventCodeObjectFromDB.role).to.equal('maven');
-
-    //       return done();
-    //     });
-    //   eventQuery.eventModel = originalEventModel;
-    //   createEventCodeStub.restore();
-    // })
   });
 });

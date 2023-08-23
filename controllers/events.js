@@ -273,13 +273,13 @@ const generateEventCode = async (req, res) => {
   }
 
   try {
-    const eventCodeObjectFromDB = await eventQuery.createEventCode({
+    const allEventCodeObjectFromDB = await eventQuery.createEventCode({
       id: eventCodeUuid,
       event_id: id,
       code: eventCode,
       role,
     });
-    return res.status(201).json({ message: "Event code created succesfully!", eventCodeObjectFromDB });
+    return res.status(201).json({ message: "Event code created succesfully!", data: [...allEventCodeObjectFromDB] });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({

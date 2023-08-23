@@ -114,4 +114,55 @@ describe("Events", function () {
       expect(data.joinedEvents[0].role).to.equal(peerData.role);
     });
   });
+
+  describe("createEventCode", function () {
+    it("should create a new event document if it doesn't exist", async function () {
+      const docRef = await eventModel.add(eventData);
+
+      const peerData = {
+        peerId: "someid",
+        name: "NonExistingPeer",
+        eventId: docRef.id,
+        role: "participant",
+        joinedAt: new Date(),
+      };
+
+      const result = await eventQuery.addPeerToEvent(peerData);
+
+      const docSnapshot = await peerModel.doc(result.peerId).get();
+      const data = docSnapshot.data();
+
+      expect(data.name).to.equal(peerData.name);
+      expect(data.joinedEvents).to.have.lengthOf(1);
+      expect(data.joinedEvents[0].event_id).to.equal(peerData.eventId);
+      expect(data.joinedEvents[0].role).to.equal(peerData.role);
+    });
+
+    it("should update the joinedEvents array if the peer document exists", async function () {
+      const docRef = await eventModel.add(eventData);
+
+      const peerData = {
+        peerId: "someid",
+        name: "ExistingPeer",
+        eventId: docRef.id,
+        role: "participant",
+        joinedAt: new Date(),
+      };
+
+      await peerModel.add({
+        peerId: peerData.peerId,
+        name: peerData.name,
+        joinedEvents: [],
+      });
+
+      await eventQuery.addPeerToEvent(peerData);
+
+      const docSnapshot = await peerModel.doc(peerData.peerId).get();
+      const data = docSnapshot.data();
+
+      expect(data.joinedEvents).to.have.lengthOf(1);
+      expect(data.joinedEvents[0].event_id).to.equal(peerData.eventId);
+      expect(data.joinedEvents[0].role).to.equal(peerData.role);
+    });
+  });
 });
