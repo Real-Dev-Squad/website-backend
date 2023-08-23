@@ -102,8 +102,8 @@ const getUsers = async (req, res) => {
       return res.boom.badRequest(`Days is required for filterBy ${transformedQuery?.filterBy}`);
     }
 
-    if (transformedQuery?.filterBy === "unmerged_prs" && transformedQuery?.days) {
-      const days = transformedQuery.days;
+    const { filterBy, days } = transformedQuery;
+    if (filterBy === "unmerged_prs" && days) {
       try {
         const inDiscordUser = await dataAccess.retrieveUsersWithRole(ROLES.INDISCORD);
         const users = [];

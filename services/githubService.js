@@ -267,15 +267,13 @@ const fetchIssues = async () => {
  **/
 const fetchLastMergedPR = async (username) => {
   try {
-    const baseURL = config.get("githubApi.baseUrl");
-    const issues = "/search/issues";
-    const urlObj = new URL(baseURL);
-    urlObj.pathname = issues;
-    urlObj.searchParams.append("q", `is:pr is:merged author:${username} org:${config.get("githubApi.org")}`);
-    urlObj.searchParams.append("sort", "merged");
-    urlObj.searchParams.append("order", "desc");
-    urlObj.searchParams.append("per_page", "1");
-    const createdURL = urlObj.href;
+    const searchParams = {
+      type: "pr",
+      is: "merged",
+      author: username,
+    };
+    const createdURL = getGithubURL(searchParams, { sort: "merged", order: "desc", per_page: "1" });
+
     const headers = {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${config.get("githubAccessToken")}`,
@@ -291,7 +289,7 @@ const fetchLastMergedPR = async (username) => {
 
     const data = await res.json();
 
-    if (!data || !data.items || data.items.length === 0) {
+    if (!data || !data.items || !data.items.length) {
       throw new Error(`No merged PRs found for user ${username}`);
     }
 
@@ -311,7 +309,8 @@ const fetchLastMergedPR = async (username) => {
 const isLastPRMergedWithinDays = async (username, days) => {
   try {
     const res = await fetchLastMergedPR(username);
-    const lastPRMergedDate = new Date(res.items[0].pull_request.merged_at);
+    const mergedAt = res.items[0].pull_request.merged_at;
+    const lastPRMergedDate = new Date(mergedAt);
     const currentDate = new Date();
 
     const timeDifferenceInMilliseconds = currentDate - lastPRMergedDate;
