@@ -8,7 +8,7 @@ const axios = require("../../../utils/fetch");
 
 const githubService = require("../../../services/githubService");
 const githubUserInfo = require("../../fixtures/auth/githubUserInfo")();
-
+const { prDates } = require("../../fixtures/pullrequests/pullrequests");
 describe("githubService", function () {
   beforeEach(async function () {
     sinon.stub(axios, "fetch").returnsArg(0);
@@ -168,15 +168,8 @@ describe("githubService", function () {
     });
 
     it("Should generate the correct url to fetch last merged PR", async function () {
-      const data = {
-        items: [
-          {
-            pull_request: {
-              merged_at: "2023-08-18T11:56:45Z",
-            },
-          },
-        ],
-      };
+      const data = prDates[0];
+
       const username = "sahsisunny";
       stub.withArgs(username).returns(data);
 
@@ -185,7 +178,7 @@ describe("githubService", function () {
     });
 
     it("Should throw an error if no merged PRs found for user", async function () {
-      const username = "octocat";
+      const username = "ankurnarkhede";
       stub.withArgs(username).returns({
         items: [],
       });
@@ -200,15 +193,8 @@ describe("githubService", function () {
 
   describe("isLastPRMergedWithinDays", function () {
     it("Should return true if last PR merged is within the last `days` days else false", async function () {
-      const data = {
-        items: [
-          {
-            pull_request: {
-              merged_at: "2023-08-18T11:56:45Z",
-            },
-          },
-        ],
-      };
+      const data = prDates[1];
+
       const days = 20;
       const username = "sahsisunny";
       const stub = sinon.stub(githubService, "fetchLastMergedPR").returns(data);
@@ -220,15 +206,7 @@ describe("githubService", function () {
     });
 
     it("Should return false if last PR merged is not within the last `days` days else false", async function () {
-      const data = {
-        items: [
-          {
-            pull_request: {
-              merged_at: "2023-08-18T11:56:45Z",
-            },
-          },
-        ],
-      };
+      const data = prDates[2];
       const days = 10;
       const username = "sahsisunny";
       const stub = sinon.stub(githubService, "fetchLastMergedPR").returns(data);
