@@ -130,12 +130,13 @@ const fetchPaginatedTasks = async ({
   title,
 }) => {
   try {
-    let initialQuery = tasksModel.orderBy("title");
+    let initialQuery = tasksModel;
 
     if (status === TASK_STATUS.OVERDUE && dev) {
       const currentTime = Math.floor(Date.now() / 1000);
-      initialQuery = initialQuery.where("endsOn", "<", currentTime);
+      initialQuery = tasksModel.where("endsOn", "<", currentTime);
     } else {
+      initialQuery = tasksModel.orderBy("title");
       if (status) {
         initialQuery = initialQuery.where("status", "==", status);
       }
