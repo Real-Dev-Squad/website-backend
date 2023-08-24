@@ -1,8 +1,18 @@
 const chai = require("chai");
 const { expect } = chai;
-const { generateNewStatus, checkIfUserHasLiveTasks, generateOOONickname } = require("../../../utils/userStatus");
+const sinon = require("sinon");
+const {
+  generateNewStatus,
+  checkIfUserHasLiveTasks,
+  generateOOONickname,
+  updateNickname,
+} = require("../../../utils/userStatus");
 const { userState, discordNicknameLength, month } = require("../../../constants/userStatus");
 const userData = require("../../fixtures/user/user")()[0];
+const firestore = require("../../../utils/firestore");
+const services = require("../../../services/users");
+const userModel = firestore.collection("users");
+const userStatusUtils = require("../../../utils/userStatus");
 
 describe("User Status Functions", function () {
   describe("generateNewStatus", function () {
@@ -155,10 +165,133 @@ describe("User Status Functions", function () {
   /* Skipping since test changes will go through before the util changes */
   // eslint-disable-next-line mocha/no-skipped-tests
   describe.skip("updateNickname", function () {
-    it("should call the user status service to update user's discord nickname successfully", async function () {});
+    let fetchStub, userInfo, getUserDiscordIdUsernameStub, generateOOONicknameStub;
 
-    it("should not call the user status service to update user's discord nickname when there's an error while fetching user details", async function () {});
+    beforeEach(async function () {
+      fetchStub = sinon.stub(global, "fetch");
+      userInfo = await userModel.add(userData);
+      getUserDiscordIdUsernameStub = sinon.stub(services, "getUserDiscordIdUsername");
+      generateOOONicknameStub = sinon.stub(userStatusUtils, "generateOOONickname");
+    });
 
-    it("should throw error when the users status service call to update user's discord nickname fails", async function () {});
+    afterEach(function () {
+      fetchStub.restore();
+      getUserDiscordIdUsernameStub.restore();
+      generateOOONicknameStub.restore();
+    });
+
+    it("should call the user status service to update user's discord nickname successfully", async function () {
+      const responseObject = { message: ["User nickname changed successfully"] };
+      const { id: userId } = userInfo;
+      const { username, discordId } = userData;
+
+      getUserDiscordIdUsernameStub.returns(
+        Promise.resolve({
+          discordId,
+          username,
+        })
+      );
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          ok: true,
+          text: () => Promise.resolve(responseObject),
+        })
+      );
+
+      await updateNickname(userId, {
+        from: new Date().getTime(),
+        until: new Date().getTime(),
+      });
+
+      expect(getUserDiscordIdUsernameStub.calledOnce).to.be.equal(true);
+      expect(generateOOONicknameStub.calledOnce).to.be.equal(true);
+      expect(fetchStub.calledOnce).to.be.equal(true);
+    });
+
+    it("should not call the user status service to update user's discord nickname when there's an error while fetching user details", async function () {
+      const error = new Error("Unable to find user with id 1234");
+      getUserDiscordIdUsernameStub.returns(Promise.reject(error));
+
+      await updateNickname("1234", {
+        from: new Date().getTime(),
+        until: new Date().getTime(),
+      }).catch((err) => expect(err).to.be.equal(error));
+      expect(fetchStub.calledOnce).to.be.equal(false);
+      expect(generateOOONicknameStub.calledOnce).to.be.equal(false);
+    });
+
+    /* Skipping since test changes will go through before the util changes */
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it("should throw error when the users status service call to update user's discord nickname fails", async function () {
+      const { id: userId } = userInfo;
+      const { username, discordId } = userData;
+
+      getUserDiscordIdUsernameStub.returns(
+        Promise.resolve({
+          discordId,
+          username,
+        })
+      );
+
+      const error = new Error(`Unable to update nickname for user with discord id ${discordId}`);
+      fetchStub.returns(Promise.reject(error));
+
+      await updateNickname(userId, {
+        from: new Date().getTime(),
+        until: new Date().getTime(),
+      }).catch((err) => expect(err).to.be.equal(err));
+
+      expect(fetchStub.calledOnce).to.be.equal(true);
+      expect(generateOOONicknameStub.calledOnce).to.be.equal(true);
+      expect(getUserDiscordIdUsernameStub.calledOnce).to.be.equal(true);
+    });
+  });
+
+  /* Skipping since test changes will go through before the util changes */
+  // eslint-disable-next-line mocha/no-skipped-tests
+  describe.skip("updateUserStatusFields", function () {
+    it("Should update current user OOO state to the future IDLE state when the current date exceeds OOO until", function () {});
+
+    it("Should update current user OOO state to the future ACTIVE state when the current date exceeds OOO until", function () {});
+
+    it("Should not update current user OOO state to the future IDLE state when the current date does not exceed OOO until", function () {});
+
+    it("Should not update current user OOO state to the future ACTIVE state when the current date does not exceed OOO until", function () {});
+
+    // future status is OOO
+
+    it("Should update current user ACTIVE state to the future OOO state when the current date exceeds OOO from but not until timestamp", function () {});
+
+    it("Should update current user IDLE state to the future OOO state when the current date exceeds OOO from but not until timestamp", function () {});
+
+    it("Should remove the future user OOO status when the current date exceeds OOO until timestamp", function () {});
+
+    it("Should not update current user ACTIVE state to the future OOO state when the current date does not exceed OOO from timestamp", function () {});
+
+    it("Should not update current user IDLE state to the future OOO state when the current date does not exceed OOO from timestamp", function () {});
+  });
+
+  /* Skipping since test changes will go through before the util changes */
+  // eslint-disable-next-line mocha/no-skipped-tests
+  describe.skip("updateUsersDiscordNicknameBasedOnStatus", function () {
+    it("Should update user's nickname to add OOO dates when the user's updated current status is OOO", function () {});
+
+    it("Should update user's nickname to remove OOO dates when the user's updated current status is ACTIVE from OOO", function () {});
+
+    it("Should update user's nickname to remove OOO dates when the user's updated current status is IDLE from OOO", function () {});
+
+    it("Should not update user's nickname to add OOO date when OOO date exceeds the current date ", function () {});
+
+    // future status is OOO
+
+    it("Should update user's nickname to add OOO end date when the OOO date exceeds the current date, but new state is also OOO", function () {});
+
+    it("Should update user's nickname to add OOO when the updated current status is OOO", function () {});
+
+    it("Should update user's nickname to add OOO when the current date is three days away from OOO start date", function () {});
+
+    it("Should not update user's nickname when the current status remains unchanged", function () {});
   });
 });
