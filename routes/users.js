@@ -20,6 +20,13 @@ router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvai
 router.get("/username", authenticate, userValidator.getUsername, users.getUsername);
 router.get("/chaincode", authenticate, users.generateChaincode);
 router.get("/search", userValidator.validateUserQueryParams, users.filterUsers);
+router.patch(
+  "/:userId/update-nickname",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  checkIsVerifiedDiscord,
+  users.updateDiscordUserNickname
+);
 
 router.get("/:username", users.getUser);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
