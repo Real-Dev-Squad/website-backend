@@ -116,53 +116,48 @@ describe("Events", function () {
   });
 
   describe("createEventCode", function () {
-    it("should create a new event document if it doesn't exist", async function () {
-      const docRef = await eventModel.add(eventData);
-
-      const peerData = {
-        peerId: "someid",
-        name: "NonExistingPeer",
-        eventId: docRef.id,
-        role: "participant",
-        joinedAt: new Date(),
+    it("should create a new event code document if it doesn't exist", async function () {
+      const eventDocRef = await eventModel.add(eventData);
+      const eventCodeData = {
+        code: "test-code",
+        role: "maven",
+        event_id: eventDocRef.id,
+        id: "test-id",
       };
 
-      const result = await eventQuery.addPeerToEvent(peerData);
+      const result = await eventQuery.createEventCode(eventCodeData);
 
-      const docSnapshot = await peerModel.doc(result.peerId).get();
-      const data = docSnapshot.data();
-
-      expect(data.name).to.equal(peerData.name);
-      expect(data.joinedEvents).to.have.lengthOf(1);
-      expect(data.joinedEvents[0].event_id).to.equal(peerData.eventId);
-      expect(data.joinedEvents[0].role).to.equal(peerData.role);
+      expect(result[0].code).to.equal(eventCodeData.code);
+      expect(result[0].event_id).to.equal(eventCodeData.event_id);
+      expect(result[0].role).to.equal(eventCodeData.role);
+      expect(result[0].id).to.equal(eventCodeData.id);
     });
 
-    it("should update the joinedEvents array if the peer document exists", async function () {
-      const docRef = await eventModel.add(eventData);
+    it("should update the event code in events modal event_codes array if the event codes already exists", async function () {
+      const eventDocRef = await eventModel.add(eventData);
 
-      const peerData = {
-        peerId: "someid",
-        name: "ExistingPeer",
-        eventId: docRef.id,
-        role: "participant",
-        joinedAt: new Date(),
+      const eventCodeDataFirst = {
+        code: "test-code-1",
+        role: "maven",
+        event_id: eventDocRef.id,
+        id: "test-id-1",
       };
 
-      await peerModel.add({
-        peerId: peerData.peerId,
-        name: peerData.name,
-        joinedEvents: [],
-      });
+      const eventCodeDataSecond = {
+        code: "test-code-2",
+        role: "maven",
+        event_id: eventDocRef.id,
+        id: "test-id-2",
+      };
 
-      await eventQuery.addPeerToEvent(peerData);
+      await eventQuery.createEventCode(eventCodeDataFirst);
+      const result2 = await eventQuery.createEventCode(eventCodeDataSecond);
 
-      const docSnapshot = await peerModel.doc(peerData.peerId).get();
-      const data = docSnapshot.data();
-
-      expect(data.joinedEvents).to.have.lengthOf(1);
-      expect(data.joinedEvents[0].event_id).to.equal(peerData.eventId);
-      expect(data.joinedEvents[0].role).to.equal(peerData.role);
+      expect(result2).to.have.lengthOf(2);
+      expect(result2[0].id).to.equal(eventCodeDataFirst.id);
+      expect(result2[1].id).to.equal(eventCodeDataSecond.id);
+      expect(result2[0].code).to.equal(eventCodeDataFirst.code);
+      expect(result2[1].code).to.equal(eventCodeDataSecond.code);
     });
   });
 });
