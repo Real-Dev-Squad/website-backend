@@ -7,8 +7,9 @@ const walletConstants = require("../constants/wallets");
 const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
-const { arraysHaveCommonItem } = require("../utils/array");
-const { ALLOWED_FILTER_PARAMS } = require("../constants/users");
+const { arraysHaveCommonItem, chunks } = require("../utils/array");
+const { archiveUsers } = require("../services/users");
+const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const ROLES = require("../constants/roles");
@@ -19,6 +20,7 @@ const userStatusModel = firestore.collection("usersStatus");
 const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Adds or updates the user data
@@ -506,6 +508,14 @@ const getUsersBasedOnFilter = async (query) => {
     const userRefs = finalItems.map((itemId) => userModel.doc(itemId));
     const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
     const filteredUserDocs = userDocs.filter((doc) => !doc.roles?.archived);
+    if (query.time && query.state === "ONBOARDING") {
+      const fetchUsersWithOnBoardingState = await getUsersWithOnboardingStateInRange(
+        filteredUserDocs,
+        stateItems,
+        query.time
+      );
+      return fetchUsersWithOnBoardingState;
+    }
     return filteredUserDocs;
   }
 
@@ -539,9 +549,29 @@ const getUsersBasedOnFilter = async (query) => {
 
     return filteredUsers.filter((user) => !user.roles?.archived);
   }
+
   return [];
 };
 
+const getUsersWithOnboardingStateInRange = async (filteredUserDocs, stateItems, time) => {
+  const usersInRange = [];
+  const range = Number(time.split("d")[0]);
+  const filteredUsers = filteredUserDocs.filter((userDoc) => {
+    return stateItems.some((stateItem) => stateItem.userId === userDoc.id);
+  });
+  filteredUsers.forEach((user) => {
+    if (user.discordJoinedAt) {
+      const userDiscordJoinedDate = new Date(user.discordJoinedAt);
+      const currentTimeStamp = new Date().getTime();
+      const timeDifferenceInMilliseconds = currentTimeStamp - userDiscordJoinedDate.getTime();
+      const currentAndUserJoinedDateDifference = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+      if (currentAndUserJoinedDateDifference > range) {
+        usersInRange.push(user);
+      }
+    }
+  });
+  return usersInRange;
+};
 /**
  * Fetch all users
  *
@@ -574,16 +604,72 @@ const fetchAllUsers = async () => {
   return users;
 };
 
-const fetchUsersWithToken = async () => {
+const archiveUserIfNotInDiscord = async () => {
   try {
-    const users = [];
-    const usersRef = await userModel.where("tokens", "!=", false).get();
-    usersRef.forEach((user) => {
-      users.push(userModel.doc(user.id));
+    const snapshot = await userModel.where("roles.in_discord", "==", false).where("roles.archived", "==", false).get();
+    const usersNotInDiscord = [];
+    let summary = {
+      totalUsers: snapshot.size,
+      totalUsersArchived: 0,
+      totalOperationsFailed: 0,
+      updatedUserDetails: [],
+      failedUserDetails: [],
+    };
+
+    if (snapshot.size === 0) {
+      return summary;
+    }
+
+    snapshot.forEach((user) => {
+      const id = user.id;
+      const userData = user.data();
+      usersNotInDiscord.push({ ...userData, id });
     });
+
+    const userNotInDiscordChunks = chunks(usersNotInDiscord, DOCUMENT_WRITE_SIZE);
+    for (const users of userNotInDiscordChunks) {
+      const res = await archiveUsers(users);
+      summary = {
+        ...summary,
+        totalUsersArchived: (summary.totalUsersArchived += res.totalUsersArchived),
+        totalOperationsFailed: (summary.totalOperationsFailed += res.totalOperationsFailed),
+        updatedUserDetails: [...summary.updatedUserDetails, ...res.updatedUserDetails],
+        failedUserDetails: [...summary.failedUserDetails, ...res.failedUserDetails],
+      };
+    }
+
+    if (summary.totalOperationsFailed === summary.totalUsers) {
+      throw Error(INTERNAL_SERVER_ERROR);
+    }
+
+    return summary;
+  } catch (error) {
+    logger.error(`Error in updating Users archived role:  ${error}`);
+    throw error;
+  }
+};
+/**
+ *
+ * @param {[string]} userIds  Array id's of user
+ * @returns Object containing the details of the users whose userId was provided.
+ */
+const fetchUserByIds = async (userIds = []) => {
+  if (userIds.length === 0) {
+    return {};
+  }
+  try {
+    const users = {};
+    const usersRefs = userIds.map((docId) => userModel.doc(docId));
+    const documents = await firestore.getAll(...usersRefs);
+    documents.forEach((snapshot) => {
+      if (snapshot.exists) {
+        users[snapshot.id] = snapshot.data();
+      }
+    });
+
     return users;
   } catch (err) {
-    logger.error(`Error while fetching all users with tokens field: ${err}`);
+    logger.error("Error retrieving user data", err);
     throw err;
   }
 };
@@ -663,7 +749,8 @@ module.exports = {
   getUserImageForVerification,
   getDiscordUsers,
   fetchAllUsers,
-  fetchUsersWithToken,
+  archiveUserIfNotInDiscord,
   removeGitHubToken,
   getUsersByRole,
+  fetchUserByIds,
 };

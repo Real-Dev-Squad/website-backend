@@ -15,7 +15,7 @@ const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
-const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
+const { getDiscordMembers, updatedNicknameResponse } = require("../fixtures/discordResponse/discord-response");
 const joinData = require("../fixtures/user/join");
 const {
   userStatusDataAfterSignup,
@@ -45,6 +45,7 @@ describe("Users", function () {
   let superUserId;
   let superUserAuthToken;
   let userId = "";
+  let fetchStub;
 
   beforeEach(async function () {
     userId = await addUser();
@@ -290,7 +291,6 @@ describe("Users", function () {
           expect(res.body.users).to.be.a("array");
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
-          expect(res.body.users[0]).to.not.have.property("tokens");
           expect(res.body.users[0]).to.not.have.property("chaincode");
 
           return done();
@@ -315,7 +315,6 @@ describe("Users", function () {
           });
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
-          expect(res.body.users[0]).to.not.have.property("tokens");
           expect(res.body.users[0]).to.not.have.property("chaincode");
           return done();
         });
@@ -341,7 +340,6 @@ describe("Users", function () {
           expect(res.body.users.length).to.equal(1);
           expect(res.body.users[0]).to.not.have.property("phone");
           expect(res.body.users[0]).to.not.have.property("email");
-          expect(res.body.users[0]).to.not.have.property("tokens");
           expect(res.body.users[0]).to.not.have.property("chaincode");
           return done();
         });
@@ -552,27 +550,7 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body).to.not.have.property("phone");
           expect(res.body).to.not.have.property("email");
-          expect(res.body).to.not.have.property("tokens");
           expect(res.body).to.not.have.property("chaincode");
-          return done();
-        });
-    });
-
-    it("Should return details with phone and email when query 'private' is true", function (done) {
-      chai
-        .request(app)
-        .get("/users/self")
-        .query({ private: true })
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done();
-          }
-
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body).to.have.property("phone");
-          expect(res.body).to.have.property("email");
           return done();
         });
     });
@@ -616,7 +594,6 @@ describe("Users", function () {
           expect(res.body.user).to.be.a("object");
           expect(res.body.user).to.not.have.property("phone");
           expect(res.body.user).to.not.have.property("email");
-          expect(res.body.user).to.not.have.property("tokens");
           expect(res.body.user).to.not.have.property("chaincode");
           return done();
         });
@@ -658,7 +635,6 @@ describe("Users", function () {
           expect(res.body.user).to.be.a("object");
           expect(res.body.user).to.not.have.property("phone");
           expect(res.body.user).to.not.have.property("email");
-          expect(res.body.user).to.not.have.property("tokens");
           expect(res.body.user).to.not.have.property("chaincode");
           return done();
         });
@@ -1640,28 +1616,203 @@ describe("Users", function () {
     });
   });
 
-  describe("POST /users/tokens", function () {
-    before(async function () {
-      await addOrUpdate(userData[0]);
-      await addOrUpdate(userData[1]);
-      await addOrUpdate(userData[2]);
-      await addOrUpdate(userData[3]);
+  describe("PATCH /users", function () {
+    let userId1;
+    let userId2;
+    let userId3;
+
+    beforeEach(async function () {
+      const rolesToBeAdded = {
+        archived: false,
+        in_discord: false,
+      };
+      userId1 = await addUser({ ...userData[0], roles: rolesToBeAdded });
+      userId2 = await addUser({ ...userData[1], roles: rolesToBeAdded });
+      userId3 = await addUser({ ...userData[2], roles: rolesToBeAdded });
     });
-    after(async function () {
+
+    afterEach(async function () {
       await cleanDb();
+      Sinon.restore();
     });
-    it("should remove all the users with token field", function (done) {
+
+    it("should return 400 if payload is not passed correctly", function (done) {
       chai
         .request(app)
-        .post("/users/tokens")
+        .patch("/users")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send()
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal('Invalid Payload: "action" is required');
+          return done();
+        });
+    });
+
+    it("should returns successful response for api archiveUsersIfNotInDiscord", function (done) {
+      chai
+        .request(app)
+        .patch("/users")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({ action: "archiveUsers" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.summary).to.have.all.keys(["totalUsersArchived", "totalOperationsFailed", "totalUsers"]);
+          expect(res.body.summary).to.not.have.property("updatedUserIds");
+          expect(res.body.summary.totalUsersArchived).to.be.equal(3);
+          expect(res.body.summary.totalUsers).to.be.equal(3);
+          expect(res.body.summary.totalOperationsFailed).to.be.equal(0);
+          expect(res.body.message).to.equal(
+            "Successfully updated users archived role to true if in_discord role is false"
+          );
+          return done();
+        });
+    });
+
+    it("should return proper response if no documents are found to update for api archiveUsersIfNotInDiscord", async function () {
+      const roles = {
+        archived: true,
+        in_discord: false,
+      };
+      await addOrUpdate({ ...userData[0], roles }, userId1);
+      await addOrUpdate({ ...userData[1], roles }, userId2);
+      await addOrUpdate({ ...userData[2], roles }, userId3);
+
+      const res = await chai
+        .request(app)
+        .patch("/users")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({ action: "archiveUsers" });
+
+      expect(res).to.have.status(200);
+      expect(res.body.summary).to.have.all.keys(["totalUsersArchived", "totalOperationsFailed", "totalUsers"]);
+      expect(res.body.summary).to.not.have.property("updatedUserIds");
+      expect(res.body.summary.totalUsers).to.be.equal(0);
+      expect(res.body.summary.totalUsersArchived).to.be.equal(0);
+      expect(res.body.summary.totalOperationsFailed).to.be.equal(0);
+      expect(res.body.message).to.equal("Couldn't find any users currently inactive in Discord but not archived.");
+    });
+
+    it("should throw an error if firestore batch operations fail for api archiveUsersIfNotInDiscord", async function () {
+      const stub = Sinon.stub(firestore, "batch");
+      stub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("Firestore batch commit failed!");
+        },
+      });
+
+      const res = await chai
+        .request(app)
+        .patch(`/users`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({ action: "archiveUsers" });
+
+      expect(res.status).to.equal(500);
+      const response = res.body;
+      expect(response.message).to.be.equal("An internal server error occurred");
+    });
+
+    it("should return correct response if debug query is passed for api archiveUsersIfNotInDiscord", function (done) {
+      chai
+        .request(app)
+        .patch("/users?debug=true")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({ action: "archiveUsers" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.summary).to.have.all.keys([
+            "totalUsersArchived",
+            "totalOperationsFailed",
+            "totalUsers",
+            "updatedUserDetails",
+            "failedUserDetails",
+          ]);
+          expect(res.body.summary.totalUsersArchived).to.be.equal(3);
+          expect(res.body.summary.totalUsers).to.be.equal(3);
+          expect(res.body.summary.totalOperationsFailed).to.be.equal(0);
+          expect(res.body.summary.updatedUserDetails.length).to.equal(3);
+          expect(res.body.summary.failedUserDetails.length).to.equal(0);
+          expect(res.body.message).to.equal(
+            "Successfully updated users archived role to true if in_discord role is false"
+          );
+          return done();
+        });
+    });
+  });
+  describe("PATCH /:userId/update-nickname", function () {
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      userId = await addUser(userData[0]);
+    });
+    afterEach(async function () {
+      await cleanDb();
+      Sinon.restore();
+    });
+    it("returns 200 for successfully updating nickname with patch method", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(updatedNicknameResponse),
+        })
+      );
+      chai
+        .request(app)
+        .patch(`/users/${userId}/update-nickname`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
           expect(res).to.have.status(200);
-          expect(res.body.message).to.be.equal("Github Token removed from all users!");
-          expect(res.body.usersFound).to.be.equal(3);
+          expect(res.body.message.message).to.be.equal("User nickname changed successfully");
+          return done();
+        });
+    });
+  });
+
+  describe("test discord actions of nickname for unverified user", function () {
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      const superUser = userData[4];
+      userId = await addUser(userData[2]);
+      superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    });
+    afterEach(async function () {
+      await cleanDb();
+      Sinon.restore();
+    });
+    it("throw error if discordId is not present and user is not verified", function (done) {
+      fetchStub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("User not verified");
+        },
+      });
+      chai
+        .request(app)
+        .patch(`/users/${userId}/update-nickname`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          const response = res.body;
+          expect(response.message).to.be.equal("An internal server error occurred");
           return done();
         });
     });
