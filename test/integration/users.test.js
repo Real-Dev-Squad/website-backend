@@ -734,6 +734,23 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should return 400 for empty firstname and lastname", function (done) {
+      chai
+        .request(app)
+        .get(`/users/username?firstname=&lastname=&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Invalid Query Parameters Passed");
+
+          return done();
+        });
+    });
   });
 
   describe("GET /users/:userId/intro", function () {

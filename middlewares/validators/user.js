@@ -281,6 +281,32 @@ async function validateUsersPatchHandler(req, res, next) {
   }
 }
 
+/**
+ * Validates query params for the username route
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ * @param next {Object} - Express middelware function
+ */
+const getUsername = async (req, res, next) => {
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      firstname: joi.string().min(1).required(),
+      lastname: joi.string().min(1).required(),
+      dev: joi.string().valid("true").optional(),
+    });
+
+  try {
+    await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    logger.error("Invalid Query Parameters Passed");
+    res.boom.badRequest("Invalid Query Parameters Passed");
+  }
+};
+
 module.exports = {
   updateUser,
   updateProfileURL,
@@ -290,4 +316,5 @@ module.exports = {
   validateImageVerificationQuery,
   validateUpdateRoles,
   validateUsersPatchHandler,
+  getUsername,
 };
