@@ -1,4 +1,6 @@
 import { Request, Response } from "express";
+import { addLog } from "../models/logs";
+import { logType } from "../constants/logs";
 
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const jwt = require("jsonwebtoken");
@@ -102,11 +104,27 @@ const updateApplication = async (req: any, res: any) => {
 
       rawBody["discord_invite_link"] = inviteLink;
     }
-    await ApplicationModel.updateApplication(rawBody, applicationId);
 
+    const applicationLog = {
+      type: logType.APPLICATION_UPDATED,
+      meta: {
+        applicationId,
+        username: req.userData.username,
+        userId: req.userData.id,
+      },
+      body: rawBody
+    };
+
+    const promises = [
+      ApplicationModel.updateApplication(rawBody, applicationId),
+      addLog(applicationLog.type, applicationLog.meta, applicationLog.body),
+    ];
+
+    await Promise.all(promises);
     return res.json({
       message: "Application updated successfully!",
     });
+
   } catch (err) {
     console.log(err)
     logger.error(`Error while fetching all the intros: ${err}`);
