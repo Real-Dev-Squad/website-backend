@@ -1,5 +1,7 @@
 const joi = require("joi");
 const { EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests");
+const { parseQueryParams } = require("../../utils/queryParser");
+const { BAD_REQUEST } = require("../../constants/errorMessages");
 
 const ER_STATUS_ENUM = Object.values(EXTENSION_REQUEST_STATUS);
 
@@ -77,7 +79,12 @@ const getExtensionRequestsValidator = async (req, res, next) => {
   });
 
   try {
-    await schema.validateAsync(req.query);
+    const queries = parseQueryParams(req._parsedUrl.search);
+    if (!queries) {
+      res.boom.badRequest(BAD_REQUEST);
+      return;
+    }
+    await schema.validateAsync(queries);
     next();
   } catch (error) {
     logger.error(`Error validating fetch extension requests query : ${error}`);

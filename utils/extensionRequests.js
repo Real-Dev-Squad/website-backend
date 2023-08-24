@@ -36,17 +36,21 @@ const transformQuery = (dev = false, size) => {
 };
 
 const generateNextLink = (nextPageParams) => {
-  let nextLink = new URLSearchParams();
+  const queryStringList = [];
   for (const [key, value] of Object.entries(nextPageParams)) {
     if (value) {
+      let queryString;
       if (Array.isArray(value)) {
-        value.forEach((arrayItem) => nextLink.append(key, arrayItem));
+        queryString = key + ":" + value.join("+");
       } else {
-        nextLink.append(key, value);
+        queryString = key + ":" + value;
       }
+      queryStringList.push(queryString);
     }
   }
-  nextLink = `/extension-requests?${nextLink.toString()}`;
+  const urlSearchParams = new URLSearchParams();
+  urlSearchParams.append("q", queryStringList.join(","));
+  const nextLink = `/extension-requests?${urlSearchParams.toString()}`;
   return nextLink;
 };
 
