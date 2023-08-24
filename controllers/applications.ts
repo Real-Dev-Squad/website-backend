@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, application } from "express";
 import { addLog } from "../models/logs";
 import { logType } from "../constants/logs";
 
@@ -126,7 +126,6 @@ const updateApplication = async (req: any, res: any) => {
     });
 
   } catch (err) {
-    console.log(err)
     logger.error(`Error while fetching all the intros: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }

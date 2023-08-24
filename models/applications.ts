@@ -25,15 +25,10 @@ const getAllApplications = async () => {
 
 const getUserApplications = async (userId: string) => {
   try {
-    const applicationData = [];
     const application = await ApplicationsModel.where("userId", "==", userId).limit(1).get();
-    application.forEach((data: any) => {
-      applicationData.push({
-        id: data.id,
-        ...data.data(),
-      });
-    });
-    return applicationData;
+    const [applicationDoc] = application.docs;
+
+    return { id: applicationDoc.id, ...applicationDoc.data() };
   } catch (err) {
     logger.log("error in getting user intro", err);
     throw err;

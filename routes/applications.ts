@@ -12,10 +12,9 @@ router.get(
   "/",
   authenticate,
   authorizeOwnOrSuperUser,
-  applicationValidator.validateApplicationData,
   applications.getAllOrUserApplication
 );
-router.post("/", authenticate, applications.addApplication);
+router.post("/", authenticate, applicationValidator.validateApplicationData, applications.addApplication);
 router.patch("/:applicationId", authenticate, authorizeRoles([SUPERUSER]), applications.updateApplication);
 
 module.exports = router;
