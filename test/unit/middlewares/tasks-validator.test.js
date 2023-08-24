@@ -383,7 +383,7 @@ describe("getTasks validator", function () {
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
-    it("should pass the request when correct parameters are passed: assignee, dev, status and title", async function () {
+  it("should pass the request when correct parameters are passed: assignee, dev, status and title", async function () {
     const req = {
       query: {
         dev: "true",
