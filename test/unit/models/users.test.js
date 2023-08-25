@@ -385,6 +385,14 @@ describe("users", function () {
       expect(fetchedUserIds).to.deep.equal([]);
     });
   });
+  describe("generateUniqueUsername", function () {
+    it("should generate a unique username when existing users are present", async function () {
+      const userData = userDataArray[15];
+      await users.addOrUpdate(userData);
+      const newUsername = await users.generateUniqueUsername("shubham", "sigdar");
+      expect(newUsername).to.deep.equal("shubham-sigdar-2");
+    });
+  });
   describe("add github key in DB", function () {
     beforeEach(async function () {
       const addUsersPromises = [];

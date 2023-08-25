@@ -201,6 +201,23 @@ const getUsernameAvailabilty = async (req, res) => {
   }
 };
 
+const generateUsername = async (req, res) => {
+  try {
+    const { firstname, lastname, dev } = req.query;
+    if (dev === "true") {
+      const username = await userQuery.generateUniqueUsername(firstname, lastname);
+      return res.json({ username });
+    } else {
+      return res.status(404).json({
+        message: "UserName Not Found",
+      });
+    }
+  } catch (error) {
+    logger.error(`Error while checking user: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
 /**
  * Fetches the data about logged in user
  *
@@ -719,6 +736,7 @@ module.exports = {
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
+  generateUsername,
   getSuggestedUsers,
   postUserPicture,
   updateUser,
