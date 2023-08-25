@@ -361,5 +361,17 @@ module.exports = () => {
       updated_at: Date.now(),
       created_at: Date.now(),
     },
+    {
+      first_name: "Jane",
+      last_name: "Doe",
+      yoe: 1,
+      img: "./img.png",
+      linkedin_id: "jane-doe",
+      github_id: "jane-doe",
+      github_display_name: "Jane Doe",
+      phone: "1234567890",
+      email: "janedoe@gmail.com",
+      chaincode: "12345",
+    },
   ];
 };
