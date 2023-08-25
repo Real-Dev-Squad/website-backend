@@ -288,7 +288,7 @@ async function validateUsersPatchHandler(req, res, next) {
  * @param res {Object} - Express response object
  * @param next {Object} - Express middelware function
  */
-const getUsername = async (req, res, next) => {
+const validateGenerateUsernameQuery = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -316,5 +316,5 @@ module.exports = {
   validateImageVerificationQuery,
   validateUpdateRoles,
   validateUsersPatchHandler,
-  getUsername,
+  validateGenerateUsernameQuery,
 };

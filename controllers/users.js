@@ -201,7 +201,7 @@ const getUsernameAvailabilty = async (req, res) => {
   }
 };
 
-const getUsername = async (req, res) => {
+const generateUsername = async (req, res) => {
   try {
     const { firstname, lastname, dev } = req.query;
     if (dev === "true") {
@@ -719,7 +719,7 @@ module.exports = {
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
-  getUsername,
+  generateUsername,
   getSuggestedUsers,
   postUserPicture,
   updateUser,
