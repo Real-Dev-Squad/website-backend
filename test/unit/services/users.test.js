@@ -5,7 +5,7 @@ const firestore = require("../../../utils/firestore");
 const userModel = firestore.collection("users");
 const cleanDb = require("../../utils/cleanDb");
 const userDataArray = require("../../fixtures/user/user")();
-const { archiveUsers } = require("../../../services/users");
+const { archiveUsers, getUserDiscordIdUsername } = require("../../../services/users");
 
 describe("Users services", function () {
   describe("archive inactive discord users in bulk", function () {
@@ -53,7 +53,7 @@ describe("Users services", function () {
 
       expect(res).to.deep.equal({
         message: "Successfully completed batch updates",
-        totalUsersArchived: 16,
+        totalUsersArchived: userDetails.length,
         totalOperationsFailed: 0,
         updatedUserDetails: userDetails,
         failedUserDetails: [],
@@ -74,7 +74,7 @@ describe("Users services", function () {
       expect(res).to.deep.equal({
         message: "Firebase batch operation failed",
         totalUsersArchived: 0,
-        totalOperationsFailed: 16,
+        totalOperationsFailed: userDetails.length,
         updatedUserDetails: [],
         failedUserDetails: userDetails,
       });
@@ -82,8 +82,7 @@ describe("Users services", function () {
   });
 
   /* Skipping since test changes will go through before the util changes */
-  // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("getUserDiscordIdUsername", function () {
+  describe("getUserDiscordIdUsername", function () {
     const userDetails = [];
 
     before(async function () {
@@ -92,33 +91,68 @@ describe("Users services", function () {
       userDataArray.forEach((user) => {
         addedUsers.push(userModel.add(user));
       });
-      const userInfo = await Promise.all(addedUsers);
-      userDetails.push(userInfo);
+      await Promise.all(addedUsers);
+
+      const snapshot = await userModel.get();
+
+      snapshot.forEach((user) => {
+        const id = user.id;
+        const userData = user.data();
+        userDetails.push({ ...userData, id });
+      });
     });
 
     afterEach(async function () {
       Sinon.restore();
     });
 
-    it("Should successfully return the username and discordId of the user whose userId is passed", async function () {});
+    it("Should successfully return the username and discordId of the user whose userId is passed", async function () {
+      const userData = userDetails.filter((user) => user.discordId)[0];
+      const { id: userId, discordId, username } = userData;
 
-    it("Should fail to return the data when userId is invalid", async function () {});
+      const fetchedUserData = await getUserDiscordIdUsername(userId);
 
-    it("Should fail to return the data when userId is valid but username is unavailable", async function () {});
+      expect(fetchedUserData).to.have.property("discordId", discordId);
+      expect(fetchedUserData).to.have.property("username", username);
+    });
+
+    it("Should fail to return the data when userId is invalid", async function () {
+      const error = new Error("User data not found! Invalid id passed");
+      Sinon.stub(userModel, "get").rejects(error);
+      await getUserDiscordIdUsername("randomId").catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+        expect(err).to.be.deep.equal(err);
+      });
+    });
+
+    it("Should fail to return the data when userId is valid but username is unavailable", async function () {
+      const userData = userDetails.filter((user) => !user.username)[0];
+      const { id: userId } = userData;
+
+      await getUserDiscordIdUsername(userId).catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+        expect(err.message).to.be.equal("Complete user information unavailable!");
+      });
+    });
 
     it("Should fail to return the data when userId is valid but discord id is unavailable", async function () {
-      // const userWithoutUserName = {
-      //   first_name: "John",
-      //   last_name: "Doe",
-      //   discordId: "12345",
-      // };
+      const userData = userDetails.filter((user) => !user.discordId)[0];
+      const { id: userId } = userData;
+
+      await getUserDiscordIdUsername(userId).catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+        expect(err.message).to.be.equal("Complete user information unavailable!");
+      });
     });
 
     it("Should fail to return the data when userId is valid but both usernam and discord id are unavailable", async function () {
-      // const userWithoutDiscordIdAndUsername = {
-      //   first_name: "Jane",
-      //   last_name: "Doe",
-      // };
+      const userData = userDetails.filter((user) => !user.discordId && !user.username)[0];
+      const { id: userId } = userData;
+
+      await getUserDiscordIdUsername(userId).catch((err) => {
+        expect(err).to.be.instanceOf(Error);
+        expect(err.message).to.be.equal("Complete user information unavailable!");
+      });
     });
   });
 });
