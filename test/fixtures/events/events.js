@@ -15,6 +15,24 @@ module.exports = () => {
       customer_id: "6407de59edc7c8f3674c0d12",
       app_id: "6407de59edc7c8f3674c0d13",
       recording_info: null,
+      event_codes: {
+        byRole: {
+          mavens: [
+            {
+              id: "6407de59edc7c8f3674c0d13",
+              code: "code1",
+              created_at: "2023-04-14T22:32:01.246757531Z",
+              updated_at: "2023-04-14T22:32:01.246757531Z",
+            },
+            {
+              id: "6407de59edc7c8f3674c0d13",
+              code: "code2",
+              created_at: "2023-04-14T22:32:01.246757531Z",
+              updated_at: "2023-04-14T22:32:01.246757531Z",
+            },
+          ],
+        },
+      },
     },
   ];
 };

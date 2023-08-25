@@ -74,4 +74,44 @@ describe("Events", function () {
       }
     });
   });
+
+  describe("getAllEventCodes", function () {
+    it("should return an array of event codes", async function () {
+      const docRef = eventModel.doc(eventData.room_id);
+      await docRef.set(eventData);
+
+      const result = await eventQuery.getAllEventCodes(eventData.room_id);
+
+      expect(result).to.deep.equal(["code1", "code2"]);
+    });
+
+    it("should throw an error when document does not exist", async function () {
+      const roomId = "nonExistentRoomId";
+
+      try {
+        await eventQuery.getAllEventCodes(roomId);
+      } catch (error) {
+        expect(error.message).to.equal("Document does not exist.");
+      }
+    });
+
+    it("should throw an error for invalid event structure", async function () {
+      const invalidEventStructure = {
+        event_codes: {
+          byRole: {
+            mavens: null,
+          },
+        },
+      };
+
+      const docRef = eventModel.doc(eventData.room_id);
+      await docRef.set({ ...eventData, ...invalidEventStructure });
+
+      try {
+        await eventQuery.getAllEventCodes(eventData.room_id);
+      } catch (error) {
+        expect(error.message).to.equal(`Invalid event structure in document ${eventData.room_id}.`);
+      }
+    });
+  });
 });
