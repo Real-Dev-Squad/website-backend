@@ -260,6 +260,25 @@ const fetchIssues = async () => {
   }
 };
 
+const getGithubCreatedAt = async (username) => {
+  try {
+    const response = await fetch(`https://api.github.com/users/${username}`);
+    const userData = await response.json();
+    if (userData?.message === "Not Found") {
+      return null;
+    }
+
+    if (!response.ok && userData?.message !== "Not Found") {
+      throw new Error(`GitHub API request failed with status: ${response.status}`);
+    }
+
+    return Number(new Date(userData?.created_at).getTime());
+  } catch (error) {
+    logger.error("Error fetching GitHub user data:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
@@ -269,4 +288,5 @@ module.exports = {
   fetchIssues,
   fetchOpenIssues,
   fetchClosedIssues,
+  getGithubCreatedAt,
 };
