@@ -30,7 +30,8 @@ const authorizeEventRoles = (allowedRoles) => {
     }
 
     if (req.body.role === ROLES.MAVEN) {
-      const allowedEventCodes = await getAllEventCodes();
+      const roomId = req.body.roomId ?? req.params.id;
+      const allowedEventCodes = await getAllEventCodes(roomId);
       if (allowedEventCodes.includes(req.body.eventCode) && userHasPermission(req.body.role, allowedRoles)) {
         return next();
       }

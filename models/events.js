@@ -2,7 +2,6 @@ const firestore = require("../utils/firestore");
 const logger = require("../utils/logger");
 
 const eventModel = firestore.collection("events");
-const eventCodeModel = firestore.collection("event-codes");
 
 /**
  * Creates a new event document in Firestore and returns the data for the created document.
@@ -67,13 +66,23 @@ const endActiveEvent = async ({ id, reason, lock }) => {
   }
 };
 
-const getAllEventCodes = async () => {
+const getAllEventCodes = async (roomId) => {
   try {
-    const querySnapshot = await eventCodeModel.get();
-    const eventCodes = [];
-    querySnapshot.forEach((doc) => {
-      eventCodes.push(doc.data().code);
-    });
+    const docRef = eventModel.doc(roomId);
+    const docSnapshot = await docRef.get();
+
+    if (!docSnapshot.exists) {
+      throw new Error("Document does not exist.");
+    }
+
+    const eventData = docSnapshot.data();
+
+    if (!eventData.event_codes || !eventData.event_codes.byRole || !eventData.event_codes.byRole.mavens) {
+      throw new Error(`Invalid event structure in document ${roomId}.`);
+    }
+
+    const eventCodes = eventData.event_codes.byRole.mavens.map((maven) => maven.code);
+
     return eventCodes;
   } catch (error) {
     logger.error("Error in getting event codes", error);
