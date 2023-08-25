@@ -5,16 +5,12 @@ const authenticate = require("../middlewares/authenticate");
 const eventsValidator = require("../middlewares/validators/events");
 const authorizeEventRoles = require("../middlewares/authorizeEventRoles");
 const { ROLES } = require("../constants/events");
+const authorizeRoles = require("../middlewares/authorizeRoles");
+const { SUPERUSER } = require("../constants/roles");
 
-router.post("/", authenticate, authorizeEventRoles([ROLES.HOST]), eventsValidator.createEvent, events.createEvent);
+router.post("/", authenticate, authorizeRoles([SUPERUSER]), eventsValidator.createEvent, events.createEvent);
 
-router.get(
-  "/",
-  authenticate,
-  authorizeEventRoles([ROLES.HOST, ROLES.MODERATOR]),
-  eventsValidator.getAllEvents,
-  events.getAllEvents
-);
+router.get("/", authenticate, eventsValidator.getAllEvents, events.getAllEvents);
 
 router.post(
   "/join-admin",
@@ -28,14 +24,8 @@ router.post("/join", authorizeEventRoles([ROLES.MAVEN, ROLES.GUEST]), eventsVali
 
 router.get("/:id", eventsValidator.getEventById, events.getEventById);
 
-router.patch("/", authenticate, authorizeEventRoles([ROLES.HOST]), eventsValidator.updateEvent, events.updateEvent);
+router.patch("/", authenticate, authorizeRoles([SUPERUSER]), eventsValidator.updateEvent, events.updateEvent);
 
-router.patch(
-  "/end",
-  authenticate,
-  authorizeEventRoles([ROLES.HOST]),
-  eventsValidator.endActiveEvent,
-  events.endActiveEvent
-);
+router.patch("/end", authenticate, authorizeRoles([SUPERUSER]), eventsValidator.endActiveEvent, events.endActiveEvent);
 
 module.exports = router;

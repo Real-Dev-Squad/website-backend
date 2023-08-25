@@ -10,7 +10,7 @@ const UNWANTED_PROPERTIES_FROM_100MS = [
 ];
 
 const ROLES = {
-  HOST: "super_user",
+  HOST: "host",
   MODERATOR: "moderator",
   MAVEN: "maven",
   GUEST: "guest",
