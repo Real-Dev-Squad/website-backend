@@ -24,7 +24,7 @@ const formatExtensionRequest = async (extensionRequest) => {
   return { ...body, id, timestamp, assignee };
 };
 
-const transformQuery = (dev = false, size) => {
+const transformQuery = (size, dev = false) => {
   const transformedDev = JSON.parse(dev);
 
   let transformedSize;
@@ -32,7 +32,7 @@ const transformQuery = (dev = false, size) => {
     transformedSize = parseInt(size);
   }
 
-  return { transformedDev: transformedDev, transformedSize: transformedSize };
+  return { transformedSize: transformedSize, transformedDev: transformedDev };
 };
 
 const generateNextLink = (nextPageParams) => {

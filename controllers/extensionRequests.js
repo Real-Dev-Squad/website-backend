@@ -82,7 +82,7 @@ const fetchExtensionRequests = async (req, res) => {
   try {
     const { status, taskId, assignee, dev, cursor, size, order } = parseQueryParams(req._parsedUrl.search);
 
-    const { transformedDev, transformedSize } = transformQuery(dev, size);
+    const { transformedSize, transformedDev } = transformQuery(size, dev);
 
     let allExtensionRequests;
 
