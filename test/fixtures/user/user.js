@@ -366,16 +366,25 @@ module.exports = () => {
       created_at: Date.now(),
     },
     {
-      username: "ankitbajpai",
-      first_name: "ankit",
-      last_name: "bajpai",
+      username: "ankit",
+      first_name: "Ankit",
+      last_name: "Bajpai",
+      discordId: "12345",
+      linkedin_id: "ankitbajpai",
+      github_id: githubUserInfo[0].username,
+      github_display_name: githubUserInfo[0].displayName,
+      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
+      joined_discord: "2023-01-13T18:21:09.278000+00:00",
       roles: {
-        archived: true,
-        in_discord: false,
+        member: true,
+        in_discord: true,
       },
+      tokens: {
+        githubAccessToken: "githubAccessToken",
+      },
+      status: "active",
+      profileURL: "https://abcde.com",
       incompleteUserDetails: false,
-      updated_at: Date.now(),
-      created_at: Date.now(),
     },
   ];
 };

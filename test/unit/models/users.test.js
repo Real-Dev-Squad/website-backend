@@ -55,8 +55,8 @@ describe("users", function () {
         profileStatus: "PENDING",
         roles: { archived: false, in_discord: true },
       };
-      await users.addOrUpdate(updatedUserData, userId);
 
+      await users.addOrUpdate(updatedUserData, userId);
       const data = (await userModel.doc(userId).get()).data();
 
       expect(data.roles.archived).to.equal(false);

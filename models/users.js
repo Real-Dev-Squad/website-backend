@@ -34,7 +34,9 @@ const addOrUpdate = async (userData, userId = null) => {
     // userId exists Update user
     if (userId !== null) {
       const user = await userModel.doc(userId).get();
+
       const isNewUser = !user.data();
+
       // user exists update user
       if (user.data()) {
         await userModel.doc(userId).set({
@@ -50,14 +52,7 @@ const addOrUpdate = async (userData, userId = null) => {
     // userId is null, Add or Update user
     const user = await userModel.where("github_id", "==", userData.github_id).limit(1).get();
     if (!user.empty) {
-      await userModel.doc(user.docs[0].id).set(
-        {
-          ...userData,
-          roles: { archived: false, in_discord: true }, // Update roles here
-          updated_at: Date.now(),
-        },
-        { merge: true }
-      );
+      await userModel.doc(user.docs[0].id).set(userData, { merge: true });
 
       return {
         isNewUser: false,
@@ -76,7 +71,12 @@ const addOrUpdate = async (userData, userId = null) => {
     userData.roles = { archived: false, in_discord: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
-    return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true, updated_at: Date.now() };
+    return {
+      isNewUser: true,
+      userId: userInfo.id,
+      incompleteUserDetails: true,
+      updated_at: Date.now(),
+    };
   } catch (err) {
     logger.error("Error in adding or updating user", err);
     throw err;
