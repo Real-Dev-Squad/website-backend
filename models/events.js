@@ -198,7 +198,7 @@ const createEventCode = async (eventCodeData) => {
 
     if (!data) throw new Error();
 
-    if (previouslyPresentEventCodes?.length > 0) {
+    if (previouslyPresentEventCodes?.length) {
       await eventRef.update({
         event_codes: {
           by_role: {
@@ -232,7 +232,7 @@ const createEventCode = async (eventCodeData) => {
 
     return allEventCodesForMavens;
   } catch (error) {
-    logger.error("Error in adding data", error);
+    logger.error("Error in creating event code", error);
     throw error;
   }
 };
