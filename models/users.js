@@ -21,7 +21,6 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { getGithubCreatedAt } = require("../services/githubService");
 /**
  * Adds or updates the user data
  *
@@ -215,7 +214,6 @@ const fetchUsers = async (usernames = []) => {
     });
 
     const snapshots = await Promise.all(promises);
-
     snapshots.forEach((snapshot) => {
       snapshot.forEach((doc) => {
         users.push({
@@ -224,7 +222,6 @@ const fetchUsers = async (usernames = []) => {
         });
       });
     });
-
     return {
       users,
     };
@@ -758,7 +755,7 @@ const fetchUsersWithoutGithubCreatedAtKey = async () => {
       const userData = user.data();
       const githubCreatedAtKey = Object.keys(userData).includes("github_created_at");
       if (!githubCreatedAtKey) {
-        users.push(userModel.doc(user.id));
+        users.push(userData.github_id);
       }
     });
     return users;
@@ -786,11 +783,9 @@ const addGithubCreatedAtKey = async (users) => {
     let batchIndex = 0;
     let operations = 0;
     for (let i = 0; i < length; i++) {
-      const userRef = await users[i].get();
-      const userData = await userRef.data();
-      const githubCreatedAt = await getGithubCreatedAt(userData.github_id);
-
-      batchArray[batchIndex].update(users[i], { github_created_at: githubCreatedAt });
+      const docID = users[i].id;
+      const docRef = userModel.doc(docID);
+      batchArray[batchIndex].update(docRef, { github_created_at: users[i].github_created_at });
       operations++;
 
       if (operations === 500) {
