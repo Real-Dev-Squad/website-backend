@@ -695,6 +695,65 @@ describe("Users", function () {
     });
   });
 
+  describe("GET /users/username", function () {
+    const firstname = "shubham";
+    const lastname = "sigdar";
+
+    it("Should return unique username when passing firstname and lastname", function (done) {
+      addUser(userData[15]).then((availableUsernameUserId) => {
+        const userJwt = authService.generateAuthToken({ userId: availableUsernameUserId });
+        chai
+          .request(app)
+          .get(`/users/username?firstname=${firstname}&lastname=${lastname}&dev=true`)
+          .set("cookie", `${cookieName}=${userJwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done();
+            }
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.a("object");
+            expect(res.body.username).to.equal("shubham-sigdar-2");
+
+            return done();
+          });
+      });
+    });
+
+    it("Should return 404 if feature flag is not pass", function (done) {
+      chai
+        .request(app)
+        .get(`/users/username?firstname=${firstname}&lastname=${lastname}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("UserName Not Found");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for empty firstname and lastname", function (done) {
+      chai
+        .request(app)
+        .get(`/users/username?firstname=&lastname=&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Invalid Query Parameters Passed");
+
+          return done();
+        });
+    });
+  });
+
   describe("GET /users/:userId/intro", function () {
     beforeEach(async function () {
       await addJoinData(joinData(userId)[0]);

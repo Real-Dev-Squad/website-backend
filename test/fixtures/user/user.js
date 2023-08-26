@@ -43,6 +43,7 @@ module.exports = () => {
     {
       username: "nikhil",
       first_name: "Nikhil",
+      discordId: "1234567890",
       last_name: "Bhandarkar",
       yoe: 0,
       img: "./img.png",
@@ -352,9 +353,9 @@ module.exports = () => {
       },
     },
     {
-      username: "sahsisunny",
-      first_name: "sunny",
-      last_name: "sahsi",
+      username: "shubham-sigdar",
+      first_name: "shubham",
+      last_name: "sigdar",
       github_id: githubUserInfo[1].login,
       github_display_name: githubUserInfo[1].name,
       roles: {

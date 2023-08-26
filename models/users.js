@@ -736,6 +736,27 @@ const getUsersByRole = async (role) => {
   }
 };
 
+const generateUniqueUsername = async (firstname, lastname) => {
+  try {
+    const snapshot = await userModel
+      .where("first_name", "==", firstname)
+      .where("last_name", "==", lastname)
+      .count()
+      .get();
+    const existingUserCount = snapshot.data().count;
+    const initialUsername = `${firstname}-${lastname}`;
+    if (existingUserCount === 0) {
+      return initialUsername;
+    } else {
+      const uniqueUsername = `${initialUsername}-${existingUserCount + 1}`;
+      return uniqueUsername;
+    }
+  } catch (err) {
+    logger.error(`Error while generating unique username: ${err.message}`);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -760,4 +781,5 @@ module.exports = {
   removeGitHubToken,
   getUsersByRole,
   fetchUserByIds,
+  generateUniqueUsername,
 };
