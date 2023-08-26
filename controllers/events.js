@@ -277,7 +277,7 @@ const getEventCodes = async (req, res) => {
 
     return res.status(200).json({
       message: "Event codes is successfully fetched for the event!",
-      event_codes: eventCodes,
+      data: eventCodes,
     });
   } catch (error) {
     logger.error({ error });

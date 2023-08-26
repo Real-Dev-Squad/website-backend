@@ -9,6 +9,7 @@ const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 
 const eventData = require("../fixtures/events/events")();
+const eventCodeData = require("../fixtures/events/event-codes")();
 const event1Data = eventData[0];
 
 const userData = require("../fixtures/user/user")();
@@ -411,6 +412,53 @@ describe("events", function () {
           expect(response.body.error).to.be.equal("Unauthorized");
           expect(response.body.message).to.be.equal("Unauthenticated User");
 
+          return done();
+        });
+    });
+  });
+
+  describe("GET /events/:id/codes - getEventCodes", function () {
+    let service;
+
+    afterEach(function () {
+      service.restore();
+      sinon.restore();
+    });
+
+    it("should return all event codes based on event id", function (done) {
+      service = sinon.stub(eventQuery, "getEventCodes").returns([...eventCodeData.data]);
+
+      chai
+        .request(app)
+        .get(`/events/${eventData[1].id}/codes`)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(200);
+          expect(response.body).to.be.a("object");
+          expect(response.body).to.have.all.keys("message", "data");
+          return done();
+        });
+    });
+
+    it("should return something went wrong while getting the event codes!", function (done) {
+      service = sinon.stub(eventQuery, "getEventCodes").throws(new Error());
+
+      chai
+        .request(app)
+        .get(`/events/${eventData[1].id}/codes`)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(500);
+          expect(response.body).to.be.a("object");
+          expect(response.body).to.have.all.keys("message");
           return done();
         });
     });
