@@ -9,6 +9,7 @@ const eventModel = firestore.collection("events");
 const peerModel = firestore.collection("peers");
 
 const eventDataArray = require("../../fixtures/events/events")();
+const eventCodeDataArray = require("../../fixtures/events/event-codes")();
 const eventData = eventDataArray[0];
 
 describe("Events", function () {
@@ -158,6 +159,33 @@ describe("Events", function () {
       expect(result2[1].id).to.equal(eventCodeDataSecond.id);
       expect(result2[0].code).to.equal(eventCodeDataFirst.code);
       expect(result2[1].code).to.equal(eventCodeDataSecond.code);
+    });
+  });
+
+  describe("getEventCodes", function () {
+    it("should get event codes", async function () {
+      await eventQuery.createEvent(eventDataArray[1]);
+
+      // eslint-disable-next-line no-unused-vars
+      const allEventCodesPromises = eventCodeDataArray[1].data.map(async (code) => {
+        const eventCodeRef = await eventQuery.createEventCode(code);
+        const eventCodeSnapshot = await eventCodeRef.get();
+        const eventCodeData = await eventCodeSnapshot.data();
+        return eventCodeData;
+      });
+
+      const id = eventDataArray[1].id;
+
+      await eventQuery.getEventById({ id });
+
+      const result = await eventQuery.getEventCodes({ id });
+      expect(result).to.have.lengthOf(10);
+      result.forEach((elem, idx) => {
+        expect(elem.event_id).to.equal(eventCodeDataArray[1].data[idx].event_id);
+        expect(elem.code).to.equal(eventCodeDataArray[1].data[idx].code);
+        expect(elem.role).to.equal(eventCodeDataArray[1].data[idx].role);
+        expect(elem.id).to.equal(eventCodeDataArray[1].data[idx].id);
+      });
     });
   });
 });
