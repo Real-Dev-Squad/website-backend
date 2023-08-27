@@ -37,11 +37,12 @@ const getUserApplications = async (userId: string) => {
 
 const addApplication = async (data: application) => {
   try {
-    await ApplicationsModel.add(data);
+    const application = await ApplicationsModel.add(data);
     await updateUserStatus(data.userId, {
       currentStatus: { state: userState.ONBOARDING },
       monthlyHours: { committed: 4 * data.intro.numberOfHours },
     });
+    return application.id;
   } catch (err) {
     logger.error("Error in adding data", err);
     throw err;

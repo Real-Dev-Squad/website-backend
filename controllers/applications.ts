@@ -40,7 +40,7 @@ const addApplication = async (req: any, res: any) => {
   const rawData = req.body;
   const application = await ApplicationModel.getUserApplications(req.userData.id);
 
-  if (application.length === 1) {
+  if (application && !application.status) {
     return res.status(409).json({
       message: "User data is already present!",
     });

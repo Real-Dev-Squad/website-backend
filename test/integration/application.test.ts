@@ -22,25 +22,32 @@ let userId: string;
 let superUserId: string;
 let jwt: string;
 let superUserJwt: string;
+let applicationId1;
+let applicationId2;
 
-describe("Application", function () {
+describe.only("Application", function () {
   before(async function () {
     userId = await addUser(appOwner);
     superUserId = await addUser(superUser);
     jwt = authService.generateAuthToken({ userId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
-    console.log(applicationsData, "applicationData...");
     const applicationOne = { ...applicationsData[0], userId };
     const applicationTwo = { ...applicationsData[1], superUserId };
 
-    const promises = [applicationModel.addApplication(applicationOne), applicationModel.addApplication(applicationTwo)];
-
-    await Promise.all(promises);
+    const promises = [
+      applicationModel.addApplication(applicationOne),
+      applicationModel.addApplication(applicationTwo)
+    ];
+    const [id1, id2] = await Promise.all(promises);
+    console.log(id1, id2, 'userId main')
+    applicationId1 = id1;
+    applicationId2 = id2;
   });
 
   after(async function () {
     await cleanDb();
   });
+
   describe("GET /applications", function () {
     it("should return all the application if the user is super user and there is no user id", function (done) {
       chai
@@ -135,6 +142,85 @@ describe("Application", function () {
           return done();
         });
     });
-
   });
+
+  describe("POST /applications", function () {
+    it("should create a application and return 201 if the user has not yet submitted the application", function (done) {
+      chai
+        .request(app)
+        .post(`/applications`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          ...applicationsData[2],
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(201);
+          expect(res.body.message).to.be.equal("User join data and newstatus data added and updated successfully");
+          return done();
+        });
+    });
+
+    it("should return 409 if the user data is already submitted and the status is not there", function(done) {
+      chai
+        .request(app)
+        .post(`/applications`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          ...applicationsData[2],
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(409);
+          expect(res.body.message).to.be.equal("User data is already present!");
+          return done();
+        });
+    })
+  });
+
+  describe("PATCH /application/:applicationId", function () {
+    it("should return 200 if the user is super user and application is updated", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId1}`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: 'accepted',
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Application updated successfully!");
+          return done();
+        });
+    })
+
+    it("should return 401 if the user is not super user", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId1}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          status: "accepted",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body.message).to.be.equal("You are not authorized for this action.");
+          return done();
+        });
+    })
+  })
 });
