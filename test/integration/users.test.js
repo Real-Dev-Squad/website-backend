@@ -15,7 +15,7 @@ const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
-const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
+const { getDiscordMembers, updatedNicknameResponse } = require("../fixtures/discordResponse/discord-response");
 const joinData = require("../fixtures/user/join");
 const {
   userStatusDataAfterSignup,
@@ -45,6 +45,7 @@ describe("Users", function () {
   let superUserId;
   let superUserAuthToken;
   let userId = "";
+  let fetchStub;
 
   beforeEach(async function () {
     userId = await addUser();
@@ -688,6 +689,65 @@ describe("Users", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.isUsernameAvailable).to.equal(false);
+
+          return done();
+        });
+    });
+  });
+
+  describe("GET /users/username", function () {
+    const firstname = "shubham";
+    const lastname = "sigdar";
+
+    it("Should return unique username when passing firstname and lastname", function (done) {
+      addUser(userData[15]).then((availableUsernameUserId) => {
+        const userJwt = authService.generateAuthToken({ userId: availableUsernameUserId });
+        chai
+          .request(app)
+          .get(`/users/username?firstname=${firstname}&lastname=${lastname}&dev=true`)
+          .set("cookie", `${cookieName}=${userJwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done();
+            }
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.a("object");
+            expect(res.body.username).to.equal("shubham-sigdar-2");
+
+            return done();
+          });
+      });
+    });
+
+    it("Should return 404 if feature flag is not pass", function (done) {
+      chai
+        .request(app)
+        .get(`/users/username?firstname=${firstname}&lastname=${lastname}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("UserName Not Found");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for empty firstname and lastname", function (done) {
+      chai
+        .request(app)
+        .get(`/users/username?firstname=&lastname=&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Invalid Query Parameters Passed");
 
           return done();
         });
@@ -1747,6 +1807,71 @@ describe("Users", function () {
           expect(res.body.message).to.equal(
             "Successfully updated users archived role to true if in_discord role is false"
           );
+          return done();
+        });
+    });
+  });
+  describe("PATCH /:userId/update-nickname", function () {
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      userId = await addUser(userData[0]);
+    });
+    afterEach(async function () {
+      await cleanDb();
+      Sinon.restore();
+    });
+    it("returns 200 for successfully updating nickname with patch method", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(updatedNicknameResponse),
+        })
+      );
+      chai
+        .request(app)
+        .patch(`/users/${userId}/update-nickname`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message.message).to.be.equal("User nickname changed successfully");
+          return done();
+        });
+    });
+  });
+
+  describe("test discord actions of nickname for unverified user", function () {
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      const superUser = userData[4];
+      userId = await addUser(userData[2]);
+      superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    });
+    afterEach(async function () {
+      await cleanDb();
+      Sinon.restore();
+    });
+    it("throw error if discordId is not present and user is not verified", function (done) {
+      fetchStub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("User not verified");
+        },
+      });
+      chai
+        .request(app)
+        .patch(`/users/${userId}/update-nickname`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          const response = res.body;
+          expect(response.message).to.be.equal("An internal server error occurred");
           return done();
         });
     });
