@@ -427,7 +427,7 @@ describe("users", function () {
       const userObj = await githubModalCircularDependency(usersArray);
       await users.addGithubCreatedAtKey(userObj);
       const docID = userObj[0].id;
-      const userRefAfter = await userModel.doc(docID).get();
+      const userRefAfter = await userModel.doc(`${docID}`).get();
       const dataAfter = userRefAfter.data();
       const afterAdd = Object.keys(dataAfter).includes("github_created_at");
       expect(afterAdd).to.be.equal(true);
