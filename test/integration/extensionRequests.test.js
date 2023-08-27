@@ -443,7 +443,8 @@ describe("Extension Requests", function () {
     it("should return success response and all extension requests with query params", function (done) {
       chai
         .request(app)
-        .get(`/extension-requests?q=taskId:${taskId3},assignee:${appOwner.id}`)
+        .get(`/extension-requests`)
+        .query({ taskId: taskId3, assignee: appOwner.id })
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
