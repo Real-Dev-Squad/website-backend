@@ -1,7 +1,7 @@
 const joi = require("joi");
 const { EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests");
 const { parseQueryParams } = require("../../utils/queryParser");
-const { BAD_REQUEST } = require("../../constants/errorMessages");
+const { URLSearchParams } = require("url");
 
 const ER_STATUS_ENUM = Object.values(EXTENSION_REQUEST_STATUS);
 
@@ -67,24 +67,26 @@ const updateExtensionRequest = async (req, res, next) => {
 const getExtensionRequestsValidator = async (req, res, next) => {
   const schema = joi.object().keys({
     dev: joi.bool().optional().sensitive(),
+    cursor: joi.string().optional(),
+    order: joi.string().valid("asc", "desc").optional(),
+    size: joi.number().integer().positive().min(1).max(100).optional(),
+    q: joi.string().optional(),
+  });
+
+  const querySchema = joi.object().keys({
     status: joi
       .alternatives()
       .try(joi.string().valid(...ER_STATUS_ENUM), joi.array().items(joi.string().valid(...ER_STATUS_ENUM)))
       .optional(),
-    cursor: joi.string().optional(),
-    order: joi.string().valid("asc", "desc").optional(),
-    size: joi.number().integer().positive().min(1).max(100).optional(),
     assignee: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),
     taskId: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),
   });
-
   try {
-    const queries = parseQueryParams(req._parsedUrl.search);
-    if (!queries) {
-      res.boom.badRequest(BAD_REQUEST);
-      return;
-    }
-    await schema.validateAsync(queries);
+    const { q: queryString } = req.query;
+    const urlSearchParams = new URLSearchParams();
+    urlSearchParams.append("q", queryString);
+    const queries = parseQueryParams(urlSearchParams.toString());
+    await Promise.all([schema.validateAsync(req.query), querySchema.validateAsync(queries)]);
     next();
   } catch (error) {
     logger.error(`Error validating fetch extension requests query : ${error}`);

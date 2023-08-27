@@ -443,8 +443,7 @@ describe("Extension Requests", function () {
     it("should return success response and all extension requests with query params", function (done) {
       chai
         .request(app)
-        .get(`/extension-requests`)
-        .query({ taskId: taskId3, assignee: appOwner.id })
+        .get(`/extension-requests?q=taskId:${taskId3},assignee:${appOwner.id}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
@@ -486,7 +485,7 @@ describe("Extension Requests", function () {
       const fetchPaginatedExtensionRequestStub = sinon.stub(extensionRequests, "fetchPaginatedExtensionRequests");
       chai
         .request(app)
-        .get("/extension-requests?q=dev:true,size:10")
+        .get("/extension-requests?dev=true&size=10")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
@@ -501,7 +500,7 @@ describe("Extension Requests", function () {
     it("Should have the link to get next set of results", function (done) {
       chai
         .request(app)
-        .get(`/extension-requests?q=dev:true,size:10`)
+        .get(`/extension-requests?dev=true&size=10`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
@@ -518,7 +517,7 @@ describe("Extension Requests", function () {
       chai
         .request(app)
         .get(
-          `/extension-requests?q=dev:true,status:${EXTENSION_REQUEST_STATUS.APPROVED}+${EXTENSION_REQUEST_STATUS.PENDING}`
+          `/extension-requests?dev=true&q=status:${EXTENSION_REQUEST_STATUS.APPROVED}+${EXTENSION_REQUEST_STATUS.PENDING}`
         )
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {

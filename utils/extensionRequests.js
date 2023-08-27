@@ -37,8 +37,13 @@ const transformQuery = (size, dev = false) => {
 
 const generateNextLink = (nextPageParams) => {
   const queryStringList = [];
+  const searchQueries = ["assignee", "taskId", "status"];
+  const urlSearchParams = new URLSearchParams();
+
   for (const [key, value] of Object.entries(nextPageParams)) {
-    if (value) {
+    if (!value) continue;
+
+    if (searchQueries.includes(key)) {
       let queryString;
       if (Array.isArray(value)) {
         queryString = key + ":" + value.join("+");
@@ -46,9 +51,10 @@ const generateNextLink = (nextPageParams) => {
         queryString = key + ":" + value;
       }
       queryStringList.push(queryString);
+    } else {
+      urlSearchParams.append(key, value);
     }
   }
-  const urlSearchParams = new URLSearchParams();
   urlSearchParams.append("q", queryStringList.join(","));
   const nextLink = `/extension-requests?${urlSearchParams.toString()}`;
   return nextLink;
