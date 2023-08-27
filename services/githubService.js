@@ -262,7 +262,11 @@ const fetchIssues = async () => {
 
 const getGithubCreatedAt = async (username) => {
   try {
-    const response = await fetch(`https://api.github.com/users/${username}`);
+    const response = await fetch(`https://api.github.com/users/${username}`, {
+      headers: {
+        Authorization: `Bearer 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`,
+      },
+    });
     const userData = await response.json();
     if (userData?.message === "Not Found") {
       return null;

@@ -1889,7 +1889,7 @@ describe("Users", function () {
     it("should add all the users with github_created_at field", function (done) {
       chai
         .request(app)
-        .patch("/users/backfill-github-created-at")
+        .post("/users/backfill-github-created-at")
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {

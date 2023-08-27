@@ -22,6 +22,7 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const userData = require("../../fixtures/user/user");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
+const { githubModalCircularDependency } = require("../../../utils/circularDependency");
 /**
  * Test the model functions and validate the data stored
  */
@@ -412,7 +413,9 @@ describe("users", function () {
     });
     it("check github_created_at field in users db", async function () {
       const usersRef = await users.fetchUsersWithoutGithubCreatedAtKey();
-      const userRefBefore = await usersRef[1].get();
+      const userObj = await githubModalCircularDependency(usersRef);
+      const docID = userObj[1].id;
+      const userRefBefore = await userModel.doc(docID).get();
       const dataBefore = await userRefBefore.data();
       const beforeAdd = Object.keys(dataBefore).includes("github_created_at");
       expect(beforeAdd).to.be.equal(false);
@@ -420,9 +423,12 @@ describe("users", function () {
 
     it("add github_created_at field in users db", async function () {
       const usersRef = await users.fetchUsersWithoutGithubCreatedAtKey();
-      await users.addGithubCreatedAtKey(usersRef);
-      const userRefAfter = await usersRef[1].get();
-      const dataAfter = await userRefAfter.data();
+      const usersArray = [usersRef[0]];
+      const userObj = await githubModalCircularDependency(usersArray);
+      await users.addGithubCreatedAtKey(userObj);
+      const docID = userObj[0].id;
+      const userRefAfter = await userModel.doc(docID).get();
+      const dataAfter = userRefAfter.data();
       const afterAdd = Object.keys(dataAfter).includes("github_created_at");
       expect(afterAdd).to.be.equal(true);
     });
