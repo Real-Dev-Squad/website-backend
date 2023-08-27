@@ -22,6 +22,7 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const userData = require("../../fixtures/user/user");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
+const { getUsersGithubCreatedAt } = require("../../../utils/users");
 /**
  * Test the model functions and validate the data stored
  */
@@ -391,6 +392,45 @@ describe("users", function () {
       await users.addOrUpdate(userData);
       const newUsername = await users.generateUniqueUsername("shubham", "sigdar");
       expect(newUsername).to.deep.equal("shubham-sigdar-2");
+    });
+  });
+  describe("add github key in DB", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("return array of users", async function () {
+      const data = await users.fetchUsersWithoutGithubCreatedAtKey();
+      expect(data).to.be.not.equal(null);
+    });
+    it("check github_created_at field in users db", async function () {
+      const usersRef = await users.fetchUsersWithoutGithubCreatedAtKey();
+      const userObj = await getUsersGithubCreatedAt(usersRef);
+      const docID = userObj[1].id;
+      const userRefBefore = await userModel.doc(docID).get();
+      const dataBefore = await userRefBefore.data();
+      const beforeAdd = Object.keys(dataBefore).includes("github_created_at");
+      expect(beforeAdd).to.be.equal(false);
+    });
+
+    it("add github_created_at field in users db", async function () {
+      const usersRef = await users.fetchUsersWithoutGithubCreatedAtKey();
+      const usersArray = [usersRef[0]];
+      const userObj = await getUsersGithubCreatedAt(usersArray);
+      await users.addGithubCreatedAtKey(userObj);
+      const docID = userObj[0].id;
+      const userRefAfter = await userModel.doc(`${docID}`).get();
+      const dataAfter = userRefAfter.data();
+      const afterAdd = Object.keys(dataAfter).includes("github_created_at");
+      expect(afterAdd).to.be.equal(true);
     });
   });
 });
