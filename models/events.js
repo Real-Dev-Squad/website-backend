@@ -262,6 +262,10 @@ const getEventCodes = async ({ id }) => {
       return eventCodeSnapshotData;
     });
 
+    if (!eventCodesArrayPromises) {
+      throw new Error("Event codes not found with this event id!");
+    }
+
     const eventCodesArray = await Promise.all(eventCodesArrayPromises);
     return eventCodesArray;
   } catch (error) {
