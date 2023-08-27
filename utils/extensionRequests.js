@@ -55,7 +55,7 @@ const generateNextLink = (nextPageParams) => {
       urlSearchParams.append(key, value);
     }
   }
-  urlSearchParams.append("q", queryStringList.join(","));
+  if (queryStringList.length > 0) urlSearchParams.append("q", queryStringList.join(","));
   const nextLink = `/extension-requests?${urlSearchParams.toString()}`;
   return nextLink;
 };

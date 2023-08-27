@@ -81,12 +81,29 @@ const getExtensionRequestsValidator = async (req, res, next) => {
     assignee: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),
     taskId: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),
   });
+  const oldSchema = joi.object().keys({
+    dev: joi.bool().optional().sensitive(),
+    cursor: joi.string().optional(),
+    order: joi.string().valid("asc", "desc").optional(),
+    size: joi.number().integer().positive().min(1).max(100).optional(),
+    status: joi
+      .alternatives()
+      .try(joi.string().valid(...ER_STATUS_ENUM), joi.array().items(joi.string().valid(...ER_STATUS_ENUM)))
+      .optional(),
+    assignee: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),
+    taskId: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),
+  });
   try {
-    const { q: queryString } = req.query;
-    const urlSearchParams = new URLSearchParams();
-    urlSearchParams.append("q", queryString);
-    const queries = parseQueryParams(urlSearchParams.toString());
-    await Promise.all([schema.validateAsync(req.query), querySchema.validateAsync(queries)]);
+    const { q: queryString, dev } = req.query;
+    if (dev === "true") {
+      const urlSearchParams = new URLSearchParams();
+      urlSearchParams.append("q", queryString);
+      const queries = parseQueryParams(urlSearchParams.toString());
+      await Promise.all([schema.validateAsync(req.query), querySchema.validateAsync(queries)]);
+    } else {
+      await oldSchema.validateAsync(req.query);
+    }
+
     next();
   } catch (error) {
     logger.error(`Error validating fetch extension requests query : ${error}`);
