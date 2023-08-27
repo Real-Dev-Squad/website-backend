@@ -3,6 +3,7 @@ const { EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests"
 const { parseQueryParams } = require("../../utils/queryParser");
 const { URLSearchParams } = require("url");
 
+
 const ER_STATUS_ENUM = Object.values(EXTENSION_REQUEST_STATUS);
 
 const createExtensionRequest = async (req, res, next) => {
@@ -103,7 +104,6 @@ const getExtensionRequestsValidator = async (req, res, next) => {
     } else {
       await oldSchema.validateAsync(req.query);
     }
-
     next();
   } catch (error) {
     logger.error(`Error validating fetch extension requests query : ${error}`);
