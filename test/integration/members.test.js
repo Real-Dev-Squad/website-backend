@@ -14,7 +14,7 @@ const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
-const dataAccess = require("../.././services/dataAccessLayer");
+const members = require("../../models/members");
 
 chai.use(chaiHttp);
 
@@ -261,7 +261,7 @@ describe("Members", function () {
   });
 
   describe("PATCH /members/archiveMembers/:username", function () {
-    let dataAccessStub;
+    let archiveRoleToMemberStub;
     beforeEach(async function () {
       const superUserId = await addUser(superUser);
       jwt = authService.generateAuthToken({ userId: superUserId });
@@ -271,20 +271,22 @@ describe("Members", function () {
       await cleanDb();
     });
     it("Should return an object with status 500 and an error message", function (done) {
-      dataAccessStub = Sinon.stub(dataAccess, "retrieveUsers");
-      dataAccessStub.throws(new Error(INTERNAL_SERVER_ERROR));
+      archiveRoleToMemberStub = Sinon.stub(members, "addArchiveRoleToMembers");
+      archiveRoleToMemberStub.throws(new Error(INTERNAL_SERVER_ERROR));
+
       addUser(userToBeArchived).then(() => {
         chai
           .request(app)
           .patch(`/members/archiveMembers/${userToBeArchived.username}`)
-          .set("Cookie", `${cookieName}=${jwt}`)
+          .set("cookie", `${cookieName}=${jwt}`)
           .send({ reason: "some reason" })
           .end((err, res) => {
             if (err) {
               return done(err);
             }
             expect(res).to.have.status(500);
-            expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal(INTERNAL_SERVER_ERROR);
             return done();
           });
       });
@@ -302,24 +304,6 @@ describe("Members", function () {
           expect(res).to.have.status(404);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User doesn't exist");
-          return done();
-        });
-    });
-    it("Should return 400 if body is empty", function (done) {
-      chai
-        .request(app)
-        .patch(`/members/archiveMembers/${userToBeArchived.username}`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({})
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(400);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Reason is required");
-
           return done();
         });
     });

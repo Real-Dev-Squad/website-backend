@@ -9,12 +9,17 @@ const dataAccess = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
-const { setInDiscordFalseScript } = require("../services/discordService");
+const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
 const { getQualifiers } = require("../utils/helper");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+const {
+  USERS_PATCH_HANDLER_ACTIONS,
+  USERS_PATCH_HANDLER_ERROR_MESSAGES,
+  USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
+} = require("../constants/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -196,6 +201,23 @@ const getUsernameAvailabilty = async (req, res) => {
   }
 };
 
+const generateUsername = async (req, res) => {
+  try {
+    const { firstname, lastname, dev } = req.query;
+    if (dev === "true") {
+      const username = await userQuery.generateUniqueUsername(firstname, lastname);
+      return res.json({ username });
+    } else {
+      return res.status(404).json({
+        message: "UserName Not Found",
+      });
+    }
+  } catch (error) {
+    logger.error(`Error while checking user: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
 /**
  * Fetches the data about logged in user
  *
@@ -310,6 +332,36 @@ const verifyUserImage = async (req, res) => {
   }
 };
 
+/**
+ * Patch Update user nickname
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const updateDiscordUserNickname = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const userToBeUpdated = await dataAccess.retrieveUsers({ id: userId });
+    const { discordId, username } = userToBeUpdated.user;
+    if (!discordId) {
+      throw new Error("user not verified");
+    }
+    const response = await setUserDiscordNickname(username, discordId);
+
+    return res.json({
+      userAffected: {
+        userId,
+        username,
+        discordId,
+      },
+      message: response,
+    });
+  } catch (err) {
+    logger.error(`Error while updating nickname: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
 const markUnverified = async (req, res) => {
   try {
     const [usersInRdsDiscordServer, allRdsLoggedInUsers] = await Promise.all([getDiscordMembers(), fetchAllUsers()]);
@@ -570,34 +622,15 @@ const filterUsers = async (req, res) => {
   }
 };
 
-const nonVerifiedDiscordUsers = async (req, res) => {
+const nonVerifiedDiscordUsers = async () => {
   const data = await dataAccess.retrieveDiscordUsers();
-  return res.json(data);
+  return data;
 };
 
 const setInDiscordScript = async (req, res) => {
   try {
     await setInDiscordFalseScript();
     return res.json({ message: "Successfully added the in_discord field to false for all users" });
-  } catch (err) {
-    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
-  }
-};
-
-const removeTokens = async (req, res) => {
-  try {
-    const users = await userQuery.fetchUsersWithToken();
-
-    if (!users.length) {
-      return res.status(404).json({ message: "No users found with github Token!" });
-    }
-
-    await userQuery.removeGitHubToken(users);
-
-    return res.status(200).json({
-      message: "Github Token removed from all users!",
-      usersFound: users.length,
-    });
   } catch (err) {
     return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
   }
@@ -626,6 +659,58 @@ const updateRoles = async (req, res) => {
   }
 };
 
+const archiveUserIfNotInDiscord = async () => {
+  try {
+    const data = await userQuery.archiveUserIfNotInDiscord();
+
+    if (data.totalUsers === 0) {
+      return {
+        message: USERS_PATCH_HANDLER_ERROR_MESSAGES.ARCHIVE_USERS.NO_USERS_DATA_TO_UPDATE,
+        summary: data,
+      };
+    }
+
+    return {
+      message: USERS_PATCH_HANDLER_SUCCESS_MESSAGES.ARCHIVE_USERS.SUCCESSFULLY_UPDATED_DATA,
+      summary: data,
+    };
+  } catch (error) {
+    logger.error(`Error while updating the archived role: ${error}`);
+    throw Error(INTERNAL_SERVER_ERROR);
+  }
+};
+
+async function usersPatchHandler(req, res) {
+  try {
+    const { action } = req.body;
+    let response;
+
+    if (action === USERS_PATCH_HANDLER_ACTIONS.NON_VERFIED_DISCORD_USERS) {
+      const data = await nonVerifiedDiscordUsers();
+      response = data;
+    }
+
+    if (action === USERS_PATCH_HANDLER_ACTIONS.ARCHIVE_USERS) {
+      const debugQuery = req.query.debug?.toLowerCase();
+      const data = await archiveUserIfNotInDiscord();
+
+      if (debugQuery === "true") {
+        data.summary.updatedUserDetails = data.summary.updatedUserDetails.slice(-3);
+        response = data;
+      } else {
+        delete data.summary.updatedUserDetails;
+        delete data.summary.failedUserDetails;
+        response = data;
+      }
+    }
+
+    return res.status(200).json(response);
+  } catch (error) {
+    logger.error("Error while handling the users common patch route:", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+}
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -634,6 +719,7 @@ module.exports = {
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
+  generateUsername,
   getSuggestedUsers,
   postUserPicture,
   updateUser,
@@ -650,6 +736,8 @@ module.exports = {
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
-  removeTokens,
   updateRoles,
+  updateDiscordUserNickname,
+  archiveUserIfNotInDiscord,
+  usersPatchHandler,
 };
