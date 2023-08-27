@@ -3,7 +3,7 @@ const { validateJoinData, validateUsersPatchHandler } = require("./../../../midd
 const joinData = require("./../../fixtures/user/join");
 const userData = require("./../../fixtures/user/user");
 const { expect } = require("chai");
-const { updateUser } = require("./../../../middlewares/validators/user");
+const { updateUser, getUsers } = require("./../../../middlewares/validators/user");
 
 describe("Middleware | Validators | User", function () {
   describe("Create user validator for validateJoinData", function () {
@@ -174,6 +174,43 @@ describe("Middleware | Validators | User", function () {
       };
       const nextSpy = sinon.spy();
       await updateUser(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+      expect(nextSpy.calledOnce).to.be.equal(false);
+    });
+  });
+
+  describe("Create user validator for getUsers", function () {
+    it("lets the request pass to next", async function () {
+      const req = {
+        query: {
+          filterBy: "unmerged_prs",
+          days: "30",
+        },
+      };
+
+      const res = {};
+      const next = sinon.spy();
+
+      await getUsers(req, res, next);
+      expect(next.calledOnce).to.be.equal(true);
+    });
+
+    it("Stops the propagation of the next", async function () {
+      const req = {
+        query: {
+          filterBy: 45,
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = sinon.spy();
+
+      await getUsers(req, res, nextSpy).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
       });
       expect(nextSpy.calledOnce).to.be.equal(false);
