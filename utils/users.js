@@ -1,4 +1,5 @@
-const { fetchUser } = require("../models/users");
+const { fetchUser, fetchUsers } = require("../models/users");
+const { getGithubCreatedAt } = require("../services/githubService");
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 
@@ -196,6 +197,20 @@ const getRoleToUpdate = async (userData, newRoles) => {
   return { updateRole: true, newUserRoles };
 };
 
+const getUsersGithubCreatedAt = async (users) => {
+  const usersData = await fetchUsers(users);
+  const usersGithubCreatedAt = await Promise.all(
+    usersData.users.map(async (user) => {
+      const githubCreatedAt = await getGithubCreatedAt(user.github_id);
+      return {
+        id: user.id,
+        github_created_at: githubCreatedAt,
+      };
+    })
+  );
+  return usersGithubCreatedAt;
+};
+
 module.exports = {
   addUserToDBForTest,
   getUserId,
@@ -208,4 +223,5 @@ module.exports = {
   getUsernameElseUndefined,
   getUserIdElseUndefined,
   getRoleToUpdate,
+  getUsersGithubCreatedAt,
 };

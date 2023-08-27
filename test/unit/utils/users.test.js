@@ -6,6 +6,11 @@ const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
 const { filteredPRs } = require("../../fixtures/pullrequests/pullrequests");
 const userData = require("../../fixtures/user/user")()[0];
+const firestore = require("../../../utils/firestore");
+const { getUsersGithubCreatedAt } = require("../../../utils/users");
+const userDataArray = require("../../fixtures/user/user")();
+const userModel = firestore.collection("users");
+
 /**
  * Test the utils functions and validate the data returned
  */
@@ -131,6 +136,27 @@ describe("users", function () {
           member: false,
         },
       },
+    });
+  });
+
+  describe("get users with github created at key", function () {
+    beforeEach(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user) => {
+        addUsersPromises.push(userModel.add(user));
+      });
+      await Promise.all(addUsersPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("should give array of object with is and github_created_at keys", async function () {
+      const data = ["ankushdharkar"];
+
+      const dataS = await getUsersGithubCreatedAt(data);
+
+      expect(dataS[0].github_created_at).to.equal(1341655281000);
     });
   });
 });

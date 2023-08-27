@@ -20,7 +20,7 @@ const {
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
 } = require("../constants/users");
-const { githubModalCircularDependency } = require("../utils/circularDependency");
+const { getUsersGithubCreatedAt } = require("../utils/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -718,12 +718,12 @@ const addGithubCreatedAtKey = async (req, res) => {
     if (!users.length) {
       return res.status(404).json({ message: "No users found without github created at key!" });
     }
-    const usersGithubKey = await githubModalCircularDependency(users);
+    const usersGithubKey = await getUsersGithubCreatedAt(users);
     await userQuery.addGithubCreatedAtKey(usersGithubKey);
 
     return res.status(200).json({
       message: "Github created at added for all users!",
-      usersFound: users.length,
+      usersUpdated: users.length,
     });
   } catch (err) {
     return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
