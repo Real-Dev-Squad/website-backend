@@ -547,6 +547,66 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+
+    it("Should return paginated response when dev flag and size is passed", function (done) {
+      const fetchPaginatedExtensionRequestStub = sinon.stub(extensionRequests, "fetchPaginatedExtensionRequests");
+      chai
+        .request(app)
+        .get("/extension-requests?q=dev:true,size:10")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(fetchPaginatedExtensionRequestStub.calledOnce).to.be.equal(true);
+
+          return done();
+        });
+    });
+
+    it("Should have the link to get next set of results", function (done) {
+      chai
+        .request(app)
+        .get(`/extension-requests?q=dev:true,size:10`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.property("next");
+          return done();
+        });
+    });
+
+    it("Should get all extension requests filtered with status when multiple params are passed", function (done) {
+      chai
+        .request(app)
+        .get(
+          `/extension-requests?q=dev:true,status:${EXTENSION_REQUEST_STATUS.APPROVED}+${EXTENSION_REQUEST_STATUS.PENDING}`
+        )
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Extension Requests returned successfully!");
+          expect(res.body.allExtensionRequests).to.be.a("array");
+          expect(res.body).to.have.property("next");
+
+          const extensionRequestsList = res.body.allExtensionRequests ?? [];
+          extensionRequestsList.forEach((extensionReq) => {
+            expect(extensionReq.status).to.be.oneOf([
+              EXTENSION_REQUEST_STATUS.APPROVED,
+              EXTENSION_REQUEST_STATUS.PENDING,
+            ]);
+          });
+          return done();
+        });
+    });
   });
 
   describe("PATCH /extension-requests/:id/status", function () {
