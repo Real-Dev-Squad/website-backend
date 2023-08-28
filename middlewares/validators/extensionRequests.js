@@ -94,8 +94,9 @@ const getExtensionRequestsValidator = async (req, res, next) => {
     taskId: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),
   });
   try {
-    const { q: queryString, dev } = req.query;
-    if (dev === "true") {
+    const { q: queryString, dev = false } = req.query;
+    const transformedDev = JSON.parse(dev);
+    if (transformedDev) {
       const urlSearchParams = new URLSearchParams();
       urlSearchParams.append("q", queryString);
       const queries = parseQueryParams(urlSearchParams.toString());
