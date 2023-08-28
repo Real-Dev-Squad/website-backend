@@ -119,4 +119,57 @@ const syncExternalAccountData = async (req, res) => {
   }
 };
 
-module.exports = { addExternalAccountData, getExternalAccountData, syncExternalAccountData };
+/**
+ * Gets all group-roles
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const newSyncExternalAccountData = async (req, res) => {
+  try {
+    const [discordUserData, unArchivedRdsUsersData] = await Promise.all([getDiscordMembers(), retrieveDiscordUsers()]);
+
+    const discordUserIdSet = new Set();
+
+    discordUserData.forEach((discordUser) => discordUserIdSet.add(discordUser.user.id));
+
+    const updateUserList = [];
+
+    for (const rdsUser of unArchivedRdsUsersData) {
+      let userData = {};
+      if (discordUserIdSet.has(rdsUser.discordId)) {
+        userData = {
+          roles: {
+            ...rdsUser.roles,
+            in_discord: true,
+            archived: false,
+          },
+        };
+        discordUserIdSet.delete(rdsUser.discordId);
+        updateUserList.push(userData);
+      } else if (rdsUser.roles?.in_discord) {
+        userData = {
+          roles: {
+            ...rdsUser.roles,
+            in_discord: false,
+            archived: true,
+          },
+        };
+        updateUserList.push(userData);
+      }
+    }
+
+    return res.json({
+      message: "Data Sync Complete",
+    });
+  } catch (err) {
+    logger.error("Error in syncing users discord joined at", err);
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
+module.exports = {
+  addExternalAccountData,
+  getExternalAccountData,
+  syncExternalAccountData,
+  newSyncExternalAccountData,
+};

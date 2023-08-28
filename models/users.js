@@ -750,6 +750,26 @@ const generateUniqueUsername = async (firstname, lastname) => {
   }
 };
 
+const updateUsersInBatch = async (usersData) => {
+  try {
+    const userDataChunks = chunks(usersData, DOCUMENT_WRITE_SIZE);
+
+    const batchUpdatePromiseList = [];
+    for (const userData of userDataChunks) {
+      const batch = firestore.batch();
+
+      userData.forEach((user) => {
+        batch.update(userModel.doc(user.id), user);
+      });
+      const batchUpdatePromise = batch.commit();
+      batchUpdatePromiseList.push(batchUpdatePromise);
+    }
+    await Promise.all(batchUpdatePromiseList);
+  } catch (err) {
+    logger.error("Firebase batch Operation Failed!");
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -775,4 +795,5 @@ module.exports = {
   getUsersByRole,
   fetchUserByIds,
   generateUniqueUsername,
+  updateUsersInBatch,
 };
