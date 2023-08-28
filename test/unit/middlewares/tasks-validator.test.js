@@ -429,10 +429,7 @@ describe("getTasks validator", function () {
   });
 
   it("should return a bad request error when empty request body is provided", async function () {
-    const invalidRequestBody = {
-      // Invalid: Missing required fields
-    };
-
+    const invalidRequestBody = {};
     const req = {
       body: invalidRequestBody,
     };
