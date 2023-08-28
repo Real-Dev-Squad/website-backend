@@ -6,6 +6,7 @@ const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { transformQuery } = require("../utils/extensionRequests");
 const { parseQueryParams } = require("../utils/queryParser");
+
 /**
  * Create ETA extension Request
  *
@@ -91,15 +92,15 @@ const createTaskExtensionRequest = async (req, res) => {
  */
 const fetchExtensionRequests = async (req, res) => {
   try {
-    const { status, taskId, assignee, dev, cursor, size, order } = parseQueryParams(req._parsedUrl.search);
-
-    const { transformedSize, transformedDev } = transformQuery(size, dev);
+    const { dev, cursor, size, order } = req.query;
+    const { status, taskId, assignee } = parseQueryParams(req._parsedUrl.search);
+    const { transformedSize, transformedDev, transformedStatus } = transformQuery(size, dev, status);
 
     let allExtensionRequests;
 
     if (transformedDev) {
       allExtensionRequests = await extensionRequestsQuery.fetchPaginatedExtensionRequests(
-        { taskId, status, assignee },
+        { taskId, status: transformedStatus, assignee },
         { cursor, order, size: transformedSize, dev }
       );
       return res.json({
@@ -107,7 +108,11 @@ const fetchExtensionRequests = async (req, res) => {
         ...allExtensionRequests,
       });
     } else {
-      allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({ taskId, status, assignee });
+      allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
+        taskId,
+        status: transformedStatus,
+        assignee,
+      });
     }
 
     return res.json({
