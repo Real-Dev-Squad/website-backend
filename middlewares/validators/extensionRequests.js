@@ -76,7 +76,18 @@ const getExtensionRequestsValidator = async (req, res, next) => {
   const querySchema = joi.object().keys({
     status: joi
       .alternatives()
-      .try(joi.string().valid(...ER_STATUS_ENUM), joi.array().items(joi.string().valid(...ER_STATUS_ENUM)))
+      .try(
+        joi
+          .string()
+          .valid(...ER_STATUS_ENUM)
+          .insensitive(),
+        joi.array().items(
+          joi
+            .string()
+            .valid(...ER_STATUS_ENUM)
+            .insensitive()
+        )
+      )
       .optional(),
     assignee: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),
     taskId: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),
@@ -88,7 +99,18 @@ const getExtensionRequestsValidator = async (req, res, next) => {
     size: joi.number().integer().positive().min(1).max(100).optional(),
     status: joi
       .alternatives()
-      .try(joi.string().valid(...ER_STATUS_ENUM), joi.array().items(joi.string().valid(...ER_STATUS_ENUM)))
+      .try(
+        joi
+          .string()
+          .valid(...ER_STATUS_ENUM)
+          .insensitive(),
+        joi.array().items(
+          joi
+            .string()
+            .valid(...ER_STATUS_ENUM)
+            .insensitive()
+        )
+      )
       .optional(),
     assignee: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),
     taskId: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),

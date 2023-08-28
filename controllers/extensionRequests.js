@@ -94,13 +94,13 @@ const fetchExtensionRequests = async (req, res) => {
   try {
     const { dev, cursor, size, order } = req.query;
     const { status, taskId, assignee } = parseQueryParams(req._parsedUrl.search);
-    const { transformedSize, transformedDev } = transformQuery(size, dev);
+    const { transformedSize, transformedDev, transformedStatus } = transformQuery(size, dev, status);
 
     let allExtensionRequests;
 
     if (transformedDev) {
       allExtensionRequests = await extensionRequestsQuery.fetchPaginatedExtensionRequests(
-        { taskId, status, assignee },
+        { taskId, status: transformedStatus, assignee },
         { cursor, order, size: transformedSize, dev }
       );
       return res.json({
@@ -108,7 +108,11 @@ const fetchExtensionRequests = async (req, res) => {
         ...allExtensionRequests,
       });
     } else {
-      allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({ taskId, status, assignee });
+      allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
+        taskId,
+        status: transformedStatus,
+        assignee,
+      });
     }
 
     return res.json({

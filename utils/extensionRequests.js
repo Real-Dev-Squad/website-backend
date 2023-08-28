@@ -24,15 +24,22 @@ const formatExtensionRequest = async (extensionRequest) => {
   return { ...body, id, timestamp, assignee };
 };
 
-const transformQuery = (size, dev = false) => {
+const transformQuery = (size, dev = false, status) => {
   const transformedDev = JSON.parse(dev);
 
   let transformedSize;
   if (size) {
     transformedSize = parseInt(size);
   }
+  let transformedStatus;
 
-  return { transformedSize: transformedSize, transformedDev: transformedDev };
+  if (status && Array.isArray(status)) {
+    transformedStatus = [];
+    status.forEach((statusItem) => transformedStatus.push(statusItem.toUpperCase()));
+  } else if (status) {
+    transformedStatus = status.toUpperCase();
+  }
+  return { transformedSize: transformedSize, transformedDev: transformedDev, transformedStatus: transformedStatus };
 };
 
 const generateNextLink = (nextPageParams) => {
