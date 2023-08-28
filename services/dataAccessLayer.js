@@ -10,8 +10,8 @@ const retrieveUsers = async ({
   query = null,
   userdata,
 }) => {
+  let result;
   if (id || username) {
-    let result;
     if (id != null) {
       result = await userQuery.fetchUser({ userId: id });
     } else {
@@ -32,9 +32,7 @@ const retrieveUsers = async ({
     });
     return { allUsers, nextId, prevId };
   } else if (discordId !== null) {
-    console.log("retireve user", discordId);
     result = await userQuery.fetchUser({ discordId: discordId });
-    console.log("result****", result);
     return result;
   } else {
     removeSensitiveInfo(userdata);

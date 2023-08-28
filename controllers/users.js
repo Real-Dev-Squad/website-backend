@@ -15,7 +15,6 @@ const { addRoleToUser, getDiscordMembers } = require("../services/discordService
 const { fetchAllUsers } = require("../models/users");
 const { getQualifiers } = require("../utils/helper");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
-const { getUserStatus } = require("../controllers/userStatus");
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
   try {
@@ -89,12 +88,9 @@ const getUsers = async (req, res) => {
         user,
       });
     }
-    console.log(req.query);
 
     // getting user details by discord id if present.
     if (req.query.discordId) {
-      console.log("abcs", req.query.discordId);
-
       const discordId = req.query.discordId;
       let result, user;
       try {
