@@ -1,8 +1,12 @@
 const { expect } = require("chai");
 const sinon = require("sinon");
+const firestore = require("../../../utils/firestore");
+
 const { ROLES } = require("../../../constants/events");
 const authorizeEventRoles = require("../../../middlewares/authorizeEventRoles");
-// const eventQuery = require("../../../models/events");
+const eventModel = firestore.collection("events");
+
+const eventQuery = require("../../../models/events");
 const eventDataArray = require("../../fixtures/events/events")();
 const eventData = eventDataArray[0];
 
@@ -53,7 +57,10 @@ describe("authorizeEventRoles", function () {
     req.body.roomId = eventData.room_id;
     req.body.eventCode = "code1";
 
-    // sinon.stub(eventQuery, "getAllEventCodes").resolves(["code1"]);
+    const docRef = eventModel.doc(eventData.room_id);
+    await docRef.set(eventData);
+
+    await eventQuery.getAllEventCodes(eventData.room_id);
 
     await authorizeEventRoles(["maven"])(req, res, next);
 
