@@ -1,7 +1,11 @@
 const { customWordCountValidator } = require("../../utils/customWordCountValidator");
 
 const joi = require("joi");
-const { USER_STATUS } = require("../../constants/users");
+const {
+  USER_STATUS,
+  USERS_PATCH_HANDLER_ACTIONS,
+  USERS_PATCH_HANDLER_ERROR_MESSAGES,
+} = require("../../constants/users");
 const ROLES = require("../../constants/roles");
 const { IMAGE_VERIFICATION_TYPES } = require("../../constants/imageVerificationTypes");
 const { userState } = require("../../constants/userStatus");
@@ -173,6 +177,8 @@ async function getUsers(req, res, next) {
           "string.empty": "prev value cannot be empty",
         }),
       query: joi.string().optional(),
+      filterBy: joi.string().optional(),
+      days: joi.string().optional(),
     });
   try {
     await schema.validateAsync(req.query);
@@ -207,6 +213,10 @@ async function validateUserQueryParams(req, res, next) {
         .optional(),
       role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD, ROLES.ARCHIVED).optional(),
       verified: joi.string().optional(),
+      time: joi
+        .string()
+        .regex(/^[1-9]\d*d$/)
+        .optional(),
     })
     .messages({
       "object.min": "Please provide at least one filter criteria",
@@ -256,6 +266,49 @@ async function validateUpdateRoles(req, res, next) {
   }
 }
 
+async function validateUsersPatchHandler(req, res, next) {
+  const requestBodySchema = joi.object({
+    action: joi
+      .string()
+      .valid(USERS_PATCH_HANDLER_ACTIONS.ARCHIVE_USERS, USERS_PATCH_HANDLER_ACTIONS.NON_VERFIED_DISCORD_USERS)
+      .required(),
+  });
+
+  try {
+    await requestBodySchema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error("Error in validating action payload", error);
+    res.boom.badRequest(`${USERS_PATCH_HANDLER_ERROR_MESSAGES.VALIDATE_PAYLOAD}: ${error.message}`);
+  }
+}
+
+/**
+ * Validates query params for the username route
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ * @param next {Object} - Express middelware function
+ */
+const validateGenerateUsernameQuery = async (req, res, next) => {
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      firstname: joi.string().min(1).required(),
+      lastname: joi.string().min(1).required(),
+      dev: joi.string().valid("true").optional(),
+    });
+
+  try {
+    await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    logger.error("Invalid Query Parameters Passed");
+    res.boom.badRequest("Invalid Query Parameters Passed");
+  }
+};
+
 module.exports = {
   updateUser,
   updateProfileURL,
@@ -264,4 +317,6 @@ module.exports = {
   validateUserQueryParams,
   validateImageVerificationQuery,
   validateUpdateRoles,
+  validateUsersPatchHandler,
+  validateGenerateUsernameQuery,
 };
