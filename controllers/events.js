@@ -1,9 +1,12 @@
-/* eslint-disable camelcase */
-const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS } = require("../constants/events");
+const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS, ROLES } = require("../constants/events");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { EventTokenService, EventAPIService } = require("../services");
-const { removeUnwantedProperties } = require("../utils/events");
 const eventQuery = require("../models/events");
+
 const logger = require("../utils/logger");
+const { removeUnwantedProperties } = require("../utils/events");
+
+const crypto = require("crypto");
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
@@ -100,7 +103,7 @@ const joinEvent = async (req, res) => {
     });
   } catch (error) {
     logger.error({ error });
-    return res.status(500).send("Internal Server Error");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -193,6 +196,99 @@ const endActiveEvent = async (req, res) => {
   }
 };
 
+/**
+ * Adds a peer to an event.
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with the added peer data and a success message.
+ * @throws {Object} The JSON response with an error message if an error occurred while adding the peer.
+ */
+const addPeerToEvent = async (req, res) => {
+  try {
+    const data = await eventQuery.addPeerToEvent({
+      peerId: req.body.peerId,
+      name: req.body.name,
+      role: req.body.role,
+      joinedAt: req.body.joinedAt,
+      eventId: req.params.id,
+    });
+    return res.status(200).json({
+      data,
+      message: `Selected Participant is added to the event.`,
+    });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "You can't add selected Participant. Please ask Admin or Host for help.",
+    });
+  }
+};
+
+/**
+ * Kicks out a peer from an event.
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with a success message if the peer is successfully kicked out.
+ * @throws {Object} The JSON response with an error message if an error occurred while kicking out the peer.
+ */
+const kickoutPeer = async (req, res) => {
+  const { id } = req.params;
+  const payload = {
+    peer_id: req.body.peerId,
+    reason: req.body.reason,
+  };
+
+  try {
+    await apiService.post(`/active-rooms/${id}/remove-peers`, payload);
+    await eventQuery.kickoutPeer({ eventId: id, peerId: payload.peer_id, reason: req.body.reason });
+    return res.status(200).json({
+      message: `Selected Participant is removed from event.`,
+    });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "You can't remove selected Participant from Remove, Please ask Admin or Host for help.",
+    });
+  }
+};
+
+const generateEventCode = async (req, res) => {
+  // this id is for events
+  const { id } = req.params;
+  const { eventCode, role } = req.body;
+  const eventCodeUuid = crypto.randomUUID({ disableEntropyCache: true });
+
+  if (role !== ROLES.MAVEN) {
+    return res.status(400).json({
+      message: "Currently the room codes feature is only for mavens!",
+    });
+  }
+
+  try {
+    const allEventCodeObjectFromDB = await eventQuery.createEventCode({
+      id: eventCodeUuid,
+      event_id: id,
+      code: eventCode,
+      role,
+    });
+    return res.status(201).json({ message: "Event code created succesfully!", data: [...allEventCodeObjectFromDB] });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Couldn't create event code. Please try again later",
+    });
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -200,4 +296,7 @@ module.exports = {
   getEventById,
   updateEvent,
   endActiveEvent,
+  addPeerToEvent,
+  kickoutPeer,
+  generateEventCode,
 };

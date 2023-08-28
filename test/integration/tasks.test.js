@@ -61,6 +61,7 @@ describe("Tasks", function () {
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
         isNoteworthy: false,
+        assignee: appOwner.username,
       },
     ];
 
@@ -206,6 +207,47 @@ describe("Tasks", function () {
           tasksData.forEach((task) => {
             expect(task.status).to.equal(TASK_STATUS.IN_PROGRESS);
           });
+          return done();
+        });
+    });
+
+    it("Should get all tasks filtered with status ,assignee, title when passed to GET /tasks", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?status=${TASK_STATUS.AVAILABLE}&dev=true&assignee=sagar&title=Test`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          const tasksData = res.body.tasks ?? [];
+          tasksData.forEach((task) => {
+            expect(task.status).to.equal(TASK_STATUS.AVAILABLE);
+            expect(task.assignee).to.equal("sagar");
+            expect(task.title).to.include("Test");
+          });
+          return done();
+        });
+    });
+
+    it("Should get all overdue tasks GET /tasks", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?dev=true&status=overdue`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.tasks[0].id).to.be.oneOf([taskId, taskId1]);
           return done();
         });
     });
@@ -767,7 +809,7 @@ describe("Tasks", function () {
     });
 
     it("Should return Forbidden error if task is not assigned to self", async function () {
-      const { userId } = await addUser(userData[0]);
+      const userId = await addUser(userData[0]);
       const jwt = authService.generateAuthToken({ userId });
 
       const res = await chai.request(app).patch(`/tasks/self/${taskId1}`).set("cookie", `${cookieName}=${jwt}`);

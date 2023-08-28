@@ -2,7 +2,13 @@ const passport = require("passport");
 const users = require("../models/users");
 const QrCodeAuthModel = require("../models/qrCodeAuth");
 const authService = require("../services/authService");
-const { SOMETHING_WENT_WRONG, DATA_ADDED_SUCCESSFULLY, BAD_REQUEST } = require("../constants/errorMessages");
+const dataAccess = require("../services/dataAccessLayer");
+const {
+  SOMETHING_WENT_WRONG,
+  DATA_ADDED_SUCCESSFULLY,
+  USER_DOES_NOT_EXIST_ERROR,
+} = require("../constants/errorMessages");
+const { generateUniqueToken } = require("../utils/generateUniqueToken");
 
 /**
  * Makes authentication call to GitHub statergy
@@ -49,11 +55,10 @@ const githubAuthCallback = (req, res, next) => {
         logger.error(err);
         return res.boom.unauthorized("User cannot be authenticated");
       }
-
       userData = {
         github_id: user.username,
         github_display_name: user.displayName,
-        // github_account_created_at: user.created_at,
+        github_created_at: Number(new Date(user._json.created_at).getTime()),
         created_at: Date.now(),
         updated_at: Date.now(),
       };
@@ -111,13 +116,12 @@ const storeUserDeviceInfo = async (req, res) => {
       authorization_status: "NOT_INIT",
     };
 
-    const userInfo = await QrCodeAuthModel.storeUserDeviceInfo(userJson);
+    const userInfoData = await dataAccess.retrieveUsers({ id: userJson.user_id });
 
-    if (!userInfo) {
-      return res.status(404).json({
-        message: BAD_REQUEST,
-      });
+    if (!userInfoData.userExists) {
+      return res.boom.notFound(USER_DOES_NOT_EXIST_ERROR);
     }
+    const userInfo = await QrCodeAuthModel.storeUserDeviceInfo(userJson);
 
     return res.status(201).json({
       ...userInfo,
@@ -133,7 +137,11 @@ const updateAuthStatus = async (req, res) => {
   try {
     const userId = req.userData.id;
     const authStatus = req.params.authorization_status;
-    const result = await QrCodeAuthModel.updateStatus(userId, authStatus);
+    let token;
+    if (authStatus === "AUTHORIZED") {
+      token = await generateUniqueToken();
+    }
+    const result = await QrCodeAuthModel.updateStatus(userId, authStatus, token);
 
     if (!result.userExists) {
       return res.boom.notFound("Document not found!");
@@ -151,8 +159,8 @@ const updateAuthStatus = async (req, res) => {
 
 const fetchUserDeviceInfo = async (req, res) => {
   try {
-    const deviceId = req.query.device_id;
-    const userDeviceInfoData = await QrCodeAuthModel.retrieveUserDeviceInfo(deviceId);
+    const { device_id: deviceId } = req.query;
+    const userDeviceInfoData = await QrCodeAuthModel.retrieveUserDeviceInfo({ deviceId });
     if (!userDeviceInfoData.userExists) {
       return res.boom.notFound(`User with id ${deviceId} does not exist.`);
     }
@@ -166,6 +174,23 @@ const fetchUserDeviceInfo = async (req, res) => {
   }
 };
 
+const fetchDeviceDetails = async (req, res) => {
+  try {
+    const userId = req.userData.id;
+    const userDeviceInfoData = await QrCodeAuthModel.retrieveUserDeviceInfo({ userId });
+    if (!userDeviceInfoData.userExists) {
+      return res.boom.notFound(`User with id ${userId} does not exist.`);
+    }
+    return res.json({
+      message: "Authentication document Exists",
+      data: { device_info: userDeviceInfoData.data?.device_info },
+    });
+  } catch (error) {
+    logger.error(`Error while fetching user device info: ${error}`);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+  }
+};
+
 module.exports = {
   githubAuthLogin,
   githubAuthCallback,
@@ -173,4 +198,5 @@ module.exports = {
   storeUserDeviceInfo,
   updateAuthStatus,
   fetchUserDeviceInfo,
+  fetchDeviceDetails,
 };
