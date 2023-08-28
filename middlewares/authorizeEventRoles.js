@@ -23,7 +23,7 @@ const authorizeEventRoles = (allowedRoles) => {
       if (roles) {
         if (req.body.role === ROLES.HOST && userHasPermission(roles, allowedRoles)) {
           return next();
-        } else if (req.body.role === ROLES.MODERATOR && userHasPermission(roles, allowedRoles)) {
+        } else if (req.body.role === ROLES.MODERATOR && userHasPermission(roles, allowedRoles) && roles.member) {
           return next();
         }
       }

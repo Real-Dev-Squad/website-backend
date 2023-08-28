@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS, ROLES } = require("../constants/events");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { EventTokenService, EventAPIService } = require("../services");
@@ -96,6 +97,13 @@ const joinEvent = async (req, res) => {
   const payload = { roomId, userId, role };
   try {
     const token = tokenService.getAuthToken(payload);
+
+    // TODO: get - retrieve all active events
+
+    const eventData = await apiService.get("https://api.100ms.live/v2/active-rooms");
+
+    console.log({ eventData });
+
     return res.status(201).json({
       token: token,
       message: "Token generated successfully!",
