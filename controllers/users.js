@@ -15,7 +15,7 @@ const { addRoleToUser, getDiscordMembers } = require("../services/discordService
 const { fetchAllUsers } = require("../models/users");
 const { getQualifiers } = require("../utils/helper");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
-
+const { getUserStatus } = require("../controllers/userStatus");
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
   try {
@@ -77,6 +77,30 @@ const getUsers = async (req, res) => {
       try {
         result = await dataAccess.retrieveUsers({ id: id });
         user = result.user;
+      } catch (error) {
+        logger.error(`Error while fetching user: ${error}`);
+        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+      }
+      if (!result.userExists) {
+        return res.boom.notFound("User doesn't exist");
+      }
+      return res.json({
+        message: "User returned successfully!",
+        user,
+      });
+    }
+    console.log(req.query);
+
+    // getting user details by discord id if present.
+    if (req.query.discordId) {
+      console.log("abcs", req.query.discordId);
+
+      const discordId = req.query.discordId;
+      let result, user;
+      try {
+        result = await dataAccess.retrieveUsers({ discordId: discordId });
+        user = await result;
+        // user = user.user;
       } catch (error) {
         logger.error(`Error while fetching user: ${error}`);
         return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);

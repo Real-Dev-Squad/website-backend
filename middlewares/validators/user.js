@@ -146,6 +146,9 @@ async function getUsers(req, res, next) {
       id: joi.string().optional().messages({
         "string.empty": "id value must not be empty",
       }),
+      discordId: joi.string().optional().messages({
+        "string.empty": "discord id value must not be empty",
+      }),
       next: joi
         .string()
         .optional()

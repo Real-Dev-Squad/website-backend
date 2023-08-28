@@ -2,7 +2,14 @@ const userQuery = require("../models/users");
 const members = require("../models/members");
 const { USER_SENSITIVE_DATA } = require("../constants/users");
 
-const retrieveUsers = async ({ id = null, username = null, usernames = null, query = null, userdata }) => {
+const retrieveUsers = async ({
+  discordId = null,
+  id = null,
+  username = null,
+  usernames = null,
+  query = null,
+  userdata,
+}) => {
   if (id || username) {
     let result;
     if (id != null) {
@@ -24,6 +31,11 @@ const retrieveUsers = async ({ id = null, username = null, usernames = null, que
       removeSensitiveInfo(element);
     });
     return { allUsers, nextId, prevId };
+  } else if (discordId !== null) {
+    console.log("retireve user", discordId);
+    result = await userQuery.fetchUser({ discordId: discordId });
+    console.log("result****", result);
+    return result;
   } else {
     removeSensitiveInfo(userdata);
     return userdata;
