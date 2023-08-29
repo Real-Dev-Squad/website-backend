@@ -323,12 +323,12 @@ const generateOOONickname = (username, from, until) => {
     const fromMonth = month[fromDate.getMonth()];
 
     oooMessage = `(OOO ${fromMonth} ${fromDay} - ${untilMonth} ${untilDay})`;
-    // the max length of the nickname should be discord nickname length limit - OOO message length
-    // the extra 1 is for the space between ooo date and the nickname
   } else {
     oooMessage = `(OOO ${untilMonth} ${untilDay})`;
   }
 
+  // the max length of the nickname should be discord nickname length limit - OOO message length
+  // the extra 1 is for the space between ooo date and the nickname
   const nicknameLen = discordNicknameLength - oooMessage.length - 1;
   return `${username.substring(0, nicknameLen)} ${oooMessage}`;
 };
@@ -403,7 +403,6 @@ const updateUserStatusFields = async (userStatusDocs = [], summary = {}) => {
       }
     } else {
       // futureState is OOO
-      // 20th
       if (today > futureStatus.until) {
         // the OOO period is over
         // change nickname back to the original discord username if the current status is not OOO
@@ -430,7 +429,7 @@ const updateUserStatusFields = async (userStatusDocs = [], summary = {}) => {
         // if today < future OOO status's from date
         // remove OOO if there in user's name
         // if future OOO state and today has a difference of 3 days or lesser
-        const threeDaysAfterToday = today + ONE_DAY_IN_MS;
+        const threeDaysAfterToday = today + ONE_DAY_IN_MS * 3;
         if (threeDaysAfterToday >= futureStatus.from) {
           // update the status of user to OOO
           nicknameUpdates.push(updateNickname(userId, futureStatus));
