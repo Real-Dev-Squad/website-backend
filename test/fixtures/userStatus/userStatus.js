@@ -1,4 +1,4 @@
-const { userState } = require("../../../constants/userStatus");
+const { userState, ONE_DAY_IN_MS } = require("../../../constants/userStatus");
 
 const userStatusDataForNewUser = {
   currentStatus: {
@@ -126,6 +126,72 @@ const generateStatusDataForCancelOOO = (userId, state) => {
   };
 };
 
+const getStatus = () => {
+  const today = new Date().getTime();
+  return {
+    currentOOOExpiredStatus: {
+      currentStatus: {
+        from: today - 1000 * 36 * 60 * 60,
+        until: today - ONE_DAY_IN_MS,
+        state: "OOO",
+      },
+      futureStatus: { until: "", state: "IDLE", from: today - ONE_DAY_IN_MS },
+    },
+    currentOOOPeriodStatus: {
+      futureStatus: {
+        from: today + 1000 * 36 * 60 * 60,
+        state: "ACTIVE",
+      },
+      currentStatus: {
+        from: today - ONE_DAY_IN_MS,
+        until: today + 1000 * 36 * 60 * 60,
+        state: "OOO",
+      },
+    },
+    futureOOOExpiredStatus: {
+      futureStatus: {
+        from: today - 1000 * 36 * 60 * 60,
+        until: today - ONE_DAY_IN_MS,
+        state: "OOO",
+      },
+      currentStatus: { until: today - 1000 * 36 * 60 * 60, state: "ACTIVE", from: today - ONE_DAY_IN_MS * 2 },
+    },
+    futureOOOPeriodStatus: {
+      currentStatus: {
+        from: today - ONE_DAY_IN_MS * 2,
+        state: "ACTIVE",
+      },
+      futureStatus: {
+        from: today + 1000 * 100 * 60 * 60,
+        until: today + ONE_DAY_IN_MS * 5,
+        state: "OOO",
+      },
+    },
+    futureCurrentOOOPeriodStatus: {
+      currentStatus: {
+        from: today - 1000 * 77 * 60 * 60,
+        state: "ACTIVE",
+      },
+      futureStatus: {
+        from: today - ONE_DAY_IN_MS * 2,
+        until: today + 1000 * 36 * 60 * 60,
+        state: "OOO",
+      },
+    },
+    futureOOOThreeDaysAwayPeriodStatus: {
+      currentStatus: {
+        from: today - 1000 * 77 * 60 * 60,
+        state: "ACTIVE",
+      },
+      futureStatus: {
+        from: today + 1000 * 36 * 60 * 60,
+        until: today + ONE_DAY_IN_MS * 3,
+        state: "OOO",
+      },
+    },
+  };
+};
+
 module.exports = {
   userStatusDataForNewUser,
   userStatusDataAfterSignup,
@@ -137,4 +203,5 @@ module.exports = {
   activeStatus,
   generateStatusDataForCancelOOO,
   generateStatusDataForState,
+  getStatus,
 };
