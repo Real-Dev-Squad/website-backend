@@ -126,6 +126,72 @@ const generateStatusDataForCancelOOO = (userId, state) => {
   };
 };
 
+const getStatus = () => {
+  const today = new Date().getTime();
+  return {
+    currentOOOExpiredStatus: {
+      currentStatus: {
+        from: today - 1000 * 36 * 60 * 60,
+        until: today - 1000 * 24 * 60 * 60,
+        state: "OOO",
+      },
+      futureStatus: { until: "", state: "IDLE", from: today - 1000 * 24 * 60 * 60 },
+    },
+    currentOOOPeriodStatus: {
+      futureStatus: {
+        from: today + 1000 * 36 * 60 * 60,
+        state: "ACTIVE",
+      },
+      currentStatus: {
+        from: today - 1000 * 24 * 60 * 60,
+        until: today + 1000 * 36 * 60 * 60,
+        state: "OOO",
+      },
+    },
+    futureOOOExpiredStatus: {
+      futureStatus: {
+        from: today - 1000 * 36 * 60 * 60,
+        until: today - 1000 * 24 * 60 * 60,
+        state: "OOO",
+      },
+      currentStatus: { until: today - 1000 * 36 * 60 * 60, state: "ACTIVE", from: today - 1000 * 48 * 60 * 60 },
+    },
+    futureOOOPeriodStatus: {
+      currentStatus: {
+        from: today - 1000 * 48 * 60 * 60,
+        state: "ACTIVE",
+      },
+      futureStatus: {
+        from: today + 1000 * 100 * 60 * 60,
+        until: today + 1000 * 120 * 60 * 60,
+        state: "OOO",
+      },
+    },
+    futureCurrentOOOPeriodStatus: {
+      currentStatus: {
+        from: today - 1000 * 77 * 60 * 60,
+        state: "ACTIVE",
+      },
+      futureStatus: {
+        from: today - 1000 * 48 * 60 * 60,
+        until: today + 1000 * 36 * 60 * 60,
+        state: "OOO",
+      },
+    },
+    futureOOOThreeDaysAwayPeriodStatus: {
+      currentStatus: {
+        from: today - 1000 * 77 * 60 * 60,
+        state: "ACTIVE",
+      },
+      futureStatus: {
+        from: today + 1000 * 36 * 60 * 60,
+        until: today + 1000 * 72 * 60 * 60,
+        state: "OOO",
+      },
+    },
+  };
+};
+
 module.exports = {
   userStatusDataForNewUser,
   userStatusDataAfterSignup,
@@ -137,4 +203,5 @@ module.exports = {
   activeStatus,
   generateStatusDataForCancelOOO,
   generateStatusDataForState,
+  getStatus,
 };

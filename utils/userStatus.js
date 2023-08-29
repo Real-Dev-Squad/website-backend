@@ -1,6 +1,7 @@
 const { NotFound } = require("http-errors");
-const { userState } = require("../constants/userStatus");
-
+const { userState, month, discordNicknameLength, ONE_DAY_IN_MS } = require("../constants/userStatus");
+const userStatusServices = require("../services/usersStatusService");
+const userServices = require("../services/users");
 /* returns the User Id based on the route path
  *  @param req {Object} : Express request object
  *  @returns userId {Number | undefined} : the user id incase it exists
@@ -302,6 +303,151 @@ const getNextDayTimeStamp = (timeStamp) => {
   return nextDateDateTime.getTime();
 };
 
+/**
+ * Generates discord nickname for a user
+ *
+ * @param {string} username - The discord username of the user.
+ * @returns {string} - Nickname of the user.
+ */
+const generateOOONickname = (username, from, until) => {
+  if (!from && !until) return username;
+  const untilDate = new Date(Number(until));
+  const untilDay = untilDate.getDate();
+  const untilMonth = month[untilDate.getMonth()];
+
+  let oooMessage;
+
+  if (from && until) {
+    const fromDate = new Date(Number(from));
+    const fromDay = fromDate.getDate();
+    const fromMonth = month[fromDate.getMonth()];
+
+    oooMessage = `(OOO ${fromMonth} ${fromDay} - ${untilMonth} ${untilDay})`;
+    // the max length of the nickname should be discord nickname length limit - OOO message length
+    // the extra 1 is for the space between ooo date and the nickname
+  } else {
+    oooMessage = `(OOO ${untilMonth} ${untilDay})`;
+  }
+
+  const nicknameLen = discordNicknameLength - oooMessage.length - 1;
+  return `${username.substring(0, nicknameLen)} ${oooMessage}`;
+};
+
+/**
+ * @param userId { string }: Id of the User
+ * @param status { object: { from?: number, until: number }}: OOO date object
+ * @returns Promise<object>
+ */
+const updateNickname = async (userId, status = {}) => {
+  try {
+    const { discordId, username } = await userServices.getUserDiscordIdUsername(userId);
+    try {
+      const nickname =
+        status.from || status.until ? generateOOONickname(username, status.from, status.until) : username;
+
+      await userStatusServices.updateDiscordUserNickname(discordId, nickname);
+    } catch (err) {
+      logger.error("Failed to update user's nickname");
+    }
+  } catch (err) {
+    logger.error(`Failed to get discord id and username for user with id ${userId}`);
+    throw err;
+  }
+};
+
+const updateUsersDiscordNicknameBasedOnStatus = async (usersNicknameUpdates) => {
+  let errorsLen = 0;
+  try {
+    const updates = await Promise.allSettled(usersNicknameUpdates);
+    for (const update of updates) {
+      if (update.status === "rejected") {
+        errorsLen++;
+      }
+    }
+
+    if (errorsLen) {
+      throw new Error(`Error updating ${errorsLen} users' nickname`);
+    }
+  } catch (err) {
+    logger.error("Error updating user's nickname", err);
+  }
+};
+
+const updateUserStatusFields = async (userStatusDocs = [], summary = {}) => {
+  const today = new Date().getTime();
+  const updatedUserStatusDocs = [];
+  const nicknameUpdates = [];
+
+  userStatusDocs.forEach((document) => {
+    const doc = document.data();
+    const docRef = document.ref;
+    const newStatusData = { ...doc };
+
+    let toUpdate = false;
+    const { futureStatus, currentStatus, userId } = doc;
+    const { state: futureState } = futureStatus;
+
+    if (futureState === "ACTIVE" || futureState === "IDLE") {
+      if (today >= futureStatus.from) {
+        // OOO period is over and we need to update their current status
+        nicknameUpdates.push(updateNickname(userId));
+        newStatusData.currentStatus = { ...futureStatus, until: "", updatedAt: today };
+
+        delete newStatusData.futureStatus;
+        toUpdate = !toUpdate;
+        summary.oooUsersAltered++;
+      } else {
+        summary.oooUsersUnaltered++;
+        // current status is OOO and we need to update the user's nickname
+        nicknameUpdates.push(updateNickname(userId, currentStatus)); // TESTED
+      }
+    } else {
+      // futureState is OOO
+      // 20th
+      if (today > futureStatus.until) {
+        // the OOO period is over
+        // change nickname back to the original discord username if the current status is not OOO
+        nicknameUpdates.push(updateNickname(userId)); // TESTED
+        delete newStatusData.futureStatus;
+        toUpdate = !toUpdate;
+        summary.nonOooUsersAltered++;
+      } else if (today <= doc.futureStatus.until && today >= doc.futureStatus.from) {
+        // the current date i.e today lies in between the from and until so we need to swap the status
+        // change nickname here to OOO
+        nicknameUpdates.push(updateNickname(userId, futureStatus)); // TESTED
+
+        let newCurrentStatus = {};
+        let newFutureStatus = {};
+        newCurrentStatus = { ...futureStatus, updatedAt: today };
+        if (currentStatus?.state) {
+          newFutureStatus = { ...currentStatus, from: futureStatus.until, updatedAt: today };
+        }
+        newStatusData.currentStatus = newCurrentStatus;
+        newStatusData.futureStatus = newFutureStatus;
+        toUpdate = !toUpdate;
+        summary.nonOooUsersAltered++;
+      } else {
+        // if today < future OOO status's from date
+        // remove OOO if there in user's name
+        // if future OOO state and today has a difference of 3 days or lesser
+        const threeDaysAfterToday = today + ONE_DAY_IN_MS;
+        if (threeDaysAfterToday >= futureStatus.from) {
+          // update the status of user to OOO
+          nicknameUpdates.push(updateNickname(userId, futureStatus)); // TESTED
+        } else nicknameUpdates.push(updateNickname(userId));
+        summary.nonOooUsersUnaltered++;
+      }
+    }
+    if (toUpdate) {
+      updatedUserStatusDocs.push({ ...newStatusData, docRef });
+    }
+  });
+
+  await updateUsersDiscordNicknameBasedOnStatus(nicknameUpdates);
+
+  return updatedUserStatusDocs;
+};
+
 module.exports = {
   getUserIdBasedOnRoute,
   getTomorrowTimeStamp,
@@ -316,4 +462,8 @@ module.exports = {
   generateErrorResponse,
   generateNewStatus,
   getNextDayTimeStamp,
+  generateOOONickname,
+  updateNickname,
+  updateUserStatusFields,
+  updateUsersDiscordNicknameBasedOnStatus,
 };
