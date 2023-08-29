@@ -24,6 +24,24 @@ const {
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
 } = require("../constants/users");
 
+/**
+ * Patch Update user nickname
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const updateDiscordNicknames = async (req, res) => {
+  const usersInDiscord = await userQuery.getDiscordUsers();
+  usersInDiscord.forEach(async (user) => {
+    const { discordId, username } = user;
+    await setUserDiscordNickname(username, discordId);
+  });
+  return res.json({
+    numberOfUsersEffected: usersInDiscord.length,
+    message: "Users discord nicknames synced Successfully",
+  });
+};
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
   try {
@@ -772,4 +790,5 @@ module.exports = {
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
+  updateDiscordNicknames,
 };
