@@ -1,7 +1,7 @@
 const externalAccountsModel = require("../models/external-accounts");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getDiscordMembers } = require("../services/discordService");
-const { addOrUpdate, getUsersByRole } = require("../models/users");
+const { addOrUpdate, getUsersByRole, updateUsersInBatch, fetchUsersListForMultipleValues } = require("../models/users");
 const { retrieveDiscordUsers } = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
 
@@ -132,7 +132,7 @@ const newSyncExternalAccountData = async (req, res) => {
 
     discordUserData.forEach((discordUser) => discordUserIdSet.add(discordUser.user.id));
 
-    const updateUserList = [];
+    let updateUserList = [];
 
     for (const rdsUser of unArchivedRdsUsersData) {
       let userData = {};
@@ -157,6 +157,26 @@ const newSyncExternalAccountData = async (req, res) => {
         updateUserList.push(userData);
       }
     }
+
+    const updateUserBatchPromise1 = updateUsersInBatch(updateUserList);
+
+    const archivedUsersInDiscordList = await fetchUsersListForMultipleValues("users.discordId", [...discordUserIdSet]);
+
+    updateUserList = [];
+
+    for (const rdsUser of archivedUsersInDiscordList) {
+      const userData = {
+        roles: {
+          ...rdsUser.roles,
+          in_discord: true,
+          archived: false,
+        },
+      };
+      updateUserList.push(userData);
+    }
+    const updateUserBatchPromise2 = updateUsersInBatch(updateUserList);
+
+    await Promise.all([updateUserBatchPromise1, updateUserBatchPromise2]);
 
     return res.json({
       message: "Data Sync Complete",
