@@ -98,16 +98,15 @@ const joinEvent = async (req, res) => {
   try {
     const token = tokenService.getAuthToken(payload);
 
-    // TODO: get - retrieve all active events
+    const eventsData = await apiService.get("https://api.100ms.live/v2/rooms?enabled=true");
 
-    const eventData = await apiService.get("https://api.100ms.live/v2/active-rooms");
-
-    console.log({ eventData });
+    const activeEvent = eventsData?.data?.[0];
 
     return res.status(201).json({
       token: token,
       message: "Token generated successfully!",
       success: true,
+      event: activeEvent,
     });
   } catch (error) {
     logger.error({ error });
