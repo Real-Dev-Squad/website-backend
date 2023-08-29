@@ -81,9 +81,8 @@ describe("Users services", function () {
     });
   });
 
-  /* Skipping since test changes will go through before the discordService changes */
-  // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("getUserDiscordIdUsername", function () {
+  /* Skipping since test changes will go through before the util changes */
+  describe("getUserDiscordIdUsername", function () {
     const userDetails = [];
 
     before(async function () {

@@ -108,7 +108,7 @@ describe("User Status Functions", function () {
 
   /* Skipping since test changes will go through before the util changes */
   // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("generateOOONickname", function () {
+  describe("generateOOONickname", function () {
     it("should return nickname of the user when username, from and status is passed", async function () {
       const { username } = userData;
       const from = new Date();
@@ -167,7 +167,7 @@ describe("User Status Functions", function () {
 
   /* Skipping since test changes will go through before the util changes */
   // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("updateNickname", function () {
+  describe("updateNickname", function () {
     let fetchStub, userInfo, getUserDiscordIdUsernameStub, generateOOONicknameStub;
 
     beforeEach(async function () {
@@ -223,6 +223,7 @@ describe("User Status Functions", function () {
       expect(fetchStub.calledOnce).to.be.equal(false);
     });
 
+    /* Skipping since test changes will go through before the util changes */
     it("should throw error when the users status service call to update user's discord nickname fails", async function () {
       const { id: userId } = userInfo;
       const { username, discordId } = userData;
@@ -247,9 +248,8 @@ describe("User Status Functions", function () {
     });
   });
 
-  /* Skipping since test changes will go through before the discordService changes */
-  // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("updateUserStatusFields", function () {
+  /* Skipping since test changes will go through before the util changes */
+  describe("updateUserStatusFields", function () {
     const getUserStatusDocs = async () =>
       await userStatusModel.where("futureStatus.state", "in", ["ACTIVE", "IDLE", "OOO"]).get();
 
