@@ -13,5 +13,5 @@ router.patch("/end", authenticate, eventsValidator.endActiveEvent, events.endAct
 router.post("/:id/peers", authenticate, eventsValidator.addPeerToEvent, events.addPeerToEvent);
 router.patch("/:id/peers/kickout", authenticate, eventsValidator.kickoutPeer, events.kickoutPeer);
 router.post("/:id/codes", authenticate, eventsValidator.generateEventCode, events.generateEventCode);
-
+router.get("/:id/codes", authenticate, eventsValidator.getEventCodes, events.getEventCodes);
 module.exports = router;
