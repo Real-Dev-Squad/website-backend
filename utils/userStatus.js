@@ -399,7 +399,7 @@ const updateUserStatusFields = async (userStatusDocs = [], summary = {}) => {
       } else {
         summary.oooUsersUnaltered++;
         // current status is OOO and we need to update the user's nickname
-        nicknameUpdates.push(updateNickname(userId, currentStatus)); // TESTED
+        nicknameUpdates.push(updateNickname(userId, currentStatus));
       }
     } else {
       // futureState is OOO
@@ -407,14 +407,14 @@ const updateUserStatusFields = async (userStatusDocs = [], summary = {}) => {
       if (today > futureStatus.until) {
         // the OOO period is over
         // change nickname back to the original discord username if the current status is not OOO
-        nicknameUpdates.push(updateNickname(userId)); // TESTED
+        nicknameUpdates.push(updateNickname(userId));
         delete newStatusData.futureStatus;
         toUpdate = !toUpdate;
         summary.nonOooUsersAltered++;
       } else if (today <= doc.futureStatus.until && today >= doc.futureStatus.from) {
         // the current date i.e today lies in between the from and until so we need to swap the status
         // change nickname here to OOO
-        nicknameUpdates.push(updateNickname(userId, futureStatus)); // TESTED
+        nicknameUpdates.push(updateNickname(userId, futureStatus));
 
         let newCurrentStatus = {};
         let newFutureStatus = {};
@@ -433,7 +433,7 @@ const updateUserStatusFields = async (userStatusDocs = [], summary = {}) => {
         const threeDaysAfterToday = today + ONE_DAY_IN_MS;
         if (threeDaysAfterToday >= futureStatus.from) {
           // update the status of user to OOO
-          nicknameUpdates.push(updateNickname(userId, futureStatus)); // TESTED
+          nicknameUpdates.push(updateNickname(userId, futureStatus));
         } else nicknameUpdates.push(updateNickname(userId));
         summary.nonOooUsersUnaltered++;
       }
