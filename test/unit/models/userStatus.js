@@ -65,4 +65,8 @@ describe("tasks", function () {
       expect(err.message).to.be.equal("Task not found");
     });
   });
+
+  describe("updateAllUserStatus", function () {
+    it("should ");
+  });
 });

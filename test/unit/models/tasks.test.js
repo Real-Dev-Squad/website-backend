@@ -156,6 +156,32 @@ describe("tasks", function () {
       expect(result.allTasks).to.have.length(tasksLength);
       result.allTasks.forEach((task) => expect(task.status).to.be.equal(status));
     });
+
+    it("should fetch all tasks filtered by the assignee and title", async function () {
+      const assignee = "ankur";
+      const title = "Overdue";
+      const result = await tasks.fetchPaginatedTasks({ assignee, title });
+
+      const filteredTasks = tasksData.filter((task) => task.assignee === assignee && task.title.includes(title));
+
+      expect(result).to.have.property("allTasks");
+      filteredTasks.forEach((task) => {
+        expect(task.assignee).to.be.equal(assignee);
+        expect(task.title).to.include(title);
+      });
+    });
+
+    it("should fetch all tasks filtered by the assignee passed", async function () {
+      const assignee = "ankur";
+      const result = await tasks.fetchPaginatedTasks({ assignee });
+
+      const filteredTasks = tasksData.filter((task) => task.assignee === assignee);
+
+      expect(result).to.have.property("allTasks");
+      filteredTasks.forEach((task) => {
+        expect(task.assignee).to.be.equal(assignee);
+      });
+    });
   });
 
   describe("update Dependency", function () {
