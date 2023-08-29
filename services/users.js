@@ -41,34 +41,6 @@ const archiveUsers = async (usersData) => {
   }
 };
 
-/**
- * Fetches the discordId of a user
- *
- * @param {string} userId - The ID of the user.
- * @returns {Promise<usersModel | Object>} - A promise that resolves to an object containing the user information.
- * @throws {Error} - If an error occurs while retrieving user information.
- */
-const getUserDiscordIdUsername = async (userId) => {
-  try {
-    const user = await userModel.doc(userId).get();
-    const userData = user.data();
-
-    const userExists = !!userData;
-    if (!userExists) {
-      throw new Error("User data not found!");
-    }
-    const { username, discordId } = userData;
-    if (!username || !discordId) {
-      throw new Error("Complete user information unavailable!");
-    }
-    return { username, discordId };
-  } catch (err) {
-    logger.error(`Failed to get data for user with id ${userId}`);
-    throw err;
-  }
-};
-
 module.exports = {
   archiveUsers,
-  getUserDiscordIdUsername,
 };

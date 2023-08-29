@@ -10,12 +10,10 @@ const qrCodeAuthModel = require("../../models/qrCodeAuth");
 const authService = require("../../services/authService");
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
-const USER_DOES_NOT_EXIST_ERROR = "User does not exist!";
 
 // Import fixtures
 let userDeviceInfoData;
 let wrongUserDeviceInfoData;
-let wrongUserIdDeviceInfo;
 let userId;
 const user = userData[0];
 
@@ -23,10 +21,8 @@ describe("QrCodeAuth", function () {
   describe("POST call for adding user", function () {
     beforeEach(async function () {
       userId = await addUser(user);
-
       userDeviceInfoData = { ...userDeviceInfoDataArray[0], user_id: userId };
       wrongUserDeviceInfoData = userDeviceInfoDataArray[0];
-      wrongUserIdDeviceInfo = { ...userDeviceInfoDataArray[0], user_id: userId, device_info: 2 };
     });
     afterEach(async function () {
       await cleanDb();
@@ -52,39 +48,21 @@ describe("QrCodeAuth", function () {
         });
     });
 
-    it("should fail with 404, when the user is not found", function (done) {
+    it("Should return a 500 status code and the correct error message when an error occurs while storing user device info", function (done) {
       chai
         .request(app)
         .post("/auth/qr-code-auth")
         .send(wrongUserDeviceInfoData)
         .end((err, res) => {
           if (err) {
-            return done(err);
+            return done();
           }
-
-          expect(res).to.have.status(404);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal(USER_DOES_NOT_EXIST_ERROR);
-          expect(res.body.error).to.equal("Not Found");
-
-          return done();
-        });
-    });
-
-    it("should throw 400, if the validation of the values passed in the body does not pass", function (done) {
-      chai
-        .request(app)
-        .post("/auth/qr-code-auth")
-        .send(wrongUserIdDeviceInfo)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(400);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal('"device_info" must be a string');
-          expect(res.body.error).to.equal("Bad Request");
+          expect(res).to.have.status(500);
+          expect(res.body).to.eql({
+            statusCode: 500,
+            error: "Internal Server Error",
+            message: "An internal server error occurred",
+          });
 
           return done();
         });

@@ -87,13 +87,18 @@ const archiveMembers = async (req, res) => {
     const superUserId = req.userData.id;
     const { reason } = req.body;
     const roles = req?.userData?.roles;
+    const isReasonNullOrUndefined = !reason;
+    const isReasonEmptyOrWhitespace = /^\s*$/.test(reason);
+    if (isReasonNullOrUndefined || isReasonEmptyOrWhitespace) {
+      return res.boom.badRequest("Reason is required");
+    }
     if (user?.userExists) {
       const successObject = await members.addArchiveRoleToMembers(user.user.id);
       if (successObject.isArchived) {
         return res.boom.badRequest("User is already archived");
       }
       const body = {
-        reason: reason || "",
+        reason: reason,
         archived_user: {
           user_id: user.user.id,
           username: user.user.username,

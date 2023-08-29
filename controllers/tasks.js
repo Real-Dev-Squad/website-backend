@@ -126,8 +126,8 @@ const fetchPaginatedTasks = async (query) => {
 
 const fetchTasks = async (req, res) => {
   try {
-    const { dev, status, page, size, prev, next, q: queryString, assignee, title } = req.query;
-    const transformedQuery = transformQuery(dev, status, size, page, assignee, title);
+    const { dev, status, page, size, prev, next, q: queryString } = req.query;
+    const transformedQuery = transformQuery(dev, status, size, page);
 
     if (dev) {
       const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next });

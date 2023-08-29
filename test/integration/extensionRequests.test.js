@@ -24,7 +24,7 @@ const superUser = userData[4];
 let appOwnerjwt, superUserJwt, jwt;
 
 describe("Extension Requests", function () {
-  let taskId0, taskId1, taskId2, taskId3, extensionRequestId1, extensionRequestId2;
+  let taskId1, taskId2, taskId3, extensionRequestId1, extensionRequestId2;
 
   before(async function () {
     const userId = await addUser(user);
@@ -37,19 +37,6 @@ describe("Extension Requests", function () {
     jwt = authService.generateAuthToken({ userId: userId });
 
     const taskData = [
-      {
-        title: "Test task 1",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "active",
-        percentCompleted: 10,
-        participants: [],
-        assignee: appOwner.username,
-        isNoteworthy: true,
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-      },
       {
         title: "Test task",
         type: "feature",
@@ -96,14 +83,13 @@ describe("Extension Requests", function () {
     ];
 
     // Add the active task
-    taskId0 = (await tasks.updateTask(taskData[0])).taskId;
-    taskId1 = (await tasks.updateTask(taskData[1])).taskId;
+    taskId1 = (await tasks.updateTask(taskData[0])).taskId;
 
     // Add the completed task
-    taskId2 = (await tasks.updateTask(taskData[2])).taskId;
+    taskId2 = (await tasks.updateTask(taskData[1])).taskId;
 
     // Add the completed task
-    taskId3 = (await tasks.updateTask(taskData[3])).taskId;
+    taskId3 = (await tasks.updateTask(taskData[2])).taskId;
 
     const extensionRequest = {
       taskId: taskId3,
@@ -228,56 +214,6 @@ describe("Extension Requests", function () {
           return done();
         });
     });
-    it("Should return success response after adding the extension request (sending assignee username)", function (done) {
-      chai
-        .request(app)
-        .post("/extension-requests")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
-        .send({
-          taskId: taskId0,
-          title: "change ETA",
-          assignee: appOwner.username,
-          oldEndsOn: 1234,
-          newEndsOn: 1235,
-          reason: "family event",
-          status: "PENDING",
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Extension Request created successfully!");
-          expect(res.body.extensionRequest).to.be.a("object");
-          expect(res.body.extensionRequest.assignee).to.equal(appOwner.id);
-          expect(res.body.extensionRequest.status).to.equal(EXTENSION_REQUEST_STATUS.PENDING);
-          return done();
-        });
-    });
-    it("Should return failure response after adding the extension request (sending wrong assignee info)", function (done) {
-      chai
-        .request(app)
-        .post("/extension-requests")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
-        .send({
-          taskId: taskId0,
-          title: "change ETA",
-          assignee: "hello",
-          oldEndsOn: 1234,
-          newEndsOn: 1235,
-          reason: "family event",
-          status: "PENDING",
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(400);
-          expect(res.body.message).to.equal("User with this id or username doesn't exist.");
-          return done();
-        });
-    });
     it("Should return fail response if someone try to create a extension request for someone else and is not a super user", function (done) {
       chai
         .request(app)
@@ -299,9 +235,7 @@ describe("Extension Requests", function () {
 
           expect(res).to.have.status(403);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal(
-            "Only assigned user and super user can create an extension request for this task."
-          );
+          expect(res.body.message).to.equal("Only Super User can create an extension request for this task.");
           return done();
         });
     });
@@ -544,66 +478,6 @@ describe("Extension Requests", function () {
             message: "You are not authorized for this action.",
           });
 
-          return done();
-        });
-    });
-
-    it("Should return paginated response when dev flag and size is passed", function (done) {
-      const fetchPaginatedExtensionRequestStub = sinon.stub(extensionRequests, "fetchPaginatedExtensionRequests");
-      chai
-        .request(app)
-        .get("/extension-requests?dev=true&size=10")
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(fetchPaginatedExtensionRequestStub.calledOnce).to.be.equal(true);
-
-          return done();
-        });
-    });
-
-    it("Should have the link to get next set of results", function (done) {
-      chai
-        .request(app)
-        .get(`/extension-requests?dev=true&size=10`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(200);
-          expect(res.body).to.have.property("next");
-          return done();
-        });
-    });
-
-    it("Should get all extension requests filtered with status when multiple params are passed", function (done) {
-      chai
-        .request(app)
-        .get(
-          `/extension-requests?dev=true&q=status:${EXTENSION_REQUEST_STATUS.APPROVED}+${EXTENSION_REQUEST_STATUS.PENDING}`
-        )
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Extension Requests returned successfully!");
-          expect(res.body.allExtensionRequests).to.be.a("array");
-          expect(res.body).to.have.property("next");
-
-          const extensionRequestsList = res.body.allExtensionRequests ?? [];
-          extensionRequestsList.forEach((extensionReq) => {
-            expect(extensionReq.status).to.be.oneOf([
-              EXTENSION_REQUEST_STATUS.APPROVED,
-              EXTENSION_REQUEST_STATUS.PENDING,
-            ]);
-          });
           return done();
         });
     });

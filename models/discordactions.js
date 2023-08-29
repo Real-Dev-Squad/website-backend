@@ -3,9 +3,6 @@ const firestore = require("../utils/firestore");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const admin = require("firebase-admin");
-const { findSubscribedGroupIds } = require("../utils/helper");
-const { retrieveUsers } = require("../services/dataAccessLayer");
-const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const photoVerificationModel = firestore.collection("photo-verification");
 
 /**
@@ -117,83 +114,32 @@ const updateDiscordImageForVerification = async (userDiscordId) => {
   }
 };
 
-/**
- * Enriches group data with membership information for a given Discord ID.
- *
- * @param {string} discordId - The Discord ID of the user.
- * @param {Array<object>} groups - Array of group objects to process.
- * @returns {Promise<Array<object>>} - An array of group objects with enriched information.
- */
-const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
+const getNumberOfMemberForGroups = async (groups = []) => {
   try {
     if (!groups.length) {
       return [];
     }
-
-    const groupCreatorIds = groups.reduce((ids, group) => {
-      if (group.createdBy) {
-        ids.add(group.createdBy);
-      }
-      return ids;
-    }, new Set());
-
-    const groupCreatorsDetails = await retrieveUsers({ userIds: Array.from(groupCreatorIds) });
     const roleIds = groups.map((group) => group.roleid);
-    const groupsToUserMappings = await fetchGroupToUserMapping(roleIds);
-    const roleIdToCountMap = {};
 
-    groupsToUserMappings.forEach((groupToUserMapping) => {
-      // Count how many times roleId comes up in the array.
-      // This says how many users we have for a given roleId
-      roleIdToCountMap[groupToUserMapping.roleid] = (roleIdToCountMap[groupToUserMapping.roleid] ?? 0) + 1;
+    const snapshots = await memberRoleModel.where("roleid", "in", roleIds).get();
+    const roleCount = {};
+
+    snapshots.forEach((doc) => {
+      const roleToMemberMapping = doc.data();
+
+      if (roleCount[roleToMemberMapping.roleid]) {
+        roleCount[roleToMemberMapping.roleid] += 1;
+      } else {
+        roleCount[roleToMemberMapping.roleid] = 1;
+      }
     });
 
-    const subscribedGroupIds = findSubscribedGroupIds(discordId, groupsToUserMappings);
-
-    return groups.map((group) => {
-      const groupCreator = groupCreatorsDetails[group.createdBy];
-      return {
-        ...group,
-        firstName: groupCreator?.first_name,
-        lastName: groupCreator?.last_name,
-        image: groupCreator?.picture?.url,
-        memberCount: roleIdToCountMap[group.roleid] || 0, // Number of users joined this group
-        isMember: subscribedGroupIds.has(group.roleid), // Is current loggedIn user is a member of this group
-      };
-    });
+    return groups.map((group) => ({
+      ...group,
+      memberCount: roleCount[group.roleid] || 0,
+    }));
   } catch (err) {
-    logger.error("Error while enriching group data with membership info", err);
-    throw err;
-  }
-};
-
-/**
- *
- * @param {Array<string>} roleIds Array of roleIds whose user mapping needs to fetched
- * @returns Array of roleId to userId mapping
- *
- * Breaking the roleIds array into chunks of 30 or less due to firebase limitation
- */
-const fetchGroupToUserMapping = async (roleIds) => {
-  try {
-    const roleIdChunks = [];
-
-    for (let i = 0; i < roleIds.length; i += BATCH_SIZE_IN_CLAUSE) {
-      roleIdChunks.push(roleIds.slice(i, i + BATCH_SIZE_IN_CLAUSE));
-    }
-
-    const promises = roleIdChunks.map(async (roleIdChunk) => {
-      const querySnapshot = await memberRoleModel.where("roleid", "in", roleIdChunk).get();
-      return querySnapshot.docs.map((doc) => doc.data());
-    });
-
-    const snapshots = await Promise.all(promises);
-
-    const groupToUserMappingArray = snapshots.flat();
-
-    return groupToUserMappingArray;
-  } catch (err) {
-    logger.error("Error while fetching group to user mapping", err);
+    logger.error("Error while counting members for each group", err);
     throw err;
   }
 };
@@ -204,6 +150,5 @@ module.exports = {
   addGroupRoleToMember,
   isGroupRoleExists,
   updateDiscordImageForVerification,
-  enrichGroupDataWithMembershipInfo,
-  fetchGroupToUserMapping,
+  getNumberOfMemberForGroups,
 };

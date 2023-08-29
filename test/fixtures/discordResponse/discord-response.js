@@ -89,17 +89,7 @@ const usersFromRds = [
   },
 ];
 
-const updatedNicknameResponse = {
-  userAffected: {
-    userId: "X0H3paYveEWh7Q2fPhor",
-    username: "test-name-007",
-    discordId: "1123566257019568232",
-  },
-  message: "User nickname changed successfully",
-};
-
 module.exports = {
   getDiscordMembers,
   usersFromRds,
-  updatedNicknameResponse,
 };

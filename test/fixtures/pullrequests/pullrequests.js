@@ -111,24 +111,6 @@ const filteredPRs = [
   },
 ];
 
-const prDates = [
-  {
-    pull_request: {
-      merged_at: "2023-08-18T11:56:45Z",
-    },
-  },
-  {
-    pull_request: {
-      merged_at: "2023-08-18T11:56:45Z",
-    },
-  },
-  {
-    pull_request: {
-      merged_at: "2023-08-18T11:56:45Z",
-    },
-  },
-];
 module.exports = {
   filteredPRs,
-  prDates,
 };

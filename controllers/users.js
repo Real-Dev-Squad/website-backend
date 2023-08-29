@@ -5,18 +5,15 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
-const ROLES = require("../constants/roles");
 const dataAccess = require("../services/dataAccessLayer");
-const { isLastPRMergedWithinDays } = require("../services/githubService");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
-const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
+const { setInDiscordFalseScript } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
 const { getQualifiers } = require("../utils/helper");
-const { parseSearchQuery } = require("../utils/users");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 const {
   USERS_PATCH_HANDLER_ACTIONS,
@@ -76,7 +73,6 @@ const getUsers = async (req, res) => {
   try {
     // getting user details by id if present.
     const query = req.query?.query ?? "";
-    const transformedQuery = parseSearchQuery(query);
     const qualifiers = getQualifiers(query);
 
     // getting user details by id if present.
@@ -97,34 +93,6 @@ const getUsers = async (req, res) => {
         message: "User returned successfully!",
         user,
       });
-    }
-    if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
-      return res.boom.badRequest(`Days is required for filterBy ${transformedQuery?.filterBy}`);
-    }
-
-    const { filterBy, days } = transformedQuery;
-    if (filterBy === "unmerged_prs" && days) {
-      try {
-        const inDiscordUser = await dataAccess.retrieveUsersWithRole(ROLES.INDISCORD);
-        const users = [];
-
-        for (const user of inDiscordUser) {
-          const username = user.github_id;
-          const isMerged = await isLastPRMergedWithinDays(username, days);
-          if (!isMerged) {
-            users.push(user.id);
-          }
-        }
-
-        return res.json({
-          message: "Inactive users returned successfully!",
-          count: users.length,
-          users: users,
-        });
-      } catch (error) {
-        logger.error(`Error while fetching all users: ${error}`);
-        return res.boom.serverUnavailable("Something went wrong please contact admin");
-      }
     }
 
     if (qualifiers?.filterBy) {
@@ -227,23 +195,6 @@ const getUsernameAvailabilty = async (req, res) => {
     return res.json({
       isUsernameAvailable: !result.userExists,
     });
-  } catch (error) {
-    logger.error(`Error while checking user: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
-  }
-};
-
-const generateUsername = async (req, res) => {
-  try {
-    const { firstname, lastname, dev } = req.query;
-    if (dev === "true") {
-      const username = await userQuery.generateUniqueUsername(firstname, lastname);
-      return res.json({ username });
-    } else {
-      return res.status(404).json({
-        message: "UserName Not Found",
-      });
-    }
   } catch (error) {
     logger.error(`Error while checking user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -364,36 +315,6 @@ const verifyUserImage = async (req, res) => {
   }
 };
 
-/**
- * Patch Update user nickname
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-
-const updateDiscordUserNickname = async (req, res) => {
-  const { userId } = req.params;
-  try {
-    const userToBeUpdated = await dataAccess.retrieveUsers({ id: userId });
-    const { discordId, username } = userToBeUpdated.user;
-    if (!discordId) {
-      throw new Error("user not verified");
-    }
-    const response = await setUserDiscordNickname(username, discordId);
-
-    return res.json({
-      userAffected: {
-        userId,
-        username,
-        discordId,
-      },
-      message: response,
-    });
-  } catch (err) {
-    logger.error(`Error while updating nickname: ${err}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-  }
-};
 const markUnverified = async (req, res) => {
   try {
     const [usersInRdsDiscordServer, allRdsLoggedInUsers] = await Promise.all([getDiscordMembers(), fetchAllUsers()]);
@@ -668,6 +589,25 @@ const setInDiscordScript = async (req, res) => {
   }
 };
 
+const removeTokens = async (req, res) => {
+  try {
+    const users = await userQuery.fetchUsersWithToken();
+
+    if (!users.length) {
+      return res.status(404).json({ message: "No users found with github Token!" });
+    }
+
+    await userQuery.removeGitHubToken(users);
+
+    return res.status(200).json({
+      message: "Github Token removed from all users!",
+      usersFound: users.length,
+    });
+  } catch (err) {
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
 const updateRoles = async (req, res) => {
   try {
     const result = await dataAccess.retrieveUsers({ id: req.params.id });
@@ -751,7 +691,6 @@ module.exports = {
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
-  generateUsername,
   getSuggestedUsers,
   postUserPicture,
   updateUser,
@@ -768,8 +707,8 @@ module.exports = {
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
+  removeTokens,
   updateRoles,
-  updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
 };

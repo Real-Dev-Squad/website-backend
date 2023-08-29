@@ -30,21 +30,13 @@ const updateUser = async (req, res, next) => {
       company: joi.string().optional(),
       designation: joi.string().optional(),
       img: joi.string().optional(),
-      linkedin_id: joi
-        .string()
-        .optional()
-        .regex(/^[^@\s]*$/)
-        .message("Invalid Linkedin ID. ID should not contain special character @ or spaces"),
+      linkedin_id: joi.string().optional(),
       twitter_id: joi
         .string()
         .optional()
-        .regex(/^[^@\s]*$/)
-        .message("Invalid Twitter ID. ID should not contain special character @ or spaces"),
-      instagram_id: joi
-        .string()
-        .optional()
-        .regex(/^[^@\s]*$/)
-        .message("Invalid Instagram ID. ID should not contain special character @ or spaces"),
+        .regex(/^[^@]*$/)
+        .message("Invalid Twitter ID. ID should not contain special character @"),
+      instagram_id: joi.string().optional(),
       website: joi.string().optional(),
       status: joi
         .any()
@@ -185,8 +177,6 @@ async function getUsers(req, res, next) {
           "string.empty": "prev value cannot be empty",
         }),
       query: joi.string().optional(),
-      filterBy: joi.string().optional(),
-      days: joi.string().optional(),
     });
   try {
     await schema.validateAsync(req.query);
@@ -221,10 +211,6 @@ async function validateUserQueryParams(req, res, next) {
         .optional(),
       role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD, ROLES.ARCHIVED).optional(),
       verified: joi.string().optional(),
-      time: joi
-        .string()
-        .regex(/^[1-9]\d*d$/)
-        .optional(),
     })
     .messages({
       "object.min": "Please provide at least one filter criteria",
@@ -291,32 +277,6 @@ async function validateUsersPatchHandler(req, res, next) {
   }
 }
 
-/**
- * Validates query params for the username route
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- * @param next {Object} - Express middelware function
- */
-const validateGenerateUsernameQuery = async (req, res, next) => {
-  const schema = joi
-    .object()
-    .strict()
-    .keys({
-      firstname: joi.string().min(1).required(),
-      lastname: joi.string().min(1).required(),
-      dev: joi.string().valid("true").optional(),
-    });
-
-  try {
-    await schema.validateAsync(req.query);
-    next();
-  } catch (error) {
-    logger.error("Invalid Query Parameters Passed");
-    res.boom.badRequest("Invalid Query Parameters Passed");
-  }
-};
-
 module.exports = {
   updateUser,
   updateProfileURL,
@@ -326,5 +286,4 @@ module.exports = {
   validateImageVerificationQuery,
   validateUpdateRoles,
   validateUsersPatchHandler,
-  validateGenerateUsernameQuery,
 };

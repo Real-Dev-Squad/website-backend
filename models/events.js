@@ -1,11 +1,9 @@
-const admin = require("firebase-admin");
 const Firestore = require("@google-cloud/firestore");
 const firestore = require("../utils/firestore");
 const logger = require("../utils/logger");
 
 const eventModel = firestore.collection("events");
 const peerModel = firestore.collection("peers");
-const eventCodeModel = firestore.collection("event-codes");
 
 /**
  * Creates a new event document in Firestore and returns the data for the created document.
@@ -171,71 +169,6 @@ const kickoutPeer = async ({ eventId, peerId, reason }) => {
     throw error;
   }
 };
-/**
- * Creates an events code document in the Firestore database with the given event code data.
- * @async
- * @function
- * @param {object} eventCodeData - The data for the event code to be created.
- * @throws {Error} If an error occurs while creating the event code document.
- */
-
-const createEventCode = async (eventCodeData) => {
-  try {
-    const eventRef = eventModel.doc(eventCodeData.event_id);
-    const eventSnapshot = await eventRef.get();
-    const eventSnapshotData = eventSnapshot.data();
-    const createdAndUpdatedAt = admin.firestore.Timestamp.now();
-    const docRef = eventCodeModel.doc(eventCodeData.id);
-
-    await docRef.set({ ...eventCodeData, created_at: createdAndUpdatedAt, updated_at: createdAndUpdatedAt });
-
-    const docSnapshot = await docRef.get();
-    const data = docSnapshot.data();
-
-    const previouslyPresentEventCodes = eventSnapshotData?.event_codes?.by_role?.mavens && [
-      ...eventSnapshotData?.event_codes?.by_role?.mavens,
-    ];
-
-    if (!data) throw new Error();
-
-    if (previouslyPresentEventCodes?.length) {
-      await eventRef.update({
-        event_codes: {
-          by_role: {
-            mavens: [...previouslyPresentEventCodes, data?.id],
-          },
-        },
-      });
-    } else {
-      await eventRef.update({
-        event_codes: {
-          by_role: {
-            mavens: [data?.id],
-          },
-        },
-      });
-    }
-
-    const updatedEventRef = eventModel.doc(eventCodeData.event_id);
-    const updatedEventSnapshot = await updatedEventRef.get();
-    const updatedEventSnapshotData = updatedEventSnapshot.data();
-    const allEventCodesIdsForMavens = updatedEventSnapshotData?.event_codes?.by_role?.mavens;
-
-    const allEventCodesIdsForMavensPromises = allEventCodesIdsForMavens.map(async (eventCodeRefId) => {
-      const eventCodeRef = eventCodeModel.doc(eventCodeRefId);
-      const eventCodeSnapshot = await eventCodeRef.get();
-      const eventCodeData = eventCodeSnapshot.data();
-      return eventCodeData;
-    });
-
-    const allEventCodesForMavens = await Promise.all(allEventCodesIdsForMavensPromises);
-
-    return allEventCodesForMavens;
-  } catch (error) {
-    logger.error("Error in creating event code", error);
-    throw error;
-  }
-};
 
 module.exports = {
   createEvent,
@@ -243,5 +176,4 @@ module.exports = {
   endActiveEvent,
   addPeerToEvent,
   kickoutPeer,
-  createEventCode,
 };

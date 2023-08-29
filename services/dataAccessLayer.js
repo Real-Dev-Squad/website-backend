@@ -10,7 +10,7 @@ const retrieveUsers = async ({
   userdata,
   level = ACCESS_LEVEL.PUBLIC,
   role = null,
-  userIds = null,
+  userIds = [],
 }) => {
   if (id || username) {
     let result;
@@ -30,10 +30,7 @@ const retrieveUsers = async ({
       result.push(user);
     });
     return result;
-  } else if (userIds) {
-    if (userIds.length === 0) {
-      return {};
-    }
+  } else if (userIds.length > 0) {
     const userDetails = await userQuery.fetchUserByIds(userIds);
     Object.keys(userDetails).forEach((userId) => {
       removeSensitiveInfo(userDetails[userId]);

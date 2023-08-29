@@ -12,7 +12,6 @@ const {
   generateErrorResponse,
   generateNewStatus,
   getNextDayTimeStamp,
-  updateUserStatusFields,
 } = require("../utils/userStatus");
 const { TASK_STATUS } = require("../constants/tasks");
 const userStatusModel = firestore.collection("usersStatus");
@@ -170,12 +169,51 @@ const updateAllUserStatus = async () => {
     const userStatusDocs = await userStatusModel.where("futureStatus.state", "in", ["ACTIVE", "IDLE", "OOO"]).get();
     summary.usersCount = userStatusDocs._size;
     const batch = firestore.batch();
-
-    const updatedUserStatusDocs = await updateUserStatusFields(userStatusDocs, summary);
-    updatedUserStatusDocs.forEach(({ docRef, ...newStatusData }) => {
-      batch.set(docRef, newStatusData);
+    const today = new Date().getTime();
+    userStatusDocs.forEach(async (document) => {
+      const doc = document.data();
+      const docRef = document.ref;
+      const newStatusData = { ...doc };
+      let toUpdate = false;
+      const { futureStatus, currentStatus } = doc;
+      const { state: futureState } = futureStatus;
+      if (futureState === "ACTIVE" || futureState === "IDLE") {
+        if (today >= futureStatus.from) {
+          // OOO period is over and we need to update their current status
+          newStatusData.currentStatus = { ...futureStatus, until: "", updatedAt: today };
+          delete newStatusData.futureStatus;
+          toUpdate = !toUpdate;
+          summary.oooUsersAltered++;
+        } else {
+          summary.oooUsersUnaltered++;
+        }
+      } else {
+        // futureState is OOO
+        if (today > futureStatus.until) {
+          // the OOO period is over
+          delete newStatusData.futureStatus;
+          toUpdate = !toUpdate;
+          summary.nonOooUsersAltered++;
+        } else if (today <= doc.futureStatus.until && today >= doc.futureStatus.from) {
+          // the current date i.e today lies in between the from and until so we need to swap the status
+          let newCurrentStatus = {};
+          let newFutureStatus = {};
+          newCurrentStatus = { ...futureStatus, updatedAt: today };
+          if (currentStatus?.state) {
+            newFutureStatus = { ...currentStatus, from: futureStatus.until, updatedAt: today };
+          }
+          newStatusData.currentStatus = newCurrentStatus;
+          newStatusData.futureStatus = newFutureStatus;
+          toUpdate = !toUpdate;
+          summary.nonOooUsersAltered++;
+        } else {
+          summary.nonOooUsersUnaltered++;
+        }
+      }
+      if (toUpdate) {
+        batch.set(docRef, newStatusData);
+      }
     });
-
     if (batch._ops.length > 100) {
       logger.info(
         `Warning: More than 100 User Status documents to update. The max limit permissible is 500. Refer https://github.com/Real-Dev-Squad/website-backend/issues/890 for more details.`

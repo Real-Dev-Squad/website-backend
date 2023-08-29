@@ -4,13 +4,11 @@ const chaiHttp = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
-const { ROLES } = require("../../constants/events");
+
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 
 const eventData = require("../fixtures/events/events")();
-const eventCodeData = require("../fixtures/events/event-codes");
-const eventCodeDataFirst = [...eventCodeData[0].data];
 const event1Data = eventData[0];
 
 const userData = require("../fixtures/user/user")();
@@ -401,131 +399,9 @@ describe("events", function () {
     });
 
     it("should return unauthorized error if user is not authenticated", function (done) {
-      const id = event1Data.id;
-      const payload = {
-        eventCode: "test-code",
-        role: "moderator",
-      };
       chai
         .request(app)
-        .post(`/events/${id}/codes`)
-        .send({ ...payload })
-        .end((error, response) => {
-          if (error) {
-            return done(error);
-          }
-
-          expect(response).to.have.status(401);
-          expect(response.body.error).to.be.equal("Unauthorized");
-          expect(response.body.message).to.be.equal("Unauthenticated User");
-
-          return done();
-        });
-    });
-  });
-
-  describe("POST /events/:id/codes", function () {
-    let service;
-
-    afterEach(function () {
-      service.restore();
-      sinon.restore();
-    });
-
-    it("creates an event code when the request is successful", function (done) {
-      const payload = {
-        eventCode: "test-code",
-        role: ROLES.MAVEN,
-      };
-
-      service = sinon
-        .stub(eventQuery, "createEventCode")
-        .returns([
-          ...eventCodeDataFirst,
-          { code: "test-code", role: "maven", id: "test-id", event_id: event1Data.room_id },
-        ]);
-
-      chai
-        .request(app)
-        .post(`/events/${event1Data.room_id}/codes`)
-        .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...payload })
-        .end((error, response) => {
-          if (error) {
-            return done(error);
-          }
-
-          expect(response).to.have.status(201);
-          expect(response.body.message).to.equal("Event code created succesfully!");
-          expect(response.body.data[3].code).to.equal(payload.eventCode);
-          expect(response.body.data[3].role).to.equal(payload.role);
-
-          return done();
-        });
-    });
-
-    it("should return bad request if the role is not maven", function (done) {
-      const id = event1Data.id;
-      const payload = {
-        eventCode: "test-code",
-        role: "moderator",
-      };
-      chai
-        .request(app)
-        .post(`/events/${id}/codes`)
-        .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...payload })
-        .end((error, response) => {
-          if (error) {
-            return done(error);
-          }
-
-          expect(response).to.have.status(400);
-          expect(response.body).to.be.an("object");
-          expect(response.body.message).to.equal("Currently the room codes feature is only for mavens!");
-          expect(response.body.message).to.be.a("string");
-
-          return done();
-        });
-    });
-
-    it("returns an error message when code creation fails", function (done) {
-      const payload = {
-        eventCode: "test-code",
-        role: ROLES.MAVEN,
-      };
-
-      const errorMessage = "Error creating event code.";
-
-      service = sinon.stub(eventQuery, "createEventCode").throws(new Error(errorMessage));
-
-      chai
-        .request(app)
-        .post(`/events/${event1Data.room_id}/codes`)
-        .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...payload })
-        .end((error, response) => {
-          if (error) {
-            return done(error);
-          }
-
-          expect(response).to.have.status(500);
-          expect(response.body.message).to.equal("Couldn't create event code. Please try again later");
-
-          return done();
-        });
-    });
-
-    it("should return unauthorized error if user is not authenticated", function (done) {
-      const id = event1Data.id;
-      const payload = {
-        eventCode: "test-code",
-        role: "moderator",
-      };
-      chai
-        .request(app)
-        .post(`/events/${id}/codes`)
-        .send({ ...payload })
+        .patch("/events")
         .end((error, response) => {
           if (error) {
             return done(error);

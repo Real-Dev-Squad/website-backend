@@ -260,69 +260,6 @@ const fetchIssues = async () => {
   }
 };
 
-/**
- * Fetches the last merged PR by a user
- * @param username {string} - Username String
- * @returns {Object} - Object containing the last merged PR
- **/
-const fetchLastMergedPR = async (username) => {
-  try {
-    const searchParams = {
-      type: "pr",
-      is: "merged",
-      author: username,
-    };
-    const createdURL = getGithubURL(searchParams, { sort: "merged", order: "desc", per_page: "1" });
-
-    const headers = {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${config.get("githubAccessToken")}`,
-      org: config.get("githubApi.org"),
-    };
-
-    const res = await fetch(createdURL, { headers });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`GitHub API request failed: ${errorText}`);
-    }
-
-    const data = await res.json();
-
-    if (!data || !data.items || !data.items.length) {
-      throw new Error(`No merged PRs found for user ${username}`);
-    }
-
-    return data;
-  } catch (err) {
-    logger.error(`Error while fetching merged PRs: ${err}`);
-    throw err;
-  }
-};
-
-/**
- * Checks if the last PR merged by a user is within the last `days` days
- * @param username {string} - Username String
- * @param days {number} - Number of days
- * @returns {boolean} - True if last PR merged is within the last `days` days else false
- **/
-const isLastPRMergedWithinDays = async (username, days) => {
-  try {
-    const res = await fetchLastMergedPR(username);
-    const mergedAt = res.items[0].pull_request.merged_at;
-    const lastPRMergedDate = new Date(mergedAt);
-    const currentDate = new Date();
-
-    const timeDifferenceInMilliseconds = currentDate - lastPRMergedDate;
-    const timeDifferenceInDays = timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24);
-
-    return timeDifferenceInDays <= days;
-  } catch (err) {
-    logger.error(`Error while checking last PR merged: ${err}`);
-    throw err;
-  }
-};
-
 module.exports = {
   fetchPRsByUser,
   fetchOpenPRs,
@@ -332,6 +269,4 @@ module.exports = {
   fetchIssues,
   fetchOpenIssues,
   fetchClosedIssues,
-  fetchLastMergedPR,
-  isLastPRMergedWithinDays,
 };

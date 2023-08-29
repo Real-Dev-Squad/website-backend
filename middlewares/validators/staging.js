@@ -4,7 +4,7 @@ const validateUserRoles = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     super_user: joi.boolean().optional(),
     member: joi.boolean().optional(),
-    archived: joi.boolean().optional(),
+    archive: joi.boolean().optional(),
     in_discord: joi.boolean().optional(),
   });
 

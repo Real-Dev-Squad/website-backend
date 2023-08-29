@@ -105,5 +105,4 @@ module.exports = {
     APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
     APP_SECRET: "EVENT_100MS_APP_SECREt",
   },
-  githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
 };

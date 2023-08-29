@@ -3,6 +3,7 @@ const admin = require("firebase-admin");
 const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
+const { retrieveUsers } = require("../services/dataAccessLayer");
 
 /**
  * Creates a role
@@ -66,19 +67,25 @@ const createGroupRole = async (req, res) => {
 const getAllGroupRoles = async (req, res) => {
   try {
     const { groups } = await discordRolesModel.getAllGroupRoles();
-    const dev = req.query.dev === "true";
-    if (dev) {
-      // Placing the new changes under the feature flag.
-      const discordId = req.userData?.discordId;
-      const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
-      return res.json({
-        message: "Roles fetched successfully!",
-        groups: groupsWithMembershipInfo,
-      });
-    }
+    const groupsWithMemberCount = await discordRolesModel.getNumberOfMemberForGroups(groups);
+    const groupCreatorIds = groupsWithMemberCount.reduce((ids, group) => {
+      ids.add(group.createdBy);
+      return ids;
+    }, new Set());
+    const groupCreatorsDetails = await retrieveUsers({ userIds: Array.from(groupCreatorIds) });
+    const groupsWithUserDetails = groupsWithMemberCount.map((group) => {
+      const groupCreator = groupCreatorsDetails[group.createdBy];
+      return {
+        ...group,
+        firstName: groupCreator.first_name,
+        lastName: groupCreator.last_name,
+        image: groupCreator.picture?.url,
+      };
+    });
+
     return res.json({
       message: "Roles fetched successfully!",
-      groups,
+      groups: groupsWithUserDetails,
     });
   } catch (err) {
     logger.error(`Error while getting roles: ${err}`);

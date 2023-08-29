@@ -20,7 +20,6 @@ const TASK_STATUS = {
   RELEASED: "RELEASED",
   VERIFIED: "VERIFIED",
   DONE: "DONE",
-  OVERDUE: "OVERDUE",
 };
 
 // TODO: convert this to new task status

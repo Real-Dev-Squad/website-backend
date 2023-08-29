@@ -29,11 +29,7 @@ describe("qrCodeAuth", function () {
         },
       };
 
-      const res = {
-        boom: {
-          badRequest: () => {},
-        },
-      };
+      const res = {};
 
       const nextSpy = Sinon.spy();
       await storeUserDeviceInfo(req, res, nextSpy);

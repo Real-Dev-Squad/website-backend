@@ -92,30 +92,24 @@ describe("Discord actions", function () {
   });
 
   describe("GET /discord-actions/groups", function () {
-    let newGroupData;
-    let allIds = [];
     before(async function () {
+      let allIds = [];
+
       const addUsersPromises = userData.map((user) => userModel.add({ ...user }));
       const responses = await Promise.all(addUsersPromises);
       allIds = responses.map((response) => response.id);
-      newGroupData = groupData.map((group, index) => {
-        return {
-          ...group,
-          createdBy: allIds[Math.min(index, allIds.length - 1)],
-        };
-      });
 
       const addRolesPromises = [
-        discordRoleModel.add(newGroupData[0]),
-        discordRoleModel.add(newGroupData[1]),
-        discordRoleModel.add(newGroupData[2]),
+        discordRoleModel.add({ roleid: groupData[0].roleid, rolename: groupData[0].rolename, createdBy: allIds[1] }),
+        discordRoleModel.add({ roleid: groupData[1].roleid, rolename: groupData[1].rolename, createdBy: allIds[0] }),
       ];
       await Promise.all(addRolesPromises);
 
       const addGroupRolesPromises = [
-        addGroupRoleToMember({ roleid: newGroupData[0].roleid, userid: userData[0].discordId }),
-        addGroupRoleToMember({ roleid: newGroupData[0].roleid, userid: userData[1].discordId }),
-        addGroupRoleToMember({ roleid: newGroupData[1].roleid, userid: userData[0].discordId }),
+        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: allIds[0] }),
+        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: allIds[1] }),
+        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: allIds[1] }),
+        addGroupRoleToMember({ roleid: groupData[1].roleid, userid: allIds[0] }),
       ];
       await Promise.all(addGroupRolesPromises);
     });
@@ -124,7 +118,7 @@ describe("Discord actions", function () {
       await cleanDb();
     });
 
-    it("should successfully return old groups detail", function (done) {
+    it("should successfully return all groups detail", function (done) {
       chai
         .request(app)
         .get(`/discord-actions/groups`)
@@ -137,28 +131,7 @@ describe("Discord actions", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
           // Verify presence of specific properties in each group
-          const expectedProps = ["roleid", "rolename", "memberCount", "firstName", "lastName", "image", "isMember"];
-          res.body.groups.forEach((group) => {
-            expect(group).not.to.include.all.keys(expectedProps);
-          });
-          expect(res.body.message).to.equal("Roles fetched successfully!");
-          return done();
-        });
-    });
-    it("should successfully return new groups detail when flag is set", function (done) {
-      chai
-        .request(app)
-        .get(`/discord-actions/groups?dev=true`)
-        .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.an("object");
-          // Verify presence of specific properties in each group
-          const expectedProps = ["roleid", "rolename", "memberCount", "firstName", "lastName", "image", "isMember"];
+          const expectedProps = ["roleid", "rolename", "memberCount", "firstName", "lastName", "image"];
           res.body.groups.forEach((group) => {
             expect(group).to.include.all.keys(expectedProps);
           });

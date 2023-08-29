@@ -1,6 +1,7 @@
 const firestore = require("../utils/firestore");
 const QrCodeAuthModel = firestore.collection("QrCodeAuth");
-
+const userModel = firestore.collection("users");
+const USER_DOES_NOT_EXIST_ERROR = "User does not exist.";
 /**
  * Stores the user device info
  *
@@ -39,9 +40,14 @@ const updateStatus = async (userId, authStatus = "NOT_INIT", token) => {
 const storeUserDeviceInfo = async (userDeviceInfoData) => {
   try {
     const { user_id: userId } = userDeviceInfoData;
-    await QrCodeAuthModel.doc(userId).set(userDeviceInfoData);
+    const user = await userModel.doc(userId).get();
+    if (user.data()) {
+      await QrCodeAuthModel.doc(userId).set(userDeviceInfoData);
 
-    return { userDeviceInfoData };
+      return { userDeviceInfoData };
+    } else {
+      throw new Error(USER_DOES_NOT_EXIST_ERROR);
+    }
   } catch (err) {
     logger.error("Error in storing user device info.", err);
     throw err;

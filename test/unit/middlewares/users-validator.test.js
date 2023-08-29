@@ -1,5 +1,5 @@
 const Sinon = require("sinon");
-const { validateUpdateRoles, validateUserQueryParams } = require("../../../middlewares/validators/user");
+const { validateUpdateRoles } = require("../../../middlewares/validators/user");
 const { expect } = require("chai");
 
 describe("Test the roles update validator", function () {
@@ -12,19 +12,6 @@ describe("Test the roles update validator", function () {
     const res = {};
     const nextSpy = Sinon.spy();
     await validateUpdateRoles(req, res, nextSpy);
-    expect(nextSpy.callCount).to.be.equal(1);
-  });
-
-  it("Allows the request for time as 31d", async function () {
-    const req = {
-      query: {
-        state: "ONBOARDING",
-        time: "31d",
-      },
-    };
-    const res = {};
-    const nextSpy = Sinon.spy();
-    await validateUserQueryParams(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(1);
   });
 
