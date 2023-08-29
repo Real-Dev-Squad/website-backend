@@ -36,7 +36,7 @@ describe("authorizeEventRoles", function () {
 
   it("should call next if user has valid role and valid body role", async function () {
     req.body.role = ROLES.HOST;
-    req.userData.roles = { super_user: true, member: true };
+    req.userData.roles = { super_user: true, moderator: true };
 
     await authorizeEventRoles(["host", "moderator"])(req, res, next);
 
@@ -45,7 +45,7 @@ describe("authorizeEventRoles", function () {
 
   it("should call next if user has valid role and valid body role (MODERATOR)", async function () {
     req.body.role = ROLES.MODERATOR;
-    req.userData.roles = { super_user: true, member: true };
+    req.userData.roles = { super_user: true, moderator: true, member: true };
 
     await authorizeEventRoles(["host", "moderator"])(req, res, next);
 
