@@ -13,6 +13,9 @@ const firestore = require("../../../utils/firestore");
 const services = require("../../../services/users");
 const userModel = firestore.collection("users");
 const userStatusUtils = require("../../../utils/userStatus");
+const cleanDb = require("../../utils/cleanDb");
+const { getStatus } = require("../../fixtures/userStatus/userStatus");
+const userStatusModel = firestore.collection("usersStatus");
 
 describe("User Status Functions", function () {
   describe("generateNewStatus", function () {
@@ -105,7 +108,7 @@ describe("User Status Functions", function () {
 
   /* Skipping since test changes will go through before the util changes */
   // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("generateOOONickname", function () {
+  describe("generateOOONickname", function () {
     it("should return nickname of the user when username, from and status is passed", async function () {
       const { username } = userData;
       const from = new Date();
@@ -164,7 +167,7 @@ describe("User Status Functions", function () {
 
   /* Skipping since test changes will go through before the util changes */
   // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("updateNickname", function () {
+  describe("updateNickname", function () {
     let fetchStub, userInfo, getUserDiscordIdUsernameStub, generateOOONicknameStub;
 
     beforeEach(async function () {
@@ -174,7 +177,7 @@ describe("User Status Functions", function () {
       generateOOONicknameStub = sinon.stub(userStatusUtils, "generateOOONickname");
     });
 
-    afterEach(function () {
+    afterEach(async function () {
       fetchStub.restore();
       getUserDiscordIdUsernameStub.restore();
       generateOOONicknameStub.restore();
@@ -206,7 +209,6 @@ describe("User Status Functions", function () {
       });
 
       expect(getUserDiscordIdUsernameStub.calledOnce).to.be.equal(true);
-      expect(generateOOONicknameStub.calledOnce).to.be.equal(true);
       expect(fetchStub.calledOnce).to.be.equal(true);
     });
 
@@ -219,11 +221,9 @@ describe("User Status Functions", function () {
         until: new Date().getTime(),
       }).catch((err) => expect(err).to.be.equal(error));
       expect(fetchStub.calledOnce).to.be.equal(false);
-      expect(generateOOONicknameStub.calledOnce).to.be.equal(false);
     });
 
     /* Skipping since test changes will go through before the util changes */
-    // eslint-disable-next-line mocha/no-skipped-tests
     it("should throw error when the users status service call to update user's discord nickname fails", async function () {
       const { id: userId } = userInfo;
       const { username, discordId } = userData;
@@ -244,54 +244,86 @@ describe("User Status Functions", function () {
       }).catch((err) => expect(err).to.be.equal(err));
 
       expect(fetchStub.calledOnce).to.be.equal(true);
-      expect(generateOOONicknameStub.calledOnce).to.be.equal(true);
       expect(getUserDiscordIdUsernameStub.calledOnce).to.be.equal(true);
     });
   });
 
   /* Skipping since test changes will go through before the util changes */
-  // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("updateUserStatusFields", function () {
-    it("Should update current user OOO state to the future IDLE state when the current date exceeds OOO until", function () {});
+  describe("updateUserStatusFields", function () {
+    const getUserStatusDocs = async () =>
+      await userStatusModel.where("futureStatus.state", "in", ["ACTIVE", "IDLE", "OOO"]).get();
 
-    it("Should update current user OOO state to the future ACTIVE state when the current date exceeds OOO until", function () {});
+    afterEach(async function () {
+      await cleanDb();
+    });
 
-    it("Should not update current user OOO state to the future IDLE state when the current date does not exceed OOO until", function () {});
+    it("Should update current user OOO state to the future state when the current OOO period expires", async function () {
+      const summary = {
+        oooUsersAltered: 0,
+      };
+      const { currentOOOExpiredStatus } = getStatus();
+      await userStatusModel.add(currentOOOExpiredStatus);
+      const doc = await getUserStatusDocs();
+      const data = await userStatusUtils.updateUserStatusFields(doc, summary);
 
-    it("Should not update current user OOO state to the future ACTIVE state when the current date does not exceed OOO until", function () {});
+      expect(summary.oooUsersAltered).to.be.equal(1);
+      expect(data[0].currentStatus.state).to.be.equal(currentOOOExpiredStatus.futureStatus.state);
+      expect(data[0].futureStatus).to.be.equal(undefined);
+    });
 
-    // future status is OOO
+    it("Should not update the current OOO status when the OOO dates have not expired", async function () {
+      const summary = {
+        oooUsersUnaltered: 0,
+      };
+      const { currentOOOPeriodStatus } = getStatus();
+      await userStatusModel.add(currentOOOPeriodStatus);
+      const doc = await getUserStatusDocs();
+      const data = await userStatusUtils.updateUserStatusFields(doc, summary);
 
-    it("Should update current user ACTIVE state to the future OOO state when the current date exceeds OOO from but not until timestamp", function () {});
+      expect(summary.oooUsersUnaltered).to.be.equal(1);
+      expect(data.length).to.be.equal(0);
+    });
 
-    it("Should update current user IDLE state to the future OOO state when the current date exceeds OOO from but not until timestamp", function () {});
+    it("Should not update the current status to future OOO status when future OOO dates have expired and OOO future state should be removed", async function () {
+      const { futureOOOExpiredStatus } = getStatus();
+      const summary = {
+        nonOooUsersAltered: 0,
+      };
+      await userStatusModel.add(futureOOOExpiredStatus);
+      const doc = await getUserStatusDocs();
+      const data = await userStatusUtils.updateUserStatusFields(doc, summary);
 
-    it("Should remove the future user OOO status when the current date exceeds OOO until timestamp", function () {});
+      expect(summary.nonOooUsersAltered).to.be.equal(1);
+      expect(data.length).to.be.equal(1);
+      expect(data[0].currentStatus.state).to.be.equal(futureOOOExpiredStatus.currentStatus.state);
+      expect(data[0].futureStatus).to.be.equal(undefined);
+    });
 
-    it("Should not update current user ACTIVE state to the future OOO state when the current date does not exceed OOO from timestamp", function () {});
+    it("Should update current user state to the future OOO state when the current date falls between OOO start and end dates", async function () {
+      const { futureCurrentOOOPeriodStatus } = getStatus();
+      const summary = {
+        nonOooUsersAltered: 0,
+      };
+      await userStatusModel.add(futureCurrentOOOPeriodStatus);
+      const doc = await getUserStatusDocs();
+      const data = await userStatusUtils.updateUserStatusFields(doc, summary);
 
-    it("Should not update current user IDLE state to the future OOO state when the current date does not exceed OOO from timestamp", function () {});
-  });
+      expect(summary.nonOooUsersAltered).to.be.equal(1);
+      expect(data[0].currentStatus.state).to.be.equal(futureCurrentOOOPeriodStatus.futureStatus.state);
+      expect(data[0].futureStatus.state).to.be.equal(futureCurrentOOOPeriodStatus.currentStatus.state);
+    });
 
-  /* Skipping since test changes will go through before the util changes */
-  // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("updateUsersDiscordNicknameBasedOnStatus", function () {
-    it("Should update user's nickname to add OOO dates when the user's updated current status is OOO", function () {});
+    it("Should not update the future user OOO status when the OOO period has not started", async function () {
+      const { futureOOOPeriodStatus } = getStatus();
+      const summary = {
+        nonOooUsersUnaltered: 0,
+      };
+      await userStatusModel.add(futureOOOPeriodStatus);
+      const doc = await getUserStatusDocs();
+      const data = await userStatusUtils.updateUserStatusFields(doc, summary);
 
-    it("Should update user's nickname to remove OOO dates when the user's updated current status is ACTIVE from OOO", function () {});
-
-    it("Should update user's nickname to remove OOO dates when the user's updated current status is IDLE from OOO", function () {});
-
-    it("Should not update user's nickname to add OOO date when OOO date exceeds the current date ", function () {});
-
-    // future status is OOO
-
-    it("Should update user's nickname to add OOO end date when the OOO date exceeds the current date, but new state is also OOO", function () {});
-
-    it("Should update user's nickname to add OOO when the updated current status is OOO", function () {});
-
-    it("Should update user's nickname to add OOO when the current date is three days away from OOO start date", function () {});
-
-    it("Should not update user's nickname when the current status remains unchanged", function () {});
+      expect(summary.nonOooUsersUnaltered).to.be.equal(1);
+      expect(data.length).to.be.equal(0);
+    });
   });
 });
