@@ -28,6 +28,7 @@ router.patch("/", authenticate, authorizeRoles([SUPERUSER]), eventsValidator.upd
 
 router.patch("/end", authenticate, authorizeRoles([SUPERUSER]), eventsValidator.endActiveEvent, events.endActiveEvent);
 router.post("/:id/peers", authenticate, eventsValidator.addPeerToEvent, events.addPeerToEvent);
+
 router.patch(
   "/:id/peers/kickout",
   authenticate,
@@ -42,5 +43,5 @@ router.post(
   eventsValidator.generateEventCode,
   events.generateEventCode
 );
-
+router.get("/:id/codes", authenticate, eventsValidator.getEventCodes, events.getEventCodes);
 module.exports = router;

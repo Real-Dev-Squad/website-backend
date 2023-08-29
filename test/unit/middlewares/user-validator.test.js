@@ -137,6 +137,27 @@ describe("Middleware | Validators | User", function () {
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
 
+    it("Stops the propagation of the next if username is invalid", async function () {
+      const req = {
+        body: {
+          last_name: "patil",
+          first_name: "Abhay",
+          username: "@invalidusername-12",
+          twitter_id: "abhayisawesome",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = sinon.spy();
+      await updateUser(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+      expect(nextSpy.calledOnce).to.be.equal(false);
+    });
+
     it("Stops the propagation of the next if twitter_id is invalid", async function () {
       const req = {
         body: {
@@ -158,13 +179,78 @@ describe("Middleware | Validators | User", function () {
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
 
-    it("Stops the propagation of the next if username is invalid", async function () {
+    it("Stops the propagation of the next if twitter_id is valid", async function () {
       const req = {
         body: {
           last_name: "patil",
           first_name: "Abhay",
-          username: "@invalidusername-12",
+          username: "invalidusername",
           twitter_id: "abhayisawesome",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = sinon.spy();
+      await updateUser(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+      expect(nextSpy.calledOnce).to.be.equal(true);
+    });
+
+    it("Stops the propagation of the next if instagram_id is invalid", async function () {
+      const req = {
+        body: {
+          last_name: "patil",
+          first_name: "Abhay",
+          username: "invalidusername",
+          instagram_id: "@abhayisawesome",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = sinon.spy();
+      await updateUser(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+      expect(nextSpy.calledOnce).to.be.equal(false);
+    });
+
+    it("Stops the propagation of the next if linkedin id is invalid", async function () {
+      const req = {
+        body: {
+          last_name: "patil",
+          first_name: "Abhay",
+          username: "invalidusername12",
+          twitter_id: "abhayisawesome",
+          linkedin_id: "@abhay2011",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = sinon.spy();
+      await updateUser(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+      expect(nextSpy.calledOnce).to.be.equal(false);
+    });
+
+    it("Stops the propagation of the next if linkedin id is invalid or contain spaces", async function () {
+      const req = {
+        body: {
+          last_name: "patil",
+          first_name: "Abhay",
+          username: "invalidusername12",
+          twitter_id: "abhayisawesome",
+          linkedin_id: "abhay 2011",
         },
       };
       const res = {

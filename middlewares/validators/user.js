@@ -30,13 +30,21 @@ const updateUser = async (req, res, next) => {
       company: joi.string().optional(),
       designation: joi.string().optional(),
       img: joi.string().optional(),
-      linkedin_id: joi.string().optional(),
+      linkedin_id: joi
+        .string()
+        .optional()
+        .regex(/^[^@\s]*$/)
+        .message("Invalid Linkedin ID. ID should not contain special character @ or spaces"),
       twitter_id: joi
         .string()
         .optional()
-        .regex(/^[^@]*$/)
-        .message("Invalid Twitter ID. ID should not contain special character @"),
-      instagram_id: joi.string().optional(),
+        .regex(/^[^@\s]*$/)
+        .message("Invalid Twitter ID. ID should not contain special character @ or spaces"),
+      instagram_id: joi
+        .string()
+        .optional()
+        .regex(/^[^@\s]*$/)
+        .message("Invalid Instagram ID. ID should not contain special character @ or spaces"),
       website: joi.string().optional(),
       status: joi
         .any()
