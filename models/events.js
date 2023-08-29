@@ -171,6 +171,7 @@ const kickoutPeer = async ({ eventId, peerId, reason }) => {
     throw error;
   }
 };
+
 /**
  * Creates an events code document in the Firestore database with the given event code data.
  * @async
@@ -237,6 +238,30 @@ const createEventCode = async (eventCodeData) => {
   }
 };
 
+const getAllEventCodes = async (roomId) => {
+  try {
+    const docRef = eventModel.doc(roomId);
+    const docSnapshot = await docRef.get();
+
+    if (!docSnapshot.exists) {
+      throw new Error("Document does not exist.");
+    }
+
+    const eventData = docSnapshot.data();
+
+    if (!eventData.event_codes || !eventData.event_codes.byRole || !eventData.event_codes.byRole.mavens) {
+      throw new Error(`Invalid event structure in document ${roomId}.`);
+    }
+
+    const eventCodes = eventData.event_codes.byRole.mavens.map((maven) => maven.code);
+
+    return eventCodes;
+  } catch (error) {
+    logger.error("Error in getting event codes", error);
+    throw error;
+  }
+};
+
 const getEventById = async ({ id }) => {
   try {
     const eventRef = eventModel.doc(id);
@@ -278,6 +303,7 @@ module.exports = {
   createEvent,
   updateEvent,
   endActiveEvent,
+  getAllEventCodes,
   addPeerToEvent,
   kickoutPeer,
   createEventCode,
