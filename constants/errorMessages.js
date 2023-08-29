@@ -8,4 +8,5 @@ module.exports = {
   BAD_REQUEST: "BAD_REQUEST",
   INVALID_QUERY_PARAM: "Invalid Query Parameters Passed",
   FILE_TOO_LARGE: (size) => `File too large, max accepted size is ${size} MB`,
+  USER_DOES_NOT_EXIST_ERROR: "User does not exist!",
 };

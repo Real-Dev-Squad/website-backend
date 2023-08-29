@@ -508,6 +508,14 @@ const getUsersBasedOnFilter = async (query) => {
     const userRefs = finalItems.map((itemId) => userModel.doc(itemId));
     const userDocs = (await firestore.getAll(...userRefs)).map((doc) => ({ id: doc.id, ...doc.data() }));
     const filteredUserDocs = userDocs.filter((doc) => !doc.roles?.archived);
+    if (query.time && query.state === "ONBOARDING") {
+      const fetchUsersWithOnBoardingState = await getUsersWithOnboardingStateInRange(
+        filteredUserDocs,
+        stateItems,
+        query.time
+      );
+      return fetchUsersWithOnBoardingState;
+    }
     return filteredUserDocs;
   }
 
@@ -541,9 +549,29 @@ const getUsersBasedOnFilter = async (query) => {
 
     return filteredUsers.filter((user) => !user.roles?.archived);
   }
+
   return [];
 };
 
+const getUsersWithOnboardingStateInRange = async (filteredUserDocs, stateItems, time) => {
+  const usersInRange = [];
+  const range = Number(time.split("d")[0]);
+  const filteredUsers = filteredUserDocs.filter((userDoc) => {
+    return stateItems.some((stateItem) => stateItem.userId === userDoc.id);
+  });
+  filteredUsers.forEach((user) => {
+    if (user.discordJoinedAt) {
+      const userDiscordJoinedDate = new Date(user.discordJoinedAt);
+      const currentTimeStamp = new Date().getTime();
+      const timeDifferenceInMilliseconds = currentTimeStamp - userDiscordJoinedDate.getTime();
+      const currentAndUserJoinedDateDifference = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+      if (currentAndUserJoinedDateDifference > range) {
+        usersInRange.push(user);
+      }
+    }
+  });
+  return usersInRange;
+};
 /**
  * Fetch all users
  *
@@ -618,20 +646,6 @@ const archiveUserIfNotInDiscord = async () => {
   } catch (error) {
     logger.error(`Error in updating Users archived role:  ${error}`);
     throw error;
-  }
-};
-
-const fetchUsersWithToken = async () => {
-  try {
-    const users = [];
-    const usersRef = await userModel.where("tokens", "!=", false).get();
-    usersRef.forEach((user) => {
-      users.push(userModel.doc(user.id));
-    });
-    return users;
-  } catch (err) {
-    logger.error(`Error while fetching all users with tokens field: ${err}`);
-    return [];
   }
 };
 /**
@@ -715,6 +729,27 @@ const getUsersByRole = async (role) => {
   }
 };
 
+const generateUniqueUsername = async (firstname, lastname) => {
+  try {
+    const snapshot = await userModel
+      .where("first_name", "==", firstname)
+      .where("last_name", "==", lastname)
+      .count()
+      .get();
+    const existingUserCount = snapshot.data().count;
+    const initialUsername = `${firstname}-${lastname}`;
+    if (existingUserCount === 0) {
+      return initialUsername;
+    } else {
+      const uniqueUsername = `${initialUsername}-${existingUserCount + 1}`;
+      return uniqueUsername;
+    }
+  } catch (err) {
+    logger.error(`Error while generating unique username: ${err.message}`);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -736,8 +771,8 @@ module.exports = {
   getDiscordUsers,
   fetchAllUsers,
   archiveUserIfNotInDiscord,
-  fetchUsersWithToken,
   removeGitHubToken,
   getUsersByRole,
   fetchUserByIds,
+  generateUniqueUsername,
 };
