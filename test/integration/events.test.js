@@ -202,12 +202,18 @@ describe("events", function () {
 
   describe("POST /events/join - joinEvent", function () {
     let tokenService;
+    let service;
 
     afterEach(function () {
       tokenService.restore();
+      service.restore();
     });
 
     it("should return a token when the request is successful", function (done) {
+      const eventsData = {
+        data: [event1Data],
+      };
+      service = sinon.stub(EventAPIService.prototype, "get").returns(eventsData);
       const payload = {
         roomId: event1Data.id,
         userId: "5678",
@@ -223,7 +229,6 @@ describe("events", function () {
           if (error) {
             return done(error);
           }
-
           expect(response).to.have.status(201);
           expect(response.body.token).to.be.a("string");
           expect(response.body.message).to.be.a("string");
@@ -236,6 +241,7 @@ describe("events", function () {
 
   describe("POST /events/join-admin - joinEvent", function () {
     let tokenService;
+    let service;
     let superUserAuthToken;
     let memberAuthToken;
     beforeEach(async function () {
@@ -248,10 +254,16 @@ describe("events", function () {
     });
 
     afterEach(function () {
+      service.restore();
       tokenService.restore();
     });
 
     it("should return a token when the request is successful for host", function (done) {
+      const eventsData = {
+        data: [event1Data],
+      };
+      service = sinon.stub(EventAPIService.prototype, "get").returns(eventsData);
+
       const payload = {
         roomId: event1Data.id,
         userId: "5678",
