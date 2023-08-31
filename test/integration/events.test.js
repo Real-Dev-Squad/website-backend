@@ -291,12 +291,15 @@ describe("events", function () {
     });
 
     it("should return a token when the request is successful for moderator", function (done) {
+      const eventsData = {
+        data: [event1Data],
+      };
+      service = sinon.stub(EventAPIService.prototype, "get").returns(eventsData);
       const payload = {
         roomId: event1Data.id,
         userId: "5678",
         role: "moderator",
       };
-
       tokenService = sinon.stub(EventTokenService.prototype, "getAuthToken").returns("test-token");
 
       chai
