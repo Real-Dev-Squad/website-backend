@@ -1,8 +1,8 @@
 const externalAccountsModel = require("../models/external-accounts");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getDiscordMembers } = require("../services/discordService");
-const { addOrUpdate, getUsersByRole, updateUsersInBatch, fetchUsersListForMultipleValues } = require("../models/users");
-const { retrieveDiscordUsers } = require("../services/dataAccessLayer");
+const { addOrUpdate, getUsersByRole, updateUsersInBatch } = require("../models/users");
+const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/dataAccessLayer");
 const logger = require("../utils/logger");
 
 const addExternalAccountData = async (req, res) => {
@@ -126,7 +126,13 @@ const syncExternalAccountData = async (req, res) => {
  */
 const newSyncExternalAccountData = async (req, res) => {
   try {
-    const [discordUserData, unArchivedRdsUsersData] = await Promise.all([getDiscordMembers(), retrieveDiscordUsers()]);
+    const [discordUserData, unArchivedRdsUsersData] = await Promise.all([
+      getDiscordMembers(),
+      fetchUsersForKeyValues("roles.archived", false),
+    ]);
+    let usersArchived = 0;
+    let usersUnArchived = 0;
+    let totalUsersProcessed = unArchivedRdsUsersData.length;
 
     const discordUserIdSet = new Set();
 
@@ -136,18 +142,24 @@ const newSyncExternalAccountData = async (req, res) => {
 
     for (const rdsUser of unArchivedRdsUsersData) {
       let userData = {};
-      if (discordUserIdSet.has(rdsUser.discordId)) {
+      if (discordUserIdSet.has(rdsUser?.discordId)) {
+        if (rdsUser.roles?.archived) usersUnArchived++;
         userData = {
+          ...rdsUser,
           roles: {
             ...rdsUser.roles,
             in_discord: true,
             archived: false,
           },
         };
+
         discordUserIdSet.delete(rdsUser.discordId);
         updateUserList.push(userData);
-      } else if (rdsUser.roles?.in_discord) {
+      } else {
+        usersArchived++;
+
         userData = {
+          ...rdsUser,
           roles: {
             ...rdsUser.roles,
             in_discord: false,
@@ -157,15 +169,16 @@ const newSyncExternalAccountData = async (req, res) => {
         updateUserList.push(userData);
       }
     }
-
     const updateUserBatchPromise1 = updateUsersInBatch(updateUserList);
 
-    const archivedUsersInDiscordList = await fetchUsersListForMultipleValues("users.discordId", [...discordUserIdSet]);
-
+    const archivedUsersInDiscordList = await fetchUsersForKeyValues("discordId", [...discordUserIdSet]);
+    totalUsersProcessed += archivedUsersInDiscordList.length;
     updateUserList = [];
 
     for (const rdsUser of archivedUsersInDiscordList) {
+      usersUnArchived++;
       const userData = {
+        ...rdsUser,
         roles: {
           ...rdsUser.roles,
           in_discord: true,
@@ -180,9 +193,12 @@ const newSyncExternalAccountData = async (req, res) => {
 
     return res.json({
       message: "Data Sync Complete",
+      usersArchived: usersArchived,
+      usersUnArchived: usersUnArchived,
+      totalUsersProcessed: totalUsersProcessed,
     });
   } catch (err) {
-    logger.error("Error in syncing users discord joined at", err);
+    logger.error("Error in syncing users discord joined at");
     return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
   }
 };
