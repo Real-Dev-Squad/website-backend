@@ -43,7 +43,7 @@ router.post(
 router.get(
   "/:id/codes",
   authenticate,
-  authorizeRoles([SUPERUSER, MEMBER]),
+  authorizeRoles([SUPERUSER]),
   eventsValidator.getEventCodes,
   events.getEventCodes
 );

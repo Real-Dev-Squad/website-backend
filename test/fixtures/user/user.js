@@ -366,5 +366,20 @@ module.exports = () => {
       updated_at: Date.now(),
       created_at: Date.now(),
     },
+    {
+      username: "satyam-bajpai",
+      first_name: "Satyam",
+      last_name: "Bajpai",
+      github_id: "satyam73",
+      github_display_name: "Satyam Bajpai",
+      roles: {
+        member: false,
+        in_discord: true,
+        archived: false,
+      },
+      incompleteUserDetails: false,
+      updated_at: Date.now(),
+      created_at: Date.now(),
+    },
   ];
 };
