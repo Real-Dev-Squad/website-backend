@@ -752,13 +752,15 @@ const generateUniqueUsername = async (firstname, lastname) => {
 
 const updateUsersInBatch = async (usersData) => {
   try {
-    const batch = firestore.batch();
+    const bulkWriter = firestore.bulkWriter();
+
     usersData.forEach((user) => {
       const id = user.id;
       delete user.id;
-      batch.set(userModel.doc(id), user);
+      bulkWriter.update(userModel.doc(id), user);
     });
-    await batch.commit();
+
+    await bulkWriter.close();
   } catch (err) {
     logger.error("Firebase batch operation failed!");
   }
