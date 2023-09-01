@@ -750,6 +750,10 @@ const generateUniqueUsername = async (firstname, lastname) => {
   }
 };
 
+/**
+ * Updates given list of users in batch
+ * @param usersData {Array} - Users list as an array. Each element of user list should contain a property called id(PK)
+ */
 const updateUsersInBatch = async (usersData) => {
   try {
     const bulkWriter = firestore.bulkWriter();
@@ -766,6 +770,11 @@ const updateUsersInBatch = async (usersData) => {
   }
 };
 
+/**
+ * Fetch users based on document key and value.
+ * @param documentKey {String} - Model field path.
+ * @param value {String} - Field value.
+ */
 const fetchUserForKeyValue = async (documentKey, value) => {
   try {
     const userRefList = await userModel.where(documentKey, "==", value).get();
@@ -784,6 +793,12 @@ const fetchUserForKeyValue = async (documentKey, value) => {
     return [];
   }
 };
+
+/**
+ * Fetch users based on document key and value.
+ * @param documentKey {String} - Model field path.
+ * @param valueList {Array} - List of values to be matched.
+ */
 const fetchUsersListForMultipleValues = async (documentKey, valueList) => {
   try {
     const documentIdChunks = chunks(valueList, MAX_IN_OPERANDS);
