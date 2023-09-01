@@ -46,6 +46,7 @@ const getExternalAccountData = async (req, res) => {
 };
 
 /**
+ * @deprecated
  * Gets all group-roles
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
@@ -196,6 +197,7 @@ const newSyncExternalAccountData = async (req, res) => {
       usersArchived: usersArchived,
       usersUnArchived: usersUnArchived,
       totalUsersProcessed: totalUsersProcessed,
+      rdsDiscordServerUsers: discordUserData.length,
     });
   } catch (err) {
     logger.error("Error in syncing users discord joined at");

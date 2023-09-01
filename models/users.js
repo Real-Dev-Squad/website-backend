@@ -764,7 +764,7 @@ const updateUsersInBatch = async (usersData) => {
   }
 };
 
-const fetchUserForKeyValue = async (documentKey, value, removeSensitiveInfo = true) => {
+const fetchUserForKeyValue = async (documentKey, value) => {
   try {
     const userRefList = await userModel.where(documentKey, "==", value).get();
     const users = [];
@@ -782,7 +782,7 @@ const fetchUserForKeyValue = async (documentKey, value, removeSensitiveInfo = tr
     return [];
   }
 };
-const fetchUsersListForMultipleValues = async (documentKey, valueList, removeSensitiveInfo = true) => {
+const fetchUsersListForMultipleValues = async (documentKey, valueList) => {
   try {
     const documentIdChunks = chunks(valueList, MAX_IN_OPERANDS);
 
