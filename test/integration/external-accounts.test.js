@@ -15,7 +15,7 @@ const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const firestore = require("../../utils/firestore");
 const userData = require("../fixtures/user/user")();
 const userModel = firestore.collection("users");
-
+const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../constants/external-accounts");
 chai.use(chaiHttp);
 const cookieName = config.get("userToken.cookieName");
 
@@ -318,7 +318,8 @@ describe("External Accounts", function () {
 
       const res = await chai
         .request(app)
-        .patch("/external-accounts/users")
+        .post("/external-accounts/users")
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${superUserJwt}`);
 
       expect(res).to.have.status(200);
@@ -342,7 +343,8 @@ describe("External Accounts", function () {
       );
       const res = await chai
         .request(app)
-        .patch("/external-accounts/users")
+        .post("/external-accounts/users")
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${superUserJwt}`);
 
       expect(res).to.have.status(200);
@@ -366,7 +368,8 @@ describe("External Accounts", function () {
       );
       const res = await chai
         .request(app)
-        .patch("/external-accounts/users")
+        .post("/external-accounts/users")
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${superUserJwt}`);
 
       expect(res).to.have.status(200);
@@ -390,7 +393,8 @@ describe("External Accounts", function () {
       );
       const res = await chai
         .request(app)
-        .patch("/external-accounts/users")
+        .post("/external-accounts/users")
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${superUserJwt}`);
 
       expect(res).to.have.status(200);
@@ -407,7 +411,8 @@ describe("External Accounts", function () {
       fetchStub.throws(new Error("Some Internal Error"));
       chai
         .request(app)
-        .patch("/external-accounts/users")
+        .post("/external-accounts/users")
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
