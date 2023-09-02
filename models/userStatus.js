@@ -18,10 +18,39 @@ const { TASK_STATUS } = require("../constants/tasks");
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
 const { userState } = require("../constants/userStatus");
-const { getGroupRole, addGroupRoleToMember, removeGroupRoleFromMember } = require("./discordactions");
+const discordRoleModel = firestore.collection("discord-roles");
+const memberRoleModel = firestore.collection("member-group-roles");
 const usersCollection = firestore.collection("users");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 const jwt = require("jsonwebtoken");
+
+// added this function here to avoid circular dependency
+/**
+ *
+ * @param rolename { String }: Name of existing role
+ * @returns {Promise<discordRoleModel|Object>}
+ */
+const getGroupRole = async (rolename) => {
+  try {
+    if (!rolename) return { roleExists: false };
+    const data = await discordRoleModel.where("rolename", "==", rolename).limit(1).get();
+    if (data.empty) {
+      return {
+        roleExists: false,
+      };
+    }
+    return {
+      roleExists: true,
+      role: {
+        id: data.docs[0].id,
+        ...data.docs[0].data(),
+      },
+    };
+  } catch (err) {
+    logger.error("Error in getting role", err);
+    throw err;
+  }
+};
 
 const removeGroupRoleFromDiscordUser = async ({ userId, roleName }) => {
   try {
@@ -29,11 +58,19 @@ const removeGroupRoleFromDiscordUser = async ({ userId, roleName }) => {
     if (groupRole?.roleExists) {
       const user = await usersCollection.doc(userId).get();
       const userData = user.data();
-      await removeGroupRoleFromMember({
-        roleid: groupRole.role.roleid,
-        userid: userData.discordId,
-        date: admin.firestore.Timestamp.fromDate(new Date()),
-      });
+
+      // remove role from member role collection in firestore
+      const hasRole = await memberRoleModel
+        .where("roleid", "==", groupRole.role.roleid)
+        .where("userid", "==", userData.discordId)
+        .limit(1)
+        .get();
+      if (!hasRole.empty) {
+        const oldRole = [];
+        hasRole.forEach((role) => oldRole.push({ id: role.id }));
+        await memberRoleModel.doc(oldRole[0].id).delete();
+      }
+
       const dataForDiscord = {
         roleid: groupRole.role.roleid,
         userid: userData.discordId,
@@ -61,11 +98,21 @@ const addGroupRoleToDiscordUser = async ({ userId, roleName }) => {
     if (groupRole?.roleExists) {
       const user = await usersCollection.doc(userId).get();
       const userData = user.data();
-      await addGroupRoleToMember({
-        roleid: groupRole.role.roleid,
-        userid: userData.discordId,
-        date: admin.firestore.Timestamp.fromDate(new Date()),
-      });
+
+      // add role to member role collection in firestore
+      const alreadyHasRole = await memberRoleModel
+        .where("roleid", "==", groupRole.role.roleid)
+        .where("userid", "==", userData.discordId)
+        .limit(1)
+        .get();
+      if (alreadyHasRole.empty) {
+        await memberRoleModel.add({
+          roleid: groupRole.role.roleid,
+          userid: userData.discordId,
+          date: admin.firestore.Timestamp.fromDate(new Date()),
+        });
+      }
+
       const dataForDiscord = {
         roleid: groupRole.role.roleid,
         userid: userData.discordId,
