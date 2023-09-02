@@ -6,6 +6,14 @@ const admin = require("firebase-admin");
 const { findSubscribedGroupIds } = require("../utils/helper");
 const { retrieveUsers } = require("../services/dataAccessLayer");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
+const {
+  getAllUserStatus,
+  addGroupRoleToDiscordUser,
+  getGroupRole,
+  removeGroupRoleFromDiscordUser,
+} = require("./userStatus");
+const { userState } = require("../constants/userStatus");
+const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
 
 /**
@@ -41,6 +49,33 @@ const getAllGroupRoles = async () => {
       groups.push(group);
     });
     return { groups };
+  } catch (err) {
+    logger.error("Error in getting all group-roles", err);
+    throw err;
+  }
+};
+
+const getAllUsersHavingRole = async (rolename) => {
+  try {
+    if (!rolename) return { roleExists: false };
+    const data = await discordRoleModel.where("rolename", "==", rolename).limit(1).get();
+    if (data.empty) {
+      return {
+        roleExists: false,
+      };
+    }
+
+    const roleId = data.docs[0].data().roleid;
+    const usersHavingRole = [];
+    const snapshot = await memberRoleModel.where("roleid", "==", roleId).get();
+    snapshot.forEach((doc) => {
+      const role = {
+        id: doc.id,
+        ...doc.data(),
+      };
+      usersHavingRole.push(role);
+    });
+    return { usersHavingRole };
   } catch (err) {
     logger.error("Error in getting all group-roles", err);
     throw err;
@@ -198,6 +233,87 @@ const fetchGroupToUserMapping = async (roleIds) => {
   }
 };
 
+const updateIdleUsersOnDiscord = async () => {
+  let totalIdleUsers = 0;
+  let totalGroupIdleRolesApplied = 0;
+  let totalGroupIdleRolesNotApplied = 0;
+  let totalGroupIdleRolesRemoved = 0;
+  let totalGroupIdleRolesNotRemoved = 0;
+  let allIdleUsers = [];
+  let allUsersHavingGroupIdle = [];
+
+  try {
+    const { allUserStatus } = await getAllUserStatus({ state: userState.IDLE });
+    const { usersHavingRole } = await getAllUsersHavingRole("group-idle");
+    if (allUserStatus) {
+      await Promise.all(
+        allUserStatus.map(async (userStatus) => {
+          try {
+            const userData = await userModel.doc(userStatus.userId).get();
+            if (userData.exists) {
+              userStatus.userid = userData.data().discordId;
+            }
+          } catch (error) {
+            logger.error(`error updating discordId in userStatus ${error.message}`);
+            throw new Error("error updating discordId in userStatus");
+          }
+        })
+      );
+    }
+    allIdleUsers = allUserStatus;
+    allUsersHavingGroupIdle = usersHavingRole;
+  } catch (error) {
+    logger.error(`unable to get idle users ${error.message}`);
+    throw new Error("unable to get idle users");
+  }
+
+  const getUniqueInFirst = (first, second) => first.filter((a) => !second.some((b) => a.userid === b.userid));
+  const usersForRoleRemoval = getUniqueInFirst(allUsersHavingGroupIdle, allIdleUsers);
+  const usersForRoleAddition = getUniqueInFirst(allIdleUsers, allUsersHavingGroupIdle);
+
+  totalIdleUsers = allIdleUsers.length;
+
+  if (usersForRoleAddition.length) {
+    await Promise.all(
+      usersForRoleAddition.map(async (user) => {
+        try {
+          const groupIdleRole = await getGroupRole("group-idle");
+          if (!groupIdleRole.roleExists) throw new Error("Role does not exist");
+          await addGroupRoleToDiscordUser({ discordId: user.userid, roleId: groupIdleRole.role.roleid });
+          totalGroupIdleRolesApplied++;
+        } catch (error) {
+          totalGroupIdleRolesNotApplied++;
+          logger.error(`Error in setting group-idle on user: ${error}`);
+        }
+      })
+    );
+  }
+
+  if (usersForRoleRemoval.length) {
+    await Promise.all(
+      usersForRoleRemoval.map(async (user) => {
+        try {
+          const groupIdleRole = await getGroupRole("group-idle");
+          if (!groupIdleRole.roleExists) throw new Error("Role does not exist");
+          await removeGroupRoleFromDiscordUser({ discordId: user.userid, roleId: groupIdleRole.role.roleid });
+          totalGroupIdleRolesRemoved++;
+        } catch (error) {
+          totalGroupIdleRolesNotRemoved++;
+          logger.error(`Error in removing group-idle from user: ${error}`);
+        }
+      })
+    );
+  }
+
+  return {
+    totalIdleUsers,
+    totalGroupIdleRolesApplied,
+    totalGroupIdleRolesNotApplied,
+    totalGroupIdleRolesRemoved,
+    totalGroupIdleRolesNotRemoved,
+  };
+};
+
 module.exports = {
   createNewRole,
   getAllGroupRoles,
@@ -206,4 +322,5 @@ module.exports = {
   updateDiscordImageForVerification,
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
+  updateIdleUsersOnDiscord,
 };
