@@ -146,6 +146,25 @@ const updateAllUserStatus = async (req, res) => {
   }
 };
 
+// TODO - Remove it
+/**
+ * Update All Users Status
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const setRoleIdleToIdleMembers = async (req, res) => {
+  try {
+    await userStatusModel.updateIdleMembers();
+    return res.status(200).json({
+      message: "All Idle Members updated successfully.",
+    });
+  } catch (err) {
+    logger.error(`Error while setting idle role: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 /**
  * Retrieve users status based on task status
  * @param req {Object} - Express request object
@@ -247,4 +266,6 @@ module.exports = {
   getUserStatusControllers,
   batchUpdateUsersStatus,
   updateUserStatusController,
+  // TODO - Remove it
+  setRoleIdleToIdleMembers,
 };
