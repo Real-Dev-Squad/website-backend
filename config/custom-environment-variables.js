@@ -29,6 +29,8 @@ module.exports = {
     clientSecret: "GITHUB_CLIENT_SECRET",
   },
 
+  githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
+
   firestore: "FIRESTORE_CONFIG",
 
   services: {
