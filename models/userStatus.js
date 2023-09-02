@@ -52,17 +52,23 @@ const getGroupRole = async (rolename) => {
   }
 };
 
-const removeGroupRoleFromDiscordUser = async ({ userId, roleName }) => {
+const removeGroupRoleFromDiscordUser = async ({ userId, roleName, roleId, discordId }) => {
   try {
-    const groupRole = await getGroupRole(roleName);
-    if (groupRole?.roleExists) {
-      const user = await usersCollection.doc(userId).get();
-      const userData = user.data();
+    let groupRole;
+    if (!roleId) groupRole = await getGroupRole(roleName);
+    if (groupRole?.roleExists || roleId) {
+      const ROLE_ID = roleId || groupRole.role.roleid;
+      let userData;
+      if (!discordId) {
+        const user = await usersCollection.doc(userId).get();
+        userData = user.data();
+      }
+      const USER_DISCORD_ID = discordId || userData.discordId;
 
       // remove role from member role collection in firestore
       const hasRole = await memberRoleModel
-        .where("roleid", "==", groupRole.role.roleid)
-        .where("userid", "==", userData.discordId)
+        .where("roleid", "==", ROLE_ID)
+        .where("userid", "==", USER_DISCORD_ID)
         .limit(1)
         .get();
       if (!hasRole.empty) {
@@ -72,8 +78,8 @@ const removeGroupRoleFromDiscordUser = async ({ userId, roleName }) => {
       }
 
       const dataForDiscord = {
-        roleid: groupRole.role.roleid,
-        userid: userData.discordId,
+        roleid: ROLE_ID,
+        userid: USER_DISCORD_ID,
       };
       const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
         algorithm: "RS256",
@@ -92,30 +98,36 @@ const removeGroupRoleFromDiscordUser = async ({ userId, roleName }) => {
   }
 };
 
-const addGroupRoleToDiscordUser = async ({ userId, roleName }) => {
+const addGroupRoleToDiscordUser = async ({ userId, roleName, roleId, discordId }) => {
   try {
-    const groupRole = await getGroupRole(roleName);
-    if (groupRole?.roleExists) {
-      const user = await usersCollection.doc(userId).get();
-      const userData = user.data();
+    let groupRole;
+    if (!roleId) groupRole = await getGroupRole(roleName);
+    if (groupRole?.roleExists || roleId) {
+      const ROLE_ID = roleId || groupRole.role.roleid;
+      let userData;
+      if (!discordId) {
+        const user = await usersCollection.doc(userId).get();
+        userData = user.data();
+      }
+      const USER_DISCORD_ID = discordId || userData.discordId;
 
       // add role to member role collection in firestore
       const alreadyHasRole = await memberRoleModel
-        .where("roleid", "==", groupRole.role.roleid)
-        .where("userid", "==", userData.discordId)
+        .where("roleid", "==", ROLE_ID)
+        .where("userid", "==", USER_DISCORD_ID)
         .limit(1)
         .get();
       if (alreadyHasRole.empty) {
         await memberRoleModel.add({
-          roleid: groupRole.role.roleid,
-          userid: userData.discordId,
+          roleid: ROLE_ID,
+          userid: USER_DISCORD_ID,
           date: admin.firestore.Timestamp.fromDate(new Date()),
         });
       }
 
       const dataForDiscord = {
-        roleid: groupRole.role.roleid,
-        userid: userData.discordId,
+        roleid: ROLE_ID,
+        userid: USER_DISCORD_ID,
       };
       const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
         algorithm: "RS256",
@@ -679,23 +691,6 @@ const cancelOooStatus = async (userId) => {
   }
 };
 
-// TODO - Remove it
-const updateIdleMembers = async () => {
-  const { allUserStatus: allIdleUsers } = await getAllUserStatus({ state: userState.IDLE });
-  const promiseArray = [];
-  allIdleUsers.forEach((idleUser) => {
-    promiseArray.push(
-      new Promise((resolve, reject) => {
-        addGroupRoleToDiscordUser({ userId: idleUser.userId, roleName: "group-idle" }).then((response) => {
-          resolve();
-        });
-      })
-    );
-  });
-  Promise.all(promiseArray);
-  return { wasSuccess: true };
-};
-
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -708,6 +703,7 @@ module.exports = {
   batchUpdateUsersStatus,
   getTaskBasedUsersStatus,
   cancelOooStatus,
-  // TODO - Remove it
-  updateIdleMembers,
+  addGroupRoleToDiscordUser,
+  removeGroupRoleFromDiscordUser,
+  getGroupRole,
 };

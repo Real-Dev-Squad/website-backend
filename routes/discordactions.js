@@ -5,6 +5,7 @@ const {
   getAllGroupRoles,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
+  setRoleIdleToIdleUsers,
 } = require("../controllers/discordactions");
 const { validateGroupRoleBody, validateMemberRoleBody } = require("../middlewares/validators/discordactions");
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
@@ -23,5 +24,6 @@ router.patch(
   checkIsVerifiedDiscord,
   updateDiscordImageForVerification
 );
+router.put("/group-idle", authenticate, authorizeRoles([SUPERUSER]), setRoleIdleToIdleUsers);
 
 module.exports = router;
