@@ -691,6 +691,23 @@ const cancelOooStatus = async (userId) => {
   }
 };
 
+// TODO - Remove it
+const updateIdleMembers = async () => {
+  const { allUserStatus: allIdleUsers } = await getAllUserStatus({ state: userState.IDLE });
+  const promiseArray = [];
+  allIdleUsers.forEach((idleUser) => {
+    promiseArray.push(
+      new Promise((resolve, reject) => {
+        addGroupRoleToDiscordUser({ userId: idleUser.userId, roleName: "group-idle" }).then((response) => {
+          resolve();
+        });
+      })
+    );
+  });
+  Promise.all(promiseArray);
+  return { wasSuccess: true };
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
