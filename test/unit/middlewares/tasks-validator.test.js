@@ -487,4 +487,37 @@ describe("getTasks validator", function () {
       expect.fail("Should not have thrown a validation error");
     }
   });
+
+  it("should fail when html_url in github request body is not a valid URL", async function () {
+    const invalidRequestBody = {
+      title: "Sample Task",
+      type: "Feature",
+      status: TASK_STATUS.ASSIGNED,
+      priority: "High",
+      percentCompleted: 0,
+      github: {
+        issue: {
+          html_url: "invalid-url",
+        },
+      },
+    };
+    const req = {
+      body: invalidRequestBody,
+    };
+    const res = {
+      boom: {
+        badRequest: (message) => {
+          return message;
+        },
+      },
+    };
+    const nextMiddlewareSpy = Sinon.spy();
+    try {
+      await createTask(req, res, nextMiddlewareSpy);
+      expect.fail("Should have thrown a bad request error");
+    } catch (error) {
+      expect(error);
+    }
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
 });
