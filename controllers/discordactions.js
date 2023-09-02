@@ -151,9 +151,28 @@ const updateDiscordImageForVerification = async (req, res) => {
   }
 };
 
+/**
+ * Set all group-idle on discord
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const setRoleIdleToIdleUsers = async (req, res) => {
+  try {
+    const result = await discordRolesModel.updateIdleUsersOnDiscord();
+    return res.status(201).json({
+      message: "All Idle Users updated successfully.",
+      ...result,
+    });
+  } catch (err) {
+    logger.error(`Error while setting idle role: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   createGroupRole,
   getAllGroupRoles,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
+  setRoleIdleToIdleUsers,
 };
