@@ -1,4 +1,5 @@
 const { Forbidden, NotFound } = require("http-errors");
+const admin = require("firebase-admin");
 const firestore = require("../utils/firestore");
 const {
   getTomorrowTimeStamp,
@@ -28,7 +29,11 @@ const removeGroupRoleFromDiscordUser = async ({ userId, roleName }) => {
     if (groupRole?.roleExists) {
       const user = await usersCollection.doc(userId).get();
       const userData = user.data();
-      await removeGroupRoleFromMember({ roleid: groupRole.role.roleid, userid: userData.discordId });
+      await removeGroupRoleFromMember({
+        roleid: groupRole.role.roleid,
+        userid: userData.discordId,
+        date: admin.firestore.Timestamp.fromDate(new Date()),
+      });
       const dataForDiscord = {
         roleid: groupRole.role.roleid,
         userid: userData.discordId,
@@ -56,7 +61,11 @@ const addGroupRoleToDiscordUser = async ({ userId, roleName }) => {
     if (groupRole?.roleExists) {
       const user = await usersCollection.doc(userId).get();
       const userData = user.data();
-      await addGroupRoleToMember({ roleid: groupRole.role.roleid, userid: userData.discordId });
+      await addGroupRoleToMember({
+        roleid: groupRole.role.roleid,
+        userid: userData.discordId,
+        date: admin.firestore.Timestamp.fromDate(new Date()),
+      });
       const dataForDiscord = {
         roleid: groupRole.role.roleid,
         userid: userData.discordId,
@@ -623,6 +632,23 @@ const cancelOooStatus = async (userId) => {
   }
 };
 
+// TODO - Remove it
+const updateIdleMembers = async () => {
+  const { allUserStatus: allIdleUsers } = await getAllUserStatus({ state: userState.IDLE });
+  const promiseArray = [];
+  allIdleUsers.forEach((idleUser) => {
+    promiseArray.push(
+      new Promise((resolve, reject) => {
+        addGroupRoleToDiscordUser({ userId: idleUser.userId, roleName: "group-idle" }).then((response) => {
+          resolve();
+        });
+      })
+    );
+  });
+  Promise.all(promiseArray);
+  return { wasSuccess: true };
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -635,4 +661,6 @@ module.exports = {
   batchUpdateUsersStatus,
   getTaskBasedUsersStatus,
   cancelOooStatus,
+  // TODO - Remove it
+  updateIdleMembers,
 };
