@@ -1,6 +1,6 @@
 const firestore = require("../utils/firestore");
 const extensionRequestsModel = firestore.collection("extensionRequests");
-const { buildExtensionRequests, formatExtensionRequest } = require("../utils/extensionRequests");
+const { buildExtensionRequests, formatExtensionRequest, generateNextLink } = require("../utils/extensionRequests");
 
 /**
  * Create Extension Request
@@ -69,6 +69,69 @@ const fetchExtensionRequests = async (extensionRequestQuery) => {
   }
 };
 
+/**
+ * Fetch all Extension Requests
+ * @param extensionRequestQuery { Object }: Body of the extension request
+ * @param extensionRequestQuery.status {string} : STATUS of the extension request
+ * @param extensionRequestQuery.assignee {string} : assignee of the extension request
+ * @param extensionRequestQuery.taskId {string} : taskId of the extension request
+ * @param paginationQuery.cursor {string} : Id of the extension request
+ * @param paginationQuery.size {number} : maximum number of items in response
+ * @param paginationQuery.order {string} : order for timestamp/created time
+ * @return Array of Extension Requests {Promise<ExtensionRequestsArray|Array>}
+ */
+const fetchPaginatedExtensionRequests = async (extensionRequestQuery, paginationQuery) => {
+  try {
+    let extensionRequestsSnapshot = extensionRequestsModel;
+
+    Object.entries(extensionRequestQuery).forEach(([key, value]) => {
+      if (value) {
+        const opStr = Array.isArray(value) ? "in" : "==";
+        extensionRequestsSnapshot = extensionRequestsSnapshot.where(key, opStr, value);
+      }
+    });
+
+    const { cursor, size, order } = paginationQuery;
+
+    if (order) {
+      extensionRequestsSnapshot = extensionRequestsSnapshot.orderBy("timestamp", order);
+    }
+
+    if (cursor) {
+      const data = await extensionRequestsModel.doc(cursor).get();
+      extensionRequestsSnapshot = extensionRequestsSnapshot.startAfter(data).limit(size);
+    } else if (size) {
+      extensionRequestsSnapshot = extensionRequestsSnapshot.limit(size);
+    }
+
+    extensionRequestsSnapshot = await extensionRequestsSnapshot.get();
+
+    const requests = buildExtensionRequests(extensionRequestsSnapshot);
+    const promises = requests.map((request) => formatExtensionRequest(request));
+    const updatedRequests = await Promise.all(promises);
+
+    const resultDataLength = extensionRequestsSnapshot.docs.length;
+    const isNextLinkRequired = size && resultDataLength === size;
+    const lastVisible = isNextLinkRequired && extensionRequestsSnapshot.docs[resultDataLength - 1];
+
+    const nextPageParams = {
+      ...extensionRequestQuery,
+      ...paginationQuery,
+      cursor: lastVisible?.id,
+    };
+
+    let nextLink = "";
+    if (lastVisible) {
+      nextLink = generateNextLink(nextPageParams);
+    }
+
+    return { allExtensionRequests: updatedRequests, next: nextLink };
+  } catch (err) {
+    logger.error("error getting extension requests", err);
+    throw err;
+  }
+};
+
 const fetchExtensionRequest = async (extensionRequestId) => {
   try {
     const extensionRequest = await extensionRequestsModel.doc(extensionRequestId).get();
@@ -85,4 +148,5 @@ module.exports = {
   fetchExtensionRequests,
   fetchExtensionRequest,
   updateExtensionRequest,
+  fetchPaginatedExtensionRequests,
 };

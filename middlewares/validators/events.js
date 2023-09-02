@@ -35,8 +35,9 @@ const getAllEvents = async (req, res, next) => {
 
 const joinEvent = async (req, res, next) => {
   const schema = joi.object({
-    roomId: joi.string().required(),
+    roomId: joi.optional(),
     userId: joi.string().required(),
+    eventCode: joi.optional(),
     role: joi.string().valid("host", "moderator", "guest", "maven").required(),
   });
 
@@ -144,6 +145,45 @@ const kickoutPeer = async (req, res, next) => {
   }
 };
 
+const generateEventCode = async (req, res, next) => {
+  const { id } = req.params;
+  const { eventCode, role } = req.body;
+
+  const schema = joi.object({
+    id: joi.string().required(),
+    eventCode: joi.string().required(),
+    role: joi.string().required(),
+  });
+
+  const validationOptions = { abortEarly: false };
+
+  try {
+    await schema.validateAsync({ id, eventCode, role }, validationOptions);
+    next();
+  } catch (error) {
+    logger.error(`We encountered some error while generating event code: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
+const getEventCodes = async (req, res, next) => {
+  const { id } = req.params;
+
+  const schema = joi.object({
+    id: joi.string().required(),
+  });
+
+  const validationOptions = { abortEarly: false };
+
+  try {
+    await schema.validateAsync({ id }, validationOptions);
+    next();
+  } catch (error) {
+    logger.error(`Event id is required : ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -153,4 +193,6 @@ module.exports = {
   endActiveEvent,
   addPeerToEvent,
   kickoutPeer,
+  generateEventCode,
+  getEventCodes,
 };

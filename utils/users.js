@@ -196,6 +196,25 @@ const getRoleToUpdate = async (userData, newRoles) => {
   return { updateRole: true, newUserRoles };
 };
 
+const parseSearchQuery = (queryString) => {
+  const searchParams = {};
+  const queryParts = queryString.split(" ");
+  queryParts.forEach((part) => {
+    const [key, value] = part.split(":");
+    switch (key.toLowerCase()) {
+      case "filterby":
+        searchParams.filterBy = value.toLowerCase();
+        break;
+      case "days":
+        searchParams.days = parseInt(value);
+        break;
+      default:
+        break;
+    }
+  });
+  return searchParams;
+};
+
 module.exports = {
   addUserToDBForTest,
   getUserId,
@@ -208,4 +227,5 @@ module.exports = {
   getUsernameElseUndefined,
   getUserIdElseUndefined,
   getRoleToUpdate,
+  parseSearchQuery,
 };
