@@ -144,7 +144,8 @@ const newSyncExternalAccountData = async (req, res) => {
     for (const rdsUser of unArchivedRdsUsersData) {
       let userData = {};
 
-      // This if-block will be removed if the IN_DISCORD ROLE is deprecated.
+      // TODO: This if-block will be removed if the IN_DISCORD ROLE is deprecated. It can be tracked using the following issue : https://github.com/Real-Dev-Squad/website-backend/issues/1475
+
       if (discordUserIdSet.has(rdsUser?.discordId)) {
         discordUserIdSet.delete(rdsUser.discordId);
 
