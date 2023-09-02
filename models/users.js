@@ -9,7 +9,7 @@ const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
 const { archiveUsers } = require("../services/users");
-const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE, FS_IN_CLAUSE_SIZE } = require("../constants/users");
+const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE, FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const ROLES = require("../constants/roles");
@@ -786,7 +786,7 @@ const fetchUserForKeyValue = async (documentKey, value) => {
 };
 const fetchUsersListForMultipleValues = async (documentKey, valueList) => {
   try {
-    const documentIdChunks = chunks(valueList, FS_IN_CLAUSE_SIZE);
+    const documentIdChunks = chunks(valueList, FIRESTORE_IN_CLAUSE_SIZE);
 
     const allUserRefPromiseList = [];
     for (const documentIds of documentIdChunks) {
