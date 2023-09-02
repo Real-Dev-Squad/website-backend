@@ -62,6 +62,7 @@ module.exports = () => {
       username: "pranavg",
       first_name: "Pranav",
       last_name: "Gajjewar",
+      discordId: "12345678",
       yoe: 0,
       img: "./img.png",
       github_id: "cartmanishere",
