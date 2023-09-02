@@ -324,8 +324,8 @@ describe("External Accounts", function () {
       expect(res).to.have.status(200);
       expect(res.body).to.deep.equal({
         message: "Data Sync Complete",
-        usersArchived: 1,
-        usersUnArchived: 0,
+        usersArchivedCount: 1,
+        usersUnArchivedCount: 0,
         totalUsersProcessed: 2,
         rdsDiscordServerUsers: 3,
       });
@@ -348,13 +348,12 @@ describe("External Accounts", function () {
       expect(res).to.have.status(200);
       expect(res.body).to.deep.equal({
         message: "Data Sync Complete",
-        usersArchived: 0,
-        usersUnArchived: 0,
+        usersArchivedCount: 0,
+        usersUnArchivedCount: 0,
         totalUsersProcessed: 2,
         rdsDiscordServerUsers: 3,
       });
     });
-
     it("Should Un-Archive Users With Archived as True and in RDS Discord Server", async function () {
       await userModel.add(usersFromRds[2]); // archivedAndInDiscord
 
@@ -372,8 +371,8 @@ describe("External Accounts", function () {
       expect(res).to.have.status(200);
       expect(res.body).to.deep.equal({
         message: "Data Sync Complete",
-        usersArchived: 0,
-        usersUnArchived: 1,
+        usersArchivedCount: 0,
+        usersUnArchivedCount: 1,
         totalUsersProcessed: 2,
         rdsDiscordServerUsers: 3,
       });
@@ -396,8 +395,8 @@ describe("External Accounts", function () {
       expect(res).to.have.status(200);
       expect(res.body).to.deep.equal({
         message: "Data Sync Complete",
-        usersArchived: 0,
-        usersUnArchived: 0,
+        usersArchivedCount: 0,
+        usersUnArchivedCount: 0,
         totalUsersProcessed: 1,
         rdsDiscordServerUsers: 3,
       });
