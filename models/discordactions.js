@@ -49,6 +49,33 @@ const getAllGroupRoles = async () => {
 
 /**
  *
+ * @param rolename { String }: Name of existing role
+ * @returns {Promise<discordRoleModel|Object>}
+ */
+const getGroupRole = async (rolename) => {
+  try {
+    if (!rolename) return { roleExists: false };
+    const data = await discordRoleModel.where("rolename", "==", rolename).limit(1).get();
+    if (data.empty) {
+      return {
+        roleExists: false,
+      };
+    }
+    return {
+      roleExists: true,
+      role: {
+        id: data.docs[0].id,
+        ...data.docs[0].data(),
+      },
+    };
+  } catch (err) {
+    logger.error("Error in getting role", err);
+    throw err;
+  }
+};
+
+/**
+ *
  * @param roleData { Object }: Data of the new role
  * @returns {Promise<discordRoleModel|Object>}
  */
@@ -89,6 +116,31 @@ const addGroupRoleToMember = async (roleData) => {
     return { id, roleData, wasSuccess: true };
   } catch (err) {
     logger.error("Error in adding role", err);
+    throw err;
+  }
+};
+
+/**
+ *
+ * @param roleData { Object }: Data of the new role
+ * @returns {Promise<discordRoleModel|Object>}
+ */
+const removeGroupRoleFromMember = async (roleData) => {
+  try {
+    const hasRole = await memberRoleModel
+      .where("roleid", "==", roleData.roleid)
+      .where("userid", "==", roleData.userid)
+      .limit(1)
+      .get();
+    if (hasRole.empty) {
+      return { wasSuccess: false };
+    }
+    const oldRole = [];
+    hasRole.forEach((role) => oldRole.push({ id: role.id }));
+    await memberRoleModel.doc(oldRole[0].id).delete();
+    return { wasSuccess: true };
+  } catch (err) {
+    logger.error("Error in deleting role", err);
     throw err;
   }
 };
@@ -202,8 +254,10 @@ module.exports = {
   createNewRole,
   getAllGroupRoles,
   addGroupRoleToMember,
+  removeGroupRoleFromMember,
   isGroupRoleExists,
   updateDiscordImageForVerification,
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
+  getGroupRole,
 };
