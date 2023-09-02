@@ -49,7 +49,7 @@ const getAllGroupRoles = async () => {
 
 /**
  *
- * @param roleData { Object }: Data of the new role
+ * @param rolename { String }: Name of existing role
  * @returns {Promise<discordRoleModel|Object>}
  */
 const getGroupRole = async (rolename) => {
