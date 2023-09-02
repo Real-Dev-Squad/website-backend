@@ -131,8 +131,8 @@ const newSyncExternalAccountData = async (req, res) => {
       getDiscordMembers(),
       fetchUsersForKeyValues("roles.archived", false),
     ]);
-    let usersArchived = 0;
-    let usersUnArchived = 0;
+    let usersArchivedCount = 0;
+    let usersUnArchivedCount = 0;
     let totalUsersProcessed = unArchivedRdsUsersData.length;
 
     const discordUserIdSet = new Set();
@@ -143,8 +143,13 @@ const newSyncExternalAccountData = async (req, res) => {
 
     for (const rdsUser of unArchivedRdsUsersData) {
       let userData = {};
+
+      // This if-block will be removed if the IN_DISCORD ROLE is deprecated.
       if (discordUserIdSet.has(rdsUser?.discordId)) {
-        if (rdsUser.roles?.archived) usersUnArchived++;
+        discordUserIdSet.delete(rdsUser.discordId);
+
+        if (rdsUser.roles?.in_discord) continue;
+
         userData = {
           ...rdsUser,
           roles: {
@@ -153,12 +158,8 @@ const newSyncExternalAccountData = async (req, res) => {
             archived: false,
           },
         };
-
-        discordUserIdSet.delete(rdsUser.discordId);
-        updateUserList.push(userData);
       } else {
-        usersArchived++;
-
+        usersArchivedCount++;
         userData = {
           ...rdsUser,
           roles: {
@@ -167,17 +168,17 @@ const newSyncExternalAccountData = async (req, res) => {
             archived: true,
           },
         };
-        updateUserList.push(userData);
       }
+      updateUserList.push(userData);
     }
-    const updateUserBatchPromise1 = updateUsersInBatch(updateUserList);
+    const unArchiveUsersInBatchPromise = updateUsersInBatch(updateUserList);
 
     const archivedUsersInDiscordList = await fetchUsersForKeyValues("discordId", [...discordUserIdSet]);
     totalUsersProcessed += archivedUsersInDiscordList.length;
     updateUserList = [];
 
     for (const rdsUser of archivedUsersInDiscordList) {
-      usersUnArchived++;
+      usersUnArchivedCount++;
       const userData = {
         ...rdsUser,
         roles: {
@@ -188,14 +189,14 @@ const newSyncExternalAccountData = async (req, res) => {
       };
       updateUserList.push(userData);
     }
-    const updateUserBatchPromise2 = updateUsersInBatch(updateUserList);
+    const archiveUsersInBatchPromise = updateUsersInBatch(updateUserList);
 
-    await Promise.all([updateUserBatchPromise1, updateUserBatchPromise2]);
+    await Promise.all([unArchiveUsersInBatchPromise, archiveUsersInBatchPromise]);
 
     return res.json({
       message: "Data Sync Complete",
-      usersArchived: usersArchived,
-      usersUnArchived: usersUnArchived,
+      usersArchivedCount: usersArchivedCount,
+      usersUnArchivedCount: usersUnArchivedCount,
       totalUsersProcessed: totalUsersProcessed,
       rdsDiscordServerUsers: discordUserData.length,
     });
