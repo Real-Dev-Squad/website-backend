@@ -15,6 +15,7 @@ const {
 const { userState } = require("../constants/userStatus");
 const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
+const dataAccess = require("../services/dataAccessLayer");
 
 /**
  *
@@ -239,6 +240,8 @@ const updateIdleUsersOnDiscord = async () => {
   const totalGroupIdleRolesNotApplied = { count: 0, errors: [] };
   let totalGroupIdleRolesRemoved = 0;
   const totalGroupIdleRolesNotRemoved = { count: 0, errors: [] };
+  let totalUsersHavingNoDiscordId = 0;
+  let totalArchivedUsers = 0;
   let allIdleUsers = [];
   let allUsersHavingGroupIdle = [];
 
@@ -281,11 +284,18 @@ const updateIdleUsersOnDiscord = async () => {
         try {
           const groupIdleRole = await getGroupRole("group-idle");
           if (!groupIdleRole.roleExists) throw new Error("Role does not exist");
-          await addGroupRoleToDiscordUser({ discordId: user.userid, roleId: groupIdleRole.role.roleid });
-          totalGroupIdleRolesApplied++;
+          const result = await dataAccess.retrieveUsers({ id: user.userId });
+          if (result.user?.roles?.archived) {
+            totalArchivedUsers++;
+          } else if (!user.userid) {
+            totalUsersHavingNoDiscordId++;
+          } else {
+            await addGroupRoleToDiscordUser({ discordId: user.userid, roleId: groupIdleRole.role.roleid });
+            totalGroupIdleRolesApplied++;
+          }
         } catch (error) {
           totalGroupIdleRolesNotApplied.count++;
-          totalGroupIdleRolesNotApplied.errors.push(error);
+          totalGroupIdleRolesNotApplied.errors.push(error.message);
           logger.error(`Error in setting group-idle on user: ${error}`);
         }
       })
@@ -302,7 +312,7 @@ const updateIdleUsersOnDiscord = async () => {
           totalGroupIdleRolesRemoved++;
         } catch (error) {
           totalGroupIdleRolesNotRemoved.count++;
-          totalGroupIdleRolesNotRemoved.errors.push(error);
+          totalGroupIdleRolesNotRemoved.errors.push(error.message);
           logger.error(`Error in removing group-idle from user: ${error}`);
         }
       })
@@ -317,6 +327,8 @@ const updateIdleUsersOnDiscord = async () => {
     totalGroupIdleRolesNotRemoved,
     totalUserRoleToBeRemoved,
     totalUserRoleToBeAdded,
+    totalUsersHavingNoDiscordId,
+    totalArchivedUsers,
   };
 };
 
