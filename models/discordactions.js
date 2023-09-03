@@ -308,8 +308,12 @@ const updateIdleUsersOnDiscord = async () => {
         try {
           const groupIdleRole = await getGroupRole("group-idle");
           if (!groupIdleRole.roleExists) throw new Error("Role does not exist");
-          await removeGroupRoleFromDiscordUser({ discordId: user.userid, roleId: groupIdleRole.role.roleid });
-          totalGroupIdleRolesRemoved++;
+          if (!user.userid) {
+            totalUsersHavingNoDiscordId++;
+          } else {
+            await removeGroupRoleFromDiscordUser({ discordId: user.userid, roleId: groupIdleRole.role.roleid });
+            totalGroupIdleRolesRemoved++;
+          }
         } catch (error) {
           totalGroupIdleRolesNotRemoved.count++;
           totalGroupIdleRolesNotRemoved.errors.push(error.message);
