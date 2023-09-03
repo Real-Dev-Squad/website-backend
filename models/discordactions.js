@@ -236,9 +236,9 @@ const fetchGroupToUserMapping = async (roleIds) => {
 const updateIdleUsersOnDiscord = async () => {
   let totalIdleUsers = 0;
   let totalGroupIdleRolesApplied = 0;
-  let totalGroupIdleRolesNotApplied = 0;
+  const totalGroupIdleRolesNotApplied = { count: 0, errors: [] };
   let totalGroupIdleRolesRemoved = 0;
-  let totalGroupIdleRolesNotRemoved = 0;
+  const totalGroupIdleRolesNotRemoved = { count: 0, errors: [] };
   let allIdleUsers = [];
   let allUsersHavingGroupIdle = [];
 
@@ -272,6 +272,8 @@ const updateIdleUsersOnDiscord = async () => {
   const usersForRoleAddition = getUniqueInFirst(allIdleUsers, allUsersHavingGroupIdle);
 
   totalIdleUsers = allIdleUsers.length;
+  const totalUserRoleToBeRemoved = usersForRoleRemoval.length;
+  const totalUserRoleToBeAdded = usersForRoleAddition.length;
 
   if (usersForRoleAddition.length) {
     await Promise.all(
@@ -282,7 +284,8 @@ const updateIdleUsersOnDiscord = async () => {
           await addGroupRoleToDiscordUser({ discordId: user.userid, roleId: groupIdleRole.role.roleid });
           totalGroupIdleRolesApplied++;
         } catch (error) {
-          totalGroupIdleRolesNotApplied++;
+          totalGroupIdleRolesNotApplied.count++;
+          totalGroupIdleRolesNotApplied.errors.push(error);
           logger.error(`Error in setting group-idle on user: ${error}`);
         }
       })
@@ -298,7 +301,8 @@ const updateIdleUsersOnDiscord = async () => {
           await removeGroupRoleFromDiscordUser({ discordId: user.userid, roleId: groupIdleRole.role.roleid });
           totalGroupIdleRolesRemoved++;
         } catch (error) {
-          totalGroupIdleRolesNotRemoved++;
+          totalGroupIdleRolesNotRemoved.count++;
+          totalGroupIdleRolesNotRemoved.errors.push(error);
           logger.error(`Error in removing group-idle from user: ${error}`);
         }
       })
@@ -311,6 +315,8 @@ const updateIdleUsersOnDiscord = async () => {
     totalGroupIdleRolesNotApplied,
     totalGroupIdleRolesRemoved,
     totalGroupIdleRolesNotRemoved,
+    totalUserRoleToBeRemoved,
+    totalUserRoleToBeAdded,
   };
 };
 
