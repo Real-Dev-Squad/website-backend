@@ -32,15 +32,24 @@ const {
  */
 
 const updateDiscordNicknames = async (req, res) => {
-  const usersInDiscord = await userQuery.getDiscordUsers();
-  usersInDiscord.forEach(async (user) => {
-    const { discordId, username } = user;
-    await setUserDiscordNickname(username, discordId);
-  });
-  return res.json({
-    numberOfUsersEffected: usersInDiscord.length,
-    message: "Users discord nicknames synced Successfully",
-  });
+  let response;
+  try {
+    const usersInDiscord = await userQuery.getDiscordUsers();
+    const nonSuperUsers = usersInDiscord.filter((user) => !user.roles.super_user === true);
+    const batchUpdate = nonSuperUsers.map(async (user) => {
+      const { discordId, username } = user;
+      return await setUserDiscordNickname(username, discordId);
+    });
+    response = await Promise.all(batchUpdate);
+
+    return res.json({
+      numberOfUsersEffected: response.length,
+      message: `Updated Nicknames for ${response.length} Users`,
+    });
+  } catch (error) {
+    logger.error(`Error while updating nicknames: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
 };
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
