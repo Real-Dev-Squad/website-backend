@@ -455,5 +455,4 @@ describe("users", function () {
       expect(userListResult[0].discordId).to.be.deep.equal(userDataArray[0].discordId);
     });
   });
-
 });
