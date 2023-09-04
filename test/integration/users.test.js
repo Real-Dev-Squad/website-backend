@@ -2002,4 +2002,35 @@ describe("Users", function () {
         });
     });
   });
+
+  describe("POST /discord/update-nicknames", function () {
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      userId = await addUser(userData[0]);
+    });
+    afterEach(async function () {
+      await cleanDb();
+      Sinon.restore();
+    });
+    it("returns 200 for successfully updating nicknames with POST method", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(updatedNicknameResponse),
+        })
+      );
+      chai
+        .request(app)
+        .post(`/users/discord/update-nicknames`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Users Nicknames updated successfully");
+          return done();
+        });
+    });
+  });
 });

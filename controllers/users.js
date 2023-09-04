@@ -44,7 +44,7 @@ const updateDiscordNicknames = async (req, res) => {
 
     return res.json({
       numberOfUsersEffected: response.length,
-      message: `Updated Nicknames for ${response.length} Users`,
+      message: `Users Nicknames updated successfully`,
     });
   } catch (error) {
     logger.error(`Error while updating nicknames: ${error}`);
