@@ -494,7 +494,6 @@ const addUserIntro = async (req, res) => {
       },
       foundFrom: rawData.foundFrom,
       created_at: Date.now(),
-      updated_at: Date.now(),
     };
     await userQuery.addJoinData(data);
 

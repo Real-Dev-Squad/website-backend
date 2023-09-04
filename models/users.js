@@ -78,7 +78,6 @@ const addJoinData = async (userData) => {
     await updateUserStatus(userData.userId, {
       currentStatus: { state: userState.ONBOARDING },
       monthlyHours: { committed: 4 * userData.intro.numberOfHours },
-      updated_at: Date.now(),
     });
   } catch (err) {
     logger.error("Error in adding data", err);
