@@ -639,9 +639,8 @@ describe("Users", function () {
             return done(err);
           }
           const {
-            body: { data, message },
+            body: { data },
           } = res;
-          console.log("data", data);
           expect(data[0]).to.haveOwnProperty("created_at");
           return done();
         });
