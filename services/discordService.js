@@ -86,10 +86,15 @@ const setUserDiscordNickname = async (userName, discordId) => {
   }
 };
 
+const removeUnverifiedRole = (discordId) => {
+  // Script here
+};
+
 module.exports = {
   getDiscordMembers,
   setInDiscordFalseScript,
   addRoleToUser,
   removeRoleFromUser,
   setUserDiscordNickname,
+  removeUnverifiedRole,
 };
