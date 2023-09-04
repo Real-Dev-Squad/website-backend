@@ -124,6 +124,23 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
+    it("throw 400 if task progress is updated on a non working day (Sunday)", function (done) {
+      // Set the current date to a Sunday (e.g., 2023-07-22) using sinon.
+      clock.setSystemTime(new Date(Date.UTC(2023, 6, 23, 4, 29)).getTime()); // 2nd May 2023 05:59 am IST
+      chai
+        .request(app)
+        .post(`/progresses`)
+        .set("cookie", `${cookieName}=${userToken}`)
+        .send(taskProgressDay1(taskId1))
+        .end((err, res) => {
+          clock.restore(); // Restore the original clock after the request is made.
+          if (err) return done(err);
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.be.equal("Progress document cannot be created on non working days (Sundays)");
+          return done();
+        });
+    });
+
     it("Gives 400 for invalid request body", function (done) {
       const incompleteProgressArray = incompleteTaskProgress(taskId1);
       const requests = incompleteProgressArray.map((progress) => {
@@ -286,8 +303,10 @@ describe("Test Progress Updates API for Tasks", function () {
       taskId2 = taskObject2.taskId;
       const progressData1 = stubbedModelTaskProgressData(userId, taskId1, 1683626400000, 1683590400000); // 2023-05-09
       const progressData2 = stubbedModelTaskProgressData(userId, taskId1, 1683885600000, 1683849600000); // 2023-05-12
+      const progressData3 = stubbedModelTaskProgressData(userId, taskId1, 1684153600000, 1684108800000); // 2023-05-15
       await firestore.collection("progresses").doc("taskProgressDocument1").set(progressData1);
       await firestore.collection("progresses").doc("taskProgressDocument2").set(progressData2);
+      await firestore.collection("progresses").doc("taskProgressDocument3").set(progressData3);
     });
 
     it("Verifies the progress records for a task within the specified date range.", function (done) {
@@ -308,6 +327,37 @@ describe("Test Progress Updates API for Tasks", function () {
           expect(res.body.data.progressRecords["2023-05-10"]).to.be.equal(false);
           expect(res.body.data.progressRecords["2023-05-11"]).to.be.equal(false);
           expect(res.body.data.progressRecords["2023-05-12"]).to.be.equal(true);
+          return done();
+        });
+    });
+
+    it("Verifies the progress records for a task within the specified date range ignoring non working day ( Sunday )", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/range?taskId=${taskId1}&startDate=2023-05-09&endDate=2023-05-15`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body.data).to.be.an("object");
+          expect(res.body).to.have.keys(["message", "data"]);
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.data).to.have.keys(["startDate", "endDate", "progressRecords"]);
+          expect(res.body.data.startDate).to.be.equal("2023-05-09");
+          expect(res.body.data.endDate).to.be.equal("2023-05-15");
+          expect(res.body.data.progressRecords).to.have.key([
+            "2023-05-09",
+            "2023-05-10",
+            "2023-05-11",
+            "2023-05-12",
+            "2023-05-13",
+            "2023-05-15",
+          ]);
+          expect(res.body.data.progressRecords["2023-05-09"]).to.be.equal(true);
+          expect(res.body.data.progressRecords["2023-05-10"]).to.be.equal(false);
+          expect(res.body.data.progressRecords["2023-05-11"]).to.be.equal(false);
+          expect(res.body.data.progressRecords["2023-05-12"]).to.be.equal(true);
+          expect(res.body.data.progressRecords["2023-05-13"]).to.be.equal(false);
+          expect(res.body.data.progressRecords["2023-05-15"]).to.be.equal(true);
           return done();
         });
     });
