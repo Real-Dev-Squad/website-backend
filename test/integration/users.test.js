@@ -2003,7 +2003,7 @@ describe("Users", function () {
     });
   });
 
-  describe("POST /discord/update-nicknames", function () {
+  describe("POST /discord/nickname", function () {
     beforeEach(async function () {
       fetchStub = Sinon.stub(global, "fetch");
       userId = await addUser(userData[0]);
@@ -2021,7 +2021,7 @@ describe("Users", function () {
       );
       chai
         .request(app)
-        .post(`/users/discord/update-nicknames`)
+        .post(`/users/discord/nickname`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -2038,7 +2038,7 @@ describe("Users", function () {
 
       chai
         .request(app)
-        .patch(`/users/${userId}/update-nickname`)
+        .post(`/users/discord/nickname`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
