@@ -48,7 +48,7 @@ const updateDiscordNicknames = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while updating nicknames: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 const verifyUser = async (req, res) => {

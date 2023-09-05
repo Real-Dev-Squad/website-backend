@@ -2032,5 +2032,23 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("returns an error for unsuccessful updating nicknames with POST method", function (done) {
+      fetchStub.returns(Promise.reject(new Error("User not verified")));
+
+      chai
+        .request(app)
+        .patch(`/users/${userId}/update-nickname`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          const response = res.body;
+          expect(response.message).to.be.equal("An internal server error occurred");
+          return done();
+        });
+    });
   });
 });
