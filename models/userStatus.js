@@ -21,7 +21,8 @@ const { userState } = require("../constants/userStatus");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const usersCollection = firestore.collection("users");
-const { removeRoleFromUser, addRoleToUser } = require("../services/discordService");
+const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
+const { generateAuthTokenForCloudflare } = require("../utils/discord-actions");
 
 // added this function here to avoid circular dependency
 /**
@@ -71,7 +72,12 @@ const removeGroupIdleRoleFromDiscordUser = async (userId) => {
           await memberRoleModel.doc(oldRole[0].id).delete();
         }
 
-        await removeRoleFromUser(groupIdleRoleId, discordId);
+        const authToken = generateAuthTokenForCloudflare();
+        await fetch(`${DISCORD_BASE_URL}/roles`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+          body: JSON.stringify({ userid: discordId, roleid: groupIdleRoleId }),
+        });
       }
     }
   } catch (error) {
@@ -102,7 +108,12 @@ const addGroupIdleRoleToDiscordUser = async (userId) => {
           });
         }
 
-        await addRoleToUser(discordId, groupIdleRoleId);
+        const authToken = generateAuthTokenForCloudflare();
+        await fetch(`${DISCORD_BASE_URL}/roles/add`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+          body: JSON.stringify({ userid: discordId, roleid: groupIdleRoleId }),
+        });
       }
     }
   } catch (error) {
