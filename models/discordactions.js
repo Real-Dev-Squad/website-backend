@@ -6,10 +6,7 @@ const admin = require("firebase-admin");
 const { findSubscribedGroupIds } = require("../utils/helper");
 const { retrieveUsers } = require("../services/dataAccessLayer");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
-const {
-  getAllUserStatus,
-  getGroupRole,
-} = require("./userStatus");
+const { getAllUserStatus, getGroupRole } = require("./userStatus");
 const { userState } = require("../constants/userStatus");
 const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
@@ -50,33 +47,6 @@ const getAllGroupRoles = async () => {
       groups.push(group);
     });
     return { groups };
-  } catch (err) {
-    logger.error("Error in getting all group-roles", err);
-    throw err;
-  }
-};
-
-const getAllUsersHavingRole = async (rolename) => {
-  try {
-    if (!rolename) return { roleExists: false };
-    const data = await discordRoleModel.where("rolename", "==", rolename).limit(1).get();
-    if (data.empty) {
-      return {
-        roleExists: false,
-      };
-    }
-
-    const roleId = data.docs[0].data().roleid;
-    const usersHavingRole = [];
-    const snapshot = await memberRoleModel.where("roleid", "==", roleId).get();
-    snapshot.forEach((doc) => {
-      const role = {
-        id: doc.id,
-        ...doc.data(),
-      };
-      usersHavingRole.push(role);
-    });
-    return { usersHavingRole };
   } catch (err) {
     logger.error("Error in getting all group-roles", err);
     throw err;
@@ -257,7 +227,7 @@ const updateIdleUsersOnDiscord = async () => {
       const haveIdleRole = discordUser.roles.includes(groupIdleRole.role.roleid);
 
       if (isDeveloper && haveIdleRole) {
-        usersHavingIdleRole.push({userid: discordUser.user.id});
+        usersHavingIdleRole.push({ userid: discordUser.user.id });
       }
     });
     if (allUserStatus) {

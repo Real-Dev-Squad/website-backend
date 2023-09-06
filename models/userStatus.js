@@ -54,11 +54,11 @@ const getGroupRole = async (rolename) => {
 const removeGroupIdleRoleFromDiscordUser = async (userId) => {
   try {
     const groupRoleObj = await getGroupRole("group-idle");
-    if(groupRoleObj?.roleExists) {
+    if (groupRoleObj?.roleExists) {
       const groupIdleRoleId = groupRoleObj.role.roleid;
       const user = await usersCollection.doc(userId).get();
       const discordId = user.data().discordId;
-      if(discordId) {
+      if (discordId) {
         // Remove role from firestore collection
         const hasRole = await memberRoleModel
           .where("roleid", "==", groupIdleRoleId)
@@ -83,11 +83,11 @@ const removeGroupIdleRoleFromDiscordUser = async (userId) => {
 const addGroupIdleRoleToDiscordUser = async (userId) => {
   try {
     const groupRoleObj = await getGroupRole("group-idle");
-    if(groupRoleObj?.roleExists) {
+    if (groupRoleObj?.roleExists) {
       const groupIdleRoleId = groupRoleObj.role.roleid;
       const user = await usersCollection.doc(userId).get();
       const discordId = user.data().discordId;
-      if(discordId) {
+      if (discordId) {
         // Add role to firestore collection
         const alreadyHasRole = await memberRoleModel
           .where("roleid", "==", groupIdleRoleId)
