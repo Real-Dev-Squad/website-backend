@@ -92,14 +92,42 @@ const getAllEvents = async (req, res) => {
  * @throws {Error} If an error occurs while generating the token.
  */
 const joinEvent = async (req, res) => {
-  const { roomId, userId, role } = req.body;
-  const payload = { roomId, userId, role };
+  const { userId, role, eventCode } = req.body;
+  const payload = { userId, role };
   try {
-    const token = tokenService.getAuthToken(payload);
+    const eventsData = await apiService.get("https://api.100ms.live/v2/rooms?enabled=true");
+
+    const activeEvent = eventsData?.data?.[0];
+    const eventId = activeEvent?.id;
+
+    if (role === ROLES.MAVEN) {
+      const eventCodes = await eventQuery.getEventCodes({ id: eventId });
+      const allEventCodesArray = eventCodes.map((eventCode) => {
+        return eventCode.code;
+      });
+
+      const isEventCodeValid = allEventCodesArray.includes(eventCode);
+
+      if (!isEventCodeValid) {
+        return res.status(400).json({
+          message: "Provided event code is invalid for the role!",
+        });
+      }
+      const token = tokenService.getAuthToken({ ...payload, roomId: eventId });
+
+      return res.status(201).json({
+        token: token,
+        message: "Token generated successfully!",
+        event: activeEvent,
+      });
+    }
+
+    const token = tokenService.getAuthToken({ ...payload, roomId: eventId });
+
     return res.status(201).json({
       token: token,
       message: "Token generated successfully!",
-      success: true,
+      event: activeEvent,
     });
   } catch (error) {
     logger.error({ error });
@@ -289,6 +317,35 @@ const generateEventCode = async (req, res) => {
   }
 };
 
+/**
+ * Gets event codes for particular event
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with a success message if the event codes are fetched succesfully
+ * @throws {Object} The JSON response with an error message if an error occurred while getting the event codes data
+ */
+const getEventCodes = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const eventCodes = await eventQuery.getEventCodes({ id });
+
+    return res.status(200).json({
+      message: "Event codes is successfully fetched for the event!",
+      data: eventCodes,
+    });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Something went wrong while getting the event codes!",
+    });
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -299,4 +356,5 @@ module.exports = {
   addPeerToEvent,
   kickoutPeer,
   generateEventCode,
+  getEventCodes,
 };

@@ -9,7 +9,7 @@ const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
 const { archiveUsers } = require("../services/users");
-const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE } = require("../constants/users");
+const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE, FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const ROLES = require("../constants/roles");
@@ -760,6 +760,69 @@ const generateUniqueUsername = async (firstname, lastname) => {
   }
 };
 
+const updateUsersInBatch = async (usersData) => {
+  try {
+    const bulkWriter = firestore.bulkWriter();
+
+    usersData.forEach((user) => {
+      const id = user.id;
+      delete user.id;
+      bulkWriter.update(userModel.doc(id), user);
+    });
+
+    await bulkWriter.close();
+  } catch (err) {
+    logger.error("Firebase batch operation failed!");
+  }
+};
+
+const fetchUserForKeyValue = async (documentKey, value) => {
+  try {
+    const userRefList = await userModel.where(documentKey, "==", value).get();
+    const users = [];
+    userRefList.forEach((user) => {
+      const userData = user.data();
+      if (userData)
+        users.push({
+          id: user.id,
+          ...userData,
+        });
+    });
+    return users;
+  } catch (err) {
+    logger.error("Firebase fetch operation failed!", err);
+    return [];
+  }
+};
+const fetchUsersListForMultipleValues = async (documentKey, valueList) => {
+  try {
+    const documentIdChunks = chunks(valueList, FIRESTORE_IN_CLAUSE_SIZE);
+
+    const allUserRefPromiseList = [];
+    for (const documentIds of documentIdChunks) {
+      const usersRefPromise = await userModel.where(documentKey, "in", documentIds).get();
+      allUserRefPromiseList.push(usersRefPromise);
+    }
+    const userRefList = await Promise.all(allUserRefPromiseList);
+
+    const users = [];
+    for (const usersRef of userRefList) {
+      usersRef.forEach((user) => {
+        const userData = user.data();
+        if (userData)
+          users.push({
+            id: user.id,
+            ...userData,
+          });
+      });
+    }
+    return users;
+  } catch (err) {
+    logger.error("Firebase fetch operation failed!");
+    return [];
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -785,4 +848,7 @@ module.exports = {
   getUsersByRole,
   fetchUserByIds,
   generateUniqueUsername,
+  updateUsersInBatch,
+  fetchUsersListForMultipleValues,
+  fetchUserForKeyValue,
 };
