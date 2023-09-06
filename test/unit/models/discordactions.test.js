@@ -5,6 +5,8 @@ const firestore = require("../../../utils/firestore");
 const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
+const userModel = firestore.collection("users");
+const admin = require("firebase-admin");
 
 const {
   createNewRole,
@@ -12,10 +14,13 @@ const {
   isGroupRoleExists,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
+  enrichGroupDataWithMembershipInfo,
+  fetchGroupToUserMapping,
 } = require("../../../models/discordactions");
 const { groupData, roleData, existingRole } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
 const { userPhotoVerificationData } = require("../../fixtures/user/photo-verification");
+const userData = require("../../fixtures/user/user")();
 
 chai.should();
 
@@ -241,6 +246,122 @@ describe("discordactions", function () {
         expect(logger.error.calledOnce).to.be.equal(true);
         expect(logger.error.calledWith("Error in adding role", error)).to.be.equal(true);
       }
+    });
+  });
+
+  describe("enrichGroupDataWithMembershipInfo", function () {
+    let newGroupData;
+    let allIds = [];
+
+    before(async function () {
+      const addUsersPromises = userData.map((user) => userModel.add({ ...user }));
+      const responses = await Promise.all(addUsersPromises);
+      allIds = responses.map((response) => response.id);
+      newGroupData = groupData.map((group, index) => {
+        return {
+          ...group,
+          createdBy: allIds[Math.min(index, allIds.length - 1)],
+        };
+      });
+
+      const addRolesPromises = [
+        discordRoleModel.add(newGroupData[0]),
+        discordRoleModel.add(newGroupData[1]),
+        discordRoleModel.add(newGroupData[2]),
+      ];
+      await Promise.all(addRolesPromises);
+
+      const addGroupRolesPromises = [
+        addGroupRoleToMember({ roleid: newGroupData[0].roleid, userid: userData[0].discordId }),
+        addGroupRoleToMember({ roleid: newGroupData[0].roleid, userid: userData[1].discordId }),
+        addGroupRoleToMember({ roleid: newGroupData[1].roleid, userid: userData[0].discordId }),
+      ];
+      await Promise.all(addGroupRolesPromises);
+    });
+
+    after(async function () {
+      await cleanDb();
+    });
+
+    it("should return an empty array if the parameter is an empty array", async function () {
+      const result = await enrichGroupDataWithMembershipInfo(userData[0].discordId, []);
+      expect(result).to.be.an("array");
+      expect(result.length).to.equal(0);
+    });
+
+    it("should return an empty array if the parameter no parameter is passed", async function () {
+      const result = await enrichGroupDataWithMembershipInfo();
+      expect(result).to.be.an("array");
+      expect(result.length).to.equal(0);
+    });
+
+    it("should return group details with memberCount details ", async function () {
+      const result = await enrichGroupDataWithMembershipInfo(userData[0].discordId, newGroupData);
+      expect(result[0]).to.deep.equal({
+        ...newGroupData[0],
+        memberCount: 2,
+        firstName: userData[0].first_name,
+        lastName: userData[0].last_name,
+        image: userData[0].picture.url,
+        isMember: true,
+      });
+
+      expect(result[1]).to.deep.equal({
+        ...newGroupData[1],
+        memberCount: 1,
+        firstName: userData[1].first_name,
+        lastName: userData[1].last_name,
+        image: userData[1].picture.url,
+        isMember: true,
+      });
+
+      expect(result[2]).to.deep.equal({
+        ...newGroupData[2],
+        memberCount: 0,
+        firstName: userData[2].first_name,
+        lastName: userData[2].last_name,
+        image: userData[2].picture.url,
+        isMember: false,
+      });
+    });
+  });
+
+  describe("fetchGroupToMemberMapping", function () {
+    const roleIds = [];
+    before(async function () {
+      // Add 50 different roles and user mapping
+      const addGroupRolesPromises = Array.from({ length: 65 }).map((_, index) => {
+        const roleId = `role-id-${index}`;
+        roleIds.push(roleId);
+        return addGroupRoleToMember({
+          roleid: roleId,
+          userid: index,
+          date: admin.firestore.Timestamp.fromDate(new Date()),
+        });
+      });
+      await Promise.all(addGroupRolesPromises);
+    });
+
+    after(async function () {
+      await cleanDb();
+    });
+
+    it("should return empty array for empty roleId", async function () {
+      const groupToMemberMappings = await fetchGroupToUserMapping([]);
+      expect(groupToMemberMappings).to.be.an("array");
+      expect(groupToMemberMappings).to.have.lengthOf(0);
+    });
+
+    it("should be able to fetch mapping for less than 30 roleIds", async function () {
+      const groupToMemberMappings = await fetchGroupToUserMapping(roleIds.slice(0, 25));
+      expect(groupToMemberMappings).to.be.an("array");
+      expect(groupToMemberMappings).to.have.lengthOf(25);
+    });
+
+    it("should be able to fetch mapping for more than 30 roleIds", async function () {
+      const groupToMemberMappings = await fetchGroupToUserMapping(roleIds);
+      expect(groupToMemberMappings).to.be.an("array");
+      expect(groupToMemberMappings).to.have.lengthOf(65);
     });
   });
 });

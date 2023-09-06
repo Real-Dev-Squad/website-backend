@@ -135,9 +135,10 @@ const updateUserStatus = async (req, res) => {
  */
 const updateAllUserStatus = async (req, res) => {
   try {
-    await userStatusModel.updateAllUserStatus();
+    const data = await userStatusModel.updateAllUserStatus();
     return res.status(200).json({
       message: "All User Status updated successfully.",
+      data,
     });
   } catch (err) {
     logger.error(`Error while updating the User Data: ${err}`);

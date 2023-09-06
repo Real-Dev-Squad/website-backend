@@ -1,5 +1,5 @@
 const Sinon = require("sinon");
-const { validateUpdateRoles } = require("../../../middlewares/validators/user");
+const { validateUpdateRoles, validateUserQueryParams } = require("../../../middlewares/validators/user");
 const { expect } = require("chai");
 
 describe("Test the roles update validator", function () {
@@ -15,6 +15,19 @@ describe("Test the roles update validator", function () {
     expect(nextSpy.callCount).to.be.equal(1);
   });
 
+  it("Allows the request for time as 31d", async function () {
+    const req = {
+      query: {
+        state: "ONBOARDING",
+        time: "31d",
+      },
+    };
+    const res = {};
+    const nextSpy = Sinon.spy();
+    await validateUserQueryParams(req, res, nextSpy);
+    expect(nextSpy.callCount).to.be.equal(1);
+  });
+
   it("Allows the request to pass with archived property", async function () {
     const req = {
       body: {
@@ -27,11 +40,12 @@ describe("Test the roles update validator", function () {
     expect(nextSpy.callCount).to.be.equal(1);
   });
 
-  it("Throws an error if both member and archived properties are present", async function () {
+  it("Throws an error if both member and archived with reason properties are present", async function () {
     const req = {
       body: {
         member: true,
         archived: true,
+        reason: "test reason",
       },
     };
     const res = {

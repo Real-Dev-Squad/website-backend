@@ -6,26 +6,33 @@ const fromFirestoreData = async (task) => {
     return task;
   }
 
-  let { createdBy, assignee, participants, type } = task;
+  let { createdBy, assignee: assigneeId, participants, type } = task;
+  let assigneeName;
 
   if (createdBy) {
     createdBy = await getUsername(createdBy);
   }
 
-  if (assignee) {
-    assignee = await getUsername(assignee);
+  if (assigneeId) {
+    assigneeName = await getUsername(assigneeId);
   }
 
   if (type === TASK_TYPE.GROUP) {
     participants = await getParticipantUsernames(participants);
   }
 
-  return {
+  const updatedTask = {
     ...task,
     createdBy,
-    assignee,
     participants,
   };
+
+  if (assigneeName || assigneeId) {
+    updatedTask.assignee = assigneeName;
+    updatedTask.assigneeId = assigneeId;
+  }
+
+  return updatedTask;
 };
 
 const toFirestoreData = async (task) => {
@@ -57,10 +64,12 @@ const buildTasks = (tasks, initialTaskArray = []) => {
   return initialTaskArray;
 };
 
-const transformQuery = (dev = false, status = "", size, page) => {
+const transformQuery = (dev = false, status = "", size, page, assignee = "", title = "") => {
   const query = {};
   const transformedDev = JSON.parse(dev);
   const transformedStatus = MAPPED_TASK_STATUS[status.toUpperCase()];
+  const transformedAssignee = assignee.toLowerCase();
+  const transformedTitle = title;
 
   if (page) {
     query.page = parseInt(page);
@@ -70,7 +79,35 @@ const transformQuery = (dev = false, status = "", size, page) => {
     query.size = parseInt(size);
   }
 
-  return { status: transformedStatus, dev: transformedDev, ...query };
+  return {
+    status: transformedStatus,
+    dev: transformedDev,
+    assignee: transformedAssignee,
+    title: transformedTitle,
+    ...query,
+  };
+};
+
+const parseSearchQuery = (queryString) => {
+  const searchParams = {};
+  const queryParts = queryString.split("+");
+  queryParts.forEach((part) => {
+    const [key, value] = part.split(":");
+    switch (key.toLowerCase()) {
+      case "searchterm":
+        searchParams.searchTerm = value.toLowerCase();
+        break;
+      case "assignee":
+        searchParams.assignee = value.toLowerCase();
+        break;
+      case "status":
+        searchParams.status = value.toLowerCase();
+        break;
+      default:
+        break;
+    }
+  });
+  return searchParams;
 };
 
 module.exports = {
@@ -78,4 +115,5 @@ module.exports = {
   toFirestoreData,
   buildTasks,
   transformQuery,
+  parseSearchQuery,
 };

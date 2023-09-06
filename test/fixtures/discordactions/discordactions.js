@@ -1,7 +1,7 @@
 const groupData = [
-  { id: "1", name: "Group 1" },
-  { id: "2", name: "Group 2" },
-  { id: "3", name: "Group 3" },
+  { rolename: "Group 1", roleid: 1 },
+  { rolename: "Group 2", roleid: 2 },
+  { rolename: "Group 3", roleid: 3 },
 ];
 
 const roleData = {

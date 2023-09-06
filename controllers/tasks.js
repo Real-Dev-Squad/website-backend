@@ -11,6 +11,7 @@ const { transformQuery } = require("../utils/tasks");
 const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 const dataAccess = require("../services/dataAccessLayer");
+const { parseSearchQuery } = require("../utils/tasks");
 /**
  * Creates new task
  *
@@ -20,9 +21,6 @@ const dataAccess = require("../services/dataAccessLayer");
  */
 const addNewTask = async (req, res) => {
   try {
-    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
-    const { userStatusFlag } = req.query;
-    const isUserStatusEnabled = userStatusFlag === "true";
     const { id: createdBy } = req.userData;
     const dependsOn = req.body.dependsOn;
     let userStatusUpdate;
@@ -37,7 +35,7 @@ const addNewTask = async (req, res) => {
       dependsOn,
     };
     const taskDependency = dependsOn && (await dependencyModel.addDependency(data));
-    if (isUserStatusEnabled && req.body.assignee) {
+    if (req.body.assignee) {
       userStatusUpdate = await updateUserStatusOnTaskUpdate(req.body.assignee);
     }
     return res.json({
@@ -128,8 +126,8 @@ const fetchPaginatedTasks = async (query) => {
 
 const fetchTasks = async (req, res) => {
   try {
-    const { dev, status, page, size, prev, next } = req.query;
-    const transformedQuery = transformQuery(dev, status, size, page);
+    const { dev, status, page, size, prev, next, q: queryString, assignee, title } = req.query;
+    const transformedQuery = transformQuery(dev, status, size, page, assignee, title);
 
     if (dev) {
       const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next });
@@ -139,12 +137,39 @@ const fetchTasks = async (req, res) => {
       });
     }
 
+    if (queryString !== undefined) {
+      const searchParams = parseSearchQuery(queryString);
+      if (!searchParams.searchTerm) {
+        return res.status(404).json({
+          message: "No tasks found.",
+          tasks: [],
+        });
+      }
+      const filterTasks = await tasks.fetchTasks(searchParams.searchTerm);
+      const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(filterTasks);
+      if (tasksWithRdsAssigneeInfo.length === 0) {
+        return res.status(404).json({
+          message: "No tasks found.",
+          tasks: [],
+        });
+      }
+      return res.json({
+        message: "Filter tasks returned successfully!",
+        tasks: tasksWithRdsAssigneeInfo,
+      });
+    }
+
     const allTasks = await tasks.fetchTasks();
     const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
-
+    if (tasksWithRdsAssigneeInfo.length === 0) {
+      return res.status(404).json({
+        message: "No tasks found",
+        tasks: [],
+      });
+    }
     return res.json({
       message: "Tasks returned successfully!",
-      tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
+      tasks: tasksWithRdsAssigneeInfo,
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);
@@ -241,9 +266,6 @@ const getTask = async (req, res) => {
  */
 const updateTask = async (req, res) => {
   try {
-    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
-    const { userStatusFlag } = req.query;
-    const isUserStatusEnabled = userStatusFlag === "true";
     const task = await tasks.fetchTask(req.params.id);
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
@@ -255,10 +277,14 @@ const updateTask = async (req, res) => {
       }
     }
     await tasks.updateTask(req.body, req.params.id);
-    if (isUserStatusEnabled && req.body.assignee) {
+    if (req.body.assignee) {
+      // New Assignee Status Update
       await updateUserStatusOnTaskUpdate(req.body.assignee);
+      // Old Assignee Status Update if available
+      if (task.taskData.assigneeId) {
+        await updateStatusOnTaskCompletion(task.taskData.assigneeId);
+      }
     }
-
     return res.status(204).send();
   } catch (err) {
     if (err.message.includes("Invalid dependency passed")) {
@@ -278,9 +304,6 @@ const updateTask = async (req, res) => {
  */
 const updateTaskStatus = async (req, res, next) => {
   try {
-    // userStatusFlag is the Feature flag for status update based on task status. This flag is temporary and will be removed once the feature becomes stable.
-    const { userStatusFlag } = req.query;
-    const isUserStatusEnabled = userStatusFlag === "true";
     let userStatusUpdate;
     const taskId = req.params.id;
     const { dev } = req.query;
@@ -341,7 +364,7 @@ const updateTaskStatus = async (req, res, next) => {
       }
     }
 
-    if (isUserStatusEnabled && req.body.status) {
+    if (req.body.status) {
       userStatusUpdate = await updateStatusOnTaskCompletion(userId);
     }
     return res.json({

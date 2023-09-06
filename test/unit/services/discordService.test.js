@@ -5,6 +5,7 @@ const {
   addRoleToUser,
   getDiscordMembers,
   removeRoleFromUser,
+  setUserDiscordNickname,
 } = require("../../../services/discordService");
 const { fetchAllUsers } = require("../../../models/users");
 const Sinon = require("sinon");
@@ -26,6 +27,7 @@ describe("Discord services", function () {
       const updatedUsers = await fetchAllUsers();
       updatedUsers.forEach((user) => {
         expect(user.roles.in_discord).to.be.equal(false);
+        expect(user.updated_at).to.be.a("number");
       });
     });
   });
@@ -111,6 +113,29 @@ describe("Discord services", function () {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Fetch error");
       });
+    });
+  });
+
+  describe("change user nickname on discord", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+    });
+
+    afterEach(function () {
+      fetchStub.restore();
+    });
+
+    it("makes a API call to update the user's discord nickname ", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ message: "done" }),
+        })
+      );
+
+      const response = await setUserDiscordNickname("aMYlI7sxQ4JMPwiqLQlp", "username");
+
+      expect(response.message).to.be.equal("done");
     });
   });
 });

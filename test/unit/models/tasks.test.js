@@ -9,7 +9,7 @@ const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");
-const { addDependency, updateTask } = require("../../../models/tasks");
+const { addDependency, updateTask, getBuiltTasks } = require("../../../models/tasks");
 const firestore = require("../../../utils/firestore");
 const { TASK_STATUS } = require("../../../constants/tasks");
 const dependencyModel = firestore.collection("TaskDependencies");
@@ -91,6 +91,22 @@ describe("tasks", function () {
         expect(task).to.contain.all.keys(sameTask);
       });
     });
+    it("should fetch tasks filtered by search term", async function () {
+      const searchTerm = "task-dependency";
+      const tasksSnapshot = await tasksModel.get();
+      const result = await getBuiltTasks(tasksSnapshot, searchTerm);
+      expect(result).to.have.lengthOf(1);
+      result.forEach((task) => {
+        expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
+      });
+      expect(tasksData[5].title.includes(searchTerm));
+    });
+    it("should return empty array when no search term is found", async function () {
+      const searchTerm = "random";
+      const tasksSnapshot = await tasksModel.get();
+      const result = await getBuiltTasks(tasksSnapshot, searchTerm);
+      expect(result).to.have.lengthOf(0);
+    });
   });
 
   describe("paginatedTasks", function () {
@@ -139,6 +155,32 @@ describe("tasks", function () {
 
       expect(result.allTasks).to.have.length(tasksLength);
       result.allTasks.forEach((task) => expect(task.status).to.be.equal(status));
+    });
+
+    it("should fetch all tasks filtered by the assignee and title", async function () {
+      const assignee = "ankur";
+      const title = "Overdue";
+      const result = await tasks.fetchPaginatedTasks({ assignee, title });
+
+      const filteredTasks = tasksData.filter((task) => task.assignee === assignee && task.title.includes(title));
+
+      expect(result).to.have.property("allTasks");
+      filteredTasks.forEach((task) => {
+        expect(task.assignee).to.be.equal(assignee);
+        expect(task.title).to.include(title);
+      });
+    });
+
+    it("should fetch all tasks filtered by the assignee passed", async function () {
+      const assignee = "ankur";
+      const result = await tasks.fetchPaginatedTasks({ assignee });
+
+      const filteredTasks = tasksData.filter((task) => task.assignee === assignee);
+
+      expect(result).to.have.property("allTasks");
+      filteredTasks.forEach((task) => {
+        expect(task.assignee).to.be.equal(assignee);
+      });
     });
   });
 
