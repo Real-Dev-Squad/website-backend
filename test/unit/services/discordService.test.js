@@ -6,6 +6,7 @@ const {
   getDiscordMembers,
   removeRoleFromUser,
   setUserDiscordNickname,
+  markUserVerified,
 } = require("../../../services/discordService");
 const { fetchAllUsers } = require("../../../models/users");
 const Sinon = require("sinon");
@@ -136,6 +137,44 @@ describe("Discord services", function () {
       const response = await setUserDiscordNickname("aMYlI7sxQ4JMPwiqLQlp", "username");
 
       expect(response.message).to.be.equal("done");
+    });
+  });
+
+  describe("mark user verified", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+    });
+
+    afterEach(function () {
+      fetchStub.restore();
+    });
+
+    it("should remove the unverified role from the user", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              message: "Role Removed successfully",
+              userAffected: { userid: "829963250862784513", roleid: "1148946889199337522" },
+            }),
+        })
+      );
+      const response = await markUserVerified("829963250862784513");
+      expect(response).to.deep.equal({
+        message: "Role Removed successfully",
+        userAffected: { userid: "829963250862784513", roleid: "1148946889199337522" },
+      });
+      expect(fetchStub.calledOnce).to.be.equal(true);
+    });
+
+    it("should throw an error if user was mark user verified script fails", function () {
+      fetchStub.rejects(new Error("Fetch Error"));
+
+      markUserVerified("829963250862784513").catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal("Fetch error");
+      });
     });
   });
 });
