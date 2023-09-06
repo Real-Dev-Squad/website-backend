@@ -1,11 +1,12 @@
-const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS } = require("../constants/events");
+const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS, ROLES } = require("../constants/events");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-
 const { EventTokenService, EventAPIService } = require("../services");
 const eventQuery = require("../models/events");
 
 const logger = require("../utils/logger");
 const { removeUnwantedProperties } = require("../utils/events");
+
+const crypto = require("crypto");
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
@@ -91,14 +92,42 @@ const getAllEvents = async (req, res) => {
  * @throws {Error} If an error occurs while generating the token.
  */
 const joinEvent = async (req, res) => {
-  const { roomId, userId, role } = req.body;
-  const payload = { roomId, userId, role };
+  const { userId, role, eventCode } = req.body;
+  const payload = { userId, role };
   try {
-    const token = tokenService.getAuthToken(payload);
+    const eventsData = await apiService.get("https://api.100ms.live/v2/rooms?enabled=true");
+
+    const activeEvent = eventsData?.data?.[0];
+    const eventId = activeEvent?.id;
+
+    if (role === ROLES.MAVEN) {
+      const eventCodes = await eventQuery.getEventCodes({ id: eventId });
+      const allEventCodesArray = eventCodes.map((eventCode) => {
+        return eventCode.code;
+      });
+
+      const isEventCodeValid = allEventCodesArray.includes(eventCode);
+
+      if (!isEventCodeValid) {
+        return res.status(400).json({
+          message: "Provided event code is invalid for the role!",
+        });
+      }
+      const token = tokenService.getAuthToken({ ...payload, roomId: eventId });
+
+      return res.status(201).json({
+        token: token,
+        message: "Token generated successfully!",
+        event: activeEvent,
+      });
+    }
+
+    const token = tokenService.getAuthToken({ ...payload, roomId: eventId });
+
     return res.status(201).json({
       token: token,
       message: "Token generated successfully!",
-      success: true,
+      event: activeEvent,
     });
   } catch (error) {
     logger.error({ error });
@@ -259,6 +288,64 @@ const kickoutPeer = async (req, res) => {
   }
 };
 
+const generateEventCode = async (req, res) => {
+  // this id is for events
+  const { id } = req.params;
+  const { eventCode, role } = req.body;
+  const eventCodeUuid = crypto.randomUUID({ disableEntropyCache: true });
+
+  if (role !== ROLES.MAVEN) {
+    return res.status(400).json({
+      message: "Currently the room codes feature is only for mavens!",
+    });
+  }
+
+  try {
+    const allEventCodeObjectFromDB = await eventQuery.createEventCode({
+      id: eventCodeUuid,
+      event_id: id,
+      code: eventCode,
+      role,
+    });
+    return res.status(201).json({ message: "Event code created succesfully!", data: [...allEventCodeObjectFromDB] });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Couldn't create event code. Please try again later",
+    });
+  }
+};
+
+/**
+ * Gets event codes for particular event
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with a success message if the event codes are fetched succesfully
+ * @throws {Object} The JSON response with an error message if an error occurred while getting the event codes data
+ */
+const getEventCodes = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const eventCodes = await eventQuery.getEventCodes({ id });
+
+    return res.status(200).json({
+      message: "Event codes is successfully fetched for the event!",
+      data: eventCodes,
+    });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Something went wrong while getting the event codes!",
+    });
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -268,4 +355,6 @@ module.exports = {
   endActiveEvent,
   addPeerToEvent,
   kickoutPeer,
+  generateEventCode,
+  getEventCodes,
 };

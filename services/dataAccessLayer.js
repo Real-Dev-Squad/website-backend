@@ -10,7 +10,7 @@ const retrieveUsers = async ({
   userdata,
   level = ACCESS_LEVEL.PUBLIC,
   role = null,
-  userIds = [],
+  userIds = null,
 }) => {
   if (id || username) {
     let result;
@@ -30,7 +30,10 @@ const retrieveUsers = async ({
       result.push(user);
     });
     return result;
-  } else if (userIds.length > 0) {
+  } else if (userIds) {
+    if (userIds.length === 0) {
+      return {};
+    }
     const userDetails = await userQuery.fetchUserByIds(userIds);
     Object.keys(userDetails).forEach((userId) => {
       removeSensitiveInfo(userDetails[userId]);
@@ -100,6 +103,17 @@ const levelSpecificAccess = (user, level = ACCESS_LEVEL.PUBLIC, role = null) => 
   return "unauthorized";
 };
 
+const fetchUsersForKeyValues = async (documentKey, value, removeSensitiveInfo = true) => {
+  let userList;
+  if (Array.isArray(value)) {
+    userList = await userQuery.fetchUsersListForMultipleValues(documentKey, value);
+  } else {
+    userList = await userQuery.fetchUserForKeyValue(documentKey, value);
+  }
+
+  return userList.map((user) => (removeSensitiveInfo ? levelSpecificAccess(user) : user));
+};
+
 module.exports = {
   retrieveUsers,
   removeSensitiveInfo,
@@ -108,4 +122,5 @@ module.exports = {
   retrieveUsersWithRole,
   retreiveFilteredUsers,
   levelSpecificAccess,
+  fetchUsersForKeyValues,
 };

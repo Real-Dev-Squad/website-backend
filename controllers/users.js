@@ -5,7 +5,9 @@ const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
 const { logType } = require("../constants/logs");
+const ROLES = require("../constants/roles");
 const dataAccess = require("../services/dataAccessLayer");
+const { isLastPRMergedWithinDays } = require("../services/githubService");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
@@ -14,12 +16,14 @@ const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
 const { getQualifiers } = require("../utils/helper");
+const { parseSearchQuery } = require("../utils/users");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
 const {
   USERS_PATCH_HANDLER_ACTIONS,
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
 } = require("../constants/users");
+const { addLog } = require("../models/logs");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -73,6 +77,7 @@ const getUsers = async (req, res) => {
   try {
     // getting user details by id if present.
     const query = req.query?.query ?? "";
+    const transformedQuery = parseSearchQuery(query);
     const qualifiers = getQualifiers(query);
 
     // getting user details by id if present.
@@ -93,6 +98,34 @@ const getUsers = async (req, res) => {
         message: "User returned successfully!",
         user,
       });
+    }
+    if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
+      return res.boom.badRequest(`Days is required for filterBy ${transformedQuery?.filterBy}`);
+    }
+
+    const { filterBy, days } = transformedQuery;
+    if (filterBy === "unmerged_prs" && days) {
+      try {
+        const inDiscordUser = await dataAccess.retrieveUsersWithRole(ROLES.INDISCORD);
+        const users = [];
+
+        for (const user of inDiscordUser) {
+          const username = user.github_id;
+          const isMerged = await isLastPRMergedWithinDays(username, days);
+          if (!isMerged) {
+            users.push(user.id);
+          }
+        }
+
+        return res.json({
+          message: "Inactive users returned successfully!",
+          count: users.length,
+          users: users,
+        });
+      } catch (error) {
+        logger.error(`Error while fetching all users: ${error}`);
+        return res.boom.serverUnavailable("Something went wrong please contact admin");
+      }
     }
 
     if (qualifiers?.filterBy) {
@@ -195,6 +228,23 @@ const getUsernameAvailabilty = async (req, res) => {
     return res.json({
       isUsernameAvailable: !result.userExists,
     });
+  } catch (error) {
+    logger.error(`Error while checking user: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
+const generateUsername = async (req, res) => {
+  try {
+    const { firstname, lastname, dev } = req.query;
+    if (dev === "true") {
+      const username = await userQuery.generateUniqueUsername(firstname, lastname);
+      return res.json({ username });
+    } else {
+      return res.status(404).json({
+        message: "UserName Not Found",
+      });
+    }
   } catch (error) {
     logger.error(`Error while checking user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -624,9 +674,27 @@ const updateRoles = async (req, res) => {
     const result = await dataAccess.retrieveUsers({ id: req.params.id });
     if (result?.userExists) {
       const dataToUpdate = req.body;
+      const roles = req?.userData?.roles;
+      const { reason } = req.body;
+      const superUserId = req.userData.id;
+
       const response = await getRoleToUpdate(result.user, dataToUpdate);
       if (response.updateRole) {
         await userQuery.addOrUpdate(response.newUserRoles, result.user.id);
+        if (dataToUpdate?.archived) {
+          const body = {
+            reason: reason || "",
+            archived_user: {
+              user_id: result.user.id,
+              username: result.user.username,
+            },
+            archived_by: {
+              user_id: superUserId,
+              roles: roles,
+            },
+          };
+          addLog("archived-details", {}, body);
+        }
         return res.json({
           message: "role updated successfully!",
         });
@@ -702,6 +770,7 @@ module.exports = {
   getSelfDetails,
   getUser,
   getUsernameAvailabilty,
+  generateUsername,
   getSuggestedUsers,
   postUserPicture,
   updateUser,

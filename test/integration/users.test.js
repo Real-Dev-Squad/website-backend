@@ -35,7 +35,7 @@ const nonSuperUser = userData[0];
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const Sinon = require("sinon");
-const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
+const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../../constants/errorMessages");
 const photoVerificationModel = firestore.collection("photo-verification");
 
 chai.use(chaiHttp);
@@ -238,6 +238,24 @@ describe("Users", function () {
         });
     });
 
+    it("Should update the social id with valid social id", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          twitter_id: "Valid_twitterId",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
     it("Should return 400 for invalid Twitter ID", function (done) {
       chai
         .request(app)
@@ -256,7 +274,82 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Invalid Twitter ID. ID should not contain special character @",
+            message: "Invalid Twitter ID. ID should not contain special character @ or spaces",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid Linkedin ID", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          linkedin_id: "invalid@linkedin_id",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Linkedin ID. ID should not contain special character @ or spaces",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid instagram ID", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          instagram_id: "invalid@instagram_id",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Instagram ID. ID should not contain special character @ or spaces",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 is space is included in the social ID", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          linkedin_id: "Linkedin 123",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Linkedin ID. ID should not contain special character @ or spaces",
           });
 
           return done();
@@ -533,6 +626,39 @@ describe("Users", function () {
       expect(previousPageResponse.body.links).to.have.property("prev");
       expect(previousPageResponse.body.users).to.have.length(2);
     });
+
+    it("Should return 503 if something went wrong if data not fetch from github", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({
+          query: "filterBy:unmerged_prs+days:30",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(503);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal(SOMETHING_WENT_WRONG);
+          return done();
+        });
+    });
+
+    it("Should return 400 if days is not passed for filterBy unmerged_prs", function (done) {
+      chai
+        .request(app)
+        .get("/users?query=filterBy:unmerged_prs")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Days is required for filterBy unmerged_prs");
+          return done();
+        });
+    });
   });
 
   describe("GET /users/self", function () {
@@ -689,6 +815,65 @@ describe("Users", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.isUsernameAvailable).to.equal(false);
+
+          return done();
+        });
+    });
+  });
+
+  describe("GET /users/username", function () {
+    const firstname = "shubham";
+    const lastname = "sigdar";
+
+    it("Should return unique username when passing firstname and lastname", function (done) {
+      addUser(userData[15]).then((availableUsernameUserId) => {
+        const userJwt = authService.generateAuthToken({ userId: availableUsernameUserId });
+        chai
+          .request(app)
+          .get(`/users/username?firstname=${firstname}&lastname=${lastname}&dev=true`)
+          .set("cookie", `${cookieName}=${userJwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done();
+            }
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.a("object");
+            expect(res.body.username).to.equal("shubham-sigdar-2");
+
+            return done();
+          });
+      });
+    });
+
+    it("Should return 404 if feature flag is not pass", function (done) {
+      chai
+        .request(app)
+        .get(`/users/username?firstname=${firstname}&lastname=${lastname}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("UserName Not Found");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for empty firstname and lastname", function (done) {
+      chai
+        .request(app)
+        .get(`/users/username?firstname=&lastname=&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Invalid Query Parameters Passed");
 
           return done();
         });
@@ -1457,6 +1642,7 @@ describe("Users", function () {
           .send({
             member: true,
             archived: true,
+            reason: "test reason",
           })
           .end((err, res) => {
             if (err) {
@@ -1464,7 +1650,7 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(400);
-            expect(res.body.message).to.be.equal("we only allow either role member or archieve");
+            expect(res.body.message).to.be.equal("we only allow either role member or archived with a reason");
             return done();
           });
       });
@@ -1485,7 +1671,7 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(400);
-            expect(res.body.message).to.be.equal("we only allow either role member or archieve");
+            expect(res.body.message).to.be.equal("we only allow either role member or archived with a reason");
             return done();
           });
       });
