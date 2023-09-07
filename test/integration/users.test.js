@@ -2021,7 +2021,7 @@ describe("Users", function () {
       );
       chai
         .request(app)
-        .post(`/users/discord/nickname`)
+        .post(`/users/discord/nickname?dev=true`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -2038,7 +2038,7 @@ describe("Users", function () {
 
       chai
         .request(app)
-        .post(`/users/discord/nickname`)
+        .post(`/users/discord/nickname?dev=true`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
