@@ -88,10 +88,10 @@ const getAllGroupRoles = async (req, res) => {
 const getGroupsRoleId = async (req, res) => {
   try {
     const { discordId } = req.userData;
-    const userRolesArray = await discordRolesModel.getGroupRolesForUser(discordId);
+    const userGroupRoles = await discordRolesModel.getGroupRolesForUser(discordId);
     return res.json({
       message: "User group roles Id fetched successfully!",
-      ...userRolesArray,
+      ...userGroupRoles,
     });
   } catch (error) {
     logger.error(`Error while getting user roles: ${error}`);
