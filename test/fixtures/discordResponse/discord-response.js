@@ -8,7 +8,7 @@ const getDiscordMembers = [
     nick: "jhon",
     pending: false,
     premium_since: null,
-    roles: ["hero", "racer"],
+    roles: ["1234567890", "racer"],
     user: {
       id: "123456789098765432",
       username: "jhondoe",

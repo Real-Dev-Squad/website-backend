@@ -267,7 +267,7 @@ describe("External Accounts", function () {
             discordUsers: 3,
             userUpdatedWithInDiscordFalse: 0,
             usersMarkedUnArchived: 1,
-            usersMarkVerified: 0,
+            usersMarkVerified: 1,
             message: "Data Sync Complete",
           });
           return done();
