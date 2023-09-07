@@ -264,8 +264,8 @@ describe("External Accounts", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.deep.equal({
             rdsUsers: 3,
-            discordUsers: 2,
-            userUpdatedWithInDiscordFalse: 1,
+            discordUsers: 3,
+            userUpdatedWithInDiscordFalse: 0,
             usersMarkedUnArchived: 1,
             usersMarkVerified: 0,
             message: "Data Sync Complete",
@@ -279,6 +279,135 @@ describe("External Accounts", function () {
       chai
         .request(app)
         .patch("/external-accounts/discord-sync")
+        .set("Cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.deep.equal({
+            message: INTERNAL_SERVER_ERROR,
+          });
+          return done();
+        });
+    });
+  });
+
+  describe("POST /external-accounts/users", function () {
+    let superUserJwt, fetchStub;
+
+    beforeEach(async function () {
+      // userData[4] is a super user
+      const userId = await addUser(userData[4]);
+      superUserJwt = authService.generateAuthToken({ userId });
+      fetchStub = Sinon.stub(global, "fetch");
+    });
+
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
+    });
+
+    it("Should Archive Users With Archived as False and Not in RDS Discord Server", async function () {
+      await userModel.add(usersFromRds[4]); // nonArchivedAndNotInDiscord
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+
+      const res = await chai
+        .request(app)
+        .patch("/external-accounts/users")
+        .set("Cookie", `${cookieName}=${superUserJwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.deep.equal({
+        message: "Data Sync Complete",
+        usersArchivedCount: 1,
+        usersUnArchivedCount: 0,
+        totalUsersProcessed: 2,
+        rdsDiscordServerUsers: 3,
+      });
+    });
+
+    it("Should Do Nothing to Users With Archived as False and in RDS Discord Server", async function () {
+      await userModel.add(usersFromRds[1]); // nonArchivedAndInDiscord;
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+      const res = await chai
+        .request(app)
+        .patch("/external-accounts/users")
+        .set("Cookie", `${cookieName}=${superUserJwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.deep.equal({
+        message: "Data Sync Complete",
+        usersArchivedCount: 0,
+        usersUnArchivedCount: 0,
+        totalUsersProcessed: 2,
+        rdsDiscordServerUsers: 3,
+      });
+    });
+    it("Should Un-Archive Users With Archived as True and in RDS Discord Server", async function () {
+      await userModel.add(usersFromRds[2]); // archivedAndInDiscord
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+      const res = await chai
+        .request(app)
+        .patch("/external-accounts/users")
+        .set("Cookie", `${cookieName}=${superUserJwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.deep.equal({
+        message: "Data Sync Complete",
+        usersArchivedCount: 0,
+        usersUnArchivedCount: 1,
+        totalUsersProcessed: 2,
+        rdsDiscordServerUsers: 3,
+      });
+    });
+
+    it("Should Do Nothing to Users With Archived as True and Not in RDS Discord Server", async function () {
+      await userModel.add(usersFromRds[3]); // archivedAndNotInDiscord
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+      const res = await chai
+        .request(app)
+        .patch("/external-accounts/users")
+        .set("Cookie", `${cookieName}=${superUserJwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.deep.equal({
+        message: "Data Sync Complete",
+        usersArchivedCount: 0,
+        usersUnArchivedCount: 0,
+        totalUsersProcessed: 1,
+        rdsDiscordServerUsers: 3,
+      });
+    });
+
+    it("Should Handle 5xx Errors", function (done) {
+      fetchStub.throws(new Error("Some Internal Error"));
+      chai
+        .request(app)
+        .patch("/external-accounts/users")
         .set("Cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {

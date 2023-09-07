@@ -23,6 +23,7 @@ const {
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
 } = require("../constants/users");
+const { addLog } = require("../models/logs");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -678,9 +679,27 @@ const updateRoles = async (req, res) => {
     const result = await dataAccess.retrieveUsers({ id: req.params.id });
     if (result?.userExists) {
       const dataToUpdate = req.body;
+      const roles = req?.userData?.roles;
+      const { reason } = req.body;
+      const superUserId = req.userData.id;
+
       const response = await getRoleToUpdate(result.user, dataToUpdate);
       if (response.updateRole) {
         await userQuery.addOrUpdate(response.newUserRoles, result.user.id);
+        if (dataToUpdate?.archived) {
+          const body = {
+            reason: reason || "",
+            archived_user: {
+              user_id: result.user.id,
+              username: result.user.username,
+            },
+            archived_by: {
+              user_id: superUserId,
+              roles: roles,
+            },
+          };
+          addLog("archived-details", {}, body);
+        }
         return res.json({
           message: "role updated successfully!",
         });
