@@ -752,7 +752,8 @@ const generateUniqueUsername = async (firstname, lastname) => {
 
 /**
  * Updates given list of users in batch
- * @param usersData {Array} - Users list as an array. Each element of user list should contain a property called id(PK)
+ * @param usersData {Array} - Users list as an array.
+ * @param usersData.id {String} - User id which is the primary key of user model.
  */
 const updateUsersInBatch = async (usersData) => {
   try {
