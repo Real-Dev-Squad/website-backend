@@ -74,15 +74,15 @@ const isGroupRoleExists = async (rolename) => {
   }
 };
 
-const getGroupRolesForUser = async (userId) => {
+const getGroupRolesForUser = async (discordId) => {
   try {
-    const userRolesSnapshot = await memberRoleModel.where("userid", "==", userId).get();
+    const userRolesSnapshot = await memberRoleModel.where("userid", "==", discordId).get();
 
     const userRoles = userRolesSnapshot.docs.map((doc) => ({
       ...doc.data(),
     }));
     const userRolesObject = {
-      userId: userId,
+      userId: discordId,
       groups: userRoles.map((userRole) => ({
         roleId: userRole.roleid,
       })),
