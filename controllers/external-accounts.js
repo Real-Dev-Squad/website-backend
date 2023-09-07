@@ -90,9 +90,9 @@ const syncExternalAccountData = async (req, res) => {
       }
 
       const unverifiedRoleId = config.get("discordUnverifiedRoleId");
-      const isUserUnverified = discordUser && discordUser.roles.includes(unverifiedRoleId);
+      const isUserHasUnverifiedRole = discordUser && discordUser.roles.includes(unverifiedRoleId);
 
-      if (discordUser && isUserUnverified) {
+      if (isUserHasUnverifiedRole) {
         markUsersVerifiedPromises.push(markUserVerified(discordUser.user.id));
       }
 

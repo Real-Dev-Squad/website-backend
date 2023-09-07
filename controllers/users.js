@@ -295,7 +295,8 @@ const updateSelf = async (req, res) => {
 
     if (req.body.discordId) {
       // new user runs the verify command
-      await markUserVerified(req.body.discordId);
+      const { user } = await dataAccess.retrieveUsers({ id: userId });
+      await markUserVerified(user.discordId);
     }
 
     if (!user.isNewUser) {
