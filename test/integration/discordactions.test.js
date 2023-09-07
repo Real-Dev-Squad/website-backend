@@ -145,6 +145,29 @@ describe("Discord actions", function () {
           return done();
         });
     });
+
+    it("should successfully return api response correctly", function (done) {
+      chai
+        .request(app)
+        .get(`/discord-actions/user/group/roles`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          // Verify presence of specific properties in each group
+          const expectedProps = ["roleid", "userId"];
+          res.body.groups.forEach((group) => {
+            expect(group).not.to.include.all.keys(expectedProps);
+          });
+          expect(res.body.message).to.equal("User group roles Id fetched successfully!");
+          return done();
+        });
+    });
+
     it("should successfully return new groups detail when flag is set", function (done) {
       chai
         .request(app)
