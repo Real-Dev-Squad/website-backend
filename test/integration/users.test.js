@@ -1962,7 +1962,7 @@ describe("Users", function () {
             return done(err);
           }
           expect(res).to.have.status(200);
-          expect(res.body.message.message).to.be.equal("User nickname changed successfully");
+          expect(res.body.message).to.be.equal("User nickname changed successfully");
           return done();
         });
     });
