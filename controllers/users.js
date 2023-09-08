@@ -24,40 +24,6 @@ const {
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
 } = require("../constants/users");
 
-/**
- * Patch Update user nickname
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-
-const updateDiscordNicknames = async (req, res) => {
-  let response;
-  try {
-    const { dev } = req.query;
-    if (dev === "true") {
-      const usersInDiscord = await userQuery.getDiscordUsers();
-      const nonSuperUsers = usersInDiscord.filter((user) => !user.roles.super_user === true);
-      const batchUpdate = nonSuperUsers.map(async (user) => {
-        const { discordId, username } = user;
-        return await setUserDiscordNickname(username, discordId);
-      });
-      response = await Promise.all(batchUpdate);
-
-      return res.json({
-        numberOfUsersEffected: response.length,
-        message: `Users Nicknames updated successfully`,
-      });
-    } else {
-      return res.status(404).json({
-        message: "Users Nicknames not updated",
-      });
-    }
-  } catch (error) {
-    logger.error(`Error while updating nicknames: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-  }
-};
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
   try {
@@ -806,5 +772,4 @@ module.exports = {
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
-  updateDiscordNicknames,
 };
