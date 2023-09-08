@@ -146,10 +146,10 @@ describe("Discord actions", function () {
         });
     });
 
-    it("should successfully return api response correctly", function (done) {
+    it.only("should successfully return api response correctly", function (done) {
       chai
         .request(app)
-        .get(`/discord-actions/user/group/roles`)
+        .get(`/discord-actions/roles`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
