@@ -3,6 +3,7 @@ const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/er
 const { getDiscordMembers } = require("../services/discordService");
 const { addOrUpdate, getUsersByRole, updateUsersInBatch } = require("../models/users");
 const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/dataAccessLayer");
+const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
 const logger = require("../utils/logger");
 
 const addExternalAccountData = async (req, res) => {
@@ -120,6 +121,18 @@ const syncExternalAccountData = async (req, res) => {
   }
 };
 
+const externalAccountsUsersPostHandler = async (req, res) => {
+  const { action } = req.query;
+
+  switch (action) {
+    case EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC: {
+      return await newSyncExternalAccountData(req, res);
+    }
+    default:
+      return res.status(400).json({ message: "Invalid action" });
+  }
+};
+
 /**
  * Gets all group-roles
  * @param req {Object} - Express request object
@@ -145,7 +158,6 @@ const newSyncExternalAccountData = async (req, res) => {
       let userData = {};
 
       // TODO: This if-block will be removed if the IN_DISCORD ROLE is deprecated. It can be tracked using the following issue : https://github.com/Real-Dev-Squad/website-backend/issues/1475
-
       if (discordUserIdSet.has(rdsUser?.discordId)) {
         discordUserIdSet.delete(rdsUser.discordId);
 
@@ -212,4 +224,5 @@ module.exports = {
   getExternalAccountData,
   syncExternalAccountData,
   newSyncExternalAccountData,
+  externalAccountsUsersPostHandler,
 };
