@@ -146,7 +146,7 @@ describe("Discord actions", function () {
         });
     });
 
-    it.only("should successfully return api response correctly", function (done) {
+    it("should successfully return api response correctly", function (done) {
       chai
         .request(app)
         .get(`/discord-actions/roles`)
