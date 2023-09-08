@@ -1669,6 +1669,7 @@ describe("Users", function () {
           .send({
             member: true,
             archived: true,
+            reason: "test reason",
           })
           .end((err, res) => {
             if (err) {
@@ -1676,7 +1677,7 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(400);
-            expect(res.body.message).to.be.equal("we only allow either role member or archieve");
+            expect(res.body.message).to.be.equal("we only allow either role member or archived with a reason");
             return done();
           });
       });
@@ -1697,7 +1698,7 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(400);
-            expect(res.body.message).to.be.equal("we only allow either role member or archieve");
+            expect(res.body.message).to.be.equal("we only allow either role member or archived with a reason");
             return done();
           });
       });

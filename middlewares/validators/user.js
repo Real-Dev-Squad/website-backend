@@ -263,17 +263,18 @@ const validateImageVerificationQuery = async (req, res, next) => {
 };
 
 async function validateUpdateRoles(req, res, next) {
-  const schema = joi.object().strict().min(1).max(1).keys({
+  const schema = joi.object().strict().min(1).max(2).keys({
+    // either member or archived with reason (optional) is allowed
     member: joi.boolean(),
     archived: joi.boolean(),
+    reason: joi.string().optional(), // reason is optional
   });
-
   try {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
     logger.error(`Error validating updateRoles query params : ${error}`);
-    res.boom.badRequest("we only allow either role member or archieve");
+    res.boom.badRequest("we only allow either role member or archived with a reason");
   }
 }
 
