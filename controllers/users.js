@@ -379,7 +379,7 @@ const updateDiscordUserNickname = async (req, res) => {
     if (!discordId) {
       throw new Error("user not verified");
     }
-    const response = await setUserDiscordNickname(username, discordId);
+     await setUserDiscordNickname(username, discordId);
 
     return res.json({
       userAffected: {
@@ -387,7 +387,7 @@ const updateDiscordUserNickname = async (req, res) => {
         username,
         discordId,
       },
-      message: response,
+      message: "User nickname changed successfully",
     });
   } catch (err) {
     logger.error(`Error while updating nickname: ${err}`);
