@@ -47,7 +47,7 @@ const retrieveUsers = async ({
       const user = levelSpecificAccess(userdata, level, role);
       users.push(user);
     });
-    return { allUsers, nextId, prevId };
+    return { users, nextId, prevId };
   } else if (discordId !== null) {
     result = await userQuery.fetchUser({ discordId: discordId });
     return result;

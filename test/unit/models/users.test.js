@@ -422,4 +422,32 @@ describe("users", function () {
       expect(isAllUserStatusInactive).to.be.equal(true);
     });
   });
+  describe("fetch users by discord id", function () {
+    let allIds = [];
+    before(async function () {
+      const addUsersPromises = [];
+      userDataArray.forEach((user, index) => {
+        addUsersPromises.push(userModel.add({ ...user }));
+      });
+      const responses = await Promise.all(addUsersPromises);
+      allIds = responses.map((response) => response.id);
+    });
+
+    after(async function () {
+      await cleanDb();
+    });
+
+    it("should fetch the details of users whose ids are present in the array", async function () {
+      const randomIds = allIds.sort(() => 0.5 - Math.random()).slice(0, 3); // Select random ids from allIds
+      const result = await users.fetchUserByIds(randomIds);
+      const fetchedUserIds = Object.keys(result);
+      expect(fetchedUserIds).to.deep.equal(randomIds);
+    });
+
+    it("should return empty object if no ids are passed", async function () {
+      const result = await users.fetchUserByIds();
+      const fetchedUserIds = Object.keys(result);
+      expect(fetchedUserIds).to.deep.equal([]);
+    });
+  });
 });

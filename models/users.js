@@ -34,17 +34,17 @@ const addOrUpdate = async (userData, userId = null) => {
     // userId exists Update user
     if (userId !== null) {
       const user = await userModel.doc(userId).get();
-      // const isNewUser = !user.data();
+      const isNewUser = !user.data();
       // user exists update user
-      if (user) {
+      if (user.data()) {
         await userModel.doc(userId).set({
-          // ...user.data(),
+          ...user.data(),
           ...userData,
           updated_at: Date.now(),
         });
       }
 
-      return { userId };
+      return { isNewUser, userId };
     }
 
     // userId is null, Add or Update user
