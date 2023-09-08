@@ -95,14 +95,13 @@ describe("Discord actions", function () {
     let newGroupData;
     let allIds = [];
     before(async function () {
-      const addUsersPromises = userData.map((user) => userModel.add({ ...user })); // Mapping over the mock users data and adding them to the usermodel(firestore instance)
-      const responses = await Promise.all(addUsersPromises); // waiting for all of them to get added to firestore instance and get an array of the responses after adding
-      allIds = responses.map((response) => response.id); // now getting Id's of the newly added users to the firestore instance
+      const addUsersPromises = userData.map((user) => userModel.add({ ...user }));
+      const responses = await Promise.all(addUsersPromises);
+      allIds = responses.map((response) => response.id);
       newGroupData = groupData.map((group, index) => {
-        // adding createdBy peoperty to each group-object
         return {
           ...group,
-          createdBy: allIds[Math.min(index, allIds.length - 1)], // It prevents accessing an index that doesn't exist, which could lead to errors.
+          createdBy: allIds[Math.min(index, allIds.length - 1)],
         };
       });
 
@@ -214,9 +213,9 @@ describe("Discord actions", function () {
           if (err) {
             return done(err);
           }
-          // expect(res).to.have.status(200);
-          // expect(res.body.message).to.be.equal("Users Nicknames updated successfully");
-          // expect(res.body.userAffected).to.be.equal("test-name-007");
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Users Nicknames updated successfully");
+          expect(res.body.userAffected).to.be.equal("test-name-007");
           return done();
         });
     });
