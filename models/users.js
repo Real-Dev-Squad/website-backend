@@ -34,17 +34,17 @@ const addOrUpdate = async (userData, userId = null) => {
     // userId exists Update user
     if (userId !== null) {
       const user = await userModel.doc(userId).get();
-      const isNewUser = !user.data();
+      // const isNewUser = !user.data();
       // user exists update user
-      if (user.data()) {
+      if (user) {
         await userModel.doc(userId).set({
-          ...user.data(),
+          // ...user.data(),
           ...userData,
           updated_at: Date.now(),
         });
       }
 
-      return { isNewUser, userId };
+      return { userId };
     }
 
     // userId is null, Add or Update user
@@ -267,6 +267,7 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       });
       const userStatusDocs = await userStatusModel.where("userId", "==", id).limit(1).get();
       const [userStatusDoc] = userStatusDocs.docs;
+
       const data = userStatusDoc.data();
       userData.state = data.currentStatus.state;
     }

@@ -133,7 +133,7 @@ const getUsers = async (req, res) => {
       let result, user;
       try {
         result = await dataAccess.retrieveUsers({ discordId: discordId });
-        user = await result;
+        user = result.user;
         // user = user.user;
       } catch (error) {
         logger.error(`Error while fetching user: ${error}`);
