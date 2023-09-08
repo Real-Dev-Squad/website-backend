@@ -170,20 +170,13 @@ describe("Discord actions", function () {
   });
 
   describe("POST /discord-actions/nicknames/sync", function () {
-    let superUserId;
-    let superUserAuthToken;
-    let fetchStub;
     beforeEach(async function () {
-      fetchStub = sinon.stub(global, "fetch");
-      superUserId = await addUser(superUser);
-      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-      const archivedRole = { roles: { archived: false } };
-      // const addUsersWithRolePromises = [
-      await addUser({ ...userData[0], archivedRole });
-      await addUser({ ...userData[1], archivedRole });
-      await addUser({ ...userData[2], archivedRole });
-      // ];
-      // await Promise.all(addUsersWithRolePromises);
+      userData[0].roles = { archived: false };
+      userData[1].roles = { archived: false };
+      userData[2].roles = { archived: false };
+      await addUser(userData[0]);
+      await addUser(userData[1]);
+      await addUser(userData[2]);
     });
 
     afterEach(async function () {
@@ -200,7 +193,7 @@ describe("Discord actions", function () {
       );
       chai
         .request(app)
-        .post(`/users/discord/nicknames?dev=true`)
+        .post(`/discord-actions/nicknames/sync?dev=true`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -208,20 +201,14 @@ describe("Discord actions", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.be.equal("Users Nicknames updated successfully");
-          expect(res.body.numberOfUsersEffected).to.be.equal(3);
+          expect(res.body.numberOfUsersEffected).to.be.equal(2);
           return done();
         });
     });
     it("updates the nickname with username", function (done) {
-      // fetchStub.returns(
-      //   Promise.resolve({
-      //     status: 200,
-      //     json: () => Promise.resolve(updatedNicknameResponse),
-      //   })
-      // );
       chai
         .request(app)
-        .post(`/users/discord/nicknames?dev=true`)
+        .post(`/discord-actions/nicknames/sync?dev=true`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -239,7 +226,7 @@ describe("Discord actions", function () {
 
       chai
         .request(app)
-        .post(`/users/discord/nicknames?dev=true`)
+        .post(`/discord-actions/nicknames/sync?dev=true`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {

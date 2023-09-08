@@ -379,7 +379,7 @@ const updateDiscordUserNickname = async (req, res) => {
     if (!discordId) {
       throw new Error("user not verified");
     }
-     await setUserDiscordNickname(username, discordId);
+    await setUserDiscordNickname(username, discordId);
     return res.json({
       userAffected: {
         userId,

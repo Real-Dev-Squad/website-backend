@@ -184,7 +184,7 @@ const updateDiscordNicknames = async (req, res) => {
     const { dev } = req.query;
     if (dev === "true") {
       const usersInDiscord = await userQuery.getDiscordUsers();
-      const nonSuperUsers = usersInDiscord.filter((user) => !user.roles.super_user === true);
+      const nonSuperUsers = usersInDiscord.filter((user) => !user.roles.super_user);
       const batchUpdate = nonSuperUsers.map(async (user) => {
         const { discordId, username } = user;
         return await setUserDiscordNickname(username, discordId);
