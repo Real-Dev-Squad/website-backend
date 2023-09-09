@@ -11,6 +11,7 @@ const admin = require("firebase-admin");
 const {
   createNewRole,
   getAllGroupRoles,
+  getGroupRolesForUser,
   isGroupRoleExists,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
@@ -248,6 +249,52 @@ describe("discordactions", function () {
       }
     });
   });
+
+  describe.only("getGroupRolesForUser", function () {
+    let getStub;
+  
+    beforeEach(function () {
+      getStub = sinon.stub(memberRoleModel, "where");
+    });
+  
+    afterEach(function () {
+      sinon.restore();
+    });
+  
+    it.only("should return user roles for a given discordId", async function () {
+      const discordId = "12345";
+      const userRolesSnapshot = {
+        docs: [
+          { data: () => ({ roleid: "role1", userid: "12345" }) },
+          { data: () => ({ roleid: "role2", userid: "12345" }) },
+        ],
+      };
+      getStub.resolves(userRolesSnapshot);
+  
+      const result = await getGroupRolesForUser(discordId);
+      console.log(result)
+  
+      expect(result).to.deep.equal({
+        userId: discordId,
+        groups: [{ roleId: "role1" }, { roleId: "role2" }],
+      });
+    });
+  
+    it("should handle errors and log them", async function () {
+      const discordId = "12345";
+      const error = new Error("Database error");
+      getStub.rejects(error);
+      const loggerStub = sinon.stub(logger, "error");
+  
+      try {
+        await getGroupRolesForUser(discordId);
+      } catch (err) {
+        expect(err).to.equal(error);
+        expect(loggerStub.calledOnce).to.be.equal(true);
+        expect(loggerStub.calledWith("Error fetching user roles:", error)).to.be.equal(true);
+      }
+    });
+  });    
 
   describe("enrichGroupDataWithMembershipInfo", function () {
     let newGroupData;
