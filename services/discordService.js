@@ -88,11 +88,6 @@ const setUserDiscordNickname = async (userName, discordId) => {
 const markUserVerified = async (discordId) => {
   try {
     const unverifiedRoleId = config.get("discordUnverifiedRoleId");
-
-    if (!discordId) {
-      throw Error;
-    }
-
     const res = await removeRoleFromUser(unverifiedRoleId, discordId);
     return res;
   } catch (err) {

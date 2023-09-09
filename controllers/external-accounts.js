@@ -59,6 +59,7 @@ const syncExternalAccountData = async (req, res) => {
     const userUpdatedWithInDiscordFalse = [];
     const updateArchivedPromises = [];
     const markUsersVerifiedPromises = [];
+    const unverifiedRoleId = config.get("discordUnverifiedRoleId");
 
     rdsUserData.forEach((rdsUser) => {
       rdsUserDataMap[rdsUser.discordId] = {
@@ -89,7 +90,6 @@ const syncExternalAccountData = async (req, res) => {
         };
       }
 
-      const unverifiedRoleId = config.get("discordUnverifiedRoleId");
       const isUserHasUnverifiedRole = discordUser && discordUser.roles.includes(unverifiedRoleId);
 
       if (isUserHasUnverifiedRole) {
