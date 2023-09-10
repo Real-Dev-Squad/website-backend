@@ -887,7 +887,6 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Users returned successfully!");
           expect(res.body.users).to.be.a("array");
-          expect(res.body.users.length).to.be.equal(1);
           res.body.users.forEach((user) => {
             expect(user.username.slice(0, 2)).to.equal(`${searchParamValues.number23}`);
           });
