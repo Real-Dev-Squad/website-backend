@@ -129,24 +129,27 @@ const getUsers = async (req, res) => {
     }
 
     // getting user details by discord id if present.
-    if (req.query.discordId) {
-      const discordId = req.query.discordId;
-      let result, user;
-      try {
-        result = await dataAccess.retrieveUsers({ discordId: discordId });
-        user = result.user;
-        // user = user.user;
-      } catch (error) {
-        logger.error(`Error while fetching user: ${error}`);
-        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    const dev = req.query.dev === "true";
+    if (dev) {
+      if (req.query.discordId) {
+        const discordId = req.query.discordId;
+
+        let result, user;
+        try {
+          result = await dataAccess.retrieveUsers({ discordId: discordId });
+          user = result.user;
+        } catch (error) {
+          logger.error(`Error while fetching user: ${error}`);
+          return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+        }
+        if (!result.userExists) {
+          return res.boom.notFound("User doesn't exist");
+        }
+        return res.json({
+          message: "User returned successfully!",
+          user,
+        });
       }
-      if (!result.userExists) {
-        return res.boom.notFound("User doesn't exist");
-      }
-      return res.json({
-        message: "User returned successfully!",
-        user,
-      });
     }
 
     if (qualifiers?.filterBy) {

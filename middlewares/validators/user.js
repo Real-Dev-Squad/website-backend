@@ -133,6 +133,7 @@ const validateJoinData = async (req, res, next) => {
  */
 async function getUsers(req, res, next) {
   const schema = joi
+
     .object()
     .strict()
     .keys({
@@ -190,6 +191,7 @@ async function getUsers(req, res, next) {
       query: joi.string().optional(),
       filterBy: joi.string().optional(),
       days: joi.string().optional(),
+      dev: joi.string().optional(),
     });
   try {
     await schema.validateAsync(req.query);

@@ -362,18 +362,6 @@ describe("Users", function () {
     beforeEach(async function () {
       const { userId } = await addOrUpdate(userData[0]);
       await userStatusModel.updateUserStatus(userId, userStatusDataForNewUser);
-
-      // if (userId) {
-      //   await userStatusModel.add({ userId, ...newStatusData });
-      // }
-
-      // use this userId to add a new user status
-      // use `userStatusModel` to add a new status
-      // userStatus controller -> check how to add new status
-      // await userStatusModel.add({ userId, ...newStatusData });
-
-      // { currentStatus: { state: "OOO | IDLE | ACTIVE", from: timestamp, until: stamp, message:   }}
-      // await addOrUpdate(userData[0]);
       await addOrUpdate(userData[1]);
       await addOrUpdate(userData[2]);
       await addOrUpdate(userData[3]);
@@ -674,16 +662,25 @@ describe("Users", function () {
         });
     });
 
-    it("Should return one user with given discord id", async function () {
+    it("Should return one user with given discord id and feature flag", async function () {
       const discordId = userData[0].discordId;
 
-      const res = await chai.request(app).get(`/users?discordId=${discordId}`).set("cookie", `${cookieName}=${jwt}`);
-
+      const res = await chai
+        .request(app)
+        .get(`/users?dev=true&discordId=${discordId}`)
+        .set("cookie", `${cookieName}=${jwt}`);
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
-      expect(res.body).to.not.have.property("phone");
-      expect(res.body).to.not.have.property("email");
-      expect(res.body).to.not.have.property("chaincode");
+      expect(res.body.user).to.have.property("state");
+    });
+
+    it("Should return one user with given discord id", async function () {
+      const discordId = userData[0].discordId;
+      const res = await chai.request(app).get(`/users?discordId=${discordId}`).set("cookie", `${cookieName}=${jwt}`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body).to.not.have.property("state");
+      expect(res.body.users.length).to.be.equal(5);
     });
   });
 
@@ -1102,7 +1099,6 @@ describe("Users", function () {
   describe("PUT /users/self/intro", function () {
     let userStatusData;
     beforeEach(async function () {
-      // refer this
       await userStatusModel.updateUserStatus(userId, userStatusDataAfterSignup);
       const updateStatus = await userStatusModel.updateUserStatus(userId, userStatusDataAfterFillingJoinSection);
       userStatusData = (await firestore.collection("usersStatus").doc(updateStatus.id).get()).data();
