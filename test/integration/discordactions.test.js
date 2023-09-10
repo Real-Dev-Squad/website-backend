@@ -223,7 +223,7 @@ describe("Discord actions", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.be.equal("Users Nicknames updated successfully");
-          expect(res.body.numberOfUsersEffected).to.be.equal(2);
+          expect(res.body.numberOfUsersEffected).to.be.equal(3);
           return done();
         });
     });
@@ -233,7 +233,7 @@ describe("Discord actions", function () {
           status: 200,
           json: () =>
             Promise.resolve({
-              userEffected: "test-name-007",
+              userAffected: "test-name-007",
               message: "Users Nicknames updated successfully",
             }),
         })
