@@ -205,6 +205,16 @@ describe("Discord actions", function () {
         });
     });
     it("updates the nickname with username", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              userEffected: "test-name-007",
+              message: "Users Nicknames updated successfully",
+            }),
+        })
+      );
       chai
         .request(app)
         .post(`/discord-actions/nicknames/sync?dev=true`)
