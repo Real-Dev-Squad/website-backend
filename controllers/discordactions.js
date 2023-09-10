@@ -88,6 +88,19 @@ const getAllGroupRoles = async (req, res) => {
   }
 };
 
+const getGroupsRoleId = async (req, res) => {
+  try {
+    const { discordId } = req.userData;
+    const userGroupRoles = await discordRolesModel.getGroupRolesForUser(discordId);
+    return res.json({
+      message: "User group roles Id fetched successfully!",
+      ...userGroupRoles,
+    });
+  } catch (error) {
+    logger.error(`Error while getting user roles: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
 /**
  * Gets all group-roles
  * @param req {Object} - Express request object
@@ -206,6 +219,7 @@ const updateDiscordNicknames = async (req, res) => {
 };
 
 module.exports = {
+  getGroupsRoleId,
   createGroupRole,
   getAllGroupRoles,
   addGroupRoleToMember,

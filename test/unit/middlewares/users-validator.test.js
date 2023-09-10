@@ -40,11 +40,12 @@ describe("Test the roles update validator", function () {
     expect(nextSpy.callCount).to.be.equal(1);
   });
 
-  it("Throws an error if both member and archived properties are present", async function () {
+  it("Throws an error if both member and archived with reason properties are present", async function () {
     const req = {
       body: {
         member: true,
         archived: true,
+        reason: "test reason",
       },
     };
     const res = {
