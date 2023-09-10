@@ -43,6 +43,46 @@ const getUsername = async (userId) => {
     throw error;
   }
 };
+
+/**
+ * Used for receiving username when providing userId, if not found then returns undefined
+ *
+ * @param userId {String} - userId of the User.
+ * @returns username {String} - username of the same user
+ */
+const getUsernameElseUndefined = async (userId) => {
+  try {
+    const {
+      user: { username },
+    } = await fetchUser({ userId });
+    return username;
+  } catch (error) {
+    logger.error("Something went wrong", error);
+    return undefined;
+  }
+};
+
+/**
+ * Used for receiving userId when providing username, if not found then returns undefined
+ *
+ * @param username {String} - username of the User.
+ * @returns id {String} - userId of the same user
+ */
+
+const getUserIdElseUndefined = async (username) => {
+  try {
+    const {
+      userExists,
+      user: { id },
+    } = await fetchUser({ username });
+
+    return userExists ? id : false;
+  } catch (error) {
+    logger.error("Something went wrong", error);
+    return undefined;
+  }
+};
+
 /**
  * Converts the userIds entered in the array to corresponding usernames
  * @param participantArray {array} : participants array to be updated
@@ -166,6 +206,25 @@ function isUsernameLowercase(username) {
   return true;
 }
 
+const parseSearchQuery = (queryString) => {
+  const searchParams = {};
+  const queryParts = queryString.split(" ");
+  queryParts.forEach((part) => {
+    const [key, value] = part.split(":");
+    switch (key.toLowerCase()) {
+      case "filterby":
+        searchParams.filterBy = value.toLowerCase();
+        break;
+      case "days":
+        searchParams.days = parseInt(value);
+        break;
+      default:
+        break;
+    }
+  });
+  return searchParams;
+};
+
 module.exports = {
   addUserToDBForTest,
   getUserId,
@@ -175,6 +234,9 @@ module.exports = {
   getLowestLevelSkill,
   getPaginationLink,
   getUsernamesFromPRs,
+  getUsernameElseUndefined,
+  getUserIdElseUndefined,
   getRoleToUpdate,
   isUsernameLowercase,
+  parseSearchQuery,
 };

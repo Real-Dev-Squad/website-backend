@@ -2,7 +2,6 @@ const firestore = require("../utils/firestore");
 const { fetchAllUsers } = require("../models/users");
 const { generateAuthTokenForCloudflare } = require("../utils/discord-actions");
 const userModel = firestore.collection("users");
-
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
 const getDiscordMembers = async () => {
@@ -68,9 +67,28 @@ const removeRoleFromUser = async (roleId, discordId) => {
   }
 };
 
+const setUserDiscordNickname = async (userName, discordId) => {
+  try {
+    const authToken = await generateAuthTokenForCloudflare();
+
+    const response = await (
+      await fetch(`${DISCORD_BASE_URL}/guild/member`, {
+        method: "PATCH",
+        body: JSON.stringify({ userName, discordId }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      })
+    ).json();
+    return response;
+  } catch (err) {
+    logger.error("Error in updating discord Nickname", err);
+    throw err;
+  }
+};
+
 module.exports = {
   getDiscordMembers,
   setInDiscordFalseScript,
   addRoleToUser,
   removeRoleFromUser,
+  setUserDiscordNickname,
 };

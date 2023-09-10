@@ -52,6 +52,7 @@ const createTask = async (req, res, next) => {
             assignee: joi.string().optional(),
             id: joi.number().optional(),
             closedAt: joi.string().optional(),
+            html_url: joi.string().uri().optional(),
           }),
         })
         .optional(),
@@ -84,7 +85,7 @@ const updateTask = async (req, res, next) => {
         .string()
         .valid(...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD))
         .optional(),
-      assignee: joi.string().optional(),
+      assignee: joi.alternatives().try(joi.string().optional(), joi.valid(null)),
       percentCompleted: joi.number().integer().min(0).max(100).optional(),
       dependsOn: joi.array().items(joi.string()).optional(),
       participants: joi.array().items(joi.string()).optional(),
@@ -142,6 +143,8 @@ const getTasksValidator = async (req, res, next) => {
       .insensitive()
       .valid(...MAPPED_TASK_STATUS_ENUM)
       .optional(),
+    assignee: joi.string().insensitive().optional(),
+    title: joi.string().insensitive().optional(),
     page: joi.number().integer().min(0),
     next: joi
       .string()

@@ -1,5 +1,10 @@
 const chai = require("chai");
-const { getDateTimeRangeForPRs, getQualifiers, getPaginatedLink } = require("../../../utils/helper");
+const {
+  getDateTimeRangeForPRs,
+  getQualifiers,
+  getPaginatedLink,
+  findSubscribedGroupIds,
+} = require("../../../utils/helper");
 const { TASK_STATUS, TASK_SIZE } = require("../../../constants/tasks");
 const { expect } = chai;
 
@@ -91,6 +96,16 @@ describe("helper", function () {
       expect(result).to.contain(`dev=${dev}`);
       expect(result).to.contain(`${cursorKey}=${docId}`);
       expect(result).to.not.contain(`next=${nextId}`);
+    });
+  });
+
+  describe("findSubscribedGroupIds", function () {
+    it("should return set of member groupIds", function () {
+      const memberGroupIds = findSubscribedGroupIds("1234", [
+        { userid: "1234", roleid: "1" },
+        { userid: "12345", roleid: "3" },
+      ]);
+      expect(memberGroupIds).to.deep.equal(new Set(["1"]));
     });
   });
 });

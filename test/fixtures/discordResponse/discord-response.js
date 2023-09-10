@@ -45,11 +45,34 @@ const getDiscordMembers = [
     mute: false,
     deaf: false,
   },
+  {
+    avatar: "",
+    communication_disabled_until: "",
+    flags: 0,
+    is_pending: false,
+    joined_at: "some_intensional_date", // ISO8601 timestamp
+    nick: "goliath",
+    pending: false,
+    premium_since: null,
+    roles: ["giant", "hero"],
+    user: {
+      id: "123456",
+      username: "goliath",
+      global_name: "goliath",
+      display_name: "goliath",
+      avatar: "56yu6567uuju7636w4e6yr7e9utbw8r4", // avatar hash
+      discriminator: "44551", // 4-digit discord-tag
+      public_flags: 0,
+      avatar_decoration: null,
+    },
+    mute: false,
+    deaf: false,
+  },
 ];
 
 const usersFromRds = [
   {
-    username: "",
+    username: "nonArchivedAndInDiscord",
     first_name: "",
     last_name: "",
     github_id: "",
@@ -62,7 +85,7 @@ const usersFromRds = [
     },
   },
   {
-    username: "",
+    username: "nonArchivedAndInDiscord",
     first_name: "",
     last_name: "",
     github_id: "",
@@ -75,7 +98,7 @@ const usersFromRds = [
     },
   },
   {
-    username: "",
+    username: "archivedAndInDiscord",
     first_name: "",
     last_name: "",
     github_id: "",
@@ -87,9 +110,45 @@ const usersFromRds = [
       archived: true,
     },
   },
+  {
+    username: "archivedAndNotInDiscord",
+    first_name: "",
+    last_name: "",
+    github_id: "",
+    github_display_name: "",
+    incompleteUserDetails: false,
+    discordId: "90438342",
+    roles: {
+      in_discord: true,
+      archived: true,
+    },
+  },
+  {
+    username: "nonArchivedAndNotInDiscord",
+    first_name: "",
+    last_name: "",
+    github_id: "",
+    github_display_name: "",
+    incompleteUserDetails: false,
+    discordId: "457298342",
+    roles: {
+      in_discord: false,
+      archived: false,
+    },
+  },
 ];
+
+const updatedNicknameResponse = {
+  userAffected: {
+    userId: "X0H3paYveEWh7Q2fPhor",
+    username: "test-name-007",
+    discordId: "1123566257019568232",
+  },
+  message: "User nickname changed successfully",
+};
 
 module.exports = {
   getDiscordMembers,
   usersFromRds,
+  updatedNicknameResponse,
 };

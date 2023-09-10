@@ -1,9 +1,12 @@
 const extensionRequestsQuery = require("../models/extensionRequests");
 const { addLog } = require("../models/logs");
 const tasks = require("../models/tasks");
-const { getUsername } = require("../utils/users");
+const { getUsername, getUsernameElseUndefined, getUserIdElseUndefined } = require("../utils/users");
 const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { transformQuery } = require("../utils/extensionRequests");
+const { parseQueryParams } = require("../utils/queryParser");
+
 /**
  * Create ETA extension Request
  *
@@ -14,11 +17,22 @@ const createTaskExtensionRequest = async (req, res) => {
   try {
     const extensionBody = req.body;
 
-    if (req.userData.id !== extensionBody.assignee && !req.userData.roles?.super_user) {
-      return res.boom.forbidden("Only Super User can create an extension request for this task.");
+    let assigneeUsername = await getUsernameElseUndefined(extensionBody.assignee);
+    let assigneeId = extensionBody.assignee;
+    if (!assigneeUsername) {
+      assigneeId = await getUserIdElseUndefined(extensionBody.assignee);
+      assigneeUsername = extensionBody.assignee;
+      extensionBody.assignee = assigneeId;
     }
 
-    const assigneeUsername = await getUsername(extensionBody.assignee);
+    if (!assigneeId) {
+      return res.boom.badRequest("User with this id or username doesn't exist.");
+    }
+
+    if (req.userData.id !== extensionBody.assignee && !req.userData.roles?.super_user) {
+      return res.boom.forbidden("Only assigned user and super user can create an extension request for this task.");
+    }
+
     const { taskData: task } = await tasks.fetchTask(extensionBody.taskId);
     if (!task) {
       return res.boom.badRequest("Task with this id or taskid doesn't exist.");
@@ -78,8 +92,28 @@ const createTaskExtensionRequest = async (req, res) => {
  */
 const fetchExtensionRequests = async (req, res) => {
   try {
-    const { status, taskId, assignee } = req.query;
-    const allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({ taskId, status, assignee });
+    const { dev, cursor, size, order } = req.query;
+    const { status, taskId, assignee } = parseQueryParams(req._parsedUrl.search);
+    const { transformedSize, transformedDev, transformedStatus } = transformQuery(size, dev, status);
+
+    let allExtensionRequests;
+
+    if (transformedDev) {
+      allExtensionRequests = await extensionRequestsQuery.fetchPaginatedExtensionRequests(
+        { taskId, status: transformedStatus, assignee },
+        { cursor, order, size: transformedSize, dev }
+      );
+      return res.json({
+        message: "Extension Requests returned successfully!",
+        ...allExtensionRequests,
+      });
+    } else {
+      allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
+        taskId,
+        status: transformedStatus,
+        assignee,
+      });
+    }
 
     return res.json({
       message: "Extension Requests returned successfully!",

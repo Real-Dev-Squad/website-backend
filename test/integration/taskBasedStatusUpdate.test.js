@@ -321,7 +321,8 @@ describe("Task Based Status Updates", function () {
   });
 
   describe("PATCH Integration tests for Changing the status to IDLE based on users list passed", function () {
-    let [userId0, userId1, userId2, userId3, userId4, userId5, userId6, userId7, userId8, userId9] = [];
+    let [userId0, userId1, userId2, userId3, userId4, userId5, userId6, userId7, userId8, userId9, userId10, userId11] =
+      [];
     let superUserJwt;
     let listUsers;
     const reqBody = {};
@@ -337,6 +338,8 @@ describe("Task Based Status Updates", function () {
       userId7 = await addUser(userData[7]);
       userId8 = await addUser(userData[8]);
       userId9 = await addUser(userData[9]);
+      userId10 = await addUser(userData[10]);
+      userId11 = await addUser(userData[11]);
       superUserJwt = authService.generateAuthToken({ userId: userId4 });
       listUsers = [
         { userId: userId0, state: "IDLE" },
@@ -349,6 +352,8 @@ describe("Task Based Status Updates", function () {
         { userId: userId7, state: "ACTIVE" },
         { userId: userId8, state: "ACTIVE" },
         { userId: userId9, state: "ACTIVE" },
+        { userId: userId10, state: "ACTIVE" },
+        { userId: userId11, state: "IDLE" },
       ];
       reqBody.users = listUsers;
       await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.ACTIVE));
@@ -359,6 +364,14 @@ describe("Task Based Status Updates", function () {
       await userStatusModel.doc("userStatus006").set(generateStatusDataForState(userId6, userState.OOO));
       await userStatusModel.doc("userStatus007").set(generateStatusDataForState(userId7, userState.IDLE));
       await userStatusModel.doc("userStatus008").set(generateStatusDataForState(userId8, userState.ONBOARDING));
+      const oooStateCompletedStatus = generateStatusDataForState(userId10, userState.OOO);
+      oooStateCompletedStatus.currentStatus.from =
+        oooStateCompletedStatus.currentStatus.from - 20 * 24 * 60 * 60 * 1000;
+      oooStateCompletedStatus.currentStatus.until =
+        oooStateCompletedStatus.currentStatus.until - 10 * 24 * 60 * 60 * 1000;
+      await userStatusModel.doc("userStatus010").set(oooStateCompletedStatus);
+      oooStateCompletedStatus.userId = userId11;
+      await userStatusModel.doc("userStatus011").set(oooStateCompletedStatus);
     });
 
     afterEach(async function () {
@@ -383,13 +396,13 @@ describe("Task Based Status Updates", function () {
         "idleUsersAltered",
         "idleUsersUnaltered"
       );
-      expect(response.usersCount).to.equal(10);
+      expect(response.usersCount).to.equal(12);
       expect(response.unprocessedUsers).to.equal(0);
       expect(response.onboardingUsersAltered).to.equal(1);
       expect(response.onboardingUsersUnaltered).to.equal(1);
-      expect(response.activeUsersAltered).to.equal(3);
+      expect(response.activeUsersAltered).to.equal(4);
       expect(response.activeUsersUnaltered).to.equal(1);
-      expect(response.idleUsersAltered).to.equal(3);
+      expect(response.idleUsersAltered).to.equal(4);
       expect(response.idleUsersUnaltered).to.equal(1);
 
       const userStatus000Data = (await userStatusModel.doc("userStatus000").get()).data();
@@ -418,6 +431,10 @@ describe("Task Based Status Updates", function () {
       const [userStatus009Doc] = userStatus009SnapShot.docs;
       const userStatus009Data = userStatus009Doc.data();
       expect(userStatus009Data.currentStatus.state).to.equal(userState.ACTIVE);
+      const userStatus010Data = (await userStatusModel.doc("userStatus010").get()).data();
+      expect(userStatus010Data.currentStatus.state).to.equal(userState.ACTIVE);
+      const userStatus011Data = (await userStatusModel.doc("userStatus011").get()).data();
+      expect(userStatus011Data.currentStatus.state).to.equal(userState.IDLE);
     });
 
     it("should throw an error if users firestore batch operations fail", async function () {

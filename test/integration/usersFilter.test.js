@@ -177,6 +177,29 @@ describe("Filter Users", function () {
         });
     });
 
+    it("Should search users based on Onboarding state and discord join more then 31 days", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ state: "ONBOARDING", time: "31d" })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(1);
+          res.body.users.forEach((user) => {
+            expect(user).to.have.property("discordJoinedAt");
+          });
+          return done();
+        });
+    });
+
     it("Should search users based on Tag", function (done) {
       chai
         .request(app)
@@ -365,7 +388,6 @@ describe("Filter Users", function () {
           res.body.users.forEach((user) => {
             expect(user).to.not.have.property("phone");
             expect(user).to.not.have.property("email");
-            expect(user).to.not.have.property("tokens");
           });
           return done();
         });

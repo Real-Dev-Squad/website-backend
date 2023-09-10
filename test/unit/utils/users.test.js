@@ -146,4 +146,12 @@ describe("users", function () {
       expect(res).to.be.equal(true);
     });
   });
+
+  describe("parseSearchQuery", function () {
+    it("should return an object with filterBy and days properties", function () {
+      const queryString = "filterBy:UNMERGED_PRS days:30";
+      const result = usersUtils.parseSearchQuery(queryString);
+      expect(result).to.deep.equal({ filterBy: "unmerged_prs", days: 30 });
+    });
+  });
 });
