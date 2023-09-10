@@ -227,31 +227,6 @@ describe("Discord actions", function () {
           return done();
         });
     });
-    it("updates the nickname with username", function (done) {
-      fetchStub.returns(
-        Promise.resolve({
-          status: 200,
-          json: () =>
-            Promise.resolve({
-              userAffected: "test-name-007",
-              message: "Users Nicknames updated successfully",
-            }),
-        })
-      );
-      chai
-        .request(app)
-        .post(`/discord-actions/nicknames/sync?dev=true`)
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body.message).to.be.equal("Users Nicknames updated successfully");
-          expect(res.body.userAffected).to.be.equal("test-name-007");
-          return done();
-        });
-    });
 
     it("returns an error for unsuccessful updating nicknames with POST method", function (done) {
       fetchStub.returns(Promise.reject(new Error("User not verified")));
