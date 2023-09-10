@@ -158,6 +158,11 @@ const fetchPaginatedUsers = async (query) => {
     }
 
     if (Object.keys(query).length) {
+      if (query.search) {
+        dbQuery = dbQuery
+          .startAt(query.search.toLowerCase().trim())
+          .endAt(query.search.toLowerCase().trim() + "\uf8ff");
+      }
       if (query.page) {
         const offsetValue = size * parseInt(query.page);
         dbQuery = dbQuery.offset(offsetValue);
@@ -166,29 +171,8 @@ const fetchPaginatedUsers = async (query) => {
       } else if (query.prev) {
         dbQuery = dbQuery.endBefore(doc);
       }
-
-      if (query.search) {
-        const snapshot = await dbQuery.get();
-        const users = [];
-
-        snapshot.forEach((doc) => {
-          users.push({ id: doc.id, ...doc.data() });
-        });
-
-        const filteredUserByQuery = users.filter((user) =>
-          user.username.toLowerCase().includes(query.search.toLowerCase())
-        );
-
-        const firstDoc = filteredUserByQuery[0];
-        const lastDoc = filteredUserByQuery[filteredUserByQuery.length - 1];
-
-        return {
-          allUsers: filteredUserByQuery,
-          nextId: lastDoc?.id ?? "",
-          prevId: firstDoc?.id ?? "",
-        };
-      }
     }
+
     const snapshot = await dbQuery.get();
 
     const firstDoc = snapshot.docs[0];
