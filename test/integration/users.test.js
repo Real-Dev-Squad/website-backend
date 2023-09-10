@@ -1666,4 +1666,33 @@ describe("Users", function () {
         });
     });
   });
+
+  describe("POST /users/username", function () {
+    beforeEach(async function () {
+      const user1 = { ...userData[0], username: "ANKUR" };
+      const user2 = { ...userData[1], username: "NIKHIL" };
+      await addOrUpdate(user1);
+      await addOrUpdate(user2);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should return the successfull response", function (done) {
+      chai
+        .request(app)
+        .post("/users/username")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          return done();
+        });
+    });
+
+    it("should return the failed response", function () {});
+  });
 });

@@ -19,6 +19,7 @@ const userStatusModel = firestore.collection("usersStatus");
 const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
+const { isUsernameLowercase } = require("../utils/users");
 
 /**
  * Adds or updates the user data
@@ -644,6 +645,26 @@ const getUsersByRole = async (role) => {
   }
 };
 
+const updateUsernameToLowercase = async () => {
+  try {
+    const allUsers = await fetchAllUsers();
+    const updateUserNameToLowercasePromises = [];
+    allUsers.forEach((user) => {
+      const id = user.id;
+      if (!isUsernameLowercase(user.username)) {
+        const updatedData = { ...user, username: user.username.toLowerCase() };
+        updateUserNameToLowercasePromises.push(addOrUpdate(updatedData, id));
+      }
+    });
+
+    await Promise.all(updateUserNameToLowercasePromises);
+    return updateUserNameToLowercasePromises.length;
+  } catch (err) {
+    logger.error("Error in updating username to lowercase");
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -667,4 +688,5 @@ module.exports = {
   fetchUsersWithToken,
   removeGitHubToken,
   getUsersByRole,
+  updateUsernameToLowercase,
 };
