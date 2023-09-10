@@ -156,6 +156,16 @@ const getRoleToUpdate = async (userData, newRoles) => {
   return { updateRole: true, newUserRoles };
 };
 
+function isUsernameLowercase(username) {
+  for (const currentChar of username) {
+    const currentCharCode = currentChar.charCodeAt(0);
+    if (currentCharCode >= 65 && currentCharCode <= 90) {
+      return false;
+    }
+  }
+  return true;
+}
+
 module.exports = {
   addUserToDBForTest,
   getUserId,
@@ -166,4 +176,5 @@ module.exports = {
   getPaginationLink,
   getUsernamesFromPRs,
   getRoleToUpdate,
+  isUsernameLowercase,
 };

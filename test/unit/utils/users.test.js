@@ -133,4 +133,17 @@ describe("users", function () {
       },
     });
   });
+
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only("is username lowercase", function () {
+    it("should return false for the username MANISH", function () {
+      const res = usersUtils.isUsernameLowercase("MANISH");
+      expect(res).to.be.equal(false);
+    });
+
+    it("should return true for the username manish", function () {
+      const res = usersUtils.isUsernameLowercase("manish");
+      expect(res).to.be.equal(true);
+    });
+  });
 });
