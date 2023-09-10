@@ -41,6 +41,11 @@ Install all the packages using the following command:
 ```shell
 yarn
 ```
+Now if one runs yarn install. The yarn.lock will be unexpectedly updated with an unknown future version of a dependency, potentially breaking the build in the future. To ensure that the yarn.lock file is not update, you will need to use the --frozen-lockfile flag.
+
+```shell
+yarn install --frozen-lockfile
+```
 
 #### Confirm correct configuration setup
 
