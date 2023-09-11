@@ -190,4 +190,60 @@ describe("Discord actions", function () {
         });
     });
   });
+
+  describe("POST /discord-actions/nicknames/sync", function () {
+    beforeEach(async function () {
+      userData[0].roles = { archived: false };
+      userData[1].roles = { archived: false };
+      userData[2].roles = { archived: false };
+      await addUser(userData[0]);
+      await addUser(userData[1]);
+      await addUser(userData[2]);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should successfully update discord nicknames", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(),
+        })
+      );
+      chai
+        .request(app)
+        .post(`/discord-actions/nicknames/sync?dev=true`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Users Nicknames updated successfully");
+          expect(res.body.numberOfUsersEffected).to.be.equal(3);
+          return done();
+        });
+    });
+
+    it("returns an error for unsuccessful updating nicknames with POST method", function (done) {
+      fetchStub.returns(Promise.reject(new Error("User not verified")));
+
+      chai
+        .request(app)
+        .post(`/discord-actions/nicknames/sync?dev=true`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(500);
+          const response = res.body;
+          expect(response.message).to.be.equal("An internal server error occurred");
+          return done();
+        });
+    });
+  });
 });

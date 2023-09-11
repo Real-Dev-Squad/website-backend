@@ -78,7 +78,10 @@ const setUserDiscordNickname = async (userName, discordId) => {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
       })
     ).json();
-    return response;
+    return {
+      userEffected: userName,
+      message: response,
+    };
   } catch (err) {
     logger.error("Error in updating discord Nickname", err);
     throw err;
