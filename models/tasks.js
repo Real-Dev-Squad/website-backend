@@ -158,9 +158,26 @@ const fetchPaginatedTasks = async ({
       }
 
       if (assignee) {
-        const user = await userUtils.getUserId(assignee);
-        if (user) {
-          initialQuery = initialQuery.where("assignee", "==", user);
+        const assignees = assignee.split(",");
+        if (assignees.length > 1) {
+          const users = [];
+          for (const singleAssignee of assignees) {
+            const user = await userUtils.getUserId(singleAssignee);
+            if (user) {
+              users.push(user);
+            }
+            // handle error
+            // else {
+            // }
+          }
+          if (users) {
+            initialQuery = initialQuery.where("assignee", "in", users);
+          }
+        } else {
+          const user = await userUtils.getUserId(assignees[0]);
+          if (user) {
+            initialQuery = initialQuery.where("assignee", "==", user);
+          }
         }
       }
 
