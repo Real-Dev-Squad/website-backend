@@ -41,6 +41,17 @@ const archiveUsers = async (usersData) => {
   }
 };
 
+const isUsernameLowercase = (username) => {
+  for (const currentChar of username) {
+    const currentCharCode = currentChar.charCodeAt(0);
+    if (currentCharCode >= 65 && currentCharCode <= 90) {
+      return false;
+    }
+  }
+  return true;
+};
+
 module.exports = {
   archiveUsers,
+  isUsernameLowercase,
 };
