@@ -252,6 +252,31 @@ describe("Tasks", function () {
         });
     });
 
+    it("Should get all overdue tasks filtered with assignee when passed to GET /tasks", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?dev=true&status=overdue&assignee=${appOwner.username}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          const tasksData = res.body.tasks ?? [];
+          tasksData.forEach((task) => {
+            expect(task.assignee).to.equal(appOwner.username);
+            expect(task.title).to.include("Test task");
+          });
+          return done();
+        });
+    });
+
     it("Should get tasks when correct query parameters are passed", function (done) {
       chai
         .request(app)

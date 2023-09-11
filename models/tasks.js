@@ -105,7 +105,7 @@ const getBuiltTasks = async (tasksSnapshot, searchTerm) => {
     updatedTasks = updatedTasks.filter((task) => task.title.toLowerCase().includes(searchTerm.toLowerCase()));
   }
   const taskPromises = updatedTasks.map(async (task) => {
-    task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
+    task.status = TASK_STATUS[task.status?.toUpperCase()] || task.status;
     const taskId = task.id;
     const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
     task.dependsOn = [];
@@ -135,6 +135,12 @@ const fetchPaginatedTasks = async ({
     if (status === TASK_STATUS.OVERDUE && dev) {
       const currentTime = Math.floor(Date.now() / 1000);
       initialQuery = tasksModel.where("endsOn", "<", currentTime);
+      if (assignee) {
+        const user = await userUtils.getUserId(assignee);
+        if (user) {
+          initialQuery = initialQuery.where("assignee", "==", user);
+        }
+      }
     } else {
       initialQuery = tasksModel.orderBy("title");
       if (status) {
