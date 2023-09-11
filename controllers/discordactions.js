@@ -3,7 +3,6 @@ const admin = require("firebase-admin");
 const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
-
 /**
  * Creates a role
  *
@@ -86,6 +85,19 @@ const getAllGroupRoles = async (req, res) => {
   }
 };
 
+const getGroupsRoleId = async (req, res) => {
+  try {
+    const { discordId } = req.userData;
+    const userGroupRoles = await discordRolesModel.getGroupRolesForUser(discordId);
+    return res.json({
+      message: "User group roles Id fetched successfully!",
+      ...userGroupRoles,
+    });
+  } catch (error) {
+    logger.error(`Error while getting user roles: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
 /**
  * Gets all group-roles
  * @param req {Object} - Express request object
@@ -151,9 +163,29 @@ const updateDiscordImageForVerification = async (req, res) => {
   }
 };
 
+/**
+ * Set all group-idle on discord
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const setRoleIdleToIdleUsers = async (req, res) => {
+  try {
+    const result = await discordRolesModel.updateIdleUsersOnDiscord();
+    return res.status(201).json({
+      message: "All Idle Users updated successfully.",
+      ...result,
+    });
+  } catch (err) {
+    logger.error(`Error while setting idle role: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
+  getGroupsRoleId,
   createGroupRole,
   getAllGroupRoles,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
+  setRoleIdleToIdleUsers,
 };

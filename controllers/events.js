@@ -92,14 +92,42 @@ const getAllEvents = async (req, res) => {
  * @throws {Error} If an error occurs while generating the token.
  */
 const joinEvent = async (req, res) => {
-  const { roomId, userId, role } = req.body;
-  const payload = { roomId, userId, role };
+  const { userId, role, eventCode } = req.body;
+  const payload = { userId, role };
   try {
-    const token = tokenService.getAuthToken(payload);
+    const eventsData = await apiService.get("https://api.100ms.live/v2/rooms?enabled=true");
+
+    const activeEvent = eventsData?.data?.[0];
+    const eventId = activeEvent?.id;
+
+    if (role === ROLES.MAVEN) {
+      const eventCodes = await eventQuery.getEventCodes({ id: eventId });
+      const allEventCodesArray = eventCodes.map((eventCode) => {
+        return eventCode.code;
+      });
+
+      const isEventCodeValid = allEventCodesArray.includes(eventCode);
+
+      if (!isEventCodeValid) {
+        return res.status(400).json({
+          message: "Provided event code is invalid for the role!",
+        });
+      }
+      const token = tokenService.getAuthToken({ ...payload, roomId: eventId });
+
+      return res.status(201).json({
+        token: token,
+        message: "Token generated successfully!",
+        event: activeEvent,
+      });
+    }
+
+    const token = tokenService.getAuthToken({ ...payload, roomId: eventId });
+
     return res.status(201).json({
       token: token,
       message: "Token generated successfully!",
-      success: true,
+      event: activeEvent,
     });
   } catch (error) {
     logger.error({ error });
