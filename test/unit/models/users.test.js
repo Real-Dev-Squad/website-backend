@@ -396,9 +396,8 @@ describe("users", function () {
 
   describe("updateUsersInBatch", function () {
     it("should update existing users", async function () {
-      const userData = userDataArray;
       const addUserPromiseList = [];
-      for (const user of userData) {
+      for (const user of userDataArray) {
         const addUserPromise = users.addOrUpdate(user);
         addUserPromiseList.push(addUserPromise);
       }
@@ -420,6 +419,40 @@ describe("users", function () {
       });
 
       expect(isAllUserStatusInactive).to.be.equal(true);
+    });
+  });
+
+  describe("fetchUsersListForMultipleValues", function () {
+    it("should fetch users for all the given id list", async function () {
+      const actualUserList = [userDataArray[0], userDataArray[1], userDataArray[2]];
+
+      const addUserPromiseList = [];
+      for (const user of actualUserList) {
+        const addUserPromise = users.addOrUpdate(user);
+        addUserPromiseList.push(addUserPromise);
+      }
+      await Promise.all(addUserPromiseList);
+
+      const discordIdList = actualUserList.map((user) => user.discordId);
+
+      const userListResult = await users.fetchUsersListForMultipleValues("discordId", discordIdList);
+
+      expect(userListResult.length).to.be.equal(3);
+      const resultDiscordIdList = userListResult.map((user) => user.discordId);
+      resultDiscordIdList.sort();
+      discordIdList.sort();
+      expect(resultDiscordIdList).to.be.deep.equal(discordIdList);
+    });
+  });
+
+  describe("fetchUserForKeyValue", function () {
+    it("should fetch users for the given id", async function () {
+      await users.addOrUpdate(userDataArray[0]);
+
+      const userListResult = await users.fetchUserForKeyValue("discordId", userDataArray[0].discordId);
+
+      expect(userListResult.length).to.be.equal(1);
+      expect(userListResult[0].discordId).to.be.deep.equal(userDataArray[0].discordId);
     });
   });
 });
