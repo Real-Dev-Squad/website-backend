@@ -189,6 +189,9 @@ function getUsernamesFromPRs(allPRs) {
  */
 
 const getRoleToUpdate = async (userData, newRoles) => {
+  if (newRoles.reason) {
+    delete newRoles.reason; // delete reason field from newRoles to keep only roles
+  }
   const roles = { ...userData.roles };
   const newRolesArray = Object.entries(newRoles);
   if (roles[newRolesArray[0][0]] === newRolesArray[0][1]) return { updateRole: false };
