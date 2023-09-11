@@ -8,7 +8,7 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
-const { archiveUsers } = require("../services/users");
+const { archiveUsers, isUsernameLowercase } = require("../services/users");
 const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE, FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
@@ -829,6 +829,26 @@ const fetchUsersListForMultipleValues = async (documentKey, valueList) => {
   }
 };
 
+const updateUsernameToLowercase = async () => {
+  try {
+    const allUsers = await fetchAllUsers();
+    const updateUserNameToLowercasePromises = [];
+    allUsers.forEach((user) => {
+      const id = user.id;
+      if (!isUsernameLowercase(user.username)) {
+        const updatedData = { ...user, username: user.username.toLowerCase() };
+        updateUserNameToLowercasePromises.push(addOrUpdate(updatedData, id));
+      }
+    });
+
+    await Promise.all(updateUserNameToLowercasePromises);
+    return updateUserNameToLowercasePromises.length;
+  } catch (err) {
+    logger.error("Error in updating username to lowercase");
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -857,4 +877,5 @@ module.exports = {
   updateUsersInBatch,
   fetchUsersListForMultipleValues,
   fetchUserForKeyValue,
+  updateUsernameToLowercase,
 };
