@@ -214,7 +214,7 @@ describe("Tasks", function () {
     it("Should get all tasks filtered with status ,assignee, title when passed to GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?status=${TASK_STATUS.AVAILABLE}&dev=true&assignee=sagar&title=Test`)
+        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&dev=true&assignee=sagar&title=Test`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -229,7 +229,7 @@ describe("Tasks", function () {
 
           const tasksData = res.body.tasks ?? [];
           tasksData.forEach((task) => {
-            expect(task.status).to.equal(TASK_STATUS.AVAILABLE);
+            expect(task.status).to.equal(TASK_STATUS.IN_PROGRESS);
             expect(task.assignee).to.equal("sagar");
             expect(task.title).to.include("Test");
           });
