@@ -74,6 +74,26 @@ const isGroupRoleExists = async (rolename) => {
   }
 };
 
+const getGroupRolesForUser = async (discordId) => {
+  try {
+    const userRolesSnapshot = await memberRoleModel.where("userid", "==", discordId).get();
+
+    const userRoles = userRolesSnapshot.docs.map((doc) => ({
+      ...doc.data(),
+    }));
+    const userRolesObject = {
+      userId: discordId,
+      groups: userRoles.map((userRole) => ({
+        roleId: userRole.roleid,
+      })),
+    };
+    return userRolesObject;
+  } catch (error) {
+    logger.error("Error fetching user roles:", error);
+    throw error;
+  }
+};
+
 /**
  *
  * @param roleData { Object }: Data of the new role
@@ -318,6 +338,7 @@ const updateIdleUsersOnDiscord = async () => {
 
 module.exports = {
   createNewRole,
+  getGroupRolesForUser,
   getAllGroupRoles,
   addGroupRoleToMember,
   isGroupRoleExists,

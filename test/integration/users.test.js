@@ -15,7 +15,7 @@ const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
-const { getDiscordMembers, updatedNicknameResponse } = require("../fixtures/discordResponse/discord-response");
+const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const joinData = require("../fixtures/user/join");
 const {
   userStatusDataForNewUser,
@@ -1974,7 +1974,7 @@ describe("Users", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(updatedNicknameResponse),
+          json: () => Promise.resolve(),
         })
       );
       chai
@@ -1986,7 +1986,7 @@ describe("Users", function () {
             return done(err);
           }
           expect(res).to.have.status(200);
-          expect(res.body.message.message).to.be.equal("User nickname changed successfully");
+          expect(res.body.message).to.be.equal("User nickname changed successfully");
           return done();
         });
     });

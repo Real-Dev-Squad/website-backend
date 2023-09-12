@@ -328,6 +328,7 @@ describe("users", function () {
       });
     });
   });
+
   describe("get users by roles", function () {
     beforeEach(async function () {
       const addUsersPromises = [];
@@ -375,6 +376,7 @@ describe("users", function () {
       expect(result.length).to.equal(2);
     });
   });
+
   describe("fetch users by id", function () {
     let allIds = [];
     before(async function () {
@@ -403,6 +405,7 @@ describe("users", function () {
       expect(fetchedUserIds).to.deep.equal([]);
     });
   });
+
   describe("generateUniqueUsername", function () {
     it("should generate a unique username when existing users are present", async function () {
       const userData = userDataArray[15];
@@ -414,9 +417,8 @@ describe("users", function () {
 
   describe("updateUsersInBatch", function () {
     it("should update existing users", async function () {
-      const userData = userDataArray;
       const addUserPromiseList = [];
-      for (const user of userData) {
+      for (const user of userDataArray) {
         const addUserPromise = users.addOrUpdate(user);
         addUserPromiseList.push(addUserPromise);
       }
@@ -440,32 +442,38 @@ describe("users", function () {
       expect(isAllUserStatusInactive).to.be.equal(true);
     });
   });
-  describe("fetch users by discord id", function () {
-    let allIds = [];
-    before(async function () {
-      const addUsersPromises = [];
-      userDataArray.forEach((user, index) => {
-        addUsersPromises.push(userModel.add({ ...user }));
-      });
-      const responses = await Promise.all(addUsersPromises);
-      allIds = responses.map((response) => response.id);
-    });
 
-    after(async function () {
-      await cleanDb();
-    });
+  describe("fetchUsersListForMultipleValues", function () {
+    it("should fetch users for all the given id list", async function () {
+      const actualUserList = [userDataArray[0], userDataArray[1], userDataArray[2]];
 
-    it("should fetch the details of users whose ids are present in the array", async function () {
-      const randomIds = allIds.sort(() => 0.5 - Math.random()).slice(0, 3); // Select random ids from allIds
-      const result = await users.fetchUserByIds(randomIds);
-      const fetchedUserIds = Object.keys(result);
-      expect(fetchedUserIds).to.deep.equal(randomIds);
-    });
+      const addUserPromiseList = [];
+      for (const user of actualUserList) {
+        const addUserPromise = users.addOrUpdate(user);
+        addUserPromiseList.push(addUserPromise);
+      }
+      await Promise.all(addUserPromiseList);
 
-    it("should return empty object if no ids are passed", async function () {
-      const result = await users.fetchUserByIds();
-      const fetchedUserIds = Object.keys(result);
-      expect(fetchedUserIds).to.deep.equal([]);
+      const discordIdList = actualUserList.map((user) => user.discordId);
+
+      const userListResult = await users.fetchUsersListForMultipleValues("discordId", discordIdList);
+
+      expect(userListResult.length).to.be.equal(3);
+      const resultDiscordIdList = userListResult.map((user) => user.discordId);
+      resultDiscordIdList.sort();
+      discordIdList.sort();
+      expect(resultDiscordIdList).to.be.deep.equal(discordIdList);
+    });
+  });
+
+  describe("fetchUserForKeyValue", function () {
+    it("should fetch users for the given id", async function () {
+      await users.addOrUpdate(userDataArray[0]);
+
+      const userListResult = await users.fetchUserForKeyValue("discordId", userDataArray[0].discordId);
+
+      expect(userListResult.length).to.be.equal(1);
+      expect(userListResult[0].discordId).to.be.deep.equal(userDataArray[0].discordId);
     });
   });
 });

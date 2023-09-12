@@ -125,17 +125,29 @@ describe("Discord services", function () {
       fetchStub.restore();
     });
 
-    it("makes a API call to update the user's discord nickname ", async function () {
+    it("should update the user's discord nickname ", async function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve({ message: "done" }),
+          json: () =>
+            Promise.resolve({
+              userEffected: "Kotesh",
+              message: "User nickname changed successfully",
+            }),
         })
       );
 
-      const response = await setUserDiscordNickname("aMYlI7sxQ4JMPwiqLQlp", "username");
+      const response = await setUserDiscordNickname("Kotesh", "aMYlI7sxQ4JMPwiqLQlp");
+      expect(response.message.userEffected).to.be.equal("Kotesh");
+      expect(response.message.message).to.be.equal("User nickname changed successfully");
+    });
 
-      expect(response.message).to.be.equal("done");
+    it("makes a failing fetch call to update the user's discord nickname ", async function () {
+      fetchStub.rejects(new Error("Error in updating discord Nickname"));
+      setUserDiscordNickname("Kotesh", "aMYlI7sxQ4JMPwiqLQlp").catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal("Error in updating discord Nickname");
+      });
     });
   });
 });

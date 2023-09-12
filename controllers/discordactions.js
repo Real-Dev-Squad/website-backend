@@ -3,6 +3,8 @@ const admin = require("firebase-admin");
 const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
+const { setUserDiscordNickname } = require("../services/discordService");
+const dataAccess = require("../services/dataAccessLayer");
 
 /**
  * Creates a role
@@ -86,6 +88,19 @@ const getAllGroupRoles = async (req, res) => {
   }
 };
 
+const getGroupsRoleId = async (req, res) => {
+  try {
+    const { discordId } = req.userData;
+    const userGroupRoles = await discordRolesModel.getGroupRolesForUser(discordId);
+    return res.json({
+      message: "User group roles Id fetched successfully!",
+      ...userGroupRoles,
+    });
+  } catch (error) {
+    logger.error(`Error while getting user roles: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
 /**
  * Gets all group-roles
  * @param req {Object} - Express request object
@@ -169,10 +184,47 @@ const setRoleIdleToIdleUsers = async (req, res) => {
   }
 };
 
+/**
+ * Patch Update user nicknames on discord server
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const updateDiscordNicknames = async (req, res) => {
+  let response;
+  try {
+    const { dev } = req.query;
+    if (dev !== "true") {
+      return res.status(404).json({
+        message: "Users Nicknames not updated",
+      });
+    }
+
+    const discordServerUsers = await dataAccess.retrieveDiscordUsers();
+    const nonSuperUsers = discordServerUsers.filter((user) => !user.roles.super_user);
+    const batchUpdate = nonSuperUsers.map(async (user) => {
+      const { discordId, username } = user;
+      return await setUserDiscordNickname(username, discordId);
+    });
+
+    response = await Promise.all(batchUpdate);
+    return res.json({
+      numberOfUsersEffected: response.length,
+      message: `Users Nicknames updated successfully`,
+    });
+  } catch (error) {
+    logger.error(`Error while updating nicknames: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
+  getGroupsRoleId,
   createGroupRole,
   getAllGroupRoles,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
+  updateDiscordNicknames,
 };

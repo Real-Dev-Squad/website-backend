@@ -2,10 +2,12 @@ const express = require("express");
 const authenticate = require("../middlewares/authenticate");
 const {
   createGroupRole,
+  getGroupsRoleId,
   getAllGroupRoles,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
+  updateDiscordNicknames,
 } = require("../controllers/discordactions");
 const { validateGroupRoleBody, validateMemberRoleBody } = require("../middlewares/validators/discordactions");
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
@@ -17,6 +19,7 @@ const router = express.Router();
 router.post("/groups", authenticate, checkIsVerifiedDiscord, validateGroupRoleBody, createGroupRole);
 router.get("/groups", authenticate, checkIsVerifiedDiscord, getAllGroupRoles);
 router.post("/roles", authenticate, checkIsVerifiedDiscord, validateMemberRoleBody, addGroupRoleToMember);
+router.get("/roles", authenticate, checkIsVerifiedDiscord, getGroupsRoleId);
 router.patch(
   "/avatar/verify/:id",
   authenticate,
@@ -25,5 +28,11 @@ router.patch(
   updateDiscordImageForVerification
 );
 router.put("/group-idle", authenticate, authorizeRoles([SUPERUSER]), setRoleIdleToIdleUsers);
-
+router.post(
+  "/nicknames/sync",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  checkIsVerifiedDiscord,
+  updateDiscordNicknames
+);
 module.exports = router;
