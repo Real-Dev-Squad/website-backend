@@ -22,16 +22,35 @@ describe("Goals Site", function () {
   before(async function () {
     const userId = await addUser(user);
     user.id = userId;
+    const goalsBackendUserId = "test_1";
     jwt = authService.generateAuthToken({ userId: userId });
     goalSiteConfig = config.services.goalAPI;
 
     nock(goalSiteConfig.baseUrl)
-      .post("/auth_token")
-      .reply((uri, requestBody) => {
-        const parsedBody = JSON.parse(requestBody);
+      .post("/api/v1/user/")
+      .reply(function (uri, requestBody) {
+        const headers = this.req.headers;
 
-        if (parsedBody.goal_api_secret_key === goalSiteConfig.secretKey) {
-          return [200, { token: "goal_site_test_token_cookie123", token_expiry: new Date().getTime() }];
+        if (headers["Rest-Key"] === goalSiteConfig.secretKey) {
+          return [
+            200,
+            {
+              message: "success",
+              user: {
+                rds_id: userId,
+                token: {
+                  exp: 1694625316,
+                  access: "access-token-goal-site-backend",
+                },
+                created_at: "2023-09-12T17:07:28.242030Z",
+                modified_at: "2023-09-12T17:15:16.383069Z",
+                roles: {
+                  restricted: false,
+                },
+                id: goalsBackendUserId,
+              },
+            },
+          ];
         }
         return [400, { data: "something went wrong" }];
       });
@@ -45,17 +64,21 @@ describe("Goals Site", function () {
     sinon.restore();
   });
 
-  describe("POST /token - set goal site token as cookie", function () {
+  describe("GET /token - set goal site token as cookie", function () {
     it("Should set the cookie successfully on the request and return success", function (done) {
       chai
         .request(app)
-        .post("/goals/token/")
+        .get("/goals/token/")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
           expect(res).to.have.status(200);
+          expect(res.body).to.have.property("user");
+          const userResponseData = res.body.user;
+          expect(userResponseData).to.have.property("rds_id");
+          expect(userResponseData).to.have.property("token");
           return done();
         });
     });

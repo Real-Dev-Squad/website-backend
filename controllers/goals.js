@@ -5,33 +5,25 @@ const getGoalSiteToken = async (req, res) => {
   try {
     const { roles, id: userId } = req.userData;
     const goalSiteConfig = config.services.goalAPI;
-
-    const goalApiResponse = await fetch(`${goalSiteConfig.baseUrl}/auth_token`, {
+    const goalApiResponse = await fetch(`${goalSiteConfig.baseUrl}/api/v1/user/`, {
       method: "POST",
       body: JSON.stringify({
-        user_id: userId,
-        roles,
-        goal_api_secret_key: goalSiteConfig.secretKey,
+        data: {
+          type: "User",
+          attributes: {
+            rds_id: userId,
+            roles: roles,
+          },
+        },
       }),
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/vnd.api+json", "Rest-Key": goalSiteConfig.secretKey },
     });
 
     const goalApiData = await goalApiResponse.json();
 
-    if (goalApiResponse.status === 200) {
-      const goalApiToken = goalApiData.token ?? "";
-      const goalApiTokenExpiry = goalApiData.token_expiry;
-      const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
-
-      res.cookie(goalSiteConfig.cookieName, goalApiToken, {
-        domain: rdsUiUrl.hostname,
-        expires: new Date(Date.now() + goalApiTokenExpiry),
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-      });
-
-      return res.status(200);
+    if (goalApiData) {
+      const data = goalApiData.data;
+      return res.status(200).json({ message: "success", user: { ...data.attributes, id: data.id } });
     }
     return res.status(400);
   } catch {
