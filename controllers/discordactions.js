@@ -203,14 +203,27 @@ const updateDiscordNicknames = async (req, res) => {
 
     const discordServerUsers = await dataAccess.retrieveDiscordUsers();
     const nonSuperUsers = discordServerUsers.filter((user) => !user.roles.super_user);
+    const errorsArr = [];
+    let successCounter = 0;
+    let errorCounter = 0;
     const batchUpdate = nonSuperUsers.map(async (user) => {
       const { discordId, username } = user;
-      return await setUserDiscordNickname(username, discordId);
+      try {
+        await setUserDiscordNickname(username, discordId);
+        successCounter++;
+      } catch (error) {
+        errorsArr.push(`User: ${username}, ${error.message}`);
+        errorCounter++;
+      }
     });
 
     response = await Promise.all(batchUpdate);
+
     return res.json({
-      numberOfUsersEffected: response.length,
+      errorsArr,
+      numberOfUnEffectedUsers: errorCounter,
+      numberOfUsersEffected: successCounter,
+      totalusersChecked: response.length,
       message: `Users Nicknames updated successfully`,
     });
   } catch (error) {
