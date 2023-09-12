@@ -33,7 +33,7 @@ describe("Goals Site", function () {
 
         if (headers["Rest-Key"] === goalSiteConfig.secretKey) {
           return [
-            200,
+            201,
             {
               message: "success",
               user: {
