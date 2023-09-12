@@ -128,6 +128,20 @@ const getUsers = async (req, res) => {
       }
     }
 
+    if (transformedQuery?.filterBy === "overdue_tasks") {
+      try {
+        const users = await userQuery.getUserswithOverdueTasks(days);
+        return res.json({
+          message: "Users returned successfully!",
+          count: users.length,
+          users: users,
+        });
+      } catch (error) {
+        logger.error(`Error while fetching all users: ${error}`);
+        return res.boom.serverUnavailable("Something went wrong please contact admin");
+      }
+    }
+
     if (qualifiers?.filterBy) {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);
       const usernames = getUsernamesFromPRs(allPRs);
