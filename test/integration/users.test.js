@@ -108,7 +108,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          username: "validUsername123",
+          username: "validusername123",
         })
         .end((err, res) => {
           if (err) {
@@ -232,7 +232,29 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Username must be between 4 and 20 characters long and contain only letters or numbers.",
+            message: "Username must be between 4 and 20 characters long and contain only lowercase letters or numbers.",
+          });
+
+          return done();
+        });
+    });
+
+    it("should return 400 if username contains uppercase character", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ username: "MANISH18" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.status).to.be.equal(400);
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Username must be between 4 and 20 characters long and contain only lowercase letters or numbers.",
           });
 
           return done();

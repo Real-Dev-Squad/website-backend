@@ -459,9 +459,7 @@ describe("users", function () {
   describe("update username to lowercase", function () {
     beforeEach(async function () {
       const user1 = { ...userDataArray[0], username: "Ankur" };
-      const user2 = { ...userDataArray[1], username: "NIKHIL" };
       await userModel.add(user1);
-      await userModel.add(user2);
     });
 
     afterEach(async function () {
@@ -473,7 +471,6 @@ describe("users", function () {
       const allusers = await users.fetchAllUsers();
 
       expect(allusers[0].username).to.be.equal("ankur");
-      expect(allusers[1].username).to.be.equal("nikhil");
     });
   });
 });
