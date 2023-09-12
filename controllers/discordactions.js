@@ -203,7 +203,7 @@ const updateDiscordNicknames = async (req, res) => {
 
     const discordServerUsers = await dataAccess.retrieveDiscordUsers();
     const nonSuperUsers = discordServerUsers.filter((user) => !user.roles.super_user);
-    let errorsArr = [];
+    const errorsArr = [];
     let successCounter = 0;
     let errorCounter = 0;
     const batchUpdate = nonSuperUsers.map(async (user) => {
