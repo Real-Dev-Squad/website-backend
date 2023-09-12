@@ -230,7 +230,7 @@ describe("Discord actions", function () {
         });
     });
 
-    it("returns an error for unsuccessful updating nicknames with POST method", function (done) {
+    it("returns an error array with users whose nicknames are failed to update", function (done) {
       fetchStub.returns(Promise.reject(new Error("User not verified")));
 
       chai
@@ -241,9 +241,9 @@ describe("Discord actions", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(500);
+          expect(res).to.have.status(200);
           const response = res.body;
-          expect(response.message).to.be.equal("An internal server error occurred");
+          expect(response.errorsArr.length).to.be.equal(3);
           return done();
         });
     });
