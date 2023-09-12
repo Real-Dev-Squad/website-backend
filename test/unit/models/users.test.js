@@ -117,6 +117,24 @@ describe("users", function () {
     });
   });
 
+  describe("fetch user details based on discord id", function () {
+    let [userId0] = [];
+    beforeEach(async function () {
+      const userArr = userData();
+      userId0 = await addUser(userArr[0]);
+      await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.IDLE));
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("It should have discordId field", async function () {
+      const result = await users.fetchUser({ discordId: "12345" });
+      expect(result.user).to.haveOwnProperty("discordId");
+      expect(result.user).to.haveOwnProperty("state");
+    });
+  });
+
   describe("user image verification", function () {
     let userId, discordId, profileImageUrl, discordImageUrl;
     beforeEach(async function () {
