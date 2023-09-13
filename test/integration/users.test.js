@@ -143,6 +143,25 @@ describe("Users", function () {
         });
     });
 
+    it("Should update the discordId and role", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          discordId: "12345",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+
+          return done();
+        });
+    });
+
     it("Should return 400 for invalid status value", function (done) {
       chai
         .request(app)

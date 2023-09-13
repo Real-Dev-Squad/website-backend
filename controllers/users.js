@@ -291,7 +291,19 @@ const updateSelf = async (req, res) => {
       await userQuery.setIncompleteUserDetails(userId);
     }
 
-    const user = await userQuery.addOrUpdate(req.body, userId);
+    let updatedUserData = req.body;
+    if (req.body.discordId) {
+      // The request is from /verify, set in_discord to true
+      updatedUserData = {
+        ...updatedUserData,
+        roles: {
+          ...req.userData.roles,
+          in_discord: true,
+        },
+      };
+    }
+
+    const user = await userQuery.addOrUpdate(updatedUserData, userId);
 
     if (!user.isNewUser) {
       // Success criteria, user finished the sign up process.
