@@ -38,7 +38,7 @@ const verifyUser = async (req, res) => {
   }
   fetch(process.env.IDENTITY_SERVICE_URL, {
     method: "POST",
-    body: { userId },
+    body: JSON.stringify({ userId }),
     headers: { "Content-Type": "application/json" },
   });
   return res.json({
