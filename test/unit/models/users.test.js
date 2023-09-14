@@ -471,8 +471,17 @@ describe("users", function () {
       await cleanDb();
     });
     it("should return the users which have overdue tasks", async function () {
-      const days = 5;
+      const days = 10;
       const usersWithOverdueTasks = await users.getUserswithOverdueTasks(days);
+      expect(usersWithOverdueTasks.length).to.be.equal(3);
+      expect(usersWithOverdueTasks).to.include("ankur");
+      expect(usersWithOverdueTasks).to.include("akshay");
+      expect(usersWithOverdueTasks).to.include("narendra");
+      expect(usersWithOverdueTasks).to.not.include("modi");
+    });
+
+    it("should return all users which have overdue tasks if days is not passed", async function () {
+      const usersWithOverdueTasks = await users.getUserswithOverdueTasks();
       expect(usersWithOverdueTasks.length).to.be.equal(2);
       expect(usersWithOverdueTasks).to.include("ankur");
       expect(usersWithOverdueTasks).to.include("akshay");
