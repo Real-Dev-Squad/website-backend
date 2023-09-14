@@ -9,6 +9,12 @@ const { SUPERUSER } = require("../constants/roles");
 router.post("/", validator.externalAccountData, authorizeBot.verifyDiscordBot, externalAccount.addExternalAccountData);
 router.get("/:token", authenticate, externalAccount.getExternalAccountData);
 router.patch("/discord-sync", authenticate, authorizeRoles([SUPERUSER]), externalAccount.syncExternalAccountData);
-router.patch("/users", authenticate, authorizeRoles([SUPERUSER]), externalAccount.newSyncExternalAccountData);
+router.post(
+  "/users",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  validator.postExternalAccountsUsers,
+  externalAccount.externalAccountsUsersPostHandler
+);
 
 module.exports = router;
