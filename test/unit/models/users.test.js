@@ -20,6 +20,7 @@ const userDataArray = require("../../fixtures/user/user")();
 const joinData = require("../../fixtures/user/join")();
 const photoVerificationModel = firestore.collection("photo-verification");
 const userData = require("../../fixtures/user/user");
+const tasksData = require("../../fixtures/tasks/tasks");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
 /**
@@ -453,6 +454,28 @@ describe("users", function () {
 
       expect(userListResult.length).to.be.equal(1);
       expect(userListResult[0].discordId).to.be.deep.equal(userDataArray[0].discordId);
+    });
+  });
+
+  describe("getUsersWithOverdueTasks", function () {
+    beforeEach(async function () {
+      const taskData = tasksData();
+      const addTasksPromises = [];
+      taskData.forEach((task) => {
+        addTasksPromises.push(firestore.collection("tasks").add(task));
+      });
+      await Promise.all(addTasksPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("should return the users which have overdue tasks", async function () {
+      const days = 5;
+      const usersWithOverdueTasks = await users.getUserswithOverdueTasks(days);
+      expect(usersWithOverdueTasks.length).to.be.equal(2);
+      expect(usersWithOverdueTasks).to.include("ankur");
+      expect(usersWithOverdueTasks).to.include("akshay");
     });
   });
 });
