@@ -212,9 +212,9 @@ const updateDiscordNicknames = async (req, res) => {
       const { discordId, username } = nonSuperUsers[i];
       try {
         if (counter % 10 === 0 && counter !== 0) {
-          await new Promise((resolve) => setTimeout(resolve, 4000));
+          await new Promise((resolve) => setTimeout(resolve, 4500));
         }
-        await setUserDiscordNickname(username, discordId);
+        await setUserDiscordNickname(username.toLowerCase(), discordId);
         counter++;
 
         successCounter++;
