@@ -9,6 +9,7 @@ const eventModel = firestore.collection("events");
 const peerModel = firestore.collection("peers");
 
 const eventDataArray = require("../../fixtures/events/events")();
+const eventCodeDataArray = require("../../fixtures/events/event-codes")();
 const eventData = eventDataArray[0];
 
 describe("Events", function () {
@@ -112,6 +113,79 @@ describe("Events", function () {
       expect(data.joinedEvents).to.have.lengthOf(1);
       expect(data.joinedEvents[0].event_id).to.equal(peerData.eventId);
       expect(data.joinedEvents[0].role).to.equal(peerData.role);
+    });
+  });
+
+  describe("createEventCode", function () {
+    it("should create a new event code document if it doesn't exist", async function () {
+      const eventDocRef = await eventModel.add(eventData);
+      const eventCodeData = {
+        code: "test-code",
+        role: "maven",
+        event_id: eventDocRef.id,
+        id: "test-id",
+      };
+
+      const result = await eventQuery.createEventCode(eventCodeData);
+
+      expect(result[0].code).to.equal(eventCodeData.code);
+      expect(result[0].event_id).to.equal(eventCodeData.event_id);
+      expect(result[0].role).to.equal(eventCodeData.role);
+      expect(result[0].id).to.equal(eventCodeData.id);
+    });
+
+    it("should update the event code in events modal event_codes array if the event codes already exists", async function () {
+      const eventDocRef = await eventModel.add(eventData);
+
+      const eventCodeDataFirst = {
+        code: "test-code-1",
+        role: "maven",
+        event_id: eventDocRef.id,
+        id: "test-id-1",
+      };
+
+      const eventCodeDataSecond = {
+        code: "test-code-2",
+        role: "maven",
+        event_id: eventDocRef.id,
+        id: "test-id-2",
+      };
+
+      await eventQuery.createEventCode(eventCodeDataFirst);
+      const result2 = await eventQuery.createEventCode(eventCodeDataSecond);
+
+      expect(result2).to.have.lengthOf(2);
+      expect(result2[0].id).to.equal(eventCodeDataFirst.id);
+      expect(result2[1].id).to.equal(eventCodeDataSecond.id);
+      expect(result2[0].code).to.equal(eventCodeDataFirst.code);
+      expect(result2[1].code).to.equal(eventCodeDataSecond.code);
+    });
+  });
+
+  describe("getEventCodes", function () {
+    it("should get event codes", async function () {
+      await eventQuery.createEvent(eventDataArray[1]);
+
+      // eslint-disable-next-line no-unused-vars
+      const allEventCodesPromises = eventCodeDataArray[1].data.map(async (code) => {
+        const eventCodeRef = await eventQuery.createEventCode(code);
+        const eventCodeSnapshot = await eventCodeRef.get();
+        const eventCodeData = await eventCodeSnapshot.data();
+        return eventCodeData;
+      });
+
+      const id = eventDataArray[1].id;
+
+      await eventQuery.getEventById({ id });
+
+      const result = await eventQuery.getEventCodes({ id });
+      expect(result).to.have.lengthOf(10);
+      result.forEach((elem, idx) => {
+        expect(elem.event_id).to.equal(eventCodeDataArray[1].data[idx].event_id);
+        expect(elem.code).to.equal(eventCodeDataArray[1].data[idx].code);
+        expect(elem.role).to.equal(eventCodeDataArray[1].data[idx].role);
+        expect(elem.id).to.equal(eventCodeDataArray[1].data[idx].id);
+      });
     });
   });
 });

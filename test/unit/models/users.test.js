@@ -385,4 +385,41 @@ describe("users", function () {
       expect(fetchedUserIds).to.deep.equal([]);
     });
   });
+  describe("generateUniqueUsername", function () {
+    it("should generate a unique username when existing users are present", async function () {
+      const userData = userDataArray[15];
+      await users.addOrUpdate(userData);
+      const newUsername = await users.generateUniqueUsername("shubham", "sigdar");
+      expect(newUsername).to.deep.equal("shubham-sigdar-2");
+    });
+  });
+
+  describe("updateUsersInBatch", function () {
+    it("should update existing users", async function () {
+      const userData = userDataArray;
+      const addUserPromiseList = [];
+      for (const user of userData) {
+        const addUserPromise = users.addOrUpdate(user);
+        addUserPromiseList.push(addUserPromise);
+      }
+
+      await Promise.all(addUserPromiseList);
+
+      const usersList = [];
+      const usersQuerySnapshot = await userModel.get();
+      usersQuerySnapshot.forEach((user) => usersList.push({ ...user.data(), id: user.id, status: "inactive" }));
+
+      await users.updateUsersInBatch(usersList);
+
+      const updatedUserList = [];
+      const updatedUserQuerySnapshot = await userModel.get();
+      updatedUserQuerySnapshot.forEach((user) => updatedUserList.push({ ...user.data(), id: user.id }));
+
+      const isAllUserStatusInactive = updatedUserList.every((user) => {
+        return !!user.status && user.status === "inactive";
+      });
+
+      expect(isAllUserStatusInactive).to.be.equal(true);
+    });
+  });
 });
