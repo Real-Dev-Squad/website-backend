@@ -224,8 +224,8 @@ describe("Discord actions", function () {
           expect(res).to.have.status(200);
           expect(res.body.message).to.be.equal("Users Nicknames updated successfully");
           expect(res.body.numberOfUsersEffected).to.be.equal(3);
-          expect(res.body.numberOfUnEffectedUsers).to.be.equal(0);
-          expect(res.body.totalusersChecked).to.be.equal(3);
+          expect(res.body.numberOfUneffectedUsers).to.be.equal(0);
+          expect(res.body.totalUsersChecked).to.be.equal(3);
           return done();
         });
     });
