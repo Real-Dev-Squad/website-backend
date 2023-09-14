@@ -49,7 +49,7 @@ const retrieveUsers = async ({
     });
     return { users, nextId, prevId };
   } else if (discordId !== null) {
-    result = await userQuery.fetchUser({ discordId: discordId });
+    result = await userQuery.fetchUser({ discordId });
     return result;
   } else {
     const result = await userQuery.fetchUser({ userId: userdata.id });

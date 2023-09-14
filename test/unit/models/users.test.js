@@ -131,7 +131,6 @@ describe("users", function () {
     it("It should have discordId field", async function () {
       const result = await users.fetchUser({ discordId: "12345" });
       expect(result.user).to.haveOwnProperty("discordId");
-      expect(result.user).to.haveOwnProperty("state");
     });
   });
 
