@@ -37,8 +37,11 @@ const fetchLogs = async (query, param) => {
   try {
     let call = logsModel.where("type", "==", param);
     Object.keys(query).forEach((key) => {
-      // eslint-disable-next-line security/detect-object-injection
-      if (key !== "limit" && key !== "lastDocId") {
+      if (key === "meta") {
+        Object.keys(query[key]).forEach((metakey) => {
+          call = call.where(`meta.${metakey}`, "==", query.meta[metakey]); // fetch extension logs of a task with its task ID
+        });
+      } else if (key !== "limit" && key !== "lastDocId") {
         call = call.where(key, "==", query[key]);
       }
     });
