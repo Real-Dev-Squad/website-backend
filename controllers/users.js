@@ -18,12 +18,14 @@ const { fetchAllUsers } = require("../models/users");
 const { getQualifiers } = require("../utils/helper");
 const { parseSearchQuery } = require("../utils/users");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+
 const {
   USERS_PATCH_HANDLER_ACTIONS,
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
 } = require("../constants/users");
 const { addLog } = require("../models/logs");
+const { getUserStatus } = require("../models/userStatus");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -138,12 +140,18 @@ const getUsers = async (req, res) => {
         try {
           result = await dataAccess.retrieveUsers({ discordId });
           user = result.user;
+
+          if (!result.userExists) {
+            return res.boom.notFound("User doesn't exist");
+          }
+
+          const userStatusResult = await getUserStatus(user.id);
+          if (userStatusResult.userStatusExists) {
+            user.state = userStatusResult.data.currentStatus.state;
+          }
         } catch (error) {
           logger.error(`Error while fetching user: ${error}`);
           return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
-        }
-        if (!result.userExists) {
-          return res.boom.notFound("User doesn't exist");
         }
         return res.json({
           message: "User returned successfully!",

@@ -265,11 +265,6 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
         id = doc.id;
         userData = doc.data();
       });
-      const userStatusDocs = await userStatusModel.where("userId", "==", id).get();
-      const [userStatusDoc] = userStatusDocs.docs;
-
-      const data = userStatusDoc.data();
-      userData.state = data.currentStatus.state;
     }
     return {
       userExists: !!userData,

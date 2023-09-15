@@ -665,10 +665,7 @@ describe("Users", function () {
     it("Should return one user with given discord id and feature flag", async function () {
       const discordId = userData[0].discordId;
 
-      const res = await chai
-        .request(app)
-        .get(`/users?dev=true&discordId=${discordId}`)
-        .set("cookie", `${cookieName}=${jwt}`);
+      const res = await chai.request(app).get(`/users?dev=true&discordId=${discordId}`);
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
       expect(res.body.user).to.have.property("state");
