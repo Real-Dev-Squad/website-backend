@@ -858,16 +858,14 @@ const getUserswithOverdueTasks = async (days = 0) => {
     if (snapshot.empty) {
       return [];
     }
-    const users = [];
+    const users = new Set();
 
     snapshot.forEach((doc) => {
       const taskData = doc.data();
-      users.push(taskData.assignee);
+      users.add(taskData.assignee);
     });
 
-    const uniqueUsers = [...new Set(users)];
-
-    return uniqueUsers;
+    return Array.from(users);
   } catch (err) {
     logger.error("Error in getting users with overdue tasks", err);
     throw err;
