@@ -10,6 +10,7 @@ const dataAccess = require("../services/dataAccessLayer");
 const { isLastPRMergedWithinDays } = require("../services/githubService");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { OVERDUE_TASKS } = require("../constants/users");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
@@ -129,7 +130,7 @@ const getUsers = async (req, res) => {
       }
     }
 
-    if (transformedQuery?.filterBy === "overdue_tasks") {
+    if (transformedQuery?.filterBy === OVERDUE_TASKS) {
       try {
         const tasksData = await getOverdueTasks(days);
         const users = new Set();

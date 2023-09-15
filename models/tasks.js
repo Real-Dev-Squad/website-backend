@@ -541,7 +541,7 @@ const getOverdueTasks = async (days = 0) => {
     });
     return taskData;
   } catch (err) {
-    logger.error("Error in getting users with overdue tasks", err);
+    logger.error("Error in getting overdue tasks", err);
     throw err;
   }
 };
