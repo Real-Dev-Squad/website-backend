@@ -671,13 +671,12 @@ describe("Users", function () {
       expect(res.body.user).to.have.property("state");
     });
 
-    it("Should return one user with given discord id", async function () {
+    it("Should throw an error when there is no feature flag", async function () {
       const discordId = userData[0].discordId;
       const res = await chai.request(app).get(`/users?discordId=${discordId}`).set("cookie", `${cookieName}=${jwt}`);
-      expect(res).to.have.status(200);
+      expect(res).to.have.status(404);
       expect(res.body).to.be.a("object");
-      expect(res.body).to.not.have.property("state");
-      expect(res.body.users.length).to.be.equal(5);
+      expect(res.body.message).to.equal("User not found");
     });
   });
 

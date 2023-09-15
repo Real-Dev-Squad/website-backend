@@ -158,6 +158,8 @@ const getUsers = async (req, res) => {
           user,
         });
       }
+    } else {
+      return res.boom.notFound("Route not found");
     }
 
     if (qualifiers?.filterBy) {
