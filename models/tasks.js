@@ -5,7 +5,20 @@ const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED, MERGED, RELEASED, VERIFIED, AVAILABLE } = TASK_STATUS;
+const {
+  IN_PROGRESS,
+  BLOCKED,
+  SMOKE_TESTING,
+  COMPLETED,
+  MERGED,
+  RELEASED,
+  VERIFIED,
+  AVAILABLE,
+  ASSIGNED,
+  NEEDS_REVIEW,
+  IN_REVIEW,
+  SANITY_CHECK,
+} = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 
 /**
@@ -500,6 +513,46 @@ const overdueTasks = async (overDueTasks) => {
   }
 };
 
+/**
+ * @param {Number} [days] - Number of days (optional, default is 0)
+ * @returns {Array} - tasks which are overdue
+ * @throws {Error} - If error occurs while fetching tasks
+ **/
+const getOverdueTasks = async (days = 0) => {
+  try {
+    const currentTime = Math.floor(Date.now() / 1000);
+    const targetTime = days > 0 ? currentTime + days * 24 * 60 * 60 : currentTime;
+
+    const OVERDUE_TASK_STATUSES = [
+      IN_PROGRESS,
+      ASSIGNED,
+      NEEDS_REVIEW,
+      IN_REVIEW,
+      SMOKE_TESTING,
+      BLOCKED,
+      SANITY_CHECK,
+    ];
+
+    const query = tasksModel.where("endsOn", "<", targetTime).where("status", "in", OVERDUE_TASK_STATUSES);
+    const snapshot = await query.get();
+
+    if (snapshot.empty) {
+      return [];
+    }
+
+    const taskData = snapshot.docs.map((doc) => {
+      return {
+        id: doc.id,
+        ...doc.data(),
+      };
+    });
+    return taskData;
+  } catch (err) {
+    logger.error("Error in getting users with overdue tasks", err);
+    throw err;
+  }
+};
+
 module.exports = {
   updateTask,
   fetchTasks,
@@ -515,4 +568,5 @@ module.exports = {
   fetchTaskByIssueId,
   fetchPaginatedTasks,
   getBuiltTasks,
+  getOverdueTasks,
 };

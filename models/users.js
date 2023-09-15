@@ -10,15 +10,12 @@ const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
 const { archiveUsers } = require("../services/users");
 const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE, FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
-const { TASK_STATUS } = require("../constants/tasks");
-const { IN_PROGRESS, ASSIGNED, NEEDS_REVIEW, IN_REVIEW, SMOKE_TESTING, BLOCKED, SANITY_CHECK } = TASK_STATUS;
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const ROLES = require("../constants/roles");
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
-const tasksModel = firestore.collection("tasks");
 const userStatusModel = firestore.collection("usersStatus");
 const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
@@ -832,46 +829,6 @@ const fetchUsersListForMultipleValues = async (documentKey, valueList) => {
   }
 };
 
-/**
- * @param {Number} [days] - Number of days (optional, default is 0)
- * @returns {Array} - Array of user ids
- * @throws {Error} - If error occurs while fetching users with overdue tasks
- **/
-const getUserswithOverdueTasks = async (days = 0) => {
-  try {
-    const currentTime = Math.floor(Date.now() / 1000);
-    const targetTime = days > 0 ? currentTime + days * 24 * 60 * 60 : currentTime;
-
-    const OVERDUE_TASK_STATUSES = [
-      IN_PROGRESS,
-      ASSIGNED,
-      NEEDS_REVIEW,
-      IN_REVIEW,
-      SMOKE_TESTING,
-      BLOCKED,
-      SANITY_CHECK,
-    ];
-
-    const query = tasksModel.where("endsOn", "<", targetTime).where("status", "in", OVERDUE_TASK_STATUSES);
-    const snapshot = await query.get();
-
-    if (snapshot.empty) {
-      return [];
-    }
-    const users = new Set();
-
-    snapshot.forEach((doc) => {
-      const taskData = doc.data();
-      users.add(taskData.assignee);
-    });
-
-    return Array.from(users);
-  } catch (err) {
-    logger.error("Error in getting users with overdue tasks", err);
-    throw err;
-  }
-};
-
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -900,5 +857,4 @@ module.exports = {
   updateUsersInBatch,
   fetchUsersListForMultipleValues,
   fetchUserForKeyValue,
-  getUserswithOverdueTasks,
 };

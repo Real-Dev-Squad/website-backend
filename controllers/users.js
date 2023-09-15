@@ -15,6 +15,7 @@ const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
+const { getOverdueTasks } = require("../models/tasks");
 const { getQualifiers } = require("../utils/helper");
 const { parseSearchQuery } = require("../utils/users");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
@@ -130,11 +131,15 @@ const getUsers = async (req, res) => {
 
     if (transformedQuery?.filterBy === "overdue_tasks") {
       try {
-        const users = await userQuery.getUserswithOverdueTasks(days);
+        const tasksData = await getOverdueTasks(days);
+        const users = new Set();
+        tasksData.forEach((task) => {
+          users.add(task.assignee);
+        });
         return res.json({
           message: "Users returned successfully!",
-          count: users.length,
-          users: users,
+          count: users.size,
+          users: Array.from(users),
         });
       } catch (error) {
         logger.error(`Error while fetching all users: ${error}`);
