@@ -182,6 +182,19 @@ describe("tasks", function () {
         expect(task.assignee).to.be.equal(assignee);
       });
     });
+
+    it("should fetch overdue tasks filtered by the assignee passed", async function () {
+      const assignee = "ankur";
+      const status = TASK_STATUS.OVERDUE;
+      const result = await tasks.fetchPaginatedTasks({ assignee, status });
+
+      const filteredTasks = tasksData.filter((task) => task.assignee === assignee);
+
+      expect(result).to.have.property("allTasks");
+      filteredTasks.forEach((task) => {
+        expect(task.assignee).to.be.equal(assignee);
+      });
+    });
   });
 
   describe("update Dependency", function () {
