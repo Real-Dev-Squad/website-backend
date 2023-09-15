@@ -192,7 +192,6 @@ const setRoleIdleToIdleUsers = async (req, res) => {
  */
 
 const updateDiscordNicknames = async (req, res) => {
-  let response;
   try {
     const { dev } = req.query;
     if (dev !== "true") {
@@ -203,14 +202,33 @@ const updateDiscordNicknames = async (req, res) => {
 
     const discordServerUsers = await dataAccess.retrieveDiscordUsers();
     const nonSuperUsers = discordServerUsers.filter((user) => !user.roles.super_user);
-    const batchUpdate = nonSuperUsers.map(async (user) => {
-      const { discordId, username } = user;
-      return await setUserDiscordNickname(username, discordId);
-    });
 
-    response = await Promise.all(batchUpdate);
+    const errorsArr = [];
+    let successCounter = 0;
+    let errorCounter = 0;
+
+    let counter = 0;
+    for (let i = 0; i < nonSuperUsers.length; i++) {
+      const { discordId, username } = nonSuperUsers[i];
+      try {
+        if (counter % 10 === 0 && counter !== 0) {
+          await new Promise((resolve) => setTimeout(resolve, 4500));
+        }
+        await setUserDiscordNickname(username.toLowerCase(), discordId);
+        counter++;
+
+        successCounter++;
+      } catch (error) {
+        errorsArr.push(`User: ${username}, ${error.message}`);
+        errorCounter++;
+      }
+    }
+
     return res.json({
-      numberOfUsersEffected: response.length,
+      errorsArr,
+      numberOfUneffectedUsers: errorCounter,
+      numberOfUsersEffected: successCounter,
+      totalUsersChecked: nonSuperUsers.length,
       message: `Users Nicknames updated successfully`,
     });
   } catch (error) {

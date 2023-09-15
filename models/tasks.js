@@ -5,20 +5,7 @@ const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
-const {
-  IN_PROGRESS,
-  BLOCKED,
-  SMOKE_TESTING,
-  COMPLETED,
-  MERGED,
-  RELEASED,
-  VERIFIED,
-  AVAILABLE,
-  ASSIGNED,
-  NEEDS_REVIEW,
-  IN_REVIEW,
-  SANITY_CHECK,
-} = TASK_STATUS;
+const { IN_PROGRESS, NEEDS_REVIEW, IN_REVIEW, ASSIGNED, BLOCKED, SMOKE_TESTING, COMPLETED, SANITY_CHECK } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 
 /**
@@ -145,9 +132,25 @@ const fetchPaginatedTasks = async ({
   try {
     let initialQuery = tasksModel;
 
-    if (status === TASK_STATUS.OVERDUE && dev) {
+    if (status === TASK_STATUS.OVERDUE || assignee) {
       const currentTime = Math.floor(Date.now() / 1000);
-      initialQuery = tasksModel.where("endsOn", "<", currentTime);
+      const OVERDUE_TASK_STATUSES = [
+        IN_PROGRESS,
+        ASSIGNED,
+        NEEDS_REVIEW,
+        IN_REVIEW,
+        SMOKE_TESTING,
+        BLOCKED,
+        SANITY_CHECK,
+      ];
+      initialQuery = tasksModel.where("endsOn", "<", currentTime).where("status", "in", OVERDUE_TASK_STATUSES);
+
+      if (assignee) {
+        const user = await userUtils.getUserId(assignee);
+        if (user) {
+          initialQuery = initialQuery.where("assignee", "==", user);
+        }
+      }
     } else {
       initialQuery = tasksModel.orderBy("title");
       if (status) {
@@ -194,16 +197,6 @@ const fetchPaginatedTasks = async ({
     const nextDoc = await initialQuery.startAfter(last).limit(1).get();
 
     const allTasks = await getBuiltTasks(snapshot);
-
-    if (status === TASK_STATUS.OVERDUE && dev) {
-      const nonOverdueTasksStatus = [MERGED, COMPLETED, RELEASED, VERIFIED, AVAILABLE];
-      const overdueTasks = allTasks.filter((task) => !nonOverdueTasksStatus.includes(task.status) && task.assignee);
-      return {
-        allTasks: overdueTasks,
-        next: nextDoc.docs[0]?.id ?? "",
-        prev: prevDoc.docs[0]?.id ?? "",
-      };
-    }
 
     return {
       allTasks,
