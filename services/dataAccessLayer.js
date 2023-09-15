@@ -13,7 +13,7 @@ const retrieveUsers = async ({
   role = null,
   userIds = null,
 }) => {
-  let result = {};
+  let result;
   if (id || username) {
     if (id != null) {
       result = await userQuery.fetchUser({ userId: id });
@@ -50,7 +50,7 @@ const retrieveUsers = async ({
     return { users, nextId, prevId };
   } else if (discordId !== null) {
     result = await userQuery.fetchUser({ discordId });
-    return result;
+    return levelSpecificAccess(result);
   } else {
     const result = await userQuery.fetchUser({ userId: userdata.id });
     return levelSpecificAccess(result.user, level, role);
