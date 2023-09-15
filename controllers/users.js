@@ -10,11 +10,13 @@ const dataAccess = require("../services/dataAccessLayer");
 const { isLastPRMergedWithinDays } = require("../services/githubService");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { OVERDUE_TASKS } = require("../constants/users");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
+const { getOverdueTasks } = require("../models/tasks");
 const { getQualifiers } = require("../utils/helper");
 const { parseSearchQuery } = require("../utils/users");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
@@ -40,7 +42,7 @@ const verifyUser = async (req, res) => {
   }
   fetch(process.env.IDENTITY_SERVICE_URL, {
     method: "POST",
-    body: { userId },
+    body: JSON.stringify({ userId }),
     headers: { "Content-Type": "application/json" },
   });
   return res.json({
@@ -160,6 +162,24 @@ const getUsers = async (req, res) => {
       }
     } else {
       return res.boom.notFound("Route not found");
+    }
+
+    if (transformedQuery?.filterBy === OVERDUE_TASKS) {
+      try {
+        const tasksData = await getOverdueTasks(days);
+        const users = new Set();
+        tasksData.forEach((task) => {
+          users.add(task.assignee);
+        });
+        return res.json({
+          message: "Users returned successfully!",
+          count: users.size,
+          users: Array.from(users),
+        });
+      } catch (error) {
+        logger.error(`Error while fetching all users: ${error}`);
+        return res.boom.serverUnavailable("Something went wrong please contact admin");
+      }
     }
 
     if (qualifiers?.filterBy) {

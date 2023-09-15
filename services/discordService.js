@@ -69,7 +69,7 @@ const removeRoleFromUser = async (roleId, discordId) => {
 
 const setUserDiscordNickname = async (userName, discordId) => {
   try {
-    const authToken = await generateAuthTokenForCloudflare();
+    const authToken = generateAuthTokenForCloudflare();
 
     const response = await (
       await fetch(`${DISCORD_BASE_URL}/guild/member`, {

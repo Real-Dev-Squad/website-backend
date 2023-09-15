@@ -81,5 +81,27 @@ module.exports = () => {
       isNoteworthy: true,
       assignee: false,
     },
+    {
+      id: "P86Y1hVrS0zR5ZcVPwLZ",
+      percentCompleted: 80,
+      endsOn: 1695200648,
+      isNoteworthy: false,
+      createdBy: "sahsi",
+      lossRate: {
+        dinero: 100,
+        neelam: 0,
+      },
+      assignee: "narendra",
+      type: "feature",
+      priority: "HIGH",
+      completionAward: {
+        dinero: 1000,
+        neelam: 0,
+      },
+      title: "Implement user authentication and authorization",
+      status: "IN_PROGRESS",
+      assigneeId: "WbceXEPcohuJ5IxHHecf",
+      dependsOn: [],
+    },
   ];
 };
