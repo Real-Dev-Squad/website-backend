@@ -136,8 +136,8 @@ const getUsers = async (req, res) => {
     const discordId = req.query.discordId;
 
     const dev = req.query.dev === "true";
-    if (dev) {
-      if (req.query.discordId) {
+    if (req.query.discordId) {
+      if (dev) {
         let result, user;
         try {
           result = await dataAccess.retrieveUsers({ discordId });
@@ -159,9 +159,9 @@ const getUsers = async (req, res) => {
           message: "User returned successfully!",
           user,
         });
+      } else {
+        return res.boom.notFound("Route not found");
       }
-    } else {
-      return res.boom.notFound("Route not found");
     }
 
     if (transformedQuery?.filterBy === OVERDUE_TASKS) {

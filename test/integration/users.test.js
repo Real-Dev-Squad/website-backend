@@ -676,7 +676,7 @@ describe("Users", function () {
       const res = await chai.request(app).get(`/users?discordId=${discordId}`).set("cookie", `${cookieName}=${jwt}`);
       expect(res).to.have.status(404);
       expect(res.body).to.be.a("object");
-      expect(res.body.message).to.equal("User not found");
+      expect(res.body.message).to.equal("Route not found");
     });
 
     it("Should return user id which have overdue tasks", function (done) {
