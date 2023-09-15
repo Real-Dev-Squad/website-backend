@@ -214,7 +214,7 @@ describe("Tasks", function () {
     it("Should get all tasks filtered with status ,assignee, title when passed to GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?status=${TASK_STATUS.AVAILABLE}&dev=true&assignee=sagar&title=Test`)
+        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&dev=true&assignee=sagar&title=Test`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -229,7 +229,7 @@ describe("Tasks", function () {
 
           const tasksData = res.body.tasks ?? [];
           tasksData.forEach((task) => {
-            expect(task.status).to.equal(TASK_STATUS.AVAILABLE);
+            expect(task.status).to.equal(TASK_STATUS.IN_PROGRESS);
             expect(task.assignee).to.equal("sagar");
             expect(task.title).to.include("Test");
           });
@@ -248,6 +248,31 @@ describe("Tasks", function () {
 
           expect(res).to.have.status(200);
           expect(res.body.tasks[0].id).to.be.oneOf([taskId, taskId1]);
+          return done();
+        });
+    });
+
+    it("Should get all overdue tasks filtered with assignee when passed to GET /tasks", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?dev=true&status=overdue&assignee=${appOwner.username}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          const tasksData = res.body.tasks ?? [];
+          tasksData.forEach((task) => {
+            expect(task.assignee).to.equal(appOwner.username);
+            expect(task.title).to.include("Test task");
+          });
           return done();
         });
     });
