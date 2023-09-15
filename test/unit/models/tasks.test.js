@@ -257,4 +257,27 @@ describe("tasks", function () {
       expect(firestoreResult.assignee).to.be.equal(userId1);
     });
   });
+  describe("getOverdueTasks", function () {
+    beforeEach(async function () {
+      const tasksPromise = tasksData.map(async (task) => {
+        await tasks.updateTask(task);
+      });
+      await Promise.all(tasksPromise);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should return the overdue tasks for the given days", async function () {
+      const days = 10;
+      const usersWithOverdueTasks = await tasks.getOverdueTasks(days);
+      expect(usersWithOverdueTasks.length).to.be.equal(4);
+    });
+
+    it("should return all users which have overdue tasks if days is not passed", async function () {
+      const usersWithOverdueTasks = await tasks.getOverdueTasks();
+      expect(usersWithOverdueTasks.length).to.be.equal(3);
+    });
+  });
 });
