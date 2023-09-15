@@ -40,6 +40,7 @@ const USERS_PATCH_HANDLER_SUCCESS_MESSAGES = {
     SUCCESSFULLY_COMPLETED_BATCH_UPDATES: "Successfully completed batch updates",
   },
 };
+const OVERDUE_TASKS = "overdue_tasks";
 
 module.exports = {
   profileStatus,
@@ -50,4 +51,5 @@ module.exports = {
   USERS_PATCH_HANDLER_ACTIONS,
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
+  OVERDUE_TASKS,
 };

@@ -10,11 +10,13 @@ const dataAccess = require("../services/dataAccessLayer");
 const { isLastPRMergedWithinDays } = require("../services/githubService");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { OVERDUE_TASKS } = require("../constants/users");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
+const { getOverdueTasks } = require("../models/tasks");
 const { getQualifiers } = require("../utils/helper");
 const { parseSearchQuery } = require("../utils/users");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
@@ -121,6 +123,24 @@ const getUsers = async (req, res) => {
           message: "Inactive users returned successfully!",
           count: users.length,
           users: users,
+        });
+      } catch (error) {
+        logger.error(`Error while fetching all users: ${error}`);
+        return res.boom.serverUnavailable("Something went wrong please contact admin");
+      }
+    }
+
+    if (transformedQuery?.filterBy === OVERDUE_TASKS) {
+      try {
+        const tasksData = await getOverdueTasks(days);
+        const users = new Set();
+        tasksData.forEach((task) => {
+          users.add(task.assignee);
+        });
+        return res.json({
+          message: "Users returned successfully!",
+          count: users.size,
+          users: Array.from(users),
         });
       } catch (error) {
         logger.error(`Error while fetching all users: ${error}`);
