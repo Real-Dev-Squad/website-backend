@@ -659,6 +659,22 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should return user id which have overdue tasks", function (done) {
+      chai
+        .request(app)
+        .get("/users?query=filterBy:overdue_tasks+days:1")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          return done();
+        });
+    });
   });
 
   describe("GET /users/self", function () {
