@@ -159,7 +159,6 @@ const fetchPaginatedTasks = async ({
 
       if (assignee) {
         const assignees = assignee.split(",");
-        logger.info(assignees);
         if (assignees.length > 1) {
           const users = [];
           for (const singleAssignee of assignees) {
