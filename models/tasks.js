@@ -159,6 +159,7 @@ const fetchPaginatedTasks = async ({
 
       if (assignee) {
         const assignees = assignee.split(",");
+        logger.info(assignees);
         if (assignees.length > 1) {
           const users = [];
           for (const singleAssignee of assignees) {
@@ -166,17 +167,26 @@ const fetchPaginatedTasks = async ({
             if (user) {
               users.push(user);
             }
-            // handle error
-            // else {
-            // }
           }
-          if (users) {
+          if (users.length) {
             initialQuery = initialQuery.where("assignee", "in", users);
+          } else {
+            return {
+              allTasks: [],
+              next: "",
+              prev: "",
+            };
           }
         } else {
           const user = await userUtils.getUserId(assignees[0]);
           if (user) {
             initialQuery = initialQuery.where("assignee", "==", user);
+          } else {
+            return {
+              allTasks: [],
+              next: "",
+              prev: "",
+            };
           }
         }
       }
