@@ -132,7 +132,7 @@ const fetchPaginatedTasks = async ({
   try {
     let initialQuery = tasksModel;
 
-    if (status === TASK_STATUS.OVERDUE || assignee) {
+    if (status === TASK_STATUS.OVERDUE) {
       const currentTime = Math.floor(Date.now() / 1000);
       const OVERDUE_TASK_STATUSES = [
         IN_PROGRESS,
