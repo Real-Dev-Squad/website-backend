@@ -240,7 +240,7 @@ const fetchUsers = async (usernames = []) => {
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const fetchUser = async ({ userId = null, username = null, githubUsername = null }) => {
+const fetchUser = async ({ userId = null, username = null, githubUsername = null, discordId = null }) => {
   try {
     let userData, id;
     if (username) {
@@ -255,6 +255,12 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       userData = user.data();
     } else if (githubUsername) {
       const user = await userModel.where("github_id", "==", githubUsername).limit(1).get();
+      user.forEach((doc) => {
+        id = doc.id;
+        userData = doc.data();
+      });
+    } else if (discordId) {
+      const user = await userModel.where("discordId", "==", discordId).get();
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
