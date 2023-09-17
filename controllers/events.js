@@ -279,12 +279,41 @@ const generateEventCode = async (req, res) => {
       code: eventCode,
       role,
     });
-    return res.status(201).json({ message: "Event code created succesfully!", eventCodeObjectFromDB });
+    return res.status(201).json({ message: "Event code created succesfully!", data: [eventCodeObjectFromDB] });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
       message: "Couldn't create event code. Please try again later",
+    });
+  }
+};
+
+/**
+ * Gets event codes for particular event
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with a success message if the event codes are fetched succesfully
+ * @throws {Object} The JSON response with an error message if an error occurred while getting the event codes data
+ */
+const getEventCodes = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const eventCodes = await eventQuery.getEventCodes({ id });
+
+    return res.status(200).json({
+      message: "Event codes is successfully fetched for the event!",
+      data: eventCodes,
+    });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Something went wrong while getting the event codes!",
     });
   }
 };
@@ -299,4 +328,5 @@ module.exports = {
   addPeerToEvent,
   kickoutPeer,
   generateEventCode,
+  getEventCodes,
 };
