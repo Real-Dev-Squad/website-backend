@@ -179,22 +179,22 @@ const getUsers = async (req, res) => {
 
           if (userInfo) {
             const userTasks = tasksData.filter((task) => task.assignee === userId);
-            const userTaskDetails = userTasks.map((task) => ({
-              id: task.id,
-              title: task.title,
-              percentCompleted: task.percentCompleted,
-              startedOn: task.startedOn,
-              endsOn: task.endsOn,
-              status: task.status,
-            }));
-
-            const userData = {
-              id: userId,
-              discordId: userInfo.user.discordId,
-              username: userInfo.user.username,
-              tasks: userTaskDetails,
-            };
-            usersData.push(userData);
+            if (dev) {
+              const userData = {
+                id: userId,
+                discordId: userInfo.user.discordId,
+                username: userInfo.user.username,
+                tasks: userTasks,
+              };
+              usersData.push(userData);
+            } else {
+              const userData = {
+                id: userId,
+                discordId: userInfo.user.discordId,
+                username: userInfo.user.username,
+              };
+              usersData.push(userData);
+            }
           }
         }
 

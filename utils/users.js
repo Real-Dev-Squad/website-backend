@@ -211,6 +211,9 @@ const parseSearchQuery = (queryString) => {
       case "days":
         searchParams.days = parseInt(value);
         break;
+      case "dev":
+        searchParams.dev = value.toLowerCase() === "true";
+        break;
       default:
         break;
     }
