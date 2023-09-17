@@ -697,7 +697,7 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
-          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.message).to.equal("Users and their tasks returned successfully!");
           expect(res.body.users).to.be.a("array");
           return done();
         });
