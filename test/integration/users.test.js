@@ -18,6 +18,7 @@ const config = require("config");
 const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const joinData = require("../fixtures/user/join");
 const {
+  userStatusDataForNewUser,
   userStatusDataAfterSignup,
   userStatusDataAfterFillingJoinSection,
 } = require("../fixtures/userStatus/userStatus");
@@ -359,7 +360,8 @@ describe("Users", function () {
 
   describe("GET /users", function () {
     beforeEach(async function () {
-      await addOrUpdate(userData[0]);
+      const { userId } = await addOrUpdate(userData[0]);
+      await userStatusModel.updateUserStatus(userId, userStatusDataForNewUser);
       await addOrUpdate(userData[1]);
       await addOrUpdate(userData[2]);
       await addOrUpdate(userData[3]);
@@ -658,6 +660,31 @@ describe("Users", function () {
           expect(res.body.message).to.equal("Days is required for filterBy unmerged_prs");
           return done();
         });
+    });
+
+    it("Should return one user with given discord id and feature flag", async function () {
+      const discordId = userData[0].discordId;
+
+      const res = await chai.request(app).get(`/users?dev=true&discordId=${discordId}`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.user).to.have.property("state");
+    });
+
+    it("Should throw an error when there is no feature flag", async function () {
+      const discordId = userData[0].discordId;
+      const res = await chai.request(app).get(`/users?discordId=${discordId}`).set("cookie", `${cookieName}=${jwt}`);
+      expect(res).to.have.status(404);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("Route not found");
+    });
+
+    it("Should return an error when passing an invalid Discord ID", async function () {
+      const invalidDiscordId = "50485556209423";
+      const res = await chai.request(app).get(`/users?dev=true&discordId=${invalidDiscordId}`);
+      expect(res).to.have.status(404);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("User doesn't exist");
     });
 
     it("Should return user id which have overdue tasks", function (done) {
