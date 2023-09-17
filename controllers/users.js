@@ -15,7 +15,7 @@ const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
-const { fetchAllUsers } = require("../models/users");
+const { fetchAllUsers, fetchUser } = require("../models/users");
 const { getOverdueTasks } = require("../models/tasks");
 const { getQualifiers } = require("../utils/helper");
 const { parseSearchQuery } = require("../utils/users");
@@ -167,18 +167,45 @@ const getUsers = async (req, res) => {
     if (transformedQuery?.filterBy === OVERDUE_TASKS) {
       try {
         const tasksData = await getOverdueTasks(days);
-        const users = new Set();
+        const userIds = new Set();
+        const usersData = [];
+
         tasksData.forEach((task) => {
-          users.add(task.assignee);
+          userIds.add(task.assignee);
         });
+
+        for (const userId of Array.from(userIds)) {
+          const userInfo = await fetchUser({ userId: userId });
+
+          if (userInfo) {
+            const userTasks = tasksData.filter((task) => task.assignee === userId);
+            const userTaskDetails = userTasks.map((task) => ({
+              id: task.id,
+              title: task.title,
+              percentCompleted: task.percentCompleted,
+              startedOn: task.startedOn,
+              endsOn: task.endsOn,
+              status: task.status,
+            }));
+
+            const userData = {
+              id: userId,
+              discordId: userInfo.user.discordId,
+              username: userInfo.user.username,
+              tasks: userTaskDetails,
+            };
+            usersData.push(userData);
+          }
+        }
+
         return res.json({
-          message: "Users returned successfully!",
-          count: users.size,
-          users: Array.from(users),
+          message: "Users and their tasks returned successfully!",
+          count: usersData.length,
+          users: usersData,
         });
       } catch (error) {
-        logger.error(`Error while fetching all users: ${error}`);
-        return res.boom.serverUnavailable("Something went wrong please contact admin");
+        logger.error(`Error while fetching users and tasks: ${error}`);
+        return res.boom.serverUnavailable("Something went wrong, please contact admin");
       }
     }
 
