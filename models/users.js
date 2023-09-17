@@ -240,7 +240,7 @@ const fetchUsers = async (usernames = []) => {
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const fetchUser = async ({ userId = null, username = null, githubUsername = null }) => {
+const fetchUser = async ({ userId = null, username = null, githubUsername = null, discordId = null }) => {
   try {
     let userData, id;
     if (username) {
@@ -255,6 +255,12 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       userData = user.data();
     } else if (githubUsername) {
       const user = await userModel.where("github_id", "==", githubUsername).limit(1).get();
+      user.forEach((doc) => {
+        id = doc.id;
+        userData = doc.data();
+      });
+    } else if (discordId) {
+      const user = await userModel.where("discordId", "==", discordId).get();
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
@@ -750,6 +756,11 @@ const generateUniqueUsername = async (firstname, lastname) => {
   }
 };
 
+/**
+ * Updates given list of users in batch
+ * @param usersData {Array} - Users list as an array.
+ * @param usersData.id {String} - User id which is the primary key of user model.
+ */
 const updateUsersInBatch = async (usersData) => {
   try {
     const bulkWriter = firestore.bulkWriter();
@@ -766,6 +777,11 @@ const updateUsersInBatch = async (usersData) => {
   }
 };
 
+/**
+ * Fetch users based on document key and value.
+ * @param documentKey {String} - Model field path.
+ * @param value {String} - Field value.
+ */
 const fetchUserForKeyValue = async (documentKey, value) => {
   try {
     const userRefList = await userModel.where(documentKey, "==", value).get();
@@ -784,6 +800,12 @@ const fetchUserForKeyValue = async (documentKey, value) => {
     return [];
   }
 };
+
+/**
+ * Fetch users based on document key and value.
+ * @param documentKey {String} - Model field path.
+ * @param valueList {Array} - List of values to be matched.
+ */
 const fetchUsersListForMultipleValues = async (documentKey, valueList) => {
   try {
     const documentIdChunks = chunks(valueList, FIRESTORE_IN_CLAUSE_SIZE);

@@ -10,20 +10,24 @@ const dataAccess = require("../services/dataAccessLayer");
 const { isLastPRMergedWithinDays } = require("../services/githubService");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { OVERDUE_TASKS } = require("../constants/users");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
+const { getOverdueTasks } = require("../models/tasks");
 const { getQualifiers } = require("../utils/helper");
 const { parseSearchQuery } = require("../utils/users");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+
 const {
   USERS_PATCH_HANDLER_ACTIONS,
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
 } = require("../constants/users");
 const { addLog } = require("../models/logs");
+const { getUserStatus } = require("../models/userStatus");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -38,7 +42,7 @@ const verifyUser = async (req, res) => {
   }
   fetch(process.env.IDENTITY_SERVICE_URL, {
     method: "POST",
-    body: { userId },
+    body: JSON.stringify({ userId }),
     headers: { "Content-Type": "application/json" },
   });
   return res.json({
@@ -121,6 +125,56 @@ const getUsers = async (req, res) => {
           message: "Inactive users returned successfully!",
           count: users.length,
           users: users,
+        });
+      } catch (error) {
+        logger.error(`Error while fetching all users: ${error}`);
+        return res.boom.serverUnavailable("Something went wrong please contact admin");
+      }
+    }
+
+    // getting user details by discord id if present.
+    const discordId = req.query.discordId;
+
+    const dev = req.query.dev === "true";
+    if (req.query.discordId) {
+      if (dev) {
+        let result, user;
+        try {
+          result = await dataAccess.retrieveUsers({ discordId });
+          user = result.user;
+
+          if (!result.userExists) {
+            return res.boom.notFound("User doesn't exist");
+          }
+
+          const userStatusResult = await getUserStatus(user.id);
+          if (userStatusResult.userStatusExists) {
+            user.state = userStatusResult.data.currentStatus.state;
+          }
+        } catch (error) {
+          logger.error(`Error while fetching user: ${error}`);
+          return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
+        }
+        return res.json({
+          message: "User returned successfully!",
+          user,
+        });
+      } else {
+        return res.boom.notFound("Route not found");
+      }
+    }
+
+    if (transformedQuery?.filterBy === OVERDUE_TASKS) {
+      try {
+        const tasksData = await getOverdueTasks(days);
+        const users = new Set();
+        tasksData.forEach((task) => {
+          users.add(task.assignee);
+        });
+        return res.json({
+          message: "Users returned successfully!",
+          count: users.size,
+          users: Array.from(users),
         });
       } catch (error) {
         logger.error(`Error while fetching all users: ${error}`);
@@ -380,15 +434,14 @@ const updateDiscordUserNickname = async (req, res) => {
     if (!discordId) {
       throw new Error("user not verified");
     }
-    const response = await setUserDiscordNickname(username, discordId);
-
+    await setUserDiscordNickname(username, discordId);
     return res.json({
       userAffected: {
         userId,
         username,
         discordId,
       },
-      message: response,
+      message: "User nickname changed successfully",
     });
   } catch (err) {
     logger.error(`Error while updating nickname: ${err}`);

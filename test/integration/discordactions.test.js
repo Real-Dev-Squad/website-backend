@@ -145,6 +145,29 @@ describe("Discord actions", function () {
           return done();
         });
     });
+
+    it("should successfully return api response correctly", function (done) {
+      chai
+        .request(app)
+        .get(`/discord-actions/roles`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          // Verify presence of specific properties in each group
+          const expectedProps = ["roleid", "userId"];
+          res.body.groups.forEach((group) => {
+            expect(group).not.to.include.all.keys(expectedProps);
+          });
+          expect(res.body.message).to.equal("User group roles Id fetched successfully!");
+          return done();
+        });
+    });
+
     it("should successfully return new groups detail when flag is set", function (done) {
       chai
         .request(app)
@@ -163,6 +186,64 @@ describe("Discord actions", function () {
             expect(group).to.include.all.keys(expectedProps);
           });
           expect(res.body.message).to.equal("Roles fetched successfully!");
+          return done();
+        });
+    });
+  });
+
+  describe("POST /discord-actions/nicknames/sync", function () {
+    beforeEach(async function () {
+      userData[0].roles = { archived: false };
+      userData[1].roles = { archived: false };
+      userData[2].roles = { archived: false };
+      await addUser(userData[0]);
+      await addUser(userData[1]);
+      await addUser(userData[2]);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should successfully update discord nicknames", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(),
+        })
+      );
+      chai
+        .request(app)
+        .post(`/discord-actions/nicknames/sync?dev=true`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Users Nicknames updated successfully");
+          expect(res.body.numberOfUsersEffected).to.be.equal(3);
+          expect(res.body.numberOfUneffectedUsers).to.be.equal(0);
+          expect(res.body.totalUsersChecked).to.be.equal(3);
+          return done();
+        });
+    });
+
+    it("returns an error array with users whose nicknames are failed to update", function (done) {
+      fetchStub.returns(Promise.reject(new Error("User not verified")));
+
+      chai
+        .request(app)
+        .post(`/discord-actions/nicknames/sync?dev=true`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          const response = res.body;
+          expect(response.errorsArr.length).to.be.equal(3);
           return done();
         });
     });
