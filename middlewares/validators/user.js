@@ -133,6 +133,7 @@ const validateJoinData = async (req, res, next) => {
  */
 async function getUsers(req, res, next) {
   const schema = joi
+
     .object()
     .strict()
     .keys({
@@ -157,6 +158,9 @@ async function getUsers(req, res, next) {
       }),
       id: joi.string().optional().messages({
         "string.empty": "id value must not be empty",
+      }),
+      discordId: joi.string().optional().messages({
+        "string.empty": "discord id value must not be empty",
       }),
       next: joi
         .string()
@@ -187,6 +191,7 @@ async function getUsers(req, res, next) {
       query: joi.string().optional(),
       filterBy: joi.string().optional(),
       days: joi.string().optional(),
+      dev: joi.string().optional(),
     });
   try {
     await schema.validateAsync(req.query);
