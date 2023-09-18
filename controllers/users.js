@@ -199,7 +199,7 @@ const getUsers = async (req, res) => {
         }
 
         return res.json({
-          message: "Users and their tasks returned successfully!",
+          message: "Users returned successfully!",
           count: usersData.length,
           users: usersData,
         });
