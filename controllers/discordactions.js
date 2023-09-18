@@ -3,9 +3,10 @@ const admin = require("firebase-admin");
 const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
-const { setUserDiscordNickname } = require("../services/discordService");
-const dataAccess = require("../services/dataAccessLayer");
-
+const { setUserDiscordNickname, getDiscordMembers } = require("../services/discordService");
+const { fetchUser } = require("../models/users");
+const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const discordMavenRoleId = config.get("discordMavenRoleId");
 /**
  * Creates a role
  *
@@ -200,35 +201,60 @@ const updateDiscordNicknames = async (req, res) => {
       });
     }
 
-    const discordServerUsers = await dataAccess.retrieveDiscordUsers();
-    const nonSuperUsers = discordServerUsers.filter((user) => !user.roles.super_user);
+    const membersInDiscord = await getDiscordMembers();
 
-    const errorsArr = [];
-    let successCounter = 0;
-    let errorCounter = 0;
+    const usersToBeEffected = [];
+
+    await Promise.all(
+      membersInDiscord.map(async (discordUser) => {
+        try {
+          const foundUserWithDiscordId = await fetchUser({ discordId: discordUser.user.id });
+
+          if (foundUserWithDiscordId.userExists) {
+            const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
+            const isMaven = discordUser.roles.includes(discordMavenRoleId);
+            const isBot = discordUser.user.bot;
+            const isUsernameMatched = discordUser.nick === foundUserWithDiscordId.user.username;
+            const isSuperuser = foundUserWithDiscordId.user.roles.super_user;
+            if (isDeveloper && !isMaven && !isUsernameMatched && !isBot && !isSuperuser) {
+              usersToBeEffected.push({
+                discordId: foundUserWithDiscordId.user.discordId,
+                username: foundUserWithDiscordId.user.username,
+              });
+            }
+          }
+        } catch (error) {
+          logger.error(`error updating discordId in userStatus ${error.message}`);
+          throw new Error("error updating discordId in userStatus");
+        }
+      })
+    );
+
+    const totalNicknamesUpdated = { count: 0 };
+    const totalNicknamesNotUpdated = { count: 0, errors: [] };
 
     let counter = 0;
-    for (let i = 0; i < nonSuperUsers.length; i++) {
-      const { discordId, username } = nonSuperUsers[i];
+    for (let i = 0; i < usersToBeEffected.length; i++) {
+      const { discordId, username } = usersToBeEffected[i];
       try {
         if (counter % 10 === 0 && counter !== 0) {
-          await new Promise((resolve) => setTimeout(resolve, 4500));
+          await new Promise((resolve) => setTimeout(resolve, 3100));
         }
-        await setUserDiscordNickname(username.toLowerCase(), discordId);
-        counter++;
-
-        successCounter++;
+        const response = await setUserDiscordNickname(username.toLowerCase(), discordId);
+        if (response.message) {
+          counter++; // Increment counter when the operation is successful
+          totalNicknamesUpdated.count++;
+        }
       } catch (error) {
-        errorsArr.push(`User: ${username}, ${error.message}`);
-        errorCounter++;
+        totalNicknamesNotUpdated.count++;
+        totalNicknamesNotUpdated.errors.push(`User: ${username}, ${error.message}`);
+        logger.error(`Error in updating discord Nickname: ${error}`);
       }
     }
 
     return res.json({
-      errorsArr,
-      numberOfUneffectedUsers: errorCounter,
-      numberOfUsersEffected: successCounter,
-      totalUsersChecked: nonSuperUsers.length,
+      totalNicknamesUpdated,
+      totalNicknamesNotUpdated,
       message: `Users Nicknames updated successfully`,
     });
   } catch (error) {
