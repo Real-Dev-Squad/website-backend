@@ -8,7 +8,7 @@ module.exports = () => {
       nick: "test-16",
       pending: false,
       premium_since: null,
-      roles: ["1152384058580549633"],
+      roles: ["9876543210"],
       user: {
         id: "232533446310887426",
         username: "sharkode",
@@ -33,7 +33,7 @@ module.exports = () => {
       nick: "test-7",
       pending: false,
       premium_since: null,
-      roles: ["1152384058580549633"],
+      roles: ["9876543210"],
       user: {
         id: "415438605813678080",
         username: "fmk23",
@@ -58,7 +58,7 @@ module.exports = () => {
       nick: "test-9",
       pending: false,
       premium_since: null,
-      roles: ["1152384058580549633"],
+      roles: ["9876543210"],
       user: {
         id: "416635283048628224",
         username: "hustle3r",
@@ -83,7 +83,7 @@ module.exports = () => {
       nick: "test-10",
       pending: false,
       premium_since: null,
-      roles: ["1152384058580549633"],
+      roles: ["9876543210"],
       user: {
         id: "416635283048628225",
         username: "anish",
