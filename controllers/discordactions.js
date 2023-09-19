@@ -224,7 +224,6 @@ const updateDiscordNicknames = async (req, res) => {
           }
         } catch (error) {
           logger.error(`error getting user with matching discordId ${error.message}`);
-          throw new Error("error getting user with matching discordId");
         }
       })
     );
