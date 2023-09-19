@@ -244,9 +244,12 @@ const updateDiscordNicknames = async (req, res) => {
           throw new Error(`does not have a username`);
         }
         const response = await setUserDiscordNickname(username.toLowerCase(), discordId);
-        if (response.message) {
-          counter++;
-          totalNicknamesUpdated.count++;
+        if (response) {
+          const message = await response.message;
+          if (message) {
+            counter++;
+            totalNicknamesUpdated.count++;
+          }
         }
       } catch (error) {
         totalNicknamesNotUpdated.count++;
