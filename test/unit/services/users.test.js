@@ -5,7 +5,7 @@ const firestore = require("../../../utils/firestore");
 const userModel = firestore.collection("users");
 const cleanDb = require("../../utils/cleanDb");
 const userDataArray = require("../../fixtures/user/user")();
-const { archiveUsers } = require("../../../services/users");
+const { archiveUsers, isUsernameLowercase } = require("../../../services/users");
 
 describe("Users services", function () {
   describe("archive inactive discord users in bulk", function () {
@@ -78,6 +78,18 @@ describe("Users services", function () {
         updatedUserDetails: [],
         failedUserDetails: userDetails,
       });
+    });
+  });
+
+  describe("is username lowercase", function () {
+    it("should return false for the username MANISH", function () {
+      const res = isUsernameLowercase("MANISH");
+      expect(res).to.be.equal(false);
+    });
+
+    it("should return true for the username manish", function () {
+      const res = isUsernameLowercase("manish");
+      expect(res).to.be.equal(true);
     });
   });
 });

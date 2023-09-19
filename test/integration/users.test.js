@@ -24,6 +24,7 @@ const {
 } = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
+const userModel = require("../../models/users");
 
 const userRoleUpdate = userData[4];
 const userRoleUnArchived = userData[13];
@@ -108,7 +109,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          username: "validUsername123",
+          username: "validusername123",
         })
         .end((err, res) => {
           if (err) {
@@ -232,7 +233,29 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Username must be between 4 and 20 characters long and contain only letters or numbers.",
+            message: "Username must be between 4 and 20 characters long and contain only lowercase letters or numbers.",
+          });
+
+          return done();
+        });
+    });
+
+    it("should return 400 if username contains uppercase character", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ username: "MANISH18" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.status).to.be.equal(400);
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Username must be between 4 and 20 characters long and contain only lowercase letters or numbers.",
           });
 
           return done();
@@ -2042,6 +2065,57 @@ describe("Users", function () {
           expect(res).to.have.status(500);
           const response = res.body;
           expect(response.message).to.be.equal("An internal server error occurred");
+          return done();
+        });
+    });
+  });
+
+  describe("POST /users/username", function () {
+    beforeEach(async function () {
+      const user1 = { ...userData[0], username: "ANKUR" };
+      const user2 = { ...userData[1], username: "NIKHIL" };
+      const user3 = { ...userData[3], username: "manish" };
+      await addOrUpdate(user1);
+      await addOrUpdate(user2);
+      await addOrUpdate(user3);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+      Sinon.restore();
+    });
+
+    it("should return the successfull response", function (done) {
+      chai
+        .request(app)
+        .post("/users/username")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.status).to.be.equal(200);
+          expect(res.body.message).to.be.equal("Updated usernames to lowercase successfully!");
+          expect(res.body.data.totalUsersAffected).to.be.equal(2);
+          return done();
+        });
+    });
+
+    it("should return the failed response", function (done) {
+      Sinon.stub(userModel, "updateUsernameToLowercase").throws(new Error("Firstore error!"));
+
+      chai
+        .request(app)
+        .post("/users/username")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.status).to.be.equal(500);
+          expect(res.body.message).to.be.equal("An internal server error occurred");
           return done();
         });
     });

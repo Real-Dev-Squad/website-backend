@@ -842,6 +842,21 @@ async function usersPatchHandler(req, res) {
   }
 }
 
+const updateUsernamesToLowercase = async (req, res) => {
+  try {
+    const data = await userQuery.updateUsernameToLowercase();
+    return res.json({
+      message: "Updated usernames to lowercase successfully!",
+      data: {
+        totalUsersAffected: data,
+      },
+    });
+  } catch (error) {
+    logger.error(`Error while updating username to lowercase: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -871,4 +886,5 @@ module.exports = {
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
+  updateUsernamesToLowercase,
 };

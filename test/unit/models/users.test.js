@@ -475,4 +475,22 @@ describe("users", function () {
       expect(userListResult[0].discordId).to.be.deep.equal(userDataArray[0].discordId);
     });
   });
+
+  describe("update username to lowercase", function () {
+    beforeEach(async function () {
+      const user1 = { ...userDataArray[0], username: "Ankur" };
+      await userModel.add(user1);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should update all the users username to lowercase", async function () {
+      await users.updateUsernameToLowercase();
+      const allusers = await users.fetchAllUsers();
+
+      expect(allusers[0].username).to.be.equal("ankur");
+    });
+  });
 });

@@ -46,6 +46,7 @@ router.patch(
   userValidator.validateUpdateRoles,
   users.updateRoles
 );
+router.post("/username", authenticate, authorizeRoles([SUPERUSER]), users.updateUsernamesToLowercase);
 
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post("/picture", authenticate, checkIsVerifiedDiscord, upload.single("profile"), users.postUserPicture);
