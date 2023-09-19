@@ -11,7 +11,9 @@ module.exports = {
   port: 3000,
   enableFileLogs: true,
   enableConsoleLogs: false,
-
+  discordUnverifiedRoleId: "<discordUnverifiedRoleId>",
+  discordDeveloperRoleId: "<discordDeveloperRoleId>",
+  discordMavenRoleId: "<discordMavenRoleId>",
   githubApi: {
     baseUrl: "https://api.github.com",
     org: "Real-Dev-Squad",
