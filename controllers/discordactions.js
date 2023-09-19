@@ -202,9 +202,7 @@ const updateDiscordNicknames = async (req, res) => {
     }
 
     const membersInDiscord = await getDiscordMembers();
-
     const usersToBeEffected = [];
-
     await Promise.all(
       membersInDiscord.map(async (discordUser) => {
         try {
@@ -220,12 +218,13 @@ const updateDiscordNicknames = async (req, res) => {
               usersToBeEffected.push({
                 discordId: foundUserWithDiscordId.user.discordId,
                 username: foundUserWithDiscordId.user.username,
+                first_name: foundUserWithDiscordId.user.first_name,
               });
             }
           }
         } catch (error) {
-          logger.error(`error updating discordId in userStatus ${error.message}`);
-          throw new Error("error updating discordId in userStatus");
+          logger.error(`error getting user with matching discordId ${error.message}`);
+          throw new Error("error getting user with matching discordId");
         }
       })
     );
@@ -235,19 +234,24 @@ const updateDiscordNicknames = async (req, res) => {
 
     let counter = 0;
     for (let i = 0; i < usersToBeEffected.length; i++) {
-      const { discordId, username } = usersToBeEffected[i];
+      const { discordId, username, first_name: firstName } = usersToBeEffected[i];
       try {
         if (counter % 10 === 0 && counter !== 0) {
           await new Promise((resolve) => setTimeout(resolve, 3100));
         }
+        if (!discordId) {
+          throw new Error("user not verified");
+        } else if (!username) {
+          throw new Error(`does not have a username`);
+        }
         const response = await setUserDiscordNickname(username.toLowerCase(), discordId);
         if (response.message) {
-          counter++; // Increment counter when the operation is successful
+          counter++;
           totalNicknamesUpdated.count++;
         }
       } catch (error) {
         totalNicknamesNotUpdated.count++;
-        totalNicknamesNotUpdated.errors.push(`User: ${username}, ${error.message}`);
+        totalNicknamesNotUpdated.errors.push(`User: ${username ?? firstName}, ${error.message}`);
         logger.error(`Error in updating discord Nickname: ${error}`);
       }
     }
