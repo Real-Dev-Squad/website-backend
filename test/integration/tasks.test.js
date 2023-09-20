@@ -892,6 +892,18 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
     });
 
+    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "VERIFIED" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
+    });
+
     it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {
       const taskData = {
         title: "Test task",
