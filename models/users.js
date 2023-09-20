@@ -835,6 +835,29 @@ const fetchUsersListForMultipleValues = async (documentKey, valueList) => {
   }
 };
 
+const getNonNickNameSyncedUsers = async () => {
+  try {
+    const usersRef = await userModel
+      .where("roles.archived", "==", false)
+      .where("nickname_synced", "==", false)
+      .where("discordId", "!=", null)
+      .get();
+    const users = [];
+    usersRef.forEach((user) => {
+      const userData = user.data();
+      if (userData?.discordId)
+        users.push({
+          id: user.id,
+          ...userData,
+        });
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Error while fetching all users: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -863,4 +886,5 @@ module.exports = {
   updateUsersInBatch,
   fetchUsersListForMultipleValues,
   fetchUserForKeyValue,
+  getNonNickNameSyncedUsers,
 };
