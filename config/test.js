@@ -11,6 +11,7 @@ module.exports = {
   enableConsoleLogs: true,
   discordUnverifiedRoleId: "1234567890",
   discordDeveloperRoleId: "9876543210",
+  discordMavenRoleId: "1212121212",
   githubOauth: {
     clientId: "clientId",
     clientSecret: "clientSecret",
