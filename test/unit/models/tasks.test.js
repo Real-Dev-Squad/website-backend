@@ -284,8 +284,11 @@ describe("tasks", function () {
 
     it("should return the overdue tasks for the given days", async function () {
       const days = 10;
+      const overdueTask = {...tasksData[0]};
+      overdueTask.endsOn = (Date.now() / 1000) + (24 * 60 * 60 *7);
+      await tasks.updateTask(overdueTask);
       const usersWithOverdueTasks = await tasks.getOverdueTasks(days);
-      expect(usersWithOverdueTasks.length).to.be.equal(4);
+      expect(usersWithOverdueTasks.length).to.be.equal(5);
     });
 
     it("should return all users which have overdue tasks if days is not passed", async function () {
