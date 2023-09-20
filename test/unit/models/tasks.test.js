@@ -195,6 +195,19 @@ describe("tasks", function () {
         expect(task.assignee).to.be.equal(assignee);
       });
     });
+
+    it("should fetch all tasks filtered by the multiple assignees passed", async function () {
+      const assignee = "ankur,akshay";
+      const assigneesArr = assignee.split(",");
+      const result = await tasks.fetchPaginatedTasks({ assignee });
+
+      const filteredTasks = tasksData.filter((task) => assigneesArr.includes(task.assignee));
+
+      expect(result).to.have.property("allTasks");
+      filteredTasks.forEach((task) => {
+        expect(task.assignee).to.be.oneOf(assigneesArr);
+      });
+    });
   });
 
   describe("update Dependency", function () {
