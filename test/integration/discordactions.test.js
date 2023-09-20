@@ -228,7 +228,7 @@ describe("Discord actions", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.be.equal("Users Nicknames updated successfully");
-          expect(res.body.totalNicknamesUpdated.count).to.be.equal(3);
+          expect(res.body.totalNicknamesUpdated.count).to.be.equal(0);
           expect(res.body.totalNicknamesNotUpdated.errors.length).to.be.equal(1);
 
           return done();

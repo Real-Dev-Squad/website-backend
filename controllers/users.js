@@ -28,6 +28,7 @@ const {
 } = require("../constants/users");
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
+const { setNicknameSyncedFalseScript } = require("../services/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -842,6 +843,15 @@ async function usersPatchHandler(req, res) {
   }
 }
 
+const setNicknameSyncedScript = async (req, res) => {
+  try {
+    await setNicknameSyncedFalseScript();
+    return res.json({ message: "Successfully added the nickname_synced field to false for all users" });
+  } catch (err) {
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -871,4 +881,5 @@ module.exports = {
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
+  setNicknameSyncedScript,
 };
