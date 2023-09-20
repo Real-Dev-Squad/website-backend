@@ -4,7 +4,8 @@ const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
 const { setUserDiscordNickname, getDiscordMembers } = require("../services/discordService");
-const { fetchUser } = require("../models/users");
+const { getNonNickNameSyncedUsers } = require("../models/users");
+const { updateNicknameSynced } = require("../services/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
 /**
@@ -203,22 +204,23 @@ const updateDiscordNicknames = async (req, res) => {
 
     const membersInDiscord = await getDiscordMembers();
     const usersToBeEffected = [];
+    const nickNameToBeSyncedUsers = await getNonNickNameSyncedUsers();
     await Promise.all(
       membersInDiscord.map(async (discordUser) => {
         try {
-          const foundUserWithDiscordId = await fetchUser({ discordId: discordUser.user.id });
-
-          if (foundUserWithDiscordId.userExists) {
+          const foundUserWithDiscordId = nickNameToBeSyncedUsers.find((user) => user.discordId === discordUser.user.id);
+          if (foundUserWithDiscordId) {
             const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
             const isMaven = discordUser.roles.includes(discordMavenRoleId);
             const isBot = discordUser.user.bot;
-            const isUsernameMatched = discordUser.nick === foundUserWithDiscordId.user.username;
-            const isSuperuser = foundUserWithDiscordId.user.roles.super_user;
+            const isUsernameMatched = discordUser.nick === foundUserWithDiscordId.username.toLowerCase();
+            const isSuperuser = foundUserWithDiscordId.roles.super_user;
             if (isDeveloper && !isMaven && !isUsernameMatched && !isBot && !isSuperuser) {
               usersToBeEffected.push({
-                discordId: foundUserWithDiscordId.user.discordId,
-                username: foundUserWithDiscordId.user.username,
-                first_name: foundUserWithDiscordId.user.first_name,
+                discordId: foundUserWithDiscordId.discordId,
+                username: foundUserWithDiscordId.username,
+                first_name: foundUserWithDiscordId.first_name,
+                id: foundUserWithDiscordId.id,
               });
             }
           }
@@ -230,13 +232,13 @@ const updateDiscordNicknames = async (req, res) => {
 
     const totalNicknamesUpdated = { count: 0 };
     const totalNicknamesNotUpdated = { count: 0, errors: [] };
-
+    const nickNameUpdatedUsers = [];
     let counter = 0;
     for (let i = 0; i < usersToBeEffected.length; i++) {
       const { discordId, username, first_name: firstName } = usersToBeEffected[i];
       try {
         if (counter % 10 === 0 && counter !== 0) {
-          await new Promise((resolve) => setTimeout(resolve, 3100));
+          await new Promise((resolve) => setTimeout(resolve, 5000));
         }
         if (!discordId) {
           throw new Error("user not verified");
@@ -249,6 +251,7 @@ const updateDiscordNicknames = async (req, res) => {
           if (message) {
             counter++;
             totalNicknamesUpdated.count++;
+            nickNameUpdatedUsers.push(usersToBeEffected[i].id);
           }
         }
       } catch (error) {
@@ -257,7 +260,7 @@ const updateDiscordNicknames = async (req, res) => {
         logger.error(`Error in updating discord Nickname: ${error}`);
       }
     }
-
+    await updateNicknameSynced(nickNameUpdatedUsers);
     return res.json({
       totalNicknamesUpdated,
       totalNicknamesNotUpdated,

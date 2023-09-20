@@ -2046,4 +2046,43 @@ describe("Users", function () {
         });
     });
   });
+  describe("PATCH /nickname-synced-field", function () {
+    beforeEach(async function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      await addUser(userData[0]);
+      await addUser(userData[1]);
+      await addUser(userData[2]);
+      await addUser(userData[3]);
+      const superUser = userData[4];
+      userId = await addUser(userData[2]);
+      superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    });
+    afterEach(async function () {
+      await cleanDb();
+      Sinon.restore();
+    });
+
+    it("returns 200 for successfully adding nickname_synced field to all users with patch method", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(),
+        })
+      );
+      chai
+        .request(app)
+        .post(`/users/nickname-synced-field`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          const response = res.body;
+          expect(response.message).to.be.equal("Successfully added the nickname_synced field to false for all users");
+          return done();
+        });
+    });
+  });
 });
