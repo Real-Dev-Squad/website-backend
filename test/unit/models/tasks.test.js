@@ -290,7 +290,7 @@ describe("tasks", function () {
 
     it("should return all users which have overdue tasks if days is not passed", async function () {
       const usersWithOverdueTasks = await tasks.getOverdueTasks();
-      expect(usersWithOverdueTasks.length).to.be.equal(3);
+      expect(usersWithOverdueTasks.length).to.be.equal(4);
     });
   });
 });
