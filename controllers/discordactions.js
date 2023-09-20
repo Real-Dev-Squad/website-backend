@@ -238,7 +238,7 @@ const updateDiscordNicknames = async (req, res) => {
       const { discordId, username, first_name: firstName } = usersToBeEffected[i];
       try {
         if (counter % 10 === 0 && counter !== 0) {
-          await new Promise((resolve) => setTimeout(resolve, 3100));
+          await new Promise((resolve) => setTimeout(resolve, 5000));
         }
         if (!discordId) {
           throw new Error("user not verified");
