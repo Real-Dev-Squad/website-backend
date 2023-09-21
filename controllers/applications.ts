@@ -90,16 +90,16 @@ const updateApplication = async (req: any, res: any) => {
       });
 
       const inviteOptions = {
-        max_uses: 1, // Maximum number of times the invite can be used (optional)
-        unique: true, // Whether to create a unique invite or not (optional)
+        channelId: 'channelId'
       };
-      const response = await fetch(`${DISCORD_BASE_URL}/channels/${channelId}/invites`, {
+      const response = await fetch(`${DISCORD_BASE_URL}/invite`, {
         method: "POST",
         body: JSON.stringify(inviteOptions),
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
       }).then((response) => response.json());
 
-      const inviteCode = response.code;
+
+      const inviteCode = response.data.code;
       const inviteLink = `discord.gg/${inviteCode}`;
 
       rawBody["discord_invite_link"] = inviteLink;
