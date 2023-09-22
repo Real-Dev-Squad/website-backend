@@ -16,11 +16,17 @@ const {
   updateDiscordImageForVerification,
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
+  updateUsersNicknameStatus,
 } = require("../../../models/discordactions");
 const { groupData, roleData, existingRole } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
 const { userPhotoVerificationData } = require("../../fixtures/user/photo-verification");
 const userData = require("../../fixtures/user/user")();
+const userStatusModel = firestore.collection("usersStatus");
+const { getStatusData } = require("../../fixtures/userStatus/userStatus");
+const usersStatusData = getStatusData();
+const dataAccessLayer = require("../../../services/dataAccessLayer");
+const { ONE_DAY_IN_MS } = require("../../../constants/users");
 
 chai.should();
 
@@ -362,6 +368,164 @@ describe("discordactions", function () {
       const groupToMemberMappings = await fetchGroupToUserMapping(roleIds);
       expect(groupToMemberMappings).to.be.an("array");
       expect(groupToMemberMappings).to.have.lengthOf(65);
+    });
+  });
+
+  describe("updateUsersNicknameStatus", function () {
+    let length;
+    let users = [];
+
+    let addedUers = [];
+    let addedUsersStatus = [];
+    let fetchStub, dataAccessLayerStub;
+
+    beforeEach(async function () {
+      fetchStub = sinon.stub(global, "fetch");
+      dataAccessLayerStub = sinon.stub(dataAccessLayer, "retrieveUsers");
+
+      addedUers.forEach(({ username, discordId, id }) => {
+        dataAccessLayerStub.withArgs(sinon.match({ id })).resolves({
+          user: {
+            username,
+            discordId,
+          },
+        });
+      });
+    });
+
+    afterEach(async function () {
+      fetchStub.restore();
+      dataAccessLayerStub.restore();
+    });
+
+    before(async function () {
+      length = usersStatusData.length;
+      users = userData.filter((data) => data.username && data.discordId).slice(0, length);
+      const addedUersPromise = users.map(async (user) => {
+        const { id } = await userModel.add({ ...user });
+        return { ...user, id };
+      });
+
+      addedUers = await Promise.all(addedUersPromise);
+
+      const addedUsersStatusPromise = usersStatusData.map(async (data, index) => {
+        const { id } = addedUers[index];
+        const statusData = { ...data, userId: id };
+        const { id: userStatusId } = await userStatusModel.add(statusData);
+        return { ...statusData, id: userStatusId };
+      });
+
+      addedUsersStatus = await Promise.all(addedUsersStatusPromise);
+    });
+
+    after(async function () {
+      await cleanDb();
+    });
+
+    const getTotalUsers = (timestamp) => {
+      const currentUsersStatus = addedUsersStatus.filter((data) => data.currentStatus.updatedAt >= timestamp);
+
+      let futureUsersStatus = addedUsersStatus.filter((data) => data.futureStatus.updatedAt >= timestamp);
+
+      futureUsersStatus = futureUsersStatus.filter(({ id }) => !currentUsersStatus.find((data) => data.id === id));
+
+      return currentUsersStatus.length + futureUsersStatus.length;
+    };
+
+    it("should return response successfully when user's nickname have been changed", async function () {
+      const fetchStubResponse = "User nickname changed successfully";
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(fetchStubResponse),
+        })
+      );
+
+      const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
+      const length = getTotalUsers(lastTimestamp);
+      const responseObj = {
+        totalUsersStatus: length,
+        successfulNicknameUpdates: length,
+        unsuccessfulNicknameUpdates: 0,
+      };
+
+      const response = await updateUsersNicknameStatus(lastTimestamp);
+      expect(response).to.be.an("object");
+      expect(response).to.be.deep.equal(responseObj);
+    });
+
+    it("should return response with 1 failed update when one of the complete user data is not found", async function () {
+      dataAccessLayerStub
+        .withArgs(sinon.match({ id: addedUers[0].id }))
+        .rejects("Error occurred while retrieving data");
+
+      const fetchStubResponse = "User nickname changed successfully";
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(fetchStubResponse),
+        })
+      );
+
+      const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
+      const length = getTotalUsers(lastTimestamp);
+
+      const responseObj = {
+        totalUsersStatus: length,
+        successfulNicknameUpdates: length - 1,
+        unsuccessfulNicknameUpdates: 1,
+      };
+
+      const response = await updateUsersNicknameStatus(lastTimestamp);
+      expect(response).to.be.an("object");
+      expect(response).to.be.deep.equal(responseObj);
+    });
+
+    it("should return response with 1 failed update when one of the user data retrieval fails", async function () {
+      dataAccessLayerStub
+        .withArgs(sinon.match({ id: addedUers[1].id }))
+        .rejects("Error occurred while retrieving data");
+
+      const fetchStubResponse = "User nickname changed successfully";
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(fetchStubResponse),
+        })
+      );
+
+      const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
+      const length = getTotalUsers(lastTimestamp);
+
+      const responseObj = {
+        totalUsersStatus: length,
+        successfulNicknameUpdates: length - 1,
+        unsuccessfulNicknameUpdates: 1,
+      };
+
+      const response = await updateUsersNicknameStatus(lastTimestamp);
+      expect(response).to.be.an("object");
+      expect(response).to.be.deep.equal(responseObj);
+    });
+
+    it("should return response with all failed updates when the fetch call from the discord service to update nickname fails", async function () {
+      const fetchStubResponse = "Error in updating discord Nickname";
+      fetchStub.throws(new Error(fetchStubResponse));
+
+      const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
+      const length = getTotalUsers(lastTimestamp);
+
+      const responseObj = {
+        totalUsersStatus: length,
+        successfulNicknameUpdates: 0,
+        unsuccessfulNicknameUpdates: length,
+      };
+
+      try {
+        const response = await updateUsersNicknameStatus(lastTimestamp);
+        expect(response).to.be.an("object");
+        expect(response).to.be.deep.equal(responseObj);
+      } catch (err) {}
     });
   });
 });

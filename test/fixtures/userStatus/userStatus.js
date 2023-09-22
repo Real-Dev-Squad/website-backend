@@ -1,4 +1,5 @@
 const { userState } = require("../../../constants/userStatus");
+const { ONE_DAY_IN_MS } = require("../../../constants/users");
 
 const userStatusDataForNewUser = {
   currentStatus: {
@@ -44,6 +45,11 @@ const userStatusDataForOooState = {
     updatedAt: 1668211200000,
     from: 1668211200000,
     until: 1668709800000,
+  },
+  futureStatus: {
+    state: "ACTIVE",
+    updatedAt: 1668211200000,
+    from: 1668709800000,
   },
   monthlyHours: {
     updatedAt: 1668215609000,
@@ -126,6 +132,64 @@ const generateStatusDataForCancelOOO = (userId, state) => {
   };
 };
 
+const getStatusData = () => {
+  const today = Date.now();
+  return [
+    {
+      futureStatus: {
+        from: today + 1000 * 36 * 60 * 60,
+        state: "IDLE",
+        updatedAt: today - ONE_DAY_IN_MS,
+      },
+      currentStatus: {
+        from: today - ONE_DAY_IN_MS,
+        until: today + 1000 * 36 * 60 * 60,
+        state: "OOO",
+        updatedAt: today - ONE_DAY_IN_MS,
+      },
+    },
+    {
+      currentStatus: {
+        from: today - ONE_DAY_IN_MS * 2,
+        state: "ACTIVE",
+        updatedAt: today - ONE_DAY_IN_MS * 2,
+      },
+      futureStatus: {
+        from: today + 1000 * 100 * 60 * 60,
+        until: today + ONE_DAY_IN_MS * 5,
+        state: "OOO",
+        updatedAt: today,
+      },
+    },
+    {
+      currentStatus: {
+        from: today - 1000 * 77 * 60 * 60,
+        state: "ACTIVE",
+        updatedAt: today - 1000 * 77 * 60 * 60,
+      },
+      futureStatus: {
+        from: today + 1000 * 36 * 60 * 60,
+        until: today + ONE_DAY_IN_MS * 4,
+        state: "OOO",
+        updatedAt: today,
+      },
+    },
+    {
+      currentStatus: {
+        from: today - 1000 * 77 * 60 * 60,
+        state: "IDLE",
+        updatedAt: today - 1000 * 77 * 60 * 60,
+      },
+      futureStatus: {
+        from: today + ONE_DAY_IN_MS * 5,
+        until: today + ONE_DAY_IN_MS * 8,
+        state: "OOO",
+        updatedAt: today - 1000 * 77 * 60 * 60,
+      },
+    },
+  ];
+};
+
 module.exports = {
   userStatusDataForNewUser,
   userStatusDataAfterSignup,
@@ -137,4 +201,5 @@ module.exports = {
   activeStatus,
   generateStatusDataForCancelOOO,
   generateStatusDataForState,
+  getStatusData,
 };

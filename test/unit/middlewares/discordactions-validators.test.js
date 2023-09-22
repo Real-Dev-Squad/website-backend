@@ -1,5 +1,9 @@
 const Sinon = require("sinon");
-const { validateGroupRoleBody, validateMemberRoleBody } = require("../../../middlewares/validators/discordactions");
+const {
+  validateGroupRoleBody,
+  validateMemberRoleBody,
+  validateUpdateUsersNicknameStatusBody,
+} = require("../../../middlewares/validators/discordactions");
 const { expect } = require("chai");
 
 describe("Middleware | Validators | discord actions", function () {
@@ -53,6 +57,66 @@ describe("Middleware | Validators | discord actions", function () {
       const nextSpy = Sinon.spy();
       const req = {
         body: {},
+      };
+      await validateMemberRoleBody(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+      expect(nextSpy.callCount).to.be.equal(0);
+    });
+  });
+
+  describe("validateUpdateUsersNicknameStatusBody", function () {
+    it("should pass the request to the next function when lastNicknameUpdate timestamp is a string", async function () {
+      const req = {
+        body: {
+          lastNicknameUpdate: String(Date.now()),
+        },
+      };
+      const nextSpy = Sinon.spy();
+      const res = {};
+      await validateUpdateUsersNicknameStatusBody(req, res, nextSpy);
+      expect(nextSpy.calledOnce).to.be.equal(true);
+    });
+
+    it("should pass the request to the next function when lastNicknameUpdate timestamp is a number", async function () {
+      const req = {
+        body: {
+          lastNicknameUpdate: Date.now(),
+        },
+      };
+      const nextSpy = Sinon.spy();
+      const res = {};
+      await validateUpdateUsersNicknameStatusBody(req, res, nextSpy);
+      expect(nextSpy.calledOnce).to.be.equal(true);
+    });
+
+    it("should throw error when the lastNicknameUpdate timestamp is not present", async function () {
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = Sinon.spy();
+      const req = {
+        body: {},
+      };
+      await validateMemberRoleBody(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+      expect(nextSpy.callCount).to.be.equal(0);
+    });
+
+    it("should throw error when the lastNicknameUpdate timestamp is not a string or timestamp", async function () {
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = Sinon.spy();
+      const req = {
+        body: {
+          lastNicknameUpdate: 112.45478,
+        },
       };
       await validateMemberRoleBody(req, res, nextSpy).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);

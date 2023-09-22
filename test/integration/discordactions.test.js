@@ -19,10 +19,13 @@ const { userPhotoVerificationData } = require("../fixtures/user/photo-verificati
 const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
 const userModel = firestore.collection("users");
-
+const userStatusModel = firestore.collection("usersStatus");
 const { groupData } = require("../fixtures/discordactions/discordactions");
 const { addGroupRoleToMember } = require("../../models/discordactions");
 chai.use(chaiHttp);
+const { userStatusDataForOooState } = require("../fixtures/userStatus/userStatus");
+const { generateCronJobToken } = require("../utils/generateBotToken");
+const { CRON_JOB_HANDLER } = require("../../constants/bot");
 
 describe("Discord actions", function () {
   let superUserId;
@@ -231,6 +234,81 @@ describe("Discord actions", function () {
           expect(res.body.totalNicknamesUpdated.count).to.be.equal(3);
           expect(res.body.totalNicknamesNotUpdated.errors.length).to.be.equal(0);
 
+          return done();
+        });
+    });
+  });
+
+  describe("POST /discord-actions/nickname/status", function () {
+    let jwtToken;
+    beforeEach(async function () {
+      const { id } = await userModel.add({ ...userData[0] });
+      const statusData = { ...userStatusDataForOooState, userId: id };
+      userStatusModel.add(statusData);
+      jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should successfully return response when user nickname changes", function (done) {
+      const response = "Username updated successfully";
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(response),
+        })
+      );
+
+      chai
+        .request(app)
+        .post("/discord-actions/nickname/status")
+        .set("Authorization", `Bearer ${jwtToken}`)
+        .send({
+          lastNicknameUpdate: (userStatusDataForOooState.currentStatus.updatedAt - 1000 * 60 * 10).toString(),
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res).to.be.an("object");
+          expect(res.body).to.deep.equal({
+            message: "Updated discord users nickname based on status",
+            data: {
+              totalUsersStatus: 1,
+              successfulNicknameUpdates: 1,
+              unsuccessfulNicknameUpdates: 0,
+            },
+          });
+          return done();
+        });
+    });
+
+    it("should return object with 0 successful updates when user nickname changes", function (done) {
+      const response = "Error occurred while updating user's nickname";
+      fetchStub.returns(Promise.reject(response));
+
+      chai
+        .request(app)
+        .post("/discord-actions/nickname/status")
+        .set("Authorization", `Bearer ${jwtToken}`)
+        .send({
+          lastNicknameUpdate: (userStatusDataForOooState.currentStatus.updatedAt - 1000 * 60 * 10).toString(),
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res).to.be.an("object");
+          expect(res.body.data).to.deep.equal({
+            totalUsersStatus: 1,
+            successfulNicknameUpdates: 0,
+            unsuccessfulNicknameUpdates: 1,
+          });
           return done();
         });
     });
