@@ -452,7 +452,7 @@ describe("discordactions", function () {
       const response = await updateUsersNicknameStatus(lastTimestamp);
       expect(response).to.be.an("object");
       expect(response).to.be.deep.equal(responseObj);
-    });
+    }).timeout(10000);
 
     it("should return response with 1 failed update when one of the complete user data is not found", async function () {
       dataAccessLayerStub
@@ -479,7 +479,7 @@ describe("discordactions", function () {
       const response = await updateUsersNicknameStatus(lastTimestamp);
       expect(response).to.be.an("object");
       expect(response).to.be.deep.equal(responseObj);
-    });
+    }).timeout(10000);
 
     it("should return response with 1 failed update when one of the user data retrieval fails", async function () {
       dataAccessLayerStub
@@ -506,7 +506,7 @@ describe("discordactions", function () {
       const response = await updateUsersNicknameStatus(lastTimestamp);
       expect(response).to.be.an("object");
       expect(response).to.be.deep.equal(responseObj);
-    });
+    }).timeout(10000);
 
     it("should return response with all failed updates when the fetch call from the discord service to update nickname fails", async function () {
       const fetchStubResponse = "Error in updating discord Nickname";
@@ -521,11 +521,9 @@ describe("discordactions", function () {
         unsuccessfulNicknameUpdates: length,
       };
 
-      try {
-        const response = await updateUsersNicknameStatus(lastTimestamp);
-        expect(response).to.be.an("object");
-        expect(response).to.be.deep.equal(responseObj);
-      } catch (err) {}
-    });
+      const response = await updateUsersNicknameStatus(lastTimestamp);
+      expect(response).to.be.an("object");
+      expect(response).to.be.deep.equal(responseObj);
+    }).timeout(10000);
   });
 });

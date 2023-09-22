@@ -48,6 +48,8 @@ const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 
 const discordNicknameLength = 32;
 
+const SIMULTANEOUS_WORKER_CALLS = 3;
+
 module.exports = {
   profileStatus,
   USER_STATUS,
@@ -61,4 +63,5 @@ module.exports = {
   ONE_DAY_IN_MS,
   months,
   discordNicknameLength,
+  SIMULTANEOUS_WORKER_CALLS,
 };

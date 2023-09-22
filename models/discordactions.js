@@ -8,7 +8,7 @@ const { retrieveUsers } = require("../services/dataAccessLayer");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const { getAllUserStatus, getGroupRole } = require("./userStatus");
 const { userState } = require("../constants/userStatus");
-const { ONE_DAY_IN_MS } = require("../constants/users");
+const { ONE_DAY_IN_MS, SIMULTANEOUS_WORKER_CALLS } = require("../constants/users");
 const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
 const dataAccess = require("../services/dataAccessLayer");
@@ -369,13 +369,14 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
     const totalUsersStatus = usersStatusDocs.length;
 
     let startIndex = 0;
-    for (let i = 0; i < Math.ceil(totalUsersStatus / 6); i++) {
-      const end = Math.min(totalUsersStatus, startIndex + 6);
+    for (let i = 0; i < Math.ceil(totalUsersStatus / SIMULTANEOUS_WORKER_CALLS); i++) {
+      const end = Math.min(totalUsersStatus, startIndex + SIMULTANEOUS_WORKER_CALLS);
       nicknameUpdateBatches.push(usersStatusDocs.slice(startIndex, end));
       startIndex = end;
     }
 
     for (let i = 0; i < nicknameUpdateBatches.length; i++) {
+      const promises = [];
       const usersStatusDocsBatch = nicknameUpdateBatches[i];
       usersStatusDocsBatch.forEach((document) => {
         const doc = document.data();
@@ -386,32 +387,36 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
         const { state: currentState } = currentStatus;
 
         if (currentState === userState.OOO) {
-          nicknameUpdatePromises.push(usersUtils.updateNickname(userId, currentStatus));
+          promises.push(usersUtils.updateNickname(userId, currentStatus));
         } else if (futureState === userState.OOO && today + 3 * ONE_DAY_IN_MS >= futureStatus.from) {
-          nicknameUpdatePromises.push(usersUtils.updateNickname(userId, futureStatus));
+          promises.push(usersUtils.updateNickname(userId, futureStatus));
         } else {
-          nicknameUpdatePromises.push(usersUtils.updateNickname(userId));
+          promises.push(usersUtils.updateNickname(userId));
         }
       });
+
+      try {
+        const settledPromises = await Promise.allSettled(promises);
+        nicknameUpdatePromises.push(...settledPromises);
+      } catch (err) {
+        logger.error(`Error while updating user's nickname: ${err}`);
+        throw err;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
-    try {
-      const promises = await Promise.allSettled(nicknameUpdatePromises);
-      let successfulUpdates = 0;
-      promises.forEach((promise) => {
-        if (promise.status === "fulfilled") successfulUpdates++;
-      });
+    let successfulUpdates = 0;
+    nicknameUpdatePromises.forEach((promise) => {
+      if (promise.status === "fulfilled") successfulUpdates++;
+    });
 
-      const res = {
-        totalUsersStatus,
-        successfulNicknameUpdates: successfulUpdates,
-        unsuccessfulNicknameUpdates: totalUsersStatus - successfulUpdates,
-      };
-      return res;
-    } catch (err) {
-      logger.error(`Error while updating user's nickname: ${err}`);
-      throw err;
-    }
+    const res = {
+      totalUsersStatus,
+      successfulNicknameUpdates: successfulUpdates,
+      unsuccessfulNicknameUpdates: totalUsersStatus - successfulUpdates,
+    };
+    return res;
   } catch (err) {
     logger.error(`Error while retrieving users status documents: ${err}`);
     throw err;
