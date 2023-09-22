@@ -40,22 +40,39 @@ const archiveUsers = async (usersData) => {
     return { message: USERS_PATCH_HANDLER_ERROR_MESSAGES.ARCHIVE_USERS.BATCH_DATA_UPDATED_FAILED, ...summary };
   }
 };
+
+function updateInBatch(usersData, addOrUpdateField) {
+  while (usersData.length !== 0) {
+    let limitedBatch;
+    if (usersData.length > 500) {
+      limitedBatch = usersData.splice(0, 500);
+    } else {
+      limitedBatch = usersData.splice(0, usersData.length);
+    }
+    addOrUpdateField(limitedBatch);
+  }
+}
 const setNicknameSyncedFalseScript = async () => {
   const users = [];
   const usersQuerySnapshot = await userModel.get();
   usersQuerySnapshot.forEach((user) => users.push({ ...user.data(), id: user.id }));
   const updateUsersPromises = [];
-  users.forEach((user) => {
-    const id = user.id;
-    // eslint-disable-next-line security/detect-object-injection
-    delete user[id];
-    const userData = {
-      ...user,
-      nickname_synced: false,
-      updated_at: Date.now(),
-    };
-    updateUsersPromises.push(userModel.doc(id).update(userData));
-  });
+  const addField = (users) => {
+    users.forEach((user) => {
+      const id = user.id;
+      // eslint-disable-next-line security/detect-object-injection
+      delete user[id];
+      const userData = {
+        ...user,
+        nickname_synced: false,
+        updated_at: Date.now(),
+      };
+      updateUsersPromises.push(userModel.doc(id).update(userData));
+    });
+  };
+
+  updateInBatch(users, addField);
+
   await Promise.all(updateUsersPromises);
 };
 
@@ -68,14 +85,17 @@ const updateNicknameSynced = async (usersData) => {
     updatedUserDetails: [],
     failedUserDetails: [],
   };
+  const updateField = (usersData) => {
+    usersData.forEach((id) => {
+      const updatedUserData = {
+        nickname_synced: true,
+      };
+      batch.update(userModel.doc(id), updatedUserData);
+      usersBatch.push({ id });
+    });
+  };
 
-  usersData.forEach((id) => {
-    const updatedUserData = {
-      nickname_synced: true,
-    };
-    batch.update(userModel.doc(id), updatedUserData);
-    usersBatch.push({ id });
-  });
+  updateInBatch(usersData, updateField);
 
   try {
     await batch.commit();
