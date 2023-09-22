@@ -272,6 +272,27 @@ const updateDiscordNicknames = async (req, res) => {
   }
 };
 
+/**
+ * Update all user Discord nickname based on status
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const updateUsersNicknameStatus = async (req, res) => {
+  try {
+    const { lastNicknameUpdate = 0 } = req.body;
+    const data = await discordRolesModel.updateUsersNicknameStatus(lastNicknameUpdate);
+    return res.json({
+      message: "Updated discord users nickname based on status",
+      data,
+    });
+  } catch (err) {
+    logger.error(`Error while updating users nickname based on status: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   getGroupsRoleId,
   createGroupRole,
@@ -280,4 +301,5 @@ module.exports = {
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
   updateDiscordNicknames,
+  updateUsersNicknameStatus,
 };

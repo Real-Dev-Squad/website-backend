@@ -8,11 +8,14 @@ const { retrieveUsers } = require("../services/dataAccessLayer");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const { getAllUserStatus, getGroupRole } = require("./userStatus");
 const { userState } = require("../constants/userStatus");
+const { ONE_DAY_IN_MS } = require("../constants/users");
 const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
 const dataAccess = require("../services/dataAccessLayer");
 const { getDiscordMembers, addRoleToUser, removeRoleFromUser } = require("../services/discordService");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const userStatusModel = firestore.collection("usersStatus");
+const usersUtils = require("../utils/users");
 
 /**
  *
@@ -336,6 +339,85 @@ const updateIdleUsersOnDiscord = async () => {
   };
 };
 
+const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
+  const lastNicknameUpdateTimestamp = Number(lastNicknameUpdate);
+  try {
+    const usersCurrentStatus = userStatusModel
+      .where("currentStatus.updatedAt", ">=", lastNicknameUpdateTimestamp)
+      .get();
+    const usersFutureStatus = userStatusModel.where("futureStatus.updatedAt", ">=", lastNicknameUpdateTimestamp).get();
+
+    const [usersCurrentStatusSnapshot, usersFutureStatusSnapshots] = await Promise.all([
+      usersCurrentStatus,
+      usersFutureStatus,
+    ]);
+
+    const usersCurrentStatusDocs = usersCurrentStatusSnapshot.docs;
+    let usersFutureStatusDocs = usersFutureStatusSnapshots.docs;
+    usersFutureStatusDocs = usersFutureStatusDocs.filter(({ id }) => {
+      const isIdPresent = usersCurrentStatusDocs.find((status) => {
+        return status.id === id;
+      });
+      return !isIdPresent;
+    });
+    const usersStatusDocs = usersCurrentStatusDocs.concat(usersFutureStatusDocs);
+
+    const today = new Date().getTime();
+
+    const nicknameUpdatePromises = [];
+    const nicknameUpdateBatches = [];
+    const totalUsersStatus = usersStatusDocs.length;
+
+    let startIndex = 0;
+    for (let i = 0; i < Math.ceil(totalUsersStatus / 6); i++) {
+      const end = Math.min(totalUsersStatus, startIndex + 6);
+      nicknameUpdateBatches.push(usersStatusDocs.slice(startIndex, end));
+      startIndex = end;
+    }
+
+    for (let i = 0; i < nicknameUpdateBatches.length; i++) {
+      const usersStatusDocsBatch = nicknameUpdateBatches[i];
+      usersStatusDocsBatch.forEach((document) => {
+        const doc = document.data();
+        const userId = doc.userId;
+
+        const { futureStatus = {}, currentStatus = {} } = doc;
+        const { state: futureState } = futureStatus;
+        const { state: currentState } = currentStatus;
+
+        if (currentState === userState.OOO) {
+          nicknameUpdatePromises.push(usersUtils.updateNickname(userId, currentStatus));
+        } else if (futureState === userState.OOO && today + 3 * ONE_DAY_IN_MS >= futureStatus.from) {
+          nicknameUpdatePromises.push(usersUtils.updateNickname(userId, futureStatus));
+        } else {
+          nicknameUpdatePromises.push(usersUtils.updateNickname(userId));
+        }
+      });
+    }
+
+    try {
+      const promises = await Promise.allSettled(nicknameUpdatePromises);
+      let successfulUpdates = 0;
+      promises.forEach((promise) => {
+        if (promise.status === "fulfilled") successfulUpdates++;
+      });
+
+      const res = {
+        totalUsersStatus,
+        successfulNicknameUpdates: successfulUpdates,
+        unsuccessfulNicknameUpdates: totalUsersStatus - successfulUpdates,
+      };
+      return res;
+    } catch (err) {
+      logger.error(`Error while updating user's nickname: ${err}`);
+      throw err;
+    }
+  } catch (err) {
+    logger.error(`Error while retrieving users status documents: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   createNewRole,
   getGroupRolesForUser,
@@ -346,4 +428,5 @@ module.exports = {
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
   updateIdleUsersOnDiscord,
+  updateUsersNicknameStatus,
 };

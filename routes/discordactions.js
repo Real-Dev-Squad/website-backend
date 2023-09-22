@@ -8,11 +8,17 @@ const {
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
   updateDiscordNicknames,
+  updateUsersNicknameStatus,
 } = require("../controllers/discordactions");
-const { validateGroupRoleBody, validateMemberRoleBody } = require("../middlewares/validators/discordactions");
+const {
+  validateGroupRoleBody,
+  validateMemberRoleBody,
+  validateUpdateUsersNicknameStatusBody,
+} = require("../middlewares/validators/discordactions");
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
 const { SUPERUSER } = require("../constants/roles");
 const authorizeRoles = require("../middlewares/authorizeRoles");
+const { verifyCronJob } = require("../middlewares/authorizeBot");
 
 const router = express.Router();
 
@@ -35,4 +41,6 @@ router.post(
   checkIsVerifiedDiscord,
   updateDiscordNicknames
 );
+router.post("/nickname/status", verifyCronJob, validateUpdateUsersNicknameStatusBody, updateUsersNicknameStatus);
+
 module.exports = router;
