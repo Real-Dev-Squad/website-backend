@@ -59,6 +59,7 @@ router.patch(
 router.get("/picture/:id", authenticate, authorizeRoles([SUPERUSER]), users.getUserImageForVerification);
 router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
+router.patch("/nickname-synced-field", authenticate, authorizeRoles([SUPERUSER]), users.removeNicknameSyncedField);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
 module.exports = router;
