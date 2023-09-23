@@ -24,7 +24,7 @@ const formatExtensionRequest = async (extensionRequest) => {
   return { ...body, id, timestamp, assignee };
 };
 
-const transformQuery = (size, dev = false, status) => {
+const transformQuery = (size, status, dev = false) => {
   const transformedDev = JSON.parse(dev);
 
   let transformedSize;
@@ -39,7 +39,7 @@ const transformQuery = (size, dev = false, status) => {
   } else if (status) {
     transformedStatus = status.toUpperCase();
   }
-  return { transformedSize: transformedSize, transformedDev: transformedDev, transformedStatus: transformedStatus };
+  return { transformedSize: transformedSize, transformedStatus: transformedStatus, transformedDev: transformedDev };
 };
 
 const generateNextLink = (nextPageParams) => {
