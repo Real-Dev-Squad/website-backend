@@ -1,7 +1,7 @@
 const { USERS_PATCH_HANDLER_SUCCESS_MESSAGES, USERS_PATCH_HANDLER_ERROR_MESSAGES } = require("../constants/users");
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
-
+const admin = require("firebase-admin");
 const archiveUsers = async (usersData) => {
   const batch = firestore.batch();
   const usersBatch = [];
@@ -47,12 +47,12 @@ const removeNicknameSyncedFieldScript = async () => {
   const updateUsersPromises = [];
   users.forEach((user) => {
     const id = user.id;
-    // eslint-disable-next-line security/detect-object-injection
-    delete user.nickname_synced;
-    const userData = {
-      ...user,
-    };
-    updateUsersPromises.push(userModel.doc(id).update(userData));
+    const usersRef = userModel.doc(id);
+    updateUsersPromises.push(
+      usersRef.update({
+        nickname_synced: admin.firestore.FieldValue.delete(),
+      })
+    );
   });
   await Promise.all(updateUsersPromises);
 };
