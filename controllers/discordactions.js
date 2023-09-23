@@ -4,8 +4,7 @@ const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
 const { setUserDiscordNickname, getDiscordMembers } = require("../services/discordService");
-const { getNonNickNameSyncedUsers } = require("../models/users");
-const { updateNicknameSynced } = require("../services/users");
+const { fetchAllUsers } = require("../models/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
 /**
@@ -203,12 +202,12 @@ const updateDiscordNicknames = async (req, res) => {
     }
 
     const membersInDiscord = await getDiscordMembers();
+    const usersInDB = await fetchAllUsers();
     const usersToBeEffected = [];
-    const nickNameToBeSyncedUsers = await getNonNickNameSyncedUsers();
     await Promise.all(
       membersInDiscord.map(async (discordUser) => {
         try {
-          const foundUserWithDiscordId = nickNameToBeSyncedUsers.find((user) => user.discordId === discordUser.user.id);
+          const foundUserWithDiscordId = usersInDB.find((user) => user.discordId === discordUser.user.id);
           if (foundUserWithDiscordId) {
             const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
             const isMaven = discordUser.roles.includes(discordMavenRoleId);
@@ -238,7 +237,7 @@ const updateDiscordNicknames = async (req, res) => {
       const { discordId, username, first_name: firstName } = usersToBeEffected[i];
       try {
         if (counter % 10 === 0 && counter !== 0) {
-          await new Promise((resolve) => setTimeout(resolve, 5000));
+          await new Promise((resolve) => setTimeout(resolve, 5500));
         }
         if (!discordId) {
           throw new Error("user not verified");
@@ -260,7 +259,6 @@ const updateDiscordNicknames = async (req, res) => {
         logger.error(`Error in updating discord Nickname: ${error}`);
       }
     }
-    await updateNicknameSynced(nickNameUpdatedUsers);
     return res.json({
       totalNicknamesUpdated,
       totalNicknamesNotUpdated,
