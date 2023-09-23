@@ -40,6 +40,7 @@ const archiveUsers = async (usersData) => {
     return { message: USERS_PATCH_HANDLER_ERROR_MESSAGES.ARCHIVE_USERS.BATCH_DATA_UPDATED_FAILED, ...summary };
   }
 };
+
 const removeNicknameSyncedFieldScript = async () => {
   const users = [];
   const usersQuerySnapshot = await userModel.get();
@@ -59,4 +60,5 @@ const removeNicknameSyncedFieldScript = async () => {
 module.exports = {
   archiveUsers,
   removeNicknameSyncedFieldScript,
+
 };

@@ -28,7 +28,9 @@ const {
 } = require("../constants/users");
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
+
 const { removeNicknameSyncedFieldScript } = require("../services/users");
+
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -842,6 +844,7 @@ async function usersPatchHandler(req, res) {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 }
+
 const removeNicknameSyncedField = async (req, res) => {
   try {
     await removeNicknameSyncedFieldScript();
@@ -850,6 +853,7 @@ const removeNicknameSyncedField = async (req, res) => {
     return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
   }
 };
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -880,4 +884,5 @@ module.exports = {
   archiveUserIfNotInDiscord,
   usersPatchHandler,
   removeNicknameSyncedField,
+
 };
