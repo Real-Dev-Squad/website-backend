@@ -60,5 +60,4 @@ const removeNicknameSyncedFieldScript = async () => {
 module.exports = {
   archiveUsers,
   removeNicknameSyncedFieldScript,
-
 };

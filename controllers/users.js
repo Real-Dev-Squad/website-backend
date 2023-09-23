@@ -31,7 +31,6 @@ const { getUserStatus } = require("../models/userStatus");
 
 const { removeNicknameSyncedFieldScript } = require("../services/users");
 
-
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
   try {
@@ -884,5 +883,4 @@ module.exports = {
   archiveUserIfNotInDiscord,
   usersPatchHandler,
   removeNicknameSyncedField,
-
 };
