@@ -40,7 +40,23 @@ const archiveUsers = async (usersData) => {
     return { message: USERS_PATCH_HANDLER_ERROR_MESSAGES.ARCHIVE_USERS.BATCH_DATA_UPDATED_FAILED, ...summary };
   }
 };
-
+const removeNicknameSyncedFieldScript = async () => {
+  const users = [];
+  const usersQuerySnapshot = await userModel.get();
+  usersQuerySnapshot.forEach((user) => users.push({ ...user.data(), id: user.id }));
+  const updateUsersPromises = [];
+  users.forEach((user) => {
+    const id = user.id;
+    // eslint-disable-next-line security/detect-object-injection
+    delete user.nickname_synced;
+    const userData = {
+      ...user,
+    };
+    updateUsersPromises.push(userModel.doc(id).update(userData));
+  });
+  await Promise.all(updateUsersPromises);
+};
 module.exports = {
   archiveUsers,
+  removeNicknameSyncedFieldScript,
 };
