@@ -2,7 +2,7 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const admin = require("firebase-admin");
 const config = require("config");
 const jwt = require("jsonwebtoken");
-const discordRolesModel = require("../models/discordactions");
+const discordActionModel = require("../models/discordactions");
 
 /**
  * Creates a role
@@ -17,7 +17,7 @@ const createGroupRole = async (req, res) => {
   try {
     const rolename = `group-${req.body.rolename}`;
 
-    const { wasSuccess } = await discordRolesModel.isGroupRoleExists(rolename);
+    const { wasSuccess } = await discordActionModel.isGroupRoleExists(rolename);
 
     if (!wasSuccess) {
       return res.status(400).json({
@@ -46,7 +46,7 @@ const createGroupRole = async (req, res) => {
 
     groupRoleData.roleid = responseForCreatedRole.id;
 
-    const { id } = await discordRolesModel.createNewRole(groupRoleData);
+    const { id } = await discordActionModel.createNewRole(groupRoleData);
     return res.status(201).json({
       message: "Role created successfully!",
       id,
@@ -65,12 +65,12 @@ const createGroupRole = async (req, res) => {
 
 const getAllGroupRoles = async (req, res) => {
   try {
-    const { groups } = await discordRolesModel.getAllGroupRoles();
+    const { groups } = await discordActionModel.getAllGroupRoles();
     const dev = req.query.dev === "true";
     if (dev) {
       // Placing the new changes under the feature flag.
       const discordId = req.userData?.discordId;
-      const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
+      const groupsWithMembershipInfo = await discordActionModel.enrichGroupDataWithMembershipInfo(discordId, groups);
       return res.json({
         message: "Roles fetched successfully!",
         groups: groupsWithMembershipInfo,
@@ -88,7 +88,7 @@ const getAllGroupRoles = async (req, res) => {
 
 /**
  * Gets all group-roles
- * @param req {Object} - Express request object
+ * @param req {Object} - Epxpress request object
  * @param res {Object} - Express response object
  */
 
@@ -99,7 +99,7 @@ const addGroupRoleToMember = async (req, res) => {
       date: admin.firestore.Timestamp.fromDate(new Date()),
     };
 
-    const { roleData, wasSuccess } = await discordRolesModel.addGroupRoleToMember(memberGroupRole);
+    const { roleData, wasSuccess } = await discordActionModel.addGroupRoleToMember(memberGroupRole);
 
     if (!wasSuccess) {
       return res.status(400).json({
@@ -140,7 +140,7 @@ const addGroupRoleToMember = async (req, res) => {
 const updateDiscordImageForVerification = async (req, res) => {
   try {
     const { id: userDiscordId } = req.params;
-    const discordAvatarUrl = await discordRolesModel.updateDiscordImageForVerification(userDiscordId);
+    const discordAvatarUrl = await discordActionModel.updateDiscordImageForVerification(userDiscordId);
     return res.json({
       message: "Discord avatar URL updated successfully!",
       discordAvatarUrl,
@@ -158,7 +158,7 @@ const updateDiscordImageForVerification = async (req, res) => {
  */
 const setRoleIdleToIdleUsers = async (req, res) => {
   try {
-    const result = await discordRolesModel.updateIdleUsersOnDiscord();
+    const result = await discordActionModel.updateIdleUsersOnDiscord();
     return res.status(201).json({
       message: "All Idle Users updated successfully.",
       ...result,
@@ -169,10 +169,76 @@ const setRoleIdleToIdleUsers = async (req, res) => {
   }
 };
 
+const generateInviteForUser = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const userIdForInvite = userId || req.userData.id;
+
+    const modelResponse = await discordActionModel.getUserDiscordInvite(userIdForInvite);
+
+    if (!modelResponse.notFound) {
+      return res.status(409).json({
+        message: "User invite is already present!",
+      });
+    }
+
+    const channelId = config.get("discordNewComersChannelId");
+    const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
+      algorithm: "RS256",
+      expiresIn: config.get("rdsServerlessBot.ttl"),
+    });
+
+    const inviteOptions = {
+      channelId: channelId,
+    };
+    const response = await fetch(`${DISCORD_BASE_URL}/invite`, {
+      method: "POST",
+      body: JSON.stringify(inviteOptions),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+    }).then((response) => response.json());
+
+    const inviteCode = response.data.code;
+    const inviteLink = `discord.gg/${inviteCode}`;
+
+    await discordActionModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
+
+    return res.json({
+      message: "invite generated successfully",
+      inviteLink,
+    });
+  } catch (err) {
+    logger.error(`Error in generating invite for user: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const getUserDiscordInvite = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const userIdForInvite = userId || req.userData.id;
+
+    const modelResponse = await discordActionModel.getUserDiscordInvite(userIdForInvite);
+
+    if (modelResponse.notFound) {
+      return res.boom.notFound("User invite doesn't exist");
+    }
+
+    return res.json({
+      message: "Invite returned successfully",
+      modelResponse,
+    });
+  } catch (err) {
+    logger.error(`Error in fetching user invite: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   createGroupRole,
   getAllGroupRoles,
   addGroupRoleToMember,
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
+  getUserDiscordInvite,
+  generateInviteForUser,
 };
