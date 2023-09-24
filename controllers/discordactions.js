@@ -185,6 +185,24 @@ const setRoleIdleToIdleUsers = async (req, res) => {
 };
 
 /**
+ * Set all group-idle-7d+ on discord
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const setRoleIdle7DToIdleUsers = async (req, res) => {
+  try {
+    const result = await discordRolesModel.updateIdle7dUsersOnDiscord();
+    return res.status(201).json({
+      message: "All Idle 7d+ Users updated successfully.",
+      ...result,
+    });
+  } catch (err) {
+    logger.error(`Error while setting idle role: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
  * Patch Update user nicknames on discord server
  *
  * @param req {Object} - Express request object
@@ -244,5 +262,6 @@ module.exports = {
   addGroupRoleToMember,
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
+  setRoleIdle7DToIdleUsers,
   updateDiscordNicknames,
 };
