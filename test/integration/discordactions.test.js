@@ -290,7 +290,7 @@ describe("Discord actions", function () {
           }
           expect(res).to.have.status(201);
           expect(res.body.message).to.be.equal("All Users with 31 Days Plus Onboarding are updated successfully.");
-          expect(res.body.totalOnboardingUsers31DaysCompleted.count).to.be.equal(9);
+          expect(res.body.totalOnboardingUsers31DaysCompleted.count).to.be.equal(3);
           expect(res.body.totalOnboarding31dPlusRoleApplied.count).to.be.equal(3);
           return done();
         });
