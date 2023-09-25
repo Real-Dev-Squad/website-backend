@@ -43,7 +43,7 @@ describe("auth", function () {
   it("should return github call back URL with redirectUrl for mobile-app", async function () {
     const RDS_MEMBERS_SITE_URL = "https://members.realdevsquad.com";
     const githubOauthURL =
-      "https://github.com/login/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fgithub%2Fcallback&scope=user%3Aemail&state=https%3A%2F%2Fmembers.realdevsquad.com&isMobileApp=true&client_id=clientId";
+      "https://github.com/login/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fgithub%2Fcallback&scope=user%3Aemail&state=https%3A%2F%2Fmembers.realdevsquad.com%2F%3FisMobileApp%3Dtrue&client_id=clientId";
     const res = await chai
       .request(app)
       .get("/auth/github/login")
