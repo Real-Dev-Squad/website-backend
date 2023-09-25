@@ -7,6 +7,7 @@ const generateGithubAuthRedirectUrl = function ({
   scope = "user:email",
   state = "",
   clientId = defaultClientId,
+  isMobileApp = false,
 }) {
   const encodedBaseUrl = encodeURI(baseUrl);
   const encodedRedirectUri = encodeURIComponent(redirectUri);
@@ -14,6 +15,9 @@ const generateGithubAuthRedirectUrl = function ({
   let encodedUrl = `${encodedBaseUrl}?response_type=${responseType}&redirect_uri=${encodedRedirectUri}&scope=${encodedScope}`;
   if (state) {
     encodedUrl += `&state=${encodeURIComponent(state)}`;
+  }
+  if (isMobileApp) {
+    encodedUrl += `&isMobileApp=${encodeURIComponent(true)}`;
   }
   return `${encodedUrl}&client_id=${clientId}`;
 };

@@ -42,7 +42,7 @@ describe("auth", function () {
 
   it("should return github call back URL with redirectUrl for mobile-app", async function () {
     const RDS_MEMBERS_SITE_URL = "https://members.realdevsquad.com";
-    const githubOauthURL = generateGithubAuthRedirectUrl({ state: RDS_MEMBERS_SITE_URL });
+    const githubOauthURL = generateGithubAuthRedirectUrl({ state: RDS_MEMBERS_SITE_URL, isMobileApp: true });
     const res = await chai
       .request(app)
       .get("/auth/github/login")
