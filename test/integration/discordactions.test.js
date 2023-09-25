@@ -266,7 +266,7 @@ describe("Discord actions", function () {
       await updateUserStatus(userId1, generateUserStatusData("ONBOARDING", new Date(), new Date()));
       await updateUserStatus(userId2, generateUserStatusData("ONBOARDING", new Date(), new Date()));
       await updateUserStatus(userId3, generateUserStatusData("ONBOARDING", new Date(), new Date()));
-
+    });
     afterEach(async function () {
       sinon.restore();
       await cleanDb();
