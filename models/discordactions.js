@@ -12,6 +12,7 @@ const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
 const dataAccess = require("../services/dataAccessLayer");
 const { getDiscordMembers, addRoleToUser, removeRoleFromUser } = require("../services/discordService");
+const { log } = require("console");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 /**
@@ -53,6 +54,35 @@ const getAllGroupRoles = async () => {
   }
 };
 
+/**
+ *
+ * @param groupRoleName String : name of the role
+ * @returns {role data}
+ */
+const getAllGroupRoleByName = async (groupRoleName) => {
+  try {
+    const data = await discordRoleModel.where('rolename', '==', groupRoleName).limit(1).get();
+    return { data };
+  } catch (err) {
+    logger.error("Error in getting all group-role", err);
+    throw err;
+  }
+};
+
+/**
+ *
+ * @param roleData { Object }: Data of the new role
+ * @returns {role data}
+ */
+const updateGroupRole = async (roleData, docId) => {
+  try {
+    const data = await discordRoleModel.doc(docId).set(roleData, { merge: true });
+    return { data };
+  } catch (err) {
+    logger.error("Error in getting all group-roles", err);
+    throw err;
+  }
+};
 /**
  *
  * @param roleData { Object }: Data of the new role
@@ -340,6 +370,8 @@ module.exports = {
   createNewRole,
   getGroupRolesForUser,
   getAllGroupRoles,
+  getAllGroupRoleByName,
+  updateGroupRole,
   addGroupRoleToMember,
   isGroupRoleExists,
   updateDiscordImageForVerification,
