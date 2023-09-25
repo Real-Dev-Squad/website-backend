@@ -177,24 +177,21 @@ const getUsers = async (req, res) => {
         });
 
         for (const userId of Array.from(userIds)) {
-          const userInfo = await fetchUser({ userId: userId });
+          const userInfo = await fetchUser({ userId });
 
           if (userInfo) {
             const userTasks = tasksData.filter((task) => task.assignee === userId);
+            const userData = {
+              id: userId,
+              discordId: userInfo.user.discordId,
+              username: userInfo.user.username,
+            };
+
             if (dev) {
-              const userData = {
-                id: userId,
-                discordId: userInfo.user.discordId,
-                username: userInfo.user.username,
-                tasks: userTasks,
-              };
-              usersData.push(userData);
-            } else {
-              const userData = {
-                id: userId,
-                discordId: userInfo.user.discordId,
-                username: userInfo.user.username,
-              };
+              userData.tasks = userTasks;
+            }
+
+            if (userInfo.user.roles.in_discord) {
               usersData.push(userData);
             }
           }
@@ -206,7 +203,8 @@ const getUsers = async (req, res) => {
           users: usersData,
         });
       } catch (error) {
-        logger.error(`Error while fetching users and tasks: ${error}`);
+        const errorMessage = `Error while fetching users and tasks: ${error}`;
+        logger.error(errorMessage);
         return res.boom.serverUnavailable("Something went wrong, please contact admin");
       }
     }
