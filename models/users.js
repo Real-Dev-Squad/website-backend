@@ -566,7 +566,7 @@ const getUsersWithOnboardingStateInRange = async (filteredUserDocs, stateItems, 
     return stateItems.some((stateItem) => stateItem.userId === userDoc.id);
   });
   filteredUsers.forEach((user) => {
-    if (user.discordJoinedAt && user.roles?.in_discord) {
+    if (user.discordJoinedAt && user.roles.in_discord) {
       const userDiscordJoinedDate = new Date(user.discordJoinedAt);
       const currentTimeStamp = new Date().getTime();
       const timeDifferenceInMilliseconds = currentTimeStamp - userDiscordJoinedDate.getTime();
