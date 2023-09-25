@@ -290,7 +290,7 @@ describe("Discord actions", function () {
     it("should update Idle Users successfully and return a 201 status code", function (done) {
       chai
         .request(app)
-        .put(`/discord-actions/group-idle-7d`)
+        .put(`/discord-actions/group-idle`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
