@@ -383,6 +383,7 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
     const totalOnboarding31dPlusRoleNoteApplied = { count: 0, errors: [] };
     const totalOnboarding31dPlusRoleRemoved = { count: 0, response: [] };
     const totalOnboarding31dPlusRoleNotRemoved = { count: 0, errors: [] };
+
     if (usersForRoleAddition.length) {
       await Promise.all(
         usersForRoleAddition.map(async (user) => {
@@ -429,6 +430,7 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
     const totalOnboardingUsers31DaysCompleted = allOnboardingUsers31DaysCompleted.map(
       ({ id, discordId, username }) => ({ userId: id, discordId, username })
     );
+
     return {
       totalOnboardingUsers31DaysCompleted: {
         users: totalOnboardingUsers31DaysCompleted,
@@ -443,8 +445,8 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
       totalOnboarding31dPlusRoleNotRemoved,
     };
   } catch (error) {
-    logger.error(`Error while fetching onboarding users ${error.message}`);
-    throw new Error("Error while fetching onboarding users");
+    logger.error(`Error while fetching onboarding users who have completed 31 days ${error.message}`);
+    throw new Error("Error while fetching onboarding users who have completed 31 days");
   }
 };
 

@@ -22,6 +22,9 @@ const userModel = firestore.collection("users");
 
 const { groupData } = require("../fixtures/discordactions/discordactions");
 const { addGroupRoleToMember } = require("../../models/discordactions");
+const { updateUserStatus } = require("../../models/userStatus");
+const { generateUserStatusData } = require("../fixtures/userStatus/userStatus");
+
 chai.use(chaiHttp);
 
 describe("Discord actions", function () {
@@ -231,6 +234,64 @@ describe("Discord actions", function () {
           expect(res.body.totalNicknamesUpdated.count).to.be.equal(3);
           expect(res.body.totalNicknamesNotUpdated.errors.length).to.be.equal(0);
 
+          return done();
+        });
+    });
+  });
+
+  describe("PUT /discord-actions/group-onboarding-31d-plus", function () {
+    beforeEach(async function () {
+      userData[0] = {
+        ...userData[0],
+        discordId: "232533446310887426",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false },
+      };
+      userData[1] = {
+        ...userData[1],
+        discordId: "415438605813678080",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false },
+      };
+      userData[2] = {
+        ...userData[2],
+        discordId: "416635283048628224",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false },
+      };
+      const userId1 = await addUser(userData[0]);
+      const userId2 = await addUser(userData[1]);
+      const userId3 = await addUser(userData[2]);
+
+      await updateUserStatus(userId1, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+      await updateUserStatus(userId2, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+      await updateUserStatus(userId3, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should update role for onboarding users with 31 days completed", function (done) {
+      const discordUsers = usersInDiscord();
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(discordUsers),
+        })
+      );
+      chai
+        .request(app)
+        .put(`/discord-actions/group-onboarding-31d-plus`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(201);
+          expect(res.body.message).to.be.equal("All Users with 31 Days Plus Onboarding are updated successfully.");
+          expect(res.body.totalOnboardingUsers31DaysCompleted.count).to.be.equal(9);
+          expect(res.body.totalOnboarding31dPlusRoleApplied.count).to.be.equal(3);
           return done();
         });
     });
