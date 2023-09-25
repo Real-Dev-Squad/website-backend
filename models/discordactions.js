@@ -12,7 +12,6 @@ const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
 const dataAccess = require("../services/dataAccessLayer");
 const { getDiscordMembers, addRoleToUser, removeRoleFromUser } = require("../services/discordService");
-const { log } = require("console");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 /**
