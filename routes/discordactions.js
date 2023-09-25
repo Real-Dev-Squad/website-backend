@@ -8,6 +8,7 @@ const {
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
   updateDiscordNicknames,
+  setRoleToUsersWith31DaysPlusOnboarding,
 } = require("../controllers/discordactions");
 const { validateGroupRoleBody, validateMemberRoleBody } = require("../middlewares/validators/discordactions");
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
@@ -34,5 +35,11 @@ router.post(
   authorizeRoles([SUPERUSER]),
   checkIsVerifiedDiscord,
   updateDiscordNicknames
+);
+router.put(
+  "/group-onboarding-31d-plus",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  setRoleToUsersWith31DaysPlusOnboarding
 );
 module.exports = router;

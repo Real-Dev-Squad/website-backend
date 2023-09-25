@@ -6,13 +6,14 @@ const admin = require("firebase-admin");
 const { findSubscribedGroupIds } = require("../utils/helper");
 const { retrieveUsers } = require("../services/dataAccessLayer");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
-const { getAllUserStatus, getGroupRole } = require("./userStatus");
+const { getAllUserStatus, getGroupRole, getUserStatus } = require("./userStatus");
 const { userState } = require("../constants/userStatus");
 const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
 const dataAccess = require("../services/dataAccessLayer");
 const { getDiscordMembers, addRoleToUser, removeRoleFromUser } = require("../services/discordService");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const { getUsersBasedOnFilter, fetchUser } = require("./users");
 
 /**
  *
@@ -336,6 +337,117 @@ const updateIdleUsersOnDiscord = async () => {
   };
 };
 
+const updateUsersWith31DaysPlusOnboarding = async () => {
+  try {
+    const allOnboardingUsers31DaysCompleted = await getUsersBasedOnFilter({
+      state: userState.ONBOARDING,
+      time: "31d",
+    });
+    const discordMembers = await getDiscordMembers();
+    const groupOnboardingRole = await getGroupRole("group-onboarding-31d+");
+    if (!groupOnboardingRole.roleExists) throw new Error("Role does not exist");
+
+    const usersAlreadyHavingOnboaring31DaysRole = [];
+
+    discordMembers?.forEach((discordUser) => {
+      const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
+      const haveOnboarding31DaysRole = discordUser.roles.includes(groupOnboardingRole.role.roleid);
+      if (isDeveloper && haveOnboarding31DaysRole) {
+        usersAlreadyHavingOnboaring31DaysRole.push({ discordId: discordUser.user.id });
+      }
+    });
+
+    const usersForRoleAddition = allOnboardingUsers31DaysCompleted.filter(
+      (user1) => !usersAlreadyHavingOnboaring31DaysRole.some((user2) => user1.discordId === user2.discordId)
+    );
+
+    const usersForRoleRemoval = await Promise.all(
+      usersAlreadyHavingOnboaring31DaysRole.map(async (user) => {
+        try {
+          const userDetails = await fetchUser({ discordId: user.discordId });
+          const userStatus = await getUserStatus(userDetails.user.id);
+          if (userStatus.data.currentStatus.state !== userState.ONBOARDING) {
+            return userDetails.user;
+          }
+        } catch (error) {
+          logger.error(`Error in getting users to remove role: ${error}`);
+        }
+        return null;
+      })
+    );
+    const filteredUsersForRoleRemoval = usersForRoleRemoval.filter((user) => user !== null);
+
+    let totalUsersHavingNoDiscordId = 0;
+    let totalArchivedUsers = 0;
+    const totalOnboarding31dPlusRoleApplied = { count: 0, response: [] };
+    const totalOnboarding31dPlusRoleNoteApplied = { count: 0, errors: [] };
+    const totalOnboarding31dPlusRoleRemoved = { count: 0, response: [] };
+    const totalOnboarding31dPlusRoleNotRemoved = { count: 0, errors: [] };
+    if (usersForRoleAddition.length) {
+      await Promise.all(
+        usersForRoleAddition.map(async (user) => {
+          try {
+            const result = await dataAccess.retrieveUsers({ id: user.discordId });
+            if (result.user?.roles?.archived) {
+              totalArchivedUsers++;
+            } else if (!user.discordId) {
+              totalUsersHavingNoDiscordId++;
+            } else {
+              const response = await addRoleToUser(user.discordId, groupOnboardingRole.role.roleid);
+              totalOnboarding31dPlusRoleApplied.response.push({ message: response.message, discordId: user.discordId });
+              totalOnboarding31dPlusRoleApplied.count++;
+            }
+          } catch (error) {
+            totalOnboarding31dPlusRoleNoteApplied.count++;
+            totalOnboarding31dPlusRoleNoteApplied.errors.push({ error: error.message, discordId: user.discordId });
+            logger.error(`Error in setting group-onboarding-31+ role on user: ${error}`);
+          }
+        })
+      );
+    }
+
+    if (filteredUsersForRoleRemoval.length) {
+      await Promise.all(
+        filteredUsersForRoleRemoval.map(async (user) => {
+          try {
+            if (!user.discordId) {
+              totalUsersHavingNoDiscordId++;
+            } else {
+              const response = await removeRoleFromUser(groupOnboardingRole.role.roleid, user.discordId);
+              totalOnboarding31dPlusRoleRemoved.response.push({ message: response.message, discordId: user.discordId });
+              totalOnboarding31dPlusRoleRemoved.count++;
+            }
+          } catch (error) {
+            totalOnboarding31dPlusRoleNotRemoved.count++;
+            totalOnboarding31dPlusRoleNotRemoved.errors.push({ error: error.message, discordId: user.discordId });
+            logger.error(`Error in removing group-onboarding-31d+ role from user: ${error}`);
+          }
+        })
+      );
+    }
+
+    const totalOnboardingUsers31DaysCompleted = allOnboardingUsers31DaysCompleted.map(
+      ({ id, discordId, username }) => ({ userId: id, discordId, username })
+    );
+    return {
+      totalOnboardingUsers31DaysCompleted: {
+        users: totalOnboardingUsers31DaysCompleted,
+        count: totalOnboardingUsers31DaysCompleted.length,
+      },
+      totalUsersHavingNoDiscordId,
+      totalArchivedUsers,
+      usersAlreadyHavingOnboaring31DaysRole,
+      totalOnboarding31dPlusRoleApplied,
+      totalOnboarding31dPlusRoleNoteApplied,
+      totalOnboarding31dPlusRoleRemoved,
+      totalOnboarding31dPlusRoleNotRemoved,
+    };
+  } catch (error) {
+    logger.error(`Error while fetching onboarding users ${error.message}`);
+    throw new Error("Error while fetching onboarding users");
+  }
+};
+
 module.exports = {
   createNewRole,
   getGroupRolesForUser,
@@ -346,4 +458,5 @@ module.exports = {
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
   updateIdleUsersOnDiscord,
+  updateUsersWith31DaysPlusOnboarding,
 };

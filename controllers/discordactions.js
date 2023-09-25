@@ -270,6 +270,25 @@ const updateDiscordNicknames = async (req, res) => {
   }
 };
 
+/**
+ * Set role group-onboarding-31d+
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const setRoleToUsersWith31DaysPlusOnboarding = async (req, res) => {
+  try {
+    const result = await discordRolesModel.updateUsersWith31DaysPlusOnboarding();
+    return res.status(201).json({
+      message: "All Users with 31 Days Plus Onboarding are updated successfully.",
+      ...result,
+    });
+  } catch (error) {
+    logger.error(`Error while setting group-onboarding-31d+ role : ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   getGroupsRoleId,
   createGroupRole,
@@ -278,4 +297,5 @@ module.exports = {
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
   updateDiscordNicknames,
+  setRoleToUsersWith31DaysPlusOnboarding,
 };
