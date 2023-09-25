@@ -40,8 +40,20 @@ describe("auth", function () {
     expect(res.headers.location).to.equal(githubOauthURL);
   });
 
+  it("should return github call back URL with redirectUrl for mobile-app", async function () {
+    const RDS_MEMBERS_SITE_URL = "https://members.realdevsquad.com";
+    const githubOauthURL = generateGithubAuthRedirectUrl({ state: RDS_MEMBERS_SITE_URL });
+    const res = await chai
+      .request(app)
+      .get("/auth/github/login")
+      .query({ redirectURL: RDS_MEMBERS_SITE_URL, sourceUtm: "rds-mobile-app" })
+      .redirects(0);
+    expect(res).to.have.status(302);
+    expect(res.headers.location).to.equal(githubOauthURL);
+  });
   it("should redirect the user to new sign up flow if they are have incomplete user details true", async function () {
     const redirectURL = "https://my.realdevsquad.com/new-signup";
+
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
       callback(null, "accessToken", githubUserInfo[0]);
       return (req, res, next) => {};
