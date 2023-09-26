@@ -58,7 +58,7 @@ const getAllGroupRoles = async () => {
  * @param groupRoleName String : name of the role
  * @returns {role data}
  */
-const getAllGroupRoleByName = async (groupRoleName) => {
+const getGroupRoleByName = async (groupRoleName) => {
   try {
     const data = await discordRoleModel.where("rolename", "==", groupRoleName).limit(1).get();
     return { data };
@@ -78,7 +78,7 @@ const updateGroupRole = async (roleData, docId) => {
     const data = await discordRoleModel.doc(docId).set(roleData, { merge: true });
     return { data };
   } catch (err) {
-    logger.error("Error in getting all group-roles", err);
+    logger.error("Error in updating all group-role", err);
     throw err;
   }
 };
@@ -369,7 +369,7 @@ module.exports = {
   createNewRole,
   getGroupRolesForUser,
   getAllGroupRoles,
-  getAllGroupRoleByName,
+  getGroupRoleByName,
   updateGroupRole,
   addGroupRoleToMember,
   isGroupRoleExists,

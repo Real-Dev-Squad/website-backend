@@ -274,7 +274,7 @@ const updateDiscordNicknames = async (req, res) => {
 const getRolesFromDiscord = async (req, res) => {
   const value = await getDiscordRoles();
   const batch = value.roles.map(async (role) => {
-    const data = await discordRolesModel.getAllGroupRoleByName(role.name);
+    const data = await discordRolesModel.getGroupRoleByName(role.name);
     if (!data.data.empty) {
       const roleInFirestore = {
         id: data.data.docs[0].id,
