@@ -225,7 +225,7 @@ const getUserDiscordInvite = async (req, res) => {
 
     return res.json({
       message: "Invite returned successfully",
-      modelResponse,
+      inviteResponse: modelResponse,
     });
   } catch (err) {
     logger.error(`Error in fetching user invite: ${err}`);
