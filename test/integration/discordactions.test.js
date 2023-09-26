@@ -20,10 +20,11 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
 const userModel = firestore.collection("users");
 
-const { groupData } = require("../fixtures/discordactions/discordactions");
+const { groupData, groupOnboarding31dPlus } = require("../fixtures/discordactions/discordactions");
 const { addGroupRoleToMember } = require("../../models/discordactions");
 const { updateUserStatus } = require("../../models/userStatus");
 const { generateUserStatusData } = require("../fixtures/userStatus/userStatus");
+const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 
 chai.use(chaiHttp);
 
@@ -239,7 +240,7 @@ describe("Discord actions", function () {
     });
   });
 
-  describe("PUT /discord-actions/group-onboarding-31d-plus", function () {
+  describe("PUT /discord-actions/group-onboarding-31d-plus1", function () {
     beforeEach(async function () {
       userData[0] = {
         ...userData[0],
@@ -266,6 +267,16 @@ describe("Discord actions", function () {
       await updateUserStatus(userId1, generateUserStatusData("ONBOARDING", new Date(), new Date()));
       await updateUserStatus(userId2, generateUserStatusData("ONBOARDING", new Date(), new Date()));
       await updateUserStatus(userId3, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+
+      const addRolesPromises = [discordRoleModel.add(groupOnboarding31dPlus)];
+      await Promise.all(addRolesPromises);
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
     });
     afterEach(async function () {
       sinon.restore();
@@ -273,13 +284,6 @@ describe("Discord actions", function () {
     });
 
     it("should update role for onboarding users with 31 days completed", function (done) {
-      const discordUsers = usersInDiscord();
-      fetchStub.returns(
-        Promise.resolve({
-          status: 200,
-          json: () => Promise.resolve(discordUsers),
-        })
-      );
       chai
         .request(app)
         .put(`/discord-actions/group-onboarding-31d-plus`)

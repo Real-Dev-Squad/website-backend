@@ -18,9 +18,12 @@ const existingRole = {
   wasSuccess: false,
 };
 
+const groupOnboarding31dPlus = { rolename: "group-onboarding-31d+", roleid: 5, createdBy: "1dad23q23j131j" };
+
 module.exports = {
   groupData,
   roleData,
   existingRole,
   requestRoleData,
+  groupOnboarding31dPlus,
 };

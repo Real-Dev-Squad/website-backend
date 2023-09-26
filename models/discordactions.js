@@ -345,13 +345,14 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
     });
     const discordMembers = await getDiscordMembers();
     const groupOnboardingRole = await getGroupRole("group-onboarding-31d+");
+    const groupOnboardingRoleId = groupOnboardingRole.role.roleid;
     if (!groupOnboardingRole.roleExists) throw new Error("Role does not exist");
 
     const usersAlreadyHavingOnboaring31DaysRole = [];
 
     discordMembers?.forEach((discordUser) => {
       const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
-      const haveOnboarding31DaysRole = discordUser.roles.includes(groupOnboardingRole.role.roleid);
+      const haveOnboarding31DaysRole = discordUser.roles.includes(groupOnboardingRoleId);
       if (isDeveloper && haveOnboarding31DaysRole) {
         usersAlreadyHavingOnboaring31DaysRole.push({ discordId: discordUser.user.id });
       }
@@ -387,20 +388,33 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
     if (usersForRoleAddition.length) {
       await Promise.all(
         usersForRoleAddition.map(async (user) => {
+          const userDiscordId = user.discordId;
           try {
-            const result = await dataAccess.retrieveUsers({ id: user.discordId });
+            const result = await dataAccess.retrieveUsers({ id: userDiscordId });
             if (result.user?.roles?.archived) {
               totalArchivedUsers++;
-            } else if (!user.discordId) {
+            } else if (!userDiscordId) {
               totalUsersHavingNoDiscordId++;
             } else {
-              const response = await addRoleToUser(user.discordId, groupOnboardingRole.role.roleid);
-              totalOnboarding31dPlusRoleApplied.response.push({ message: response.message, discordId: user.discordId });
+              const alreadyHasRole = await memberRoleModel
+                .where("roleid", "==", groupOnboardingRoleId)
+                .where("userid", "==", userDiscordId)
+                .limit(1)
+                .get();
+              if (alreadyHasRole.empty) {
+                await memberRoleModel.add({
+                  roleid: groupOnboardingRoleId,
+                  userid: userDiscordId,
+                  date: admin.firestore.Timestamp.fromDate(new Date()),
+                });
+              }
+              const response = await addRoleToUser(userDiscordId, groupOnboardingRoleId);
+              totalOnboarding31dPlusRoleApplied.response.push({ message: response.message, discordId: userDiscordId });
               totalOnboarding31dPlusRoleApplied.count++;
             }
           } catch (error) {
             totalOnboarding31dPlusRoleNoteApplied.count++;
-            totalOnboarding31dPlusRoleNoteApplied.errors.push({ error: error.message, discordId: user.discordId });
+            totalOnboarding31dPlusRoleNoteApplied.errors.push({ error: error.message, discordId: userDiscordId });
             logger.error(`Error in setting group-onboarding-31+ role on user: ${error}`);
           }
         })
@@ -410,17 +424,28 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
     if (filteredUsersForRoleRemoval.length) {
       await Promise.all(
         filteredUsersForRoleRemoval.map(async (user) => {
+          const userDiscordId = user.discordId;
           try {
             if (!user.discordId) {
               totalUsersHavingNoDiscordId++;
             } else {
-              const response = await removeRoleFromUser(groupOnboardingRole.role.roleid, user.discordId);
-              totalOnboarding31dPlusRoleRemoved.response.push({ message: response.message, discordId: user.discordId });
+              const hasRole = await memberRoleModel
+                .where("roleid", "==", groupOnboardingRoleId)
+                .where("userid", "==", userDiscordId)
+                .limit(1)
+                .get();
+              if (!hasRole.empty) {
+                const oldRole = [];
+                hasRole.forEach((role) => oldRole.push({ id: role.id }));
+                await memberRoleModel.doc(oldRole[0].id).delete();
+              }
+              const response = await removeRoleFromUser(groupOnboardingRoleId, userDiscordId);
+              totalOnboarding31dPlusRoleRemoved.response.push({ message: response.message, discordId: userDiscordId });
               totalOnboarding31dPlusRoleRemoved.count++;
             }
           } catch (error) {
             totalOnboarding31dPlusRoleNotRemoved.count++;
-            totalOnboarding31dPlusRoleNotRemoved.errors.push({ error: error.message, discordId: user.discordId });
+            totalOnboarding31dPlusRoleNotRemoved.errors.push({ error: error.message, discordId: userDiscordId });
             logger.error(`Error in removing group-onboarding-31d+ role from user: ${error}`);
           }
         })
