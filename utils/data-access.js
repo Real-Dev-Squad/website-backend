@@ -45,6 +45,9 @@ const dataAccessMiddleware = (options = {}) => {
         for (const rule of rules) {
           const userHasPermission = rule?.allowedRoles?.some((role) => roles[`${role}`]);
 
+          if (typeof body === "string") {
+            body = JSON.parse(body);
+          }
           if (!userHasPermission) {
             removeObjectField(rule.keyPath, body);
           }
@@ -78,8 +81,10 @@ function removeObjectField(path, object) {
   let currentObj = object;
   for (let i = 0; i < pathList.length; i++) {
     const key = pathList[i];
-
     if (key === "*") {
+      if (typeof currentObj !== "object") {
+        continue;
+      }
       let newPath = "";
       for (let j = i + 1; j < pathList.length; j++) {
         newPath += pathList[j] + ".";
@@ -90,9 +95,10 @@ function removeObjectField(path, object) {
         removeObjectField(newPath, childObj);
       }
       break;
-    }
-    if (Object.prototype.hasOwnProperty.call(currentObj, key) && typeof currentObj[key] === "object") {
+    } else if (Object.prototype.hasOwnProperty.call(currentObj, key) && typeof currentObj[key] === "object") {
       currentObj = currentObj[key];
+    } else {
+      break;
     }
   }
   if (lastKey === "*") {
