@@ -240,7 +240,7 @@ describe("Discord actions", function () {
     });
   });
 
-  describe("PUT /discord-actions/group-onboarding-31d-plus1", function () {
+  describe("PUT /discord-actions/group-onboarding-31d-plus", function () {
     beforeEach(async function () {
       userData[0] = {
         ...userData[0],
