@@ -244,42 +244,29 @@ describe("Discord actions", function () {
     beforeEach(async function () {
       userData[0] = {
         ...userData[0],
-        discordId: "232533446310887426",
+        discordId: "123456789098765432",
         discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
-        roles: { archived: false },
+        roles: { archived: false, in_discord: true },
       };
       userData[1] = {
         ...userData[1],
-        discordId: "415438605813678080",
+        discordId: "12345678909867666",
         discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
-        roles: { archived: false },
+        roles: { archived: false, in_discord: true },
       };
       userData[2] = {
         ...userData[2],
-        discordId: "416635283048628224",
+        discordId: "123456",
         discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
-        roles: { archived: false },
+        roles: { archived: false, in_discord: true },
       };
-      // const userId1 = await addUser(userData[0]);
-      // const userId2 = await addUser(userData[1]);
-      // const userId3 = await addUser(userData[2]);
+      const userId1 = await addUser(userData[0]);
+      const userId2 = await addUser(userData[1]);
+      const userId3 = await addUser(userData[2]);
 
-      // await updateUserStatus(userId1, generateUserStatusData("ONBOARDING", new Date(), new Date()));
-      // await updateUserStatus(userId2, generateUserStatusData("ONBOARDING", new Date(), new Date()));
-      // await updateUserStatus(userId3, generateUserStatusData("ONBOARDING", new Date(), new Date()));
-
-      await addUser(userData[0]);
-      await addUser(userData[1]);
-      await addUser(userData[2]);
-
-      const addUsersPromises = userData.slice(0, 3).map((user) => userModel.add({ ...user }));
-      const responses = await Promise.all(addUsersPromises);
-      const allIds = responses.map((response) => response.id);
-
-      const userStatusPromises = allIds.map(async (userId) => {
-        await updateUserStatus(userId, generateUserStatusData("ONBOARDING", 1690829925336, 1690829925336));
-      });
-      await Promise.all(userStatusPromises);
+      await updateUserStatus(userId1, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+      await updateUserStatus(userId2, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+      await updateUserStatus(userId3, generateUserStatusData("ONBOARDING", new Date(), new Date()));
 
       const addRolesPromises = [discordRoleModel.add(groupOnboarding31dPlus)];
       await Promise.all(addRolesPromises);
