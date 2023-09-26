@@ -32,7 +32,10 @@ const getDiscordRoles = async () => {
     return response;
   } catch (err) {
     logger.error("Error in fetching the discord data", err);
-    throw err;
+    return {
+      status: 500,
+      message: "Something went wrong",
+    };
   }
 };
 

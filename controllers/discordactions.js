@@ -275,9 +275,13 @@ const updateDiscordNicknames = async (req, res) => {
 
 const syncDiscordGroupRolesInFirestore = async (req, res) => {
   try {
-    const value = await discordServices.getDiscordRoles();
-    const batch = value.roles.map(async (role) => {
+    const discordRoles = await discordServices.getDiscordRoles();
+    if (discordRoles.status === 500) {
+      return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    }
+    const batch = discordRoles.roles.map(async (role) => {
       const data = await discordRolesModel.getGroupRoleByName(role.name);
+
       if (!data.data.empty) {
         const roleInFirestore = {
           id: data.data.docs[0].id,
