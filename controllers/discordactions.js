@@ -3,10 +3,12 @@ const admin = require("firebase-admin");
 const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
-const { setUserDiscordNickname, getDiscordMembers, getDiscordRoles } = require("../services/discordService");
+const discordServices = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
+
+const { setUserDiscordNickname, getDiscordMembers } = discordServices;
 
 /**
  * Creates a role
@@ -271,8 +273,8 @@ const updateDiscordNicknames = async (req, res) => {
   }
 };
 
-const getRolesFromDiscord = async (req, res) => {
-  const value = await getDiscordRoles();
+const syncDiscordGroupRolesInFirestore = async (req, res) => {
+  const value = await discordServices.getDiscordRoles();
   const batch = value.roles.map(async (role) => {
     const data = await discordRolesModel.getGroupRoleByName(role.name);
     if (!data.data.empty) {
@@ -280,7 +282,6 @@ const getRolesFromDiscord = async (req, res) => {
         id: data.data.docs[0].id,
         ...data.data.docs[0].data(),
       };
-
       if (roleInFirestore.roleid !== role.id) {
         await discordRolesModel.updateGroupRole(
           {
@@ -300,7 +301,9 @@ const getRolesFromDiscord = async (req, res) => {
   });
   const response = await Promise.all(batch);
   return res.json({
+    batch,
     response,
+    message: `Discord groups synced with firestore successfully`,
   });
 };
 
@@ -312,5 +315,5 @@ module.exports = {
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
   updateDiscordNicknames,
-  getRolesFromDiscord,
+  syncDiscordGroupRolesInFirestore,
 };
