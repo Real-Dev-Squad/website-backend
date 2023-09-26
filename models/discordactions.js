@@ -60,7 +60,7 @@ const getAllGroupRoles = async () => {
  */
 const getAllGroupRoleByName = async (groupRoleName) => {
   try {
-    const data = await discordRoleModel.where('rolename', '==', groupRoleName).limit(1).get();
+    const data = await discordRoleModel.where("rolename", "==", groupRoleName).limit(1).get();
     return { data };
   } catch (err) {
     logger.error("Error in getting all group-role", err);

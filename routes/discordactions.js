@@ -8,7 +8,7 @@ const {
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
   updateDiscordNicknames,
-  getRolesFromDiscord
+  getRolesFromDiscord,
 } = require("../controllers/discordactions");
 const { validateGroupRoleBody, validateMemberRoleBody } = require("../middlewares/validators/discordactions");
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
@@ -37,5 +37,5 @@ router.post(
   updateDiscordNicknames
 );
 
-router.get('/discord-roles',authenticate,  getRolesFromDiscord)
+router.get("/discord-roles", authenticate, getRolesFromDiscord);
 module.exports = router;

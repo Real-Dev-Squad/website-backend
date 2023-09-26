@@ -104,8 +104,6 @@ const setUserDiscordNickname = async (userName, discordId) => {
   }
 };
 
-
-
 module.exports = {
   getDiscordMembers,
   getDiscordRoles,
