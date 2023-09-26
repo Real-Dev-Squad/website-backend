@@ -143,24 +143,24 @@ const fetchExtensionRequest = async (extensionRequestId) => {
   }
 };
 
-const fetchLatestExtensionRequest = async(ExtensionRequestQuery)=>{
-  try{
+const fetchLatestExtensionRequest = async (ExtensionRequestQuery) => {
+  try {
     let extensionRequestsSnapshot = extensionRequestsModel;
-    Object.entries(ExtensionRequestQuery).forEach(([key,value])=>{
-      if(value) {
+    Object.entries(ExtensionRequestQuery).forEach(([key, value]) => {
+      if (value) {
         extensionRequestsSnapshot = extensionRequestsSnapshot.where(key, "==", value);
       }
-      })
+    });
     const extensionRequestSnapshot = await extensionRequestsSnapshot.orderBy("timestamp", "desc").limit(1).get();
-    
-    if(extensionRequestSnapshot.size==0){
+
+    if (extensionRequestSnapshot.size === 0) {
       return [];
     }
-    
+
     const request = buildExtensionRequests(extensionRequestSnapshot);
     const updatedRequests = await formatExtensionRequest(request[0]);
     return [updatedRequests];
-  }catch (err) {
+  } catch (err) {
     logger.error("error getting extension requests", err);
     throw err;
   }
@@ -172,5 +172,5 @@ module.exports = {
   fetchExtensionRequest,
   updateExtensionRequest,
   fetchPaginatedExtensionRequests,
-  fetchLatestExtensionRequest
+  fetchLatestExtensionRequest,
 };
