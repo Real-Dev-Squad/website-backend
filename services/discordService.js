@@ -20,6 +20,25 @@ const getDiscordMembers = async () => {
   }
 };
 
+const getDiscordRoles = async () => {
+  const authToken = await generateAuthTokenForCloudflare();
+  try {
+    const response = await (
+      await fetch(`${DISCORD_BASE_URL}/roles`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      })
+    ).json();
+    return response;
+  } catch (err) {
+    logger.error("Error in fetching the discord data", err);
+    return {
+      status: 500,
+      message: "Something went wrong",
+    };
+  }
+};
+
 const setInDiscordFalseScript = async () => {
   const users = await fetchAllUsers();
   const updateUsersPromises = [];
@@ -90,6 +109,7 @@ const setUserDiscordNickname = async (userName, discordId) => {
 
 module.exports = {
   getDiscordMembers,
+  getDiscordRoles,
   setInDiscordFalseScript,
   addRoleToUser,
   removeRoleFromUser,

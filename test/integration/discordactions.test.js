@@ -20,7 +20,8 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
 const userModel = firestore.collection("users");
 
-const { groupData } = require("../fixtures/discordactions/discordactions");
+const { groupData, roleDataFromDiscord } = require("../fixtures/discordactions/discordactions");
+const discordServices = require("../../services/discordService");
 const { addGroupRoleToMember } = require("../../models/discordactions");
 chai.use(chaiHttp);
 
@@ -47,6 +48,7 @@ describe("Discord actions", function () {
     sinon.restore();
     await cleanDb();
   });
+
   describe("PATCH /discord-actions/picture/id", function () {
     it("Should successfully update a picture", function (done) {
       fetchStub.returns(
@@ -231,6 +233,38 @@ describe("Discord actions", function () {
           expect(res.body.totalNicknamesUpdated.count).to.be.equal(3);
           expect(res.body.totalNicknamesNotUpdated.errors.length).to.be.equal(0);
 
+          return done();
+        });
+    });
+  });
+
+  describe("POST /discord-actions/discord-roles", function () {
+    before(async function () {
+      const value = [discordRoleModel.add(groupData[0]), discordRoleModel.add(groupData[1])];
+
+      await Promise.all(value);
+
+      sinon.stub(discordServices, "getDiscordRoles").returns(roleDataFromDiscord);
+    });
+
+    after(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should successfully update discord role into firestore", function (done) {
+      chai
+        .request(app)
+        .post(`/discord-actions/discord-roles`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.response.length).to.be.equal(3);
+          expect(res.body.message).to.equal("Discord groups synced with firestore successfully");
           return done();
         });
     });
