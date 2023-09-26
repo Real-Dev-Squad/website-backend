@@ -292,6 +292,8 @@ describe("Discord actions", function () {
           if (err) {
             return done(err);
           }
+          console.log("err", err);
+          console.log("res", res);
           expect(res).to.have.status(201);
           expect(res.body.message).to.be.equal("All Users with 31 Days Plus Onboarding are updated successfully.");
           expect(res.body.totalOnboardingUsers31DaysCompleted.count).to.be.equal(3);
