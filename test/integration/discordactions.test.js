@@ -238,12 +238,10 @@ describe("Discord actions", function () {
     });
   });
 
-  describe.only("POST /discord-actions/discord-roles", function () {
+  describe("POST /discord-actions/discord-roles", function () {
     before(async function () {
-      const value = [
-        discordRoleModel.add(groupData[0]),
-        discordRoleModel.add(groupData[1]),
-      ];
+      const value = [discordRoleModel.add(groupData[0]), discordRoleModel.add(groupData[1])];
+
       await Promise.all(value);
 
       sinon.stub(discordServices, "getDiscordRoles").returns(roleDataFromDiscord);
