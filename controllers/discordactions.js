@@ -290,7 +290,7 @@ const getRolesFromDiscord = async (req, res) => {
         );
       }
     } else {
-      const data = await discordRolesModel.createNewRole({
+      await discordRolesModel.createNewRole({
         createdBy: req.userData.id,
         rolename: role.name,
         roleid: role.id,
@@ -300,7 +300,6 @@ const getRolesFromDiscord = async (req, res) => {
   });
   const response = await Promise.all(batch);
   return res.json({
-    value,
     response,
   });
 };
