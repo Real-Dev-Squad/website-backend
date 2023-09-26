@@ -37,5 +37,5 @@ router.post(
   updateDiscordNicknames
 );
 
-router.post("/discord-roles", authenticate, syncDiscordGroupRolesInFirestore);
+router.post("/discord-roles", authenticate, authorizeRoles([SUPERUSER]), syncDiscordGroupRolesInFirestore);
 module.exports = router;

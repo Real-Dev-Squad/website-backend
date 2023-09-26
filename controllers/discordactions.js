@@ -305,7 +305,6 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
     const allRolesInFirestore = await discordRolesModel.getAllGroupRoles();
 
     return res.json({
-      batch,
       response: allRolesInFirestore.groups,
       message: `Discord groups synced with firestore successfully`,
     });
