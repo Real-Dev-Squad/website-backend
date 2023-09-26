@@ -260,13 +260,26 @@ describe("Discord actions", function () {
         discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
         roles: { archived: false },
       };
-      const userId1 = await addUser(userData[0]);
-      const userId2 = await addUser(userData[1]);
-      const userId3 = await addUser(userData[2]);
+      // const userId1 = await addUser(userData[0]);
+      // const userId2 = await addUser(userData[1]);
+      // const userId3 = await addUser(userData[2]);
 
-      await updateUserStatus(userId1, generateUserStatusData("ONBOARDING", new Date(), new Date()));
-      await updateUserStatus(userId2, generateUserStatusData("ONBOARDING", new Date(), new Date()));
-      await updateUserStatus(userId3, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+      // await updateUserStatus(userId1, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+      // await updateUserStatus(userId2, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+      // await updateUserStatus(userId3, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+
+      await addUser(userData[0]);
+      await addUser(userData[1]);
+      await addUser(userData[2]);
+
+      const addUsersPromises = userData.slice(0, 3).map((user) => userModel.add({ ...user }));
+      const responses = await Promise.all(addUsersPromises);
+      const allIds = responses.map((response) => response.id);
+
+      const userStatusPromises = allIds.map(async (userId) => {
+        await updateUserStatus(userId, generateUserStatusData("ONBOARDING", 1690829925336, 1690829925336));
+      });
+      await Promise.all(userStatusPromises);
 
       const addRolesPromises = [discordRoleModel.add(groupOnboarding31dPlus)];
       await Promise.all(addRolesPromises);
@@ -292,8 +305,6 @@ describe("Discord actions", function () {
           if (err) {
             return done(err);
           }
-          console.log("err", err);
-          console.log("res", res);
           expect(res).to.have.status(201);
           expect(res.body.message).to.be.equal("All Users with 31 Days Plus Onboarding are updated successfully.");
           expect(res.body.totalOnboardingUsers31DaysCompleted.count).to.be.equal(3);
