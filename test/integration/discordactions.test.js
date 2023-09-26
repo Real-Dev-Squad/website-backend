@@ -261,11 +261,10 @@ describe("Discord actions", function () {
           if (err) {
             return done(err);
           }
-
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
-          expect(res.body.batch.count).to.be.equal(3);
-          expect(res.body.message).to.equal("Discord groups synced with firestore successfull");
+          expect(res.body.response.length).to.be.equal(3);
+          expect(res.body.message).to.equal("Discord groups synced with firestore successfully");
           return done();
         });
     });

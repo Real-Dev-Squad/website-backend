@@ -18,16 +18,18 @@ const existingRole = {
   wasSuccess: false,
 };
 
-const roleDataFromDiscord = [
-  {
-    id: "test-role-id",
-    role: "test-role-name"
-  },
-  {
-    id: "test-role-id1",
-    role: "test-role-name1"
-  },
-];
+const roleDataFromDiscord = {
+  roles: [
+    {
+      id: "test-role-id",
+      name: "test-role-name",
+    },
+    {
+      id: "test-role-id1",
+      name: "Group 2",
+    },
+  ],
+};
 
 module.exports = {
   groupData,
