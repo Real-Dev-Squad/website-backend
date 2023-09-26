@@ -18,6 +18,19 @@ const existingRole = {
   wasSuccess: false,
 };
 
+const roleDataFromDiscord = {
+  roles: [
+    {
+      id: "test-role-id",
+      name: "test-role-name",
+    },
+    {
+      id: "test-role-id1",
+      name: "Group 2",
+    },
+  ],
+};
+
 const groupOnboarding31dPlus = { rolename: "group-onboarding-31d+", roleid: 5, createdBy: "1dad23q23j131j" };
 
 module.exports = {
@@ -25,5 +38,6 @@ module.exports = {
   roleData,
   existingRole,
   requestRoleData,
+  roleDataFromDiscord,
   groupOnboarding31dPlus,
 };

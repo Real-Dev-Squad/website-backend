@@ -8,6 +8,7 @@ const {
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
   updateDiscordNicknames,
+  syncDiscordGroupRolesInFirestore,
   setRoleToUsersWith31DaysPlusOnboarding,
 } = require("../controllers/discordactions");
 const { validateGroupRoleBody, validateMemberRoleBody } = require("../middlewares/validators/discordactions");
@@ -36,6 +37,8 @@ router.post(
   checkIsVerifiedDiscord,
   updateDiscordNicknames
 );
+
+router.post("/discord-roles", authenticate, authorizeRoles([SUPERUSER]), syncDiscordGroupRolesInFirestore);
 router.put(
   "/group-onboarding-31d-plus",
   authenticate,

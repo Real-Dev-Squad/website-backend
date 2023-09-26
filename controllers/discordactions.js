@@ -3,10 +3,13 @@ const admin = require("firebase-admin");
 const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
-const { setUserDiscordNickname, getDiscordMembers } = require("../services/discordService");
+const discordServices = require("../services/discordService");
 const { fetchAllUsers } = require("../models/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
+
+const { setUserDiscordNickname, getDiscordMembers } = discordServices;
+
 /**
  * Creates a role
  *
@@ -270,6 +273,51 @@ const updateDiscordNicknames = async (req, res) => {
   }
 };
 
+const syncDiscordGroupRolesInFirestore = async (req, res) => {
+  try {
+    const discordRoles = await discordServices.getDiscordRoles();
+    if (discordRoles.status === 500) {
+      return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    }
+    const batch = discordRoles.roles.map(async (role) => {
+      const data = await discordRolesModel.getGroupRoleByName(role.name);
+
+      if (!data.data.empty) {
+        const roleInFirestore = {
+          id: data.data.docs[0].id,
+          ...data.data.docs[0].data(),
+        };
+        if (roleInFirestore.roleid !== role.id) {
+          await discordRolesModel.updateGroupRole(
+            {
+              roleid: role.id,
+            },
+            roleInFirestore.id
+          );
+        }
+      } else {
+        await discordRolesModel.createNewRole({
+          createdBy: req.userData.id,
+          rolename: role.name,
+          roleid: role.id,
+          date: admin.firestore.Timestamp.fromDate(new Date()),
+        });
+      }
+    });
+    await Promise.all(batch);
+
+    const allRolesInFirestore = await discordRolesModel.getAllGroupRoles();
+
+    return res.json({
+      response: allRolesInFirestore.groups,
+      message: `Discord groups synced with firestore successfully`,
+    });
+  } catch (error) {
+    logger.error(`Error while updating discord groups ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 /**
  * Set role group-onboarding-31d+
  *
@@ -297,5 +345,6 @@ module.exports = {
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
   updateDiscordNicknames,
+  syncDiscordGroupRolesInFirestore,
   setRoleToUsersWith31DaysPlusOnboarding,
 };
