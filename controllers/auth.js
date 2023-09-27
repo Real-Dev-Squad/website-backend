@@ -139,7 +139,7 @@ const updateAuthStatus = async (req, res) => {
     const authStatus = req.params.authorization_status;
     let token;
     if (authStatus === "AUTHORIZED") {
-      token = await generateUniqueToken(userId);
+      token = generateUniqueToken(userId);
     }
     const result = await QrCodeAuthModel.updateStatus(userId, authStatus, token);
 
