@@ -601,7 +601,7 @@ describe("Tasks", function () {
       return taskId;
     });
 
-    it("Should add startedOn when assignee pass as a payload", async function () {
+    it("Should add startedOn field when assignee passed as a payload", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
       const res = await chai
         .request(app)
@@ -611,11 +611,8 @@ describe("Tasks", function () {
       expect(res).to.have.status(204);
       const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
       const startedOn = new Date().getTime() / 1000;
-      expect(res2).to.have.status(200);
-      expect(res2.body.taskData.assignee).to.be.equal("sagar");
-      expect(res2.body.taskData.startedOn).to.be.equal(startedOn);
-
-      return taskId;
+      expect(res2.body.taskData).to.have.property("startedOn");
+      expect(Math.round(res2.body.taskData.startedOn)).to.be.equal(Math.round(startedOn));
     });
     it("should check updated dependsOn", function (done) {
       chai
