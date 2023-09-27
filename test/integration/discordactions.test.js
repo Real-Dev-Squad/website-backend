@@ -25,7 +25,7 @@ const discordServices = require("../../services/discordService");
 const { addGroupRoleToMember } = require("../../models/discordactions");
 const { updateUserStatus } = require("../../models/userStatus");
 const { generateUserStatusData } = require("../fixtures/userStatus/userStatus");
-const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
+const { getOnboarding31DPlusMembers } = require("../fixtures/discordResponse/discord-response");
 
 chai.use(chaiHttp);
 
@@ -317,7 +317,7 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(getDiscordMembers),
+          json: () => Promise.resolve(getOnboarding31DPlusMembers),
         })
       );
     });
