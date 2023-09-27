@@ -8,7 +8,6 @@ const {
   DATA_ADDED_SUCCESSFULLY,
   USER_DOES_NOT_EXIST_ERROR,
 } = require("../constants/errorMessages");
-const { generateUniqueToken } = require("../utils/generateUniqueToken");
 
 /**
  * Makes authentication call to GitHub statergy
@@ -139,7 +138,7 @@ const updateAuthStatus = async (req, res) => {
     const authStatus = req.params.authorization_status;
     let token;
     if (authStatus === "AUTHORIZED") {
-      token = generateUniqueToken(userId);
+      token = authService.generateAuthToken({ userId });
     }
     const result = await QrCodeAuthModel.updateStatus(userId, authStatus, token);
 
