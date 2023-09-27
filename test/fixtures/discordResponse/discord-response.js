@@ -68,6 +68,30 @@ const getDiscordMembers = [
     mute: false,
     deaf: false,
   },
+  {
+    avatar: "",
+    communication_disabled_until: "",
+    flags: 0,
+    is_pending: false,
+    joined_at: "some_intensional_date", // ISO8601 timestamp
+    nick: "john",
+    pending: false,
+    premium_since: null,
+    // eslint-disable-next-line no-loss-of-precision
+    roles: ["526667488", "11334336"],
+    user: {
+      id: "9653710123456",
+      username: "john",
+      global_name: "john",
+      display_name: "john",
+      avatar: "56yu6567uuju7636w4e6yr7e9utbw8r4", // avatar hash
+      discriminator: "4451", // 4-digit discord-tag
+      public_flags: 0,
+      avatar_decoration: null,
+    },
+    mute: false,
+    deaf: false,
+  },
 ];
 
 const usersFromRds = [

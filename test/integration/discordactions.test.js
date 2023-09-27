@@ -294,16 +294,25 @@ describe("Discord actions", function () {
         discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
         roles: { archived: false, in_discord: true },
       };
-      const userId1 = await addUser(userData[0]);
-      const userId2 = await addUser(userData[1]);
-      const userId3 = await addUser(userData[2]);
+      userData[3] = {
+        ...userData[3],
+        discordId: "9653710123456",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
 
-      await updateUserStatus(userId1, generateUserStatusData("ONBOARDING", new Date(), new Date()));
-      await updateUserStatus(userId2, generateUserStatusData("ONBOARDING", new Date(), new Date()));
-      await updateUserStatus(userId3, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+      const allUsers = [userData[0], userData[1], userData[2], userData[3]];
 
-      const addRolesPromises = [discordRoleModel.add(groupOnboarding31dPlus)];
-      await Promise.all(addRolesPromises);
+      const addUsersPromises = allUsers.map((user) => addUser(user));
+      const userIds = await Promise.all(addUsersPromises);
+
+      const updateUserStatusPromises = userIds.map((userId, index) => {
+        if (index === 3) return updateUserStatus(userId, generateUserStatusData("IDLE", new Date(), new Date()));
+        return updateUserStatus(userId, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+      });
+      await Promise.all(updateUserStatusPromises);
+
+      await discordRoleModel.add(groupOnboarding31dPlus);
 
       fetchStub.returns(
         Promise.resolve({
@@ -330,6 +339,7 @@ describe("Discord actions", function () {
           expect(res.body.message).to.be.equal("All Users with 31 Days Plus Onboarding are updated successfully.");
           expect(res.body.totalOnboardingUsers31DaysCompleted.count).to.be.equal(3);
           expect(res.body.totalOnboarding31dPlusRoleApplied.count).to.be.equal(3);
+          expect(res.body.totalOnboarding31dPlusRoleRemoved.count).to.be.equal(1);
           return done();
         });
     });
