@@ -78,7 +78,7 @@ const getDiscordMembers = [
     pending: false,
     premium_since: null,
     // eslint-disable-next-line no-loss-of-precision
-    roles: ["526667488", "11334336"],
+    roles: ["9876543210", "11334336"],
     user: {
       id: "9653710123456",
       username: "john",
