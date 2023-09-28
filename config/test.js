@@ -193,6 +193,6 @@ module.exports = {
 
   Event100ms: {
     APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
-    APP_SECRET: "EVENT_100MS_APP_SECREt",
+    APP_SECRET: "EVENT_100MS_APP_SECRET",
   },
 };
