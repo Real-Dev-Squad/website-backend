@@ -46,11 +46,6 @@ const userStatusDataForOooState = {
     from: 1668211200000,
     until: 1668709800000,
   },
-  futureStatus: {
-    state: "ACTIVE",
-    updatedAt: 1668211200000,
-    from: 1668709800000,
-  },
   monthlyHours: {
     updatedAt: 1668215609000,
     committed: 40,

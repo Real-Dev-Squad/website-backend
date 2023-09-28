@@ -245,8 +245,16 @@ describe("Discord actions", function () {
     let jwtToken;
     beforeEach(async function () {
       const { id } = await userModel.add({ ...userData[0] });
-      const statusData = { ...userStatusDataForOooState, userId: id };
-      userStatusModel.add(statusData);
+      const statusData = {
+        ...userStatusDataForOooState,
+        futureStatus: {
+          state: "ACTIVE",
+          updatedAt: 1668211200000,
+          from: 1668709800000,
+        },
+        userId: id,
+      };
+      await userStatusModel.add(statusData);
       jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
     });
 
