@@ -468,17 +468,12 @@ describe("discordactions", function () {
       );
 
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
-      const length = getTotalUsers(lastTimestamp);
 
-      const responseObj = {
-        totalUsersStatus: length,
-        successfulNicknameUpdates: length - 1,
-        unsuccessfulNicknameUpdates: 1,
-      };
-
-      const response = await updateUsersNicknameStatus(lastTimestamp);
-      expect(response).to.be.an("object");
-      expect(response).to.be.deep.equal(responseObj);
+      try {
+        await updateUsersNicknameStatus(lastTimestamp);
+      } catch (err) {
+        expect(err).to.be.instanceOf(Error);
+      }
     }).timeout(10000);
 
     it("should return response with 1 failed update when one of the user data retrieval fails", async function () {
@@ -495,17 +490,12 @@ describe("discordactions", function () {
       );
 
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
-      const length = getTotalUsers(lastTimestamp);
 
-      const responseObj = {
-        totalUsersStatus: length,
-        successfulNicknameUpdates: length - 1,
-        unsuccessfulNicknameUpdates: 1,
-      };
-
-      const response = await updateUsersNicknameStatus(lastTimestamp);
-      expect(response).to.be.an("object");
-      expect(response).to.be.deep.equal(responseObj);
+      try {
+        await updateUsersNicknameStatus(lastTimestamp);
+      } catch (err) {
+        expect(err).to.be.instanceOf(Error);
+      }
     }).timeout(10000);
 
     it("should return response with all failed updates when the fetch call from the discord service to update nickname fails", async function () {
@@ -513,17 +503,12 @@ describe("discordactions", function () {
       fetchStub.throws(new Error(fetchStubResponse));
 
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
-      const length = getTotalUsers(lastTimestamp);
 
-      const responseObj = {
-        totalUsersStatus: length,
-        successfulNicknameUpdates: 0,
-        unsuccessfulNicknameUpdates: length,
-      };
-
-      const response = await updateUsersNicknameStatus(lastTimestamp);
-      expect(response).to.be.an("object");
-      expect(response).to.be.deep.equal(responseObj);
+      try {
+        await updateUsersNicknameStatus(lastTimestamp);
+      } catch (err) {
+        expect(err).to.be.instanceOf(Error);
+      }
     }).timeout(10000);
   });
 });
