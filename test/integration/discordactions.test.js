@@ -20,9 +20,12 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
 const userModel = firestore.collection("users");
 
-const { groupData, roleDataFromDiscord } = require("../fixtures/discordactions/discordactions");
+const { groupData, groupIdle7d, roleDataFromDiscord } = require("../fixtures/discordactions/discordactions");
 const discordServices = require("../../services/discordService");
 const { addGroupRoleToMember } = require("../../models/discordactions");
+const { updateUserStatus } = require("../../models/userStatus");
+const { generateUserStatusData } = require("../fixtures/userStatus/userStatus");
+const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 chai.use(chaiHttp);
 
 describe("Discord actions", function () {
@@ -265,6 +268,60 @@ describe("Discord actions", function () {
           expect(res.body).to.be.an("object");
           expect(res.body.response.length).to.be.equal(3);
           expect(res.body.message).to.equal("Discord groups synced with firestore successfully");
+          return done();
+        });
+    });
+  });
+
+  describe("PUT /discord-actions/group-idle-7d", function () {
+    let allIds;
+    beforeEach(async function () {
+      userData[0].roles = { archived: false };
+      userData[1].roles = { archived: false };
+      userData[2].roles = { archived: false };
+      await addUser(userData[0]);
+      await addUser(userData[1]);
+      await addUser(userData[2]);
+
+      const addUsersPromises = userData.slice(0, 3).map((user) => userModel.add({ ...user }));
+      const responses = await Promise.all(addUsersPromises);
+      allIds = responses.map((response) => response.id);
+
+      const userStatusPromises = allIds.map(async (userId) => {
+        await updateUserStatus(userId, generateUserStatusData("IDLE", 1690829925336, 1690829925336));
+      });
+      await Promise.all(userStatusPromises);
+
+      const addRolesPromises = [discordRoleModel.add(groupIdle7d)];
+      await Promise.all(addRolesPromises);
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should update Idle 7d+ Users successfully and return a 201 status code", function (done) {
+      chai
+        .request(app)
+        .put(`/discord-actions/group-idle-7d`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(201);
+          expect(res.body.message).to.be.equal("All Idle 7d+ Users updated successfully.");
+          expect(res.body.totalIdle7dUsers).to.be.equal(3);
+          expect(res.body.totalGroupIdle7dRolesApplied.count).to.be.equal(3);
+          expect(res.body.totalUserRoleToBeAdded).to.be.equal(3);
           return done();
         });
     });

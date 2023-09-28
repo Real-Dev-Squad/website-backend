@@ -7,6 +7,7 @@ const {
   addGroupRoleToMember,
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
+  setRoleIdle7DToIdleUsers,
   updateDiscordNicknames,
   syncDiscordGroupRolesInFirestore,
 } = require("../controllers/discordactions");
@@ -29,6 +30,7 @@ router.patch(
   updateDiscordImageForVerification
 );
 router.put("/group-idle", authenticate, authorizeRoles([SUPERUSER]), setRoleIdleToIdleUsers);
+router.put("/group-idle-7d", authenticate, authorizeRoles([SUPERUSER]), setRoleIdle7DToIdleUsers);
 router.post(
   "/nicknames/sync",
   authenticate,
