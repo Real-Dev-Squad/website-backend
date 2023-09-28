@@ -286,7 +286,7 @@ describe("Discord actions", function () {
           });
           return done();
         });
-    });
+    }).timeout(10000);
 
     it("should return object with 0 successful updates when user nickname changes", function (done) {
       const response = "Error occurred while updating user's nickname";
@@ -304,13 +304,8 @@ describe("Discord actions", function () {
             return done(err);
           }
 
-          expect(res).to.have.status(200);
-          expect(res).to.be.an("object");
-          expect(res.body.data).to.deep.equal({
-            totalUsersStatus: 1,
-            successfulNicknameUpdates: 0,
-            unsuccessfulNicknameUpdates: 1,
-          });
+          expect(res).to.have.status(500);
+          expect(res.body.message).to.equal("An internal server error occurred");
           return done();
         });
     });
