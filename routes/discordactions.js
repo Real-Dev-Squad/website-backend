@@ -9,6 +9,7 @@ const {
   setRoleIdleToIdleUsers,
   updateDiscordNicknames,
   updateUsersNicknameStatus,
+  syncDiscordGroupRolesInFirestore,
 } = require("../controllers/discordactions");
 const {
   validateGroupRoleBody,
@@ -42,5 +43,5 @@ router.post(
   updateDiscordNicknames
 );
 router.post("/nickname/status", verifyCronJob, validateUpdateUsersNicknameStatusBody, updateUsersNicknameStatus);
-
+router.post("/discord-roles", authenticate, authorizeRoles([SUPERUSER]), syncDiscordGroupRolesInFirestore);
 module.exports = router;

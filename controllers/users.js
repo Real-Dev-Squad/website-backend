@@ -28,7 +28,8 @@ const {
 } = require("../constants/users");
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
-const { setNicknameSyncedFalseScript } = require("../services/users");
+
+const { removeNicknameSyncedFieldScript } = require("../services/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -176,24 +177,21 @@ const getUsers = async (req, res) => {
         });
 
         for (const userId of Array.from(userIds)) {
-          const userInfo = await fetchUser({ userId: userId });
+          const userInfo = await fetchUser({ userId });
 
           if (userInfo) {
             const userTasks = tasksData.filter((task) => task.assignee === userId);
+            const userData = {
+              id: userId,
+              discordId: userInfo.user.discordId,
+              username: userInfo.user.username,
+            };
+
             if (dev) {
-              const userData = {
-                id: userId,
-                discordId: userInfo.user.discordId,
-                username: userInfo.user.username,
-                tasks: userTasks,
-              };
-              usersData.push(userData);
-            } else {
-              const userData = {
-                id: userId,
-                discordId: userInfo.user.discordId,
-                username: userInfo.user.username,
-              };
+              userData.tasks = userTasks;
+            }
+
+            if (userInfo.user.roles.in_discord) {
               usersData.push(userData);
             }
           }
@@ -205,7 +203,8 @@ const getUsers = async (req, res) => {
           users: usersData,
         });
       } catch (error) {
-        logger.error(`Error while fetching users and tasks: ${error}`);
+        const errorMessage = `Error while fetching users and tasks: ${error}`;
+        logger.error(errorMessage);
         return res.boom.serverUnavailable("Something went wrong, please contact admin");
       }
     }
@@ -843,10 +842,10 @@ async function usersPatchHandler(req, res) {
   }
 }
 
-const setNicknameSyncedScript = async (req, res) => {
+const removeNicknameSyncedField = async (req, res) => {
   try {
-    await setNicknameSyncedFalseScript();
-    return res.json({ message: "Successfully added the nickname_synced field to false for all users" });
+    await removeNicknameSyncedFieldScript();
+    return res.json({ message: "Successfully removed the nickname_synced field for all users" });
   } catch (err) {
     return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
   }
@@ -881,5 +880,5 @@ module.exports = {
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
-  setNicknameSyncedScript,
+  removeNicknameSyncedField,
 };

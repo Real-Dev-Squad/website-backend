@@ -372,7 +372,7 @@ describe("users", function () {
         time: "31d",
       };
       const result = await users.getUsersBasedOnFilter(query);
-      expect(result.length).to.equal(2);
+      expect(result.length).to.equal(1);
     });
   });
 

@@ -92,32 +92,17 @@ const createTaskExtensionRequest = async (req, res) => {
  */
 const fetchExtensionRequests = async (req, res) => {
   try {
-    const { dev, cursor, size, order } = req.query;
+    const { cursor, size, order } = req.query;
     const { status, taskId, assignee } = parseQueryParams(req._parsedUrl.search);
-    const { transformedSize, transformedDev, transformedStatus } = transformQuery(size, dev, status);
+    const { transformedSize, transformedStatus } = transformQuery(size, status);
 
-    let allExtensionRequests;
-
-    if (transformedDev) {
-      allExtensionRequests = await extensionRequestsQuery.fetchPaginatedExtensionRequests(
-        { taskId, status: transformedStatus, assignee },
-        { cursor, order, size: transformedSize, dev }
-      );
-      return res.json({
-        message: "Extension Requests returned successfully!",
-        ...allExtensionRequests,
-      });
-    } else {
-      allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
-        taskId,
-        status: transformedStatus,
-        assignee,
-      });
-    }
-
+    const allExtensionRequests = await extensionRequestsQuery.fetchPaginatedExtensionRequests(
+      { taskId, status: transformedStatus, assignee },
+      { cursor, order, size: transformedSize }
+    );
     return res.json({
       message: "Extension Requests returned successfully!",
-      allExtensionRequests: allExtensionRequests.length ? allExtensionRequests : [],
+      ...allExtensionRequests,
     });
   } catch (err) {
     logger.error(`Error while fetching Extension Requests ${err}`);

@@ -510,7 +510,7 @@ describe("Extension Requests", function () {
       chai
         .request(app)
         .get(`/extension-requests`)
-        .query({ taskId: taskId3, assignee: appOwner.id })
+        .query({ q: `assignee:${appOwner.id},taskId:${taskId3}` })
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
@@ -548,11 +548,11 @@ describe("Extension Requests", function () {
         });
     });
 
-    it("Should return paginated response when dev flag and size is passed", function (done) {
+    it("Should return paginated response when size is passed", function (done) {
       const fetchPaginatedExtensionRequestStub = sinon.stub(extensionRequests, "fetchPaginatedExtensionRequests");
       chai
         .request(app)
-        .get("/extension-requests?dev=true&size=10")
+        .get("/extension-requests?size=10")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
@@ -567,7 +567,7 @@ describe("Extension Requests", function () {
     it("Should have the link to get next set of results", function (done) {
       chai
         .request(app)
-        .get(`/extension-requests?dev=true&size=10`)
+        .get(`/extension-requests?size=10`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
@@ -583,9 +583,7 @@ describe("Extension Requests", function () {
     it("Should get all extension requests filtered with status when multiple params are passed", function (done) {
       chai
         .request(app)
-        .get(
-          `/extension-requests?dev=true&q=status:${EXTENSION_REQUEST_STATUS.APPROVED}+${EXTENSION_REQUEST_STATUS.PENDING}`
-        )
+        .get(`/extension-requests?q=status:${EXTENSION_REQUEST_STATUS.APPROVED}+${EXTENSION_REQUEST_STATUS.PENDING}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
