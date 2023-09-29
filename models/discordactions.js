@@ -41,6 +41,7 @@ const removeMemberGroup = async (roleId, discordId) => {
     logger.error(`Error while removing role: ${error}`);
     throw new Error(error);
   }
+  return false;
 };
 
 const deleteRoleFromDatabase = async (roleId, discordId) => {
@@ -62,6 +63,7 @@ const deleteRoleFromDatabase = async (roleId, discordId) => {
     const errorMessage = `Error while deleting role from backend: ${error}`;
     logger.error(errorMessage);
   }
+  return false;
 };
 
 /**
