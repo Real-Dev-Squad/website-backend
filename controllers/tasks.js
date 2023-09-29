@@ -270,27 +270,21 @@ const updateTask = async (req, res) => {
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
     }
-    const requestData = { ...req.body };
-    if (requestData?.assignee) {
-      const user = await dataAccess.retrieveUsers({ username: requestData.assignee });
+    if (req.body?.assignee) {
+      const user = await dataAccess.retrieveUsers({ username: req.body.assignee });
       if (!user.userExists) {
         return res.boom.notFound("User doesn't exist");
       }
-      if (!requestData?.startedOn) {
-        requestData.startedOn = Math.round(new Date().getTime() / 1000);
-      }
     }
-
-    await tasks.updateTask(requestData, req.params.id);
-    if (requestData.assignee) {
+    await tasks.updateTask(req.body, req.params.id);
+    if (req.body.assignee) {
       // New Assignee Status Update
-      await updateUserStatusOnTaskUpdate(requestData.assignee);
+      await updateUserStatusOnTaskUpdate(req.body.assignee);
       // Old Assignee Status Update if available
       if (task.taskData.assigneeId) {
         await updateStatusOnTaskCompletion(task.taskData.assigneeId);
       }
     }
-
     return res.status(204).send();
   } catch (err) {
     if (err.message.includes("Invalid dependency passed")) {
