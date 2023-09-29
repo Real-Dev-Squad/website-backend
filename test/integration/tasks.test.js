@@ -610,9 +610,9 @@ describe("Tasks", function () {
         .send({ assignee: "sagar", endsOn: 1695804641, status: TASK_STATUS.ASSIGNED });
       expect(res).to.have.status(204);
       const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
-      const startedOn = new Date().getTime() / 1000;
+      const startedOn = Math.round(new Date().getTime() / 1000);
       expect(res2.body.taskData).to.have.property("startedOn");
-      expect(Math.round(res2.body.taskData.startedOn)).to.be.equal(Math.round(startedOn));
+      expect(Math.round(res2.body.taskData.startedOn)).to.be.equal(startedOn);
     });
     it("should check updated dependsOn", function (done) {
       chai

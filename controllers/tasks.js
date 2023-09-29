@@ -277,7 +277,7 @@ const updateTask = async (req, res) => {
         return res.boom.notFound("User doesn't exist");
       }
       if (!requestData?.startedOn) {
-        requestData.startedOn = new Date().getTime() / 1000;
+        requestData.startedOn = Math.round(new Date().getTime() / 1000);
       }
     }
 
