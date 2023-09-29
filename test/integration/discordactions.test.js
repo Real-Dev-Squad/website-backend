@@ -21,7 +21,12 @@ const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const userModel = firestore.collection("users");
 
-const { groupData, groupIdle7d, roleDataFromDiscord } = require("../fixtures/discordactions/discordactions");
+const {
+  groupData,
+  groupIdle7d,
+  roleDataFromDiscord,
+  memberGroupData,
+} = require("../fixtures/discordactions/discordactions");
 const discordServices = require("../../services/discordService");
 const { addGroupRoleToMember } = require("../../models/discordactions");
 const { updateUserStatus } = require("../../models/userStatus");
