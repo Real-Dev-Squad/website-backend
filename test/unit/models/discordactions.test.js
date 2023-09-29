@@ -13,11 +13,12 @@ const {
   getAllGroupRoles,
   isGroupRoleExists,
   addGroupRoleToMember,
+  deleteRoleFromDatabase,
   updateDiscordImageForVerification,
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
 } = require("../../../models/discordactions");
-const { groupData, roleData, existingRole } = require("../../fixtures/discordactions/discordactions");
+const { groupData, roleData, existingRole, memberGroupData } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
 const { userPhotoVerificationData } = require("../../fixtures/user/photo-verification");
 const userData = require("../../fixtures/user/user")();
@@ -183,6 +184,61 @@ describe("discordactions", function () {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Database error");
       });
+    });
+  });
+
+  describe("deleteRoleFromMember", function () {
+    let deleteStub;
+
+    beforeEach(async function () {
+      const addRolePromises = memberGroupData.map(async (data) => {
+        await memberRoleModel.add(data);
+      });
+
+      await Promise.all(addRolePromises);
+
+      deleteStub = sinon.stub();
+      sinon.stub(memberRoleModel, "doc").returns({
+        delete: deleteStub.resolves(),
+      });
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should delete role from backend and return success", async function () {
+      const roleId = "1234";
+      const discordId = "12356";
+
+      const result = await deleteRoleFromDatabase(roleId, discordId);
+      expect(result.wasSuccess).to.equal(true);
+      expect(result.roleId).to.deep.equal(roleId);
+    });
+
+    it("should return failure if no matching role is found", async function () {
+      const roleId = "non-existing-role-id";
+      const discordId = "12356";
+
+      const result = await deleteRoleFromDatabase(roleId, discordId);
+
+      expect(result.wasSuccess).to.equal(false);
+      expect(result.roleId).to.deep.equal(roleId);
+    });
+
+    it("should throw an error if deleting role fails", async function () {
+      const roleId = "1234";
+      const discordId = "12356";
+
+      deleteStub.rejects(new Error("Database error"));
+
+      try {
+        await deleteRoleFromDatabase(roleId, discordId);
+      } catch (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal("Database error");
+      }
     });
   });
 

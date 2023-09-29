@@ -18,6 +18,7 @@ const firestore = require("../../utils/firestore");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
+const memberRoleModel = firestore.collection("member-group-roles");
 const userModel = firestore.collection("users");
 
 const { groupData, groupIdle7d, roleDataFromDiscord } = require("../fixtures/discordactions/discordactions");
@@ -34,11 +35,13 @@ describe("Discord actions", function () {
   let userId = "";
   let discordId = "";
   let fetchStub;
+  let jwt;
   beforeEach(async function () {
     fetchStub = sinon.stub(global, "fetch");
     userId = await addUser();
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    jwt = authService.generateAuthToken({ userId });
     discordId = "12345";
 
     const docRefUser0 = photoVerificationModel.doc();
@@ -192,6 +195,68 @@ describe("Discord actions", function () {
             expect(group).to.include.all.keys(expectedProps);
           });
           expect(res.body.message).to.equal("Roles fetched successfully!");
+          return done();
+        });
+    });
+  });
+
+  describe("DELETE /discord-actions/roles", function () {
+    beforeEach(async function () {
+      const addRolePromises = memberGroupData.map(async (data) => {
+        await memberRoleModel.add(data);
+      });
+
+      await Promise.all(addRolePromises);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should delete a role successfully", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ roleId: "1234", wasSuccess: true }),
+        })
+      );
+      chai
+        .request(app)
+        .delete("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(memberGroupData[0])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Role deleted successfully");
+
+          return done();
+        });
+    });
+
+    it("should handle internal server error", function (done) {
+      const mockdata = {
+        roleid: "mockroleid",
+        userid: "mockUserId",
+      };
+      chai
+        .request(app)
+        .delete("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(mockdata)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(500);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Internal server error");
           return done();
         });
     });

@@ -151,6 +151,21 @@ const addGroupRoleToMember = async (req, res) => {
   }
 };
 
+const deleteRole = async (req, res) => {
+  try {
+    const { roleid, userid } = req.body;
+    const deletionResult = await discordRolesModel.removeMemberGroup(roleid, userid);
+    if (deletionResult) {
+      return res.status(200).json({ message: "Role deleted successfully" });
+    } else {
+      return res.status(400).json({ message: "Role deletion failed" });
+    }
+  } catch (error) {
+    logger.error(`Error while deleting role: ${error}`);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 /**
  * Gets all group-roles
  * @param req {Object} - Express request object
@@ -341,6 +356,8 @@ module.exports = {
   createGroupRole,
   getAllGroupRoles,
   addGroupRoleToMember,
+  deleteRole,
+  // deleteGroupRole,
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
   setRoleIdle7DToIdleUsers,

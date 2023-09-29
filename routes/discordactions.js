@@ -5,6 +5,7 @@ const {
   getGroupsRoleId,
   getAllGroupRoles,
   addGroupRoleToMember,
+  deleteRole,
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
   setRoleIdle7DToIdleUsers,
@@ -21,6 +22,7 @@ const router = express.Router();
 router.post("/groups", authenticate, checkIsVerifiedDiscord, validateGroupRoleBody, createGroupRole);
 router.get("/groups", authenticate, checkIsVerifiedDiscord, getAllGroupRoles);
 router.post("/roles", authenticate, checkIsVerifiedDiscord, validateMemberRoleBody, addGroupRoleToMember);
+router.delete("/roles", authenticate, checkIsVerifiedDiscord, deleteRole);
 router.get("/roles", authenticate, checkIsVerifiedDiscord, getGroupsRoleId);
 router.patch(
   "/avatar/verify/:id",

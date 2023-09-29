@@ -30,6 +30,40 @@ const createNewRole = async (roleData) => {
   }
 };
 
+const removeMemberGroup = async (roleId, discordId) => {
+  try {
+    const discordResponse = await removeRoleFromUser(roleId, discordId);
+    if (discordResponse) {
+      const backendResponse = await deleteRoleFromDatabase(roleId, discordId);
+      return backendResponse;
+    }
+  } catch (error) {
+    logger.error(`Error while removing role: ${error}`);
+    throw new Error(error);
+  }
+};
+
+const deleteRoleFromDatabase = async (roleId, discordId) => {
+  try {
+    const rolesToDeleteSnapshot = await memberRoleModel
+      .where("userid", "==", discordId)
+      .where("roleid", "==", roleId)
+      .limit(1)
+      .get();
+
+    if (rolesToDeleteSnapshot.docs.length > 0) {
+      const doc = rolesToDeleteSnapshot.docs[0];
+      const roleRef = memberRoleModel.doc(doc.id);
+      await roleRef.delete();
+      return { roleId: roleId, wasSuccess: true };
+    }
+    return { roleId: roleId, wasSuccess: false };
+  } catch (error) {
+    const errorMessage = `Error while deleting role from backend: ${error}`;
+    logger.error(errorMessage);
+  }
+};
+
 /**
  *
  * @param roleData { Object }: Data of the new role
@@ -543,12 +577,14 @@ const updateIdle7dUsersOnDiscord = async () => {
 
 module.exports = {
   createNewRole,
+  removeMemberGroup,
   getGroupRolesForUser,
   getAllGroupRoles,
   getGroupRoleByName,
   updateGroupRole,
   addGroupRoleToMember,
   isGroupRoleExists,
+  deleteRoleFromDatabase,
   updateDiscordImageForVerification,
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,

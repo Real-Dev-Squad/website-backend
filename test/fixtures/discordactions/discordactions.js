@@ -36,6 +36,7 @@ const roleDataFromDiscord = {
 module.exports = {
   groupData,
   roleData,
+  memberGroupData,
   existingRole,
   requestRoleData,
   groupIdle7d,
