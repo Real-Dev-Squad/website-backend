@@ -92,16 +92,12 @@ const getAllEvents = async (req, res) => {
  * @throws {Error} If an error occurs while generating the token.
  */
 const joinEvent = async (req, res) => {
-  const { userId, role, eventCode } = req.body;
+  const { roomId, userId, role, eventCode } = req.body;
   const payload = { userId, role };
+
   try {
-    const eventsData = await apiService.get("https://api.100ms.live/v2/rooms?enabled=true");
-
-    const activeEvent = eventsData?.data?.[0];
-    const eventId = activeEvent?.id;
-
     if (role === ROLES.MAVEN) {
-      const eventCodes = await eventQuery.getEventCodes({ id: eventId });
+      const eventCodes = await eventQuery.getEventCodes({ id: roomId });
       const allEventCodesArray = eventCodes.map((eventCode) => {
         return eventCode.code;
       });
@@ -113,21 +109,45 @@ const joinEvent = async (req, res) => {
           message: "Provided event code is invalid for the role!",
         });
       }
-      const token = tokenService.getAuthToken({ ...payload, roomId: eventId });
+      const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
 
       return res.status(201).json({
         token: token,
         message: "Token generated successfully!",
-        event: activeEvent,
       });
     }
 
-    const token = tokenService.getAuthToken({ ...payload, roomId: eventId });
+    if (role === ROLES.HOST || role === ROLES.MODERATOR) {
+      if (!req.userData) {
+        return res.status(400).json({
+          message: "Unauthorized, please login to perform this action!",
+        });
+      }
+
+      if (role === ROLES.HOST && req.userData.roles.super_user) {
+        const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
+
+        return res.status(201).json({
+          token: token,
+          message: "Token generated successfully!",
+        });
+      }
+
+      if (role === ROLES.MODERATOR && req.userData.roles.member) {
+        const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
+
+        return res.status(201).json({
+          token: token,
+          message: "Token generated successfully!",
+        });
+      }
+    }
+
+    const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
 
     return res.status(201).json({
       token: token,
       message: "Token generated successfully!",
-      event: activeEvent,
     });
   } catch (error) {
     logger.error({ error });
