@@ -357,7 +357,6 @@ module.exports = {
   getAllGroupRoles,
   addGroupRoleToMember,
   deleteRole,
-  // deleteGroupRole,
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
   setRoleIdle7DToIdleUsers,
