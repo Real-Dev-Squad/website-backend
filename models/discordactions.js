@@ -441,9 +441,13 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
         const { state: futureState } = futureStatus;
         const { state: currentState } = currentStatus;
 
-        if (currentState === userState.OOO) {
+        if (currentState === userState.OOO && today <= currentStatus.until) {
           promises.push(usersUtils.updateNickname(userId, currentStatus));
-        } else if (futureState === userState.OOO && today + 3 * ONE_DAY_IN_MS >= futureStatus.from) {
+        } else if (
+          futureState === userState.OOO &&
+          today + 3 * ONE_DAY_IN_MS >= futureStatus.from &&
+          today <= futureStatus.until
+        ) {
           promises.push(usersUtils.updateNickname(userId, futureStatus));
         } else {
           promises.push(usersUtils.updateNickname(userId));

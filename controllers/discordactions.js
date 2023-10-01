@@ -311,6 +311,7 @@ const updateUsersNicknameStatus = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
+
 const syncDiscordGroupRolesInFirestore = async (req, res) => {
   try {
     const discordRoles = await discordServices.getDiscordRoles();

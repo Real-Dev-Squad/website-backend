@@ -600,6 +600,33 @@ describe("Tasks", function () {
 
       return taskId;
     });
+
+    it("Should add startedOn field when assignee passed as a payload", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "sagar", endsOn: 1695804641, status: TASK_STATUS.ASSIGNED });
+      expect(res).to.have.status(204);
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      const startedOn = Math.round(new Date().getTime() / 1000);
+      expect(res2.body.taskData).to.have.property("startedOn");
+      expect(res2.body.taskData.startedOn).to.be.equal(startedOn);
+    });
+
+    it("Should use the existing startedOn field if it is passed in the payload", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "sagar", endsOn: 1695804641, status: TASK_STATUS.ASSIGNED, startedOn: 1695804041 });
+      expect(res).to.have.status(204);
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      expect(res2.body.taskData).to.have.property("startedOn");
+      expect(res2.body.taskData.startedOn).to.be.equal(1695804041);
+    });
     it("should check updated dependsOn", function (done) {
       chai
         .request(app)
