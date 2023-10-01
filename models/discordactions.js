@@ -8,11 +8,14 @@ const { retrieveUsers } = require("../services/dataAccessLayer");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const { getAllUserStatus, getGroupRole } = require("./userStatus");
 const { userState } = require("../constants/userStatus");
+const { ONE_DAY_IN_MS, SIMULTANEOUS_WORKER_CALLS } = require("../constants/users");
 const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
 const dataAccess = require("../services/dataAccessLayer");
 const { getDiscordMembers, addRoleToUser, removeRoleFromUser } = require("../services/discordService");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const userStatusModel = firestore.collection("usersStatus");
+const usersUtils = require("../utils/users");
 
 /**
  *
@@ -391,6 +394,82 @@ const updateIdleUsersOnDiscord = async () => {
   };
 };
 
+const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
+  const lastNicknameUpdateTimestamp = Number(lastNicknameUpdate);
+  try {
+    const usersCurrentStatus = userStatusModel
+      .where("currentStatus.updatedAt", ">=", lastNicknameUpdateTimestamp)
+      .get();
+    const usersFutureStatus = userStatusModel.where("futureStatus.updatedAt", ">=", lastNicknameUpdateTimestamp).get();
+
+    const [usersCurrentStatusSnapshot, usersFutureStatusSnapshots] = await Promise.all([
+      usersCurrentStatus,
+      usersFutureStatus,
+    ]);
+
+    const usersCurrentStatusDocs = usersCurrentStatusSnapshot.docs;
+    let usersFutureStatusDocs = usersFutureStatusSnapshots.docs;
+    usersFutureStatusDocs = usersFutureStatusDocs.filter(({ id }) => {
+      const isIdPresent = usersCurrentStatusDocs.find((status) => {
+        return status.id === id;
+      });
+      return !isIdPresent;
+    });
+    const usersStatusDocs = usersCurrentStatusDocs.concat(usersFutureStatusDocs);
+
+    const today = new Date().getTime();
+
+    const nicknameUpdatePromises = [];
+    const nicknameUpdateBatches = [];
+    const totalUsersStatus = usersStatusDocs.length;
+
+    let startIndex = 0;
+    for (let i = 0; i < Math.ceil(totalUsersStatus / SIMULTANEOUS_WORKER_CALLS); i++) {
+      const end = Math.min(totalUsersStatus, startIndex + SIMULTANEOUS_WORKER_CALLS);
+      nicknameUpdateBatches.push(usersStatusDocs.slice(startIndex, end));
+      startIndex = end;
+    }
+
+    for (let i = 0; i < nicknameUpdateBatches.length; i++) {
+      const promises = [];
+      const usersStatusDocsBatch = nicknameUpdateBatches[i];
+      usersStatusDocsBatch.forEach((document) => {
+        const doc = document.data();
+        const userId = doc.userId;
+
+        const { futureStatus = {}, currentStatus = {} } = doc;
+        const { state: futureState } = futureStatus;
+        const { state: currentState } = currentStatus;
+
+        if (currentState === userState.OOO) {
+          promises.push(usersUtils.updateNickname(userId, currentStatus));
+        } else if (futureState === userState.OOO && today + 3 * ONE_DAY_IN_MS >= futureStatus.from) {
+          promises.push(usersUtils.updateNickname(userId, futureStatus));
+        } else {
+          promises.push(usersUtils.updateNickname(userId));
+        }
+      });
+
+      const settledPromises = await Promise.all(promises);
+      nicknameUpdatePromises.push(...settledPromises);
+
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+
+    const successfulUpdates = nicknameUpdatePromises.length;
+
+    const res = {
+      totalUsersStatus,
+      successfulNicknameUpdates: successfulUpdates,
+      unsuccessfulNicknameUpdates: totalUsersStatus - successfulUpdates,
+    };
+    return res;
+  } catch (err) {
+    logger.error(`Error while retrieving users status documents: ${err}`);
+    throw err;
+  }
+};
+
 const updateIdle7dUsersOnDiscord = async () => {
   let totalIdle7dUsers = 0;
   const totalGroupIdle7dRolesApplied = { count: 0, response: [] };
@@ -553,5 +632,6 @@ module.exports = {
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
   updateIdleUsersOnDiscord,
+  updateUsersNicknameStatus,
   updateIdle7dUsersOnDiscord,
 };
