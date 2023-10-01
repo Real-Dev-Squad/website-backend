@@ -95,13 +95,22 @@ const assertUserOrTaskExists = async (queryParams) => {
  * @returns {Query} A Firestore query object that filters progress documents based on the given parameters.
  */
 const buildQueryToFetchDocs = (queryParams) => {
-  const { type, userId, taskId } = queryParams;
+  const { type, userId, taskId, orderBy } = queryParams;
+  const orderByField = !orderBy ? "date" : orderBy.split("-")[orderBy.split("-").length - 1];
+  const isAscOrDsc = orderBy && orderBy.split("-").length === 1 ? "asc" : "desc";
+
   if (type) {
-    return progressesCollection.where("type", "==", type);
+    return progressesCollection.where("type", "==", type).orderBy(orderByField, isAscOrDsc);
   } else if (userId) {
-    return progressesCollection.where("type", "==", "user").where("userId", "==", userId);
+    return progressesCollection
+      .where("type", "==", "user")
+      .where("userId", "==", userId)
+      .orderBy(orderByField, isAscOrDsc);
   } else {
-    return progressesCollection.where("type", "==", "task").where("taskId", "==", taskId);
+    return progressesCollection
+      .where("type", "==", "task")
+      .where("taskId", "==", taskId)
+      .orderBy(orderByField, isAscOrDsc);
   }
 };
 
