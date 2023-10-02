@@ -189,6 +189,24 @@ const setRoleIdleToIdleUsers = async (req, res) => {
 };
 
 /**
+ * Set all group-idle-7d+ on discord
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const setRoleIdle7DToIdleUsers = async (req, res) => {
+  try {
+    const result = await discordRolesModel.updateIdle7dUsersOnDiscord();
+    return res.status(201).json({
+      message: "All Idle 7d+ Users updated successfully.",
+      ...result,
+    });
+  } catch (err) {
+    logger.error(`Error while setting idle role: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
  * Patch Update user nicknames on discord server
  *
  * @param req {Object} - Express request object
@@ -273,6 +291,27 @@ const updateDiscordNicknames = async (req, res) => {
   }
 };
 
+/**
+ * Update all user Discord nickname based on status
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const updateUsersNicknameStatus = async (req, res) => {
+  try {
+    const { lastNicknameUpdate = 0 } = req.body;
+    const data = await discordRolesModel.updateUsersNicknameStatus(lastNicknameUpdate);
+    return res.json({
+      message: "Updated discord users nickname based on status",
+      data,
+    });
+  } catch (err) {
+    logger.error(`Error while updating users nickname based on status: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 const syncDiscordGroupRolesInFirestore = async (req, res) => {
   try {
     const discordRoles = await discordServices.getDiscordRoles();
@@ -344,7 +383,9 @@ module.exports = {
   addGroupRoleToMember,
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
+  setRoleIdle7DToIdleUsers,
   updateDiscordNicknames,
+  updateUsersNicknameStatus,
   syncDiscordGroupRolesInFirestore,
   setRoleToUsersWith31DaysPlusOnboarding,
 };

@@ -8,11 +8,14 @@ const { retrieveUsers } = require("../services/dataAccessLayer");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const { getAllUserStatus, getGroupRole, getUserStatus } = require("./userStatus");
 const { userState } = require("../constants/userStatus");
+const { ONE_DAY_IN_MS, SIMULTANEOUS_WORKER_CALLS } = require("../constants/users");
 const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
 const dataAccess = require("../services/dataAccessLayer");
 const { getDiscordMembers, addRoleToUser, removeRoleFromUser } = require("../services/discordService");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const userStatusModel = firestore.collection("usersStatus");
+const usersUtils = require("../utils/users");
 const { getUsersBasedOnFilter, fetchUser } = require("./users");
 
 /**
@@ -265,9 +268,11 @@ const updateIdleUsersOnDiscord = async () => {
   let allIdleUsers = [];
   let allUsersHavingGroupIdle = [];
   let groupIdleRole;
+  let groupIdleRoleId;
 
   try {
     groupIdleRole = await getGroupRole("group-idle");
+    groupIdleRoleId = groupIdleRole.role.roleid;
     if (!groupIdleRole.roleExists) throw new Error("Idle Role does not exist");
     const { allUserStatus } = await getAllUserStatus({ state: userState.IDLE });
     const discordUsers = await getDiscordMembers();
@@ -315,11 +320,24 @@ const updateIdleUsersOnDiscord = async () => {
       usersForRoleAddition.map(async (user) => {
         try {
           const result = await dataAccess.retrieveUsers({ id: user.userId });
+          const discordId = user.userid;
           if (result.user?.roles?.archived) {
             totalArchivedUsers++;
           } else if (!user.userid) {
             totalUsersHavingNoDiscordId++;
           } else {
+            const alreadyHasRole = await memberRoleModel
+              .where("roleid", "==", "1153280659004080148")
+              .where("userid", "==", discordId)
+              .limit(1)
+              .get();
+            if (alreadyHasRole.empty) {
+              await memberRoleModel.add({
+                roleid: "1153280659004080148",
+                userid: discordId,
+                date: admin.firestore.Timestamp.fromDate(new Date()),
+              });
+            }
             const response = await addRoleToUser(user.userid, groupIdleRole.role.roleid);
             totalGroupIdleRolesApplied.response.push(response);
             totalGroupIdleRolesApplied.count++;
@@ -336,10 +354,21 @@ const updateIdleUsersOnDiscord = async () => {
   if (usersForRoleRemoval.length) {
     await Promise.all(
       usersForRoleRemoval.map(async (user) => {
+        const discordId = user.userid;
         try {
           if (!user.userid) {
             totalUsersHavingNoDiscordId++;
           } else {
+            const hasRole = await memberRoleModel
+              .where("roleid", "==", groupIdleRoleId)
+              .where("userid", "==", discordId)
+              .limit(1)
+              .get();
+            if (!hasRole.empty) {
+              const oldRole = [];
+              hasRole.forEach((role) => oldRole.push({ id: role.id }));
+              await memberRoleModel.doc(oldRole[0].id).delete();
+            }
             const response = await removeRoleFromUser(groupIdleRole.role.roleid, user.userid);
             totalGroupIdleRolesRemoved.response.push(response);
             totalGroupIdleRolesRemoved.count++;
@@ -359,6 +388,236 @@ const updateIdleUsersOnDiscord = async () => {
     totalGroupIdleRolesNotApplied,
     totalGroupIdleRolesRemoved,
     totalGroupIdleRolesNotRemoved,
+    totalUserRoleToBeRemoved,
+    totalUserRoleToBeAdded,
+    totalUsersHavingNoDiscordId,
+    totalArchivedUsers,
+  };
+};
+
+const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
+  const lastNicknameUpdateTimestamp = Number(lastNicknameUpdate);
+  try {
+    const usersCurrentStatus = userStatusModel
+      .where("currentStatus.updatedAt", ">=", lastNicknameUpdateTimestamp)
+      .get();
+    const usersFutureStatus = userStatusModel.where("futureStatus.updatedAt", ">=", lastNicknameUpdateTimestamp).get();
+
+    const [usersCurrentStatusSnapshot, usersFutureStatusSnapshots] = await Promise.all([
+      usersCurrentStatus,
+      usersFutureStatus,
+    ]);
+
+    const usersCurrentStatusDocs = usersCurrentStatusSnapshot.docs;
+    let usersFutureStatusDocs = usersFutureStatusSnapshots.docs;
+    usersFutureStatusDocs = usersFutureStatusDocs.filter(({ id }) => {
+      const isIdPresent = usersCurrentStatusDocs.find((status) => {
+        return status.id === id;
+      });
+      return !isIdPresent;
+    });
+    const usersStatusDocs = usersCurrentStatusDocs.concat(usersFutureStatusDocs);
+
+    const today = new Date().getTime();
+
+    const nicknameUpdatePromises = [];
+    const nicknameUpdateBatches = [];
+    const totalUsersStatus = usersStatusDocs.length;
+
+    let startIndex = 0;
+    for (let i = 0; i < Math.ceil(totalUsersStatus / SIMULTANEOUS_WORKER_CALLS); i++) {
+      const end = Math.min(totalUsersStatus, startIndex + SIMULTANEOUS_WORKER_CALLS);
+      nicknameUpdateBatches.push(usersStatusDocs.slice(startIndex, end));
+      startIndex = end;
+    }
+
+    for (let i = 0; i < nicknameUpdateBatches.length; i++) {
+      const promises = [];
+      const usersStatusDocsBatch = nicknameUpdateBatches[i];
+      usersStatusDocsBatch.forEach((document) => {
+        const doc = document.data();
+        const userId = doc.userId;
+
+        const { futureStatus = {}, currentStatus = {} } = doc;
+        const { state: futureState } = futureStatus;
+        const { state: currentState } = currentStatus;
+
+        if (currentState === userState.OOO && today <= currentStatus.until) {
+          promises.push(usersUtils.updateNickname(userId, currentStatus));
+        } else if (
+          futureState === userState.OOO &&
+          today + 3 * ONE_DAY_IN_MS >= futureStatus.from &&
+          today <= futureStatus.until
+        ) {
+          promises.push(usersUtils.updateNickname(userId, futureStatus));
+        } else {
+          promises.push(usersUtils.updateNickname(userId));
+        }
+      });
+
+      const settledPromises = await Promise.all(promises);
+      nicknameUpdatePromises.push(...settledPromises);
+
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+
+    const successfulUpdates = nicknameUpdatePromises.length;
+
+    const res = {
+      totalUsersStatus,
+      successfulNicknameUpdates: successfulUpdates,
+      unsuccessfulNicknameUpdates: totalUsersStatus - successfulUpdates,
+    };
+    return res;
+  } catch (err) {
+    logger.error(`Error while retrieving users status documents: ${err}`);
+    throw err;
+  }
+};
+
+const updateIdle7dUsersOnDiscord = async () => {
+  let totalIdle7dUsers = 0;
+  const totalGroupIdle7dRolesApplied = { count: 0, response: [] };
+  const totalGroupIdle7dRolesNotApplied = { count: 0, errors: [] };
+  const totalGroupIdle7dRolesRemoved = { count: 0, response: [] };
+  const totalGroupIdle7dRolesNotRemoved = { count: 0, errors: [] };
+  let totalUsersHavingNoDiscordId = 0;
+  let totalArchivedUsers = 0;
+  const allIdle7dUsers = [];
+  let allUsersHavingGroupIdle7d = [];
+  let groupIdle7dRole;
+  let groupIdle7dRoleId;
+
+  try {
+    groupIdle7dRole = await getGroupRole("group-idle-7d+");
+    groupIdle7dRoleId = groupIdle7dRole.role.roleid;
+    if (!groupIdle7dRole.roleExists) throw new Error("Idle Role does not exist");
+
+    const { allUserStatus } = await getAllUserStatus({ state: userState.IDLE });
+    const discordUsers = await getDiscordMembers();
+    const usersHavingIdle7dRole = [];
+
+    discordUsers?.forEach((discordUser) => {
+      const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
+      const haveIdle7dRole = discordUser.roles.includes(groupIdle7dRoleId);
+
+      if (isDeveloper && haveIdle7dRole) {
+        usersHavingIdle7dRole.push({ userid: discordUser.user.id });
+      }
+    });
+
+    if (allUserStatus) {
+      await Promise.all(
+        allUserStatus.map(async (userStatus) => {
+          const currentDate = new Date();
+          const lastDate = new Date(userStatus.currentStatus.from);
+          const ONE_DAY = 1000 * 60 * 60 * 24;
+          const timeDifference = currentDate.setUTCHours(0, 0, 0, 0) - lastDate.setUTCHours(0, 0, 0, 0);
+          const daysDifference = Math.floor(timeDifference / ONE_DAY);
+
+          try {
+            if (daysDifference > 7) {
+              const userData = await userModel.doc(userStatus.userId).get();
+              if (userData.exists) {
+                userStatus.userid = userData.data().discordId;
+                allIdle7dUsers.push(userStatus);
+              }
+            }
+          } catch (error) {
+            logger.error(`error updating discordId in userStatus ${error.message}`);
+            throw new Error("error updating discordId in userStatus");
+          }
+        })
+      );
+    }
+
+    allUsersHavingGroupIdle7d = usersHavingIdle7dRole;
+  } catch (error) {
+    logger.error(`unable to get idle users ${error.message}`);
+    throw new Error("unable to get idle users");
+  }
+
+  const getUniqueInFirst = (first, second) => first.filter((a) => !second.some((b) => a.userid === b.userid));
+  const usersForRoleRemoval = getUniqueInFirst(allUsersHavingGroupIdle7d, allIdle7dUsers);
+  const usersForRoleAddition = getUniqueInFirst(allIdle7dUsers, allUsersHavingGroupIdle7d);
+
+  totalIdle7dUsers = allIdle7dUsers.length;
+  const totalUserRoleToBeRemoved = usersForRoleRemoval.length;
+  const totalUserRoleToBeAdded = usersForRoleAddition.length;
+
+  if (usersForRoleAddition.length) {
+    await Promise.all(
+      usersForRoleAddition.map(async (user) => {
+        try {
+          const result = await dataAccess.retrieveUsers({ id: user.userId });
+          const discordId = user.userid;
+          if (result.user?.roles?.archived) {
+            totalArchivedUsers++;
+          } else if (!user.userid) {
+            totalUsersHavingNoDiscordId++;
+          } else {
+            const alreadyHasRole = await memberRoleModel
+              .where("roleid", "==", groupIdle7dRoleId)
+              .where("userid", "==", discordId)
+              .limit(1)
+              .get();
+            if (alreadyHasRole.empty) {
+              await memberRoleModel.add({
+                roleid: groupIdle7dRoleId,
+                userid: discordId,
+                date: admin.firestore.Timestamp.fromDate(new Date()),
+              });
+            }
+            const response = await addRoleToUser(user.userid, groupIdle7dRole.role.roleid);
+            totalGroupIdle7dRolesApplied.response.push(response);
+            totalGroupIdle7dRolesApplied.count++;
+          }
+        } catch (error) {
+          totalGroupIdle7dRolesNotApplied.count++;
+          totalGroupIdle7dRolesNotApplied.errors.push(error.message);
+          logger.error(`Error in setting group-idle on user: ${error}`);
+        }
+      })
+    );
+  }
+
+  if (usersForRoleRemoval.length) {
+    await Promise.all(
+      usersForRoleRemoval.map(async (user) => {
+        const discordId = user.roleid;
+        try {
+          if (!user.userid) {
+            totalUsersHavingNoDiscordId++;
+          } else {
+            const hasRole = await memberRoleModel
+              .where("roleid", "==", groupIdle7dRoleId)
+              .where("userid", "==", discordId)
+              .limit(1)
+              .get();
+            if (!hasRole.empty) {
+              const oldRole = [];
+              hasRole.forEach((role) => oldRole.push({ id: role.id }));
+              await memberRoleModel.doc(oldRole[0].id).delete();
+            }
+            const response = await removeRoleFromUser(groupIdle7dRole.role.roleid, user.userid);
+            totalGroupIdle7dRolesRemoved.response.push(response);
+            totalGroupIdle7dRolesRemoved.count++;
+          }
+        } catch (error) {
+          totalGroupIdle7dRolesNotRemoved.count++;
+          totalGroupIdle7dRolesNotRemoved.errors.push(error.message);
+          logger.error(`Error in removing group-idle from user: ${error}`);
+        }
+      })
+    );
+  }
+
+  return {
+    totalIdle7dUsers,
+    totalGroupIdle7dRolesApplied,
+    totalGroupIdle7dRolesNotApplied,
+    totalGroupIdle7dRolesRemoved,
+    totalGroupIdle7dRolesNotRemoved,
     totalUserRoleToBeRemoved,
     totalUserRoleToBeAdded,
     totalUsersHavingNoDiscordId,
@@ -516,5 +775,7 @@ module.exports = {
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
   updateIdleUsersOnDiscord,
+  updateUsersNicknameStatus,
+  updateIdle7dUsersOnDiscord,
   updateUsersWith31DaysPlusOnboarding,
 };
