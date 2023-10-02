@@ -92,6 +92,7 @@ const assertUserOrTaskExists = async (queryParams) => {
  * @param {string} queryParams.userId - (Optional) The user ID to filter progress documents by.
  * @param {string} queryParams.taskId - (Optional) The task ID to filter progress documents by.
  * @param {string} queryParams.type - (Optional) The type to filter progress documents by.
+ * @param {string} queryParams.orderBy - (Optional) The type to sort the documents.
  * @returns {Query} A Firestore query object that filters progress documents based on the given parameters.
  */
 const buildQueryToFetchDocs = (queryParams) => {
