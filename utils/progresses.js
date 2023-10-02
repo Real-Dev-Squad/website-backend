@@ -97,7 +97,7 @@ const assertUserOrTaskExists = async (queryParams) => {
  */
 const buildQueryToFetchDocs = (queryParams) => {
   const { type, userId, taskId, orderBy } = queryParams;
-  const orderByField = !orderBy ? "date" : orderBy.split("-")[orderBy.split("-").length - 1];
+  const orderByField = orderBy ? orderBy.split("-")[orderBy.split("-").length - 1] : "date";
   const isAscOrDsc = orderBy && orderBy.split("-").length === 1 ? "asc" : "desc";
 
   if (type) {
