@@ -401,7 +401,6 @@ const updateIdle7dUsersOnDiscord = async () => {
           const ONE_DAY = 1000 * 60 * 60 * 24;
           const timeDifference = currentDate.setUTCHours(0, 0, 0, 0) - lastDate.setUTCHours(0, 0, 0, 0);
           const daysDifference = Math.floor(timeDifference / ONE_DAY);
-
           try {
             if (daysDifference > 7) {
               const userData = await userModel.doc(userStatus.userId).get();
@@ -471,7 +470,7 @@ const updateIdle7dUsersOnDiscord = async () => {
   if (usersForRoleRemoval.length) {
     await Promise.all(
       usersForRoleRemoval.map(async (user) => {
-        const discordId = user.roleid;
+        const discordId = user.userid;
         try {
           if (!user.userid) {
             totalUsersHavingNoDiscordId++;
