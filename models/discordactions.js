@@ -49,16 +49,15 @@ const deleteRoleFromDatabase = async (roleId, discordId) => {
     const rolesToDeleteSnapshot = await memberRoleModel
       .where("userid", "==", discordId)
       .where("roleid", "==", roleId)
-      .limit(1)
       .get();
 
     if (rolesToDeleteSnapshot.docs.length > 0) {
       const doc = rolesToDeleteSnapshot.docs[0];
       const roleRef = memberRoleModel.doc(doc.id);
       await roleRef.delete();
-      return { roleId: roleId, wasSuccess: true };
+      return { roleId, wasSuccess: true };
     }
-    return { roleId: roleId, wasSuccess: false };
+    return { roleId, wasSuccess: false };
   } catch (error) {
     const errorMessage = `Error while deleting role from backend: ${error}`;
     logger.error(errorMessage);

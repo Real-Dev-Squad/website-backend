@@ -154,8 +154,8 @@ const addGroupRoleToMember = async (req, res) => {
 const deleteRole = async (req, res) => {
   try {
     const { roleid, userid } = req.body;
-    const deletionResult = await discordRolesModel.removeMemberGroup(roleid, userid);
-    if (deletionResult) {
+    const { wasSuccess } = await discordRolesModel.removeMemberGroup(roleid, userid);
+    if (wasSuccess) {
       return res.status(200).json({ message: "Role deleted successfully" });
     } else {
       return res.status(400).json({ message: "Role deletion failed" });
