@@ -39,6 +39,7 @@ module.exports = () => {
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
       incompleteUserDetails: false,
+      nickname_synced: false,
     },
     {
       username: "nikhil",
@@ -57,6 +58,7 @@ module.exports = () => {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
+      nickname_synced: false,
     },
     {
       username: "pranavg",
@@ -78,6 +80,7 @@ module.exports = () => {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
+      nickname_synced: false,
     },
     {
       username: "sagar",
@@ -373,6 +376,20 @@ module.exports = () => {
       last_name: "Bajpai",
       github_id: "satyam73",
       github_display_name: "Satyam Bajpai",
+      roles: {
+        member: false,
+        in_discord: true,
+        archived: false,
+      },
+      incompleteUserDetails: false,
+      updated_at: Date.now(),
+      created_at: Date.now(),
+    },
+    {
+      first_name: "Kotesh",
+      last_name: "Mudila",
+      github_id: "kotesh-arya",
+      github_display_name: "Kotesh Mudila",
       roles: {
         member: false,
         in_discord: true,

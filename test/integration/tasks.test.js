@@ -237,6 +237,32 @@ describe("Tasks", function () {
         });
     });
 
+    it("Should get all tasks filtered with status, multiple assignees, title when passed to GET /tasks", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&dev=true&assignee=sagar,ankur&title=Test`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          const tasksData = res.body.tasks ?? [];
+          tasksData.forEach((task) => {
+            expect(task.status).to.equal(TASK_STATUS.IN_PROGRESS);
+            expect(task.assignee).to.be.oneOf(["sagar", "ankur"]);
+            expect(task.title).to.include("Test");
+          });
+          return done();
+        });
+    });
+
     it("Should get all overdue tasks GET /tasks", function (done) {
       chai
         .request(app)
@@ -887,6 +913,18 @@ describe("Tasks", function () {
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "COMPLETED" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
+    });
+
+    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "VERIFIED" });
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
