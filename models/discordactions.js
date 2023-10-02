@@ -8,11 +8,14 @@ const { retrieveUsers } = require("../services/dataAccessLayer");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const { getAllUserStatus, getGroupRole } = require("./userStatus");
 const { userState } = require("../constants/userStatus");
+const { ONE_DAY_IN_MS, SIMULTANEOUS_WORKER_CALLS } = require("../constants/users");
 const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
 const dataAccess = require("../services/dataAccessLayer");
 const { getDiscordMembers, addRoleToUser, removeRoleFromUser } = require("../services/discordService");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const userStatusModel = firestore.collection("usersStatus");
+const usersUtils = require("../utils/users");
 
 /**
  *
@@ -28,6 +31,41 @@ const createNewRole = async (roleData) => {
     logger.error("Error in creating role", err);
     throw err;
   }
+};
+
+const removeMemberGroup = async (roleId, discordId) => {
+  try {
+    const discordResponse = await removeRoleFromUser(roleId, discordId);
+    if (discordResponse) {
+      const backendResponse = await deleteRoleFromDatabase(roleId, discordId);
+      return backendResponse;
+    }
+  } catch (error) {
+    logger.error(`Error while removing role: ${error}`);
+    throw new Error(error);
+  }
+  return false;
+};
+
+const deleteRoleFromDatabase = async (roleId, discordId) => {
+  try {
+    const rolesToDeleteSnapshot = await memberRoleModel
+      .where("userid", "==", discordId)
+      .where("roleid", "==", roleId)
+      .get();
+
+    if (rolesToDeleteSnapshot.docs.length > 0) {
+      const doc = rolesToDeleteSnapshot.docs[0];
+      const roleRef = memberRoleModel.doc(doc.id);
+      await roleRef.delete();
+      return { roleId, wasSuccess: true };
+    }
+    return { roleId, wasSuccess: false };
+  } catch (error) {
+    const errorMessage = `Error while deleting role from backend: ${error}`;
+    logger.error(errorMessage);
+  }
+  return false;
 };
 
 /**
@@ -391,6 +429,86 @@ const updateIdleUsersOnDiscord = async () => {
   };
 };
 
+const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
+  const lastNicknameUpdateTimestamp = Number(lastNicknameUpdate);
+  try {
+    const usersCurrentStatus = userStatusModel
+      .where("currentStatus.updatedAt", ">=", lastNicknameUpdateTimestamp)
+      .get();
+    const usersFutureStatus = userStatusModel.where("futureStatus.updatedAt", ">=", lastNicknameUpdateTimestamp).get();
+
+    const [usersCurrentStatusSnapshot, usersFutureStatusSnapshots] = await Promise.all([
+      usersCurrentStatus,
+      usersFutureStatus,
+    ]);
+
+    const usersCurrentStatusDocs = usersCurrentStatusSnapshot.docs;
+    let usersFutureStatusDocs = usersFutureStatusSnapshots.docs;
+    usersFutureStatusDocs = usersFutureStatusDocs.filter(({ id }) => {
+      const isIdPresent = usersCurrentStatusDocs.find((status) => {
+        return status.id === id;
+      });
+      return !isIdPresent;
+    });
+    const usersStatusDocs = usersCurrentStatusDocs.concat(usersFutureStatusDocs);
+
+    const today = new Date().getTime();
+
+    const nicknameUpdatePromises = [];
+    const nicknameUpdateBatches = [];
+    const totalUsersStatus = usersStatusDocs.length;
+
+    let startIndex = 0;
+    for (let i = 0; i < Math.ceil(totalUsersStatus / SIMULTANEOUS_WORKER_CALLS); i++) {
+      const end = Math.min(totalUsersStatus, startIndex + SIMULTANEOUS_WORKER_CALLS);
+      nicknameUpdateBatches.push(usersStatusDocs.slice(startIndex, end));
+      startIndex = end;
+    }
+
+    for (let i = 0; i < nicknameUpdateBatches.length; i++) {
+      const promises = [];
+      const usersStatusDocsBatch = nicknameUpdateBatches[i];
+      usersStatusDocsBatch.forEach((document) => {
+        const doc = document.data();
+        const userId = doc.userId;
+
+        const { futureStatus = {}, currentStatus = {} } = doc;
+        const { state: futureState } = futureStatus;
+        const { state: currentState } = currentStatus;
+
+        if (currentState === userState.OOO && today <= currentStatus.until) {
+          promises.push(usersUtils.updateNickname(userId, currentStatus));
+        } else if (
+          futureState === userState.OOO &&
+          today + 3 * ONE_DAY_IN_MS >= futureStatus.from &&
+          today <= futureStatus.until
+        ) {
+          promises.push(usersUtils.updateNickname(userId, futureStatus));
+        } else {
+          promises.push(usersUtils.updateNickname(userId));
+        }
+      });
+
+      const settledPromises = await Promise.all(promises);
+      nicknameUpdatePromises.push(...settledPromises);
+
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+
+    const successfulUpdates = nicknameUpdatePromises.length;
+
+    const res = {
+      totalUsersStatus,
+      successfulNicknameUpdates: successfulUpdates,
+      unsuccessfulNicknameUpdates: totalUsersStatus - successfulUpdates,
+    };
+    return res;
+  } catch (err) {
+    logger.error(`Error while retrieving users status documents: ${err}`);
+    throw err;
+  }
+};
+
 const updateIdle7dUsersOnDiscord = async () => {
   let totalIdle7dUsers = 0;
   const totalGroupIdle7dRolesApplied = { count: 0, response: [] };
@@ -542,15 +660,18 @@ const updateIdle7dUsersOnDiscord = async () => {
 
 module.exports = {
   createNewRole,
+  removeMemberGroup,
   getGroupRolesForUser,
   getAllGroupRoles,
   getGroupRoleByName,
   updateGroupRole,
   addGroupRoleToMember,
   isGroupRoleExists,
+  deleteRoleFromDatabase,
   updateDiscordImageForVerification,
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
   updateIdleUsersOnDiscord,
+  updateUsersNicknameStatus,
   updateIdle7dUsersOnDiscord,
 };

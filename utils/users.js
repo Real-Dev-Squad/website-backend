@@ -1,6 +1,9 @@
 const { fetchUser } = require("../models/users");
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
+const { months, discordNicknameLength } = require("../constants/users");
+const dataAccessLayer = require("../services/dataAccessLayer");
+const discordService = require("../services/discordService");
 
 const addUserToDBForTest = async (userData) => {
   await userModel.add(userData);
@@ -218,6 +221,56 @@ const parseSearchQuery = (queryString) => {
   return searchParams;
 };
 
+/**
+ * Generates discord nickname for a user
+ *
+ * @param {string} username - The discord username of the user.
+ * @returns {string} - Nickname of the user.
+ */
+const generateOOONickname = (username = "", from, until) => {
+  if (!from && !until) return username;
+  const untilDate = new Date(Number(until));
+  const untilDay = untilDate.getDate();
+  const untilMonth = months[untilDate.getMonth()];
+
+  const fromDate = new Date(Number(from));
+  const fromDay = fromDate.getDate();
+  const fromMonth = months[fromDate.getMonth()];
+
+  const oooMessage = `(OOO ${fromMonth} ${fromDay} - ${untilMonth} ${untilDay})`;
+
+  // the max length of the nickname should be discord nickname length limit - OOO message length
+  // the extra 1 is for the space between ooo date and the nickname
+  const nicknameLen = discordNicknameLength - oooMessage.length - 1;
+  return `${username.substring(0, nicknameLen)} ${oooMessage}`;
+};
+
+/**
+ * @param userId { string }: Id of the User
+ * @param status { object: { from?: number, until: number }}: OOO date object
+ * @returns Promise<object>
+ */
+const updateNickname = async (userId, status = {}) => {
+  try {
+    const { user: { discordId, username } = {} } = await dataAccessLayer.retrieveUsers({ id: userId });
+    if (!discordId || !username) {
+      throw new Error("Username or discordId unavailable");
+    }
+    try {
+      const nickname = generateOOONickname(username, status.from, status.until);
+
+      const response = await discordService.setUserDiscordNickname(nickname, discordId);
+      return response;
+    } catch (err) {
+      logger.error(`${username} Error while updating user's nickname`);
+      throw err;
+    }
+  } catch (err) {
+    logger.error(`Error while retrieving discord id and username for ${userId}: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   addUserToDBForTest,
   getUserId,
@@ -231,4 +284,6 @@ module.exports = {
   getUserIdElseUndefined,
   getRoleToUpdate,
   parseSearchQuery,
+  generateOOONickname,
+  updateNickname,
 };

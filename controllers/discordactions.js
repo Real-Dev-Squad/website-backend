@@ -151,6 +151,21 @@ const addGroupRoleToMember = async (req, res) => {
   }
 };
 
+const deleteRole = async (req, res) => {
+  try {
+    const { roleid, userid } = req.body;
+    const { wasSuccess } = await discordRolesModel.removeMemberGroup(roleid, userid);
+    if (wasSuccess) {
+      return res.status(200).json({ message: "Role deleted successfully" });
+    } else {
+      return res.status(400).json({ message: "Role deletion failed" });
+    }
+  } catch (error) {
+    logger.error(`Error while deleting role: ${error}`);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 /**
  * Gets all group-roles
  * @param req {Object} - Express request object
@@ -291,6 +306,27 @@ const updateDiscordNicknames = async (req, res) => {
   }
 };
 
+/**
+ * Update all user Discord nickname based on status
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const updateUsersNicknameStatus = async (req, res) => {
+  try {
+    const { lastNicknameUpdate = 0 } = req.body;
+    const data = await discordRolesModel.updateUsersNicknameStatus(lastNicknameUpdate);
+    return res.json({
+      message: "Updated discord users nickname based on status",
+      data,
+    });
+  } catch (err) {
+    logger.error(`Error while updating users nickname based on status: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 const syncDiscordGroupRolesInFirestore = async (req, res) => {
   try {
     const discordRoles = await discordServices.getDiscordRoles();
@@ -341,9 +377,11 @@ module.exports = {
   createGroupRole,
   getAllGroupRoles,
   addGroupRoleToMember,
+  deleteRole,
   updateDiscordImageForVerification,
   setRoleIdleToIdleUsers,
   setRoleIdle7DToIdleUsers,
   updateDiscordNicknames,
+  updateUsersNicknameStatus,
   syncDiscordGroupRolesInFirestore,
 };
