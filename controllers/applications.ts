@@ -79,31 +79,7 @@ const addApplication = async (req: any, res: any) => {
 const updateApplication = async (req: any, res: any) => {
   try {
     const { applicationId } = req.params;
-    const { generate_discord_link } = req.query;
     const rawBody = req.body;
-    
-    if (generate_discord_link) {
-      const channelId = config.get("discordNewComersChannelId");
-      const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
-        algorithm: "RS256",
-        expiresIn: config.get("rdsServerlessBot.ttl"),
-      });
-
-      const inviteOptions = {
-        channelId: 'channelId'
-      };
-      const response = await fetch(`${DISCORD_BASE_URL}/invite`, {
-        method: "POST",
-        body: JSON.stringify(inviteOptions),
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-      }).then((response) => response.json());
-
-
-      const inviteCode = response.data.code;
-      const inviteLink = `discord.gg/${inviteCode}`;
-
-      rawBody["discord_invite_link"] = inviteLink;
-    }
 
     const applicationLog = {
       type: logType.APPLICATION_UPDATED,

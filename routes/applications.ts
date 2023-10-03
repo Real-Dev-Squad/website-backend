@@ -15,6 +15,6 @@ router.get(
   applications.getAllOrUserApplication
 );
 router.post("/", authenticate, applicationValidator.validateApplicationData, applications.addApplication);
-router.patch("/:applicationId", authenticate, authorizeRoles([SUPERUSER]), applications.updateApplication);
+router.patch("/:applicationId", authenticate, applicationValidator.validateApplicationUpdateData, authorizeRoles([SUPERUSER]), applications.updateApplication);
 
 module.exports = router;

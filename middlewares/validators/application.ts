@@ -1,8 +1,11 @@
+import { NextFunction } from "express";
+import { CustomRequest, CustomResponse } from "../../types/global";
 import { customWordCountValidator } from "../../utils/customWordCountValidator";
 const joi = require("joi");
 
-const validateApplicationData = async (req, res, next) => {
-  const schema = joi.object()
+const validateApplicationData = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
+  const schema = joi
+    .object()
     .strict()
     .keys({
       userId: joi.string().optional(),
@@ -40,6 +43,25 @@ const validateApplicationData = async (req, res, next) => {
   }
 };
 
+const validateApplicationUpdateData = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      status: joi.string().min(1).optional(),
+      reason: joi.string().min(1).optional(),
+    });
+
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error(`Error in validating recruiter data: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
 module.exports = {
   validateApplicationData,
+  validateApplicationUpdateData,
 };

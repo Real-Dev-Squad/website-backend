@@ -9,7 +9,10 @@
  * 
 **/
 
-module.exports = async (req, res, next) => {
+import { NextFunction } from "express";
+import { CustomRequest, CustomResponse } from "../types/global";
+
+module.exports = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   try {
     const isSuperUser = req.userData.roles.super_user;
     const { id } = req.userData;
