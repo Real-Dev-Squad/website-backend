@@ -1,20 +1,12 @@
-import { Request, Response, application } from "express";
 import { addLog } from "../models/logs";
 import { logType } from "../constants/logs";
+import { CustomRequest, CustomResponse } from "../types/global";
 
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const jwt = require("jsonwebtoken");
 const ApplicationModel = require("../models/applications");
 
-const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
-
-/**
- * Adds a tag to an item with its corresponding a level
- *
- * @param res {Object} - Express response object
- */
-
-const getAllOrUserApplication = async (req: Request, res): Promise<any> => {
+const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
     const { userId } = req.query;
     if (userId) {
@@ -36,7 +28,7 @@ const getAllOrUserApplication = async (req: Request, res): Promise<any> => {
   }
 }
 
-const addApplication = async (req: any, res: any) => {
+const addApplication = async (req: CustomRequest, res: CustomResponse) => {
   const rawData = req.body;
   const application = await ApplicationModel.getUserApplications(req.userData.id);
 
@@ -76,7 +68,7 @@ const addApplication = async (req: any, res: any) => {
   });
 };
 
-const updateApplication = async (req: any, res: any) => {
+const updateApplication = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const { applicationId } = req.params;
     const rawBody = req.body;

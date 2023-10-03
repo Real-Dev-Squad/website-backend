@@ -10,7 +10,6 @@ module.exports = {
   port: port,
   enableFileLogs: false,
   enableConsoleLogs: true,
-  discordNewComersChannelId: "709080951824842783",
 
   services: {
     rdsApi: {
