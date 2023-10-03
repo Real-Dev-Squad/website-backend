@@ -27,12 +27,15 @@ const {
   groupIdle7d,
   roleDataFromDiscord,
   memberGroupData,
+  groupOnboarding31dPlus,
 } = require("../fixtures/discordactions/discordactions");
 const discordServices = require("../../services/discordService");
 const { addGroupRoleToMember } = require("../../models/discordactions");
 const { updateUserStatus } = require("../../models/userStatus");
 const { generateUserStatusData } = require("../fixtures/userStatus/userStatus");
 const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
+const { getOnboarding31DPlusMembers } = require("../fixtures/discordResponse/discord-response");
+
 chai.use(chaiHttp);
 const { userStatusDataForOooState } = require("../fixtures/userStatus/userStatus");
 const { generateCronJobToken } = require("../utils/generateBotToken");
@@ -473,6 +476,77 @@ describe("Discord actions", function () {
           expect(res.body.totalIdle7dUsers).to.be.equal(3);
           expect(res.body.totalGroupIdle7dRolesApplied.count).to.be.equal(3);
           expect(res.body.totalUserRoleToBeAdded).to.be.equal(3);
+          return done();
+        });
+    });
+  });
+
+  describe("PUT /discord-actions/group-onboarding-31d-plus", function () {
+    beforeEach(async function () {
+      userData[0] = {
+        ...userData[0],
+        discordId: "123456789098765432",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[1] = {
+        ...userData[1],
+        discordId: "12345678909867666",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[2] = {
+        ...userData[2],
+        discordId: "123456",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[3] = {
+        ...userData[3],
+        discordId: "9653710123456",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+
+      const allUsers = [userData[0], userData[1], userData[2], userData[3]];
+
+      const addUsersPromises = allUsers.map((user) => addUser(user));
+      const userIds = await Promise.all(addUsersPromises);
+
+      const updateUserStatusPromises = userIds.map((userId, index) => {
+        if (index === 3) return updateUserStatus(userId, generateUserStatusData("IDLE", new Date(), new Date()));
+        return updateUserStatus(userId, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+      });
+      await Promise.all(updateUserStatusPromises);
+
+      await discordRoleModel.add(groupOnboarding31dPlus);
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getOnboarding31DPlusMembers),
+        })
+      );
+    });
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should update role for onboarding users with 31 days completed", function (done) {
+      chai
+        .request(app)
+        .put(`/discord-actions/group-onboarding-31d-plus`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(201);
+          expect(res.body.message).to.be.equal("All Users with 31 Days Plus Onboarding are updated successfully.");
+          expect(res.body.totalOnboardingUsers31DaysCompleted.count).to.be.equal(3);
+          expect(res.body.totalOnboarding31dPlusRoleApplied.count).to.be.equal(3);
+          expect(res.body.totalOnboarding31dPlusRoleRemoved.count).to.be.equal(1);
           return done();
         });
     });

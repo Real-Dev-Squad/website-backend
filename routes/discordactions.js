@@ -12,6 +12,7 @@ const {
   updateDiscordNicknames,
   updateUsersNicknameStatus,
   syncDiscordGroupRolesInFirestore,
+  setRoleToUsersWith31DaysPlusOnboarding,
 } = require("../controllers/discordactions");
 const {
   validateGroupRoleBody,
@@ -48,4 +49,10 @@ router.post(
 );
 router.post("/nickname/status", verifyCronJob, validateUpdateUsersNicknameStatusBody, updateUsersNicknameStatus);
 router.post("/discord-roles", authenticate, authorizeRoles([SUPERUSER]), syncDiscordGroupRolesInFirestore);
+router.put(
+  "/group-onboarding-31d-plus",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  setRoleToUsersWith31DaysPlusOnboarding
+);
 module.exports = router;

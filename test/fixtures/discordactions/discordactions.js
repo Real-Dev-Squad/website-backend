@@ -39,6 +39,12 @@ const memberGroupData = [
   { roleid: "12564", userid: "12350" },
 ];
 
+const groupOnboarding31dPlus = {
+  rolename: "group-onboarding-31d+",
+  roleid: "11334336",
+  createdBy: "1dad23q23j131j",
+};
+
 module.exports = {
   groupData,
   roleData,
@@ -47,4 +53,5 @@ module.exports = {
   requestRoleData,
   groupIdle7d,
   roleDataFromDiscord,
+  groupOnboarding31dPlus,
 };
