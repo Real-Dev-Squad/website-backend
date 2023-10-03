@@ -72,7 +72,7 @@ const addApplication = async (req: any, res: any) => {
   await ApplicationModel.addApplication(data);
 
   return res.status(201).json({
-    message: "User join data and newstatus data added and updated successfully",
+    message: "User application added and newstatus data added and updated successfully",
   });
 };
 
