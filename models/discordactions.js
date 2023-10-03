@@ -692,6 +692,7 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
       (user1) => !usersAlreadyHavingOnboaring31DaysRole.some((user2) => user1.discordId === user2.discordId)
     );
 
+    const errorInFetchingUserDetailsForRoleRemoval = { count: 0, errors: [] };
     const usersForRoleRemoval = await Promise.all(
       usersAlreadyHavingOnboaring31DaysRole.map(async (user) => {
         try {
@@ -701,6 +702,11 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
             return userDetails.user;
           }
         } catch (error) {
+          errorInFetchingUserDetailsForRoleRemoval.count++;
+          errorInFetchingUserDetailsForRoleRemoval.errors.push({
+            error: "Error in getting users to remove role",
+            discordId: user.discordId,
+          });
           logger.error(`Error in getting users to remove role: ${error}`);
         }
         return null;
@@ -803,6 +809,7 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
       totalOnboarding31dPlusRoleNoteApplied,
       totalOnboarding31dPlusRoleRemoved,
       totalOnboarding31dPlusRoleNotRemoved,
+      errorInFetchingUserDetailsForRoleRemoval,
     };
   } catch (error) {
     logger.error(`Error while fetching onboarding users who have completed 31 days ${error.message}`);
