@@ -14,6 +14,7 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const dataAccess = require("../services/dataAccessLayer");
 const { getDiscordMembers, addRoleToUser, removeRoleFromUser } = require("../services/discordService");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const discordMavenRoleId = config.get("discordMavenRoleId");
 const userStatusModel = firestore.collection("usersStatus");
 const usersUtils = require("../utils/users");
 const { getUsersBasedOnFilter, fetchUser } = require("./users");
@@ -671,6 +672,13 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
     const groupOnboardingRoleId = groupOnboardingRole.role.roleid;
     if (!groupOnboardingRole.roleExists) throw new Error("Role does not exist");
 
+    const allOnboardingDevs31DaysCompleted = allOnboardingUsers31DaysCompleted.filter((user) => {
+      const discordMember = discordMembers.find((discordUser) => discordUser.user.id === user.discordId);
+      const isDeveloper = discordMember && discordMember.roles.includes(discordDeveloperRoleId);
+      const isNotMaven = discordMember && !discordMember.roles.includes(discordMavenRoleId);
+      return isDeveloper && isNotMaven;
+    });
+
     const usersAlreadyHavingOnboaring31DaysRole = [];
 
     discordMembers?.forEach((discordUser) => {
@@ -681,7 +689,7 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
       }
     });
 
-    const usersForRoleAddition = allOnboardingUsers31DaysCompleted.filter(
+    const usersForRoleAddition = allOnboardingDevs31DaysCompleted.filter(
       (user1) => !usersAlreadyHavingOnboaring31DaysRole.some((user2) => user1.discordId === user2.discordId)
     );
 
@@ -775,9 +783,11 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
       );
     }
 
-    const totalOnboardingUsers31DaysCompleted = allOnboardingUsers31DaysCompleted.map(
-      ({ id, discordId, username }) => ({ userId: id, discordId, username })
-    );
+    const totalOnboardingUsers31DaysCompleted = allOnboardingDevs31DaysCompleted.map(({ id, discordId, username }) => ({
+      userId: id,
+      discordId,
+      username,
+    }));
 
     return {
       totalOnboardingUsers31DaysCompleted: {
@@ -786,7 +796,10 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
       },
       totalUsersHavingNoDiscordId,
       totalArchivedUsers,
-      usersAlreadyHavingOnboaring31DaysRole,
+      usersAlreadyHavingOnboaring31DaysRole: {
+        users: usersAlreadyHavingOnboaring31DaysRole,
+        count: usersAlreadyHavingOnboaring31DaysRole.length,
+      },
       totalOnboarding31dPlusRoleApplied,
       totalOnboarding31dPlusRoleNoteApplied,
       totalOnboarding31dPlusRoleRemoved,

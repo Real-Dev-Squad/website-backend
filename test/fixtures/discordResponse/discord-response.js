@@ -8,7 +8,7 @@ const getDiscordMembers = [
     nick: "jhon",
     pending: false,
     premium_since: null,
-    roles: ["hero", "racer"],
+    roles: ["hero", "racer", "9876543210"],
     user: {
       id: "123456789098765432",
       username: "jhondoe",
@@ -31,7 +31,7 @@ const getDiscordMembers = [
     nick: "david",
     pending: false,
     premium_since: null,
-    roles: ["hero", "racer"],
+    roles: ["hero", "racer", "9876543210"],
     user: {
       id: "12345678909867666",
       username: "david",
@@ -54,7 +54,7 @@ const getDiscordMembers = [
     nick: "goliath",
     pending: false,
     premium_since: null,
-    roles: ["giant", "hero"],
+    roles: ["giant", "hero", "9876543210"],
     user: {
       id: "123456",
       username: "goliath",
