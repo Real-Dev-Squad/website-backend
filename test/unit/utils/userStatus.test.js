@@ -115,6 +115,15 @@ describe("User Status Functions", function () {
       // Expected result: 1696463999999 Wed Oct 04 2023 23:59:59 UTC
       expect(result).to.equal(1696463999999);
     });
+
+    it("should should return null if timestamp is not a valid timestamp", function () {
+      const timestamp = "random text";
+      const isEndOfDay = true;
+      const result = convertTimestampToUTCStartOrEndOfDay(timestamp, isEndOfDay);
+
+      // Expected result: 1696463999999 Wed Oct 04 2023 23:59:59 UTC
+      expect(result).to.equal(null);
+    });
   });
 
   describe("convertTimestampsToUTC", function () {

@@ -310,6 +310,9 @@ const getNextDayTimeStamp = (timeStamp) => {
  * @returns {number} The converted timestamp.
  */
 const convertTimestampToUTCStartOrEndOfDay = (timestamp, isEndOfDay) => {
+  if (isNaN(timestamp)) {
+    return null;
+  }
   const currTime = new Date(timestamp);
   if (isEndOfDay) {
     currTime.setUTCHours(23, 59, 59, 999);
