@@ -121,7 +121,6 @@ describe("User Status Functions", function () {
       const isEndOfDay = true;
       const result = convertTimestampToUTCStartOrEndOfDay(timestamp, isEndOfDay);
 
-      // Expected result: 1696463999999 Wed Oct 04 2023 23:59:59 UTC
       expect(result).to.equal(null);
     });
   });
