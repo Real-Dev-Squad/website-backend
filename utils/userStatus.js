@@ -22,7 +22,7 @@ const getUserIdBasedOnRoute = (req) => {
 const getTomorrowTimeStamp = () => {
   const today = new Date();
   today.setDate(today.getDate() + 1);
-  today.setHours(0, 0, 0, 0);
+  today.setUTCHours(0, 0, 0, 0);
   return today.getTime();
 };
 
@@ -302,6 +302,52 @@ const getNextDayTimeStamp = (timeStamp) => {
   return nextDateDateTime.getTime();
 };
 
+/**
+ * Converts a timestamp to either the start or end of a day in UTC time.
+ *
+ * @param {number} timestamp - The timestamp to be converted.
+ * @param {boolean} isEndOfDay - A flag indicating whether to convert to the end of the day (true) or the start of the day (false).
+ * @returns {number} The converted timestamp.
+ */
+const convertTimestampToUTCStartOrEndOfDay = (timestamp, isEndOfDay) => {
+  const currTime = new Date(timestamp);
+  if (isEndOfDay) {
+    currTime.setUTCHours(23, 59, 59, 999);
+  } else {
+    currTime.setUTCHours(0, 0, 0, 0);
+  }
+  return currTime.getTime();
+};
+
+/**
+ * Converts timestamps within an input object to either UTC 00:00:00 (start of day)
+ * or UTC 23:59:59 (end of day) based on specified flags.
+ *
+ * @param {Object} obj - The input object containing 'currentStatus' and 'futureStatus' keys.
+ * @returns {Object} The modified input object with timestamps converted to UTC time.
+ */
+const convertTimestampsToUTC = (obj) => {
+  const statusKeys = ["currentStatus", "futureStatus"];
+
+  for (const key of statusKeys) {
+    if (obj[key]) {
+      const { from, until } = obj[key];
+      const fromType = typeof from;
+      const untilType = typeof until;
+
+      if ((fromType === "string" || fromType === "number") && String(from).trim() !== "") {
+        obj[key].from = convertTimestampToUTCStartOrEndOfDay(from, false);
+      }
+
+      if ((untilType === "string" || untilType === "number") && String(until).trim() !== "") {
+        obj[key].until = convertTimestampToUTCStartOrEndOfDay(until, true);
+      }
+    }
+  }
+
+  return obj;
+};
+
 module.exports = {
   getUserIdBasedOnRoute,
   getTomorrowTimeStamp,
@@ -316,4 +362,6 @@ module.exports = {
   generateErrorResponse,
   generateNewStatus,
   getNextDayTimeStamp,
+  convertTimestampToUTCStartOrEndOfDay,
+  convertTimestampsToUTC,
 };
