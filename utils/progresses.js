@@ -5,6 +5,7 @@ const fireStore = require("../utils/firestore");
 const {
   RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
   MILLISECONDS_IN_DAY,
+  PROGRESS_VALID_SORT_FIELDS,
 } = require("../constants/progresses");
 const progressesCollection = fireStore.collection("progresses");
 
@@ -97,8 +98,8 @@ const assertUserOrTaskExists = async (queryParams) => {
  */
 const buildQueryToFetchDocs = (queryParams) => {
   const { type, userId, taskId, orderBy } = queryParams;
-  const orderByField = orderBy ? orderBy.split("-")[orderBy.split("-").length - 1] : "date";
-  const isAscOrDsc = orderBy && orderBy.split("-").length === 1 ? "asc" : "desc";
+  const orderByField = PROGRESS_VALID_SORT_FIELDS[0];
+  const isAscOrDsc = orderBy && PROGRESS_VALID_SORT_FIELDS[0] === orderBy ? "asc" : "desc";
 
   if (type) {
     return progressesCollection.where("type", "==", type).orderBy(orderByField, isAscOrDsc);
