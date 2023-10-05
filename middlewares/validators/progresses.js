@@ -63,9 +63,6 @@ const validateGetProgressRecordsQuery = async (req, res, next) => {
       taskId: joi.string().optional().allow("").messages({
         "string.base": "taskId must be a string",
       }),
-      orderBy: joi.string().optional().allow("").messages({
-        "string.base": "orderBy must be a string",
-      }),
     })
     .xor("type", "userId", "taskId")
     .messages({
