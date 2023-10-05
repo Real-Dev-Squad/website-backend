@@ -18,15 +18,28 @@ const firestore = require("../../utils/firestore");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
+const memberRoleModel = firestore.collection("member-group-roles");
 const userModel = firestore.collection("users");
+const userStatusModel = firestore.collection("usersStatus");
 
-const { groupData, groupIdle7d, roleDataFromDiscord } = require("../fixtures/discordactions/discordactions");
+const {
+  groupData,
+  groupIdle7d,
+  roleDataFromDiscord,
+  memberGroupData,
+  groupOnboarding31dPlus,
+} = require("../fixtures/discordactions/discordactions");
 const discordServices = require("../../services/discordService");
 const { addGroupRoleToMember } = require("../../models/discordactions");
 const { updateUserStatus } = require("../../models/userStatus");
 const { generateUserStatusData } = require("../fixtures/userStatus/userStatus");
 const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
+const { getOnboarding31DPlusMembers } = require("../fixtures/discordResponse/discord-response");
+
 chai.use(chaiHttp);
+const { userStatusDataForOooState } = require("../fixtures/userStatus/userStatus");
+const { generateCronJobToken } = require("../utils/generateBotToken");
+const { CRON_JOB_HANDLER } = require("../../constants/bot");
 
 describe("Discord actions", function () {
   let superUserId;
@@ -34,11 +47,13 @@ describe("Discord actions", function () {
   let userId = "";
   let discordId = "";
   let fetchStub;
+  let jwt;
   beforeEach(async function () {
     fetchStub = sinon.stub(global, "fetch");
     userId = await addUser();
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    jwt = authService.generateAuthToken({ userId });
     discordId = "12345";
 
     const docRefUser0 = photoVerificationModel.doc();
@@ -197,6 +212,68 @@ describe("Discord actions", function () {
     });
   });
 
+  describe("DELETE /discord-actions/roles", function () {
+    beforeEach(async function () {
+      const addRolePromises = memberGroupData.map(async (data) => {
+        await memberRoleModel.add(data);
+      });
+
+      await Promise.all(addRolePromises);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should delete a role successfully", function (done) {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ roleId: "1234", wasSuccess: true }),
+        })
+      );
+      chai
+        .request(app)
+        .delete("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(memberGroupData[0])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Role deleted successfully");
+
+          return done();
+        });
+    });
+
+    it("should handle internal server error", function (done) {
+      const mockdata = {
+        roleid: "mockroleid",
+        userid: "mockUserId",
+      };
+      chai
+        .request(app)
+        .delete("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(mockdata)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(500);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Internal server error");
+          return done();
+        });
+    });
+  });
+
   describe("POST /discord-actions/nicknames/sync", function () {
     beforeEach(async function () {
       userData[0].discordId = "232533446310887426";
@@ -241,6 +318,83 @@ describe("Discord actions", function () {
     });
   });
 
+  describe("POST /discord-actions/nickname/status", function () {
+    let jwtToken;
+    beforeEach(async function () {
+      const { id } = await userModel.add({ ...userData[0] });
+      const statusData = {
+        ...userStatusDataForOooState,
+        futureStatus: {
+          state: "ACTIVE",
+          updatedAt: 1668211200000,
+          from: 1668709800000,
+        },
+        userId: id,
+      };
+      await userStatusModel.add(statusData);
+      jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should successfully return response when user nickname changes", function (done) {
+      const response = "Username updated successfully";
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(response),
+        })
+      );
+
+      chai
+        .request(app)
+        .post("/discord-actions/nickname/status")
+        .set("Authorization", `Bearer ${jwtToken}`)
+        .send({
+          lastNicknameUpdate: (userStatusDataForOooState.currentStatus.updatedAt - 1000 * 60 * 10).toString(),
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res).to.be.an("object");
+          expect(res.body).to.deep.equal({
+            message: "Updated discord users nickname based on status",
+            data: {
+              totalUsersStatus: 1,
+              successfulNicknameUpdates: 1,
+              unsuccessfulNicknameUpdates: 0,
+            },
+          });
+          return done();
+        });
+    }).timeout(10000);
+
+    it("should return object with 0 successful updates when user nickname changes", function (done) {
+      const response = "Error occurred while updating user's nickname";
+      fetchStub.returns(Promise.reject(response));
+
+      chai
+        .request(app)
+        .post("/discord-actions/nickname/status")
+        .set("Authorization", `Bearer ${jwtToken}`)
+        .send({
+          lastNicknameUpdate: (userStatusDataForOooState.currentStatus.updatedAt - 1000 * 60 * 10).toString(),
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(500);
+          expect(res.body.message).to.equal("An internal server error occurred");
+          return done();
+        });
+    });
+  });
   describe("POST /discord-actions/discord-roles", function () {
     before(async function () {
       const value = [discordRoleModel.add(groupData[0]), discordRoleModel.add(groupData[1])];
@@ -322,6 +476,77 @@ describe("Discord actions", function () {
           expect(res.body.totalIdle7dUsers).to.be.equal(3);
           expect(res.body.totalGroupIdle7dRolesApplied.count).to.be.equal(3);
           expect(res.body.totalUserRoleToBeAdded).to.be.equal(3);
+          return done();
+        });
+    });
+  });
+
+  describe("PUT /discord-actions/group-onboarding-31d-plus", function () {
+    beforeEach(async function () {
+      userData[0] = {
+        ...userData[0],
+        discordId: "123456789098765432",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[1] = {
+        ...userData[1],
+        discordId: "12345678909867666",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[2] = {
+        ...userData[2],
+        discordId: "123456",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[3] = {
+        ...userData[3],
+        discordId: "9653710123456",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+
+      const allUsers = [userData[0], userData[1], userData[2], userData[3]];
+
+      const addUsersPromises = allUsers.map((user) => addUser(user));
+      const userIds = await Promise.all(addUsersPromises);
+
+      const updateUserStatusPromises = userIds.map((userId, index) => {
+        if (index === 3) return updateUserStatus(userId, generateUserStatusData("IDLE", new Date(), new Date()));
+        return updateUserStatus(userId, generateUserStatusData("ONBOARDING", new Date(), new Date()));
+      });
+      await Promise.all(updateUserStatusPromises);
+
+      await discordRoleModel.add(groupOnboarding31dPlus);
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getOnboarding31DPlusMembers),
+        })
+      );
+    });
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should update role for onboarding users with 31 days completed", function (done) {
+      chai
+        .request(app)
+        .put(`/discord-actions/group-onboarding-31d-plus`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(201);
+          expect(res.body.message).to.be.equal("All Users with 31 Days Plus Onboarding are updated successfully.");
+          expect(res.body.totalOnboardingUsers31DaysCompleted.count).to.be.equal(3);
+          expect(res.body.totalOnboarding31dPlusRoleApplied.count).to.be.equal(3);
+          expect(res.body.totalOnboarding31dPlusRoleRemoved.count).to.be.equal(1);
           return done();
         });
     });
