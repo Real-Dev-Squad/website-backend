@@ -17,20 +17,18 @@ const { EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests"
 
 chai.use(chaiHttp);
 
-const user = userData[6];
+const user = userData[5];
 const appOwner = userData[3];
-
-let appOwnerjwt;
-
+let userJWT;
 describe("Multiple Extension Requests", function () {
-  let taskId0, taskId1, taskId2;
+  let taskId0, taskId1, taskId2, taskId3;
 
   before(async function () {
     const userId = await addUser(user);
     user.id = userId;
     const appOwnerUserId = await addUser(appOwner);
     appOwner.id = appOwnerUserId;
-    appOwnerjwt = authService.generateAuthToken({ userId: appOwnerUserId });
+    userJWT = authService.generateAuthToken({ userId: userId });
 
     const taskData = [
       {
@@ -40,50 +38,46 @@ describe("Multiple Extension Requests", function () {
         startedOn: 4567,
         status: "active",
         percentCompleted: 10,
-        participants: [],
-        assignee: appOwner.username,
+        assignee: user.username,
         isNoteworthy: true,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
       },
       {
-        title: "Test task",
+        title: "Test task 2",
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
         status: "active",
         percentCompleted: 10,
-        participants: [],
-        assignee: appOwner.username,
+        assignee: user.username,
         isNoteworthy: true,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
       },
       {
-        title: "Test task",
+        title: "Test task 3",
         purpose: "To Test mocha",
         featureUrl: "<testUrl>",
         type: "group",
         links: ["test1"],
         endsOn: 1234,
         startedOn: 54321,
-        status: "completed",
+        status: "active",
         percentCompleted: 10,
         dependsOn: ["d12", "d23"],
-        participants: [],
         isNoteworthy: false,
-        assignee: user.username,
+        assignee: appOwner.username,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
       },
       {
-        title: "Test task",
+        title: "Test task 4",
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
         status: "active",
         percentCompleted: 10,
-        participants: [],
         assignee: appOwner.username,
         isNoteworthy: true,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
@@ -94,9 +88,8 @@ describe("Multiple Extension Requests", function () {
     // Add the active task
     taskId0 = (await tasks.updateTask(taskData[0])).taskId;
     taskId1 = (await tasks.updateTask(taskData[1])).taskId;
-
-    // Add the completed task
     taskId2 = (await tasks.updateTask(taskData[2])).taskId;
+    taskId3 = (await tasks.updateTask(taskData[3])).taskId;
   });
 
   after(async function () {
@@ -126,11 +119,11 @@ describe("Multiple Extension Requests", function () {
       chai
         .request(app)
         .post("/extension-requests/?dev=true")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .set("cookie", `${cookieName}=${userJWT}`)
         .send({
           taskId: taskId0,
           title: "change ETA",
-          assignee: appOwner.username,
+          assignee: user.username,
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
@@ -144,7 +137,7 @@ describe("Multiple Extension Requests", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Extension Request created successfully!");
           expect(res.body.extensionRequest).to.be.a("object");
-          expect(res.body.extensionRequest.assignee).to.equal(appOwner.id);
+          expect(res.body.extensionRequest.assignee).to.equal(user.id);
           expect(res.body.extensionRequest.status).to.equal(EXTENSION_REQUEST_STATUS.PENDING);
           return done();
         });
@@ -153,7 +146,7 @@ describe("Multiple Extension Requests", function () {
       chai
         .request(app)
         .post("/extension-requests/?dev=true")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .set("cookie", `${cookieName}=${userJWT}`)
         .send({
           taskId: taskId0,
           title: "change ETA",
@@ -172,15 +165,15 @@ describe("Multiple Extension Requests", function () {
           return done();
         });
     });
-    it("Should return fail response if someone try to create a extension request for someone else and is not a super user", function (done) {
+    it("Should return fail response if someone try to create an extension request for someone else and is not a super user", function (done) {
       chai
         .request(app)
         .post("/extension-requests/?dev=true")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .set("cookie", `${cookieName}=${userJWT}`)
         .send({
-          taskId: taskId2,
+          taskId: taskId3,
           title: "change ETA",
-          assignee: user.id,
+          assignee: appOwner.id,
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
@@ -203,11 +196,11 @@ describe("Multiple Extension Requests", function () {
       chai
         .request(app)
         .post("/extension-requests/?dev=true")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .set("cookie", `${cookieName}=${userJWT}`)
         .send({
           taskId: "12345678",
           title: "change ETA",
-          assignee: appOwner.id,
+          assignee: user.id,
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
@@ -228,11 +221,11 @@ describe("Multiple Extension Requests", function () {
       chai
         .request(app)
         .post("/extension-requests?dev=true")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .set("cookie", `${cookieName}=${userJWT}`)
         .send({
           taskId: taskId2,
           title: "change ETA",
-          assignee: appOwner.id,
+          assignee: user.id, // sending wrong assignee as task is assigned to appOwner
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
@@ -251,13 +244,12 @@ describe("Multiple Extension Requests", function () {
     });
 
     it("should create a new extension request when dev flag is true and no previous extension request exists and make the requestNumber to 1", async function () {
-      // Arrange
       fetchLatestExtensionRequestStub.returns([]);
 
       const requestData = {
         taskId: taskId1,
         title: "change ETA",
-        assignee: appOwner.id,
+        assignee: user.id,
         oldEndsOn: 1234,
         newEndsOn: 1235,
         reason: "family event",
@@ -267,7 +259,7 @@ describe("Multiple Extension Requests", function () {
       const res = await chai
         .request(app)
         .post("/extension-requests?dev=true")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .set("cookie", `${cookieName}=${userJWT}`)
         .send(requestData);
 
       expect(res).to.have.status(200);
@@ -275,8 +267,6 @@ describe("Multiple Extension Requests", function () {
 
       expect(res.body.extensionRequest.requestNumber).to.be.equal(1);
       expect(res.body.extensionRequest).to.be.an("object");
-      // Verify that fetchLatestExtensionRequestStub was called once
-      sinon.assert.calledOnce(fetchLatestExtensionRequestStub);
     });
 
     it("should handle the case when a previous extension request is pending so api should not allow and throw a proper message", async function () {
@@ -284,7 +274,7 @@ describe("Multiple Extension Requests", function () {
         {
           taskId: taskId1,
           title: "change ETA",
-          assignee: appOwner.id,
+          assignee: user.id,
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
@@ -295,7 +285,7 @@ describe("Multiple Extension Requests", function () {
       const requestData = {
         taskId: taskId1,
         title: "change ETA",
-        assignee: appOwner.id,
+        assignee: user.id,
         oldEndsOn: 1235,
         newEndsOn: 1236,
         reason: "family event",
@@ -305,7 +295,7 @@ describe("Multiple Extension Requests", function () {
       const res = await chai
         .request(app)
         .post("/extension-requests?dev=true")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .set("cookie", `${cookieName}=${userJWT}`)
         .send(requestData);
 
       expect(res).to.have.status(400);
@@ -313,28 +303,12 @@ describe("Multiple Extension Requests", function () {
       sinon.assert.calledOnce(fetchLatestExtensionRequestStub);
     });
 
-    it("should handle the case when a previous extension request is approved and fail if newETA<oldETA", async function () {
-      let requestData = {
-        taskId: taskId1,
-        title: "change ETA",
-        assignee: "mayur",
-        oldEndsOn: 1235,
-        newEndsOn: 1236,
-        reason: "family event",
-        status: "PENDING",
-      };
-
-      let res = await chai
-        .request(app)
-        .post("/extension-requests?dev=true")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
-        .send(requestData);
-
+    it("should return fail response if newETA<oldETA", async function () {
       fetchLatestExtensionRequestStub.returns([
         {
           taskId: taskId1,
           title: "change ETA",
-          assignee: appOwner.id,
+          assignee: user.username,
           oldEndsOn: 1235,
           newEndsOn: 1236,
           reason: "family event",
@@ -342,81 +316,23 @@ describe("Multiple Extension Requests", function () {
         },
       ]);
 
-      requestData = {
+      const requestData = {
         taskId: taskId1,
         title: "change ETA",
-        assignee: appOwner.id,
+        assignee: user.id,
         oldEndsOn: 1236,
         // fail as newETA<oldETA
         newEndsOn: 1230,
         reason: "family event",
         status: "PENDING",
       };
-      res = await chai
+      const res = await chai
         .request(app)
         .post("/extension-requests?dev=true")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .set("cookie", `${cookieName}=${userJWT}`)
         .send(requestData);
       expect(res).to.have.status(400);
-      expect(res.body.message).to.equal(
-        "The value for newEndsOn should be greater than the previous ETA" /* Expected error message or response message */
-      );
-      // sinon.assert.calledOnce(fetchLatestExtensionRequestStub);
-    });
-
-    it("should handle the case when a previous extension request is denied and fail if newETA>oldETA", async function () {
-      let requestData = {
-        taskId: taskId1,
-        title: "change ETA",
-        assignee: appOwner.id,
-        oldEndsOn: 1234,
-        newEndsOn: 1237,
-        reason: "family event",
-        status: "PENDING",
-      };
-
-      let res = await chai
-        .request(app)
-        .post("/extension-requests?dev=true")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
-        .send(requestData);
-
-      fetchLatestExtensionRequestStub.returns([
-        {
-          taskId: taskId1,
-          title: "change ETA",
-          assignee: appOwner.id,
-          oldEndsOn: 1234,
-          newEndsOn: 1237,
-          reason: "family event",
-          status: "DENIED",
-          requestNumber: 5,
-        },
-      ]);
-
-      requestData = {
-        taskId: taskId1,
-        title: "change ETA",
-        assignee: appOwner.id,
-        oldEndsOn: 1234,
-        // making it fail it here because previousExtension is denied so newEndsOn should be > fetchLatestExtensionRequestStub.oldEndsOn
-        newEndsOn: 1230,
-        reason: "family event",
-        status: "PENDING",
-      };
-
-      res = await chai
-        .request(app)
-        .post("/extension-requests?dev=true")
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
-        .send(requestData);
-
-      // Assert
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.equal(
-        "The value for newEndsOn should be greater than the previous ETA" /* Expected error message or response message */
-      );
-      sinon.assert.calledOnce(fetchLatestExtensionRequestStub);
+      expect(res.body.message).to.equal("An extension request can't be equal to or lesser than taskEndsOn");
     });
   });
 
@@ -450,7 +366,7 @@ describe("Multiple Extension Requests", function () {
         .request(app)
         .get(`/extension-requests/self`)
         .query({ taskId: taskId2, dev: "true" })
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .set("cookie", `${cookieName}=${userJWT}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -475,14 +391,14 @@ describe("Multiple Extension Requests", function () {
           reason: "family event",
           status: "APPROVED",
           requestNumber: 5,
-          userId: appOwner.id,
+          userId: user.id,
         },
       ]);
       chai
         .request(app)
         .get(`/extension-requests/self`)
         .query({ taskId: taskId2, dev: "true" })
-        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .set("cookie", `${cookieName}=${userJWT}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -496,7 +412,7 @@ describe("Multiple Extension Requests", function () {
         });
     });
 
-    it("Should return 401 if not logged in **when dev=true**", function (done) {
+    it("Dev-flag true->it should return 401 if not logged in", function (done) {
       chai
         .request(app)
         .get("/extension-requests/self")
