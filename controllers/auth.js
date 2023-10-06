@@ -8,7 +8,6 @@ const {
   DATA_ADDED_SUCCESSFULLY,
   USER_DOES_NOT_EXIST_ERROR,
 } = require("../constants/errorMessages");
-const { generateUniqueToken } = require("../utils/generateUniqueToken");
 
 /**
  * Makes authentication call to GitHub statergy
@@ -18,7 +17,15 @@ const { generateUniqueToken } = require("../utils/generateUniqueToken");
  * @param next {Function} - Express middleware function
  */
 const githubAuthLogin = (req, res, next) => {
-  const redirectURL = req.query.redirectURL;
+  let { sourceUtm, redirectURL } = req.query;
+
+  const isMobileApp = sourceUtm === "rds-mobile-app";
+
+  if (isMobileApp) {
+    const newUrl = new URL(redirectURL);
+    newUrl.searchParams.set("isMobileApp", true);
+    redirectURL = newUrl.toString();
+  }
   return passport.authenticate("github", {
     scope: ["user:email"],
     state: redirectURL,
@@ -34,11 +41,16 @@ const githubAuthLogin = (req, res, next) => {
  */
 const githubAuthCallback = (req, res, next) => {
   let userData;
+  let isMobileApp = false;
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
   let authRedirectionUrl = rdsUiUrl;
   if ("state" in req.query) {
     try {
       const redirectUrl = new URL(req.query.state);
+      if (redirectUrl.searchParams.get("isMobileApp") === "true") {
+        isMobileApp = true;
+        redirectUrl.searchParams.delete("isMobileApp");
+      }
       if (`.${redirectUrl.hostname}`.endsWith(`.${rdsUiUrl.hostname}`)) {
         // Matching *.realdevsquad.com
         authRedirectionUrl = redirectUrl;
@@ -77,7 +89,11 @@ const githubAuthCallback = (req, res, next) => {
       });
 
       if (incompleteUserDetails) authRedirectionUrl = "https://my.realdevsquad.com/new-signup";
-
+      if (isMobileApp) {
+        const newUrl = new URL(authRedirectionUrl);
+        newUrl.searchParams.set("token", token);
+        authRedirectionUrl = newUrl.toString();
+      }
       return res.redirect(authRedirectionUrl);
     })(req, res, next);
   } catch (err) {
@@ -139,7 +155,7 @@ const updateAuthStatus = async (req, res) => {
     const authStatus = req.params.authorization_status;
     let token;
     if (authStatus === "AUTHORIZED") {
-      token = await generateUniqueToken();
+      token = authService.generateAuthToken({ userId });
     }
     const result = await QrCodeAuthModel.updateStatus(userId, authStatus, token);
 
