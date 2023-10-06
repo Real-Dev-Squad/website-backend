@@ -1,19 +1,33 @@
 const chai = require("chai");
+
 const { expect } = chai;
 
 const cleanDb = require("../../utils/cleanDb");
+
 const logsQuery = require("../../../models/logs");
+
 const cacheData = require("../../fixtures/cloudflareCache/data");
+
 const logsData = require("../../fixtures/logs/archievedUsers");
+
+const extensionRequestLogs = require("../../fixtures/logs/extensionRequests");
+
 const app = require("../../../server");
+
 const Sinon = require("sinon");
+
 const { INTERNAL_SERVER_ERROR } = require("../../../constants/errorMessages");
+
 const userData = require("../../fixtures/user/user")();
+
 const addUser = require("../../utils/addUser");
+
 const cookieName = config.get("userToken.cookieName");
+
 const authService = require("../../../services/authService");
 
 const superUser = userData[4];
+
 const userToBeMadeMember = userData[1];
 
 describe("Logs", function () {
@@ -119,6 +133,20 @@ describe("Logs", function () {
       expect(data).to.be.an("array").with.lengthOf(0);
       expect(response).to.have.status(404);
       expect(response.body.message).to.be.equal("Not Found");
+    });
+  });
+  describe("GET /logs/extensionRequests", function () {
+    it("Should fetch all extension request logs", async function () {
+      const { type, meta, body } = extensionRequestLogs.extensionRequestLogsModel[0];
+      const query = {};
+      await logsQuery.addLog(type, meta, body);
+      const data = await logsQuery.fetchLogs(query, type);
+
+      expect(data).to.be.an("array").with.lengthOf.greaterThan(0);
+      expect(data[0]).to.have.property("timestamp").that.is.an("object");
+      expect(data[0].timestamp).to.have.property("_seconds").that.is.a("number");
+      expect(data[0].timestamp).to.have.property("_nanoseconds").that.is.a("number");
+      expect(data[0].meta).to.have.property("taskId").that.is.a("string");
     });
   });
 });
