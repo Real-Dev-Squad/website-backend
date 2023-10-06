@@ -23,7 +23,7 @@ const { updateUserStatus } = require("../../models/userStatus");
 const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
 const userStatusModel = require("../../models/userStatus");
-const { convertTimestampToUTCStartOrEndOfDay } = require("../../utils/userStatus");
+const { convertTimestampToUTCStartOrEndOfDay } = require("../../utils/time");
 
 chai.use(chaiHttp);
 

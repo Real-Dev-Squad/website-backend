@@ -1,5 +1,6 @@
 const { NotFound } = require("http-errors");
 const { userState } = require("../constants/userStatus");
+const { convertTimestampToUTCStartOrEndOfDay } = require("./time");
 
 /* returns the User Id based on the route path
  *  @param req {Object} : Express request object
@@ -303,26 +304,6 @@ const getNextDayTimeStamp = (timeStamp) => {
 };
 
 /**
- * Converts a timestamp to either the start or end of a day in UTC time.
- *
- * @param {number} timestamp - The timestamp to be converted.
- * @param {boolean} isEndOfDay - A flag indicating whether to convert to the end of the day (true) or the start of the day (false).
- * @returns {number} The converted timestamp.
- */
-const convertTimestampToUTCStartOrEndOfDay = (timestamp, isEndOfDay) => {
-  if (isNaN(timestamp)) {
-    return null;
-  }
-  const currTime = new Date(timestamp);
-  if (isEndOfDay) {
-    currTime.setUTCHours(23, 59, 59, 999);
-  } else {
-    currTime.setUTCHours(0, 0, 0, 0);
-  }
-  return currTime.getTime();
-};
-
-/**
  * Converts timestamps within an input object to either UTC 00:00:00 (start of day)
  * or UTC 23:59:59 (end of day) based on specified flags.
  *
@@ -365,6 +346,5 @@ module.exports = {
   generateErrorResponse,
   generateNewStatus,
   getNextDayTimeStamp,
-  convertTimestampToUTCStartOrEndOfDay,
   convertTimestampsToUTC,
 };
