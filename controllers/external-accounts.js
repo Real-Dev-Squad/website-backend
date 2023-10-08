@@ -1,6 +1,6 @@
 const externalAccountsModel = require("../models/external-accounts");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { getDiscordMembers } = require("../services/discordService");
+const { getDiscordMembers, markUserVerified } = require("../services/discordService");
 const { addOrUpdate, getUsersByRole, updateUsersInBatch } = require("../models/users");
 const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/dataAccessLayer");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
@@ -59,6 +59,8 @@ const syncExternalAccountData = async (req, res) => {
     const updateUserDataPromises = [];
     const userUpdatedWithInDiscordFalse = [];
     const updateArchivedPromises = [];
+    const markUsersVerifiedPromises = [];
+    const unverifiedRoleId = config.get("discordUnverifiedRoleId");
 
     rdsUserData.forEach((rdsUser) => {
       rdsUserDataMap[rdsUser.discordId] = {
@@ -88,10 +90,18 @@ const syncExternalAccountData = async (req, res) => {
           },
         };
       }
+
+      const isUserHasUnverifiedRole = discordUser && discordUser.roles.includes(unverifiedRoleId);
+
+      if (isUserHasUnverifiedRole) {
+        markUsersVerifiedPromises.push(markUserVerified(discordUser.user.id));
+      }
+
       updateUserDataPromises.push(addOrUpdate(userData, rdsUser.id));
     }
 
     await Promise.all(updateUserDataPromises);
+    await Promise.all(markUsersVerifiedPromises);
 
     const inDiscordUsers = await getUsersByRole("in_discord");
     inDiscordUsers.forEach((user) => {
@@ -113,6 +123,7 @@ const syncExternalAccountData = async (req, res) => {
       discordUsers: discordUserData.length,
       userUpdatedWithInDiscordFalse: userUpdatedWithInDiscordFalse.length,
       usersMarkedUnArchived: updateArchivedPromises.length,
+      usersMarkVerified: markUsersVerifiedPromises.length,
       message: "Data Sync Complete",
     });
   } catch (err) {

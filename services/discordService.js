@@ -107,6 +107,17 @@ const setUserDiscordNickname = async (userName, discordId) => {
   }
 };
 
+const markUserVerified = async (discordId) => {
+  try {
+    const unverifiedRoleId = config.get("discordUnverifiedRoleId");
+    const res = await removeRoleFromUser(unverifiedRoleId, discordId);
+    return res;
+  } catch (err) {
+    logger.error("Error in removing unverified role");
+    throw err;
+  }
+};
+
 module.exports = {
   getDiscordMembers,
   getDiscordRoles,
@@ -114,4 +125,5 @@ module.exports = {
   addRoleToUser,
   removeRoleFromUser,
   setUserDiscordNickname,
+  markUserVerified,
 };

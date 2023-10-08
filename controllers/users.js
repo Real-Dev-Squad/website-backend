@@ -12,7 +12,7 @@ const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { OVERDUE_TASKS } = require("../constants/users");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
-const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
+const { setInDiscordFalseScript, setUserDiscordNickname, markUserVerified } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
 const { fetchAllUsers, fetchUser } = require("../models/users");
@@ -371,6 +371,12 @@ const updateSelf = async (req, res) => {
     }
 
     const user = await userQuery.addOrUpdate(req.body, userId);
+
+    if (req.body.discordId) {
+      // new user runs the verify command
+      const { user } = await dataAccess.retrieveUsers({ id: userId });
+      await markUserVerified(user.discordId);
+    }
 
     if (!user.isNewUser) {
       // Success criteria, user finished the sign up process.
