@@ -97,6 +97,7 @@ module.exports = () => {
       roles: {
         restricted: false,
         app_owner: true,
+        archived: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
@@ -213,6 +214,7 @@ module.exports = () => {
         archived: false,
         member: true,
         in_discord: true,
+        designer: true,
       },
       twitter_id: "RitvikJamwal4u",
       linkedin_id: "ritvik-jamwal4u",
@@ -235,6 +237,7 @@ module.exports = () => {
         member: true,
         archived: false,
         in_discord: true,
+        product_manager: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
@@ -257,6 +260,7 @@ module.exports = () => {
       },
       roles: {
         member: true,
+        maven: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",

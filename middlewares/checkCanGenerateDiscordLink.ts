@@ -18,8 +18,8 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
     return res.boom.forbidden("Archived users cannot generate invite");
   }
 
-  if (!roles.maven && !roles.designer && profileStatus !== "VERIFIED") {
-    return res.boom.forbidden("Only mavens and designers can generate discord link directly, others need to have verified profile status");
+  if (!roles.maven && !roles.designer && !roles.product_manager && profileStatus !== "VERIFIED") {
+    return res.boom.forbidden("Only mavens, product managers and designers can generate discord link directly, others need to have verified profile status");
   }
 
   return next();

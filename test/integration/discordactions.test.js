@@ -9,6 +9,11 @@ const cleanDb = require("../utils/cleanDb");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
 const superUser = userData[4];
+const archievedUser = userData[3];
+const developerUserWithoutApprovedProfileStatus = userData[6];
+const designerUser = userData[8];
+const productManagerUser = userData[9];
+const mavenUser = userData[10];
 
 const config = require("config");
 const sinon = require("sinon");
@@ -25,8 +30,18 @@ chai.use(chaiHttp);
 
 describe("Discord actions", function () {
   let superUserId;
+  let archievedUserId;
+  let designerUserId;
+  let mavenUserId;
+  let productManagerUserId;
+  let developerUserWithoutApprovedProfileStatusId;
   let superUserAuthToken;
   let userAuthToken;
+  let developerUserWithoutApprovedProfileStatusToken;
+  let designerAuthToken;
+  let mavenAuthToken;
+  let productManagerAuthToken;
+  let archievedUserToken;
   let userId = "";
   let discordId = "";
   let fetchStub;
@@ -219,5 +234,113 @@ describe("Discord actions", function () {
     });
   });
 
-  describe("POST /discord-actions/invite", function () {});
+  describe("POST /discord-actions/invite", function () {
+    it("should return 403 if the userId in the query param is not equal to the user of the user and user is not a super user", async function () {
+      const res = await chai
+        .request(app)
+        .post(`/discord-actions/invite?userId=${superUserId}`)
+        .set("cookie", `${cookieName}=${userAuthToken}`);
+      expect(res).to.have.status(403);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.be.equal("User should be super user to generate link for other users");
+    });
+
+    it("should return 403 if the user has discord id in their user object, which means user is already in discord", async function () {
+      const res = await chai
+        .request(app)
+        .post(`/discord-actions/invite`)
+        .set("cookie", `${cookieName}=${userAuthToken}`);
+      expect(res).to.have.status(403);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.be.equal("Only users who have never joined discord can generate invite link");
+    });
+
+    it("should return 403 if user has role archieved", async function () {
+      archievedUserId = await addUser(archievedUser);
+      archievedUserToken = authService.generateAuthToken({ userId: archievedUserId });
+      const res = await chai
+        .request(app)
+        .post(`/discord-actions/invite`)
+        .set("cookie", `${cookieName}=${archievedUserToken}`);
+      expect(res).to.have.status(403);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.be.equal("Archived users cannot generate invite");
+    });
+
+    it("should return 403 if the user doesn't have role designer, product_manager, or mavens", async function () {
+      developerUserWithoutApprovedProfileStatusId = await addUser(developerUserWithoutApprovedProfileStatus);
+      developerUserWithoutApprovedProfileStatusToken = authService.generateAuthToken({
+        userId: developerUserWithoutApprovedProfileStatusId,
+      });
+      const res = await chai
+        .request(app)
+        .post(`/discord-actions/invite`)
+        .set("cookie", `${cookieName}=${developerUserWithoutApprovedProfileStatusToken}`);
+      expect(res).to.have.status(403);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.be.equal(
+        "Only mavens, product managers and designers can generate discord link directly, others need to have verified profile status"
+      );
+    });
+
+    it("should generate discord link if user is a product mananger", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 201,
+          json: () => Promise.resolve({ data: { code: "xyz" } }),
+        })
+      );
+
+      productManagerUserId = await addUser(productManagerUser);
+      productManagerAuthToken = authService.generateAuthToken({ userId: productManagerUserId });
+      const res = await chai
+        .request(app)
+        .post(`/discord-actions/invite`)
+        .set("cookie", `${cookieName}=${productManagerAuthToken}`);
+
+      expect(res).to.have.status(201);
+      expect(res.body.message).to.be.equal("invite generated successfully");
+      expect(res.body.inviteLink).to.be.equal("discord.gg/xyz");
+    });
+
+    it("should generate discord link if user is a designer", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 201,
+          json: () => Promise.resolve({ data: { code: "zlmfasd" } }),
+        })
+      );
+
+      designerUserId = await addUser(designerUser);
+      designerAuthToken = authService.generateAuthToken({ userId: designerUserId });
+      const res = await chai
+        .request(app)
+        .post(`/discord-actions/invite`)
+        .set("cookie", `${cookieName}=${designerAuthToken}`);
+
+      expect(res).to.have.status(201);
+      expect(res.body.message).to.be.equal("invite generated successfully");
+      expect(res.body.inviteLink).to.be.equal("discord.gg/zlmfasd");
+    });
+
+    it("should generate discord link if user is a maven", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 201,
+          json: () => Promise.resolve({ data: { code: "asdfdsfsd" } }),
+        })
+      );
+
+      mavenUserId = await addUser(mavenUser);
+      mavenAuthToken = authService.generateAuthToken({ userId: mavenUserId });
+      const res = await chai
+        .request(app)
+        .post(`/discord-actions/invite`)
+        .set("cookie", `${cookieName}=${mavenAuthToken}`);
+
+      expect(res).to.have.status(201);
+      expect(res.body.message).to.be.equal("invite generated successfully");
+      expect(res.body.inviteLink).to.be.equal("discord.gg/asdfdsfsd");
+    });
+  });
 });

@@ -202,7 +202,7 @@ const generateInviteForUser = async (req, res) => {
 
     await discordActionModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
 
-    return res.json({
+    return res.status(201).json({
       message: "invite generated successfully",
       inviteLink,
     });
