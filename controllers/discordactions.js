@@ -215,6 +215,10 @@ const generateInviteForUser = async (req, res) => {
 const getUserDiscordInvite = async (req, res) => {
   try {
     const { userId } = req.query;
+    const isSuperUser = req.userData.roles.super_user;
+
+    if (userId && !isSuperUser) return res.boom.forbidden("User should be super user to get link for other users");
+
     const userIdForInvite = userId || req.userData.id;
 
     const modelResponse = await discordActionModel.getUserDiscordInvite(userIdForInvite);

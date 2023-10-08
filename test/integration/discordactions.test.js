@@ -20,12 +20,13 @@ const discordRoleModel = firestore.collection("discord-roles");
 const userModel = firestore.collection("users");
 
 const { groupData } = require("../fixtures/discordactions/discordactions");
-const { addGroupRoleToMember } = require("../../models/discordactions");
+const { addGroupRoleToMember, addInviteToInviteModel } = require("../../models/discordactions");
 chai.use(chaiHttp);
 
 describe("Discord actions", function () {
   let superUserId;
   let superUserAuthToken;
+  let userAuthToken;
   let userId = "";
   let discordId = "";
   let fetchStub;
@@ -34,6 +35,7 @@ describe("Discord actions", function () {
     userId = await addUser();
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    userAuthToken = authService.generateAuthToken({ userId: userId });
     discordId = "12345";
 
     const docRefUser0 = photoVerificationModel.doc();
@@ -167,4 +169,55 @@ describe("Discord actions", function () {
         });
     });
   });
+
+  describe("GET /discord-actions/invite", function () {
+    it("should return the invite for the user if no userId is provided in the params and the invite exists", async function () {
+      const inviteId = await addInviteToInviteModel({ userId: superUserId, inviteLink: "discord.gg/apQYT7HB" });
+
+      const res = await chai
+        .request(app)
+        .get("/discord-actions/invite")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body).to.deep.equal({
+        message: "Invite returned successfully",
+        inviteResponse: {
+          id: inviteId,
+          inviteLink: "discord.gg/apQYT7HB",
+          userId: superUserId,
+        },
+      });
+    });
+
+    it("Should return the invite for other user if the userId is provided in the query and the user is super user", async function () {
+      const inviteId = await addInviteToInviteModel({ userId: userId, inviteLink: "discord.gg/apQYT7HA" });
+      const res = await chai
+        .request(app)
+        .get(`/discord-actions/invite?userId=${userId}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body).to.deep.equal({
+        message: "Invite returned successfully",
+        inviteResponse: {
+          id: inviteId,
+          inviteLink: "discord.gg/apQYT7HA",
+          userId: userId,
+        },
+      });
+    });
+
+    it("should return 403 if the other user's id is provided and the user is not a super user", async function () {
+      const res = await chai
+        .request(app)
+        .get(`/discord-actions/invite?userId=${superUserId}`)
+        .set("cookie", `${cookieName}=${userAuthToken}`);
+      expect(res).to.have.status(403);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.be.equal("User should be super user to get link for other users");
+    });
+  });
+
+  describe("POST /discord-actions/invite", function () {});
 });
