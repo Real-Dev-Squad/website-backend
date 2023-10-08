@@ -15,31 +15,33 @@ const cookieName = config.get("userToken.cookieName");
 
 const appOwner = userData[3];
 const superUser = userData[4];
+const secondUser = userData[0];
 
 chai.use(chaiHttp);
 
 let userId: string;
 let superUserId: string;
+let secondUserId: string;
 let jwt: string;
 let superUserJwt: string;
-let applicationId1;
-let applicationId2;
+let secondUserJwt: string;
+let applicationId1: string;
+let applicationId2: string;
 
-describe.only("Application", function () {
+describe("Application", function () {
   before(async function () {
     userId = await addUser(appOwner);
     superUserId = await addUser(superUser);
+    secondUserId = await addUser(secondUser);
     jwt = authService.generateAuthToken({ userId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
+    secondUserJwt = authService.generateAuthToken({ userId: secondUserId });
     const applicationOne = { ...applicationsData[0], userId };
-    const applicationTwo = { ...applicationsData[1], superUserId };
+    const applicationTwo = { ...applicationsData[1], userId: superUserId };
 
-    const promises = [
-      applicationModel.addApplication(applicationOne),
-      applicationModel.addApplication(applicationTwo)
-    ];
+    const promises = [applicationModel.addApplication(applicationOne), applicationModel.addApplication(applicationTwo)];
     const [id1, id2] = await Promise.all(promises);
-    console.log(id1, id2, 'userId main')
+    console.log(id1, id2, "userId main");
     applicationId1 = id1;
     applicationId2 = id2;
   });
@@ -61,7 +63,7 @@ describe.only("Application", function () {
 
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("application returned successfully!");
+          expect(res.body.message).to.equal("applications returned successfully!");
           expect(res.body.applications).to.be.a("array");
 
           return done();
@@ -105,7 +107,7 @@ describe.only("Application", function () {
         });
     });
 
-    it("should return the user object if the userId of user is same as userId in the application object", function (done) {
+    it("should return the application object if the userId of user is same as userId in the application object", function (done) {
       chai
         .request(app)
         .get(`/applications?userId=${userId}`)
@@ -149,7 +151,7 @@ describe.only("Application", function () {
       chai
         .request(app)
         .post(`/applications`)
-        .set("cookie", `${cookieName}=${jwt}`)
+        .set("cookie", `${cookieName}=${secondUserJwt}`)
         .send({
           ...applicationsData[2],
         })
@@ -159,16 +161,16 @@ describe.only("Application", function () {
           }
 
           expect(res).to.have.status(201);
-          expect(res.body.message).to.be.equal("User join data and newstatus data added and updated successfully");
+          expect(res.body.message).to.be.equal("User application added.");
           return done();
         });
     });
 
-    it("should return 409 if the user data is already submitted and the status is not there", function(done) {
+    it("should return 409 if the user data is already submitted and the status is not there", function (done) {
       chai
         .request(app)
         .post(`/applications`)
-        .set("cookie", `${cookieName}=${jwt}`)
+        .set("cookie", `${cookieName}=${secondUserJwt}`)
         .send({
           ...applicationsData[2],
         })
@@ -181,7 +183,7 @@ describe.only("Application", function () {
           expect(res.body.message).to.be.equal("User data is already present!");
           return done();
         });
-    })
+    });
   });
 
   describe("PATCH /application/:applicationId", function () {
@@ -191,7 +193,7 @@ describe.only("Application", function () {
         .patch(`/applications/${applicationId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
-          status: 'accepted',
+          status: "accepted",
         })
         .end((err, res) => {
           if (err) {
@@ -202,7 +204,7 @@ describe.only("Application", function () {
           expect(res.body.message).to.be.equal("Application updated successfully!");
           return done();
         });
-    })
+    });
 
     it("should return 401 if the user is not super user", function (done) {
       chai
@@ -221,6 +223,6 @@ describe.only("Application", function () {
           expect(res.body.message).to.be.equal("You are not authorized for this action.");
           return done();
         });
-    })
-  })
+    });
+  });
 });

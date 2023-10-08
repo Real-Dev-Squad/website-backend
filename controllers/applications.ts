@@ -19,7 +19,7 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
 
     const applications = await ApplicationModel.getAllApplications();
     return res.json({
-      message: "application returned successfully!",
+      message: "applications returned successfully!",
       applications,
     });
   } catch (err) {
@@ -31,8 +31,7 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
 const addApplication = async (req: CustomRequest, res: CustomResponse) => {
   const rawData = req.body;
   const application = await ApplicationModel.getUserApplications(req.userData.id);
-
-  if (application && !application.status) {
+  if (!application.notFound && !application.status) {
     return res.status(409).json({
       message: "User data is already present!",
     });
@@ -64,7 +63,7 @@ const addApplication = async (req: CustomRequest, res: CustomResponse) => {
   await ApplicationModel.addApplication(data);
 
   return res.status(201).json({
-    message: "User application added and newstatus data added and updated successfully",
+    message: "User application added.",
   });
 };
 

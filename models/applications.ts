@@ -27,9 +27,12 @@ const getUserApplications = async (userId: string) => {
   try {
     const application = await ApplicationsModel.where("userId", "==", userId).limit(1).get();
     const [applicationDoc] = application.docs;
-
-    return { id: applicationDoc.id, ...applicationDoc.data() };
+    if (applicationDoc) {
+      return { id: applicationDoc.id, ...applicationDoc.data() };
+    }
+    return { notFound: true }
   } catch (err) {
+    console.log(err, 'error')
     logger.log("error in getting user intro", err);
     throw err;
   }
@@ -38,10 +41,6 @@ const getUserApplications = async (userId: string) => {
 const addApplication = async (data: application) => {
   try {
     const application = await ApplicationsModel.add(data);
-    await updateUserStatus(data.userId, {
-      currentStatus: { state: userState.ONBOARDING },
-      monthlyHours: { committed: 4 * data.intro.numberOfHours },
-    });
     return application.id;
   } catch (err) {
     logger.error("Error in adding data", err);
