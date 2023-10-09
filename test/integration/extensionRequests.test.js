@@ -24,7 +24,14 @@ const superUser = userData[4];
 let appOwnerjwt, superUserJwt, jwt;
 
 describe("Extension Requests", function () {
-  let taskId0, taskId1, taskId2, taskId3, extensionRequestId1, extensionRequestId2;
+  let taskId0,
+    taskId1,
+    taskId2,
+    taskId3,
+    extensionRequestId1,
+    extensionRequestId2,
+    extensionRequestId3,
+    extensionRequestId4;
 
   before(async function () {
     const userId = await addUser(user);
@@ -123,8 +130,30 @@ describe("Extension Requests", function () {
       reason: "family event",
       status: "APPROVED",
     };
+
+    const extensionRequest2 = {
+      taskId: taskId3,
+      title: "change ETA",
+      assignee: appOwner.id,
+      oldEndsOn: 1234,
+      newEndsOn: 1235,
+      reason: "family event",
+      status: "PENDING",
+    };
+
+    const extensionRequest3 = {
+      taskId: taskId3,
+      title: "change ETA",
+      assignee: appOwner.id,
+      oldEndsOn: 1234,
+      newEndsOn: 1235,
+      reason: "family event",
+      status: "PENDING",
+    };
     extensionRequestId1 = (await extensionRequests.createExtensionRequest(extensionRequest)).id;
     extensionRequestId2 = (await extensionRequests.createExtensionRequest(extensionRequest1)).id;
+    extensionRequestId3 = (await extensionRequests.createExtensionRequest(extensionRequest2)).id;
+    extensionRequestId4 = (await extensionRequests.createExtensionRequest(extensionRequest3)).id;
   });
 
   after(async function () {
@@ -789,6 +818,79 @@ describe("Extension Requests", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal('"status" is not allowed');
           return done();
+        });
+    });
+
+    it("Extension request log should contain extensionRequestId upon approving request in dev mode", function (done) {
+      chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId3}/status?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "APPROVED",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Extension request APPROVED succesfully");
+          expect(res.body.extensionLog.type).to.equal("extensionRequests");
+          expect(res.body.extensionLog.body.status).to.equal("APPROVED");
+
+          chai
+            .request(app)
+            .get(`/logs/extensionRequests?body.status=APPROVED&meta.extensionRequestId=${extensionRequestId3}`)
+            .set("cookie", `${cookieName}=${superUserJwt}`)
+            .end((err, res) => {
+              if (err) {
+                return done(err);
+              }
+              expect(res.body.logs[0].body.status).to.equal("APPROVED");
+              expect(res.body.logs[0].meta.extensionRequestId).to.equal(extensionRequestId3);
+
+              return done();
+            });
+
+          return null;
+        });
+    });
+    it("Extension request log should contain extensionRequestId upon denying request in dev mode", function (done) {
+      chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId4}/status?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "DENIED",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Extension request DENIED succesfully");
+          expect(res.body.extensionLog.type).to.equal("extensionRequests");
+          expect(res.body.extensionLog.body.status).to.equal("DENIED");
+
+          chai
+            .request(app)
+            .get(`/logs/extensionRequests?body.status=DENIED&meta.extensionRequestId=${extensionRequestId4}`)
+            .set("cookie", `${cookieName}=${superUserJwt}`)
+            .end((err, res) => {
+              if (err) {
+                return done(err);
+              }
+              expect(res.body.logs[0].body.status).to.equal("DENIED");
+              expect(res.body.logs[0].meta.extensionRequestId).to.equal(extensionRequestId4);
+
+              return done();
+            });
+
+          return null;
         });
     });
   });

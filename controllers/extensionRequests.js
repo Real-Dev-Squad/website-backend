@@ -187,6 +187,7 @@ const updateExtensionRequest = async (req, res) => {
  */
 const updateExtensionRequestStatus = async (req, res) => {
   try {
+    const { dev = "false" } = req.query;
     const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
@@ -196,6 +197,7 @@ const updateExtensionRequestStatus = async (req, res) => {
     const extensionLog = {
       type: "extensionRequests",
       meta: {
+        ...(dev === "true" && { extensionRequestId: req.params.id }), // if flag is present, add extensionRequestId
         taskId: extensionRequest.extensionRequestData.taskId,
         username: req.userData.username,
         userId: req.userData.id,
