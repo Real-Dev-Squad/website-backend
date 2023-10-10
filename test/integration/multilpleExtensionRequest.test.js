@@ -238,7 +238,7 @@ describe("Multiple Extension Requests", function () {
 
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("This task is assigned to some different user");
+          expect(res.body.message).to.equal("This task is assigned to some different user.");
           return done();
         });
     });
@@ -270,17 +270,15 @@ describe("Multiple Extension Requests", function () {
     });
 
     it("should handle the case when a previous extension request is pending so api should not allow and throw a proper message", async function () {
-      fetchLatestExtensionRequestStub.returns([
-        {
-          taskId: taskId1,
-          title: "change ETA",
-          assignee: user.id,
-          oldEndsOn: 1234,
-          newEndsOn: 1235,
-          reason: "family event",
-          status: "PENDING",
-        },
-      ]);
+      fetchLatestExtensionRequestStub.returns({
+        taskId: taskId1,
+        title: "change ETA",
+        assignee: user.id,
+        oldEndsOn: 1234,
+        newEndsOn: 1235,
+        reason: "family event",
+        status: "PENDING",
+      });
 
       const requestData = {
         taskId: taskId1,
@@ -332,36 +330,32 @@ describe("Multiple Extension Requests", function () {
         .set("cookie", `${cookieName}=${userJWT}`)
         .send(requestData);
       expect(res).to.have.status(400);
-      expect(res.body.message).to.equal("An extension request can't be equal to or lesser than taskEndsOn");
+      expect(res.body.message).to.equal("New ETA must be later than the existing ETA.");
     });
   });
 
   let fetchLatestExtensionRequestStub;
   describe("GET /extension-requests/self **when dev flag is true**", function () {
     beforeEach(function () {
-      // Create a Sinon sandbox
       fetchLatestExtensionRequestStub = sinon.stub(extensionRequests, "fetchLatestExtensionRequest");
     });
 
     afterEach(function () {
-      // Restore the stub after each test
       fetchLatestExtensionRequestStub.restore();
     });
 
     it("Dev-flag true->should return success response and an empty array of extensionRequest if assignee is not same as latest one", function (done) {
-      fetchLatestExtensionRequestStub.returns([
-        {
-          taskId: taskId2,
-          title: "change ETA",
-          assignee: "mayur",
-          oldEndsOn: 1234,
-          newEndsOn: 1237,
-          reason: "family event",
-          status: "APPROVED",
-          requestNumber: 5,
-          userId: "ajdf",
-        },
-      ]);
+      fetchLatestExtensionRequestStub.returns({
+        taskId: taskId2,
+        title: "change ETA",
+        assignee: "mayur",
+        oldEndsOn: 1234,
+        newEndsOn: 1237,
+        reason: "family event",
+        status: "APPROVED",
+        requestNumber: 5,
+        userId: "ajdf",
+      });
       chai
         .request(app)
         .get(`/extension-requests/self`)
@@ -380,20 +374,18 @@ describe("Multiple Extension Requests", function () {
         });
     });
 
-    it("Dev-flag true->should return success response and an  array of single extensionRequest if assignee same as latest one", function (done) {
-      fetchLatestExtensionRequestStub.returns([
-        {
-          taskId: taskId2,
-          title: "change ETA",
-          assignee: "mayur",
-          oldEndsOn: 1234,
-          newEndsOn: 1237,
-          reason: "family event",
-          status: "APPROVED",
-          requestNumber: 5,
-          userId: user.id,
-        },
-      ]);
+    it("Dev-flag true->should return success response and a single latestExtensionRequest if assignee same as latest one", function (done) {
+      fetchLatestExtensionRequestStub.returns = {
+        taskId: taskId2,
+        title: "change ETA",
+        assignee: "mayur",
+        oldEndsOn: 1234,
+        newEndsOn: 1237,
+        reason: "family event",
+        status: "APPROVED",
+        requestNumber: 5,
+        userId: user.id,
+      };
       chai
         .request(app)
         .get(`/extension-requests/self`)

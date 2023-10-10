@@ -40,10 +40,10 @@ const createTaskExtensionRequest = async (req, res) => {
         return res.boom.badRequest("Task with this id or taskid doesn't exist.");
       }
       if (task.assignee !== assigneeUsername) {
-        return res.boom.badRequest("This task is assigned to some different user");
+        return res.boom.badRequest("This task is assigned to some different user.");
       }
       if (task.endsOn >= extensionBody.newEndsOn) {
-        return res.boom.badRequest("The value for newEndsOn should be greater than the previous ETA");
+        return res.boom.badRequest("New ETA must be later than the existing ETA.");
       }
       if (extensionBody.oldEndsOn !== task.endsOn) {
         extensionBody.oldEndsOn = task.endsOn;
@@ -53,24 +53,14 @@ const createTaskExtensionRequest = async (req, res) => {
         taskId: extensionBody.taskId,
       });
 
-      if (latestExtensionRequest[0] && latestExtensionRequest[0].status === "PENDING") {
+      if (latestExtensionRequest && latestExtensionRequest.status === EXTENSION_REQUEST_STATUS.PENDING) {
         return res.boom.badRequest("An extension request for this task already exists.");
       }
 
-      // dont allow newETA<taskEndsOnETA
-      if (latestExtensionRequest[0]) {
-        if (latestExtensionRequest[0].status === "APPROVED" || latestExtensionRequest[0].status === "DENIED") {
-          if (extensionBody.newEndsOn < task.endsOn) {
-            return res.boom.badRequest("An extension request can't be equal to or lesser than taskEndsOn date");
-          }
-        }
-      }
-
-      // logic for extension request count
       let requestNumber;
-      if (latestExtensionRequest[0] && latestExtensionRequest[0].userId === assigneeId) {
-        if (latestExtensionRequest[0].requestNumber !== undefined && latestExtensionRequest[0].requestNumber > 0) {
-          requestNumber = latestExtensionRequest[0].requestNumber + 1;
+      if (latestExtensionRequest && latestExtensionRequest.assigneeId === assigneeId) {
+        if (latestExtensionRequest.requestNumber && latestExtensionRequest.requestNumber > 0) {
+          requestNumber = latestExtensionRequest.requestNumber + 1;
           extensionBody = { ...extensionBody, requestNumber };
         } else {
           extensionBody = { ...extensionBody, requestNumber: 2 };
@@ -225,32 +215,30 @@ const getExtensionRequest = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const getSelfExtensionRequests = async (req, res) => {
-  // Inside dev flag it just shows
   const dev = req.query.dev === "true";
-  if (dev) {
-    try {
-      const { id: userId } = req.userData;
-      const { taskId } = req.query;
 
-      if (userId) {
-        let allExtensionRequests = await extensionRequestsQuery.fetchLatestExtensionRequest({
+  try {
+    const { id: userId } = req.userData;
+    const { taskId, status } = req.query;
+
+    if (dev) {
+      if (taskId) {
+        const latestExtensionRequest = await extensionRequestsQuery.fetchLatestExtensionRequest({
           taskId,
         });
 
-        if (allExtensionRequests.length && allExtensionRequests[0].userId !== userId) {
-          allExtensionRequests = [];
+        if (latestExtensionRequest && latestExtensionRequest.assigneeId !== userId) {
+          return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests: [] });
+        } else {
+          return res.json({
+            message: "Extension Requests returned successfully!",
+            allExtensionRequests: [latestExtensionRequest],
+          });
         }
-        return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
+      } else {
+        return res.boom.notFound("User doesn't exist");
       }
-      return res.boom.notFound("User doesn't exist");
-    } catch (error) {
-      logger.error(`Error while fetching extension requests: ${error}`);
-      return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-    }
-  } else {
-    try {
-      const { id: userId } = req.userData;
-      const { taskId, status } = req.query;
+    } else {
       if (userId) {
         const allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
           status,
@@ -258,12 +246,13 @@ const getSelfExtensionRequests = async (req, res) => {
           assignee: userId,
         });
         return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
+      } else {
+        return res.boom.notFound("User doesn't exist");
       }
-      return res.boom.notFound("User doesn't exist");
-    } catch (error) {
-      logger.error(`Error while fetching extension requests: ${error}`);
-      return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
     }
+  } catch (error) {
+    logger.error(`Error while fetching extension requests: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 

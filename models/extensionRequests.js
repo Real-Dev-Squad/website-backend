@@ -159,7 +159,7 @@ const fetchLatestExtensionRequest = async (ExtensionRequestQuery) => {
 
     const request = buildExtensionRequests(extensionRequestSnapshot);
     const updatedRequests = await formatExtensionRequest(request[0]);
-    return [updatedRequests];
+    return updatedRequests;
   } catch (err) {
     logger.error("error getting extension requests", err);
     throw err;
