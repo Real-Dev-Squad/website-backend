@@ -11,6 +11,8 @@ const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
 const cleanDb = require("../utils/cleanDb");
+const goals = require("../../services/goalService");
+const { GET_OR_CREATE_GOAL_USER } = require("../fixtures/goals/Token");
 
 chai.use(chaiHttp);
 
@@ -66,6 +68,8 @@ describe("Goals Site", function () {
 
   describe("GET /token - set goal site token as cookie", function () {
     it("Should set the cookie successfully on the request and return success", function (done) {
+      sinon.stub(goals, "getOrCreateGoalUser").resolves(GET_OR_CREATE_GOAL_USER);
+
       chai
         .request(app)
         .get("/goals/token/")
