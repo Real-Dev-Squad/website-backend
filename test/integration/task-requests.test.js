@@ -204,7 +204,7 @@ describe("Task Requests", function () {
     });
   });
 
-  describe("POST /task-requests - add or updates a task request", function () {
+  describe("POST /task-requests - add a task request", function () {
     describe("When a new task requested is created", function () {
       before(async function () {
         userId = await addUser(member);

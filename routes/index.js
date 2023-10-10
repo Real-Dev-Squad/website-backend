@@ -14,7 +14,7 @@ app.use("/pullrequests", require("./pullrequests.js"));
 app.use("/stocks", require("./stocks.js"));
 app.use("/tasks", require("./tasks.js"));
 app.use("/taskRequests", require("./taskRequests"));
-app.use("task-requests", require("./task-requests"));
+app.use("/task-requests", require("./task-requests"));
 app.use("/trade", require("./trading.js"));
 app.use("/users/status", require("./userStatus.js"));
 app.use("/users", require("./users.js"));
