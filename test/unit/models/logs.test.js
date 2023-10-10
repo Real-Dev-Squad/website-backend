@@ -140,7 +140,7 @@ describe("Logs", function () {
       const extensionRequestId = "y79PXir0s82qNAzeIn8S";
       const response = await chai
         .request(app)
-        .get(`/logs/extensionRequests?meta.extensionRequestId=${extensionRequestId}&isDev=true`)
+        .get(`/logs/extensionRequests?meta.extensionRequestId=${extensionRequestId}&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send();
 
