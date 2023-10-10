@@ -159,6 +159,7 @@ const getSelfExtensionRequests = async (req, res) => {
  */
 const updateExtensionRequest = async (req, res) => {
   try {
+    const { dev = "false" } = req.query;
     const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
@@ -171,7 +172,40 @@ const updateExtensionRequest = async (req, res) => {
       }
     }
 
-    await extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id);
+    const promises = [extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id)];
+    // If flag is present, then only create log for change in ETA/reason by SU
+    if (dev === "true" && (req.body.reason || req.body.newEndsOn || req.body.title)) {
+      const extensionLog = {
+        type: "extensionRequests",
+        meta: {
+          extensionRequestId: req.params.id,
+          taskId: extensionRequest.extensionRequestData.taskId,
+          superUserId: req.userData.id,
+        },
+        body: {
+          // If newEndsOn has been changed by SU
+          ...(req.body.newEndsOn !== extensionRequest.extensionRequestData.newEndsOn && {
+            oldEndsOn: extensionRequest.extensionRequestData.newEndsOn,
+            newEndsOn: req.body.newEndsOn,
+          }),
+
+          // If reason has been changed by SU
+          ...(req.body.reason !== extensionRequest.extensionRequestData.reason && {
+            oldReason: extensionRequest.extensionRequestData.reason,
+            newReason: req.body.reason,
+          }),
+
+          // If title has been changed by SU
+          ...(req.body.title !== extensionRequest.extensionRequestData.title && {
+            oldTitle: extensionRequest.extensionRequestData.title,
+            newTitle: req.body.title,
+          }),
+        },
+      };
+      promises.push(addLog(extensionLog.type, extensionLog.meta, extensionLog.body));
+    }
+    await Promise.all(promises);
+
     return res.status(204).send();
   } catch (err) {
     logger.error(`Error while updating extension request: ${err}`);
