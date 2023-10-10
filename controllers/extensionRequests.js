@@ -58,7 +58,7 @@ const createTaskExtensionRequest = async (req, res) => {
       }
 
       let requestNumber;
-      if (latestExtensionRequest && latestExtensionRequest.assigneeId === assigneeId) {
+      if (latestExtensionRequest && latestExtensionRequest.userId === assigneeId) {
         if (latestExtensionRequest.requestNumber && latestExtensionRequest.requestNumber > 0) {
           requestNumber = latestExtensionRequest.requestNumber + 1;
           extensionBody = { ...extensionBody, requestNumber };
@@ -222,28 +222,34 @@ const getSelfExtensionRequests = async (req, res) => {
     const { taskId, status } = req.query;
 
     if (dev) {
-      if (taskId) {
-        const latestExtensionRequest = await extensionRequestsQuery.fetchLatestExtensionRequest({
-          taskId,
-        });
+      if (userId) {
+        let allExtensionRequests;
+        if (taskId) {
+          const latestExtensionRequest = await extensionRequestsQuery.fetchLatestExtensionRequest({
+            taskId,
+          });
 
-        if (latestExtensionRequest && latestExtensionRequest.assigneeId !== userId) {
-          return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests: [] });
+          if (latestExtensionRequest && latestExtensionRequest.assigneeId !== userId) {
+            allExtensionRequests = [];
+          } else {
+            allExtensionRequests = [latestExtensionRequest];
+          }
         } else {
-          return res.json({
-            message: "Extension Requests returned successfully!",
-            allExtensionRequests: [latestExtensionRequest],
+          allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
+            assignee: userId,
+            status: status || undefined,
           });
         }
+        return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
       } else {
         return res.boom.notFound("User doesn't exist");
       }
     } else {
       if (userId) {
         const allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
-          status,
           taskId,
           assignee: userId,
+          status: status || undefined,
         });
         return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
       } else {
