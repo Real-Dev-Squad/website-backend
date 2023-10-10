@@ -174,8 +174,13 @@ describe("Test Progress Updates API for Tasks", function () {
       taskId2 = taskObject2.taskId;
       taskObject3 = await tasks.updateTask(taskData[2]);
       taskId3 = taskObject3.taskId;
-      const progressData1 = stubbedModelTaskProgressData(userId1, taskId1, 1683957764140, 1683936000000);
-      const progressData2 = stubbedModelTaskProgressData(userId2, taskId2, 1683957764140, 1683936000000);
+      const progressData1 = stubbedModelTaskProgressData(userId1, taskId1, 1683957764140, 1683936000000); // Date:Sat May 13 2023 05:30:00
+      const progressData2 = stubbedModelTaskProgressData(userId2, taskId2, 1683957764140, 1684022400000); // Date:Sun May 14 2023 05:30:00
+      const progressData4 = stubbedModelTaskProgressData(userId1, taskId1, 1684022400000, 1684195200000); // Date:Sun May 16 2023 05:30:00
+      const progressData3 = stubbedModelTaskProgressData(userId2, taskId2, 1683957764140, 1684108800000); // Date:Mon May 15 2023 05:30:00
+
+      await firestore.collection("progresses").doc("taskProgressDocument3").set(progressData3);
+      await firestore.collection("progresses").doc("taskProgressDocument4").set(progressData4);
       await firestore.collection("progresses").doc("taskProgressDocument1").set(progressData1);
       await firestore.collection("progresses").doc("taskProgressDocument2").set(progressData2);
     });
@@ -207,6 +212,67 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
+    it("Gives 400 status when anything other than -date or date is supplied", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?taskId=${taskId1}&orderBy=-randomfield`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(400);
+
+          return done();
+        });
+    });
+
+    it("Returns the progress array with latest date first", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?taskId=${taskId1}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          res.body.data.forEach((progress, idx) => {
+            if (idx !== 0) {
+              expect(res.body.data[idx - 1].date).greaterThan(progress.date);
+            }
+          });
+
+          return done();
+        });
+    });
+
+    it("Returns the progress array with latest date first if query -date is supplied", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?taskId=${taskId1}&orderBy=-date`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          res.body.data.forEach((progress, idx) => {
+            if (idx !== 0) {
+              expect(res.body.data[idx - 1].date).greaterThan(progress.date);
+            }
+          });
+
+          return done();
+        });
+    });
+
+    it("Returns the progress array with oldest date first if query date is supplied", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?taskId=${taskId1}&orderBy=date`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          res.body.data.forEach((progress, idx) => {
+            if (idx !== 0) {
+              expect(progress.date).greaterThan(res.body.data[idx - 1].date);
+            }
+          });
+          return done();
+        });
+    });
+
     it("Returns the progress array for all the tasks", function (done) {
       chai
         .request(app)
@@ -217,7 +283,7 @@ describe("Test Progress Updates API for Tasks", function () {
           expect(res.body).to.have.keys(["message", "data", "count"]);
           expect(res.body.data).to.be.an("array");
           expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
-          expect(res.body.count).to.be.equal(2);
+          expect(res.body.count).to.be.equal(4);
           res.body.data.forEach((progress) => {
             expect(progress).to.have.keys([
               "id",

@@ -182,6 +182,32 @@ describe("tasks", function () {
         expect(task.assignee).to.be.equal(assignee);
       });
     });
+
+    it("should fetch overdue tasks filtered by the assignee passed", async function () {
+      const assignee = "ankur";
+      const status = TASK_STATUS.OVERDUE;
+      const result = await tasks.fetchPaginatedTasks({ assignee, status });
+
+      const filteredTasks = tasksData.filter((task) => task.assignee === assignee);
+
+      expect(result).to.have.property("allTasks");
+      filteredTasks.forEach((task) => {
+        expect(task.assignee).to.be.equal(assignee);
+      });
+    });
+
+    it("should fetch all tasks filtered by the multiple assignees passed", async function () {
+      const assignee = "ankur,akshay";
+      const assigneesArr = assignee.split(",");
+      const result = await tasks.fetchPaginatedTasks({ assignee });
+
+      const filteredTasks = tasksData.filter((task) => assigneesArr.includes(task.assignee));
+
+      expect(result).to.have.property("allTasks");
+      filteredTasks.forEach((task) => {
+        expect(task.assignee).to.be.oneOf(assigneesArr);
+      });
+    });
   });
 
   describe("update Dependency", function () {
@@ -242,6 +268,32 @@ describe("tasks", function () {
       const firestoreResult = (await tasksModel.doc(taskId).get()).data();
       expect(firestoreResult.status).to.be.equal(TASK_STATUS.ASSIGNED);
       expect(firestoreResult.assignee).to.be.equal(userId1);
+    });
+  });
+  describe("getOverdueTasks", function () {
+    beforeEach(async function () {
+      const tasksPromise = tasksData.map(async (task) => {
+        await tasks.updateTask(task);
+      });
+      await Promise.all(tasksPromise);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should return the overdue tasks for the given days", async function () {
+      const days = 10;
+      const overdueTask = { ...tasksData[0] };
+      overdueTask.endsOn = Date.now() / 1000 + 24 * 60 * 60 * 7;
+      await tasks.updateTask(overdueTask);
+      const usersWithOverdueTasks = await tasks.getOverdueTasks(days);
+      expect(usersWithOverdueTasks.length).to.be.equal(5);
+    });
+
+    it("should return all users which have overdue tasks if days is not passed", async function () {
+      const usersWithOverdueTasks = await tasks.getOverdueTasks();
+      expect(usersWithOverdueTasks.length).to.be.equal(4);
     });
   });
 });
