@@ -58,7 +58,7 @@ const createTaskExtensionRequest = async (req, res) => {
       }
 
       let requestNumber;
-      if (latestExtensionRequest && latestExtensionRequest.userId === assigneeId) {
+      if (latestExtensionRequest && latestExtensionRequest.assigneeId === assigneeId) {
         if (latestExtensionRequest.requestNumber && latestExtensionRequest.requestNumber > 0) {
           requestNumber = latestExtensionRequest.requestNumber + 1;
           extensionBody = { ...extensionBody, requestNumber };
