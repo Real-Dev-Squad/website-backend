@@ -174,35 +174,34 @@ const updateExtensionRequest = async (req, res) => {
 
     const promises = [extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id)];
     // If flag is present, then only create log for change in ETA/reason by SU
-    if (dev === "true" && (req.body.reason || req.body.newEndsOn || req.body.title)) {
-      const extensionLog = {
-        type: "extensionRequests",
-        meta: {
-          extensionRequestId: req.params.id,
-          taskId: extensionRequest.extensionRequestData.taskId,
-          superUserId: req.userData.id,
-        },
-        body: {
-          // If newEndsOn has been changed by SU
-          ...(req.body.newEndsOn !== extensionRequest.extensionRequestData.newEndsOn && {
-            oldEndsOn: extensionRequest.extensionRequestData.newEndsOn,
-            newEndsOn: req.body.newEndsOn,
-          }),
+    if (dev === "true") {
+      let body = {};
+      // Check if reason has been changed
+      if (req.body.reason && req.body.reason !== extensionRequest.extensionRequestData.reason) {
+        body = { ...body, oldReason: extensionRequest.extensionRequestData.reason, newReason: req.body.reason };
+      }
+      // Check if newEndsOn has been changed
+      if (req.body.newEndsOn && req.body.newEndsOn !== extensionRequest.extensionRequestData.newEndsOn) {
+        body = { ...body, oldEndsOn: extensionRequest.extensionRequestData.newEndsOn, newEndsOn: req.body.newEndsOn };
+      }
+      // Check if title has been changed
+      if (req.body.title && req.body.title !== extensionRequest.extensionRequestData.title) {
+        body = { ...body, oldTitle: extensionRequest.extensionRequestData.title, newTitle: req.body.title };
+      }
 
-          // If reason has been changed by SU
-          ...(req.body.reason !== extensionRequest.extensionRequestData.reason && {
-            oldReason: extensionRequest.extensionRequestData.reason,
-            newReason: req.body.reason,
-          }),
-
-          // If title has been changed by SU
-          ...(req.body.title !== extensionRequest.extensionRequestData.title && {
-            oldTitle: extensionRequest.extensionRequestData.title,
-            newTitle: req.body.title,
-          }),
-        },
-      };
-      promises.push(addLog(extensionLog.type, extensionLog.meta, extensionLog.body));
+      // Validate if there's any update that actually happened, then only create the log
+      if (Object.keys(body).length > 0) {
+        const extensionLog = {
+          type: "extensionRequests",
+          meta: {
+            extensionRequestId: req.params.id,
+            taskId: extensionRequest.extensionRequestData.taskId,
+            userId: req.userData.id,
+          },
+          body,
+        };
+        promises.push(addLog(extensionLog.type, extensionLog.meta, extensionLog.body));
+      }
     }
     await Promise.all(promises);
 
