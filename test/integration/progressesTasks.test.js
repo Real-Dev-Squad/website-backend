@@ -212,6 +212,18 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
+    it("Gives 400 status when anything other than -date or date is supplied", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?taskId=${taskId1}&orderBy=-randomfield`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(400);
+
+          return done();
+        });
+    });
+
     it("Returns the progress array with latest date first", function (done) {
       chai
         .request(app)
