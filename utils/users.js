@@ -48,6 +48,25 @@ const getUsername = async (userId) => {
 };
 
 /**
+ * Used for receiving first_name & last_name when providing userId
+ *
+ * @param userId {String} - userId of the User.
+ * @returns {Object} Object with first_name and last_name properties.
+ */
+const getFullName = async (userId) => {
+  try {
+    const {
+      // eslint-disable-next-line camelcase
+      user: { first_name, last_name },
+    } = await fetchUser({ userId });
+    // eslint-disable-next-line camelcase
+    return { first_name, last_name };
+  } catch (error) {
+    logger.error("Something went wrong", error);
+    throw error;
+  }
+};
+/**
  * Used for receiving username when providing userId, if not found then returns undefined
  *
  * @param userId {String} - userId of the User.
@@ -275,6 +294,7 @@ module.exports = {
   addUserToDBForTest,
   getUserId,
   getUsername,
+  getFullName,
   getParticipantUserIds,
   getParticipantUsernames,
   getLowestLevelSkill,
