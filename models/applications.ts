@@ -32,7 +32,6 @@ const getUserApplications = async (userId: string) => {
     }
     return { notFound: true }
   } catch (err) {
-    console.log(err, 'error')
     logger.log("error in getting user intro", err);
     throw err;
   }
