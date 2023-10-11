@@ -684,7 +684,7 @@ describe("Users", function () {
       const res = await chai.request(app).get(`/users?dev=true&discordId=${invalidDiscordId}`);
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
-      expect(res.body.message).to.equal("No user found");
+      expect(res.body.message).to.equal("User not found");
     });
 
     it("Should return user id which have overdue tasks", function (done) {

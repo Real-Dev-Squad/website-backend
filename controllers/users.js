@@ -144,7 +144,7 @@ const getUsers = async (req, res) => {
           user = result.user;
           if (!result.userExists) {
             return res.json({
-              message: "No user found",
+              message: "User not found",
               user: null,
             });
           }
