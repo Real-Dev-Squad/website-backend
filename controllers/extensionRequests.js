@@ -43,7 +43,7 @@ const createTaskExtensionRequest = async (req, res) => {
         return res.boom.badRequest("This task is assigned to some different user.");
       }
       if (task.endsOn >= extensionBody.newEndsOn) {
-        return res.boom.badRequest("New ETA must be later than the existing ETA.");
+        return res.boom.badRequest("New ETA must be greater than Old ETA");
       }
       if (extensionBody.oldEndsOn !== task.endsOn) {
         extensionBody.oldEndsOn = task.endsOn;
