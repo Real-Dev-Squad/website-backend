@@ -142,9 +142,11 @@ const getUsers = async (req, res) => {
         try {
           result = await dataAccess.retrieveUsers({ discordId });
           user = result.user;
-
           if (!result.userExists) {
-            return res.boom.notFound("User doesn't exist");
+            return res.json({
+              message: "User not found",
+              user: null,
+            });
           }
 
           const userStatusResult = await getUserStatus(user.id);

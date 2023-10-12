@@ -128,9 +128,9 @@ describe("users", function () {
     afterEach(async function () {
       await cleanDb();
     });
-    it("It should have discordId field", async function () {
+    it("It should fetch users who have archived:false role", async function () {
       const result = await users.fetchUser({ discordId: "12345" });
-      expect(result.user).to.haveOwnProperty("discordId");
+      expect(result.user.roles.archived).to.equal(false);
     });
   });
 
