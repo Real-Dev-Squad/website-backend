@@ -54,7 +54,7 @@ describe("Tasks", function () {
         links: ["test1"],
         endsOn: 1234,
         startedOn: 54321,
-        status: "completed",
+        status: "COMPLETED",
         percentCompleted: 10,
         dependsOn: ["d12", "d23"],
         participants: [appOwner.username],
@@ -408,6 +408,32 @@ describe("Tasks", function () {
           expect(res.body.message).to.equal("No tasks found.");
           expect(res.body.tasks).to.be.a("array");
           expect(res.body.tasks).to.have.lengthOf(0);
+          return done();
+        });
+    });
+
+    it("Should get all the tasks with status other than COMPLETED and AVAILABLE", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?dev=true&status=${TASK_STATUS.NOT_COMPLETED}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          const tasksData = res.body.tasks ?? [];
+          tasksData.forEach((task) => {
+            expect(task.assignee).to.equal(appOwner.username);
+            expect(task.title).to.include("Test task");
+            expect(task.status).to.not.equal(TASK_STATUS.COMPLETED);
+          });
           return done();
         });
     });
