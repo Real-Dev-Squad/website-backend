@@ -109,7 +109,7 @@ describe("Extension Requests", function () {
         status: "active",
         percentCompleted: 10,
         participants: [],
-        assignee: appOwner.username,
+        assignee: user.username,
         isNoteworthy: true,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
@@ -149,7 +149,7 @@ describe("Extension Requests", function () {
     const extensionRequest2 = {
       taskId: taskId3,
       title: "change ETA",
-      assignee: appOwner.id,
+      assignee: user.id,
       oldEndsOn: 1234,
       newEndsOn: 1235,
       reason: "family event",
@@ -159,7 +159,7 @@ describe("Extension Requests", function () {
     const extensionRequest3 = {
       taskId: taskId3,
       title: "change ETA",
-      assignee: appOwner.id,
+      assignee: user.id,
       oldEndsOn: 1234,
       newEndsOn: 1235,
       reason: "family event",
@@ -169,7 +169,7 @@ describe("Extension Requests", function () {
     const extensionRequest4 = {
       taskId: taskId4,
       title: "change ETA",
-      assignee: appOwner.id,
+      assignee: user.id,
       oldEndsOn: 1234,
       newEndsOn: 1235,
       reason: "family event",
