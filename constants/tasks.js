@@ -21,6 +21,7 @@ const TASK_STATUS = {
   VERIFIED: "VERIFIED",
   DONE: "DONE",
   OVERDUE: "OVERDUE",
+  NOT_COMPLETED: "NOT_COMPLETED",
 };
 
 // TODO: convert this to new task status
