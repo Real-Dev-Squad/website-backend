@@ -1,23 +1,11 @@
-const config = require("config");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const goals = require("../services/goalService");
 
 const getGoalSiteToken = async (req, res) => {
   try {
     const { roles, id: userId } = req.userData;
-    const goalSiteConfig = config.services.goalAPI;
-    const goalApiResponse = await fetch(`${goalSiteConfig.baseUrl}/api/v1/user/`, {
-      method: "POST",
-      body: JSON.stringify({
-        data: {
-          type: "User",
-          attributes: {
-            rds_id: userId,
-            roles: roles,
-          },
-        },
-      }),
-      headers: { "Content-Type": "application/vnd.api+json", "Rest-Key": goalSiteConfig.secretKey },
-    });
+
+    const goalApiResponse = await goals.getOrCreateGoalUser({ userId, roles });
 
     if (goalApiResponse.status === 201) {
       let goalApiData = await goalApiResponse.json();
