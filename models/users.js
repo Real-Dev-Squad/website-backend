@@ -260,7 +260,7 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
         userData = doc.data();
       });
     } else if (discordId) {
-      const user = await userModel.where("discordId", "==", discordId).limit(1).get();
+      const user = await userModel.where("discordId", "==", discordId).where("roles.archived", "==", false).get();
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();

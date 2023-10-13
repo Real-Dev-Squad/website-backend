@@ -1,5 +1,5 @@
 const joi = require("joi");
-const { VALID_PROGRESS_TYPES } = require("../../constants/progresses");
+const { VALID_PROGRESS_TYPES, PROGRESS_VALID_SORT_FIELDS } = require("../../constants/progresses");
 
 const validateCreateProgressRecords = async (req, res, next) => {
   const baseSchema = joi
@@ -63,6 +63,13 @@ const validateGetProgressRecordsQuery = async (req, res, next) => {
       taskId: joi.string().optional().allow("").messages({
         "string.base": "taskId must be a string",
       }),
+      orderBy: joi
+        .string()
+        .optional()
+        .valid(...PROGRESS_VALID_SORT_FIELDS)
+        .messages({
+          "string.base": "orderBy must be a string",
+        }),
     })
     .xor("type", "userId", "taskId")
     .messages({
