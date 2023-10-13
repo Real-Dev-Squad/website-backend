@@ -28,7 +28,7 @@ const createTaskExtensionRequest = async (req, res) => {
       }
 
       if (!assigneeId) {
-        return res.boom.badRequest("User with this id or username doesn't exist.");
+        return res.boom.badRequest("User Not Found");
       }
 
       if (req.userData.id !== extensionBody.assignee && !req.userData.roles?.super_user) {
@@ -37,7 +37,7 @@ const createTaskExtensionRequest = async (req, res) => {
 
       const { taskData: task } = await tasks.fetchTask(extensionBody.taskId);
       if (!task) {
-        return res.boom.badRequest("Task with this id or taskid doesn't exist.");
+        return res.boom.badRequest("Task Not Found");
       }
       if (task.assignee !== assigneeUsername) {
         return res.boom.badRequest("This task is assigned to some different user.");

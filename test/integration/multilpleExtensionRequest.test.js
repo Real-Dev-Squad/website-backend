@@ -104,7 +104,7 @@ describe("Multiple Extension Requests", function () {
             return done(err);
           }
           expect(res).to.have.status(400);
-          expect(res.body.message).to.equal("User with this id or username doesn't exist.");
+          expect(res.body.message).to.equal("User Not Found");
           return done();
         });
     });
@@ -156,7 +156,7 @@ describe("Multiple Extension Requests", function () {
 
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Task with this id or taskid doesn't exist.");
+          expect(res.body.message).to.equal("Task Not Found");
           return done();
         });
     });
