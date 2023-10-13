@@ -43,6 +43,8 @@ const fetchTaskRequestById = async (req, res) => {
   }
 };
 
+const addTaskRequests = async (req, res) => {};
+
 const addOrUpdate = async (req, res) => {
   try {
     const { taskId, userId } = req.body;
@@ -102,4 +104,5 @@ module.exports = {
   addOrUpdate,
   fetchTaskRequests,
   fetchTaskRequestById,
+  addTaskRequests,
 };
