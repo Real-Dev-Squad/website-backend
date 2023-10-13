@@ -4,16 +4,8 @@ const goals = require("../services/goalService");
 const getGoalSiteToken = async (req, res) => {
   try {
     const { roles, id: userId } = req.userData;
-    const body = JSON.stringify({
-      data: {
-        type: "User",
-        attributes: {
-          rds_id: userId,
-          roles: roles,
-        },
-      },
-    });
-    const goalApiResponse = await goals.getOrCreateGoalUser({ body });
+
+    const goalApiResponse = await goals.getOrCreateGoalUser({ userId, roles });
 
     if (goalApiResponse.status === 201) {
       let goalApiData = await goalApiResponse.json();
