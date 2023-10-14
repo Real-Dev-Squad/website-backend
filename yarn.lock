@@ -7563,6 +7563,11 @@ vm2@^3.9.3:
     acorn "^8.7.0"
     acorn-walk "^8.2.0"
 
+volta@^0.0.0:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/volta/-/volta-0.0.0.tgz#7ae630f83d1dd8f80538733fbae895c2160d8060"
+  integrity sha512-AFz3a7c7Ae3w5neg7SjTcdM690ev392liJPMeYzcgu3t75zq4WGSg52wi79f2PoqkO2heJDQx7SYAFibYUvC4g==
+
 wcwidth@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/wcwidth/-/wcwidth-1.0.1.tgz"
