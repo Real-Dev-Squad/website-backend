@@ -16,12 +16,11 @@ const formatExtensionRequest = async (extensionRequest) => {
   if (!extensionRequest) return extensionRequest;
 
   let { timestamp, id, assignee, ...body } = extensionRequest;
-
-  if (assignee) {
-    assignee = await getUsername(assignee);
+  const assigneeId = assignee;
+  if (assigneeId) {
+    assignee = await getUsername(assigneeId);
   }
-
-  return { ...body, id, timestamp, assignee };
+  return { ...body, id, timestamp, assignee, assigneeId };
 };
 
 const transformQuery = (size, status, dev = false) => {

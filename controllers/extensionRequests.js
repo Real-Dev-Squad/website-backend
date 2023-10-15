@@ -14,73 +14,156 @@ const { parseQueryParams } = require("../utils/queryParser");
  * @param res {Object} - Express response object
  */
 const createTaskExtensionRequest = async (req, res) => {
-  try {
-    const extensionBody = req.body;
+  const dev = req.query.dev === "true";
+  if (dev) {
+    try {
+      let extensionBody = req.body;
 
-    let assigneeUsername = await getUsernameElseUndefined(extensionBody.assignee);
-    let assigneeId = extensionBody.assignee;
-    if (!assigneeUsername) {
-      assigneeId = await getUserIdElseUndefined(extensionBody.assignee);
-      assigneeUsername = extensionBody.assignee;
-      extensionBody.assignee = assigneeId;
-    }
+      let assigneeUsername = await getUsernameElseUndefined(extensionBody.assignee);
+      let assigneeId = extensionBody.assignee;
+      if (!assigneeUsername) {
+        assigneeId = await getUserIdElseUndefined(extensionBody.assignee);
+        assigneeUsername = extensionBody.assignee;
+        extensionBody.assignee = assigneeId;
+      }
 
-    if (!assigneeId) {
-      return res.boom.badRequest("User with this id or username doesn't exist.");
-    }
+      if (!assigneeId) {
+        return res.boom.badRequest("User Not Found");
+      }
 
-    if (req.userData.id !== extensionBody.assignee && !req.userData.roles?.super_user) {
-      return res.boom.forbidden("Only assigned user and super user can create an extension request for this task.");
-    }
+      if (req.userData.id !== extensionBody.assignee && !req.userData.roles?.super_user) {
+        return res.boom.forbidden("Only assigned user and super user can create an extension request for this task.");
+      }
 
-    const { taskData: task } = await tasks.fetchTask(extensionBody.taskId);
-    if (!task) {
-      return res.boom.badRequest("Task with this id or taskid doesn't exist.");
-    }
-    if (task.assignee !== assigneeUsername) {
-      return res.boom.badRequest("This task is assigned to some different user");
-    }
-    if (task.endsOn >= extensionBody.newEndsOn) {
-      return res.boom.badRequest("The value for newEndsOn should be greater than the previous ETA");
-    }
-    if (extensionBody.oldEndsOn !== task.endsOn) {
-      extensionBody.oldEndsOn = task.endsOn;
-    }
+      const { taskData: task } = await tasks.fetchTask(extensionBody.taskId);
+      if (!task) {
+        return res.boom.badRequest("Task Not Found");
+      }
+      if (task.assignee !== assigneeUsername) {
+        return res.boom.badRequest("This task is assigned to some different user.");
+      }
+      if (task.endsOn >= extensionBody.newEndsOn) {
+        return res.boom.badRequest("New ETA must be greater than Old ETA");
+      }
+      if (extensionBody.oldEndsOn !== task.endsOn) {
+        extensionBody.oldEndsOn = task.endsOn;
+      }
 
-    const prevExtensionRequest = await extensionRequestsQuery.fetchExtensionRequests({
-      taskId: extensionBody.taskId,
-      assignee: extensionBody.assignee,
-    });
-    if (prevExtensionRequest.length) {
-      return res.boom.forbidden("An extension request for this task already exists.");
-    }
-
-    const extensionRequest = await extensionRequestsQuery.createExtensionRequest(extensionBody);
-
-    const extensionLog = {
-      type: "extensionRequests",
-      meta: {
+      const latestExtensionRequest = await extensionRequestsQuery.fetchLatestExtensionRequest({
         taskId: extensionBody.taskId,
-        createdBy: req.userData.id,
-      },
-      body: {
-        extensionRequestId: extensionRequest.id,
-        oldEndsOn: task.endsOn,
-        newEndsOn: extensionBody.newEndsOn,
+      });
+
+      if (latestExtensionRequest && latestExtensionRequest.status === EXTENSION_REQUEST_STATUS.PENDING) {
+        return res.boom.badRequest("An extension request for this task already exists.");
+      }
+
+      let requestNumber;
+      if (latestExtensionRequest && latestExtensionRequest.assigneeId === assigneeId) {
+        if (latestExtensionRequest.requestNumber && latestExtensionRequest.requestNumber > 0) {
+          requestNumber = latestExtensionRequest.requestNumber + 1;
+          extensionBody = { ...extensionBody, requestNumber };
+        } else {
+          extensionBody = { ...extensionBody, requestNumber: 2 };
+        }
+      } else {
+        extensionBody = { ...extensionBody, requestNumber: 1 };
+      }
+
+      const extensionRequest = await extensionRequestsQuery.createExtensionRequest(extensionBody);
+      const extensionLog = {
+        type: "extensionRequests",
+        meta: {
+          taskId: extensionBody.taskId,
+          createdBy: req.userData.id,
+        },
+        body: {
+          extensionRequestId: extensionRequest.id,
+          oldEndsOn: task.endsOn,
+          newEndsOn: extensionBody.newEndsOn,
+          assignee: extensionBody.assignee,
+          status: EXTENSION_REQUEST_STATUS.PENDING,
+        },
+      };
+
+      await addLog(extensionLog.type, extensionLog.meta, extensionLog.body);
+
+      return res.json({
+        message: "Extension Request created successfully!",
+        extensionRequest: { ...extensionBody, id: extensionRequest.id },
+      });
+    } catch (err) {
+      logger.error(`Error while creating new extension request: ${err}`);
+      return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    }
+  } else {
+    try {
+      const extensionBody = req.body;
+
+      let assigneeUsername = await getUsernameElseUndefined(extensionBody.assignee);
+      let assigneeId = extensionBody.assignee;
+      if (!assigneeUsername) {
+        assigneeId = await getUserIdElseUndefined(extensionBody.assignee);
+        assigneeUsername = extensionBody.assignee;
+        extensionBody.assignee = assigneeId;
+      }
+
+      if (!assigneeId) {
+        return res.boom.badRequest("User with this id or username doesn't exist.");
+      }
+
+      if (req.userData.id !== extensionBody.assignee && !req.userData.roles?.super_user) {
+        return res.boom.forbidden("Only assigned user and super user can create an extension request for this task.");
+      }
+
+      const { taskData: task } = await tasks.fetchTask(extensionBody.taskId);
+      if (!task) {
+        return res.boom.badRequest("Task with this id or taskid doesn't exist.");
+      }
+      if (task.assignee !== assigneeUsername) {
+        return res.boom.badRequest("This task is assigned to some different user");
+      }
+      if (task.endsOn >= extensionBody.newEndsOn) {
+        return res.boom.badRequest("The value for newEndsOn should be greater than the previous ETA");
+      }
+      if (extensionBody.oldEndsOn !== task.endsOn) {
+        extensionBody.oldEndsOn = task.endsOn;
+      }
+
+      const prevExtensionRequest = await extensionRequestsQuery.fetchExtensionRequests({
+        taskId: extensionBody.taskId,
         assignee: extensionBody.assignee,
-        status: EXTENSION_REQUEST_STATUS.PENDING,
-      },
-    };
+      });
+      if (prevExtensionRequest.length) {
+        return res.boom.forbidden("An extension request for this task already exists.");
+      }
 
-    await addLog(extensionLog.type, extensionLog.meta, extensionLog.body);
+      const extensionRequest = await extensionRequestsQuery.createExtensionRequest(extensionBody);
 
-    return res.json({
-      message: "Extension Request created successfully!",
-      extensionRequest: { ...extensionBody, id: extensionRequest.id },
-    });
-  } catch (err) {
-    logger.error(`Error while creating new extension request: ${err}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+      const extensionLog = {
+        type: "extensionRequests",
+        meta: {
+          taskId: extensionBody.taskId,
+          createdBy: req.userData.id,
+        },
+        body: {
+          extensionRequestId: extensionRequest.id,
+          oldEndsOn: task.endsOn,
+          newEndsOn: extensionBody.newEndsOn,
+          assignee: extensionBody.assignee,
+          status: EXTENSION_REQUEST_STATUS.PENDING,
+        },
+      };
+
+      await addLog(extensionLog.type, extensionLog.meta, extensionLog.body);
+
+      return res.json({
+        message: "Extension Request created successfully!",
+        extensionRequest: { ...extensionBody, id: extensionRequest.id },
+      });
+    } catch (err) {
+      logger.error(`Error while creating new extension request: ${err}`);
+      return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    }
   }
 };
 
@@ -132,19 +215,47 @@ const getExtensionRequest = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const getSelfExtensionRequests = async (req, res) => {
+  const dev = req.query.dev === "true";
+
   try {
     const { id: userId } = req.userData;
     const { taskId, status } = req.query;
 
-    if (userId) {
-      const allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
-        status,
-        taskId,
-        assignee: userId,
-      });
-      return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
+    if (dev) {
+      if (userId) {
+        let allExtensionRequests;
+        if (taskId) {
+          const latestExtensionRequest = await extensionRequestsQuery.fetchLatestExtensionRequest({
+            taskId,
+          });
+
+          if (latestExtensionRequest && latestExtensionRequest.assigneeId !== userId) {
+            allExtensionRequests = [];
+          } else {
+            allExtensionRequests = [latestExtensionRequest];
+          }
+        } else {
+          allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
+            assignee: userId,
+            status: status || undefined,
+          });
+        }
+        return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
+      } else {
+        return res.boom.notFound("User doesn't exist");
+      }
+    } else {
+      if (userId) {
+        const allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
+          taskId,
+          assignee: userId,
+          status: status || undefined,
+        });
+        return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
+      } else {
+        return res.boom.notFound("User doesn't exist");
+      }
     }
-    return res.boom.notFound("User doesn't exist");
   } catch (error) {
     logger.error(`Error while fetching extension requests: ${error}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
