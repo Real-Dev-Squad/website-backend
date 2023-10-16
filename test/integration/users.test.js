@@ -664,7 +664,23 @@ describe("Users", function () {
           return done();
         });
     });
-
+    it("Should throw an error when there is no feature flag when using the new query parameter format(q)", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({
+          q: "filterBy:unmerged_prs+days:30",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Route not found");
+          return done();
+        });
+    });
     it("Should return 400 if days is not passed for filterBy unmerged_prs", function (done) {
       chai
         .request(app)

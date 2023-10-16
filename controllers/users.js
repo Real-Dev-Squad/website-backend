@@ -85,7 +85,12 @@ const getUsers = async (req, res) => {
     const queryString = (dev ? q : query) || "";
     const transformedQuery = parseSearchQuery(queryString);
     const qualifiers = getQualifiers(queryString);
+    // Should throw an error if the new query parameter is without feature flag
+    if (q && !dev) {
+      return res.boom.notFound("Route not found");
+    }
     // getting user details by id if present.
+
     if (req.query.id) {
       const id = req.query.id;
       let result, user;
