@@ -208,108 +208,6 @@ describe("Task Requests", function () {
     });
   });
 
-  describe("POST /taskRequests", function () {
-    let fetchIssuesByIdStub;
-    let fetchTaskStub;
-    let createRequestStub;
-    let getUsernameStub;
-    const url = "/taskRequests";
-    beforeEach(async function () {
-      fetchIssuesByIdStub = sinon.stub(githubService, "fetchIssuesById");
-      fetchTaskStub = sinon.stub(tasksModel, "fetchTask");
-      createRequestStub = sinon.stub(taskRequestsModel, "createRequest");
-      getUsernameStub = sinon.stub(usersUtils, "getUsername");
-      getUsernameStub.resolves("abc");
-      userId = await addUser({ ...member, id: "user123" });
-      sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
-      jwt = authService.generateAuthToken({ userId });
-    });
-    afterEach(async function () {
-      sinon.restore();
-      await cleanDb();
-    });
-    it("should create a task request successfully (Creation)", async function () {
-      fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
-      createRequestStub.resolves({
-        id: "request123",
-        taskRequest: mockData.existingTaskRequest,
-        isCreate: true,
-        alreadyRequesting: false,
-      });
-      const res = await chai
-        .request(app)
-        .post(url)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockData.taskRequestData);
-      expect(res).to.have.status(201);
-      expect(res.body.message).to.equal("Task request successful.");
-    });
-    it("should allow users to request the same task (Creation)", async function () {
-      fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
-      createRequestStub.resolves({ taskRequest: mockData.existingTaskRequest, isCreate: false });
-      const res = await chai
-        .request(app)
-        .post(url)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockData.taskRequestData);
-      expect(res).to.have.status(200);
-      expect(res.body.message).to.equal("Task request successful.");
-    });
-    it("should allow users to request the same task (Assignment)", async function () {
-      const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
-      fetchTaskStub.resolves({ taskData: { ...taskData, id: requestData.taskId } });
-      createRequestStub.resolves({ taskRequest: mockData.existingTaskRequest, isCreate: false });
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
-      expect(res).to.have.status(200);
-      expect(res.body.message).to.equal("Task request successful.");
-    });
-    it("should handle invalid external issue URL", async function () {
-      const requestData = { ...mockData.taskRequestData, externalIssueUrl: "abc" };
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
-      expect(res.body.message).to.equal("External issue url is not valid");
-      expect(res).to.have.status(400);
-    });
-    it("should handle valid external issue URL not is RDS repo", async function () {
-      fetchIssuesByIdStub.resolves(null);
-      const res = await chai
-        .request(app)
-        .post(url)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockData.taskRequestData);
-      expect(res.body.message).to.equal("Issue does not exist");
-      expect(res).to.have.status(400);
-    });
-    it("should handle task deadline before start date", async function () {
-      const requestData = {
-        ...mockData.taskRequestData,
-        proposedStartDate: mockData.taskRequestData.proposedDeadline + 10000,
-      };
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
-      expect(res.body.message).to.equal("Task deadline cannot be before the start date");
-      expect(res).to.have.status(400);
-    });
-    it("should handle user not authorized", async function () {
-      const requestData = { ...mockData.taskRequestData, userId: "abc" };
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
-      expect(res.body.message).to.equal("Not authorized to create the request");
-      expect(res).to.have.status(403);
-    });
-    it("should handle user not found", async function () {
-      const requestData = { ...mockData.taskRequestData };
-      getUsernameStub.resolves(null);
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
-      expect(res.body.message).to.equal("User not found");
-      expect(res).to.have.status(400);
-    });
-    it("should handle task not found (Assignment)", async function () {
-      const requestData = { ...mockData.taskRequestData, taskId: "abc", requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
-      fetchTaskStub.resolves({ taskData: null });
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.equal("Task does not exist");
-    });
-  });
-
   describe("POST /taskRequests/addOrUpdate - add or updates a task request", function () {
     describe("When a new task requested is created", function () {
       before(async function () {
@@ -699,6 +597,108 @@ describe("Task Requests", function () {
             return done();
           });
       });
+    });
+  });
+
+  describe("POST /taskRequests", function () {
+    let fetchIssuesByIdStub;
+    let fetchTaskStub;
+    let createRequestStub;
+    let getUsernameStub;
+    const url = "/taskRequests";
+    beforeEach(async function () {
+      fetchIssuesByIdStub = sinon.stub(githubService, "fetchIssuesById");
+      fetchTaskStub = sinon.stub(tasksModel, "fetchTask");
+      createRequestStub = sinon.stub(taskRequestsModel, "createRequest");
+      getUsernameStub = sinon.stub(usersUtils, "getUsername");
+      getUsernameStub.resolves("abc");
+      userId = await addUser({ ...member, id: "user123" });
+      sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
+      jwt = authService.generateAuthToken({ userId });
+    });
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+    it("should create a task request successfully (Creation)", async function () {
+      fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
+      createRequestStub.resolves({
+        id: "request123",
+        taskRequest: mockData.existingTaskRequest,
+        isCreate: true,
+        alreadyRequesting: false,
+      });
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(mockData.taskRequestData);
+      expect(res).to.have.status(201);
+      expect(res.body.message).to.equal("Task request successful.");
+    });
+    it("should allow users to request the same task (Creation)", async function () {
+      fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
+      createRequestStub.resolves({ taskRequest: mockData.existingTaskRequest, isCreate: false });
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(mockData.taskRequestData);
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.equal("Task request successful.");
+    });
+    it("should allow users to request the same task (Assignment)", async function () {
+      const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
+      fetchTaskStub.resolves({ taskData: { ...taskData, id: requestData.taskId } });
+      createRequestStub.resolves({ taskRequest: mockData.existingTaskRequest, isCreate: false });
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.equal("Task request successful.");
+    });
+    it("should handle invalid external issue URL", async function () {
+      const requestData = { ...mockData.taskRequestData, externalIssueUrl: "abc" };
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      expect(res.body.message).to.equal("External issue url is not valid");
+      expect(res).to.have.status(400);
+    });
+    it("should handle valid external issue URL not is RDS repo", async function () {
+      fetchIssuesByIdStub.resolves(null);
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(mockData.taskRequestData);
+      expect(res.body.message).to.equal("Issue does not exist");
+      expect(res).to.have.status(400);
+    });
+    it("should handle task deadline before start date", async function () {
+      const requestData = {
+        ...mockData.taskRequestData,
+        proposedStartDate: mockData.taskRequestData.proposedDeadline + 10000,
+      };
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      expect(res.body.message).to.equal("Task deadline cannot be before the start date");
+      expect(res).to.have.status(400);
+    });
+    it("should handle user not authorized", async function () {
+      const requestData = { ...mockData.taskRequestData, userId: "abc" };
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      expect(res.body.message).to.equal("Not authorized to create the request");
+      expect(res).to.have.status(403);
+    });
+    it("should handle user not found", async function () {
+      const requestData = { ...mockData.taskRequestData };
+      getUsernameStub.resolves(null);
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      expect(res.body.message).to.equal("User not found");
+      expect(res).to.have.status(400);
+    });
+    it("should handle task not found (Assignment)", async function () {
+      const requestData = { ...mockData.taskRequestData, taskId: "abc", requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
+      fetchTaskStub.resolves({ taskData: null });
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.equal("Task does not exist");
     });
   });
 });
