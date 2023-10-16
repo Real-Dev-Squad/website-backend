@@ -659,6 +659,9 @@ const cancelOooStatus = async (userId) => {
     }
     const updatedStatus = generateNewStatus(isActive);
     const newStatusData = { ...docData, ...updatedStatus };
+    if (futureStatus?.state) {
+      newStatusData.futureStatus = {};
+    }
     await userStatusModel.doc(docId).update(newStatusData);
     if (!isActive) {
       await addGroupIdleRoleToDiscordUser(userId);

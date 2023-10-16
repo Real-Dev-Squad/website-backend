@@ -679,12 +679,12 @@ describe("Users", function () {
       expect(res.body.message).to.equal("Route not found");
     });
 
-    it("Should return an error when passing an invalid Discord ID", async function () {
+    it("Should return an empty object when passing an invalid Discord ID", async function () {
       const invalidDiscordId = "50485556209423";
       const res = await chai.request(app).get(`/users?dev=true&discordId=${invalidDiscordId}`);
-      expect(res).to.have.status(404);
+      expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
-      expect(res.body.message).to.equal("User doesn't exist");
+      expect(res.body.message).to.equal("User not found");
     });
 
     it("Should return user id which have overdue tasks", function (done) {
