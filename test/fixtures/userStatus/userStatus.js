@@ -207,6 +207,17 @@ const OutputFixtureForFnConvertTimestampsToUTC = {
   },
 };
 
+const generateDefaultFutureStatus = (state, from, until) => {
+  const futureStatusData = {
+    state,
+    from,
+    until,
+    message: "",
+    updatedAt: new Date().getTime(),
+  };
+  return futureStatusData;
+};
+
 module.exports = {
   userStatusDataForNewUser,
   userStatusDataAfterSignup,
@@ -221,4 +232,5 @@ module.exports = {
   getStatusData,
   inputFixtureForFnConvertTimestampsToUTC,
   OutputFixtureForFnConvertTimestampsToUTC,
+  generateDefaultFutureStatus,
 };
