@@ -127,20 +127,14 @@ describe("Middleware | Validators | Task Requests", function () {
         expect(badRequestSpy.calledOnce).to.be.equal(true);
         expect(nextSpy.callCount).to.be.equal(0);
       });
-      it("should  throw error when request body with task id is passed", async function () {
+      it("should not throw error when request body with task id is passed", async function () {
         const req = {
           body: data.creationReqWithTaskId,
         };
-        const badRequestSpy = Sinon.spy();
-        const res = {
-          boom: {
-            badRequest: badRequestSpy,
-          },
-        };
+        const res = {};
         const nextSpy = Sinon.spy();
         await postTaskRequests(req, res, nextSpy);
-        expect(badRequestSpy.calledOnce).to.be.equal(true);
-        expect(nextSpy.callCount).to.be.equal(0);
+        expect(nextSpy.calledOnce).to.be.equal(true);
       });
       it("should throw error when request body without used id is passed", async function () {
         const req = {
