@@ -6,6 +6,8 @@ const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { transformQuery } = require("../utils/extensionRequests");
 const { parseQueryParams } = require("../utils/queryParser");
+const logsQuery = require("../models/logs");
+const { getFullName } = require("../utils/users");
 
 /**
  * Create ETA extension Request
@@ -232,6 +234,23 @@ const getSelfExtensionRequests = async (req, res) => {
           if (latestExtensionRequest && latestExtensionRequest.assigneeId !== userId) {
             allExtensionRequests = [];
           } else {
+            // Add reviewer's name if status is not PENDING
+            if (latestExtensionRequest.status === "APPROVED" || latestExtensionRequest.status === "DENIED") {
+              const logs = await logsQuery.fetchLogs(
+                { "meta.extensionRequestId": latestExtensionRequest.id, limit: 1 },
+                "extensionRequests"
+              );
+
+              if (
+                logs.length === 1 &&
+                logs[0]?.meta?.userId &&
+                (logs[0]?.body?.status === "APPROVED" || logs[0]?.body?.status === "DENIED") // Make sure log is only related to status change
+              ) {
+                const superUserId = logs[0].meta.userId;
+                const name = await getFullName(superUserId);
+                latestExtensionRequest.reviewedBy = `${name?.first_name} ${name?.last_name}`;
+              }
+            }
             allExtensionRequests = [latestExtensionRequest];
           }
         } else {
