@@ -1,4 +1,4 @@
-const { TASK_REQUEST_STATUS } = require("../constants/taskRequests");
+const { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE } = require("../constants/taskRequests");
 const { TASK_STATUS } = require("../constants/tasks");
 const firestore = require("../utils/firestore");
 const taskRequestsCollection = firestore.collection("taskRequests");
@@ -73,6 +73,73 @@ const fetchTaskRequestById = async (taskRequestId) => {
   };
 };
 
+const createRequest = async (data, authenticatedUsername) => {
+  const queryFieldPath = data.requestType === TASK_REQUEST_TYPE.CREATION ? "externalIssueUrl" : "taskId";
+  const queryValue = data.requestType === TASK_REQUEST_TYPE.CREATION ? data.externalIssueUrl : data.taskId;
+  const taskRequestsSnapshot = await taskRequestsCollection.where(queryFieldPath, "==", queryValue).get();
+  const [taskRequestRef] = taskRequestsSnapshot.docs;
+  const taskRequestData = taskRequestRef?.data();
+  const userRequest = {
+    userId: data.userId,
+    proposedDeadline: data.proposedDeadline,
+    proposedStartDate: data.proposedStartDate,
+    description: data.description,
+    status: TASK_REQUEST_STATUS.PENDING,
+  };
+  if (!userRequest.description) delete userRequest.description;
+  if (taskRequestData) {
+    // TODO : remove after the migration of old data
+    const currentRequestors = taskRequestData.requestors;
+    let alreadyRequesting = currentRequestors.some((requestor) => requestor === data.userId);
+    // End of old logic
+    const currentRequestingUsers = taskRequestData.users;
+    alreadyRequesting = currentRequestingUsers.some((requestor) => requestor.userId === data.userId);
+    if (alreadyRequesting) {
+      return { alreadyRequesting };
+    }
+    // TODO : remove after the migration of old data
+    const updatedRequestors = [...currentRequestors, data.userId];
+    // End of old logic
+    const updatedUsers = [...currentRequestingUsers, userRequest];
+    const updatedTaskRequest = {
+      requestors: updatedRequestors,
+      users: updatedUsers,
+      lastModifiedBy: authenticatedUsername,
+      lastModifiedAt: Date.now(),
+    };
+    await taskRequestsCollection.doc(taskRequestRef.id).update(updatedTaskRequest);
+    return {
+      id: taskRequestRef.id,
+      isCreate: false,
+      taskRequest: {
+        ...taskRequestData,
+        ...updatedTaskRequest,
+      },
+    };
+  }
+  const newTaskRequest = {
+    requestors: [data.userId],
+    status: TASK_REQUEST_STATUS.PENDING,
+    taskTitle: data.taskTitle,
+    taskId: data.taskId,
+    externalIssueUrl: data.externalIssueUrl,
+    requestType: data.requestType,
+    users: [userRequest],
+    createdBy: authenticatedUsername,
+    createdAt: Date.now(),
+    lastModifiedBy: authenticatedUsername,
+    lastModifiedAt: Date.now(),
+  };
+  if (!newTaskRequest.externalIssueUrl) delete newTaskRequest.externalIssueUrl;
+  if (!newTaskRequest.taskId) delete newTaskRequest.taskId;
+  if (!newTaskRequest.taskTitle) delete newTaskRequest.taskTitle;
+  const newTaskRequestRef = await taskRequestsCollection.add(newTaskRequest);
+  return {
+    isCreate: true,
+    taskRequest: newTaskRequest,
+    id: newTaskRequestRef.id,
+  };
+};
 /**
  * Creates a task request
  *
@@ -151,6 +218,7 @@ const approveTaskRequest = async (taskRequestId, user) => {
 };
 
 module.exports = {
+  createRequest,
   fetchTaskRequests,
   fetchTaskRequestById,
   addOrUpdate,

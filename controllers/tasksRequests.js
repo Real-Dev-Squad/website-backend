@@ -1,6 +1,9 @@
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const { TASK_REQUEST_TYPE } = require("../constants/taskRequests");
 const taskRequestsModel = require("../models/taskRequests");
 const tasksModel = require("../models/tasks.js");
+const githubService = require("../services/githubService");
+const usersUtils = require("../utils/users");
 
 const fetchTaskRequests = async (_, res) => {
   try {
@@ -43,7 +46,67 @@ const fetchTaskRequestById = async (req, res) => {
   }
 };
 
-const addTaskRequests = async (req, res) => {};
+const addTaskRequests = async (req, res) => {
+  try {
+    const taskRequestData = req.body;
+    const usernamePromise = usersUtils.getUsername(taskRequestData.userId);
+    if (req.userData.id !== taskRequestData.userId && !req.userData.roles?.super_user) {
+      return res.boom.forbidden("Not authorized to create the request");
+    }
+    if (taskRequestData.proposedDeadline < taskRequestData.proposedStartDate) {
+      return res.boom.badRequest("Task deadline cannot be before the start date");
+    }
+    switch (req.body.requestType) {
+      case TASK_REQUEST_TYPE.ASSIGNMENT: {
+        const taskDataPromise = tasksModel.fetchTask(taskRequestData.taskId);
+
+        const [{ taskData }, username] = await Promise.all([taskDataPromise, usernamePromise]);
+        if (!username) {
+          return res.boom.badRequest("User not found");
+        }
+        if (!taskData) {
+          return res.boom.badRequest("Task does not exist");
+        }
+        break;
+      }
+      case TASK_REQUEST_TYPE.CREATION: {
+        let issuePromise;
+        try {
+          const url = new URL(taskRequestData.externalIssueUrl);
+          const issueUrlPaths = url.pathname.split("/");
+          const repositoryName = issueUrlPaths[3];
+          const issueNumber = issueUrlPaths[5];
+          issuePromise = githubService.fetchIssuesById(repositoryName, issueNumber);
+        } catch (error) {
+          return res.boom.badRequest("External issue url is not valid");
+        }
+        const [issueData, username] = await Promise.all([issuePromise, usernamePromise]);
+        if (!username) {
+          return res.boom.badRequest("User not found");
+        }
+        if (!issueData) {
+          return res.boom.badRequest("Issue does not exist");
+        }
+        break;
+      }
+    }
+    const newTaskRequest = await taskRequestsModel.createRequest(taskRequestData, req.userData.username);
+    if (newTaskRequest.alreadyRequesting) {
+      return res.boom.badRequest("Task was already requested");
+    }
+    const statusCode = newTaskRequest.isCreate ? 201 : 200;
+    return res.status(statusCode).json({
+      message: "Task request successful.",
+      data: {
+        id: newTaskRequest.id,
+        ...newTaskRequest.taskRequest,
+      },
+    });
+  } catch (err) {
+    logger.error("Error while creating task request");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
 
 const addOrUpdate = async (req, res) => {
   try {

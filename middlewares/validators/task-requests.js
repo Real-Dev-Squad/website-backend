@@ -6,10 +6,12 @@ const postTaskRequests = async (req, res, next) => {
     .object()
     .strict()
     .keys({
+      taskTitle: joi.string().optional(),
       taskId: joi.string().required(),
-      externalIssueId: joi.string().optional(),
+      externalIssueUrl: joi.string().optional(),
       requestType: joi.string().valid(TASK_REQUEST_TYPE.ASSIGNMENT).required(),
       userId: joi.string().required(),
+      proposedStartDate: joi.number().required(),
       proposedDeadline: joi.number().required(),
       description: joi.string().optional(),
     });
@@ -18,9 +20,12 @@ const postTaskRequests = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      externalIssueId: joi.string().required(),
+      taskTitle: joi.string().required(),
+      taskId: joi.string().optional(),
+      externalIssueUrl: joi.string().required(),
       requestType: joi.string().valid(TASK_REQUEST_TYPE.CREATION).required(),
       userId: joi.string().required(),
+      proposedStartDate: joi.number().required(),
       proposedDeadline: joi.number().required(),
       description: joi.string().optional(),
     });
@@ -31,7 +36,7 @@ const postTaskRequests = async (req, res, next) => {
     next();
   } catch (error) {
     logger.error(`Error validating postTaskRequests payload : ${error}`);
-    res.boom.badRequest(error.details[0].message);
+    res.boom.badRequest(error.details[0].context.message);
   }
 };
 
