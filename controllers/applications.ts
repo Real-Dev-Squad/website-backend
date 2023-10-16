@@ -26,45 +26,50 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
     logger.error(`Error in fetching application: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
-}
+};
 
 const addApplication = async (req: CustomRequest, res: CustomResponse) => {
-  const rawData = req.body;
-  const application = await ApplicationModel.getUserApplications(req.userData.id);
-  if (!application.notFound && !application.status) {
-    return res.status(409).json({
-      message: "User data is already present!",
-    });
-  }
-  const data = {
-    userId: req.userData.id,
-    biodata: {
-      firstName: rawData.firstName,
-      lastName: rawData.lastName,
-    },
-    location: {
-      city: rawData.city,
-      state: rawData.state,
-      country: rawData.country,
-    },
-    professional: {
-      institution: rawData.college,
-      skills: rawData.skills,
-    },
-    intro: {
-      introduction: rawData.introduction,
-      funFact: rawData.funFact,
-      forFun: rawData.forFun,
-      whyRds: rawData.whyRds,
-      numberOfHours: rawData.numberOfHours,
-    },
-    foundFrom: rawData.foundFrom,
-  };
-  await ApplicationModel.addApplication(data);
+  try {
+    const rawData = req.body;
+    const application = await ApplicationModel.getUserApplications(req.userData.id);
+    if (!application.notFound && !application.status) {
+      return res.status(409).json({
+        message: "User data is already present!",
+      });
+    }
+    const data = {
+      userId: req.userData.id,
+      biodata: {
+        firstName: rawData.firstName,
+        lastName: rawData.lastName,
+      },
+      location: {
+        city: rawData.city,
+        state: rawData.state,
+        country: rawData.country,
+      },
+      professional: {
+        institution: rawData.college,
+        skills: rawData.skills,
+      },
+      intro: {
+        introduction: rawData.introduction,
+        funFact: rawData.funFact,
+        forFun: rawData.forFun,
+        whyRds: rawData.whyRds,
+        numberOfHours: rawData.numberOfHours,
+      },
+      foundFrom: rawData.foundFrom,
+    };
+    await ApplicationModel.addApplication(data);
 
-  return res.status(201).json({
-    message: "User application added.",
-  });
+    return res.status(201).json({
+      message: "User application added.",
+    });
+  } catch (err) {
+    logger.error(`Error while fetching all the intros: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
 };
 
 const updateApplication = async (req: CustomRequest, res: CustomResponse) => {
@@ -79,7 +84,7 @@ const updateApplication = async (req: CustomRequest, res: CustomResponse) => {
         username: req.userData.username,
         userId: req.userData.id,
       },
-      body: rawBody
+      body: rawBody,
     };
 
     const promises = [
@@ -91,7 +96,6 @@ const updateApplication = async (req: CustomRequest, res: CustomResponse) => {
     return res.json({
       message: "Application updated successfully!",
     });
-
   } catch (err) {
     logger.error(`Error while fetching all the intros: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);

@@ -41,7 +41,6 @@ describe("Application", function () {
 
     const promises = [applicationModel.addApplication(applicationOne), applicationModel.addApplication(applicationTwo)];
     const [id1, id2] = await Promise.all(promises);
-    console.log(id1, id2, "userId main");
     applicationId1 = id1;
     applicationId2 = id2;
   });
