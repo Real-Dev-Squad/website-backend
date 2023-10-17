@@ -61,6 +61,7 @@ const addTaskRequests = async (req, res) => {
         const taskDataPromise = tasksModel.fetchTask(taskRequestData.taskId);
 
         const [{ taskData }, username] = await Promise.all([taskDataPromise, usernamePromise]);
+        taskRequestData.taskTitle = taskData?.title;
         if (!username) {
           return res.boom.badRequest("User not found");
         }
@@ -81,6 +82,7 @@ const addTaskRequests = async (req, res) => {
           return res.boom.badRequest("External issue url is not valid");
         }
         const [issueData, username] = await Promise.all([issuePromise, usernamePromise]);
+        taskRequestData.taskTitle = issueData?.title;
         if (!username) {
           return res.boom.badRequest("User not found");
         }

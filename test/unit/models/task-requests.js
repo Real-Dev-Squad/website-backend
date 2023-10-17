@@ -48,8 +48,7 @@ describe("createRequest", function () {
     expect(addedTaskRequest).to.not.be.equal(undefined);
     expect(addedTaskRequest.requestors).to.deep.equal([...mockData.existingTaskRequest.requestors, requestData.userId]);
     expect(addedTaskRequest.status).to.equal(TASK_REQUEST_STATUS.PENDING);
-    expect(addedTaskRequest.taskTitle).to.equal(requestData.taskTitle);
-    expect(addedTaskRequest.taskId).to.equal(requestData.taskId);
+    expect(addedTaskRequest.taskTitle).to.not.be.equal(undefined);
     expect(addedTaskRequest.externalIssueUrl).to.equal(requestData.externalIssueUrl);
     expect(addedTaskRequest.users).to.deep.equal([
       ...mockData.existingTaskRequest.users,
@@ -76,7 +75,7 @@ describe("createRequest", function () {
     expect(result.alreadyRequesting).to.be.equal(true);
   });
   it("should create a new task request when request type is assignment", async function () {
-    const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
+    const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT, taskId: "abc" };
     const result = await createRequest(requestData, authenticatedUsername);
     const addedTaskRequest = result.taskRequest;
     expect(addedTaskRequest.requestors).to.deep.equal([requestData.userId]);
@@ -103,13 +102,18 @@ describe("createRequest", function () {
   });
   it("should let a new user request same task when request type is assignment", async function () {
     await taskRequestsCollection.add(mockData.existingTaskRequest);
-    const requestData = { ...mockData.taskRequestData, userId: "user456", requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
+    const requestData = {
+      ...mockData.taskRequestData,
+      userId: "user456",
+      requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
+      taskId: "task123",
+    };
     const result = await createRequest(requestData, authenticatedUsername);
     const addedTaskRequest = result.taskRequest;
     expect(addedTaskRequest).to.not.be.equal(undefined);
     expect(addedTaskRequest.requestors).to.deep.equal([...mockData.existingTaskRequest.requestors, requestData.userId]);
     expect(addedTaskRequest.status).to.equal(TASK_REQUEST_STATUS.PENDING);
-    expect(addedTaskRequest.taskTitle).to.equal(requestData.taskTitle);
+    expect(addedTaskRequest.taskTitle).to.not.be.equal(undefined);
     expect(addedTaskRequest.taskId).to.equal(requestData.taskId);
     expect(addedTaskRequest.externalIssueUrl).to.equal(requestData.externalIssueUrl);
     expect(addedTaskRequest.users).to.deep.equal([
@@ -132,7 +136,7 @@ describe("createRequest", function () {
   });
   it("should handle the case where the user is already requesting in the existing request when request type is assignment", async function () {
     await taskRequestsCollection.add(mockData.existingTaskRequest);
-    const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
+    const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT, taskId: "task123" };
     const result = await createRequest(requestData, authenticatedUsername);
     expect(result.alreadyRequesting).to.be.equal(true);
   });

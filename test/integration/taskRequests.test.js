@@ -648,7 +648,7 @@ describe("Task Requests", function () {
       expect(res.body.message).to.equal("Task request successful.");
     });
     it("should allow users to request the same task (Assignment)", async function () {
-      const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
+      const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT, taskId: "abc" };
       fetchTaskStub.resolves({ taskData: { ...taskData, id: requestData.taskId } });
       createRequestStub.resolves({ taskRequest: mockData.existingTaskRequest, isCreate: false });
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);

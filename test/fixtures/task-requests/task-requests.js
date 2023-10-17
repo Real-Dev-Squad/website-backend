@@ -34,7 +34,6 @@ const taskRequestData = {
   description: "Task description",
   requestType: TASK_REQUEST_TYPE.CREATION,
   externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-backend/issues/1599",
-  taskId: "task123",
 };
 const existingTaskRequest = {
   requestors: ["user123"],
