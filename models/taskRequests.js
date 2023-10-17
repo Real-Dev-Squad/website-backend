@@ -88,7 +88,7 @@ const createRequest = async (data, authenticatedUsername) => {
   };
   if (!userRequest.description) delete userRequest.description;
   if (taskRequestData) {
-    // TODO : remove after the migration of old data
+    // TODO : remove after the migration of old data https://github.com/Real-Dev-Squad/website-backend/issues/1613
     const currentRequestors = taskRequestData.requestors;
     let alreadyRequesting = currentRequestors.some((requestor) => requestor === data.userId);
     // End of old logic
@@ -97,7 +97,7 @@ const createRequest = async (data, authenticatedUsername) => {
     if (alreadyRequesting) {
       return { alreadyRequesting };
     }
-    // TODO : remove after the migration of old data
+    // TODO : remove after the migration of old data https://github.com/Real-Dev-Squad/website-backend/issues/1613
     const updatedRequestors = [...currentRequestors, data.userId];
     // End of old logic
     const updatedUsers = [...currentRequestingUsers, userRequest];
