@@ -6,7 +6,6 @@ const postTaskRequests = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      taskTitle: joi.string().optional(),
       taskId: joi.string().required(),
       externalIssueUrl: joi.string().optional(),
       requestType: joi.string().valid(TASK_REQUEST_TYPE.ASSIGNMENT).required(),
@@ -20,8 +19,6 @@ const postTaskRequests = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      taskTitle: joi.string().required(),
-      taskId: joi.string().optional(),
       externalIssueUrl: joi.string().required(),
       requestType: joi.string().valid(TASK_REQUEST_TYPE.CREATION).required(),
       userId: joi.string().required(),
