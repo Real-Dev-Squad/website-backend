@@ -273,7 +273,7 @@ const fetchIssuesById = async (repositoryName, issueId) => {
     const url = `${baseURL}/repos/${org}/${repositoryName}/issues/${issueId}`;
     const headers = {
       Accept: "application/vnd.github+json",
-      // Authorization: `Bearer ${config.get("githubAccessToken")}`,
+      Authorization: `Bearer ${config.get("githubAccessToken")}`,
       org: org,
     };
     const res = await fetch(url, { headers });
