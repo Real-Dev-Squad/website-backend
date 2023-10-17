@@ -18,7 +18,6 @@ const validCreationRequest = {
   userId: "7890",
   proposedDeadline: 1243455234,
   proposedStartDate: 1243405234,
-  taskTitle: "ABC",
 };
 const creationReqWithTaskId = { ...validCreationRequest, taskId: "1234" };
 const { userId: tcrUserId, ...creationReqWithoutUserId } = validCreationRequest;
@@ -35,7 +34,6 @@ const taskRequestData = {
   description: "Task description",
   requestType: TASK_REQUEST_TYPE.CREATION,
   externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-backend/issues/1599",
-  taskTitle: "Task Title",
   taskId: "task123",
 };
 const existingTaskRequest = {
