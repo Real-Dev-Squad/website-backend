@@ -76,9 +76,23 @@ const fetchTaskRequestById = async (taskRequestId) => {
 const createRequest = async (data, authenticatedUsername) => {
   const queryFieldPath = data.requestType === TASK_REQUEST_TYPE.CREATION ? "externalIssueUrl" : "taskId";
   const queryValue = data.requestType === TASK_REQUEST_TYPE.CREATION ? data.externalIssueUrl : data.taskId;
-  const taskRequestsSnapshot = await taskRequestsCollection.where(queryFieldPath, "==", queryValue).get();
+  const statusQueryValue =
+    data.requestType === TASK_REQUEST_TYPE.CREATION
+      ? [TASK_REQUEST_STATUS.PENDING, TASK_REQUEST_STATUS.APPROVED]
+      : [TASK_REQUEST_STATUS.PENDING];
+  const taskRequestsSnapshot = await taskRequestsCollection
+    .where(queryFieldPath, "==", queryValue)
+    .where("status", "in", statusQueryValue)
+    .get();
   const [taskRequestRef] = taskRequestsSnapshot.docs;
   const taskRequestData = taskRequestRef?.data();
+  const isCreationRequestApproved =
+    taskRequestData &&
+    taskRequestData.requestType === TASK_REQUEST_TYPE.CREATION &&
+    taskRequestData.status === TASK_REQUEST_STATUS.APPROVED;
+  if (isCreationRequestApproved) {
+    return { isCreationRequestApproved };
+  }
   const userRequest = {
     userId: data.userId,
     proposedDeadline: data.proposedDeadline,

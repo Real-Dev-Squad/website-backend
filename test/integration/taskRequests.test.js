@@ -647,6 +647,17 @@ describe("Task Requests", function () {
       expect(res).to.have.status(200);
       expect(res.body.message).to.equal("Task request successful.");
     });
+    it("should not allow users to request a issue which was previously approved (Creation)", async function () {
+      fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
+      createRequestStub.resolves({ isCreationRequestApproved: true });
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(mockData.taskRequestData);
+      expect(res).to.have.status(409);
+      expect(res.body.message).to.equal("Task exists for the given issue.");
+    });
     it("should allow users to request the same task (Assignment)", async function () {
       const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT, taskId: "abc" };
       fetchTaskStub.resolves({ taskData: { ...taskData, id: requestData.taskId } });

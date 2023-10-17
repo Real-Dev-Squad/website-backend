@@ -93,6 +93,9 @@ const addTaskRequests = async (req, res) => {
       }
     }
     const newTaskRequest = await taskRequestsModel.createRequest(taskRequestData, req.userData.username);
+    if (newTaskRequest.isCreationRequestApproved) {
+      return res.boom.conflict("Task exists for the given issue.");
+    }
     if (newTaskRequest.alreadyRequesting) {
       return res.boom.badRequest("Task was already requested");
     }

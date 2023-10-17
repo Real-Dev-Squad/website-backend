@@ -140,4 +140,10 @@ describe("createRequest", function () {
     const result = await createRequest(requestData, authenticatedUsername);
     expect(result.alreadyRequesting).to.be.equal(true);
   });
+  it("should handle the case where the user is requesting an approved task/issue (CREATION)", async function () {
+    await taskRequestsCollection.add({ ...mockData.existingTaskRequest, status: TASK_REQUEST_STATUS.APPROVED });
+    const requestData = { ...mockData.taskRequestData };
+    const result = await createRequest(requestData, authenticatedUsername);
+    expect(result.isCreationRequestApproved).to.be.equal(true);
+  });
 });
