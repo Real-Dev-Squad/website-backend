@@ -2,7 +2,7 @@ const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
-
+const logsQuery = require("../../models/logs");
 const app = require("../../server");
 const extensionRequests = require("../../models/extensionRequests");
 const tasks = require("../../models/tasks");
@@ -21,17 +21,25 @@ const user = userData[6];
 const appOwner = userData[3];
 const superUser = userData[4];
 
-let appOwnerjwt, superUserJwt, jwt;
+let appOwnerjwt, superUserJwt, jwt, superUserId, extensionRequestId5;
 
 describe("Extension Requests", function () {
-  let taskId0, taskId1, taskId2, taskId3, extensionRequestId1, extensionRequestId2;
+  let taskId0,
+    taskId1,
+    taskId2,
+    taskId3,
+    taskId4,
+    extensionRequestId1,
+    extensionRequestId2,
+    extensionRequestId3,
+    extensionRequestId4;
 
   before(async function () {
     const userId = await addUser(user);
     user.id = userId;
     const appOwnerUserId = await addUser(appOwner);
     appOwner.id = appOwnerUserId;
-    const superUserId = await addUser(superUser);
+    superUserId = await addUser(superUser);
     appOwnerjwt = authService.generateAuthToken({ userId: appOwnerUserId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
     jwt = authService.generateAuthToken({ userId: userId });
@@ -93,6 +101,19 @@ describe("Extension Requests", function () {
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
       },
+      {
+        title: "Test task for dev flag",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "active",
+        percentCompleted: 10,
+        participants: [],
+        assignee: user.username,
+        isNoteworthy: true,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+      },
     ];
 
     // Add the active task
@@ -104,6 +125,7 @@ describe("Extension Requests", function () {
 
     // Add the completed task
     taskId3 = (await tasks.updateTask(taskData[3])).taskId;
+    taskId4 = (await tasks.updateTask(taskData[4])).taskId;
 
     const extensionRequest = {
       taskId: taskId3,
@@ -123,8 +145,41 @@ describe("Extension Requests", function () {
       reason: "family event",
       status: "APPROVED",
     };
+
+    const extensionRequest2 = {
+      taskId: taskId3,
+      title: "change ETA",
+      assignee: user.id,
+      oldEndsOn: 1234,
+      newEndsOn: 1235,
+      reason: "family event",
+      status: "PENDING",
+    };
+
+    const extensionRequest3 = {
+      taskId: taskId3,
+      title: "change ETA",
+      assignee: user.id,
+      oldEndsOn: 1234,
+      newEndsOn: 1235,
+      reason: "family event",
+      status: "PENDING",
+    };
+
+    const extensionRequest4 = {
+      taskId: taskId4,
+      title: "change ETA",
+      assignee: user.id,
+      oldEndsOn: 1234,
+      newEndsOn: 1235,
+      reason: "family event",
+      status: "PENDING",
+    };
     extensionRequestId1 = (await extensionRequests.createExtensionRequest(extensionRequest)).id;
     extensionRequestId2 = (await extensionRequests.createExtensionRequest(extensionRequest1)).id;
+    extensionRequestId3 = (await extensionRequests.createExtensionRequest(extensionRequest2)).id;
+    extensionRequestId4 = (await extensionRequests.createExtensionRequest(extensionRequest3)).id;
+    extensionRequestId5 = (await extensionRequests.createExtensionRequest(extensionRequest4)).id;
   });
 
   after(async function () {
@@ -790,6 +845,140 @@ describe("Extension Requests", function () {
           expect(res.body.message).to.equal('"status" is not allowed');
           return done();
         });
+    });
+
+    it("Extension request log should contain extensionRequestId upon approving request in dev mode", function (done) {
+      chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId3}/status?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "APPROVED",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Extension request APPROVED succesfully");
+          expect(res.body.extensionLog.type).to.equal("extensionRequests");
+          expect(res.body.extensionLog.body.status).to.equal("APPROVED");
+
+          chai
+            .request(app)
+            .get(`/logs/extensionRequests?body.status=APPROVED&meta.extensionRequestId=${extensionRequestId3}`)
+            .set("cookie", `${cookieName}=${superUserJwt}`)
+            .end((err, res) => {
+              if (err) {
+                return done(err);
+              }
+              expect(res.body.logs[0].body.status).to.equal("APPROVED");
+              expect(res.body.logs[0].meta.extensionRequestId).to.equal(extensionRequestId3);
+
+              return done();
+            });
+
+          return null;
+        });
+    });
+    it("Extension request log should contain extensionRequestId upon denying request in dev mode", function (done) {
+      chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId4}/status?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "DENIED",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Extension request DENIED succesfully");
+          expect(res.body.extensionLog.type).to.equal("extensionRequests");
+          expect(res.body.extensionLog.body.status).to.equal("DENIED");
+
+          chai
+            .request(app)
+            .get(`/logs/extensionRequests?body.status=DENIED&meta.extensionRequestId=${extensionRequestId4}`)
+            .set("cookie", `${cookieName}=${superUserJwt}`)
+            .end((err, res) => {
+              if (err) {
+                return done(err);
+              }
+              expect(res.body.logs[0].body.status).to.equal("DENIED");
+              expect(res.body.logs[0].meta.extensionRequestId).to.equal(extensionRequestId4);
+
+              return done();
+            });
+
+          return null;
+        });
+    });
+  });
+  describe("PATCH /extension-requests/:id?dev=true", function () {
+    it("Should create a log when SU changes the extension request's title", async function () {
+      const newTitle = "new-title";
+      const oldTitle = "change ETA"; // from above
+      await chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId5}/?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          title: newTitle,
+        });
+      const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId5 }, "extensionRequests");
+      const updationLogs = logs.find(
+        (log) => log.meta.userId === superUserId && log.body.newTitle === newTitle && log.body.oldTitle === oldTitle
+      );
+      expect(updationLogs.meta.extensionRequestId).to.equal(extensionRequestId5);
+      expect(updationLogs.body.newTitle).to.equal(newTitle);
+      expect(updationLogs.body.oldTitle).to.equal(oldTitle);
+      return null;
+    });
+
+    it("Should create a log when SU changes the extension request's ETA", async function () {
+      const usersETA = 1235;
+      const suETA = 4444; // from above
+      await chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId5}/?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          newEndsOn: suETA,
+        });
+      const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId5 }, "extensionRequests");
+      const updationLogs = logs.find(
+        (log) => log.meta.userId === superUserId && log.body.newEndsOn === suETA && log.body.oldEndsOn === usersETA
+      );
+      expect(updationLogs.meta.extensionRequestId).to.equal(extensionRequestId5);
+      expect(updationLogs.body.newEndsOn).to.equal(suETA);
+      expect(updationLogs.body.oldEndsOn).to.equal(usersETA);
+      return null;
+    });
+
+    it("Should create a log when SU changes the extension request's reason", async function () {
+      const newReason = "office work";
+      const oldReason = "family event"; // from above
+      await chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId5}/?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          reason: newReason,
+        });
+      const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId5 }, "extensionRequests");
+      const updationLogs = logs.find(
+        (log) => log.meta.userId === superUserId && log.body.newReason === newReason && log.body.oldReason === oldReason
+      );
+      expect(updationLogs.meta.extensionRequestId).to.equal(extensionRequestId5);
+      expect(updationLogs.body.newReason).to.equal(newReason);
+      expect(updationLogs.body.oldReason).to.equal(oldReason);
+      return null;
     });
   });
 });
