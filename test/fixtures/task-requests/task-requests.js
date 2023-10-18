@@ -56,7 +56,13 @@ const existingTaskRequest = {
   lastModifiedBy: "testUser",
   lastModifiedAt: 1697452229369,
 };
+const existingOldTaskRequest = {
+  requestors: ["user123"],
+  status: "PENDING",
+  taskId: "task123",
+};
 module.exports = {
+  existingOldTaskRequest,
   taskRequestData,
   existingTaskRequest,
   validAssignmentRequest,
