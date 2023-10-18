@@ -470,6 +470,7 @@ describe("Task Requests", function () {
       });
 
       it("should match response for successfull approval", function (done) {
+        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ approvedTo: member.username });
         chai
           .request(app)
           .patch("/taskRequests/approve")
@@ -515,8 +516,7 @@ describe("Task Requests", function () {
           .patch("/taskRequests/approve")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
-            taskRequestId: taskId,
-            userId: activeUserId,
+            userId: oooUserId,
           })
           .end((err, res) => {
             if (err) {
