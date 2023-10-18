@@ -74,6 +74,7 @@ const fetchTaskRequestById = async (taskRequestId) => {
 };
 
 const createRequest = async (data, authenticatedUsername) => {
+  try {
   const queryFieldPath = data.requestType === TASK_REQUEST_TYPE.CREATION ? "externalIssueUrl" : "taskId";
   const queryValue = data.requestType === TASK_REQUEST_TYPE.CREATION ? data.externalIssueUrl : data.taskId;
   const statusQueryValue =
@@ -153,6 +154,9 @@ const createRequest = async (data, authenticatedUsername) => {
     taskRequest: newTaskRequest,
     id: newTaskRequestRef.id,
   };
+  } catch (err) {
+    logger.error("Error creating a task request", err);
+  }
 };
 /**
  * Creates a task request
