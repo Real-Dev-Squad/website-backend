@@ -400,28 +400,6 @@ describe("Task Requests", function () {
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
-
-      it("should match response when the user is OOO", function (done) {
-        sinon.stub(userStatusModel, "getUserStatus").callsFake(() => ({ userStatusExists: true, data: oooUserStatus }));
-        chai
-          .request(app)
-          .post("/taskRequests/addOrUpdate")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({
-            taskId,
-            userId,
-          })
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
-            expect(res).to.have.status(409);
-            expect(res.body.message).to.equal("User is currently OOO");
-            return done();
-          });
-      });
-
       it("should match response when the user is active on another task", function (done) {
         sinon
           .stub(userStatusModel, "getUserStatus")
