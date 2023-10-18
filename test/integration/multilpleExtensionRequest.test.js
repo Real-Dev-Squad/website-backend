@@ -318,9 +318,10 @@ describe("Multiple Extension Requests", function () {
     });
 
     it("Dev-flag true->should return success response and a single latestExtensionRequest if assignee same as latest one", function (done) {
-      fetchLatestExtensionRequestStub.returns = {
+      fetchLatestExtensionRequestStub.returns({
         taskId: taskId2,
         title: "change ETA",
+        assigneeId: user.id,
         assignee: "mayur",
         oldEndsOn: 1234,
         newEndsOn: 1237,
@@ -328,7 +329,8 @@ describe("Multiple Extension Requests", function () {
         status: "APPROVED",
         requestNumber: 5,
         userId: user.id,
-      };
+        id: "12234",
+      });
       chai
         .request(app)
         .get(`/extension-requests/self`)
