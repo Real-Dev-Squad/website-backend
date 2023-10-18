@@ -1,9 +1,10 @@
-const { TASK_REQUEST_STATUS } = require("../constants/taskRequests");
-const { TASK_STATUS } = require("../constants/tasks");
+const { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE } = require("../constants/taskRequests");
+const { TASK_TYPE } = require("../constants/tasks");
 const firestore = require("../utils/firestore");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const tasksModel = require("./tasks");
 const userModel = require("./users");
+const tasksCollection = firestore.collection("tasks");
 
 /**
  * Fetch all task requests
@@ -129,21 +130,103 @@ const addOrUpdate = async (taskId, userId) => {
  */
 const approveTaskRequest = async (taskRequestId, user) => {
   try {
-    const taskRequest = await taskRequestsCollection.doc(taskRequestId).get();
-
-    const updatedTaskRequest = {
-      ...taskRequest.data(),
-      approvedTo: user.id,
-      status: TASK_REQUEST_STATUS.APPROVED,
-    };
-
-    await taskRequestsCollection.doc(taskRequestId).set(updatedTaskRequest);
-    await tasksModel.updateTask({ assignee: user.id, status: TASK_STATUS.ASSIGNED }, taskRequestId);
-
-    return {
-      approvedTo: user.username,
-      taskRequest: updatedTaskRequest,
-    };
+    return await firestore.runTransaction(async (transaction) => {
+      const taskRequestDocRef = taskRequestsCollection.doc(taskRequestId);
+      const taskRequestDoc = await transaction.get(taskRequestDocRef);
+      const taskRequestData = taskRequestDoc.data();
+      if (!taskRequestData) {
+        return { taskRequestNotFound: true };
+      }
+      let isUserInvalid;
+      if (taskRequestData.users) {
+        isUserInvalid = !taskRequestData.users.some((userElement) => user.id === userElement.userId);
+      } else {
+        isUserInvalid = !taskRequestData.requestors.some((userId) => user.id === userId);
+      }
+      if (isUserInvalid) {
+        return { isUserInvalid };
+      }
+      if (
+        taskRequestData.status === TASK_REQUEST_STATUS.APPROVED ||
+        taskRequestData.status === TASK_REQUEST_STATUS.DENIED
+      ) {
+        return { isTaskRequestInvalid: true };
+      }
+      if (taskRequestData.requestType === TASK_REQUEST_TYPE.CREATION) {
+        // TODO : extract the common code after the migration of the task request model. https://github.com/Real-Dev-Squad/website-backend/issues/1613
+        let userRequestData;
+        taskRequestData.users.forEach((userElement) => {
+          if (userElement.userId === user.id) {
+            userElement.status = TASK_REQUEST_STATUS.APPROVED;
+            userRequestData = userElement;
+          }
+        });
+        const updatedTaskRequest = {
+          users: taskRequestData.users,
+          approvedTo: user.id,
+          status: TASK_REQUEST_STATUS.APPROVED,
+        };
+        // End of TODO
+        const updateTaskRequestPromise = transaction.update(taskRequestDocRef, updatedTaskRequest);
+        const newTaskRequestData = {
+          assignee: user.id,
+          title: taskRequestData.taskTitle,
+          type: TASK_TYPE.FEATURE,
+          startedOn: userRequestData.proposedStartDate / 1000,
+          endsOn: userRequestData.proposedDeadline / 1000,
+          github: {
+            issue: {
+              url: taskRequestData.externalIssueUrl,
+            },
+          },
+        };
+        const newTaskDocRef = tasksCollection.doc();
+        const addTaskPromise = transaction.set(newTaskDocRef, newTaskRequestData);
+        await Promise.all([updateTaskRequestPromise, addTaskPromise]);
+        return {
+          approvedTo: user.username,
+          taskRequest: {
+            ...updatedTaskRequest,
+            taskId: newTaskDocRef.id,
+          },
+        };
+      } else {
+        // TODO : extract the common code and remove the unnecessary if-condition after the migration of the task request model. https://github.com/Real-Dev-Squad/website-backend/issues/1613
+        const updatedTaskRequest = {
+          approvedTo: user.id,
+          status: TASK_REQUEST_STATUS.APPROVED,
+        };
+        let userRequestData;
+        if (taskRequestData.users) {
+          taskRequestData.users.forEach((userElement) => {
+            if (userElement.userId === user.id) {
+              userElement.status = TASK_REQUEST_STATUS.APPROVED;
+              userRequestData = userElement;
+            }
+          });
+          updatedTaskRequest.users = taskRequestData.users;
+        }
+        // End of TODO
+        const updateTaskRequestPromise = transaction.update(taskRequestDocRef, updatedTaskRequest);
+        const updatedTaskData = { assignee: user.id };
+        // TODO : remove the unnecessary if-condition after the migration of the task request model. https://github.com/Real-Dev-Squad/website-backend/issues/1613
+        if (userRequestData) {
+          updatedTaskData.startedOn = userRequestData.proposedStartDate / 1000;
+          updatedTaskData.endsOn = userRequestData.proposedDeadline / 1000;
+        }
+        // End of TODO
+        const oldTaskDocRef = tasksCollection.doc(taskRequestData.taskId);
+        const updateTaskPromise = transaction.update(oldTaskDocRef, updatedTaskData);
+        await Promise.all([updateTaskRequestPromise, updateTaskPromise]);
+        return {
+          approvedTo: user.username,
+          taskRequest: {
+            ...updatedTaskRequest,
+            taskId: oldTaskDocRef.id,
+          },
+        };
+      }
+    });
   } catch (err) {
     logger.error("Error in approving task", err);
     throw err;

@@ -24,9 +24,6 @@ async function validateUser(req, res, next) {
     if (!userStatusExists) {
       return res.boom.conflict("User status does not exist");
     }
-    if (userStatus.currentStatus.state === userState.OOO) {
-      return res.boom.conflict("User is currently OOO");
-    }
     if (userStatus.currentStatus.state === userState.ACTIVE) {
       return res.boom.conflict("User is currently active on another task");
     }
