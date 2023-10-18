@@ -56,7 +56,7 @@ const addTaskRequests = async (req, res) => {
     if (taskRequestData.proposedDeadline < taskRequestData.proposedStartDate) {
       return res.boom.badRequest("Task deadline cannot be before the start date");
     }
-    switch (req.body.requestType) {
+    switch (taskRequestData.requestType) {
       case TASK_REQUEST_TYPE.ASSIGNMENT: {
         const taskDataPromise = tasksModel.fetchTask(taskRequestData.taskId);
 
