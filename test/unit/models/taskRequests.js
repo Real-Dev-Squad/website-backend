@@ -1,6 +1,7 @@
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
+const { fetchTaskRequests } = require("./../../../models/taskRequests");
 const mockData = require("../../fixtures/task-requests/task-requests");
 const firestore = require("../../../utils/firestore");
 const taskRequestsCollection = firestore.collection("taskRequests");
@@ -23,7 +24,7 @@ describe("Task requests", function () {
       const result = await fetchTaskRequests();
       expect(result).to.be.an("array");
     });
-    it("should fetch task requests with associated tasks and requestors", async function () {
+    it("should fetch task requests with associated tasks and requestors of only the old task request models when dev is false", async function () {
       const taskData = { taskData: { title: "hello" } };
       const userData = { username: "hello" };
       sinon.stub(tasksModel, "fetchTask").resolves(taskData);
@@ -34,7 +35,7 @@ describe("Task requests", function () {
       expect(fetchedTaskRequest.task).to.deep.equal(taskData.taskData);
       expect(fetchedTaskRequest.requestors[0]).to.deep.equal(userData);
     });
-    it("should fetch task requests in development mode with associated requestors only", async function () {
+    it("should fetch task requests in development mode with associated requestors of all task request models when dev is true", async function () {
       const taskData = { taskData: { title: "hello" } };
       const userData = { username: "hello" };
       sinon.stub(tasksModel, "fetchTask").resolves(taskData);
