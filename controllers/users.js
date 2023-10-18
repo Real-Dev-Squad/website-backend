@@ -80,11 +80,17 @@ const getUserById = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     // getting user details by id if present.
-    const query = req.query?.query ?? "";
-    const transformedQuery = parseSearchQuery(query);
-    const qualifiers = getQualifiers(query);
-
+    const { q, dev: devParam, query } = req.query;
+    const dev = devParam === "true";
+    const queryString = (dev ? q : query) || "";
+    const transformedQuery = parseSearchQuery(queryString);
+    const qualifiers = getQualifiers(queryString);
+    // Should throw an error if the new query parameter is without feature flag
+    if (q && !dev) {
+      return res.boom.notFound("Route not found");
+    }
     // getting user details by id if present.
+
     if (req.query.id) {
       const id = req.query.id;
       let result, user;
@@ -135,16 +141,17 @@ const getUsers = async (req, res) => {
     // getting user details by discord id if present.
     const discordId = req.query.discordId;
 
-    const dev = req.query.dev === "true";
     if (req.query.discordId) {
       if (dev) {
         let result, user;
         try {
           result = await dataAccess.retrieveUsers({ discordId });
           user = result.user;
-
           if (!result.userExists) {
-            return res.boom.notFound("User doesn't exist");
+            return res.json({
+              message: "User not found",
+              user: null,
+            });
           }
 
           const userStatusResult = await getUserStatus(user.id);

@@ -63,4 +63,32 @@ describe("time", function () {
       }
     });
   });
+
+  describe("convertTimestampToUTCStartOrEndOfDay", function () {
+    it("should convert a timestamp to UTC 00:00:00 when isEndOfDay is false", function () {
+      const timestamp = 1696439365987; // Wed Oct 04 2023 17:09:25 UTC
+      const isEndOfDay = false;
+      const result = timeUtils.convertTimestampToUTCStartOrEndOfDay(timestamp, isEndOfDay);
+
+      // Expected result: 1696377600000 Wed Oct 04 2023 00:00:00 UTC
+      expect(result).to.equal(1696377600000);
+    });
+
+    it("should convert a timestamp to UTC 23:59:59.999 when isEndOfDay is true", function () {
+      const timestamp = 1696439365987; // Wed Oct 04 2023 17:09:25 UTC
+      const isEndOfDay = true;
+      const result = timeUtils.convertTimestampToUTCStartOrEndOfDay(timestamp, isEndOfDay);
+
+      // Expected result: 1696463999999 Wed Oct 04 2023 23:59:59 UTC
+      expect(result).to.equal(1696463999999);
+    });
+
+    it("should should return null if timestamp is not a valid timestamp", function () {
+      const timestamp = "random text";
+      const isEndOfDay = true;
+      const result = timeUtils.convertTimestampToUTCStartOrEndOfDay(timestamp, isEndOfDay);
+
+      expect(result).to.equal(null);
+    });
+  });
 });

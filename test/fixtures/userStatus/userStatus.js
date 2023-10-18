@@ -185,6 +185,39 @@ const getStatusData = () => {
   ];
 };
 
+const inputFixtureForFnConvertTimestampsToUTC = {
+  currentStatus: {
+    from: 1696439365987, // Wed Oct 04 2023 17:09:25 UTC
+    until: 1697124600000, // Thu Oct 12, 2023, 15:30:00
+  },
+  futureStatus: {
+    from: 1696439365987, // Wed Oct 04 2023 17:09:25 UTC
+    until: "", // An empty string
+  },
+};
+
+const OutputFixtureForFnConvertTimestampsToUTC = {
+  currentStatus: {
+    from: 1696377600000, // October 4, 2023, 00:00:00 UTC
+    until: 1697155199999, // Thu Oct 12, 2023, 23:59:59 UTC
+  },
+  futureStatus: {
+    from: 1696377600000, // October 4, 2023, 00:00:00 UTC
+    until: "", // No conversion for an empty string
+  },
+};
+
+const generateDefaultFutureStatus = (state, from, until) => {
+  const futureStatusData = {
+    state,
+    from,
+    until,
+    message: "",
+    updatedAt: new Date().getTime(),
+  };
+  return futureStatusData;
+};
+
 module.exports = {
   userStatusDataForNewUser,
   userStatusDataAfterSignup,
@@ -197,4 +230,7 @@ module.exports = {
   generateStatusDataForCancelOOO,
   generateStatusDataForState,
   getStatusData,
+  inputFixtureForFnConvertTimestampsToUTC,
+  OutputFixtureForFnConvertTimestampsToUTC,
+  generateDefaultFutureStatus,
 };

@@ -646,11 +646,59 @@ describe("Users", function () {
           return done();
         });
     });
-
+    it("Should return 503 if something went wrong if data not fetch from github for new query format under feature flag", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({
+          q: "filterBy:unmerged_prs+days:30",
+          dev: true,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(503);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal(SOMETHING_WENT_WRONG);
+          return done();
+        });
+    });
+    it("Should throw an error when there is no feature flag when using the new query parameter format(q)", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({
+          q: "filterBy:unmerged_prs+days:30",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Route not found");
+          return done();
+        });
+    });
     it("Should return 400 if days is not passed for filterBy unmerged_prs", function (done) {
       chai
         .request(app)
         .get("/users?query=filterBy:unmerged_prs")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Days is required for filterBy unmerged_prs");
+          return done();
+        });
+    });
+    it("Should return 400 if days is not passed for filterBy unmerged_prs with new query format and feature flag", function (done) {
+      chai
+        .request(app)
+        .get("/users?q=filterBy:unmerged_prs&dev=true")
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -679,18 +727,34 @@ describe("Users", function () {
       expect(res.body.message).to.equal("Route not found");
     });
 
-    it("Should return an error when passing an invalid Discord ID", async function () {
+    it("Should return an empty object when passing an invalid Discord ID", async function () {
       const invalidDiscordId = "50485556209423";
       const res = await chai.request(app).get(`/users?dev=true&discordId=${invalidDiscordId}`);
-      expect(res).to.have.status(404);
+      expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
-      expect(res.body.message).to.equal("User doesn't exist");
+      expect(res.body.message).to.equal("User not found");
     });
 
     it("Should return user id which have overdue tasks", function (done) {
       chai
         .request(app)
         .get("/users?query=filterBy:overdue_tasks+days:1")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          return done();
+        });
+    });
+
+    it("Should return user id which have overdue tasks with new query params under feature flag", function (done) {
+      chai
+        .request(app)
+        .get("/users?q=filterBy:overdue_tasks+days:1&dev=true")
         .end((err, res) => {
           if (err) {
             return done(err);
