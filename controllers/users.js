@@ -29,8 +29,6 @@ const {
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 
-const { removeNicknameSyncedFieldScript } = require("../services/users");
-
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
   try {
@@ -842,15 +840,6 @@ async function usersPatchHandler(req, res) {
   }
 }
 
-const removeNicknameSyncedField = async (req, res) => {
-  try {
-    await removeNicknameSyncedFieldScript();
-    return res.json({ message: "Successfully removed the nickname_synced field for all users" });
-  } catch (err) {
-    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
-  }
-};
-
 /**
  * Makes user a member
  *
@@ -916,6 +905,7 @@ const archiveUser = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -945,7 +935,6 @@ module.exports = {
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
-  removeNicknameSyncedField,
   moveToMembers,
   archiveUser,
 };

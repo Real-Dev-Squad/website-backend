@@ -42,6 +42,14 @@ const USERS_PATCH_HANDLER_SUCCESS_MESSAGES = {
 };
 const OVERDUE_TASKS = "overdue_tasks";
 
+const ONE_DAY_IN_MS = 1000 * 60 * 60 * 24;
+
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+const discordNicknameLength = 32;
+
+const SIMULTANEOUS_WORKER_CALLS = 4;
+
 module.exports = {
   profileStatus,
   USER_STATUS,
@@ -52,4 +60,8 @@ module.exports = {
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
   OVERDUE_TASKS,
+  ONE_DAY_IN_MS,
+  months,
+  discordNicknameLength,
+  SIMULTANEOUS_WORKER_CALLS,
 };
