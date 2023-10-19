@@ -113,41 +113,6 @@ const addTaskRequests = async (req, res) => {
   }
 };
 
-const addOrUpdate = async (req, res) => {
-  try {
-    const { taskId, userId } = req.body;
-    if (!taskId) {
-      return res.boom.badRequest("taskId not provided");
-    }
-
-    const { taskData } = await tasksModel.fetchTask(taskId);
-    if (!taskData) {
-      return res.boom.conflict("Task does not exist");
-    }
-
-    const response = await taskRequestsModel.addOrUpdate(taskId, userId);
-
-    if (response.alreadyRequesting) {
-      return res.boom.conflict("User is already requesting for the task");
-    }
-
-    if (response.isCreate) {
-      return res.status(201).json({
-        message: "Task request successfully created",
-        taskRequest: response.taskRequest,
-      });
-    }
-
-    return res.status(200).json({
-      message: "Task request successfully updated",
-      requestors: response.requestors,
-    });
-  } catch (err) {
-    logger.error("Error while creating task request");
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
-  }
-};
-
 const approveTaskRequest = async (req, res) => {
   try {
     const { taskRequestId, user } = req.body;
@@ -169,7 +134,6 @@ const approveTaskRequest = async (req, res) => {
 
 module.exports = {
   approveTaskRequest,
-  addOrUpdate,
   fetchTaskRequests,
   fetchTaskRequestById,
   addTaskRequests,

@@ -9,7 +9,6 @@ const validators = require("../middlewares/validators/task-requests");
 
 router.get("/", authenticate, authorizeRoles([SUPERUSER]), taskRequests.fetchTaskRequests);
 router.get("/:id", authenticate, authorizeRoles([SUPERUSER]), taskRequests.fetchTaskRequestById);
-router.post("/addOrUpdate", authenticate, validateUser, taskRequests.addOrUpdate);
 router.patch("/approve", authenticate, authorizeRoles([SUPERUSER]), validateUser, taskRequests.approveTaskRequest);
 router.post("/", authenticate, validators.postTaskRequests, taskRequests.addTaskRequests);
 module.exports = router;
