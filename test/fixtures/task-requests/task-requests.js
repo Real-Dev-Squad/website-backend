@@ -1,7 +1,7 @@
 const { TASK_REQUEST_TYPE } = require("../../../constants/taskRequests");
 const validAssignmentRequest = {
   taskId: "1234",
-  externalIssueUrl: "/repos/Real-Dev-Squad/website-status/911",
+  externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-status/issues/1564672",
   requestType: "ASSIGNMENT",
   userId: "7890",
   proposedDeadline: 1243455234,
@@ -13,7 +13,7 @@ const { proposedDeadline: tarProposedDeadline, ...assignmentReqWithoutProposedDe
 const { externalIssueUrl: tarExternalIssueUrl, ...assignmentReqWithoutExtIssueId } = validAssignmentRequest;
 const assignmentReqWithDescription = { ...validAssignmentRequest, description: "something something" };
 const validCreationRequest = {
-  externalIssueUrl: "/repos/Real-Dev-Squad/website-status/911",
+  externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-status/issues/1564672",
   requestType: "CREATION",
   userId: "7890",
   proposedDeadline: 1243455234,

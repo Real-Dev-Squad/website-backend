@@ -667,9 +667,12 @@ describe("Task Requests", function () {
       expect(res.body.message).to.equal("Task request successful.");
     });
     it("should handle invalid external issue URL", async function () {
-      const requestData = { ...mockData.taskRequestData, externalIssueUrl: "abc" };
+      const requestData = {
+        ...mockData.taskRequestData,
+        externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website/atus/issues/1564672",
+      };
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
-      expect(res.body.message).to.equal("External issue url is not valid");
+      expect(res.body.message).to.equal("Issue does not exist");
       expect(res).to.have.status(400);
     });
     it("should handle valid external issue URL not is RDS repo", async function () {
