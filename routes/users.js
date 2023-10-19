@@ -62,4 +62,6 @@ router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rej
 router.patch("/nickname-synced-field", authenticate, authorizeRoles([SUPERUSER]), users.removeNicknameSyncedField);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
+router.patch("/moveToMembers/:username", authenticate, authorizeRoles([SUPERUSER]), users.moveToMembers);
+router.patch("/archive/:username", authenticate, authorizeRoles([SUPERUSER]), users.archiveUser);
 module.exports = router;

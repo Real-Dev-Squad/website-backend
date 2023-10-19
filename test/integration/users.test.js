@@ -22,7 +22,8 @@ const {
   userStatusDataAfterSignup,
   userStatusDataAfterFillingJoinSection,
 } = require("../fixtures/userStatus/userStatus");
-const { addJoinData, addOrUpdate } = require("../../models/users");
+const usersModel = require("../../models/users");
+const { addJoinData, addOrUpdate } = usersModel;
 const userStatusModel = require("../../models/userStatus");
 
 const userRoleUpdate = userData[4];
@@ -32,6 +33,9 @@ const userAlreadyNotMember = userData[13];
 const userAlreadyArchived = userData[5];
 const userAlreadyUnArchived = userData[4];
 const nonSuperUser = userData[0];
+const userToBeMadeMember = userData[1];
+const userToBeArchived = userData[3];
+const userDoesNotExists = userData[1];
 
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
@@ -2044,6 +2048,182 @@ describe("Users", function () {
           expect(response.message).to.be.equal("An internal server error occurred");
           return done();
         });
+    });
+  });
+
+  describe("PATCH /users/moveToMembers/:username", function () {
+    beforeEach(async function () {
+      const superUserId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId: superUserId });
+    });
+
+    it("Should return 404 if user doesn't exist", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/moveToMembers/${userToBeMadeMember.username}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User doesn't exist");
+
+          return done();
+        });
+    });
+
+    it("Should make the user a member", function (done) {
+      addUser(userToBeMadeMember).then(() => {
+        chai
+          .request(app)
+          .patch(`/users/moveToMembers/${userToBeMadeMember.username}`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(204);
+            /* eslint-disable no-unused-expressions */
+            expect(res.body).to.be.a("object").to.be.empty;
+
+            return done();
+          });
+      });
+    });
+
+    it("Should return 400 if user is already a member", function (done) {
+      addUser(userAlreadyMember).then(() => {
+        chai
+          .request(app)
+          .patch(`/users/moveToMembers/${userAlreadyMember.username}`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal("User is already a member");
+
+            return done();
+          });
+      });
+    });
+
+    it("Should return 401 if user is not a super_user", function (done) {
+      addUser(nonSuperUser).then((nonSuperUserId) => {
+        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+        chai
+          .request(app)
+          .patch(`/members/moveToMembers/${nonSuperUser.username}`)
+          .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(401);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal("You are not authorized for this action.");
+
+            return done();
+          });
+      });
+    });
+  });
+
+  describe("PATCH /users/archive/:username", function () {
+    let archiveRoleToMemberStub;
+    beforeEach(async function () {
+      const superUserId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId: superUserId });
+    });
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
+    });
+    it("Should return an object with status 500 and an error message", function (done) {
+      archiveRoleToMemberStub = Sinon.stub(usersModel, "addArchiveRoleToUser");
+      archiveRoleToMemberStub.throws(new Error(INTERNAL_SERVER_ERROR));
+
+      addUser(userToBeArchived).then(() => {
+        chai
+          .request(app)
+          .patch(`/users/archive/${userToBeArchived.username}`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({ reason: "some reason" })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res).to.have.status(500);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal(INTERNAL_SERVER_ERROR);
+            return done();
+          });
+      });
+    });
+    it("Should return 404 if user doesn't exist", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/archive/${userDoesNotExists.username}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ reason: "some reason" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User doesn't exist");
+          return done();
+        });
+    });
+    it("Should archive the user", function (done) {
+      addUser(userToBeArchived).then(() => {
+        chai
+          .request(app)
+          .patch(`/users/archive/${userToBeArchived.username}`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({ reason: "some reason" })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(204);
+            /* eslint-disable no-unused-expressions */
+            expect(res.body).to.be.a("object").to.be.empty;
+
+            return done();
+          });
+      });
+    });
+
+    it("Should return 400 if user is already archived", function (done) {
+      addUser(userAlreadyArchived).then(() => {
+        chai
+          .request(app)
+          .patch(`/users/archive/${userAlreadyArchived.username}`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({ reason: "some reason" })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body).to.be.a("object");
+            expect(res.body.message).to.equal("User is already archived");
+
+            return done();
+          });
+      });
     });
   });
 });

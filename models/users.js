@@ -858,6 +858,49 @@ const getNonNickNameSyncedUsers = async () => {
   }
 };
 
+/**
+ * changes the role of a new user to member
+ * @param userId { String }: User id of user to be modified
+ * @return { Object }: whether moveToMember was successful or not and whether user is already a member or not
+ */
+
+const moveUserToMembers = async (userId) => {
+  try {
+    const userDoc = await userModel.doc(userId).get();
+    const user = userDoc.data();
+    if (user?.roles?.member) return { isAlreadyMember: true, movedToMember: false };
+    const roles = user.roles ? { ...user.roles, member: true } : { member: true };
+    await userModel.doc(userId).update({
+      roles,
+    });
+    return { isAlreadyMember: false, movedToMember: true };
+  } catch (err) {
+    logger.error("Error updating user", err);
+    throw err;
+  }
+};
+
+/**
+ * changes the role of a user to archived
+ * @param userId { String }: User id of user to be modified
+ * @return { Object }: whether moveToMember was successful or not and whether user is already a member or not
+ */
+
+const addArchiveRoleToUser = async (userId) => {
+  try {
+    const userDoc = await userModel.doc(userId).get();
+    const user = userDoc.data();
+    if (user?.roles && user.roles[ROLES.ARCHIVED]) return { isArchived: true };
+    const roles = { ...user.roles, [ROLES.ARCHIVED]: true };
+    await userModel.doc(userId).update({
+      roles,
+    });
+    return { isArchived: false };
+  } catch (err) {
+    logger.error("Error updating user", err);
+    throw err;
+  }
+};
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -887,4 +930,6 @@ module.exports = {
   fetchUsersListForMultipleValues,
   fetchUserForKeyValue,
   getNonNickNameSyncedUsers,
+  moveUserToMembers,
+  addArchiveRoleToUser,
 };

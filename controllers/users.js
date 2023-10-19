@@ -851,6 +851,71 @@ const removeNicknameSyncedField = async (req, res) => {
   }
 };
 
+/**
+ * Makes user a member
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const moveToMembers = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const result = await dataAccess.retrieveUsers({ username });
+    if (result.userExists) {
+      const successObject = await userQuery.moveUserToMembers(result.user.id);
+      if (successObject.isAlreadyMember) {
+        return res.boom.badRequest("User is already a member");
+      }
+      return res.status(204).send();
+    }
+    return res.boom.notFound("User doesn't exist");
+  } catch (err) {
+    logger.error(`Error while retriving contributions ${err}`);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
+  }
+};
+
+/**
+ * Archives user from the current users.
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const archiveUser = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await dataAccess.retrieveUsers({ username });
+    const superUserId = req.userData.id;
+    const { reason } = req.body;
+    const roles = req?.userData?.roles;
+    if (user?.userExists) {
+      const successObject = await userQuery.addArchiveRoleToUser(user.user.id);
+      if (successObject.isArchived) {
+        return res.boom.badRequest("User is already archived");
+      }
+      const body = {
+        reason: reason || "",
+        archived_user: {
+          user_id: user.user.id,
+          username: user.user.username,
+        },
+        archived_by: {
+          user_id: superUserId,
+          roles: roles,
+        },
+      };
+
+      addLog("archived-details", {}, body);
+      return res.status(204).send();
+    }
+    return res.boom.notFound("User doesn't exist");
+  } catch (err) {
+    logger.error(`Error while retriving contributions ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -881,4 +946,6 @@ module.exports = {
   archiveUserIfNotInDiscord,
   usersPatchHandler,
   removeNicknameSyncedField,
+  moveToMembers,
+  archiveUser,
 };
