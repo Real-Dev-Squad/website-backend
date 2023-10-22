@@ -13,6 +13,7 @@ const {
   retrieveMembers,
   retreiveFilteredUsers,
   levelSpecificAccess,
+  fetchUsersForKeyValues,
 } = require("../../../services/dataAccessLayer");
 
 const { KEYS_NOT_ALLOWED, ACCESS_LEVEL } = require("../../../constants/userDataLevels");
@@ -192,6 +193,51 @@ describe("Data Access Layer", function () {
       });
       expect(result).to.have.property("phone");
       expect(result).to.have.property("email");
+    });
+  });
+
+  describe("fetchUsersForKeyValues", function () {
+    afterEach(async function () {
+      sinon.restore();
+    });
+    it("should return list of users for a single value", async function () {
+      const fetchUserStub = sinon.stub(userQuery, "fetchUserForKeyValue");
+      fetchUserStub.returns(Promise.resolve([userData[12], userData[11]]));
+
+      const usersList = await fetchUsersForKeyValues("discordId", "1234");
+
+      expect(usersList.length).to.be.equal(2);
+      expect(usersList).to.be.deep.equal([userData[12], userData[11]]);
+    });
+
+    it("should return list of users for a multiple value", async function () {
+      const fetchUserStub = sinon.stub(userQuery, "fetchUsersListForMultipleValues");
+      fetchUserStub.returns(Promise.resolve([userData[12], userData[11]]));
+
+      const usersList = await fetchUsersForKeyValues("discordId", ["1234", "23434"]);
+
+      expect(usersList.length).to.be.equal(2);
+      expect(usersList).to.be.deep.equal([userData[12], userData[11]]);
+    });
+
+    it("should return list of users without sensitive info", async function () {
+      const fetchUserStub = sinon.stub(userQuery, "fetchUsersListForMultipleValues");
+      fetchUserStub.returns(Promise.resolve([userData[12]]));
+
+      const [user] = await fetchUsersForKeyValues("discordId", ["1234", "23434"]);
+
+      KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+        expect(user).to.not.have.property(key);
+      });
+    });
+
+    it("should return list of users with sensitive info", async function () {
+      const fetchUserStub = sinon.stub(userQuery, "fetchUsersListForMultipleValues");
+      fetchUserStub.returns(Promise.resolve([userData[1]]));
+
+      const [user] = await fetchUsersForKeyValues("discordId", ["1234", "23434"], false);
+
+      expect(user).to.be.deep.equal(userData[1]);
     });
   });
 });

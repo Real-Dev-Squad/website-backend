@@ -1,5 +1,6 @@
 const Sinon = require("sinon");
-const { externalAccountData } = require("../../../middlewares/validators/external-accounts");
+const { externalAccountData, postExternalAccountsUsers } = require("../../../middlewares/validators/external-accounts");
+const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../../constants/external-accounts");
 const { expect } = require("chai");
 
 describe("Middleware | Validators | external accounts", function () {
@@ -32,6 +33,33 @@ describe("Middleware | Validators | external accounts", function () {
         expect(err).to.be.an.instanceOf(Error);
       });
       expect(nextSpy.callCount).to.be.equal(0);
+    });
+  });
+
+  describe("postExternalAccountsUsers", function () {
+    it("should be successful when valid query params are passed", async function () {
+      const req = {
+        query: { action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC },
+      };
+      const res = {};
+      const nextSpy = Sinon.spy();
+      await postExternalAccountsUsers(req, res, nextSpy);
+      expect(nextSpy.calledOnce).to.be.equal(true);
+    });
+
+    it("should be respond with bad request when invalid query params are passed", async function () {
+      const req = {
+        query: { action: "abc" },
+      };
+      const res = {
+        boom: {
+          badRequest: Sinon.spy(),
+        },
+      };
+      const nextSpy = Sinon.spy();
+      await postExternalAccountsUsers(req, res, nextSpy);
+      expect(nextSpy.calledOnce).to.be.equal(false);
+      expect(res.boom.badRequest.callCount).to.be.equal(1);
     });
   });
 });

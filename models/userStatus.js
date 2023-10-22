@@ -13,6 +13,7 @@ const {
   generateErrorResponse,
   generateNewStatus,
   getNextDayTimeStamp,
+  convertTimestampsToUTC,
 } = require("../utils/userStatus");
 const { TASK_STATUS } = require("../constants/tasks");
 const userStatusModel = firestore.collection("usersStatus");
@@ -22,7 +23,7 @@ const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const usersCollection = firestore.collection("users");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
-const jwt = require("jsonwebtoken");
+const { generateAuthTokenForCloudflare } = require("../utils/discord-actions");
 
 // added this function here to avoid circular dependency
 /**
@@ -52,92 +53,69 @@ const getGroupRole = async (rolename) => {
   }
 };
 
-const removeGroupRoleFromDiscordUser = async ({ userId, roleName, roleId, discordId }) => {
+const removeGroupIdleRoleFromDiscordUser = async (userId) => {
   try {
-    let groupRole;
-    if (!roleId) groupRole = await getGroupRole(roleName);
-    if (groupRole?.roleExists || roleId) {
-      const ROLE_ID = roleId || groupRole.role.roleid;
-      let userData;
-      if (!discordId) {
-        const user = await usersCollection.doc(userId).get();
-        userData = user.data();
+    const groupRoleObj = await getGroupRole("group-idle");
+    if (groupRoleObj?.roleExists) {
+      const groupIdleRoleId = groupRoleObj.role.roleid;
+      const user = await usersCollection.doc(userId).get();
+      const discordId = user.data().discordId;
+      if (discordId) {
+        // Remove role from firestore collection
+        const hasRole = await memberRoleModel
+          .where("roleid", "==", groupIdleRoleId)
+          .where("userid", "==", discordId)
+          .limit(1)
+          .get();
+        if (!hasRole.empty) {
+          const oldRole = [];
+          hasRole.forEach((role) => oldRole.push({ id: role.id }));
+          await memberRoleModel.doc(oldRole[0].id).delete();
+        }
+
+        const authToken = generateAuthTokenForCloudflare();
+        await fetch(`${DISCORD_BASE_URL}/roles`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+          body: JSON.stringify({ userid: discordId, roleid: groupIdleRoleId }),
+        });
       }
-      const USER_DISCORD_ID = discordId || userData.discordId;
-
-      // remove role from member role collection in firestore
-      const hasRole = await memberRoleModel
-        .where("roleid", "==", ROLE_ID)
-        .where("userid", "==", USER_DISCORD_ID)
-        .limit(1)
-        .get();
-      if (!hasRole.empty) {
-        const oldRole = [];
-        hasRole.forEach((role) => oldRole.push({ id: role.id }));
-        await memberRoleModel.doc(oldRole[0].id).delete();
-      }
-
-      const dataForDiscord = {
-        roleid: ROLE_ID,
-        userid: USER_DISCORD_ID,
-      };
-      const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
-        algorithm: "RS256",
-        expiresIn: config.get("rdsServerlessBot.ttl"),
-      });
-
-      await fetch(`${DISCORD_BASE_URL}/roles`, {
-        method: "DELETE",
-        body: JSON.stringify(dataForDiscord),
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-      }).then((response) => response.json());
     }
   } catch (error) {
-    logger.error(`error in removing role from discord user. Reason - ${error}`);
+    logger.error(`error in removing group-idle role from discord user. Reason - ${error}`);
     throw error;
   }
 };
 
-const addGroupRoleToDiscordUser = async ({ userId, roleName, roleId, discordId }) => {
+const addGroupIdleRoleToDiscordUser = async (userId) => {
   try {
-    let groupRole;
-    if (!roleId) groupRole = await getGroupRole(roleName);
-    if (groupRole?.roleExists || roleId) {
-      const ROLE_ID = roleId || groupRole.role.roleid;
-      let userData;
-      if (!discordId) {
-        const user = await usersCollection.doc(userId).get();
-        userData = user.data();
-      }
-      const USER_DISCORD_ID = discordId || userData.discordId;
+    const groupRoleObj = await getGroupRole("group-idle");
+    if (groupRoleObj?.roleExists) {
+      const groupIdleRoleId = groupRoleObj.role.roleid;
+      const user = await usersCollection.doc(userId).get();
+      const discordId = user.data().discordId;
+      if (discordId) {
+        // Add role to firestore collection
+        const alreadyHasRole = await memberRoleModel
+          .where("roleid", "==", groupIdleRoleId)
+          .where("userid", "==", discordId)
+          .limit(1)
+          .get();
+        if (alreadyHasRole.empty) {
+          await memberRoleModel.add({
+            roleid: groupIdleRoleId,
+            userid: discordId,
+            date: admin.firestore.Timestamp.fromDate(new Date()),
+          });
+        }
 
-      // add role to member role collection in firestore
-      const alreadyHasRole = await memberRoleModel
-        .where("roleid", "==", ROLE_ID)
-        .where("userid", "==", USER_DISCORD_ID)
-        .limit(1)
-        .get();
-      if (alreadyHasRole.empty) {
-        await memberRoleModel.add({
-          roleid: ROLE_ID,
-          userid: USER_DISCORD_ID,
-          date: admin.firestore.Timestamp.fromDate(new Date()),
+        const authToken = generateAuthTokenForCloudflare();
+        await fetch(`${DISCORD_BASE_URL}/roles/add`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+          body: JSON.stringify({ userid: discordId, roleid: groupIdleRoleId }),
         });
       }
-
-      const dataForDiscord = {
-        roleid: ROLE_ID,
-        userid: USER_DISCORD_ID,
-      };
-      const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
-        algorithm: "RS256",
-        expiresIn: config.get("rdsServerlessBot.ttl"),
-      });
-      await fetch(`${DISCORD_BASE_URL}/roles/add`, {
-        method: "PUT",
-        body: JSON.stringify(dataForDiscord),
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-      }).then((response) => response.json());
     }
   } catch (error) {
     logger.error(`error in adding role to discord user. Reason - ${error}`);
@@ -224,11 +202,12 @@ const getAllUserStatus = async (query) => {
  * @returns Promise<userStatusModel|Object>
  */
 
-const updateUserStatus = async (userId, newStatusData) => {
+const updateUserStatus = async (userId, updatedStatusData) => {
   try {
+    const newStatusData = convertTimestampsToUTC({ ...updatedStatusData });
     const userStatusDocs = await userStatusModel.where("userId", "==", userId).limit(1).get();
     const [userStatusDoc] = userStatusDocs.docs;
-    const tommorow = getTomorrowTimeStamp();
+    const tomorrow = getTomorrowTimeStamp();
     if (userStatusDoc) {
       const docId = userStatusDoc.id;
       const userStatusData = userStatusDoc.data();
@@ -246,7 +225,7 @@ const updateUserStatus = async (userId, newStatusData) => {
           newStatusData.futureStatus = {};
         }
         if (isNewStateOoo) {
-          if (newStatusData.currentStatus.from >= tommorow) {
+          if (newStatusData.currentStatus.from >= tomorrow) {
             newStatusData.futureStatus = { ...newStatusData.currentStatus };
             delete newStatusData.currentStatus;
           } else {
@@ -258,7 +237,7 @@ const updateUserStatus = async (userId, newStatusData) => {
         userStatusData.currentStatus?.state === userState.IDLE &&
         newStatusData.currentStatus?.state !== userState.IDLE
       ) {
-        await removeGroupRoleFromDiscordUser({ userId, roleName: "group-idle" });
+        await removeGroupIdleRoleFromDiscordUser(userId);
       }
       await userStatusModel.doc(docId).update(newStatusData);
       return { id: docId, userStatusExists: true, data: newStatusData };
@@ -268,7 +247,7 @@ const updateUserStatus = async (userId, newStatusData) => {
         filterStatusData(newStatusData);
         const isNewStateOOO = newStatusData.currentStatus.state === userState.OOO;
         if (isNewStateOOO) {
-          if (newStatusData.currentStatus.from >= tommorow) {
+          if (newStatusData.currentStatus.from >= tomorrow) {
             newStatusData.futureStatus = { ...newStatusData.currentStatus };
             delete newStatusData.currentStatus;
           }
@@ -346,9 +325,9 @@ const updateAllUserStatus = async () => {
       }
       if (toUpdate) {
         if (futureState === userState.IDLE && currentState !== userState.IDLE) {
-          await addGroupRoleToDiscordUser({ userId, roleName: "group-idle" });
+          await addGroupIdleRoleToDiscordUser(userId);
         } else if (currentState === userState.IDLE && futureState !== userState.IDLE) {
-          await removeGroupRoleFromDiscordUser({ userId, roleName: "group-idle" });
+          await removeGroupIdleRoleFromDiscordUser(userId);
         }
         batch.set(docRef, newStatusData);
       }
@@ -397,7 +376,7 @@ const updateUserStatusOnNewTaskAssignment = async (userId) => {
       return generateAlreadyExistingStatusResponse(userState.ACTIVE);
     }
     if (state === userState.IDLE || state === userState.ONBOARDING) {
-      await removeGroupRoleFromDiscordUser({ userId, roleName: "group-idle" });
+      await removeGroupIdleRoleFromDiscordUser(userId);
       return updateCurrentStatusToState(userStatusModel, latestStatusData, userState.ACTIVE);
     }
     if (state === userState.OOO) {
@@ -454,7 +433,7 @@ const updateStatusOnTaskCompletion = async (userId) => {
       if (hasActiveTask) {
         return createUserStatusWithState(userId, userStatusModel, userState.ACTIVE);
       } else {
-        await addGroupRoleToDiscordUser({ userId, roleName: "group-idle" });
+        await addGroupIdleRoleToDiscordUser(userId);
         return createUserStatusWithState(userId, userStatusModel, userState.IDLE);
       }
     }
@@ -470,7 +449,7 @@ const updateStatusOnTaskCompletion = async (userId) => {
         case userState.ACTIVE:
           return generateAlreadyExistingStatusResponse(userState.ACTIVE);
         default:
-          if (state === userState.IDLE) await removeGroupRoleFromDiscordUser({ userId, roleName: "group-idle" });
+          if (state === userState.IDLE) await removeGroupIdleRoleFromDiscordUser(userId);
           return updateCurrentStatusToState(userStatusModel, latestStatusData, userState.ACTIVE);
       }
     } else {
@@ -480,7 +459,7 @@ const updateStatusOnTaskCompletion = async (userId) => {
         case userState.IDLE:
           return generateAlreadyExistingStatusResponse(userState.IDLE);
         default:
-          await addGroupRoleToDiscordUser({ userId, roleName: "group-idle" });
+          await addGroupIdleRoleToDiscordUser(userId);
           return updateCurrentStatusToState(userStatusModel, latestStatusData, userState.IDLE);
       }
     }
@@ -527,7 +506,7 @@ const batchUpdateUsersStatus = async (users) => {
         currentStatus: statusToUpdate,
       };
       state === userState.ACTIVE ? summary.activeUsersAltered++ : summary.idleUsersAltered++;
-      if (state === userState.IDLE) await addGroupRoleToDiscordUser({ userId, roleName: "group-idle" });
+      if (state === userState.IDLE) await addGroupIdleRoleToDiscordUser(userId);
       batch.set(newUserStatusRef, newUserStatusData);
     } else {
       const {
@@ -558,7 +537,7 @@ const batchUpdateUsersStatus = async (users) => {
         const timeDifferenceDays = Math.floor(timeDifferenceMilliseconds / (24 * 60 * 60 * 1000));
 
         if (timeDifferenceDays >= 1) {
-          if (state === userState.IDLE) await addGroupRoleToDiscordUser({ userId, roleName: "group-idle" });
+          if (state === userState.IDLE) await addGroupIdleRoleToDiscordUser(userId);
           batch.update(docRef, {
             currentStatus: statusToUpdate,
           });
@@ -574,7 +553,7 @@ const batchUpdateUsersStatus = async (users) => {
       } else {
         const docRef = userStatusModel.doc(id);
         state === userState.ACTIVE ? summary.activeUsersAltered++ : summary.idleUsersAltered++;
-        if (state === userState.IDLE) await addGroupRoleToDiscordUser({ userId, roleName: "group-idle" });
+        if (state === userState.IDLE) await addGroupIdleRoleToDiscordUser(userId);
         const updatedStatusData = {
           currentStatus: statusToUpdate,
         };
@@ -680,9 +659,12 @@ const cancelOooStatus = async (userId) => {
     }
     const updatedStatus = generateNewStatus(isActive);
     const newStatusData = { ...docData, ...updatedStatus };
+    if (futureStatus?.state) {
+      newStatusData.futureStatus = {};
+    }
     await userStatusModel.doc(docId).update(newStatusData);
     if (!isActive) {
-      await addGroupRoleToDiscordUser({ userId, roleName: "group-idle" });
+      await addGroupIdleRoleToDiscordUser(userId);
     }
     return { id: docId, userStatusExists: true, data: newStatusData };
   } catch (error) {
@@ -703,7 +685,5 @@ module.exports = {
   batchUpdateUsersStatus,
   getTaskBasedUsersStatus,
   cancelOooStatus,
-  addGroupRoleToDiscordUser,
-  removeGroupRoleFromDiscordUser,
   getGroupRole,
 };

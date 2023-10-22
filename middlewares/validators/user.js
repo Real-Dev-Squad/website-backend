@@ -133,6 +133,7 @@ const validateJoinData = async (req, res, next) => {
  */
 async function getUsers(req, res, next) {
   const schema = joi
+
     .object()
     .strict()
     .keys({
@@ -157,6 +158,9 @@ async function getUsers(req, res, next) {
       }),
       id: joi.string().optional().messages({
         "string.empty": "id value must not be empty",
+      }),
+      discordId: joi.string().optional().messages({
+        "string.empty": "discord id value must not be empty",
       }),
       next: joi
         .string()
@@ -185,8 +189,10 @@ async function getUsers(req, res, next) {
           "string.empty": "prev value cannot be empty",
         }),
       query: joi.string().optional(),
+      q: joi.string().optional(),
       filterBy: joi.string().optional(),
       days: joi.string().optional(),
+      dev: joi.string().optional(),
     });
   try {
     await schema.validateAsync(req.query);
@@ -260,17 +266,18 @@ const validateImageVerificationQuery = async (req, res, next) => {
 };
 
 async function validateUpdateRoles(req, res, next) {
-  const schema = joi.object().strict().min(1).max(1).keys({
+  const schema = joi.object().strict().min(1).max(2).keys({
+    // either member or archived with reason (optional) is allowed
     member: joi.boolean(),
     archived: joi.boolean(),
+    reason: joi.string().optional(), // reason is optional
   });
-
   try {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
     logger.error(`Error validating updateRoles query params : ${error}`);
-    res.boom.badRequest("we only allow either role member or archieve");
+    res.boom.badRequest("we only allow either role member or archived with a reason");
   }
 }
 

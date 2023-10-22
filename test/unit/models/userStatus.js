@@ -9,7 +9,7 @@ const { cancelOooStatus } = require("../../../models/userStatus");
 const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
-const { generateStatusDataForCancelOOO } = require("../../fixtures/userStatus/userStatus");
+const { generateStatusDataForCancelOOO, generateDefaultFutureStatus } = require("../../fixtures/userStatus/userStatus");
 
 describe("tasks", function () {
   let userId;
@@ -30,6 +30,18 @@ describe("tasks", function () {
     expect(response.userStatusExists).to.equal(true);
     expect(response.data.userId).to.equal(userId);
     expect(response.data.currentStatus).to.not.equal(userState.OOO);
+    expect(response.data.futureStatus?.state).to.equal(undefined);
+  });
+
+  it("Should clear the future Status if the User cancels OOO", async function () {
+    const data = generateStatusDataForCancelOOO(userId, userState.OOO);
+    const from = new Date().getTime() + 24 * 60 * 60 * 1000; // 1 day offset from current time
+    data.futureStatus = generateDefaultFutureStatus(userState.IDLE, from, "");
+    await docRefUser0.set(data);
+    const response = await cancelOooStatus(userId);
+    expect(response.userStatusExists).to.equal(true);
+    expect(response.data.userId).to.equal(userId);
+    expect(response.data.futureStatus.state).to.equal(undefined);
   });
 
   it("should throw an error if unable to fetch the user status document", async function () {

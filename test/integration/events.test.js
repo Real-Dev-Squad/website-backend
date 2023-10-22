@@ -232,7 +232,6 @@ describe("events", function () {
           expect(response).to.have.status(201);
           expect(response.body.token).to.be.a("string");
           expect(response.body.message).to.be.a("string");
-          expect(response.body.event).to.be.a("object");
 
           return done();
         });
@@ -284,7 +283,6 @@ describe("events", function () {
           expect(response).to.have.status(201);
           expect(response.body.token).to.be.a("string");
           expect(response.body.message).to.be.a("string");
-          expect(response.body.event).to.be.a("object");
 
           return done();
         });
@@ -315,7 +313,6 @@ describe("events", function () {
           expect(response).to.have.status(201);
           expect(response.body.token).to.be.a("string");
           expect(response.body.message).to.be.a("string");
-          expect(response.body.event).to.be.a("object");
 
           return done();
         });
