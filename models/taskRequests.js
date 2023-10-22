@@ -1,5 +1,5 @@
 const { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE } = require("../constants/taskRequests");
-const { TASK_TYPE } = require("../constants/tasks");
+const { TASK_TYPE, TASK_STATUS } = require("../constants/tasks");
 const firestore = require("../utils/firestore");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const tasksModel = require("./tasks");
@@ -11,14 +11,16 @@ const tasksCollection = firestore.collection("tasks");
  *
  * @return {Object}
  */
-const fetchTaskRequests = async () => {
+const fetchTaskRequests = async (dev) => {
   const taskRequests = [];
-
+  const newTaskRequestsModel = [];
   try {
     const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
 
     const taskPromises = [];
     const userPromises = [];
+
+    const newUserPromises = [];
 
     taskRequestsSnapshots.forEach((taskRequestsSnapshot) => {
       const taskRequestData = taskRequestsSnapshot.data();
@@ -26,14 +28,25 @@ const fetchTaskRequests = async () => {
       taskRequestData.url = new URL(`/taskRequests/${taskRequestData.id}`, config.get("services.rdsUi.baseUrl"));
       const { requestors } = taskRequestData;
 
-      taskPromises.push(tasksModel.fetchTask(taskRequestData.taskId));
-      userPromises.push(Promise.all(requestors.map((requestor) => userModel.fetchUser({ userId: requestor }))));
-
-      taskRequests.push(taskRequestData);
+      if (taskRequestData.taskId && !taskRequestData.requestType) {
+        taskPromises.push(tasksModel.fetchTask(taskRequestData.taskId));
+        userPromises.push(Promise.all(requestors.map((requestor) => userModel.fetchUser({ userId: requestor }))));
+        taskRequests.push(taskRequestData);
+      } else if (dev) {
+        newUserPromises.push(Promise.all(requestors.map((requestor) => userModel.fetchUser({ userId: requestor }))));
+        newTaskRequestsModel.push(taskRequestData);
+      }
     });
 
     const tasks = await Promise.all(taskPromises);
     const users = await Promise.all(userPromises);
+
+    if (dev) {
+      const newUsers = await Promise.all(newUserPromises);
+      newTaskRequestsModel.forEach((taskRequest, index) => {
+        taskRequest.requestors = newUsers[+index];
+      });
+    }
 
     taskRequests.forEach((taskRequest, index) => {
       taskRequest.task = tasks[+index].taskData;
@@ -43,6 +56,9 @@ const fetchTaskRequests = async () => {
     logger.error("Error in updating task", err);
   }
 
+  if (dev) {
+    return [...taskRequests, ...newTaskRequestsModel];
+  }
   return taskRequests;
 };
 
@@ -74,6 +90,92 @@ const fetchTaskRequestById = async (taskRequestId) => {
   };
 };
 
+const createRequest = async (data, authenticatedUsername) => {
+  try {
+    const queryFieldPath = data.requestType === TASK_REQUEST_TYPE.CREATION ? "externalIssueUrl" : "taskId";
+    const queryValue = data.requestType === TASK_REQUEST_TYPE.CREATION ? data.externalIssueUrl : data.taskId;
+    const statusQueryValue =
+      data.requestType === TASK_REQUEST_TYPE.CREATION
+        ? [TASK_REQUEST_STATUS.PENDING, TASK_REQUEST_STATUS.APPROVED]
+        : [TASK_REQUEST_STATUS.PENDING];
+    const taskRequestsSnapshot = await taskRequestsCollection
+      .where(queryFieldPath, "==", queryValue)
+      .where("status", "in", statusQueryValue)
+      .get();
+    const [taskRequestRef] = taskRequestsSnapshot.docs;
+    const taskRequestData = taskRequestRef?.data();
+    const isCreationRequestApproved =
+      taskRequestData &&
+      taskRequestData.requestType === TASK_REQUEST_TYPE.CREATION &&
+      taskRequestData.status === TASK_REQUEST_STATUS.APPROVED;
+    if (isCreationRequestApproved) {
+      return { isCreationRequestApproved };
+    }
+    const userRequest = {
+      userId: data.userId,
+      proposedDeadline: data.proposedDeadline,
+      proposedStartDate: data.proposedStartDate,
+      description: data.description,
+      status: TASK_REQUEST_STATUS.PENDING,
+    };
+    if (!userRequest.description) delete userRequest.description;
+    if (taskRequestData) {
+      // TODO : remove after the migration of old data https://github.com/Real-Dev-Squad/website-backend/issues/1613
+      const currentRequestors = taskRequestData.requestors;
+      let alreadyRequesting = currentRequestors.some((requestor) => requestor === data.userId);
+      // End of old logic
+      const currentRequestingUsers = taskRequestData.users;
+      alreadyRequesting = currentRequestingUsers.some((requestor) => requestor.userId === data.userId);
+      if (alreadyRequesting) {
+        return { alreadyRequesting };
+      }
+      // TODO : remove after the migration of old data https://github.com/Real-Dev-Squad/website-backend/issues/1613
+      const updatedRequestors = [...currentRequestors, data.userId];
+      // End of old logic
+      const updatedUsers = [...currentRequestingUsers, userRequest];
+      const updatedTaskRequest = {
+        requestors: updatedRequestors,
+        users: updatedUsers,
+        lastModifiedBy: authenticatedUsername,
+        lastModifiedAt: Date.now(),
+      };
+      await taskRequestsCollection.doc(taskRequestRef.id).update(updatedTaskRequest);
+      return {
+        id: taskRequestRef.id,
+        isCreate: false,
+        taskRequest: {
+          ...taskRequestData,
+          ...updatedTaskRequest,
+        },
+      };
+    }
+    const newTaskRequest = {
+      requestors: [data.userId],
+      status: TASK_REQUEST_STATUS.PENDING,
+      taskTitle: data.taskTitle,
+      taskId: data.taskId,
+      externalIssueUrl: data.externalIssueUrl,
+      requestType: data.requestType,
+      users: [userRequest],
+      createdBy: authenticatedUsername,
+      createdAt: Date.now(),
+      lastModifiedBy: authenticatedUsername,
+      lastModifiedAt: Date.now(),
+    };
+    if (!newTaskRequest.externalIssueUrl) delete newTaskRequest.externalIssueUrl;
+    if (!newTaskRequest.taskId) delete newTaskRequest.taskId;
+    if (!newTaskRequest.taskTitle) delete newTaskRequest.taskTitle;
+    const newTaskRequestRef = await taskRequestsCollection.add(newTaskRequest);
+    return {
+      isCreate: true,
+      taskRequest: newTaskRequest,
+      id: newTaskRequestRef.id,
+    };
+  } catch (err) {
+    logger.error("Error creating a task request", err);
+    throw err;
+  }
+};
 /**
  * Creates a task request
  *
@@ -234,6 +336,7 @@ const approveTaskRequest = async (taskRequestId, user) => {
 };
 
 module.exports = {
+  createRequest,
   fetchTaskRequests,
   fetchTaskRequestById,
   addOrUpdate,

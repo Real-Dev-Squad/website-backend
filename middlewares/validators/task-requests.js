@@ -1,5 +1,8 @@
 const joi = require("joi");
 const { TASK_REQUEST_TYPE } = require("../../constants/taskRequests");
+const githubOrg = config.get("githubApi.org");
+const githubBaseUrl = config.get("githubApi.baseUrl");
+const githubIssuerUrlPattern = new RegExp(`^${githubBaseUrl}/repos/${githubOrg}/.+/issues/\\d+$`);
 
 const postTaskRequests = async (req, res, next) => {
   const taskAssignmentSchema = joi
@@ -7,7 +10,7 @@ const postTaskRequests = async (req, res, next) => {
     .strict()
     .keys({
       taskId: joi.string().required(),
-      externalIssueUrl: joi.string().optional(),
+      externalIssueUrl: joi.string().regex(githubIssuerUrlPattern).optional(),
       requestType: joi.string().valid(TASK_REQUEST_TYPE.ASSIGNMENT).required(),
       userId: joi.string().required(),
       proposedStartDate: joi.number().required(),
@@ -19,7 +22,7 @@ const postTaskRequests = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      externalIssueUrl: joi.string().required(),
+      externalIssueUrl: joi.string().regex(githubIssuerUrlPattern).required(),
       requestType: joi.string().valid(TASK_REQUEST_TYPE.CREATION).required(),
       userId: joi.string().required(),
       proposedStartDate: joi.number().required(),

@@ -1,10 +1,14 @@
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const { TASK_REQUEST_TYPE } = require("../constants/taskRequests");
 const taskRequestsModel = require("../models/taskRequests");
 const tasksModel = require("../models/tasks.js");
+const githubService = require("../services/githubService");
+const usersUtils = require("../utils/users");
 
 const fetchTaskRequests = async (_, res) => {
   try {
-    const data = await taskRequestsModel.fetchTaskRequests();
+    const { dev } = _.query;
+    const data = await taskRequestsModel.fetchTaskRequests(dev === "true");
 
     if (data.length > 0) {
       return res.status(200).json({
@@ -40,6 +44,73 @@ const fetchTaskRequestById = async (req, res) => {
   } catch (err) {
     logger.error("Error while fetching task requests", err);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const addTaskRequests = async (req, res) => {
+  try {
+    const taskRequestData = req.body;
+    const usernamePromise = usersUtils.getUsername(taskRequestData.userId);
+    if (req.userData.id !== taskRequestData.userId && !req.userData.roles?.super_user) {
+      return res.boom.forbidden("Not authorized to create the request");
+    }
+    if (taskRequestData.proposedDeadline < taskRequestData.proposedStartDate) {
+      return res.boom.badRequest("Task deadline cannot be before the start date");
+    }
+    switch (taskRequestData.requestType) {
+      case TASK_REQUEST_TYPE.ASSIGNMENT: {
+        const taskDataPromise = tasksModel.fetchTask(taskRequestData.taskId);
+
+        const [{ taskData }, username] = await Promise.all([taskDataPromise, usernamePromise]);
+        taskRequestData.taskTitle = taskData?.title;
+        if (!username) {
+          return res.boom.badRequest("User not found");
+        }
+        if (!taskData) {
+          return res.boom.badRequest("Task does not exist");
+        }
+        break;
+      }
+      case TASK_REQUEST_TYPE.CREATION: {
+        let issuePromise;
+        try {
+          const url = new URL(taskRequestData.externalIssueUrl);
+          const issueUrlPaths = url.pathname.split("/");
+          const repositoryName = issueUrlPaths[3];
+          const issueNumber = issueUrlPaths[5];
+          issuePromise = githubService.fetchIssuesById(repositoryName, issueNumber);
+        } catch (error) {
+          return res.boom.badRequest("External issue url is not valid");
+        }
+        const [issueData, username] = await Promise.all([issuePromise, usernamePromise]);
+        taskRequestData.taskTitle = issueData?.title;
+        if (!username) {
+          return res.boom.badRequest("User not found");
+        }
+        if (!issueData) {
+          return res.boom.badRequest("Issue does not exist");
+        }
+        break;
+      }
+    }
+    const newTaskRequest = await taskRequestsModel.createRequest(taskRequestData, req.userData.username);
+    if (newTaskRequest.isCreationRequestApproved) {
+      return res.boom.conflict("Task exists for the given issue.");
+    }
+    if (newTaskRequest.alreadyRequesting) {
+      return res.boom.badRequest("Task was already requested");
+    }
+    const statusCode = newTaskRequest.isCreate ? 201 : 200;
+    return res.status(statusCode).json({
+      message: "Task request successful.",
+      data: {
+        id: newTaskRequest.id,
+        ...newTaskRequest.taskRequest,
+      },
+    });
+  } catch (err) {
+    logger.error("Error while creating task request");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -111,4 +182,5 @@ module.exports = {
   addOrUpdate,
   fetchTaskRequests,
   fetchTaskRequestById,
+  addTaskRequests,
 };

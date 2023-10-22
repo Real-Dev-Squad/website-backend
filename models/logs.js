@@ -4,6 +4,7 @@ const logsModel = firestore.collection("logs");
 const admin = require("firebase-admin");
 const { logType } = require("../constants/logs");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { getFullName } = require("../utils/users");
 
 /**
  * Adds log
@@ -35,15 +36,17 @@ const addLog = async (type, meta, body) => {
  */
 const fetchLogs = async (query, param) => {
   try {
+    const { dev, ...remainingQuery } = query;
     let call = logsModel.where("type", "==", param);
-    Object.keys(query).forEach((key) => {
+    Object.keys(remainingQuery).forEach((key) => {
       // eslint-disable-next-line security/detect-object-injection
       if (key !== "limit" && key !== "lastDocId") {
-        call = call.where(key, "==", query[key]);
+        // eslint-disable-next-line security/detect-object-injection
+        call = call.where(key, "==", remainingQuery[key]);
       }
     });
 
-    const { limit, lastDocId, userId } = query;
+    const { limit, lastDocId, userId } = remainingQuery;
     let lastDoc;
     const limitDocuments = Number(limit);
 
@@ -75,6 +78,22 @@ const fetchLogs = async (query, param) => {
         ...doc.data(),
       });
     });
+
+    // If dev flag is presend and extensionRequest logs are requested, populate userId
+    if (dev === "true" && param === "extensionRequests") {
+      const userIdNameMap = {};
+      for await (const log of logs) {
+        if (log.meta.userId) {
+          if (userIdNameMap[log.meta.userId]) {
+            log.meta.name = userIdNameMap[log.meta.userId];
+          } else {
+            const name = await getFullName(log.meta.userId);
+            log.meta.name = `${name?.first_name} ${name?.last_name}`;
+            userIdNameMap[log.meta.userId] = log.meta.name;
+          }
+        }
+      }
+    }
     return logs;
   } catch (err) {
     logger.error("Error in adding log", err);
