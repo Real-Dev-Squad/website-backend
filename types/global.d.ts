@@ -33,7 +33,7 @@ export type userData = {
     designation: string;
     status: string;
     username: string;
-    updated_at: string;
+    updated_at: number;
   };
 };
 

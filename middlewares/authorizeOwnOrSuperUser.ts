@@ -5,7 +5,7 @@
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  * @param next {Function} - Express middleware function
- * @return {Object} - return un
+ * @return {Object} - Returns unauthorized user if the role is not assigned
  * 
 **/
 

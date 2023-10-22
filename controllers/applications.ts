@@ -67,7 +67,7 @@ const addApplication = async (req: CustomRequest, res: CustomResponse) => {
       message: "User application added.",
     });
   } catch (err) {
-    logger.error(`Error while adding intros: ${err}`);
+    logger.error(`Error while adding application: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
@@ -97,7 +97,7 @@ const updateApplication = async (req: CustomRequest, res: CustomResponse) => {
       message: "Application updated successfully!",
     });
   } catch (err) {
-    logger.error(`Error while fetching all the intros: ${err}`);
+    logger.error(`Error while updating the application: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
