@@ -158,6 +158,15 @@ const approveTaskRequest = async (req, res) => {
 
     const response = await taskRequestsModel.approveTaskRequest(taskRequestId, user);
 
+    if (response.taskRequestNotFound) {
+      return res.boom.badRequest("Task request not found.");
+    }
+    if (response.isUserInvalid) {
+      return res.boom.badRequest("User request not available.");
+    }
+    if (response.isTaskRequestInvalid) {
+      return res.boom.badRequest("Task request was previously approved or rejected.");
+    }
     return res.status(200).json({
       message: `Task successfully assigned to user ${response.approvedTo}`,
       taskRequest: response.taskRequest,

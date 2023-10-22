@@ -404,28 +404,6 @@ describe("Task Requests", function () {
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
-
-      it("should match response when the user is OOO", function (done) {
-        sinon.stub(userStatusModel, "getUserStatus").callsFake(() => ({ userStatusExists: true, data: oooUserStatus }));
-        chai
-          .request(app)
-          .post("/taskRequests/addOrUpdate")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({
-            taskId,
-            userId,
-          })
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
-            expect(res).to.have.status(409);
-            expect(res.body.message).to.equal("User is currently OOO");
-            return done();
-          });
-      });
-
       it("should match response when the user is active on another task", function (done) {
         sinon
           .stub(userStatusModel, "getUserStatus")
@@ -474,6 +452,7 @@ describe("Task Requests", function () {
       });
 
       it("should match response for successfull approval", function (done) {
+        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ approvedTo: member.username });
         chai
           .request(app)
           .patch("/taskRequests/approve")
@@ -513,43 +492,79 @@ describe("Task Requests", function () {
           });
       });
 
-      it("should return 409 error with message when user is ooo", function (done) {
+      it("should throw 400 error when taskRequestId is missing", function (done) {
         chai
           .request(app)
           .patch("/taskRequests/approve")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
-            taskRequestId: taskId,
             userId: oooUserId,
           })
           .end((err, res) => {
             if (err) {
               return done(err);
             }
-
-            expect(res).to.have.status(409);
-            expect(res.body.message).to.equal("User is currently OOO");
-            return done();
-          });
-      });
-
-      it("should throw 400 error when taskRequestId is missing", function (done) {
-        chai
-          .request(app)
-          .patch("/taskRequests/approve")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({ userId })
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
             expect(res).to.have.status(400);
             expect(res.body.message).to.equal("taskRequestId not provided");
             return done();
           });
       });
 
+      it("should throw 400 error when task request id provided doesn't exist", function (done) {
+        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ taskRequestNotFound: true });
+        chai
+          .request(app)
+          .patch("/taskRequests/approve")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({ taskRequestId: taskId, userId, activeUserId })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.message).to.equal("Task request not found.");
+            expect(res).to.have.status(400);
+
+            return done();
+          });
+      });
+
+      it("should throw 400 error when user did not request for a task", function (done) {
+        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ isUserInvalid: true });
+        chai
+          .request(app)
+          .patch("/taskRequests/approve")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({ taskRequestId: taskId, userId, activeUserId })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.message).to.equal("User request not available.");
+            expect(res).to.have.status(400);
+
+            return done();
+          });
+      });
+      it("should throw 400 error when task was previously approved or rejected.", function (done) {
+        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ isTaskRequestInvalid: true });
+        chai
+          .request(app)
+          .patch("/taskRequests/approve")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({ taskRequestId: taskId, userId, activeUserId })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.message).to.equal("Task request was previously approved or rejected.");
+            expect(res).to.have.status(400);
+
+            return done();
+          });
+      });
       it("should throw 400 error when userId is missing", function (done) {
         chai
           .request(app)
