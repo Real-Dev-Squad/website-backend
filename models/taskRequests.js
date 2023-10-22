@@ -10,14 +10,16 @@ const userModel = require("./users");
  *
  * @return {Object}
  */
-const fetchTaskRequests = async () => {
+const fetchTaskRequests = async (dev) => {
   const taskRequests = [];
-
+  const newTaskRequestsModel = [];
   try {
     const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
 
     const taskPromises = [];
     const userPromises = [];
+
+    const newUserPromises = [];
 
     taskRequestsSnapshots.forEach((taskRequestsSnapshot) => {
       const taskRequestData = taskRequestsSnapshot.data();
@@ -25,14 +27,25 @@ const fetchTaskRequests = async () => {
       taskRequestData.url = new URL(`/taskRequests/${taskRequestData.id}`, config.get("services.rdsUi.baseUrl"));
       const { requestors } = taskRequestData;
 
-      taskPromises.push(tasksModel.fetchTask(taskRequestData.taskId));
-      userPromises.push(Promise.all(requestors.map((requestor) => userModel.fetchUser({ userId: requestor }))));
-
-      taskRequests.push(taskRequestData);
+      if (taskRequestData.taskId && !taskRequestData.requestType) {
+        taskPromises.push(tasksModel.fetchTask(taskRequestData.taskId));
+        userPromises.push(Promise.all(requestors.map((requestor) => userModel.fetchUser({ userId: requestor }))));
+        taskRequests.push(taskRequestData);
+      } else if (dev) {
+        newUserPromises.push(Promise.all(requestors.map((requestor) => userModel.fetchUser({ userId: requestor }))));
+        newTaskRequestsModel.push(taskRequestData);
+      }
     });
 
     const tasks = await Promise.all(taskPromises);
     const users = await Promise.all(userPromises);
+
+    if (dev) {
+      const newUsers = await Promise.all(newUserPromises);
+      newTaskRequestsModel.forEach((taskRequest, index) => {
+        taskRequest.requestors = newUsers[+index];
+      });
+    }
 
     taskRequests.forEach((taskRequest, index) => {
       taskRequest.task = tasks[+index].taskData;
@@ -42,6 +55,9 @@ const fetchTaskRequests = async () => {
     logger.error("Error in updating task", err);
   }
 
+  if (dev) {
+    return [...taskRequests, ...newTaskRequestsModel];
+  }
   return taskRequests;
 };
 
