@@ -1,5 +1,5 @@
 const { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE } = require("../constants/taskRequests");
-const { TASK_TYPE, TASK_STATUS } = require("../constants/tasks");
+const { TASK_TYPE } = require("../constants/tasks");
 const firestore = require("../utils/firestore");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const tasksModel = require("./tasks");
