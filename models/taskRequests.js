@@ -1,5 +1,5 @@
 const { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE } = require("../constants/taskRequests");
-const { TASK_TYPE } = require("../constants/tasks");
+const { TASK_TYPE, TASK_STATUS, DEFAULT_TASK_PRIORITY } = require("../constants/tasks");
 const firestore = require("../utils/firestore");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const tasksModel = require("./tasks");
@@ -274,6 +274,9 @@ const approveTaskRequest = async (taskRequestId, user) => {
           assignee: user.id,
           title: taskRequestData.taskTitle,
           type: TASK_TYPE.FEATURE,
+          percentCompleted: 0,
+          status: TASK_STATUS.ASSIGNED,
+          priority: DEFAULT_TASK_PRIORITY,
           startedOn: userRequestData.proposedStartDate / 1000,
           endsOn: userRequestData.proposedDeadline / 1000,
           github: {
@@ -310,7 +313,7 @@ const approveTaskRequest = async (taskRequestId, user) => {
         }
         // End of TODO
         const updateTaskRequestPromise = transaction.update(taskRequestDocRef, updatedTaskRequest);
-        const updatedTaskData = { assignee: user.id };
+        const updatedTaskData = { assignee: user.id, status: TASK_STATUS.ASSIGNED };
         // TODO : remove the unnecessary if-condition after the migration of the task request model. https://github.com/Real-Dev-Squad/website-backend/issues/1613
         if (userRequestData) {
           updatedTaskData.startedOn = userRequestData.proposedStartDate / 1000;

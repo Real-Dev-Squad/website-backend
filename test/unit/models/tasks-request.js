@@ -8,6 +8,7 @@ const firestore = require("../../../utils/firestore");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const tasksCollection = firestore.collection("tasks");
 const cleanDb = require("../../utils/cleanDb");
+const { TASK_STATUS, DEFAULT_TASK_PRIORITY } = require("../../../constants/tasks");
 const tasksData = require("../../fixtures/tasks/tasks")();
 const tasksModel = firestore.collection("tasks");
 
@@ -31,6 +32,9 @@ describe("approveTaskRequest", function () {
     const approvedTask = await tasksCollection.doc(approvedTaskRequest.taskId).get();
     expect(approvedTask.exists).to.be.equal(true);
     expect(approvedTask.data().assignee).to.equal(user.id);
+    expect(approvedTask.data().status).to.equal(TASK_STATUS.ASSIGNED);
+    expect(approvedTask.data().percentCompleted).to.equal(0);
+    expect(approvedTask.data().priority).to.equal(DEFAULT_TASK_PRIORITY);
   });
   it("should approve a task request for assignment", async function () {
     const existingTaskRequest = { ...mockData.existingTaskRequest, requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
@@ -44,6 +48,7 @@ describe("approveTaskRequest", function () {
     const approvedTask = await tasksCollection.doc(approvedTaskRequest.taskId).get();
     expect(approvedTask.exists).to.be.equal(true);
     expect(approvedTask.data().assignee).to.equal(user.id);
+    expect(approvedTask.data().status).to.equal(TASK_STATUS.ASSIGNED);
   });
   it("should handle invalid user for approval", async function () {
     const existingTaskRequest = { ...mockData.existingTaskRequest };
