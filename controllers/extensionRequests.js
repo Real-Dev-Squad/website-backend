@@ -6,6 +6,8 @@ const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { transformQuery } = require("../utils/extensionRequests");
 const { parseQueryParams } = require("../utils/queryParser");
+const logsQuery = require("../models/logs");
+const { getFullName } = require("../utils/users");
 
 /**
  * Create ETA extension Request
@@ -232,6 +234,23 @@ const getSelfExtensionRequests = async (req, res) => {
           if (latestExtensionRequest && latestExtensionRequest.assigneeId !== userId) {
             allExtensionRequests = [];
           } else {
+            // Add reviewer's name if status is not PENDING
+            if (latestExtensionRequest.status === "APPROVED" || latestExtensionRequest.status === "DENIED") {
+              const logs = await logsQuery.fetchLogs(
+                { "meta.extensionRequestId": latestExtensionRequest.id, limit: 1 },
+                "extensionRequests"
+              );
+
+              if (
+                logs.length === 1 &&
+                logs[0]?.meta?.userId &&
+                (logs[0]?.body?.status === "APPROVED" || logs[0]?.body?.status === "DENIED") // Make sure log is only related to status change
+              ) {
+                const superUserId = logs[0].meta.userId;
+                const name = await getFullName(superUserId);
+                latestExtensionRequest.reviewedBy = `${name?.first_name} ${name?.last_name}`;
+              }
+            }
             allExtensionRequests = [latestExtensionRequest];
           }
         } else {
@@ -270,6 +289,7 @@ const getSelfExtensionRequests = async (req, res) => {
  */
 const updateExtensionRequest = async (req, res) => {
   try {
+    const { dev = "false" } = req.query;
     const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
@@ -282,7 +302,39 @@ const updateExtensionRequest = async (req, res) => {
       }
     }
 
-    await extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id);
+    const promises = [extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id)];
+    // If flag is present, then only create log for change in ETA/reason by SU
+    if (dev === "true") {
+      let body = {};
+      // Check if reason has been changed
+      if (req.body.reason && req.body.reason !== extensionRequest.extensionRequestData.reason) {
+        body = { ...body, oldReason: extensionRequest.extensionRequestData.reason, newReason: req.body.reason };
+      }
+      // Check if newEndsOn has been changed
+      if (req.body.newEndsOn && req.body.newEndsOn !== extensionRequest.extensionRequestData.newEndsOn) {
+        body = { ...body, oldEndsOn: extensionRequest.extensionRequestData.newEndsOn, newEndsOn: req.body.newEndsOn };
+      }
+      // Check if title has been changed
+      if (req.body.title && req.body.title !== extensionRequest.extensionRequestData.title) {
+        body = { ...body, oldTitle: extensionRequest.extensionRequestData.title, newTitle: req.body.title };
+      }
+
+      // Validate if there's any update that actually happened, then only create the log
+      if (Object.keys(body).length > 0) {
+        const extensionLog = {
+          type: "extensionRequests",
+          meta: {
+            extensionRequestId: req.params.id,
+            taskId: extensionRequest.extensionRequestData.taskId,
+            userId: req.userData.id,
+          },
+          body,
+        };
+        promises.push(addLog(extensionLog.type, extensionLog.meta, extensionLog.body));
+      }
+    }
+    await Promise.all(promises);
+
     return res.status(204).send();
   } catch (err) {
     logger.error(`Error while updating extension request: ${err}`);
@@ -298,6 +350,7 @@ const updateExtensionRequest = async (req, res) => {
  */
 const updateExtensionRequestStatus = async (req, res) => {
   try {
+    const { dev = "false" } = req.query;
     const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
@@ -307,6 +360,7 @@ const updateExtensionRequestStatus = async (req, res) => {
     const extensionLog = {
       type: "extensionRequests",
       meta: {
+        ...(dev === "true" && { extensionRequestId: req.params.id }), // if flag is present, add extensionRequestId
         taskId: extensionRequest.extensionRequestData.taskId,
         username: req.userData.username,
         userId: req.userData.id,
