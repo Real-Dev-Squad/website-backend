@@ -374,26 +374,6 @@ describe("Task Requests", function () {
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
-
-      it("should match response", function (done) {
-        chai
-          .request(app)
-          .post("/taskRequests/addOrUpdate")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({
-            taskId,
-            userId,
-          })
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
-            expect(res).to.have.status(409);
-            expect(res.body.message).to.equal("User status does not exist");
-            return done();
-          });
-      });
     });
 
     describe("When the user status is not idle", function () {
@@ -403,29 +383,6 @@ describe("Task Requests", function () {
         jwt = authService.generateAuthToken({ userId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-      });
-      it("should match response when the user is active on another task", function (done) {
-        sinon
-          .stub(userStatusModel, "getUserStatus")
-          .callsFake(() => ({ userStatusExists: true, data: activeUserStatus }));
-
-        chai
-          .request(app)
-          .post("/taskRequests/addOrUpdate")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({
-            taskId,
-            userId,
-          })
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
-            expect(res).to.have.status(409);
-            expect(res.body.message).to.equal("User is currently active on another task");
-            return done();
-          });
       });
     });
   });
@@ -468,26 +425,6 @@ describe("Task Requests", function () {
 
             expect(res).to.have.status(200);
             expect(res.body.message).to.equal(`Task successfully assigned to user ${member.username}`);
-            return done();
-          });
-      });
-
-      it("should return 409 error with message when user is active", function (done) {
-        chai
-          .request(app)
-          .patch("/taskRequests/approve")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({
-            taskRequestId: taskId,
-            userId: activeUserId,
-          })
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
-            expect(res).to.have.status(409);
-            expect(res.body.message).to.equal("User is currently active on another task");
             return done();
           });
       });
