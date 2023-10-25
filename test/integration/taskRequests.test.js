@@ -14,6 +14,9 @@ const userData = require("../fixtures/user/user")();
 const taskData = require("../fixtures/tasks/tasks")();
 const mockData = require("../fixtures/task-requests/task-requests");
 const userStatusData = require("../fixtures/userStatus/userStatus");
+const firestore = require("../../utils/firestore");
+const logsModel = firestore.collection("logs");
+
 chai.use(chaiHttp);
 
 const config = require("config");
@@ -583,6 +586,70 @@ describe("Task Requests", function () {
       });
     });
 
+    describe("task request logs", function () {
+      beforeEach(async function () {
+        userId = await addUser(member);
+        superUserId = await addUser(superUser);
+
+        jwt = authService.generateAuthToken({ userId: superUserId });
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
+
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+      });
+      afterEach(async () => {
+        sinon.restore();
+        await cleanDb();
+      });
+      it("should save logs of approved requests", function (done) {
+        sinon
+          .stub(taskRequestsModel, "approveTaskRequest")
+          .resolves({ approvedTo: member.username, taskRequest: { taskRequestId: taskId } });
+        chai
+          .request(app)
+          .patch("/taskRequests/approve")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({
+            taskRequestId: taskId,
+            userId,
+          })
+          .end(async (err, res) => {
+            if (err) {
+              return done(err);
+            }
+            const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+            let taskRequestLogs;
+            logsRef.forEach((data) => {
+              taskRequestLogs = data.data();
+            });
+            expect(taskRequestLogs).to.not.be.equal(undefined);
+            expect(taskRequestLogs.body.taskRequestId).to.be.equal(taskId);
+            return done();
+          });
+      });
+      it("should not save logs of failed requests", function (done) {
+        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ taskRequestNotFound: true });
+        chai
+          .request(app)
+          .patch("/taskRequests/approve")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({
+            taskRequestId: taskId,
+            userId,
+          })
+          .end(async (err, res) => {
+            if (err) {
+              return done(err);
+            }
+            const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+            let taskRequestLogs;
+            logsRef.forEach((data) => {
+              taskRequestLogs = data.data();
+            });
+            expect(taskRequestLogs).to.be.equal(undefined);
+            return done();
+          });
+      });
+    });
     describe("When the user is not super user", function () {
       before(async function () {
         userId = await addUser(member);
@@ -728,6 +795,43 @@ describe("Task Requests", function () {
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res).to.have.status(400);
       expect(res.body.message).to.equal("Task does not exist");
+    });
+    it("should save logs of approved requests", async function () {
+      fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
+      createRequestStub.resolves({
+        id: "request123",
+        taskRequest: mockData.existingTaskRequest,
+        isCreate: true,
+        alreadyRequesting: false,
+      });
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(mockData.taskRequestData);
+
+      const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+      let taskRequestLogs;
+      logsRef.forEach((data) => {
+        taskRequestLogs = data.data();
+      });
+      expect(taskRequestLogs).to.not.be.equal(undefined);
+      expect(taskRequestLogs.body).to.be.deep.equal(mockData.existingTaskRequest);
+    });
+    it("should not save logs of failed requests", async function () {
+      const requestData = {
+        ...mockData.taskRequestData,
+        taskId: "abc",
+        requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
+      };
+      fetchTaskStub.resolves({ taskData: null });
+      await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+      let taskRequestLogs;
+      logsRef.forEach((data) => {
+        taskRequestLogs = data.data();
+      });
+      expect(taskRequestLogs).to.be.equal(undefined);
     });
   });
 });

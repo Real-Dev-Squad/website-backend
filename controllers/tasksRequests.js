@@ -1,5 +1,6 @@
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const { TASK_REQUEST_TYPE } = require("../constants/taskRequests");
+const { addLog } = require("../models/logs");
 const taskRequestsModel = require("../models/taskRequests");
 const tasksModel = require("../models/tasks.js");
 const githubService = require("../services/githubService");
@@ -94,6 +95,21 @@ const addTaskRequests = async (req, res) => {
       }
     }
     const newTaskRequest = await taskRequestsModel.createRequest(taskRequestData, req.userData.username);
+
+    const taskRequestLog = {
+      type: "taskRequests",
+      meta: {
+        taskRequestId: newTaskRequest.id,
+        action: "create",
+        createdBy: req.userData.username,
+        createdAt: Date.now(),
+        lastModifiedBy: req.userData.username,
+        lastModifiedAt: Date.now(),
+      },
+      body: newTaskRequest.taskRequest,
+    };
+    await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
+
     if (newTaskRequest.isCreationRequestApproved) {
       return res.boom.conflict("Task exists for the given issue.");
     }
@@ -167,6 +183,22 @@ const approveTaskRequest = async (req, res) => {
     if (response.isTaskRequestInvalid) {
       return res.boom.badRequest("Task request was previously approved or rejected.");
     }
+
+    const taskRequestLog = {
+      type: "taskRequests",
+      meta: {
+        taskRequestId: taskRequestId,
+        action: "update",
+        subAction: "approve",
+        createdBy: req.userData.username,
+        createdAt: Date.now(),
+        lastModifiedBy: req.userData.username,
+        lastModifiedAt: Date.now(),
+      },
+      body: response.taskRequest,
+    };
+    await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
+
     return res.status(200).json({
       message: `Task successfully assigned to user ${response.approvedTo}`,
       taskRequest: response.taskRequest,
