@@ -777,7 +777,7 @@ describe("Task Requests", function () {
       expect(res).to.have.status(400);
       expect(res.body.message).to.equal("Task does not exist");
     });
-    it("should save logs of approved requests", async function () {
+    it("should save logs of successful requests", async function () {
       fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
       createRequestStub.resolves({
         id: "request123",
