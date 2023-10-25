@@ -593,61 +593,42 @@ describe("Task Requests", function () {
 
         jwt = authService.generateAuthToken({ userId: superUserId });
         sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
-
+        await userStatusModel.updateUserStatus(userId, idleUserStatus);
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
       afterEach(async function () {
         sinon.restore();
         await cleanDb();
       });
-      it("should save logs of approved requests", function (done) {
+      it("should save logs of approved requests", async function () {
         sinon
           .stub(taskRequestsModel, "approveTaskRequest")
           .resolves({ approvedTo: member.username, taskRequest: { taskRequestId: taskId } });
-        chai
-          .request(app)
-          .patch("/taskRequests/approve")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({
-            taskRequestId: taskId,
-            userId,
-          })
-          .end(async (err, res) => {
-            if (err) {
-              return done(err);
-            }
-            const logsRef = await logsModel.where("type", "==", "taskRequests").get();
-            let taskRequestLogs;
-            logsRef.forEach((data) => {
-              taskRequestLogs = data.data();
-            });
-            expect(taskRequestLogs).to.not.be.equal(undefined);
-            expect(taskRequestLogs.body.taskRequestId).to.be.equal(taskId);
-            return done();
-          });
+        await chai.request(app).patch("/taskRequests/approve").set("cookie", `${cookieName}=${jwt}`).send({
+          taskRequestId: taskId,
+          userId,
+        });
+        const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+        let taskRequestLogs;
+        logsRef.forEach((data) => {
+          taskRequestLogs = data.data();
+        });
+        expect(taskRequestLogs).to.not.be.equal(undefined);
+        expect(taskRequestLogs.body.taskRequestId).to.be.equal(taskId);
       });
-      it("should not save logs of failed requests", function (done) {
+
+      it("should not save logs of failed requests", async function () {
         sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ taskRequestNotFound: true });
-        chai
-          .request(app)
-          .patch("/taskRequests/approve")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({
-            taskRequestId: taskId,
-            userId,
-          })
-          .end(async (err, res) => {
-            if (err) {
-              return done(err);
-            }
-            const logsRef = await logsModel.where("type", "==", "taskRequests").get();
-            let taskRequestLogs;
-            logsRef.forEach((data) => {
-              taskRequestLogs = data.data();
-            });
-            expect(taskRequestLogs).to.be.equal(undefined);
-            return done();
-          });
+        await chai.request(app).patch("/taskRequests/approve").set("cookie", `${cookieName}=${jwt}`).send({
+          taskRequestId: taskId,
+          userId,
+        });
+        const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+        let taskRequestLogs;
+        logsRef.forEach((data) => {
+          taskRequestLogs = data.data();
+        });
+        expect(taskRequestLogs).to.be.equal(undefined);
       });
     });
     describe("When the user is not super user", function () {
