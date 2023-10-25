@@ -596,7 +596,7 @@ describe("Task Requests", function () {
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
-      afterEach(async () => {
+      afterEach(async function () {
         sinon.restore();
         await cleanDb();
       });
@@ -804,12 +804,7 @@ describe("Task Requests", function () {
         isCreate: true,
         alreadyRequesting: false,
       });
-      const res = await chai
-        .request(app)
-        .post(url)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockData.taskRequestData);
-
+      await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(mockData.taskRequestData);
       const logsRef = await logsModel.where("type", "==", "taskRequests").get();
       let taskRequestLogs;
       logsRef.forEach((data) => {
