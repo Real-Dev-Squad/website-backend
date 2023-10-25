@@ -455,7 +455,7 @@ describe("Task Requests", function () {
       });
 
       it("should match response for successfull approval", function (done) {
-        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ approvedTo: member.username });
+        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ approvedTo: member.username, taskRequest: {} });
         chai
           .request(app)
           .patch("/taskRequests/approve")
@@ -720,7 +720,7 @@ describe("Task Requests", function () {
     });
     it("should allow users to request the same task (Creation)", async function () {
       fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
-      createRequestStub.resolves({ taskRequest: mockData.existingTaskRequest, isCreate: false });
+      createRequestStub.resolves({ id: "request123", taskRequest: mockData.existingTaskRequest, isCreate: false });
       const res = await chai
         .request(app)
         .post(url)
@@ -743,7 +743,7 @@ describe("Task Requests", function () {
     it("should allow users to request the same task (Assignment)", async function () {
       const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT, taskId: "abc" };
       fetchTaskStub.resolves({ taskData: { ...taskData, id: requestData.taskId } });
-      createRequestStub.resolves({ taskRequest: mockData.existingTaskRequest, isCreate: false });
+      createRequestStub.resolves({ id: "request123", taskRequest: mockData.existingTaskRequest, isCreate: false });
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res).to.have.status(200);
       expect(res.body.message).to.equal("Task request successful.");

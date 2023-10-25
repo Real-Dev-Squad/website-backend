@@ -96,6 +96,13 @@ const addTaskRequests = async (req, res) => {
     }
     const newTaskRequest = await taskRequestsModel.createRequest(taskRequestData, req.userData.username);
 
+    if (newTaskRequest.isCreationRequestApproved) {
+      return res.boom.conflict("Task exists for the given issue.");
+    }
+    if (newTaskRequest.alreadyRequesting) {
+      return res.boom.badRequest("Task was already requested");
+    }
+
     const taskRequestLog = {
       type: "taskRequests",
       meta: {
@@ -110,12 +117,6 @@ const addTaskRequests = async (req, res) => {
     };
     await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
 
-    if (newTaskRequest.isCreationRequestApproved) {
-      return res.boom.conflict("Task exists for the given issue.");
-    }
-    if (newTaskRequest.alreadyRequesting) {
-      return res.boom.badRequest("Task was already requested");
-    }
     const statusCode = newTaskRequest.isCreate ? 201 : 200;
     return res.status(statusCode).json({
       message: "Task request successful.",
