@@ -435,7 +435,7 @@ describe("Task Requests", function () {
     let activeUserId, oooUserId;
 
     describe("When the user is super user", function () {
-      before(async function () {
+      beforeEach(async function () {
         userId = await addUser(member);
         activeUserId = await addUser(activeMember);
         oooUserId = await addUser(member2);
@@ -450,6 +450,10 @@ describe("Task Requests", function () {
         await userStatusModel.updateUserStatus(activeUserId, activeUserStatus);
         await userStatusModel.updateUserStatus(oooUserId, { ...oooUserStatus });
         await taskRequestsModel.addOrUpdate(taskId, userId);
+      });
+      afterEach(async function () {
+        sinon.restore();
+        await cleanDb();
       });
 
       it("should match response for successfull approval", function (done) {
