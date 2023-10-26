@@ -726,10 +726,14 @@ describe("events", function () {
   describe("PATCH /events/:id/peers/kickout", function () {
     let service;
     let superUserAuthToken;
+    let memberAuthToken;
     beforeEach(async function () {
       const superUser = userData[4];
+      const member = userData[6];
       const superUserId = await addUser(superUser);
+      const memberUserId = await addUser(member);
       superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+      memberAuthToken = authService.generateAuthToken({ userId: memberUserId });
     });
 
     afterEach(function () {
@@ -737,7 +741,7 @@ describe("events", function () {
       sinon.restore();
     });
 
-    it("returns a success message when the request is successful", function (done) {
+    it("returns a success message when the request is successful for super user", function (done) {
       const payload = {
         peerId: "peer123",
         reason: "Kicked out for a reason",
@@ -752,6 +756,35 @@ describe("events", function () {
         .request(app)
         .patch(`/events/${event1Data.room_id}/peers/kickout`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send(payload)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(200);
+          expect(response.body.message).to.be.a("string");
+          expect(response.body.message).to.equal("Selected Participant is removed from event.");
+
+          return done();
+        });
+    });
+
+    it("returns a success message when the request is successful for member user", function (done) {
+      const payload = {
+        peerId: "peer123",
+        reason: "Kicked out for a reason",
+      };
+
+      service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "peer remove request submitted" });
+
+      sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Selected Participant is removed from event." });
+      sinon.stub(logsModel, "addLog");
+
+      chai
+        .request(app)
+        .patch(`/events/${event1Data.room_id}/peers/kickout`)
+        .set("cookie", `${cookieName}=${memberAuthToken}`)
         .send(payload)
         .end((error, response) => {
           if (error) {
