@@ -20,6 +20,7 @@ const config = require("config");
 const { TASK_REQUEST_TYPE } = require("../../constants/taskRequests");
 const usersUtils = require("../../utils/users");
 const githubService = require("../../services/githubService");
+const { userState } = require("../../constants/userStatus");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -580,6 +581,38 @@ describe("Task Requests", function () {
             expect(res.body.message).to.equal("userId not provided");
             return done();
           });
+      });
+      describe("Checks the user status", function () {
+        it("Should change the user status to ACTIVE when request is successful", async function () {
+          sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ approvedTo: member.username });
+          const res = await chai
+            .request(app)
+            .patch("/taskRequests/approve")
+            .set("cookie", `${cookieName}=${jwt}`)
+            .send({
+              taskRequestId: taskId,
+              userId,
+            });
+
+          expect(res).to.have.status(200);
+          const userStatus = await userStatusModel.getUserStatus(userId);
+          expect(userStatus.data.currentStatus.state).to.be.equal(userState.ACTIVE);
+        });
+        it("Should not change the user status to ACTIVE when request is unsuccessful", async function () {
+          sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ isTaskRequestInvalid: true });
+          const res = await chai
+            .request(app)
+            .patch("/taskRequests/approve")
+            .set("cookie", `${cookieName}=${jwt}`)
+            .send({
+              taskRequestId: taskId,
+              userId,
+            });
+
+          expect(res).to.have.status(400);
+          const userStatus = await userStatusModel.getUserStatus(userId);
+          expect(userStatus.data.currentStatus.state).to.be.equal(userState.IDLE);
+        });
       });
     });
 
