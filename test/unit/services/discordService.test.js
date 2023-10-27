@@ -5,6 +5,7 @@ const {
   addRoleToUser,
   getDiscordMembers,
   removeRoleFromUser,
+  setUserDiscordNickname,
 } = require("../../../services/discordService");
 const { fetchAllUsers } = require("../../../models/users");
 const Sinon = require("sinon");
@@ -111,6 +112,41 @@ describe("Discord services", function () {
       removeRoleFromUser("", "").catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Fetch error");
+      });
+    });
+  });
+
+  describe("change user nickname on discord", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+    });
+
+    afterEach(function () {
+      fetchStub.restore();
+    });
+
+    it("should update the user's discord nickname ", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              userEffected: "Kotesh",
+              message: "User nickname changed successfully",
+            }),
+        })
+      );
+
+      const response = await setUserDiscordNickname("Kotesh", "aMYlI7sxQ4JMPwiqLQlp");
+      expect(response.message.userEffected).to.be.equal("Kotesh");
+      expect(response.message.message).to.be.equal("User nickname changed successfully");
+    });
+
+    it("makes a failing fetch call to update the user's discord nickname ", async function () {
+      fetchStub.rejects(new Error("Error in updating discord Nickname"));
+      setUserDiscordNickname("Kotesh", "aMYlI7sxQ4JMPwiqLQlp").catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal("Error in updating discord Nickname");
       });
     });
   });

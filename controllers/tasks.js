@@ -126,8 +126,8 @@ const fetchPaginatedTasks = async (query) => {
 
 const fetchTasks = async (req, res) => {
   try {
-    const { dev, status, page, size, prev, next, q: queryString } = req.query;
-    const transformedQuery = transformQuery(dev, status, size, page);
+    const { dev, status, page, size, prev, next, q: queryString, assignee, title } = req.query;
+    const transformedQuery = transformQuery(dev, status, size, page, assignee, title);
 
     if (dev) {
       const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next });
@@ -270,21 +270,27 @@ const updateTask = async (req, res) => {
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
     }
-    if (req.body?.assignee) {
-      const user = await dataAccess.retrieveUsers({ username: req.body.assignee });
+    const requestData = { ...req.body };
+    if (requestData?.assignee) {
+      const user = await dataAccess.retrieveUsers({ username: requestData.assignee });
       if (!user.userExists) {
         return res.boom.notFound("User doesn't exist");
       }
+      if (!requestData?.startedOn) {
+        requestData.startedOn = Math.round(new Date().getTime() / 1000);
+      }
     }
-    await tasks.updateTask(req.body, req.params.id);
-    if (req.body.assignee) {
+
+    await tasks.updateTask(requestData, req.params.id);
+    if (requestData.assignee) {
       // New Assignee Status Update
-      await updateUserStatusOnTaskUpdate(req.body.assignee);
+      await updateUserStatusOnTaskUpdate(requestData.assignee);
       // Old Assignee Status Update if available
       if (task.taskData.assigneeId) {
         await updateStatusOnTaskCompletion(task.taskData.assigneeId);
       }
     }
+
     return res.status(204).send();
   } catch (err) {
     if (err.message.includes("Invalid dependency passed")) {
@@ -321,7 +327,10 @@ const updateTaskStatus = async (req, res, next) => {
       }
     }
 
-    if (req.body.status === TASK_STATUS.COMPLETED && task.taskData.percentCompleted !== 100) {
+    if (
+      (req.body.status === TASK_STATUS.COMPLETED || req.body.status === TASK_STATUS.VERIFIED) &&
+      task.taskData.percentCompleted !== 100
+    ) {
       if (req.body.percentCompleted !== 100) {
         return res.boom.badRequest("Status cannot be updated. Task is not completed yet");
       }

@@ -12,6 +12,7 @@ const storeUserDeviceInfo = async (req, res, next) => {
     next();
   } catch (error) {
     logger.error(`Error validating newDeviceInfo payload : ${error}`);
+    res.boom.badRequest(error.details[0].message);
   }
 };
 
@@ -41,8 +42,8 @@ const validateFetchingUserDocument = async (req, res, next) => {
     await schema.validateAsync(req.query);
     next();
   } catch (error) {
-    logger.error(`Invalid Query Parameters Passed`);
-    res.boom.badRequest(`Invalid Query Parameters Passed`);
+    logger.error("Invalid Query Parameters Passed");
+    res.boom.badRequest("Invalid Query Parameters Passed");
   }
 };
 

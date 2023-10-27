@@ -5,7 +5,7 @@ const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, COMPLETED } = TASK_STATUS;
+const { IN_PROGRESS, NEEDS_REVIEW, IN_REVIEW, ASSIGNED, BLOCKED, SMOKE_TESTING, COMPLETED, SANITY_CHECK } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 
 /**
@@ -119,11 +119,82 @@ const getBuiltTasks = async (tasksSnapshot, searchTerm) => {
   return taskList;
 };
 
-const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, prev }) => {
+const fetchPaginatedTasks = async ({
+  status = "",
+  size = TASK_SIZE,
+  page,
+  next,
+  prev,
+  dev = false,
+  assignee,
+  title,
+}) => {
   try {
-    const initialQuery = status
-      ? tasksModel.where("status", "==", status).orderBy("title")
-      : tasksModel.orderBy("title");
+    let initialQuery = tasksModel;
+
+    if (status === TASK_STATUS.OVERDUE) {
+      const currentTime = Math.floor(Date.now() / 1000);
+      const OVERDUE_TASK_STATUSES = [
+        IN_PROGRESS,
+        ASSIGNED,
+        NEEDS_REVIEW,
+        IN_REVIEW,
+        SMOKE_TESTING,
+        BLOCKED,
+        SANITY_CHECK,
+      ];
+      initialQuery = tasksModel.where("endsOn", "<", currentTime).where("status", "in", OVERDUE_TASK_STATUSES);
+
+      if (assignee) {
+        const user = await userUtils.getUserId(assignee);
+        if (user) {
+          initialQuery = initialQuery.where("assignee", "==", user);
+        }
+      }
+    } else {
+      initialQuery = tasksModel.orderBy("title");
+      if (status) {
+        initialQuery = initialQuery.where("status", "==", status);
+      }
+
+      if (assignee) {
+        const assignees = assignee.split(",");
+        if (assignees.length > 1) {
+          const users = [];
+          for (const singleAssignee of assignees) {
+            const user = await userUtils.getUserId(singleAssignee);
+            if (user) {
+              users.push(user);
+            }
+          }
+          if (users.length) {
+            initialQuery = initialQuery.where("assignee", "in", users);
+          } else {
+            return {
+              allTasks: [],
+              next: "",
+              prev: "",
+            };
+          }
+        } else {
+          const user = await userUtils.getUserId(assignees[0]);
+          if (user) {
+            initialQuery = initialQuery.where("assignee", "==", user);
+          } else {
+            return {
+              allTasks: [],
+              next: "",
+              prev: "",
+            };
+          }
+        }
+      }
+
+      if (title) {
+        initialQuery = initialQuery.where("title", ">=", title).where("title", "<=", title + "\uf8ff");
+      }
+    }
+
     let queryDoc = initialQuery;
 
     if (prev) {
@@ -152,6 +223,7 @@ const fetchPaginatedTasks = async ({ status = "", size = TASK_SIZE, page, next, 
     const nextDoc = await initialQuery.startAfter(last).limit(1).get();
 
     const allTasks = await getBuiltTasks(snapshot);
+
     return {
       allTasks,
       next: nextDoc.docs[0]?.id ?? "",
@@ -459,6 +531,47 @@ const overdueTasks = async (overDueTasks) => {
     throw err;
   }
 };
+
+/**
+ * @param {Number} [days] - Number of days (optional, default is 0)
+ * @returns {Array} - tasks which are overdue
+ * @throws {Error} - If error occurs while fetching tasks
+ **/
+const getOverdueTasks = async (days = 0) => {
+  try {
+    const currentTime = Math.floor(Date.now() / 1000);
+    const targetTime = days > 0 ? currentTime + days * 24 * 60 * 60 : currentTime;
+
+    const OVERDUE_TASK_STATUSES = [
+      IN_PROGRESS,
+      ASSIGNED,
+      NEEDS_REVIEW,
+      IN_REVIEW,
+      SMOKE_TESTING,
+      BLOCKED,
+      SANITY_CHECK,
+    ];
+
+    const query = tasksModel.where("endsOn", "<", targetTime).where("status", "in", OVERDUE_TASK_STATUSES);
+    const snapshot = await query.get();
+
+    if (snapshot.empty) {
+      return [];
+    }
+
+    const taskData = snapshot.docs.map((doc) => {
+      return {
+        id: doc.id,
+        ...doc.data(),
+      };
+    });
+    return taskData;
+  } catch (err) {
+    logger.error("Error in getting overdue tasks", err);
+    throw err;
+  }
+};
+
 module.exports = {
   updateTask,
   fetchTasks,
@@ -474,4 +587,5 @@ module.exports = {
   fetchTaskByIssueId,
   fetchPaginatedTasks,
   getBuiltTasks,
+  getOverdueTasks,
 };

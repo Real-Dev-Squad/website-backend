@@ -34,4 +34,10 @@ describe("transformQuery", function () {
     expect(transformedQuery.page).to.be.equal(1);
     expect(typeof transformedQuery.page).to.equal("number");
   });
+
+  it("should transfrom and parse assignee to lowercase when passed as param", function () {
+    const transformedQuery = transformQuery(false, TASK_STATUS.ASSIGNED, 5, 1, "Test");
+    expect(transformedQuery.assignee).to.be.equal("test");
+    expect(typeof transformedQuery.assignee).to.equal("string");
+  });
 });

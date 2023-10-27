@@ -20,6 +20,7 @@ const TASK_STATUS = {
   RELEASED: "RELEASED",
   VERIFIED: "VERIFIED",
   DONE: "DONE",
+  OVERDUE: "OVERDUE",
 };
 
 // TODO: convert this to new task status
@@ -29,6 +30,7 @@ const TASK_STATUS_OLD = {
   OLD_PENDING: "pending",
   OLD_COMPLETED: "completed",
 };
+const DEFAULT_TASK_PRIORITY = "TBD";
 
 const MAPPED_TASK_STATUS = {
   ...TASK_STATUS,
@@ -38,4 +40,4 @@ const MAPPED_TASK_STATUS = {
 
 const TASK_SIZE = 5;
 
-module.exports = { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS, TASK_SIZE };
+module.exports = { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS, TASK_SIZE, DEFAULT_TASK_PRIORITY };

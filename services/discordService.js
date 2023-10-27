@@ -2,7 +2,6 @@ const firestore = require("../utils/firestore");
 const { fetchAllUsers } = require("../models/users");
 const { generateAuthTokenForCloudflare } = require("../utils/discord-actions");
 const userModel = firestore.collection("users");
-
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
 const getDiscordMembers = async () => {
@@ -18,6 +17,25 @@ const getDiscordMembers = async () => {
   } catch (err) {
     logger.error("Error in fetching the discord data", err);
     throw err;
+  }
+};
+
+const getDiscordRoles = async () => {
+  const authToken = await generateAuthTokenForCloudflare();
+  try {
+    const response = await (
+      await fetch(`${DISCORD_BASE_URL}/roles`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      })
+    ).json();
+    return response;
+  } catch (err) {
+    logger.error("Error in fetching the discord data", err);
+    return {
+      status: 500,
+      message: "Something went wrong",
+    };
   }
 };
 
@@ -68,9 +86,32 @@ const removeRoleFromUser = async (roleId, discordId) => {
   }
 };
 
+const setUserDiscordNickname = async (userName, discordId) => {
+  try {
+    const authToken = generateAuthTokenForCloudflare();
+
+    const response = await (
+      await fetch(`${DISCORD_BASE_URL}/guild/member`, {
+        method: "PATCH",
+        body: JSON.stringify({ userName, discordId }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      })
+    ).json();
+    return {
+      userEffected: userName,
+      message: response,
+    };
+  } catch (err) {
+    logger.error("Error in updating discord Nickname", err);
+    throw err;
+  }
+};
+
 module.exports = {
   getDiscordMembers,
+  getDiscordRoles,
   setInDiscordFalseScript,
   addRoleToUser,
   removeRoleFromUser,
+  setUserDiscordNickname,
 };

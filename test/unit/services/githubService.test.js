@@ -8,7 +8,7 @@ const axios = require("../../../utils/fetch");
 
 const githubService = require("../../../services/githubService");
 const githubUserInfo = require("../../fixtures/auth/githubUserInfo")();
-
+const { prDates } = require("../../fixtures/pullrequests/pullrequests");
 describe("githubService", function () {
   beforeEach(async function () {
     sinon.stub(axios, "fetch").returnsArg(0);
@@ -153,6 +153,116 @@ describe("githubService", function () {
 
       const url = `${baseURL}/${path}?q=${searchString}+${searchParams}`;
       expect(response).to.be.equal(url);
+    });
+  });
+
+  describe("fetchLastMergedPR", function () {
+    let stub;
+
+    before(function () {
+      stub = sinon.stub(githubService, "fetchLastMergedPR");
+    });
+
+    after(function () {
+      stub.restore();
+    });
+
+    it("Should generate the correct url to fetch last merged PR", async function () {
+      const data = prDates[0];
+      const username = "sahsisunny";
+
+      stub.withArgs(username).returns(data);
+
+      const response = await githubService.fetchLastMergedPR(username);
+      expect(response).to.be.equal(data);
+    });
+
+    it("Should throw an error if no merged PRs found for user", async function () {
+      const username = "dfgfdgdg";
+      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns({
+        items: [],
+      });
+
+      try {
+        await githubService.fetchLastMergedPR(username);
+      } catch (err) {
+        expect(err.message).to.be.equal(`No merged PRs found for user ${username}`);
+      }
+      stub.restore();
+    });
+  });
+
+  describe("isLastPRMergedWithinDays", function () {
+    it("Should return true if last PR merged is within the last `days` days else false", async function () {
+      const data = prDates[1];
+
+      const days = 20;
+      const username = "sahsisunny";
+      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns(data);
+      const stub2 = sinon.stub(githubService, "isLastPRMergedWithinDays").returns(true);
+      const response = await githubService.isLastPRMergedWithinDays(username, days);
+      expect(response).to.be.equal(true);
+      stub.restore();
+      stub2.restore();
+    });
+
+    it("Should return false if last PR merged is not within the last `days` days else false", async function () {
+      const data = prDates[2];
+      const days = 10;
+      const username = "sahsisunny";
+      const stub = sinon.stub(githubService, "fetchLastMergedPR").returns(data);
+      const stub2 = sinon.stub(githubService, "isLastPRMergedWithinDays").returns(false);
+      const response = await githubService.isLastPRMergedWithinDays(username, days);
+      expect(response).to.be.equal(false);
+      stub.restore();
+      stub2.restore();
+    });
+
+    it("Should throw an error while checking last PR merged", async function () {
+      const days = 10;
+      const username = "sahsisunny";
+      const stub = sinon.stub(githubService, "fetchLastMergedPR").throws("Error");
+      const stub2 = sinon.stub(githubService, "isLastPRMergedWithinDays").returns(false);
+      try {
+        await githubService.isLastPRMergedWithinDays(username, days);
+      } catch (err) {
+        expect(err.message).to.be.equal("Error while checking last PR merged: Error");
+      }
+      stub.restore();
+      stub2.restore();
+    });
+  });
+
+  describe("fetchIssuesById", function () {
+    beforeEach(async function () {});
+    afterEach(async function () {
+      await cleanDb();
+      sinon.restore();
+    });
+    it("should handle API call errors and return null", async function () {
+      const repositoryName = "example-repo";
+      const issueId = 123;
+      sinon.stub(global, "fetch").throws(new Error("API call failed"));
+      try {
+        await githubService.fetchIssuesById(repositoryName, issueId);
+      } catch (err) {
+        expect(err.message).to.be.equal("API call failed");
+      }
+    });
+    it("should handle non-OK API response and return null", async function () {
+      const repositoryName = "example-repo";
+      const issueId = 123;
+      sinon.stub(global, "fetch").returns({ ok: false, status: 404, text: () => "Not Found" });
+      const response = await githubService.fetchIssuesById(repositoryName, issueId);
+      expect(response).to.be.equal(null);
+    });
+    it("should handle a successful API response and return issue details", async function () {
+      const repositoryName = "example-repo";
+      const issueId = 123;
+      const issueDetails = { title: "Example Issue", body: "Issue details" };
+      sinon.stub(global, "fetch").returns({ ok: true, json: () => Promise.resolve(issueDetails) });
+      const response = await githubService.fetchIssuesById(repositoryName, issueId);
+      expect(response).to.deep.equal(issueDetails);
     });
   });
 });

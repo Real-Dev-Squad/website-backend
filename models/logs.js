@@ -3,6 +3,8 @@ const { getBeforeHourTime } = require("../utils/time");
 const logsModel = firestore.collection("logs");
 const admin = require("firebase-admin");
 const { logType } = require("../constants/logs");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { getFullName } = require("../utils/users");
 
 /**
  * Adds log
@@ -22,7 +24,7 @@ const addLog = async (type, meta, body) => {
     return await logsModel.add(log);
   } catch (err) {
     logger.error("Error in adding log", err);
-    throw err;
+    throw new Error(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -34,22 +36,37 @@ const addLog = async (type, meta, body) => {
  */
 const fetchLogs = async (query, param) => {
   try {
+    const { dev, ...remainingQuery } = query;
     let call = logsModel.where("type", "==", param);
-    Object.keys(query).forEach((key) => {
+    Object.keys(remainingQuery).forEach((key) => {
       // eslint-disable-next-line security/detect-object-injection
       if (key !== "limit" && key !== "lastDocId") {
-        call = call.where(key, "==", query[key]);
+        // eslint-disable-next-line security/detect-object-injection
+        call = call.where(key, "==", remainingQuery[key]);
       }
     });
 
-    const { limit, lastDocId } = query;
+    const { limit, lastDocId, userId } = remainingQuery;
     let lastDoc;
     const limitDocuments = Number(limit);
 
     if (lastDocId) {
       lastDoc = await logsModel.doc(lastDocId).get();
     }
-
+    if (userId) {
+      const logsSnapshot = await logsModel
+        .where("type", "==", param)
+        .where("body.archived_user.user_id", "==", userId)
+        .orderBy("timestamp", "desc")
+        .get();
+      const logs = [];
+      logsSnapshot.forEach((doc) => {
+        logs.push({
+          ...doc.data(),
+        });
+      });
+      return logs;
+    }
     const logsSnapshotQuery = call.orderBy("timestamp", "desc").startAfter(lastDoc ?? "");
     const snapshot = limit
       ? await logsSnapshotQuery.limit(limitDocuments).get()
@@ -61,10 +78,26 @@ const fetchLogs = async (query, param) => {
         ...doc.data(),
       });
     });
+
+    // If dev flag is presend and extensionRequest logs are requested, populate userId
+    if (dev === "true" && param === "extensionRequests") {
+      const userIdNameMap = {};
+      for await (const log of logs) {
+        if (log.meta.userId) {
+          if (userIdNameMap[log.meta.userId]) {
+            log.meta.name = userIdNameMap[log.meta.userId];
+          } else {
+            const name = await getFullName(log.meta.userId);
+            log.meta.name = `${name?.first_name} ${name?.last_name}`;
+            userIdNameMap[log.meta.userId] = log.meta.name;
+          }
+        }
+      }
+    }
     return logs;
   } catch (err) {
     logger.error("Error in adding log", err);
-    throw err;
+    throw new Error(INTERNAL_SERVER_ERROR);
   }
 };
 
