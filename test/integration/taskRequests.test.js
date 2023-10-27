@@ -608,8 +608,11 @@ describe("Task Requests", function () {
           taskRequestId: taskId,
           userId,
         });
-        const taskRequestLogs = (await logsModel.where("type", "==", "taskRequests").limit(1).get()).docs[0].data();
-
+        const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+        let taskRequestLogs;
+        logsRef.forEach((data) => {
+          taskRequestLogs = data.data();
+        });
         expect(taskRequestLogs.body.taskRequestId).to.be.equal(taskId);
       });
 
@@ -619,8 +622,11 @@ describe("Task Requests", function () {
           taskRequestId: taskId,
           userId,
         });
-        const taskRequestLogs = (await logsModel.where("type", "==", "taskRequests").limit(1).get()).docs[0].data();
-
+        const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+        let taskRequestLogs;
+        logsRef.forEach((data) => {
+          taskRequestLogs = data.data();
+        });
         expect(taskRequestLogs).to.be.equal(undefined);
       });
     });
