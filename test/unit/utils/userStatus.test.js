@@ -1,7 +1,11 @@
 const chai = require("chai");
 const { expect } = chai;
-const { generateNewStatus, checkIfUserHasLiveTasks } = require("../../../utils/userStatus");
+const { generateNewStatus, checkIfUserHasLiveTasks, convertTimestampsToUTC } = require("../../../utils/userStatus");
 const { userState } = require("../../../constants/userStatus");
+const {
+  OutputFixtureForFnConvertTimestampsToUTC,
+  inputFixtureForFnConvertTimestampsToUTC,
+} = require("../../fixtures/userStatus/userStatus");
 
 describe("User Status Functions", function () {
   describe("generateNewStatus", function () {
@@ -89,6 +93,13 @@ describe("User Status Functions", function () {
         expect(error).to.be.instanceOf(Error);
         expect(error.message).to.equal(errorMessage);
       }
+    });
+  });
+
+  describe("convertTimestampsToUTC", function () {
+    it("should convert timestamps within the input object to UTC 00:00:00 (start of day) and UTC 23:59:59 (end of day)", function () {
+      const result = convertTimestampsToUTC(inputFixtureForFnConvertTimestampsToUTC);
+      expect(result).to.deep.equal(OutputFixtureForFnConvertTimestampsToUTC);
     });
   });
 });

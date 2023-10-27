@@ -16,8 +16,9 @@ const event1Data = eventData[0];
 const userData = require("../fixtures/user/user")();
 
 const eventQuery = require("../../models/events");
+const logsModel = require("../../models/logs");
 
-const defaultUser = userData[0];
+const defaultUser = userData[16];
 
 const config = require("config");
 const sinon = require("sinon");
@@ -202,12 +203,18 @@ describe("events", function () {
 
   describe("POST /events/join - joinEvent", function () {
     let tokenService;
+    let service;
 
     afterEach(function () {
       tokenService.restore();
+      service.restore();
     });
 
     it("should return a token when the request is successful", function (done) {
+      const eventsData = {
+        data: [event1Data],
+      };
+      service = sinon.stub(EventAPIService.prototype, "get").returns(eventsData);
       const payload = {
         roomId: event1Data.id,
         userId: "5678",
@@ -223,11 +230,117 @@ describe("events", function () {
           if (error) {
             return done(error);
           }
+          expect(response).to.have.status(201);
+          expect(response.body.token).to.be.a("string");
+          expect(response.body.message).to.be.a("string");
+
+          return done();
+        });
+    });
+  });
+
+  describe("POST /events/join-admin - joinEvent", function () {
+    let tokenService;
+    let service;
+    let superUserAuthToken;
+    let memberAuthToken;
+    beforeEach(async function () {
+      const superUser = userData[4];
+      const member = userData[6];
+      const memberUserId = await addUser(member);
+      const superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+      memberAuthToken = authService.generateAuthToken({ userId: memberUserId });
+    });
+
+    afterEach(function () {
+      service.restore();
+      tokenService.restore();
+    });
+
+    it("should return a token when the request is successful for host", function (done) {
+      const eventsData = {
+        data: [event1Data],
+      };
+      service = sinon.stub(EventAPIService.prototype, "get").returns(eventsData);
+
+      const payload = {
+        roomId: event1Data.id,
+        userId: "5678",
+        role: "host",
+      };
+      tokenService = sinon.stub(EventTokenService.prototype, "getAuthToken").returns("test-token");
+
+      chai
+        .request(app)
+        .post("/events/join-admin")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send(payload)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
 
           expect(response).to.have.status(201);
           expect(response.body.token).to.be.a("string");
           expect(response.body.message).to.be.a("string");
-          expect(response.body.success).to.be.equal(true);
+
+          return done();
+        });
+    });
+
+    it("should return a token when the request is successful for moderator", function (done) {
+      const eventsData = {
+        data: [event1Data],
+      };
+      service = sinon.stub(EventAPIService.prototype, "get").returns(eventsData);
+      const payload = {
+        roomId: event1Data.id,
+        userId: "5678",
+        role: "moderator",
+      };
+      tokenService = sinon.stub(EventTokenService.prototype, "getAuthToken").returns("test-token");
+
+      chai
+        .request(app)
+        .post("/events/join-admin")
+        .set("cookie", `${cookieName}=${memberAuthToken}`)
+        .send(payload)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(201);
+          expect(response.body.token).to.be.a("string");
+          expect(response.body.message).to.be.a("string");
+
+          return done();
+        });
+    });
+
+    it("should return a bad request for the user if they're normal user", function (done) {
+      const payload = {
+        roomId: event1Data.id,
+        userId: "5678",
+        role: "host",
+      };
+
+      tokenService = sinon.stub(EventTokenService.prototype, "getAuthToken").returns("test-token");
+
+      chai
+        .request(app)
+        .post("/events/join-admin")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(payload)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+          expect(response).to.have.status(401);
+          expect(response.body.message).to.be.a("string");
+          expect(response.body.error).to.be.equal("Unauthorized");
+          expect(response.body.message).to.be.equal("You are not authorized for this action.");
 
           return done();
         });
@@ -367,6 +480,16 @@ describe("events", function () {
 
   describe("PATCH /events/end - endActiveEvent", function () {
     let service;
+    let superUserAuthToken;
+    let memberAuthToken;
+    beforeEach(async function () {
+      const superUser = userData[4];
+      const member = userData[6];
+      const memberUserId = await addUser(member);
+      const superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+      memberAuthToken = authService.generateAuthToken({ userId: memberUserId });
+    });
 
     afterEach(function () {
       service.restore();
@@ -385,7 +508,8 @@ describe("events", function () {
       chai
         .request(app)
         .patch("/events/end")
-        .set("cookie", `${cookieName}=${authToken}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .set("cookie", `${cookieName}=${memberAuthToken}`)
         .send({ ...payload, id: event1Data.room_id })
         .end((error, response) => {
           if (error) {
@@ -426,6 +550,12 @@ describe("events", function () {
 
   describe("POST /events/:id/codes", function () {
     let service;
+    let superUserAuthToken;
+    beforeEach(async function () {
+      const superUser = userData[4];
+      const superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    });
 
     afterEach(function () {
       service.restore();
@@ -448,7 +578,7 @@ describe("events", function () {
       chai
         .request(app)
         .post(`/events/${event1Data.room_id}/codes`)
-        .set("cookie", `${cookieName}=${authToken}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({ ...payload })
         .end((error, response) => {
           if (error) {
@@ -473,7 +603,7 @@ describe("events", function () {
       chai
         .request(app)
         .post(`/events/${id}/codes`)
-        .set("cookie", `${cookieName}=${authToken}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({ ...payload })
         .end((error, response) => {
           if (error) {
@@ -502,7 +632,7 @@ describe("events", function () {
       chai
         .request(app)
         .post(`/events/${event1Data.room_id}/codes`)
-        .set("cookie", `${cookieName}=${authToken}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({ ...payload })
         .end((error, response) => {
           if (error) {
@@ -542,6 +672,12 @@ describe("events", function () {
 
   describe("GET /events/:id/codes - getEventCodes", function () {
     let service;
+    let superUserAuthToken;
+    beforeEach(async function () {
+      const superUser = userData[4];
+      const superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    });
 
     afterEach(function () {
       service.restore();
@@ -554,7 +690,7 @@ describe("events", function () {
       chai
         .request(app)
         .get(`/events/${eventData[1].id}/codes`)
-        .set("cookie", `${cookieName}=${authToken}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -573,7 +709,7 @@ describe("events", function () {
       chai
         .request(app)
         .get(`/events/${eventData[1].id}/codes`)
-        .set("cookie", `${cookieName}=${authToken}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((error, response) => {
           if (error) {
             return done(error);
@@ -582,6 +718,100 @@ describe("events", function () {
           expect(response).to.have.status(500);
           expect(response.body).to.be.a("object");
           expect(response.body).to.have.all.keys("message");
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /events/:id/peers/kickout", function () {
+    let service;
+    let superUserAuthToken;
+    let memberAuthToken;
+    beforeEach(async function () {
+      const superUser = userData[4];
+      const member = userData[6];
+      const superUserId = await addUser(superUser);
+      const memberUserId = await addUser(member);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+      memberAuthToken = authService.generateAuthToken({ userId: memberUserId });
+    });
+
+    afterEach(function () {
+      service.restore();
+      sinon.restore();
+    });
+
+    it("returns a success message when the request is successful for super user", function (done) {
+      const payload = {
+        peerId: "peer123",
+        reason: "Kicked out for a reason",
+      };
+
+      service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "peer remove request submitted" });
+
+      sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Selected Participant is removed from event." });
+      sinon.stub(logsModel, "addLog");
+
+      chai
+        .request(app)
+        .patch(`/events/${event1Data.room_id}/peers/kickout`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send(payload)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(200);
+          expect(response.body.message).to.be.a("string");
+          expect(response.body.message).to.equal("Selected Participant is removed from event.");
+
+          return done();
+        });
+    });
+
+    it("returns a success message when the request is successful for member user", function (done) {
+      const payload = {
+        peerId: "peer123",
+        reason: "Kicked out for a reason",
+      };
+
+      service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "peer remove request submitted" });
+
+      sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Selected Participant is removed from event." });
+      sinon.stub(logsModel, "addLog");
+
+      chai
+        .request(app)
+        .patch(`/events/${event1Data.room_id}/peers/kickout`)
+        .set("cookie", `${cookieName}=${memberAuthToken}`)
+        .send(payload)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(200);
+          expect(response.body.message).to.be.a("string");
+          expect(response.body.message).to.equal("Selected Participant is removed from event.");
+
+          return done();
+        });
+    });
+
+    it("should return unauthorized error if user is not authenticated", function (done) {
+      chai
+        .request(app)
+        .patch(`/events/${event1Data.room_id}/peers/kickout`)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(401);
+          expect(response.body.error).to.be.equal("Unauthorized");
+          expect(response.body.message).to.be.equal("Unauthenticated User");
+
           return done();
         });
     });

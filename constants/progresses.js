@@ -17,6 +17,7 @@ const TYPE_MAP = {
   user: "userId",
   task: "taskId",
 };
+const PROGRESS_VALID_SORT_FIELDS = ["date", "-date"];
 
 const VALID_PROGRESS_TYPES = ["task", "user"];
 
@@ -26,4 +27,5 @@ module.exports = {
   INTERNAL_SERVER_ERROR_MESSAGE,
   TYPE_MAP,
   VALID_PROGRESS_TYPES,
+  PROGRESS_VALID_SORT_FIELDS,
 };

@@ -117,6 +117,23 @@ describe("users", function () {
     });
   });
 
+  describe("fetch user details based on discord id", function () {
+    let [userId0] = [];
+    beforeEach(async function () {
+      const userArr = userData();
+      userId0 = await addUser(userArr[0]);
+      await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.IDLE));
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("It should fetch users who have archived:false role", async function () {
+      const result = await users.fetchUser({ discordId: "12345" });
+      expect(result.user.roles.archived).to.equal(false);
+    });
+  });
+
   describe("user image verification", function () {
     let userId, discordId, profileImageUrl, discordImageUrl;
     beforeEach(async function () {
@@ -310,6 +327,7 @@ describe("users", function () {
       });
     });
   });
+
   describe("get users by roles", function () {
     beforeEach(async function () {
       const addUsersPromises = [];
@@ -354,9 +372,10 @@ describe("users", function () {
         time: "31d",
       };
       const result = await users.getUsersBasedOnFilter(query);
-      expect(result.length).to.equal(2);
+      expect(result.length).to.equal(1);
     });
   });
+
   describe("fetch users by id", function () {
     let allIds = [];
     before(async function () {
@@ -385,12 +404,75 @@ describe("users", function () {
       expect(fetchedUserIds).to.deep.equal([]);
     });
   });
+
   describe("generateUniqueUsername", function () {
     it("should generate a unique username when existing users are present", async function () {
       const userData = userDataArray[15];
       await users.addOrUpdate(userData);
       const newUsername = await users.generateUniqueUsername("shubham", "sigdar");
       expect(newUsername).to.deep.equal("shubham-sigdar-2");
+    });
+  });
+
+  describe("updateUsersInBatch", function () {
+    it("should update existing users", async function () {
+      const addUserPromiseList = [];
+      for (const user of userDataArray) {
+        const addUserPromise = users.addOrUpdate(user);
+        addUserPromiseList.push(addUserPromise);
+      }
+
+      await Promise.all(addUserPromiseList);
+
+      const usersList = [];
+      const usersQuerySnapshot = await userModel.get();
+      usersQuerySnapshot.forEach((user) => usersList.push({ ...user.data(), id: user.id, status: "inactive" }));
+
+      await users.updateUsersInBatch(usersList);
+
+      const updatedUserList = [];
+      const updatedUserQuerySnapshot = await userModel.get();
+      updatedUserQuerySnapshot.forEach((user) => updatedUserList.push({ ...user.data(), id: user.id }));
+
+      const isAllUserStatusInactive = updatedUserList.every((user) => {
+        return !!user.status && user.status === "inactive";
+      });
+
+      expect(isAllUserStatusInactive).to.be.equal(true);
+    });
+  });
+
+  describe("fetchUsersListForMultipleValues", function () {
+    it("should fetch users for all the given id list", async function () {
+      const actualUserList = [userDataArray[0], userDataArray[1], userDataArray[2]];
+
+      const addUserPromiseList = [];
+      for (const user of actualUserList) {
+        const addUserPromise = users.addOrUpdate(user);
+        addUserPromiseList.push(addUserPromise);
+      }
+      await Promise.all(addUserPromiseList);
+
+      const discordIdList = actualUserList.map((user) => user.discordId);
+
+      const userListResult = await users.fetchUsersListForMultipleValues("discordId", discordIdList);
+
+      expect(userListResult.length).to.be.equal(3);
+      const resultDiscordIdList = userListResult.map((user) => user.discordId);
+      resultDiscordIdList.sort();
+      discordIdList.sort();
+      expect(resultDiscordIdList).to.be.deep.equal(discordIdList);
+    });
+  });
+
+  describe("fetchUserForKeyValue", function () {
+    it("should fetch users for the given id", async function () {
+      await users.addOrUpdate(userDataArray[0]);
+
+      const userListResult = await users.fetchUserForKeyValue("discordId", userDataArray[0].discordId);
+
+      expect(userListResult.length).to.be.equal(1);
+      expect(userListResult[0].discordId).to.be.deep.equal(userDataArray[0].discordId);
     });
   });
 });

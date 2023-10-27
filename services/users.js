@@ -1,7 +1,6 @@
 const { USERS_PATCH_HANDLER_SUCCESS_MESSAGES, USERS_PATCH_HANDLER_ERROR_MESSAGES } = require("../constants/users");
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
-
 const archiveUsers = async (usersData) => {
   const batch = firestore.batch();
   const usersBatch = [];

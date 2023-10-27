@@ -9,7 +9,7 @@ const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
 const { archiveUsers } = require("../services/users");
-const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE } = require("../constants/users");
+const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE, FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const ROLES = require("../constants/roles");
@@ -240,7 +240,7 @@ const fetchUsers = async (usernames = []) => {
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const fetchUser = async ({ userId = null, username = null, githubUsername = null }) => {
+const fetchUser = async ({ userId = null, username = null, githubUsername = null, discordId = null }) => {
   try {
     let userData, id;
     if (username) {
@@ -255,6 +255,12 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       userData = user.data();
     } else if (githubUsername) {
       const user = await userModel.where("github_id", "==", githubUsername).limit(1).get();
+      user.forEach((doc) => {
+        id = doc.id;
+        userData = doc.data();
+      });
+    } else if (discordId) {
+      const user = await userModel.where("discordId", "==", discordId).where("roles.archived", "==", false).get();
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
@@ -560,7 +566,7 @@ const getUsersWithOnboardingStateInRange = async (filteredUserDocs, stateItems, 
     return stateItems.some((stateItem) => stateItem.userId === userDoc.id);
   });
   filteredUsers.forEach((user) => {
-    if (user.discordJoinedAt) {
+    if (user.discordJoinedAt && user.roles.in_discord) {
       const userDiscordJoinedDate = new Date(user.discordJoinedAt);
       const currentTimeStamp = new Date().getTime();
       const timeDifferenceInMilliseconds = currentTimeStamp - userDiscordJoinedDate.getTime();
@@ -750,6 +756,108 @@ const generateUniqueUsername = async (firstname, lastname) => {
   }
 };
 
+/**
+ * Updates given list of users in batch
+ * @param usersData {Array} - Users list as an array.
+ * @param usersData.id {String} - User id which is the primary key of user model.
+ */
+const updateUsersInBatch = async (usersData) => {
+  try {
+    const bulkWriter = firestore.bulkWriter();
+
+    usersData.forEach((user) => {
+      const id = user.id;
+      delete user.id;
+      bulkWriter.update(userModel.doc(id), user);
+    });
+
+    await bulkWriter.close();
+  } catch (err) {
+    logger.error("Firebase batch operation failed!");
+  }
+};
+
+/**
+ * Fetch users based on document key and value.
+ * @param documentKey {String} - Model field path.
+ * @param value {String} - Field value.
+ */
+const fetchUserForKeyValue = async (documentKey, value) => {
+  try {
+    const userRefList = await userModel.where(documentKey, "==", value).get();
+    const users = [];
+    userRefList.forEach((user) => {
+      const userData = user.data();
+      if (userData)
+        users.push({
+          id: user.id,
+          ...userData,
+        });
+    });
+    return users;
+  } catch (err) {
+    logger.error("Firebase fetch operation failed!", err);
+    return [];
+  }
+};
+
+/**
+ * Fetch users based on document key and value.
+ * @param documentKey {String} - Model field path.
+ * @param valueList {Array} - List of values to be matched.
+ */
+const fetchUsersListForMultipleValues = async (documentKey, valueList) => {
+  try {
+    const documentIdChunks = chunks(valueList, FIRESTORE_IN_CLAUSE_SIZE);
+
+    const allUserRefPromiseList = [];
+    for (const documentIds of documentIdChunks) {
+      const usersRefPromise = await userModel.where(documentKey, "in", documentIds).get();
+      allUserRefPromiseList.push(usersRefPromise);
+    }
+    const userRefList = await Promise.all(allUserRefPromiseList);
+
+    const users = [];
+    for (const usersRef of userRefList) {
+      usersRef.forEach((user) => {
+        const userData = user.data();
+        if (userData)
+          users.push({
+            id: user.id,
+            ...userData,
+          });
+      });
+    }
+    return users;
+  } catch (err) {
+    logger.error("Firebase fetch operation failed!");
+    return [];
+  }
+};
+
+const getNonNickNameSyncedUsers = async () => {
+  try {
+    const usersRef = await userModel
+      .where("roles.archived", "==", false)
+      .where("nickname_synced", "==", false)
+      .where("discordId", "!=", null)
+      .get();
+    const users = [];
+    usersRef.forEach((user) => {
+      const userData = user.data();
+      if (userData?.discordId)
+        users.push({
+          id: user.id,
+          ...userData,
+        });
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Error while fetching all users: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -775,4 +883,8 @@ module.exports = {
   getUsersByRole,
   fetchUserByIds,
   generateUniqueUsername,
+  updateUsersInBatch,
+  fetchUsersListForMultipleValues,
+  fetchUserForKeyValue,
+  getNonNickNameSyncedUsers,
 };

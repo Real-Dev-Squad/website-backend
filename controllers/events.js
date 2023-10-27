@@ -7,6 +7,8 @@ const logger = require("../utils/logger");
 const { removeUnwantedProperties } = require("../utils/events");
 
 const crypto = require("crypto");
+const { addLog } = require("../models/logs");
+const { logType } = require("../constants/logs");
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
@@ -92,14 +94,62 @@ const getAllEvents = async (req, res) => {
  * @throws {Error} If an error occurs while generating the token.
  */
 const joinEvent = async (req, res) => {
-  const { roomId, userId, role } = req.body;
-  const payload = { roomId, userId, role };
+  const { roomId, userId, role, eventCode } = req.body;
+  const payload = { userId, role };
+
   try {
-    const token = tokenService.getAuthToken(payload);
+    if (role === ROLES.MAVEN) {
+      const eventCodes = await eventQuery.getEventCodes({ id: roomId });
+      const allEventCodesArray = eventCodes.map((eventCode) => {
+        return eventCode.code;
+      });
+
+      const isEventCodeValid = allEventCodesArray.includes(eventCode);
+
+      if (!isEventCodeValid) {
+        return res.status(400).json({
+          message: "Provided event code is invalid for the role!",
+        });
+      }
+      const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
+
+      return res.status(201).json({
+        token: token,
+        message: "Token generated successfully!",
+      });
+    }
+
+    if (role === ROLES.HOST || role === ROLES.MODERATOR) {
+      if (!req.userData) {
+        return res.status(400).json({
+          message: "Unauthorized, please login to perform this action!",
+        });
+      }
+
+      if (role === ROLES.HOST && req.userData.roles.super_user) {
+        const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
+
+        return res.status(201).json({
+          token: token,
+          message: "Token generated successfully!",
+        });
+      }
+
+      if (role === ROLES.MODERATOR && req.userData.roles.member) {
+        const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
+
+        return res.status(201).json({
+          token: token,
+          message: "Token generated successfully!",
+        });
+      }
+    }
+
+    const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
+
     return res.status(201).json({
       token: token,
       message: "Token generated successfully!",
-      success: true,
     });
   } catch (error) {
     logger.error({ error });
@@ -248,6 +298,7 @@ const kickoutPeer = async (req, res) => {
   try {
     await apiService.post(`/active-rooms/${id}/remove-peers`, payload);
     await eventQuery.kickoutPeer({ eventId: id, peerId: payload.peer_id, reason: req.body.reason });
+    addLog(logType.EVENTS_REMOVE_PEER, { removed_by: req.userData.id }, payload);
     return res.status(200).json({
       message: `Selected Participant is removed from event.`,
     });

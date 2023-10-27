@@ -37,6 +37,7 @@ const joinEvent = async (req, res, next) => {
   const schema = joi.object({
     roomId: joi.string().required(),
     userId: joi.string().required(),
+    eventCode: joi.optional(),
     role: joi.string().valid("host", "moderator", "guest", "maven").required(),
   });
 

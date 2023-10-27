@@ -15,9 +15,10 @@ const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
-const { getDiscordMembers, updatedNicknameResponse } = require("../fixtures/discordResponse/discord-response");
+const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const joinData = require("../fixtures/user/join");
 const {
+  userStatusDataForNewUser,
   userStatusDataAfterSignup,
   userStatusDataAfterFillingJoinSection,
 } = require("../fixtures/userStatus/userStatus");
@@ -359,7 +360,8 @@ describe("Users", function () {
 
   describe("GET /users", function () {
     beforeEach(async function () {
-      await addOrUpdate(userData[0]);
+      const { userId } = await addOrUpdate(userData[0]);
+      await userStatusModel.updateUserStatus(userId, userStatusDataForNewUser);
       await addOrUpdate(userData[1]);
       await addOrUpdate(userData[2]);
       await addOrUpdate(userData[3]);
@@ -644,7 +646,41 @@ describe("Users", function () {
           return done();
         });
     });
-
+    it("Should return 503 if something went wrong if data not fetch from github for new query format under feature flag", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({
+          q: "filterBy:unmerged_prs+days:30",
+          dev: true,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(503);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal(SOMETHING_WENT_WRONG);
+          return done();
+        });
+    });
+    it("Should throw an error when there is no feature flag when using the new query parameter format(q)", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({
+          q: "filterBy:unmerged_prs+days:30",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Route not found");
+          return done();
+        });
+    });
     it("Should return 400 if days is not passed for filterBy unmerged_prs", function (done) {
       chai
         .request(app)
@@ -656,6 +692,77 @@ describe("Users", function () {
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
           expect(res.body.message).to.equal("Days is required for filterBy unmerged_prs");
+          return done();
+        });
+    });
+    it("Should return 400 if days is not passed for filterBy unmerged_prs with new query format and feature flag", function (done) {
+      chai
+        .request(app)
+        .get("/users?q=filterBy:unmerged_prs&dev=true")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Days is required for filterBy unmerged_prs");
+          return done();
+        });
+    });
+
+    it("Should return one user with given discord id and feature flag", async function () {
+      const discordId = userData[0].discordId;
+
+      const res = await chai.request(app).get(`/users?dev=true&discordId=${discordId}`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.user).to.have.property("state");
+    });
+
+    it("Should throw an error when there is no feature flag", async function () {
+      const discordId = userData[0].discordId;
+      const res = await chai.request(app).get(`/users?discordId=${discordId}`).set("cookie", `${cookieName}=${jwt}`);
+      expect(res).to.have.status(404);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("Route not found");
+    });
+
+    it("Should return an empty object when passing an invalid Discord ID", async function () {
+      const invalidDiscordId = "50485556209423";
+      const res = await chai.request(app).get(`/users?dev=true&discordId=${invalidDiscordId}`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("User not found");
+    });
+
+    it("Should return user id which have overdue tasks", function (done) {
+      chai
+        .request(app)
+        .get("/users?query=filterBy:overdue_tasks+days:1")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          return done();
+        });
+    });
+
+    it("Should return user id which have overdue tasks with new query params under feature flag", function (done) {
+      chai
+        .request(app)
+        .get("/users?q=filterBy:overdue_tasks+days:1&dev=true")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
           return done();
         });
     });
@@ -1642,6 +1749,7 @@ describe("Users", function () {
           .send({
             member: true,
             archived: true,
+            reason: "test reason",
           })
           .end((err, res) => {
             if (err) {
@@ -1649,7 +1757,7 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(400);
-            expect(res.body.message).to.be.equal("we only allow either role member or archieve");
+            expect(res.body.message).to.be.equal("we only allow either role member or archived with a reason");
             return done();
           });
       });
@@ -1670,7 +1778,7 @@ describe("Users", function () {
             }
 
             expect(res).to.have.status(400);
-            expect(res.body.message).to.be.equal("we only allow either role member or archieve");
+            expect(res.body.message).to.be.equal("we only allow either role member or archived with a reason");
             return done();
           });
       });
@@ -1950,7 +2058,7 @@ describe("Users", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(updatedNicknameResponse),
+          json: () => Promise.resolve(),
         })
       );
       chai
@@ -1962,7 +2070,7 @@ describe("Users", function () {
             return done(err);
           }
           expect(res).to.have.status(200);
-          expect(res.body.message.message).to.be.equal("User nickname changed successfully");
+          expect(res.body.message).to.be.equal("User nickname changed successfully");
           return done();
         });
     });
