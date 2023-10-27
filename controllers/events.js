@@ -7,6 +7,8 @@ const logger = require("../utils/logger");
 const { removeUnwantedProperties } = require("../utils/events");
 
 const crypto = require("crypto");
+const { addLog } = require("../models/logs");
+const { logType } = require("../constants/logs");
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
@@ -296,6 +298,7 @@ const kickoutPeer = async (req, res) => {
   try {
     await apiService.post(`/active-rooms/${id}/remove-peers`, payload);
     await eventQuery.kickoutPeer({ eventId: id, peerId: payload.peer_id, reason: req.body.reason });
+    addLog(logType.EVENTS_REMOVE_PEER, { removed_by: req.userData.id }, payload);
     return res.status(200).json({
       message: `Selected Participant is removed from event.`,
     });
