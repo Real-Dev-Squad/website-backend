@@ -237,14 +237,29 @@ const fetchUsers = async (usernames = []) => {
 /**
  * Fetches the user data from the the provided username or userId
  *
- * @param { Object }: Object with username and userId, any of the two can be used
+ * @param { Object }: Object with username and userId, any of the two can be used n
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const fetchUser = async ({ userId = null, username = null, githubUsername = null, discordId = null }) => {
+const fetchUser = async ({
+  userId = null,
+  username = null,
+  githubUsername = null,
+  discordId = null,
+  isNoArchived = false,
+}) => {
   try {
     let userData, id;
     if (username) {
       const user = await userModel.where("username", "==", username).limit(1).get();
+      user.forEach((doc) => {
+        id = doc.id;
+        userData = doc.data();
+      });
+    } else if (isNoArchived && userId) {
+      const user = await userModel
+        .where(admin.firestore.FieldPath.documentId(), "==", userId)
+        .where("roles.archived", "==", false)
+        .get();
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();

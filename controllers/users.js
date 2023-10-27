@@ -182,7 +182,7 @@ const getUsers = async (req, res) => {
         });
 
         for (const userId of Array.from(userIds)) {
-          const userInfo = await fetchUser({ userId });
+          const userInfo = await fetchUser({ userId, isNoArchived: true });
 
           if (userInfo) {
             const userTasks = tasksData.filter((task) => task.assignee === userId);
@@ -196,9 +196,7 @@ const getUsers = async (req, res) => {
               userData.tasks = userTasks;
             }
 
-            if (userInfo.user.roles.in_discord) {
-              usersData.push(userData);
-            }
+            usersData.push(userData);
           }
         }
 
