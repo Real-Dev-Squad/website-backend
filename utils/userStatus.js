@@ -301,7 +301,26 @@ const getNextDayTimeStamp = (timeStamp) => {
   nextDateDateTime.setUTCHours(0, 0, 0, 0);
   return nextDateDateTime.getTime();
 };
+/**
+ * Creates pagination link for next and previous pages
+ *
+ * @param query {Object} - request query params
+ * @param cursor {string} - next | prev
+ * @param documentId {string} - DB document Id
+ */
 
+function getFilteredPaginationLink(query, cursor, documentId) {
+  let endpoint = `/search?${cursor}=${documentId}`;
+  const keysToExclude = ["next", "prev", "page"]; // next, prev needs to be updated with new document Id and page is not required in the links.
+  for (const [key, value] of Object.entries(query)) {
+    if (keysToExclude.includes(key)) continue;
+    endpoint = endpoint.concat(`&${key}=${value}`);
+  }
+  if (!query.size) {
+    endpoint = endpoint.concat("&size=100");
+  }
+  return endpoint;
+}
 module.exports = {
   getUserIdBasedOnRoute,
   getTomorrowTimeStamp,
@@ -316,4 +335,5 @@ module.exports = {
   generateErrorResponse,
   generateNewStatus,
   getNextDayTimeStamp,
+  getFilteredPaginationLink,
 };

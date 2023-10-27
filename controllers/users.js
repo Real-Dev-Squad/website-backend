@@ -18,6 +18,7 @@ const { fetchAllUsers } = require("../models/users");
 const { getQualifiers } = require("../utils/helper");
 const { parseSearchQuery } = require("../utils/users");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
+const { getFilteredPaginationLink } = require("../utils/userStatus");
 const {
   USERS_PATCH_HANDLER_ACTIONS,
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
@@ -636,17 +637,59 @@ const addDefaultArchivedRole = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
+// const filterUsers = async (req, res) => {
+//   try {
+//     if (!Object.keys(req.query).length) {
+//       return res.boom.badRequest("filter for item not provided");
+//     }
+
+//     const users = await dataAccess.retreiveFilteredUsers(req.query);
+//     const {filteredUser, nextId, prevId} = await {users,}
+//     return res.json({
+//       message: users.length ? "Users found successfully!" : "No users found",
+//       users: users,
+//       count: users.length,
+//     });
+//   } catch (error) {
+//     logger.error(`Error while fetching all users: ${error}`);
+//     return res.boom.serverUnavailable("Something went wrong please contact admin");
+//   }
+// };
+
 const filterUsers = async (req, res) => {
   try {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
 
-    const users = await dataAccess.retreiveFilteredUsers(req.query);
+    const { page, limit } = req.query;
+    const pageNumber = parseInt(page) || 0;
+    const limitNumber = parseInt(limit) || 100;
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const users = await dataAccess.retreiveFilteredUsers(req.query, skip, limitNumber);
+    const totalCount = await users.length;
+    const totalPages = Math.ceil(totalCount / limitNumber);
+    const nextPage = pageNumber < totalPages - 1 ? pageNumber + 1 : null;
+    const prevPage = pageNumber > 0 ? pageNumber - 1 : null;
+
+    const paginationLinks = {
+      next: nextPage ? getFilteredPaginationLink(req.query, nextPage, limitNumber) : null,
+      prev: prevPage ? getFilteredPaginationLink(req.query, prevPage, limitNumber) : null,
+    };
+
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
       users: users,
       count: users.length,
+      pagination: {
+        totalCount,
+        totalPages,
+        currentPage: pageNumber,
+        nextPage,
+        prevPage,
+        links: paginationLinks,
+      },
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
