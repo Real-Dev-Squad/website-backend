@@ -128,8 +128,6 @@ describe("Users", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           roles: {
-            archived: false,
-            in_discord: false,
             developer: true,
           },
         })
