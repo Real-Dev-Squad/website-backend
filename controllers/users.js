@@ -181,24 +181,19 @@ const getUsers = async (req, res) => {
           userIds.add(task.assignee);
         });
 
-        for (const userId of Array.from(userIds)) {
-          const userInfo = await fetchUser({ userId, isNoArchived: true });
-
-          if (userInfo.userExists) {
-            const userTasks = tasksData.filter((task) => task.assignee === userId);
-            const userData = {
-              id: userId,
-              discordId: userInfo.user.discordId,
-              username: userInfo.user.username,
-            };
-
-            if (dev) {
-              userData.tasks = userTasks;
-            }
-
-            usersData.push(userData);
+        const userInfo = await fetchUser({ userIds: Array.from(userIds) });
+        userInfo.users.forEach((user) => {
+          const userTasks = tasksData.filter((task) => task.assignee === user.id);
+          const userData = {
+            id: user.id,
+            discordId: user.discordId,
+            username: user.username,
+          };
+          if (dev) {
+            userData.tasks = userTasks;
           }
-        }
+          usersData.push(userData);
+        });
 
         return res.json({
           message: "Users returned successfully!",

@@ -242,10 +242,10 @@ const fetchUsers = async (usernames = []) => {
  */
 const fetchUser = async ({
   userId = null,
+  userIds = null,
   username = null,
   githubUsername = null,
   discordId = null,
-  isNoArchived = false,
 }) => {
   try {
     let userData, id;
@@ -255,15 +255,23 @@ const fetchUser = async ({
         id = doc.id;
         userData = doc.data();
       });
-    } else if (isNoArchived && userId) {
-      const user = await userModel
-        .where(admin.firestore.FieldPath.documentId(), "==", userId)
+    } else if (userIds) {
+      const users = await userModel
+        .where(admin.firestore.FieldPath.documentId(), "in", userIds)
         .where("roles.archived", "==", false)
         .get();
-      user.forEach((doc) => {
-        id = doc.id;
-        userData = doc.data();
+      const usersData = [];
+      users.forEach((doc) => {
+        usersData.push({
+          id: doc.id,
+          ...doc.data(),
+        });
       });
+
+      return {
+        userExists: !!usersData.length,
+        users: usersData,
+      };
     } else if (userId) {
       const user = await userModel.doc(userId).get();
       id = userId;
