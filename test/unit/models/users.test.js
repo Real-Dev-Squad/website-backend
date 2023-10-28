@@ -475,4 +475,18 @@ describe("users", function () {
       expect(userListResult[0].discordId).to.be.deep.equal(userDataArray[0].discordId);
     });
   });
+
+  describe("fetchUser", function () {
+    it("It should fetch users based on userids", async function () {
+      const userArr = userData();
+      const userIds = [];
+      for (let i = 0; i < userArr.length; i++) {
+        const userId = await addUser(userArr[i]);
+        userIds.push(userId);
+      }
+      const result = await users.fetchUser({ userIds });
+      expect(result).to.haveOwnProperty("users");
+      expect(result.users).to.have.length(15);
+    });
+  });
 });

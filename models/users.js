@@ -237,7 +237,7 @@ const fetchUsers = async (usernames = []) => {
 /**
  * Fetches the user data from the the provided username or userId
  *
- * @param { Object }: Object with username and userId, any of the two can be used n
+ * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
 const fetchUser = async ({
