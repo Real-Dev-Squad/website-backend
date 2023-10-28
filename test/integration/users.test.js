@@ -121,7 +121,7 @@ describe("Users", function () {
         });
     });
 
-    it("Should update the user roles", function (done) {
+    it("Should not update the user roles", function (done) {
       chai
         .request(app)
         .patch("/users/self")
@@ -129,6 +129,7 @@ describe("Users", function () {
         .send({
           roles: {
             developer: true,
+            maven: true,
           },
         })
         .end((err, res) => {
@@ -136,7 +137,7 @@ describe("Users", function () {
             return done(err);
           }
 
-          expect(res).to.have.status(204);
+          expect(res).to.have.status(403);
 
           return done();
         });
