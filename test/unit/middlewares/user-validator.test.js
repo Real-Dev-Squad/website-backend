@@ -103,8 +103,8 @@ describe("Middleware | Validators | User", function () {
       const req = {
         body: {
           roles: {
-            archived: false,
-            in_discord: false,
+            // archived: false,
+            // in_discord: false,
             developer: true,
           },
         },

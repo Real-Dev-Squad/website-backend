@@ -379,7 +379,7 @@ const updateSelf = async (req, res) => {
 
     const updatedUser = await userQuery.addOrUpdate(req.body, userId);
 
-    if (updatedUser.isNewUser) {
+    if (!updatedUser.isNewUser) {
       // Success criteria, user finished the sign-up process.
       userQuery.initializeUser(userId);
       return res.status(204).send();
