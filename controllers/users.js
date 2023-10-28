@@ -184,7 +184,7 @@ const getUsers = async (req, res) => {
         for (const userId of Array.from(userIds)) {
           const userInfo = await fetchUser({ userId, isNoArchived: true });
 
-          if (userInfo) {
+          if (userInfo.userExists) {
             const userTasks = tasksData.filter((task) => task.assignee === userId);
             const userData = {
               id: userId,
