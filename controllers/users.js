@@ -722,25 +722,6 @@ const addDefaultArchivedRole = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-// const filterUsers = async (req, res) => {
-//   try {
-//     if (!Object.keys(req.query).length) {
-//       return res.boom.badRequest("filter for item not provided");
-//     }
-
-//     const users = await dataAccess.retreiveFilteredUsers(req.query);
-//     const {filteredUser, nextId, prevId} = await {users,}
-//     return res.json({
-//       message: users.length ? "Users found successfully!" : "No users found",
-//       users: users,
-//       count: users.length,
-//     });
-//   } catch (error) {
-//     logger.error(`Error while fetching all users: ${error}`);
-//     return res.boom.serverUnavailable("Something went wrong please contact admin");
-//   }
-// };
-
 const filterUsers = async (req, res) => {
   try {
     if (!Object.keys(req.query).length) {

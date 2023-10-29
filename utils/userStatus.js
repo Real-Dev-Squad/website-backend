@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-object-injection */
 const { NotFound } = require("http-errors");
 const { userState } = require("../constants/userStatus");
 const { convertTimestampToUTCStartOrEndOfDay } = require("./time");
@@ -322,7 +323,7 @@ function getFilteredPaginationLink(query, cursor, documentId) {
   }
   return endpoint;
 }
-=======
+
 /**
  * Converts timestamps within an input object to either UTC 00:00:00 (start of day)
  * or UTC 23:59:59 (end of day) based on specified flags.
@@ -344,6 +345,7 @@ const convertTimestampsToUTC = (obj) => {
       }
 
       if ((untilType === "string" || untilType === "number") && String(until).trim() !== "") {
+        // eslint-disable-next-line security/detect-object-injection
         obj[key].until = convertTimestampToUTCStartOrEndOfDay(until, true);
       }
     }
@@ -366,4 +368,6 @@ module.exports = {
   generateErrorResponse,
   generateNewStatus,
   getNextDayTimeStamp,
+  getFilteredPaginationLink,
+  convertTimestampsToUTC,
 };

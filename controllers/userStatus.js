@@ -4,7 +4,6 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const dataAccess = require("../services/dataAccessLayer");
 const userStatusModel = require("../models/userStatus");
 const { userState, CANCEL_OOO } = require("../constants/userStatus");
-const { getPaginationLink } = require("../utils/userStatus");
 
 /**
  * Deletes a new User Status
@@ -73,7 +72,7 @@ const getUserStatus = async (req, res) => {
  */
 const getAllUserStatus = async (req, res) => {
   try {
-    const { allUserStatus, nextId, prevId } = await userStatusModel.getAllUserStatus(req.query);
+    const { allUserStatus } = await userStatusModel.getAllUserStatus(req.query);
     const activeUsers = [];
     for (const status of allUserStatus) {
       //  fetching users from users collection by userID in userStatus collection
@@ -89,10 +88,6 @@ const getAllUserStatus = async (req, res) => {
       message: "All User Status found successfully.",
       totalUserStatus: activeUsers.length,
       allUserStatus: activeUsers,
-      links: {
-        next: nextId ? getPaginationLink(req.query, "next", nextId) : "",
-        prev: prevId ? getPaginationLink(req.query, "prev", prevId) : "",
-      },
     });
   } catch (err) {
     logger.error(`Error while fetching all the User Status: ${err}`);
