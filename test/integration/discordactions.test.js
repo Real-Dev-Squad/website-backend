@@ -192,7 +192,7 @@ describe("Discord actions", function () {
     it("should successfully return new groups detail when flag is set", function (done) {
       chai
         .request(app)
-        .get(`/discord-actions/groups?dev=true`)
+        .get(`/discord-actions/groups`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
