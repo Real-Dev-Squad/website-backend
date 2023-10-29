@@ -107,6 +107,7 @@ describe("discordactions", function () {
 
     it("should return true if role doesn't exist in the database", async function () {
       const result = await isGroupRoleExists("Test Role");
+      console.log(result, 'result')
       expect(result.wasSuccess).to.equal(true);
       expect(getStub.calledOnceWith("rolename", "==", "Test Role")).to.equal(false);
     });
@@ -598,18 +599,18 @@ describe("discordactions", function () {
     });
   });
 
-  describe("getUserDiscordInvite", function () {
+  describe.only("getUserDiscordInvite", function () {
     let getStub;
 
     beforeEach(function () {
-      getStub = sinon.stub(discordInvitesModel, "where").resolves({
-        get: sinon.stub().returns({
+      getStub = sinon.stub(discordRoleModel, "where").returns({
+        get: sinon.stub().resolves({
           docs: [
             {
-              id: "zyfdsf",
+              id: "xyzfdsf",
               data: sinon.stub().returns({
-                inviteLink: "discord.gg/tYU6Gm7e",
-                userId: "hKzs2IQGe4sLnAuSZ85i",
+                userId: "xyz",
+                inviteLink: "discord.gg/fkjasdfjk",
               }),
             },
           ],
@@ -623,6 +624,10 @@ describe("discordactions", function () {
 
     it("should return the invite for the user", async function () {
       const result = await getUserDiscordInvite("xyz");
+      expect(result.id).to.be.equal("xyzfdsf");
+      expect(result.notFound).to.be.equal(false);
+      expect(result.userId).to.be.equals("xyz");
+      expect(result.inviteLink).to.be.equal("discord.gg/fkjasdfjk");
     });
   });
 });
