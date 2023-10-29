@@ -19,7 +19,7 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
   }
 
   if (!roles.maven && !roles.designer && !roles.product_manager && profileStatus !== "VERIFIED") {
-    return res.boom.forbidden("Only mavens, product managers and designers can generate discord link directly, others need to have verified profile status");
+    return res.boom.forbidden("Only selected roles can generate discord link directly");
   }
 
   return next();

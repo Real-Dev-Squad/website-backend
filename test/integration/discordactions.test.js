@@ -662,9 +662,7 @@ describe("Discord actions", function () {
         .set("cookie", `${cookieName}=${developerUserWithoutApprovedProfileStatusToken}`);
       expect(res).to.have.status(403);
       expect(res.body).to.be.a("object");
-      expect(res.body.message).to.be.equal(
-        "Only mavens, product managers and designers can generate discord link directly, others need to have verified profile status"
-      );
+      expect(res.body.message).to.be.equal("Only selected roles can generate discord link directly");
     });
 
     it("should generate discord link if user is a product mananger", async function () {

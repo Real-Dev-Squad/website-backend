@@ -833,7 +833,7 @@ const getUserDiscordInvite = async (userId) => {
     const invite = await discordInvitesModel.where("userId", "==", userId).get();
     const [inviteDoc] = invite.docs;
     if (inviteDoc) {
-      return { id: inviteDoc.id, ...inviteDoc.data() };
+      return { id: inviteDoc.id, ...inviteDoc.data(), notFound: false };
     } else {
       return { notFound: true };
     }

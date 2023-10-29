@@ -24,9 +24,9 @@ export type userData = {
   discordId: string;
   last_name: string;
   linkedin_id: string;
-  picture: {
-    url: string;
-    publicId: string;
+  picture?: {
+    url?: string;
+    publicId?: string;
   };
   instagram_id: string;
   github_display_name: string;
