@@ -174,6 +174,12 @@ const getUsers = async (req, res) => {
     if (transformedQuery?.filterBy === OVERDUE_TASKS) {
       try {
         const tasksData = await getOverdueTasks(days);
+        if (!tasksData.length) {
+          return res.json({
+            message: "No users found",
+            users: [],
+          });
+        }
         const userIds = new Set();
         const usersData = [];
 

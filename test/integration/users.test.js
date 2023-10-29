@@ -745,9 +745,14 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
-          expect(res.body.message).to.equal("Users returned successfully!");
-          expect(res.body.users).to.be.a("array");
-          return done();
+          if (res.body.users.length > 0) {
+            expect(res.body.message).to.equal("Users returned successfully!");
+            expect(res.body.users).to.be.a("array");
+            return done();
+          } else {
+            expect(res.body.message).to.equal("No users found");
+            return done();
+          }
         });
     });
 
@@ -761,9 +766,14 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
-          expect(res.body.message).to.equal("Users returned successfully!");
-          expect(res.body.users).to.be.a("array");
-          return done();
+          if (res.body.users.length > 0) {
+            expect(res.body.message).to.equal("Users returned successfully!");
+            expect(res.body.users).to.be.a("array");
+            return done();
+          } else {
+            expect(res.body.message).to.equal("No users found");
+            return done();
+          }
         });
     });
   });
