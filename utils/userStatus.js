@@ -1,4 +1,3 @@
-/* eslint-disable security/detect-object-injection */
 const { NotFound } = require("http-errors");
 const { userState } = require("../constants/userStatus");
 const { convertTimestampToUTCStartOrEndOfDay } = require("./time");
@@ -345,7 +344,6 @@ const convertTimestampsToUTC = (obj) => {
       }
 
       if ((untilType === "string" || untilType === "number") && String(until).trim() !== "") {
-        // eslint-disable-next-line security/detect-object-injection
         obj[key].until = convertTimestampToUTCStartOrEndOfDay(until, true);
       }
     }
