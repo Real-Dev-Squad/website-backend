@@ -7,6 +7,7 @@ const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const userModel = firestore.collection("users");
 const admin = require("firebase-admin");
+const discordInvitesModel = firestore.collection("discord-invites");
 
 const {
   createNewRole,
@@ -18,6 +19,8 @@ const {
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
   updateUsersNicknameStatus,
+  addInviteToInviteModel,
+  getUserDiscordInvite,
 } = require("../../../models/discordactions");
 const { groupData, roleData, existingRole, memberGroupData } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
@@ -566,5 +569,60 @@ describe("discordactions", function () {
         expect(err).to.be.instanceOf(Error);
       }
     }).timeout(10000);
+  });
+
+  describe("addInviteToInviteModel", function () {
+    let addStub;
+
+    beforeEach(function () {
+      addStub = sinon.stub(discordRoleModel, "add").resolves({ id: "invite-test-id" });
+    });
+
+    afterEach(function () {
+      addStub.restore();
+    });
+
+    it("should add invite in the invite model for user", async function () {
+      const inviteObject = { userId: "kfjkasdfl", inviteLink: "discord.gg/xyz" };
+      const inviteId = await addInviteToInviteModel(inviteObject);
+      expect(inviteId).to.exist;
+    });
+
+    it("should throw an error if creating invite fails", async function () {
+      const inviteObject = { userId: "kfjkasdfl", inviteLink: "discord.gg/xyz" };
+      addStub.rejects(new Error("Database error!"));
+      return await addInviteToInviteModel(inviteObject).catch((error) => {
+        expect(error).to.be.an.instanceOf(Error);
+        expect(error.message).to.equal("Database error!");
+      });
+    });
+  });
+
+  describe("getUserDiscordInvite", function () {
+    let getStub;
+
+    beforeEach(function () {
+      getStub = sinon.stub(discordInvitesModel, "where").resolves({
+        get: sinon.stub().returns({
+          docs: [
+            {
+              id: "zyfdsf",
+              data: sinon.stub().returns({
+                inviteLink: "discord.gg/tYU6Gm7e",
+                userId: "hKzs2IQGe4sLnAuSZ85i",
+              }),
+            },
+          ],
+        }),
+      });
+    });
+
+    afterEach(function () {
+      getStub.restore();
+    });
+
+    it("should return the invite for the user", async function () {
+      const result = await getUserDiscordInvite("xyz");
+    });
   });
 });
