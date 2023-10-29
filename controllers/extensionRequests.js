@@ -249,6 +249,7 @@ const getSelfExtensionRequests = async (req, res) => {
                 const superUserId = logs[0].meta.userId;
                 const name = await getFullName(superUserId);
                 latestExtensionRequest.reviewedBy = `${name?.first_name} ${name?.last_name}`;
+                latestExtensionRequest.reviewedAt = logs[0].timestamp._seconds;
               }
             }
             allExtensionRequests = [latestExtensionRequest];
