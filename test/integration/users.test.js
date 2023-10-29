@@ -128,7 +128,6 @@ describe("Users", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           roles: {
-            developer: true,
             maven: true,
           },
         })
