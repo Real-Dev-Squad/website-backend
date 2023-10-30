@@ -74,7 +74,7 @@ describe("Users services", function () {
       expect(res).to.deep.equal({
         message: "Firebase batch operation failed",
         totalUsersArchived: 0,
-        totalOperationsFailed: 18,
+        totalOperationsFailed: 19,
         updatedUserDetails: [],
         failedUserDetails: userDetails,
       });
