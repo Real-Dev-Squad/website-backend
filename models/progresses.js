@@ -1,7 +1,7 @@
 const { Conflict, NotFound } = require("http-errors");
 const fireStore = require("../utils/firestore");
 const progressesCollection = fireStore.collection("progresses");
-const { RESPONSE_MESSAGES, TYPE_MAP } = require("../constants/progresses");
+const { PROGRESSES_RESPONSE_MESSAGES, TYPE_MAP } = require("../constants/progresses");
 const {
   buildQueryToFetchDocs,
   getProgressDocs,
@@ -13,7 +13,7 @@ const {
   getProgressDateTimestamp,
   buildQueryToSearchProgressByDay,
 } = require("../utils/progresses");
-const { PROGRESS_ALREADY_CREATED, PROGRESS_DOCUMENT_NOT_FOUND } = RESPONSE_MESSAGES;
+const { PROGRESS_ALREADY_CREATED, PROGRESS_DOCUMENT_NOT_FOUND } = PROGRESSES_RESPONSE_MESSAGES;
 
 /**
  * Adds a new progress document for the given user or task, with a limit of one progress document per day.
