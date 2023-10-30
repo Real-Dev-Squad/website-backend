@@ -158,7 +158,7 @@ describe("Filter Users", function () {
       chai
         .request(app)
         .get("/users/search")
-        .query({ page: 1, limit: 100 }) // Adjust the page and limit as needed
+        .query({ page: 0, limit: 100 }) // Adjust the page and limit as needed
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
