@@ -154,6 +154,37 @@ describe("Filter Users", function () {
         });
     });
 
+    it("Should return the correct pagination information", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ page: 1, limit: 100 }) // Adjust the page and limit as needed
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          try {
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.an("object");
+            expect(res.body).to.have.property("message");
+            expect(res.body).to.have.property("users");
+            expect(res.body).to.have.property("count");
+            expect(res.body).to.have.property("pagination");
+            expect(res.body.pagination).to.have.property("totalCount");
+            expect(res.body.pagination).to.have.property("totalPages");
+            expect(res.body.pagination).to.have.property("currentPage");
+            expect(res.body.pagination).to.have.property("nextPage");
+            expect(res.body.pagination).to.have.property("prevPage");
+            expect(res.body.pagination).to.have.property("links");
+            // Add more specific assertions for pagination if needed
+            done();
+          } catch (error) {
+            done(error);
+          }
+          return done();
+        });
+    });
     it("Should search users based on Onboarding state", function (done) {
       chai
         .request(app)
