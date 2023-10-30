@@ -321,14 +321,14 @@ const updateTaskStatus = async (req, res, next) => {
     if (task.taskData.status === TASK_STATUS.VERIFIED || req.body.status === TASK_STATUS.MERGED)
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
-    if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
-      if (req.body.status === TASK_STATUS.COMPLETED || !req.body.status) {
+    if (task.taskData.status === TASK_STATUS.DONE && req.body.percentCompleted < 100) {
+      if (req.body.status === TASK_STATUS.DONE || !req.body.status) {
         return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
       }
     }
 
     if (
-      (req.body.status === TASK_STATUS.COMPLETED || req.body.status === TASK_STATUS.VERIFIED) &&
+      (req.body.status === TASK_STATUS.DONE || req.body.status === TASK_STATUS.VERIFIED) &&
       task.taskData.percentCompleted !== 100
     ) {
       if (req.body.percentCompleted !== 100) {
