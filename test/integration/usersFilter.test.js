@@ -158,7 +158,7 @@ describe("Filter Users", function () {
       chai
         .request(app)
         .get("/users/search")
-        .query({ page: 0, limit: 100 }) // Adjust the page and limit as needed
+        .query({ page: 0, limit: 100 })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -177,7 +177,6 @@ describe("Filter Users", function () {
             expect(res.body.pagination).to.have.property("nextPage");
             expect(res.body.pagination).to.have.property("prevPage");
             expect(res.body.pagination).to.have.property("links");
-            // Add more specific assertions for pagination if needed
             done();
           } catch (error) {
             done(error);
