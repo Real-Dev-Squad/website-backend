@@ -32,6 +32,7 @@ const userAlreadyNotMember = userData[13];
 const userAlreadyArchived = userData[5];
 const userAlreadyUnArchived = userData[4];
 const nonSuperUser = userData[0];
+const newUser = userData[18];
 
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
@@ -121,6 +122,28 @@ describe("Users", function () {
         });
     });
 
+    it("Should allow updating user role when in_discord is not present", function (done) {
+      addUser(newUser).then((newUserId) => {
+        const nonSuperUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch(`/users/self`)
+          .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
+          .send({
+            roles: {
+              maven: true,
+            },
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(204);
+            return done();
+          });
+      });
+    });
     it("Should not update the user roles", function (done) {
       chai
         .request(app)

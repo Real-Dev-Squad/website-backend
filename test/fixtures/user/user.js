@@ -399,5 +399,18 @@ module.exports = () => {
       updated_at: Date.now(),
       created_at: Date.now(),
     },
+    {
+      id: "11",
+      first_name: "vinit",
+      last_name: "khandal",
+      github_id: "vinit717",
+      github_display_name: "vinit717",
+      roles: {
+        in_discord: false,
+      },
+      incompleteUserDetails: false,
+      updated_at: Date.now(),
+      created_at: Date.now(),
+    },
   ];
 };
