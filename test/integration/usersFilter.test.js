@@ -166,7 +166,7 @@ describe("Filter Users", function () {
           }
           try {
             expect(res).to.have.status(200);
-            expect(res.body).to.be.an("object");
+            expect(res.body).to.be.a("object");
             expect(res.body).to.have.property("message");
             expect(res.body).to.have.property("users");
             expect(res.body).to.have.property("count");
