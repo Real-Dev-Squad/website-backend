@@ -4,7 +4,7 @@ const chaiHttp = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
-const { ROLES } = require("../../constants/events");
+const { EVENT_ROLES } = require("../../constants/events");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 
@@ -565,7 +565,7 @@ describe("events", function () {
     it("creates an event code when the request is successful", function (done) {
       const payload = {
         eventCode: "test-code",
-        role: ROLES.MAVEN,
+        role: EVENT_ROLES.MAVEN,
       };
 
       service = sinon
@@ -622,7 +622,7 @@ describe("events", function () {
     it("returns an error message when code creation fails", function (done) {
       const payload = {
         eventCode: "test-code",
-        role: ROLES.MAVEN,
+        role: EVENT_ROLES.MAVEN,
       };
 
       const errorMessage = "Error creating event code.";
