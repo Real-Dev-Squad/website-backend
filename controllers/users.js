@@ -363,6 +363,8 @@ const updateSelf = async (req, res) => {
   try {
     const { id: userId } = req.userData;
     const { user } = await dataAccess.retrieveUsers({ id: userId });
+    // eslint-disable-next-line no-console
+    console.log("usrt", req.userdata);
 
     if (req.body.username) {
       if (!user.incompleteUserDetails) {
@@ -372,7 +374,7 @@ const updateSelf = async (req, res) => {
     }
 
     if (req.body.roles) {
-      if (user && user.roles.in_discord) {
+      if (user && user.roles.in_discord && !user.roles.developer) {
         return res.boom.forbidden("Cannot update roles");
       }
     }
