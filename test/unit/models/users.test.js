@@ -481,8 +481,8 @@ describe("users", function () {
       const userArr = userData();
       const userIds = [];
       for (const user of userArr) {
-      const userId = await addUser(user);
-      userIds.push(userId);
+        const userId = await addUser(user);
+        userIds.push(userId);
       }
       const result = await users.fetchUser({ userIds });
       expect(result).to.haveOwnProperty("users");
