@@ -480,9 +480,9 @@ describe("users", function () {
     it("It should fetch users based on userids", async function () {
       const userArr = userData();
       const userIds = [];
-      for (let i = 0; i < userArr.length; i++) {
-        const userId = await addUser(userArr[i]);
-        userIds.push(userId);
+      for (const user of userArr) {
+      const userId = await addUser(user);
+      userIds.push(userId);
       }
       const result = await users.fetchUser({ userIds });
       expect(result).to.haveOwnProperty("users");
