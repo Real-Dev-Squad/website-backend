@@ -957,7 +957,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
     });
 
-    it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {
+    it("Should give 400 if status is DONE and newpercent is less than 100", async function () {
       const taskData = {
         title: "Test task",
         type: "feature",
