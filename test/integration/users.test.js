@@ -122,8 +122,7 @@ describe("Users", function () {
         });
     });
 
-    // eslint-disable-next-line mocha/no-exclusive-tests
-    it.only("Should allow updating user role when in_discord is not present", function (done) {
+    it("Should allow updating user role when in_discord is not present", function (done) {
       addUser(newUser).then((newUserId) => {
         const nonSuperUserJwt = authService.generateAuthToken({ userId: newUserId });
         chai
