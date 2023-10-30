@@ -3,6 +3,7 @@ const { TASK_REQUEST_TYPE } = require("../constants/taskRequests");
 const { addLog } = require("../models/logs");
 const taskRequestsModel = require("../models/taskRequests");
 const tasksModel = require("../models/tasks.js");
+const { updateUserStatusOnTaskUpdate } = require("../models/userStatus");
 const githubService = require("../services/githubService");
 const usersUtils = require("../utils/users");
 
@@ -184,7 +185,9 @@ const approveTaskRequest = async (req, res) => {
     if (response.isTaskRequestInvalid) {
       return res.boom.badRequest("Task request was previously approved or rejected.");
     }
-
+    
+    await updateUserStatusOnTaskUpdate(user.username);
+    
     const taskRequestLog = {
       type: "taskRequests",
       meta: {
