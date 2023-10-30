@@ -400,7 +400,6 @@ module.exports = () => {
       created_at: Date.now(),
     },
     {
-      id: "11",
       first_name: "vinit",
       last_name: "khandal",
       github_id: "vinit717",
