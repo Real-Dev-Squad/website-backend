@@ -363,8 +363,6 @@ const updateSelf = async (req, res) => {
   try {
     const { id: userId } = req.userData;
     const { user } = await dataAccess.retrieveUsers({ id: userId });
-    // eslint-disable-next-line no-console
-    console.log("usrt", req.userdata);
 
     if (req.body.username) {
       if (!user.incompleteUserDetails) {
