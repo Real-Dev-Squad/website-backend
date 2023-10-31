@@ -122,13 +122,13 @@ describe("Users", function () {
         });
     });
 
-    it("Should allow updating user role when in_discord is not present and not is developer", function (done) {
+    it("Should allow updating user role when in_discord is not present and  is not developer", function (done) {
       addUser(newUser).then((newUserId) => {
-        const nonSuperUserJwt = authService.generateAuthToken({ userId: newUserId });
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
         chai
           .request(app)
           .patch(`/users/self`)
-          .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
+          .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
             roles: {
               maven: true,
