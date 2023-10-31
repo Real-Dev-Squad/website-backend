@@ -342,6 +342,8 @@ const addNewFields = async () => {
   const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
 
   const bulkWriter = firestore.bulkWriter();
+  let documentsModified = 0;
+  const totalDocuments = taskRequestsSnapshots.length;
 
   await Promise.all(
     taskRequestsSnapshots.map(async (taskRequestsSnapshot) => {
@@ -368,27 +370,34 @@ const addNewFields = async () => {
         };
 
         bulkWriter.update(taskRequestsCollection.doc(taskRequestsSnapshot.id), updatedTaskRequestData);
+        documentsModified++;
       }
     })
   );
 
   await bulkWriter.close();
+  return { documentsModified, totalDocuments };
 };
 
 const removeOldField = async () => {
   const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
 
   const bulkWriter = firestore.bulkWriter();
-
+  let documentsModified = 0;
+  const totalDocuments = taskRequestsSnapshots.length;
   taskRequestsSnapshots.forEach((taskRequestsSnapshot) => {
     const taskRequestData = taskRequestsSnapshot.data();
-    delete taskRequestData.requestors;
-    delete taskRequestData.approvedTo;
+    if (taskRequestData.requestors || taskRequestData.approvedTo) {
+      delete taskRequestData.requestors;
+      delete taskRequestData.approvedTo;
 
-    bulkWriter.set(taskRequestsCollection.doc(taskRequestsSnapshot.id), taskRequestData);
+      bulkWriter.set(taskRequestsCollection.doc(taskRequestsSnapshot.id), taskRequestData);
+      documentsModified++;
+    }
   });
 
   await bulkWriter.close();
+  return { documentsModified, totalDocuments };
 };
 
 module.exports = {

@@ -158,7 +158,7 @@ describe("Task requests", function () {
 
   describe("Task requests migrations", function () {
     const taskRequestId1 = "123";
-    const taskRequestId2 = "123";
+    const taskRequestId2 = "456";
 
     const taskData = { taskData: { title: "hello" } };
 
@@ -167,25 +167,34 @@ describe("Task requests", function () {
         sinon.restore();
         await cleanDb();
       });
-
       beforeEach(function () {
         sinon.stub(tasksModel, "fetchTask").resolves(taskData);
       });
 
       it("Should update the existing documents with single user", async function () {
         await taskRequestsCollection.doc(taskRequestId1).set(mockData.existingOldTaskRequest);
-        await addNewFields();
+        const response = await addNewFields();
         const taskRequestData = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(1);
         expect(taskRequestData.taskTitle).to.be.equal(taskData.taskData.title);
         expect(taskRequestData.users[0].userId).to.be.equal(mockData.existingOldTaskRequest.requestors[0]);
         expect(taskRequestData.requestType).to.be.equal(TASK_REQUEST_TYPE.ASSIGNMENT);
+      });
+      it("Should not update documents with new schema", async function () {
+        await taskRequestsCollection.doc(taskRequestId1).set(mockData.existingTaskRequest);
+        const response = await addNewFields();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(0);
       });
       it("Should update the existing documents with multiple users", async function () {
         await Promise.all([
           taskRequestsCollection.doc(taskRequestId1).set(mockData.existingOldTaskRequest),
           taskRequestsCollection.doc(taskRequestId2).set(mockData.existingOldTaskRequestWithMultipleUsers),
         ]);
-        await addNewFields();
+        const response = await addNewFields();
+        expect(response.totalDocuments).to.be.equal(2);
+        expect(response.documentsModified).to.be.equal(2);
         const taskRequestData1 = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
         expect(taskRequestData1.taskTitle).to.be.equal(taskData.taskData.title);
         expect(taskRequestData1.users[0].userId).to.be.equal(mockData.existingOldTaskRequest.requestors[0]);
@@ -205,15 +214,25 @@ describe("Task requests", function () {
     describe("remove old fields", function () {
       it("Should remove the unnecessary fields", async function () {
         await taskRequestsCollection.doc(taskRequestId1).set(mockData.existingTaskRequest);
-        await removeOldField();
+        const response = await removeOldField();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(1);
         const taskRequestData = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
         expect(taskRequestData.requestors).to.be.equal(undefined);
         expect(taskRequestData.approvedTo).to.be.equal(undefined);
       });
-
+      it("Should not update documents with new schema", async function () {
+        const { requestors, ...taskRequest } = mockData.existingTaskRequest;
+        await taskRequestsCollection.doc(taskRequestId1).set(taskRequest);
+        const response = await removeOldField();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(0);
+      });
       it("Should not remove required fields", async function () {
         await taskRequestsCollection.doc(taskRequestId1).set(mockData.existingTaskRequest);
-        await removeOldField();
+        const response = await removeOldField();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(1);
         const taskRequestData = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
         const taskRequest = mockData.existingTaskRequest;
         delete taskRequest.requestors;
