@@ -185,9 +185,9 @@ const approveTaskRequest = async (req, res) => {
     if (response.isTaskRequestInvalid) {
       return res.boom.badRequest("Task request was previously approved or rejected.");
     }
-    
+
     await updateUserStatusOnTaskUpdate(user.username);
-    
+
     const taskRequestLog = {
       type: "taskRequests",
       meta: {
