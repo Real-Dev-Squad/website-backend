@@ -2,6 +2,7 @@ const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/er
 const { TASK_REQUEST_TYPE } = require("../constants/taskRequests");
 const taskRequestsModel = require("../models/taskRequests");
 const tasksModel = require("../models/tasks.js");
+const { updateUserStatusOnTaskUpdate } = require("../models/userStatus");
 const githubService = require("../services/githubService");
 const usersUtils = require("../utils/users");
 
@@ -167,6 +168,8 @@ const approveTaskRequest = async (req, res) => {
     if (response.isTaskRequestInvalid) {
       return res.boom.badRequest("Task request was previously approved or rejected.");
     }
+    await updateUserStatusOnTaskUpdate(user.username);
+
     return res.status(200).json({
       message: `Task successfully assigned to user ${response.approvedTo}`,
       taskRequest: response.taskRequest,

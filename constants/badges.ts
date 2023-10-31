@@ -1,5 +1,3 @@
-const DOCUMENT_WRITE_SIZE = 500;
-
 const ERROR_MESSAGES = {
   MODELS: {
     REMOVE_BADGES: "Error removing badges",
@@ -42,7 +40,6 @@ const SUCCESS_MESSAGES = {
 };
 
 module.exports = {
-  DOCUMENT_WRITE_SIZE,
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
 };
