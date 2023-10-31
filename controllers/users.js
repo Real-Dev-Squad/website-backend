@@ -372,7 +372,7 @@ const updateSelf = async (req, res) => {
     }
 
     if (req.body.roles) {
-      if ((user && user.roles.in_discord) || (user && user.roles.in_discord)) {
+      if (user && (user.roles.in_discord || user.roles.developer)) {
         return res.boom.forbidden("Cannot update roles");
       }
     }
