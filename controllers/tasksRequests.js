@@ -178,12 +178,27 @@ const approveTaskRequest = async (req, res) => {
 };
 
 const migrateTaskRequests = async (req, res) => {
-  // try {
-  //   const { action } = req.query;
-  // } catch (err) {
-  //   logger.error("Error in migration scripts", err);
-  //   return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-  // }
+  try {
+    const { action } = req.query;
+    let responseData;
+    switch (action) {
+      case "add-new-fields": {
+        responseData = await taskRequestsModel.addNewFields();
+        break;
+      }
+      case "remove-redundant-fields": {
+        responseData = await taskRequestsModel.removeOldField();
+        break;
+      }
+      default: {
+        return res.boom.badRequest("Unknown action");
+      }
+    }
+    return res.json({ message: "Task requests migration successful", ...responseData });
+  } catch (err) {
+    logger.error("Error in migration scripts", err);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
 };
 module.exports = {
   approveTaskRequest,
