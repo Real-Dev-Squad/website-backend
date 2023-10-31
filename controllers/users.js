@@ -15,7 +15,7 @@ const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
-const { fetchAllUsers, fetchUser } = require("../models/users");
+const { fetchAllUsers } = require("../models/users");
 const { getOverdueTasks } = require("../models/tasks");
 const { getQualifiers } = require("../utils/helper");
 const { parseSearchQuery } = require("../utils/users");
@@ -187,8 +187,8 @@ const getUsers = async (req, res) => {
           userIds.add(task.assignee);
         });
 
-        const userInfo = await fetchUser({ userIds: Array.from(userIds) });
-        userInfo.users.forEach((user) => {
+        const userInfo = await dataAccess.retrieveUsers({ userIds: Array.from(userIds) });
+        userInfo.forEach((user) => {
           const userTasks = tasksData.filter((task) => task.assignee === user.id);
           const userData = {
             id: user.id,

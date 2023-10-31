@@ -241,13 +241,7 @@ const fetchUsers = async (usernames = []) => {
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const fetchUser = async ({
-  userId = null,
-  userIds = null,
-  username = null,
-  githubUsername = null,
-  discordId = null,
-}) => {
+const fetchUser = async ({ userId = null, username = null, githubUsername = null, discordId = null }) => {
   try {
     let userData, id;
     if (username) {
@@ -256,23 +250,6 @@ const fetchUser = async ({
         id = doc.id;
         userData = doc.data();
       });
-    } else if (userIds) {
-      const users = await userModel
-        .where(admin.firestore.FieldPath.documentId(), "in", userIds)
-        .where("roles.archived", "==", false)
-        .get();
-      const usersData = [];
-      users.forEach((doc) => {
-        usersData.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-
-      return {
-        userExists: !!usersData.length,
-        users: usersData,
-      };
     } else if (userId) {
       const user = await userModel.doc(userId).get();
       id = userId;
@@ -688,15 +665,17 @@ const fetchUserByIds = async (userIds = []) => {
     return {};
   }
   try {
-    const users = {};
+    const users = [];
     const usersRefs = userIds.map((docId) => userModel.doc(docId));
     const documents = await firestore.getAll(...usersRefs);
     documents.forEach((snapshot) => {
       if (snapshot.exists) {
-        users[snapshot.id] = snapshot.data();
+        users.push({
+          id: snapshot.id,
+          ...snapshot.data(),
+        });
       }
     });
-
     return users;
   } catch (err) {
     logger.error("Error retrieving user data", err);
