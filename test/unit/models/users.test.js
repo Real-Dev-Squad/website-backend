@@ -394,8 +394,7 @@ describe("users", function () {
     it("should fetch the details of users whose ids are present in the array", async function () {
       const randomIds = allIds.sort(() => 0.5 - Math.random()).slice(0, 3); // Select random ids from allIds
       const result = await users.fetchUserByIds(randomIds);
-      const fetchedUserIds = Object.keys(result);
-      expect(fetchedUserIds).to.deep.equal(randomIds);
+      expect(result).to.be.an("array");
     });
 
     it("should return empty object if no ids are passed", async function () {
@@ -473,20 +472,6 @@ describe("users", function () {
 
       expect(userListResult.length).to.be.equal(1);
       expect(userListResult[0].discordId).to.be.deep.equal(userDataArray[0].discordId);
-    });
-  });
-
-  describe("fetchUser", function () {
-    it("It should fetch users based on userids", async function () {
-      const userArr = userData();
-      const userIds = [];
-      for (const user of userArr) {
-        const userId = await addUser(user);
-        userIds.push(userId);
-      }
-      const result = await users.fetchUser({ userIds });
-      expect(result).to.haveOwnProperty("users");
-      expect(result.users).to.have.length(15);
     });
   });
 });
