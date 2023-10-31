@@ -528,7 +528,9 @@ describe("Task Requests", function () {
       });
       describe("Checks the user status", function () {
         it("Should change the user status to ACTIVE when request is successful", async function () {
-          sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ approvedTo: member.username });
+          sinon
+            .stub(taskRequestsModel, "approveTaskRequest")
+            .resolves({ approvedTo: member.username, taskRequest: { taskRequestId: taskId } });
           const res = await chai
             .request(app)
             .patch("/taskRequests/approve")
