@@ -746,11 +746,18 @@ describe("events", function () {
         peerId: "peer123",
         reason: "Kicked out for a reason",
       };
-
+      const peerData = {
+        peerId: "dummyid",
+        name: "Satyam Bajpai",
+        eventId: event1Data.room_id,
+        role: "guest",
+        joinedAt: new Date(),
+      };
       service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "peer remove request submitted" });
 
       sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Selected Participant is removed from event." });
       sinon.stub(logsModel, "addLog");
+      sinon.stub(eventQuery, "getPeerById").returns(peerData);
 
       chai
         .request(app)
@@ -775,11 +782,19 @@ describe("events", function () {
         peerId: "peer123",
         reason: "Kicked out for a reason",
       };
+      const peerData = {
+        peerId: "dummyid",
+        name: "Satyam Bajpai",
+        eventId: event1Data.room_id,
+        role: "guest",
+        joinedAt: new Date(),
+      };
 
       service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "peer remove request submitted" });
 
       sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Selected Participant is removed from event." });
       sinon.stub(logsModel, "addLog");
+      sinon.stub(eventQuery, "getPeerById").returns(peerData);
 
       chai
         .request(app)

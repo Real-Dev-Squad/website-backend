@@ -188,4 +188,26 @@ describe("Events", function () {
       });
     });
   });
+
+  describe("getPeerById", function () {
+    it("should get peer by id", async function () {
+      const docRef = await eventModel.add(eventData);
+
+      const peerData = {
+        peerId: "dummyid",
+        name: "Satyam Bajpai",
+        eventId: docRef.id,
+        role: "guest",
+        joinedAt: new Date(),
+      };
+
+      await eventQuery.addPeerToEvent(peerData);
+
+      const result = await eventQuery.getPeerById("dummyid");
+
+      expect(result.peerId).to.equal("dummyid");
+      expect(result.name).to.equal("Satyam Bajpai");
+      expect(result.joinedEvents).to.be.a("array");
+    });
+  });
 });
