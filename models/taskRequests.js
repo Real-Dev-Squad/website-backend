@@ -338,10 +338,65 @@ const approveTaskRequest = async (taskRequestId, user) => {
   }
 };
 
+const addNewFields = async () => {
+  const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
+
+  const bulkWriter = firestore.bulkWriter();
+
+  await Promise.all(
+    taskRequestsSnapshots.map(async (taskRequestsSnapshot) => {
+      const taskRequestData = taskRequestsSnapshot.data();
+      if (!taskRequestData.requestType) {
+        const { taskData } = await tasksModel.fetchTask(taskRequestData.taskId);
+        const usersRequestList = taskRequestData.requestors.map((requestorId) => {
+          let userStatus = TASK_REQUEST_STATUS.PENDING;
+
+          if (taskRequestData.status === TASK_REQUEST_STATUS.APPROVED && requestorId === taskRequestData.approvedTo) {
+            userStatus = TASK_REQUEST_STATUS.APPROVED;
+          }
+
+          return {
+            userId: requestorId,
+            status: userStatus,
+          };
+        });
+        const updatedTaskRequestData = {
+          ...taskRequestData,
+          requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
+          taskTitle: taskData.title,
+          users: usersRequestList,
+        };
+
+        bulkWriter.update(taskRequestsCollection.doc(taskRequestsSnapshot.id), updatedTaskRequestData);
+      }
+    })
+  );
+
+  await bulkWriter.close();
+};
+
+const removeOldField = async () => {
+  const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
+
+  const bulkWriter = firestore.bulkWriter();
+
+  taskRequestsSnapshots.forEach((taskRequestsSnapshot) => {
+    const taskRequestData = taskRequestsSnapshot.data();
+    delete taskRequestData.requestors;
+    delete taskRequestData.approvedTo;
+
+    bulkWriter.set(taskRequestsCollection.doc(taskRequestsSnapshot.id), taskRequestData);
+  });
+
+  await bulkWriter.close();
+};
+
 module.exports = {
   createRequest,
   fetchTaskRequests,
   fetchTaskRequestById,
   addOrUpdate,
   approveTaskRequest,
+  addNewFields,
+  removeOldField,
 };

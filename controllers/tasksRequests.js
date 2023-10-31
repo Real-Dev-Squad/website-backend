@@ -177,10 +177,19 @@ const approveTaskRequest = async (req, res) => {
   }
 };
 
+const migrateTaskRequests = async (req, res) => {
+  // try {
+  //   const { action } = req.query;
+  // } catch (err) {
+  //   logger.error("Error in migration scripts", err);
+  //   return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  // }
+};
 module.exports = {
   approveTaskRequest,
   addOrUpdate,
   fetchTaskRequests,
   fetchTaskRequestById,
   addTaskRequests,
+  migrateTaskRequests,
 };
