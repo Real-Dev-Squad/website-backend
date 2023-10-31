@@ -189,16 +189,18 @@ const getUsers = async (req, res) => {
 
         const userInfo = await dataAccess.retrieveUsers({ userIds: Array.from(userIds) });
         userInfo.forEach((user) => {
-          const userTasks = tasksData.filter((task) => task.assignee === user.id);
-          const userData = {
-            id: user.id,
-            discordId: user.discordId,
-            username: user.username,
-          };
-          if (dev) {
-            userData.tasks = userTasks;
+          if (!user.roles.archived) {
+            const userTasks = tasksData.filter((task) => task.assignee === user.id);
+            const userData = {
+              id: user.id,
+              discordId: user.discordId,
+              username: user.username,
+            };
+            if (dev) {
+              userData.tasks = userTasks;
+            }
+            usersData.push(userData);
           }
-          usersData.push(userData);
         });
 
         return res.json({
