@@ -144,7 +144,7 @@ describe("Users", function () {
           });
       });
     });
-    it("Should not update the user roles", function (done) {
+    it("Should not update the user roles when user has in_discord and developer true", function (done) {
       chai
         .request(app)
         .patch("/users/self")
