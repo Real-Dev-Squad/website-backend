@@ -18,9 +18,9 @@ module.exports = {
       baseUrl: "https://staging-api.realdevsquad.com",
     },
     goalAPI: {
-      baseUrl: "",
-      secretKey: "",
-      cookieName: "",
+      baseUrl: "https://backend-goals-production.up.railway.app",
+      secretKey: "123456789",
+      cookieName: "goals_session_stagging",
     },
   },
 

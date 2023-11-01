@@ -48,9 +48,9 @@ module.exports = {
         authRedirection: "/goto",
       },
       goalAPI: {
-        baseUrl: "",
-        secretKey: "",
-        cookieName: "",
+        baseUrl: "https://goal-api.realdevsquad.com",
+        secretKey: "<goal-secret-key>",
+        cookieName: "goals_session",
       },
     },
     discordBot: {
