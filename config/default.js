@@ -47,6 +47,11 @@ module.exports = {
       routes: {
         authRedirection: "/goto",
       },
+      goalAPI: {
+        baseUrl: "",
+        secretKey: "",
+        cookieName: "",
+      },
     },
     discordBot: {
       baseUrl: "<DISCORD_BOT_BASE_URL>",
