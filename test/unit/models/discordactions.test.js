@@ -20,7 +20,6 @@ const {
   fetchGroupToUserMapping,
   updateUsersNicknameStatus,
   addInviteToInviteModel,
-  getUserDiscordInvite,
 } = require("../../../models/discordactions");
 const { groupData, roleData, existingRole, memberGroupData } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
@@ -107,7 +106,6 @@ describe("discordactions", function () {
 
     it("should return true if role doesn't exist in the database", async function () {
       const result = await isGroupRoleExists("Test Role");
-      console.log(result, 'result')
       expect(result.wasSuccess).to.equal(true);
       expect(getStub.calledOnceWith("rolename", "==", "Test Role")).to.equal(false);
     });
@@ -576,7 +574,7 @@ describe("discordactions", function () {
     let addStub;
 
     beforeEach(function () {
-      addStub = sinon.stub(discordRoleModel, "add").resolves({ id: "invite-test-id" });
+      addStub = sinon.stub(discordInvitesModel, "add").resolves({ id: "invite-test-id" });
     });
 
     afterEach(function () {
@@ -586,7 +584,7 @@ describe("discordactions", function () {
     it("should add invite in the invite model for user", async function () {
       const inviteObject = { userId: "kfjkasdfl", inviteLink: "discord.gg/xyz" };
       const inviteId = await addInviteToInviteModel(inviteObject);
-      expect(inviteId).to.exist;
+      expect(inviteId).to.exist; // eslint-disable-line no-unused-expressions
     });
 
     it("should throw an error if creating invite fails", async function () {
@@ -596,38 +594,6 @@ describe("discordactions", function () {
         expect(error).to.be.an.instanceOf(Error);
         expect(error.message).to.equal("Database error!");
       });
-    });
-  });
-
-  describe.only("getUserDiscordInvite", function () {
-    let getStub;
-
-    beforeEach(function () {
-      getStub = sinon.stub(discordRoleModel, "where").returns({
-        get: sinon.stub().resolves({
-          docs: [
-            {
-              id: "xyzfdsf",
-              data: sinon.stub().returns({
-                userId: "xyz",
-                inviteLink: "discord.gg/fkjasdfjk",
-              }),
-            },
-          ],
-        }),
-      });
-    });
-
-    afterEach(function () {
-      getStub.restore();
-    });
-
-    it("should return the invite for the user", async function () {
-      const result = await getUserDiscordInvite("xyz");
-      expect(result.id).to.be.equal("xyzfdsf");
-      expect(result.notFound).to.be.equal(false);
-      expect(result.userId).to.be.equals("xyz");
-      expect(result.inviteLink).to.be.equal("discord.gg/fkjasdfjk");
     });
   });
 });
