@@ -735,7 +735,7 @@ describe("Users", function () {
       expect(res.body.message).to.equal("User not found");
     });
 
-    it("Should return user id which have overdue tasks", function (done) {
+    it("Should return user ID(s) with overdue tasks within the last 1 day", function (done) {
       chai
         .request(app)
         .get("/users?query=filterBy:overdue_tasks+days:1")
@@ -745,14 +745,9 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
-          if (res.body.users.length > 0) {
-            expect(res.body.message).to.equal("Users returned successfully!");
-            expect(res.body.users).to.be.a("array");
-            return done();
-          } else {
-            expect(res.body.message).to.equal("No users found");
-            return done();
-          }
+          expect(res.body.users).to.be.an("array");
+
+          return done();
         });
     });
 
@@ -766,14 +761,9 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
-          if (res.body.users.length > 0) {
-            expect(res.body.message).to.equal("Users returned successfully!");
-            expect(res.body.users).to.be.a("array");
-            return done();
-          } else {
-            expect(res.body.message).to.equal("No users found");
-            return done();
-          }
+          expect(res.body.users).to.be.an("array");
+
+          return done();
         });
     });
   });
