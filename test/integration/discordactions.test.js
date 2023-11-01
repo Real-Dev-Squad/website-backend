@@ -607,7 +607,7 @@ describe("Discord actions", function () {
       });
     });
 
-    it("should return 403 if the other user's id is provided and the user is not a super user", async function () {
+    it("should return 403 if the userId in the query param is not equal to the userId of the user and user is not a super user", async function () {
       const res = await chai
         .request(app)
         .get(`/discord-actions/invite?userId=${superUserId}`)
