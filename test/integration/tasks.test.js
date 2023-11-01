@@ -836,6 +836,30 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("Should update the task status for given self taskid under feature flag", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "DONE", percentCompleted: 100 })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.taskLog).to.have.property("type");
+          expect(res.body.taskLog).to.have.property("id");
+          expect(res.body.taskLog.body).to.be.a("object");
+          expect(res.body.taskLog.meta).to.be.a("object");
+          expect(res.body.message).to.equal("Task updated successfully!");
+
+          expect(res.body.taskLog.body.new.status).to.equal("DONE");
+          expect(res.body.taskLog.body.new.percentCompleted).to.equal(100);
+          return done();
+        });
+    });
+
     it("Should return fail response if task data has non-acceptable status value to update the task status for given self taskid", function (done) {
       chai
         .request(app)
