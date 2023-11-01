@@ -369,18 +369,25 @@ const getSelfDetails = async (req, res) => {
 const updateSelf = async (req, res) => {
   try {
     const { id: userId } = req.userData;
+    const { user } = await dataAccess.retrieveUsers({ id: userId });
+
     if (req.body.username) {
-      const { user } = await dataAccess.retrieveUsers({ id: userId });
       if (!user.incompleteUserDetails) {
         return res.boom.forbidden("Cannot update username again");
       }
       await userQuery.setIncompleteUserDetails(userId);
     }
 
-    const user = await userQuery.addOrUpdate(req.body, userId);
+    if (req.body.roles) {
+      if (user && (user.roles.in_discord || user.roles.developer)) {
+        return res.boom.forbidden("Cannot update roles");
+      }
+    }
 
-    if (!user.isNewUser) {
-      // Success criteria, user finished the sign up process.
+    const updatedUser = await userQuery.addOrUpdate(req.body, userId);
+
+    if (!updatedUser.isNewUser) {
+      // Success criteria, user finished the sign-up process.
       userQuery.initializeUser(userId);
       return res.status(204).send();
     }

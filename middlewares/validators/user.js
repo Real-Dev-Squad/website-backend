@@ -52,9 +52,6 @@ const updateUser = async (req, res, next) => {
         .optional(),
       discordId: joi.string().optional(),
       roles: joi.object().keys({
-        archived: joi.boolean().required(),
-        in_discord: joi.boolean().required(),
-        developer: joi.boolean().optional(),
         designer: joi.boolean().optional(),
         maven: joi.boolean().optional(),
         productmanager: joi.boolean().optional(),
