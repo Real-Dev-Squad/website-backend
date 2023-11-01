@@ -665,15 +665,17 @@ const fetchUserByIds = async (userIds = []) => {
     return {};
   }
   try {
-    const users = {};
+    const users = [];
     const usersRefs = userIds.map((docId) => userModel.doc(docId));
     const documents = await firestore.getAll(...usersRefs);
     documents.forEach((snapshot) => {
       if (snapshot.exists) {
-        users[snapshot.id] = snapshot.data();
+        users.push({
+          id: snapshot.id,
+          ...snapshot.data(),
+        });
       }
     });
-
     return users;
   } catch (err) {
     logger.error("Error retrieving user data", err);
