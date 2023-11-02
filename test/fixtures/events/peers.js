@@ -1,4 +1,4 @@
-const eventData = require("../fixtures/events/events")();
+const eventData = require("../events/events")();
 const event1Data = eventData[0];
 
 const eventOnePeerData = {
