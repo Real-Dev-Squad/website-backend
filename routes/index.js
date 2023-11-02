@@ -1,12 +1,12 @@
 const express = require("express");
 const app = express();
 
-app.use("/auctions", require("./auctions.js"));
-app.use("/arts", require("./arts.js"));
-app.use("/auth", require("./auth.js"));
+app.use("/auctions", require("./auctions.ts"));
+app.use("/arts", require("./arts.ts"));
+app.use("/auth", require("./auth.ts"));
 app.use("/badges", require("./badges.js"));
-app.use("/challenges", require("./challenges.js"));
-app.use("/contributions", require("./contributions.js"));
+app.use("/challenges", require("./challenges.ts"));
+app.use("/contributions", require("./contributions.ts"));
 app.use("/healthcheck", require("./healthCheck.js"));
 app.use("/logs", require("./logs.js"));
 app.use("/members", require("./members.js"));
@@ -23,7 +23,7 @@ app.use("/extension-requests", require("./extensionRequests"));
 app.use("/tags", require("./tags.js"));
 app.use("/levels", require("./levels.js"));
 app.use("/items", require("./items.js"));
-app.use("/cache", require("./cloudflareCache.js"));
+app.use("/cache", require("./cloudflareCache.ts"));
 app.use("/external-accounts", require("./external-accounts.js"));
 app.use("/events", require("./events.js"));
 app.use("/discord-actions", require("./discordactions.js"));
