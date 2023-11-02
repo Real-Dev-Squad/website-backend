@@ -1031,20 +1031,7 @@ describe("Tasks", function () {
     });
 
     it("Should give 400 if status is DONE and newpercent is less than 100 under feature flag", async function () {
-      const taskData = {
-        title: "Test task",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "DONE",
-        percentCompleted: 100,
-        participants: [],
-        assignee: appOwner.username,
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-      };
-      taskId = (await tasks.updateTask(taskData)).taskId;
+      taskId = (await tasks.updateTask(tasksData[7])).taskId;
       const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
