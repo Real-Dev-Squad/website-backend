@@ -144,6 +144,47 @@ describe("Users", function () {
           });
       });
     });
+
+    it("Should not remove old roles when updating user roles", async function () {
+      let newUserId;
+      await addUser(newUser).then((userId) => {
+        newUserId = userId;
+      });
+
+      const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+
+      const getUserResponseBeforeUpdate = await chai
+        .request(app)
+        .get("/users/self")
+        .set("cookie", `${cookieName}=${newUserJwt}`);
+
+      expect(getUserResponseBeforeUpdate).to.have.status(200);
+      expect(getUserResponseBeforeUpdate.body.roles).to.not.have.property("maven");
+      expect(getUserResponseBeforeUpdate.body.roles.in_discord).to.equal(false);
+
+      const updateRolesResponse = await chai
+        .request(app)
+        .patch(`/users/self`)
+        .set("cookie", `${cookieName}=${newUserJwt}`)
+        .send({
+          roles: {
+            maven: true,
+          },
+        });
+
+      expect(updateRolesResponse).to.have.status(204);
+
+      const getUserResponseAfterUpdate = await chai
+        .request(app)
+        .get("/users/self")
+        .set("cookie", `${cookieName}=${newUserJwt}`);
+
+      expect(getUserResponseAfterUpdate).to.have.status(200);
+      expect(getUserResponseAfterUpdate.body.roles).to.have.property("maven");
+      expect(getUserResponseAfterUpdate.body.roles.maven).to.equal(true);
+      expect(getUserResponseAfterUpdate.body.roles.in_discord).to.equal(false);
+    });
+
     it("Should not update the user roles when user has in_discord and developer true", function (done) {
       chai
         .request(app)
