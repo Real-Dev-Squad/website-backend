@@ -1030,7 +1030,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
     });
 
-    it("Should give 400 if status is COMPLETED and newpercent is less than 100 under feature flag", async function () {
+    it("Should give 400 if status is DONE and newpercent is less than 100 under feature flag", async function () {
       const taskData = {
         title: "Test task",
         type: "feature",
