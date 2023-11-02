@@ -146,11 +146,7 @@ describe("Users", function () {
     });
 
     it("Should not remove old roles when updating user roles", async function () {
-      let newUserId;
-      await addUser(newUser).then((userId) => {
-        newUserId = userId;
-      });
-
+      const newUserId = await addUser(newUser);
       const newUserJwt = authService.generateAuthToken({ userId: newUserId });
 
       const getUserResponseBeforeUpdate = await chai
