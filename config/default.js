@@ -39,7 +39,7 @@ module.exports = {
 
   services: {
     rdsApi: {
-      baseUrl: "https://api.realdevsquad.com",
+      baseUrl: "http://localhost:3000",
     },
 
     rdsUi: {

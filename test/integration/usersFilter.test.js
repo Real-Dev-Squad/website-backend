@@ -164,26 +164,22 @@ describe("Filter Users", function () {
           if (err) {
             return done(err);
           }
-          try {
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body).to.have.property("message");
-            expect(res.body).to.have.property("users");
-            expect(res.body).to.have.property("count");
-            expect(res.body).to.have.property("pagination");
-            expect(res.body.pagination).to.have.property("totalCount");
-            expect(res.body.pagination).to.have.property("totalPages");
-            expect(res.body.pagination).to.have.property("currentPage");
-            expect(res.body.pagination).to.have.property("nextPage");
-            expect(res.body.pagination).to.have.property("prevPage");
-            expect(res.body.pagination).to.have.property("links");
-            done();
-          } catch (error) {
-            done(error);
-          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.have.property("message");
+          expect(res.body).to.have.property("users");
+          expect(res.body).to.have.property("count");
+          expect(res.body).to.have.property("pagination");
+          expect(res.body.pagination).to.have.property("totalCount");
+          expect(res.body.pagination).to.have.property("totalPages");
+          expect(res.body.pagination).to.have.property("currentPage");
+          expect(res.body.pagination).to.have.property("nextPage");
+          expect(res.body.pagination).to.have.property("prevPage");
+          expect(res.body.pagination).to.have.property("links");
           return done();
         });
     });
+
     it("Should search users based on Onboarding state", function (done) {
       chai
         .request(app)
