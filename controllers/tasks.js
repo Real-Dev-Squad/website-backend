@@ -383,7 +383,7 @@ const updateTaskStatus = async (req, res, next) => {
     ]);
     taskLog.id = taskLogResult.id;
 
-    // assignTask function in middleware is not in used
+    // assignTask function in middleware is not in used and not working
     // if (userStatusFlag) {
     //   if (req.body.percentCompleted === 100) {
     //     return next();
