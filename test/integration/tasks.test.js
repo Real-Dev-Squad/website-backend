@@ -15,6 +15,7 @@ const tasksData = require("../fixtures/tasks/tasks")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
 const { TASK_STATUS } = require("../../constants/tasks");
+const updateTaskStatus = require("../fixtures/tasks/tasks1")();
 chai.use(chaiHttp);
 
 const appOwner = userData[3];
@@ -1031,7 +1032,7 @@ describe("Tasks", function () {
     });
 
     it("Should give 400 if status is DONE and newpercent is less than 100 under feature flag", async function () {
-      taskId = (await tasks.updateTask(tasksData[7])).taskId;
+      taskId = (await tasks.updateTask(updateTaskStatus[0])).taskId;
       const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
