@@ -26,7 +26,6 @@ module.exports = {
     goalAPI: {
       baseUrl: "https://backend-goals-production.up.railway.app",
       secretKey: "123456789",
-      cookieName: "goals_session_development",
     },
   },
 
