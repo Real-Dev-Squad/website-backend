@@ -10,4 +10,8 @@ const TASK_REQUEST_TYPE = {
   CREATION: "CREATION",
 };
 
-module.exports = { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE };
+const MIGRATION_TYPE = {
+  ADD_NEW_FIELDS: "add-new-fields",
+  REMOVE_OLD_FIELDS: "remove-redundant-fields",
+};
+module.exports = { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE, MIGRATION_TYPE };

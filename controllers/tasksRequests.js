@@ -1,5 +1,5 @@
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const { TASK_REQUEST_TYPE } = require("../constants/taskRequests");
+const { TASK_REQUEST_TYPE, MIGRATION_TYPE } = require("../constants/taskRequests");
 const { addLog } = require("../models/logs");
 const taskRequestsModel = require("../models/taskRequests");
 const tasksModel = require("../models/tasks.js");
@@ -218,11 +218,11 @@ const migrateTaskRequests = async (req, res) => {
     const { action } = req.query;
     let responseData;
     switch (action) {
-      case "add-new-fields": {
+      case MIGRATION_TYPE.ADD_NEW_FIELDS: {
         responseData = await taskRequestsModel.addNewFields();
         break;
       }
-      case "remove-redundant-fields": {
+      case MIGRATION_TYPE.REMOVE_OLD_FIELDS: {
         responseData = await taskRequestsModel.removeOldField();
         break;
       }
