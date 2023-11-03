@@ -18,8 +18,10 @@ describe("Task requests | models", function () {
     sinon.restore();
     await cleanDb();
   });
+
   describe("createRequest", function () {
     const authenticatedUsername = "testUser";
+
     it("should create a new task request when request type is creation", async function () {
       const requestData = mockData.taskRequestData;
       const result = await createRequest(requestData, authenticatedUsername);
@@ -163,11 +165,13 @@ describe("Task requests | models", function () {
       expect(result.isCreationRequestApproved).to.be.equal(true);
     });
   });
+
   describe("fetchTaskRequests", function () {
     beforeEach(async function () {
       await taskRequestsCollection.add(mockData.existingTaskRequest);
       await taskRequestsCollection.add(mockData.existingOldTaskRequest);
     });
+
     it("should fetch all task requests", async function () {
       const result = await fetchTaskRequests();
       expect(result).to.be.an("array");
