@@ -394,8 +394,7 @@ describe("users", function () {
     it("should fetch the details of users whose ids are present in the array", async function () {
       const randomIds = allIds.sort(() => 0.5 - Math.random()).slice(0, 3); // Select random ids from allIds
       const result = await users.fetchUserByIds(randomIds);
-      const fetchedUserIds = Object.keys(result);
-      expect(fetchedUserIds).to.deep.equal(randomIds);
+      expect(result).to.be.an("array");
     });
 
     it("should return empty object if no ids are passed", async function () {

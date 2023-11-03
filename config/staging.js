@@ -17,6 +17,10 @@ module.exports = {
     rdsApi: {
       baseUrl: "https://staging-api.realdevsquad.com",
     },
+    goalAPI: {
+      baseUrl: "https://backend-goals-production.up.railway.app",
+      secretKey: "123456789",
+    },
   },
 
   integrations: {

@@ -22,7 +22,7 @@ const updateUser = async (req, res, next) => {
         .optional()
         .min(4)
         .max(20)
-        .regex(/^[a-zA-Z0-9]+$/)
+        .regex(/^[a-zA-Z0-9-]+$/)
         .message("Username must be between 4 and 20 characters long and contain only letters or numbers."),
       first_name: joi.string().optional(),
       last_name: joi.string().optional(),

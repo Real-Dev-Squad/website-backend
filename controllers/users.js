@@ -15,7 +15,7 @@ const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
-const { fetchAllUsers, fetchUser } = require("../models/users");
+const { fetchAllUsers } = require("../models/users");
 const { getOverdueTasks } = require("../models/tasks");
 const { getQualifiers } = require("../utils/helper");
 const { parseSearchQuery } = require("../utils/users");
@@ -174,33 +174,36 @@ const getUsers = async (req, res) => {
     if (transformedQuery?.filterBy === OVERDUE_TASKS) {
       try {
         const tasksData = await getOverdueTasks(days);
+        if (!tasksData.length) {
+          return res.json({
+            message: "No users found",
+            users: [],
+          });
+        }
         const userIds = new Set();
         const usersData = [];
 
         tasksData.forEach((task) => {
-          userIds.add(task.assignee);
+          if (task.assignee) {
+            userIds.add(task.assignee);
+          }
         });
 
-        for (const userId of Array.from(userIds)) {
-          const userInfo = await fetchUser({ userId });
-
-          if (userInfo) {
-            const userTasks = tasksData.filter((task) => task.assignee === userId);
+        const userInfo = await dataAccess.retrieveUsers({ userIds: Array.from(userIds) });
+        userInfo.forEach((user) => {
+          if (!user.roles.archived) {
+            const userTasks = tasksData.filter((task) => task.assignee === user.id);
             const userData = {
-              id: userId,
-              discordId: userInfo.user.discordId,
-              username: userInfo.user.username,
+              id: user.id,
+              discordId: user.discordId,
+              username: user.username,
             };
-
             if (dev) {
               userData.tasks = userTasks;
             }
-
-            if (userInfo.user.roles.in_discord) {
-              usersData.push(userData);
-            }
+            usersData.push(userData);
           }
-        }
+        });
 
         return res.json({
           message: "Users returned successfully!",

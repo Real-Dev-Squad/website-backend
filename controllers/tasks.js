@@ -312,7 +312,7 @@ const updateTaskStatus = async (req, res, next) => {
   try {
     let userStatusUpdate;
     const taskId = req.params.id;
-    const { userStatusFlag } = req.query;
+    const { dev } = req.query;
     const { id: userId, username } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
 
@@ -321,28 +321,12 @@ const updateTaskStatus = async (req, res, next) => {
     if (task.taskData.status === TASK_STATUS.VERIFIED || req.body.status === TASK_STATUS.MERGED)
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
-    if (userStatusFlag) {
-      if (task.taskData.status === TASK_STATUS.DONE && req.body.percentCompleted < 100) {
-        if (req.body.status === TASK_STATUS.DONE || !req.body.status) {
-          return res.boom.badRequest("Task percentCompleted can't updated as status is DONE");
-        }
-      }
-
-      if (
-        (req.body.status === TASK_STATUS.DONE || req.body.status === TASK_STATUS.VERIFIED) &&
-        task.taskData.percentCompleted !== 100
-      ) {
-        if (req.body.percentCompleted !== 100) {
-          return res.boom.badRequest("Status cannot be updated. Task is not done yet");
-        }
-      }
-    }
-
     if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
       if (req.body.status === TASK_STATUS.COMPLETED || !req.body.status) {
         return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
       }
     }
+
     if (
       (req.body.status === TASK_STATUS.COMPLETED || req.body.status === TASK_STATUS.VERIFIED) &&
       task.taskData.percentCompleted !== 100
@@ -383,8 +367,8 @@ const updateTaskStatus = async (req, res, next) => {
     ]);
     taskLog.id = taskLogResult.id;
 
-    if (userStatusFlag) {
-      if (req.body.percentCompleted === 100 && req.body.status === "DONE") {
+    if (dev) {
+      if (req.body.percentCompleted === 100) {
         return next();
       }
     }
