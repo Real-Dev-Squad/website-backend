@@ -383,13 +383,6 @@ const updateTaskStatus = async (req, res, next) => {
     ]);
     taskLog.id = taskLogResult.id;
 
-    // assignTask function in middleware is hardcoded and not working(Issue: https://github.com/Real-Dev-Squad/website-backend/issues/1658)
-    // if (userStatusFlag) {
-    //   if (req.body.percentCompleted === 100) {
-    //     return next();
-    //   }
-    // }
-
     if (req.body.status) {
       userStatusUpdate = await updateStatusOnTaskCompletion(userId);
     }
