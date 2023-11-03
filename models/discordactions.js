@@ -246,7 +246,7 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
     const subscribedGroupIds = findSubscribedGroupIds(discordId, groupsToUserMappings);
 
     return groups.map((group) => {
-      const groupCreator = groupCreatorsDetails[group.createdBy];
+      const groupCreator = groupCreatorsDetails.find((user) => user.id === group.createdBy);
       return {
         ...group,
         firstName: groupCreator?.first_name,
