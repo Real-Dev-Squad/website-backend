@@ -105,7 +105,10 @@ const getBuiltTasks = async (tasksSnapshot, searchTerm) => {
     updatedTasks = updatedTasks.filter((task) => task.title.toLowerCase().includes(searchTerm.toLowerCase()));
   }
   const taskPromises = updatedTasks.map(async (task) => {
-    task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
+    if (task.status) {
+      task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
+    }
+
     const taskId = task.id;
     const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
     task.dependsOn = [];
