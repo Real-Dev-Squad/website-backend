@@ -11,12 +11,12 @@ const githubService = require("../services/githubService");
 
 const getIssues = async (req, res) => {
   try {
-    const { q: queryString } = req.query;
+    const { q: queryString, dev } = req.query;
     let issues = {};
     const githubOrg = config.get("githubApi.org");
     const githubIssuerUrlPattern = new RegExp(`^https://github.com/${githubOrg}/.+/issues/\\d+$`);
 
-    if (githubIssuerUrlPattern.test(queryString)) {
+    if (githubIssuerUrlPattern.test(queryString) && dev === "true") {
       const url = new URL(queryString);
       const issueUrlPaths = url.pathname.split("/");
       const repositoryName = issueUrlPaths[2];
