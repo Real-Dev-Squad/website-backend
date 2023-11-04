@@ -18,7 +18,7 @@ describe("Issues", function () {
   describe("GET /issues fetch github issues", function () {
     it("Should return issue when valid github page url is passed", async function () {
       const fetchIssuesByIdStub = sinon.stub(githubService, "fetchIssuesById").resolves(issuesMockData.issuesData);
-      const res = await chai.request(app).get("/issues").query({ q: issuesMockData.issuesHtmlUrl });
+      const res = await chai.request(app).get("/issues").query({ q: issuesMockData.issuesHtmlUrl, dev: true });
       expect(res).to.have.status(200);
       expect(fetchIssuesByIdStub.calledOnce).to.be.equal(true);
       expect(res.body.message).to.equal("Issues returned successfully!");
