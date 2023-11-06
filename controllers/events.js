@@ -296,9 +296,15 @@ const kickoutPeer = async (req, res) => {
   };
 
   try {
+    const peer = await eventQuery.getPeerById(payload.peer_id);
     await apiService.post(`/active-rooms/${id}/remove-peers`, payload);
     await eventQuery.kickoutPeer({ eventId: id, peerId: payload.peer_id, reason: req.body.reason });
-    addLog(logType.EVENTS_REMOVE_PEER, { removed_by: req.userData.id }, payload);
+    addLog(
+      logType.EVENTS_REMOVE_PEER,
+      { removed_by_id: req.userData.id, removed_by_username: req.userData.username },
+      { ...payload, event_id: id, peer_name: peer.name }
+    );
+
     return res.status(200).json({
       message: `Selected Participant is removed from event.`,
     });
