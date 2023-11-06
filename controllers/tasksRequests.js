@@ -1,5 +1,6 @@
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const { TASK_REQUEST_TYPE } = require("../constants/taskRequests");
+const { addLog } = require("../models/logs");
 const taskRequestsModel = require("../models/taskRequests");
 const tasksModel = require("../models/tasks.js");
 const { updateUserStatusOnTaskUpdate } = require("../models/userStatus");
@@ -95,12 +96,28 @@ const addTaskRequests = async (req, res) => {
       }
     }
     const newTaskRequest = await taskRequestsModel.createRequest(taskRequestData, req.userData.username);
+
     if (newTaskRequest.isCreationRequestApproved) {
       return res.boom.conflict("Task exists for the given issue.");
     }
     if (newTaskRequest.alreadyRequesting) {
       return res.boom.badRequest("Task was already requested");
     }
+
+    const taskRequestLog = {
+      type: "taskRequests",
+      meta: {
+        taskRequestId: newTaskRequest.id,
+        action: "create",
+        createdBy: req.userData.username,
+        createdAt: Date.now(),
+        lastModifiedBy: req.userData.username,
+        lastModifiedAt: Date.now(),
+      },
+      body: newTaskRequest.taskRequest,
+    };
+    await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
+
     const statusCode = newTaskRequest.isCreate ? 201 : 200;
     return res.status(statusCode).json({
       message: "Task request successful.",
@@ -168,7 +185,23 @@ const approveTaskRequest = async (req, res) => {
     if (response.isTaskRequestInvalid) {
       return res.boom.badRequest("Task request was previously approved or rejected.");
     }
+
     await updateUserStatusOnTaskUpdate(user.username);
+
+    const taskRequestLog = {
+      type: "taskRequests",
+      meta: {
+        taskRequestId: taskRequestId,
+        action: "update",
+        subAction: "approve",
+        createdBy: req.userData.username,
+        createdAt: Date.now(),
+        lastModifiedBy: req.userData.username,
+        lastModifiedAt: Date.now(),
+      },
+      body: response.taskRequest,
+    };
+    await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
 
     return res.status(200).json({
       message: `Task successfully assigned to user ${response.approvedTo}`,

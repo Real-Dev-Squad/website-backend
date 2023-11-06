@@ -38,11 +38,14 @@ const addOrUpdate = async (userData, userId = null) => {
       const isNewUser = !user.data();
       // user exists update user
       if (user.data()) {
-        await userModel.doc(userId).set({
-          ...user.data(),
-          ...userData,
-          updated_at: Date.now(),
-        });
+        await userModel.doc(userId).set(
+          {
+            ...user.data(),
+            ...userData,
+            updated_at: Date.now(),
+          },
+          { merge: true }
+        );
       }
 
       return { isNewUser, userId };
@@ -665,15 +668,17 @@ const fetchUserByIds = async (userIds = []) => {
     return {};
   }
   try {
-    const users = {};
+    const users = [];
     const usersRefs = userIds.map((docId) => userModel.doc(docId));
     const documents = await firestore.getAll(...usersRefs);
     documents.forEach((snapshot) => {
       if (snapshot.exists) {
-        users[snapshot.id] = snapshot.data();
+        users.push({
+          id: snapshot.id,
+          ...snapshot.data(),
+        });
       }
     });
-
     return users;
   } catch (err) {
     logger.error("Error retrieving user data", err);
