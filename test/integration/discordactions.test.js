@@ -597,7 +597,7 @@ describe("Discord actions", function () {
   });
 
   describe("POST /discord-actions/invite", function () {
-    it("should return 403 if the userId in the query param is not equal to the user of the user and user is not a super user", async function () {
+    it("should return 403 if the userId in the query param is not equal to the userId of the user and user is not a super user", async function () {
       const res = await chai
         .request(app)
         .post(`/discord-actions/invite?userId=${superUserId}`)
