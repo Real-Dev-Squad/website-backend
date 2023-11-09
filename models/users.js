@@ -9,7 +9,8 @@ const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
 const { archiveUsers } = require("../services/users");
-const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE, FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
+const { ALLOWED_FILTER_PARAMS, FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
+const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const ROLES = require("../constants/roles");
@@ -37,11 +38,14 @@ const addOrUpdate = async (userData, userId = null) => {
       const isNewUser = !user.data();
       // user exists update user
       if (user.data()) {
-        await userModel.doc(userId).set({
-          ...user.data(),
-          ...userData,
-          updated_at: Date.now(),
-        });
+        await userModel.doc(userId).set(
+          {
+            ...user.data(),
+            ...userData,
+            updated_at: Date.now(),
+          },
+          { merge: true }
+        );
       }
 
       return { isNewUser, userId };
@@ -664,15 +668,17 @@ const fetchUserByIds = async (userIds = []) => {
     return {};
   }
   try {
-    const users = {};
+    const users = [];
     const usersRefs = userIds.map((docId) => userModel.doc(docId));
     const documents = await firestore.getAll(...usersRefs);
     documents.forEach((snapshot) => {
       if (snapshot.exists) {
-        users[snapshot.id] = snapshot.data();
+        users.push({
+          id: snapshot.id,
+          ...snapshot.data(),
+        });
       }
     });
-
     return users;
   } catch (err) {
     logger.error("Error retrieving user data", err);

@@ -72,19 +72,11 @@ const createGroupRole = async (req, res) => {
 const getAllGroupRoles = async (req, res) => {
   try {
     const { groups } = await discordRolesModel.getAllGroupRoles();
-    const dev = req.query.dev === "true";
-    if (dev) {
-      // Placing the new changes under the feature flag.
-      const discordId = req.userData?.discordId;
-      const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
-      return res.json({
-        message: "Roles fetched successfully!",
-        groups: groupsWithMembershipInfo,
-      });
-    }
+    const discordId = req.userData?.discordId;
+    const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
     return res.json({
       message: "Roles fetched successfully!",
-      groups,
+      groups: groupsWithMembershipInfo,
     });
   } catch (err) {
     logger.error(`Error while getting roles: ${err}`);

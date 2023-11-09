@@ -3,7 +3,7 @@ const { fetchTask } = require("../models/tasks");
 const { fetchUser } = require("../models/users");
 const fireStore = require("../utils/firestore");
 const {
-  RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
+  PROGRESSES_RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
   MILLISECONDS_IN_DAY,
   PROGRESS_VALID_SORT_FIELDS,
 } = require("../constants/progresses");

@@ -103,5 +103,26 @@ module.exports = () => {
       assigneeId: "WbceXEPcohuJ5IxHHecf",
       dependsOn: [],
     },
+    {
+      id: "P86Y1fsvS0zR5ZcVPwLZ",
+      percentCompleted: 90,
+      endsOn: 1695200648,
+      isNoteworthy: false,
+      createdBy: "ramchandra",
+      lossRate: {
+        dinero: 100,
+        neelam: 0,
+      },
+      assignee: "ravan",
+      type: "feature",
+      priority: "HIGH",
+      completionAward: {
+        dinero: 10000,
+        neelam: 0,
+      },
+      title: "Undefined status",
+      assigneeId: "WbceXEPcdsuJ5IxHHecf",
+      dependsOn: [],
+    },
   ];
 };

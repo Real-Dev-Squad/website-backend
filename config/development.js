@@ -23,6 +23,11 @@ module.exports = {
         authRedirection: "/healthcheck",
       },
     },
+
+    goalAPI: {
+      baseUrl: "https://backend-goals-production.up.railway.app",
+      secretKey: "123456789",
+    },
   },
 
   userToken: {
