@@ -10,7 +10,7 @@ const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
 const usersInDiscord = require("../fixtures/user/inDiscord");
 const superUser = userData[4];
-const archievedUser = userData[18];
+const archievedUser = userData[19];
 const developerUserWithoutApprovedProfileStatus = userData[6];
 const designerUser = userData[8];
 const productManagerUser = userData[9];
@@ -549,7 +549,7 @@ describe("Discord actions", function () {
 
   describe("GET /discord-actions/invite", function () {
     it("should return the invite for the user if no userId is provided in the params and the invite exists", async function () {
-      const inviteId = await addInviteToInviteModel({ userId: superUserId, inviteLink: "discord.gg/apQYT7HB" });
+      await addInviteToInviteModel({ userId: superUserId, inviteLink: "discord.gg/apQYT7HB" });
 
       const res = await chai
         .request(app)
@@ -559,16 +559,12 @@ describe("Discord actions", function () {
       expect(res.body).to.be.a("object");
       expect(res.body).to.deep.equal({
         message: "Invite returned successfully",
-        inviteResponse: {
-          id: inviteId,
-          inviteLink: "discord.gg/apQYT7HB",
-          userId: superUserId,
-        },
+        inviteLink: "discord.gg/apQYT7HB",
       });
     });
 
     it("Should return the invite for other user if the userId is provided in the query and the user is super user", async function () {
-      const inviteId = await addInviteToInviteModel({ userId: userId, inviteLink: "discord.gg/apQYT7HA" });
+      await addInviteToInviteModel({ userId: userId, inviteLink: "discord.gg/apQYT7HA" });
       const res = await chai
         .request(app)
         .get(`/discord-actions/invite?userId=${userId}`)
@@ -577,11 +573,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.a("object");
       expect(res.body).to.deep.equal({
         message: "Invite returned successfully",
-        inviteResponse: {
-          id: inviteId,
-          inviteLink: "discord.gg/apQYT7HA",
-          userId: userId,
-        },
+        inviteLink: "discord.gg/apQYT7HA",
       });
     });
 
