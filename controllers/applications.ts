@@ -1,9 +1,7 @@
 import { addLog } from "../models/logs";
-import { logType } from "../constants/logs";
+const { logType } = require("../constants/logs");
 import { CustomRequest, CustomResponse } from "../types/global";
-
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const jwt = require("jsonwebtoken");
 const ApplicationModel = require("../models/applications");
 
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
