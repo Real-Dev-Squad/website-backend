@@ -103,9 +103,7 @@ describe("Middleware | Validators | User", function () {
       const req = {
         body: {
           roles: {
-            archived: false,
-            in_discord: false,
-            developer: true,
+            maven: true,
           },
         },
       };
@@ -262,6 +260,49 @@ describe("Middleware | Validators | User", function () {
       await updateUser(req, res, nextSpy).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
       });
+      expect(nextSpy.calledOnce).to.be.equal(false);
+    });
+    it("Allows a valid username", async function () {
+      const req = {
+        body: {
+          username: "john-doe",
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: (message) => {
+            throw new Error(message);
+          },
+        },
+      };
+
+      const next = sinon.spy();
+
+      await updateUser(req, res, next);
+
+      expect(next.calledOnce).to.be.equal(true);
+    });
+
+    it("Stops the propagation of next for an invalid username", async function () {
+      const req = {
+        body: {
+          username: "@john_doe",
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+
+      const nextSpy = sinon.spy();
+
+      await updateUser(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
   });

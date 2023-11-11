@@ -4,7 +4,7 @@ const chaiHttp = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
-const { ROLES } = require("../../constants/events");
+const { EVENT_ROLES } = require("../../constants/events");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 
@@ -24,6 +24,7 @@ const config = require("config");
 const sinon = require("sinon");
 
 const { EventTokenService, EventAPIService } = require("../../services");
+const { eventOnePeerData } = require("../fixtures/events/peers");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -565,7 +566,7 @@ describe("events", function () {
     it("creates an event code when the request is successful", function (done) {
       const payload = {
         eventCode: "test-code",
-        role: ROLES.MAVEN,
+        role: EVENT_ROLES.MAVEN,
       };
 
       service = sinon
@@ -622,7 +623,7 @@ describe("events", function () {
     it("returns an error message when code creation fails", function (done) {
       const payload = {
         eventCode: "test-code",
-        role: ROLES.MAVEN,
+        role: EVENT_ROLES.MAVEN,
       };
 
       const errorMessage = "Error creating event code.";
@@ -751,6 +752,7 @@ describe("events", function () {
 
       sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Selected Participant is removed from event." });
       sinon.stub(logsModel, "addLog");
+      sinon.stub(eventQuery, "getPeerById").returns(eventOnePeerData);
 
       chai
         .request(app)
@@ -780,6 +782,7 @@ describe("events", function () {
 
       sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Selected Participant is removed from event." });
       sinon.stub(logsModel, "addLog");
+      sinon.stub(eventQuery, "getPeerById").returns(eventOnePeerData);
 
       chai
         .request(app)

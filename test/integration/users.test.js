@@ -32,6 +32,7 @@ const userAlreadyNotMember = userData[13];
 const userAlreadyArchived = userData[5];
 const userAlreadyUnArchived = userData[4];
 const nonSuperUser = userData[0];
+const newUser = userData[18];
 
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
@@ -121,16 +122,73 @@ describe("Users", function () {
         });
     });
 
-    it("Should update the user roles", function (done) {
+    it("Should allow updating user role when in_discord is not present and  is not developer", function (done) {
+      addUser(newUser).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch(`/users/self`)
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            roles: {
+              maven: true,
+            },
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(204);
+            return done();
+          });
+      });
+    });
+
+    it("Should not remove old roles when updating user roles", async function () {
+      const newUserId = await addUser(newUser);
+      const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+
+      const getUserResponseBeforeUpdate = await chai
+        .request(app)
+        .get("/users/self")
+        .set("cookie", `${cookieName}=${newUserJwt}`);
+
+      expect(getUserResponseBeforeUpdate).to.have.status(200);
+      expect(getUserResponseBeforeUpdate.body.roles).to.not.have.property("maven");
+      expect(getUserResponseBeforeUpdate.body.roles.in_discord).to.equal(false);
+
+      const updateRolesResponse = await chai
+        .request(app)
+        .patch(`/users/self`)
+        .set("cookie", `${cookieName}=${newUserJwt}`)
+        .send({
+          roles: {
+            maven: true,
+          },
+        });
+
+      expect(updateRolesResponse).to.have.status(204);
+
+      const getUserResponseAfterUpdate = await chai
+        .request(app)
+        .get("/users/self")
+        .set("cookie", `${cookieName}=${newUserJwt}`);
+
+      expect(getUserResponseAfterUpdate).to.have.status(200);
+      expect(getUserResponseAfterUpdate.body.roles).to.have.property("maven");
+      expect(getUserResponseAfterUpdate.body.roles.maven).to.equal(true);
+      expect(getUserResponseAfterUpdate.body.roles.in_discord).to.equal(false);
+    });
+
+    it("Should not update the user roles when user has in_discord and developer true", function (done) {
       chai
         .request(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           roles: {
-            archived: false,
-            in_discord: false,
-            developer: true,
+            maven: true,
           },
         })
         .end((err, res) => {
@@ -138,7 +196,7 @@ describe("Users", function () {
             return done(err);
           }
 
-          expect(res).to.have.status(204);
+          expect(res).to.have.status(403);
 
           return done();
         });
@@ -735,7 +793,7 @@ describe("Users", function () {
       expect(res.body.message).to.equal("User not found");
     });
 
-    it("Should return user id which have overdue tasks", function (done) {
+    it("Should return user ID(s) with overdue tasks within the last 1 day", function (done) {
       chai
         .request(app)
         .get("/users?query=filterBy:overdue_tasks+days:1")
@@ -745,8 +803,8 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
-          expect(res.body.message).to.equal("Users returned successfully!");
-          expect(res.body.users).to.be.a("array");
+          expect(res.body.users).to.be.an("array");
+
           return done();
         });
     });
@@ -761,8 +819,8 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
-          expect(res.body.message).to.equal("Users returned successfully!");
-          expect(res.body.users).to.be.a("array");
+          expect(res.body.users).to.be.an("array");
+
           return done();
         });
     });

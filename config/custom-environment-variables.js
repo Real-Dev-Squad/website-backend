@@ -45,6 +45,11 @@ module.exports = {
       },
     },
 
+    goalAPI: {
+      baseUrl: "GOALS_BASE_URL",
+      secretKey: "GOALS_SECRET_KEY",
+    },
+
     discordBot: {
       baseUrl: "DISCORD_BASE_URL",
     },
