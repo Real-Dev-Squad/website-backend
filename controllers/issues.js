@@ -1,6 +1,7 @@
 const issuesService = require("../services/issuesService");
 const tasks = require("../models/tasks");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const githubService = require("../services/githubService");
 
 /**
  * Get the issues of the repo
@@ -10,9 +11,18 @@ const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 const getIssues = async (req, res) => {
   try {
-    const { q: queryString } = req.query;
+    const { q: queryString, dev } = req.query;
     let issues = {};
-    if (queryString) {
+    const githubOrg = config.get("githubApi.org");
+    const githubIssuerUrlPattern = new RegExp(`^https://github.com/${githubOrg}/.+/issues/\\d+$`);
+
+    if (githubIssuerUrlPattern.test(queryString) && dev === "true") {
+      const url = new URL(queryString);
+      const issueUrlPaths = url.pathname.split("/");
+      const repositoryName = issueUrlPaths[2];
+      const issueNumber = issueUrlPaths[4];
+      issues.data = [await githubService.fetchIssuesById(repositoryName, issueNumber)];
+    } else if (queryString) {
       const searchedIssues = await issuesService.searchOrgIssues(queryString);
       issues.data = searchedIssues?.data?.items ?? [];
     } else {
