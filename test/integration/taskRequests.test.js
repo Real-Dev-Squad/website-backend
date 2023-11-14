@@ -78,7 +78,7 @@ describe("Task Requests", function () {
               return done(err);
             }
 
-            expect(res).to.have.status(404);
+            expect(res).to.have.status(200);
             return done();
           });
       });

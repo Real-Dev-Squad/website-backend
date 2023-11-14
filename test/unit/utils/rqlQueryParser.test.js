@@ -2,7 +2,6 @@ const { expect } = require("chai");
 const { RQLQueryParser, QueryTypes, Operators } = require("../../../utils/RQLParser");
 
 describe("RQLQueryParser", function () {
-
   it("should parse filter queries", function () {
     const queryString = "key:value";
     const parser = new RQLQueryParser(queryString);
@@ -68,5 +67,4 @@ describe("RQLQueryParser", function () {
     const queryString = "invalidKey()&value";
     expect(() => new RQLQueryParser(queryString)).to.throw("Invalid query param format");
   });
-
 });
