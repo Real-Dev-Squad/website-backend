@@ -61,6 +61,11 @@ const existingOldTaskRequest = {
   status: "PENDING",
   taskId: "task123",
 };
+const existingOldTaskRequestWithMultipleUsers = {
+  requestors: ["user123", "user456"],
+  status: "PENDING",
+  taskId: "task456",
+};
 module.exports = {
   existingOldTaskRequest,
   taskRequestData,
@@ -78,4 +83,5 @@ module.exports = {
   creationReqWithoutExtIssueId,
   creationReqWithDescription,
   invalidRequest,
+  existingOldTaskRequestWithMultipleUsers,
 };

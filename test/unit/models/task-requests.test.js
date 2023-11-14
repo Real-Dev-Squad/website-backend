@@ -1,7 +1,13 @@
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
-const { createRequest, fetchTaskRequests, approveTaskRequest } = require("./../../../models/taskRequests");
+const {
+  createRequest,
+  fetchTaskRequests,
+  approveTaskRequest,
+  addNewFields,
+  removeOldField,
+} = require("./../../../models/taskRequests");
 const { TASK_REQUEST_TYPE, TASK_REQUEST_STATUS } = require("./../../../constants/taskRequests");
 const mockData = require("../../fixtures/task-requests/task-requests");
 const firestore = require("../../../utils/firestore");
@@ -261,6 +267,92 @@ describe("Task requests | models", function () {
       } catch (err) {
         expect(err.message).to.equal("Transaction failed");
       }
+    });
+  });
+
+  describe("Task requests migrations", function () {
+    const taskRequestId1 = "123";
+    const taskRequestId2 = "456";
+
+    const taskData = { taskData: { title: "hello" } };
+
+    describe("addNewFields", function () {
+      afterEach(async function () {
+        sinon.restore();
+        await cleanDb();
+      });
+      beforeEach(function () {
+        sinon.stub(tasksModel, "fetchTask").resolves(taskData);
+      });
+
+      it("Should update the existing documents with single user", async function () {
+        await taskRequestsCollection.doc(taskRequestId1).set(mockData.existingOldTaskRequest);
+        const response = await addNewFields();
+        const taskRequestData = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(1);
+        expect(taskRequestData.taskTitle).to.be.equal(taskData.taskData.title);
+        expect(taskRequestData.users[0].userId).to.be.equal(mockData.existingOldTaskRequest.requestors[0]);
+        expect(taskRequestData.requestType).to.be.equal(TASK_REQUEST_TYPE.ASSIGNMENT);
+      });
+      it("Should not update documents with new schema", async function () {
+        await taskRequestsCollection.doc(taskRequestId1).set(mockData.existingTaskRequest);
+        const response = await addNewFields();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(0);
+      });
+      it("Should update the existing documents with multiple users", async function () {
+        await Promise.all([
+          taskRequestsCollection.doc(taskRequestId1).set(mockData.existingOldTaskRequest),
+          taskRequestsCollection.doc(taskRequestId2).set(mockData.existingOldTaskRequestWithMultipleUsers),
+        ]);
+        const response = await addNewFields();
+        expect(response.totalDocuments).to.be.equal(2);
+        expect(response.documentsModified).to.be.equal(2);
+        const taskRequestData1 = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
+        expect(taskRequestData1.taskTitle).to.be.equal(taskData.taskData.title);
+        expect(taskRequestData1.users[0].userId).to.be.equal(mockData.existingOldTaskRequest.requestors[0]);
+        expect(taskRequestData1.requestType).to.be.equal(TASK_REQUEST_TYPE.ASSIGNMENT);
+        const taskRequestData2 = (await taskRequestsCollection.doc(taskRequestId2).get()).data();
+        expect(taskRequestData2.taskTitle).to.be.equal(taskData.taskData.title);
+        expect(taskRequestData2.users[0].userId).to.be.equal(
+          mockData.existingOldTaskRequestWithMultipleUsers.requestors[0]
+        );
+        expect(taskRequestData2.users[1].userId).to.be.equal(
+          mockData.existingOldTaskRequestWithMultipleUsers.requestors[1]
+        );
+        expect(taskRequestData2.requestType).to.be.equal(TASK_REQUEST_TYPE.ASSIGNMENT);
+      });
+    });
+
+    describe("remove old fields", function () {
+      it("Should remove the unnecessary fields", async function () {
+        await taskRequestsCollection.doc(taskRequestId1).set(mockData.existingTaskRequest);
+        const response = await removeOldField();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(1);
+        const taskRequestData = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
+        expect(taskRequestData.requestors).to.be.equal(undefined);
+        expect(taskRequestData.approvedTo).to.be.equal(undefined);
+      });
+      it("Should not update documents with new schema", async function () {
+        const { requestors, ...taskRequest } = mockData.existingTaskRequest;
+        await taskRequestsCollection.doc(taskRequestId1).set(taskRequest);
+        const response = await removeOldField();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(0);
+      });
+      it("Should not remove required fields", async function () {
+        await taskRequestsCollection.doc(taskRequestId1).set(mockData.existingTaskRequest);
+        const response = await removeOldField();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(1);
+        const taskRequestData = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
+        const taskRequest = mockData.existingTaskRequest;
+        delete taskRequest.requestors;
+        delete taskRequest.approvedTo;
+        expect(taskRequestData).to.be.deep.equal(taskRequest);
+      });
     });
   });
 });
