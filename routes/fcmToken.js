@@ -3,9 +3,10 @@ const router = express.Router();
 
 const authenticate = require("../middlewares/authenticate");
 const { fcmTokenController } = require("../controllers/fcmToken");
+const { fcmTokenValidator } = require("../middlewares/validators/fcmToken");
 
 // the route should be authenticated
-router.post("/", authenticate, fcmTokenController);
+router.post("/", fcmTokenValidator, authenticate, fcmTokenController);
 module.exports = router;
 
 // controller

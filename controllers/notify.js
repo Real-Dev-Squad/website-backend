@@ -1,9 +1,6 @@
 const admin = require("firebase-admin");
-const firestore = require("../utils/firestore");
-const memberRoleModel = firestore.collection("member-group-roles");
-const usersModel = firestore.collection("users");
-
-const fcmTokenModel = firestore.collection("fcmToken");
+const { getFcmTokenFromUserId } = require("../services/getFcmTokenFromUserId");
+const { getUserIdsFromRoleId } = require("../services/getUserIdsFromRoleId");
 
 /**
  * Route used to get the health status of teh server
@@ -12,47 +9,21 @@ const fcmTokenModel = firestore.collection("fcmToken");
  * @param res {Object} - Express response object
  */
 const notifyController = async (req, res) => {
-
   const { title, body, userId, groupRoleId } = req.body;
   let fcmTokens = [];
-
-  const getFcmTokenFromUserId = async (userId) => {
-    if (!userId) return [];
-    const fcmTokenSnapshot = await fcmTokenModel.where("userId", "==", userId).limit(1).get();
-
-    if (!fcmTokenSnapshot.empty) {
-      return fcmTokenSnapshot.docs[0].data().fcmTokens;
-    }
-    return [];
-  };
   if (userId) {
-
     const fcmTokensFromUserId = await getFcmTokenFromUserId(userId);
     fcmTokens = [...fcmTokens, ...fcmTokensFromUserId];
   }
 
+  let userIdsFromRoleId = [];
   if (groupRoleId) {
-    let discordIds = [];
-    const querySnapshot = await memberRoleModel.where("roleid", "==", groupRoleId).get();
-    if (!querySnapshot.empty) {
-      discordIds = querySnapshot.docs.map((doc) => doc.data());
-    }
-
-    const discordIdsPromiseArray = discordIds.map(async (item) => {
-      const userSnapshot = await usersModel.where("discordId", "==", item.userid).get();
-      if (!userSnapshot.empty) {
-        return userSnapshot.docs[0].id;
-      }
-      return undefined;
-    });
-
-    const userIdFromDiscordId = await Promise.all(discordIdsPromiseArray);
-
-    const fcmtokensPromiseArray = userIdFromDiscordId.map(async (userId) => {
+    userIdsFromRoleId = await getUserIdsFromRoleId(groupRoleId);
+    const fcmTokensPromiseArray = userIdsFromRoleId.map(async (userId) => {
       const fcmTokensFromUserId = await getFcmTokenFromUserId(userId);
       fcmTokens = [...fcmTokens, ...fcmTokensFromUserId];
     });
-    await Promise.all(fcmtokensPromiseArray);
+    await Promise.all(fcmTokensPromiseArray);
   }
 
   const setOfFcmTokens = new Set(fcmTokens);
@@ -75,14 +46,11 @@ const notifyController = async (req, res) => {
   admin
     .messaging()
     .sendMulticast(message)
-    .then((response) => {
-      const successCount = response.responses.filter((r) => r.success).length;
-      logger.info("Successfully sent message to", successCount, "devices.");
-    })
+    .then(() => res.status(200).json({ status: 200, message: "User notified successfully" }))
     .catch((error) => {
       logger.error("Error sending message:", error);
+      res.status(500).json({ status: 500, message: "Internal server error" });
     });
-  res.status(200).send(`fcm tokens device will get notified: ${Array.from(setOfFcmTokens)}`);
 };
 
 module.exports = {
