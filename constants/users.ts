@@ -17,8 +17,6 @@ const ALLOWED_FILTER_PARAMS = {
   ROLE: ["role"],
 };
 
-const DOCUMENT_WRITE_SIZE = 500;
-
 const FIRESTORE_IN_CLAUSE_SIZE = 30;
 
 const USERS_PATCH_HANDLER_ACTIONS = {
@@ -40,14 +38,27 @@ const USERS_PATCH_HANDLER_SUCCESS_MESSAGES = {
     SUCCESSFULLY_COMPLETED_BATCH_UPDATES: "Successfully completed batch updates",
   },
 };
+const OVERDUE_TASKS = "overdue_tasks";
+
+const ONE_DAY_IN_MS = 1000 * 60 * 60 * 24;
+
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+const discordNicknameLength = 32;
+
+const SIMULTANEOUS_WORKER_CALLS = 4;
 
 module.exports = {
   profileStatus,
   USER_STATUS,
   ALLOWED_FILTER_PARAMS,
-  DOCUMENT_WRITE_SIZE,
   FIRESTORE_IN_CLAUSE_SIZE,
   USERS_PATCH_HANDLER_ACTIONS,
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
+  OVERDUE_TASKS,
+  ONE_DAY_IN_MS,
+  months,
+  discordNicknameLength,
+  SIMULTANEOUS_WORKER_CALLS,
 };

@@ -28,7 +28,25 @@ const validateMemberRoleBody = async (req, res, next) => {
   }
 };
 
+const validateMillisecondsTimestamp = async (reqBody, timestampProperty) => {
+  const schema = Joi.object({
+    [timestampProperty]: Joi.number().unit("milliseconds").required(),
+  });
+  return schema.validateAsync(reqBody);
+};
+
+const validateUpdateUsersNicknameStatusBody = async (req, res, next) => {
+  try {
+    await validateMillisecondsTimestamp(req.body, "lastNicknameUpdate");
+    next();
+  } catch (error) {
+    logger.error(`Error while validating request body for update users nickname status payload : ${error}`);
+    res.boom.badRequest(error);
+  }
+};
+
 module.exports = {
   validateGroupRoleBody,
   validateMemberRoleBody,
+  validateUpdateUsersNicknameStatusBody,
 };

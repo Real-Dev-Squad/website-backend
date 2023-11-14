@@ -1,6 +1,6 @@
 const chai = require("chai");
 const { expect } = chai;
-
+const chaiHttp = require("chai-http");
 const cleanDb = require("../../utils/cleanDb");
 const logsQuery = require("../../../models/logs");
 const cacheData = require("../../fixtures/cloudflareCache/data");
@@ -12,7 +12,8 @@ const userData = require("../../fixtures/user/user")();
 const addUser = require("../../utils/addUser");
 const cookieName = config.get("userToken.cookieName");
 const authService = require("../../../services/authService");
-
+const { extensionRequestLogs } = require("../../fixtures/logs/extensionRequests");
+chai.use(chaiHttp);
 const superUser = userData[4];
 const userToBeMadeMember = userData[1];
 
@@ -119,6 +120,50 @@ describe("Logs", function () {
       expect(data).to.be.an("array").with.lengthOf(0);
       expect(response).to.have.status(404);
       expect(response.body.message).to.be.equal("Not Found");
+    });
+  });
+
+  describe("GET /logs/extension-request", function () {
+    let jwt;
+    let userId;
+    before(async function () {
+      userId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId });
+    });
+
+    after(async function () {
+      await cleanDb();
+    });
+    it("Should return all the logs related to extension requests", async function () {
+      Sinon.stub(logsQuery, "fetchLogs").returns(extensionRequestLogs);
+
+      const extensionRequestId = "y79PXir0s82qNAzeIn8S";
+      const response = await chai
+        .request(app)
+        .get(`/logs/extensionRequests?meta.extensionRequestId=${extensionRequestId}&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send();
+
+      const logs = response.body.logs;
+
+      expect(response.body.message).to.equal("Logs returned successfully!");
+      expect(logs).to.be.a("array").length(4);
+
+      // Checking new fields that must be present in APPROVED Log
+      expect(logs[0].body.status).to.equal("APPROVED");
+      expect(logs[0].meta.extensionRequestId).to.equal(extensionRequestId);
+
+      // Checking new fields that must be present in  DENIED Log
+      expect(logs[1].body.status).to.equal("DENIED");
+      expect(logs[1].meta.extensionRequestId).to.equal(extensionRequestId);
+
+      // Validating fields when SU has changed the ETA
+      expect(logs[2].meta.oldETA).to.exist.and.equal(extensionRequestLogs[2].meta.oldETA);
+      expect(logs[2].meta.newETA).to.exist.and.equal(extensionRequestLogs[2].meta.newETA);
+
+      // Validating fields when SU has changed the Title
+      expect(logs[3].meta.oldTitle).to.exist.and.equal(extensionRequestLogs[3].meta.oldTitle);
+      expect(logs[3].meta.newTitle).to.exist.and.equal(extensionRequestLogs[3].meta.newTitle);
     });
   });
 });

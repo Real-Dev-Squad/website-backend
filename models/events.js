@@ -131,6 +131,27 @@ const addPeerToEvent = async (peerData) => {
 };
 
 /**
+ * Gets a peer with the help of id from Firestore database
+ * @async
+ * @function
+ * @param {String} params - id of the peer
+ * @returns {Promise<Object>} The data of the peer
+ * @throws {Error} If the peer is not found
+ */
+const getPeerById = async (id) => {
+  try {
+    const peerRef = peerModel.doc(id);
+    const peerSnapshot = await peerRef.get();
+    const peerData = peerSnapshot.data();
+
+    return peerData;
+  } catch (error) {
+    logger.error("Error in retrieving the peer", error);
+    throw error;
+  }
+};
+
+/**
  * Removes a peer from an event and marks them as kicked out in the Firestore database.
  * @async
  * @function
@@ -283,4 +304,5 @@ module.exports = {
   createEventCode,
   getEventById,
   getEventCodes,
+  getPeerById,
 };

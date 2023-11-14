@@ -15,6 +15,7 @@ const tasksData = require("../fixtures/tasks/tasks")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
 const { TASK_STATUS } = require("../../constants/tasks");
+const updateTaskStatus = require("../fixtures/tasks/tasks1")();
 chai.use(chaiHttp);
 
 const appOwner = userData[3];
@@ -231,6 +232,32 @@ describe("Tasks", function () {
           tasksData.forEach((task) => {
             expect(task.status).to.equal(TASK_STATUS.IN_PROGRESS);
             expect(task.assignee).to.equal("sagar");
+            expect(task.title).to.include("Test");
+          });
+          return done();
+        });
+    });
+
+    it("Should get all tasks filtered with status, multiple assignees, title when passed to GET /tasks", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&dev=true&assignee=sagar,ankur&title=Test`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+
+          const tasksData = res.body.tasks ?? [];
+          tasksData.forEach((task) => {
+            expect(task.status).to.equal(TASK_STATUS.IN_PROGRESS);
+            expect(task.assignee).to.be.oneOf(["sagar", "ankur"]);
             expect(task.title).to.include("Test");
           });
           return done();
@@ -574,6 +601,33 @@ describe("Tasks", function () {
 
       return taskId;
     });
+
+    it("Should add startedOn field when assignee passed as a payload", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "sagar", endsOn: 1695804641, status: TASK_STATUS.ASSIGNED });
+      expect(res).to.have.status(204);
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      const startedOn = Math.round(new Date().getTime() / 1000);
+      expect(res2.body.taskData).to.have.property("startedOn");
+      expect(res2.body.taskData.startedOn).to.be.equal(startedOn);
+    });
+
+    it("Should use the existing startedOn field if it is passed in the payload", async function () {
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ assignee: "sagar", endsOn: 1695804641, status: TASK_STATUS.ASSIGNED, startedOn: 1695804041 });
+      expect(res).to.have.status(204);
+      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      expect(res2.body.taskData).to.have.property("startedOn");
+      expect(res2.body.taskData.startedOn).to.be.equal(1695804041);
+    });
     it("should check updated dependsOn", function (done) {
       chai
         .request(app)
@@ -783,6 +837,30 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("Should update the task status for given self taskid under feature flag", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "DONE", percentCompleted: 100 })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.taskLog).to.have.property("type");
+          expect(res.body.taskLog).to.have.property("id");
+          expect(res.body.taskLog.body).to.be.a("object");
+          expect(res.body.taskLog.meta).to.be.a("object");
+          expect(res.body.message).to.equal("Task updated successfully!");
+
+          expect(res.body.taskLog.body.new.status).to.equal("DONE");
+          expect(res.body.taskLog.body.new.percentCompleted).to.equal(100);
+          return done();
+        });
+    });
+
     it("Should return fail response if task data has non-acceptable status value to update the task status for given self taskid", function (done) {
       chai
         .request(app)
@@ -892,6 +970,42 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
     });
 
+    it("Should give 400 if percentCompleted is not 100 and new status is DONE under feature flag ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "DONE" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
+    });
+
+    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "VERIFIED" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
+    });
+
+    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED under feature flag", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "VERIFIED" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
+    });
+
     it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {
       const taskData = {
         title: "Test task",
@@ -915,6 +1029,18 @@ describe("Tasks", function () {
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
+    });
+
+    it("Should give 400 if status is DONE and newpercent is less than 100 under feature flag", async function () {
+      taskId = (await tasks.updateTask(updateTaskStatus[0])).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ percentCompleted: 80 });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is DONE");
     });
   });
 

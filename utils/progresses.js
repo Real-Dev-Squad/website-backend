@@ -3,8 +3,9 @@ const { fetchTask } = require("../models/tasks");
 const { fetchUser } = require("../models/users");
 const fireStore = require("../utils/firestore");
 const {
-  RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
+  PROGRESSES_RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
   MILLISECONDS_IN_DAY,
+  PROGRESS_VALID_SORT_FIELDS,
 } = require("../constants/progresses");
 const progressesCollection = fireStore.collection("progresses");
 
@@ -92,16 +93,26 @@ const assertUserOrTaskExists = async (queryParams) => {
  * @param {string} queryParams.userId - (Optional) The user ID to filter progress documents by.
  * @param {string} queryParams.taskId - (Optional) The task ID to filter progress documents by.
  * @param {string} queryParams.type - (Optional) The type to filter progress documents by.
+ * @param {string} queryParams.orderBy - (Optional) The type to sort the documents.
  * @returns {Query} A Firestore query object that filters progress documents based on the given parameters.
  */
 const buildQueryToFetchDocs = (queryParams) => {
-  const { type, userId, taskId } = queryParams;
+  const { type, userId, taskId, orderBy } = queryParams;
+  const orderByField = PROGRESS_VALID_SORT_FIELDS[0];
+  const isAscOrDsc = orderBy && PROGRESS_VALID_SORT_FIELDS[0] === orderBy ? "asc" : "desc";
+
   if (type) {
-    return progressesCollection.where("type", "==", type);
+    return progressesCollection.where("type", "==", type).orderBy(orderByField, isAscOrDsc);
   } else if (userId) {
-    return progressesCollection.where("type", "==", "user").where("userId", "==", userId);
+    return progressesCollection
+      .where("type", "==", "user")
+      .where("userId", "==", userId)
+      .orderBy(orderByField, isAscOrDsc);
   } else {
-    return progressesCollection.where("type", "==", "task").where("taskId", "==", taskId);
+    return progressesCollection
+      .where("type", "==", "task")
+      .where("taskId", "==", taskId)
+      .orderBy(orderByField, isAscOrDsc);
   }
 };
 

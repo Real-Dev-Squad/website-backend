@@ -11,6 +11,7 @@ module.exports = {
   enableConsoleLogs: true,
   discordUnverifiedRoleId: "1234567890",
   discordDeveloperRoleId: "9876543210",
+  discordMavenRoleId: "1212121212",
   githubOauth: {
     clientId: "clientId",
     clientSecret: "clientSecret",
@@ -33,6 +34,11 @@ module.exports = {
     },
     discordBot: {
       baseUrl: "DISCORD_BASE_URL",
+    },
+    goalAPI: {
+      baseUrl: "<goalBaseUrl>",
+      secretKey: "<goalSecretKey>",
+      cookieName: `goals-session-test`,
     },
   },
 
@@ -192,6 +198,6 @@ module.exports = {
 
   Event100ms: {
     APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
-    APP_SECRET: "EVENT_100MS_APP_SECREt",
+    APP_SECRET: "EVENT_100MS_APP_SECRET",
   },
 };

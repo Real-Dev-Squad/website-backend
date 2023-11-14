@@ -13,6 +13,7 @@ const {
   generateErrorResponse,
   generateNewStatus,
   getNextDayTimeStamp,
+  convertTimestampsToUTC,
 } = require("../utils/userStatus");
 const { TASK_STATUS } = require("../constants/tasks");
 const userStatusModel = firestore.collection("usersStatus");
@@ -201,11 +202,12 @@ const getAllUserStatus = async (query) => {
  * @returns Promise<userStatusModel|Object>
  */
 
-const updateUserStatus = async (userId, newStatusData) => {
+const updateUserStatus = async (userId, updatedStatusData) => {
   try {
+    const newStatusData = convertTimestampsToUTC({ ...updatedStatusData });
     const userStatusDocs = await userStatusModel.where("userId", "==", userId).limit(1).get();
     const [userStatusDoc] = userStatusDocs.docs;
-    const tommorow = getTomorrowTimeStamp();
+    const tomorrow = getTomorrowTimeStamp();
     if (userStatusDoc) {
       const docId = userStatusDoc.id;
       const userStatusData = userStatusDoc.data();
@@ -223,7 +225,7 @@ const updateUserStatus = async (userId, newStatusData) => {
           newStatusData.futureStatus = {};
         }
         if (isNewStateOoo) {
-          if (newStatusData.currentStatus.from >= tommorow) {
+          if (newStatusData.currentStatus.from >= tomorrow) {
             newStatusData.futureStatus = { ...newStatusData.currentStatus };
             delete newStatusData.currentStatus;
           } else {
@@ -245,7 +247,7 @@ const updateUserStatus = async (userId, newStatusData) => {
         filterStatusData(newStatusData);
         const isNewStateOOO = newStatusData.currentStatus.state === userState.OOO;
         if (isNewStateOOO) {
-          if (newStatusData.currentStatus.from >= tommorow) {
+          if (newStatusData.currentStatus.from >= tomorrow) {
             newStatusData.futureStatus = { ...newStatusData.currentStatus };
             delete newStatusData.currentStatus;
           }
@@ -657,6 +659,9 @@ const cancelOooStatus = async (userId) => {
     }
     const updatedStatus = generateNewStatus(isActive);
     const newStatusData = { ...docData, ...updatedStatus };
+    if (futureStatus?.state) {
+      newStatusData.futureStatus = {};
+    }
     await userStatusModel.doc(docId).update(newStatusData);
     if (!isActive) {
       await addGroupIdleRoleToDiscordUser(userId);

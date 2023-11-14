@@ -3,6 +3,7 @@ const members = require("../models/members");
 const { ROLE_LEVEL, KEYS_NOT_ALLOWED, ACCESS_LEVEL } = require("../constants/userDataLevels");
 
 const retrieveUsers = async ({
+  discordId = null,
   id = null,
   username = null,
   usernames = null,
@@ -12,8 +13,8 @@ const retrieveUsers = async ({
   role = null,
   userIds = null,
 }) => {
+  let result;
   if (id || username) {
-    let result;
     if (id != null) {
       result = await userQuery.fetchUser({ userId: id });
     } else {
@@ -47,6 +48,9 @@ const retrieveUsers = async ({
       users.push(user);
     });
     return { users, nextId, prevId };
+  } else if (discordId !== null) {
+    result = await userQuery.fetchUser({ discordId });
+    return levelSpecificAccess(result, level, role);
   } else {
     const result = await userQuery.fetchUser({ userId: userdata.id });
     return levelSpecificAccess(result.user, level, role);

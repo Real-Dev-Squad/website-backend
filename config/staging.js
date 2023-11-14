@@ -5,6 +5,7 @@
 module.exports = {
   discordUnverifiedRoleId: "1120875993771544687",
   discordDeveloperRoleId: "1121445071213056071",
+  discordMavenRoleId: "1152361736456896586",
   enableFileLogs: false,
   enableConsoleLogs: true,
 
@@ -15,6 +16,10 @@ module.exports = {
   services: {
     rdsApi: {
       baseUrl: "https://staging-api.realdevsquad.com",
+    },
+    goalAPI: {
+      baseUrl: "https://backend-goals-production.up.railway.app",
+      secretKey: "123456789",
     },
   },
 

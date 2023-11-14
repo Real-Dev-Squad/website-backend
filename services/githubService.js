@@ -261,6 +261,34 @@ const fetchIssues = async () => {
 };
 
 /**
+ * Fetches issues for given repository and id
+ * @param repositoryName {string} - Github repository name where the issue is created.
+ * @param issueId {string} - Github issue id to be found.
+ * @returns {Object | null} - Object containing Issue details or null if no issue is found.
+ */
+const fetchIssuesById = async (repositoryName, issueId) => {
+  try {
+    const baseURL = config.get("githubApi.baseUrl");
+    const org = config.get("githubApi.org");
+    const url = `${baseURL}/repos/${org}/${repositoryName}/issues/${issueId}`;
+    const headers = {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${config.get("githubAccessToken")}`,
+      org: org,
+    };
+    const res = await fetch(url, { headers });
+    if (!res.ok) {
+      logger.error(`GitHub API request failed. Status: ${res.status}, URL: ${url}`);
+      return null;
+    }
+    return await res.json();
+  } catch (err) {
+    logger.error(`Error while fetching issues: ${err}`);
+    throw err;
+  }
+};
+
+/**
  * Fetches the last merged PR by a user
  * @param username {string} - Username String
  * @returns {Object} - Object containing the last merged PR
@@ -299,7 +327,6 @@ const fetchLastMergedPR = async (username) => {
     throw err;
   }
 };
-
 /**
  * Checks if the last PR merged by a user is within the last `days` days
  * @param username {string} - Username String
@@ -334,4 +361,5 @@ module.exports = {
   fetchClosedIssues,
   fetchLastMergedPR,
   isLastPRMergedWithinDays,
+  fetchIssuesById,
 };
