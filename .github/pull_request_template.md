@@ -1,5 +1,6 @@
-Date: change date here
-Developer Name: developer name here 
+Date: `change date here`
+
+Developer Name: `developer name here`
 
 ----
 
@@ -32,4 +33,5 @@ Tested in staging?
 - [x] Yes
 - [ ] No
 
-## Add relevant Screenshot below ( e.g test coverage etc. )
+### Add relevant Screenshot below ( e.g test coverage etc. )
+
