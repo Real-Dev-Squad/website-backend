@@ -31,6 +31,10 @@ const TASK_REQUEST_SORT_VALUES = {
   asc: "asc",
   desc: "desc",
 };
+const MIGRATION_TYPE = {
+  ADD_NEW_FIELDS: "add-new-fields",
+  REMOVE_OLD_FIELDS: "remove-redundant-fields",
+};
 
 module.exports = {
   TASK_REQUEST_STATUS,
@@ -40,4 +44,5 @@ module.exports = {
   TASK_REQUEST_SORT_KEYS,
   TASK_REQUEST_ERROR_MESSAGE,
   TASK_REQUEST_SORT_VALUES,
+  MIGRATION_TYPE
 };
