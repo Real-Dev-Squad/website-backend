@@ -5,6 +5,10 @@ const TASK_REQUEST_STATUS = {
   DENIED: "DENIED",
 };
 
+const TASK_REQUEST_UPDATE_ACTION = {
+  APPROVE: "approve",
+  REJECT: "reject",
+};
 const TASK_REQUEST_TYPE = {
   ASSIGNMENT: "ASSIGNMENT",
   CREATION: "CREATION",
@@ -14,4 +18,4 @@ const MIGRATION_TYPE = {
   ADD_NEW_FIELDS: "add-new-fields",
   REMOVE_OLD_FIELDS: "remove-redundant-fields",
 };
-module.exports = { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE, MIGRATION_TYPE };
+module.exports = { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE, MIGRATION_TYPE, TASK_REQUEST_UPDATE_ACTION };

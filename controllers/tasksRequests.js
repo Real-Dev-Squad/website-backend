@@ -1,5 +1,5 @@
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const { TASK_REQUEST_TYPE, MIGRATION_TYPE } = require("../constants/taskRequests");
+const { TASK_REQUEST_TYPE, MIGRATION_TYPE, TASK_REQUEST_UPDATE_ACTION } = require("../constants/taskRequests");
 const { addLog } = require("../models/logs");
 const taskRequestsModel = require("../models/taskRequests");
 const tasksModel = require("../models/tasks.js");
@@ -95,7 +95,7 @@ const addTaskRequests = async (req, res) => {
         break;
       }
     }
-    const newTaskRequest = await taskRequestsModel.createRequest(taskRequestData, req.userData.username);
+    const newTaskRequest = await taskRequestsModel.createRequest(taskRequestData, req.userData.id);
 
     if (newTaskRequest.isCreationRequestApproved) {
       return res.boom.conflict("Task exists for the given issue.");
@@ -109,9 +109,9 @@ const addTaskRequests = async (req, res) => {
       meta: {
         taskRequestId: newTaskRequest.id,
         action: "create",
-        createdBy: req.userData.username,
+        createdBy: req.userData.id,
         createdAt: Date.now(),
-        lastModifiedBy: req.userData.username,
+        lastModifiedBy: req.userData.id,
         lastModifiedAt: Date.now(),
       },
       body: newTaskRequest.taskRequest,
@@ -167,14 +167,29 @@ const addOrUpdate = async (req, res) => {
   }
 };
 
-const approveTaskRequest = async (req, res) => {
+const updateTaskRequests = async (req, res) => {
   try {
     const { taskRequestId, user } = req.body;
     if (!taskRequestId) {
       return res.boom.badRequest("taskRequestId not provided");
     }
 
-    const response = await taskRequestsModel.approveTaskRequest(taskRequestId, user);
+    const { action = TASK_REQUEST_UPDATE_ACTION.APPROVE } = req.query;
+
+    let response = {};
+    switch (action) {
+      case TASK_REQUEST_UPDATE_ACTION.APPROVE: {
+        response = await taskRequestsModel.approveTaskRequest(taskRequestId, user, req.userData.id);
+        break;
+      }
+      case TASK_REQUEST_UPDATE_ACTION.REJECT: {
+        response = await taskRequestsModel.rejectTaskRequest(taskRequestId, req.userData.id);
+        break;
+      }
+      default: {
+        return res.boom.badRequest("Unknown action");
+      }
+    }
 
     if (response.taskRequestNotFound) {
       return res.boom.badRequest("Task request not found.");
@@ -186,17 +201,19 @@ const approveTaskRequest = async (req, res) => {
       return res.boom.badRequest("Task request was previously approved or rejected.");
     }
 
-    await updateUserStatusOnTaskUpdate(user.username);
+    if (action && action === TASK_REQUEST_UPDATE_ACTION.APPROVE) {
+      await updateUserStatusOnTaskUpdate(user.username);
+    }
 
     const taskRequestLog = {
       type: "taskRequests",
       meta: {
         taskRequestId: taskRequestId,
         action: "update",
-        subAction: "approve",
-        createdBy: req.userData.username,
+        subAction: action,
+        createdBy: req.userData.id,
         createdAt: Date.now(),
-        lastModifiedBy: req.userData.username,
+        lastModifiedBy: req.userData.id,
         lastModifiedAt: Date.now(),
       },
       body: response.taskRequest,
@@ -204,8 +221,8 @@ const approveTaskRequest = async (req, res) => {
     await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
 
     return res.status(200).json({
-      message: `Task successfully assigned to user ${response.approvedTo}`,
-      taskRequest: response.taskRequest,
+      message: `Task updated successfully.`,
+      taskRequest: response?.taskRequest,
     });
   } catch (err) {
     logger.error("Error while approving task request", err);
@@ -237,7 +254,7 @@ const migrateTaskRequests = async (req, res) => {
   }
 };
 module.exports = {
-  approveTaskRequest,
+  updateTaskRequests,
   addOrUpdate,
   fetchTaskRequests,
   fetchTaskRequestById,
