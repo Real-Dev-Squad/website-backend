@@ -42,7 +42,7 @@ const postTaskRequests = async (req, res, next) => {
 };
 
 const getTaskRequests = async (req, res, next) => {
-  const schema = joi
+  const queryParamsSchema = joi
     .object()
     .keys({
       dev: joi.bool().optional().sensitive(),
@@ -87,7 +87,7 @@ const getTaskRequests = async (req, res, next) => {
     await Promise.all([
       filtersSchema.validateAsync(rqlQueryParser.getFilterQueries()),
       sortSchema.validateAsync(rqlQueryParser.getSortQueries()),
-      schema.validateAsync(req.query),
+      queryParamsSchema.validateAsync(req.query),
     ]);
     next();
   } catch (error) {
