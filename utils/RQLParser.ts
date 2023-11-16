@@ -1,32 +1,10 @@
-export enum QueryTypes {
-  FILTER = "FILTER",
-  SORT = "SORT",
-}
-
-export enum Operators {
-  INCLUDE = "INCLUDE",
-  EXCLUDE = "EXCLUDE",
-}
-
-interface Queries {
-  operator: Operators;
-  key: string;
-  value: string;
-  type: QueryTypes;
-}
-
-interface FilterQueryValue {
-  operator: Operators;
-  value: string;
-}
-
-interface GroupedFilterQueries {
-  [key: string]: FilterQueryValue[];
-}
-
-interface GroupedSortQueries {
-  [key: string]: string;
-}
+import {
+  GroupedFilterQueries,
+  GroupedSortQueries,
+  Operators,
+  Queries,
+  QueryTypes,
+} from "../typeDefinitions/rqlParser";
 
 const KEY_VALUE_PAIR_DELIMITER_PATTERN = /\s+/;
 const KEY_VALUE_DELIMITER = ":";
