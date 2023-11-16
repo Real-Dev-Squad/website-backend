@@ -13,8 +13,6 @@ const {
   TASK_REQUEST_TYPE,
   TASK_REQUEST_STATUS,
   TASK_REQUEST_ERROR_MESSAGE,
-  TASK_REQUEST_TYPE,
-  TASK_REQUEST_STATUS,
 } = require("./../../../constants/taskRequests");
 
 const mockData = require("../../fixtures/task-requests/task-requests");
