@@ -69,7 +69,7 @@ describe("Task Requests", function () {
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
       });
 
-      it("should fetch 404 when taskRequests are empty", function (done) {
+      it("should have status 200 when taskRequests are empty", function (done) {
         chai
           .request(app)
           .get("/taskRequests")
