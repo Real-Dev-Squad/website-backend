@@ -1,7 +1,10 @@
-const usersService = require("../services/dataAccessLayer");
-const admin = require("firebase-admin");
+import { TaskRequestType } from "../typeDefinitions/task-requests";
+import { User } from "../typeDefinitions/users";
 
-const generateLink = (queries) => {
+import usersService from "../services/dataAccessLayer";
+import admin from "firebase-admin";
+
+const generateLink = (queries: { [key: string]: string }): string => {
   const urlSearchParams = new URLSearchParams();
 
   for (const [key, value] of Object.entries(queries)) {
@@ -11,9 +14,9 @@ const generateLink = (queries) => {
   return "/taskRequests?" + urlSearchParams.toString();
 };
 
-const buildTaskRequests = (taskRequests, initialArray = []) => {
+const buildTaskRequests = (taskRequests: any, initialArray: any = []) => {
   if (!taskRequests.empty) {
-    taskRequests.forEach((taskRequests) => {
+    taskRequests.forEach((taskRequests: any) => {
       initialArray.push({
         id: taskRequests.id,
         ...taskRequests.data(),
@@ -23,7 +26,7 @@ const buildTaskRequests = (taskRequests, initialArray = []) => {
   return initialArray;
 };
 
-const transformTaskRequests = async (taskRequestsList) => {
+const transformTaskRequests = async (taskRequestsList: TaskRequestType[]) => {
   const userIdSet = new Set();
   taskRequestsList.forEach((data) => {
     data.users.forEach((userData) => {
@@ -36,10 +39,10 @@ const transformTaskRequests = async (taskRequestsList) => {
     Array.from(userIdSet)
   );
 
-  const usersMap = new Map(userList.map((data) => [data.id, data]));
+  const usersMap = new Map<string, User>(userList.map((data) => [data.id, data]));
   taskRequestsList.forEach((data) => {
     data.users = data.users.map((userData) => {
-      const { username, first_name: firstName, last_name: lastName, picture } = usersMap.get(userData.userId);
+      const { username, first_name: firstName, last_name: lastName, picture }: User = usersMap.get(userData.userId);
       return { ...userData, username: username, first_name: firstName, last_name: lastName, picture };
     });
   });

@@ -8,6 +8,7 @@ const {
   TASK_REQUEST_ERROR_MESSAGE,
 } = require("../constants/taskRequests");
 const { TASK_TYPE, TASK_STATUS, DEFAULT_TASK_PRIORITY } = require("../constants/tasks");
+const { Operators } = require("../typeDefinitions/rqlParser");
 const { RQLQueryParser } = require("../utils/RQLParser");
 const firestore = require("../utils/firestore");
 const { buildTaskRequests, generateLink, transformTaskRequests } = require("../utils/task-requests");
@@ -82,7 +83,9 @@ const fetchPaginatedTaskRequests = async (queries = {}) => {
     const rqlQueryParser = new RQLQueryParser(queryString);
 
     Object.entries(rqlQueryParser.getFilterQueries()).forEach(([key, value]) => {
-      const valuesList = value.map((query) => query.operator === "INCLUDE" && TASK_REQUEST_FILTER_VALUES[query.value]);
+      const valuesList = value.map(
+        (query) => query.operator === Operators.INCLUDE && TASK_REQUEST_FILTER_VALUES[query.value]
+      );
       taskRequestsSnapshot = taskRequestsSnapshot.where(TASK_REQUEST_FILTER_KEYS[key], "in", valuesList);
     });
 
