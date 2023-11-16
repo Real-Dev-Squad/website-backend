@@ -12,4 +12,6 @@ router.get("/:id", authenticate, authorizeRoles([SUPERUSER]), taskRequests.fetch
 router.post("/addOrUpdate", authenticate, validateUser, taskRequests.addOrUpdate);
 router.patch("/approve", authenticate, authorizeRoles([SUPERUSER]), validateUser, taskRequests.approveTaskRequest);
 router.post("/", authenticate, validators.postTaskRequests, taskRequests.addTaskRequests);
+router.post("/migrations", authenticate, authorizeRoles([SUPERUSER]), taskRequests.migrateTaskRequests);
+
 module.exports = router;
