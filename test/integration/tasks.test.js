@@ -1070,4 +1070,38 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("No overdue tasks found");
     });
   });
+
+  describe("POST /tasks/migration", function () {
+    // let taskId1;
+    // let taskId2;
+    // let taskId3;
+
+    beforeEach(async function () {
+      // taskId1 = (await tasks.updateTask({ ...updateTaskStatus[1], status: "DONE" })).taskId;
+      // taskId2 = (await tasks.updateTask({ ...updateTaskStatus[2], status: "DONE" })).taskId;
+      // taskId3 = (await tasks.updateTask({ ...updateTaskStatus[3], status: "DONE" })).taskId;
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+      sinon.restore();
+    });
+
+    it("Should update status COMPLETED to DONE successful", function (done) {
+      chai
+        .request(app)
+        .post("/tasks/migration")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.summary).to.have.all.keys(["totalUpdatedStatus", "totalOperationsFailed", "totalTasks"]);
+          expect(res.body.summary.totalUpdatedStatus).to.be.equal(3);
+          return done();
+        });
+    });
+  });
 });
