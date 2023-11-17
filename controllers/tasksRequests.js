@@ -228,6 +228,10 @@ const migrateTaskRequests = async (req, res) => {
         responseData = await taskRequestsModel.removeOldField();
         break;
       }
+      case MIGRATION_TYPE.ADD_COUNT_CREATED: {
+        responseData = await taskRequestsModel.addUsersCountAndCreatedAt();
+        break;
+      }
       default: {
         return res.boom.badRequest("Unknown action");
       }

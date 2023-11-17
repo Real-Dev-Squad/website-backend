@@ -34,6 +34,7 @@ const TASK_REQUEST_SORT_VALUES = {
 const MIGRATION_TYPE = {
   ADD_NEW_FIELDS: "add-new-fields",
   REMOVE_OLD_FIELDS: "remove-redundant-fields",
+  ADD_COUNT_CREATED: "add-count-created-time"
 };
 
 module.exports = {

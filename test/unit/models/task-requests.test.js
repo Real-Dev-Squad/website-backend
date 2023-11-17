@@ -8,6 +8,7 @@ const {
   fetchPaginatedTaskRequests,
   addNewFields,
   removeOldField,
+  addUsersCountAndCreatedAt,
 } = require("./../../../models/taskRequests");
 const {
   TASK_REQUEST_TYPE,
@@ -484,10 +485,35 @@ describe("Task requests | models", function () {
         expect(response.totalDocuments).to.be.equal(1);
         expect(response.documentsModified).to.be.equal(1);
         const taskRequestData = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
-        const taskRequest = mockData.existingTaskRequest;
+        const taskRequest = { ...mockData.existingTaskRequest };
         delete taskRequest.requestors;
         delete taskRequest.approvedTo;
         expect(taskRequestData).to.be.deep.equal(taskRequest);
+      });
+    });
+
+    describe("Add users count and created at", function () {
+      it("Should add users count and createdAt", async function () {
+        const taskRequest = { ...mockData.existingTaskRequest };
+        delete taskRequest.createdAt;
+        await taskRequestsCollection.doc(taskRequestId1).set(taskRequest);
+        const response = await addUsersCountAndCreatedAt();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(1);
+        const taskRequestData = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
+        expect(taskRequestData.usersCount).to.be.equal(1);
+        expect(taskRequestData.createdAt).to.be.equal(0);
+      });
+      it("Should not update existing fields", async function () {
+        const taskRequest = { ...mockData.existingTaskRequest };
+        taskRequest.usersCount = 1;
+        await taskRequestsCollection.doc(taskRequestId1).set(taskRequest);
+        const response = await addUsersCountAndCreatedAt();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(0);
+        const taskRequestData = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
+        expect(taskRequestData.usersCount).to.be.equal(1);
+        expect(taskRequestData.createdAt).to.be.equal(taskRequest.createdAt);
       });
     });
   });
