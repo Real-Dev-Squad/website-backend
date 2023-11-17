@@ -458,7 +458,7 @@ const rejectTaskRequest = async (taskRequestId, authenticatedUserId) => {
     lastModifiedAt: Date.now(),
   };
   await taskRequestDoc.update(updatedTaskRequest);
-  return { ...taskRequestData, ...updatedTaskRequest };
+  return { taskRequest: { ...taskRequestData, ...updatedTaskRequest } };
 };
 const addNewFields = async () => {
   const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;

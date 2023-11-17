@@ -1,5 +1,6 @@
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dataAccess = require("../services/dataAccessLayer");
+const { TASK_REQUEST_UPDATE_ACTION } = require("../constants/taskRequests");
 /**
  * Validates user id for task request
  *
@@ -7,6 +8,10 @@ const dataAccess = require("../services/dataAccessLayer");
  */
 async function validateUser(req, res, next) {
   try {
+    const { action } = req.query;
+    if (action === TASK_REQUEST_UPDATE_ACTION.REJECT) {
+      return next();
+    }
     const { userId } = req.body;
 
     if (!userId) {
