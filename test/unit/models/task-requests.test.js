@@ -5,19 +5,28 @@ const {
   createRequest,
   fetchTaskRequests,
   approveTaskRequest,
+  fetchPaginatedTaskRequests,
   addNewFields,
   removeOldField,
 } = require("./../../../models/taskRequests");
-const { TASK_REQUEST_TYPE, TASK_REQUEST_STATUS } = require("./../../../constants/taskRequests");
+const {
+  TASK_REQUEST_TYPE,
+  TASK_REQUEST_STATUS,
+  TASK_REQUEST_ERROR_MESSAGE,
+} = require("./../../../constants/taskRequests");
+
 const mockData = require("../../fixtures/task-requests/task-requests");
 const firestore = require("../../../utils/firestore");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const cleanDb = require("../../utils/cleanDb");
 const userModel = require("../../../models/users");
 const tasksModel = require("../../../models/tasks");
+const usersService = require("../../../services/dataAccessLayer");
+
 const tasksCollection = firestore.collection("tasks");
 const { TASK_STATUS, DEFAULT_TASK_PRIORITY } = require("../../../constants/tasks");
 const tasksData = require("../../fixtures/tasks/tasks")();
+const userData = require("../../fixtures/user/user")();
 
 describe("Task requests | models", function () {
   afterEach(async function () {
@@ -174,8 +183,29 @@ describe("Task requests | models", function () {
 
   describe("fetchTaskRequests", function () {
     beforeEach(async function () {
-      await taskRequestsCollection.add(mockData.existingTaskRequest);
-      await taskRequestsCollection.add(mockData.existingOldTaskRequest);
+      const approvedTaskRequest = {
+        ...mockData.existingTaskRequest,
+        status: TASK_REQUEST_STATUS.APPROVED,
+        createdAt: Date.now(),
+        usersCount: 1,
+      };
+      const assignmentTaskRequest = {
+        ...mockData.existingTaskRequest,
+        requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
+        createdAt: Date.now() + 10000,
+        usersCount: 2,
+      };
+      const existingTaskRequest = { ...mockData.existingTaskRequest, createdAt: Date.now() + 20000, usersCount: 3 };
+      await Promise.all([
+        taskRequestsCollection.add(existingTaskRequest),
+        taskRequestsCollection.add(mockData.existingOldTaskRequest),
+        taskRequestsCollection.add(approvedTaskRequest),
+        taskRequestsCollection.add(assignmentTaskRequest),
+      ]);
+      const userDetails = userData[0];
+      userDetails.id = mockData.existingTaskRequest.users[0].userId;
+
+      sinon.stub(usersService, "fetchUsersForKeyValues").resolves([userDetails]);
     });
 
     it("should fetch all task requests", async function () {
@@ -199,13 +229,119 @@ describe("Task requests | models", function () {
       sinon.stub(tasksModel, "fetchTask").resolves(taskData);
       sinon.stub(userModel, "fetchUser").resolves(userData);
       const result = await fetchTaskRequests(true);
-      expect(result.length).to.be.equal(2);
+      expect(result.length).to.be.equal(4);
       const fetchedOldTaskRequest = result[0];
       expect(fetchedOldTaskRequest.task).to.equal(taskData.taskData);
       expect(fetchedOldTaskRequest.requestors[0]).to.deep.equal(userData);
       const fetchedNewTaskRequest = result[1];
       expect(fetchedNewTaskRequest.task).to.equal(undefined);
       expect(fetchedNewTaskRequest.requestors[0]).to.deep.equal(userData);
+    });
+    it("should fetch all task requests when no queries are passed", async function () {
+      const result = await fetchPaginatedTaskRequests();
+      expect(result).to.have.any.key("data");
+      expect(result).to.have.any.key("prev");
+      expect(result).to.have.any.key("next");
+      expect(result.data).to.be.an("array");
+    });
+    it("should fetch only task requests of status pending", async function () {
+      const queries = {
+        q: "status:pending",
+      };
+      const result = await fetchPaginatedTaskRequests(queries);
+      result.data.forEach((taskRequest) => {
+        expect(taskRequest.status).to.equal(TASK_REQUEST_STATUS.PENDING);
+      });
+    });
+    it("should fetch only task requests of status approved and request type of assignment", async function () {
+      const queries = {
+        q: "status:approved request-type:assignment",
+      };
+      const result = await fetchPaginatedTaskRequests(queries);
+      result.data.forEach((taskRequest) => {
+        expect(taskRequest.status).to.equal(TASK_REQUEST_STATUS.APPROVED);
+        expect(taskRequest.requestType).to.equal(TASK_REQUEST_TYPE.ASSIGNMENT);
+      });
+    });
+    it("should limit the response list to size 1", async function () {
+      const queries = {
+        size: "1",
+      };
+      const result = await fetchPaginatedTaskRequests(queries);
+      expect(result.data.length).to.be.equal(1);
+    });
+    it("should sort the response in descending order of created time", async function () {
+      const queries = {
+        q: "sort:created-desc",
+      };
+      const result = await fetchPaginatedTaskRequests(queries);
+      const createdTimeList = result.data.map((data) => data.createdAt);
+      const createdTimeListInDescending = [...createdTimeList];
+      createdTimeListInDescending.sort((a, b) => b - a);
+      expect(createdTimeList).to.be.deep.equal(createdTimeListInDescending);
+    });
+    it("should sort the response in ascending order of requestors count", async function () {
+      const queries = {
+        q: "sort:requestors-asc",
+      };
+      const result = await fetchPaginatedTaskRequests(queries);
+      const usersCountList = result.data.map((data) => data.usersCount);
+      const usersCountListInAscending = [...usersCountList];
+      usersCountListInAscending.sort();
+      expect(usersCountList).to.be.deep.equal(usersCountListInAscending);
+    });
+
+    it("should provide next set of results when next is passed in query param", async function () {
+      const queries = {
+        q: "sort:requestors-asc",
+        size: "1",
+      };
+      const result = await fetchPaginatedTaskRequests(queries);
+      expect(result.next).to.be.not.equal(undefined);
+      expect(result.data.length).to.be.equal(1);
+      queries.next = result.data[0].id;
+      const nextResult = await fetchPaginatedTaskRequests(queries);
+      expect(nextResult.data.length).to.be.equal(1);
+      expect(nextResult.data[0].usersCount).to.be.greaterThan(result.data[0].usersCount);
+    });
+    it("should provide previous set of results when prev is passed in query param", async function () {
+      const queries = {
+        q: "sort:requestors-asc",
+        size: "1",
+      };
+      const result = await fetchPaginatedTaskRequests(queries);
+      expect(result.next).to.be.not.equal(undefined);
+      expect(result.data.length).to.be.equal(1);
+      queries.next = result.data[0].id;
+      const nextResult = await fetchPaginatedTaskRequests(queries);
+      delete queries.next;
+      queries.prev = nextResult.data[0].id;
+      const prevResult = await fetchPaginatedTaskRequests(queries);
+      expect(prevResult.data[0]).to.be.deep.equal(result.data[0]);
+    });
+    it("should return error when an invalid next value is passed", async function () {
+      const queries = {
+        next: "abc",
+        size: "1",
+      };
+      const result = await fetchPaginatedTaskRequests(queries);
+      expect(result).to.be.deep.equal({
+        statusCode: 400,
+        error: "Bad Request",
+        message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_NEXT}: ${queries.next}`,
+      });
+    });
+    it("should return error when an invalid prev value is passed", async function () {
+      const queries = {
+        prev: "abc",
+        size: "1",
+      };
+      const result = await fetchPaginatedTaskRequests(queries);
+      expect(result).to.be.deep.equal({
+        statusCode: 400,
+        error: "Bad Request",
+        message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_PREV}: ${queries.prev}`,
+      });
     });
   });
 
