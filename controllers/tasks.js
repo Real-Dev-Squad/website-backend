@@ -443,6 +443,16 @@ const assignTask = async (req, res) => {
   }
 };
 
+const updateStatus = async (req, res) => {
+  try {
+    const response = await tasks.updateTaskStatus();
+    return res.status(200).json(response);
+  } catch (error) {
+    logger.error("Error in migration scripts", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   addNewTask,
   fetchTasks,
@@ -453,4 +463,5 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
+  updateStatus,
 };
