@@ -1,5 +1,5 @@
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const { TASK_REQUEST_TYPE } = require("../constants/taskRequests");
+const { TASK_REQUEST_TYPE, MIGRATION_TYPE } = require("../constants/taskRequests");
 const { addLog } = require("../models/logs");
 const taskRequestsModel = require("../models/taskRequests");
 const tasksModel = require("../models/tasks.js");
@@ -10,18 +10,20 @@ const usersUtils = require("../utils/users");
 const fetchTaskRequests = async (_, res) => {
   try {
     const { dev } = _.query;
-    const data = await taskRequestsModel.fetchTaskRequests(dev === "true");
-
-    if (data.length > 0) {
-      return res.status(200).json({
-        message: "Task requests returned successfully",
-        data,
-      });
+    let data;
+    if (dev === "true") {
+      data = await taskRequestsModel.fetchPaginatedTaskRequests(_.query);
+      if (data.error) {
+        return res.status(data.statusCode).json(data);
+      }
+    } else {
+      data = {};
+      data.data = await taskRequestsModel.fetchTaskRequests(true);
     }
 
-    return res.status(404).json({
-      message: "Task requests not found",
-      data,
+    return res.status(200).json({
+      message: "Task requests returned successfully",
+      ...data,
     });
   } catch (err) {
     logger.error("Error while fetching task requests", err);
@@ -213,10 +215,34 @@ const approveTaskRequest = async (req, res) => {
   }
 };
 
+const migrateTaskRequests = async (req, res) => {
+  try {
+    const { action } = req.query;
+    let responseData;
+    switch (action) {
+      case MIGRATION_TYPE.ADD_NEW_FIELDS: {
+        responseData = await taskRequestsModel.addNewFields();
+        break;
+      }
+      case MIGRATION_TYPE.REMOVE_OLD_FIELDS: {
+        responseData = await taskRequestsModel.removeOldField();
+        break;
+      }
+      default: {
+        return res.boom.badRequest("Unknown action");
+      }
+    }
+    return res.json({ message: "Task requests migration successful", ...responseData });
+  } catch (err) {
+    logger.error("Error in migration scripts", err);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
 module.exports = {
   approveTaskRequest,
   addOrUpdate,
   fetchTaskRequests,
   fetchTaskRequestById,
   addTaskRequests,
+  migrateTaskRequests,
 };
