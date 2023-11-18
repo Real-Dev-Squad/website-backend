@@ -409,9 +409,10 @@ const generateInviteForUser = async (req, res) => {
       method: "POST",
       body: JSON.stringify(inviteOptions),
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-    }).then((response) => response.json());
+    });
+    const discordInviteResponse = await response.json();
 
-    const inviteCode = response.data.code;
+    const inviteCode = discordInviteResponse.data.code;
     const inviteLink = `discord.gg/${inviteCode}`;
 
     await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
@@ -435,15 +436,15 @@ const getUserDiscordInvite = async (req, res) => {
 
     const userIdForInvite = userId || req.userData.id;
 
-    const modelResponse = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
+    const invite = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
 
-    if (modelResponse.notFound) {
+    if (invite.notFound) {
       return res.boom.notFound("User invite doesn't exist");
     }
 
     return res.json({
       message: "Invite returned successfully",
-      inviteLink: modelResponse?.inviteLink,
+      inviteLink: invite?.inviteLink,
     });
   } catch (err) {
     logger.error(`Error in fetching user invite: ${err}`);

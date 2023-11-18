@@ -11,7 +11,7 @@ export type userData = {
     member?: boolean;
     maven?: boolean;
     designer?: boolean;
-    product_manager: boolean;
+    product_manager?: boolean;
   };
   profileStatus: string;
   created_at: number;
