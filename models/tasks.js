@@ -10,6 +10,7 @@ const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tas
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
 const { IN_PROGRESS, NEEDS_REVIEW, IN_REVIEW, ASSIGNED, BLOCKED, SMOKE_TESTING, COMPLETED, SANITY_CHECK } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Adds and Updates tasks
@@ -612,9 +613,9 @@ const updateTaskStatus = async () => {
       };
     }
 
-    // if (summary.totalOperationsFailed === summary.totalTasks) {
-    //   throw Error(INTERNAL_SERVER_ERROR);
-    // }
+    if (summary.totalOperationsFailed === summary.totalTasks) {
+      throw Error(INTERNAL_SERVER_ERROR);
+    }
 
     return summary;
   } catch (error) {
