@@ -17,13 +17,30 @@ const notifyController = async (req, res) => {
   }
 
   let userIdsFromRoleId = [];
+  let fcmTokensFromUserId;
   if (groupRoleId) {
-    userIdsFromRoleId = await getUserIdsFromRoleId(groupRoleId);
+    try {
+      userIdsFromRoleId = await getUserIdsFromRoleId(groupRoleId);
+    } catch (error) {
+      logger.error("error ", error);
+      throw error;
+    }
+
     const fcmTokensPromiseArray = userIdsFromRoleId.map(async (userId) => {
-      const fcmTokensFromUserId = await getFcmTokenFromUserId(userId);
+      try {
+        fcmTokensFromUserId = await getFcmTokenFromUserId(userId);
+      } catch (error) {
+        logger.error("error ", error);
+        throw error;
+      }
       fcmTokens = [...fcmTokens, ...fcmTokensFromUserId];
     });
-    await Promise.all(fcmTokensPromiseArray);
+    try {
+      await Promise.all(fcmTokensPromiseArray);
+    } catch (error) {
+      logger.error("error", error);
+      throw error;
+    }
   }
 
   const setOfFcmTokens = new Set(fcmTokens);
