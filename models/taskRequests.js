@@ -181,7 +181,7 @@ const fetchTaskRequestById = async (taskRequestId) => {
       taskRequestExists: false,
     };
   } catch (err) {
-    logger.error("Error while fetching task", err);
+    logger.error("Error while fetching data from task requests model", err);
     throw err;
   }
 };
