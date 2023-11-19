@@ -169,22 +169,21 @@ const fetchTaskRequestById = async (taskRequestId) => {
   try {
     const taskRequestSnapshot = await taskRequestsCollection.doc(taskRequestId).get();
     const taskRequestData = taskRequestSnapshot.data();
-
     if (taskRequestData) {
       taskRequestData.id = taskRequestSnapshot.id;
       taskRequestData.url = new URL(`/taskRequests/${taskRequestData.id}`, config.get("services.rdsUi.baseUrl"));
+      return {
+        taskRequestData,
+        taskRequestExists: true,
+      };
     }
     return {
-      taskRequestData,
-      taskRequestExists: true,
+      taskRequestExists: false,
     };
   } catch (err) {
-    logger.error("Error in updating task", err);
+    logger.error("Error while fetching task", err);
+    throw err;
   }
-
-  return {
-    taskRequestExists: false,
-  };
 };
 
 const createRequest = async (data, authenticatedUsername) => {
