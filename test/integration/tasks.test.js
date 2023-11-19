@@ -1013,7 +1013,7 @@ describe("Tasks", function () {
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
-        status: "COMPLETED",
+        status: "completed",
         percentCompleted: 100,
         participants: [],
         assignee: appOwner.username,
