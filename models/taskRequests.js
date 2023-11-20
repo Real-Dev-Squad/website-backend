@@ -268,11 +268,14 @@ const createRequest = async (data, authenticatedUsername) => {
       if (!newTaskRequest.externalIssueUrl) delete newTaskRequest.externalIssueUrl;
       if (!newTaskRequest.taskId) delete newTaskRequest.taskId;
       if (!newTaskRequest.taskTitle) delete newTaskRequest.taskTitle;
-      const newTaskRequestRef = await taskRequestsCollection.add(newTaskRequest);
+
+      const newTaskRequestsDocRef = taskRequestsCollection.doc();
+      transaction.set(newTaskRequestsDocRef, newTaskRequest);
+
       return {
         isCreate: true,
         taskRequest: newTaskRequest,
-        id: newTaskRequestRef.id,
+        id: newTaskRequestsDocRef.id,
       };
     });
   } catch (err) {
