@@ -184,7 +184,9 @@ const getUsers = async (req, res) => {
         const usersData = [];
 
         tasksData.forEach((task) => {
-          userIds.add(task.assignee);
+          if (task.assignee) {
+            userIds.add(task.assignee);
+          }
         });
 
         const userInfo = await dataAccess.retrieveUsers({ userIds: Array.from(userIds) });

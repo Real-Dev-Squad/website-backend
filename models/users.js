@@ -38,11 +38,14 @@ const addOrUpdate = async (userData, userId = null) => {
       const isNewUser = !user.data();
       // user exists update user
       if (user.data()) {
-        await userModel.doc(userId).set({
-          ...user.data(),
-          ...userData,
-          updated_at: Date.now(),
-        });
+        await userModel.doc(userId).set(
+          {
+            ...user.data(),
+            ...userData,
+            updated_at: Date.now(),
+          },
+          { merge: true }
+        );
       }
 
       return { isNewUser, userId };

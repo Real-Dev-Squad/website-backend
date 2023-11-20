@@ -36,9 +36,9 @@ module.exports = {
       baseUrl: "DISCORD_BASE_URL",
     },
     goalAPI: {
-      baseUrl: "https://goals-api.realdevsquad.com",
-      secretKey: "123456789",
-      cookieName: "goals_session",
+      baseUrl: "<goalBaseUrl>",
+      secretKey: "<goalSecretKey>",
+      cookieName: `goals-session-test`,
     },
   },
 

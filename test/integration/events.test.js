@@ -24,6 +24,7 @@ const config = require("config");
 const sinon = require("sinon");
 
 const { EventTokenService, EventAPIService } = require("../../services");
+const { eventOnePeerData } = require("../fixtures/events/peers");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -751,6 +752,7 @@ describe("events", function () {
 
       sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Selected Participant is removed from event." });
       sinon.stub(logsModel, "addLog");
+      sinon.stub(eventQuery, "getPeerById").returns(eventOnePeerData);
 
       chai
         .request(app)
@@ -780,6 +782,7 @@ describe("events", function () {
 
       sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Selected Participant is removed from event." });
       sinon.stub(logsModel, "addLog");
+      sinon.stub(eventQuery, "getPeerById").returns(eventOnePeerData);
 
       chai
         .request(app)

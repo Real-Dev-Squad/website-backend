@@ -107,6 +107,14 @@ describe("tasks", function () {
       const result = await getBuiltTasks(tasksSnapshot, searchTerm);
       expect(result).to.have.lengthOf(0);
     });
+    it("should fetch tasks status have undefined value", async function () {
+      const searchTerm = "Undefined";
+      const tasksSnapshot = await tasksModel.get();
+      const result = await getBuiltTasks(tasksSnapshot, searchTerm);
+      result.forEach((task) => {
+        expect(task.status).to.be.equal(undefined);
+      });
+    });
   });
 
   describe("paginatedTasks", function () {

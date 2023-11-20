@@ -281,7 +281,7 @@ const fetchIssuesById = async (repositoryName, issueId) => {
       logger.error(`GitHub API request failed. Status: ${res.status}, URL: ${url}`);
       return null;
     }
-    return res.json();
+    return await res.json();
   } catch (err) {
     logger.error(`Error while fetching issues: ${err}`);
     throw err;
