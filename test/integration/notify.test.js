@@ -96,15 +96,14 @@ describe("Notify Test", function () {
       expect(response.body.message).equals('"body" is required');
     });
 
-    it("should have user id in body ", async function () {
-      const notifyData = { title: "some title", body: "some body", userId: userId0 };
+    it("should user token exist ", async function () {
+      const notifyData = { title: "some title", body: "some body" };
 
       const fcmTokenData = { fcmToken: "iedsijdsdj" };
 
       await chai
         .request(app)
         .post("/fcm-token")
-        .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...fcmTokenData,
         });
@@ -112,36 +111,12 @@ describe("Notify Test", function () {
       const response = await chai
         .request(app)
         .post("/notify")
-        .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...notifyData,
         });
 
       expect(response).to.have.status(400);
-      expect(response.body.message).equals('"userId" is required');
-    });
-
-    it("should user token exist ", async function () {
-      const notifyData = { title: "some title", body: "some body", userId: userId0 };
-
-      const fcmTokenData = { fcmToken: "iedsijdsdj" };
-
-      await chai
-        .request(app)
-        .post("/fcm-token")
-        .send({
-          ...fcmTokenData,
-        });
-
-      const response = await chai
-        .request(app)
-        .post("/notify")
-        .send({
-          ...notifyData,
-        });
-
-      expect(response).to.have.status(401);
-      expect(response.body.message).equals("Unauthenticated User");
+      expect(response.body.message).equals('"value" must contain at least one of [userId, groupRoleId]');
     });
   });
 });
