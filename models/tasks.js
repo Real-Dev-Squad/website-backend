@@ -602,8 +602,19 @@ const updateTaskStatus = async () => {
     });
     const taskStatusCompletedChunks = chunks(tasksStatusCompleted, DOCUMENT_WRITE_SIZE);
 
-    for (const tasks of taskStatusCompletedChunks) {
-      const res = await updateTaskStatusToDone(tasks);
+    const updatedTasksPromises = await Promise.all(
+      taskStatusCompletedChunks.map(async (tasks) => {
+        const res = await updateTaskStatusToDone(tasks);
+        return {
+          totalUpdatedStatus: res.totalUpdatedStatus,
+          totalOperationsFailed: res.totalOperationsFailed,
+          updatedTaskDetails: res.updatedTaskDetails,
+          failedTaskDetails: res.failedTaskDetails,
+        };
+      })
+    );
+
+    updatedTasksPromises.forEach((res) => {
       summary = {
         ...summary,
         totalUpdatedStatus: (summary.totalUpdatedStatus += res.totalUpdatedStatus),
@@ -611,7 +622,7 @@ const updateTaskStatus = async () => {
         updatedTaskDetails: [...summary.updatedTaskDetails, ...res.updatedTaskDetails],
         failedTaskDetails: [...summary.failedTaskDetails, ...res.failedTaskDetails],
       };
-    }
+    });
 
     if (summary.totalOperationsFailed === summary.totalTasks) {
       throw Error(INTERNAL_SERVER_ERROR);
