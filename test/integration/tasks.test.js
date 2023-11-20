@@ -3,6 +3,7 @@ const sinon = require("sinon");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 
+const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const tasks = require("../../models/tasks");
 const authService = require("../../services/authService");
@@ -1012,7 +1013,7 @@ describe("Tasks", function () {
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
-        status: "COMPLETED",
+        status: "completed",
         percentCompleted: 100,
         participants: [],
         assignee: appOwner.username,
@@ -1068,6 +1069,53 @@ describe("Tasks", function () {
       expect(res).to.have.status(200);
       expect(res.body.newAvailableTasks).to.have.lengthOf(0);
       expect(res.body.message).to.be.equal("No overdue tasks found");
+    });
+  });
+
+  describe("POST /tasks/migration", function () {
+    it("Should update status COMPLETED to DONE successful", async function () {
+      const taskData1 = { status: "COMPLETED" };
+      await firestore.collection("tasks").doc("updateTaskStatus1").set(taskData1);
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(1);
+      expect(res.body.totalUpdatedStatus).to.be.equal(1);
+      expect(res.body.updatedTaskDetails).to.deep.equal(["updateTaskStatus1"]);
+      expect(res.body.totalOperationsFailed).to.be.equal(0);
+      expect(res.body.failedTaskDetails).to.deep.equal([]);
+    });
+
+    it("Should not update if not found any COMPLETED task status ", async function () {
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(0);
+      expect(res.body.totalUpdatedStatus).to.be.equal(0);
+      expect(res.body.updatedTaskDetails).to.deep.equal([]);
+      expect(res.body.totalOperationsFailed).to.be.equal(0);
+      expect(res.body.failedTaskDetails).to.deep.equal([]);
+    });
+
+    it("should throw an error if firestore batch operations fail", async function () {
+      const stub = sinon.stub(firestore, "batch");
+      stub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("Firestore batch commit failed!");
+        },
+      });
+      const taskData1 = { status: "COMPLETED" };
+      await firestore.collection("tasks").doc("updateTaskStatus1").set(taskData1);
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(res.status).to.equal(500);
+      const response = res.body;
+      expect(response.message).to.be.equal("An internal server error occurred");
+    });
+
+    it("Should return 401 if not super_user", async function () {
+      const nonSuperUserId = await addUser(appOwner);
+      const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${nonSuperUserJwt}`);
+      expect(res).to.have.status(401);
     });
   });
 });
