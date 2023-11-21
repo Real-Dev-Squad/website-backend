@@ -3,14 +3,10 @@ const tasksModel = firestore.collection("tasks");
 const ItemModel = firestore.collection("itemTags");
 const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
-const { updateTaskStatusToDone } = require("../services/tasks");
-const { chunks } = require("../utils/array");
-const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
 const { IN_PROGRESS, NEEDS_REVIEW, IN_REVIEW, ASSIGNED, BLOCKED, SMOKE_TESTING, COMPLETED, SANITY_CHECK } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Adds and Updates tasks
@@ -579,62 +575,6 @@ const getOverdueTasks = async (days = 0) => {
   }
 };
 
-const updateTaskStatus = async () => {
-  try {
-    const snapshot = await tasksModel.where("status", "==", "COMPLETED").get();
-    const tasksStatusCompleted = [];
-    let summary = {
-      totalTasks: snapshot.size,
-      totalUpdatedStatus: 0,
-      totalOperationsFailed: 0,
-      updatedTaskDetails: [],
-      failedTaskDetails: [],
-    };
-
-    if (snapshot.size === 0) {
-      return summary;
-    }
-
-    snapshot.forEach((task) => {
-      const id = task.id;
-      const taskData = task.data();
-      tasksStatusCompleted.push({ ...taskData, id });
-    });
-    const taskStatusCompletedChunks = chunks(tasksStatusCompleted, DOCUMENT_WRITE_SIZE);
-
-    const updatedTasksPromises = await Promise.all(
-      taskStatusCompletedChunks.map(async (tasks) => {
-        const res = await updateTaskStatusToDone(tasks);
-        return {
-          totalUpdatedStatus: res.totalUpdatedStatus,
-          totalOperationsFailed: res.totalOperationsFailed,
-          updatedTaskDetails: res.updatedTaskDetails,
-          failedTaskDetails: res.failedTaskDetails,
-        };
-      })
-    );
-
-    updatedTasksPromises.forEach((res) => {
-      summary = {
-        ...summary,
-        totalUpdatedStatus: (summary.totalUpdatedStatus += res.totalUpdatedStatus),
-        totalOperationsFailed: (summary.totalOperationsFailed += res.totalOperationsFailed),
-        updatedTaskDetails: [...summary.updatedTaskDetails, ...res.updatedTaskDetails],
-        failedTaskDetails: [...summary.failedTaskDetails, ...res.failedTaskDetails],
-      };
-    });
-
-    if (summary.totalOperationsFailed === summary.totalTasks) {
-      throw Error(INTERNAL_SERVER_ERROR);
-    }
-
-    return summary;
-  } catch (error) {
-    logger.error(`Error in updating task status:  ${error}`);
-    throw error;
-  }
-};
-
 module.exports = {
   updateTask,
   fetchTasks,
@@ -651,5 +591,4 @@ module.exports = {
   fetchPaginatedTasks,
   getBuiltTasks,
   getOverdueTasks,
-  updateTaskStatus,
 };

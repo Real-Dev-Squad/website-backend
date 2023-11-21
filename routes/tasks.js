@@ -40,6 +40,4 @@ router.patch(
 );
 router.patch("/assign/self", authenticate, invalidateCache({ invalidationKeys: [ALL_TASKS] }), tasks.assignTask);
 
-router.post("/migration", authenticate, authorizeRoles([SUPERUSER]), tasks.updateStatus);
-
 module.exports = router;
