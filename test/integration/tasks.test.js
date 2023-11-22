@@ -3,6 +3,7 @@ const sinon = require("sinon");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 
+const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const tasks = require("../../models/tasks");
 const authService = require("../../services/authService");
@@ -958,19 +959,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
 
-    it("Should give 400 if percentCompleted is not 100 and new status is COMPLETED ", async function () {
-      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ ...taskStatusData, status: "COMPLETED" });
-
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
-    });
-
-    it("Should give 400 if percentCompleted is not 100 and new status is DONE under feature flag ", async function () {
+    it("Should give 400 if percentCompleted is not 100 and new status is DONE", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
@@ -982,19 +971,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
     });
 
-    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED ", async function () {
-      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ ...taskStatusData, status: "VERIFIED" });
-
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
-    });
-
-    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED under feature flag", async function () {
+    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
@@ -1006,32 +983,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
     });
 
-    it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {
-      const taskData = {
-        title: "Test task",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "COMPLETED",
-        percentCompleted: 100,
-        participants: [],
-        assignee: appOwner.username,
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-      };
-      taskId = (await tasks.updateTask(taskData)).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ percentCompleted: 80 });
-
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
-    });
-
-    it("Should give 400 if status is DONE and newpercent is less than 100 under feature flag", async function () {
+    it("Should give 400 if status is DONE and newpercent is less than 100", async function () {
       taskId = (await tasks.updateTask(updateTaskStatus[0])).taskId;
       const res = await chai
         .request(app)
@@ -1068,6 +1020,53 @@ describe("Tasks", function () {
       expect(res).to.have.status(200);
       expect(res.body.newAvailableTasks).to.have.lengthOf(0);
       expect(res.body.message).to.be.equal("No overdue tasks found");
+    });
+  });
+
+  describe("POST /tasks/migration", function () {
+    it("Should update status COMPLETED to DONE successful", async function () {
+      const taskData1 = { status: "COMPLETED" };
+      await firestore.collection("tasks").doc("updateTaskStatus1").set(taskData1);
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(1);
+      expect(res.body.totalUpdatedStatus).to.be.equal(1);
+      expect(res.body.updatedTaskDetails).to.deep.equal(["updateTaskStatus1"]);
+      expect(res.body.totalOperationsFailed).to.be.equal(0);
+      expect(res.body.failedTaskDetails).to.deep.equal([]);
+    });
+
+    it("Should not update if not found any COMPLETED task status ", async function () {
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(0);
+      expect(res.body.totalUpdatedStatus).to.be.equal(0);
+      expect(res.body.updatedTaskDetails).to.deep.equal([]);
+      expect(res.body.totalOperationsFailed).to.be.equal(0);
+      expect(res.body.failedTaskDetails).to.deep.equal([]);
+    });
+
+    it("should throw an error if firestore batch operations fail", async function () {
+      const stub = sinon.stub(firestore, "batch");
+      stub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("Firestore batch commit failed!");
+        },
+      });
+      const taskData1 = { status: "COMPLETED" };
+      await firestore.collection("tasks").doc("updateTaskStatus1").set(taskData1);
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(res.status).to.equal(500);
+      const response = res.body;
+      expect(response.message).to.be.equal("An internal server error occurred");
+    });
+
+    it("Should return 401 if not super_user", async function () {
+      const nonSuperUserId = await addUser(appOwner);
+      const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${nonSuperUserJwt}`);
+      expect(res).to.have.status(401);
     });
   });
 });
