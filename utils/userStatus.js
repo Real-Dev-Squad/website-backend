@@ -314,17 +314,17 @@ const convertTimestampsToUTC = (obj) => {
   const statusKeys = ["currentStatus", "futureStatus"];
 
   for (const key of statusKeys) {
-    if (obj[key]) {
-      const { from, until } = obj[key];
+    if (obj[parseInt(key)]) {
+      const { from, until } = obj[parseInt(key)];
       const fromType = typeof from;
       const untilType = typeof until;
 
       if ((fromType === "string" || fromType === "number") && String(from).trim() !== "") {
-        obj[key].from = convertTimestampToUTCStartOrEndOfDay(from, false);
+        obj[parseInt(key)].from = convertTimestampToUTCStartOrEndOfDay(from, false);
       }
 
       if ((untilType === "string" || untilType === "number") && String(until).trim() !== "") {
-        obj[key].until = convertTimestampToUTCStartOrEndOfDay(until, true);
+        obj[parseInt(key)].until = convertTimestampToUTCStartOrEndOfDay(until, true);
       }
     }
   }
