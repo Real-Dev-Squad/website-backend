@@ -959,19 +959,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
 
-    it("Should give 400 if percentCompleted is not 100 and new status is COMPLETED ", async function () {
-      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ ...taskStatusData, status: "COMPLETED" });
-
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
-    });
-
-    it("Should give 400 if percentCompleted is not 100 and new status is DONE under feature flag ", async function () {
+    it("Should give 400 if percentCompleted is not 100 and new status is DONE", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
@@ -983,19 +971,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
     });
 
-    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED ", async function () {
-      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ ...taskStatusData, status: "VERIFIED" });
-
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
-    });
-
-    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED under feature flag", async function () {
+    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
@@ -1007,32 +983,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
     });
 
-    it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {
-      const taskData = {
-        title: "Test task",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "completed",
-        percentCompleted: 100,
-        participants: [],
-        assignee: appOwner.username,
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-      };
-      taskId = (await tasks.updateTask(taskData)).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ percentCompleted: 80 });
-
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
-    });
-
-    it("Should give 400 if status is DONE and newpercent is less than 100 under feature flag", async function () {
+    it("Should give 400 if status is DONE and newpercent is less than 100", async function () {
       taskId = (await tasks.updateTask(updateTaskStatus[0])).taskId;
       const res = await chai
         .request(app)
