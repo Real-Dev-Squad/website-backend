@@ -24,9 +24,12 @@ const addNewTask = async (req, res) => {
     const { id: createdBy } = req.userData;
     const dependsOn = req.body.dependsOn;
     let userStatusUpdate;
+    const timeStamp = Math.round(Date.now() / 1000);
     const body = {
       ...req.body,
       createdBy,
+      createdAt: timeStamp,
+      updatedAt: timeStamp,
     };
     delete body.dependsOn;
     const { taskId, taskDetails } = await tasks.updateTask(body);
@@ -270,7 +273,7 @@ const updateTask = async (req, res) => {
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
     }
-    const requestData = { ...req.body };
+    const requestData = { ...req.body, updatedAt: Math.round(Date.now() / 1000) };
     if (requestData?.assignee) {
       const user = await dataAccess.retrieveUsers({ username: requestData.assignee });
       if (!user.userExists) {
@@ -310,6 +313,7 @@ const updateTask = async (req, res) => {
  */
 const updateTaskStatus = async (req, res, next) => {
   try {
+    req.body.updatedAt = Math.round(new Date().getTime() / 1000);
     let userStatusUpdate;
     const taskId = req.params.id;
     const { userStatusFlag } = req.query;
