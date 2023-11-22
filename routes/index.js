@@ -32,4 +32,5 @@ app.use("/progresses", require("./progresses.js"));
 app.use("/monitor", require("./monitor.js"));
 app.use("/staging", require("./staging.js"));
 app.use("/goals", require("./goals.js"));
+app.use("/questions", require("./questions.js"));
 module.exports = app;
