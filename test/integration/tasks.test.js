@@ -1070,7 +1070,7 @@ describe("Tasks", function () {
     });
 
     // TASK createdAt and updatedAt migration script
-    it("Should update status createAt and updateAt", async function () {
+    it("Should update status createdAt and updatedAt", async function () {
       const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
         action: "ADD",
         field: "CREATED_AT+UPDATED_AT",
