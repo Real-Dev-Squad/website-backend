@@ -1068,5 +1068,34 @@ describe("Tasks", function () {
       const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${nonSuperUserJwt}`);
       expect(res).to.have.status(401);
     });
+
+    // TASK createdAt and updatedAt migration script
+    it("Should update status createAt and updateAt", async function () {
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
+        action: "ADD",
+        field: "CREATED_AT+UPDATED_AT",
+      });
+      expect(res).to.have.status(200);
+      expect(res.body.totalFailedTasks).to.be.equal(0);
+      expect(res.body.totalTasks).to.be.equal(3);
+      expect(res.body.failedTasksIds).to.deep.equal([]);
+    });
+    it("should throw an error if firestore batch operations fail for updating createdAt and updatedAt", async function () {
+      const stub = sinon.stub(firestore, "batch");
+      stub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("Firestore batch commit failed!");
+        },
+      });
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
+        action: "ADD",
+        field: "CREATED_AT+UPDATED_AT",
+      });
+      expect(res).to.have.status(200);
+      expect(res.body.totalFailedTasks).to.be.equal(3);
+      expect(res.body.totalTasks).to.be.equal(3);
+      expect(res.body.failedTasksIds.length).to.equal(3);
+    });
   });
 });
