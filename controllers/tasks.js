@@ -12,6 +12,7 @@ const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 const dataAccess = require("../services/dataAccessLayer");
 const { parseSearchQuery } = require("../utils/tasks");
+const { addTaskCreatedAtAndUpdatedAtFields } = require("../services/tasks");
 /**
  * Creates new task
  *
@@ -432,6 +433,11 @@ const assignTask = async (req, res) => {
 
 const updateStatus = async (req, res) => {
   try {
+    const { action, field } = req.body;
+    if (action === "ADD" && field === "CREATED_AT+UPDATED_AT") {
+      const updateStats = await addTaskCreatedAtAndUpdatedAtFields();
+      return res.json(updateStats);
+    }
     const response = await tasks.updateTaskStatus();
     return res.status(200).json(response);
   } catch (error) {
