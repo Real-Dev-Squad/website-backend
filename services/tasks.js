@@ -32,9 +32,11 @@ const updateTaskStatusToDone = async (tasksData) => {
 
 const addTaskCreatedAtAndUpdatedAtFields = async () => {
   const operationStats = {
-    failedTasksIds: [],
-    totalFailedTasks: 0,
     totalTasks: 0,
+    totalTaskToBeUpdate: 0,
+    totalTasksUpdated: 0,
+    totalFailedTasks: 0,
+    failedTasksIds: [],
   };
   const updatedTasks = [];
   const tasks = await tasksModel.get();
@@ -45,31 +47,39 @@ const addTaskCreatedAtAndUpdatedAtFields = async () => {
 
   operationStats.totalTasks = tasks.size;
 
-  tasks.forEach(async (task) => {
+  tasks.forEach((task) => {
     const taskData = task.data();
-    taskData.createdAt = task.createTime.seconds;
-    taskData.updatedAt = task.updateTime.seconds;
-    updatedTasks.push({ id: task.id, data: taskData });
+    let didAddField = false;
+    if (!taskData.createdAt) {
+      taskData.createdAt = task.createTime.seconds;
+      didAddField = true;
+    }
+    if (!taskData.updatedAt) {
+      taskData.updatedAt = task.updateTime.seconds;
+      didAddField = true;
+    }
+    if (didAddField) {
+      updatedTasks.push({ id: task.id, data: taskData });
+    }
   });
 
-  const multipleTasksUpdateBatch = [];
+  operationStats.totalTaskToBeUpdate = updatedTasks.length;
+
   const chunkedTasks = chunks(updatedTasks, FIRESTORE_BATCH_OPERATIONS_LIMIT);
 
-  chunkedTasks.forEach(async (tasks) => {
+  chunkedTasks.forEach((tasks) => {
     const batch = firestore.batch();
     tasks.forEach(({ id, data }) => {
       batch.update(tasksModel.doc(id), data);
     });
     try {
-      await batch.commit();
-      multipleTasksUpdateBatch.push(batch);
+      batch.commit();
+      operationStats.totalTasksUpdated += tasks.length;
     } catch (error) {
       operationStats.totalFailedTasks += tasks.length;
       tasks.forEach(({ id }) => operationStats.failedTasksIds.push(id));
     }
   });
-
-  await Promise.allSettled(multipleTasksUpdateBatch);
   return operationStats;
 };
 
