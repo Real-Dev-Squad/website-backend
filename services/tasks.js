@@ -43,6 +43,8 @@ const addTaskCreatedAtAndUpdatedAtFields = async () => {
     return operationStats;
   }
 
+  operationStats.totalTasks = tasks.size;
+
   tasks.forEach(async (task) => {
     const taskData = task.data();
     taskData.createdAt = task.createTime.seconds;
@@ -58,7 +60,6 @@ const addTaskCreatedAtAndUpdatedAtFields = async () => {
     tasks.forEach(({ id, data }) => {
       batch.update(tasksModel.doc(id), data);
     });
-    operationStats.totalTasks += tasks.length;
     try {
       await batch.commit();
       multipleTasksUpdateBatch.push(batch);
