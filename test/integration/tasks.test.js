@@ -1196,12 +1196,12 @@ describe("Tasks", function () {
       jwt = authService.generateAuthToken({ userId });
       superUserJwt = authService.generateAuthToken({ userId: superUserId });
       // Add the active task
-      taskId = (await tasks.updateTask(tasksData[0])).taskId;
-      taskId = (await tasks.updateTask(tasksData[1])).taskId;
-      taskId = (await tasks.updateTask(tasksData[3])).taskId;
-      taskId = (await tasks.updateTask(tasksData[4])).taskId;
-      taskId = (await tasks.updateTask(tasksData[5])).taskId;
-      taskId = (await tasks.updateTask(tasksData[6])).taskId;
+      await tasks.updateTask(tasksData[0]);
+      await tasks.updateTask(tasksData[1]);
+      await tasks.updateTask(tasksData[3]);
+      await tasks.updateTask(tasksData[4]);
+      await tasks.updateTask(tasksData[5]);
+      await tasks.updateTask(tasksData[6]);
     });
     afterEach(async function () {
       await cleanDb();
@@ -1213,17 +1213,41 @@ describe("Tasks", function () {
 
     // TASK createdAt and updatedAt migration script
     it("Should update status createdAt and updatedAt", async function () {
+      // Add new tasks with createdAt and updatedAt present
+      await tasks.updateTask({ ...tasksData[7], createdAt: null, updatedAt: null });
+      await tasks.updateTask({ ...tasksData[8], createdAt: null, updatedAt: null });
+      await tasks.updateTask({ ...tasksData[9], updatedAt: null });
+      await tasks.updateTask({ ...tasksData[10], createdAt: null });
       const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
         action: "ADD",
         field: "CREATED_AT+UPDATED_AT",
       });
       expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(10);
+      expect(res.body.totalTaskToBeUpdate).to.be.equal(4);
+      expect(res.body.totalTasksUpdated).to.be.equal(4);
       expect(res.body.totalFailedTasks).to.be.equal(0);
+      expect(res.body.failedTasksIds).to.deep.equal([]);
+    });
+
+    it("Should update status createdAt and updatedAt, if filed doesn't exists", async function () {
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
+        action: "ADD",
+        field: "CREATED_AT+UPDATED_AT",
+      });
+      expect(res).to.have.status(200);
       expect(res.body.totalTasks).to.be.equal(6);
+      expect(res.body.totalTaskToBeUpdate).to.be.equal(0);
+      expect(res.body.totalTasksUpdated).to.be.equal(0);
+      expect(res.body.totalFailedTasks).to.be.equal(0);
       expect(res.body.failedTasksIds).to.deep.equal([]);
     });
 
     it("should return failed stats if firestore batch operations fail for adding createdAt and updatedAt", async function () {
+      await tasks.updateTask({ ...tasksData[7], createdAt: null, updatedAt: null });
+      await tasks.updateTask({ ...tasksData[8], createdAt: null, updatedAt: null });
+      await tasks.updateTask({ ...tasksData[9], updatedAt: null });
+      await tasks.updateTask({ ...tasksData[10], createdAt: null });
       const stub = sinon.stub(firestore, "batch");
       stub.returns({
         update: function () {},
@@ -1236,9 +1260,11 @@ describe("Tasks", function () {
         field: "CREATED_AT+UPDATED_AT",
       });
       expect(res).to.have.status(200);
-      expect(res.body.totalFailedTasks).to.be.equal(6);
-      expect(res.body.totalTasks).to.be.equal(6);
-      expect(res.body.failedTasksIds.length).to.equal(6);
+      expect(res.body.totalTasks).to.be.equal(10);
+      expect(res.body.totalTaskToBeUpdate).to.be.equal(4);
+      expect(res.body.totalTasksUpdated).to.be.equal(0);
+      expect(res.body.totalFailedTasks).to.be.equal(4);
+      expect(res.body.failedTasksIds.length).to.equal(4);
     });
   });
 });
