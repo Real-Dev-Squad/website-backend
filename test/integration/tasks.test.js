@@ -1077,7 +1077,7 @@ describe("Tasks", function () {
       });
       expect(res).to.have.status(200);
       expect(res.body.totalFailedTasks).to.be.equal(0);
-      expect(res.body.totalTasks).to.be.equal(22);
+      expect(res.body.totalTasks).to.be.equal(23);
       expect(res.body.failedTasksIds).to.deep.equal([]);
     });
 
@@ -1094,9 +1094,9 @@ describe("Tasks", function () {
         field: "CREATED_AT+UPDATED_AT",
       });
       expect(res).to.have.status(200);
-      expect(res.body.totalFailedTasks).to.be.equal(22);
-      expect(res.body.totalTasks).to.be.equal(22);
-      expect(res.body.failedTasksIds.length).to.equal(22);
+      expect(res.body.totalFailedTasks).to.be.equal(23);
+      expect(res.body.totalTasks).to.be.equal(23);
+      expect(res.body.failedTasksIds.length).to.equal(23);
     });
   });
 });
