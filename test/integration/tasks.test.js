@@ -112,10 +112,45 @@ describe("Tasks", function () {
           expect(res.body.message).to.equal("Task created successfully!");
           expect(res.body.task).to.be.a("object");
           expect(res.body.task.id).to.be.a("string");
+          expect(res.body.task.createdAt).to.be.a("number");
+          expect(res.body.task.updatedAt).to.be.a("number");
           expect(res.body.task.createdBy).to.equal(appOwner.username);
           expect(res.body.task.assignee).to.equal(appOwner.username);
           expect(res.body.task.participants).to.be.a("array");
           expect(res.body.task.dependsOn).to.be.a("array");
+          return done();
+        });
+    });
+    it("Should have same time for createdAt and updatedAt for new tasks", function (done) {
+      chai
+        .request(app)
+        .post("/tasks")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "Test task - Create",
+          type: "feature",
+          endsOn: 123,
+          startedOn: 456,
+          status: "AVAILABLE",
+          percentCompleted: 10,
+          priority: "HIGH",
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          assignee: appOwner.username,
+          participants: [],
+          dependsOn: [],
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Task created successfully!");
+          expect(res.body.task).to.be.a("object");
+          expect(res.body.task.createdAt).to.be.a("number");
+          expect(res.body.task.updatedAt).to.be.a("number");
+          expect(res.body.task.createdAt).to.be.eq(res.body.task.updatedAt);
           return done();
         });
     });
@@ -374,7 +409,7 @@ describe("Tasks", function () {
           matchingTasks.forEach((task) => {
             expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
           });
-          expect(matchingTasks).to.have.length(3);
+          expect(matchingTasks).to.have.length(4);
 
           return done();
         });
@@ -535,7 +570,7 @@ describe("Tasks", function () {
   });
 
   describe("PATCH /tasks", function () {
-    it("Should update the task for the given taskid", function (done) {
+    it("Should update the task for the given taskId", function (done) {
       chai
         .request(app)
         .patch("/tasks/" + taskId1)
@@ -551,6 +586,41 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("should update updatedAt field when patch request is made", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/" + taskId1)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "new-title",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("should update updatedAt field", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.taskData.updatedAt).to.be.a("number");
+          expect(res.body.taskData.updatedAt).to.be.not.eq(tasksData[0].updatedAt);
+          expect(res.body.taskData.updatedAt).to.be.not.eq(res.body.taskData.createdAt);
+          return done();
+        });
+    });
+
     it("Should update dependency", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
       const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
