@@ -1187,6 +1187,29 @@ describe("Tasks", function () {
       const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${nonSuperUserJwt}`);
       expect(res).to.have.status(401);
     });
+  });
+
+  describe("POST /tasks/migration for adding createdAt+updatedAt", function () {
+    beforeEach(async function () {
+      const userId = await addUser(appOwner);
+      const superUserId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId });
+      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+      // Add the active task
+      taskId = (await tasks.updateTask(tasksData[0])).taskId;
+      taskId = (await tasks.updateTask(tasksData[1])).taskId;
+      taskId = (await tasks.updateTask(tasksData[3])).taskId;
+      taskId = (await tasks.updateTask(tasksData[4])).taskId;
+      taskId = (await tasks.updateTask(tasksData[5])).taskId;
+      taskId = (await tasks.updateTask(tasksData[6])).taskId;
+    });
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("Should return 401 if not super_user", async function () {
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${jwt}`);
+      expect(res).to.have.status(401);
+    });
 
     // TASK createdAt and updatedAt migration script
     it("Should update status createdAt and updatedAt", async function () {
@@ -1196,7 +1219,7 @@ describe("Tasks", function () {
       });
       expect(res).to.have.status(200);
       expect(res.body.totalFailedTasks).to.be.equal(0);
-      expect(res.body.totalTasks).to.be.equal(23);
+      expect(res.body.totalTasks).to.be.equal(6);
       expect(res.body.failedTasksIds).to.deep.equal([]);
     });
 
@@ -1213,9 +1236,9 @@ describe("Tasks", function () {
         field: "CREATED_AT+UPDATED_AT",
       });
       expect(res).to.have.status(200);
-      expect(res.body.totalFailedTasks).to.be.equal(23);
-      expect(res.body.totalTasks).to.be.equal(23);
-      expect(res.body.failedTasksIds.length).to.equal(23);
+      expect(res.body.totalFailedTasks).to.be.equal(6);
+      expect(res.body.totalTasks).to.be.equal(6);
+      expect(res.body.failedTasksIds.length).to.equal(6);
     });
   });
 });
