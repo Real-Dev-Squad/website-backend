@@ -1080,7 +1080,8 @@ describe("Tasks", function () {
       expect(res.body.totalTasks).to.be.equal(22);
       expect(res.body.failedTasksIds).to.deep.equal([]);
     });
-    it("should throw an error if firestore batch operations fail for updating createdAt and updatedAt", async function () {
+
+    it("should return failed stats if firestore batch operations fail for adding createdAt and updatedAt", async function () {
       const stub = sinon.stub(firestore, "batch");
       stub.returns({
         update: function () {},
