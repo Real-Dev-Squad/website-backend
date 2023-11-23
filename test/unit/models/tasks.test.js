@@ -5,6 +5,7 @@
 /* eslint-disable security/detect-object-injection */
 
 const chai = require("chai");
+const sinon = require("sinon");
 const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const tasksData = require("../../fixtures/tasks/tasks")();
@@ -302,6 +303,47 @@ describe("tasks", function () {
     it("should return all users which have overdue tasks if days is not passed", async function () {
       const usersWithOverdueTasks = await tasks.getOverdueTasks();
       expect(usersWithOverdueTasks.length).to.be.equal(4);
+    });
+  });
+
+  describe("update task status", function () {
+    beforeEach(async function () {
+      const addTasksPromises = [];
+      tasksData.forEach((task) => {
+        const taskData = {
+          ...task,
+          status: "COMPLETED",
+        };
+        addTasksPromises.push(tasksModel.add(taskData));
+      });
+
+      await Promise.all(addTasksPromises);
+    });
+
+    afterEach(function () {
+      sinon.restore();
+    });
+
+    it("Should update task status COMPLETED to DONE", async function () {
+      const res = await tasks.updateTaskStatus();
+      expect(res.totalTasks).to.be.equal(8);
+      expect(res.totalUpdatedStatus).to.be.equal(8);
+    });
+
+    it("should throw an error if firebase batch operation fails", async function () {
+      const stub = sinon.stub(firestore, "batch");
+      stub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("Firestore batch update failed");
+        },
+      });
+      try {
+        await tasks.updateTaskStatus();
+      } catch (error) {
+        expect(error).to.be.an.instanceOf(Error);
+        expect(error.message).to.equal("An internal server error occurred");
+      }
     });
   });
 });
