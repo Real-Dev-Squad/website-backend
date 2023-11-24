@@ -119,7 +119,7 @@ describe("Task Requests", function () {
         await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
-      it("should return 401 unauthorized user response", function (done) {
+      it("should be successful when the user is not a super user", function (done) {
         chai
           .request(app)
           .get("/taskRequests")
@@ -129,7 +129,7 @@ describe("Task Requests", function () {
               return done(err);
             }
 
-            expect(res).to.have.status(401);
+            expect(res).to.have.status(200);
             return done();
           });
       });
@@ -196,7 +196,7 @@ describe("Task Requests", function () {
         await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
-      it("should return 401 status code", function (done) {
+      it("should be successful when the user is not a super user", function (done) {
         chai
           .request(app)
           .get(`/taskRequests/taskrequstid`)
@@ -206,7 +206,7 @@ describe("Task Requests", function () {
               return done(err);
             }
 
-            expect(res).to.have.status(401);
+            expect(res).to.have.status(200);
             return done();
           });
       });

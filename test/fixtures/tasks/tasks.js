@@ -14,6 +14,8 @@ module.exports = () => {
       type: "feature",
       assignee: "akshay",
       createdBy: "ankush",
+      createdAt: 1644753600,
+      updatedAt: 1644753600,
       status: "IN_PROGRESS",
       percentCompleted: 50,
       endsOn: 1647172800, // 13 march
@@ -25,6 +27,8 @@ module.exports = () => {
       type: "feature",
       assignee: "ankur",
       createdBy: "ankush",
+      createdAt: 1644753600,
+      updatedAt: 1644753600,
       status: "ASSIGNED",
       percentCompleted: 50,
       endsOn: 1647172800, // 13 march
@@ -36,6 +40,8 @@ module.exports = () => {
       type: "feature",
       assignee: "ankur",
       createdBy: "ankush",
+      createdAt: 1644753600,
+      updatedAt: 1644753600,
       status: "BLOCKED",
       percentCompleted: 50,
       endsOn: 1647172800,
@@ -51,6 +57,8 @@ module.exports = () => {
       percentCompleted: 50,
       endsOn: 1650032259,
       startedOn: 1644753600,
+      createdAt: 1644753600,
+      updatedAt: 1644753600,
     },
     {
       title: "Test task",
@@ -67,6 +75,8 @@ module.exports = () => {
       priority: "HIGH",
       isNoteworthy: true,
       assignee: false,
+      createdAt: 1644753600,
+      updatedAt: 1644753600,
     },
     {
       title: "Test task-dependency",
@@ -80,6 +90,8 @@ module.exports = () => {
       lossRate: { [DINERO]: 1 },
       isNoteworthy: true,
       assignee: false,
+      createdAt: 1644753600,
+      updatedAt: 1644753600,
     },
     {
       id: "P86Y1hVrS0zR5ZcVPwLZ",
@@ -102,6 +114,8 @@ module.exports = () => {
       status: "IN_PROGRESS",
       assigneeId: "WbceXEPcohuJ5IxHHecf",
       dependsOn: [],
+      createdAt: 1644753600,
+      updatedAt: 1644753600,
     },
     {
       id: "P86Y1fsvS0zR5ZcVPwLZ",
@@ -123,6 +137,8 @@ module.exports = () => {
       title: "Undefined status",
       assigneeId: "WbceXEPcdsuJ5IxHHecf",
       dependsOn: [],
+      createdAt: 1644753600,
+      updatedAt: 1644753600,
     },
   ];
 };
