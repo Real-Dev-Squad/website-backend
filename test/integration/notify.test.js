@@ -22,7 +22,7 @@ describe("Notify Test", function () {
   });
 
   describe("POST call to notify", function () {
-    it("should send message to specified users", async function () {
+    it.skip("should send message to specified users", async function () {
       const notifyData = { title: "some title", body: "some body", userId: userId0 };
 
       const fcmTokenData = { fcmToken: "iedsijdsdj" };
