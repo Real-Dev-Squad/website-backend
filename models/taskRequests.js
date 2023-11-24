@@ -187,6 +187,25 @@ const fetchTaskRequestById = async (taskRequestId) => {
   };
 };
 
+/**
+ * Creates a task request with user details.
+ *
+ * @param {Object} data - The data for creating the task request.
+ * @param {string} data.userId - The ID of the user making the request.
+ * @param {string} data.proposedDeadline - The proposed deadline for the task.
+ * @param {string} data.proposedStartDate - The proposed start date for the task.
+ * @param {string} data.description - The description of the task request.
+ * @param {string} data.taskTitle - The title of the task.
+ * @param {string} data.taskId - The ID of the task (optional).
+ * @param {string} data.externalIssueUrl - The external issue URL (optional).
+ * @param {string} data.requestType - The type of the task request (CREATION | ASSIGNMENT).
+ * @param {string} authenticatedUserId - The ID of the authenticated user creating the request.
+ * @returns {Promise<{
+ *   id: string,
+ *   isCreate: boolean,
+ *   taskRequest: Object,
+ * }|{isCreationRequestApproved: boolean}|{alreadyRequesting: boolean}>}
+ */
 const createRequest = async (data, authenticatedUserId) => {
   try {
     const queryFieldPath = data.requestType === TASK_REQUEST_TYPE.CREATION ? "externalIssueUrl" : "taskId";
@@ -321,11 +340,15 @@ const addOrUpdate = async (taskId, userId) => {
 };
 
 /**
- * Approves task request to user
+ * Approves a task request for a user.
  *
- * @param taskRequestId { string }: id of task request
- * @param userId { Object }: user whose being approved
- * @return {Promise<{approvedTo: string, taskRequest: Object}>}
+ * @param {string} taskRequestId - The ID of the task request.
+ * @param {Object} user - The user to whom the task request is being approved.
+ * @param {string} authenticatedUserId - The ID of the authenticated user performing the approval.
+ * @returns {Promise<{
+ *   approvedTo: string,
+ *   taskRequest: Object,
+ * }|{taskRequestNotFound: boolean}|{isUserInvalid: boolean}|{isTaskRequestInvalid: boolean}>}
  */
 const approveTaskRequest = async (taskRequestId, user, authenticatedUserId) => {
   try {
@@ -439,6 +462,13 @@ const approveTaskRequest = async (taskRequestId, user, authenticatedUserId) => {
   }
 };
 
+/**
+ * Rejects a task request.
+ *
+ * @param {string} taskRequestId - The ID of the task request.
+ * @param {string} authenticatedUserId - The ID of the authenticated or logged in user performing the rejection.
+ * @returns {Promise<{taskRequest: Object}|{taskRequestNotFound: boolean}|{isTaskRequestInvalid: boolean}>}
+ */
 const rejectTaskRequest = async (taskRequestId, authenticatedUserId) => {
   const taskRequestDoc = taskRequestsCollection.doc(taskRequestId);
   const taskRequestData = (await taskRequestDoc.get()).data();
@@ -460,6 +490,7 @@ const rejectTaskRequest = async (taskRequestId, authenticatedUserId) => {
   await taskRequestDoc.update(updatedTaskRequest);
   return { taskRequest: { ...taskRequestData, ...updatedTaskRequest } };
 };
+
 const addNewFields = async () => {
   const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
 

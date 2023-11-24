@@ -178,14 +178,14 @@ const updateTaskRequests = async (req, res) => {
 
     const { action = TASK_REQUEST_UPDATE_ACTION.APPROVE } = req.query;
 
-    let response = {};
+    let updateTaskRequestResponse = {};
     switch (action) {
       case TASK_REQUEST_UPDATE_ACTION.APPROVE: {
-        response = await taskRequestsModel.approveTaskRequest(taskRequestId, user, req.userData.id);
+        updateTaskRequestResponse = await taskRequestsModel.approveTaskRequest(taskRequestId, user, req.userData.id);
         break;
       }
       case TASK_REQUEST_UPDATE_ACTION.REJECT: {
-        response = await taskRequestsModel.rejectTaskRequest(taskRequestId, req.userData.id);
+        updateTaskRequestResponse = await taskRequestsModel.rejectTaskRequest(taskRequestId, req.userData.id);
         break;
       }
       default: {
@@ -193,13 +193,13 @@ const updateTaskRequests = async (req, res) => {
       }
     }
 
-    if (response.taskRequestNotFound) {
+    if (updateTaskRequestResponse.taskRequestNotFound) {
       return res.boom.badRequest("Task request not found.");
     }
-    if (response.isUserInvalid) {
+    if (updateTaskRequestResponse.isUserInvalid) {
       return res.boom.badRequest("User request not available.");
     }
-    if (response.isTaskRequestInvalid) {
+    if (updateTaskRequestResponse.isTaskRequestInvalid) {
       return res.boom.badRequest("Task request was previously approved or rejected.");
     }
 
@@ -218,13 +218,13 @@ const updateTaskRequests = async (req, res) => {
         lastModifiedBy: req.userData.id,
         lastModifiedAt: Date.now(),
       },
-      body: response.taskRequest,
+      body: updateTaskRequestResponse.taskRequest,
     };
     await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
 
     return res.status(200).json({
       message: `Task updated successfully.`,
-      taskRequest: response?.taskRequest,
+      taskRequest: updateTaskRequestResponse?.taskRequest,
     });
   } catch (err) {
     logger.error("Error while approving task request", err);
