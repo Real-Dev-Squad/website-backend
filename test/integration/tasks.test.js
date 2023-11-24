@@ -24,6 +24,40 @@ const superUser = userData[4];
 
 let jwt, superUserJwt;
 
+const taskData = [
+  {
+    title: "Test task",
+    type: "feature",
+    endsOn: 1234,
+    startedOn: 4567,
+    status: "IN_PROGRESS",
+    percentCompleted: 10,
+    participants: [],
+    assignee: appOwner.username,
+    completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+    lossRate: { [DINERO]: 1 },
+    isNoteworthy: true,
+    isCollapsed: true,
+  },
+  {
+    title: "Test task",
+    purpose: "To Test mocha",
+    featureUrl: "<testUrl>",
+    type: "group",
+    links: ["test1"],
+    endsOn: 1234,
+    startedOn: 54321,
+    status: "completed",
+    percentCompleted: 10,
+    dependsOn: ["d12", "d23"],
+    participants: [appOwner.username],
+    completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+    lossRate: { [DINERO]: 1 },
+    isNoteworthy: false,
+    assignee: appOwner.username,
+  },
+];
+
 describe("Tasks", function () {
   let taskId1, taskId;
 
@@ -32,40 +66,6 @@ describe("Tasks", function () {
     const superUserId = await addUser(superUser);
     jwt = authService.generateAuthToken({ userId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
-
-    const taskData = [
-      {
-        title: "Test task",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "IN_PROGRESS",
-        percentCompleted: 10,
-        participants: [],
-        assignee: appOwner.username,
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-        isCollapsed: true,
-      },
-      {
-        title: "Test task",
-        purpose: "To Test mocha",
-        featureUrl: "<testUrl>",
-        type: "group",
-        links: ["test1"],
-        endsOn: 1234,
-        startedOn: 54321,
-        status: "completed",
-        percentCompleted: 10,
-        dependsOn: ["d12", "d23"],
-        participants: [appOwner.username],
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: false,
-        assignee: appOwner.username,
-      },
-    ];
 
     // Add the active task
     taskId = (await tasks.updateTask(taskData[0])).taskId;
@@ -184,6 +184,11 @@ describe("Tasks", function () {
   });
 
   describe("GET /tasks", function () {
+    before(async function () {
+      await tasks.updateTask({ ...taskData[0], createdAt: 1621717694, updatedAt: 1700680830 });
+      await tasks.updateTask({ ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753 });
+    });
+
     it("Should get all the list of tasks", function (done) {
       chai
         .request(app)
@@ -409,7 +414,7 @@ describe("Tasks", function () {
           matchingTasks.forEach((task) => {
             expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
           });
-          expect(matchingTasks).to.have.length(4);
+          expect(matchingTasks).to.have.length(6);
 
           return done();
         });
