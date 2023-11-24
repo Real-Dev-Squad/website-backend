@@ -191,7 +191,7 @@ const fetchTaskRequestById = async (taskRequestId) => {
  * Creates a task request with user details.
  *
  * @param {Object} data - The data for creating the task request.
- * @param {string} data.userId - The ID of the user making the request.
+ * @param {string} data.userId - The ID of the user to whom the task request is being created.
  * @param {string} data.proposedDeadline - The proposed deadline for the task.
  * @param {string} data.proposedStartDate - The proposed start date for the task.
  * @param {string} data.description - The description of the task request.
