@@ -353,7 +353,6 @@ describe("Tasks", function () {
           if (err) {
             return done(err);
           }
-
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Tasks returned successfully!");
@@ -450,6 +449,26 @@ describe("Tasks", function () {
           expect(res.body.message).to.equal("No tasks found.");
           expect(res.body.tasks).to.be.a("array");
           expect(res.body.tasks).to.have.lengthOf(0);
+          return done();
+        });
+    });
+    it("Should get paginated tasks ordered by updatedAt in desc order ", function (done) {
+      chai
+        .request(app)
+        .get("/tasks?dev=true&size=5&page=0")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          const tasks = res.body.tasks;
+          // Check if Tasks are returned in desc order of updatedAt field
+          for (let i = 0; i < tasks.length - 1; i++) {
+            expect(tasks[+i].updatedAt).to.be.greaterThanOrEqual(tasks[i + 1].updatedAt);
+          }
           return done();
         });
     });
