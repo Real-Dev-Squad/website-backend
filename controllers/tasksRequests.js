@@ -1,5 +1,5 @@
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const { TASK_REQUEST_TYPE, MIGRATION_TYPE, TASK_REQUEST_UPDATE_ACTION } = require("../constants/taskRequests");
+const { TASK_REQUEST_TYPE, MIGRATION_TYPE, TASK_REQUEST_ACTIONS } = require("../constants/taskRequests");
 const { addLog } = require("../models/logs");
 const taskRequestsModel = require("../models/taskRequests");
 const tasksModel = require("../models/tasks.js");
@@ -176,15 +176,15 @@ const updateTaskRequests = async (req, res) => {
       return res.boom.badRequest("taskRequestId not provided");
     }
 
-    const { action = TASK_REQUEST_UPDATE_ACTION.APPROVE } = req.query;
+    const { action = TASK_REQUEST_ACTIONS.APPROVE } = req.query;
 
     let updateTaskRequestResponse = {};
     switch (action) {
-      case TASK_REQUEST_UPDATE_ACTION.APPROVE: {
+      case TASK_REQUEST_ACTIONS.APPROVE: {
         updateTaskRequestResponse = await taskRequestsModel.approveTaskRequest(taskRequestId, user, req.userData.id);
         break;
       }
-      case TASK_REQUEST_UPDATE_ACTION.REJECT: {
+      case TASK_REQUEST_ACTIONS.REJECT: {
         updateTaskRequestResponse = await taskRequestsModel.rejectTaskRequest(taskRequestId, req.userData.id);
         break;
       }
@@ -203,7 +203,7 @@ const updateTaskRequests = async (req, res) => {
       return res.boom.badRequest("Task request was previously approved or rejected.");
     }
 
-    if (action && action === TASK_REQUEST_UPDATE_ACTION.APPROVE) {
+    if (action && action === TASK_REQUEST_ACTIONS.APPROVE) {
       await updateUserStatusOnTaskUpdate(user.username);
     }
 

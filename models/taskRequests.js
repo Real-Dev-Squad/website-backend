@@ -201,10 +201,12 @@ const fetchTaskRequestById = async (taskRequestId) => {
  * @param {string} data.requestType - The type of the task request (CREATION | ASSIGNMENT).
  * @param {string} authenticatedUserId - The ID of the authenticated user creating the request.
  * @returns {Promise<{
+ *   isCreationRequestApproved: boolean | undefined,
+ *   alreadyRequesting: boolean | undefined,
  *   id: string,
  *   isCreate: boolean,
  *   taskRequest: Object,
- * }|{isCreationRequestApproved: boolean}|{alreadyRequesting: boolean}>}
+ * }>}
  */
 const createRequest = async (data, authenticatedUserId) => {
   try {
@@ -348,7 +350,10 @@ const addOrUpdate = async (taskId, userId) => {
  * @returns {Promise<{
  *   approvedTo: string,
  *   taskRequest: Object,
- * }|{taskRequestNotFound: boolean}|{isUserInvalid: boolean}|{isTaskRequestInvalid: boolean}>}
+ *   taskRequestNotFound: boolean | undefined
+ *   isUserInvalid: boolean | undefined
+ *   isTaskRequestInvalid: boolean | undefined
+ * }>}
  */
 const approveTaskRequest = async (taskRequestId, user, authenticatedUserId) => {
   try {
@@ -467,7 +472,10 @@ const approveTaskRequest = async (taskRequestId, user, authenticatedUserId) => {
  *
  * @param {string} taskRequestId - The ID of the task request.
  * @param {string} authenticatedUserId - The ID of the authenticated or logged in user performing the rejection.
- * @returns {Promise<{taskRequest: Object}|{taskRequestNotFound: boolean}|{isTaskRequestInvalid: boolean}>}
+ * @returns {Promise<{taskRequest: Object
+ *   taskRequestNotFound: boolean | undefined
+ *   isTaskRequestInvalid: boolean | undefined
+ * }>}
  */
 const rejectTaskRequest = async (taskRequestId, authenticatedUserId) => {
   const taskRequestDoc = taskRequestsCollection.doc(taskRequestId);

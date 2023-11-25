@@ -21,7 +21,7 @@ const { MIGRATION_TYPE } = require("../../constants/taskRequests");
 chai.use(chaiHttp);
 
 const config = require("config");
-const { TASK_REQUEST_TYPE, TASK_REQUEST_UPDATE_ACTION } = require("../../constants/taskRequests");
+const { TASK_REQUEST_TYPE, TASK_REQUEST_ACTIONS } = require("../../constants/taskRequests");
 const usersUtils = require("../../utils/users");
 const githubService = require("../../services/githubService");
 const { userState } = require("../../constants/userStatus");
@@ -670,7 +670,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests/")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.APPROVE })
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
           .send({
             taskRequestId: taskId,
             userId,
@@ -692,7 +692,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests/")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.REJECT })
+          .query({ action: TASK_REQUEST_ACTIONS.REJECT })
           .send({
             taskRequestId: taskId,
             userId,
@@ -712,7 +712,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.APPROVE })
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
           .send({
             userId: oooUserId,
           })
@@ -732,7 +732,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.APPROVE })
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
           .send({ taskRequestId: taskId, userId, activeUserId })
           .end((err, res) => {
             if (err) {
@@ -752,7 +752,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.REJECT })
+          .query({ action: TASK_REQUEST_ACTIONS.REJECT })
           .send({ taskRequestId: taskId, userId, activeUserId })
           .end((err, res) => {
             if (err) {
@@ -772,7 +772,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.APPROVE })
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
           .send({ taskRequestId: taskId, userId, activeUserId })
           .end((err, res) => {
             if (err) {
@@ -791,7 +791,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.APPROVE })
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
           .send({ taskRequestId: taskId, userId, activeUserId })
           .end((err, res) => {
             if (err) {
@@ -811,7 +811,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.REJECT })
+          .query({ action: TASK_REQUEST_ACTIONS.REJECT })
           .send({ taskRequestId: taskId, userId, activeUserId })
           .end((err, res) => {
             if (err) {
@@ -829,7 +829,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.APPROVE })
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
           .send({ taskRequestId: taskId })
           .end((err, res) => {
             if (err) {
@@ -850,7 +850,7 @@ describe("Task Requests", function () {
           const res = await chai
             .request(app)
             .patch("/taskRequests")
-            .query({ action: TASK_REQUEST_UPDATE_ACTION.APPROVE })
+            .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
             .set("cookie", `${cookieName}=${jwt}`)
             .send({
               taskRequestId: taskId,
@@ -868,7 +868,7 @@ describe("Task Requests", function () {
           const res = await chai
             .request(app)
             .patch("/taskRequests")
-            .query({ action: TASK_REQUEST_UPDATE_ACTION.REJECT })
+            .query({ action: TASK_REQUEST_ACTIONS.REJECT })
             .set("cookie", `${cookieName}=${jwt}`)
             .send({
               taskRequestId: taskId,
@@ -885,7 +885,7 @@ describe("Task Requests", function () {
             .request(app)
             .patch("/taskRequests/approve")
             .set("cookie", `${cookieName}=${jwt}`)
-            .query({ action: TASK_REQUEST_UPDATE_ACTION.APPROVE })
+            .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
             .send({
               taskRequestId: taskId,
               userId,
@@ -920,7 +920,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.APPROVE })
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
           .send({
             taskRequestId: taskId,
             userId,
@@ -939,7 +939,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.REJECT })
+          .query({ action: TASK_REQUEST_ACTIONS.REJECT })
           .send({
             taskRequestId: taskId,
             userId,
@@ -957,7 +957,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.APPROVE })
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
           .send({
             taskRequestId: taskId,
             userId,
@@ -986,7 +986,7 @@ describe("Task Requests", function () {
           .request(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
-          .query({ action: TASK_REQUEST_UPDATE_ACTION.APPROVE })
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
           .send({
             taskRequestId: taskId,
             userId,
