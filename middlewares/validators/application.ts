@@ -49,7 +49,7 @@ const validateApplicationUpdateData = async (req: CustomRequest, res: CustomResp
     .strict()
     .keys({
       status: joi.string().min(1).optional(),
-      reason: joi.string().min(1).optional(),
+      feedback: joi.string().min(1).optional(),
     });
 
   try {

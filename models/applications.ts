@@ -1,8 +1,5 @@
 import { application } from "../types/application";
-
-const { userState } = require("../constants/userStatus");
 const firestore = require("../utils/firestore");
-const { updateUserStatus } = require("./userStatus");
 const ApplicationsModel = firestore.collection("applicants");
 
 
