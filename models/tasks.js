@@ -159,7 +159,7 @@ const fetchPaginatedTasks = async ({
         }
       }
     } else {
-      initialQuery = tasksModel.orderBy("updatedAt", "desc");
+      initialQuery = tasksModel.orderBy("title");
       if (status) {
         initialQuery = initialQuery.where("status", "==", status);
       }
