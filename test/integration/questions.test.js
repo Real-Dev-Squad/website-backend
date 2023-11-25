@@ -26,10 +26,14 @@ chai.use(chaiHttp);
 describe("questions", function () {
   let authToken;
   let userId;
+  let superUserAuthToken;
 
   beforeEach(async function () {
     userId = await addUser(defaultUser);
     authToken = authService.generateAuthToken({ userId });
+
+    const superUserId = await addUser(superUser);
+    superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
   });
 
   afterEach(async function () {
@@ -37,13 +41,6 @@ describe("questions", function () {
   });
 
   describe("POST questions - createQuestion", function () {
-    let superUserAuthToken;
-
-    beforeEach(async function () {
-      const superUserId = await addUser(superUser);
-      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-    });
-
     afterEach(function () {
       sinon.restore();
     });
@@ -131,4 +128,8 @@ describe("questions", function () {
         });
     });
   });
+
+  // TODO - write tests for this api
+  // eslint-disable-next-line mocha/no-skipped-tests
+  describe.skip("GET questions - getQuestions", function () {});
 });

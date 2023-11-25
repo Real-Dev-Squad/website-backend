@@ -6,7 +6,7 @@ const createQuestion = async (req, res, next) => {
     question: joi.string().required(),
     createdBy: joi.string().required(),
     eventId: joi.string().required(),
-    maxWords: joi.optional(),
+    maxCharacters: joi.optional(),
   });
 
   try {
