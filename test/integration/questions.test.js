@@ -116,7 +116,7 @@ describe("questions", function () {
           }
 
           expect(response).to.have.status(201);
-          expect(response.body.message).to.equal("Question created successfully!");
+          expect(response.body.message).to.equal("Question created and sent successfully to connected peers");
           expect(response.body.data.question).to.equal(questionDataArray[6].question);
           expect(response.body.data.id).to.equal(questionDataArray[6].id);
           expect(response.body.data.is_new).to.equal(questionDataArray[6].is_new);
@@ -131,5 +131,5 @@ describe("questions", function () {
 
   // TODO - write tests for this api
   // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("GET questions - getQuestions", function () {});
+  describe.skip("GET questions - getQuestions", function () { });
 });

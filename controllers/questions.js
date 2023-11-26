@@ -12,7 +12,7 @@ function sendQuestionToAll(newQuestion, res) {
   clients.forEach((client) => client.res.write(`data: ${JSON.stringify(newQuestion)}\n\n`));
 
   return res.status(201).send({
-    message: "Question created and sent successfully to connected peers!",
+    message: "Question created and sent successfully to connected peers",
     data: newQuestion,
   });
 }
