@@ -33,4 +33,6 @@ app.use("/monitor", require("./monitor.js"));
 app.use("/staging", require("./staging.js"));
 app.use("/goals", require("./goals.js"));
 app.use("/questions", require("./questions.js"));
+app.use("/answers", require("./answers.ts"));
+
 module.exports = app;
