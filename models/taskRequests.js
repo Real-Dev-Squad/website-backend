@@ -342,7 +342,7 @@ const addOrUpdate = async (taskId, userId) => {
 };
 
 /**
- * Approves a task request for a user.
+ * Approve task request for a user.
  *
  * @param {string} taskRequestId - The ID of the task request.
  * @param {Object} user - The user to whom the task request is being approved.
