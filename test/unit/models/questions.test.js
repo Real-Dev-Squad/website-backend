@@ -36,23 +36,6 @@ describe("Questions", function () {
     });
   });
 
-  describe("getQuestions", function () {
-    beforeEach(async function () {
-      await questionQuery.createQuestion(questionDataWithoutMaxWords);
-    });
-
-    it("should get question with is_new=true attribute", async function () {
-      const result = await questionQuery.getQuestions({ isNew: true });
-
-      expect(result).to.be.a("object");
-      expect(result.question).to.equal(questionDataWithoutMaxWords.question);
-      expect(result.event_id).to.equal(questionDataWithoutMaxWords.eventId);
-      expect(result.created_by).to.equal(questionDataWithoutMaxWords.createdBy);
-      expect(result.max_characters).to.equal(null);
-      expect(result.is_new).to.equal(true);
-    });
-  });
-
   describe("updateQuestions", function () {
     let questionId;
     beforeEach(async function () {

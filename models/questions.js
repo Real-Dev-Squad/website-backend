@@ -16,7 +16,6 @@ const createQuestion = async (questionData) => {
       event_id,
       created_by,
       max_characters: max_characters || null,
-      is_new: true,
       created_at: createdAndUpdatedAt,
       updated_at: createdAndUpdatedAt,
     });
@@ -27,25 +26,6 @@ const createQuestion = async (questionData) => {
     return { id, ...questionFromDB };
   } catch (error) {
     logger.error(`Some error occured while creating question ${error}`);
-    throw error;
-  }
-};
-
-const getQuestions = async (query) => {
-  try {
-    const isNew = Boolean(query.isNew);
-    let questionFromDB, id;
-
-    const questionSnapshot = await questionModel.where("is_new", "==", isNew).limit(1).get();
-
-    questionSnapshot.forEach((question) => {
-      id = question.id;
-      questionFromDB = question.data();
-    });
-
-    return { id, ...questionFromDB };
-  } catch (error) {
-    logger.error(`Some error occured while getting question ${error}`);
     throw error;
   }
 };
@@ -66,4 +46,4 @@ const updateQuestion = async (id, fieldsToUpdate) => {
   }
 };
 
-module.exports = { createQuestion, getQuestions, updateQuestion };
+module.exports = { createQuestion, updateQuestion };
