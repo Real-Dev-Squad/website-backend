@@ -12,7 +12,6 @@ const fcmTokenModel = firestore.collection("fcmToken");
  * @param res {Object} - Express response object
  */
 const notifyController = async (req, res) => {
-
   const { title, body, userId, groupRoleId } = req.body;
   let fcmTokens = [];
 
@@ -26,7 +25,6 @@ const notifyController = async (req, res) => {
     return [];
   };
   if (userId) {
-
     const fcmTokensFromUserId = await getFcmTokenFromUserId(userId);
     fcmTokens = [...fcmTokens, ...fcmTokensFromUserId];
   }
