@@ -1,6 +1,17 @@
-const { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE } = require("../constants/taskRequests");
+const {
+  TASK_REQUEST_STATUS,
+  TASK_REQUEST_TYPE,
+  TASK_REQUEST_FILTER_KEYS,
+  TASK_REQUEST_FILTER_VALUES,
+  TASK_REQUEST_SORT_KEYS,
+  TASK_REQUEST_SORT_VALUES,
+  TASK_REQUEST_ERROR_MESSAGE,
+} = require("../constants/taskRequests");
 const { TASK_TYPE, TASK_STATUS, DEFAULT_TASK_PRIORITY } = require("../constants/tasks");
+const { Operators } = require("../typeDefinitions/rqlParser");
+const { RQLQueryParser } = require("../utils/RQLParser");
 const firestore = require("../utils/firestore");
+const { buildTaskRequests, generateLink, transformTaskRequests } = require("../utils/task-requests");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const tasksModel = require("./tasks");
 const userModel = require("./users");
@@ -60,6 +71,92 @@ const fetchTaskRequests = async (dev) => {
     return [...taskRequests, ...newTaskRequestsModel];
   }
   return taskRequests;
+};
+
+const fetchPaginatedTaskRequests = async (queries = {}) => {
+  try {
+    let taskRequestsSnapshot = taskRequestsCollection;
+
+    let { next, prev, size, q: queryString } = queries;
+    if (size) size = parseInt(size);
+
+    const rqlQueryParser = new RQLQueryParser(queryString);
+
+    Object.entries(rqlQueryParser.getFilterQueries()).forEach(([key, value]) => {
+      const valuesList = value.map(
+        (query) => query.operator === Operators.INCLUDE && TASK_REQUEST_FILTER_VALUES[query.value]
+      );
+      taskRequestsSnapshot = taskRequestsSnapshot.where(TASK_REQUEST_FILTER_KEYS[key], "in", valuesList);
+    });
+
+    const sortQueries = rqlQueryParser.getSortQueries();
+    const sortQueryEntries = Object.entries(sortQueries);
+
+    if (sortQueryEntries.length) {
+      sortQueryEntries.forEach(([key, value]) => {
+        taskRequestsSnapshot = taskRequestsSnapshot.orderBy(
+          TASK_REQUEST_SORT_KEYS[key],
+          TASK_REQUEST_SORT_VALUES[value]
+        );
+      });
+    } else {
+      taskRequestsSnapshot = taskRequestsSnapshot.orderBy(TASK_REQUEST_SORT_KEYS.created, "desc");
+    }
+
+    if (next) {
+      const data = await taskRequestsCollection.doc(next).get();
+      if (!data.data()) {
+        return {
+          statusCode: 400,
+          error: "Bad Request",
+          message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_NEXT}: ${next}`,
+        };
+      }
+      taskRequestsSnapshot = taskRequestsSnapshot.startAfter(data).limit(size);
+    } else if (prev) {
+      const data = await taskRequestsCollection.doc(prev).get();
+      if (!data.data()) {
+        return {
+          statusCode: 400,
+          error: "Bad Request",
+          message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_PREV}: ${prev}`,
+        };
+      }
+      taskRequestsSnapshot = taskRequestsSnapshot.endBefore(data).limitToLast(size);
+    } else if (size) {
+      taskRequestsSnapshot = taskRequestsSnapshot.limit(size);
+    }
+
+    taskRequestsSnapshot = await taskRequestsSnapshot.get();
+    const taskRequestsList = buildTaskRequests(taskRequestsSnapshot);
+    await transformTaskRequests(taskRequestsList);
+
+    const resultDataLength = taskRequestsSnapshot.docs.length;
+    const isNextLinkRequired = size && resultDataLength === size;
+    const lastVisibleDoc = isNextLinkRequired && taskRequestsSnapshot.docs[resultDataLength - 1];
+    const firstDoc = taskRequestsSnapshot.docs[0];
+    const nextPageParams = {
+      ...queries,
+      next: lastVisibleDoc?.id,
+    };
+    delete nextPageParams.prev;
+    const prevPageParams = {
+      ...queries,
+      prev: firstDoc?.id,
+    };
+    delete prevPageParams.next;
+    const nextLink = lastVisibleDoc ? generateLink(nextPageParams) : "";
+    const prevLink = next || prev ? generateLink(prevPageParams) : "";
+
+    return {
+      data: taskRequestsList,
+      next: nextLink,
+      prev: prevLink,
+    };
+  } catch (err) {
+    logger.error("error getting task requests", err);
+    throw err;
+  }
 };
 
 /**
@@ -338,10 +435,75 @@ const approveTaskRequest = async (taskRequestId, user) => {
   }
 };
 
+const addNewFields = async () => {
+  const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
+
+  const bulkWriter = firestore.bulkWriter();
+  let documentsModified = 0;
+  const totalDocuments = taskRequestsSnapshots.length;
+
+  await Promise.all(
+    taskRequestsSnapshots.map(async (taskRequestsSnapshot) => {
+      const taskRequestData = taskRequestsSnapshot.data();
+      if (!taskRequestData.requestType) {
+        const { taskData } = await tasksModel.fetchTask(taskRequestData.taskId);
+        const usersRequestList = taskRequestData.requestors.map((requestorId) => {
+          let userStatus = TASK_REQUEST_STATUS.PENDING;
+
+          if (taskRequestData.status === TASK_REQUEST_STATUS.APPROVED && requestorId === taskRequestData.approvedTo) {
+            userStatus = TASK_REQUEST_STATUS.APPROVED;
+          }
+
+          return {
+            userId: requestorId,
+            status: userStatus,
+          };
+        });
+        const updatedTaskRequestData = {
+          ...taskRequestData,
+          requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
+          taskTitle: taskData.title,
+          users: usersRequestList,
+        };
+
+        bulkWriter.update(taskRequestsCollection.doc(taskRequestsSnapshot.id), updatedTaskRequestData);
+        documentsModified++;
+      }
+    })
+  );
+
+  await bulkWriter.close();
+  return { documentsModified, totalDocuments };
+};
+
+const removeOldField = async () => {
+  const taskRequestsSnapshots = (await taskRequestsCollection.get()).docs;
+
+  const bulkWriter = firestore.bulkWriter();
+  let documentsModified = 0;
+  const totalDocuments = taskRequestsSnapshots.length;
+  taskRequestsSnapshots.forEach((taskRequestsSnapshot) => {
+    const taskRequestData = taskRequestsSnapshot.data();
+    if (taskRequestData.requestors || taskRequestData.approvedTo) {
+      delete taskRequestData.requestors;
+      delete taskRequestData.approvedTo;
+
+      bulkWriter.set(taskRequestsCollection.doc(taskRequestsSnapshot.id), taskRequestData);
+      documentsModified++;
+    }
+  });
+
+  await bulkWriter.close();
+  return { documentsModified, totalDocuments };
+};
+
 module.exports = {
   createRequest,
   fetchTaskRequests,
   fetchTaskRequestById,
   addOrUpdate,
   approveTaskRequest,
+  fetchPaginatedTaskRequests,
+  addNewFields,
+  removeOldField,
 };
