@@ -5,10 +5,6 @@ const questionQuery = require("../models/questions");
 let clients = [];
 
 function sendQuestionToAll(newQuestion, res) {
-  (async () => {
-    await questionQuery.updateQuestion(newQuestion.id, { is_new: false });
-  })();
-
   clients.forEach((client) => client.res.write(`data: ${JSON.stringify(newQuestion)}\n\n`));
 
   return res.status(201).send({

@@ -131,5 +131,5 @@ describe("questions", function () {
 
   // TODO - write tests for this api
   // eslint-disable-next-line mocha/no-skipped-tests
-  describe.skip("GET questions - getQuestions", function () { });
+  describe.skip("GET questions - getQuestions", function () {});
 });
