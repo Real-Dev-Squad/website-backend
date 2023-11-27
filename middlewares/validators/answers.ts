@@ -2,7 +2,7 @@ const joi = require("joi");
 import { Request, NextFunction } from "express";
 import { CustomResponse } from "../../typeDefinitions/global";
 
-const createAnswer = async (req : Request, res: CustomResponse, next: NextFunction) => {
+const createAnswer = async (req: Request, res: CustomResponse, next: NextFunction) => {
   const schema = joi.object({
     answer: joi.string().required(),
     answeredBy: joi.string().required(),
@@ -19,4 +19,18 @@ const createAnswer = async (req : Request, res: CustomResponse, next: NextFuncti
   }
 };
 
-module.exports = { createAnswer };
+const updateAnswer = async (req: Request, res: CustomResponse, next: NextFunction) => {
+  const schema = joi.object({
+    status: joi.string().optional(),
+  });
+
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error(`Error validating answer: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
+module.exports = { createAnswer, updateAnswer };

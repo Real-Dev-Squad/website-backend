@@ -2,32 +2,76 @@
 // const { expect } = chai;
 
 import { expect } from "chai";
+import { Answer, AnswerFieldsToUpdate } from "../../../typeDefinitions/answers";
 
 const cleanDb = require("../../utils/cleanDb");
 const answerQuery = require("../../../models/answers");
 const answerDataArray = require("../../fixtures/answers/answers");
 
-describe("Answers", function () {
+describe.only("Answers", function () {
   afterEach(async function () {
     await cleanDb();
   });
 
   describe("createAnswer", function () {
     it("should create a answer in db with the given data and add approved_by, status, rejected_by default values", async function () {
-      const result = await answerQuery.createAnswer(answerDataArray[0]);
+      const createdAnswer: Answer = await answerQuery.createAnswer(answerDataArray[0]);
 
-      expect(result).to.be.a("object");
-      expect(result.id).to.equal(answerDataArray[0].id);
-      expect(result.answer).to.equal(answerDataArray[0].answer);
-      expect(result.event_id).to.equal(answerDataArray[0].eventId);
-      expect(result.created_by).to.equal(answerDataArray[0].createdBy);
-      expect(result.rejected_by).to.equal(null);
-      expect(result.approved_by).to.equal(null);
-      expect(result.status).to.equal("PENDING");
+      expect(createdAnswer).to.be.a("object");
+      expect(createdAnswer.id).to.equal(answerDataArray[0].id);
+      expect(createdAnswer.answer).to.equal(answerDataArray[0].answer);
+      expect(createdAnswer.event_id).to.equal(answerDataArray[0].eventId);
+      expect(createdAnswer.answered_by).to.equal(answerDataArray[0].answeredBy);
+      expect(createdAnswer.reviewed_by).to.equal(null);
+      expect(createdAnswer.status).to.equal("PENDING");
+    });
+  });
+
+  describe("updateAnswer", function () {
+    let createdAnswer: Answer;
+    let createdAnswerId: string;
+    beforeEach(async function () {
+      createdAnswer = await answerQuery.createAnswer(answerDataArray[0]);
+      createdAnswerId = createdAnswer.id;
     });
 
-    // it("should create a answer in db with the given data and add approved_by, status, rejected_by default values", async function () {
-    //   const result = await answerQuery.createAnswer(answerDataArray[0]);
-    // });
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should update answer with rejected data", async function () {
+      const fieldsToUpdate: AnswerFieldsToUpdate = {
+        status: "REJECTED",
+        reviewed_by: "satyam-bajpai",
+      };
+
+      const updatedAnswer: Answer = await answerQuery.updateAnswer(createdAnswerId, fieldsToUpdate);
+
+      expect(updatedAnswer).to.be.a("object");
+      expect(updatedAnswer.id).to.equal(answerDataArray[0].id);
+      expect(updatedAnswer.reviewed_by).to.equal(fieldsToUpdate.reviewed_by);
+      expect(updatedAnswer.status).to.equal(fieldsToUpdate.status);
+      expect(updatedAnswer.answer).to.equal(answerDataArray[0].answer);
+      expect(updatedAnswer.event_id).to.equal(answerDataArray[0].eventId);
+      expect(updatedAnswer.answered_by).to.equal(answerDataArray[0].answeredBy);
+      expect(updatedAnswer.updated_at.toDate()).to.not.equal(createdAnswer.updated_at.toDate());
+    });
+
+    it("should update answer with approved data", async function () {
+      const fieldsToUpdate: AnswerFieldsToUpdate = {
+        status: "APPROVED",
+        reviewed_by: "satyam-bajpai",
+      };
+      const updatedAnswer: Answer = await answerQuery.updateAnswer(createdAnswerId, fieldsToUpdate);
+
+      expect(updatedAnswer).to.be.a("object");
+      expect(updatedAnswer.id).to.equal(answerDataArray[0].id);
+      expect(updatedAnswer.reviewed_by).to.equal(fieldsToUpdate.reviewed_by);
+      expect(updatedAnswer.status).to.equal(fieldsToUpdate.status);
+      expect(updatedAnswer.answer).to.equal(answerDataArray[0].answer);
+      expect(updatedAnswer.event_id).to.equal(answerDataArray[0].eventId);
+      expect(updatedAnswer.answered_by).to.equal(answerDataArray[0].answeredBy);
+      expect(updatedAnswer.updated_at.toDate()).to.not.equal(createdAnswer.updated_at.toDate());
+    });
   });
 });
