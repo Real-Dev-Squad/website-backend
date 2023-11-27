@@ -199,7 +199,7 @@ const fetchTaskRequestById = async (taskRequestId) => {
  * @param {string} data.taskId - The ID of the task (optional).
  * @param {string} data.externalIssueUrl - The external issue URL (optional).
  * @param {string} data.requestType - The type of the task request (CREATION | ASSIGNMENT).
- * @param {string} authenticatedUserId - The ID of the authenticated user creating the request.
+ * @param {string} authorUserId - The ID of the authenticated user creating the request.
  * @returns {Promise<{
  *   isCreationRequestApproved: boolean | undefined,
  *   alreadyRequesting: boolean | undefined,
@@ -208,7 +208,7 @@ const fetchTaskRequestById = async (taskRequestId) => {
  *   taskRequest: Object,
  * }>}
  */
-const createRequest = async (data, authenticatedUserId) => {
+const createRequest = async (data, authorUserId) => {
   try {
     const queryFieldPath = data.requestType === TASK_REQUEST_TYPE.CREATION ? "externalIssueUrl" : "taskId";
     const queryValue = data.requestType === TASK_REQUEST_TYPE.CREATION ? data.externalIssueUrl : data.taskId;
@@ -254,7 +254,7 @@ const createRequest = async (data, authenticatedUserId) => {
       const updatedTaskRequest = {
         requestors: updatedRequestors,
         users: updatedUsers,
-        lastModifiedBy: authenticatedUserId,
+        lastModifiedBy: authorUserId,
         lastModifiedAt: Date.now(),
       };
       await taskRequestsCollection.doc(taskRequestRef.id).update(updatedTaskRequest);
@@ -275,9 +275,9 @@ const createRequest = async (data, authenticatedUserId) => {
       externalIssueUrl: data.externalIssueUrl,
       requestType: data.requestType,
       users: [userRequest],
-      createdBy: authenticatedUserId,
+      createdBy: authorUserId,
       createdAt: Date.now(),
-      lastModifiedBy: authenticatedUserId,
+      lastModifiedBy: authorUserId,
       lastModifiedAt: Date.now(),
     };
     if (!newTaskRequest.externalIssueUrl) delete newTaskRequest.externalIssueUrl;
@@ -346,7 +346,7 @@ const addOrUpdate = async (taskId, userId) => {
  *
  * @param {string} taskRequestId - The ID of the task request.
  * @param {Object} user - The user to whom the task request is being approved.
- * @param {string} authenticatedUserId - The ID of the authenticated user performing the approval.
+ * @param {string} authorUserId - The ID of the authenticated user performing the approval.
  * @returns {Promise<{
  *   approvedTo: string,
  *   taskRequest: Object,
@@ -355,7 +355,7 @@ const addOrUpdate = async (taskId, userId) => {
  *   isTaskRequestInvalid: boolean | undefined
  * }>}
  */
-const approveTaskRequest = async (taskRequestId, user, authenticatedUserId) => {
+const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
   try {
     return await firestore.runTransaction(async (transaction) => {
       const taskRequestDocRef = taskRequestsCollection.doc(taskRequestId);
@@ -392,7 +392,7 @@ const approveTaskRequest = async (taskRequestId, user, authenticatedUserId) => {
           users: taskRequestData.users,
           approvedTo: user.id,
           status: TASK_REQUEST_STATUS.APPROVED,
-          lastModifiedBy: authenticatedUserId,
+          lastModifiedBy: authorUserId,
           lastModifiedAt: Date.now(),
         };
         // End of TODO
@@ -427,7 +427,7 @@ const approveTaskRequest = async (taskRequestId, user, authenticatedUserId) => {
         const updatedTaskRequest = {
           approvedTo: user.id,
           status: TASK_REQUEST_STATUS.APPROVED,
-          lastModifiedBy: authenticatedUserId,
+          lastModifiedBy: authorUserId,
           lastModifiedAt: Date.now(),
         };
         let userRequestData;
@@ -471,13 +471,13 @@ const approveTaskRequest = async (taskRequestId, user, authenticatedUserId) => {
  * Rejects a task request.
  *
  * @param {string} taskRequestId - The ID of the task request.
- * @param {string} authenticatedUserId - The ID of the authenticated or logged in user performing the rejection.
+ * @param {string} authorUserId - The ID of the authenticated or logged in user performing the rejection.
  * @returns {Promise<{taskRequest: Object
  *   taskRequestNotFound: boolean | undefined
  *   isTaskRequestInvalid: boolean | undefined
  * }>}
  */
-const rejectTaskRequest = async (taskRequestId, authenticatedUserId) => {
+const rejectTaskRequest = async (taskRequestId, authorUserId) => {
   const taskRequestDoc = taskRequestsCollection.doc(taskRequestId);
   const taskRequestData = (await taskRequestDoc.get()).data();
   if (!taskRequestData) {
@@ -492,7 +492,7 @@ const rejectTaskRequest = async (taskRequestId, authenticatedUserId) => {
   }
   const updatedTaskRequest = {
     status: TASK_REQUEST_STATUS.DENIED,
-    lastModifiedBy: authenticatedUserId,
+    lastModifiedBy: authorUserId,
     lastModifiedAt: Date.now(),
   };
   await taskRequestDoc.update(updatedTaskRequest);
