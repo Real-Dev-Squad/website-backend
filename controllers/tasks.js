@@ -12,6 +12,7 @@ const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 const dataAccess = require("../services/dataAccessLayer");
 const { parseSearchQuery } = require("../utils/tasks");
+const { addTaskCreatedAtAndUpdatedAtFields } = require("../services/tasks");
 /**
  * Creates new task
  *
@@ -24,9 +25,12 @@ const addNewTask = async (req, res) => {
     const { id: createdBy } = req.userData;
     const dependsOn = req.body.dependsOn;
     let userStatusUpdate;
+    const timeStamp = Math.round(Date.now() / 1000);
     const body = {
       ...req.body,
       createdBy,
+      createdAt: timeStamp,
+      updatedAt: timeStamp,
     };
     delete body.dependsOn;
     const { taskId, taskDetails } = await tasks.updateTask(body);
@@ -270,7 +274,7 @@ const updateTask = async (req, res) => {
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
     }
-    const requestData = { ...req.body };
+    const requestData = { ...req.body, updatedAt: Math.round(Date.now() / 1000) };
     if (requestData?.assignee) {
       const user = await dataAccess.retrieveUsers({ username: requestData.assignee });
       if (!user.userExists) {
@@ -310,6 +314,7 @@ const updateTask = async (req, res) => {
  */
 const updateTaskStatus = async (req, res, next) => {
   try {
+    req.body.updatedAt = Math.round(new Date().getTime() / 1000);
     let userStatusUpdate;
     const taskId = req.params.id;
     const { userStatusFlag } = req.query;
@@ -445,6 +450,11 @@ const assignTask = async (req, res) => {
 
 const updateStatus = async (req, res) => {
   try {
+    const { action, field } = req.body;
+    if (action === "ADD" && field === "CREATED_AT+UPDATED_AT") {
+      const updateStats = await addTaskCreatedAtAndUpdatedAtFields();
+      return res.json(updateStats);
+    }
     const response = await tasks.updateTaskStatus();
     return res.status(200).json(response);
   } catch (error) {
