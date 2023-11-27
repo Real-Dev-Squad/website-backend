@@ -184,9 +184,10 @@ describe("Tasks", function () {
   });
 
   describe("GET /tasks", function () {
+    let taskId2, taskId3;
     before(async function () {
-      await tasks.updateTask({ ...taskData[0], createdAt: 1621717694, updatedAt: 1700680830 });
-      await tasks.updateTask({ ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753 });
+      taskId2 = (await tasks.updateTask({ ...taskData[0], createdAt: 1621717694, updatedAt: 1700680830 })).taskId;
+      taskId3 = (await tasks.updateTask({ ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753 })).taskId;
     });
 
     it("Should get all the list of tasks", function (done) {
@@ -315,7 +316,7 @@ describe("Tasks", function () {
           }
 
           expect(res).to.have.status(200);
-          expect(res.body.tasks[0].id).to.be.oneOf([taskId, taskId1]);
+          expect(res.body.tasks[0].id).to.be.oneOf([taskId, taskId1, taskId2, taskId3]);
           return done();
         });
     });
