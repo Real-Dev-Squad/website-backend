@@ -500,7 +500,7 @@ const addUsersCountAndCreatedAt = async () => {
       isDocumentModified = true;
     }
     if (!taskRequestData.createdAt) {
-      taskRequestData.createdAt = 0;
+      taskRequestData.createdAt = taskRequestsSnapshot.createTime.toMillis();
       isDocumentModified = true;
     }
 

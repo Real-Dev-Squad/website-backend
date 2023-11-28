@@ -500,9 +500,10 @@ describe("Task requests | models", function () {
         const response = await addUsersCountAndCreatedAt();
         expect(response.totalDocuments).to.be.equal(1);
         expect(response.documentsModified).to.be.equal(1);
-        const taskRequestData = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
+        const taskRequestSnapshot = await taskRequestsCollection.doc(taskRequestId1).get();
+        const taskRequestData = taskRequestSnapshot.data();
         expect(taskRequestData.usersCount).to.be.equal(1);
-        expect(taskRequestData.createdAt).to.be.equal(0);
+        expect(taskRequestData.createdAt).to.be.equal(taskRequestSnapshot.createTime.toMillis());
       });
       it("Should not update existing fields", async function () {
         const taskRequest = { ...mockData.existingTaskRequest };
