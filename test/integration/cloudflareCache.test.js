@@ -48,7 +48,7 @@ describe("Purged Cache Metadata", function () {
           expect(response).to.have.status(200);
           expect(response.body).to.be.an("object");
           expect(response.body.message).to.equal("No cache is cleared yet");
-          expect(response.body.count).to.equal(0);
+          expect(response.body.remainingCount).to.equal(3);
           return done();
         });
     });
@@ -67,7 +67,7 @@ describe("Purged Cache Metadata", function () {
           expect(response).to.have.status(200);
           expect(response.body).to.be.an("object");
           expect(response.body.message).to.equal("Purged cache metadata returned successfully!");
-          expect(response.body.count).to.be.a("number");
+          expect(response.body.remainingCount).to.be.a("number");
           expect(response.body.timeLastCleared).to.be.a("number");
 
           return done();

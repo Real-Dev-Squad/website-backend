@@ -81,7 +81,7 @@ const fetchPurgedCacheMetadata = async (req, res) => {
       const { timestamp } = latestCacheMetadata;
       return res.json({
         message: "Purged cache metadata returned successfully!",
-        count: logs.length,
+        remainingCount: MAX_CACHE_PURGE_COUNT - logs.length,
         timeLastCleared: timestamp._seconds,
       });
     } else if ((await logsQuery.fetchLastAddedCacheLog(id)).length !== 0) {
@@ -89,13 +89,13 @@ const fetchPurgedCacheMetadata = async (req, res) => {
       const { timestamp } = lastLog[0];
       return res.json({
         message: "Purged cache metadata returned successfully!",
-        count: 0,
+        remainingCount: MAX_CACHE_PURGE_COUNT,
         timeLastCleared: timestamp._seconds,
       });
     } else {
       return res.json({
         message: "No cache is cleared yet",
-        count: 0,
+        remainingCount: MAX_CACHE_PURGE_COUNT,
       });
     }
   } catch (error) {
