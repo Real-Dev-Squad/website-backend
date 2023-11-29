@@ -9,4 +9,10 @@ module.exports = {
   userToken: {
     cookieName: "rds-session",
   },
+
+  services: {
+    goalAPI: {
+      baseUrl: "https://goals-api.realdevsquad.com",
+    },
+  },
 };

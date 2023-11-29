@@ -24,7 +24,7 @@ module.exports = {
     },
 
     goalAPI: {
-      baseUrl: "https://backend-goals-production.up.railway.app",
+      baseUrl: "https://staging-goals-api.realdevsquad.com",
       secretKey: "123456789",
     },
   },
