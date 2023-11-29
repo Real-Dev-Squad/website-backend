@@ -16,6 +16,6 @@ router.patch(
   answers.updateAnswer
 );
 
-// router.get("/", answers.getanswers);
+router.get("/", answers.getAnswers);
 
 module.exports = router;

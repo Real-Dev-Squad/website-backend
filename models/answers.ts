@@ -1,7 +1,7 @@
 const admin = require("firebase-admin");
 const firestore = require("../utils/firestore");
 const answerModel = firestore.collection("answers");
-import { AnswerBody, AnswerFieldsToUpdate } from "../typeDefinitions/answers";
+import { Answer, AnswerBody, AnswerFieldsToUpdate } from "../typeDefinitions/answers";
 const { ANSWER_STATUS } = require("../constants/answers");
 
 const createAnswer = async (answerData: AnswerBody) => {
@@ -47,4 +47,30 @@ const updateAnswer = async (id: string, fieldsToUpdate: AnswerFieldsToUpdate) =>
   }
 };
 
-module.exports = { createAnswer, updateAnswer };
+const getAnswers = async (queryFields) => {
+  console.log({ getanswermode: queryFields });
+  const questionId = queryFields.questionId || "";
+  const eventId = queryFields.eventId || "";
+  const status = queryFields.status || "";
+  let answersRef = answerModel;
+  let answers: Answer[] = [];
+
+  try {
+    answersRef = questionId ? answersRef.where("question_id", "==", questionId) : answersRef;
+    answersRef = eventId ? answersRef.where("event_id", "==", eventId) : answersRef;
+    answersRef = status ? answersRef.where("status", "==", status) : answersRef;
+
+    const answerSnapshot = await answersRef.get();
+
+    answerSnapshot.forEach((answer) => {
+      answers.push({ id: answer.id, ...answer.data() });
+    });
+
+    return answers;
+  } catch (error) {
+    logger.error(`Some error occured while getting answers ${error}`);
+    throw error;
+  }
+};
+
+module.exports = { createAnswer, updateAnswer, getAnswers };

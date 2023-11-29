@@ -26,3 +26,9 @@ export type Answer = {
   question_id: string;
   status: AnswerStatus;
 };
+
+export type AnswerQueryFields = {
+  status: AnswerStatus;
+  questionId: string;
+  eventId: string;
+};
