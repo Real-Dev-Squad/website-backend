@@ -50,7 +50,7 @@ describe("Discord actions", function () {
   let jwt;
   beforeEach(async function () {
     fetchStub = sinon.stub(global, "fetch");
-    userId = await addUser();
+    userId = await addUser(userData[0]);
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
     jwt = authService.generateAuthToken({ userId });
@@ -190,12 +190,70 @@ describe("Discord actions", function () {
     });
   });
 
+  describe("POST /discord-actions/roles", function () {
+    let roleid;
+    beforeEach(async function () {
+      const discordRoleModelPromise = [discordRoleModel.add(groupData[0]), discordRoleModel.add(groupData[1])];
+      roleid = groupData[0].roleid;
+      await Promise.all(discordRoleModelPromise);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should allow role to be added", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({}),
+        })
+      );
+      const res = await chai
+        .request(app)
+        .post("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ roleid, userid: userData[0].discordId });
+
+      expect(res).to.have.status(201);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Role added successfully!");
+    });
+    it("should not allow unknown role to be added to user", async function () {
+      const res = await chai
+        .request(app)
+        .post("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ roleid: "randomId", userid: "abc" });
+
+      expect(res).to.have.status(403);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Permission denied. Cannot add the role.");
+    });
+    it("should not allow role to be added when userid does not belong to authenticated user", async function () {
+      const res = await chai
+        .request(app)
+        .post("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ roleid, userid: "asdf" });
+
+      expect(res).to.have.status(403);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Permission denied. Cannot add the role.");
+    });
+  });
   describe("DELETE /discord-actions/roles", function () {
+    let roleid;
+
     beforeEach(async function () {
       const addRolePromises = memberGroupData.map(async (data) => {
         await memberRoleModel.add(data);
       });
-
+      const discordRoleModelPromise = [discordRoleModel.add(groupData[0]), discordRoleModel.add(groupData[1])];
+      await Promise.all(discordRoleModelPromise);
+      roleid = groupData[0].roleid;
+      await memberRoleModel.add({ roleid, userid: userData[0].discordId });
       await Promise.all(addRolePromises);
     });
 
@@ -215,7 +273,7 @@ describe("Discord actions", function () {
         .request(app)
         .delete("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(memberGroupData[0])
+        .send({ roleid, userid: userData[0].discordId })
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -229,16 +287,34 @@ describe("Discord actions", function () {
         });
     });
 
+    it("should not allow unknown role to be deleted from user", async function () {
+      const res = await chai
+        .request(app)
+        .post("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ roleid: "randomId", userid: "abc" });
+
+      expect(res).to.have.status(403);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Permission denied. Cannot add the role.");
+    });
+    it("should not allow role to be deleted when userid does not belong to authenticated user", async function () {
+      const res = await chai
+        .request(app)
+        .post("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ roleid, userid: "asdf" });
+
+      expect(res).to.have.status(403);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Permission denied. Cannot add the role.");
+    });
     it("should handle internal server error", function (done) {
-      const mockdata = {
-        roleid: "mockroleid",
-        userid: "mockUserId",
-      };
       chai
         .request(app)
         .delete("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockdata)
+        .send({ roleid, userid: userData[0].discordId })
         .end((err, res) => {
           if (err) {
             return done(err);
