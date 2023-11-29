@@ -109,7 +109,7 @@ const levelSpecificAccess = (user, level = ACCESS_LEVEL.PUBLIC, role = null) => 
 
 /**
  * Fetch users based on document key and value
- * @param documentKey {String} -  Model field path.
+ * @param documentKey {string | FieldPath} -  Model field path.
  * @param value {String | Array} - Single field value or list of values to be matched.
  */
 const fetchUsersForKeyValues = async (documentKey, value, removeSensitiveInfo = true) => {
