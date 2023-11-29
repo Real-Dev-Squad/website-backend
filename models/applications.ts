@@ -2,7 +2,6 @@ import { application } from "../types/application";
 const firestore = require("../utils/firestore");
 const ApplicationsModel = firestore.collection("applicants");
 
-
 const getAllApplications = async () => {
   try {
     const allApplicationsData = [];
@@ -20,6 +19,25 @@ const getAllApplications = async () => {
   }
 };
 
+const getApplicationsBasedOnStatus = async (status: string, userId: string) => {
+  const applications = [];
+  let dbQuery = ApplicationsModel.where("status", "==", status);
+
+  if (userId) {
+    dbQuery = dbQuery.where('userId', '==', userId)
+  }
+  const applicationsBasedOnStatus = await dbQuery.get();
+
+  applicationsBasedOnStatus.forEach((data: any) => {
+    applications.push({
+      id: data.id,
+      ...data.data(),
+    });
+  });
+
+  return applications;
+};
+
 const getUserApplications = async (userId: string) => {
   try {
     const application = await ApplicationsModel.where("userId", "==", userId).limit(1).get();
@@ -27,7 +45,7 @@ const getUserApplications = async (userId: string) => {
     if (applicationDoc) {
       return { id: applicationDoc.id, ...applicationDoc.data() };
     }
-    return { notFound: true }
+    return { notFound: true };
   } catch (err) {
     logger.log("error in getting user intro", err);
     throw err;
@@ -58,4 +76,5 @@ module.exports = {
   getUserApplications,
   addApplication,
   updateApplication,
+  getApplicationsBasedOnStatus
 };

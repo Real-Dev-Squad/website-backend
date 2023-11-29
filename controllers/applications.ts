@@ -6,13 +6,21 @@ const ApplicationModel = require("../models/applications");
 
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
-    const { userId } = req.query;
+    const { userId, status } = req.query;
     if (userId) {
       const application = await ApplicationModel.getUserApplications(userId);
       return res.json({
         message: "application returned successfully!",
         application,
       });
+    }
+
+    if (status) {
+      const applicationsWithStatus = await ApplicationModel.getApplicationsBasedOnStatus(status)
+      return res.json({
+        message: 'applications returned successfully!',
+        applcations: applicationsWithStatus
+      })
     }
 
     const applications = await ApplicationModel.getAllApplications();
@@ -29,8 +37,8 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
 const addApplication = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const rawData = req.body;
-    const application = await ApplicationModel.getUserApplications(req.userData.id);
-    if (!application.notFound && !application.status) {
+    const applications = await ApplicationModel.getApplicationsBasedOnStatus('pending', req.userData.id);
+    if (applications.length) {
       return res.status(409).json({
         message: "User data is already present!",
       });
@@ -58,6 +66,7 @@ const addApplication = async (req: CustomRequest, res: CustomResponse) => {
         numberOfHours: rawData.numberOfHours,
       },
       foundFrom: rawData.foundFrom,
+      status: 'pending'
     };
     await ApplicationModel.addApplication(data);
 
