@@ -290,24 +290,24 @@ describe("Discord actions", function () {
     it("should not allow unknown role to be deleted from user", async function () {
       const res = await chai
         .request(app)
-        .post("/discord-actions/roles")
+        .delete("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ roleid: "randomId", userid: "abc" });
 
       expect(res).to.have.status(403);
       expect(res.body).to.be.an("object");
-      expect(res.body.message).to.equal("Permission denied. Cannot add the role.");
+      expect(res.body.message).to.equal("Permission denied. Cannot delete the role.");
     });
     it("should not allow role to be deleted when userid does not belong to authenticated user", async function () {
       const res = await chai
         .request(app)
-        .post("/discord-actions/roles")
+        .delete("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ roleid, userid: "asdf" });
 
       expect(res).to.have.status(403);
       expect(res.body).to.be.an("object");
-      expect(res.body.message).to.equal("Permission denied. Cannot add the role.");
+      expect(res.body.message).to.equal("Permission denied. Cannot delete the role.");
     });
     it("should handle internal server error", function (done) {
       chai
