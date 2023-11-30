@@ -19,7 +19,7 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
       const applicationsWithStatus = await ApplicationModel.getApplicationsBasedOnStatus(status)
       return res.json({
         message: 'applications returned successfully!',
-        applcations: applicationsWithStatus
+        applications: applicationsWithStatus
       })
     }
 

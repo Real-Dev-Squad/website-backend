@@ -28,11 +28,13 @@ let secondUserJwt: string;
 let applicationId1: string;
 let applicationId2: string;
 
-describe("Application", function () {
+describe.only("Application", function () {
   before(async function () {
-    userId = await addUser(appOwner);
-    superUserId = await addUser(superUser);
-    secondUserId = await addUser(secondUser);
+    const userIdPromises = [addUser(appOwner), addUser(superUser), addUser(secondUser)];
+    const [userId1, userId2, userId3] = await Promise.all(userIdPromises)
+    userId = userId1
+    superUserId = userId2;
+    secondUserId = userId3;
     jwt = authService.generateAuthToken({ userId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
     secondUserJwt = authService.generateAuthToken({ userId: secondUserId });
@@ -49,7 +51,7 @@ describe("Application", function () {
     await cleanDb();
   });
 
-  describe("GET /applications", function () {
+  describe.only("GET /applications", function () {
     it("should return all the application if the user is super user and there is no user id", function (done) {
       chai
         .request(app)
@@ -143,6 +145,25 @@ describe("Application", function () {
           return done();
         });
     });
+
+    it ("should return application with status accepted if status accepted is passed in query params", function(done) {
+      chai
+        .request(app)
+        .get("/applications?status=accepted")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("applications returned successfully!");
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.applications[0].status).to.be.equal('accepted')
+          return done();
+        });
+    })
   });
 
   describe("POST /applications", function () {
