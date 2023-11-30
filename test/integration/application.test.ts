@@ -28,7 +28,7 @@ let secondUserJwt: string;
 let applicationId1: string;
 let applicationId2: string;
 
-describe.only("Application", function () {
+describe("Application", function () {
   before(async function () {
     const userIdPromises = [addUser(appOwner), addUser(superUser), addUser(secondUser)];
     const [userId1, userId2, userId3] = await Promise.all(userIdPromises)
@@ -51,7 +51,7 @@ describe.only("Application", function () {
     await cleanDb();
   });
 
-  describe.only("GET /applications", function () {
+  describe("GET /applications", function () {
     it("should return all the application if the user is super user and there is no user id", function (done) {
       chai
         .request(app)
@@ -186,7 +186,7 @@ describe.only("Application", function () {
         });
     });
 
-    it("should return 409 if the user data is already submitted and the status is not there", function (done) {
+    it("should return 409 if the user data is already submitted and the status is pending", function (done) {
       chai
         .request(app)
         .post(`/applications`)
