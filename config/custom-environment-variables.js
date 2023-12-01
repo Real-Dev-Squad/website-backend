@@ -73,6 +73,10 @@ module.exports = {
     botPublicKey: "BOT_PUBLIC_KEY",
   },
 
+  cronJobHandler: {
+    publicKey: "CRON_JOB_PUBLIC_KEY",
+  },
+
   rdsServerlessBot: {
     rdsServerLessPrivateKey: "RDS_SERVERLESS_PRIVATE_KEY",
     ttl: "RDS_SERVERLESS_TTL",
