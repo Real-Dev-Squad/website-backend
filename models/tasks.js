@@ -131,6 +131,7 @@ const fetchPaginatedTasks = async ({
   dev = false,
   assignee,
   title,
+  assigneeRole,
 }) => {
   try {
     let initialQuery = tasksModel;
@@ -195,6 +196,10 @@ const fetchPaginatedTasks = async ({
 
       if (title) {
         initialQuery = initialQuery.where("title", ">=", title).where("title", "<=", title + "\uf8ff");
+      }
+      if (assigneeRole) {
+        const archivedUserIds = await userUtils.getArchivedUserIds();
+        initialQuery = initialQuery.where("assignee", "in", archivedUserIds);
       }
     }
 

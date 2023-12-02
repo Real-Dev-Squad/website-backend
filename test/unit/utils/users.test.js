@@ -7,15 +7,16 @@ const addUser = require("../../utils/addUser");
 const { filteredPRs } = require("../../fixtures/pullrequests/pullrequests");
 const { months, discordNicknameLength } = require("../../../constants/users");
 const userData = require("../../fixtures/user/user")()[0];
+const usersData = require("../../fixtures/user/user")();
 const sinon = require("sinon");
 const firestore = require("../../../utils/firestore");
 const userModel = firestore.collection("users");
 const dataAccessLayer = require("../../../services/dataAccessLayer");
-
+const userModels = require("../../../models/users");
 /**
  * Test the utils functions and validate the data returned
  */
-
+const archivedUsers = usersData.filter((user) => user?.roles?.archived === true);
 describe("users", function () {
   let userId;
   const taskData = {
@@ -50,7 +51,28 @@ describe("users", function () {
       expect(convertedUsername).to.equal(userData.username);
     });
   });
+  describe("getArchivedUsersIds", function () {
+    let archivedUserIds = [];
+    beforeEach(async function () {
+      userId = await addUser();
+      archivedUserIds = await Promise.all(archivedUsers.map((user) => addUser(user)));
+    });
 
+    afterEach(async function () {
+      await cleanDb();
+      archivedUserIds = [];
+      sinon.restore();
+    });
+
+    it("should return all userIds of archived users", async function () {
+      sinon.stub(userModels, "fetchArchivedUsers").returns([
+        { id: archivedUserIds[0], ...archivedUsers[0] },
+        { id: archivedUserIds[1], ...archivedUsers[1] },
+      ]);
+      const userIds = await usersUtils.getArchivedUserIds();
+      expect(userIds).to.deep.equal(archivedUserIds);
+    });
+  });
   describe("getUserId", function () {
     it("should receive username of user and return userId", async function () {
       const convertedUserId = await usersUtils.getUserId(userData.username);

@@ -64,7 +64,7 @@ const buildTasks = (tasks, initialTaskArray = []) => {
   return initialTaskArray;
 };
 
-const transformQuery = (dev = false, status = "", size, page, assignee = "", title = "") => {
+const transformQuery = (dev = false, status = "", size, page, assignee = "", title = "", assigneeRole = "") => {
   const query = {};
   const transformedDev = JSON.parse(dev);
   const transformedStatus = MAPPED_TASK_STATUS[status.toUpperCase()];
@@ -84,6 +84,7 @@ const transformQuery = (dev = false, status = "", size, page, assignee = "", tit
     dev: transformedDev,
     assignee: transformedAssignee,
     title: transformedTitle,
+    assigneeRole: assigneeRole,
     ...query,
   };
 };

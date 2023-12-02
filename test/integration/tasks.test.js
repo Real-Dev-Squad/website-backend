@@ -20,7 +20,9 @@ chai.use(chaiHttp);
 
 const appOwner = userData[3];
 const superUser = userData[4];
-
+const archivedUsers = userData.filter((user) => user?.roles?.archived === true);
+const archivedUserNames = archivedUsers.map((user) => user.username);
+const archivedUserIds = [];
 let jwt, superUserJwt;
 
 describe("Tasks", function () {
@@ -29,6 +31,11 @@ describe("Tasks", function () {
   before(async function () {
     const userId = await addUser(appOwner);
     const superUserId = await addUser(superUser);
+
+    archivedUsers.forEach(async (user) => {
+      const userId = await addUser(user);
+      archivedUserIds.push(userId);
+    });
     jwt = authService.generateAuthToken({ userId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
 
@@ -262,6 +269,53 @@ describe("Tasks", function () {
           });
           return done();
         });
+    });
+    it("Should get all tasks assigned to archived users GET /tasks", async function () {
+      const task = [
+        {
+          title: "Test task 1",
+          type: "feature",
+          endsOn: 1234,
+          startedOn: 4567,
+          status: "IN_PROGRESS",
+          percentCompleted: 10,
+          participants: [],
+          assignee: "ankita",
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          isNoteworthy: true,
+          assigneeId: archivedUserIds[0],
+        },
+        {
+          title: "Test task 2",
+          type: "feature",
+          endsOn: 1234,
+          startedOn: 4567,
+          status: "BLOCKED",
+          percentCompleted: 10,
+          participants: [],
+          assignee: "ram",
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          isNoteworthy: true,
+          assigneeId: archivedUserIds[1],
+        },
+      ];
+      const { taskId: taskId1 } = await tasks.updateTask(task[0]);
+      const { taskId: taskId2 } = await tasks.updateTask(task[1]);
+      const res = await chai.request(app).get(`/tasks?assigneeRole=archived&dev=true`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("Tasks returned successfully!");
+      expect(res.body.tasks).to.be.a("array");
+      expect(res.body).to.have.property("next");
+      expect(res.body).to.have.property("prev");
+
+      const tasksData = res.body.tasks ?? [];
+      tasksData.forEach((task) => {
+        expect(res.body.task.id).to.be.oneOf([taskId1, taskId2]);
+        expect(task.assignee).to.be.oneOf(archivedUserNames);
+      });
     });
 
     it("Should get all overdue tasks GET /tasks", function (done) {
