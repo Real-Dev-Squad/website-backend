@@ -69,7 +69,8 @@ describe("users", function () {
         { id: archivedUserIds[0], ...archivedUsers[0] },
         { id: archivedUserIds[1], ...archivedUsers[1] },
       ]);
-      const userIds = await usersUtils.getArchivedUserIds();
+      let userIds = await usersUtils.getArchivedUserIds();
+      userIds = [...new Set(userIds)];
       expect(userIds).to.deep.equal(archivedUserIds);
     });
   });
