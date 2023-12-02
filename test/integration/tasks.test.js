@@ -468,7 +468,7 @@ describe("Tasks", function () {
           matchingTasks.forEach((task) => {
             expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
           });
-          expect(matchingTasks).to.have.length(6);
+          expect(matchingTasks).to.have.length(8);
 
           return done();
         });
