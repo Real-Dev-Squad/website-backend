@@ -3,6 +3,7 @@ const sinon = require("sinon");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 
+const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const tasks = require("../../models/tasks");
 const authService = require("../../services/authService");
@@ -25,6 +26,40 @@ const archivedUserNames = archivedUsers.map((user) => user.username);
 const archivedUserIds = [];
 let jwt, superUserJwt;
 
+const taskData = [
+  {
+    title: "Test task",
+    type: "feature",
+    endsOn: 1234,
+    startedOn: 4567,
+    status: "IN_PROGRESS",
+    percentCompleted: 10,
+    participants: [],
+    assignee: appOwner.username,
+    completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+    lossRate: { [DINERO]: 1 },
+    isNoteworthy: true,
+    isCollapsed: true,
+  },
+  {
+    title: "Test task",
+    purpose: "To Test mocha",
+    featureUrl: "<testUrl>",
+    type: "group",
+    links: ["test1"],
+    endsOn: 1234,
+    startedOn: 54321,
+    status: "completed",
+    percentCompleted: 10,
+    dependsOn: ["d12", "d23"],
+    participants: [appOwner.username],
+    completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+    lossRate: { [DINERO]: 1 },
+    isNoteworthy: false,
+    assignee: appOwner.username,
+  },
+];
+
 describe("Tasks", function () {
   let taskId1, taskId;
 
@@ -38,40 +73,6 @@ describe("Tasks", function () {
     });
     jwt = authService.generateAuthToken({ userId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
-
-    const taskData = [
-      {
-        title: "Test task",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "IN_PROGRESS",
-        percentCompleted: 10,
-        participants: [],
-        assignee: appOwner.username,
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-        isCollapsed: true,
-      },
-      {
-        title: "Test task",
-        purpose: "To Test mocha",
-        featureUrl: "<testUrl>",
-        type: "group",
-        links: ["test1"],
-        endsOn: 1234,
-        startedOn: 54321,
-        status: "completed",
-        percentCompleted: 10,
-        dependsOn: ["d12", "d23"],
-        participants: [appOwner.username],
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: false,
-        assignee: appOwner.username,
-      },
-    ];
 
     // Add the active task
     taskId = (await tasks.updateTask(taskData[0])).taskId;
@@ -118,10 +119,45 @@ describe("Tasks", function () {
           expect(res.body.message).to.equal("Task created successfully!");
           expect(res.body.task).to.be.a("object");
           expect(res.body.task.id).to.be.a("string");
+          expect(res.body.task.createdAt).to.be.a("number");
+          expect(res.body.task.updatedAt).to.be.a("number");
           expect(res.body.task.createdBy).to.equal(appOwner.username);
           expect(res.body.task.assignee).to.equal(appOwner.username);
           expect(res.body.task.participants).to.be.a("array");
           expect(res.body.task.dependsOn).to.be.a("array");
+          return done();
+        });
+    });
+    it("Should have same time for createdAt and updatedAt for new tasks", function (done) {
+      chai
+        .request(app)
+        .post("/tasks")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "Test task - Create",
+          type: "feature",
+          endsOn: 123,
+          startedOn: 456,
+          status: "AVAILABLE",
+          percentCompleted: 10,
+          priority: "HIGH",
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          assignee: appOwner.username,
+          participants: [],
+          dependsOn: [],
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Task created successfully!");
+          expect(res.body.task).to.be.a("object");
+          expect(res.body.task.createdAt).to.be.a("number");
+          expect(res.body.task.updatedAt).to.be.a("number");
+          expect(res.body.task.createdAt).to.be.eq(res.body.task.updatedAt);
           return done();
         });
     });
@@ -155,6 +191,12 @@ describe("Tasks", function () {
   });
 
   describe("GET /tasks", function () {
+    let taskId2, taskId3;
+    before(async function () {
+      taskId2 = (await tasks.updateTask({ ...taskData[0], createdAt: 1621717694, updatedAt: 1700680830 })).taskId;
+      taskId3 = (await tasks.updateTask({ ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753 })).taskId;
+    });
+
     it("Should get all the list of tasks", function (done) {
       chai
         .request(app)
@@ -328,7 +370,7 @@ describe("Tasks", function () {
           }
 
           expect(res).to.have.status(200);
-          expect(res.body.tasks[0].id).to.be.oneOf([taskId, taskId1]);
+          expect(res.body.tasks[0].id).to.be.oneOf([taskId, taskId1, taskId2, taskId3]);
           return done();
         });
     });
@@ -366,7 +408,6 @@ describe("Tasks", function () {
           if (err) {
             return done(err);
           }
-
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Tasks returned successfully!");
@@ -427,7 +468,7 @@ describe("Tasks", function () {
           matchingTasks.forEach((task) => {
             expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
           });
-          expect(matchingTasks).to.have.length(3);
+          expect(matchingTasks).to.have.length(6);
 
           return done();
         });
@@ -463,6 +504,26 @@ describe("Tasks", function () {
           expect(res.body.message).to.equal("No tasks found.");
           expect(res.body.tasks).to.be.a("array");
           expect(res.body.tasks).to.have.lengthOf(0);
+          return done();
+        });
+    });
+    it("Should get paginated tasks ordered by updatedAt in desc order ", function (done) {
+      chai
+        .request(app)
+        .get("/tasks?dev=true&size=5&page=0")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          const tasks = res.body.tasks;
+          // Check if Tasks are returned in desc order of updatedAt field
+          for (let i = 0; i < tasks.length - 1; i++) {
+            expect(tasks[+i].updatedAt).to.be.greaterThanOrEqual(tasks[i + 1].updatedAt);
+          }
           return done();
         });
     });
@@ -588,7 +649,7 @@ describe("Tasks", function () {
   });
 
   describe("PATCH /tasks", function () {
-    it("Should update the task for the given taskid", function (done) {
+    it("Should update the task for the given taskId", function (done) {
       chai
         .request(app)
         .patch("/tasks/" + taskId1)
@@ -604,6 +665,41 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("should update updatedAt field when patch request is made", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/" + taskId1)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "new-title",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("should update updatedAt field", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.taskData.updatedAt).to.be.a("number");
+          expect(res.body.taskData.updatedAt).to.be.not.eq(tasksData[0].updatedAt);
+          expect(res.body.taskData.updatedAt).to.be.not.eq(res.body.taskData.createdAt);
+          return done();
+        });
+    });
+
     it("Should update dependency", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
       const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
@@ -1066,7 +1162,7 @@ describe("Tasks", function () {
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
-        status: "COMPLETED",
+        status: "completed",
         percentCompleted: 100,
         participants: [],
         assignee: appOwner.username,
@@ -1122,6 +1218,132 @@ describe("Tasks", function () {
       expect(res).to.have.status(200);
       expect(res.body.newAvailableTasks).to.have.lengthOf(0);
       expect(res.body.message).to.be.equal("No overdue tasks found");
+    });
+  });
+
+  describe("POST /tasks/migration", function () {
+    it("Should update status COMPLETED to DONE successful", async function () {
+      const taskData1 = { status: "COMPLETED" };
+      await firestore.collection("tasks").doc("updateTaskStatus1").set(taskData1);
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(1);
+      expect(res.body.totalUpdatedStatus).to.be.equal(1);
+      expect(res.body.updatedTaskDetails).to.deep.equal(["updateTaskStatus1"]);
+      expect(res.body.totalOperationsFailed).to.be.equal(0);
+      expect(res.body.failedTaskDetails).to.deep.equal([]);
+    });
+
+    it("Should not update if not found any COMPLETED task status ", async function () {
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(0);
+      expect(res.body.totalUpdatedStatus).to.be.equal(0);
+      expect(res.body.updatedTaskDetails).to.deep.equal([]);
+      expect(res.body.totalOperationsFailed).to.be.equal(0);
+      expect(res.body.failedTaskDetails).to.deep.equal([]);
+    });
+
+    it("should throw an error if firestore batch operations fail", async function () {
+      const stub = sinon.stub(firestore, "batch");
+      stub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("Firestore batch commit failed!");
+        },
+      });
+      const taskData1 = { status: "COMPLETED" };
+      await firestore.collection("tasks").doc("updateTaskStatus1").set(taskData1);
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(res.status).to.equal(500);
+      const response = res.body;
+      expect(response.message).to.be.equal("An internal server error occurred");
+    });
+
+    it("Should return 401 if not super_user", async function () {
+      const nonSuperUserId = await addUser(appOwner);
+      const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${nonSuperUserJwt}`);
+      expect(res).to.have.status(401);
+    });
+  });
+
+  describe("POST /tasks/migration for adding createdAt+updatedAt", function () {
+    beforeEach(async function () {
+      const userId = await addUser(appOwner);
+      const superUserId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId });
+      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+      // Add the active task
+      await tasks.updateTask(tasksData[0]);
+      await tasks.updateTask(tasksData[1]);
+      await tasks.updateTask(tasksData[3]);
+      await tasks.updateTask(tasksData[4]);
+      await tasks.updateTask(tasksData[5]);
+      await tasks.updateTask(tasksData[6]);
+    });
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("Should return 401 if not super_user", async function () {
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${jwt}`);
+      expect(res).to.have.status(401);
+    });
+
+    // TASK createdAt and updatedAt migration script
+    it("Should update status createdAt and updatedAt", async function () {
+      // Add new tasks with createdAt and updatedAt present
+      await tasks.updateTask({ ...tasksData[7], createdAt: null, updatedAt: null });
+      await tasks.updateTask({ ...tasksData[8], createdAt: null, updatedAt: null });
+      await tasks.updateTask({ ...tasksData[9], updatedAt: null });
+      await tasks.updateTask({ ...tasksData[10], createdAt: null });
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
+        action: "ADD",
+        field: "CREATED_AT+UPDATED_AT",
+      });
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(10);
+      expect(res.body.totalTaskToBeUpdate).to.be.equal(4);
+      expect(res.body.totalTasksUpdated).to.be.equal(4);
+      expect(res.body.totalFailedTasks).to.be.equal(0);
+      expect(res.body.failedTasksIds).to.deep.equal([]);
+    });
+
+    it("Should update status createdAt and updatedAt, if filed doesn't exists", async function () {
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
+        action: "ADD",
+        field: "CREATED_AT+UPDATED_AT",
+      });
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(6);
+      expect(res.body.totalTaskToBeUpdate).to.be.equal(0);
+      expect(res.body.totalTasksUpdated).to.be.equal(0);
+      expect(res.body.totalFailedTasks).to.be.equal(0);
+      expect(res.body.failedTasksIds).to.deep.equal([]);
+    });
+
+    it("should return failed stats if firestore batch operations fail for adding createdAt and updatedAt", async function () {
+      await tasks.updateTask({ ...tasksData[7], createdAt: null, updatedAt: null });
+      await tasks.updateTask({ ...tasksData[8], createdAt: null, updatedAt: null });
+      await tasks.updateTask({ ...tasksData[9], updatedAt: null });
+      await tasks.updateTask({ ...tasksData[10], createdAt: null });
+      const stub = sinon.stub(firestore, "batch");
+      stub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("Firestore batch commit failed!");
+        },
+      });
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
+        action: "ADD",
+        field: "CREATED_AT+UPDATED_AT",
+      });
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(10);
+      expect(res.body.totalTaskToBeUpdate).to.be.equal(4);
+      expect(res.body.totalTasksUpdated).to.be.equal(0);
+      expect(res.body.totalFailedTasks).to.be.equal(4);
+      expect(res.body.failedTasksIds.length).to.equal(4);
     });
   });
 });

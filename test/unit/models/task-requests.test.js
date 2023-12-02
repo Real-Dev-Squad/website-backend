@@ -8,6 +8,8 @@ const {
   fetchPaginatedTaskRequests,
   addNewFields,
   removeOldField,
+  addUsersCountAndCreatedAt,
+  rejectTaskRequest,
 } = require("./../../../models/taskRequests");
 const {
   TASK_REQUEST_TYPE,
@@ -348,11 +350,12 @@ describe("Task requests | models", function () {
   describe("approveTaskRequest", function () {
     const user = { id: "user123", username: "testUser" };
     const taskRequestId = "taskRequest123";
+    const authenticatedUserId = "userId";
 
     it("should approve a task request for creation", async function () {
       const existingTaskRequest = { ...mockData.existingTaskRequest, requestType: TASK_REQUEST_TYPE.CREATION };
       await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
-      const result = await approveTaskRequest(taskRequestId, user);
+      const result = await approveTaskRequest(taskRequestId, user, authenticatedUserId);
       const approvedTaskRequest = result.taskRequest;
       expect(approvedTaskRequest.status).to.equal(TASK_REQUEST_STATUS.APPROVED);
       expect(approvedTaskRequest.approvedTo).to.equal(user.id);
@@ -368,7 +371,7 @@ describe("Task requests | models", function () {
       const existingTaskRequest = { ...mockData.existingTaskRequest, requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
       await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
       await tasksCollection.doc(existingTaskRequest.taskId).set(tasksData[0]);
-      const result = await approveTaskRequest(taskRequestId, user);
+      const result = await approveTaskRequest(taskRequestId, user, authenticatedUserId);
       const approvedTaskRequest = result.taskRequest;
       expect(approvedTaskRequest.status).to.equal(TASK_REQUEST_STATUS.APPROVED);
       expect(approvedTaskRequest.approvedTo).to.equal(user.id);
@@ -382,27 +385,50 @@ describe("Task requests | models", function () {
       const existingTaskRequest = { ...mockData.existingTaskRequest };
       await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
       const invalidUser = { id: "invalidUserId", username: "invalidUser" };
-      const result = await approveTaskRequest(taskRequestId, invalidUser);
+      const result = await approveTaskRequest(taskRequestId, invalidUser, authenticatedUserId);
       expect(result.isUserInvalid).to.be.equal(true);
     });
     it("should handle task request not found", async function () {
-      const result = await approveTaskRequest("nonExistentTaskRequestId", user);
+      const result = await approveTaskRequest("nonExistentTaskRequestId", user, authenticatedUserId);
       expect(result.taskRequestNotFound).to.be.equal(true);
     });
     it("should handle invalid task request status", async function () {
       const existingTaskRequest = { ...mockData.existingTaskRequest, status: TASK_REQUEST_STATUS.APPROVED };
       await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
-      const result = await approveTaskRequest(taskRequestId, user);
+      const result = await approveTaskRequest(taskRequestId, user, authenticatedUserId);
       expect(result.isTaskRequestInvalid).to.be.equal(true);
     });
     it("should throw an error for general approval failure", async function () {
       sinon.stub(firestore, "runTransaction").rejects(new Error("Transaction failed"));
       try {
-        await approveTaskRequest(taskRequestId, user);
+        await approveTaskRequest(taskRequestId, user, authenticatedUserId);
         expect.fail("Error in approving task: Transaction failed");
       } catch (err) {
         expect(err.message).to.equal("Transaction failed");
       }
+    });
+  });
+
+  describe("rejectTaskRequest", function () {
+    const taskRequestId = "taskRequest123";
+    const authenticatedUserId = "userId";
+    it("should reject a task request", async function () {
+      const existingTaskRequest = { ...mockData.existingTaskRequest };
+      await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
+      const result = await rejectTaskRequest(taskRequestId, authenticatedUserId);
+      const rejectedTaskRequest = result.taskRequest;
+      expect(rejectedTaskRequest.status).to.equal(TASK_REQUEST_STATUS.DENIED);
+      expect(rejectedTaskRequest.lastModifiedBy).to.equal("userId");
+    });
+    it("should handle task request not found", async function () {
+      const result = await rejectTaskRequest("nonExistentTaskRequestId", authenticatedUserId);
+      expect(result.taskRequestNotFound).to.be.equal(true);
+    });
+    it("should handle invalid task request status", async function () {
+      const existingTaskRequest = { ...mockData.existingTaskRequest, status: TASK_REQUEST_STATUS.APPROVED };
+      await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
+      const result = await rejectTaskRequest(taskRequestId, authenticatedUserId);
+      expect(result.isTaskRequestInvalid).to.be.equal(true);
     });
   });
 
@@ -484,10 +510,36 @@ describe("Task requests | models", function () {
         expect(response.totalDocuments).to.be.equal(1);
         expect(response.documentsModified).to.be.equal(1);
         const taskRequestData = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
-        const taskRequest = mockData.existingTaskRequest;
+        const taskRequest = { ...mockData.existingTaskRequest };
         delete taskRequest.requestors;
         delete taskRequest.approvedTo;
         expect(taskRequestData).to.be.deep.equal(taskRequest);
+      });
+    });
+
+    describe("Add users count and created at", function () {
+      it("Should add users count and createdAt", async function () {
+        const taskRequest = { ...mockData.existingTaskRequest };
+        delete taskRequest.createdAt;
+        await taskRequestsCollection.doc(taskRequestId1).set(taskRequest);
+        const response = await addUsersCountAndCreatedAt();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(1);
+        const taskRequestSnapshot = await taskRequestsCollection.doc(taskRequestId1).get();
+        const taskRequestData = taskRequestSnapshot.data();
+        expect(taskRequestData.usersCount).to.be.equal(1);
+        expect(taskRequestData.createdAt).to.be.equal(taskRequestSnapshot.createTime.toMillis());
+      });
+      it("Should not update existing fields", async function () {
+        const taskRequest = { ...mockData.existingTaskRequest };
+        taskRequest.usersCount = 1;
+        await taskRequestsCollection.doc(taskRequestId1).set(taskRequest);
+        const response = await addUsersCountAndCreatedAt();
+        expect(response.totalDocuments).to.be.equal(1);
+        expect(response.documentsModified).to.be.equal(0);
+        const taskRequestData = (await taskRequestsCollection.doc(taskRequestId1).get()).data();
+        expect(taskRequestData.usersCount).to.be.equal(1);
+        expect(taskRequestData.createdAt).to.be.equal(taskRequest.createdAt);
       });
     });
   });

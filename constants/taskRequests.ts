@@ -4,6 +4,11 @@ const TASK_REQUEST_STATUS = {
   PENDING: "PENDING",
   DENIED: "DENIED",
 };
+
+const TASK_REQUEST_ACTIONS = {
+  APPROVE: "approve",
+  REJECT: "reject",
+};
 const TASK_REQUEST_ERROR_MESSAGE = {
   INVALID_PREV: "Invalid 'prev' value",
   INVALID_NEXT: "Invalid 'next' value",
@@ -34,6 +39,7 @@ const TASK_REQUEST_SORT_VALUES = {
 const MIGRATION_TYPE = {
   ADD_NEW_FIELDS: "add-new-fields",
   REMOVE_OLD_FIELDS: "remove-redundant-fields",
+  ADD_COUNT_CREATED: "add-count-created-time"
 };
 
 module.exports = {
@@ -44,5 +50,6 @@ module.exports = {
   TASK_REQUEST_SORT_KEYS,
   TASK_REQUEST_ERROR_MESSAGE,
   TASK_REQUEST_SORT_VALUES,
-  MIGRATION_TYPE
+  MIGRATION_TYPE,
+  TASK_REQUEST_ACTIONS,
 };

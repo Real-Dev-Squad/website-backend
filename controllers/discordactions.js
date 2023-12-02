@@ -4,7 +4,7 @@ const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
 const discordServices = require("../services/discordService");
-const { fetchAllUsers } = require("../models/users");
+const { fetchAllUsers, fetchUser } = require("../models/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
 
@@ -23,9 +23,9 @@ const createGroupRole = async (req, res) => {
   try {
     const rolename = `group-${req.body.rolename}`;
 
-    const { wasSuccess } = await discordRolesModel.isGroupRoleExists(rolename);
+    const { roleExists } = await discordRolesModel.isGroupRoleExists({ rolename });
 
-    if (!wasSuccess) {
+    if (roleExists) {
       return res.status(400).json({
         message: "Role already exists!",
       });
@@ -109,6 +109,15 @@ const addGroupRoleToMember = async (req, res) => {
       ...req.body,
       date: admin.firestore.Timestamp.fromDate(new Date()),
     };
+    const roleExistsPromise = discordRolesModel.isGroupRoleExists({
+      roleid: memberGroupRole.roleid,
+    });
+    const userDataPromise = fetchUser({ discordId: memberGroupRole.userid });
+    const [{ roleExists }, userData] = await Promise.all([roleExistsPromise, userDataPromise]);
+
+    if (!roleExists || req.userData.id !== userData.user.id) {
+      res.boom.forbidden("Permission denied. Cannot add the role.");
+    }
 
     const { roleData, wasSuccess } = await discordRolesModel.addGroupRoleToMember(memberGroupRole);
 
@@ -146,6 +155,17 @@ const addGroupRoleToMember = async (req, res) => {
 const deleteRole = async (req, res) => {
   try {
     const { roleid, userid } = req.body;
+
+    const roleExistsPromise = discordRolesModel.isGroupRoleExists({
+      roleid,
+    });
+    const userDataPromise = fetchUser({ discordId: userid });
+    const [{ roleExists }, userData] = await Promise.all([roleExistsPromise, userDataPromise]);
+
+    if (!roleExists || req.userData.id !== userData.user.id) {
+      res.boom.forbidden("Permission denied. Cannot delete the role.");
+    }
+
     const { wasSuccess } = await discordRolesModel.removeMemberGroup(roleid, userid);
     if (wasSuccess) {
       return res.status(200).json({ message: "Role deleted successfully" });
