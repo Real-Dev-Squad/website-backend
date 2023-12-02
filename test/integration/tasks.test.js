@@ -345,7 +345,7 @@ describe("Tasks", function () {
       ];
       const { taskId: taskId1 } = await tasks.updateTask(task[0]);
       const { taskId: taskId2 } = await tasks.updateTask(task[1]);
-      const res = await chai.request(app).get(`/tasks?assigneeRole=archived&dev=true`);
+      const res = await chai.request(app).get(`/tasks?assignee-role=archived&dev=true`);
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
       expect(res.body.message).to.equal("Tasks returned successfully!");

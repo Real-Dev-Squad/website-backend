@@ -130,7 +130,18 @@ const fetchPaginatedTasks = async (query) => {
 
 const fetchTasks = async (req, res) => {
   try {
-    const { dev, status, page, size, prev, next, q: queryString, assignee, title, assigneeRole } = req.query;
+    const {
+      dev,
+      status,
+      page,
+      size,
+      prev,
+      next,
+      q: queryString,
+      assignee,
+      title,
+      "assignee-role": assigneeRole,
+    } = req.query;
     const transformedQuery = transformQuery(dev, status, size, page, assignee, title, assigneeRole);
 
     if (dev) {
