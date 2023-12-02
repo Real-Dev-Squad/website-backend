@@ -188,17 +188,15 @@ const fetchPaginatedTasks = async ({
       initialQuery = initialQuery.where("status", "==", status);
     }
 
-      if (title) {
-         initialQuery = initialQuery
+    if (title) {
+      initialQuery = initialQuery
         .where("title", ">=", title)
         .where("title", "<=", title + "\uf8ff")
         .orderBy("title", "asc");
-      }
-      if (assigneeRole) {
-        const archivedUserIds = await userUtils.getArchivedUserIds();
-        initialQuery = initialQuery.where("assignee", "in", archivedUserIds);
-      }
-    
+    }
+    if (assigneeRole) {
+      const archivedUserIds = await userUtils.getArchivedUserIds();
+      initialQuery = initialQuery.where("assignee", "in", archivedUserIds);
     }
 
     initialQuery = initialQuery.orderBy("updatedAt", "desc");
