@@ -505,7 +505,8 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
       });
 
       const settledPromises = await Promise.all(promises);
-      nicknameUpdatePromises.push(...settledPromises);
+      const updatedPromises = settledPromises.filter(result => result);
+      nicknameUpdatePromises.push(...updatedPromises);
 
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
