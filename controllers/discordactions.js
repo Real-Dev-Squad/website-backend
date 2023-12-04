@@ -403,6 +403,75 @@ const setRoleToUsersWith31DaysPlusOnboarding = async (req, res) => {
   }
 };
 
+const generateInviteForUser = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const userIdForInvite = userId || req.userData.id;
+
+    const modelResponse = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
+
+    if (!modelResponse.notFound) {
+      return res.status(409).json({
+        message: "User invite is already present!",
+      });
+    }
+
+    const channelId = config.get("discordNewComersChannelId");
+    const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
+      algorithm: "RS256",
+      expiresIn: config.get("rdsServerlessBot.ttl"),
+    });
+
+    const inviteOptions = {
+      channelId: channelId,
+    };
+    const response = await fetch(`${DISCORD_BASE_URL}/invite`, {
+      method: "POST",
+      body: JSON.stringify(inviteOptions),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+    });
+    const discordInviteResponse = await response.json();
+
+    const inviteCode = discordInviteResponse.data.code;
+    const inviteLink = `discord.gg/${inviteCode}`;
+
+    await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
+
+    return res.status(201).json({
+      message: "invite generated successfully",
+      inviteLink,
+    });
+  } catch (err) {
+    logger.error(`Error in generating invite for user: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const getUserDiscordInvite = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const isSuperUser = req.userData.roles.super_user;
+
+    if (userId && !isSuperUser) return res.boom.forbidden("User should be super user to get link for other users");
+
+    const userIdForInvite = userId || req.userData.id;
+
+    const invite = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
+
+    if (invite.notFound) {
+      return res.boom.notFound("User invite doesn't exist");
+    }
+
+    return res.json({
+      message: "Invite returned successfully",
+      inviteLink: invite?.inviteLink,
+    });
+  } catch (err) {
+    logger.error(`Error in fetching user invite: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   getGroupsRoleId,
   createGroupRole,
@@ -416,4 +485,6 @@ module.exports = {
   updateUsersNicknameStatus,
   syncDiscordGroupRolesInFirestore,
   setRoleToUsersWith31DaysPlusOnboarding,
+  getUserDiscordInvite,
+  generateInviteForUser,
 };
