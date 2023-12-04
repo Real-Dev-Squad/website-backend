@@ -30,3 +30,15 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+
+      - name: SSH into EC2 instance and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.MY_EC2_SSH_KEY }}
+          script: |
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+            sudo docker stop ${{ github.event.repository.name }} || true
+            sudo docker rm ${{ github.event.repository.name }} || true
+            sudo docker run -d -p 3000:3000 --name ${{ github.event.repository.name }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
