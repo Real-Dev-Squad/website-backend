@@ -19,7 +19,7 @@ const getArchivedUserIds = async () => {
     const archivedUsers = await fetchArchivedUsers();
     return archivedUsers.map((user) => user?.id);
   } catch (error) {
-    logger.error("Something went wrong", error);
+    logger.error("Error while fetching archived users", error);
     throw error;
   }
 };

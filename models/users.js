@@ -867,15 +867,15 @@ const getNonNickNameSyncedUsers = async () => {
 const fetchArchivedUsers = async () => {
   try {
     const archivedUsers = [];
-    const users = await userModel.where("roles.archived", "==", true).get();
-    users.forEach((doc) => {
+    const usersSnapshot = await userModel.where("roles.archived", "==", true).get();
+    usersSnapshot.forEach((doc) => {
       const userData = { id: doc.id, ...doc.data() };
       archivedUsers.push(userData);
     });
 
     return archivedUsers;
   } catch (error) {
-    logger.error("Something went wrong", error);
+    logger.error("Error while getting archived users", error);
     throw error;
   }
 };

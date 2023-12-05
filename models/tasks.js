@@ -11,7 +11,7 @@ const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../const
 const { IN_PROGRESS, NEEDS_REVIEW, IN_REVIEW, ASSIGNED, BLOCKED, SMOKE_TESTING, COMPLETED, SANITY_CHECK } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-
+const ROLES = require("../constants/roles");
 /**
  * Adds and Updates tasks
  *
@@ -194,7 +194,7 @@ const fetchPaginatedTasks = async ({
         .where("title", "<=", title + "\uf8ff")
         .orderBy("title", "asc");
     }
-    if (assigneeRole) {
+    if (assigneeRole === ROLES.ARCHIVED) {
       const archivedUserIds = await userUtils.getArchivedUserIds();
       initialQuery = initialQuery.where("assignee", "in", archivedUserIds);
     }
