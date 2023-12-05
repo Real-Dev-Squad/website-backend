@@ -2,6 +2,7 @@ const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const firestore = require("../utils/firestore");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
+const discordInvitesModel = firestore.collection("discord-invites");
 const admin = require("firebase-admin");
 const { findSubscribedGroupIds } = require("../utils/helper");
 const { retrieveUsers } = require("../services/dataAccessLayer");
@@ -830,6 +831,31 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
   }
 };
 
+const addInviteToInviteModel = async (inviteObject) => {
+  try {
+    const invite = await discordInvitesModel.add(inviteObject);
+    return invite.id;
+  } catch (err) {
+    logger.error("Error in adding invite", err);
+    throw err;
+  }
+};
+
+const getUserDiscordInvite = async (userId) => {
+  try {
+    const invite = await discordInvitesModel.where("userId", "==", userId).get();
+    const [inviteDoc] = invite.docs;
+    if (inviteDoc) {
+      return { id: inviteDoc.id, ...inviteDoc.data(), notFound: false };
+    } else {
+      return { notFound: true };
+    }
+  } catch (err) {
+    logger.log("error in getting user invite", err);
+    throw err;
+  }
+};
+
 module.exports = {
   createNewRole,
   removeMemberGroup,
@@ -847,4 +873,6 @@ module.exports = {
   updateUsersNicknameStatus,
   updateIdle7dUsersOnDiscord,
   updateUsersWith31DaysPlusOnboarding,
+  getUserDiscordInvite,
+  addInviteToInviteModel,
 };
