@@ -14,7 +14,7 @@ module.exports = {
   discordUnverifiedRoleId: "<discordUnverifiedRoleId>",
   discordDeveloperRoleId: "<discordDeveloperRoleId>",
   discordMavenRoleId: "<discordMavenRoleId>",
-  discordMissedUpdatesRoleId:"<ID>",
+  discordMissedUpdatesRoleId: "discordMissedUpdatesRoleId",
   githubApi: {
     baseUrl: "https://api.github.com",
     org: "Real-Dev-Squad",
