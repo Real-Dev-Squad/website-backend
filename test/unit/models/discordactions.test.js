@@ -4,10 +4,12 @@ const sinon = require("sinon");
 const firestore = require("../../../utils/firestore");
 const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
+const userStatusCollection = firestore.collection("usersStatus");
 const memberRoleModel = firestore.collection("member-group-roles");
 const userModel = firestore.collection("users");
 const admin = require("firebase-admin");
 const tasksData = require("../../fixtures/tasks/tasks")();
+
 const addUser = require("../../utils/addUser");
 const userStatusData = require("../../fixtures/userStatus/userStatus");
 const { getDiscordMembers } = require("../../fixtures/discordResponse/discord-response");
@@ -488,7 +490,7 @@ describe("discordactions", function () {
       const addedUsersStatusPromise = usersStatusData.map(async (data, index) => {
         const { id } = addedUers[index];
         const statusData = { ...data, userId: id };
-        const { id: userStatusId } = await userStatusModel.add(statusData);
+        const { id: userStatusId } = await userStatusCollection.add(statusData);
         return { ...statusData, id: userStatusId };
       });
 
@@ -639,7 +641,7 @@ describe("discordactions", function () {
       progressDataList.push(progressData);
       const date2 = new Date();
       date2.setDate(date2.getDate() - 3);
-      const progressData2 = stubbedModelTaskProgressData(null, taskIdList[2], date2.getTime(), date.valueOf());
+      const progressData2 = stubbedModelTaskProgressData(null, taskIdList[2], date2.getTime(), date2.valueOf());
       progressDataList.push(progressData2);
 
       await Promise.all(progressDataList.map(async (progress) => await createProgressDocument(progress)));
