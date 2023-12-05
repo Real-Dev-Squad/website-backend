@@ -2,6 +2,7 @@ const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const firestore = require("../utils/firestore");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
+const discordInvitesModel = firestore.collection("discord-invites");
 const admin = require("firebase-admin");
 const { findSubscribedGroupIds } = require("../utils/helper");
 const { retrieveUsers } = require("../services/dataAccessLayer");
@@ -31,7 +32,6 @@ const progressesModel = firestore.collection("progresses");
 const { COMPLETED_TASK_STATUS } = require("../constants/tasks.ts");
 const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const discordService = require("../services/discordService");
-const user = require("../test/fixtures/user/user");
 
 /**
  *
@@ -138,19 +138,32 @@ const updateGroupRole = async (roleData, docId) => {
 };
 /**
  *
- * @param roleData { Object }: Data of the new role
+ * @param options { Object }: Data of the new role
+ * @param options.rolename String : name of the role
+ * @param options.roleId String : id of the role
  * @returns {Promise<discordRoleModel|Object>}
  */
 
-const isGroupRoleExists = async (rolename) => {
+const isGroupRoleExists = async (options = {}) => {
   try {
-    const alreadyIsRole = await discordRoleModel.where("rolename", "==", rolename).limit(1).get();
-    if (!alreadyIsRole.empty) {
-      const oldRole = [];
-      alreadyIsRole.forEach((role) => oldRole.push(role.data()));
-      return { wasSuccess: false };
+    const { rolename = null, roleid = null } = options;
+
+    let existingRoles;
+    if (rolename && roleid) {
+      existingRoles = await discordRoleModel
+        .where("rolename", "==", rolename)
+        .where("roleid", "==", roleid)
+        .limit(1)
+        .get();
+    } else if (rolename) {
+      existingRoles = await discordRoleModel.where("rolename", "==", rolename).limit(1).get();
+    } else if (roleid) {
+      existingRoles = await discordRoleModel.where("roleid", "==", roleid).limit(1).get();
+    } else {
+      throw Error("Either rolename or roleId is required");
     }
-    return { wasSuccess: true };
+
+    return { roleExists: !existingRoles.empty };
   } catch (err) {
     logger.error("Error in getting all group-roles", err);
     throw err;
@@ -1000,6 +1013,31 @@ const addMissedProgressUpdatesRoleInDiscord = async (options = {}) => {
   }
 };
 
+const addInviteToInviteModel = async (inviteObject) => {
+  try {
+    const invite = await discordInvitesModel.add(inviteObject);
+    return invite.id;
+  } catch (err) {
+    logger.error("Error in adding invite", err);
+    throw err;
+  }
+};
+
+const getUserDiscordInvite = async (userId) => {
+  try {
+    const invite = await discordInvitesModel.where("userId", "==", userId).get();
+    const [inviteDoc] = invite.docs;
+    if (inviteDoc) {
+      return { id: inviteDoc.id, ...inviteDoc.data(), notFound: false };
+    } else {
+      return { notFound: true };
+    }
+  } catch (err) {
+    logger.log("error in getting user invite", err);
+    throw err;
+  }
+};
+
 module.exports = {
   createNewRole,
   removeMemberGroup,
@@ -1018,4 +1056,6 @@ module.exports = {
   updateIdle7dUsersOnDiscord,
   updateUsersWith31DaysPlusOnboarding,
   addMissedProgressUpdatesRoleInDiscord,
+  getUserDiscordInvite,
+  addInviteToInviteModel,
 };
