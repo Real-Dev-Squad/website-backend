@@ -75,7 +75,7 @@ const notifyController = async (req, res) => {
 
     return kilobytes;
   }
-  if (calculateMessageSize(message) <= 2) {
+  if (calculateMessageSize(message) >= 2) {
     res.error(401).send("Message length exceeds");
   }
   // Save the FCM token to your database or perform other necessary actions.
