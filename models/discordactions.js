@@ -15,9 +15,23 @@ const dataAccess = require("../services/dataAccessLayer");
 const { getDiscordMembers, addRoleToUser, removeRoleFromUser } = require("../services/discordService");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
+const discordMissedUpdatesRoleId = config.get("discordMissedUpdatesRoleId");
+
 const userStatusModel = firestore.collection("usersStatus");
 const usersUtils = require("../utils/users");
 const { getUsersBasedOnFilter, fetchUser } = require("./users");
+const {
+  convertDaysToMilliseconds,
+  convertMillisToSeconds,
+  convertTimestampToUTCStartOrEndOfDay,
+} = require("../utils/time");
+const { chunks } = require("../utils/array");
+const tasksModel = firestore.collection("tasks");
+const progressesModel = firestore.collection("progresses");
+const { COMPLETED_TASK_STATUS } = require("../constants/tasks.ts");
+const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
+const discordService = require("../services/discordService");
+const user = require("../test/fixtures/user/user");
 
 /**
  *
@@ -817,6 +831,175 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
   }
 };
 
+const addMissedProgressUpdatesRoleInDiscord = async (options = {}) => {
+  const { cursor, size = 500, excludedDates = [], dateGap = 3 } = options;
+  const stats = {
+    tasks: 0,
+    missedUpdatesTasks: 0,
+  };
+  try {
+    const discordUsersPromise = discordService.getDiscordMembers();
+    const missedUpdatesRoleId = discordMissedUpdatesRoleId;
+
+    const completedTasksStatusList = Object.values(COMPLETED_TASK_STATUS);
+    let gapWindowStart = Date.now() - convertDaysToMilliseconds(dateGap);
+    const gapWindowEnd = Date.now();
+
+    excludedDates.forEach((timestamp) => {
+      if (timestamp > gapWindowStart && timestamp < gapWindowEnd) {
+        gapWindowStart -= convertDaysToMilliseconds(1);
+      }
+    });
+
+    let taskQuery = tasksModel
+      .where("status", "not-in", completedTasksStatusList)
+      .where("startedOn", "<", convertMillisToSeconds(gapWindowStart))
+      .orderBy("assignee") // this order by will eliminate the documents which has no assignee field. https://firebase.google.com/docs/firestore/query-data/order-limit-data#limitations
+      .limit(size);
+
+    if (cursor) {
+      const data = await tasksModel.doc(cursor).get();
+      if (!data.data()) {
+        return {
+          statusCode: 400,
+          error: "Bad Request",
+          message: `Invalid cursor: ${cursor}`,
+        };
+      }
+      taskQuery = taskQuery.startAfter(data);
+    }
+
+    const usersMap = new Map();
+    const progressCountPromise = [];
+    const tasksQuerySnapshot = await taskQuery.get();
+
+    stats.tasks = tasksQuerySnapshot.size;
+    tasksQuerySnapshot.forEach((doc) => {
+      const taskAssignee = doc.data().assignee;
+      const taskId = doc.id;
+
+      if (usersMap.has(taskAssignee)) {
+        const userData = usersMap.get(taskAssignee);
+        userData.tasksCount++;
+      } else {
+        usersMap.set(taskAssignee, {
+          tasksCount: 1,
+          latestProgressCount: dateGap + 1,
+          isActive: false,
+        });
+      }
+      const updateTasksIdMap = async () => {
+        const progressSnapshot = await progressesModel
+          .where("type", "==", "task")
+          .where("taskId", "==", taskId)
+          .where("date", ">=", convertTimestampToUTCStartOrEndOfDay(gapWindowStart))
+          .where("date", "<=", convertTimestampToUTCStartOrEndOfDay(gapWindowEnd, true))
+          .count()
+          .get();
+        const userData = usersMap.get(taskAssignee);
+        userData.latestProgressCount = Math.min(progressSnapshot.data().count, userData.latestProgressCount);
+
+        if (userData.latestProgressCount === 0) {
+          stats.missedUpdatesTasks++;
+        }
+      };
+      progressCountPromise.push(updateTasksIdMap());
+    });
+
+    const userIdChunks = chunks(Array.from(usersMap.keys()), FIRESTORE_IN_CLAUSE_SIZE);
+    const userStatusSnapshotPromise = userIdChunks.map(
+      async (userIdList) =>
+        await userStatusModel
+          .where("currentStatus.state", "==", userState.ACTIVE)
+          .where("userId", "in", userIdList)
+          .get()
+    );
+    const userDetailsPromise = userIdChunks.map(
+      async (userIdList) =>
+        await userModel
+          .where("roles.archived", "==", false)
+          .where(admin.firestore.FieldPath.documentId(), "in", userIdList)
+          .get()
+    );
+
+    const userStatusChunks = await Promise.all(userStatusSnapshotPromise);
+
+    userStatusChunks.forEach((userStatusList) =>
+      userStatusList.forEach((doc) => {
+        usersMap.get(doc.data().userId).isActive = true;
+      })
+    );
+
+    const userDetailsListChunks = await Promise.all(userDetailsPromise);
+    userDetailsListChunks.forEach((userList) => {
+      userList.forEach((doc) => {
+        const userData = usersMap.get(doc.id);
+        userData.discordId = doc.data().discordId;
+      });
+    });
+
+    const discordUserList = await Promise.all(discordUsersPromise);
+
+    const discordUserMap = new Map();
+    discordUserList.forEach((discordUser) => {
+      const discordUserData = { isBot: !!discordUser.user.bot };
+      discordUser.roles.forEach((roleId) => {
+        switch (roleId) {
+          case discordDeveloperRoleId: {
+            discordUserData.isDeveloper = true;
+            break;
+          }
+          case discordMavenRoleId: {
+            discordUserData.isMaven = true;
+            break;
+          }
+          case missedUpdatesRoleId: {
+            discordUserData.hasMissedUpdatesRole = true;
+            break;
+          }
+        }
+      });
+      discordUserMap.set(discordUser.user.id, discordUserData);
+    });
+
+    await Promise.all(progressCountPromise);
+
+    for (const [userId, userData] of usersMap.entries()) {
+      const discordUserData = discordUserMap.get(userData.discordId);
+      const isDiscordMember = !!discordUserData;
+      const shouldAddRole =
+        userData.latestProgressCount === 0 &&
+        userData.isActive &&
+        isDiscordMember &&
+        discordUserData.isDeveloper &&
+        !discordUserData.isMaven &&
+        !discordUserData.isBot &&
+        !discordUserData.hasMissedUpdatesRole;
+
+      if (!shouldAddRole) {
+        usersMap.delete(userId);
+      }
+    }
+
+    const usersToAddRole = [];
+    for (const userData of usersMap.values()) {
+      usersToAddRole.push(userData.discordId);
+    }
+    const resultDataLength = tasksQuerySnapshot.docs.length;
+    const isLast = size && resultDataLength === size;
+    const lastVisible = isLast && tasksQuerySnapshot.docs[resultDataLength - 1];
+
+    if (lastVisible) {
+      stats.cursor = lastVisible.id;
+    }
+
+    return { usersToAddRole, ...stats };
+  } catch (err) {
+    logger.error("Error while running the add missed roles script", err);
+    throw err;
+  }
+};
+
 module.exports = {
   createNewRole,
   removeMemberGroup,
@@ -834,4 +1017,5 @@ module.exports = {
   updateUsersNicknameStatus,
   updateIdle7dUsersOnDiscord,
   updateUsersWith31DaysPlusOnboarding,
+  addMissedProgressUpdatesRoleInDiscord,
 };

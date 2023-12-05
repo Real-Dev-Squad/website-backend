@@ -24,7 +24,14 @@ const convertHoursToMilliseconds = (hours) => {
 const convertDaysToMilliseconds = (days) => {
   return days * 24 * 60 * 60 * 1000;
 };
-
+/**
+ * Converts milliseconds to seconds
+ * @param milliseconds {number} : to be converted
+ * @returns {number} : seconds
+ */
+const convertMillisToSeconds = (milliseconds) => {
+  return milliseconds / 1000;
+};
 /**
  * Returns time in seconds of timestamp after given duration
  * @param timestamp {integer} : base time in milliseconds
@@ -82,4 +89,5 @@ module.exports = {
   getTimeInSecondAfter,
   getBeforeHourTime,
   convertTimestampToUTCStartOrEndOfDay,
+  convertMillisToSeconds,
 };

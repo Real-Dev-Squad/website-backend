@@ -7,6 +7,14 @@ const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const userModel = firestore.collection("users");
 const admin = require("firebase-admin");
+const tasksData = require("../../fixtures/tasks/tasks")();
+const tasks = require("../../../models/tasks");
+const addUser = require("../../utils/addUser");
+const userStatusData = require("../../fixtures/userStatus/userStatus");
+const { getDiscordMembers } = require("../../fixtures/discordResponse/discord-response");
+const discordService = require("../../../services/discordService");
+const { TASK_STATUS } = require("../../../constants/tasks");
+const tasksModel = firestore.collection("tasks");
 
 const {
   createNewRole,
@@ -18,16 +26,22 @@ const {
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
   updateUsersNicknameStatus,
+  addMissedProgressUpdatesRoleInDiscord,
 } = require("../../../models/discordactions");
 const { groupData, roleData, existingRole, memberGroupData } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
 const { userPhotoVerificationData } = require("../../fixtures/user/photo-verification");
 const userData = require("../../fixtures/user/user")();
-const userStatusModel = firestore.collection("usersStatus");
+const userStatusModel = require("../../../models/userStatus");
 const { getStatusData } = require("../../fixtures/userStatus/userStatus");
 const usersStatusData = getStatusData();
 const dataAccessLayer = require("../../../services/dataAccessLayer");
 const { ONE_DAY_IN_MS } = require("../../../constants/users");
+const { createProgress } = require("../../../controllers/progresses");
+const { createProgressDocument } = require("../../../models/progresses");
+const user = require("../../fixtures/user/user");
+const { stubbedModelTaskProgressData } = require("../../fixtures/progress/progresses");
+const { convertDaysToMilliseconds } = require("../../../utils/time");
 
 chai.should();
 
@@ -566,5 +580,119 @@ describe("discordactions", function () {
         expect(err).to.be.instanceOf(Error);
       }
     }).timeout(10000);
+  });
+
+  describe.only("addMissedProgressUpdatesRoleInDiscord", function () {
+    const idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
+    const activeUserWithProgressUpdates = { ...userData[10], discordId: getDiscordMembers[1].user.id };
+    const activeUserWithNoUpdates = { ...userData[0], discordId: getDiscordMembers[2].user.id };
+    const userNotInDiscord = { ...userData[4], discordId: "Not in discord" };
+    const {
+      idleStatus: idleUserStatus,
+      activeStatus: activeUserStatus,
+      userStatusDataForOooState: oooUserStatus,
+    } = userStatusData;
+    let taskId;
+    beforeEach(async function () {
+      const userIdList = await Promise.all([
+        await addUser(idleUser), // idle user with no task progress updates
+        await addUser(activeUserWithProgressUpdates), // active user with task progress updates
+        await addUser(activeUserWithNoUpdates), // active user with no task progress updates
+        await addUser(userNotInDiscord), // OOO user with
+      ]);
+      await Promise.all([
+        await userStatusModel.updateUserStatus(userIdList[0], idleUserStatus),
+        await userStatusModel.updateUserStatus(userIdList[1], activeUserStatus),
+        await userStatusModel.updateUserStatus(userIdList[2], activeUserStatus),
+        await userStatusModel.updateUserStatus(userIdList[3], oooUserStatus),
+      ]);
+
+      const tasksPromise = [];
+
+      for (let index = 0; index < 4; index++) {
+        const task = tasksData[index];
+        const validTask = {
+          ...task,
+          assignee: userIdList[index],
+          startedOn: (new Date().getTime() - convertDaysToMilliseconds(5)) / 1000,
+          endsOn: (new Date().getTime() + convertDaysToMilliseconds(4)) / 1000,
+          status: TASK_STATUS.IN_PROGRESS,
+        };
+
+        tasksPromise.push(await tasksModel.add(validTask));
+      }
+      const taskIdList = (await Promise.all(tasksPromise)).map((tasksDoc) => tasksDoc.id);
+      taskId = taskIdList[0];
+      const progressDataList = [];
+
+      const date = new Date();
+      date.setDate(date.getDate() - 1);
+      const progressData = stubbedModelTaskProgressData(null, taskIdList[2], date.getTime(), date.valueOf());
+      progressDataList.push(progressData);
+      const date2 = new Date();
+      date2.setDate(date2.getDate() - 3);
+      const progressData2 = stubbedModelTaskProgressData(null, taskIdList[2], date2.getTime(), date.valueOf());
+      progressDataList.push(progressData2);
+
+      await Promise.all(progressDataList.map(async (progress) => await createProgressDocument(progress)));
+
+      sinon.stub(discordService, "getDiscordMembers").returns(getDiscordMembers);
+    });
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+    it("should list of users who missed updating progress", async function () {
+      const result = await addMissedProgressUpdatesRoleInDiscord();
+      expect(result).to.be.an("object");
+      expect(result).to.be.deep.equal({
+        tasks: 4,
+        missedUpdatesTasks: 3,
+        usersToAddRole: [activeUserWithProgressUpdates.discordId],
+      });
+    });
+    it("should not list of users who are not active and who missed updating progress", async function () {
+      const result = await addMissedProgressUpdatesRoleInDiscord();
+      expect(result).to.be.an("object");
+      expect(result.usersToAddRole).to.not.contain(idleUser.discordId);
+      expect(result.usersToAddRole).to.not.contain(userNotInDiscord.discordId);
+    });
+
+    it("should not list of users when exception days are added", async function () {
+      const date = new Date();
+      date.setDate(date.getDate() - 1);
+      const date2 = new Date();
+      date.setDate(date2.getDate() - 2);
+      const date3 = new Date();
+      date.setDate(date3.getDate() - 3);
+      const date4 = new Date();
+      date.setDate(date4.getDate() - 4);
+      // this should now only get users who have not provided any update in last 7 days instead of 3;
+      const result = await addMissedProgressUpdatesRoleInDiscord({
+        excludedDates: [date.valueOf(), date2.valueOf(), date3.valueOf(), date4.valueOf()],
+      });
+      expect(result).to.be.an("object");
+      expect(result).to.be.deep.equal({
+        tasks: 0,
+        missedUpdatesTasks: 0,
+        usersToAddRole: [],
+      });
+    });
+
+    it("should process only 1 task when size is passed as 1", async function () {
+      const result = await addMissedProgressUpdatesRoleInDiscord({ size: 1 });
+
+      expect(result).to.be.an("object");
+      expect(result.tasks).to.be.equal(1);
+    });
+    it("should fetch process tasks when cursor is passed", async function () {
+      const result = await addMissedProgressUpdatesRoleInDiscord({ size: 4 });
+
+      expect(result).to.be.an("object");
+      expect(result).to.haveOwnProperty("cursor");
+      const nextResult = await addMissedProgressUpdatesRoleInDiscord({ size: 4, cursor: result.cursor });
+      expect(nextResult).to.be.an("object");
+      expect(nextResult).to.not.haveOwnProperty("cursor");
+    });
   });
 });
