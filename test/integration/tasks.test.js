@@ -1293,8 +1293,11 @@ describe("Tasks", function () {
     });
   });
 
-  describe("PATCH /tasks/:id should the tasks by SuperUser", function () {
+  describe("PATCH /tasks/:id should update the tasks by SuperUser", function () {
     beforeEach(async function () {
+      const superUserId = await addUser(superUser);
+      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+
       await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").set({
         assignee: "SooJK37gzjIZfFNH0tlL",
         status: "IN_PROGRESS",
