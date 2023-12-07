@@ -24,13 +24,15 @@ describe("Notify Test", function () {
   describe("POST call to notify", function () {
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should send message to specified users", async function () {
+      // skipping the test because it connects with firebase cloud messaging service which we are unable to mock.
+
       const notifyData = { title: "some title", body: "some body", userId: userId0 };
 
       const fcmTokenData = { fcmToken: "iedsijdsdj" };
 
       await chai
         .request(app)
-        .post("/fcm-token")
+        .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...fcmTokenData,
@@ -38,7 +40,7 @@ describe("Notify Test", function () {
 
       const response = await chai
         .request(app)
-        .post("/notify")
+        .post("/v1/notifications")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...notifyData,
@@ -54,7 +56,7 @@ describe("Notify Test", function () {
 
       await chai
         .request(app)
-        .post("/fcm-token")
+        .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...fcmTokenData,
@@ -62,7 +64,7 @@ describe("Notify Test", function () {
 
       const response = await chai
         .request(app)
-        .post("/notify")
+        .post("/v1/notifications")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...notifyData,
@@ -79,7 +81,7 @@ describe("Notify Test", function () {
 
       await chai
         .request(app)
-        .post("/fcm-token")
+        .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...fcmTokenData,
@@ -87,7 +89,7 @@ describe("Notify Test", function () {
 
       const response = await chai
         .request(app)
-        .post("/notify")
+        .post("/v1/notifications")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...notifyData,
@@ -104,20 +106,20 @@ describe("Notify Test", function () {
 
       await chai
         .request(app)
-        .post("/fcm-token")
+        .post("/v1/fcm-tokens")
         .send({
           ...fcmTokenData,
         });
 
       const response = await chai
         .request(app)
-        .post("/notify")
+        .post("/v1/notifications")
         .send({
           ...notifyData,
         });
 
-      expect(response).to.have.status(400);
-      expect(response.body.message).equals('"value" must contain at least one of [userId, groupRoleId]');
+      expect(response).to.have.status(401);
+      expect(response.body.message).equals("Unauthenticated User");
     });
   });
 });
