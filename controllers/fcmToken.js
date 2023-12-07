@@ -14,7 +14,7 @@ const fcmTokenController = (req, res) => {
 
     res.status(200).send(`FCM token saved: ${fcmTokenId}`);
   } catch (error) {
-    throw new Error(error);
+    res.status(500).send("Something went wrong, please contact admin");
   }
 };
 

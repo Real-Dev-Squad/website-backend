@@ -78,9 +78,6 @@ const notifyController = async (req, res) => {
   if (calculateMessageSize(message) >= 2) {
     res.error(401).send("Message length exceeds");
   }
-  // Save the FCM token to your database or perform other necessary actions.
-  // You can associate the token with a user or device, for example.
-
   admin
     .messaging()
     .sendMulticast(message)
