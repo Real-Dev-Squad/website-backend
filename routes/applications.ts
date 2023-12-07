@@ -8,13 +8,15 @@ const applicationValidator = require("../middlewares/validators/application");
 
 const router = express.Router();
 
-router.get(
-  "/",
-  authenticate,
-  authorizeOwnOrSuperUser,
-  applications.getAllOrUserApplication
-);
+router.get("/", authenticate, authorizeOwnOrSuperUser, applications.getAllOrUserApplication);
+router.get("/:applicationId", authenticate, authorizeRoles([SUPERUSER]), applications.getApplicationById);
 router.post("/", authenticate, applicationValidator.validateApplicationData, applications.addApplication);
-router.patch("/:applicationId", authenticate, applicationValidator.validateApplicationUpdateData, authorizeRoles([SUPERUSER]), applications.updateApplication);
+router.patch(
+  "/:applicationId",
+  authenticate,
+  applicationValidator.validateApplicationUpdateData,
+  authorizeRoles([SUPERUSER]),
+  applications.updateApplication
+);
 
 module.exports = router;

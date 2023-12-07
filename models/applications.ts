@@ -19,6 +19,16 @@ const getAllApplications = async () => {
   }
 };
 
+const getApplicationById = async (applicationId: string) => {
+  const application = await ApplicationsModel.doc(applicationId).get();
+
+  if (application.exists) {
+    return { id: application.id, ...application.data(), notFound: false };
+  }
+
+  return { notFound: true };
+}
+
 const getApplicationsBasedOnStatus = async (status: string, userId: string) => {
   const applications = [];
   let dbQuery = ApplicationsModel.where("status", "==", status);
@@ -76,5 +86,6 @@ module.exports = {
   getUserApplications,
   addApplication,
   updateApplication,
-  getApplicationsBasedOnStatus
+  getApplicationsBasedOnStatus,
+  getApplicationById,
 };
