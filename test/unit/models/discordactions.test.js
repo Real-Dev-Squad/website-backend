@@ -27,7 +27,7 @@ const {
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
   updateUsersNicknameStatus,
-  addMissedProgressUpdatesRoleInDiscord,
+  getMissedProgressUpdatesUsers,
   addInviteToInviteModel,
   getUserDiscordInvite,
 } = require("../../../models/discordactions");
@@ -591,7 +591,7 @@ describe("discordactions", function () {
     }).timeout(10000);
   });
 
-  describe("addMissedProgressUpdatesRoleInDiscord", function () {
+  describe("getMissedProgressUpdatesUsers", function () {
     let activeUserWithProgressUpdates;
     let idleUser;
     let userNotInDiscord;
@@ -639,10 +639,6 @@ describe("discordactions", function () {
       date.setDate(date.getDate() - 1);
       const progressData = stubbedModelTaskProgressData(null, taskIdList[2], date.getTime(), date.valueOf());
       progressDataList.push(progressData);
-      const date2 = new Date();
-      date2.setDate(date2.getDate() - 3);
-      const progressData2 = stubbedModelTaskProgressData(null, taskIdList[2], date2.getTime(), date2.valueOf());
-      progressDataList.push(progressData2);
 
       await Promise.all(progressDataList.map(async (progress) => await createProgressDocument(progress)));
 
@@ -653,7 +649,7 @@ describe("discordactions", function () {
       await cleanDb();
     });
     it("should list of users who missed updating progress", async function () {
-      const result = await addMissedProgressUpdatesRoleInDiscord();
+      const result = await getMissedProgressUpdatesUsers();
       expect(result).to.be.an("object");
       expect(result).to.be.deep.equal({
         tasks: 4,
@@ -663,7 +659,7 @@ describe("discordactions", function () {
     });
 
     it("should not list of users who are not active and who missed updating progress", async function () {
-      const result = await addMissedProgressUpdatesRoleInDiscord();
+      const result = await getMissedProgressUpdatesUsers();
       expect(result).to.be.an("object");
       expect(result.usersToAddRole).to.not.contain(idleUser.discordId);
       expect(result.usersToAddRole).to.not.contain(userNotInDiscord.discordId);
@@ -673,13 +669,13 @@ describe("discordactions", function () {
       const date = new Date();
       date.setDate(date.getDate() - 1);
       const date2 = new Date();
-      date.setDate(date2.getDate() - 2);
+      date2.setDate(date2.getDate() - 2);
       const date3 = new Date();
-      date.setDate(date3.getDate() - 3);
+      date3.setDate(date3.getDate() - 3);
       const date4 = new Date();
-      date.setDate(date4.getDate() - 4);
+      date4.setDate(date4.getDate() - 4);
       // this should now only get users who have not provided any update in last 7 days instead of 3;
-      const result = await addMissedProgressUpdatesRoleInDiscord({
+      const result = await getMissedProgressUpdatesUsers({
         excludedDates: [date.valueOf(), date2.valueOf(), date3.valueOf(), date4.valueOf()],
       });
       expect(result).to.be.an("object");
@@ -691,17 +687,17 @@ describe("discordactions", function () {
     });
 
     it("should process only 1 task when size is passed as 1", async function () {
-      const result = await addMissedProgressUpdatesRoleInDiscord({ size: 1 });
+      const result = await getMissedProgressUpdatesUsers({ size: 1 });
 
       expect(result).to.be.an("object");
       expect(result.tasks).to.be.equal(1);
     });
     it("should fetch process tasks when cursor is passed", async function () {
-      const result = await addMissedProgressUpdatesRoleInDiscord({ size: 4 });
+      const result = await getMissedProgressUpdatesUsers({ size: 4 });
 
       expect(result).to.be.an("object");
       expect(result).to.haveOwnProperty("cursor");
-      const nextResult = await addMissedProgressUpdatesRoleInDiscord({ size: 4, cursor: result.cursor });
+      const nextResult = await getMissedProgressUpdatesUsers({ size: 4, cursor: result.cursor });
       expect(nextResult).to.be.an("object");
       expect(nextResult).to.not.haveOwnProperty("cursor");
     });

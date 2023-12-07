@@ -21,17 +21,13 @@ const discordMissedUpdatesRoleId = config.get("discordMissedUpdatesRoleId");
 const userStatusModel = firestore.collection("usersStatus");
 const usersUtils = require("../utils/users");
 const { getUsersBasedOnFilter, fetchUser } = require("./users");
-const {
-  convertDaysToMilliseconds,
-  convertMillisToSeconds,
-  convertTimestampToUTCStartOrEndOfDay,
-} = require("../utils/time");
+const { convertDaysToMilliseconds } = require("../utils/time");
 const { chunks } = require("../utils/array");
 const tasksModel = firestore.collection("tasks");
-const progressesModel = firestore.collection("progresses");
-const { COMPLETED_TASK_STATUS } = require("../constants/tasks.ts");
 const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const discordService = require("../services/discordService");
+const { buildTasksQueryForMissedUpdates } = require("../utils/tasks");
+const { buildProgressQueryForMissedUpdates } = require("../utils/progresses");
 
 /**
  *
@@ -844,7 +840,7 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
   }
 };
 
-const addMissedProgressUpdatesRoleInDiscord = async (options = {}) => {
+const getMissedProgressUpdatesUsers = async (options = {}) => {
   const { cursor, size = 500, excludedDates = [], dateGap = 3 } = options;
   const stats = {
     tasks: 0,
@@ -854,21 +850,15 @@ const addMissedProgressUpdatesRoleInDiscord = async (options = {}) => {
     const discordUsersPromise = discordService.getDiscordMembers();
     const missedUpdatesRoleId = discordMissedUpdatesRoleId;
 
-    const completedTasksStatusList = Object.values(COMPLETED_TASK_STATUS);
     let gapWindowStart = Date.now() - convertDaysToMilliseconds(dateGap);
     const gapWindowEnd = Date.now();
-
     excludedDates.forEach((timestamp) => {
       if (timestamp > gapWindowStart && timestamp < gapWindowEnd) {
         gapWindowStart -= convertDaysToMilliseconds(1);
       }
     });
 
-    let taskQuery = tasksModel
-      .where("status", "not-in", completedTasksStatusList)
-      .where("startedOn", "<", convertMillisToSeconds(gapWindowStart))
-      .orderBy("assignee") // this order by will eliminate the documents which has no assignee field. https://firebase.google.com/docs/firestore/query-data/order-limit-data#limitations
-      .limit(size);
+    let taskQuery = buildTasksQueryForMissedUpdates(gapWindowStart, size);
 
     if (cursor) {
       const data = await tasksModel.doc(cursor).get();
@@ -902,13 +892,8 @@ const addMissedProgressUpdatesRoleInDiscord = async (options = {}) => {
         });
       }
       const updateTasksIdMap = async () => {
-        const progressSnapshot = await progressesModel
-          .where("type", "==", "task")
-          .where("taskId", "==", taskId)
-          .where("date", ">=", convertTimestampToUTCStartOrEndOfDay(gapWindowStart))
-          .where("date", "<=", convertTimestampToUTCStartOrEndOfDay(gapWindowEnd, true))
-          .count()
-          .get();
+        const progressQuery = buildProgressQueryForMissedUpdates(taskId, gapWindowStart, gapWindowEnd);
+        const progressSnapshot = await progressQuery.get();
         const userData = usersMap.get(taskAssignee);
         userData.latestProgressCount = Math.min(progressSnapshot.data().count, userData.latestProgressCount);
 
@@ -1055,7 +1040,7 @@ module.exports = {
   updateUsersNicknameStatus,
   updateIdle7dUsersOnDiscord,
   updateUsersWith31DaysPlusOnboarding,
-  addMissedProgressUpdatesRoleInDiscord,
+  getMissedProgressUpdatesUsers,
   getUserDiscordInvite,
   addInviteToInviteModel,
 };
