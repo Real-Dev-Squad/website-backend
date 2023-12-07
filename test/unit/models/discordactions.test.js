@@ -7,7 +7,6 @@ const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const userModel = firestore.collection("users");
 const admin = require("firebase-admin");
-const ROLES = require("../../../constants/roles");
 const {
   createNewRole,
   getAllGroupRoles,
