@@ -1,10 +1,12 @@
 const firestore = require("../utils/firestore");
+const { Conflict } = require("http-errors");
 
 const fcmTokenModel = firestore.collection("fcmToken");
 
 const saveFcmToken = async (fcmTokenData) => {
   try {
     const fcmTokenSnapshot = await fcmTokenModel.where("userId", "==", fcmTokenData.userId).limit(1).get();
+
     if (fcmTokenSnapshot.empty) {
       const fcmToken = await fcmTokenModel.add({
         userId: fcmTokenData.userId,
@@ -26,7 +28,7 @@ const saveFcmToken = async (fcmTokenData) => {
         });
         return fcmTokenObj.id;
       } else {
-        return "FCM token already exist";
+        throw new Conflict("Device Already Registered");
       }
     }
   } catch (err) {
