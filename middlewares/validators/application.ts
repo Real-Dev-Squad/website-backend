@@ -2,6 +2,7 @@ import { NextFunction } from "express";
 import { CustomRequest, CustomResponse } from "../../types/global";
 import { customWordCountValidator } from "../../utils/customWordCountValidator";
 const joi = require("joi");
+const { APPLICATION_STATUS_TYPES } = require("../../constants/application");
 
 const validateApplicationData = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   const schema = joi
@@ -48,7 +49,16 @@ const validateApplicationUpdateData = async (req: CustomRequest, res: CustomResp
     .object()
     .strict()
     .keys({
-      status: joi.string().min(1).optional(),
+      status: joi
+        .string()
+        .min(1)
+        .optional()
+        .custom((value, helper) => {
+          if (!APPLICATION_STATUS_TYPES.includes(value)) {
+            return helper.message("Status is not valid");
+          }
+          return value;
+        }),
       feedback: joi.string().min(1).optional(),
     });
 

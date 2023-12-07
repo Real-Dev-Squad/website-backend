@@ -40,7 +40,7 @@ const addApplication = async (req: CustomRequest, res: CustomResponse) => {
     const applications = await ApplicationModel.getApplicationsBasedOnStatus("pending", req.userData.id);
     if (applications.length) {
       return res.status(409).json({
-        message: "User data is already present!",
+        message: "User application is already present!",
       });
     }
     const data = {
