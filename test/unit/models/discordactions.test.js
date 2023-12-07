@@ -7,7 +7,7 @@ const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const userModel = firestore.collection("users");
 const admin = require("firebase-admin");
-
+const ROLES = require("../../../constants/roles");
 const {
   createNewRole,
   getAllGroupRoles,
@@ -466,7 +466,9 @@ describe("discordactions", function () {
 
     before(async function () {
       length = usersStatusData.length;
-      users = userData.filter((data) => data.username && data.discordId).slice(0, length);
+      users = userData
+        .filter((data) => data.username && data.discordId && !data?.roles[ROLES.ARCHIVED] && data?.discordJoinedAt)
+        .slice(0, length);
       const addedUersPromise = users.map(async (user) => {
         const { id } = await userModel.add({ ...user });
         return { ...user, id };
