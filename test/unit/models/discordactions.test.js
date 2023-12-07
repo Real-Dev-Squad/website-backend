@@ -18,6 +18,8 @@ const {
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
   updateUsersNicknameStatus,
+  addInviteToInviteModel,
+  getUserDiscordInvite,
 } = require("../../../models/discordactions");
 const { groupData, roleData, existingRole, memberGroupData } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
@@ -87,51 +89,59 @@ describe("discordactions", function () {
   });
 
   describe("isGroupRoleExists", function () {
-    let getStub;
+    let roleid;
+    let rolename;
+    beforeEach(async function () {
+      const discordRoleModelPromise = [discordRoleModel.add(groupData[0]), discordRoleModel.add(groupData[1])];
+      roleid = groupData[0].roleid;
+      rolename = groupData[0].rolename;
+      await Promise.all(discordRoleModelPromise);
+    });
 
-    beforeEach(function () {
-      getStub = sinon.stub(discordRoleModel, "where").returns({
-        limit: sinon.stub().resolves({
-          empty: true,
-          forEach: sinon.stub(),
-        }),
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return false if rolename doesn't exist in the database", async function () {
+      const rolename = "Test Role";
+      const result = await isGroupRoleExists({ rolename });
+      expect(result.roleExists).to.equal(false);
+    });
+    it("should return false if roleid doesn't exist in the database", async function () {
+      const roleid = "Test Role";
+      const result = await isGroupRoleExists({ roleid });
+      expect(result.roleExists).to.equal(false);
+    });
+    it("should return true if roleid exist in the database", async function () {
+      const result = await isGroupRoleExists({ roleid });
+      expect(result.roleExists).to.equal(true);
+    });
+    it("should return true if rolename exist in the database", async function () {
+      const result = await isGroupRoleExists({ rolename });
+      expect(result.roleExists).to.equal(true);
+    });
+    it("should return true if rolename and roleid exists in the database", async function () {
+      const result = await isGroupRoleExists({ rolename, roleid });
+      expect(result.roleExists).to.equal(true);
+    });
+    it("should return false if either rolename and roleid does not exist in the database", async function () {
+      const rolenameResult = await isGroupRoleExists({ rolename: "adf", roleid });
+      expect(rolenameResult.roleExists).to.equal(false);
+      const roleIdResult = await isGroupRoleExists({ rolename, roleid: "abc44" });
+      expect(roleIdResult.roleExists).to.equal(false);
+    });
+    it("should throw an error if rolename and roleid are not passed", async function () {
+      return isGroupRoleExists({}).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal("Either rolename or roleId is required");
       });
     });
-
-    afterEach(function () {
-      getStub.restore();
-    });
-
-    it("should return true if role doesn't exist in the database", async function () {
-      const result = await isGroupRoleExists("Test Role");
-      expect(result.wasSuccess).to.equal(true);
-      expect(getStub.calledOnceWith("rolename", "==", "Test Role")).to.equal(false);
-    });
-
-    it("should return false if role already exists in the database", async function () {
-      const existingRole = { rolename: "Test Role" };
-      const callbackFunction = (role) => {
-        const roleData = role.data();
-        existingRole.push(roleData);
-      };
-
-      getStub.returns({
-        limit: sinon.stub().resolves({
-          empty: false,
-          forEach: callbackFunction,
-        }),
-      });
-
-      const errorCallback = sinon.stub();
-      const result = await isGroupRoleExists("Test Role");
-      expect(result.wasSuccess).to.equal(true);
-      expect(getStub.calledOnceWith("rolename", "==", "Test Role")).to.equal(false);
-      expect(errorCallback.calledOnce).to.equal(false);
-    });
-
     it("should throw an error if getting group-roles fails", async function () {
-      getStub.rejects(new Error("Database error"));
-      return isGroupRoleExists("Test Role").catch((err) => {
+      sinon.stub(discordRoleModel, "where").rejects(new Error("Database error"));
+      const rolename = "Test Role";
+
+      return isGroupRoleExists({ rolename }).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Database error");
       });
@@ -566,5 +576,33 @@ describe("discordactions", function () {
         expect(err).to.be.instanceOf(Error);
       }
     }).timeout(10000);
+  });
+
+  describe("addInviteToInviteModel", function () {
+    it("should add invite in the invite model for user", async function () {
+      const inviteObject = { userId: "kfjkasdfl", inviteLink: "discord.gg/xyz" };
+      const inviteId = await addInviteToInviteModel(inviteObject);
+      expect(inviteId).to.exist; // eslint-disable-line no-unused-expressions
+    });
+  });
+
+  describe("getUserDiscordInvite", function () {
+    before(async function () {
+      const inviteObject = { userId: "kfjkasdfl", inviteLink: "discord.gg/xyz" };
+      await addInviteToInviteModel(inviteObject);
+    });
+
+    it("should return invite for the user when the userId of a user is passed at it exists in the db", async function () {
+      const invite = await getUserDiscordInvite("kfjkasdfl");
+      expect(invite).to.have.property("id");
+      expect(invite.notFound).to.be.equal(false);
+      expect(invite.userId).to.be.equal("kfjkasdfl");
+      expect(invite.inviteLink).to.be.equal("discord.gg/xyz");
+    });
+
+    it("should return notFound true, if the invite for user doesn't exist", async function () {
+      const invite = await getUserDiscordInvite("kfjkasdafdfdsfl");
+      expect(invite.notFound).to.be.equal(true);
+    });
   });
 });
