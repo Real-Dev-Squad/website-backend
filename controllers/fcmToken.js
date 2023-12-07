@@ -16,9 +16,6 @@ const fcmTokenController = (req, res) => {
   } catch (error) {
     throw new Error(error);
   }
-
-  // Save the FCM token to your database or perform other necessary actions.
-  // You can associate the token with a user or device, for example.
 };
 
 module.exports = {
