@@ -641,8 +641,10 @@ describe("discordactions", function () {
       progressDataList.push(progressData);
 
       await Promise.all(progressDataList.map(async (progress) => await createProgressDocument(progress)));
-
-      sinon.stub(discordService, "getDiscordMembers").returns(getDiscordMembers);
+      const discordMembers = [...getDiscordMembers];
+      discordMembers[0].roles.push("9876543210");
+      discordMembers[1].roles.push("9876543210");
+      sinon.stub(discordService, "getDiscordMembers").returns(discordMembers);
     });
     afterEach(async function () {
       sinon.restore();
