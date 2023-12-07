@@ -447,7 +447,6 @@ describe("discordactions", function () {
     beforeEach(async function () {
       fetchStub = sinon.stub(global, "fetch");
       dataAccessLayerStub = sinon.stub(dataAccessLayer, "retrieveUsers");
-
       addedUers.forEach(({ username, discordId, id }) => {
         dataAccessLayerStub.withArgs(sinon.match({ id })).resolves({
           user: {
@@ -465,9 +464,7 @@ describe("discordactions", function () {
 
     before(async function () {
       length = usersStatusData.length;
-      users = userData
-        .filter((data) => data.username && data.discordId && !data?.roles?.archived && data?.discordJoinedAt)
-        .slice(0, length);
+      users = userData.filter((data) => data.username && data.discordId).slice(0, length);
       const addedUersPromise = users.map(async (user) => {
         const { id } = await userModel.add({ ...user });
         return { ...user, id };
