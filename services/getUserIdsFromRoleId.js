@@ -5,6 +5,9 @@ export const getUserIdsFromRoleId = async (roleId) => {
   let userIds = [];
   try {
     const querySnapshot = await memberRoleModel.where("roleid", "==", roleId).get();
+    if (querySnapshot.empty) {
+      return [];
+    }
     if (!querySnapshot.empty) {
       userIds = querySnapshot.docs.map((doc) => doc.data().userid);
     }
