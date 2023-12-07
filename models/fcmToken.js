@@ -2,7 +2,6 @@ const firestore = require("../utils/firestore");
 
 const fcmTokenModel = firestore.collection("fcmToken");
 
-// eslint-disable-next-line consistent-return
 const saveFcmToken = async (fcmTokenData) => {
   try {
     const fcmTokenSnapshot = await fcmTokenModel.where("userId", "==", fcmTokenData.userId).limit(1).get();
@@ -26,6 +25,8 @@ const saveFcmToken = async (fcmTokenData) => {
           fcmTokens: fcmTokenObj.fcmTokens,
         });
         return fcmTokenObj.id;
+      } else {
+        return "FCM token already exist";
       }
     }
   } catch (err) {
