@@ -5,5 +5,5 @@ const authenticate = require("../middlewares/authenticate");
 const { notifyController } = require("../controllers/notify");
 const { notifyValidator } = require("../middlewares/validators/notify");
 
-router.post("/", notifyValidator, authenticate, notifyController);
+router.post("/", authenticate, notifyValidator, notifyController);
 module.exports = router;
