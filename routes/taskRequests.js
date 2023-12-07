@@ -4,12 +4,14 @@ const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const taskRequests = require("../controllers/tasksRequests");
-const { cacheResponse } = require("../utils/cache");
 const { validateUser } = require("../middlewares/taskRequests");
+const validators = require("../middlewares/validators/task-requests");
 
-router.get("/", authenticate, authorizeRoles([SUPERUSER]), cacheResponse(), taskRequests.fetchTaskRequests);
-router.get("/:id", authenticate, authorizeRoles([SUPERUSER]), taskRequests.fetchTaskRequestById);
+router.get("/", authenticate, taskRequests.fetchTaskRequests);
+router.get("/:id", authenticate, taskRequests.fetchTaskRequestById);
 router.post("/addOrUpdate", authenticate, validateUser, taskRequests.addOrUpdate);
 router.patch("/approve", authenticate, authorizeRoles([SUPERUSER]), validateUser, taskRequests.approveTaskRequest);
+router.post("/", authenticate, validators.postTaskRequests, taskRequests.addTaskRequests);
+router.post("/migrations", authenticate, authorizeRoles([SUPERUSER]), taskRequests.migrateTaskRequests);
 
 module.exports = router;

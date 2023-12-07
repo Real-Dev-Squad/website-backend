@@ -4,7 +4,7 @@ const chaiHttp = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
-const { ROLES } = require("../../constants/events");
+const { EVENT_ROLES } = require("../../constants/events");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 
@@ -16,6 +16,7 @@ const event1Data = eventData[0];
 const userData = require("../fixtures/user/user")();
 
 const eventQuery = require("../../models/events");
+const logsModel = require("../../models/logs");
 
 const defaultUser = userData[16];
 
@@ -23,6 +24,7 @@ const config = require("config");
 const sinon = require("sinon");
 
 const { EventTokenService, EventAPIService } = require("../../services");
+const { eventOnePeerData } = require("../fixtures/events/peers");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -232,7 +234,6 @@ describe("events", function () {
           expect(response).to.have.status(201);
           expect(response.body.token).to.be.a("string");
           expect(response.body.message).to.be.a("string");
-          expect(response.body.event).to.be.a("object");
 
           return done();
         });
@@ -284,7 +285,6 @@ describe("events", function () {
           expect(response).to.have.status(201);
           expect(response.body.token).to.be.a("string");
           expect(response.body.message).to.be.a("string");
-          expect(response.body.event).to.be.a("object");
 
           return done();
         });
@@ -315,7 +315,6 @@ describe("events", function () {
           expect(response).to.have.status(201);
           expect(response.body.token).to.be.a("string");
           expect(response.body.message).to.be.a("string");
-          expect(response.body.event).to.be.a("object");
 
           return done();
         });
@@ -567,7 +566,7 @@ describe("events", function () {
     it("creates an event code when the request is successful", function (done) {
       const payload = {
         eventCode: "test-code",
-        role: ROLES.MAVEN,
+        role: EVENT_ROLES.MAVEN,
       };
 
       service = sinon
@@ -624,7 +623,7 @@ describe("events", function () {
     it("returns an error message when code creation fails", function (done) {
       const payload = {
         eventCode: "test-code",
-        role: ROLES.MAVEN,
+        role: EVENT_ROLES.MAVEN,
       };
 
       const errorMessage = "Error creating event code.";
@@ -720,6 +719,102 @@ describe("events", function () {
           expect(response).to.have.status(500);
           expect(response.body).to.be.a("object");
           expect(response.body).to.have.all.keys("message");
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /events/:id/peers/kickout", function () {
+    let service;
+    let superUserAuthToken;
+    let memberAuthToken;
+    beforeEach(async function () {
+      const superUser = userData[4];
+      const member = userData[6];
+      const superUserId = await addUser(superUser);
+      const memberUserId = await addUser(member);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+      memberAuthToken = authService.generateAuthToken({ userId: memberUserId });
+    });
+
+    afterEach(function () {
+      service.restore();
+      sinon.restore();
+    });
+
+    it("returns a success message when the request is successful for super user", function (done) {
+      const payload = {
+        peerId: "peer123",
+        reason: "Kicked out for a reason",
+      };
+
+      service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "peer remove request submitted" });
+
+      sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Selected Participant is removed from event." });
+      sinon.stub(logsModel, "addLog");
+      sinon.stub(eventQuery, "getPeerById").returns(eventOnePeerData);
+
+      chai
+        .request(app)
+        .patch(`/events/${event1Data.room_id}/peers/kickout`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send(payload)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(200);
+          expect(response.body.message).to.be.a("string");
+          expect(response.body.message).to.equal("Selected Participant is removed from event.");
+
+          return done();
+        });
+    });
+
+    it("returns a success message when the request is successful for member user", function (done) {
+      const payload = {
+        peerId: "peer123",
+        reason: "Kicked out for a reason",
+      };
+
+      service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "peer remove request submitted" });
+
+      sinon.stub(eventQuery, "kickoutPeer").returns({ message: "Selected Participant is removed from event." });
+      sinon.stub(logsModel, "addLog");
+      sinon.stub(eventQuery, "getPeerById").returns(eventOnePeerData);
+
+      chai
+        .request(app)
+        .patch(`/events/${event1Data.room_id}/peers/kickout`)
+        .set("cookie", `${cookieName}=${memberAuthToken}`)
+        .send(payload)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(200);
+          expect(response.body.message).to.be.a("string");
+          expect(response.body.message).to.equal("Selected Participant is removed from event.");
+
+          return done();
+        });
+    });
+
+    it("should return unauthorized error if user is not authenticated", function (done) {
+      chai
+        .request(app)
+        .patch(`/events/${event1Data.room_id}/peers/kickout`)
+        .end((error, response) => {
+          if (error) {
+            return done(error);
+          }
+
+          expect(response).to.have.status(401);
+          expect(response.body.error).to.be.equal("Unauthorized");
+          expect(response.body.message).to.be.equal("Unauthenticated User");
+
           return done();
         });
     });

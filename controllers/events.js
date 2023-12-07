@@ -1,4 +1,4 @@
-const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS, ROLES } = require("../constants/events");
+const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS, EVENT_ROLES } = require("../constants/events");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { EventTokenService, EventAPIService } = require("../services");
 const eventQuery = require("../models/events");
@@ -7,6 +7,8 @@ const logger = require("../utils/logger");
 const { removeUnwantedProperties } = require("../utils/events");
 
 const crypto = require("crypto");
+const { addLog } = require("../models/logs");
+const { logType } = require("../constants/logs");
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
@@ -92,16 +94,12 @@ const getAllEvents = async (req, res) => {
  * @throws {Error} If an error occurs while generating the token.
  */
 const joinEvent = async (req, res) => {
-  const { userId, role, eventCode } = req.body;
+  const { roomId, userId, role, eventCode } = req.body;
   const payload = { userId, role };
+
   try {
-    const eventsData = await apiService.get("https://api.100ms.live/v2/rooms?enabled=true");
-
-    const activeEvent = eventsData?.data?.[0];
-    const eventId = activeEvent?.id;
-
-    if (role === ROLES.MAVEN) {
-      const eventCodes = await eventQuery.getEventCodes({ id: eventId });
+    if (role === EVENT_ROLES.MAVEN) {
+      const eventCodes = await eventQuery.getEventCodes({ id: roomId });
       const allEventCodesArray = eventCodes.map((eventCode) => {
         return eventCode.code;
       });
@@ -113,21 +111,45 @@ const joinEvent = async (req, res) => {
           message: "Provided event code is invalid for the role!",
         });
       }
-      const token = tokenService.getAuthToken({ ...payload, roomId: eventId });
+      const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
 
       return res.status(201).json({
         token: token,
         message: "Token generated successfully!",
-        event: activeEvent,
       });
     }
 
-    const token = tokenService.getAuthToken({ ...payload, roomId: eventId });
+    if (role === EVENT_ROLES.HOST || role === EVENT_ROLES.MODERATOR) {
+      if (!req.userData) {
+        return res.status(400).json({
+          message: "Unauthorized, please login to perform this action!",
+        });
+      }
+
+      if (role === EVENT_ROLES.HOST && req.userData.roles.super_user) {
+        const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
+
+        return res.status(201).json({
+          token: token,
+          message: "Token generated successfully!",
+        });
+      }
+
+      if (role === EVENT_ROLES.MODERATOR && req.userData.roles.member) {
+        const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
+
+        return res.status(201).json({
+          token: token,
+          message: "Token generated successfully!",
+        });
+      }
+    }
+
+    const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
 
     return res.status(201).json({
       token: token,
       message: "Token generated successfully!",
-      event: activeEvent,
     });
   } catch (error) {
     logger.error({ error });
@@ -274,8 +296,15 @@ const kickoutPeer = async (req, res) => {
   };
 
   try {
+    const peer = await eventQuery.getPeerById(payload.peer_id);
     await apiService.post(`/active-rooms/${id}/remove-peers`, payload);
     await eventQuery.kickoutPeer({ eventId: id, peerId: payload.peer_id, reason: req.body.reason });
+    addLog(
+      logType.EVENTS_REMOVE_PEER,
+      { removed_by_id: req.userData.id, removed_by_username: req.userData.username },
+      { ...payload, event_id: id, peer_name: peer.name }
+    );
+
     return res.status(200).json({
       message: `Selected Participant is removed from event.`,
     });
@@ -294,7 +323,7 @@ const generateEventCode = async (req, res) => {
   const { eventCode, role } = req.body;
   const eventCodeUuid = crypto.randomUUID({ disableEntropyCache: true });
 
-  if (role !== ROLES.MAVEN) {
+  if (role !== EVENT_ROLES.MAVEN) {
     return res.status(400).json({
       message: "Currently the room codes feature is only for mavens!",
     });

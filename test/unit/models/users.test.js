@@ -117,6 +117,23 @@ describe("users", function () {
     });
   });
 
+  describe("fetch user details based on discord id", function () {
+    let [userId0] = [];
+    beforeEach(async function () {
+      const userArr = userData();
+      userId0 = await addUser(userArr[0]);
+      await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.IDLE));
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("It should fetch users who have archived:false role", async function () {
+      const result = await users.fetchUser({ discordId: "12345" });
+      expect(result.user.roles.archived).to.equal(false);
+    });
+  });
+
   describe("user image verification", function () {
     let userId, discordId, profileImageUrl, discordImageUrl;
     beforeEach(async function () {
@@ -310,6 +327,7 @@ describe("users", function () {
       });
     });
   });
+
   describe("get users by roles", function () {
     beforeEach(async function () {
       const addUsersPromises = [];
@@ -354,9 +372,10 @@ describe("users", function () {
         time: "31d",
       };
       const result = await users.getUsersBasedOnFilter(query);
-      expect(result.length).to.equal(2);
+      expect(result.length).to.equal(1);
     });
   });
+
   describe("fetch users by id", function () {
     let allIds = [];
     before(async function () {
@@ -375,8 +394,7 @@ describe("users", function () {
     it("should fetch the details of users whose ids are present in the array", async function () {
       const randomIds = allIds.sort(() => 0.5 - Math.random()).slice(0, 3); // Select random ids from allIds
       const result = await users.fetchUserByIds(randomIds);
-      const fetchedUserIds = Object.keys(result);
-      expect(fetchedUserIds).to.deep.equal(randomIds);
+      expect(result).to.be.an("array");
     });
 
     it("should return empty object if no ids are passed", async function () {
@@ -385,6 +403,7 @@ describe("users", function () {
       expect(fetchedUserIds).to.deep.equal([]);
     });
   });
+
   describe("generateUniqueUsername", function () {
     it("should generate a unique username when existing users are present", async function () {
       const userData = userDataArray[15];

@@ -9,7 +9,8 @@ const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
 const { archiveUsers } = require("../services/users");
-const { ALLOWED_FILTER_PARAMS, DOCUMENT_WRITE_SIZE, FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
+const { ALLOWED_FILTER_PARAMS, FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
+const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const ROLES = require("../constants/roles");
@@ -37,11 +38,14 @@ const addOrUpdate = async (userData, userId = null) => {
       const isNewUser = !user.data();
       // user exists update user
       if (user.data()) {
-        await userModel.doc(userId).set({
-          ...user.data(),
-          ...userData,
-          updated_at: Date.now(),
-        });
+        await userModel.doc(userId).set(
+          {
+            ...user.data(),
+            ...userData,
+            updated_at: Date.now(),
+          },
+          { merge: true }
+        );
       }
 
       return { isNewUser, userId };
@@ -240,7 +244,7 @@ const fetchUsers = async (usernames = []) => {
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const fetchUser = async ({ userId = null, username = null, githubUsername = null }) => {
+const fetchUser = async ({ userId = null, username = null, githubUsername = null, discordId = null }) => {
   try {
     let userData, id;
     if (username) {
@@ -255,6 +259,12 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       userData = user.data();
     } else if (githubUsername) {
       const user = await userModel.where("github_id", "==", githubUsername).limit(1).get();
+      user.forEach((doc) => {
+        id = doc.id;
+        userData = doc.data();
+      });
+    } else if (discordId) {
+      const user = await userModel.where("discordId", "==", discordId).where("roles.archived", "==", false).get();
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
@@ -560,7 +570,7 @@ const getUsersWithOnboardingStateInRange = async (filteredUserDocs, stateItems, 
     return stateItems.some((stateItem) => stateItem.userId === userDoc.id);
   });
   filteredUsers.forEach((user) => {
-    if (user.discordJoinedAt) {
+    if (user.discordJoinedAt && user.roles.in_discord) {
       const userDiscordJoinedDate = new Date(user.discordJoinedAt);
       const currentTimeStamp = new Date().getTime();
       const timeDifferenceInMilliseconds = currentTimeStamp - userDiscordJoinedDate.getTime();
@@ -658,15 +668,17 @@ const fetchUserByIds = async (userIds = []) => {
     return {};
   }
   try {
-    const users = {};
+    const users = [];
     const usersRefs = userIds.map((docId) => userModel.doc(docId));
     const documents = await firestore.getAll(...usersRefs);
     documents.forEach((snapshot) => {
       if (snapshot.exists) {
-        users[snapshot.id] = snapshot.data();
+        users.push({
+          id: snapshot.id,
+          ...snapshot.data(),
+        });
       }
     });
-
     return users;
   } catch (err) {
     logger.error("Error retrieving user data", err);
@@ -829,6 +841,29 @@ const fetchUsersListForMultipleValues = async (documentKey, valueList) => {
   }
 };
 
+const getNonNickNameSyncedUsers = async () => {
+  try {
+    const usersRef = await userModel
+      .where("roles.archived", "==", false)
+      .where("nickname_synced", "==", false)
+      .where("discordId", "!=", null)
+      .get();
+    const users = [];
+    usersRef.forEach((user) => {
+      const userData = user.data();
+      if (userData?.discordId)
+        users.push({
+          id: user.id,
+          ...userData,
+        });
+    });
+    return users;
+  } catch (err) {
+    logger.error(`Error while fetching all users: ${err}`);
+    throw err;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -857,4 +892,5 @@ module.exports = {
   updateUsersInBatch,
   fetchUsersListForMultipleValues,
   fetchUserForKeyValue,
+  getNonNickNameSyncedUsers,
 };

@@ -18,6 +18,7 @@ const config = require("config");
 const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const joinData = require("../fixtures/user/join");
 const {
+  userStatusDataForNewUser,
   userStatusDataAfterSignup,
   userStatusDataAfterFillingJoinSection,
 } = require("../fixtures/userStatus/userStatus");
@@ -31,6 +32,7 @@ const userAlreadyNotMember = userData[13];
 const userAlreadyArchived = userData[5];
 const userAlreadyUnArchived = userData[4];
 const nonSuperUser = userData[0];
+const newUser = userData[18];
 
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
@@ -120,16 +122,73 @@ describe("Users", function () {
         });
     });
 
-    it("Should update the user roles", function (done) {
+    it("Should allow updating user role when in_discord is not present and  is not developer", function (done) {
+      addUser(newUser).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch(`/users/self`)
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            roles: {
+              maven: true,
+            },
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(204);
+            return done();
+          });
+      });
+    });
+
+    it("Should not remove old roles when updating user roles", async function () {
+      const newUserId = await addUser(newUser);
+      const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+
+      const getUserResponseBeforeUpdate = await chai
+        .request(app)
+        .get("/users/self")
+        .set("cookie", `${cookieName}=${newUserJwt}`);
+
+      expect(getUserResponseBeforeUpdate).to.have.status(200);
+      expect(getUserResponseBeforeUpdate.body.roles).to.not.have.property("maven");
+      expect(getUserResponseBeforeUpdate.body.roles.in_discord).to.equal(false);
+
+      const updateRolesResponse = await chai
+        .request(app)
+        .patch(`/users/self`)
+        .set("cookie", `${cookieName}=${newUserJwt}`)
+        .send({
+          roles: {
+            maven: true,
+          },
+        });
+
+      expect(updateRolesResponse).to.have.status(204);
+
+      const getUserResponseAfterUpdate = await chai
+        .request(app)
+        .get("/users/self")
+        .set("cookie", `${cookieName}=${newUserJwt}`);
+
+      expect(getUserResponseAfterUpdate).to.have.status(200);
+      expect(getUserResponseAfterUpdate.body.roles).to.have.property("maven");
+      expect(getUserResponseAfterUpdate.body.roles.maven).to.equal(true);
+      expect(getUserResponseAfterUpdate.body.roles.in_discord).to.equal(false);
+    });
+
+    it("Should not update the user roles when user has in_discord and developer true", function (done) {
       chai
         .request(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           roles: {
-            archived: false,
-            in_discord: false,
-            developer: true,
+            maven: true,
           },
         })
         .end((err, res) => {
@@ -137,7 +196,7 @@ describe("Users", function () {
             return done(err);
           }
 
-          expect(res).to.have.status(204);
+          expect(res).to.have.status(403);
 
           return done();
         });
@@ -359,7 +418,8 @@ describe("Users", function () {
 
   describe("GET /users", function () {
     beforeEach(async function () {
-      await addOrUpdate(userData[0]);
+      const { userId } = await addOrUpdate(userData[0]);
+      await userStatusModel.updateUserStatus(userId, userStatusDataForNewUser);
       await addOrUpdate(userData[1]);
       await addOrUpdate(userData[2]);
       await addOrUpdate(userData[3]);
@@ -644,7 +704,41 @@ describe("Users", function () {
           return done();
         });
     });
-
+    it("Should return 503 if something went wrong if data not fetch from github for new query format under feature flag", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({
+          q: "filterBy:unmerged_prs+days:30",
+          dev: true,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(503);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal(SOMETHING_WENT_WRONG);
+          return done();
+        });
+    });
+    it("Should throw an error when there is no feature flag when using the new query parameter format(q)", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({
+          q: "filterBy:unmerged_prs+days:30",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Route not found");
+          return done();
+        });
+    });
     it("Should return 400 if days is not passed for filterBy unmerged_prs", function (done) {
       chai
         .request(app)
@@ -656,6 +750,77 @@ describe("Users", function () {
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
           expect(res.body.message).to.equal("Days is required for filterBy unmerged_prs");
+          return done();
+        });
+    });
+    it("Should return 400 if days is not passed for filterBy unmerged_prs with new query format and feature flag", function (done) {
+      chai
+        .request(app)
+        .get("/users?q=filterBy:unmerged_prs&dev=true")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Days is required for filterBy unmerged_prs");
+          return done();
+        });
+    });
+
+    it("Should return one user with given discord id and feature flag", async function () {
+      const discordId = userData[0].discordId;
+
+      const res = await chai.request(app).get(`/users?dev=true&discordId=${discordId}`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.user).to.have.property("state");
+    });
+
+    it("Should throw an error when there is no feature flag", async function () {
+      const discordId = userData[0].discordId;
+      const res = await chai.request(app).get(`/users?discordId=${discordId}`).set("cookie", `${cookieName}=${jwt}`);
+      expect(res).to.have.status(404);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("Route not found");
+    });
+
+    it("Should return an empty object when passing an invalid Discord ID", async function () {
+      const invalidDiscordId = "50485556209423";
+      const res = await chai.request(app).get(`/users?dev=true&discordId=${invalidDiscordId}`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("User not found");
+    });
+
+    it("Should return user ID(s) with overdue tasks within the last 1 day", function (done) {
+      chai
+        .request(app)
+        .get("/users?query=filterBy:overdue_tasks+days:1")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.users).to.be.an("array");
+
+          return done();
+        });
+    });
+
+    it("Should return user id which have overdue tasks with new query params under feature flag", function (done) {
+      chai
+        .request(app)
+        .get("/users?q=filterBy:overdue_tasks+days:1&dev=true")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.users).to.be.an("array");
+
           return done();
         });
     });

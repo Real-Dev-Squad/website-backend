@@ -11,7 +11,9 @@ module.exports = {
   port: 3000,
   enableFileLogs: true,
   enableConsoleLogs: false,
-
+  discordUnverifiedRoleId: "<discordUnverifiedRoleId>",
+  discordDeveloperRoleId: "<discordDeveloperRoleId>",
+  discordMavenRoleId: "<discordMavenRoleId>",
   githubApi: {
     baseUrl: "https://api.github.com",
     org: "Real-Dev-Squad",
@@ -44,6 +46,11 @@ module.exports = {
       baseUrl: "https://realdevsquad.com",
       routes: {
         authRedirection: "/goto",
+      },
+      goalAPI: {
+        baseUrl: "https://goal-api.realdevsquad.com",
+        secretKey: "<goalSecretKey>",
+        cookieName: `goals-session-${NODE_ENV}`,
       },
     },
     discordBot: {
@@ -103,7 +110,7 @@ module.exports = {
 
   Event100ms: {
     APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
-    APP_SECRET: "EVENT_100MS_APP_SECREt",
+    APP_SECRET: "EVENT_100MS_APP_SECRET",
   },
   githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
 };

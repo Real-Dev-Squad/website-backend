@@ -12,6 +12,7 @@ const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 const dataAccess = require("../services/dataAccessLayer");
 const { parseSearchQuery } = require("../utils/tasks");
+const { addTaskCreatedAtAndUpdatedAtFields } = require("../services/tasks");
 /**
  * Creates new task
  *
@@ -24,9 +25,12 @@ const addNewTask = async (req, res) => {
     const { id: createdBy } = req.userData;
     const dependsOn = req.body.dependsOn;
     let userStatusUpdate;
+    const timeStamp = Math.round(Date.now() / 1000);
     const body = {
       ...req.body,
       createdBy,
+      createdAt: timeStamp,
+      updatedAt: timeStamp,
     };
     delete body.dependsOn;
     const { taskId, taskDetails } = await tasks.updateTask(body);
@@ -270,21 +274,27 @@ const updateTask = async (req, res) => {
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
     }
-    if (req.body?.assignee) {
-      const user = await dataAccess.retrieveUsers({ username: req.body.assignee });
+    const requestData = { ...req.body, updatedAt: Math.round(Date.now() / 1000) };
+    if (requestData?.assignee) {
+      const user = await dataAccess.retrieveUsers({ username: requestData.assignee });
       if (!user.userExists) {
         return res.boom.notFound("User doesn't exist");
       }
+      if (!requestData?.startedOn) {
+        requestData.startedOn = Math.round(new Date().getTime() / 1000);
+      }
     }
-    await tasks.updateTask(req.body, req.params.id);
-    if (req.body.assignee) {
+
+    await tasks.updateTask(requestData, req.params.id);
+    if (requestData.assignee) {
       // New Assignee Status Update
-      await updateUserStatusOnTaskUpdate(req.body.assignee);
+      await updateUserStatusOnTaskUpdate(requestData.assignee);
       // Old Assignee Status Update if available
       if (task.taskData.assigneeId) {
         await updateStatusOnTaskCompletion(task.taskData.assigneeId);
       }
     }
+
     return res.status(204).send();
   } catch (err) {
     if (err.message.includes("Invalid dependency passed")) {
@@ -304,9 +314,10 @@ const updateTask = async (req, res) => {
  */
 const updateTaskStatus = async (req, res, next) => {
   try {
+    req.body.updatedAt = Math.round(new Date().getTime() / 1000);
     let userStatusUpdate;
     const taskId = req.params.id;
-    const { dev } = req.query;
+    const { userStatusFlag } = req.query;
     const { id: userId, username } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
 
@@ -315,13 +326,32 @@ const updateTaskStatus = async (req, res, next) => {
     if (task.taskData.status === TASK_STATUS.VERIFIED || req.body.status === TASK_STATUS.MERGED)
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
+    if (userStatusFlag) {
+      if (task.taskData.status === TASK_STATUS.DONE && req.body.percentCompleted < 100) {
+        if (req.body.status === TASK_STATUS.DONE || !req.body.status) {
+          return res.boom.badRequest("Task percentCompleted can't updated as status is DONE");
+        }
+      }
+
+      if (
+        (req.body.status === TASK_STATUS.DONE || req.body.status === TASK_STATUS.VERIFIED) &&
+        task.taskData.percentCompleted !== 100
+      ) {
+        if (req.body.percentCompleted !== 100) {
+          return res.boom.badRequest("Status cannot be updated. Task is not done yet");
+        }
+      }
+    }
+
     if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
       if (req.body.status === TASK_STATUS.COMPLETED || !req.body.status) {
         return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
       }
     }
-
-    if (req.body.status === TASK_STATUS.COMPLETED && task.taskData.percentCompleted !== 100) {
+    if (
+      (req.body.status === TASK_STATUS.COMPLETED || req.body.status === TASK_STATUS.VERIFIED) &&
+      task.taskData.percentCompleted !== 100
+    ) {
       if (req.body.percentCompleted !== 100) {
         return res.boom.badRequest("Status cannot be updated. Task is not completed yet");
       }
@@ -357,12 +387,6 @@ const updateTaskStatus = async (req, res, next) => {
       addLog(taskLog.type, taskLog.meta, taskLog.body),
     ]);
     taskLog.id = taskLogResult.id;
-
-    if (dev) {
-      if (req.body.percentCompleted === 100) {
-        return next();
-      }
-    }
 
     if (req.body.status) {
       userStatusUpdate = await updateStatusOnTaskCompletion(userId);
@@ -424,6 +448,21 @@ const assignTask = async (req, res) => {
   }
 };
 
+const updateStatus = async (req, res) => {
+  try {
+    const { action, field } = req.body;
+    if (action === "ADD" && field === "CREATED_AT+UPDATED_AT") {
+      const updateStats = await addTaskCreatedAtAndUpdatedAtFields();
+      return res.json(updateStats);
+    }
+    const response = await tasks.updateTaskStatus();
+    return res.status(200).json(response);
+  } catch (error) {
+    logger.error("Error in migration scripts", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   addNewTask,
   fetchTasks,
@@ -434,4 +473,5 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
+  updateStatus,
 };

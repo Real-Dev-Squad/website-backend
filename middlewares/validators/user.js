@@ -22,7 +22,7 @@ const updateUser = async (req, res, next) => {
         .optional()
         .min(4)
         .max(20)
-        .regex(/^[a-zA-Z0-9]+$/)
+        .regex(/^[a-zA-Z0-9-]+$/)
         .message("Username must be between 4 and 20 characters long and contain only letters or numbers."),
       first_name: joi.string().optional(),
       last_name: joi.string().optional(),
@@ -52,9 +52,6 @@ const updateUser = async (req, res, next) => {
         .optional(),
       discordId: joi.string().optional(),
       roles: joi.object().keys({
-        archived: joi.boolean().required(),
-        in_discord: joi.boolean().required(),
-        developer: joi.boolean().optional(),
         designer: joi.boolean().optional(),
         maven: joi.boolean().optional(),
         productmanager: joi.boolean().optional(),
@@ -133,6 +130,7 @@ const validateJoinData = async (req, res, next) => {
  */
 async function getUsers(req, res, next) {
   const schema = joi
+
     .object()
     .strict()
     .keys({
@@ -157,6 +155,9 @@ async function getUsers(req, res, next) {
       }),
       id: joi.string().optional().messages({
         "string.empty": "id value must not be empty",
+      }),
+      discordId: joi.string().optional().messages({
+        "string.empty": "discord id value must not be empty",
       }),
       next: joi
         .string()
@@ -185,8 +186,10 @@ async function getUsers(req, res, next) {
           "string.empty": "prev value cannot be empty",
         }),
       query: joi.string().optional(),
+      q: joi.string().optional(),
       filterBy: joi.string().optional(),
       days: joi.string().optional(),
+      dev: joi.string().optional(),
     });
   try {
     await schema.validateAsync(req.query);

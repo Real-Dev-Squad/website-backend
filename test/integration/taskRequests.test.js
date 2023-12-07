@@ -12,10 +12,19 @@ const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
 const taskData = require("../fixtures/tasks/tasks")();
+const mockData = require("../fixtures/task-requests/task-requests");
 const userStatusData = require("../fixtures/userStatus/userStatus");
+const firestore = require("../../utils/firestore");
+const logsModel = firestore.collection("logs");
+const { MIGRATION_TYPE } = require("../../constants/taskRequests");
+
 chai.use(chaiHttp);
 
 const config = require("config");
+const { TASK_REQUEST_TYPE } = require("../../constants/taskRequests");
+const usersUtils = require("../../utils/users");
+const githubService = require("../../services/githubService");
+const { userState } = require("../../constants/userStatus");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -60,7 +69,7 @@ describe("Task Requests", function () {
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
       });
 
-      it("should fetch 404 when taskRequests are empty", function (done) {
+      it("should have status 200 when taskRequests are empty", function (done) {
         chai
           .request(app)
           .get("/taskRequests")
@@ -70,7 +79,7 @@ describe("Task Requests", function () {
               return done(err);
             }
 
-            expect(res).to.have.status(404);
+            expect(res).to.have.status(200);
             return done();
           });
       });
@@ -110,7 +119,7 @@ describe("Task Requests", function () {
         await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
-      it("should return 401 unauthorized user response", function (done) {
+      it("should be successful when the user is not a super user", function (done) {
         chai
           .request(app)
           .get("/taskRequests")
@@ -120,7 +129,7 @@ describe("Task Requests", function () {
               return done(err);
             }
 
-            expect(res).to.have.status(401);
+            expect(res).to.have.status(200);
             return done();
           });
       });
@@ -187,7 +196,7 @@ describe("Task Requests", function () {
         await taskRequestsModel.addOrUpdate(taskId, userId);
       });
 
-      it("should return 401 status code", function (done) {
+      it("should be successful when the user is not a super user", function (done) {
         chai
           .request(app)
           .get(`/taskRequests/taskrequstid`)
@@ -197,7 +206,7 @@ describe("Task Requests", function () {
               return done(err);
             }
 
-            expect(res).to.have.status(401);
+            expect(res).to.have.status(200);
             return done();
           });
       });
@@ -370,26 +379,6 @@ describe("Task Requests", function () {
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
-
-      it("should match response", function (done) {
-        chai
-          .request(app)
-          .post("/taskRequests/addOrUpdate")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({
-            taskId,
-            userId,
-          })
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
-            expect(res).to.have.status(409);
-            expect(res.body.message).to.equal("User status does not exist");
-            return done();
-          });
-      });
     });
 
     describe("When the user status is not idle", function () {
@@ -400,51 +389,6 @@ describe("Task Requests", function () {
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
-
-      it("should match response when the user is OOO", function (done) {
-        sinon.stub(userStatusModel, "getUserStatus").callsFake(() => ({ userStatusExists: true, data: oooUserStatus }));
-        chai
-          .request(app)
-          .post("/taskRequests/addOrUpdate")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({
-            taskId,
-            userId,
-          })
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
-            expect(res).to.have.status(409);
-            expect(res.body.message).to.equal("User is currently OOO");
-            return done();
-          });
-      });
-
-      it("should match response when the user is active on another task", function (done) {
-        sinon
-          .stub(userStatusModel, "getUserStatus")
-          .callsFake(() => ({ userStatusExists: true, data: activeUserStatus }));
-
-        chai
-          .request(app)
-          .post("/taskRequests/addOrUpdate")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({
-            taskId,
-            userId,
-          })
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
-            expect(res).to.have.status(409);
-            expect(res.body.message).to.equal("User is currently active on another task");
-            return done();
-          });
-      });
     });
   });
 
@@ -452,7 +396,7 @@ describe("Task Requests", function () {
     let activeUserId, oooUserId;
 
     describe("When the user is super user", function () {
-      before(async function () {
+      beforeEach(async function () {
         userId = await addUser(member);
         activeUserId = await addUser(activeMember);
         oooUserId = await addUser(member2);
@@ -468,8 +412,13 @@ describe("Task Requests", function () {
         await userStatusModel.updateUserStatus(oooUserId, { ...oooUserStatus });
         await taskRequestsModel.addOrUpdate(taskId, userId);
       });
+      afterEach(async function () {
+        sinon.restore();
+        await cleanDb();
+      });
 
       it("should match response for successfull approval", function (done) {
+        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ approvedTo: member.username, taskRequest: {} });
         chai
           .request(app)
           .patch("/taskRequests/approve")
@@ -489,63 +438,79 @@ describe("Task Requests", function () {
           });
       });
 
-      it("should return 409 error with message when user is active", function (done) {
+      it("should throw 400 error when taskRequestId is missing", function (done) {
         chai
           .request(app)
           .patch("/taskRequests/approve")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
-            taskRequestId: taskId,
-            userId: activeUserId,
-          })
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
-            expect(res).to.have.status(409);
-            expect(res.body.message).to.equal("User is currently active on another task");
-            return done();
-          });
-      });
-
-      it("should return 409 error with message when user is ooo", function (done) {
-        chai
-          .request(app)
-          .patch("/taskRequests/approve")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({
-            taskRequestId: taskId,
             userId: oooUserId,
           })
           .end((err, res) => {
             if (err) {
               return done(err);
             }
-
-            expect(res).to.have.status(409);
-            expect(res.body.message).to.equal("User is currently OOO");
-            return done();
-          });
-      });
-
-      it("should throw 400 error when taskRequestId is missing", function (done) {
-        chai
-          .request(app)
-          .patch("/taskRequests/approve")
-          .set("cookie", `${cookieName}=${jwt}`)
-          .send({ userId })
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-
             expect(res).to.have.status(400);
             expect(res.body.message).to.equal("taskRequestId not provided");
             return done();
           });
       });
 
+      it("should throw 400 error when task request id provided doesn't exist", function (done) {
+        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ taskRequestNotFound: true });
+        chai
+          .request(app)
+          .patch("/taskRequests/approve")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({ taskRequestId: taskId, userId, activeUserId })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.message).to.equal("Task request not found.");
+            expect(res).to.have.status(400);
+
+            return done();
+          });
+      });
+
+      it("should throw 400 error when user did not request for a task", function (done) {
+        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ isUserInvalid: true });
+        chai
+          .request(app)
+          .patch("/taskRequests/approve")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({ taskRequestId: taskId, userId, activeUserId })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.message).to.equal("User request not available.");
+            expect(res).to.have.status(400);
+
+            return done();
+          });
+      });
+      it("should throw 400 error when task was previously approved or rejected.", function (done) {
+        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ isTaskRequestInvalid: true });
+        chai
+          .request(app)
+          .patch("/taskRequests/approve")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .send({ taskRequestId: taskId, userId, activeUserId })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.message).to.equal("Task request was previously approved or rejected.");
+            expect(res).to.have.status(400);
+
+            return done();
+          });
+      });
       it("should throw 400 error when userId is missing", function (done) {
         chai
           .request(app)
@@ -562,8 +527,86 @@ describe("Task Requests", function () {
             return done();
           });
       });
+      describe("Checks the user status", function () {
+        it("Should change the user status to ACTIVE when request is successful", async function () {
+          sinon
+            .stub(taskRequestsModel, "approveTaskRequest")
+            .resolves({ approvedTo: member.username, taskRequest: { taskRequestId: taskId } });
+          const res = await chai
+            .request(app)
+            .patch("/taskRequests/approve")
+            .set("cookie", `${cookieName}=${jwt}`)
+            .send({
+              taskRequestId: taskId,
+              userId,
+            });
+
+          expect(res).to.have.status(200);
+          const userStatus = await userStatusModel.getUserStatus(userId);
+          expect(userStatus.data.currentStatus.state).to.be.equal(userState.ACTIVE);
+        });
+        it("Should not change the user status to ACTIVE when request is unsuccessful", async function () {
+          sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ isTaskRequestInvalid: true });
+          const res = await chai
+            .request(app)
+            .patch("/taskRequests/approve")
+            .set("cookie", `${cookieName}=${jwt}`)
+            .send({
+              taskRequestId: taskId,
+              userId,
+            });
+
+          expect(res).to.have.status(400);
+          const userStatus = await userStatusModel.getUserStatus(userId);
+          expect(userStatus.data.currentStatus.state).to.be.equal(userState.IDLE);
+        });
+      });
     });
 
+    describe("task request logs", function () {
+      beforeEach(async function () {
+        userId = await addUser(member);
+        superUserId = await addUser(superUser);
+
+        jwt = authService.generateAuthToken({ userId: superUserId });
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
+        await userStatusModel.updateUserStatus(userId, idleUserStatus);
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+      });
+      afterEach(async function () {
+        sinon.restore();
+        await cleanDb();
+      });
+      it("should save logs of approved requests", async function () {
+        sinon
+          .stub(taskRequestsModel, "approveTaskRequest")
+          .resolves({ approvedTo: member.username, taskRequest: { taskRequestId: taskId } });
+        await chai.request(app).patch("/taskRequests/approve").set("cookie", `${cookieName}=${jwt}`).send({
+          taskRequestId: taskId,
+          userId,
+        });
+        const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+        let taskRequestLogs;
+        logsRef.forEach((data) => {
+          taskRequestLogs = data.data();
+        });
+        expect(taskRequestLogs.body.taskRequestId).to.be.equal(taskId);
+      });
+
+      it("should not save logs of failed requests", async function () {
+        sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ taskRequestNotFound: true });
+        await chai.request(app).patch("/taskRequests/approve").set("cookie", `${cookieName}=${jwt}`).send({
+          taskRequestId: taskId,
+          userId,
+        });
+        const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+        let taskRequestLogs;
+        logsRef.forEach((data) => {
+          taskRequestLogs = data.data();
+        });
+        expect(taskRequestLogs).to.be.equal(undefined);
+      });
+    });
     describe("When the user is not super user", function () {
       before(async function () {
         userId = await addUser(member);
@@ -593,6 +636,213 @@ describe("Task Requests", function () {
             return done();
           });
       });
+    });
+  });
+
+  describe("POST /taskRequests", function () {
+    let fetchIssuesByIdStub;
+    let fetchTaskStub;
+    let createRequestStub;
+    let getUsernameStub;
+    const url = "/taskRequests";
+    beforeEach(async function () {
+      fetchIssuesByIdStub = sinon.stub(githubService, "fetchIssuesById");
+      fetchTaskStub = sinon.stub(tasksModel, "fetchTask");
+      createRequestStub = sinon.stub(taskRequestsModel, "createRequest");
+      getUsernameStub = sinon.stub(usersUtils, "getUsername");
+      getUsernameStub.resolves("abc");
+      userId = await addUser({ ...member, id: "user123" });
+      sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
+      jwt = authService.generateAuthToken({ userId });
+    });
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+    it("should create a task request successfully (Creation)", async function () {
+      fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
+      createRequestStub.resolves({
+        id: "request123",
+        taskRequest: mockData.existingTaskRequest,
+        isCreate: true,
+        alreadyRequesting: false,
+      });
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(mockData.taskRequestData);
+      expect(res).to.have.status(201);
+      expect(res.body.message).to.equal("Task request successful.");
+    });
+    it("should allow users to request the same task (Creation)", async function () {
+      fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
+      createRequestStub.resolves({ id: "request123", taskRequest: mockData.existingTaskRequest, isCreate: false });
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(mockData.taskRequestData);
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.equal("Task request successful.");
+    });
+    it("should not allow users to request a issue which was previously approved (Creation)", async function () {
+      fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
+      createRequestStub.resolves({ isCreationRequestApproved: true });
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(mockData.taskRequestData);
+      expect(res).to.have.status(409);
+      expect(res.body.message).to.equal("Task exists for the given issue.");
+    });
+    it("should allow users to request the same task (Assignment)", async function () {
+      const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT, taskId: "abc" };
+      fetchTaskStub.resolves({ taskData: { ...taskData, id: requestData.taskId } });
+      createRequestStub.resolves({ id: "request123", taskRequest: mockData.existingTaskRequest, isCreate: false });
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.equal("Task request successful.");
+    });
+    it("should handle invalid external issue URL", async function () {
+      const requestData = {
+        ...mockData.taskRequestData,
+        externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website/atus/issues/1564672",
+      };
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      expect(res.body.message).to.equal("Issue does not exist");
+      expect(res).to.have.status(400);
+    });
+    it("should handle valid external issue URL not is RDS repo", async function () {
+      fetchIssuesByIdStub.resolves(null);
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(mockData.taskRequestData);
+      expect(res.body.message).to.equal("Issue does not exist");
+      expect(res).to.have.status(400);
+    });
+    it("should handle task deadline before start date", async function () {
+      const requestData = {
+        ...mockData.taskRequestData,
+        proposedStartDate: mockData.taskRequestData.proposedDeadline + 10000,
+      };
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      expect(res.body.message).to.equal("Task deadline cannot be before the start date");
+      expect(res).to.have.status(400);
+    });
+    it("should handle user not authorized", async function () {
+      const requestData = { ...mockData.taskRequestData, userId: "abc" };
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      expect(res.body.message).to.equal("Not authorized to create the request");
+      expect(res).to.have.status(403);
+    });
+    it("should handle user not found", async function () {
+      const requestData = { ...mockData.taskRequestData };
+      getUsernameStub.resolves(null);
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      expect(res.body.message).to.equal("User not found");
+      expect(res).to.have.status(400);
+    });
+    it("should handle task not found (Assignment)", async function () {
+      const requestData = { ...mockData.taskRequestData, taskId: "abc", requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
+      fetchTaskStub.resolves({ taskData: null });
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.equal("Task does not exist");
+    });
+    it("should save logs of successful requests", async function () {
+      fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
+      createRequestStub.resolves({
+        id: "request123",
+        taskRequest: mockData.existingTaskRequest,
+        isCreate: true,
+        alreadyRequesting: false,
+      });
+      await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(mockData.taskRequestData);
+      const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+      let taskRequestLogs;
+      logsRef.forEach((data) => {
+        taskRequestLogs = data.data();
+      });
+      expect(taskRequestLogs).to.not.be.equal(undefined);
+      expect(taskRequestLogs.body).to.be.deep.equal(mockData.existingTaskRequest);
+    });
+    it("should not save logs of failed requests", async function () {
+      const requestData = {
+        ...mockData.taskRequestData,
+        taskId: "abc",
+        requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
+      };
+      fetchTaskStub.resolves({ taskData: null });
+      await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+      let taskRequestLogs;
+      logsRef.forEach((data) => {
+        taskRequestLogs = data.data();
+      });
+      expect(taskRequestLogs).to.be.equal(undefined);
+    });
+  });
+
+  describe("POST /taskRequests/migrations", function () {
+    const url = "/taskRequests/migrations";
+    beforeEach(async function () {
+      superUserId = await addUser(superUser);
+      sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
+      jwt = authService.generateAuthToken({ userId: superUserId });
+    });
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should run the add new fields script when the appropriate query param is passed", async function () {
+      const addNewFieldsStub = sinon
+        .stub(taskRequestsModel, "addNewFields")
+        .resolves({ documentsModified: 1, totalDocuments: 2 });
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .query({ action: MIGRATION_TYPE.ADD_NEW_FIELDS });
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.equal("Task requests migration successful");
+      expect(addNewFieldsStub.calledOnce).to.be.equal(true);
+      expect(res.body.documentsModified).to.be.equal(1);
+      expect(res.body.totalDocuments).to.be.equal(2);
+    });
+    it("should run the remove old fields script when the appropriate query param is passed", async function () {
+      const removeOldFieldsStub = sinon
+        .stub(taskRequestsModel, "removeOldField")
+        .resolves({ documentsModified: 1, totalDocuments: 2 });
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .query({ action: MIGRATION_TYPE.REMOVE_OLD_FIELDS });
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.equal("Task requests migration successful");
+      expect(removeOldFieldsStub.calledOnce).to.be.equal(true);
+      expect(res.body.documentsModified).to.be.equal(1);
+      expect(res.body.totalDocuments).to.be.equal(2);
+    });
+    it("should should handle any error thrown", async function () {
+      sinon.stub(taskRequestsModel, "removeOldField").throws(new Error("Error message"));
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .query({ action: MIGRATION_TYPE.REMOVE_OLD_FIELDS });
+      expect(res).to.have.status(500);
+      expect(res.body.message).to.be.equal("An internal server error occurred");
+    });
+    it("should should invalid query param", async function () {
+      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).query({ action: "abc" });
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Unknown action");
     });
   });
 });

@@ -23,6 +23,7 @@ const { updateUserStatus } = require("../../models/userStatus");
 const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
 const userStatusModel = require("../../models/userStatus");
+const { convertTimestampToUTCStartOrEndOfDay } = require("../../utils/time");
 
 chai.use(chaiHttp);
 
@@ -128,7 +129,7 @@ describe("UserStatus", function () {
     let clock;
     beforeEach(async function () {
       clock = sinon.useFakeTimers({
-        now: new Date(2022, 10, 12).getTime(),
+        now: new Date(2022, 10, 12, 12, 0, 0).getTime(),
         toFake: ["Date"],
       });
       testUserId = await addUser(userData[1]);
@@ -143,7 +144,9 @@ describe("UserStatus", function () {
       // creating Active Status from 12th Nov 2022 (1669401000000)
       const updatedAtDate = Date.now(); // 12th Nov 2022
       const fromDate = updatedAtDate + 12 * 24 * 60 * 60 * 1000; // 24th Nov 2022
+      const fromDateInUTC = convertTimestampToUTCStartOrEndOfDay(fromDate, false);
       const untilDate = updatedAtDate + 16 * 24 * 60 * 60 * 1000; // 28th Nov 2022
+      const untilDateInUTC = convertTimestampToUTCStartOrEndOfDay(untilDate, true);
 
       const statusData = generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate);
       statusData.userId = testUserId;
@@ -160,8 +163,8 @@ describe("UserStatus", function () {
       expect(response2.body.data).to.have.own.property("futureStatus");
       expect(response2.body.data.futureStatus.state).to.equal("OOO");
       expect(response2.body.data.futureStatus.message).to.equal("Vacation Trip");
-      expect(response2.body.data.futureStatus.from).to.equal(fromDate);
-      expect(response2.body.data.futureStatus.until).to.equal(untilDate);
+      expect(response2.body.data.futureStatus.from).to.equal(fromDateInUTC);
+      expect(response2.body.data.futureStatus.until).to.equal(untilDateInUTC);
       expect(response2.body.data.futureStatus.updatedAt).to.equal(updatedAtDate);
 
       // Mocking date to be 26th Nov 2022
@@ -277,7 +280,7 @@ describe("UserStatus", function () {
 
     beforeEach(async function () {
       clock = sinon.useFakeTimers({
-        now: new Date(2022, 10, 12).getTime(),
+        now: new Date(2022, 10, 12, 12, 0, 0).getTime(),
         toFake: ["Date"],
       });
       testUserId = await addUser(userData[1]);
@@ -483,7 +486,9 @@ describe("UserStatus", function () {
 
       // Initially Marking OOO Status from 24th Nov 2022 to 28th Nov 2022
       let fromDate = new Date(2022, 10, 24).getTime();
+      let fromDateInUTC = convertTimestampToUTCStartOrEndOfDay(fromDate, false);
       let untilDate = new Date(2022, 10, 28).getTime();
+      let untilDateInUTC = convertTimestampToUTCStartOrEndOfDay(untilDate, true);
       const response2 = await chai
         .request(app)
         .patch(`/users/status/self`)
@@ -493,12 +498,14 @@ describe("UserStatus", function () {
       expect(response2.body.message).to.equal("User Status updated successfully.");
       expect(response2.body.data).to.have.own.property("futureStatus");
       expect(response2.body.data.futureStatus.state).to.equal("OOO");
-      expect(response2.body.data.futureStatus.from).to.equal(fromDate); // 24th Nov 2022
-      expect(response2.body.data.futureStatus.until).to.equal(untilDate); // 28th Nov 2022
+      expect(response2.body.data.futureStatus.from).to.equal(fromDateInUTC); // 24th Nov 2022
+      expect(response2.body.data.futureStatus.until).to.equal(untilDateInUTC); // 28th Nov 2022
 
       // Changing OOO status again from 1st Dec 2022 to 5th Dec 2022
       fromDate = new Date(2022, 11, 1).getTime();
       untilDate = new Date(2022, 11, 5).getTime();
+      fromDateInUTC = convertTimestampToUTCStartOrEndOfDay(fromDate, false);
+      untilDateInUTC = convertTimestampToUTCStartOrEndOfDay(untilDate, true);
       const response3 = await chai
         .request(app)
         .patch(`/users/status/self`)
@@ -508,8 +515,8 @@ describe("UserStatus", function () {
       expect(response3.body.message).to.equal("User Status updated successfully.");
       expect(response3.body.data).to.have.own.property("futureStatus");
       expect(response3.body.data.futureStatus.state).to.equal("OOO");
-      expect(response3.body.data.futureStatus.from).to.equal(fromDate); // 1st Dec 2022
-      expect(response3.body.data.futureStatus.until).to.equal(untilDate); // 5th Dec 2022
+      expect(response3.body.data.futureStatus.from).to.equal(fromDateInUTC); // 1st Dec 2022
+      expect(response3.body.data.futureStatus.until).to.equal(untilDateInUTC); // 5th Dec 2022
 
       // Checking the current status
       const response4 = await chai.request(app).get(`/users/status/self`).set("Cookie", `${cookieName}=${testUserJwt}`);
@@ -520,14 +527,16 @@ describe("UserStatus", function () {
       expect(response4.body.data.currentStatus.state).to.equal("ACTIVE");
       expect(response4.body.data).to.have.property("futureStatus");
       expect(response4.body.data.futureStatus.state).to.equal("OOO");
-      expect(response3.body.data.futureStatus.from).to.equal(fromDate); // 1st Dec 2022
-      expect(response3.body.data.futureStatus.until).to.equal(untilDate); // 5th Dec 2022
+      expect(response3.body.data.futureStatus.from).to.equal(fromDateInUTC); // 1st Dec 2022
+      expect(response3.body.data.futureStatus.until).to.equal(untilDateInUTC); // 5th Dec 2022
     });
 
     it("should clear future OOO Status if current Status is marked as OOO", async function () {
       // Initially Marking OOO Status from 24th Nov 2022 to 28th Nov 2022.
       let fromDate = new Date(2022, 10, 24).getTime(); // 24th Nov 2022
       let untilDate = new Date(2022, 10, 28).getTime(); // 28th Nov 2022
+      let fromDateInUTC = convertTimestampToUTCStartOrEndOfDay(fromDate, false);
+      let untilDateInUTC = convertTimestampToUTCStartOrEndOfDay(untilDate, true);
       const response1 = await chai
         .request(app)
         .patch(`/users/status/self`)
@@ -537,12 +546,14 @@ describe("UserStatus", function () {
       expect(response1.body.message).to.equal("User Status created successfully.");
       expect(response1.body.data).to.have.own.property("futureStatus");
       expect(response1.body.data.futureStatus.state).to.equal("OOO");
-      expect(response1.body.data.futureStatus.from).to.equal(fromDate); // 24th Nov 2022
-      expect(response1.body.data.futureStatus.until).to.equal(untilDate); // 28th Nov 2022
+      expect(response1.body.data.futureStatus.from).to.equal(fromDateInUTC); // 24th Nov 2022
+      expect(response1.body.data.futureStatus.until).to.equal(untilDateInUTC); // 28th Nov 2022
 
       // Changing OOO status from today
-      fromDate = new Date(2022, 10, 12).getTime(); // 17th Nov 2022
-      untilDate = new Date(2022, 10, 17).getTime(); // 17th Nov 2022
+      fromDate = new Date(2022, 10, 12, 12, 0, 0).getTime(); // 17th Nov 2022
+      untilDate = new Date(2022, 10, 17, 12, 0, 0).getTime(); // 17th Nov 2022
+      fromDateInUTC = convertTimestampToUTCStartOrEndOfDay(fromDate, false);
+      untilDateInUTC = convertTimestampToUTCStartOrEndOfDay(untilDate, true);
       const response2 = await chai
         .request(app)
         .patch(`/users/status/self`)
@@ -552,8 +563,8 @@ describe("UserStatus", function () {
       expect(response2.body.message).to.equal("User Status updated successfully.");
       expect(response2.body.data).to.have.own.property("currentStatus");
       expect(response2.body.data.currentStatus.state).to.equal("OOO");
-      expect(response2.body.data.currentStatus.from).to.equal(fromDate); // 12 Nov 2022
-      expect(response2.body.data.currentStatus.until).to.equal(untilDate); // 17 Nov 2022
+      expect(response2.body.data.currentStatus.from).to.equal(fromDateInUTC); // 12 Nov 2022
+      expect(response2.body.data.currentStatus.until).to.equal(untilDateInUTC); // 17 Nov 2022
       expect(response2.body.data.futureStatus.state).to.equal(undefined);
     });
   });
