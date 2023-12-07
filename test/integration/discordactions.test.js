@@ -475,7 +475,7 @@ describe("Discord actions", function () {
             return done(err);
           }
 
-          // expect(res).to.have.status(500);
+          expect(res).to.have.status(500);
           expect(res.body.message).to.equal("An internal server error occurred");
           return done();
         });
