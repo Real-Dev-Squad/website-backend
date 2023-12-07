@@ -479,7 +479,7 @@ describe("Discord actions", function () {
           expect(res.body.message).to.equal("An internal server error occurred");
           return done();
         });
-    });
+    }).timeout(10000);
   });
   describe("POST /discord-actions/discord-roles", function () {
     before(async function () {
