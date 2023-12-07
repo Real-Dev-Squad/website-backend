@@ -467,7 +467,7 @@ describe("discordactions", function () {
     before(async function () {
       length = usersStatusData.length;
       users = userData
-        .filter((data) => data.username && data.discordId && !data?.roles[ROLES.ARCHIVED] && data?.discordJoinedAt)
+        .filter((data) => data.username && data.discordId && !data?.roles?.archived && data?.discordJoinedAt)
         .slice(0, length);
       const addedUersPromise = users.map(async (user) => {
         const { id } = await userModel.add({ ...user });
