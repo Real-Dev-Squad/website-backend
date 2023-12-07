@@ -271,9 +271,9 @@ const generateOOONickname = (username = "", from, until) => {
  */
 const updateNickname = async (userId, status = {}) => {
   try {
-    const { user: { discordId, username, roles: { in_discord = false } = {} }, discordJoinedAt = {} } = await dataAccessLayer.retrieveUsers({ id: userId });
+    const { user: { discordId, username, roles = {} }, discordJoinedAt = {} } = await dataAccessLayer.retrieveUsers({ id: userId });
 
-    if (!discordJoinedAt && !in_discord) return;
+    if (!discordJoinedAt && !roles['in_discord']) return;
 
     if (!discordId || !username) {
       throw new Error("Username or discordId unavailable");
