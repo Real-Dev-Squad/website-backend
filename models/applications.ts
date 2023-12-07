@@ -27,14 +27,14 @@ const getApplicationById = async (applicationId: string) => {
   }
 
   return { notFound: true };
-}
+};
 
 const getApplicationsBasedOnStatus = async (status: string, userId: string) => {
   const applications = [];
   let dbQuery = ApplicationsModel.where("status", "==", status);
 
   if (userId) {
-    dbQuery = dbQuery.where('userId', '==', userId)
+    dbQuery = dbQuery.where("userId", "==", userId);
   }
   const applicationsBasedOnStatus = await dbQuery.get();
 
@@ -50,12 +50,16 @@ const getApplicationsBasedOnStatus = async (status: string, userId: string) => {
 
 const getUserApplications = async (userId: string) => {
   try {
-    const application = await ApplicationsModel.where("userId", "==", userId).limit(1).get();
-    const [applicationDoc] = application.docs;
-    if (applicationDoc) {
-      return { id: applicationDoc.id, ...applicationDoc.data() };
-    }
-    return { notFound: true };
+    const applicationsResult = [];
+    const applications = await ApplicationsModel.where("userId", "==", userId).get();
+
+    applications.forEach((application) => {
+      applicationsResult.push({
+        id: application.id,
+        ...application.data(),
+      });
+    });
+    return applicationsResult;
   } catch (err) {
     logger.log("error in getting user intro", err);
     throw err;

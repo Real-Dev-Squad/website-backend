@@ -8,10 +8,14 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
   try {
     const { userId, status } = req.query;
     if (userId) {
-      const application = await ApplicationModel.getUserApplications(userId);
+      const applications = await ApplicationModel.getUserApplications(userId);
+
+      console.log(applications)
+      if (!applications.length) return res.boom.notFound("User application not found");
+
       return res.json({
-        message: "application returned successfully!",
-        application,
+        message: "User applications returned successfully!",
+        applications,
       });
     }
 
