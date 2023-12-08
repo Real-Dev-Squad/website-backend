@@ -29,7 +29,7 @@ const getApplicationById = async (applicationId: string) => {
   return { notFound: true };
 };
 
-const getApplicationsBasedOnStatus = async (status: string, userId: string) => {
+const getApplicationsBasedOnStatus = async (status: string, userId?: string) => {
   const applications = [];
   let dbQuery = ApplicationsModel.where("status", "==", status);
 
