@@ -3,6 +3,8 @@ const { logType } = require("../constants/logs");
 import { CustomRequest, CustomResponse } from "../types/global";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const ApplicationModel = require("../models/applications");
+const { API_RESPONSE_MESSAGES } = require("../constants/application");
+const { getUserApplicationObject } = require("../utils/application");
 
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
@@ -10,7 +12,6 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
     if (userId) {
       const applications = await ApplicationModel.getUserApplications(userId);
 
-      console.log(applications)
       if (!applications.length) return res.boom.notFound("User application not found");
 
       return res.json({
@@ -22,14 +23,14 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
     if (status) {
       const applicationsWithStatus = await ApplicationModel.getApplicationsBasedOnStatus(status);
       return res.json({
-        message: "applications returned successfully!",
+        message: API_RESPONSE_MESSAGES.APPLICATION_RETURN_SUCCESS,
         applications: applicationsWithStatus,
       });
     }
 
     const applications = await ApplicationModel.getAllApplications();
     return res.json({
-      message: "applications returned successfully!",
+      message: API_RESPONSE_MESSAGES.APPLICATION_RETURN_SUCCESS,
       applications,
     });
   } catch (err) {
@@ -47,31 +48,7 @@ const addApplication = async (req: CustomRequest, res: CustomResponse) => {
         message: "User application is already present!",
       });
     }
-    const data = {
-      userId: req.userData.id,
-      biodata: {
-        firstName: rawData.firstName,
-        lastName: rawData.lastName,
-      },
-      location: {
-        city: rawData.city,
-        state: rawData.state,
-        country: rawData.country,
-      },
-      professional: {
-        institution: rawData.college,
-        skills: rawData.skills,
-      },
-      intro: {
-        introduction: rawData.introduction,
-        funFact: rawData.funFact,
-        forFun: rawData.forFun,
-        whyRds: rawData.whyRds,
-        numberOfHours: rawData.numberOfHours,
-      },
-      foundFrom: rawData.foundFrom,
-      status: "pending",
-    };
+    const data = getUserApplicationObject(rawData, req.userData.id);
     await ApplicationModel.addApplication(data);
 
     return res.status(201).json({
