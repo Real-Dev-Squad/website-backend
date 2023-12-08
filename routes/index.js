@@ -32,5 +32,7 @@ app.use("/progresses", require("./progresses.js"));
 app.use("/monitor", require("./monitor.js"));
 app.use("/staging", require("./staging.js"));
 app.use("/applications", require("./applications"));
+app.use("/v1/fcm-tokens", require("./fcmToken.js"));
+app.use("/v1/notifications", require("./notify.js"));
 app.use("/goals", require("./goals.js"));
 module.exports = app;
