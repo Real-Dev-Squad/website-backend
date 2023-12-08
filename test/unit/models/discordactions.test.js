@@ -595,6 +595,7 @@ describe("discordactions", function () {
     let activeUserWithProgressUpdates;
     let idleUser;
     let userNotInDiscord;
+    let activeUserId;
     beforeEach(async function () {
       idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
       activeUserWithProgressUpdates = { ...userData[10], discordId: getDiscordMembers[1].user.id };
@@ -611,6 +612,7 @@ describe("discordactions", function () {
         await addUser(activeUserWithNoUpdates), // active user with no task progress updates
         await addUser(userNotInDiscord), // OOO user with
       ]);
+      activeUserId = userIdList[2];
       await Promise.all([
         await userStatusModel.updateUserStatus(userIdList[0], idleUserStatus),
         await userStatusModel.updateUserStatus(userIdList[1], activeUserStatus),
@@ -625,12 +627,12 @@ describe("discordactions", function () {
         const validTask = {
           ...task,
           assignee: userIdList[index],
-          startedOn: (new Date().getTime() - convertDaysToMilliseconds(5)) / 1000,
+          startedOn: (new Date().getTime() - convertDaysToMilliseconds(7)) / 1000,
           endsOn: (new Date().getTime() + convertDaysToMilliseconds(4)) / 1000,
           status: TASK_STATUS.IN_PROGRESS,
         };
 
-        tasksPromise.push(await tasksModel.add(validTask));
+        tasksPromise.push(tasksModel.add(validTask));
       }
       const taskIdList = (await Promise.all(tasksPromise)).map((tasksDoc) => tasksDoc.id);
       const progressDataList = [];
@@ -676,13 +678,46 @@ describe("discordactions", function () {
       date3.setDate(date3.getDate() - 3);
       const date4 = new Date();
       date4.setDate(date4.getDate() - 4);
-      // this should now only get users who have not provided any update in last 7 days instead of 3;
       const result = await getMissedProgressUpdatesUsers({
         excludedDates: [date.valueOf(), date2.valueOf(), date3.valueOf(), date4.valueOf()],
       });
       expect(result).to.be.an("object");
       expect(result).to.be.deep.equal({
         tasks: 0,
+        missedUpdatesTasks: 0,
+        usersToAddRole: [],
+      });
+    });
+
+    it("should not list of users when all days of week are excluded", async function () {
+      const result = await getMissedProgressUpdatesUsers({
+        excludedDays: [0, 1, 2, 3, 4, 5, 6],
+      });
+      expect(result).to.be.an("object");
+      expect(result).to.be.deep.equal({
+        tasks: 0,
+        missedUpdatesTasks: 0,
+        usersToAddRole: [],
+      });
+    });
+    it("should not list any users since 5 days of weeks are excluded", async function () {
+      const oneMonthOldTask = { ...tasksData[0] };
+      oneMonthOldTask.assignee = activeUserId;
+      oneMonthOldTask.startedOn = (new Date().getTime() - convertDaysToMilliseconds(30)) / 1000;
+      oneMonthOldTask.endsOn = (new Date().getTime() + convertDaysToMilliseconds(4)) / 1000;
+      const taskId = (await tasksModel.add(oneMonthOldTask)).id;
+      const date = new Date();
+      date.setDate(date.getDate() - 29);
+      const progressData = stubbedModelTaskProgressData(null, taskId, date.getTime(), date.valueOf());
+      await createProgressDocument(progressData);
+
+      const result = await getMissedProgressUpdatesUsers({
+        excludedDays: [0, 1, 2, 3, 4, 5],
+        dateGap: 3,
+      });
+      expect(result).to.be.an("object");
+      expect(result).to.be.deep.equal({
+        tasks: 1,
         missedUpdatesTasks: 0,
         usersToAddRole: [],
       });

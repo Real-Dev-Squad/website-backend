@@ -841,7 +841,7 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
 };
 
 const getMissedProgressUpdatesUsers = async (options = {}) => {
-  const { cursor, size = 500, excludedDates = [], dateGap = 3 } = options;
+  const { cursor, size = 500, excludedDates = [], excludedDays = [0], dateGap = 3 } = options;
   const stats = {
     tasks: 0,
     missedUpdatesTasks: 0,
@@ -857,6 +857,17 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
         gapWindowStart -= convertDaysToMilliseconds(1);
       }
     });
+
+    if (excludedDays.length === 7) {
+      return { usersToAddRole: [], ...stats };
+    }
+
+    for (let i = gapWindowEnd; i >= gapWindowStart; i -= convertDaysToMilliseconds(1)) {
+      const day = new Date(i).getDay();
+      if (excludedDays.includes(day)) {
+        gapWindowStart -= convertDaysToMilliseconds(1);
+      }
+    }
 
     let taskQuery = buildTasksQueryForMissedUpdates(gapWindowStart, size);
 
