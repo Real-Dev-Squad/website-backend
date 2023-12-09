@@ -5,6 +5,7 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const ApplicationModel = require("../models/applications");
 const { API_RESPONSE_MESSAGES } = require("../constants/application");
 const { getUserApplicationObject } = require("../utils/application");
+const admin = require("firebase-admin");
 
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
@@ -48,7 +49,8 @@ const addApplication = async (req: CustomRequest, res: CustomResponse) => {
         message: "User application is already present!",
       });
     }
-    const data = getUserApplicationObject(rawData, req.userData.id);
+    const createdAt = admin.firestore.Timestamp.fromDate(new Date());
+    const data = getUserApplicationObject(rawData, req.userData.id, createdAt);
     await ApplicationModel.addApplication(data);
 
     return res.status(201).json({

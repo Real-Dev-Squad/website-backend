@@ -1,4 +1,4 @@
-const getUserApplicationObject = (rawData: any, userId: string) => {
+const getUserApplicationObject = (rawData: any, userId: string, createdAt: string) => {
   return {
     userId,
     biodata: {
@@ -23,6 +23,7 @@ const getUserApplicationObject = (rawData: any, userId: string) => {
     },
     foundFrom: rawData.foundFrom,
     status: "pending",
+    createdAt,
   };
 };
 
