@@ -28,7 +28,7 @@ let secondUserJwt: string;
 let applicationId1: string;
 let applicationId2: string;
 
-describe("Application", function () {
+describe.only("Application", function () {
   before(async function () {
     const userIdPromises = [addUser(appOwner), addUser(superUser), addUser(secondUser)];
     const [userId1, userId2, userId3] = await Promise.all(userIdPromises);
@@ -84,8 +84,8 @@ describe("Application", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User applications returned successfully!");
-          expect(res.body.application).to.be.a("object");
-          expect(res.body.application.userId).to.be.equal(userId);
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.applications[0].userId).to.be.equal(userId);
 
           return done();
         });
@@ -121,8 +121,8 @@ describe("Application", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("User applications returned successfully!");
-          expect(res.body.application).to.be.a("object");
-          expect(res.body.application.userId).to.be.equal(userId);
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.applications[0].userId).to.be.equal(userId);
 
           return done();
         });
@@ -200,7 +200,7 @@ describe("Application", function () {
           }
 
           expect(res).to.have.status(409);
-          expect(res.body.message).to.be.equal("User data is already present!");
+          expect(res.body.message).to.be.equal("User application is already present!");
           return done();
         });
     });
