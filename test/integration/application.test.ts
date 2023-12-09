@@ -28,7 +28,7 @@ let secondUserJwt: string;
 let applicationId1: string;
 let applicationId2: string;
 
-describe.only("Application", function () {
+describe("Application", function () {
   before(async function () {
     const userIdPromises = [addUser(appOwner), addUser(superUser), addUser(secondUser)];
     const [userId1, userId2, userId3] = await Promise.all(userIdPromises);
