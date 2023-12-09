@@ -1,4 +1,4 @@
-const Sinon = require("Sinon");
+const Sinon = require("sinon");
 const { getTasksValidator, createTask, getUsersValidator } = require("../../../middlewares/validators/tasks");
 const { expect } = require("chai");
 const { TASK_STATUS, taskUsersType, tasksUsersStatus } = require("../../../constants/tasks");
