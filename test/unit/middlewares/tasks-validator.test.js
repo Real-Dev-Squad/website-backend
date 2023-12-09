@@ -1,7 +1,7 @@
-const Sinon = require("sinon");
-const { getTasksValidator, createTask } = require("../../../middlewares/validators/tasks");
+const Sinon = require("Sinon");
+const { getTasksValidator, createTask, getUsersValidator } = require("../../../middlewares/validators/tasks");
 const { expect } = require("chai");
-const { TASK_STATUS } = require("../../../constants/tasks");
+const { TASK_STATUS, taskUsersType, tasksUsersStatus } = require("../../../constants/tasks");
 
 describe("getTasks validator", function () {
   it("should pass the request when no values for query params dev or status is passed", async function () {
@@ -519,5 +519,103 @@ describe("getTasks validator", function () {
       expect(error);
     }
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+
+  describe("getUsersValidator | Validator", function () {
+    it("should pass the request when valid query parameters are provided", async function () {
+      const req = {
+        query: {
+          type: taskUsersType.DISCORD,
+          query: tasksUsersStatus.MISSED_UPDATES,
+          size: 10,
+          cursor: "someCursor",
+          q: "-days-count:2 -date:123423432 -weekday:sun",
+        },
+      };
+      const res = {};
+      const nextMiddlewareSpy = Sinon.spy();
+      await getUsersValidator(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+    });
+    it("should pass the request when multiple valid query parameters are provided", async function () {
+      const req = {
+        query: {
+          type: taskUsersType.DISCORD,
+          query: tasksUsersStatus.MISSED_UPDATES,
+          size: 10,
+          cursor: "someCursor",
+          q: "-days-count:2 -date:123423432 -weekday:sun -weekday:mon",
+        },
+      };
+      const res = {};
+      const nextMiddlewareSpy = Sinon.spy();
+      await getUsersValidator(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+    });
+    it("should pass the request when only required query parameters are provided", async function () {
+      const req = {
+        query: {
+          type: taskUsersType.DISCORD,
+          query: tasksUsersStatus.MISSED_UPDATES,
+        },
+      };
+      const res = {};
+      const nextMiddlewareSpy = Sinon.spy();
+      await getUsersValidator(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+    });
+
+    it("should not pass validation when invalid query parameters are provided", async function () {
+      const req = {
+        query: {
+          invalidParam: "someValue",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: Sinon.spy(),
+        },
+      };
+      const nextMiddlewareSpy = Sinon.spy();
+      await getUsersValidator(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+      expect(res.boom.badRequest.callCount).to.be.equal(1);
+    });
+
+    it("should not pass validation when required parameters are missing", async function () {
+      const req = {
+        query: {
+          query: "someQuery",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: Sinon.spy(),
+        },
+      };
+      const nextMiddlewareSpy = Sinon.spy();
+      await getUsersValidator(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+      expect(res.boom.badRequest.callCount).to.be.equal(1);
+    });
+
+    it("should not pass validation when invalid filter parameters are provided", async function () {
+      const req = {
+        query: {
+          type: "someType",
+          query: "someQuery",
+          q: "date:invalidOperator:2023-01-01",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: Sinon.spy(),
+        },
+      };
+      const nextMiddlewareSpy = Sinon.spy();
+      await getUsersValidator(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+      expect(res.boom.badRequest.callCount).to.be.equal(1);
+    });
   });
 });
