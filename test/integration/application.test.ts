@@ -244,6 +244,47 @@ describe("Application", function () {
           return done();
         });
     });
+
+    it("should return 400 if anything other than status and feedback is passed in the body", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId1}`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "accepted",
+          batman: true,
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.be.equal("Bad Request");
+          expect(res.body.message).to.be.equal('"batman" is not allowed');
+          return done();
+        });
+    });
+
+    it("should return 400 if any status other than accepted, reject or pending is passed", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId1}`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "something",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.be.equal("Bad Request");
+          expect(res.body.message).to.be.equal("Status is not valid");
+          return done();
+        });
+    });
   });
 
   describe("GET /application/:applicationId", function () {
