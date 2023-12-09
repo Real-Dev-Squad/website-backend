@@ -1152,6 +1152,21 @@ describe("Task Requests", function () {
       expect(res.body.documentsModified).to.be.equal(1);
       expect(res.body.totalDocuments).to.be.equal(2);
     });
+    it("should run the add Users count and created at script when the appropriate query param is passed", async function () {
+      const addsUsersCountCreatedStub = sinon
+        .stub(taskRequestsModel, "addUsersCountAndCreatedAt")
+        .resolves({ documentsModified: 1, totalDocuments: 2 });
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .query({ action: MIGRATION_TYPE.ADD_COUNT_CREATED });
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.equal("Task requests migration successful");
+      expect(addsUsersCountCreatedStub.calledOnce).to.be.equal(true);
+      expect(res.body.documentsModified).to.be.equal(1);
+      expect(res.body.totalDocuments).to.be.equal(2);
+    });
     it("should should handle any error thrown", async function () {
       sinon.stub(taskRequestsModel, "removeOldField").throws(new Error("Error message"));
       const res = await chai
