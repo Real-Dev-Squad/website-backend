@@ -31,8 +31,8 @@ let applicationId2: string;
 describe("Application", function () {
   before(async function () {
     const userIdPromises = [addUser(appOwner), addUser(superUser), addUser(secondUser)];
-    const [userId1, userId2, userId3] = await Promise.all(userIdPromises)
-    userId = userId1
+    const [userId1, userId2, userId3] = await Promise.all(userIdPromises);
+    userId = userId1;
     superUserId = userId2;
     secondUserId = userId3;
     jwt = authService.generateAuthToken({ userId });
@@ -146,7 +146,7 @@ describe("Application", function () {
         });
     });
 
-    it ("should return application with status accepted if status accepted is passed in query params", function(done) {
+    it("should return application with status accepted if status accepted is passed in query params", function (done) {
       chai
         .request(app)
         .get("/applications?status=accepted")
@@ -160,10 +160,10 @@ describe("Application", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("applications returned successfully!");
           expect(res.body.applications).to.be.a("array");
-          expect(res.body.applications[0].status).to.be.equal('accepted')
+          expect(res.body.applications[0].status).to.be.equal("accepted");
           return done();
         });
-    })
+    });
   });
 
   describe("POST /applications", function () {
@@ -241,6 +241,59 @@ describe("Application", function () {
 
           expect(res).to.have.status(401);
           expect(res.body.message).to.be.equal("You are not authorized for this action.");
+          return done();
+        });
+    });
+  });
+
+  describe("GET /application/:applicationId", function () {
+    it("should return Unauthorized if user is not a super user", function (done) {
+      chai
+        .request(app)
+        .get(`/applications/${applicationId1}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.be.equal("Unauthorized");
+          expect(res.body.message).to.be.equal("You are not authorized for this action.");
+          return done();
+        });
+    });
+
+    it("should return a particular application if it is present in the db and the user is super user ", function (done) {
+      chai
+        .request(app)
+        .get(`/applications/${applicationId1}`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Application returned successfully");
+          expect(res.body.application.id).to.be.equal(applicationId1);
+          return done();
+        });
+    });
+
+    it("should return 404 if the application doesn't exist", function (done) {
+      chai
+        .request(app)
+        .get(`/applications/faskdfsdjfjk`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(404);
+          expect(res.body.error).to.be.equal("Not Found");
+          expect(res.body.message).to.be.equal("Application not found");
           return done();
         });
     });
