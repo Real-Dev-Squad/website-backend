@@ -9,7 +9,7 @@ const assignTask = require("../middlewares/assignTask");
 const { cacheResponse, invalidateCache } = require("../utils/cache");
 const { ALL_TASKS } = require("../constants/cacheKeys");
 
-router.get("/", getTasksValidator, cacheResponse({ invalidationKey: ALL_TASKS, expiry: 10 }), tasks.fetchTasks);
+router.get("/", getTasksValidator, cacheResponse({ invalidationKey: ALL_TASKS, expiry: 0 }), tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);
 router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasks);
 router.post(

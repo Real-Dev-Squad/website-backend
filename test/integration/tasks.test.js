@@ -59,7 +59,34 @@ const taskData = [
     assignee: appOwner.username,
   },
 ];
-
+const tasksAssigneeArchived = [
+  {
+    title: "Test task 1",
+    type: "feature",
+    endsOn: 1234,
+    startedOn: 4567,
+    status: "IN_PROGRESS",
+    percentCompleted: 10,
+    participants: [],
+    assignee: "ankita",
+    completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+    lossRate: { [DINERO]: 1 },
+    isNoteworthy: true,
+  },
+  {
+    title: "Test task 2",
+    type: "feature",
+    endsOn: 1234,
+    startedOn: 4567,
+    status: "BLOCKED",
+    percentCompleted: 10,
+    participants: [],
+    assignee: "ram",
+    completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+    lossRate: { [DINERO]: 1 },
+    isNoteworthy: true,
+  },
+];
 describe("Tasks", function () {
   let taskId1, taskId;
 
@@ -80,6 +107,8 @@ describe("Tasks", function () {
 
     // Add the completed task
     taskId = (await tasks.updateTask(taskData[1])).taskId;
+    tasksAssigneeArchived[0].assigneeId = archivedUserIds[0];
+    tasksAssigneeArchived[1].assigneeId = archivedUserIds[1];
   });
 
   after(async function () {
@@ -313,38 +342,8 @@ describe("Tasks", function () {
         });
     });
     it("Should get all tasks assigned to archived users GET /tasks", async function () {
-      const task = [
-        {
-          title: "Test task 1",
-          type: "feature",
-          endsOn: 1234,
-          startedOn: 4567,
-          status: "IN_PROGRESS",
-          percentCompleted: 10,
-          participants: [],
-          assignee: "ankita",
-          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-          lossRate: { [DINERO]: 1 },
-          isNoteworthy: true,
-          assigneeId: archivedUserIds[0],
-        },
-        {
-          title: "Test task 2",
-          type: "feature",
-          endsOn: 1234,
-          startedOn: 4567,
-          status: "BLOCKED",
-          percentCompleted: 10,
-          participants: [],
-          assignee: "ram",
-          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-          lossRate: { [DINERO]: 1 },
-          isNoteworthy: true,
-          assigneeId: archivedUserIds[1],
-        },
-      ];
-      const { taskId: taskId1 } = await tasks.updateTask(task[0]);
-      const { taskId: taskId2 } = await tasks.updateTask(task[1]);
+      const { taskId: taskId1 } = await tasks.updateTask(tasksAssigneeArchived[0]);
+      const { taskId: taskId2 } = await tasks.updateTask(tasksAssigneeArchived[1]);
       const res = await chai.request(app).get(`/tasks?assignee-role=archived&dev=true`);
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
@@ -359,7 +358,20 @@ describe("Tasks", function () {
         expect(task.assignee).to.be.oneOf(archivedUserNames);
       });
     });
-
+    it("Should return 400 when assignee role is not archived", async function () {
+      const res = await chai.request(app).get(`/tasks?assignee-role=abc&dev=true`);
+      expect(res).to.have.status(400);
+      expect(res.body).to.be.a("object");
+      expect(res.body.error).to.equal("Bad Request");
+      expect(res.body.message).to.equal('"assignee-role" must be [archived]');
+    });
+    it("Should return 400 when assignee role is not used with dev=true param", async function () {
+      const res = await chai.request(app).get(`/tasks?assignee-role=archived`);
+      expect(res).to.have.status(400);
+      expect(res.body).to.be.a("object");
+      expect(res.body.error).to.equal("Bad Request");
+      expect(res.body.message).to.equal("assignee role should be used with dev=true");
+    });
     it("Should get all overdue tasks GET /tasks", function (done) {
       chai
         .request(app)

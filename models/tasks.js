@@ -8,10 +8,12 @@ const { chunks } = require("../utils/array");
 const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
+const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const { IN_PROGRESS, NEEDS_REVIEW, IN_REVIEW, ASSIGNED, BLOCKED, SMOKE_TESTING, COMPLETED, SANITY_CHECK } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const ROLES = require("../constants/roles");
+const { fetchPaginatedArchivedUsers } = require("../models/users");
 /**
  * Adds and Updates tasks
  *
@@ -136,10 +138,11 @@ const fetchPaginatedTasks = async ({
   assignee,
   title,
   assigneeRole,
+  nextArchivedUser,
 }) => {
   try {
     let initialQuery = tasksModel;
-
+    let nextArchivedUserCursor;
     if (assignee) {
       const assignees = assignee.split(",");
       const users = [];
@@ -195,8 +198,20 @@ const fetchPaginatedTasks = async ({
         .orderBy("title", "asc");
     }
     if (assigneeRole === ROLES.ARCHIVED) {
-      const archivedUserIds = await userUtils.getArchivedUserIds();
-      initialQuery = initialQuery.where("assignee", "in", archivedUserIds);
+      let archivedUserIds = [];
+      let usersData;
+      if (nextArchivedUser && !next) {
+        usersData = await fetchPaginatedArchivedUsers(FIRESTORE_IN_CLAUSE_SIZE, nextArchivedUser, "next");
+      }
+      if (!nextArchivedUser && !next) {
+        usersData = await fetchPaginatedArchivedUsers(FIRESTORE_IN_CLAUSE_SIZE);
+      }
+      if (nextArchivedUser && next) {
+        usersData = await fetchPaginatedArchivedUsers(FIRESTORE_IN_CLAUSE_SIZE, nextArchivedUser, "prev");
+      }
+      nextArchivedUserCursor = usersData.next;
+      archivedUserIds = usersData?.users?.map((user) => user?.id) ?? [];
+      initialQuery = initialQuery.where("assigneeId", "in", archivedUserIds);
     }
 
     initialQuery = initialQuery.orderBy("updatedAt", "desc");
@@ -236,6 +251,7 @@ const fetchPaginatedTasks = async ({
       allTasks,
       next: nextDoc?.docs[0]?.id ?? "",
       prev: prevDoc?.docs[0]?.id ?? "",
+      nextArchivedUser: nextArchivedUserCursor ?? "",
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);

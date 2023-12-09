@@ -92,21 +92,23 @@ const fetchTasksWithRdsAssigneeInfo = async (allTasks) => {
 const fetchPaginatedTasks = async (query) => {
   try {
     const tasksData = await tasks.fetchPaginatedTasks(query);
-    const { allTasks, next, prev } = tasksData;
+    const { allTasks, next, prev, nextArchivedUser } = tasksData;
     const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
 
     const result = {
       tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
       prev,
       next,
+      nextArchivedUser,
     };
 
-    if (next) {
+    if (next || nextArchivedUser) {
       const nextLink = getPaginatedLink({
         endpoint: "/tasks",
         query,
         cursorKey: "next",
         docId: next,
+        nextArchivedUser,
       });
       result.next = nextLink;
     }
@@ -141,11 +143,20 @@ const fetchTasks = async (req, res) => {
       assignee,
       title,
       "assignee-role": assigneeRole,
+      "next-archived-user": nextArchivedUser,
     } = req.query;
-    const transformedQuery = transformQuery(dev, status, size, page, assignee, title, assigneeRole);
-
+    const transformedQuery = transformQuery(dev, status, size, page, assignee, title);
+    if (!dev && assigneeRole) {
+      res.boom.badRequest("assignee role should be used with dev=true");
+    }
     if (dev) {
-      const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next });
+      const paginatedTasks = await fetchPaginatedTasks({
+        ...transformedQuery,
+        prev,
+        next,
+        assigneeRole,
+        nextArchivedUser,
+      });
       return res.json({
         message: "Tasks returned successfully!",
         ...paginatedTasks,

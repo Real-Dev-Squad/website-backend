@@ -49,21 +49,32 @@ const getDateTimeRangeForPRs = (startDate, endDate) => {
 const getPaginatedLink = ({
   endpoint = "/",
   query = {},
-  paramsToExclude = ["page", "next", "prev"],
+  paramsToExclude = ["page", "next", "prev", "nextArchivedUser"],
   cursorKey,
   docId,
+  nextArchivedUser,
 }) => {
   let paginatedLink = endpoint + "?";
 
   Object.entries(query).forEach(([key, value]) => {
-    if (!paramsToExclude.includes(key) && value) paginatedLink += `${key}=${value}&`;
+    if (!paramsToExclude.includes(key) && value) {
+      if (key === "assigneeRole") {
+        paginatedLink += `assignee-role=${value}&`;
+      } else {
+        paginatedLink += `${key}=${value}&`;
+      }
+    }
   });
 
   if (!query.size) {
     paginatedLink += `size=${TASK_SIZE}&`;
   }
-
-  paginatedLink += `${cursorKey}=${docId}`;
+  if (nextArchivedUser) {
+    paginatedLink += `next-archived-user=${nextArchivedUser}&`;
+  }
+  if (cursorKey && docId) {
+    paginatedLink += `${cursorKey}=${docId}`;
+  }
   return paginatedLink;
 };
 

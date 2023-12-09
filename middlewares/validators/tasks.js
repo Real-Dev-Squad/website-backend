@@ -146,7 +146,8 @@ const getTasksValidator = async (req, res, next) => {
     assignee: joi.string().insensitive().optional(),
     title: joi.string().insensitive().optional(),
     page: joi.number().integer().min(0),
-    "assignee-role": joi.string().optional(),
+    "assignee-role": joi.string().valid("archived").optional(),
+    "next-archived-user": joi.string().optional(),
     next: joi
       .string()
       .optional()

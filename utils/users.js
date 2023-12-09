@@ -1,4 +1,4 @@
-const { fetchUser, fetchArchivedUsers } = require("../models/users");
+const { fetchUser } = require("../models/users");
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 const { months, discordNicknameLength } = require("../constants/users");
@@ -9,20 +9,6 @@ const addUserToDBForTest = async (userData) => {
   await userModel.add(userData);
 };
 
-/**
- * Used to retrive user id of all the archived users
- *
- * @returns ids Array<String> - userIds of archived users
- */
-const getArchivedUserIds = async () => {
-  try {
-    const archivedUsers = await fetchArchivedUsers();
-    return archivedUsers.map((user) => user?.id);
-  } catch (error) {
-    logger.error("Error while fetching archived users", error);
-    throw error;
-  }
-};
 /**
  * Used for receiving userId when providing username
  *
@@ -320,5 +306,4 @@ module.exports = {
   parseSearchQuery,
   generateOOONickname,
   updateNickname,
-  getArchivedUserIds,
 };

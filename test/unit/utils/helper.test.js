@@ -52,24 +52,30 @@ describe("helper", function () {
     it("should return a string with paginated link", function () {
       const status = TASK_STATUS.ASSIGNED;
       const dev = true;
+      const assigneeRole = "archived";
       const query = {
         dev,
         status,
+        assigneeRole,
       };
       const endpoint = "/tasks";
       const cursorKey = "next";
       const docId = "UH2XHmOJKCrgherGODjG";
+      const nextArchivedUser = "FE8XTMViLvZmde2Lr0DF";
       const result = getPaginatedLink({
         query,
         endpoint: "/tasks",
         cursorKey,
         docId,
+        nextArchivedUser,
       });
       expect(result).to.contain(endpoint);
       expect(result).to.contain(`status=${status}`);
       expect(result).to.contain(`dev=${dev}`);
       expect(result).to.contain(`${cursorKey}=${docId}`);
       expect(result).to.contain(`size=${TASK_SIZE}`);
+      expect(result).to.contain(`assignee-role=${assigneeRole}`);
+      expect(result).to.contain(`next-archived-user=${nextArchivedUser}`);
     });
 
     it("should return a string and the return value should not contain cursor key present in the query", function () {
