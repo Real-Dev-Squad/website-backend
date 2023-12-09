@@ -1,7 +1,9 @@
 const joi = require("joi");
 const { DINERO, NEELAM } = require("../../constants/wallets");
-const { TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS } = require("../../constants/tasks");
-
+const { TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS, tasksUsersStatus } = require("../../constants/tasks");
+const { RQLQueryParser } = require("../../utils/RQLParser");
+const { Operators } = require("../../typeDefinitions/rqlParser");
+const { daysOfWeek } = require("../../constants/constants");
 const TASK_STATUS_ENUM = Object.values(TASK_STATUS);
 const MAPPED_TASK_STATUS_ENUM = Object.keys(MAPPED_TASK_STATUS);
 
@@ -190,10 +192,68 @@ const getTasksValidator = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
+const getUsersValidator = async (req, res, next) => {
+  const queryParamsSchema = joi.object().keys({
+    cursor: joi.string().optional(),
+    q: joi.string().optional(),
+    size: joi.number().integer().min(1).max(2013),
+  });
+  const filtersSchema = joi.object().keys({
+    status: joi
+      .array()
+      .items(
+        joi.object().keys({
+          value: joi.string().valid(...Object.values(tasksUsersStatus)),
+          operator: joi.string().valid(Operators.INCLUDE),
+        })
+      )
+      .required(),
+    "days-count": joi
+      .array()
+      .items(
+        joi.object().keys({
+          value: joi.number().integer().min(1).max(10),
+          operator: joi.string().valid(Operators.EXCLUDE),
+        })
+      )
+      .optional(),
+    weekday: joi
+      .array()
+      .items(
+        joi.object().keys({
+          value: joi.string().valid(...Object.keys(daysOfWeek)),
+          operator: joi.string().valid(Operators.EXCLUDE),
+        })
+      )
+      .optional(),
+    date: joi
+      .array()
+      .items(
+        joi.object().keys({
+          value: joi.date().timestamp(),
+          operator: joi.string().valid(Operators.EXCLUDE),
+        })
+      )
+      .optional(),
+  });
 
+  try {
+    const { q: queryString } = req.query;
+    const rqlQueryParser = new RQLQueryParser(queryString);
+    await Promise.all([
+      queryParamsSchema.validateAsync(req.query),
+      filtersSchema.validateAsync(rqlQueryParser.getFilterQueries()),
+    ]);
+    next();
+  } catch (error) {
+    logger.error(`Error validating get tasks for users query : ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
 module.exports = {
   createTask,
   updateTask,
   updateSelfTask,
   getTasksValidator,
+  getUsersValidator,
 };
