@@ -64,7 +64,7 @@ describe("Application", function () {
 
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("applications returned successfully!");
+          expect(res.body.message).to.equal("Applications returned successfully");
           expect(res.body.applications).to.be.a("array");
 
           return done();
@@ -83,7 +83,7 @@ describe("Application", function () {
 
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("application returned successfully!");
+          expect(res.body.message).to.equal("User applications returned successfully!");
           expect(res.body.application).to.be.a("object");
           expect(res.body.application.userId).to.be.equal(userId);
 
@@ -120,7 +120,7 @@ describe("Application", function () {
 
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("application returned successfully!");
+          expect(res.body.message).to.equal("User applications returned successfully!");
           expect(res.body.application).to.be.a("object");
           expect(res.body.application.userId).to.be.equal(userId);
 
@@ -158,7 +158,7 @@ describe("Application", function () {
 
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("applications returned successfully!");
+          expect(res.body.message).to.equal("Applications returned successfully");
           expect(res.body.applications).to.be.a("array");
           expect(res.body.applications[0].status).to.be.equal("accepted");
           return done();
