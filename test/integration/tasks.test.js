@@ -1311,7 +1311,7 @@ describe("Tasks", function () {
       await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").delete();
     });
 
-    it("Should unassign the task", async function () {
+    it("Should unassign the task with other fields reset exclusively", async function () {
       const res = await chai
         .request(app)
         .patch(`/tasks/4kAkRv9TBlOfR6WEUhoQ`)
@@ -1322,6 +1322,27 @@ describe("Tasks", function () {
           percentCompleted: 0,
           startedOn: null,
           endsOn: null,
+        });
+
+      expect(res).to.have.status(204);
+
+      const docSnapshot = await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").get();
+
+      const updatedData = docSnapshot.data();
+      expect(updatedData.assignee).to.equal(null);
+      expect(updatedData.status).to.equal(TASK_STATUS.AVAILABLE);
+      expect(updatedData.percentCompleted).to.equal(0);
+      expect(updatedData.startedOn).to.equal(null);
+      expect(updatedData.endsOn).to.equal(null);
+    });
+
+    it("Should unassign the task with other fields reset internally", async function () {
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/4kAkRv9TBlOfR6WEUhoQ`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: TASK_STATUS.AVAILABLE,
         });
 
       expect(res).to.have.status(204);

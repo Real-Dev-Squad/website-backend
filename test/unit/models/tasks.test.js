@@ -278,6 +278,34 @@ describe("tasks", function () {
       expect(firestoreResult.status).to.be.equal(TASK_STATUS.ASSIGNED);
       expect(firestoreResult.assignee).to.be.equal(userId1);
     });
+
+    it("Should unassign the task", async function () {
+      // Stubbing a task with a user who has completed some percent of the task
+      await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").set({
+        assignee: "SooJK37gzjIZfFNH0tlL",
+        status: "IN_PROGRESS",
+        percentCompleted: 80,
+        startedOn: 1701388800000,
+        endsOn: 1701561600000,
+      });
+
+      // Update the task status to AVAILABLE using the updateTask Model function
+      await tasks.updateTask({ status: "AVAILABLE" }, "4kAkRv9TBlOfR6WEUhoQ");
+
+      // Retrieve the updated task data
+      const docSnapshot = await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").get();
+      const updatedData = docSnapshot.data();
+
+      // Assertions to validate task unassignment and field resets
+      expect(updatedData.assignee).to.equal(null);
+      expect(updatedData.status).to.equal(TASK_STATUS.AVAILABLE);
+      expect(updatedData.percentCompleted).to.equal(0);
+      expect(updatedData.startedOn).to.equal(null);
+      expect(updatedData.endsOn).to.equal(null);
+
+      // Clean up: Destroy the snapshot after the test has completed
+      await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").delete();
+    });
   });
   describe("getOverdueTasks", function () {
     beforeEach(async function () {
