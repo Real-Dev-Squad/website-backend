@@ -31,14 +31,6 @@ const updateTask = async (taskData, taskId = null) => {
         taskData = { ...taskData, endsOn: Math.floor(Date.now() / 1000) };
       }
 
-      // currently the task is assigned to a user and the superuser is trying to un assign this task from them.
-      if (taskData?.status === TASK_STATUS.AVAILABLE && task.data().status !== TASK_STATUS.AVAILABLE) {
-        taskData.assignee = null;
-        taskData.percentCompleted = 0;
-        taskData.startedOn = null;
-        taskData.endsOn = null;
-      }
-
       const { dependsOn, ...taskWithoutDependsOn } = taskData;
       await tasksModel.doc(taskId).set({
         ...task.data(),
