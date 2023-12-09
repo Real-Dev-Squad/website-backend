@@ -2,7 +2,7 @@ import { application } from "../types/application";
 const firestore = require("../utils/firestore");
 const ApplicationsModel = firestore.collection("applicants");
 
-const getAllApplications = async (limit: number, lastDocId?: string, status?: string) => {
+const getAllApplications = async (limit: number, lastDocId? string) => {
   try {
     const allApplicationsData = [];
     let lastDoc = null;
@@ -43,7 +43,7 @@ const getApplicationById = async (applicationId: string) => {
   return { notFound: true };
 };
 
-const getApplicationsBasedOnStatus = async (status: string, limit: number, lastDoc: string, userId?: string) => {
+const getApplicationsBasedOnStatus = async (status: string, limit: number, lastDoc?: string, userId?: string) => {
   const applications = [];
   let dbQuery = ApplicationsModel.where("status", "==", status);
 
