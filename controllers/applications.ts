@@ -9,7 +9,10 @@ const admin = require("firebase-admin");
 
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
-    const { userId, status } = req.query;
+    const { userId, status, next, size } = req.query;
+    const limit = Number(size) || 25;
+    let nextPageUrl = null;
+
     if (userId) {
       const applications = await ApplicationModel.getUserApplications(userId);
 
@@ -22,17 +25,29 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
     }
 
     if (status) {
-      const applicationsWithStatus = await ApplicationModel.getApplicationsBasedOnStatus(status);
+      const { applications, lastDocId } = await ApplicationModel.getApplicationsBasedOnStatus(status, limit, next);
+
+      if (applications.length === limit) {
+        nextPageUrl = `/applications?next=${lastDocId}&size=${limit}&status=${status}`;
+      }
+
       return res.json({
         message: API_RESPONSE_MESSAGES.APPLICATION_RETURN_SUCCESS,
-        applications: applicationsWithStatus,
+        applications,
+        next: nextPageUrl,
       });
     }
 
-    const applications = await ApplicationModel.getAllApplications();
+    const { applications, lastDocId } = await ApplicationModel.getAllApplications(limit, next);
+
+    if (applications.length === limit) {
+      nextPageUrl = `/applications?next=${lastDocId}&size=${limit}`;
+    }
+
     return res.json({
       message: API_RESPONSE_MESSAGES.APPLICATION_RETURN_SUCCESS,
       applications,
+      next: nextPageUrl,
     });
   } catch (err) {
     logger.error(`Error in fetching application: ${err}`);

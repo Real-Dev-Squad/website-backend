@@ -2,17 +2,31 @@ import { application } from "../types/application";
 const firestore = require("../utils/firestore");
 const ApplicationsModel = firestore.collection("applicants");
 
-const getAllApplications = async () => {
+const getAllApplications = async (limit: number, lastDocId?: string, status?: string) => {
   try {
     const allApplicationsData = [];
-    const allApplications = await ApplicationsModel.get();
-    allApplications.forEach((data: any) => {
+    let lastDoc = null;
+
+    if (lastDocId) {
+      lastDoc = await ApplicationsModel.doc(lastDocId).get();
+    }
+
+    const applications = await ApplicationsModel.orderBy("createdAt", "desc")
+      .startAfter(lastDoc ?? "")
+      .limit(limit)
+      .get();
+
+    const lastApplicationDoc = applications.docs[applications.docs.length - 1];
+
+    applications.forEach((data: any) => {
       allApplicationsData.push({
         id: data.id,
         ...data.data(),
       });
     });
-    return allApplicationsData;
+
+    return { applications: allApplicationsData, lastDocId: lastApplicationDoc?.id };
+
   } catch (err) {
     logger.log("error in getting all intros", err);
     throw err;
@@ -29,14 +43,21 @@ const getApplicationById = async (applicationId: string) => {
   return { notFound: true };
 };
 
-const getApplicationsBasedOnStatus = async (status: string, userId?: string) => {
+const getApplicationsBasedOnStatus = async (status: string, limit: number, lastDoc: string, userId?: string) => {
   const applications = [];
   let dbQuery = ApplicationsModel.where("status", "==", status);
 
   if (userId) {
     dbQuery = dbQuery.where("userId", "==", userId);
   }
-  const applicationsBasedOnStatus = await dbQuery.get();
+
+  const applicationsBasedOnStatus = await dbQuery
+    .orderBy("createdAt", "desc")
+    .startAfter(lastDoc ?? "")
+    .limit(limit)
+    .get();
+
+  const lastApplicationDoc = applicationsBasedOnStatus.docs[applicationsBasedOnStatus.docs.length - 1];
 
   applicationsBasedOnStatus.forEach((data: any) => {
     applications.push({
@@ -45,7 +66,7 @@ const getApplicationsBasedOnStatus = async (status: string, userId?: string) => 
     });
   });
 
-  return applications;
+  return { applications, lastDocId: lastApplicationDoc?.id };
 };
 
 const getUserApplications = async (userId: string) => {
