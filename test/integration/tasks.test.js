@@ -1362,7 +1362,7 @@ describe("Tasks", function () {
       const roles2 = [...discordMembers[1].roles, "9876543210"];
       discordMembers[0].roles = roles1;
       discordMembers[0].roles = roles2;
-      sinon.stub(discordService, "getDiscordMembers").returns(...discordMembers);
+      sinon.stub(discordService, "getDiscordMembers").returns(discordMembers);
       jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
     });
     afterEach(async function () {
