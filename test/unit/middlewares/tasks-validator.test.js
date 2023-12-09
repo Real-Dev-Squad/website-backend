@@ -1,7 +1,7 @@
 const Sinon = require("sinon");
 const { getTasksValidator, createTask, getUsersValidator } = require("../../../middlewares/validators/tasks");
 const { expect } = require("chai");
-const { TASK_STATUS, taskUsersType, tasksUsersStatus } = require("../../../constants/tasks");
+const { TASK_STATUS, tasksUsersStatus } = require("../../../constants/tasks");
 
 describe("getTasks validator", function () {
   it("should pass the request when no values for query params dev or status is passed", async function () {
@@ -525,11 +525,9 @@ describe("getTasks validator", function () {
     it("should pass the request when valid query parameters are provided", async function () {
       const req = {
         query: {
-          type: taskUsersType.DISCORD,
-          query: tasksUsersStatus.MISSED_UPDATES,
           size: 10,
           cursor: "someCursor",
-          q: "-days-count:2 -date:123423432 -weekday:sun",
+          q: `status:${tasksUsersStatus.MISSED_UPDATES} -days-count:2 -date:123423432 -weekday:sun`,
         },
       };
       const res = {};
@@ -540,11 +538,9 @@ describe("getTasks validator", function () {
     it("should pass the request when multiple valid query parameters are provided", async function () {
       const req = {
         query: {
-          type: taskUsersType.DISCORD,
-          query: tasksUsersStatus.MISSED_UPDATES,
           size: 10,
           cursor: "someCursor",
-          q: "-days-count:2 -date:123423432 -weekday:sun -weekday:mon",
+          q: `status:${tasksUsersStatus.MISSED_UPDATES} -days-count:2 -date:123423432 -weekday:sun -weekday:mon`,
         },
       };
       const res = {};
@@ -555,8 +551,7 @@ describe("getTasks validator", function () {
     it("should pass the request when only required query parameters are provided", async function () {
       const req = {
         query: {
-          type: taskUsersType.DISCORD,
-          query: tasksUsersStatus.MISSED_UPDATES,
+          q: `status:${tasksUsersStatus.MISSED_UPDATES}`,
         },
       };
       const res = {};
@@ -585,7 +580,7 @@ describe("getTasks validator", function () {
     it("should not pass validation when required parameters are missing", async function () {
       const req = {
         query: {
-          query: "someQuery",
+          size: "someQuery",
         },
       };
       const res = {
@@ -602,8 +597,6 @@ describe("getTasks validator", function () {
     it("should not pass validation when invalid filter parameters are provided", async function () {
       const req = {
         query: {
-          type: "someType",
-          query: "someQuery",
           q: "date:invalidOperator:2023-01-01",
         },
       };
