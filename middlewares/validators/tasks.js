@@ -77,8 +77,8 @@ const updateTask = async (req, res, next) => {
       featureUrl: joi.string().optional(),
       type: joi.string().optional(),
       links: joi.array().items(joi.string()).optional(),
-      endsOn: joi.number().optional(),
-      startedOn: joi.number().optional(),
+      endsOn: joi.alternatives().try(joi.number().optional(), joi.valid(null)),
+      startedOn: joi.alternatives().try(joi.number().optional(), joi.valid(null)),
       category: joi.string().optional(),
       level: joi.number().optional(),
       status: joi
