@@ -1,5 +1,10 @@
 const Sinon = require("sinon");
-const { getTasksValidator, createTask, getUsersValidator, updateTask: updateTaskValidator } = require("../../../middlewares/validators/tasks");
+const {
+  getTasksValidator,
+  createTask,
+  getUsersValidator,
+  updateTask: updateTaskValidator,
+} = require("../../../middlewares/validators/tasks");
 const { expect } = require("chai");
 const { TASK_STATUS, tasksUsersStatus } = require("../../../constants/tasks");
 
@@ -611,7 +616,7 @@ describe("getTasks validator", function () {
     await updateTaskValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
-    describe("getUsersValidator | Validator", function () {
+  describe("getUsersValidator | Validator", function () {
     it("should pass the request when valid query parameters are provided", async function () {
       const req = {
         query: {
@@ -700,5 +705,5 @@ describe("getTasks validator", function () {
       expect(nextMiddlewareSpy.callCount).to.be.equal(0);
       expect(res.boom.badRequest.callCount).to.be.equal(1);
     });
-    });
+  });
 });
