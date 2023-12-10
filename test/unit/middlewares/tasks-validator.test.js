@@ -1,5 +1,5 @@
 const Sinon = require("sinon");
-const { getTasksValidator, createTask, getUsersValidator } = require("../../../middlewares/validators/tasks");
+const { getTasksValidator, createTask, getUsersValidator, updateTask: updateTaskValidator } = require("../../../middlewares/validators/tasks");
 const { expect } = require("chai");
 const { TASK_STATUS, tasksUsersStatus } = require("../../../constants/tasks");
 
@@ -521,7 +521,97 @@ describe("getTasks validator", function () {
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
-  describe("getUsersValidator | Validator", function () {
+  it("should call nextMiddlewareSpy for updateTaskValidator if startedOn is null", async function () {
+    const req = {
+      body: {
+        startedOn: null,
+        endsOn: new Date().getTime(),
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
+
+  it("should call nextMiddlewareSpy for updateTaskValidator if endsOn is null", async function () {
+    const req = {
+      body: {
+        startedOn: new Date().getTime(),
+        endsOn: null,
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
+
+  it("should call nextMiddlewareSpy for updateTaskValidator if both startedOn and endsOn are null", async function () {
+    const req = {
+      body: {
+        startedOn: null,
+        endsOn: null,
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
+
+  it("should call nextMiddlewareSpy for updateTaskValidator if both startedOn and endsOn are valid number", async function () {
+    const req = {
+      body: {
+        startedOn: new Date("2023-11-15").getTime(),
+        endsOn: new Date("2023-11-18").getTime(),
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
+
+  it("should not call nextMiddlewareSpy for updateTaskValidator if startedOn is not null or a number", async function () {
+    const req = {
+      body: {
+        startedOn: "December 6 2023",
+        endsOn: new Date().getTime(),
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+
+  it("should not call nextMiddlewareSpy for updateTaskValidator if endsOn is not null or a number", async function () {
+    const req = {
+      body: {
+        startedOn: new Date().getTime(),
+        endsOn: true,
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+
+  it("should not call nextMiddlewareSpy for updateTaskValidator if both startedOn and endsOn is not null or a number", async function () {
+    const req = {
+      body: {
+        startedOn: "December 6 2023",
+        endsOn: true,
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+    describe("getUsersValidator | Validator", function () {
     it("should pass the request when valid query parameters are provided", async function () {
       const req = {
         query: {
@@ -610,5 +700,5 @@ describe("getTasks validator", function () {
       expect(nextMiddlewareSpy.callCount).to.be.equal(0);
       expect(res.boom.badRequest.callCount).to.be.equal(1);
     });
-  });
+    });
 });
