@@ -307,6 +307,18 @@ const updateTask = async (req, res) => {
       }
     }
 
+    // currently the task is assigned to a user and the superuser is trying to un assign this task from them.
+    if (
+      requestData?.status === TASK_STATUS.AVAILABLE &&
+      task.taskData.status !== TASK_STATUS.AVAILABLE &&
+      Object.keys(req.body).length === 1
+    ) {
+      requestData.assignee = null;
+      requestData.percentCompleted = 0;
+      requestData.startedOn = null;
+      requestData.endsOn = null;
+    }
+
     await tasks.updateTask(requestData, req.params.id);
     if (requestData.assignee) {
       // New Assignee Status Update
