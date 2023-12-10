@@ -30,6 +30,7 @@ const convertDaysToMilliseconds = (days) => {
  * @returns {number} : seconds
  */
 const convertMillisToSeconds = (milliseconds) => {
+  if (typeof milliseconds !== "number") throw Error("Not a number");
   return milliseconds / 1000;
 };
 /**
