@@ -2,7 +2,7 @@ import { application } from "../types/application";
 const firestore = require("../utils/firestore");
 const ApplicationsModel = firestore.collection("applicants");
 
-const getAllApplications = async (limit: number, lastDocId? string) => {
+const getAllApplications = async (limit: number, lastDocId?: string) => {
   try {
     const allApplicationsData = [];
     let lastDoc = null;
