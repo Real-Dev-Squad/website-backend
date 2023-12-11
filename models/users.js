@@ -878,6 +878,10 @@ const fetchPaginatedArchivedUsers = async (size = FIRESTORE_IN_CLAUSE_SIZE, curs
       usersSnapshot = usersSnapshot.limit(size);
     }
     usersSnapshot = await usersSnapshot.get();
+    if (!usersSnapshot.exists) {
+      logger.info(`User with id : ${cursor} not found`);
+      return { users: [], next: "" };
+    }
     usersSnapshot.forEach((doc) => {
       archivedUsers.push({
         id: doc.id,
