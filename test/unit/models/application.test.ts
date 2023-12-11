@@ -4,7 +4,7 @@ const cleanDb = require("../../utils/cleanDb");
 const applicationsData = require("../../fixtures/applications/applications")();
 const ApplicationModel = require("../../../models/applications");
 
-describe.only("applications", function () {
+describe("applications", function () {
   let applicationId1: string,
     applicationId2: string,
     applicationId3: string,
