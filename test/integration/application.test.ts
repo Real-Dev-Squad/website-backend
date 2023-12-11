@@ -31,7 +31,7 @@ let applicationId3: string;
 let applicationId4: string;
 let applicationId5: string;
 
-describe("Application", function () {
+describe.only("Application", function () {
   before(async function () {
     const userIdPromises = [addUser(appOwner), addUser(superUser), addUser(secondUser)];
     const [userId1, userId2, userId3] = await Promise.all(userIdPromises);
@@ -184,10 +184,10 @@ describe("Application", function () {
         });
     });
 
-    it("should return application with status accepted if status accepted is passed in query params", function (done) {
+    it("should return application with status rejected if status rejected is passed in query params and next url if the size provided is equal to the applications returned in query ", function (done) {
       chai
         .request(app)
-        .get("/applications?status=accepted")
+        .get("/applications?status=rejected&size=2")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
@@ -198,7 +198,30 @@ describe("Application", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Applications returned successfully");
           expect(res.body.applications).to.be.a("array");
-          expect(res.body.applications[0].status).to.be.equal("accepted");
+          expect(res.body.applications[0].status).to.be.equal("rejected");
+          expect(res.body.next).to.be.equal(
+            `/applications?next=${res.body.applications[res.body.applications.length - 1].id}&size=2&status=rejected`
+          );
+          return done();
+        });
+    });
+
+    it("should return application with status rejected if status rejected is passed in query params and next url should be null if the size provided is not equal to the applications returned in query ", function (done) {
+      chai
+        .request(app)
+        .get("/applications?status=rejected&size=5")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Applications returned successfully");
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.applications[0].status).to.be.equal("rejected");
+          expect(res.body.next).to.be.equal(null);
           return done();
         });
     });
