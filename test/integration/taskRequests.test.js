@@ -17,11 +17,12 @@ const userStatusData = require("../fixtures/userStatus/userStatus");
 const firestore = require("../../utils/firestore");
 const logsModel = firestore.collection("logs");
 const { MIGRATION_TYPE } = require("../../constants/taskRequests");
+const taskRequestsCollection = firestore.collection("taskRequests");
 
 chai.use(chaiHttp);
 
 const config = require("config");
-const { TASK_REQUEST_TYPE } = require("../../constants/taskRequests");
+const { TASK_REQUEST_TYPE, TASK_REQUEST_STATUS, TASK_REQUEST_ACTIONS } = require("../../constants/taskRequests");
 const usersUtils = require("../../utils/users");
 const githubService = require("../../services/githubService");
 const { userState } = require("../../constants/userStatus");
@@ -44,7 +45,6 @@ const {
 
 describe("Task Requests", function () {
   let userId, superUserId;
-
   after(async function () {
     await cleanDb();
   });
@@ -433,7 +433,7 @@ describe("Task Requests", function () {
             }
 
             expect(res).to.have.status(200);
-            expect(res.body.message).to.equal(`Task successfully assigned to user ${member.username}`);
+            expect(res.body.message).to.equal(`Task updated successfully.`);
             return done();
           });
       });
@@ -639,6 +639,329 @@ describe("Task Requests", function () {
     });
   });
 
+  describe("PATCH /taskRequests/ - updates task request", function () {
+    let activeUserId, oooUserId;
+    const taskRequestId = "taskRequest123";
+    beforeEach(async function () {
+      userId = await addUser(member);
+      const existingTaskRequest = { ...mockData.existingTaskRequest };
+      existingTaskRequest.users[0].userId = userId;
+      await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
+    });
+
+    describe("When the user is super user", function () {
+      beforeEach(async function () {
+        activeUserId = await addUser(activeMember);
+        oooUserId = await addUser(member2);
+        superUserId = await addUser(superUser);
+        jwt = authService.generateAuthToken({ userId: superUserId });
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
+
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+
+        await userStatusModel.updateUserStatus(userId, idleUserStatus);
+        await userStatusModel.updateUserStatus(activeUserId, activeUserStatus);
+        await userStatusModel.updateUserStatus(oooUserId, { ...oooUserStatus });
+        await taskRequestsModel.addOrUpdate(taskId, userId);
+      });
+      afterEach(async function () {
+        sinon.restore();
+        await cleanDb();
+      });
+
+      it("should match response for successful approval", async function () {
+        const existingTaskRequest = { ...mockData.existingTaskRequest, requestType: TASK_REQUEST_TYPE.CREATION };
+        await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
+        const res = await chai
+          .request(app)
+          .patch("/taskRequests/")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
+          .send({
+            taskRequestId: taskRequestId,
+            userId,
+          });
+        expect(res.body.message).to.equal(`Task updated successfully.`);
+        expect(res).to.have.status(200);
+      });
+
+      it("should match response for successful rejection", async function () {
+        const res = await chai
+          .request(app)
+          .patch("/taskRequests/")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.REJECT })
+          .send({
+            taskRequestId: taskRequestId,
+            userId,
+          });
+
+        expect(res).to.have.status(200);
+        expect(res.body.message).to.equal(`Task updated successfully.`);
+      });
+      it("should throw 400 error when taskRequestId is missing", function (done) {
+        chai
+          .request(app)
+          .patch("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
+          .send({
+            userId: oooUserId,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res).to.have.status(400);
+            expect(res.body.message).to.equal("taskRequestId not provided");
+            return done();
+          });
+      });
+
+      it("should throw 400 error when task request id provided doesn't exist", function (done) {
+        chai
+          .request(app)
+          .patch("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
+          .send({ taskRequestId: "123435", userId, activeUserId })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.message).to.equal("Task request not found.");
+            expect(res).to.have.status(400);
+
+            return done();
+          });
+      });
+
+      it("should throw 400 error when task request id provided doesn't exist for rejection", function (done) {
+        chai
+          .request(app)
+          .patch("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.REJECT })
+          .send({ taskRequestId: taskId, userId, activeUserId })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res.body.message).to.equal("Task request not found.");
+            expect(res).to.have.status(400);
+
+            return done();
+          });
+      });
+
+      it("should throw 400 error when user did not request for a task", async function () {
+        const res = await chai
+          .request(app)
+          .patch("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
+          .send({ taskRequestId: taskRequestId, userId: activeUserId, activeUserId });
+
+        expect(res.body.message).to.equal("User request not available.");
+        expect(res).to.have.status(400);
+      });
+      it("should throw 400 error when task was previously approved or rejected.", async function () {
+        const existingTaskRequest = { ...mockData.existingTaskRequest, status: TASK_REQUEST_STATUS.APPROVED };
+        await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
+        const res = await chai
+          .request(app)
+          .patch("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
+          .send({ taskRequestId: taskRequestId, userId, activeUserId });
+
+        expect(res.body.message).to.equal("Task request was previously approved or rejected.");
+        expect(res).to.have.status(400);
+      });
+
+      it("should throw 400 error when task was previously approved or rejected for rejection", async function () {
+        const existingTaskRequest = { ...mockData.existingTaskRequest, status: TASK_REQUEST_STATUS.APPROVED };
+        await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
+        const res = await chai
+          .request(app)
+          .patch("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.REJECT })
+          .send({ taskRequestId: taskRequestId, userId, activeUserId });
+
+        expect(res.body.message).to.equal("Task request was previously approved or rejected.");
+        expect(res).to.have.status(400);
+      });
+      it("should throw 400 error when userId is missing", function (done) {
+        chai
+          .request(app)
+          .patch("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
+          .send({ taskRequestId: taskId })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(400);
+            expect(res.body.message).to.equal("userId not provided");
+            return done();
+          });
+      });
+
+      describe("Checks the user status", function () {
+        it("Should change the user status to ACTIVE when request is successful for approval", async function () {
+          const res = await chai
+            .request(app)
+            .patch("/taskRequests")
+            .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
+            .set("cookie", `${cookieName}=${jwt}`)
+            .send({
+              taskRequestId: taskRequestId,
+              userId,
+            });
+
+          expect(res).to.have.status(200);
+          const userStatus = await userStatusModel.getUserStatus(userId);
+          expect(userStatus.data.currentStatus.state).to.be.equal(userState.ACTIVE);
+        });
+        it("Should not change the user status to ACTIVE when request is successful for rejection", async function () {
+          const res = await chai
+            .request(app)
+            .patch("/taskRequests")
+            .query({ action: TASK_REQUEST_ACTIONS.REJECT })
+            .set("cookie", `${cookieName}=${jwt}`)
+            .send({
+              taskRequestId: taskRequestId,
+              userId,
+            });
+
+          expect(res).to.have.status(200);
+          const userStatus = await userStatusModel.getUserStatus(userId);
+          expect(userStatus.data.currentStatus.state).to.be.equal(userState.IDLE);
+        });
+        it("Should not change the user status to ACTIVE when request is unsuccessful", async function () {
+          const res = await chai
+            .request(app)
+            .patch("/taskRequests/approve")
+            .set("cookie", `${cookieName}=${jwt}`)
+            .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
+            .send({
+              taskRequestId: taskId,
+              userId,
+            });
+
+          expect(res).to.have.status(400);
+          const userStatus = await userStatusModel.getUserStatus(userId);
+          expect(userStatus.data.currentStatus.state).to.be.equal(userState.IDLE);
+        });
+      });
+    });
+
+    describe("task request logs", function () {
+      beforeEach(async function () {
+        userId = await addUser(member);
+        superUserId = await addUser(superUser);
+
+        jwt = authService.generateAuthToken({ userId: superUserId });
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
+        await userStatusModel.updateUserStatus(userId, idleUserStatus);
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+      });
+      afterEach(async function () {
+        sinon.restore();
+        await cleanDb();
+      });
+      it("should save logs of approved requests", async function () {
+        await chai
+          .request(app)
+          .patch("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
+          .send({
+            taskRequestId: taskRequestId,
+            userId,
+          });
+        const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+        let taskRequestLogs;
+        logsRef.forEach((data) => {
+          taskRequestLogs = data.data();
+        });
+
+        expect(taskRequestLogs.meta.taskRequestId).to.be.equal(taskRequestId);
+      });
+
+      it("should save logs of rejected requests", async function () {
+        await chai
+          .request(app)
+          .patch("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.REJECT })
+          .send({
+            taskRequestId: taskRequestId,
+            userId,
+          });
+        const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+        let taskRequestLogs;
+        logsRef.forEach((data) => {
+          taskRequestLogs = data.data();
+        });
+        expect(taskRequestLogs.meta.taskRequestId).to.be.equal(taskRequestId);
+      });
+      it("should not save logs of failed requests", async function () {
+        await chai
+          .request(app)
+          .patch("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
+          .send({
+            taskRequestId: taskId,
+            userId,
+          });
+        const logsRef = await logsModel.where("type", "==", "taskRequests").get();
+        let taskRequestLogs;
+        logsRef.forEach((data) => {
+          taskRequestLogs = data.data();
+        });
+        expect(taskRequestLogs).to.be.equal(undefined);
+      });
+    });
+    describe("When the user is not super user", function () {
+      before(async function () {
+        userId = await addUser(member);
+        jwt = authService.generateAuthToken({ userId });
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
+
+        taskId = (await tasksModel.updateTask(taskData[4])).taskId;
+        await userStatusModel.updateUserStatus(userId, idleUserStatus);
+        await taskRequestsModel.addOrUpdate(taskId, userId);
+      });
+
+      it("should return unauthorized user response", function (done) {
+        chai
+          .request(app)
+          .patch("/taskRequests")
+          .set("cookie", `${cookieName}=${jwt}`)
+          .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
+          .send({
+            taskRequestId: taskId,
+            userId,
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(401);
+            return done();
+          });
+      });
+    });
+  });
+
   describe("POST /taskRequests", function () {
     let fetchIssuesByIdStub;
     let fetchTaskStub;
@@ -826,6 +1149,21 @@ describe("Task Requests", function () {
       expect(res).to.have.status(200);
       expect(res.body.message).to.equal("Task requests migration successful");
       expect(removeOldFieldsStub.calledOnce).to.be.equal(true);
+      expect(res.body.documentsModified).to.be.equal(1);
+      expect(res.body.totalDocuments).to.be.equal(2);
+    });
+    it("should run the add Users count and created at script when the appropriate query param is passed", async function () {
+      const addsUsersCountCreatedStub = sinon
+        .stub(taskRequestsModel, "addUsersCountAndCreatedAt")
+        .resolves({ documentsModified: 1, totalDocuments: 2 });
+      const res = await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .query({ action: MIGRATION_TYPE.ADD_COUNT_CREATED });
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.equal("Task requests migration successful");
+      expect(addsUsersCountCreatedStub.calledOnce).to.be.equal(true);
       expect(res.body.documentsModified).to.be.equal(1);
       expect(res.body.totalDocuments).to.be.equal(2);
     });
