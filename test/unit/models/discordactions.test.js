@@ -444,8 +444,9 @@ describe("discordactions", function () {
     let addedUers = [];
     let addedUsersStatus = [];
     let fetchStub, dataAccessLayerStub;
-
+    let clock;
     beforeEach(async function () {
+      clock = sinon.useFakeTimers({ toFake: ["setTimeout"] });
       fetchStub = sinon.stub(global, "fetch");
       dataAccessLayerStub = sinon.stub(dataAccessLayer, "retrieveUsers");
 
@@ -460,6 +461,7 @@ describe("discordactions", function () {
     });
 
     afterEach(async function () {
+      clock.restore();
       fetchStub.restore();
       dataAccessLayerStub.restore();
     });
@@ -515,7 +517,12 @@ describe("discordactions", function () {
         unsuccessfulNicknameUpdates: 0,
       };
 
-      const response = await updateUsersNicknameStatus(lastTimestamp);
+      let response = updateUsersNicknameStatus(lastTimestamp);
+      const intervalId = setInterval(() => {
+        clock.tick(5000);
+      }, 60);
+      response = await response;
+      clearInterval(intervalId);
       expect(response).to.be.an("object");
       expect(response).to.be.deep.equal(responseObj);
     }).timeout(10000);
@@ -536,7 +543,12 @@ describe("discordactions", function () {
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
 
       try {
-        await updateUsersNicknameStatus(lastTimestamp);
+        let response = updateUsersNicknameStatus(lastTimestamp);
+        const intervalId = setInterval(() => {
+          clock.tick(5000);
+        }, 60);
+        response = await response;
+        clearInterval(intervalId);
       } catch (err) {
         expect(err).to.be.instanceOf(Error);
       }
@@ -558,7 +570,12 @@ describe("discordactions", function () {
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
 
       try {
-        await updateUsersNicknameStatus(lastTimestamp);
+        let response = updateUsersNicknameStatus(lastTimestamp);
+        const intervalId = setInterval(() => {
+          clock.tick(5000);
+        }, 60);
+        response = await response;
+        clearInterval(intervalId);
       } catch (err) {
         expect(err).to.be.instanceOf(Error);
       }
@@ -571,7 +588,12 @@ describe("discordactions", function () {
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
 
       try {
-        await updateUsersNicknameStatus(lastTimestamp);
+        let response = updateUsersNicknameStatus(lastTimestamp);
+        const intervalId = setInterval(() => {
+          clock.tick(5000);
+        }, 60);
+        response = await response;
+        clearInterval(intervalId);
       } catch (err) {
         expect(err).to.be.instanceOf(Error);
       }
