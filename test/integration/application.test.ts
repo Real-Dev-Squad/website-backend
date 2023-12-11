@@ -27,6 +27,9 @@ let superUserJwt: string;
 let secondUserJwt: string;
 let applicationId1: string;
 let applicationId2: string;
+let applicationId3: string;
+let applicationId4: string;
+let applicationId5: string;
 
 describe("Application", function () {
   before(async function () {
@@ -40,11 +43,23 @@ describe("Application", function () {
     secondUserJwt = authService.generateAuthToken({ userId: secondUserId });
     const applicationOne = { ...applicationsData[0], userId };
     const applicationTwo = { ...applicationsData[1], userId: superUserId };
+    const applicationThree = { ...applicationsData[2], userId: "fakfjdkfjkfasjdkfsjdkf" };
+    const applicationFour = { ...applicationsData[3], userId: "fkasdjfkldjfldjkfalsdfjl" };
+    const applicationFive = { ...applicationsData[4], userId: "kfasdjfkdlfjkasdjflsdjfk" };
 
-    const promises = [applicationModel.addApplication(applicationOne), applicationModel.addApplication(applicationTwo)];
-    const [id1, id2] = await Promise.all(promises);
+    const promises = [
+      applicationModel.addApplication(applicationOne),
+      applicationModel.addApplication(applicationTwo),
+      applicationModel.addApplication(applicationThree),
+      applicationModel.addApplication(applicationFour),
+      applicationModel.addApplication(applicationFive),
+    ];
+    const [id1, id2, id3, id4, id5] = await Promise.all(promises);
     applicationId1 = id1;
     applicationId2 = id2;
+    applicationId3 = id3;
+    applicationId4 = id4;
+    applicationId5 = id5;
   });
 
   after(async function () {
@@ -52,10 +67,10 @@ describe("Application", function () {
   });
 
   describe("GET /applications", function () {
-    it("should return all the application if the user is super user and there is no user id", function (done) {
+    it("should return all the application if the user is super user and there is no user id, and next url if the size provided is equal to the applications returned in query", function (done) {
       chai
         .request(app)
-        .get("/applications")
+        .get("/applications?size=5")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
           if (err) {
@@ -64,8 +79,31 @@ describe("Application", function () {
 
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("applications returned successfully!");
+          expect(res.body.message).to.equal("Applications returned successfully");
           expect(res.body.applications).to.be.a("array");
+          expect(res.body.next).to.be.equal(
+            `/applications?next=${res.body.applications[res.body.applications.length - 1].id}&size=5`
+          );
+
+          return done();
+        });
+    });
+
+    it("should return all the application if the user is super user and there is no user id, and next url should be null if the size provided is not equal to the applications returned in query", function (done) {
+      chai
+        .request(app)
+        .get("/applications?size=25")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Applications returned successfully");
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.next).to.be.equal(null);
 
           return done();
         });
@@ -83,9 +121,9 @@ describe("Application", function () {
 
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("application returned successfully!");
-          expect(res.body.application).to.be.a("object");
-          expect(res.body.application.userId).to.be.equal(userId);
+          expect(res.body.message).to.equal("User applications returned successfully!");
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.applications[0].userId).to.be.equal(userId);
 
           return done();
         });
@@ -108,7 +146,7 @@ describe("Application", function () {
         });
     });
 
-    it("should return the application object if the userId of user is same as userId in the application object", function (done) {
+    it("should return the applications of user if the userId of user is same as userId in the application object", function (done) {
       chai
         .request(app)
         .get(`/applications?userId=${userId}`)
@@ -120,9 +158,9 @@ describe("Application", function () {
 
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("application returned successfully!");
-          expect(res.body.application).to.be.a("object");
-          expect(res.body.application.userId).to.be.equal(userId);
+          expect(res.body.message).to.equal("User applications returned successfully!");
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.applications[0].userId).to.be.equal(userId);
 
           return done();
         });
@@ -158,7 +196,7 @@ describe("Application", function () {
 
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("applications returned successfully!");
+          expect(res.body.message).to.equal("Applications returned successfully");
           expect(res.body.applications).to.be.a("array");
           expect(res.body.applications[0].status).to.be.equal("accepted");
           return done();
@@ -173,7 +211,7 @@ describe("Application", function () {
         .post(`/applications`)
         .set("cookie", `${cookieName}=${secondUserJwt}`)
         .send({
-          ...applicationsData[2],
+          ...applicationsData[5],
         })
         .end((err, res) => {
           if (err) {
@@ -192,7 +230,7 @@ describe("Application", function () {
         .post(`/applications`)
         .set("cookie", `${cookieName}=${secondUserJwt}`)
         .send({
-          ...applicationsData[2],
+          ...applicationsData[5],
         })
         .end((err, res) => {
           if (err) {
@@ -200,7 +238,7 @@ describe("Application", function () {
           }
 
           expect(res).to.have.status(409);
-          expect(res.body.message).to.be.equal("User data is already present!");
+          expect(res.body.message).to.be.equal("User application is already present!");
           return done();
         });
     });
