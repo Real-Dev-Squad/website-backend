@@ -397,10 +397,7 @@ describe("Discord actions", function () {
       clock = sinon.useFakeTimers({ toFake: ["setTimeout"] });
       const userData2 = { ...userData[1] };
       delete userData2.discordId;
-      const [{ id }, { id: userId2 }] = await Promise.all([
-        userModel.add({ ...userData[0] }),
-        userModel.add(userData2),
-      ]);
+      const [{ id }] = await userModel.add({ ...userData[0] });
       const statusData = {
         ...userStatusDataForOooState,
         futureStatus: {

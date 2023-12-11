@@ -543,11 +543,11 @@ describe("discordactions", function () {
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
 
       try {
-        let response = updateUsersNicknameStatus(lastTimestamp);
         const intervalId = setInterval(() => {
           clock.tick(5000);
         }, 60);
-        response = await response;
+        await updateUsersNicknameStatus(lastTimestamp);
+
         clearInterval(intervalId);
       } catch (err) {
         expect(err).to.be.instanceOf(Error);
@@ -570,11 +570,10 @@ describe("discordactions", function () {
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
 
       try {
-        let response = updateUsersNicknameStatus(lastTimestamp);
         const intervalId = setInterval(() => {
           clock.tick(5000);
         }, 60);
-        response = await response;
+        await updateUsersNicknameStatus(lastTimestamp);
         clearInterval(intervalId);
       } catch (err) {
         expect(err).to.be.instanceOf(Error);
@@ -588,11 +587,10 @@ describe("discordactions", function () {
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
 
       try {
-        let response = updateUsersNicknameStatus(lastTimestamp);
         const intervalId = setInterval(() => {
           clock.tick(5000);
         }, 60);
-        response = await response;
+        await updateUsersNicknameStatus(lastTimestamp);
         clearInterval(intervalId);
       } catch (err) {
         expect(err).to.be.instanceOf(Error);
