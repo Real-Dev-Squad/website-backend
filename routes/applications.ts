@@ -18,5 +18,6 @@ router.patch(
   authorizeRoles([SUPERUSER]),
   applications.updateApplication
 );
+router.patch("/batch/update", authenticate, authorizeRoles([SUPERUSER]), applications.batchUpdateApplications);
 
 module.exports = router;

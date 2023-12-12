@@ -7,6 +7,16 @@ const { API_RESPONSE_MESSAGES } = require("../constants/application");
 const { getUserApplicationObject } = require("../utils/application");
 const admin = require("firebase-admin");
 
+const batchUpdateApplications = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
+  try {
+    const updateStats = await ApplicationModel.batchUpdateApplications();
+    return res.json(updateStats);
+  } catch (err) {
+    logger.error(`Error in batch updating application: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
     const { userId, status, next, size } = req.query;
@@ -131,4 +141,5 @@ module.exports = {
   addApplication,
   updateApplication,
   getApplicationById,
+  batchUpdateApplications,
 };
