@@ -391,7 +391,12 @@ describe("Discord actions", function () {
 
   describe("POST /discord-actions/nickname/status", function () {
     let jwtToken;
+    let clock;
+
     beforeEach(async function () {
+      clock = sinon.useFakeTimers({ toFake: ["setTimeout"] });
+      const userData2 = { ...userData[1] };
+      delete userData2.discordId;
       const { id } = await userModel.add({ ...userData[0] });
       const statusData = {
         ...userStatusDataForOooState,
@@ -407,6 +412,7 @@ describe("Discord actions", function () {
     });
 
     afterEach(async function () {
+      clock.restore();
       await cleanDb();
     });
 
@@ -418,7 +424,9 @@ describe("Discord actions", function () {
           json: () => Promise.resolve(response),
         })
       );
-
+      const intervalId = setInterval(() => {
+        clock.tick(5000);
+      }, 60);
       chai
         .request(app)
         .post("/discord-actions/nickname/status")
@@ -430,6 +438,7 @@ describe("Discord actions", function () {
           if (err) {
             return done(err);
           }
+          clearInterval(intervalId);
           expect(res).to.have.status(200);
           expect(res).to.be.an("object");
           expect(res.body).to.deep.equal({
@@ -448,6 +457,9 @@ describe("Discord actions", function () {
       const response = "Error occurred while updating user's nickname";
       fetchStub.returns(Promise.reject(response));
 
+      const intervalId = setInterval(() => {
+        clock.tick(5000);
+      }, 60);
       chai
         .request(app)
         .post("/discord-actions/nickname/status")
@@ -459,7 +471,7 @@ describe("Discord actions", function () {
           if (err) {
             return done(err);
           }
-
+          clearInterval(intervalId);
           expect(res).to.have.status(500);
           expect(res.body.message).to.equal("An internal server error occurred");
           return done();
