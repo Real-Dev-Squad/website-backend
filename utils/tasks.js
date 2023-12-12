@@ -2,7 +2,6 @@ const { getUsername, getUserId, getParticipantUsernames, getParticipantUserIds }
 const { TASK_TYPE, MAPPED_TASK_STATUS, COMPLETED_TASK_STATUS } = require("../constants/tasks");
 const fireStore = require("../utils/firestore");
 const tasksModel = fireStore.collection("tasks");
-
 const { convertMillisToSeconds } = require("./time");
 
 const fromFirestoreData = async (task) => {
