@@ -7,7 +7,6 @@ const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const userModel = firestore.collection("users");
 const admin = require("firebase-admin");
-
 const {
   createNewRole,
   getAllGroupRoles,
@@ -448,7 +447,6 @@ describe("discordactions", function () {
     beforeEach(async function () {
       fetchStub = sinon.stub(global, "fetch");
       dataAccessLayerStub = sinon.stub(dataAccessLayer, "retrieveUsers");
-
       addedUers.forEach(({ username, discordId, id }) => {
         dataAccessLayerStub.withArgs(sinon.match({ id })).resolves({
           user: {
