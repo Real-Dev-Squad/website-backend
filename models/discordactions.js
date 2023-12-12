@@ -479,7 +479,7 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
 
     const today = new Date().getTime();
 
-    const nicknameUpdatePromises = [];
+    let successfulUpdates = 0;
     const nicknameUpdateBatches = [];
     const totalUsersStatus = usersStatusDocs.length;
 
@@ -514,13 +514,18 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
         }
       });
 
-      const settledPromises = await Promise.all(promises);
-      nicknameUpdatePromises.push(...settledPromises);
+      const settledPromises = await Promise.allSettled(promises);
+
+      settledPromises.forEach((result) => {
+        if (result.status === "fulfilled" && !!result.value) {
+          successfulUpdates++;
+        } else {
+          logger.error(`Error while updating nickname: ${result.reason}`);
+        }
+      });
 
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
-
-    const successfulUpdates = nicknameUpdatePromises.length;
 
     const res = {
       totalUsersStatus,
