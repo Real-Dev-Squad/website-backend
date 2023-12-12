@@ -610,7 +610,7 @@ describe("discordactions", function () {
         await addUser(idleUser), // idle user with no task progress updates
         await addUser(activeUserWithProgressUpdates), // active user with task progress updates
         await addUser(activeUserWithNoUpdates), // active user with no task progress updates
-        await addUser(userNotInDiscord), // OOO user with
+        await addUser(userNotInDiscord), // OOO user with no task progress updates
       ]);
       activeUserId = userIdList[2];
       await Promise.all([
