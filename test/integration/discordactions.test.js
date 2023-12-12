@@ -40,7 +40,7 @@ const { updateUserStatus } = require("../../models/userStatus");
 const { generateUserStatusData } = require("../fixtures/userStatus/userStatus");
 const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const { getOnboarding31DPlusMembers } = require("../fixtures/discordResponse/discord-response");
-
+const discordRolesModel = require("../../models/discordactions");
 chai.use(chaiHttp);
 const { userStatusDataForOooState } = require("../fixtures/userStatus/userStatus");
 const { generateCronJobToken } = require("../utils/generateBotToken");
@@ -392,7 +392,12 @@ describe("Discord actions", function () {
   describe("POST /discord-actions/nickname/status", function () {
     let jwtToken;
     beforeEach(async function () {
-      const { id } = await userModel.add({ ...userData[0] });
+      const userData2 = { ...userData[1] };
+      delete userData2.discordId;
+      const [{ id }, { id: userId2 }] = await Promise.all([
+        userModel.add({ ...userData[0] }),
+        userModel.add(userData2),
+      ]);
       const statusData = {
         ...userStatusDataForOooState,
         futureStatus: {
@@ -402,7 +407,17 @@ describe("Discord actions", function () {
         },
         userId: id,
       };
-      await userStatusModel.add(statusData);
+      const statusData2 = {
+        ...userStatusDataForOooState,
+        futureStatus: {
+          state: "ACTIVE",
+          updatedAt: 1668211200000,
+          from: 1668709800000,
+        },
+        userId: userId2,
+      };
+      await Promise.all([userStatusModel.add(statusData), userStatusModel.add(statusData2)]);
+
       jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
     });
 
@@ -435,9 +450,9 @@ describe("Discord actions", function () {
           expect(res.body).to.deep.equal({
             message: "Updated discord users nickname based on status",
             data: {
-              totalUsersStatus: 1,
+              totalUsersStatus: 2,
               successfulNicknameUpdates: 1,
-              unsuccessfulNicknameUpdates: 0,
+              unsuccessfulNicknameUpdates: 1,
             },
           });
           return done();
@@ -445,9 +460,9 @@ describe("Discord actions", function () {
     }).timeout(10000);
 
     it("should return object with 0 successful updates when user nickname changes", function (done) {
-      const response = "Error occurred while updating user's nickname";
-      fetchStub.returns(Promise.reject(response));
+      sinon.stub(discordRolesModel, "updateUsersNicknameStatus").throws(new Error());
 
+      sinon.stub();
       chai
         .request(app)
         .post("/discord-actions/nickname/status")
@@ -464,7 +479,7 @@ describe("Discord actions", function () {
           expect(res.body.message).to.equal("An internal server error occurred");
           return done();
         });
-    });
+    }).timeout(10000);
   });
   describe("POST /discord-actions/discord-roles", function () {
     before(async function () {
