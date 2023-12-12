@@ -58,7 +58,7 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
 const addApplication = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const rawData = req.body;
-    const { applications } = await ApplicationModel.getApplicationsBasedOnStatus("pending", 1, '', req.userData.id);
+    const { applications } = await ApplicationModel.getApplicationsBasedOnStatus("pending", 1, "", req.userData.id);
     if (applications.length) {
       return res.status(409).json({
         message: "User application is already present!",
@@ -108,17 +108,22 @@ const updateApplication = async (req: CustomRequest, res: CustomResponse) => {
 };
 
 const getApplicationById = async (req: CustomRequest, res: CustomResponse) => {
-  const { applicationId } = req.params;
-  const application = await ApplicationModel.getApplicationById(applicationId);
+  try {
+    const { applicationId } = req.params;
+    const application = await ApplicationModel.getApplicationById(applicationId);
 
-  if (application.notFound) {
-    return res.boom.notFound("Application not found");
+    if (application.notFound) {
+      return res.boom.notFound("Application not found");
+    }
+
+    return res.json({
+      message: "Application returned successfully",
+      application,
+    });
+  } catch (err) {
+    logger.error(`Error in getting application by id: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
-
-  return res.json({
-    message: "Application returned successfully",
-    application,
-  });
 };
 
 module.exports = {

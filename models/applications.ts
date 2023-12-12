@@ -34,39 +34,49 @@ const getAllApplications = async (limit: number, lastDocId?: string) => {
 };
 
 const getApplicationById = async (applicationId: string) => {
-  const application = await ApplicationsModel.doc(applicationId).get();
-
-  if (application.exists) {
-    return { id: application.id, ...application.data(), notFound: false };
+  try {
+    const application = await ApplicationsModel.doc(applicationId).get();
+  
+    if (application.exists) {
+      return { id: application.id, ...application.data(), notFound: false };
+    }
+  
+    return { notFound: true };
+  } catch (err) {
+    logger.log("error in getting application", err);
+    throw err;
   }
-
-  return { notFound: true };
 };
 
 const getApplicationsBasedOnStatus = async (status: string, limit: number, lastDoc?: string, userId?: string) => {
-  const applications = [];
-  let dbQuery = ApplicationsModel.where("status", "==", status);
-
-  if (userId) {
-    dbQuery = dbQuery.where("userId", "==", userId);
-  }
-
-  const applicationsBasedOnStatus = await dbQuery
-    .orderBy("createdAt", "desc")
-    .startAfter(lastDoc ?? "")
-    .limit(limit)
-    .get();
-
-  const lastApplicationDoc = applicationsBasedOnStatus.docs[applicationsBasedOnStatus.docs.length - 1];
-
-  applicationsBasedOnStatus.forEach((data: any) => {
-    applications.push({
-      id: data.id,
-      ...data.data(),
+  try {
+    const applications = [];
+    let dbQuery = ApplicationsModel.where("status", "==", status);
+  
+    if (userId) {
+      dbQuery = dbQuery.where("userId", "==", userId);
+    }
+  
+    const applicationsBasedOnStatus = await dbQuery
+      .orderBy("createdAt", "desc")
+      .startAfter(lastDoc ?? "")
+      .limit(limit)
+      .get();
+  
+    const lastApplicationDoc = applicationsBasedOnStatus.docs[applicationsBasedOnStatus.docs.length - 1];
+  
+    applicationsBasedOnStatus.forEach((data: any) => {
+      applications.push({
+        id: data.id,
+        ...data.data(),
+      });
     });
-  });
-
-  return { applications, lastDocId: lastApplicationDoc?.id };
+  
+    return { applications, lastDocId: lastApplicationDoc?.id };
+  } catch (err) {
+    logger.log("error in getting applications based on status", err);
+    throw err;
+  }
 };
 
 const getUserApplications = async (userId: string) => {
