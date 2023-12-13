@@ -3,7 +3,7 @@ const Sinon = require("sinon");
 const { expect } = chai;
 const authorizeOwnOrSuperUser = require("../../../middlewares/authorizeOwnOrSuperUser");
 
-describe.only("authorizeOwnOrSuperUser", function () {
+describe("authorizeOwnOrSuperUser", function () {
   it("should call next function if user is super user", async function () {
     const req = {
       query: {
