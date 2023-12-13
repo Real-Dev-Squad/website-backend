@@ -78,13 +78,17 @@ describe("applications", function () {
     });
 
     it("should return application with a particular status for a particular user if userId is provided in the argument", async function () {
-      const { applications, lastDocId } = await ApplicationModel.getApplicationsBasedOnStatus("pending", 5, 'faksdjfkdfjdkfjksdfkj');
+      const { applications, lastDocId } = await ApplicationModel.getApplicationsBasedOnStatus(
+        "pending",
+        5,
+        "faksdjfkdfjdkfjksdfkj"
+      );
 
       expect(applications).to.be.a("array");
       expect(applications.length).to.be.equal(1);
-      expect(applications[0].id).to.be.equal(applicationId1)
-      expect(applications[0].status).to.be.equal('pending')
-    })
+      expect(applications[0].id).to.be.equal(applicationId1);
+      expect(applications[0].status).to.be.equal("pending");
+    });
   });
 
   describe("getApplicationById", function () {
@@ -95,18 +99,25 @@ describe("applications", function () {
     });
 
     it("should return notFound true, if the application doesn't exist in the db", async function () {
-      const application = await ApplicationModel.getApplicationById('fksadfkd');
+      const application = await ApplicationModel.getApplicationById("fksadfkd");
       expect(application.notFound).to.be.equal(true);
-    })
+    });
   });
 
   describe("updateApplication", function () {
     it("should update a particular application", async function () {
-      const dataToUpdate = { status: 'accepted' }
+      const dataToUpdate = { status: "accepted" };
       await ApplicationModel.updateApplication(dataToUpdate, applicationId1);
       const application = await ApplicationModel.getApplicationById(applicationId1);
 
-      expect(application.status).to.be.equal('accepted')
-    })
+      expect(application.status).to.be.equal("accepted");
+    });
+  });
+
+  describe("batchUpdateApplications", function () {
+    it("should add createdAt null to all existing application docs", async function () {
+      const operationStats = await ApplicationModel.batchUpdateApplications();
+      expect(operationStats.totalApplicationUpdates).to.be.equal(5);
+    });
   });
 });
