@@ -16,8 +16,6 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
     if (userId) {
       const applications = await ApplicationModel.getUserApplications(userId);
 
-      if (!applications.length) return res.boom.notFound("User application not found");
-
       return res.json({
         message: "User applications returned successfully!",
         applications,
@@ -66,7 +64,22 @@ const addApplication = async (req: CustomRequest, res: CustomResponse) => {
     }
     const createdAt = admin.firestore.Timestamp.fromDate(new Date());
     const data = getUserApplicationObject(rawData, req.userData.id, createdAt);
-    await ApplicationModel.addApplication(data);
+
+    const applicationLog = {
+      type: logType.APPLICATION_ADDED,
+      meta: {
+        username: req.userData.username,
+        userId: req.userData.id,
+      },
+      body: data,
+    };
+
+    const promises = [
+      ApplicationModel.addApplication(data),
+      addLog(applicationLog.type, applicationLog.meta, applicationLog.body),
+    ];
+
+    await Promise.all(promises);
 
     return res.status(201).json({
       message: "User application added.",
