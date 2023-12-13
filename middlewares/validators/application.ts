@@ -71,7 +71,25 @@ const validateApplicationUpdateData = async (req: CustomRequest, res: CustomResp
   }
 };
 
+const validateApplicationQueryParam = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
+  const schema = joi.object().strict().keys({
+    userId: joi.string().optional(),
+    status: joi.string().optional(),
+    size: joi.string().optional(),
+    next: joi.string().optional(),
+  });
+
+  try {
+    await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    logger.error(`Error validating query params : ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
 module.exports = {
   validateApplicationData,
   validateApplicationUpdateData,
+  validateApplicationQueryParam,
 };
