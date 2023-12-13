@@ -20,5 +20,7 @@ export type application = {
     whyRds: string;
     numberOfHours: number;
   };
+  status?: string;
+  createdAt?: string;
   foundFrom: string;
 };

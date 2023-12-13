@@ -14,8 +14,8 @@ router.post("/", authenticate, applicationValidator.validateApplicationData, app
 router.patch(
   "/:applicationId",
   authenticate,
-  applicationValidator.validateApplicationUpdateData,
   authorizeRoles([SUPERUSER]),
+  applicationValidator.validateApplicationUpdateData,
   applications.updateApplication
 );
 

@@ -1,4 +1,6 @@
-const getUserApplicationObject = (rawData: any, userId: string, createdAt: string) => {
+import { application } from "../types/application";
+
+const getUserApplicationObject = (rawData: any, userId: string, createdAt: string): application => {
   return {
     userId,
     biodata: {
