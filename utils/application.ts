@@ -1,7 +1,7 @@
 import { application } from "../types/application";
 
 const getUserApplicationObject = (rawData: any, userId: string, createdAt: string): application => {
-  return {
+  const data =  {
     userId,
     biodata: {
       firstName: rawData.firstName,
@@ -27,6 +27,8 @@ const getUserApplicationObject = (rawData: any, userId: string, createdAt: strin
     status: "pending",
     createdAt,
   };
+  console.log(data, 'data')
+  return data;
 };
 
 module.exports = { getUserApplicationObject }
