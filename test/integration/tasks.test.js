@@ -933,8 +933,8 @@ describe("Tasks", function () {
           }
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
-          expect(res.error).to.equal("Bad Request");
-          expect(res.message).to.equal("The value for the 'status' field is invalid.");
+          expect(res.body.error).to.equal("Bad Request");
+          expect(res.body.message).to.equal("The value for the 'status' field is invalid.");
           return done();
         });
     });
