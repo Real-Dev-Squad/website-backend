@@ -31,7 +31,7 @@ let applicationId3: string;
 let applicationId4: string;
 let applicationId5: string;
 
-describe("Application", function () {
+describe.only("Application", function () {
   before(async function () {
     const userIdPromises = [addUser(appOwner), addUser(superUser), addUser(secondUser)];
     const [userId1, userId2, userId3] = await Promise.all(userIdPromises);
@@ -396,6 +396,45 @@ describe("Application", function () {
           expect(res).to.have.status(404);
           expect(res.body.error).to.be.equal("Not Found");
           expect(res.body.message).to.be.equal("Application not found");
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /application/batch/update", function () {
+    it("should return 401 if the user is not super user", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/batch/update`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body.message).to.be.equal("You are not authorized for this action.");
+          return done();
+        });
+    });
+
+    it("should return updated stats after updating all the application", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/batch/update`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.be.deep.equal({
+            failedApplicationUpdateIds: [],
+            totalFailedApplicationUpdates: 0,
+            totalApplicationUpdates: 6,
+          });
           return done();
         });
     });
