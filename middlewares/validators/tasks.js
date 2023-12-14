@@ -137,10 +137,10 @@ const updateSelfTask = async (req, res, next) => {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
+    logger.error(`Error validating updateSelfTask payload : ${error}`);
     if (error instanceof BadRequest) {
       res.boom.badRequest(error.message);
     } else {
-      logger.error(`Error validating updateSelfTask payload : ${error}`);
       res.boom.badRequest(error.details[0].message);
     }
   }
