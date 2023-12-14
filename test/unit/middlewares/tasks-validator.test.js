@@ -2,6 +2,7 @@ const Sinon = require("sinon");
 const {
   getTasksValidator,
   createTask,
+  updateSelfTask,
   getUsersValidator,
   updateTask: updateTaskValidator,
 } = require("../../../middlewares/validators/tasks");
@@ -704,6 +705,24 @@ describe("getTasks validator", function () {
       await getUsersValidator(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(0);
       expect(res.boom.badRequest.callCount).to.be.equal(1);
+    });
+  });
+
+  describe("updateSelfTask Validator", function () {
+    it("should not pass the request when status is AVAILABLE", async function () {
+      const req = {
+        body: {
+          status: "AVAILABLE",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: Sinon.spy(),
+        },
+      };
+      const nextMiddlewareSpy = Sinon.spy();
+      await updateSelfTask(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(0);
     });
   });
 });

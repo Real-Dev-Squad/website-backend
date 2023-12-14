@@ -921,7 +921,26 @@ describe("Tasks", function () {
       isNoteworthy: true,
     };
 
+    it("Should throw 400 Bad Request if the user tries to update the status of a task to AVAILABLE", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.error).to.equal("Bad Request");
+          expect(res.message).to.equal("The value for the 'status' field is invalid.");
+          return done();
+        });
+    });
+
     it("Should update the task status for given self taskid", function (done) {
+      taskStatusData.status = "IN_PROGRESS";
       chai
         .request(app)
         .patch(`/tasks/self/${taskId1}`)
@@ -1002,6 +1021,7 @@ describe("Tasks", function () {
     });
 
     it("Should return 404 if task doesnt exist", function (done) {
+      taskStatusData.status = "IN_PROGRESS";
       chai
         .request(app)
         .patch("/tasks/self/wrongtaskId")
@@ -1043,6 +1063,7 @@ describe("Tasks", function () {
     });
 
     it("Should give 403 if status is already 'VERIFIED' ", async function () {
+      taskStatusData.status = "IN_PROGRESS";
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
