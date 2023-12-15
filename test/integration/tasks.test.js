@@ -1408,13 +1408,13 @@ describe("Tasks", function () {
         .request(app)
         .get("/tasks/users/discord")
         .query({
-          size: 3,
+          size: 5,
           q: `status:${tasksUsersStatus.MISSED_UPDATES} -weekday:sun -weekday:mon -weekday:tue -weekday:wed -weekday:thu -weekday:fri -date:231423432 -days-count:4`,
         })
         .set("Authorization", `Bearer ${jwtToken}`);
       expect(response.body).to.be.deep.equal({
         usersToAddRole: [],
-        tasks: 0,
+        tasks: 4,
         missedUpdatesTasks: 0,
       });
       expect(response.status).to.be.equal(200);

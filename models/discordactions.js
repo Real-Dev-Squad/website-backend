@@ -974,7 +974,6 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
           }
         }
       });
-
       discordUserMap.set(discordUser.user.id, discordUserData);
     });
 
