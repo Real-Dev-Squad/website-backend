@@ -880,7 +880,6 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
       const data = await tasksModel.doc(cursor).get();
       if (!data.data()) {
         return {
-          statusCode: 400,
           error: "Bad Request",
           message: `Invalid cursor: ${cursor}`,
         };

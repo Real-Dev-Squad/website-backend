@@ -494,7 +494,13 @@ const getUsersHandler = async (req, res) => {
         excludedDays: weekday?.map((day) => daysOfWeek[day.value]),
         dateGap: !!daysGap && daysGap.length === 1 ? Number.parseInt(daysGap[0].value) : null,
       });
-      return res.status(200).json(response);
+
+      if (response.error) {
+        return res.boom.badRequest(response.message);
+      }
+      return res
+        .status(200)
+        .json({ message: "Discord details of users with status missed updates fetched successfully", data: response });
     } else {
       return res.boom.badRequest("Unknown type and query");
     }
