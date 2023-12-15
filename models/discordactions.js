@@ -21,7 +21,7 @@ const discordMissedUpdatesRoleId = config.get("discordMissedUpdatesRoleId");
 const userStatusModel = firestore.collection("usersStatus");
 const usersUtils = require("../utils/users");
 const { getUsersBasedOnFilter, fetchUser } = require("./users");
-const { convertDaysToMilliseconds } = require("../utils/time");
+const { convertDaysToMilliseconds, convertMillisToSeconds } = require("../utils/time");
 const { chunks } = require("../utils/array");
 const tasksModel = firestore.collection("tasks");
 const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
@@ -895,7 +895,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
     stats.tasks = tasksQuerySnapshot.size;
     tasksQuerySnapshot.forEach((doc) => {
       const { assignee: taskAssignee, startedOn: taskStartedOn } = doc.data();
-      if (!taskAssignee || taskStartedOn >= convertDaysToMilliseconds(gapWindowStart)) return;
+      if (!taskAssignee || taskStartedOn >= convertMillisToSeconds(gapWindowStart)) return;
 
       const taskId = doc.id;
 
