@@ -492,7 +492,7 @@ const getUsersHandler = async (req, res) => {
         size: size && Number.parseInt(size),
         excludedDates: date?.map((date) => Number.parseInt(date.value)),
         excludedDays: weekday?.map((day) => daysOfWeek[day.value]),
-        dateGap: !!daysGap && daysGap.length === 1 && Number.parseInt(daysGap[0].value),
+        dateGap: !!daysGap && daysGap.length === 1 ? Number.parseInt(daysGap[0].value) : null,
       });
       return res.status(200).json(response);
     } else {

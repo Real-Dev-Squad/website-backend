@@ -2,7 +2,6 @@ const { getUsername, getUserId, getParticipantUsernames, getParticipantUserIds }
 const { TASK_TYPE, MAPPED_TASK_STATUS, COMPLETED_TASK_STATUS } = require("../constants/tasks");
 const fireStore = require("../utils/firestore");
 const tasksModel = fireStore.collection("tasks");
-const { convertMillisToSeconds } = require("./time");
 
 const fromFirestoreData = async (task) => {
   if (!task) {
@@ -113,11 +112,11 @@ const parseSearchQuery = (queryString) => {
   return searchParams;
 };
 
-const buildTasksQueryForMissedUpdates = (startedOnTimestamp, size) => {
+const buildTasksQueryForMissedUpdates = (size) => {
   const completedTasksStatusList = Object.values(COMPLETED_TASK_STATUS);
   return tasksModel
     .where("status", "not-in", completedTasksStatusList)
-    .where("startedOn", "<", convertMillisToSeconds(startedOnTimestamp))
+    .orderBy("status")
     .orderBy("assignee")
     .limit(size);
 };
