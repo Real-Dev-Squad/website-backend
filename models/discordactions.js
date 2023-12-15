@@ -21,7 +21,7 @@ const discordMissedUpdatesRoleId = config.get("discordMissedUpdatesRoleId");
 const userStatusModel = firestore.collection("usersStatus");
 const usersUtils = require("../utils/users");
 const { getUsersBasedOnFilter, fetchUser } = require("./users");
-const { convertDaysToMilliseconds } = require("../utils/time");
+const { convertDaysToMilliseconds, convertMillisToSeconds } = require("../utils/time");
 const { chunks } = require("../utils/array");
 const tasksModel = firestore.collection("tasks");
 const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
@@ -874,13 +874,12 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
       }
     }
 
-    let taskQuery = buildTasksQueryForMissedUpdates(gapWindowStart, size);
+    let taskQuery = buildTasksQueryForMissedUpdates(size);
 
     if (cursor) {
       const data = await tasksModel.doc(cursor).get();
       if (!data.data()) {
         return {
-          statusCode: 400,
           error: "Bad Request",
           message: `Invalid cursor: ${cursor}`,
         };
@@ -894,7 +893,9 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
 
     stats.tasks = tasksQuerySnapshot.size;
     tasksQuerySnapshot.forEach((doc) => {
-      const taskAssignee = doc.data().assignee;
+      const { assignee: taskAssignee, startedOn: taskStartedOn } = doc.data();
+      if (!taskAssignee || taskStartedOn >= convertMillisToSeconds(gapWindowStart)) return;
+
       const taskId = doc.id;
 
       if (usersMap.has(taskAssignee)) {
@@ -952,8 +953,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
       });
     });
 
-    const discordUserList = await Promise.all(discordUsersPromise);
-
+    const discordUserList = await discordUsersPromise;
     const discordUserMap = new Map();
     discordUserList.forEach((discordUser) => {
       const discordUserData = { isBot: !!discordUser.user.bot };

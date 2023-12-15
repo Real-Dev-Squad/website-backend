@@ -31,7 +31,7 @@ const convertDaysToMilliseconds = (days) => {
  */
 const convertMillisToSeconds = (milliseconds) => {
   if (typeof milliseconds !== "number") throw Error("Not a number");
-  return milliseconds / 1000;
+  return Math.round(milliseconds / 1000);
 };
 /**
  * Returns time in seconds of timestamp after given duration
