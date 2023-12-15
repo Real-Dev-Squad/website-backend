@@ -1,4 +1,5 @@
 const joi = require("joi");
+const { BadRequest } = require("http-errors");
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const { TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS, tasksUsersStatus } = require("../../constants/tasks");
 const { RQLQueryParser } = require("../../utils/RQLParser");
@@ -118,14 +119,18 @@ const updateTask = async (req, res, next) => {
 };
 
 const updateSelfTask = async (req, res, next) => {
+  const validStatus = [...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD)].filter(
+    (item) => item !== TASK_STATUS.AVAILABLE
+  );
   const schema = joi
     .object()
     .strict()
     .keys({
       status: joi
         .string()
-        .valid(...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD))
-        .optional(),
+        .valid(...validStatus)
+        .optional()
+        .error(new BadRequest(`The value for the 'status' field is invalid.`)),
       percentCompleted: joi.number().integer().min(0).max(100).optional(),
     });
   try {
@@ -133,7 +138,11 @@ const updateSelfTask = async (req, res, next) => {
     next();
   } catch (error) {
     logger.error(`Error validating updateSelfTask payload : ${error}`);
-    res.boom.badRequest(error.details[0].message);
+    if (error instanceof BadRequest) {
+      res.boom.badRequest(error.message);
+    } else {
+      res.boom.badRequest(error.details[0].message);
+    }
   }
 };
 
