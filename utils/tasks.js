@@ -1,5 +1,7 @@
 const { getUsername, getUserId, getParticipantUsernames, getParticipantUserIds } = require("./users");
-const { TASK_TYPE, MAPPED_TASK_STATUS } = require("../constants/tasks");
+const { TASK_TYPE, MAPPED_TASK_STATUS, COMPLETED_TASK_STATUS, TASK_STATUS } = require("../constants/tasks");
+const fireStore = require("../utils/firestore");
+const tasksModel = fireStore.collection("tasks");
 
 const fromFirestoreData = async (task) => {
   if (!task) {
@@ -110,10 +112,20 @@ const parseSearchQuery = (queryString) => {
   return searchParams;
 };
 
+const buildTasksQueryForMissedUpdates = (size) => {
+  const completedTasksStatusList = Object.values(COMPLETED_TASK_STATUS);
+  return tasksModel
+    .where("status", "not-in", [...completedTasksStatusList, TASK_STATUS.AVAILABLE])
+    .orderBy("status")
+    .orderBy("assignee")
+    .limit(size);
+};
+
 module.exports = {
   fromFirestoreData,
   toFirestoreData,
   buildTasks,
   transformQuery,
   parseSearchQuery,
+  buildTasksQueryForMissedUpdates,
 };

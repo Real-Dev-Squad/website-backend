@@ -961,7 +961,6 @@ describe("Task Requests", function () {
       });
     });
   });
-
   describe("POST /taskRequests", function () {
     let fetchIssuesByIdStub;
     let fetchTaskStub;
