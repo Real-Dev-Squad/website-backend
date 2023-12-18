@@ -26,7 +26,6 @@ const getAllApplications = async (limit: number, lastDocId?: string) => {
     });
 
     return { applications: allApplicationsData, lastDocId: lastApplicationDoc?.id };
-
   } catch (err) {
     logger.log("error in getting all intros", err);
     throw err;
@@ -36,11 +35,11 @@ const getAllApplications = async (limit: number, lastDocId?: string) => {
 const getApplicationById = async (applicationId: string) => {
   try {
     const application = await ApplicationsModel.doc(applicationId).get();
-  
+
     if (application.exists) {
       return { id: application.id, ...application.data(), notFound: false };
     }
-  
+
     return { notFound: true };
   } catch (err) {
     logger.log("error in getting application", err);
@@ -48,30 +47,35 @@ const getApplicationById = async (applicationId: string) => {
   }
 };
 
-const getApplicationsBasedOnStatus = async (status: string, limit: number, lastDoc?: string, userId?: string) => {
+const getApplicationsBasedOnStatus = async (status: string, limit: number, lastDocId?: string, userId?: string) => {
   try {
+    let lastDoc = null;
     const applications = [];
     let dbQuery = ApplicationsModel.where("status", "==", status);
-  
+
     if (userId) {
       dbQuery = dbQuery.where("userId", "==", userId);
     }
-  
+
+    if (lastDocId) {
+      lastDoc = await ApplicationsModel.doc(lastDocId).get();
+    }
+
     const applicationsBasedOnStatus = await dbQuery
       .orderBy("createdAt", "desc")
       .startAfter(lastDoc ?? "")
       .limit(limit)
       .get();
-  
+
     const lastApplicationDoc = applicationsBasedOnStatus.docs[applicationsBasedOnStatus.docs.length - 1];
-  
+
     applicationsBasedOnStatus.forEach((data: any) => {
       applications.push({
         id: data.id,
         ...data.data(),
       });
     });
-  
+
     return { applications, lastDocId: lastApplicationDoc?.id };
   } catch (err) {
     logger.log("error in getting applications based on status", err);
