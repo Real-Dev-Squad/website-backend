@@ -3,7 +3,7 @@ const { SUPERUSER } = require("../constants/roles");
 const authenticate = require("../middlewares/authenticate");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const applications = require("../controllers/applications");
-const authorizeOwnOrSuperUser = require("../middlewares/authorizeOwnOrSuperUser");
+const { authorizeOwnOrSuperUser } = require("../middlewares/authorizeOwnOrSuperUser");
 const applicationValidator = require("../middlewares/validators/application");
 
 const router = express.Router();

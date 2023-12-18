@@ -6,24 +6,24 @@
  * @param res {Object} - Express response object
  * @param next {Function} - Express middleware function
  * @return {Object} - Returns unauthorized user if the role is not assigned
- * 
-**/
+ *
+ **/
 
 import { NextFunction } from "express";
 import { CustomRequest, CustomResponse } from "../types/global";
 
-module.exports = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
+const authorizeOwnOrSuperUser = (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   try {
     const isSuperUser = req.userData.roles.super_user;
     const { id } = req.userData;
     const userIdInQuery = req.query.userId;
 
     if (isSuperUser || userIdInQuery === id) return next();
-    else return res.boom.forbidden('Unauthorized User')
+    else return res.boom.forbidden("Unauthorized User");
   } catch (err) {
     logger.error(err);
     return res.boom.badImplementation("Something went wrong please contact admin");
   }
 };
 
-
+export { authorizeOwnOrSuperUser };

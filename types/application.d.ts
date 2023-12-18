@@ -24,3 +24,19 @@ export type application = {
   createdAt?: string;
   foundFrom: string;
 };
+
+export type applicationPayload = {
+  firstName: string;
+  lastName: string;
+  city: string;
+  state: string;
+  country: string;
+  college: string;
+  skills: string;
+  introduction: string;
+  funFact: string;
+  forFun: string;
+  numberOfHours: number;
+  whyRds: string;
+  foundFrom: string;
+};

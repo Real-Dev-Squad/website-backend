@@ -1,7 +1,7 @@
-import { application } from "../types/application";
+import { applicationPayload, application } from "../types/application";
 
-const getUserApplicationObject = (rawData: any, userId: string, createdAt: string): application => {
-  const data =  {
+const getUserApplicationObject = (rawData: applicationPayload, userId: string, createdAt: string): application => {
+  const data = {
     userId,
     biodata: {
       firstName: rawData.firstName,
@@ -27,7 +27,6 @@ const getUserApplicationObject = (rawData: any, userId: string, createdAt: strin
     status: "pending",
     createdAt,
   };
-  console.log(data, 'data')
   return data;
 };
 
