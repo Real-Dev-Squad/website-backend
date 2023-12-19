@@ -23,6 +23,8 @@ const userStatusData = require("../fixtures/userStatus/userStatus");
 const tasksModel = firestore.collection("tasks");
 const discordService = require("../../services/discordService");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
+const { logType } = require("../../constants/logs");
+
 chai.use(chaiHttp);
 
 const appOwner = userData[3];
@@ -1450,7 +1452,7 @@ describe("Tasks", function () {
         .query({ q: `status:${tasksUsersStatus.MISSED_UPDATES}` })
         .set("Authorization", `Bearer ${jwtToken}`);
 
-      const logsRef = await logsModel.where("type", "==", "tasksMissedUpdatesErrors").get();
+      const logsRef = await logsModel.where("type", "==", logType.TASKS_MISSED_UPDATES_ERRORS).get();
       let tasksLogs;
       logsRef.forEach((data) => {
         tasksLogs = data.data();

@@ -16,6 +16,8 @@ const { addTaskCreatedAtAndUpdatedAtFields } = require("../services/tasks");
 const { RQLQueryParser } = require("../utils/RQLParser");
 const { getMissedProgressUpdatesUsers } = require("../models/discordactions");
 const { daysOfWeek } = require("../constants/constants");
+const { logType } = require("../constants/logs");
+
 /**
  * Creates new task
  *
@@ -506,7 +508,7 @@ const getUsersHandler = async (req, res) => {
     }
   } catch (error) {
     const taskRequestLog = {
-      type: "tasksMissedUpdatesErrors",
+      type: logType.TASKS_MISSED_UPDATES_ERRORS,
       meta: {
         lastModifiedAt: Date.now(),
       },
