@@ -78,7 +78,7 @@ describe("applications", function () {
     });
 
     it("should return application with a particular status for a particular user if userId is provided in the argument", async function () {
-      const { applications, lastDocId } = await ApplicationModel.getApplicationsBasedOnStatus("pending", 5, 'faksdjfkdfjdkfjksdfkj');
+      const { applications } = await ApplicationModel.getApplicationsBasedOnStatus("pending", 5, null, 'faksdjfkdfjdkfjksdfkj');
 
       expect(applications).to.be.a("array");
       expect(applications.length).to.be.equal(1);

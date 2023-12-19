@@ -1,7 +1,7 @@
 import chai from "chai";
 const Sinon = require("sinon");
 const { expect } = chai;
-const authorizeOwnOrSuperUser = require("../../../middlewares/authorizeOwnOrSuperUser");
+const { authorizeOwnOrSuperUser } = require("../../../middlewares/authorizeOwnOrSuperUser");
 
 describe("authorizeOwnOrSuperUser", function () {
   it("should call next function if user is super user", async function () {
