@@ -4,25 +4,38 @@ const { expect } = chai;
 const chaiHttp = require("chai-http");
 
 const firestore = require("../../utils/firestore");
+const logsModel = firestore.collection("logs");
 const app = require("../../server");
 const tasks = require("../../models/tasks");
 const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
 const userModel = require("../../models/users");
+const userStatusModel = require("../../models/userStatus");
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
 const tasksData = require("../fixtures/tasks/tasks")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
-const { TASK_STATUS } = require("../../constants/tasks");
+const { TASK_STATUS, tasksUsersStatus } = require("../../constants/tasks");
 const updateTaskStatus = require("../fixtures/tasks/tasks1")();
+const userStatusData = require("../fixtures/userStatus/userStatus");
+const tasksModel = firestore.collection("tasks");
+const discordService = require("../../services/discordService");
+const { CRON_JOB_HANDLER } = require("../../constants/bot");
+const { logType } = require("../../constants/logs");
+
 chai.use(chaiHttp);
 
 const appOwner = userData[3];
 const superUser = userData[4];
 
 let jwt, superUserJwt;
+const { createProgressDocument } = require("../../models/progresses");
+const { stubbedModelTaskProgressData } = require("../fixtures/progress/progresses");
+const { convertDaysToMilliseconds } = require("../../utils/time");
+const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
+const { generateCronJobToken } = require("../utils/generateBotToken");
 
 const taskData = [
   {
@@ -911,7 +924,26 @@ describe("Tasks", function () {
       isNoteworthy: true,
     };
 
+    it("Should throw 400 Bad Request if the user tries to update the status of a task to AVAILABLE", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          expect(res.body.message).to.equal("The value for the 'status' field is invalid.");
+          return done();
+        });
+    });
+
     it("Should update the task status for given self taskid", function (done) {
+      taskStatusData.status = "IN_PROGRESS";
       chai
         .request(app)
         .patch(`/tasks/self/${taskId1}`)
@@ -992,6 +1024,7 @@ describe("Tasks", function () {
     });
 
     it("Should return 404 if task doesnt exist", function (done) {
+      taskStatusData.status = "IN_PROGRESS";
       chai
         .request(app)
         .patch("/tasks/self/wrongtaskId")
@@ -1033,6 +1066,7 @@ describe("Tasks", function () {
     });
 
     it("Should give 403 if status is already 'VERIFIED' ", async function () {
+      taskStatusData.status = "IN_PROGRESS";
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
@@ -1290,6 +1324,140 @@ describe("Tasks", function () {
       expect(res.body.totalTasksUpdated).to.be.equal(0);
       expect(res.body.totalFailedTasks).to.be.equal(4);
       expect(res.body.failedTasksIds.length).to.equal(4);
+    });
+  });
+
+  describe("GET /tasks/users", function () {
+    let activeUserWithProgressUpdates;
+    let idleUser;
+    let userNotInDiscord;
+    let jwtToken;
+    let getDiscordMembersStub;
+    beforeEach(async function () {
+      await cleanDb();
+      idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
+      activeUserWithProgressUpdates = { ...userData[10], discordId: getDiscordMembers[1].user.id };
+      const activeUserWithNoUpdates = { ...userData[0], discordId: getDiscordMembers[2].user.id };
+      userNotInDiscord = { ...userData[4], discordId: "Not in discord" };
+      const {
+        idleStatus: idleUserStatus,
+        activeStatus: activeUserStatus,
+        userStatusDataForOooState: oooUserStatus,
+      } = userStatusData;
+      const userIdList = await Promise.all([
+        await addUser(idleUser), // idle user with no task progress updates
+        await addUser(activeUserWithProgressUpdates), // active user with task progress updates
+        await addUser(activeUserWithNoUpdates), // active user with no task progress updates
+        await addUser(userNotInDiscord), // OOO user with
+      ]);
+      await Promise.all([
+        await userStatusModel.updateUserStatus(userIdList[0], idleUserStatus),
+        await userStatusModel.updateUserStatus(userIdList[1], activeUserStatus),
+        await userStatusModel.updateUserStatus(userIdList[2], activeUserStatus),
+        await userStatusModel.updateUserStatus(userIdList[3], oooUserStatus),
+      ]);
+
+      const tasksPromise = [];
+
+      for (let index = 0; index < 4; index++) {
+        const task = tasksData[index];
+        const validTask = {
+          ...task,
+          assignee: userIdList[index],
+          startedOn: (new Date().getTime() - convertDaysToMilliseconds(7)) / 1000,
+          endsOn: (new Date().getTime() + convertDaysToMilliseconds(4)) / 1000,
+          status: TASK_STATUS.IN_PROGRESS,
+        };
+
+        tasksPromise.push(tasksModel.add(validTask));
+      }
+      const taskIdList = (await Promise.all(tasksPromise)).map((tasksDoc) => tasksDoc.id);
+      const progressDataList = [];
+
+      const date = new Date();
+      date.setDate(date.getDate() - 1);
+      const progressData = stubbedModelTaskProgressData(null, taskIdList[2], date.getTime(), date.valueOf());
+      progressDataList.push(progressData);
+
+      await Promise.all(progressDataList.map(async (progress) => await createProgressDocument(progress)));
+      const discordMembers = [...getDiscordMembers].map((user) => {
+        return { ...user };
+      });
+      const roles1 = [...discordMembers[0].roles, "9876543210"];
+      const roles2 = [...discordMembers[1].roles, "9876543210"];
+      discordMembers[0].roles = roles1;
+      discordMembers[1].roles = roles2;
+      getDiscordMembersStub = sinon.stub(discordService, "getDiscordMembers");
+      getDiscordMembersStub.returns(discordMembers);
+      jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
+    });
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+    it("should return successful response with user id list", async function () {
+      const response = await chai
+        .request(app)
+        .get("/tasks/users/discord")
+        .query({ q: `status:${tasksUsersStatus.MISSED_UPDATES}` })
+        .set("Authorization", `Bearer ${jwtToken}`);
+      expect(response.body).to.be.deep.equal({
+        message: "Discord details of users with status missed updates fetched successfully",
+        data: {
+          usersToAddRole: [activeUserWithProgressUpdates.discordId],
+          tasks: 4,
+          missedUpdatesTasks: 3,
+        },
+      });
+      expect(response.status).to.be.equal(200);
+    });
+    it("should return successful response with user id when all params are passed", async function () {
+      const response = await chai
+        .request(app)
+        .get("/tasks/users/discord")
+        .query({
+          size: 5,
+          q: `status:${tasksUsersStatus.MISSED_UPDATES} -weekday:sun -weekday:mon -weekday:tue -weekday:wed -weekday:thu -weekday:fri -date:231423432 -days-count:4`,
+        })
+        .set("Authorization", `Bearer ${jwtToken}`);
+      expect(response.body).to.be.deep.equal({
+        message: "Discord details of users with status missed updates fetched successfully",
+        data: {
+          usersToAddRole: [],
+          tasks: 4,
+          missedUpdatesTasks: 0,
+        },
+      });
+      expect(response.status).to.be.equal(200);
+    });
+
+    it("should return bad request error when status is not passed", async function () {
+      const response = await chai
+        .request(app)
+        .get("/tasks/users/discord")
+        .query({})
+        .set("Authorization", `Bearer ${jwtToken}`);
+      expect(response.body).to.be.deep.equal({
+        error: "Bad Request",
+        message: '"status" is required',
+        statusCode: 400,
+      });
+      expect(response.status).to.be.equal(400);
+    });
+    it("should save logs when there is an error", async function () {
+      getDiscordMembersStub.throws(new Error("Error occurred"));
+      await chai
+        .request(app)
+        .get("/tasks/users/discord")
+        .query({ q: `status:${tasksUsersStatus.MISSED_UPDATES}` })
+        .set("Authorization", `Bearer ${jwtToken}`);
+
+      const logsRef = await logsModel.where("type", "==", logType.TASKS_MISSED_UPDATES_ERRORS).get();
+      let tasksLogs;
+      logsRef.forEach((data) => {
+        tasksLogs = data.data();
+      });
+      expect(tasksLogs.body.error).to.be.equal("Error: Error occurred");
     });
   });
 
