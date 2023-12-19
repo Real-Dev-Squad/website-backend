@@ -11,10 +11,13 @@ const getAllApplications = async (limit: number, lastDocId?: string) => {
       lastDoc = await ApplicationsModel.doc(lastDocId).get();
     }
 
-    const applications = await ApplicationsModel.orderBy("createdAt", "desc")
-      .startAfter(lastDoc ?? "")
-      .limit(limit)
-      .get();
+    let dbQuery = ApplicationsModel.orderBy("createdAt", "desc");
+
+    if (lastDoc) {
+      dbQuery = dbQuery.startAfter(lastDoc);
+    }
+
+    const applications = await dbQuery.limit(limit).get();
 
     const lastApplicationDoc = applications.docs[applications.docs.length - 1];
 
@@ -61,11 +64,13 @@ const getApplicationsBasedOnStatus = async (status: string, limit: number, lastD
       lastDoc = await ApplicationsModel.doc(lastDocId).get();
     }
 
-    const applicationsBasedOnStatus = await dbQuery
-      .orderBy("createdAt", "desc")
-      .startAfter(lastDoc ?? "")
-      .limit(limit)
-      .get();
+    dbQuery = dbQuery.orderBy("createdAt", "desc");
+
+    if (lastDoc) {
+      dbQuery = dbQuery.startAfter(lastDoc);
+    }
+
+    const applicationsBasedOnStatus = await dbQuery.limit(limit).get();
 
     const lastApplicationDoc = applicationsBasedOnStatus.docs[applicationsBasedOnStatus.docs.length - 1];
 

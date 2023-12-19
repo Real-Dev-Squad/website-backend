@@ -62,7 +62,7 @@ const addApplication = async (req: CustomRequest, res: CustomResponse) => {
         message: "User application is already present!",
       });
     }
-    const createdAt = admin.firestore.Timestamp.fromDate(new Date());
+    const createdAt = new Date().toISOString();
     const data = getUserApplicationObject(rawData, req.userData.id, createdAt);
 
     const applicationLog = {
