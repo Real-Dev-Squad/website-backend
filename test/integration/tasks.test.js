@@ -4,6 +4,7 @@ const { expect } = chai;
 const chaiHttp = require("chai-http");
 
 const firestore = require("../../utils/firestore");
+const logsModel = firestore.collection("logs");
 const app = require("../../server");
 const tasks = require("../../models/tasks");
 const authService = require("../../services/authService");
@@ -1329,6 +1330,7 @@ describe("Tasks", function () {
     let idleUser;
     let userNotInDiscord;
     let jwtToken;
+    let getDiscordMembersStub;
     beforeEach(async function () {
       await cleanDb();
       idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
@@ -1383,7 +1385,8 @@ describe("Tasks", function () {
       const roles2 = [...discordMembers[1].roles, "9876543210"];
       discordMembers[0].roles = roles1;
       discordMembers[1].roles = roles2;
-      sinon.stub(discordService, "getDiscordMembers").returns(discordMembers);
+      getDiscordMembersStub = sinon.stub(discordService, "getDiscordMembers");
+      getDiscordMembersStub.returns(discordMembers);
       jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
     });
     afterEach(async function () {
@@ -1438,6 +1441,21 @@ describe("Tasks", function () {
         statusCode: 400,
       });
       expect(response.status).to.be.equal(400);
+    });
+    it("should save logs when there is an error", async function () {
+      getDiscordMembersStub.throws(new Error("Error occurred"));
+      await chai
+        .request(app)
+        .get("/tasks/users/discord")
+        .query({ q: `status:${tasksUsersStatus.MISSED_UPDATES}` })
+        .set("Authorization", `Bearer ${jwtToken}`);
+
+      const logsRef = await logsModel.where("type", "==", "tasksMissedUpdatesErrors").get();
+      let tasksLogs;
+      logsRef.forEach((data) => {
+        tasksLogs = data.data();
+      });
+      expect(tasksLogs.body.error).to.be.equal("Error: Error occurred");
     });
   });
 
