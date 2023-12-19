@@ -505,6 +505,17 @@ const getUsersHandler = async (req, res) => {
       return res.boom.badRequest("Unknown type and query");
     }
   } catch (error) {
+    const taskRequestLog = {
+      type: "tasksMissedUpdatesErrors",
+      meta: {
+        lastModifiedAt: Date.now(),
+      },
+      body: {
+        request: req.query,
+        error: error.toString(),
+      },
+    };
+    await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
     logger.error("Error in fetching users details of tasks", error);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
