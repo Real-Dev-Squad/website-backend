@@ -769,8 +769,8 @@ describe("discordactions", function () {
   });
   describe("groupUpdateLastJoinDate", function () {
     beforeEach(function () {
-      sinon.stub(discordRoleModel, "doc").returns({
-        set: Promise.resolve(),
+      sinon.stub(discordRoleModel, "where").returns({
+        limit: () => Promise.resolve({ docs: [{ ref: { update: Promise.resolve() } }] }),
       });
     });
 
@@ -778,7 +778,7 @@ describe("discordactions", function () {
       sinon.restore();
     });
     it("should add current date as lastUsedOn in groups doc", async function () {
-      const res = await groupUpdateLastJoinDate({ id: "kbl" });
+      const res = await groupUpdateLastJoinDate({ id: "12345678" });
       expect(res.updated).to.be.equal(true);
     });
   });
