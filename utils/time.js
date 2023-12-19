@@ -83,6 +83,14 @@ const convertTimestampToUTCStartOrEndOfDay = (timestamp, isEndOfDay = false) => 
   return currTime.getTime();
 };
 
+/**
+ * Returns Current Epoch time stamp
+ * @returns {EpochTimeStamp}: Current Epoch time
+ */
+const getCurrentEpochTime = () => {
+  return Math.round(Date.now() / 1000);
+};
+
 module.exports = {
   convertDaysToMilliseconds,
   convertHoursToMilliseconds,
@@ -90,5 +98,6 @@ module.exports = {
   getTimeInSecondAfter,
   getBeforeHourTime,
   convertTimestampToUTCStartOrEndOfDay,
+  getCurrentEpochTime,
   convertMillisToSeconds,
 };
