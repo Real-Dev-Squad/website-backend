@@ -136,12 +136,15 @@ const addGroupRoleToMember = async (req, res) => {
       algorithm: "RS256",
       expiresIn: config.get("rdsServerlessBot.ttl"),
     });
-
-    await fetch(`${DISCORD_BASE_URL}/roles/add`, {
+    const apiCallToDiscord = fetch(`${DISCORD_BASE_URL}/roles/add`, {
       method: "PUT",
       body: JSON.stringify(dataForDiscord),
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-    }).then((response) => response.json());
+    });
+
+    const discordLastJoinedDateUpdate = discordRolesModel.groupUpdateLastJoinDate({ id: req.body.roleid });
+
+    await Promise.all([apiCallToDiscord, discordLastJoinedDateUpdate]);
 
     return res.status(201).json({
       message: "Role added successfully!",

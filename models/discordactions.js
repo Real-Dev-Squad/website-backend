@@ -1038,6 +1038,12 @@ const getUserDiscordInvite = async (userId) => {
     throw err;
   }
 };
+const groupUpdateLastJoinDate = async ({ id }) => {
+  const snapShot = await discordRoleModel.where("roleid", "==", id).limit(1).get();
+  const doc = snapShot.docs[0];
+  await doc.ref.update({ lastUsedOn: admin.firestore.Timestamp.fromDate(new Date()) });
+  return { updated: true };
+};
 
 module.exports = {
   createNewRole,
@@ -1059,4 +1065,5 @@ module.exports = {
   getMissedProgressUpdatesUsers,
   getUserDiscordInvite,
   addInviteToInviteModel,
+  groupUpdateLastJoinDate,
 };
