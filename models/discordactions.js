@@ -159,7 +159,7 @@ const isGroupRoleExists = async (options = {}) => {
       throw Error("Either rolename or roleId is required");
     }
 
-    return { roleExists: !existingRoles.empty };
+    return { roleExists: !existingRoles.empty, existingRoles };
   } catch (err) {
     logger.error("Error in getting all group-roles", err);
     throw err;
@@ -1039,9 +1039,7 @@ const getUserDiscordInvite = async (userId) => {
   }
 };
 const groupUpdateLastJoinDate = async ({ id }) => {
-  const snapShot = await discordRoleModel.where("roleid", "==", id).limit(1).get();
-  const doc = snapShot.docs[0];
-  await doc.ref.update({ lastUsedOn: admin.firestore.Timestamp.fromDate(new Date()) });
+  await discordRoleModel.doc(id).set({ lastUsedOn: admin.firestore.Timestamp.fromDate(new Date()) }, { merge: true });
   return { updated: true };
 };
 
