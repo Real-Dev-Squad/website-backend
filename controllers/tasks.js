@@ -16,6 +16,8 @@ const { addTaskCreatedAtAndUpdatedAtFields } = require("../services/tasks");
 const { RQLQueryParser } = require("../utils/RQLParser");
 const { getMissedProgressUpdatesUsers } = require("../models/discordactions");
 const { daysOfWeek } = require("../constants/constants");
+const { logType } = require("../constants/logs");
+
 /**
  * Creates new task
  *
@@ -505,6 +507,17 @@ const getUsersHandler = async (req, res) => {
       return res.boom.badRequest("Unknown type and query");
     }
   } catch (error) {
+    const taskRequestLog = {
+      type: logType.TASKS_MISSED_UPDATES_ERRORS,
+      meta: {
+        lastModifiedAt: Date.now(),
+      },
+      body: {
+        request: req.query,
+        error: error.toString(),
+      },
+    };
+    await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
     logger.error("Error in fetching users details of tasks", error);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
