@@ -44,6 +44,10 @@ const COMPLETED_TASK_STATUS = {
 };
 const TASK_SIZE = 5;
 
+const tasksUsersStatus = {
+  MISSED_UPDATES: "missed-updates",
+};
+
 module.exports = {
   TASK_TYPE,
   TASK_STATUS,
@@ -52,4 +56,5 @@ module.exports = {
   TASK_SIZE,
   DEFAULT_TASK_PRIORITY,
   COMPLETED_TASK_STATUS,
+  tasksUsersStatus,
 };

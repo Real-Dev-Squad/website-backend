@@ -31,7 +31,7 @@ const convertDaysToMilliseconds = (days) => {
  */
 const convertMillisToSeconds = (milliseconds) => {
   if (typeof milliseconds !== "number") throw Error("Not a number");
-  return milliseconds / 1000;
+  return Math.round(milliseconds / 1000);
 };
 /**
  * Returns time in seconds of timestamp after given duration
@@ -83,6 +83,14 @@ const convertTimestampToUTCStartOrEndOfDay = (timestamp, isEndOfDay = false) => 
   return currTime.getTime();
 };
 
+/**
+ * Returns Current Epoch time stamp
+ * @returns {EpochTimeStamp}: Current Epoch time
+ */
+const getCurrentEpochTime = () => {
+  return Math.round(Date.now() / 1000);
+};
+
 module.exports = {
   convertDaysToMilliseconds,
   convertHoursToMilliseconds,
@@ -90,5 +98,6 @@ module.exports = {
   getTimeInSecondAfter,
   getBeforeHourTime,
   convertTimestampToUTCStartOrEndOfDay,
+  getCurrentEpochTime,
   convertMillisToSeconds,
 };

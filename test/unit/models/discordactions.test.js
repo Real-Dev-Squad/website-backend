@@ -682,7 +682,7 @@ describe("discordactions", function () {
       });
       expect(result).to.be.an("object");
       expect(result).to.be.deep.equal({
-        tasks: 0,
+        tasks: 4,
         missedUpdatesTasks: 0,
         usersToAddRole: [],
       });
@@ -716,7 +716,7 @@ describe("discordactions", function () {
       });
       expect(result).to.be.an("object");
       expect(result).to.be.deep.equal({
-        tasks: 1,
+        tasks: 5,
         missedUpdatesTasks: 0,
         usersToAddRole: [],
       });

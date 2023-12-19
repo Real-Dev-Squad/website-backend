@@ -6,6 +6,7 @@ module.exports = {
   discordUnverifiedRoleId: "1120875993771544687",
   discordDeveloperRoleId: "1121445071213056071",
   discordMavenRoleId: "1152361736456896586",
+  discordMissedUpdatesRoleId: "1184201657404362772",
   enableFileLogs: false,
   enableConsoleLogs: true,
 
