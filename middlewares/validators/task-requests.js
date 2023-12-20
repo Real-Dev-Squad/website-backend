@@ -4,7 +4,7 @@ const { RQLQueryParser } = require("../../utils/RQLParser");
 const githubOrg = config.get("githubApi.org");
 const githubBaseUrl = config.get("githubApi.baseUrl");
 const githubIssuerUrlPattern = new RegExp(`^${githubBaseUrl}/repos/${githubOrg}/.+/issues/\\d+$`);
-const githubIssueHtmlUrlPattern = new RegExp(`^${GITHUB_URL}/${githubOrg}/.+/issues/\\d+$`);
+const githubIssueHtmlUrlPattern = new RegExp(`^${GITHUB_URL}/${githubOrg}/.+/issues/\\d+$`); // Example: https://github.com/Real-Dev-Squad/website-status/issues/1050
 const { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE } = require("../../constants/taskRequests");
 
 const postTaskRequests = async (req, res, next) => {
@@ -14,7 +14,7 @@ const postTaskRequests = async (req, res, next) => {
     .keys({
       taskId: joi.string().required(),
       externalIssueUrl: joi.string().regex(githubIssuerUrlPattern).optional(),
-      externalIssueHtmlUrl: joi.string().regex(githubIssueHtmlUrlPattern).optional(),
+      externalIssueHtmlUrl: joi.string().regex(githubIssueHtmlUrlPattern),
       requestType: joi.string().valid(TASK_REQUEST_TYPE.ASSIGNMENT).required(),
       userId: joi.string().required(),
       proposedStartDate: joi.number().required(),
