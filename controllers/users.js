@@ -376,17 +376,27 @@ const updateSelf = async (req, res) => {
 
     if (req.body.username) {
       if (!user.incompleteUserDetails) {
+        await userQuery.setIncompleteUserDetails(userId);
         return res.boom.forbidden("Cannot update username again");
       }
-      await userQuery.setIncompleteUserDetails(userId);
     }
 
     if (req.body.roles) {
-      if (user && (user.roles.in_discord || user.roles.developer)) {
+      if (user && user.roles.in_discord) {
         return res.boom.forbidden("Cannot update roles");
       }
-    }
 
+      await userQuery.addOrUpdate(
+        { roles: req.body.roles, ...(!req.body.roles.developer && { roles: { developer: false } }) },
+        userId
+      );
+    } else if (user.incompleteUserDetails) {
+      await userQuery.addOrUpdate(
+        { roles: { developer: true, maven: false, designer: false, productmanager: false } },
+        userId
+      );
+      await userQuery.setIncompleteUserDetails(userId);
+    }
     const updatedUser = await userQuery.addOrUpdate(req.body, userId);
 
     if (!updatedUser.isNewUser) {
