@@ -31,7 +31,7 @@ let applicationId3: string;
 let applicationId4: string;
 let applicationId5: string;
 
-describe.only("Application", function () {
+describe("Application", function () {
   before(async function () {
     const userIdPromises = [addUser(appOwner), addUser(superUser), addUser(secondUser)];
     const [userId1, userId2, userId3] = await Promise.all(userIdPromises);

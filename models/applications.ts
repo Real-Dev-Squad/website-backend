@@ -1,8 +1,8 @@
 import { application } from "../types/application";
-import { chunks } from "../utils/array";
 const firestore = require("../utils/firestore");
 const ApplicationsModel = firestore.collection("applicants");
 const { DOCUMENT_WRITE_SIZE: FIRESTORE_BATCH_OPERATIONS_LIMIT } = require("../constants/constants");
+import { chunks } from "../utils/array";
 
 const batchUpdateApplications = async () => {
   try {
@@ -29,6 +29,7 @@ const batchUpdateApplications = async () => {
 
     const multipleApplicationUpdateBatch = [];
     const chunkedApplication = chunks(updatedApplications, FIRESTORE_BATCH_OPERATIONS_LIMIT);
+    console.log(chunkedApplication, "applications");
 
     chunkedApplication.forEach(async (applications) => {
       const batch = firestore.batch();
@@ -61,10 +62,13 @@ const getAllApplications = async (limit: number, lastDocId?: string) => {
       lastDoc = await ApplicationsModel.doc(lastDocId).get();
     }
 
-    const applications = await ApplicationsModel.orderBy("createdAt", "desc")
-      .startAfter(lastDoc ?? "")
-      .limit(limit)
-      .get();
+    let dbQuery = ApplicationsModel.orderBy("createdAt", "desc");
+
+    if (lastDoc) {
+      dbQuery = dbQuery.startAfter(lastDoc);
+    }
+
+    const applications = await dbQuery.limit(limit).get();
 
     const lastApplicationDoc = applications.docs[applications.docs.length - 1];
 
@@ -97,8 +101,9 @@ const getApplicationById = async (applicationId: string) => {
   }
 };
 
-const getApplicationsBasedOnStatus = async (status: string, limit: number, lastDoc?: string, userId?: string) => {
+const getApplicationsBasedOnStatus = async (status: string, limit: number, lastDocId?: string, userId?: string) => {
   try {
+    let lastDoc = null;
     const applications = [];
     let dbQuery = ApplicationsModel.where("status", "==", status);
 
@@ -106,11 +111,17 @@ const getApplicationsBasedOnStatus = async (status: string, limit: number, lastD
       dbQuery = dbQuery.where("userId", "==", userId);
     }
 
-    const applicationsBasedOnStatus = await dbQuery
-      .orderBy("createdAt", "desc")
-      .startAfter(lastDoc ?? "")
-      .limit(limit)
-      .get();
+    if (lastDocId) {
+      lastDoc = await ApplicationsModel.doc(lastDocId).get();
+    }
+
+    dbQuery = dbQuery.orderBy("createdAt", "desc");
+
+    if (lastDoc) {
+      dbQuery = dbQuery.startAfter(lastDoc);
+    }
+
+    const applicationsBasedOnStatus = await dbQuery.limit(limit).get();
 
     const lastApplicationDoc = applicationsBasedOnStatus.docs[applicationsBasedOnStatus.docs.length - 1];
 

@@ -1,5 +1,7 @@
-const getUserApplicationObject = (rawData: any, userId: string, createdAt: string) => {
-  return {
+import { applicationPayload, application } from "../types/application";
+
+const getUserApplicationObject = (rawData: applicationPayload, userId: string, createdAt: string): application => {
+  const data = {
     userId,
     biodata: {
       firstName: rawData.firstName,
@@ -25,6 +27,7 @@ const getUserApplicationObject = (rawData: any, userId: string, createdAt: strin
     status: "pending",
     createdAt,
   };
+  return data;
 };
 
 module.exports = { getUserApplicationObject }
