@@ -1,5 +1,9 @@
 const joi = require("joi");
-const { TASK_REQUEST_TYPE } = require("../../constants/taskRequests");
+const { RQLQueryParser } = require("../../utils/RQLParser");
+const githubOrg = config.get("githubApi.org");
+const githubBaseUrl = config.get("githubApi.baseUrl");
+const githubIssuerUrlPattern = new RegExp(`^${githubBaseUrl}/repos/${githubOrg}/.+/issues/\\d+$`);
+const { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE } = require("../../constants/taskRequests");
 
 const postTaskRequests = async (req, res, next) => {
   const taskAssignmentSchema = joi
@@ -7,7 +11,7 @@ const postTaskRequests = async (req, res, next) => {
     .strict()
     .keys({
       taskId: joi.string().required(),
-      externalIssueUrl: joi.string().optional(),
+      externalIssueUrl: joi.string().regex(githubIssuerUrlPattern).optional(),
       requestType: joi.string().valid(TASK_REQUEST_TYPE.ASSIGNMENT).required(),
       userId: joi.string().required(),
       proposedStartDate: joi.number().required(),
@@ -19,7 +23,7 @@ const postTaskRequests = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      externalIssueUrl: joi.string().required(),
+      externalIssueUrl: joi.string().regex(githubIssuerUrlPattern).required(),
       requestType: joi.string().valid(TASK_REQUEST_TYPE.CREATION).required(),
       userId: joi.string().required(),
       proposedStartDate: joi.number().required(),
@@ -37,6 +41,61 @@ const postTaskRequests = async (req, res, next) => {
   }
 };
 
+const getTaskRequests = async (req, res, next) => {
+  const queryParamsSchema = joi
+    .object()
+    .keys({
+      dev: joi.bool().optional().sensitive(),
+      prev: joi.string().optional(),
+      next: joi.string().optional(),
+      size: joi.number().integer().positive().min(1).max(100).optional(),
+      q: joi.string().optional(),
+    })
+    .without("prev", "next")
+    .with("prev", "size")
+    .with("next", "size");
+
+  const filtersSchema = joi.object().keys({
+    status: joi
+      .array()
+      .items(
+        joi.object().keys({
+          value: joi.string().valid(...Object.values(TASK_REQUEST_STATUS).map((value) => value.toLowerCase())),
+          operator: joi.string().optional(),
+        })
+      )
+      .optional(),
+    "request-type": joi
+      .array()
+      .items(
+        joi.object().keys({
+          value: joi.string().valid(...Object.values(TASK_REQUEST_TYPE).map((value) => value.toLowerCase())),
+          operator: joi.string().optional(),
+        })
+      )
+      .optional(),
+  });
+
+  const sortSchema = joi.object().keys({
+    created: joi.string().valid("asc", "desc").optional(),
+    requestors: joi.string().valid("asc", "desc").optional(),
+  });
+  try {
+    const { q: queryString } = req.query;
+    const rqlQueryParser = new RQLQueryParser(queryString);
+
+    await Promise.all([
+      filtersSchema.validateAsync(rqlQueryParser.getFilterQueries()),
+      sortSchema.validateAsync(rqlQueryParser.getSortQueries()),
+      queryParamsSchema.validateAsync(req.query),
+    ]);
+    next();
+  } catch (error) {
+    logger.error(`Error validating get task requests payload : ${error}`);
+    res.boom.badRequest(error?.details?.[0]?.message || error?.message);
+  }
+};
 module.exports = {
+  getTaskRequests,
   postTaskRequests,
 };

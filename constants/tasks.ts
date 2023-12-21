@@ -30,13 +30,31 @@ const TASK_STATUS_OLD = {
   OLD_PENDING: "pending",
   OLD_COMPLETED: "completed",
 };
+const DEFAULT_TASK_PRIORITY = "TBD";
 
 const MAPPED_TASK_STATUS = {
   ...TASK_STATUS,
   UNASSIGNED: "AVAILABLE",
-  DONE: "COMPLETED",
 };
 
+const COMPLETED_TASK_STATUS = {
+  VERIFIED: "VERIFIED",
+  DONE: "DONE",
+  COMPLETED: "COMPLETED",
+};
 const TASK_SIZE = 5;
 
-module.exports = { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS, TASK_SIZE };
+const tasksUsersStatus = {
+  MISSED_UPDATES: "missed-updates",
+};
+
+module.exports = {
+  TASK_TYPE,
+  TASK_STATUS,
+  TASK_STATUS_OLD,
+  MAPPED_TASK_STATUS,
+  TASK_SIZE,
+  DEFAULT_TASK_PRIORITY,
+  COMPLETED_TASK_STATUS,
+  tasksUsersStatus,
+};

@@ -2,11 +2,14 @@ const { NotFound } = require("http-errors");
 const { fetchTask } = require("../models/tasks");
 const { fetchUser } = require("../models/users");
 const fireStore = require("../utils/firestore");
+const progressesModel = fireStore.collection("progresses");
+
 const {
-  RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
+  PROGRESSES_RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
   MILLISECONDS_IN_DAY,
   PROGRESS_VALID_SORT_FIELDS,
 } = require("../constants/progresses");
+const { convertTimestampToUTCStartOrEndOfDay } = require("./time");
 const progressesCollection = fireStore.collection("progresses");
 
 /**
@@ -211,6 +214,14 @@ const buildQueryToSearchProgressByDay = (pathParams) => {
   return query;
 };
 
+const buildProgressQueryForMissedUpdates = (taskId, startTimestamp, endTimestamp) => {
+  return progressesModel
+    .where("type", "==", "task")
+    .where("taskId", "==", taskId)
+    .where("date", ">=", convertTimestampToUTCStartOrEndOfDay(startTimestamp))
+    .where("date", "<=", convertTimestampToUTCStartOrEndOfDay(endTimestamp, true))
+    .count();
+};
 module.exports = {
   getProgressDateTimestamp,
   buildQueryForPostingProgress,
@@ -222,4 +233,5 @@ module.exports = {
   buildRangeProgressQuery,
   getProgressRecords,
   buildQueryToSearchProgressByDay,
+  buildProgressQueryForMissedUpdates,
 };

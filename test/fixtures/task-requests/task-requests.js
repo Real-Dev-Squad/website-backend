@@ -1,7 +1,7 @@
 const { TASK_REQUEST_TYPE } = require("../../../constants/taskRequests");
 const validAssignmentRequest = {
   taskId: "1234",
-  externalIssueUrl: "/repos/Real-Dev-Squad/website-status/911",
+  externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-status/issues/1564672",
   requestType: "ASSIGNMENT",
   userId: "7890",
   proposedDeadline: 1243455234,
@@ -13,7 +13,7 @@ const { proposedDeadline: tarProposedDeadline, ...assignmentReqWithoutProposedDe
 const { externalIssueUrl: tarExternalIssueUrl, ...assignmentReqWithoutExtIssueId } = validAssignmentRequest;
 const assignmentReqWithDescription = { ...validAssignmentRequest, description: "something something" };
 const validCreationRequest = {
-  externalIssueUrl: "/repos/Real-Dev-Squad/website-status/911",
+  externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-status/issues/1564672",
   requestType: "CREATION",
   userId: "7890",
   proposedDeadline: 1243455234,
@@ -34,7 +34,6 @@ const taskRequestData = {
   description: "Task description",
   requestType: TASK_REQUEST_TYPE.CREATION,
   externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-backend/issues/1599",
-  taskId: "task123",
 };
 const existingTaskRequest = {
   requestors: ["user123"],
@@ -57,7 +56,18 @@ const existingTaskRequest = {
   lastModifiedBy: "testUser",
   lastModifiedAt: 1697452229369,
 };
+const existingOldTaskRequest = {
+  requestors: ["user123"],
+  status: "PENDING",
+  taskId: "task123",
+};
+const existingOldTaskRequestWithMultipleUsers = {
+  requestors: ["user123", "user456"],
+  status: "PENDING",
+  taskId: "task456",
+};
 module.exports = {
+  existingOldTaskRequest,
   taskRequestData,
   existingTaskRequest,
   validAssignmentRequest,
@@ -73,4 +83,5 @@ module.exports = {
   creationReqWithoutExtIssueId,
   creationReqWithDescription,
   invalidRequest,
+  existingOldTaskRequestWithMultipleUsers,
 };
