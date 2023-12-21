@@ -4,7 +4,7 @@ const userModel = firestore.collection("users");
 const { months, discordNicknameLength } = require("../constants/users");
 const dataAccessLayer = require("../services/dataAccessLayer");
 const discordService = require("../services/discordService");
-
+const ROLES = require("../constants/roles");
 const addUserToDBForTest = async (userData) => {
   await userModel.add(userData);
 };
@@ -271,10 +271,15 @@ const generateOOONickname = (username = "", from, until) => {
  */
 const updateNickname = async (userId, status = {}) => {
   try {
-    const { user: { discordId, username } = {} } = await dataAccessLayer.retrieveUsers({ id: userId });
-    if (!discordId || !username) {
-      throw new Error("Username or discordId unavailable");
+    const {
+      user: { discordId, username, roles = {} },
+      discordJoinedAt = {},
+    } = await dataAccessLayer.retrieveUsers({ id: userId });
+
+    if (!discordId || !username || !discordJoinedAt || roles[ROLES.ARCHIVED]) {
+      throw new Error("User details unavailable");
     }
+
     try {
       const nickname = generateOOONickname(username, status.from, status.until);
 
