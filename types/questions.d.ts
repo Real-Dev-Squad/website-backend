@@ -5,7 +5,7 @@ export type QuestionBody = {
   question: string;
   createdBy: string;
   eventId: string;
-  maxCharacters: number;
+  maxCharacters?: number | null;
 };
 
 export type Question = {
@@ -13,6 +13,6 @@ export type Question = {
   question: string;
   created_by: string;
   event_id: string;
-  max_characters: string;
+  max_characters: string | null;
   created_at: admin.firestore.Timestamp;
 };
