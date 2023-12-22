@@ -425,7 +425,7 @@ const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
           github: {
             issue: {
               url: taskRequestData.externalIssueUrl,
-              htmlUrl: taskRequestData.externalIssueUrl,
+              html_url: taskRequestData.externalIssueUrl,
             },
           },
         };
