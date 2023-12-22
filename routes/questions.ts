@@ -1,6 +1,6 @@
-const express = require("express");
-const authorizeRoles = require("../middlewares/authorizeRoles");
+import express from "express";
 const router = express.Router();
+const authorizeRoles = require("../middlewares/authorizeRoles");
 const { SUPERUSER } = require("../constants/roles");
 const authenticate = require("../middlewares/authenticate");
 const questions = require("../controllers/questions");
