@@ -1,7 +1,13 @@
 const Sinon = require("sinon");
-const { getTasksValidator, createTask } = require("../../../middlewares/validators/tasks");
+const {
+  getTasksValidator,
+  createTask,
+  updateSelfTask,
+  getUsersValidator,
+  updateTask: updateTaskValidator,
+} = require("../../../middlewares/validators/tasks");
 const { expect } = require("chai");
-const { TASK_STATUS } = require("../../../constants/tasks");
+const { TASK_STATUS, tasksUsersStatus } = require("../../../constants/tasks");
 
 describe("getTasks validator", function () {
   it("should pass the request when no values for query params dev or status is passed", async function () {
@@ -519,5 +525,204 @@ describe("getTasks validator", function () {
       expect(error);
     }
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+
+  it("should call nextMiddlewareSpy for updateTaskValidator if startedOn is null", async function () {
+    const req = {
+      body: {
+        startedOn: null,
+        endsOn: new Date().getTime(),
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
+
+  it("should call nextMiddlewareSpy for updateTaskValidator if endsOn is null", async function () {
+    const req = {
+      body: {
+        startedOn: new Date().getTime(),
+        endsOn: null,
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
+
+  it("should call nextMiddlewareSpy for updateTaskValidator if both startedOn and endsOn are null", async function () {
+    const req = {
+      body: {
+        startedOn: null,
+        endsOn: null,
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
+
+  it("should call nextMiddlewareSpy for updateTaskValidator if both startedOn and endsOn are valid number", async function () {
+    const req = {
+      body: {
+        startedOn: new Date("2023-11-15").getTime(),
+        endsOn: new Date("2023-11-18").getTime(),
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+  });
+
+  it("should not call nextMiddlewareSpy for updateTaskValidator if startedOn is not null or a number", async function () {
+    const req = {
+      body: {
+        startedOn: "December 6 2023",
+        endsOn: new Date().getTime(),
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+
+  it("should not call nextMiddlewareSpy for updateTaskValidator if endsOn is not null or a number", async function () {
+    const req = {
+      body: {
+        startedOn: new Date().getTime(),
+        endsOn: true,
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+
+  it("should not call nextMiddlewareSpy for updateTaskValidator if both startedOn and endsOn is not null or a number", async function () {
+    const req = {
+      body: {
+        startedOn: "December 6 2023",
+        endsOn: true,
+      },
+    };
+    const res = { boom: { badRequest: Sinon.spy() } };
+    const nextMiddlewareSpy = Sinon.spy();
+    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+  });
+  describe("getUsersValidator | Validator", function () {
+    it("should pass the request when valid query parameters are provided", async function () {
+      const req = {
+        query: {
+          size: 10,
+          cursor: "someCursor",
+          q: `status:${tasksUsersStatus.MISSED_UPDATES} -days-count:2 -date:123423432 -weekday:sun`,
+        },
+      };
+      const res = {};
+      const nextMiddlewareSpy = Sinon.spy();
+      await getUsersValidator(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+    });
+    it("should pass the request when multiple valid query parameters are provided", async function () {
+      const req = {
+        query: {
+          size: 10,
+          cursor: "someCursor",
+          q: `status:${tasksUsersStatus.MISSED_UPDATES} -days-count:2 -date:123423432 -weekday:sun -weekday:mon`,
+        },
+      };
+      const res = {};
+      const nextMiddlewareSpy = Sinon.spy();
+      await getUsersValidator(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+    });
+    it("should pass the request when only required query parameters are provided", async function () {
+      const req = {
+        query: {
+          q: `status:${tasksUsersStatus.MISSED_UPDATES}`,
+        },
+      };
+      const res = {};
+      const nextMiddlewareSpy = Sinon.spy();
+      await getUsersValidator(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(1);
+    });
+
+    it("should not pass validation when invalid query parameters are provided", async function () {
+      const req = {
+        query: {
+          invalidParam: "someValue",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: Sinon.spy(),
+        },
+      };
+      const nextMiddlewareSpy = Sinon.spy();
+      await getUsersValidator(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+      expect(res.boom.badRequest.callCount).to.be.equal(1);
+    });
+
+    it("should not pass validation when required parameters are missing", async function () {
+      const req = {
+        query: {
+          size: "someQuery",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: Sinon.spy(),
+        },
+      };
+      const nextMiddlewareSpy = Sinon.spy();
+      await getUsersValidator(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+      expect(res.boom.badRequest.callCount).to.be.equal(1);
+    });
+
+    it("should not pass validation when invalid filter parameters are provided", async function () {
+      const req = {
+        query: {
+          q: "date:invalidOperator:2023-01-01",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: Sinon.spy(),
+        },
+      };
+      const nextMiddlewareSpy = Sinon.spy();
+      await getUsersValidator(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+      expect(res.boom.badRequest.callCount).to.be.equal(1);
+    });
+  });
+
+  describe("updateSelfTask Validator", function () {
+    it("should not pass the request when status is AVAILABLE", async function () {
+      const req = {
+        body: {
+          status: "AVAILABLE",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: Sinon.spy(),
+        },
+      };
+      const nextMiddlewareSpy = Sinon.spy();
+      await updateSelfTask(req, res, nextMiddlewareSpy);
+      expect(nextMiddlewareSpy.callCount).to.be.equal(0);
+    });
   });
 });

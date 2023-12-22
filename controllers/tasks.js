@@ -1,5 +1,5 @@
 const tasks = require("../models/tasks");
-const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
+const { TASK_STATUS, TASK_STATUS_OLD, tasksUsersStatus } = require("../constants/tasks");
 const { addLog } = require("../models/logs");
 const { USER_STATUS } = require("../constants/users");
 const { addOrUpdate, getRdsUserInfoByGitHubUsername } = require("../models/users");
@@ -12,6 +12,12 @@ const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 const dataAccess = require("../services/dataAccessLayer");
 const { parseSearchQuery } = require("../utils/tasks");
+const { addTaskCreatedAtAndUpdatedAtFields } = require("../services/tasks");
+const { RQLQueryParser } = require("../utils/RQLParser");
+const { getMissedProgressUpdatesUsers } = require("../models/discordactions");
+const { daysOfWeek } = require("../constants/constants");
+const { logType } = require("../constants/logs");
+
 /**
  * Creates new task
  *
@@ -24,9 +30,12 @@ const addNewTask = async (req, res) => {
     const { id: createdBy } = req.userData;
     const dependsOn = req.body.dependsOn;
     let userStatusUpdate;
+    const timeStamp = Math.round(Date.now() / 1000);
     const body = {
       ...req.body,
       createdBy,
+      createdAt: timeStamp,
+      updatedAt: timeStamp,
     };
     delete body.dependsOn;
     const { taskId, taskDetails } = await tasks.updateTask(body);
@@ -270,7 +279,7 @@ const updateTask = async (req, res) => {
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
     }
-    const requestData = { ...req.body };
+    const requestData = { ...req.body, updatedAt: Math.round(Date.now() / 1000) };
     if (requestData?.assignee) {
       const user = await dataAccess.retrieveUsers({ username: requestData.assignee });
       if (!user.userExists) {
@@ -279,6 +288,18 @@ const updateTask = async (req, res) => {
       if (!requestData?.startedOn) {
         requestData.startedOn = Math.round(new Date().getTime() / 1000);
       }
+    }
+
+    // currently the task is assigned to a user and the superuser is trying to un assign this task from them.
+    if (
+      requestData?.status === TASK_STATUS.AVAILABLE &&
+      task.taskData.status !== TASK_STATUS.AVAILABLE &&
+      Object.keys(req.body).length === 1
+    ) {
+      requestData.assignee = null;
+      requestData.percentCompleted = 0;
+      requestData.startedOn = null;
+      requestData.endsOn = null;
     }
 
     await tasks.updateTask(requestData, req.params.id);
@@ -310,6 +331,7 @@ const updateTask = async (req, res) => {
  */
 const updateTaskStatus = async (req, res, next) => {
   try {
+    req.body.updatedAt = Math.round(new Date().getTime() / 1000);
     let userStatusUpdate;
     const taskId = req.params.id;
     const { userStatusFlag } = req.query;
@@ -443,6 +465,64 @@ const assignTask = async (req, res) => {
   }
 };
 
+const updateStatus = async (req, res) => {
+  try {
+    const { action, field } = req.body;
+    if (action === "ADD" && field === "CREATED_AT+UPDATED_AT") {
+      const updateStats = await addTaskCreatedAtAndUpdatedAtFields();
+      return res.json(updateStats);
+    }
+    const response = await tasks.updateTaskStatus();
+    return res.status(200).json(response);
+  } catch (error) {
+    logger.error("Error in migration scripts", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+const getUsersHandler = async (req, res) => {
+  try {
+    const { size, cursor, q: queryString } = req.query;
+    const rqlParser = new RQLQueryParser(queryString);
+    const { "days-count": daysGap, weekday, date, status } = rqlParser.getFilterQueries();
+    if (!!status && status.length === 1 && status[0].value === tasksUsersStatus.MISSED_UPDATES) {
+      if (daysGap && daysGap > 1) {
+        return res.boom.badRequest("number of days gap provided cannot be greater than 1");
+      }
+      const response = await getMissedProgressUpdatesUsers({
+        cursor: cursor,
+        size: size && Number.parseInt(size),
+        excludedDates: date?.map((date) => Number.parseInt(date.value)),
+        excludedDays: weekday?.map((day) => daysOfWeek[day.value]),
+        dateGap: !!daysGap && daysGap.length === 1 ? Number.parseInt(daysGap[0].value) : null,
+      });
+
+      if (response.error) {
+        return res.boom.badRequest(response.message);
+      }
+      return res
+        .status(200)
+        .json({ message: "Discord details of users with status missed updates fetched successfully", data: response });
+    } else {
+      return res.boom.badRequest("Unknown type and query");
+    }
+  } catch (error) {
+    const taskRequestLog = {
+      type: logType.TASKS_MISSED_UPDATES_ERRORS,
+      meta: {
+        lastModifiedAt: Date.now(),
+      },
+      body: {
+        request: req.query,
+        error: error.toString(),
+      },
+    };
+    await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
+    logger.error("Error in fetching users details of tasks", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   addNewTask,
   fetchTasks,
@@ -453,4 +533,6 @@ module.exports = {
   updateTaskStatus,
   overdueTasks,
   assignTask,
+  updateStatus,
+  getUsersHandler,
 };
