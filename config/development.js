@@ -10,6 +10,7 @@ module.exports = {
   port: port,
   enableFileLogs: false,
   enableConsoleLogs: true,
+  discordNewComersChannelId: "709080951824842783",
 
   services: {
     rdsApi: {
@@ -24,7 +25,7 @@ module.exports = {
     },
 
     goalAPI: {
-      baseUrl: "https://backend-goals-production.up.railway.app",
+      baseUrl: "https://staging-goals-api.realdevsquad.com",
       secretKey: "123456789",
     },
   },
