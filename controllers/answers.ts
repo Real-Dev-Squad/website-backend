@@ -14,16 +14,15 @@ let clients = [];
 async function sendAnswerToAll(newAnswer: Answer, res: CustomResponse, method: "POST" | "PATCH") {
   const questionId: string = newAnswer.question_id;
 
+  const allAnswers = await answerQuery.getAnswers({ questionId });
   if (method === "POST") {
-    const answers = await answerQuery.getAnswers({ questionId, status: ANSWER_STATUS.PENDING });
     clients.forEach((client) => {
-      console.log(answers);
-      if (client.status === ANSWER_STATUS.PENDING) {
-        client.res.write(`data: ${JSON.stringify(answers)}\n\n`);
+      if (client.status !== ANSWER_STATUS.APPROVED) {
+        client.res.write(`data: ${JSON.stringify(allAnswers)}\n\n`);
       }
     });
     return res.status(201).json({
-      message: "Answer created and sent successfully to connected peers",
+      message: "Answer created and sent for moderation",
       data: newAnswer,
     });
   }
@@ -33,6 +32,8 @@ async function sendAnswerToAll(newAnswer: Answer, res: CustomResponse, method: "
     clients.forEach((client) => {
       if (client.status === ANSWER_STATUS.APPROVED) {
         client.res.write(`data: ${JSON.stringify(answers)}\n\n`);
+      } else {
+        client.res.write(`data: ${JSON.stringify(allAnswers)}\n\n`);
       }
     });
 
@@ -78,7 +79,6 @@ const getAnswers = async (req: CustomRequest, res: CustomResponse) => {
     res.write(data);
 
     const clientId = crypto.randomUUID({ disableEntropyCache: true });
-    console.log({ req: req });
     const newClient = {
       id: clientId,
       res,
