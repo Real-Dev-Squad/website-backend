@@ -48,6 +48,7 @@ describe("Task requests | models", function () {
       expect(addedTaskRequest.taskTitle).to.equal(requestData.taskTitle);
       expect(addedTaskRequest.taskId).to.equal(requestData.taskId);
       expect(addedTaskRequest.externalIssueUrl).to.equal(requestData.externalIssueUrl);
+      expect(addedTaskRequest.externalIssueHtmlUrl).to.equal(requestData.externalIssueHtmlUrl);
       expect(addedTaskRequest.users).to.deep.equal([
         {
           userId: requestData.userId,
@@ -78,6 +79,7 @@ describe("Task requests | models", function () {
       expect(addedTaskRequest.status).to.equal(TASK_REQUEST_STATUS.PENDING);
       expect(addedTaskRequest.taskTitle).to.not.be.equal(undefined);
       expect(addedTaskRequest.externalIssueUrl).to.equal(requestData.externalIssueUrl);
+      expect(addedTaskRequest.externalIssueHtmlUrl).to.equal(requestData.externalIssueHtmlUrl);
       expect(addedTaskRequest.users).to.deep.equal([
         ...mockData.existingTaskRequest.users,
         {
@@ -111,6 +113,7 @@ describe("Task requests | models", function () {
       expect(addedTaskRequest.taskTitle).to.equal(requestData.taskTitle);
       expect(addedTaskRequest.taskId).to.equal(requestData.taskId);
       expect(addedTaskRequest.externalIssueUrl).to.equal(requestData.externalIssueUrl);
+      expect(addedTaskRequest.externalIssueHtmlUrl).to.equal(requestData.externalIssueHtmlUrl);
       expect(addedTaskRequest.users).to.deep.equal([
         {
           userId: requestData.userId,
@@ -147,6 +150,7 @@ describe("Task requests | models", function () {
       expect(addedTaskRequest.taskTitle).to.not.be.equal(undefined);
       expect(addedTaskRequest.taskId).to.equal(requestData.taskId);
       expect(addedTaskRequest.externalIssueUrl).to.equal(requestData.externalIssueUrl);
+      expect(addedTaskRequest.externalIssueHtmlUrl).to.equal(requestData.externalIssueHtmlUrl);
       expect(addedTaskRequest.users).to.deep.equal([
         ...mockData.existingTaskRequest.users,
         {
