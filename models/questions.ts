@@ -1,11 +1,14 @@
 /* eslint-disable camelcase */
 const admin = require("firebase-admin");
+
+import { Question, QuestionBody } from "../types/questions";
+
 const firestore = require("../utils/firestore");
 const logger = require("../utils/logger");
 
 const questionModel = firestore.collection("questions");
 
-const createQuestion = async (questionData) => {
+const createQuestion = async (questionData: QuestionBody): Promise<Question> => {
   try {
     const { eventId: event_id, createdBy: created_by, question, maxCharacters: max_characters } = questionData;
     const questionRef = questionModel.doc(questionData.id);
@@ -30,20 +33,4 @@ const createQuestion = async (questionData) => {
   }
 };
 
-const updateQuestion = async (id, fieldsToUpdate) => {
-  try {
-    const questionRef = questionModel.doc(id);
-
-    await questionRef.update({ ...fieldsToUpdate });
-
-    const questionSnapshot = await questionRef.get();
-    const question = questionSnapshot.data();
-
-    return { id: questionSnapshot.id, ...question };
-  } catch (error) {
-    logger.error(`Some error occured while updating question ${error}`);
-    throw error;
-  }
-};
-
-module.exports = { createQuestion, updateQuestion };
+module.exports = { createQuestion };
