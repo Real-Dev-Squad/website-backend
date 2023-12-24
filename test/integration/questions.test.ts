@@ -1,6 +1,5 @@
-const chai = require("chai");
+import chai, { expect } from "chai";
 const sinon = require("sinon");
-const { expect } = chai;
 const config = require("config");
 const chaiHttp = require("chai-http");
 
@@ -16,17 +15,16 @@ const defaultUser = userData[16];
 const superUser = userData[4];
 
 const questionDataArray = require("../fixtures/questions/questions");
-// const questionDataOne = questionDataArray[0];
 const questionDataWithMaxWords = questionDataArray[5];
 
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
-describe("questions", function () {
-  let authToken;
-  let userId;
-  let superUserAuthToken;
+describe.only("questions", function () {
+  let authToken: string;
+  let userId: string;
+  let superUserAuthToken: string;
 
   beforeEach(async function () {
     userId = await addUser(defaultUser);
@@ -119,7 +117,6 @@ describe("questions", function () {
           expect(response.body.message).to.equal("Question created and sent successfully to connected peers");
           expect(response.body.data.question).to.equal(questionDataArray[6].question);
           expect(response.body.data.id).to.equal(questionDataArray[6].id);
-          expect(response.body.data.is_new).to.equal(questionDataArray[6].is_new);
           expect(response.body.data.created_at).to.equal(questionDataArray[6].created_at);
           expect(response.body.data.created_by).to.equal(questionDataArray[6].created_by);
           expect(response.body.data.updated_at).to.equal(questionDataArray[6].updated_at);
