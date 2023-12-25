@@ -1,11 +1,6 @@
-// const chai = require("chai");
-// const { expect } = chai;
-
 import { expect } from "chai";
 const sinon = require("sinon");
 import { Answer, AnswerFieldsToUpdate } from "../../../typeDefinitions/answers";
-const firestore = require("../../../utils/firestore");
-const answerModel = firestore.collection("answers");
 
 const cleanDb = require("../../utils/cleanDb");
 const answerQuery = require("../../../models/answers");
