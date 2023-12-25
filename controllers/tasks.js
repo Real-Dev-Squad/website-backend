@@ -484,11 +484,17 @@ const getUsersHandler = async (req, res) => {
     const { size, cursor, q: queryString } = req.query;
     const rqlParser = new RQLQueryParser(queryString);
     const filterQueries = rqlParser.getFilterQueries();
-    const { dateGap, weekdayList, dateList, status } = transformTasksUsersQuery({ ...filterQueries, size });
+    const {
+      dateGap,
+      weekdayList,
+      dateList,
+      status,
+      size: transformedSize,
+    } = transformTasksUsersQuery({ ...filterQueries, size });
     if (status === tasksUsersStatus.MISSED_UPDATES) {
       const response = await getMissedProgressUpdatesUsers({
         cursor: cursor,
-        size: size,
+        size: transformedSize,
         excludedDates: dateList,
         excludedDays: weekdayList,
         dateGap: dateGap,
