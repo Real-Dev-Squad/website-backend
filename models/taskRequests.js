@@ -12,6 +12,7 @@ const { Operators } = require("../typeDefinitions/rqlParser");
 const { RQLQueryParser } = require("../utils/RQLParser");
 const firestore = require("../utils/firestore");
 const { buildTaskRequests, generateLink, transformTaskRequests } = require("../utils/task-requests");
+const { getCurrentEpochTime } = require("../utils/time");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const tasksModel = require("./tasks");
 const userModel = require("./users");
@@ -198,6 +199,7 @@ const fetchTaskRequestById = async (taskRequestId) => {
  * @param {string} data.taskTitle - The title of the task.
  * @param {string} data.taskId - The ID of the task (optional).
  * @param {string} data.externalIssueUrl - The external issue URL (optional).
+ * @param {string} data.externalIssueHtmlUrl - The external issue HTML URL (optional).
  * @param {string} data.requestType - The type of the task request (CREATION | ASSIGNMENT).
  * @param {string} authorUserId - The ID of the authenticated user creating the request.
  * @returns {Promise<{
@@ -278,6 +280,7 @@ const createRequest = async (data, authorUserId) => {
         taskTitle: data.taskTitle,
         taskId: data.taskId,
         externalIssueUrl: data.externalIssueUrl,
+        externalIssueHtmlUrl: data.externalIssueHtmlUrl,
         requestType: data.requestType,
         users: [userRequest],
         usersCount: 1,
@@ -407,6 +410,7 @@ const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
         };
         // End of TODO
         const updateTaskRequestPromise = transaction.update(taskRequestDocRef, updatedTaskRequest);
+        const currentEpochTime = getCurrentEpochTime();
         const newTaskRequestData = {
           assignee: user.id,
           title: taskRequestData.taskTitle,
@@ -414,11 +418,14 @@ const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
           percentCompleted: 0,
           status: TASK_STATUS.ASSIGNED,
           priority: DEFAULT_TASK_PRIORITY,
+          createdAt: currentEpochTime,
+          updatedAt: currentEpochTime,
           startedOn: userRequestData.proposedStartDate / 1000,
           endsOn: userRequestData.proposedDeadline / 1000,
           github: {
             issue: {
               url: taskRequestData.externalIssueUrl,
+              html_url: taskRequestData.externalIssueHtmlUrl,
             },
           },
         };
@@ -452,7 +459,7 @@ const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
         }
         // End of TODO
         const updateTaskRequestPromise = transaction.update(taskRequestDocRef, updatedTaskRequest);
-        const updatedTaskData = { assignee: user.id, status: TASK_STATUS.ASSIGNED };
+        const updatedTaskData = { assignee: user.id, status: TASK_STATUS.ASSIGNED, updatedAt: getCurrentEpochTime() };
         // TODO : remove the unnecessary if-condition after the migration of the task request model. https://github.com/Real-Dev-Squad/website-backend/issues/1613
         if (userRequestData) {
           updatedTaskData.startedOn = userRequestData.proposedStartDate / 1000;

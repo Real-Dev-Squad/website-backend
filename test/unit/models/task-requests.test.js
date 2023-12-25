@@ -48,6 +48,7 @@ describe("Task requests | models", function () {
       expect(addedTaskRequest.taskTitle).to.equal(requestData.taskTitle);
       expect(addedTaskRequest.taskId).to.equal(requestData.taskId);
       expect(addedTaskRequest.externalIssueUrl).to.equal(requestData.externalIssueUrl);
+      expect(addedTaskRequest.externalIssueHtmlUrl).to.equal(requestData.externalIssueHtmlUrl);
       expect(addedTaskRequest.users).to.deep.equal([
         {
           userId: requestData.userId,
@@ -78,6 +79,7 @@ describe("Task requests | models", function () {
       expect(addedTaskRequest.status).to.equal(TASK_REQUEST_STATUS.PENDING);
       expect(addedTaskRequest.taskTitle).to.not.be.equal(undefined);
       expect(addedTaskRequest.externalIssueUrl).to.equal(requestData.externalIssueUrl);
+      expect(addedTaskRequest.externalIssueHtmlUrl).to.equal(requestData.externalIssueHtmlUrl);
       expect(addedTaskRequest.users).to.deep.equal([
         ...mockData.existingTaskRequest.users,
         {
@@ -111,6 +113,7 @@ describe("Task requests | models", function () {
       expect(addedTaskRequest.taskTitle).to.equal(requestData.taskTitle);
       expect(addedTaskRequest.taskId).to.equal(requestData.taskId);
       expect(addedTaskRequest.externalIssueUrl).to.equal(requestData.externalIssueUrl);
+      expect(addedTaskRequest.externalIssueHtmlUrl).to.equal(requestData.externalIssueHtmlUrl);
       expect(addedTaskRequest.users).to.deep.equal([
         {
           userId: requestData.userId,
@@ -147,6 +150,7 @@ describe("Task requests | models", function () {
       expect(addedTaskRequest.taskTitle).to.not.be.equal(undefined);
       expect(addedTaskRequest.taskId).to.equal(requestData.taskId);
       expect(addedTaskRequest.externalIssueUrl).to.equal(requestData.externalIssueUrl);
+      expect(addedTaskRequest.externalIssueHtmlUrl).to.equal(requestData.externalIssueHtmlUrl);
       expect(addedTaskRequest.users).to.deep.equal([
         ...mockData.existingTaskRequest.users,
         {
@@ -364,6 +368,12 @@ describe("Task requests | models", function () {
       expect(approvedTask.exists).to.be.equal(true);
       expect(approvedTask.data().assignee).to.equal(user.id);
       expect(approvedTask.data().status).to.equal(TASK_STATUS.ASSIGNED);
+      expect(approvedTask.data().createdAt).to.be.a("number");
+      expect(approvedTask.data().updatedAt).to.be.a("number");
+      expect(approvedTask.data().createdAt).to.be.equal(
+        approvedTask.data().updatedAt,
+        "When new task is created createdAt and updatedAt both are same"
+      );
       expect(approvedTask.data().percentCompleted).to.equal(0);
       expect(approvedTask.data().priority).to.equal(DEFAULT_TASK_PRIORITY);
     });
@@ -380,6 +390,12 @@ describe("Task requests | models", function () {
       expect(approvedTask.exists).to.be.equal(true);
       expect(approvedTask.data().assignee).to.equal(user.id);
       expect(approvedTask.data().status).to.equal(TASK_STATUS.ASSIGNED);
+      expect(approvedTask.data().createdAt).to.be.a("number");
+      expect(approvedTask.data().updatedAt).to.be.a("number");
+      expect(approvedTask.data().createdAt).to.be.not.equal(
+        approvedTask.data().updatedAt,
+        "When existing task is updated, updatedAt field is updated so createdAt and updatedAt are not same"
+      );
     });
     it("should handle invalid user for approval", async function () {
       const existingTaskRequest = { ...mockData.existingTaskRequest };
