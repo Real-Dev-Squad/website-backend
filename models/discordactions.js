@@ -324,7 +324,7 @@ const updateIdleUsersOnDiscord = async () => {
   const totalGroupIdleRolesNotRemoved = { count: 0, errors: [] };
   let totalUsersHavingNoDiscordId = 0;
   let totalArchivedUsers = 0;
-  let allIdleUsers = [];
+  const allIdleUsers = [];
   let allUsersHavingGroupIdle = [];
   let groupIdleRole;
   let groupIdleRoleId;
@@ -349,8 +349,14 @@ const updateIdleUsersOnDiscord = async () => {
         allUserStatus.map(async (userStatus) => {
           try {
             const userData = await userModel.doc(userStatus.userId).get();
+            const isUserArchived = userData.data().roles.archived;
             if (userData.exists) {
-              userStatus.userid = userData.data().discordId;
+              if (isUserArchived) {
+                totalArchivedUsers++;
+              } else {
+                userStatus.userid = userData.data().discordId;
+                allIdleUsers.push(userStatus);
+              }
             }
           } catch (error) {
             logger.error(`error updating discordId in userStatus ${error.message}`);
@@ -359,7 +365,6 @@ const updateIdleUsersOnDiscord = async () => {
         })
       );
     }
-    allIdleUsers = allUserStatus;
     allUsersHavingGroupIdle = usersHavingIdleRole;
   } catch (error) {
     logger.error(`unable to get idle users ${error.message}`);
@@ -378,11 +383,8 @@ const updateIdleUsersOnDiscord = async () => {
     await Promise.all(
       usersForRoleAddition.map(async (user) => {
         try {
-          const result = await dataAccess.retrieveUsers({ id: user.userId });
           const discordId = user.userid;
-          if (result.user?.roles?.archived) {
-            totalArchivedUsers++;
-          } else if (!user.userid) {
+          if (!user.userid) {
             totalUsersHavingNoDiscordId++;
           } else {
             const alreadyHasRole = await memberRoleModel
@@ -581,9 +583,14 @@ const updateIdle7dUsersOnDiscord = async () => {
           try {
             if (daysDifference > 7) {
               const userData = await userModel.doc(userStatus.userId).get();
+              const isUserArchived = userData.data().roles.archived;
               if (userData.exists) {
-                userStatus.userid = userData.data().discordId;
-                allIdle7dUsers.push(userStatus);
+                if (isUserArchived) {
+                  totalArchivedUsers++;
+                } else {
+                  userStatus.userid = userData.data().discordId;
+                  allIdle7dUsers.push(userStatus);
+                }
               }
             }
           } catch (error) {
@@ -612,11 +619,8 @@ const updateIdle7dUsersOnDiscord = async () => {
     await Promise.all(
       usersForRoleAddition.map(async (user) => {
         try {
-          const result = await dataAccess.retrieveUsers({ id: user.userId });
           const discordId = user.userid;
-          if (result.user?.roles?.archived) {
-            totalArchivedUsers++;
-          } else if (!user.userid) {
+          if (!user.userid) {
             totalUsersHavingNoDiscordId++;
           } else {
             const alreadyHasRole = await memberRoleModel
