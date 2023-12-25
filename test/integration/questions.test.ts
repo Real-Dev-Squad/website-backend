@@ -21,7 +21,7 @@ const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
-describe.only("questions", function () {
+describe("questions", function () {
   let authToken: string;
   let userId: string;
   let superUserAuthToken: string;
