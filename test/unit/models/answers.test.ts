@@ -105,4 +105,47 @@ describe("Answers", function () {
       }
     });
   });
+
+  describe("getAnswers", function () {
+    const answersThatWillBeAdded = [answerDataArray[0], answerDataArray[3]];
+    beforeEach(async function () {
+      await answerQuery.createAnswer(answerDataArray[0]);
+      await answerQuery.createAnswer(answerDataArray[3]);
+    });
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should get answers for the requested query", async function () {
+      const queryFields = {
+        questionId: "demo-question-id-1",
+      };
+      const answers: Answer = await answerQuery.getAnswers(queryFields);
+
+      expect(answers).to.be.a("array");
+      expect(answers).to.be.of.length(2);
+
+      answersThatWillBeAdded.forEach((answerBody, idx) => {
+        expect(answers[idx].id).to.be.equal(answerBody.id);
+        expect(answers[idx].event_id).to.be.equal(answerBody.eventId);
+        expect(answers[idx].question_id).to.be.equal(answerBody.questionId);
+        expect(answers[idx].answer).to.be.equal(answerBody.answer);
+        expect(answers[idx].answered_by).to.be.equal(answerBody.answeredBy);
+        expect(answers[idx].reviewed_by).to.be.equal(null);
+      });
+    });
+
+    it("should throw error while creating answer", async function () {
+      sinon.stub(answerQuery, "getAnswers").throws(new Error("Error while getting answers"));
+      const queryFields = {
+        questionId: "demo-question-id-1",
+      };
+      try {
+        await answerQuery.getAnswers(queryFields);
+      } catch (error) {
+        expect(error).to.be.instanceOf(Error);
+        expect(error.message).to.equal("Error while getting answers");
+      }
+    });
+  });
 });

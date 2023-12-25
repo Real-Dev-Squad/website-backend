@@ -23,6 +23,13 @@ const answerData = [
     created_at: new Date().toString(),
     updated_at: new Date().toString(),
   },
+  {
+    id: "dummy-answer-id-3",
+    eventId: "event_id",
+    answeredBy: "satyam-bajpai",
+    answer: "this is demo answer 2",
+    questionId: "demo-question-id-1",
+  },
 ];
 
 module.exports = answerData;
