@@ -2,15 +2,19 @@
 // const { expect } = chai;
 
 import { expect } from "chai";
+const sinon = require("sinon");
 import { Answer, AnswerFieldsToUpdate } from "../../../typeDefinitions/answers";
+const firestore = require("../../../utils/firestore");
+const answerModel = firestore.collection("answers");
 
 const cleanDb = require("../../utils/cleanDb");
 const answerQuery = require("../../../models/answers");
 const answerDataArray = require("../../fixtures/answers/answers");
 
-describe.only("Answers", function () {
+describe("Answers", function () {
   afterEach(async function () {
     await cleanDb();
+    sinon.restore();
   });
 
   describe("createAnswer", function () {
@@ -24,6 +28,17 @@ describe.only("Answers", function () {
       expect(createdAnswer.answered_by).to.equal(answerDataArray[0].answeredBy);
       expect(createdAnswer.reviewed_by).to.equal(null);
       expect(createdAnswer.status).to.equal("PENDING");
+    });
+
+    it("should throw error while creating answer", async function () {
+      sinon.stub(answerQuery, "createAnswer").throws(new Error("Error while creating answer"));
+
+      try {
+        await answerQuery.createAnswer(answerDataArray[0]);
+      } catch (error) {
+        expect(error).to.be.instanceOf(Error);
+        expect(error.message).to.equal("Error while creating answer");
+      }
     });
   });
 
@@ -72,6 +87,22 @@ describe.only("Answers", function () {
       expect(updatedAnswer.event_id).to.equal(answerDataArray[0].eventId);
       expect(updatedAnswer.answered_by).to.equal(answerDataArray[0].answeredBy);
       expect(updatedAnswer.updated_at.toDate()).to.not.equal(createdAnswer.updated_at.toDate());
+    });
+
+    it("should throw error while updating the answer", async function () {
+      const fieldsToUpdate: AnswerFieldsToUpdate = {
+        status: "APPROVED",
+        reviewed_by: "satyam-bajpai",
+      };
+
+      sinon.stub(answerQuery, "updateAnswer").throws(new Error("Error while updating answer"));
+
+      try {
+        await answerQuery.updateAnswer(createdAnswerId, fieldsToUpdate);
+      } catch (error) {
+        expect(error).to.be.instanceOf(Error);
+        expect(error.message).to.equal("Error while updating answer");
+      }
     });
   });
 });

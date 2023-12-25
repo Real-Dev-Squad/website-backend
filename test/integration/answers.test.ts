@@ -20,7 +20,7 @@ import { AnswerStatus } from "../../typeDefinitions/answers";
 
 chai.use(chaiHttp);
 
-describe.only("answers", function () {
+describe("answers", function () {
   let defaultUserAuthToken: string;
   let userId: string;
   let superUserAuthToken: string;
