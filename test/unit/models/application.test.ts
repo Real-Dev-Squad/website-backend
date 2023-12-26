@@ -118,7 +118,7 @@ describe("applications", function () {
   describe("batchUpdateApplications", function () {
     it("should add createdAt null to all existing application docs", async function () {
       const operationStats = await ApplicationModel.batchUpdateApplications();
-      expect(operationStats.totalApplicationUpdates).to.be.equal(5);
+      expect(operationStats.totalApplicationUpdates).to.be.equal(6);
     });
   });
 });
