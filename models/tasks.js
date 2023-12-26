@@ -176,7 +176,7 @@ const fetchPaginatedTasks = async ({
       initialQuery = initialQuery
         .where("endsOn", "<", currentTime)
         .where("status", "in", OVERDUE_TASK_STATUSES)
-        .orderBy("endsOn");
+        .orderBy("endsOn", "desc");
       /**
        * Setting it undefined because when OVERDUE condition is applied, where 2 inEquality checks are being made
        * firestore don't allow more inEquality checks, so for title where 2 more inEquality checks are being added,
