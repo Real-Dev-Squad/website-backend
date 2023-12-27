@@ -113,7 +113,7 @@ const addGroupRoleToMember = async (req, res) => {
       roleid: memberGroupRole.roleid,
     });
     const userDataPromise = fetchUser({ discordId: memberGroupRole.userid });
-    const [{ roleExists }, userData] = await Promise.all([roleExistsPromise, userDataPromise]);
+    const [{ roleExists, existingRoles }, userData] = await Promise.all([roleExistsPromise, userDataPromise]);
 
     if (!roleExists || req.userData.id !== userData.user.id) {
       res.boom.forbidden("Permission denied. Cannot add the role.");
@@ -136,12 +136,15 @@ const addGroupRoleToMember = async (req, res) => {
       algorithm: "RS256",
       expiresIn: config.get("rdsServerlessBot.ttl"),
     });
-
-    await fetch(`${DISCORD_BASE_URL}/roles/add`, {
+    const apiCallToDiscord = fetch(`${DISCORD_BASE_URL}/roles/add`, {
       method: "PUT",
       body: JSON.stringify(dataForDiscord),
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-    }).then((response) => response.json());
+    });
+    const discordLastJoinedDateUpdate = discordRolesModel.groupUpdateLastJoinDate({
+      id: existingRoles.docs[0].id,
+    });
+    await Promise.all([apiCallToDiscord, discordLastJoinedDateUpdate]);
 
     return res.status(201).json({
       message: "Role added successfully!",
