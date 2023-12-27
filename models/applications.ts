@@ -29,7 +29,6 @@ const batchUpdateApplications = async () => {
 
     const multipleApplicationUpdateBatch = [];
     const chunkedApplication = chunks(updatedApplications, FIRESTORE_BATCH_OPERATIONS_LIMIT);
-    console.log(chunkedApplication, "applications");
 
     chunkedApplication.forEach(async (applications) => {
       const batch = firestore.batch();
