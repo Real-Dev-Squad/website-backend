@@ -9,6 +9,7 @@ const daysOfWeek = {
   sat: 6,
 };
 
+//This is the headers used in server sent events APIs
 const HEADERS_FOR_SSE = {
   "Content-Type": "text/event-stream",
   Connection: "keep-alive",
