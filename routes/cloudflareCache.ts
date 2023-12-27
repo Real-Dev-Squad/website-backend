@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const cloudflareCache = require("../controllers/cloudflareCache");
-const authenticate = require("../middlewares/authenticate");
+import cloudflareCache from "../controllers/cloudflareCache";
+import authenticate from "../middlewares/authenticate";
 
 router.get("/", authenticate, cloudflareCache.fetchPurgedCacheMetadata);
 router.post("/", authenticate, cloudflareCache.purgeCache);
