@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 const admin = require("firebase-admin");
 
 import { Question, QuestionBody } from "../types/questions";
