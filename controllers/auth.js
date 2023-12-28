@@ -71,6 +71,7 @@ const githubAuthCallback = (req, res, next) => {
         github_id: user.username,
         github_display_name: user.displayName,
         github_created_at: Number(new Date(user._json.created_at).getTime()),
+        github_user_id: user.id,
         created_at: Date.now(),
         updated_at: Date.now(),
       };
