@@ -1,3 +1,4 @@
+const firestore = require("../utils/firestore");
 const chaincodeQuery = require("../models/chaincodes");
 const userQuery = require("../models/users");
 const profileDiffsQuery = require("../models/profileDiffs");
@@ -856,6 +857,70 @@ async function usersPatchHandler(req, res) {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 }
+const addGithubId = async (req, res) => {
+  const usersNotFound = [];
+  let countUserFound = 0;
+  let countUserNotFound = 0;
+  try {
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization:
+          "Basic " + btoa(`${config.get("githubOauth.clientId")}:${config.get("githubOauth.clientSecret")}`),
+      },
+    };
+    const usersSnapshot = await firestore.collection("users").get();
+    const totalUsers = usersSnapshot.docs.length;
+    const batchCount = Math.ceil(totalUsers / 500);
+    // Create batch write operations for each batch of documents
+    for (let i = 0; i < batchCount; i++) {
+      const batchDocs = usersSnapshot.docs.slice(i * 500, (i + 1) * 500);
+      const batchWrite = firestore.batch();
+      const batchWrites = [];
+      for (const userDoc of batchDocs) {
+        const githubUsername = userDoc.data().github_id;
+        const username = userDoc.data().username;
+        const userId = userDoc.id;
+        batchWrite.update(userDoc.ref, { github_user_id: null });
+
+        const promise = fetch(`https://api.github.com/users/${githubUsername}`, requestOptions)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            const githubUserId = data.id;
+            batchWrite.update(userDoc.ref, { github_user_id: `${githubUserId}` });
+            countUserFound++;
+          })
+          .catch((error) => {
+            countUserNotFound++;
+            const invalidUsers = { userId, username, githubUsername };
+            usersNotFound.push(invalidUsers);
+            logger.error("An error occurred at fetch:", error);
+          });
+        batchWrites.push(promise);
+      }
+      await Promise.all(batchWrites);
+      await batchWrite.commit();
+    }
+    return res.status(200).json({
+      message: "Result of migration",
+      data: {
+        totalUsers: totalUsers,
+        usersUpdated: countUserFound,
+        usersNotUpdated: countUserNotFound,
+        invalidUsersDetails: usersNotFound,
+      },
+    });
+  } catch (error) {
+    logger.error(`Error while Updating all users: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
 
 module.exports = {
   verifyUser,
@@ -886,4 +951,5 @@ module.exports = {
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
+  addGithubId,
 };
