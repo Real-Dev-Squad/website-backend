@@ -7,7 +7,6 @@
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
-
 const cleanDb = require("../../utils/cleanDb");
 const users = require("../../../models/users");
 const firestore = require("../../../utils/firestore");
@@ -22,6 +21,10 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const userData = require("../../fixtures/user/user");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
+const app = require("../../../server");
+const prodUsers = require("../../fixtures/user/prodUsers");
+const authService = require("../../../services/authService");
+const cookieName = config.get("userToken.cookieName");
 /**
  * Test the model functions and validate the data stored
  */
@@ -472,6 +475,57 @@ describe("users", function () {
 
       expect(userListResult.length).to.be.equal(1);
       expect(userListResult[0].discordId).to.be.deep.equal(userDataArray[0].discordId);
+    });
+  });
+  describe("Adding github_user_id for each user document", function () {
+    let userId, userToken, superUserId, superUserToken;
+    beforeEach(async function () {
+      userId = await addUser(prodUsers[1]);
+      userToken = authService.generateAuthToken({ userId: userId });
+      superUserId = await addUser(prodUsers[0]);
+      superUserToken = authService.generateAuthToken({ userId: superUserId });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("API should not be accessible to any regular user", function (done) {
+      chai
+        .request(app)
+        .post("/users/migrate")
+        .set("cookie", `${cookieName}=${userToken}`)
+        .send()
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "You are not authorized for this action.",
+          });
+          return done();
+        });
+    });
+    it("API should be accessible by super user", async function () {
+      for (const user of prodUsers.slice(2)) {
+        await addUser(user);
+      }
+      const res = await chai
+        .request(app)
+        .post("/users/migrate")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.have.property("data").that.is.an("object");
+      expect(res.body.data).to.have.property("totalUsers").that.is.a("number");
+      expect(res.body.data).to.have.property("usersUpdated").that.is.a("number");
+      expect(res.body.data).to.have.property("usersNotUpdated").that.is.a("number");
+      expect(res.body.data).to.have.property("invalidUsersDetails").that.is.an("array");
     });
   });
 });
