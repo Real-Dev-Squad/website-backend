@@ -1,5 +1,4 @@
 import { expect } from "chai";
-// const { expect } = chai;
 
 const cleanDb = require("../../utils/cleanDb");
 const questionQuery = require("../../../models/questions");
