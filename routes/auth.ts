@@ -1,9 +1,9 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const auth = require("../controllers/auth");
-const authenticate = require("../middlewares/authenticate");
-const userDeviceInfoValidator = require("../middlewares/validators/qrCodeAuth");
-const qrCodeAuthValidator = require("../middlewares/validators/qrCodeAuth");
+import auth from "../controllers/auth";
+import authenticate from "../middlewares/authenticate";
+import userDeviceInfoValidator from "../middlewares/validators/qrCodeAuth";
+import qrCodeAuthValidator from "../middlewares/validators/qrCodeAuth";
 
 router.get("/github/login", auth.githubAuthLogin);
 
