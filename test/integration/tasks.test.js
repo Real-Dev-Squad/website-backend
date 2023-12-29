@@ -3,24 +3,73 @@ const sinon = require("sinon");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 
+const firestore = require("../../utils/firestore");
+const logsModel = firestore.collection("logs");
 const app = require("../../server");
 const tasks = require("../../models/tasks");
 const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
 const userModel = require("../../models/users");
+const userStatusModel = require("../../models/userStatus");
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const userData = require("../fixtures/user/user")();
 const tasksData = require("../fixtures/tasks/tasks")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
-const { TASK_STATUS } = require("../../constants/tasks");
+const { TASK_STATUS, tasksUsersStatus } = require("../../constants/tasks");
+const updateTaskStatus = require("../fixtures/tasks/tasks1")();
+const userStatusData = require("../fixtures/userStatus/userStatus");
+const tasksModel = firestore.collection("tasks");
+const discordService = require("../../services/discordService");
+const { CRON_JOB_HANDLER } = require("../../constants/bot");
+const { logType } = require("../../constants/logs");
+
 chai.use(chaiHttp);
 
 const appOwner = userData[3];
 const superUser = userData[4];
 
 let jwt, superUserJwt;
+const { createProgressDocument } = require("../../models/progresses");
+const { stubbedModelTaskProgressData } = require("../fixtures/progress/progresses");
+const { convertDaysToMilliseconds } = require("../../utils/time");
+const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
+const { generateCronJobToken } = require("../utils/generateBotToken");
+
+const taskData = [
+  {
+    title: "Test task",
+    type: "feature",
+    endsOn: 1234,
+    startedOn: 4567,
+    status: "IN_PROGRESS",
+    percentCompleted: 10,
+    participants: [],
+    assignee: appOwner.username,
+    completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+    lossRate: { [DINERO]: 1 },
+    isNoteworthy: true,
+    isCollapsed: true,
+  },
+  {
+    title: "Test task",
+    purpose: "To Test mocha",
+    featureUrl: "<testUrl>",
+    type: "group",
+    links: ["test1"],
+    endsOn: 1234,
+    startedOn: 54321,
+    status: "completed",
+    percentCompleted: 10,
+    dependsOn: ["d12", "d23"],
+    participants: [appOwner.username],
+    completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+    lossRate: { [DINERO]: 1 },
+    isNoteworthy: false,
+    assignee: appOwner.username,
+  },
+];
 
 describe("Tasks", function () {
   let taskId1, taskId;
@@ -30,40 +79,6 @@ describe("Tasks", function () {
     const superUserId = await addUser(superUser);
     jwt = authService.generateAuthToken({ userId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
-
-    const taskData = [
-      {
-        title: "Test task",
-        type: "feature",
-        endsOn: 1234,
-        startedOn: 4567,
-        status: "IN_PROGRESS",
-        percentCompleted: 10,
-        participants: [],
-        assignee: appOwner.username,
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: true,
-        isCollapsed: true,
-      },
-      {
-        title: "Test task",
-        purpose: "To Test mocha",
-        featureUrl: "<testUrl>",
-        type: "group",
-        links: ["test1"],
-        endsOn: 1234,
-        startedOn: 54321,
-        status: "completed",
-        percentCompleted: 10,
-        dependsOn: ["d12", "d23"],
-        participants: [appOwner.username],
-        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 },
-        isNoteworthy: false,
-        assignee: appOwner.username,
-      },
-    ];
 
     // Add the active task
     taskId = (await tasks.updateTask(taskData[0])).taskId;
@@ -110,10 +125,45 @@ describe("Tasks", function () {
           expect(res.body.message).to.equal("Task created successfully!");
           expect(res.body.task).to.be.a("object");
           expect(res.body.task.id).to.be.a("string");
+          expect(res.body.task.createdAt).to.be.a("number");
+          expect(res.body.task.updatedAt).to.be.a("number");
           expect(res.body.task.createdBy).to.equal(appOwner.username);
           expect(res.body.task.assignee).to.equal(appOwner.username);
           expect(res.body.task.participants).to.be.a("array");
           expect(res.body.task.dependsOn).to.be.a("array");
+          return done();
+        });
+    });
+    it("Should have same time for createdAt and updatedAt for new tasks", function (done) {
+      chai
+        .request(app)
+        .post("/tasks")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "Test task - Create",
+          type: "feature",
+          endsOn: 123,
+          startedOn: 456,
+          status: "AVAILABLE",
+          percentCompleted: 10,
+          priority: "HIGH",
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          assignee: appOwner.username,
+          participants: [],
+          dependsOn: [],
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Task created successfully!");
+          expect(res.body.task).to.be.a("object");
+          expect(res.body.task.createdAt).to.be.a("number");
+          expect(res.body.task.updatedAt).to.be.a("number");
+          expect(res.body.task.createdAt).to.be.eq(res.body.task.updatedAt);
           return done();
         });
     });
@@ -147,6 +197,12 @@ describe("Tasks", function () {
   });
 
   describe("GET /tasks", function () {
+    let taskId2, taskId3;
+    before(async function () {
+      taskId2 = (await tasks.updateTask({ ...taskData[0], createdAt: 1621717694, updatedAt: 1700680830 })).taskId;
+      taskId3 = (await tasks.updateTask({ ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753 })).taskId;
+    });
+
     it("Should get all the list of tasks", function (done) {
       chai
         .request(app)
@@ -273,7 +329,7 @@ describe("Tasks", function () {
           }
 
           expect(res).to.have.status(200);
-          expect(res.body.tasks[0].id).to.be.oneOf([taskId, taskId1]);
+          expect(res.body.tasks[0].id).to.be.oneOf([taskId, taskId1, taskId2, taskId3]);
           return done();
         });
     });
@@ -311,7 +367,6 @@ describe("Tasks", function () {
           if (err) {
             return done(err);
           }
-
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Tasks returned successfully!");
@@ -372,7 +427,7 @@ describe("Tasks", function () {
           matchingTasks.forEach((task) => {
             expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
           });
-          expect(matchingTasks).to.have.length(3);
+          expect(matchingTasks).to.have.length(6);
 
           return done();
         });
@@ -408,6 +463,26 @@ describe("Tasks", function () {
           expect(res.body.message).to.equal("No tasks found.");
           expect(res.body.tasks).to.be.a("array");
           expect(res.body.tasks).to.have.lengthOf(0);
+          return done();
+        });
+    });
+    it("Should get paginated tasks ordered by updatedAt in desc order ", function (done) {
+      chai
+        .request(app)
+        .get("/tasks?dev=true&size=5&page=0")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          const tasks = res.body.tasks;
+          // Check if Tasks are returned in desc order of updatedAt field
+          for (let i = 0; i < tasks.length - 1; i++) {
+            expect(tasks[+i].updatedAt).to.be.greaterThanOrEqual(tasks[i + 1].updatedAt);
+          }
           return done();
         });
     });
@@ -533,7 +608,7 @@ describe("Tasks", function () {
   });
 
   describe("PATCH /tasks", function () {
-    it("Should update the task for the given taskid", function (done) {
+    it("Should update the task for the given taskId", function (done) {
       chai
         .request(app)
         .patch("/tasks/" + taskId1)
@@ -549,6 +624,41 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("should update updatedAt field when patch request is made", function (done) {
+      chai
+        .request(app)
+        .patch("/tasks/" + taskId1)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "new-title",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("should update updatedAt field", function (done) {
+      chai
+        .request(app)
+        .get(`/tasks/${taskId1}/details`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.taskData.updatedAt).to.be.a("number");
+          expect(res.body.taskData.updatedAt).to.be.not.eq(tasksData[0].updatedAt);
+          expect(res.body.taskData.updatedAt).to.be.not.eq(res.body.taskData.createdAt);
+          return done();
+        });
+    });
+
     it("Should update dependency", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
       const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
@@ -814,7 +924,26 @@ describe("Tasks", function () {
       isNoteworthy: true,
     };
 
+    it("Should throw 400 Bad Request if the user tries to update the status of a task to AVAILABLE", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          expect(res.body.message).to.equal("The value for the 'status' field is invalid.");
+          return done();
+        });
+    });
+
     it("Should update the task status for given self taskid", function (done) {
+      taskStatusData.status = "IN_PROGRESS";
       chai
         .request(app)
         .patch(`/tasks/self/${taskId1}`)
@@ -836,6 +965,30 @@ describe("Tasks", function () {
           return done();
         });
     });
+
+    it("Should update the task status for given self taskid under feature flag", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/self/${taskId1}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "DONE", percentCompleted: 100 })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.taskLog).to.have.property("type");
+          expect(res.body.taskLog).to.have.property("id");
+          expect(res.body.taskLog.body).to.be.a("object");
+          expect(res.body.taskLog.meta).to.be.a("object");
+          expect(res.body.message).to.equal("Task updated successfully!");
+
+          expect(res.body.taskLog.body.new.status).to.equal("DONE");
+          expect(res.body.taskLog.body.new.percentCompleted).to.equal(100);
+          return done();
+        });
+    });
+
     it("Should return fail response if task data has non-acceptable status value to update the task status for given self taskid", function (done) {
       chai
         .request(app)
@@ -871,6 +1024,7 @@ describe("Tasks", function () {
     });
 
     it("Should return 404 if task doesnt exist", function (done) {
+      taskStatusData.status = "IN_PROGRESS";
       chai
         .request(app)
         .patch("/tasks/self/wrongtaskId")
@@ -912,6 +1066,7 @@ describe("Tasks", function () {
     });
 
     it("Should give 403 if status is already 'VERIFIED' ", async function () {
+      taskStatusData.status = "IN_PROGRESS";
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
@@ -945,6 +1100,18 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
     });
 
+    it("Should give 400 if percentCompleted is not 100 and new status is DONE under feature flag ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "DONE" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
+    });
+
     it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
       const res = await chai
@@ -957,13 +1124,25 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
     });
 
+    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED under feature flag", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "VERIFIED" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
+    });
+
     it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {
       const taskData = {
         title: "Test task",
         type: "feature",
         endsOn: 1234,
         startedOn: 4567,
-        status: "COMPLETED",
+        status: "completed",
         percentCompleted: 100,
         participants: [],
         assignee: appOwner.username,
@@ -980,6 +1159,18 @@ describe("Tasks", function () {
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
+    });
+
+    it("Should give 400 if status is DONE and newpercent is less than 100 under feature flag", async function () {
+      taskId = (await tasks.updateTask(updateTaskStatus[0])).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ percentCompleted: 80 });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is DONE");
     });
   });
 
@@ -1007,6 +1198,349 @@ describe("Tasks", function () {
       expect(res).to.have.status(200);
       expect(res.body.newAvailableTasks).to.have.lengthOf(0);
       expect(res.body.message).to.be.equal("No overdue tasks found");
+    });
+  });
+
+  describe("POST /tasks/migration", function () {
+    it("Should update status COMPLETED to DONE successful", async function () {
+      const taskData1 = { status: "COMPLETED" };
+      await firestore.collection("tasks").doc("updateTaskStatus1").set(taskData1);
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(1);
+      expect(res.body.totalUpdatedStatus).to.be.equal(1);
+      expect(res.body.updatedTaskDetails).to.deep.equal(["updateTaskStatus1"]);
+      expect(res.body.totalOperationsFailed).to.be.equal(0);
+      expect(res.body.failedTaskDetails).to.deep.equal([]);
+    });
+
+    it("Should not update if not found any COMPLETED task status ", async function () {
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(0);
+      expect(res.body.totalUpdatedStatus).to.be.equal(0);
+      expect(res.body.updatedTaskDetails).to.deep.equal([]);
+      expect(res.body.totalOperationsFailed).to.be.equal(0);
+      expect(res.body.failedTaskDetails).to.deep.equal([]);
+    });
+
+    it("should throw an error if firestore batch operations fail", async function () {
+      const stub = sinon.stub(firestore, "batch");
+      stub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("Firestore batch commit failed!");
+        },
+      });
+      const taskData1 = { status: "COMPLETED" };
+      await firestore.collection("tasks").doc("updateTaskStatus1").set(taskData1);
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      expect(res.status).to.equal(500);
+      const response = res.body;
+      expect(response.message).to.be.equal("An internal server error occurred");
+    });
+
+    it("Should return 401 if not super_user", async function () {
+      const nonSuperUserId = await addUser(appOwner);
+      const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${nonSuperUserJwt}`);
+      expect(res).to.have.status(401);
+    });
+  });
+
+  describe("POST /tasks/migration for adding createdAt+updatedAt", function () {
+    beforeEach(async function () {
+      const userId = await addUser(appOwner);
+      const superUserId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId });
+      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+      // Add the active task
+      await tasks.updateTask(tasksData[0]);
+      await tasks.updateTask(tasksData[1]);
+      await tasks.updateTask(tasksData[3]);
+      await tasks.updateTask(tasksData[4]);
+      await tasks.updateTask(tasksData[5]);
+      await tasks.updateTask(tasksData[6]);
+    });
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("Should return 401 if not super_user", async function () {
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${jwt}`);
+      expect(res).to.have.status(401);
+    });
+
+    // TASK createdAt and updatedAt migration script
+    it("Should update status createdAt and updatedAt", async function () {
+      // Add new tasks with createdAt and updatedAt present
+      await tasks.updateTask({ ...tasksData[7], createdAt: null, updatedAt: null });
+      await tasks.updateTask({ ...tasksData[8], createdAt: null, updatedAt: null });
+      await tasks.updateTask({ ...tasksData[9], updatedAt: null });
+      await tasks.updateTask({ ...tasksData[10], createdAt: null });
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
+        action: "ADD",
+        field: "CREATED_AT+UPDATED_AT",
+      });
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(10);
+      expect(res.body.totalTaskToBeUpdate).to.be.equal(4);
+      expect(res.body.totalTasksUpdated).to.be.equal(4);
+      expect(res.body.totalFailedTasks).to.be.equal(0);
+      expect(res.body.failedTasksIds).to.deep.equal([]);
+    });
+
+    it("Should update status createdAt and updatedAt, if filed doesn't exists", async function () {
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
+        action: "ADD",
+        field: "CREATED_AT+UPDATED_AT",
+      });
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(6);
+      expect(res.body.totalTaskToBeUpdate).to.be.equal(0);
+      expect(res.body.totalTasksUpdated).to.be.equal(0);
+      expect(res.body.totalFailedTasks).to.be.equal(0);
+      expect(res.body.failedTasksIds).to.deep.equal([]);
+    });
+
+    it("should return failed stats if firestore batch operations fail for adding createdAt and updatedAt", async function () {
+      await tasks.updateTask({ ...tasksData[7], createdAt: null, updatedAt: null });
+      await tasks.updateTask({ ...tasksData[8], createdAt: null, updatedAt: null });
+      await tasks.updateTask({ ...tasksData[9], updatedAt: null });
+      await tasks.updateTask({ ...tasksData[10], createdAt: null });
+      const stub = sinon.stub(firestore, "batch");
+      stub.returns({
+        update: function () {},
+        commit: function () {
+          throw new Error("Firestore batch commit failed!");
+        },
+      });
+      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
+        action: "ADD",
+        field: "CREATED_AT+UPDATED_AT",
+      });
+      expect(res).to.have.status(200);
+      expect(res.body.totalTasks).to.be.equal(10);
+      expect(res.body.totalTaskToBeUpdate).to.be.equal(4);
+      expect(res.body.totalTasksUpdated).to.be.equal(0);
+      expect(res.body.totalFailedTasks).to.be.equal(4);
+      expect(res.body.failedTasksIds.length).to.equal(4);
+    });
+  });
+
+  describe("GET /tasks/users", function () {
+    let activeUserWithProgressUpdates;
+    let idleUser;
+    let userNotInDiscord;
+    let jwtToken;
+    let getDiscordMembersStub;
+    beforeEach(async function () {
+      await cleanDb();
+      idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
+      activeUserWithProgressUpdates = { ...userData[10], discordId: getDiscordMembers[1].user.id };
+      const activeUserWithNoUpdates = { ...userData[0], discordId: getDiscordMembers[2].user.id };
+      userNotInDiscord = { ...userData[4], discordId: "Not in discord" };
+      const {
+        idleStatus: idleUserStatus,
+        activeStatus: activeUserStatus,
+        userStatusDataForOooState: oooUserStatus,
+      } = userStatusData;
+      const userIdList = await Promise.all([
+        await addUser(idleUser), // idle user with no task progress updates
+        await addUser(activeUserWithProgressUpdates), // active user with task progress updates
+        await addUser(activeUserWithNoUpdates), // active user with no task progress updates
+        await addUser(userNotInDiscord), // OOO user with
+      ]);
+      await Promise.all([
+        await userStatusModel.updateUserStatus(userIdList[0], idleUserStatus),
+        await userStatusModel.updateUserStatus(userIdList[1], activeUserStatus),
+        await userStatusModel.updateUserStatus(userIdList[2], activeUserStatus),
+        await userStatusModel.updateUserStatus(userIdList[3], oooUserStatus),
+      ]);
+
+      const tasksPromise = [];
+
+      for (let index = 0; index < 4; index++) {
+        const task = tasksData[index];
+        const validTask = {
+          ...task,
+          assignee: userIdList[index],
+          startedOn: (new Date().getTime() - convertDaysToMilliseconds(7)) / 1000,
+          endsOn: (new Date().getTime() + convertDaysToMilliseconds(4)) / 1000,
+          status: TASK_STATUS.IN_PROGRESS,
+        };
+
+        tasksPromise.push(tasksModel.add(validTask));
+      }
+      const taskIdList = (await Promise.all(tasksPromise)).map((tasksDoc) => tasksDoc.id);
+      const progressDataList = [];
+
+      const date = new Date();
+      date.setDate(date.getDate() - 1);
+      const progressData = stubbedModelTaskProgressData(null, taskIdList[2], date.getTime(), date.valueOf());
+      progressDataList.push(progressData);
+
+      await Promise.all(progressDataList.map(async (progress) => await createProgressDocument(progress)));
+      const discordMembers = [...getDiscordMembers].map((user) => {
+        return { ...user };
+      });
+      const roles1 = [...discordMembers[0].roles, "9876543210"];
+      const roles2 = [...discordMembers[1].roles, "9876543210"];
+      discordMembers[0].roles = roles1;
+      discordMembers[1].roles = roles2;
+      getDiscordMembersStub = sinon.stub(discordService, "getDiscordMembers");
+      getDiscordMembersStub.returns(discordMembers);
+      jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
+    });
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+    it("should return successful response with user id list", async function () {
+      const response = await chai
+        .request(app)
+        .get("/tasks/users/discord")
+        .query({ q: `status:${tasksUsersStatus.MISSED_UPDATES}` })
+        .set("Authorization", `Bearer ${jwtToken}`);
+      expect(response.body).to.be.deep.equal({
+        message: "Discord details of users with status missed updates fetched successfully",
+        data: {
+          usersToAddRole: [activeUserWithProgressUpdates.discordId],
+          tasks: 4,
+          missedUpdatesTasks: 3,
+        },
+      });
+      expect(response.status).to.be.equal(200);
+    });
+    it("should return successful response with user id when all params are passed", async function () {
+      const response = await chai
+        .request(app)
+        .get("/tasks/users/discord")
+        .query({
+          size: 5,
+          q: `status:${tasksUsersStatus.MISSED_UPDATES} -weekday:sun -weekday:mon -weekday:tue -weekday:wed -weekday:thu -weekday:fri -date:231423432 -days-count:4`,
+        })
+        .set("Authorization", `Bearer ${jwtToken}`);
+      expect(response.body).to.be.deep.equal({
+        message: "Discord details of users with status missed updates fetched successfully",
+        data: {
+          usersToAddRole: [],
+          tasks: 4,
+          missedUpdatesTasks: 0,
+        },
+      });
+      expect(response.status).to.be.equal(200);
+    });
+
+    it("should return bad request error when status is not passed", async function () {
+      const response = await chai
+        .request(app)
+        .get("/tasks/users/discord")
+        .query({})
+        .set("Authorization", `Bearer ${jwtToken}`);
+      expect(response.body).to.be.deep.equal({
+        error: "Bad Request",
+        message: '"status" is required',
+        statusCode: 400,
+      });
+      expect(response.status).to.be.equal(400);
+    });
+    it("should save logs when there is an error", async function () {
+      getDiscordMembersStub.throws(new Error("Error occurred"));
+      await chai
+        .request(app)
+        .get("/tasks/users/discord")
+        .query({ q: `status:${tasksUsersStatus.MISSED_UPDATES}` })
+        .set("Authorization", `Bearer ${jwtToken}`);
+
+      const logsRef = await logsModel.where("type", "==", logType.TASKS_MISSED_UPDATES_ERRORS).get();
+      let tasksLogs;
+      logsRef.forEach((data) => {
+        tasksLogs = data.data();
+      });
+      expect(tasksLogs.body.error).to.be.equal("Error: Error occurred");
+    });
+  });
+
+  describe("PATCH /tasks/:id should update the tasks by SuperUser", function () {
+    beforeEach(async function () {
+      const superUserId = await addUser(superUser);
+      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+
+      await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").set({
+        assignee: "SooJK37gzjIZfFNH0tlL",
+        status: "IN_PROGRESS",
+        percentCompleted: 80,
+        startedOn: 1701388800000,
+        endsOn: 1701561600000,
+      });
+    });
+
+    afterEach(async function () {
+      await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").delete();
+    });
+
+    it("Should unassign the task with other fields reset exclusively", async function () {
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/4kAkRv9TBlOfR6WEUhoQ`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          assignee: null,
+          status: TASK_STATUS.AVAILABLE,
+          percentCompleted: 0,
+          startedOn: null,
+          endsOn: null,
+        });
+
+      expect(res).to.have.status(204);
+
+      const docSnapshot = await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").get();
+
+      const updatedData = docSnapshot.data();
+      expect(updatedData.assignee).to.equal(null);
+      expect(updatedData.status).to.equal(TASK_STATUS.AVAILABLE);
+      expect(updatedData.percentCompleted).to.equal(0);
+      expect(updatedData.startedOn).to.equal(null);
+      expect(updatedData.endsOn).to.equal(null);
+    });
+
+    it("Should unassign the task with other fields reset internally", async function () {
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/4kAkRv9TBlOfR6WEUhoQ`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: TASK_STATUS.AVAILABLE,
+        });
+
+      expect(res).to.have.status(204);
+
+      const docSnapshot = await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").get();
+
+      const updatedData = docSnapshot.data();
+      expect(updatedData.assignee).to.equal(null);
+      expect(updatedData.status).to.equal(TASK_STATUS.AVAILABLE);
+      expect(updatedData.percentCompleted).to.equal(0);
+      expect(updatedData.startedOn).to.equal(null);
+      expect(updatedData.endsOn).to.equal(null);
+    });
+
+    it("Should throw bad request if the req body is invalid", async function () {
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/4kAkRv9TBlOfR6WEUhoQ`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          assignee: null,
+          status: TASK_STATUS.AVAILABLE,
+          percentCompleted: 0,
+          startedOn: "null",
+          endsOn: false,
+        });
+
+      expect(res).to.have.status(400);
+      expect(res.body.error).to.equal("Bad Request");
+      expect(res.body.message).to.equal('"endsOn" must be one of [number, null]');
     });
   });
 });
