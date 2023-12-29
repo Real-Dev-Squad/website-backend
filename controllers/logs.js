@@ -1,5 +1,6 @@
 const logsQuery = require("../models/logs");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const db = require("../utils/firestore");
 
 /**
  * Fetches logs
@@ -20,6 +21,22 @@ const fetchLogs = async (req, res) => {
   }
 };
 
+const createLogs=async (req, res) => {
+  try {
+    // Extract data from the request body
+    const logData = req.body;
+
+    // Save data to Firestore logs collection
+    const logsCollection = db.collection('logs');
+    await logsCollection.add(logData);
+
+    res.status(201).json({ message: 'Log saved successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
 module.exports = {
   fetchLogs,
+  createLogs,
 };
