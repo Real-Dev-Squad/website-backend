@@ -1,7 +1,7 @@
 const crypto = require("crypto");
-import { Request, Response } from "express";
+import { Request } from "express";
 
-import { Question } from "../types/questions";
+import { Client, Question } from "../types/questions";
 import { CustomRequest, CustomResponse } from "../types/global";
 
 const logger = require("../utils/logger.ts");
@@ -10,7 +10,7 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 const questionQuery = require("../models/questions");
 
-let clients = [];
+let clients: Client[] = [];
 
 function sendQuestionToAll(newQuestion: Question, res: CustomResponse) {
   clients.forEach((client) => client.res.write(`data: ${JSON.stringify(newQuestion)}\n\n`));
