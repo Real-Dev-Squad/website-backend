@@ -199,6 +199,7 @@ const fetchTaskRequestById = async (taskRequestId) => {
  * @param {string} data.taskTitle - The title of the task.
  * @param {string} data.taskId - The ID of the task (optional).
  * @param {string} data.externalIssueUrl - The external issue URL (optional).
+ * @param {string} data.externalIssueHtmlUrl - The external issue HTML URL (optional).
  * @param {string} data.requestType - The type of the task request (CREATION | ASSIGNMENT).
  * @param {string} authorUserId - The ID of the authenticated user creating the request.
  * @returns {Promise<{
@@ -279,6 +280,7 @@ const createRequest = async (data, authorUserId) => {
         taskTitle: data.taskTitle,
         taskId: data.taskId,
         externalIssueUrl: data.externalIssueUrl,
+        externalIssueHtmlUrl: data.externalIssueHtmlUrl,
         requestType: data.requestType,
         users: [userRequest],
         usersCount: 1,
@@ -423,6 +425,7 @@ const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
           github: {
             issue: {
               url: taskRequestData.externalIssueUrl,
+              html_url: taskRequestData.externalIssueHtmlUrl,
             },
           },
         };

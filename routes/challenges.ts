@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const authenticate = require("../middlewares/authenticate");
-const challenges = require("../controllers/challenge");
-const { createChallenge } = require("../middlewares/validators/challenges");
+import authenticate from "../middlewares/authenticate";
+import challenges from "../controllers/challenge";
+import { createChallenge } from "../middlewares/validators/challenges";
 
 router.get("/", authenticate, challenges.fetchChallenges);
 router.post("/", authenticate, createChallenge, challenges.createChallenge);

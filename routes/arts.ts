@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const authenticate = require("../middlewares/authenticate");
-const arts = require("../controllers/arts");
-const artValidator = require("../middlewares/validators/arts");
+import authenticate from "../middlewares/authenticate";
+import arts from "../controllers/arts";
+import artValidator from "../middlewares/validators/arts";
 
 router.get("/", arts.fetchArts);
 router.get("/user/self", authenticate, arts.getSelfArts);
