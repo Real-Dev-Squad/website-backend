@@ -9,10 +9,13 @@ const validators = require("../middlewares/validators/task-requests");
 
 router.get("/", authenticate, taskRequests.fetchTaskRequests);
 router.get("/:id", authenticate, taskRequests.fetchTaskRequestById);
-router.post("/addOrUpdate", authenticate, validateUser, taskRequests.addOrUpdate);
-router.patch("/approve", authenticate, authorizeRoles([SUPERUSER]), validateUser, taskRequests.updateTaskRequests);
 router.patch("/", authenticate, authorizeRoles([SUPERUSER]), validateUser, taskRequests.updateTaskRequests);
 router.post("/", authenticate, validators.postTaskRequests, taskRequests.addTaskRequests);
+
 router.post("/migrations", authenticate, authorizeRoles([SUPERUSER]), taskRequests.migrateTaskRequests);
+
+// Deprecated | @Ajeyakrishna-k | https://github.com/Real-Dev-Squad/website-backend/issues/1597
+router.post("/addOrUpdate", authenticate, validateUser, taskRequests.addOrUpdate);
+router.patch("/approve", authenticate, authorizeRoles([SUPERUSER]), validateUser, taskRequests.updateTaskRequests);
 
 module.exports = router;
