@@ -10,6 +10,7 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 const questionQuery = require("../models/questions");
 
+/* Refer to limitation of this clients array here(in the limitations section of doc) - https://github.com/Real-Dev-Squad/website-www/wiki/%5BFeature%5D-%E2%80%90-Realtime-Word-Cloud-Questions-Answers-Feature*/
 let clients: Client[] = [];
 
 function sendQuestionToAll(newQuestion: Question, res: CustomResponse) {
