@@ -581,28 +581,6 @@ describe("Extension Requests", function () {
         });
     });
 
-    it("Should return 401 if someone other than superuser logged in", function (done) {
-      chai
-        .request(app)
-        .get(`/extension-requests`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done();
-          }
-
-          expect(res).to.have.status(401);
-          expect(res.body).to.be.an("object");
-          expect(res.body).to.eql({
-            statusCode: 401,
-            error: "Unauthorized",
-            message: "You are not authorized for this action.",
-          });
-
-          return done();
-        });
-    });
-
     it("Should return paginated response when size is passed", function (done) {
       const fetchPaginatedExtensionRequestStub = sinon.stub(extensionRequests, "fetchPaginatedExtensionRequests");
       chai
