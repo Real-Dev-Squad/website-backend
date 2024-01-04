@@ -1,5 +1,8 @@
 const { getUsername, getUserId, getParticipantUsernames, getParticipantUserIds } = require("./users");
-const { TASK_TYPE, MAPPED_TASK_STATUS } = require("../constants/tasks");
+const { TASK_TYPE, MAPPED_TASK_STATUS, COMPLETED_TASK_STATUS, TASK_STATUS } = require("../constants/tasks");
+const fireStore = require("../utils/firestore");
+const tasksModel = fireStore.collection("tasks");
+const { daysOfWeek } = require("../constants/constants");
 
 const fromFirestoreData = async (task) => {
   if (!task) {
@@ -110,10 +113,46 @@ const parseSearchQuery = (queryString) => {
   return searchParams;
 };
 
+const buildTasksQueryForMissedUpdates = (size) => {
+  const completedTasksStatusList = Object.values(COMPLETED_TASK_STATUS);
+  return tasksModel
+    .where("status", "not-in", [...completedTasksStatusList, TASK_STATUS.AVAILABLE])
+    .orderBy("status")
+    .orderBy("assignee")
+    .limit(size);
+};
+
+const transformTasksUsersQuery = (queries) => {
+  if (!queries) return {};
+  const { "days-count": dateGap, weekday, date, status, size } = queries;
+  let transformedStatus;
+  if (status && status.length === 1 && status[0].value) {
+    transformedStatus = status[0].value;
+  }
+  let transformedSize;
+  if (size) {
+    transformedSize = Number.parseInt(size);
+  }
+  let transformedDateGap;
+  if (dateGap && dateGap.length === 1) {
+    transformedDateGap = Number.parseInt(dateGap[0].value);
+  }
+  let dateList;
+  if (date) {
+    dateList = date.map((date) => Number.parseInt(date.value));
+  }
+  let weekdayList;
+  if (weekday) {
+    weekdayList = weekday.map((day) => daysOfWeek[day.value]);
+  }
+  return { dateGap: transformedDateGap, status: transformedStatus, size: transformedSize, weekdayList, dateList };
+};
 module.exports = {
   fromFirestoreData,
   toFirestoreData,
   buildTasks,
   transformQuery,
   parseSearchQuery,
+  buildTasksQueryForMissedUpdates,
+  transformTasksUsersQuery,
 };

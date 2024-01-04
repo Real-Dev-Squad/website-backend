@@ -1,19 +1,18 @@
-const express = require("express");
-const router = express.Router();
-const authenticate = require("../middlewares/authenticate");
-const {
+import express from "express";
+import authenticate from "../middlewares/authenticate";
+import {
   validateCreateProgressRecords,
   validateGetProgressRecordsQuery,
   validateGetRangeProgressRecordsParams,
   validateGetDayProgressParams,
-} = require("../middlewares/validators/progresses");
-const {
+} from "../middlewares/validators/progresses";
+import {
   createProgress,
   getProgress,
   getProgressRangeData,
   getProgressBydDateController,
-} = require("../controllers/progresses");
-
+} from "../controllers/progresses";
+const router = express.Router();
 router.post("/", authenticate, validateCreateProgressRecords, createProgress);
 router.get("/", validateGetProgressRecordsQuery, getProgress);
 router.get("/:type/:typeId/date/:date", validateGetDayProgressParams, getProgressBydDateController);

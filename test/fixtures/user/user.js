@@ -217,6 +217,7 @@ module.exports = () => {
         archived: false,
         member: true,
         in_discord: true,
+        designer: true,
       },
       twitter_id: "RitvikJamwal4u",
       linkedin_id: "ritvik-jamwal4u",
@@ -239,6 +240,7 @@ module.exports = () => {
         member: true,
         archived: false,
         in_discord: true,
+        product_manager: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
@@ -261,6 +263,7 @@ module.exports = () => {
       },
       roles: {
         member: true,
+        maven: true,
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
@@ -410,6 +413,32 @@ module.exports = () => {
       incompleteUserDetails: false,
       updated_at: Date.now(),
       created_at: Date.now(),
+    },
+    {
+      username: "Vinayak",
+      first_name: "Vinayak",
+      last_name: "Trivedi",
+      yoe: 2,
+      img: "./img.png",
+      linkedin_id: "_",
+      github_id: "xfasrfsd",
+      github_display_name: "vinayak-trivedi",
+      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
+      phone: "1234567890",
+      email: "abc@gmail.com",
+      status: "active",
+      tokens: {
+        githubAccessToken: "githubAccessToken",
+      },
+      roles: {
+        restricted: false,
+        app_owner: true,
+        archived: true,
+      },
+      picture: {
+        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
     },
   ];
 };
