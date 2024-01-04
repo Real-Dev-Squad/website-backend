@@ -493,7 +493,7 @@ describe("users", function () {
     it("API should not be accessible to any regular user", function (done) {
       chai
         .request(app)
-        .post("/users/migrate")
+        .post("/users/migrations?action=adds-github-id")
         .set("cookie", `${cookieName}=${userToken}`)
         .send()
         .end((err, res) => {
@@ -514,9 +514,16 @@ describe("users", function () {
       for (const user of prodUsers.slice(2)) {
         await addUser(user);
       }
+      const allUsers = await chai.request(app).get("/users").set("cookie", `${cookieName}=${superUserToken}`).send();
+      const usersWithoutGithubId = allUsers.body.users.filter((user) => {
+        return !user.github_user_id;
+      });
+
+      expect(usersWithoutGithubId).to.not.have.length(0);
+
       const res = await chai
         .request(app)
-        .post("/users/migrate")
+        .post("/users/migrations?action=adds-github-id")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send();
 
@@ -526,6 +533,17 @@ describe("users", function () {
       expect(res.body.data).to.have.property("usersUpdated").that.is.a("number");
       expect(res.body.data).to.have.property("usersNotUpdated").that.is.a("number");
       expect(res.body.data).to.have.property("invalidUsersDetails").that.is.an("array");
+
+      const updatedUsers = await chai
+        .request(app)
+        .get("/users")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+
+      const updatedUsersWithoutGithubId = updatedUsers.body.users.filter((user) => {
+        return !user.github_user_id;
+      });
+      expect(updatedUsersWithoutGithubId).to.have.length(0);
     });
   });
 });

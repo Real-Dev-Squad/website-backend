@@ -858,6 +858,12 @@ async function usersPatchHandler(req, res) {
   }
 }
 const addGithubId = async (req, res) => {
+  const { action } = req.query;
+  if (action !== "adds-github-id") {
+    return res.status(400).json({
+      message: "Invalid action type",
+    });
+  }
   const usersNotFound = [];
   let countUserFound = 0;
   let countUserNotFound = 0;
@@ -875,16 +881,15 @@ const addGithubId = async (req, res) => {
     const batchCount = Math.ceil(totalUsers / 500);
     // Create batch write operations for each batch of documents
     for (let i = 0; i < batchCount; i++) {
-      const batchDocs = usersSnapshot.docs.slice(i * 500, (i + 1) * 500);
       const batchWrite = firestore.batch();
       const batchWrites = [];
-      for (const userDoc of batchDocs) {
+      for (const userDoc of usersSnapshot.docs.slice(i * 500, (i + 1) * 500)) {
         const githubUsername = userDoc.data().github_id;
         const username = userDoc.data().username;
         const userId = userDoc.id;
         batchWrite.update(userDoc.ref, { github_user_id: null });
 
-        const promise = fetch(`https://api.github.com/users/${githubUsername}`, requestOptions)
+        const getUserDetails = fetch(`https://api.github.com/users/${githubUsername}`, requestOptions)
           .then((response) => {
             if (!response.ok) {
               throw new Error("Network response was not ok");
@@ -902,7 +907,7 @@ const addGithubId = async (req, res) => {
             usersNotFound.push(invalidUsers);
             logger.error("An error occurred at fetch:", error);
           });
-        batchWrites.push(promise);
+        batchWrites.push(getUserDetails);
       }
       await Promise.all(batchWrites);
       await batchWrite.commit();
