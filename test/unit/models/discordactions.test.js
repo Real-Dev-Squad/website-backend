@@ -30,6 +30,7 @@ const {
   getMissedProgressUpdatesUsers,
   addInviteToInviteModel,
   getUserDiscordInvite,
+  groupUpdateLastJoinDate,
 } = require("../../../models/discordactions");
 const { groupData, roleData, existingRole, memberGroupData } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
@@ -764,6 +765,21 @@ describe("discordactions", function () {
     it("should return notFound true, if the invite for user doesn't exist", async function () {
       const invite = await getUserDiscordInvite("kfjkasdafdfdsfl");
       expect(invite.notFound).to.be.equal(true);
+    });
+  });
+  describe("groupUpdateLastJoinDate", function () {
+    beforeEach(function () {
+      sinon.stub(discordRoleModel, "doc").returns({
+        set: Promise.resolve(),
+      });
+    });
+
+    afterEach(function () {
+      sinon.restore();
+    });
+    it("should add current date as lastUsedOn in groups doc", async function () {
+      const res = await groupUpdateLastJoinDate({ id: "kbl" });
+      expect(res.updated).to.be.equal(true);
     });
   });
 });

@@ -48,7 +48,6 @@ const updateAnswer = async (id: string, fieldsToUpdate: AnswerFieldsToUpdate) =>
 };
 
 const getAnswers = async (queryFields) => {
-  console.log({ getanswermode: queryFields });
   const questionId = queryFields.questionId || "";
   const eventId = queryFields.eventId || "";
   const status = queryFields.status || "";

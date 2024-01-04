@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express";
+import authenticate from "../middlewares/authenticate";
+import health from "../controllers/health";
 const router = express.Router();
-const authenticate = require("../middlewares/authenticate");
-const health = require("../controllers/health");
 
 router.get("/", health.healthCheck);
 router.get("/v2", authenticate, health.healthCheck);
