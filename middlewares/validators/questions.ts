@@ -1,6 +1,6 @@
 import { NextFunction } from "express";
 import { CustomRequest, CustomResponse } from "../../types/global";
-const logger = require("../../utils/logger.ts");
+const logger = require("../../utils/logger");
 const joi = require("joi");
 
 const createQuestion = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
