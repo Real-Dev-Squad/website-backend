@@ -110,7 +110,7 @@ describe("Middleware | Authorization", function () {
         .request(app)
         .get("/for-super-user")
         .set("cookie", `${cookieName}=${superUserJwt}`)
-        .end((err: any, res: any) => {
+        .end((err: Error, res: CustomResponse) => {
           if (err) {
             return done(err);
           }
@@ -124,7 +124,7 @@ describe("Middleware | Authorization", function () {
         .request(app)
         .get("/for-super-user")
         .set("cookie", `${cookieName}=${jwtToken}`)
-        .end((err: any, res: any) => {
+        .end((err: Error, res: CustomResponse) => {
           if (err) {
             return done(err);
           }
@@ -137,7 +137,7 @@ describe("Middleware | Authorization", function () {
         .request(app)
         .get("/for-super-user")
         .set("cookie", `${cookieName}=${defaultJwt}`)
-        .end((err: any, res: any) => {
+        .end((err: Error, res: CustomResponse) => {
           if (err) {
             return done(err);
           }
@@ -153,7 +153,7 @@ describe("Middleware | Authorization", function () {
         .get("/for-super-user")
         .set("cookie", `${cookieName}=${defaultJwt}`)
         .set("Authorization", `Bearer ${jwtToken}`)
-        .end((err: any, res: any) => {
+        .end((err: Error, res: CustomResponse) => {
           if (err) {
             return done(err);
           }
@@ -169,7 +169,7 @@ describe("Middleware | Authorization", function () {
         .request(app)
         .get("/for-super-user")
         .set("Authorization", `Bearer ${jwtToken}`)
-        .end((err: any, res: any) => {
+        .end((err: Error, res: CustomResponse) => {
           if (err) {
             return done(err);
           }
