@@ -11,6 +11,7 @@ app.use("/healthcheck", require("./healthCheck"));
 app.use("/logs", require("./logs.js"));
 app.use("/members", require("./members.js"));
 app.use("/pullrequests", require("./pullrequests"));
+app.use("/questions", require("./questions"));
 app.use("/stocks", require("./stocks.js"));
 app.use("/tasks", require("./tasks.js"));
 app.use("/taskRequests", require("./taskRequests"));
