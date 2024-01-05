@@ -9,12 +9,12 @@ const ROLES = require("../constants/roles");
 const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
 
 export const authorization = (allowedRoles: string[], allowedServices: string[]) => {
-  const rolesAreValid = allowedRoles.every((role) => Object.values(ROLES).includes(role));
-  if (!rolesAreValid) {
+  const isRolesValid = allowedRoles.every((role) => Object.values(ROLES).includes(role));
+  if (!isRolesValid) {
     throw new Error("Invalid role");
   }
-  const validServices = allowedServices.every((service) => Object.values(Services).includes(service));
-  if (!validServices) {
+  const isServicesValid = allowedServices.every((service) => Object.values(Services).includes(service));
+  if (!isServicesValid) {
     throw new Error("Invalid service name");
   }
 
