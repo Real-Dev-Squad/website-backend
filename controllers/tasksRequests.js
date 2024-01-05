@@ -9,16 +9,9 @@ const usersUtils = require("../utils/users");
 
 const fetchTaskRequests = async (_, res) => {
   try {
-    const { dev } = _.query;
-    let data;
-    if (dev === "true") {
-      data = await taskRequestsModel.fetchPaginatedTaskRequests(_.query);
-      if (data.error) {
-        return res.status(data.statusCode).json(data);
-      }
-    } else {
-      data = {};
-      data.data = await taskRequestsModel.fetchTaskRequests(true);
+    const data = await taskRequestsModel.fetchPaginatedTaskRequests(_.query);
+    if (data.error) {
+      return res.status(data.statusCode).json(data);
     }
 
     return res.status(200).json({
