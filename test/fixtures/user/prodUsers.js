@@ -162,5 +162,30 @@ const prodUsers = [
     updated_at: 1703486457963,
     created_at: 1703486457963,
   },
+  {
+    id: "4CtxyyUtdwwMKkrdY6pK",
+    incompleteUserDetails: false,
+    discordJoinedAt: "2023-04-06T04:06:30.483000+00:00",
+    discordId: "498037866707025932",
+    roles: {
+      archived: false,
+      in_discord: true,
+    },
+    last_name: "kamat",
+    linkedin_id: "https://www.linkedin.com/in/vishal-kamat-312b02267/",
+    yoe: 0,
+    picture: {
+      publicId: "profile/4CtxyyUtdwwMKkrdY6pK/ov3b7begsmlgpncqu0ey",
+      url: "https://res.cloudinary.com/realdevsquad/image/upload/v1685934397/profile/4CtxyyUtdwwMKkrdY6pK/ov3b7begsmlgpncqu0ey.jpg",
+    },
+    github_created_at: 1552124195000,
+    github_display_name: "Vishal kamat",
+    github_id: "meanwhile7",
+    twitter_id: "vishalkrkamat",
+    first_name: "Vishal",
+    username: "vishal-#34",
+    updated_at: 1702893387292,
+    created_at: 1702893387292,
+  },
 ];
 module.exports = prodUsers;

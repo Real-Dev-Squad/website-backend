@@ -543,7 +543,8 @@ describe("users", function () {
       const updatedUsersWithoutGithubId = updatedUsers.body.users.filter((user) => {
         return !user.github_user_id;
       });
-      expect(updatedUsersWithoutGithubId).to.have.length(0);
+      // For invalid username
+      expect(updatedUsersWithoutGithubId).to.have.length(1);
     });
   });
 });
