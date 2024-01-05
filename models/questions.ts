@@ -3,7 +3,6 @@ const admin = require("firebase-admin");
 import { Question, QuestionBody } from "../types/questions";
 
 const firestore = require("../utils/firestore");
-const logger = require("../utils/logger");
 
 const questionModel = firestore.collection("questions");
 
