@@ -1,15 +1,16 @@
 import { Request } from "express";
+const crypto = require("crypto");
+
+import { Answer, AnswerClient, AnswerFieldsToUpdate, AnswerStatus } from "../typeDefinitions/answers";
 import { CustomRequest, CustomResponse } from "../typeDefinitions/global";
 
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const answerQuery = require("../models/answers");
-const crypto = require("crypto");
-import { Answer, AnswerFieldsToUpdate, AnswerStatus } from "../typeDefinitions/answers";
-const { ANSWER_STATUS } = require("../constants/answers");
-const logger = require("../utils/logger");
-const { HEADERS_FOR_SSE } = require("../constants/constants");
 
-let clients = [];
+const { ANSWER_STATUS } = require("../constants/answers");
+const { HEADERS_FOR_SSE } = require("../constants/constants");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+
+let clients: AnswerClient[] = [];
 
 async function sendAnswerToAll(newAnswer: Answer, res: CustomResponse, method: "POST" | "PATCH") {
   const questionId: string = newAnswer.question_id;
@@ -71,6 +72,7 @@ const updateAnswer = async (req: CustomRequest, res: CustomResponse) => {
 const getAnswers = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const headers = HEADERS_FOR_SSE;
+    const status = req.query.status.toString();
 
     res.writeHead(200, headers);
 
@@ -82,7 +84,7 @@ const getAnswers = async (req: CustomRequest, res: CustomResponse) => {
     const newClient = {
       id: clientId,
       res,
-      status: req.query.status,
+      status: status,
     };
 
     clients.push(newClient);

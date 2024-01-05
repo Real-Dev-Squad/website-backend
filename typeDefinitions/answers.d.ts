@@ -1,3 +1,4 @@
+import { Response } from "express";
 import * as admin from "firebase-admin";
 
 export type AnswerBody = {
@@ -31,4 +32,10 @@ export type AnswerQueryFields = {
   status: AnswerStatus;
   questionId: string;
   eventId: string;
+};
+
+export type AnswerClient = {
+  id: string;
+  res: Response;
+  status?: string;
 };
