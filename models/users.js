@@ -868,6 +868,68 @@ const getNonNickNameSyncedUsers = async () => {
     throw err;
   }
 };
+const addGithubUserId = async () => {
+  try {
+    const usersNotFound = [];
+    let countUserFound = 0;
+    let countUserNotFound = 0;
+
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization:
+          "Basic " + btoa(`${config.get("githubOauth.clientId")}:${config.get("githubOauth.clientSecret")}`),
+      },
+    };
+    const usersSnapshot = await firestore.collection("users").get();
+    const totalUsers = usersSnapshot.docs.length;
+    const batchCount = Math.ceil(totalUsers / 500);
+    // Create batch write operations for each batch of documents
+    for (let i = 0; i < batchCount; i++) {
+      const batchWrite = firestore.batch();
+      const batchWrites = [];
+      for (const userDoc of usersSnapshot.docs.slice(i * 500, (i + 1) * 500)) {
+        if (userDoc.data().github_user_id) continue;
+        const githubUsername = userDoc.data().github_id;
+        const username = userDoc.data().username;
+        const userId = userDoc.id;
+        batchWrite.update(userDoc.ref, { github_user_id: null });
+
+        const getUserDetails = fetch(`https://api.github.com/users/${githubUsername}`, requestOptions)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            const githubUserId = data.id;
+            batchWrite.update(userDoc.ref, { github_user_id: `${githubUserId}` });
+            countUserFound++;
+          })
+          .catch((error) => {
+            countUserNotFound++;
+            const invalidUsers = { userId, username, githubUsername };
+            usersNotFound.push(invalidUsers);
+            logger.error("An error occurred at fetch:", error);
+          });
+        batchWrites.push(getUserDetails);
+      }
+      await Promise.all(batchWrites);
+      await batchWrite.commit();
+    }
+    return {
+      totalUsers: totalUsers,
+      usersUpdated: countUserFound,
+      usersNotUpdated: countUserNotFound,
+      invalidUsersDetails: usersNotFound,
+    };
+  } catch (error) {
+    logger.error(`Error while Updating all users: ${error}`);
+    throw Error(error);
+  }
+};
 
 module.exports = {
   addOrUpdate,
@@ -898,4 +960,5 @@ module.exports = {
   fetchUsersListForMultipleValues,
   fetchUserForKeyValue,
   getNonNickNameSyncedUsers,
+  addGithubUserId,
 };
