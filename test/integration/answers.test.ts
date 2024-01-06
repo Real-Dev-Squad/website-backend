@@ -209,7 +209,7 @@ describe("answers", function () {
         });
     });
 
-    it("should return not authorized if user is not super user", function (done) {
+    it("should return not authorized if user is not super user or member", function (done) {
       sinon.stub(answerQuery, "updateAnswer").returns(answerDataArray[2]);
 
       const payload: { status: AnswerStatus } = {
