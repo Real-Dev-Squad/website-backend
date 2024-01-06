@@ -68,7 +68,7 @@ describe("auth", function () {
     expect(res.headers.location).to.equal(redirectURL);
   });
 
-  it("should not redirect the user to new sign up flow if they are have incomplete user details true, when redirect URL contains dev=true flag", async function () {
+  it("should not redirect the user to new sign up flow if they have incomplete user details true, when redirect URL contains dev=true flag", async function () {
     const redirectURL = "https://www.realdevsquad.com/?dev=true";
     const rdsUiUrl = new URL(redirectURL).href;
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
