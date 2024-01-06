@@ -25,7 +25,7 @@ describe("Answers", function () {
       expect(createdAnswer.status).to.equal("PENDING");
     });
 
-    it("should throw error while creating answer", async function () {
+    it("should throw error if something goes wrong while creating answer", async function () {
       sinon.stub(answerQuery, "createAnswer").throws(new Error("Error while creating answer"));
 
       try {
@@ -49,7 +49,7 @@ describe("Answers", function () {
       await cleanDb();
     });
 
-    it("should update answer with rejected data", async function () {
+    it("should update answer with rejected status", async function () {
       const fieldsToUpdate: AnswerFieldsToUpdate = {
         status: "REJECTED",
         reviewed_by: "satyam-bajpai",
@@ -67,7 +67,7 @@ describe("Answers", function () {
       expect(updatedAnswer.updated_at.toDate()).to.not.equal(createdAnswer.updated_at.toDate());
     });
 
-    it("should update answer with approved data", async function () {
+    it("should update answer with approved status", async function () {
       const fieldsToUpdate: AnswerFieldsToUpdate = {
         status: "APPROVED",
         reviewed_by: "satyam-bajpai",
@@ -84,7 +84,7 @@ describe("Answers", function () {
       expect(updatedAnswer.updated_at.toDate()).to.not.equal(createdAnswer.updated_at.toDate());
     });
 
-    it("should throw error while updating the answer", async function () {
+    it("should throw error if something goes wrong while updating answer", async function () {
       const fieldsToUpdate: AnswerFieldsToUpdate = {
         status: "APPROVED",
         reviewed_by: "satyam-bajpai",
@@ -130,7 +130,7 @@ describe("Answers", function () {
       });
     });
 
-    it("should throw error while creating answer", async function () {
+    it("should throw error if something goes wrong while getting answer", async function () {
       sinon.stub(answerQuery, "getAnswers").throws(new Error("Error while getting answers"));
       const queryFields = {
         questionId: "demo-question-id-1",
