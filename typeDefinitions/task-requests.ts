@@ -5,7 +5,7 @@ export type TaskRequestType = {
   taskId?: string;
   externalIssueUrl?: string;
   requestType?: string;
-  users?: UserType[];
+  users: UserType[];
   createdBy?: string;
   createdAt?: number;
   lastModifiedBy?: string;
@@ -13,7 +13,7 @@ export type TaskRequestType = {
 };
 
 export type UserType = {
-  userId?: string;
+  userId: string;
   proposedDeadline?: number;
   proposedStartDate?: number;
   description?: string;
