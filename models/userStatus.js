@@ -24,7 +24,6 @@ const memberRoleModel = firestore.collection("member-group-roles");
 const usersCollection = firestore.collection("users");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 const { generateAuthTokenForCloudflare } = require("../utils/discord-actions");
-const { addLog } = require("../models/logs");
 
 // added this function here to avoid circular dependency
 /**
@@ -298,19 +297,6 @@ const updateAllUserStatus = async () => {
           delete newStatusData.futureStatus;
           toUpdate = !toUpdate;
           summary.oooUsersAltered++;
-
-          const oooUsersAlteredLog = {
-            type: "userStatus",
-            meta: {
-              userId,
-              statusId: document.id,
-              action: "update",
-              createdAt: Date.now(),
-              state: futureStatus.state,
-            },
-            body: newStatusData.currentStatus,
-          };
-          await addLog(oooUsersAlteredLog.type, oooUsersAlteredLog.meta, oooUsersAlteredLog.body);
         } else {
           summary.oooUsersUnaltered++;
         }
@@ -321,19 +307,6 @@ const updateAllUserStatus = async () => {
           delete newStatusData.futureStatus;
           toUpdate = !toUpdate;
           summary.nonOooUsersAltered++;
-
-          const nonOooUsersAlteredLog = {
-            type: "userStatus",
-            meta: {
-              userId,
-              statusId: document.id,
-              action: "update",
-              createdAt: Date.now(),
-              state: futureStatus.state,
-            },
-            body: newStatusData.currentStatus,
-          };
-          await addLog(nonOooUsersAlteredLog.type, nonOooUsersAlteredLog.meta, nonOooUsersAlteredLog.body);
         } else if (today <= doc.futureStatus.until && today >= doc.futureStatus.from) {
           // the current date i.e today lies in between the from and until so we need to swap the status
           let newCurrentStatus = {};
@@ -346,19 +319,6 @@ const updateAllUserStatus = async () => {
           newStatusData.futureStatus = newFutureStatus;
           toUpdate = !toUpdate;
           summary.nonOooUsersAltered++;
-
-          const nonOooUsersAlteredLog = {
-            type: "userStatus",
-            meta: {
-              userId,
-              statusId: document.id,
-              action: "update",
-              createdAt: Date.now(),
-              state: futureStatus.state,
-            },
-            body: newStatusData.currentStatus,
-          };
-          await addLog(nonOooUsersAlteredLog.type, nonOooUsersAlteredLog.meta, nonOooUsersAlteredLog.body);
         } else {
           summary.nonOooUsersUnaltered++;
         }
@@ -538,19 +498,6 @@ const batchUpdateUsersStatus = async (users) => {
       until: "",
       updatedAt: currentTimeStamp,
     };
-
-    const userStatusLog = {
-      type: "userStatus",
-      meta: {
-        userId,
-        statusId: id,
-        action: userStatusExists ? "update" : "create",
-        createdAt: Date.now(),
-        state,
-      },
-      body: statusToUpdate,
-    };
-    await addLog(userStatusLog.type, userStatusLog.meta, userStatusLog.body);
 
     if (!userStatusExists || !data?.currentStatus) {
       const newUserStatusRef = userStatusModel.doc();
