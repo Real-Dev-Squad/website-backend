@@ -7,7 +7,7 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
-const { transformQuery } = require("../utils/tasks");
+const { transformQuery, transformTasksUsersQuery } = require("../utils/tasks");
 const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 const dataAccess = require("../services/dataAccessLayer");
@@ -15,7 +15,6 @@ const { parseSearchQuery } = require("../utils/tasks");
 const { addTaskCreatedAtAndUpdatedAtFields } = require("../services/tasks");
 const { RQLQueryParser } = require("../utils/RQLParser");
 const { getMissedProgressUpdatesUsers } = require("../models/discordactions");
-const { daysOfWeek } = require("../constants/constants");
 const { logType } = require("../constants/logs");
 
 /**
@@ -484,17 +483,21 @@ const getUsersHandler = async (req, res) => {
   try {
     const { size, cursor, q: queryString } = req.query;
     const rqlParser = new RQLQueryParser(queryString);
-    const { "days-count": daysGap, weekday, date, status } = rqlParser.getFilterQueries();
-    if (!!status && status.length === 1 && status[0].value === tasksUsersStatus.MISSED_UPDATES) {
-      if (daysGap && daysGap > 1) {
-        return res.boom.badRequest("number of days gap provided cannot be greater than 1");
-      }
+    const filterQueries = rqlParser.getFilterQueries();
+    const {
+      dateGap,
+      weekdayList,
+      dateList,
+      status,
+      size: transformedSize,
+    } = transformTasksUsersQuery({ ...filterQueries, size });
+    if (status === tasksUsersStatus.MISSED_UPDATES) {
       const response = await getMissedProgressUpdatesUsers({
         cursor: cursor,
-        size: size && Number.parseInt(size),
-        excludedDates: date?.map((date) => Number.parseInt(date.value)),
-        excludedDays: weekday?.map((day) => daysOfWeek[day.value]),
-        dateGap: !!daysGap && daysGap.length === 1 ? Number.parseInt(daysGap[0].value) : null,
+        size: transformedSize,
+        excludedDates: dateList,
+        excludedDays: weekdayList,
+        dateGap: dateGap,
       });
 
       if (response.error) {
@@ -504,7 +507,7 @@ const getUsersHandler = async (req, res) => {
         .status(200)
         .json({ message: "Discord details of users with status missed updates fetched successfully", data: response });
     } else {
-      return res.boom.badRequest("Unknown type and query");
+      return res.boom.badRequest(`Invalid status: ${status}`);
     }
   } catch (error) {
     const taskRequestLog = {

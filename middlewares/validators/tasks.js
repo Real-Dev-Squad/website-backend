@@ -205,7 +205,7 @@ const getUsersValidator = async (req, res, next) => {
   const queryParamsSchema = joi.object().keys({
     cursor: joi.string().optional(),
     q: joi.string().optional(),
-    size: joi.number().integer().min(1).max(2013),
+    size: joi.number().integer().min(1).max(2000),
   });
   const filtersSchema = joi.object().keys({
     status: joi
@@ -225,6 +225,7 @@ const getUsersValidator = async (req, res, next) => {
           operator: joi.string().valid(Operators.EXCLUDE),
         })
       )
+      .max(1)
       .optional(),
     weekday: joi
       .array()
@@ -234,6 +235,7 @@ const getUsersValidator = async (req, res, next) => {
           operator: joi.string().valid(Operators.EXCLUDE),
         })
       )
+      .max(7)
       .optional(),
     date: joi
       .array()
@@ -243,6 +245,7 @@ const getUsersValidator = async (req, res, next) => {
           operator: joi.string().valid(Operators.EXCLUDE),
         })
       )
+      .max(20)
       .optional(),
   });
 
