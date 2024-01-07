@@ -1,5 +1,5 @@
-const express = require("express");
-const issues = require("../controllers/issues");
+import express from "express";
+import issues from "../controllers/issues";
 const router = express.Router();
 
 router.get("/", issues.getIssues);

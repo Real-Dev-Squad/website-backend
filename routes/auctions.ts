@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express";
+import authenticate from "../middlewares/authenticate";
+import auction from "../controllers/auction";
+import auctionValidator from "../middlewares/validators/auctions";
 const router = express.Router();
-const authenticate = require("../middlewares/authenticate");
-const auction = require("../controllers/auction");
-const auctionValidator = require("../middlewares/validators/auctions");
 
 router.get("/:id", auction.fetchAuctionById);
 router.get("/", auction.fetchAvailableAuctions);
