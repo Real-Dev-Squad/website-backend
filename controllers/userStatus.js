@@ -4,6 +4,7 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const dataAccess = require("../services/dataAccessLayer");
 const userStatusModel = require("../models/userStatus");
 const { userState, CANCEL_OOO } = require("../constants/userStatus");
+const { addLog } = require("../models/logs");
 
 /**
  * Deletes a new User Status
@@ -18,6 +19,19 @@ const deleteUserStatus = async (req, res) => {
     const { userId } = req.params;
     const deletedUserStatus = await userStatusModel.deleteUserStatus(userId);
     const responseObj = { id: deletedUserStatus.id, userId };
+
+    const deleteStatusLog = {
+      type: "userStatus",
+      meta: {
+        userId: deletedUserStatus.id,
+        statusId: deletedUserStatus.data?.statusId,
+        action: "delete",
+        createdAt: Date.now(),
+        state: deletedUserStatus.data?.state,
+      },
+      body: deletedUserStatus.data,
+    };
+    await addLog(deleteStatusLog.type, deleteStatusLog.meta, deleteStatusLog.body);
     let statusCode;
     if (deletedUserStatus.userStatusExisted) {
       responseObj.message = "User Status deleted successfully.";
@@ -109,6 +123,19 @@ const updateUserStatus = async (req, res) => {
       const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
       const { userStatusExists, id, data } = updateStatus;
       const responseObject = { id, userId, data: null, message: "" };
+
+      const updateStatusLog = {
+        type: "userStatus",
+        meta: {
+          userId: updateStatus.id,
+          statusId: updateStatus.data?.statusId,
+          action: "update",
+          createdAt: Date.now(),
+          state: updateStatus.data?.state,
+        },
+        body: updateStatus.data,
+      };
+      await addLog(updateStatusLog.type, updateStatusLog.meta, updateStatusLog.body);
       let statusCode;
       if (data) responseObject.data = data;
       if (userStatusExists) {
@@ -200,6 +227,20 @@ const cancelOOOStatus = async (req, res) => {
   const userId = req.userData.id;
   try {
     const responseObject = await userStatusModel.cancelOooStatus(userId);
+
+    const cancelOOOLog = {
+      type: "userStatus",
+      meta: {
+        userId: responseObject.id,
+        statusId: responseObject.data?.statusId,
+        action: "cancel",
+        createdAt: Date.now(),
+        state: responseObject.data?.state,
+      },
+      body: responseObject.data,
+    };
+    await addLog(cancelOOOLog.type, cancelOOOLog.meta, cancelOOOLog.body);
+
     return res.status(200).json(responseObject);
   } catch (error) {
     logger.error(`Error while cancelling the ${userState.OOO} Status : ${error}`);
