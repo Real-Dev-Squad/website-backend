@@ -10,7 +10,7 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
     return res.boom.forbidden("User should be super user to generate link for other users");
   }
 
-  if (discordId && !isSuperUser) {
+  if (!isSuperUser && discordId) {
     return res.boom.forbidden("Only users who have never joined discord can generate invite link");
   }
 
@@ -18,7 +18,7 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
     return res.boom.forbidden("Archived users cannot generate invite");
   }
 
-  if (!roles.maven && !roles.designer && !roles.product_manager && profileStatus !== "VERIFIED") {
+  if (!isSuperUser && !roles.maven && !roles.designer && !roles.product_manager && profileStatus !== "VERIFIED") {
     return res.boom.forbidden("Only selected roles can generate discord link directly");
   }
 
