@@ -785,5 +785,24 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("invite generated successfully");
       expect(res.body.inviteLink).to.be.equal("discord.gg/asdfdsfsd");
     });
+
+    it("should generate discord link if user is a superUser", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 201,
+          json: () => Promise.resolve({ data: { code: "asdfdsfsd" } }),
+        })
+      );
+
+      mavenUserId = await addUser(mavenUser);
+      mavenAuthToken = authService.generateAuthToken({ userId: mavenUserId });
+      const res = await chai
+        .request(app)
+        .post(`/discord-actions/invite`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`);
+      expect(res).to.have.status(201);
+      expect(res.body.message).to.be.equal("invite generated successfully");
+      expect(res.body.inviteLink).to.be.equal("discord.gg/asdfdsfsd");
+    });
   });
 });
