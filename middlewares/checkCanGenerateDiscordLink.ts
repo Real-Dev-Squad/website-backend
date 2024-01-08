@@ -10,7 +10,7 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
     return res.boom.forbidden("User should be super user to generate link for other users");
   }
 
-  if (discordId) {
+  if (discordId && !isSuperUser) {
     return res.boom.forbidden("Only users who have never joined discord can generate invite link");
   }
 
