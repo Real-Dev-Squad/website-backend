@@ -794,8 +794,6 @@ describe("Discord actions", function () {
         })
       );
 
-      mavenUserId = await addUser(mavenUser);
-      mavenAuthToken = authService.generateAuthToken({ userId: mavenUserId });
       const res = await chai
         .request(app)
         .post(`/discord-actions/invite`)
