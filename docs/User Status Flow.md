@@ -31,33 +31,31 @@ This document provides an explanation for the flow diagram representing the user
 ## Flow Diagram - User Status
 
 ```mermaid
-graph TD
-  subgraph Onboarding
-    A((New User))
-    A -->|Assigned Task| B[Active]
-  end
+flowchart TD
+    style U fill:#4fc3f7,stroke:#0277bd,stroke-width:4px
+    style OB fill:#bdbdbd,stroke:#000,stroke-width:4px
+    style TA fill:#7cb342,stroke:#000,stroke-width:4px
+    style A fill:#7cb342,stroke:#000,stroke-width:4px
+    style TC fill:#7cb342,stroke:#0277bd,stroke-width:2px
+    style I fill:#ff8a80,stroke:#7cb342,stroke-width:2px
+    style OOO fill:#ff8a80,stroke:#ff5252,stroke-width:2px
+    style OO fill:#ff8a80,stroke:#ff5252,stroke-width:2px
+    style AT fill:#7cb342,stroke:#000,stroke-width:2px
+    style NAT fill:#bdbdbd,stroke:#000,stroke-width:2px
+    
+    U[fa:fa-user User] -->|Initiate| OB(Onboarding)
+    OB -->TA{Task Assigned}
+    TA -->A("`**Active**`")
+    A -->TC{Task Completed}
+    TC --> I([fa:fa-clock Idle])
+    I -->TA{Task Assigned}
+    A --> OOO[User go for OOO]
+    OOO --> OO{OOO}
+    OO -->|After time finish | AT(Active Task)
+    AT --> A(Active)
+    OO -->|After time finish | NAT(No Active Task)
+    NAT --> I(Idle)
 
-  subgraph OOO
-    C((User))
-    C -->|Go to link| D[OOO]
-    D -->|After time finish and not have active task| E[Idle]
-    D -->|After time finish if have active task| F[Active]
-  end
-
-  subgraph Active
-    F -->|Task Completed| G[Idle]
-    F -->|New Task Assigned| H[Active]
-  end
-
-  subgraph Idle
-    E -->|Task Assigned| I[Active]
-  end
-
-  B -->|Task Completed| E
-  E -->|Task Assigned| H
-  G -->|New Task Assigned| H
-  H -->|Task Completed| G
-  I -->|Task Completed| G
 ```
 
 ## Conclusion
