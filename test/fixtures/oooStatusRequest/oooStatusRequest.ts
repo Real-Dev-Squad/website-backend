@@ -22,7 +22,6 @@ export const oooStatusRequests = [
         processedBy: "adminUser",
         reason: "Welcome back! Enjoy the conference.",
     },
-
     {
         id: "Me8sT1Tlid4Y6Y0d",
         userId: "user789",

@@ -1,9 +1,7 @@
 import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE } from "../../constants/request";
-import { parseQueryParams } from "../../utils/queryParser";
 import { OooStatusRequestRequest, OooStatusRequestResponse } from "../../types/oooStatusRequest";
-const OOO_STATUS_REQUEST_ENUM = Object.values(REQUEST_STATE);
 import { RQLQueryParser } from "../../utils/RQLParser";
 
 export const createOooStatusRequestValidator = async (
