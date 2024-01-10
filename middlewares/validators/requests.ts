@@ -5,7 +5,7 @@ import { parseQueryParams } from "../../utils/queryParser";
 import { OooStatusRequestRequest, OooStatusRequestResponse } from "../../types/oooStatusRequest";
 const OOO_STATUS_REQUEST_ENUM = Object.values(REQUEST_STATE);
 
-export const createOooStatusRequest = async (
+export const createOooStatusRequestValidator = async (
   req: OooStatusRequestRequest,
   res: OooStatusRequestResponse,
   next: NextFunction
@@ -32,7 +32,7 @@ export const createOooStatusRequest = async (
   }
 };
 
-export const updateOooStatusRequestStatus = async (
+export const updateOooStatusRequestValidator = async (
   req: OooStatusRequestRequest,
   res: OooStatusRequestResponse,
   next: NextFunction
@@ -56,7 +56,7 @@ export const updateOooStatusRequestStatus = async (
   }
 };
 
-export const getOooStatusRequestsValidator = async (req, res, next) => {
+export const getOooStatusRequestValidator = async (req, res, next) => {
   const schema = joi.object().keys({
     dev: joi.bool().optional().sensitive(),
     cursor: joi.string().optional(),
