@@ -1,17 +1,15 @@
 import { REQUEST_STATE } from "../../../constants/request";
 
+export const createOooStatusRequests = {
+    userId: "user123",
+    from: 1234567890,
+    until: 1234567899,
+    message: "Out of office for personal reasons.",
+    state: REQUEST_STATE.PENDING,
+    createdAt: 1234567890,
+    updatedAt: 1234567890,
+  }
 export const oooStatusRequests = [
-    {
-        id: "OfsT1Tlid4Y6Y0d",
-        userId: "user123",
-        state: REQUEST_STATE.PENDING,
-        from: 1709438800000,
-        until: 1709870800000,
-        message: "Out of office for personal reasons.",
-        createdAt: 1709438900000,
-        updatedAt: 1709438900000,
-    },
-
     {
         id: "MpykhM8sT1Tlid4Y6Y0d",
         userId: "user456",

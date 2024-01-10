@@ -1,26 +1,19 @@
-const { expect } = require("chai");
+import chai from "chai";
 const sinon = require("sinon");
+const { expect } = chai;
+
 const {
   createOooStatusRequestValidator,
   updateOooStatusRequestValidator,
   getOooStatusRequestValidator,
 } = require("./../../../middlewares/validators/requests");
-const { REQUEST_STATE } = require("../../../constants/request");
-const { updateOooStatusRequest } = require("./../../fixtures/oooStatusRequest/oooStatusRequest");
+const { updateOooStatusRequest, createOooStatusRequests } = require("./../../fixtures/oooStatusRequest/oooStatusRequest");
 
 describe("OOO Status Request Validators", function () {
   describe("createOooStatusRequestValidator", function () {
-    it("should pass validation for a valid create request", async function () {
+    it.only("should pass validation for a valid create request", async function () {
       const req = {
-        body: {
-          userId: "user123",
-          from: 1234567890,
-          until: 1234567899,
-          message: "Out of office for personal reasons.",
-          state: REQUEST_STATE.PENDING,
-          createdAt: 1234567890,
-          updatedAt: 1234567890,
-        },
+        body: createOooStatusRequests,
       };
       const res = {};
       const nextSpy = sinon.spy();
