@@ -11,7 +11,7 @@ const { updateOooStatusRequest, createOooStatusRequests } = require("./../../fix
 
 describe("OOO Status Request Validators", function () {
   describe("createOooStatusRequestValidator", function () {
-    it.only("should pass validation for a valid create request", async function () {
+    it("should pass validation for a valid create request", async function () {
       const req = {
         body: createOooStatusRequests,
       };
