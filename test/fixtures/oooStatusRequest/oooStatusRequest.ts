@@ -1,8 +1,10 @@
+import { REQUEST_STATE } from "../../../constants/request";
+
 export const oooStatusRequests = [
     {
         id: "OfsT1Tlid4Y6Y0d",
         userId: "user123",
-        state: "PENDING",
+        state: REQUEST_STATE.PENDING,
         from: 1709438800000,
         until: 1709870800000,
         message: "Out of office for personal reasons.",
@@ -13,7 +15,7 @@ export const oooStatusRequests = [
     {
         id: "MpykhM8sT1Tlid4Y6Y0d",
         userId: "user456",
-        state: "APPROVED",
+        state: REQUEST_STATE.APPROVED,
         from: 1709525300000,
         until: 1709870800000,
         message: "Attending a work conference.",
@@ -26,7 +28,7 @@ export const oooStatusRequests = [
     {
         id: "Me8sT1Tlid4Y6Y0d",
         userId: "user789",
-        state: "REJECTED",
+        state: REQUEST_STATE.REJECTED,
         from: 1709603700000,
         until: 1709785600000,
         message: "Out of office for personal reasons.",
@@ -39,7 +41,7 @@ export const oooStatusRequests = [
     {
         id: "abc123",
         userId: "user101",
-        state: "PENDING",
+        state: REQUEST_STATE.PENDING,
         from: 1710000000000,
         until: 1711000000000,
         message: "Family vacation.",
@@ -50,7 +52,7 @@ export const oooStatusRequests = [
     {
         id: "def456",
         userId: "user202",
-        state: "APPROVED",
+        state: REQUEST_STATE.APPROVED,
         from: 1712000000000,
         until: 1713000000000,
         message: "Remote work due to personal reasons.",
@@ -61,3 +63,13 @@ export const oooStatusRequests = [
     },
 
 ];
+
+
+export const updateOooStatusRequest = [
+    {
+        state: REQUEST_STATE.APPROVED,
+        processedBy: "admin123",
+        updatedAt: 1234567890,
+        reason: "Approval granted.",
+    }
+]

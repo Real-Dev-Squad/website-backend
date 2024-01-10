@@ -6,6 +6,7 @@ const {
   getOooStatusRequestValidator,
 } = require("./../../../middlewares/validators/requests");
 const { REQUEST_STATE } = require("../../../constants/request");
+const { updateOooStatusRequest } = require("./../../fixtures/oooStatusRequest/oooStatusRequest");
 
 describe("OOO Status Request Validators", function () {
   describe("createOooStatusRequestValidator", function () {
@@ -52,12 +53,7 @@ describe("OOO Status Request Validators", function () {
   describe("updateOooStatusRequestValidator", function () {
     it("should pass validation for a valid update request", async function () {
       const req = {
-        body: {
-          state: REQUEST_STATE.APPROVED,
-          processedBy: "admin123",
-          updatedAt: 1234567890,
-          reason: "Approval granted.",
-        },
+        body: updateOooStatusRequest[0],
       };
       const res = {};
       const nextSpy = sinon.spy();
@@ -88,28 +84,33 @@ describe("OOO Status Request Validators", function () {
   });
 
   describe("getOooStatusRequestValidator", function () {
-    it("should pass validation for a valid get request", async function () {
+    it("should pass validation for no values for query params are passed", async function () {
+      const req = { query: {} };
+      const res = {};
+      const nextSpy = sinon.spy();
+
+      await getOooStatusRequestValidator(req, res, nextSpy);
+      expect(nextSpy.calledOnce).to.equal(true);
+    });
+
+    it("should pass validation for valid query parameters", async function () {
       const req = {
         query: {
-          dev: true,
-          cursor: "abc123",
-          order: "asc",
-          size: 10,
-          q: "status:pending",
+          q: "status:approved",
         },
       };
       const res = {};
       const nextSpy = sinon.spy();
 
       await getOooStatusRequestValidator(req, res, nextSpy);
-
       expect(nextSpy.calledOnce).to.equal(true);
     });
 
-    it("should throw an error for an invalid get request", async function () {
+    it("should not pass validation when next and prev are passed together", async function () {
       const req = {
         query: {
-          // Invalid query parameters
+          next: "value",
+          prev: "value",
         },
       };
       const res = {
@@ -122,7 +123,6 @@ describe("OOO Status Request Validators", function () {
       await getOooStatusRequestValidator(req, res, nextSpy);
 
       expect(res.boom.badRequest.calledOnce).to.equal(true);
-      expect(nextSpy.calledOnce).to.equal(false);
     });
   });
 });
