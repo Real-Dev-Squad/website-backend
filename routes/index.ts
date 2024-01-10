@@ -1,6 +1,7 @@
 import express from "express";
 const app = express.Router();
 
+app.use("/answers", require("./answers"));
 app.use("/auctions", require("./auctions"));
 app.use("/arts", require("./arts"));
 app.use("/auth", require("./auth"));
