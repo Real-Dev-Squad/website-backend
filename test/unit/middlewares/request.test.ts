@@ -14,6 +14,9 @@ describe("OOO Status Request Validators", function () {
     it("should pass validation for a valid create request", async function () {
       const req = {
         body: createOooStatusRequests,
+        userData: {
+          id: "user123",
+        },
       };
       const res = {};
       const nextSpy = sinon.spy();
@@ -27,6 +30,9 @@ describe("OOO Status Request Validators", function () {
       const req = {
         body: {
           // Missing required fields
+        },
+        userData: {
+          id: "someUserId",
         },
       };
       const res = {

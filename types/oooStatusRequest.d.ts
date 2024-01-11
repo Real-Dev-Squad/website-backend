@@ -27,13 +27,6 @@ export type OooStatusRequestBody = {
 
 type UserData = {
   id: string;
-  github_created_at: number;
-  github_display_name: string;
-  roles: string[];
-  github_id: string;
-  incompleteUserDetails: boolean;
-  updated_at: number;
-  created_at: number;
 };
 export type OooStatusRequestResponse = Response & { boom: Boom };
 export type OooStatusRequestRequest = Request & { OooStatusRequestBody , userData: UserData };

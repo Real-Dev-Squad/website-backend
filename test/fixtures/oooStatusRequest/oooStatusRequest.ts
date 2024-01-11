@@ -2,13 +2,13 @@ import { REQUEST_STATE } from "../../../constants/request";
 
 export const createOooStatusRequests = {
     userId: "user123",
-    from: 1234567890,
-    until: 1234567899,
+    from: Date.now() + 100000,
+    until: Date.now() + 200000,
     message: "Out of office for personal reasons.",
     state: REQUEST_STATE.PENDING,
     createdAt: 1234567890,
     updatedAt: 1234567890,
-  }
+};
 export const oooStatusRequests = [
     {
         id: "MpykhM8sT1Tlid4Y6Y0d",
@@ -58,9 +58,7 @@ export const oooStatusRequests = [
         processedBy: "adminUser",
         reason: "Understood. Make sure to stay connected during remote work.",
     },
-
 ];
-
 
 export const updateOooStatusRequest = [
     {
@@ -68,5 +66,5 @@ export const updateOooStatusRequest = [
         processedBy: "admin123",
         updatedAt: 1234567890,
         reason: "Approval granted.",
-    }
-]
+    },
+];
