@@ -9,25 +9,48 @@ export const createOooStatusRequestValidator = async (
   res: OooStatusRequestResponse,
   next: NextFunction
 ) => {
+  const requestedUserId = req.userData.id;
+
   const schema = joi
     .object()
     .strict()
     .keys({
-      userId: joi.string().required(),
-      from: joi.number().required(),
-      until: joi.number().required(),
-      message: joi.string().required(),
-      state: joi.string().valid(REQUEST_STATE.PENDING).required(),
-      createdAt: joi.number().required(),
-      updatedAt: joi.number().required(),
+      userId: joi.string().required().valid(requestedUserId)
+        .messages({
+          'any.required': 'userId is required',
+          'string.empty': 'userId cannot be empty',
+          'any.only': 'User must be the same as the logged in user',
+        }),
+      from: joi.number().min(Date.now())
+        .messages({
+          'number.min': 'from date must be greater than or equal to current date',
+        })
+        .required(),
+      until: joi.number().min(joi.ref('from'))
+        .messages({
+          'number.min': 'until date must be greater than or equal to from date',
+        })
+        .required(),
+      message: joi.string().required()
+        .messages({
+          'any.required': 'message is required',
+          'string.empty': 'message cannot be empty',
+        }),
+      state: joi.string().valid(REQUEST_STATE.PENDING).required()
+        .messages({
+          'any.only': 'state must be PENDING',
+        }),
+      createdAt: joi.number().optional(),
+      updatedAt: joi.number().optional(),
     });
 
   try {
-    await schema.validateAsync(req.body);
+    await schema.validateAsync(req.body, { abortEarly: false });
     next();
   } catch (error) {
-    logger.error(`Error while validating OOO status request creation payload : ${error}`);
-    res.boom.badRequest(error.details[0].message);
+    const errorMessages = error.details.map((detail) => detail.message);
+    logger.error(`Error while validating OOO status request creation payload: ${errorMessages}`);
+    res.boom.badRequest(errorMessages);
   }
 };
 
