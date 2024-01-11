@@ -19,7 +19,7 @@ export const oooStatusRequests = [
         message: "Attending a work conference.",
         createdAt: 1709525400000,
         updatedAt: 1709827800000,
-        processedBy: "adminUser",
+        lastUpdatedBy: "adminUser",
         reason: "Welcome back! Enjoy the conference.",
     },
     {
@@ -31,7 +31,7 @@ export const oooStatusRequests = [
         message: "Out of office for personal reasons.",
         createdAt: 1708763200000,
         updatedAt: 1708841500000,
-        processedBy: "adminUser",
+        lastUpdatedBy: "adminUser",
         reason: "Sorry, we can't approve additional leave at this time.",
     },
 
@@ -55,7 +55,7 @@ export const oooStatusRequests = [
         message: "Remote work due to personal reasons.",
         createdAt: 1711999999999,
         updatedAt: 1712000000000,
-        processedBy: "adminUser",
+        lastUpdatedBy: "adminUser",
         reason: "Understood. Make sure to stay connected during remote work.",
     },
 ];
@@ -63,7 +63,7 @@ export const oooStatusRequests = [
 export const updateOooStatusRequest = [
     {
         state: REQUEST_STATE.APPROVED,
-        processedBy: "admin123",
+        lastUpdatedBy: "admin123",
         updatedAt: 1234567890,
         reason: "Approval granted.",
     },

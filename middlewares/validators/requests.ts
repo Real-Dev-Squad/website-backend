@@ -64,7 +64,7 @@ export const updateOooStatusRequestValidator = async (
     .strict()
     .keys({
       state: joi.string().valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED).required(),
-      processedBy: joi.string().required(),
+      lastUpdatedBy: joi.string().required(),
       updatedAt: joi.number().required(),
       reason: joi.string().optional(),
     });

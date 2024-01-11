@@ -10,7 +10,7 @@ export type OooStatusRequest = {
   message?: string;
   status: userState;
   state?: REQUEST_STATE;
-  processedBy?: string;
+  lastUpdatedBy?: string;
   createdAt?: admin.firestore.Timestamp;
   updatedAt?: admin.firestore.Timestamp;
   reason?: string;
