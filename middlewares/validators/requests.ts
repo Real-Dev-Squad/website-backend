@@ -130,6 +130,6 @@ export const getOooStatusRequestValidator = async (req, res, next) => {
     next();
   } catch (error) {
     logger.error(`Error validating get task requests payload : ${error}`);
-    res.boom.badRequest(error?.details?.[0]?.message || error?.message);
+    res.boom.badRequest(error.details[0].message);
   }
 };
