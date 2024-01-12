@@ -864,6 +864,39 @@ const getNonNickNameSyncedUsers = async () => {
   }
 };
 
+const fetchPaginatedArchivedUsers = async (size = FIRESTORE_IN_CLAUSE_SIZE, cursor, key) => {
+  try {
+    const archivedUsers = [];
+    let usersSnapshot = userModel.where("roles.archived", "==", true);
+    if (cursor && key === "next") {
+      const data = await userModel.doc(cursor).get();
+      usersSnapshot = usersSnapshot.startAfter(data).limit(size);
+    } else if (cursor && key === "prev") {
+      const data = await userModel.doc(cursor).get();
+      usersSnapshot = usersSnapshot.endAt(data).limitToLast(size);
+    } else if (size && !cursor && !key) {
+      usersSnapshot = usersSnapshot.limit(size);
+    }
+    usersSnapshot = await usersSnapshot.get();
+    if (!usersSnapshot.exists) {
+      logger.info(`User with id : ${cursor} not found`);
+      return { users: [], next: "" };
+    }
+    usersSnapshot.forEach((doc) => {
+      archivedUsers.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+    const resultDataLength = usersSnapshot.docs.length;
+    const lastVisible = usersSnapshot.docs[resultDataLength - 1];
+
+    return { users: archivedUsers, next: lastVisible?.id };
+  } catch (error) {
+    logger.error("Error while getting archived users", error);
+    throw error;
+  }
+};
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -893,4 +926,5 @@ module.exports = {
   fetchUsersListForMultipleValues,
   fetchUserForKeyValue,
   getNonNickNameSyncedUsers,
+  fetchPaginatedArchivedUsers,
 };

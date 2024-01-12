@@ -11,11 +11,9 @@ const sinon = require("sinon");
 const firestore = require("../../../utils/firestore");
 const userModel = firestore.collection("users");
 const dataAccessLayer = require("../../../services/dataAccessLayer");
-
 /**
  * Test the utils functions and validate the data returned
  */
-
 describe("users", function () {
   let userId;
   const taskData = {
@@ -50,7 +48,6 @@ describe("users", function () {
       expect(convertedUsername).to.equal(userData.username);
     });
   });
-
   describe("getUserId", function () {
     it("should receive username of user and return userId", async function () {
       const convertedUserId = await usersUtils.getUserId(userData.username);

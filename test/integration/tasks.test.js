@@ -29,7 +29,9 @@ chai.use(chaiHttp);
 
 const appOwner = userData[3];
 const superUser = userData[4];
-
+const archivedUsers = userData.filter((user) => user?.roles?.archived === true);
+const archivedUserNames = archivedUsers.map((user) => user.username);
+const archivedUserIds = [];
 let jwt, superUserJwt;
 const { createProgressDocument } = require("../../models/progresses");
 const { stubbedModelTaskProgressData } = require("../fixtures/progress/progresses");
@@ -70,13 +72,45 @@ const taskData = [
     assignee: appOwner.username,
   },
 ];
-
+const tasksAssigneeArchived = [
+  {
+    title: "Test task 1",
+    type: "feature",
+    endsOn: 1234,
+    startedOn: 4567,
+    status: "IN_PROGRESS",
+    percentCompleted: 10,
+    participants: [],
+    assignee: "ankita",
+    completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+    lossRate: { [DINERO]: 1 },
+    isNoteworthy: true,
+  },
+  {
+    title: "Test task 2",
+    type: "feature",
+    endsOn: 1234,
+    startedOn: 4567,
+    status: "BLOCKED",
+    percentCompleted: 10,
+    participants: [],
+    assignee: "ram",
+    completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+    lossRate: { [DINERO]: 1 },
+    isNoteworthy: true,
+  },
+];
 describe("Tasks", function () {
   let taskId1, taskId;
 
   before(async function () {
     const userId = await addUser(appOwner);
     const superUserId = await addUser(superUser);
+
+    archivedUsers.forEach(async (user) => {
+      const userId = await addUser(user);
+      archivedUserIds.push(userId);
+    });
     jwt = authService.generateAuthToken({ userId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
 
@@ -86,6 +120,8 @@ describe("Tasks", function () {
 
     // Add the completed task
     taskId = (await tasks.updateTask(taskData[1])).taskId;
+    tasksAssigneeArchived[0].assigneeId = archivedUserIds[0];
+    tasksAssigneeArchived[1].assigneeId = archivedUserIds[1];
   });
 
   after(async function () {
@@ -318,7 +354,37 @@ describe("Tasks", function () {
           return done();
         });
     });
+    it("Should get all tasks assigned to archived users GET /tasks", async function () {
+      const { taskId: taskId1 } = await tasks.updateTask(tasksAssigneeArchived[0]);
+      const { taskId: taskId2 } = await tasks.updateTask(tasksAssigneeArchived[1]);
+      const res = await chai.request(app).get(`/tasks?assignee-role=archived&dev=true`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("Tasks returned successfully!");
+      expect(res.body.tasks).to.be.a("array");
+      expect(res.body).to.have.property("next");
+      expect(res.body).to.have.property("prev");
 
+      const tasksData = res.body.tasks ?? [];
+      tasksData.forEach((task) => {
+        expect(res.body.task.id).to.be.oneOf([taskId1, taskId2]);
+        expect(task.assignee).to.be.oneOf(archivedUserNames);
+      });
+    });
+    it("Should return 400 when assignee role is not archived", async function () {
+      const res = await chai.request(app).get(`/tasks?assignee-role=abc&dev=true`);
+      expect(res).to.have.status(400);
+      expect(res.body).to.be.a("object");
+      expect(res.body.error).to.equal("Bad Request");
+      expect(res.body.message).to.equal('"assignee-role" must be [archived]');
+    });
+    it("Should return 400 when assignee role is not used with dev=true param", async function () {
+      const res = await chai.request(app).get(`/tasks?assignee-role=archived`);
+      expect(res).to.have.status(400);
+      expect(res.body).to.be.a("object");
+      expect(res.body.error).to.equal("Bad Request");
+      expect(res.body.message).to.equal("assignee role should be used with dev=true");
+    });
     it("Should get all overdue tasks GET /tasks", function (done) {
       chai
         .request(app)
@@ -427,7 +493,7 @@ describe("Tasks", function () {
           matchingTasks.forEach((task) => {
             expect(task.title.toLowerCase()).to.include(searchTerm.toLowerCase());
           });
-          expect(matchingTasks).to.have.length(6);
+          expect(matchingTasks).to.have.length(8);
 
           return done();
         });
