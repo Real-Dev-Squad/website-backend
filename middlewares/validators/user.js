@@ -54,7 +54,7 @@ const updateUser = async (req, res, next) => {
       roles: joi.object().keys({
         designer: joi.boolean().optional(),
         maven: joi.boolean().optional(),
-        productmanager: joi.boolean().optional(),
+        product_manager: joi.boolean().optional(),
       }),
     });
 
