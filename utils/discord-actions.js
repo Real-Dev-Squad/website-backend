@@ -10,6 +10,17 @@ const generateAuthTokenForCloudflare = () => {
   });
   return authToken;
 };
+const genrateCloudFlareHeaders = ({ userName, id }) => {
+  const authToken = generateAuthTokenForCloudflare();
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${authToken}`,
+  };
+  if (userName && id) {
+    headers["X-Audit-Log-Reason"] = `Action initiator's username=>${userName} and id=${id}`;
+  }
+  return headers;
+};
 
 const generateDiscordProfileImageUrl = async (discordId) => {
   try {
@@ -29,4 +40,5 @@ const generateDiscordProfileImageUrl = async (discordId) => {
 module.exports = {
   generateDiscordProfileImageUrl,
   generateAuthTokenForCloudflare,
+  genrateCloudFlareHeaders,
 };

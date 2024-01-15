@@ -8,6 +8,7 @@
       "host": "0.0.0.0",
       "enabled": true,
       "port": 4000
-    }
+    },
+    "singleProjectMode": true
   }
 }
