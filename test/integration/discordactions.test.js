@@ -45,7 +45,9 @@ chai.use(chaiHttp);
 const { userStatusDataForOooState } = require("../fixtures/userStatus/userStatus");
 const { generateCronJobToken } = require("../utils/generateBotToken");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
+const { genrateCloudFlareHeaders } = require("../../utils/discord-actions");
 
+// describe("reason", function () {});
 describe("Discord actions", function () {
   let superUserId;
   let archievedUserId;
@@ -236,6 +238,28 @@ describe("Discord actions", function () {
       expect(res).to.have.status(201);
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Role added successfully!");
+    });
+    it("should allow role to be added if reson passed", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({}),
+        })
+      );
+      const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
+
+      await chai
+        .request(app)
+        .post("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ roleid, userid: userData[0].discordId });
+
+      const headers = genrateCloudFlareHeaders({ id: userId, userName: "ankur" });
+      sinon.assert.calledWith(fetchStub, `${DISCORD_BASE_URL}/roles/add`, {
+        method: "PUT",
+        body: JSON.stringify({ roleid, userid: userData[0].discordId }),
+        headers,
+      });
     });
     it("should not allow unknown role to be added to user", async function () {
       const res = await chai
