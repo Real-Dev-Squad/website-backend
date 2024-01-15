@@ -10,7 +10,7 @@ const generateAuthTokenForCloudflare = () => {
   });
   return authToken;
 };
-const genrateCloudFlareHeaders = ({ userName, id }) => {
+const genrateCloudFlareHeaders = ({ userName, id } = {}) => {
   const authToken = generateAuthTokenForCloudflare();
   const headers = {
     "Content-Type": "application/json",
