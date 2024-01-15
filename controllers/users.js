@@ -857,20 +857,16 @@ async function usersPatchHandler(req, res) {
   }
 }
 const migrations = async (req, res) => {
-  const { action } = req.query;
-  if (action !== "adds-github-id") {
-    return res.status(400).json({
-      message: "Invalid action type",
-    });
-  }
+  const { skip = 0, limit } = req.query;
 
   try {
-    const result = await addGithubUserId();
+    const result = await addGithubUserId(parseInt(skip), parseInt(limit));
     return res.status(200).json({
       message: "Result of migration",
       data: result,
     });
   } catch (error) {
+    logger.error(`Internal Server Error: ${error}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };

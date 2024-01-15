@@ -493,7 +493,7 @@ describe("users", function () {
     it("API should not be accessible to any regular user", function (done) {
       chai
         .request(app)
-        .post("/users/migrations?action=adds-github-id")
+        .post("/users/migrations?action=adds-github-id&skip=0&limit=10")
         .set("cookie", `${cookieName}=${userToken}`)
         .send()
         .end((err, res) => {
@@ -523,7 +523,7 @@ describe("users", function () {
 
       const res = await chai
         .request(app)
-        .post("/users/migrations?action=adds-github-id")
+        .post("/users/migrations?action=adds-github-id&skip=0&limit=10")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send();
 
