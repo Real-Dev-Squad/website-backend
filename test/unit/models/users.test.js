@@ -490,7 +490,7 @@ describe("users", function () {
       await cleanDb();
     });
 
-    it("API should not be accessible to any regular user", function (done) {
+    it("Migration API should not be accessible to any regular user", function (done) {
       chai
         .request(app)
         .post("/users/migrations?action=adds-github-id&skip=0&limit=10")
@@ -510,7 +510,16 @@ describe("users", function () {
           return done();
         });
     });
-    it("API should be accessible by super user", async function () {
+    it("Migration API should be accessible to super user", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/migrations?action=adds-github-id&skip=0&limit=10")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+      expect(res).to.have.status(200);
+    });
+
+    it("Migration API to add github_user_id should work", async function () {
       for (const user of prodUsers.slice(2)) {
         await addUser(user);
       }
