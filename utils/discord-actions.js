@@ -10,14 +10,14 @@ const generateAuthTokenForCloudflare = () => {
   });
   return authToken;
 };
-const genrateCloudFlareHeaders = ({ userName, id } = {}) => {
+const genrateCloudFlareHeaders = ({ username, id } = {}) => {
   const authToken = generateAuthTokenForCloudflare();
   const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${authToken}`,
   };
-  if (userName && id) {
-    headers["X-Audit-Log-Reason"] = `Action initiator's username=>${userName} and id=${id}`;
+  if (username && id) {
+    headers["X-Audit-Log-Reason"] = `Action initiator's username=>${username} and id=${id}`;
   }
   return headers;
 };

@@ -45,7 +45,6 @@ chai.use(chaiHttp);
 const { userStatusDataForOooState } = require("../fixtures/userStatus/userStatus");
 const { generateCronJobToken } = require("../utils/generateBotToken");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
-const { genrateCloudFlareHeaders } = require("../../utils/discord-actions");
 
 // describe("reason", function () {});
 describe("Discord actions", function () {
@@ -239,27 +238,27 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Role added successfully!");
     });
-    it("should allow role to be added if reson passed", async function () {
+    it("should create reson and pass it down to the bot", async function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({}),
         })
       );
-      const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
-      await chai
+      const body = { roleid, userid: userData[0].discordId };
+      const res = await chai
         .request(app)
         .post("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
-        .send({ roleid, userid: userData[0].discordId });
+        .send(body);
 
-      const headers = genrateCloudFlareHeaders({ id: userId, userName: "ankur" });
-      sinon.assert.calledWith(fetchStub, `${DISCORD_BASE_URL}/roles/add`, {
-        method: "PUT",
-        body: JSON.stringify({ roleid, userid: userData[0].discordId }),
-        headers,
-      });
+      expect(res).to.have.status(201);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Role added successfully!");
+      expect(fetchStub.getCall(0).args[1].headers["X-Audit-Log-Reason"]).to.equal(
+        `Action initiator's username=>ankur and id=${userId}`
+      );
     });
     it("should not allow unknown role to be added to user", async function () {
       const res = await chai
@@ -328,6 +327,26 @@ describe("Discord actions", function () {
         });
     });
 
+    it("should create reson and pass it down to the bot", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ roleId: "1234", wasSuccess: true }),
+        })
+      );
+      const res = await chai
+        .request(app)
+        .delete("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ roleid, userid: userData[0].discordId });
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Role deleted successfully");
+      expect(fetchStub.getCall(0).args[1].headers["X-Audit-Log-Reason"]).to.equal(
+        `Action initiator's username=>ankur and id=${userId}`
+      );
+    });
     it("should not allow unknown role to be deleted from user", async function () {
       const res = await chai
         .request(app)
