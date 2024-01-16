@@ -490,10 +490,10 @@ describe("users", function () {
       await cleanDb();
     });
 
-    it("Migration API should not be accessible to any regular user", function (done) {
+    it("Migration API should not be accessible by any regular user", function (done) {
       chai
         .request(app)
-        .post("/users/migrations?action=adds-github-id&skip=0&limit=10")
+        .post("/users/migrations?action=adds-github-id&page=0&size=10")
         .set("cookie", `${cookieName}=${userToken}`)
         .send()
         .end((err, res) => {
@@ -510,10 +510,22 @@ describe("users", function () {
           return done();
         });
     });
-    it("Migration API should be accessible to super user", async function () {
+    it("Migration API should be not be accessible with invalid query params", async function () {
       const res = await chai
         .request(app)
-        .post("/users/migrations?action=adds-github-id&skip=0&limit=10")
+        .post("/users/migrations")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+      expect(res).to.have.status(400);
+      expect(res.body).to.have.property("message");
+      expect(res.body).to.have.property("error");
+      expect(res.body.message).to.equal("Invalid Query Parameters Passed");
+      expect(res.body.error).to.equal("Bad Request");
+    });
+    it("Migration API should be accessible by super user", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/migrations?action=adds-github-id&page=0&size=10")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send();
       expect(res).to.have.status(200);
@@ -532,7 +544,7 @@ describe("users", function () {
 
       const res = await chai
         .request(app)
-        .post("/users/migrations?action=adds-github-id&skip=0&limit=10")
+        .post("/users/migrations?action=adds-github-id&page=0&size=10")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send();
 
