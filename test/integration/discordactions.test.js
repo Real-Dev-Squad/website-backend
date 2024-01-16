@@ -46,7 +46,6 @@ const { userStatusDataForOooState } = require("../fixtures/userStatus/userStatus
 const { generateCronJobToken } = require("../utils/generateBotToken");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
 
-// describe("reason", function () {});
 describe("Discord actions", function () {
   let superUserId;
   let archievedUserId;
