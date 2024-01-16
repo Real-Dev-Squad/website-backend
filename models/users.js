@@ -868,7 +868,7 @@ const getNonNickNameSyncedUsers = async () => {
     throw err;
   }
 };
-const addGithubUserId = async (skip, limit) => {
+const addGithubUserId = async (page, size) => {
   try {
     const usersNotFound = [];
     let countUserFound = 0;
@@ -884,8 +884,8 @@ const addGithubUserId = async (skip, limit) => {
     };
     const usersSnapshot = await firestore
       .collection("users")
-      .limit(limit)
-      .offset(skip * limit)
+      .limit(size)
+      .offset(page * size)
       .get();
     // Create batch write operations for each batch of documents
     const batchWrite = firestore.batch();

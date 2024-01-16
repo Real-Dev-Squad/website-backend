@@ -857,10 +857,10 @@ async function usersPatchHandler(req, res) {
   }
 }
 const migrations = async (req, res) => {
-  const { skip = 0, limit } = req.query;
+  const { page = 0, size } = req.query;
 
   try {
-    const result = await addGithubUserId(parseInt(skip), parseInt(limit));
+    const result = await addGithubUserId(parseInt(page), parseInt(size));
     return res.status(200).json({
       message: "Result of migration",
       data: result,

@@ -321,17 +321,17 @@ const validateGenerateUsernameQuery = async (req, res, next) => {
   }
 };
 const migrationsValidator = async (req, res, next) => {
-  const { action, skip, limit } = req.query;
+  const { action, page, size } = req.query;
   const schema = joi
     .object()
     .strict()
     .keys({
-      skip: joi.number(),
+      page: joi.number(),
       action: joi.string().valid("adds-github-id").required(),
-      limit: joi.number().min(1).max(500).required(),
+      size: joi.number().min(1).max(500).required(),
     });
   try {
-    await schema.validateAsync({ action, skip: parseInt(skip), limit: parseInt(limit) });
+    await schema.validateAsync({ action, page: parseInt(page), size: parseInt(size) });
     next();
   } catch (error) {
     logger.error("Invalid Query Parameters Passed", error);
