@@ -1,6 +1,6 @@
 import joi from "joi";
-import { NextFunction, Request } from "express";
-import { InviteBodyRequest, InviteResponse } from "../../types/invite";
+import { NextFunction } from "express";
+import { InviteBodyRequest, InviteResponse } from "../../types/invites";
 
 export const createInviteValidator = async (req: InviteBodyRequest, res: InviteResponse, next: NextFunction) => {
   const schema = joi
@@ -27,19 +27,3 @@ export const createInviteValidator = async (req: InviteBodyRequest, res: InviteR
   }
 };
 
-export const getInviteValidator = async (req: Request, res: InviteResponse, next: NextFunction) => {
-  const queryParamsSchema = joi.object().keys({
-    uniqueUserId: joi.string().required().messages({
-      "any.required": "uniqueUserId is required",
-      "string.empty": "uniqueUserId cannot be empty",
-    }),
-  });
-
-  try {
-    await queryParamsSchema.validateAsync(req.query);
-    next();
-  } catch (error) {
-    logger.error(`Error while validating invite get query params: ${error}`);
-    res.boom.badRequest(error.details[0].message);
-  }
-};

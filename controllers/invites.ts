@@ -1,5 +1,5 @@
 import { createInviteLinkModel, getInviteLinkModel } from "../models/invites";
-import { InviteResponse, InviteBodyRequest } from "../types/invite";
+import { InviteResponse, InviteBodyRequest } from "../types/invites";
 import { addLog } from "../models/logs";
 import { generateDiscordInviteLink } from "../utils/discord-actions";
 import { verifyAuthToken } from "../utils/verifyAuthToken";
