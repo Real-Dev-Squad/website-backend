@@ -1,17 +1,18 @@
+import { Request, Response, NextFunction } from "express";
 import { Boom } from "express-boom";
 
 export type InviteBody = {
+  inviteLink?: string;
   uniqueUserId: string;
   purpose: string;
-  createdAt?: Date;
 };
 
 export type Invite = {
-  id: string;
+  id?: string;
   uniqueUserId: string;
   purpose: string;
   inviteLink: string;
   createdAt?: number;
 };
 export type InviteResponse = Response & { boom: Boom };
-export type InviteBodyRequest = Request & { InviteBody: InviteBody };
+export type InviteBodyRequest = Request & { InviteBody };
