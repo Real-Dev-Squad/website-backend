@@ -73,7 +73,7 @@ const updateAnswer = async (req: CustomRequest, res: CustomResponse) => {
 const getAnswers = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const headers = HEADERS_FOR_SSE;
-    const status = req.query.status.toString();
+    const status = req.query?.status?.toString();
 
     res.writeHead(200, headers);
 
@@ -95,7 +95,7 @@ const getAnswers = async (req: CustomRequest, res: CustomResponse) => {
       clients = clients.filter((client) => client.id !== clientId);
     });
   } catch (error) {
-    logger.error(`Error while getting question: ${error}`);
+    logger.error(`Error while getting answers: ${error}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
