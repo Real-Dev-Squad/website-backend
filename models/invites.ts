@@ -1,5 +1,5 @@
 import firestore from "../utils/firestore";
-import { InviteBody, Invite } from "../types/invite";
+import { InviteBody, Invite } from "../types/invites";
 const inviteModel = firestore.collection("invite");
 
 export const createInviteLinkModel = async (body: InviteBody) => {
