@@ -11,9 +11,9 @@ export const createInviteValidator = async (req: InviteBodyRequest, res: InviteR
         "any.required": "uniqueUserId is required",
         "string.empty": "uniqueUserId cannot be empty",
       }),
-      reason: joi.string().required().messages({
-        "any.required": "reason is required",
-        "string.empty": "reason cannot be empty",
+      purpose: joi.string().required().messages({
+        "any.required": "purpose is required",
+        "string.empty": "purpose cannot be empty",
       }),
     });
 

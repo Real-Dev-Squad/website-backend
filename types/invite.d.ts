@@ -2,14 +2,14 @@ import { Boom } from "express-boom";
 
 export type InviteBody = {
   uniqueUserId: string;
-  reason: string;
+  purpose: string;
   createdAt?: Date;
 };
 
 export type Invite = {
   id: string;
   uniqueUserId: string;
-  reason: string;
+  purpose: string;
   inviteLink: string;
   createdAt?: number;
 };
