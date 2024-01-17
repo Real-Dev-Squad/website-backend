@@ -37,4 +37,5 @@ app.use("/applications", require("./applications"));
 app.use("/v1/fcm-tokens", require("./fcmToken.js"));
 app.use("/v1/notifications", require("./notify"));
 app.use("/goals", require("./goals"));
+app.use("/invites", require("./invites"));
 module.exports = app;
