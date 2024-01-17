@@ -45,6 +45,7 @@
     "@types/jest": "^29.5.3",
     "@types/mocha": "^10.0.1",
     "@types/node": "^20.4.3",
+    "@types/sinon": "^17.0.3",
     "@typescript-eslint/parser": "^6.1.0",
     "chai": "^4.3.7",
     "chai-http": "^4.3.0",
