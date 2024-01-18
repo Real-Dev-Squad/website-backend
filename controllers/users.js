@@ -15,7 +15,7 @@ const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
-const { fetchAllUsers } = require("../models/users");
+const { fetchAllUsers, addGithubUserId } = require("../models/users");
 const { getOverdueTasks } = require("../models/tasks");
 const { getQualifiers } = require("../utils/helper");
 const { parseSearchQuery } = require("../utils/users");
@@ -856,6 +856,20 @@ async function usersPatchHandler(req, res) {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 }
+const migrations = async (req, res) => {
+  const { page = 0, size } = req.query;
+
+  try {
+    const result = await addGithubUserId(parseInt(page), parseInt(size));
+    return res.status(200).json({
+      message: "Result of migration",
+      data: result,
+    });
+  } catch (error) {
+    logger.error(`Internal Server Error: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
 
 module.exports = {
   verifyUser,
@@ -886,4 +900,5 @@ module.exports = {
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
+  migrations,
 };

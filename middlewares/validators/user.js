@@ -320,7 +320,24 @@ const validateGenerateUsernameQuery = async (req, res, next) => {
     res.boom.badRequest("Invalid Query Parameters Passed");
   }
 };
-
+const migrationsValidator = async (req, res, next) => {
+  const { action, page, size } = req.query;
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      page: joi.number(),
+      action: joi.string().valid("adds-github-id").required(),
+      size: joi.number().min(1).max(500).required(),
+    });
+  try {
+    await schema.validateAsync({ action, page: parseInt(page), size: parseInt(size) });
+    next();
+  } catch (error) {
+    logger.error("Invalid Query Parameters Passed", error);
+    res.boom.badRequest("Invalid Query Parameters Passed");
+  }
+};
 module.exports = {
   updateUser,
   updateProfileURL,
@@ -331,4 +348,5 @@ module.exports = {
   validateUpdateRoles,
   validateUsersPatchHandler,
   validateGenerateUsernameQuery,
+  migrationsValidator,
 };
