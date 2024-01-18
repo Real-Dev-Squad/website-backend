@@ -18,7 +18,7 @@ export const createInviteLink = async (req: InviteBodyRequest, res: InviteRespon
     }
     const inviteLink = await generateDiscordInviteLink();
     if (!inviteLink) {
-      return res.boom.badRequest("Invite link already exists");
+      return res.boom.badRequest("Error while generating invite link");
     }
     const invite = await createInviteLinkModel({ userId, purpose, inviteLink });
 
