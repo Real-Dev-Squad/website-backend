@@ -3,13 +3,13 @@ import { Boom } from "express-boom";
 
 export type InviteBody = {
   inviteLink?: string;
-  uniqueUserId: string;
+  userId: string;
   purpose: string;
 };
 
 export type Invite = {
   id?: string;
-  uniqueUserId: string;
+  userId: string;
   purpose: string;
   inviteLink: string;
   createdAt?: number;

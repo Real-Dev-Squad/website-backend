@@ -6,7 +6,7 @@ import { verifyAuthToken } from "../utils/verifyAuthToken";
 
 export const createInviteLink = async (req: InviteBodyRequest, res: InviteResponse) => {
   try {
-    const { uniqueUserId, purpose } = req.body;
+    const { userId, purpose } = req.body;
     const authHeader = req.headers.authorization;
     if (!authHeader) {
       return res.boom.unauthorized("Unauthorised");
@@ -20,7 +20,7 @@ export const createInviteLink = async (req: InviteBodyRequest, res: InviteRespon
     if (!inviteLink) {
       return res.boom.badRequest("Invite link already exists");
     }
-    const invite = await createInviteLinkModel({ uniqueUserId, purpose, inviteLink });
+    const invite = await createInviteLinkModel({ userId, purpose, inviteLink });
 
     if (invite.error) {
       return res.boom.badRequest(invite.error);
@@ -29,7 +29,7 @@ export const createInviteLink = async (req: InviteBodyRequest, res: InviteRespon
       type: "invite",
       meta: {
         action: "create",
-        createdBy: uniqueUserId,
+        createdBy: userId,
         createdAt: Date.now(),
       },
       body: invite,
@@ -48,7 +48,7 @@ export const createInviteLink = async (req: InviteBodyRequest, res: InviteRespon
 
 export const getInviteLink = async (req: InviteBodyRequest, res: InviteResponse) => {
   try {
-    const { uniqueUserId } = req.params;
+    const { userId } = req.params;
     const authHeader = req.headers.authorization;
     if (!authHeader) {
       return res.boom.unauthorized("Unauthorised");
@@ -58,7 +58,7 @@ export const getInviteLink = async (req: InviteBodyRequest, res: InviteResponse)
     if (!isValid) {
       return res.boom.unauthorized();
     }
-    const invite = await getInviteLinkModel(uniqueUserId);
+    const invite = await getInviteLinkModel(userId);
 
     if (invite.error) {
       return res.boom.badRequest(invite.error);

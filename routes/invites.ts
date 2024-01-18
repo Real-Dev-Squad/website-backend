@@ -4,6 +4,6 @@ import { createInviteValidator } from "../middlewares/validators/invites";
 import { createInviteLink,getInviteLink } from "../controllers/invites";
 
 router.post("/", createInviteValidator, createInviteLink);
-router.get("/:uniqueUserId" , getInviteLink);
+router.get("/:userId" , getInviteLink);
 
 module.exports = router;

@@ -4,8 +4,8 @@ const inviteModel = firestore.collection("invite");
 
 export const createInviteLinkModel = async (body: InviteBody) => {
   try {
-    const { uniqueUserId, purpose, inviteLink } = body;
-    const existingInvite = await inviteModel.where("uniqueUserId", "==", uniqueUserId).get();
+    const { userId, purpose, inviteLink } = body;
+    const existingInvite = await inviteModel.where("userId", "==", userId).get();
     if (!existingInvite.empty) {
       return {
         error: "Invite link already exists",
@@ -13,7 +13,7 @@ export const createInviteLinkModel = async (body: InviteBody) => {
     }
 
     const invite: Invite = {
-      uniqueUserId,
+      userId,
       purpose,
       inviteLink,
       createdAt: Date.now(),
@@ -30,9 +30,9 @@ export const createInviteLinkModel = async (body: InviteBody) => {
   }
 };
 
-export const getInviteLinkModel = async (uniqueUserId: string) => {
+export const getInviteLinkModel = async (userId: string) => {
   try {
-    const invite = await inviteModel.where("uniqueUserId", "==", uniqueUserId).get();
+    const invite = await inviteModel.where("userId", "==", userId).get();
     if (invite.empty) {
       return {
         error: "Invite link not found",
