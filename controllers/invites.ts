@@ -1,4 +1,4 @@
-import { createInviteLinkModel, getInviteLinkModel } from "../models/invites";
+import { addInviteToInviteModel, getUserDiscordInvite } from "../models/discordactions";
 import { InviteResponse, InviteBodyRequest } from "../types/invites";
 import { addLog } from "../models/logs";
 import { generateDiscordInviteLink } from "../utils/discord-actions";
@@ -7,23 +7,34 @@ import { verifyAuthToken } from "../utils/verifyAuthToken";
 export const createInviteLink = async (req: InviteBodyRequest, res: InviteResponse) => {
   try {
     const { userId, purpose } = req.body;
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers?.authorization;
     if (!authHeader) {
-      return res.boom.unauthorized("Unauthorised");
+      return res.boom.unauthorized();
     }
     const token = authHeader.split(" ")[1];
     const isValid = await verifyAuthToken(token);
     if (!isValid) {
       return res.boom.unauthorized();
     }
+
+    const inviteExist = await getUserDiscordInvite(userId);
+    if (!inviteExist.notFound) {
+      return res.boom.badRequest("Invite link already exists");
+    }
+
     const inviteLink = await generateDiscordInviteLink();
     if (!inviteLink) {
       return res.boom.badRequest("Error while generating invite link");
     }
-    const invite = await createInviteLinkModel({ userId, purpose, inviteLink });
-
-    if (invite.error) {
-      return res.boom.badRequest(invite.error);
+    const inviteData = {
+      userId,
+      purpose,
+      inviteLink,
+      createdAt: Date.now(),
+    };
+    const invite = await addInviteToInviteModel(inviteData);
+    if (!invite) {
+      return res.boom.badRequest("Error while adding invite link to database");
     }
     const inviteLog = {
       type: "invite",
@@ -32,13 +43,19 @@ export const createInviteLink = async (req: InviteBodyRequest, res: InviteRespon
         createdBy: userId,
         createdAt: Date.now(),
       },
-      body: invite,
+      body: {
+        id: invite,
+        ...inviteData,
+      },
     };
     await addLog(inviteLog.type, inviteLog.meta, inviteLog.body);
 
     return res.json({
       message: "Invite link created successfully",
-      invite,
+      data: {
+        id: invite,
+        ...inviteData,
+      },
     });
   } catch (error) {
     logger.error("Internal server error", error);
@@ -49,7 +66,7 @@ export const createInviteLink = async (req: InviteBodyRequest, res: InviteRespon
 export const getInviteLink = async (req: InviteBodyRequest, res: InviteResponse) => {
   try {
     const { userId } = req.params;
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers?.authorization;
     if (!authHeader) {
       return res.boom.unauthorized("Unauthorised");
     }
@@ -58,10 +75,10 @@ export const getInviteLink = async (req: InviteBodyRequest, res: InviteResponse)
     if (!isValid) {
       return res.boom.unauthorized();
     }
-    const invite = await getInviteLinkModel(userId);
+    const invite = await getUserDiscordInvite(userId);
 
-    if (invite.error) {
-      return res.boom.badRequest(invite.error);
+    if (!invite) {
+      return res.boom.badRequest("Error while fetching invite link");
     }
     return res.json({
       message: "Invite link fetched successfully",
