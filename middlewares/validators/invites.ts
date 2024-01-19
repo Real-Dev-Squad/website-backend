@@ -1,8 +1,9 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { InviteBodyRequest, InviteResponse } from "../../types/invites";
+import { InviteBodyRequest } from "../../types/invites";
+import {CustomResponse} from "../../types/global";
 
-export const createInviteValidator = async (req: InviteBodyRequest, res: InviteResponse, next: NextFunction) => {
+export const createInviteValidator = async (req: InviteBodyRequest, res: CustomResponse, next: NextFunction) => {
   const schema = joi
     .object()
     .strict()

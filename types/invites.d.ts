@@ -14,5 +14,4 @@ export type Invite = {
   inviteLink: string;
   createdAt?: number;
 };
-export type InviteResponse = Response & { boom: Boom };
 export type InviteBodyRequest = Request & { InviteBody };

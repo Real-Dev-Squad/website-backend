@@ -13,14 +13,15 @@ describe("generateDiscordInviteLink", () => {
     fetchStub.restore();
   });
 
-  it.skip("should return the invite link", async () => {
-    const inviteLink = "https://discord.gg/invite/123456789";
+  it("should return the invite link", async () => {
+    const inviteLink = "discord.gg/123456789";
     const discordInviteLink = {
       data: {
         code: "123456789",
       },
     };
     fetchStub.resolves({
+      ok: true,
       json: () => discordInviteLink,
     });
 

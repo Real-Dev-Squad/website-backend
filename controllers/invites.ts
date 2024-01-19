@@ -1,10 +1,11 @@
 import { addInviteToInviteModel, getUserDiscordInvite } from "../models/discordactions";
-import { InviteResponse, InviteBodyRequest } from "../types/invites";
+import { InviteBodyRequest } from "../types/invites";
+import {CustomResponse} from "../types/global";
 import { addLog } from "../models/logs";
 import { generateDiscordInviteLink } from "../utils/discord-actions";
 import { verifyAuthToken } from "../utils/verifyAuthToken";
 
-export const createInviteLink = async (req: InviteBodyRequest, res: InviteResponse) => {
+export const createInviteLink = async (req: InviteBodyRequest, res: CustomResponse) => {
   try {
     const { userId, purpose } = req.body;
     const authHeader = req.headers?.authorization;
@@ -63,7 +64,7 @@ export const createInviteLink = async (req: InviteBodyRequest, res: InviteRespon
   }
 };
 
-export const getInviteLink = async (req: InviteBodyRequest, res: InviteResponse) => {
+export const getInviteLink = async (req: InviteBodyRequest, res: CustomResponse) => {
   try {
     const { userId } = req.params;
     const authHeader = req.headers?.authorization;
@@ -77,12 +78,15 @@ export const getInviteLink = async (req: InviteBodyRequest, res: InviteResponse)
     }
     const invite = await getUserDiscordInvite(userId);
 
-    if (!invite) {
-      return res.boom.badRequest("Error while fetching invite link");
+    if (invite.notFound) {
+      return res.boom.badRequest("Invite link not found");
     }
+    delete invite["notFound"];
     return res.json({
       message: "Invite link fetched successfully",
-      data: invite,
+      data: {
+        ...invite,
+      },
     });
   } catch (error) {
     logger.error("Error while getting invite link", error);
