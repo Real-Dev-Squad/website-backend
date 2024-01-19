@@ -237,7 +237,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Role added successfully!");
     });
-    it("should create reson and pass it down to the bot", async function () {
+    it("should create reson and pass it down to the bot, on adding the role to the user", async function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
@@ -326,7 +326,7 @@ describe("Discord actions", function () {
         });
     });
 
-    it("should create reson and pass it down to the bot", async function () {
+    it("should create reson and pass it down to the bot on deleteing the role", async function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
