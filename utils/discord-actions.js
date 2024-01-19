@@ -10,7 +10,7 @@ const generateAuthTokenForCloudflare = () => {
   });
   return authToken;
 };
-const genrateCloudFlareHeaders = ({ username, id } = {}) => {
+const generateCloudFlareHeaders = ({ username, id } = {}) => {
   const authToken = generateAuthTokenForCloudflare();
   const headers = {
     "Content-Type": "application/json",
@@ -40,5 +40,5 @@ const generateDiscordProfileImageUrl = async (discordId) => {
 module.exports = {
   generateDiscordProfileImageUrl,
   generateAuthTokenForCloudflare,
-  genrateCloudFlareHeaders,
+  generateCloudFlareHeaders,
 };

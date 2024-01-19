@@ -1,6 +1,6 @@
 const firestore = require("../utils/firestore");
 const { fetchAllUsers } = require("../models/users");
-const { generateAuthTokenForCloudflare, genrateCloudFlareHeaders } = require("../utils/discord-actions");
+const { generateAuthTokenForCloudflare, generateCloudFlareHeaders } = require("../utils/discord-actions");
 const userModel = firestore.collection("users");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
@@ -72,7 +72,7 @@ const addRoleToUser = async (userid, roleid) => {
 
 const removeRoleFromUser = async (roleId, discordId, userData) => {
   try {
-    const headers = genrateCloudFlareHeaders(userData);
+    const headers = generateCloudFlareHeaders(userData);
     const data = await fetch(`${DISCORD_BASE_URL}/roles`, {
       method: "DELETE",
       headers,

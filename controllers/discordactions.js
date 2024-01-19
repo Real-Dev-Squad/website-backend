@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
 const discordServices = require("../services/discordService");
 const { fetchAllUsers, fetchUser } = require("../models/users");
-const { genrateCloudFlareHeaders } = require("../utils/discord-actions");
+const { generateCloudFlareHeaders } = require("../utils/discord-actions");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
 
@@ -41,7 +41,7 @@ const createGroupRole = async (req, res) => {
       date: admin.firestore.Timestamp.fromDate(new Date()),
     };
 
-    const headers = genrateCloudFlareHeaders(req.userData);
+    const headers = generateCloudFlareHeaders(req.userData);
 
     const responseForCreatedRole = await fetch(`${DISCORD_BASE_URL}/roles/create`, {
       method: "PUT",
@@ -131,7 +131,7 @@ const addGroupRoleToMember = async (req, res) => {
     const dataForDiscord = {
       ...req.body,
     };
-    const headers = genrateCloudFlareHeaders(req.userData);
+    const headers = generateCloudFlareHeaders(req.userData);
 
     const apiCallToDiscord = fetch(`${DISCORD_BASE_URL}/roles/add`, {
       method: "PUT",
