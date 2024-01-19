@@ -3,20 +3,11 @@ import { InviteBodyRequest } from "../types/invites";
 import {CustomResponse} from "../types/global";
 import { addLog } from "../models/logs";
 import { generateDiscordInviteLink } from "../utils/discord-actions";
-import { verifyAuthToken } from "../utils/verifyAuthToken";
+const { logType } = require("../constants/logs");
 
 export const createInviteLink = async (req: InviteBodyRequest, res: CustomResponse) => {
   try {
     const { userId, purpose } = req.body;
-    const authHeader = req.headers?.authorization;
-    if (!authHeader) {
-      return res.boom.unauthorized();
-    }
-    const token = authHeader.split(" ")[1];
-    const isValid = await verifyAuthToken(token);
-    if (!isValid) {
-      return res.boom.unauthorized();
-    }
 
     const inviteExist = await getUserDiscordInvite(userId);
     if (!inviteExist.notFound) {
@@ -38,10 +29,10 @@ export const createInviteLink = async (req: InviteBodyRequest, res: CustomRespon
       return res.boom.badRequest("Error while adding invite link to database");
     }
     const inviteLog = {
-      type: "invite",
+      type: logType.DISCORD_INVITES,
       meta: {
         action: "create",
-        createdBy: userId,
+        createdBy: logType.EXTERNAL_SERVICE,
         createdAt: Date.now(),
       },
       body: {
@@ -67,15 +58,7 @@ export const createInviteLink = async (req: InviteBodyRequest, res: CustomRespon
 export const getInviteLink = async (req: InviteBodyRequest, res: CustomResponse) => {
   try {
     const { userId } = req.params;
-    const authHeader = req.headers?.authorization;
-    if (!authHeader) {
-      return res.boom.unauthorized("Unauthorised");
-    }
-    const token = authHeader.split(" ")[1];
-    const isValid = await verifyAuthToken(token);
-    if (!isValid) {
-      return res.boom.unauthorized();
-    }
+
     const invite = await getUserDiscordInvite(userId);
 
     if (invite.notFound) {
