@@ -13,6 +13,17 @@ const generateAuthTokenForCloudflare = () => {
   });
   return authToken;
 };
+const generateCloudFlareHeaders = ({ username, id } = {}) => {
+  const authToken = generateAuthTokenForCloudflare();
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${authToken}`,
+  };
+  if (username && id) {
+    headers["X-Audit-Log-Reason"] = `Action initiator's username=>${username} and id=${id}`;
+  }
+  return headers;
+};
 
 const generateDiscordProfileImageUrl = async (discordId) => {
   try {
@@ -63,5 +74,6 @@ const generateDiscordInviteLink = async () => {
 module.exports = {
   generateDiscordProfileImageUrl,
   generateAuthTokenForCloudflare,
+  generateCloudFlareHeaders,
   generateDiscordInviteLink,
 };
