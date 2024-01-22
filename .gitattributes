@@ -1,0 +1,5 @@
+# http://git-scm.com/docs/gitattributes#_end_of_line_conversion
+
+*.ts    text eol=lf
+*.js    text eol=lf
+*.json  text eol=lf

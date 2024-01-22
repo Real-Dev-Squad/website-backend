@@ -68,6 +68,23 @@ describe("auth", function () {
     expect(res.headers.location).to.equal(redirectURL);
   });
 
+  it("should not redirect the user to new sign up flow if they have incomplete user details true, when redirect URL contains dev=true flag", async function () {
+    const redirectURL = "https://www.realdevsquad.com/?dev=true";
+    const rdsUiUrl = new URL(redirectURL).href;
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      callback(null, "accessToken", githubUserInfo[0]);
+      return (req, res, next) => {};
+    });
+
+    const res = await chai
+      .request(app)
+      .get("/auth/github/callback")
+      .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
+      .redirects(0);
+    expect(res).to.have.status(302);
+    expect(res.headers.location).to.equal(rdsUiUrl);
+  });
+
   // same data should be return from github and same data should be added there
   it("should redirect the request to the goto page on successful login, if user has incomplete user details false", async function () {
     await addUserToDBForTest(userData[0]);
