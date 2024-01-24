@@ -3,10 +3,14 @@ const tasksModel = firestore.collection("tasks");
 const ItemModel = firestore.collection("itemTags");
 const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
+const { updateTaskStatusToDone } = require("../services/tasks");
+const { chunks } = require("../utils/array");
+const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
 const { IN_PROGRESS, NEEDS_REVIEW, IN_REVIEW, ASSIGNED, BLOCKED, SMOKE_TESTING, COMPLETED, SANITY_CHECK } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Adds and Updates tasks
@@ -105,7 +109,10 @@ const getBuiltTasks = async (tasksSnapshot, searchTerm) => {
     updatedTasks = updatedTasks.filter((task) => task.title.toLowerCase().includes(searchTerm.toLowerCase()));
   }
   const taskPromises = updatedTasks.map(async (task) => {
-    task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
+    if (task.status) {
+      task.status = TASK_STATUS[task.status.toUpperCase()] || task.status;
+    }
+
     const taskId = task.id;
     const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
     task.dependsOn = [];
@@ -132,6 +139,29 @@ const fetchPaginatedTasks = async ({
   try {
     let initialQuery = tasksModel;
 
+    if (assignee) {
+      const assignees = assignee.split(",");
+      const users = [];
+      for (const singleAssignee of assignees) {
+        const user = await userUtils.getUserId(singleAssignee);
+        if (user) {
+          users.push(user);
+        }
+      }
+
+      if (users.length > 1) {
+        initialQuery = initialQuery.where("assignee", "in", users);
+      } else if (users.length === 1) {
+        initialQuery = initialQuery.where("assignee", "==", users[0]);
+      } else {
+        return {
+          allTasks: [],
+          next: "",
+          prev: "",
+        };
+      }
+    }
+
     if (status === TASK_STATUS.OVERDUE) {
       const currentTime = Math.floor(Date.now() / 1000);
       const OVERDUE_TASK_STATUSES = [
@@ -143,57 +173,28 @@ const fetchPaginatedTasks = async ({
         BLOCKED,
         SANITY_CHECK,
       ];
-      initialQuery = tasksModel.where("endsOn", "<", currentTime).where("status", "in", OVERDUE_TASK_STATUSES);
-
-      if (assignee) {
-        const user = await userUtils.getUserId(assignee);
-        if (user) {
-          initialQuery = initialQuery.where("assignee", "==", user);
-        }
-      }
-    } else {
-      initialQuery = tasksModel.orderBy("title");
-      if (status) {
-        initialQuery = initialQuery.where("status", "==", status);
-      }
-
-      if (assignee) {
-        const assignees = assignee.split(",");
-        if (assignees.length > 1) {
-          const users = [];
-          for (const singleAssignee of assignees) {
-            const user = await userUtils.getUserId(singleAssignee);
-            if (user) {
-              users.push(user);
-            }
-          }
-          if (users.length) {
-            initialQuery = initialQuery.where("assignee", "in", users);
-          } else {
-            return {
-              allTasks: [],
-              next: "",
-              prev: "",
-            };
-          }
-        } else {
-          const user = await userUtils.getUserId(assignees[0]);
-          if (user) {
-            initialQuery = initialQuery.where("assignee", "==", user);
-          } else {
-            return {
-              allTasks: [],
-              next: "",
-              prev: "",
-            };
-          }
-        }
-      }
-
-      if (title) {
-        initialQuery = initialQuery.where("title", ">=", title).where("title", "<=", title + "\uf8ff");
-      }
+      initialQuery = initialQuery
+        .where("endsOn", "<", currentTime)
+        .where("status", "in", OVERDUE_TASK_STATUSES)
+        .orderBy("endsOn", "desc");
+      /**
+       * Setting it undefined because when OVERDUE condition is applied, where 2 inEquality checks are being made
+       * firestore don't allow more inEquality checks, so for title where 2 more inEquality checks are being added,
+       * it will give error
+       */
+      title = undefined;
+    } else if (status) {
+      initialQuery = initialQuery.where("status", "==", status);
     }
+
+    if (title) {
+      initialQuery = initialQuery
+        .where("title", ">=", title)
+        .where("title", "<=", title + "\uf8ff")
+        .orderBy("title", "asc");
+    }
+
+    initialQuery = initialQuery.orderBy("updatedAt", "desc");
 
     let queryDoc = initialQuery;
 
@@ -215,19 +216,21 @@ const fetchPaginatedTasks = async ({
     }
 
     const snapshot = await queryDoc.get();
+    let nextDoc, prevDoc;
+    if (snapshot.size) {
+      const first = snapshot.docs[0];
+      prevDoc = await initialQuery.endBefore(first).limitToLast(1).get();
 
-    const first = snapshot.docs[0];
-    const prevDoc = await initialQuery.endBefore(first).limitToLast(1).get();
-
-    const last = snapshot.docs[snapshot.docs.length - 1];
-    const nextDoc = await initialQuery.startAfter(last).limit(1).get();
+      const last = snapshot.docs[snapshot.docs.length - 1];
+      nextDoc = await initialQuery.startAfter(last).limit(1).get();
+    }
 
     const allTasks = await getBuiltTasks(snapshot);
 
     return {
       allTasks,
-      next: nextDoc.docs[0]?.id ?? "",
-      prev: prevDoc.docs[0]?.id ?? "",
+      next: nextDoc?.docs[0]?.id ?? "",
+      prev: prevDoc?.docs[0]?.id ?? "",
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
@@ -572,6 +575,62 @@ const getOverdueTasks = async (days = 0) => {
   }
 };
 
+const updateTaskStatus = async () => {
+  try {
+    const snapshot = await tasksModel.where("status", "==", "COMPLETED").get();
+    const tasksStatusCompleted = [];
+    let summary = {
+      totalTasks: snapshot.size,
+      totalUpdatedStatus: 0,
+      totalOperationsFailed: 0,
+      updatedTaskDetails: [],
+      failedTaskDetails: [],
+    };
+
+    if (snapshot.size === 0) {
+      return summary;
+    }
+
+    snapshot.forEach((task) => {
+      const id = task.id;
+      const taskData = task.data();
+      tasksStatusCompleted.push({ ...taskData, id });
+    });
+    const taskStatusCompletedChunks = chunks(tasksStatusCompleted, DOCUMENT_WRITE_SIZE);
+
+    const updatedTasksPromises = await Promise.all(
+      taskStatusCompletedChunks.map(async (tasks) => {
+        const res = await updateTaskStatusToDone(tasks);
+        return {
+          totalUpdatedStatus: res.totalUpdatedStatus,
+          totalOperationsFailed: res.totalOperationsFailed,
+          updatedTaskDetails: res.updatedTaskDetails,
+          failedTaskDetails: res.failedTaskDetails,
+        };
+      })
+    );
+
+    updatedTasksPromises.forEach((res) => {
+      summary = {
+        ...summary,
+        totalUpdatedStatus: (summary.totalUpdatedStatus += res.totalUpdatedStatus),
+        totalOperationsFailed: (summary.totalOperationsFailed += res.totalOperationsFailed),
+        updatedTaskDetails: [...summary.updatedTaskDetails, ...res.updatedTaskDetails],
+        failedTaskDetails: [...summary.failedTaskDetails, ...res.failedTaskDetails],
+      };
+    });
+
+    if (summary.totalOperationsFailed === summary.totalTasks) {
+      throw Error(INTERNAL_SERVER_ERROR);
+    }
+
+    return summary;
+  } catch (error) {
+    logger.error(`Error in updating task status:  ${error}`);
+    throw error;
+  }
+};
+
 module.exports = {
   updateTask,
   fetchTasks,
@@ -588,4 +647,5 @@ module.exports = {
   fetchPaginatedTasks,
   getBuiltTasks,
   getOverdueTasks,
+  updateTaskStatus,
 };

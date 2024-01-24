@@ -3,6 +3,7 @@ const validAssignmentRequest = {
   taskId: "1234",
   externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-status/issues/1564672",
   requestType: "ASSIGNMENT",
+  externalIssueHtmlUrl: "https://github.com/Real-Dev-Squad/website-status/issues/1564672",
   userId: "7890",
   proposedDeadline: 1243455234,
   proposedStartDate: 1243405234,
@@ -14,6 +15,7 @@ const { externalIssueUrl: tarExternalIssueUrl, ...assignmentReqWithoutExtIssueId
 const assignmentReqWithDescription = { ...validAssignmentRequest, description: "something something" };
 const validCreationRequest = {
   externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-status/issues/1564672",
+  externalIssueHtmlUrl: "https://github.com/Real-Dev-Squad/website-status/issues/1564672",
   requestType: "CREATION",
   userId: "7890",
   proposedDeadline: 1243455234,
@@ -34,6 +36,7 @@ const taskRequestData = {
   description: "Task description",
   requestType: TASK_REQUEST_TYPE.CREATION,
   externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-backend/issues/1599",
+  externalIssueHtmlUrl: "https://github.com/Real-Dev-Squad/website-backend/issues/1599",
 };
 const existingTaskRequest = {
   requestors: ["user123"],
@@ -41,6 +44,7 @@ const existingTaskRequest = {
   taskTitle: "Task Title",
   taskId: "task123",
   externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-backend/issues/1599",
+  externalIssueHtmlUrl: "https://github.com/Real-Dev-Squad/website-backend/issues/1599",
   requestType: "CREATION",
   users: [
     {
@@ -61,6 +65,11 @@ const existingOldTaskRequest = {
   status: "PENDING",
   taskId: "task123",
 };
+const existingOldTaskRequestWithMultipleUsers = {
+  requestors: ["user123", "user456"],
+  status: "PENDING",
+  taskId: "task456",
+};
 module.exports = {
   existingOldTaskRequest,
   taskRequestData,
@@ -78,4 +87,5 @@ module.exports = {
   creationReqWithoutExtIssueId,
   creationReqWithDescription,
   invalidRequest,
+  existingOldTaskRequestWithMultipleUsers,
 };

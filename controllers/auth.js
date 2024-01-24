@@ -44,6 +44,7 @@ const githubAuthCallback = (req, res, next) => {
   let isMobileApp = false;
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
   let authRedirectionUrl = rdsUiUrl;
+  let devMode = false;
   if ("state" in req.query) {
     try {
       const redirectUrl = new URL(req.query.state);
@@ -54,6 +55,7 @@ const githubAuthCallback = (req, res, next) => {
       if (`.${redirectUrl.hostname}`.endsWith(`.${rdsUiUrl.hostname}`)) {
         // Matching *.realdevsquad.com
         authRedirectionUrl = redirectUrl;
+        devMode = Boolean(redirectUrl.searchParams.get("dev"));
       } else {
         logger.error(`Malicious redirect URL provided URL: ${redirectUrl}, Will redirect to RDS`);
       }
@@ -71,6 +73,7 @@ const githubAuthCallback = (req, res, next) => {
         github_id: user.username,
         github_display_name: user.displayName,
         github_created_at: Number(new Date(user._json.created_at).getTime()),
+        github_user_id: user.id,
         created_at: Date.now(),
         updated_at: Date.now(),
       };
@@ -88,7 +91,11 @@ const githubAuthCallback = (req, res, next) => {
         sameSite: "lax",
       });
 
-      if (incompleteUserDetails) authRedirectionUrl = "https://my.realdevsquad.com/new-signup";
+      if (!devMode) {
+        // TODO: Revisit incompleteUserDetails redirect condition
+        if (incompleteUserDetails) authRedirectionUrl = "https://my.realdevsquad.com/new-signup";
+      }
+
       if (isMobileApp) {
         const newUrl = new URL(authRedirectionUrl);
         newUrl.searchParams.set("token", token);

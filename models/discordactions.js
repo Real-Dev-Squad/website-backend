@@ -2,6 +2,7 @@ const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const firestore = require("../utils/firestore");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
+const discordInvitesModel = firestore.collection("discord-invites");
 const admin = require("firebase-admin");
 const { findSubscribedGroupIds } = require("../utils/helper");
 const { retrieveUsers } = require("../services/dataAccessLayer");
@@ -15,9 +16,18 @@ const dataAccess = require("../services/dataAccessLayer");
 const { getDiscordMembers, addRoleToUser, removeRoleFromUser } = require("../services/discordService");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
+const discordMissedUpdatesRoleId = config.get("discordMissedUpdatesRoleId");
+
 const userStatusModel = firestore.collection("usersStatus");
 const usersUtils = require("../utils/users");
 const { getUsersBasedOnFilter, fetchUser } = require("./users");
+const { convertDaysToMilliseconds, convertMillisToSeconds } = require("../utils/time");
+const { chunks } = require("../utils/array");
+const tasksModel = firestore.collection("tasks");
+const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
+const discordService = require("../services/discordService");
+const { buildTasksQueryForMissedUpdates } = require("../utils/tasks");
+const { buildProgressQueryForMissedUpdates } = require("../utils/progresses");
 
 /**
  *
@@ -37,16 +47,12 @@ const createNewRole = async (roleData) => {
 
 const removeMemberGroup = async (roleId, discordId) => {
   try {
-    const discordResponse = await removeRoleFromUser(roleId, discordId);
-    if (discordResponse) {
-      const backendResponse = await deleteRoleFromDatabase(roleId, discordId);
-      return backendResponse;
-    }
+    const backendResponse = await deleteRoleFromDatabase(roleId, discordId);
+    return backendResponse;
   } catch (error) {
     logger.error(`Error while removing role: ${error}`);
     throw new Error(error);
   }
-  return false;
 };
 
 const deleteRoleFromDatabase = async (roleId, discordId) => {
@@ -124,19 +130,32 @@ const updateGroupRole = async (roleData, docId) => {
 };
 /**
  *
- * @param roleData { Object }: Data of the new role
+ * @param options { Object }: Data of the new role
+ * @param options.rolename String : name of the role
+ * @param options.roleId String : id of the role
  * @returns {Promise<discordRoleModel|Object>}
  */
 
-const isGroupRoleExists = async (rolename) => {
+const isGroupRoleExists = async (options = {}) => {
   try {
-    const alreadyIsRole = await discordRoleModel.where("rolename", "==", rolename).limit(1).get();
-    if (!alreadyIsRole.empty) {
-      const oldRole = [];
-      alreadyIsRole.forEach((role) => oldRole.push(role.data()));
-      return { wasSuccess: false };
+    const { rolename = null, roleid = null } = options;
+
+    let existingRoles;
+    if (rolename && roleid) {
+      existingRoles = await discordRoleModel
+        .where("rolename", "==", rolename)
+        .where("roleid", "==", roleid)
+        .limit(1)
+        .get();
+    } else if (rolename) {
+      existingRoles = await discordRoleModel.where("rolename", "==", rolename).limit(1).get();
+    } else if (roleid) {
+      existingRoles = await discordRoleModel.where("roleid", "==", roleid).limit(1).get();
+    } else {
+      throw Error("Either rolename or roleId is required");
     }
-    return { wasSuccess: true };
+
+    return { roleExists: !existingRoles.empty, existingRoles };
   } catch (err) {
     logger.error("Error in getting all group-roles", err);
     throw err;
@@ -246,7 +265,7 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
     const subscribedGroupIds = findSubscribedGroupIds(discordId, groupsToUserMappings);
 
     return groups.map((group) => {
-      const groupCreator = groupCreatorsDetails[group.createdBy];
+      const groupCreator = groupCreatorsDetails.find((user) => user.id === group.createdBy);
       return {
         ...group,
         firstName: groupCreator?.first_name,
@@ -301,7 +320,7 @@ const updateIdleUsersOnDiscord = async () => {
   const totalGroupIdleRolesNotRemoved = { count: 0, errors: [] };
   let totalUsersHavingNoDiscordId = 0;
   let totalArchivedUsers = 0;
-  let allIdleUsers = [];
+  const allIdleUsers = [];
   let allUsersHavingGroupIdle = [];
   let groupIdleRole;
   let groupIdleRoleId;
@@ -326,8 +345,14 @@ const updateIdleUsersOnDiscord = async () => {
         allUserStatus.map(async (userStatus) => {
           try {
             const userData = await userModel.doc(userStatus.userId).get();
+            const isUserArchived = userData.data().roles.archived;
             if (userData.exists) {
-              userStatus.userid = userData.data().discordId;
+              if (isUserArchived) {
+                totalArchivedUsers++;
+              } else {
+                userStatus.userid = userData.data().discordId;
+                allIdleUsers.push(userStatus);
+              }
             }
           } catch (error) {
             logger.error(`error updating discordId in userStatus ${error.message}`);
@@ -336,7 +361,6 @@ const updateIdleUsersOnDiscord = async () => {
         })
       );
     }
-    allIdleUsers = allUserStatus;
     allUsersHavingGroupIdle = usersHavingIdleRole;
   } catch (error) {
     logger.error(`unable to get idle users ${error.message}`);
@@ -355,11 +379,8 @@ const updateIdleUsersOnDiscord = async () => {
     await Promise.all(
       usersForRoleAddition.map(async (user) => {
         try {
-          const result = await dataAccess.retrieveUsers({ id: user.userId });
           const discordId = user.userid;
-          if (result.user?.roles?.archived) {
-            totalArchivedUsers++;
-          } else if (!user.userid) {
+          if (!user.userid) {
             totalUsersHavingNoDiscordId++;
           } else {
             const alreadyHasRole = await memberRoleModel
@@ -456,7 +477,7 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
 
     const today = new Date().getTime();
 
-    const nicknameUpdatePromises = [];
+    let successfulUpdates = 0;
     const nicknameUpdateBatches = [];
     const totalUsersStatus = usersStatusDocs.length;
 
@@ -491,13 +512,18 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
         }
       });
 
-      const settledPromises = await Promise.all(promises);
-      nicknameUpdatePromises.push(...settledPromises);
+      const settledPromises = await Promise.allSettled(promises);
+
+      settledPromises.forEach((result) => {
+        if (result.status === "fulfilled" && !!result.value) {
+          successfulUpdates++;
+        } else {
+          logger.error(`Error while updating nickname: ${result.reason}`);
+        }
+      });
 
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
-
-    const successfulUpdates = nicknameUpdatePromises.length;
 
     const res = {
       totalUsersStatus,
@@ -553,9 +579,14 @@ const updateIdle7dUsersOnDiscord = async () => {
           try {
             if (daysDifference > 7) {
               const userData = await userModel.doc(userStatus.userId).get();
+              const isUserArchived = userData.data().roles.archived;
               if (userData.exists) {
-                userStatus.userid = userData.data().discordId;
-                allIdle7dUsers.push(userStatus);
+                if (isUserArchived) {
+                  totalArchivedUsers++;
+                } else {
+                  userStatus.userid = userData.data().discordId;
+                  allIdle7dUsers.push(userStatus);
+                }
               }
             }
           } catch (error) {
@@ -584,11 +615,8 @@ const updateIdle7dUsersOnDiscord = async () => {
     await Promise.all(
       usersForRoleAddition.map(async (user) => {
         try {
-          const result = await dataAccess.retrieveUsers({ id: user.userId });
           const discordId = user.userid;
-          if (result.user?.roles?.archived) {
-            totalArchivedUsers++;
-          } else if (!user.userid) {
+          if (!user.userid) {
             totalUsersHavingNoDiscordId++;
           } else {
             const alreadyHasRole = await memberRoleModel
@@ -817,6 +845,204 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
   }
 };
 
+const getMissedProgressUpdatesUsers = async (options = {}) => {
+  const { cursor, size = 500, excludedDates = [], excludedDays = [0], dateGap = 3 } = options;
+  const stats = {
+    tasks: 0,
+    missedUpdatesTasks: 0,
+  };
+  try {
+    const discordUsersPromise = discordService.getDiscordMembers();
+    const missedUpdatesRoleId = discordMissedUpdatesRoleId;
+
+    let gapWindowStart = Date.now() - convertDaysToMilliseconds(dateGap);
+    const gapWindowEnd = Date.now();
+    excludedDates.forEach((timestamp) => {
+      if (timestamp > gapWindowStart && timestamp < gapWindowEnd) {
+        gapWindowStart -= convertDaysToMilliseconds(1);
+      }
+    });
+
+    if (excludedDays.length === 7) {
+      return { usersToAddRole: [], ...stats };
+    }
+
+    for (let i = gapWindowEnd; i >= gapWindowStart; i -= convertDaysToMilliseconds(1)) {
+      const day = new Date(i).getDay();
+      if (excludedDays.includes(day)) {
+        gapWindowStart -= convertDaysToMilliseconds(1);
+      }
+    }
+
+    let taskQuery = buildTasksQueryForMissedUpdates(size);
+
+    if (cursor) {
+      const data = await tasksModel.doc(cursor).get();
+      if (!data.data()) {
+        return {
+          error: "Bad Request",
+          message: `Invalid cursor: ${cursor}`,
+        };
+      }
+      taskQuery = taskQuery.startAfter(data);
+    }
+
+    const usersMap = new Map();
+    const progressCountPromise = [];
+    const tasksQuerySnapshot = await taskQuery.get();
+
+    stats.tasks = tasksQuerySnapshot.size;
+    tasksQuerySnapshot.forEach((doc) => {
+      const { assignee: taskAssignee, startedOn: taskStartedOn } = doc.data();
+      if (!taskAssignee || taskStartedOn >= convertMillisToSeconds(gapWindowStart)) return;
+
+      const taskId = doc.id;
+
+      if (usersMap.has(taskAssignee)) {
+        const userData = usersMap.get(taskAssignee);
+        userData.tasksCount++;
+      } else {
+        usersMap.set(taskAssignee, {
+          tasksCount: 1,
+          latestProgressCount: dateGap + 1,
+          isActive: false,
+        });
+      }
+      const updateTasksIdMap = async () => {
+        const progressQuery = buildProgressQueryForMissedUpdates(taskId, gapWindowStart, gapWindowEnd);
+        const progressSnapshot = await progressQuery.get();
+        const userData = usersMap.get(taskAssignee);
+        userData.latestProgressCount = Math.min(progressSnapshot.data().count, userData.latestProgressCount);
+
+        if (userData.latestProgressCount === 0) {
+          stats.missedUpdatesTasks++;
+        }
+      };
+      progressCountPromise.push(updateTasksIdMap());
+    });
+
+    const userIdChunks = chunks(Array.from(usersMap.keys()), FIRESTORE_IN_CLAUSE_SIZE);
+    const userStatusSnapshotPromise = userIdChunks.map(
+      async (userIdList) =>
+        await userStatusModel
+          .where("currentStatus.state", "==", userState.ACTIVE)
+          .where("userId", "in", userIdList)
+          .get()
+    );
+    const userDetailsPromise = userIdChunks.map(
+      async (userIdList) =>
+        await userModel
+          .where("roles.archived", "==", false)
+          .where(admin.firestore.FieldPath.documentId(), "in", userIdList)
+          .get()
+    );
+
+    const userStatusChunks = await Promise.all(userStatusSnapshotPromise);
+
+    userStatusChunks.forEach((userStatusList) =>
+      userStatusList.forEach((doc) => {
+        usersMap.get(doc.data().userId).isActive = true;
+      })
+    );
+
+    const userDetailsListChunks = await Promise.all(userDetailsPromise);
+    userDetailsListChunks.forEach((userList) => {
+      userList.forEach((doc) => {
+        const userData = usersMap.get(doc.id);
+        userData.discordId = doc.data().discordId;
+      });
+    });
+
+    const discordUserList = await discordUsersPromise;
+    const discordUserMap = new Map();
+    discordUserList.forEach((discordUser) => {
+      const discordUserData = { isBot: !!discordUser.user.bot };
+      discordUser.roles.forEach((roleId) => {
+        switch (roleId) {
+          case discordDeveloperRoleId: {
+            discordUserData.isDeveloper = true;
+            break;
+          }
+          case discordMavenRoleId: {
+            discordUserData.isMaven = true;
+            break;
+          }
+          case missedUpdatesRoleId: {
+            discordUserData.hasMissedUpdatesRole = true;
+            break;
+          }
+        }
+      });
+      discordUserMap.set(discordUser.user.id, discordUserData);
+    });
+
+    await Promise.all(progressCountPromise);
+
+    for (const [userId, userData] of usersMap.entries()) {
+      const discordUserData = discordUserMap.get(userData.discordId);
+      const isDiscordMember = !!discordUserData;
+      const shouldAddRole =
+        userData.latestProgressCount === 0 &&
+        userData.isActive &&
+        isDiscordMember &&
+        discordUserData.isDeveloper &&
+        !discordUserData.isMaven &&
+        !discordUserData.isBot &&
+        !discordUserData.hasMissedUpdatesRole;
+
+      if (!shouldAddRole) {
+        usersMap.delete(userId);
+      }
+    }
+
+    const usersToAddRole = [];
+    for (const userData of usersMap.values()) {
+      usersToAddRole.push(userData.discordId);
+    }
+    const resultDataLength = tasksQuerySnapshot.docs.length;
+    const isLast = size && resultDataLength === size;
+    const lastVisible = isLast && tasksQuerySnapshot.docs[resultDataLength - 1];
+
+    if (lastVisible) {
+      stats.cursor = lastVisible.id;
+    }
+
+    return { usersToAddRole, ...stats };
+  } catch (err) {
+    logger.error("Error while running the add missed roles script", err);
+    throw err;
+  }
+};
+
+const addInviteToInviteModel = async (inviteObject) => {
+  try {
+    const invite = await discordInvitesModel.add(inviteObject);
+    return invite.id;
+  } catch (err) {
+    logger.error("Error in adding invite", err);
+    throw err;
+  }
+};
+
+const getUserDiscordInvite = async (userId) => {
+  try {
+    const invite = await discordInvitesModel.where("userId", "==", userId).get();
+    const [inviteDoc] = invite.docs;
+    if (inviteDoc) {
+      return { id: inviteDoc.id, ...inviteDoc.data(), notFound: false };
+    } else {
+      return { notFound: true };
+    }
+  } catch (err) {
+    logger.log("error in getting user invite", err);
+    throw err;
+  }
+};
+const groupUpdateLastJoinDate = async ({ id }) => {
+  await discordRoleModel.doc(id).set({ lastUsedOn: admin.firestore.Timestamp.fromDate(new Date()) }, { merge: true });
+  return { updated: true };
+};
+
 module.exports = {
   createNewRole,
   removeMemberGroup,
@@ -834,4 +1060,8 @@ module.exports = {
   updateUsersNicknameStatus,
   updateIdle7dUsersOnDiscord,
   updateUsersWith31DaysPlusOnboarding,
+  getMissedProgressUpdatesUsers,
+  getUserDiscordInvite,
+  addInviteToInviteModel,
+  groupUpdateLastJoinDate,
 };

@@ -12,13 +12,7 @@ const {
 } = require("../middlewares/validators/extensionRequests");
 
 router.post("/", authenticate, createExtensionRequest, extensionRequests.createTaskExtensionRequest);
-router.get(
-  "/",
-  authenticate,
-  authorizeRoles([SUPERUSER, APPOWNER]),
-  getExtensionRequestsValidator,
-  extensionRequests.fetchExtensionRequests
-);
+router.get("/", authenticate, getExtensionRequestsValidator, extensionRequests.fetchExtensionRequests);
 router.get("/self", authenticate, extensionRequests.getSelfExtensionRequests);
 router.get("/:id", authenticate, authorizeRoles([SUPERUSER, APPOWNER]), extensionRequests.getExtensionRequest);
 router.patch(

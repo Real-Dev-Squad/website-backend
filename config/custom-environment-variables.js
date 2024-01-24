@@ -45,6 +45,11 @@ module.exports = {
       },
     },
 
+    goalAPI: {
+      baseUrl: "GOALS_BASE_URL",
+      secretKey: "GOALS_SECRET_KEY",
+    },
+
     discordBot: {
       baseUrl: "DISCORD_BASE_URL",
     },
@@ -66,6 +71,10 @@ module.exports = {
 
   botToken: {
     botPublicKey: "BOT_PUBLIC_KEY",
+  },
+
+  cronJobHandler: {
+    publicKey: "CRON_JOB_PUBLIC_KEY",
   },
 
   rdsServerlessBot: {
@@ -93,5 +102,9 @@ module.exports = {
   Event100ms: {
     APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
     APP_SECRET: "EVENT_100MS_APP_SECRET",
+  },
+
+  externalServices: {
+    EXTERNAL_SERVICE_PUBLIC_KEY: "EXTERNAL_SERVICE_PUBLIC_KEY",
   },
 };

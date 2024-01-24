@@ -5,8 +5,8 @@ const {
   getRangeProgressData,
   getProgressByDate,
 } = require("../models/progresses");
-const { RESPONSE_MESSAGES, INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
-const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEEDED } = RESPONSE_MESSAGES;
+const { PROGRESSES_RESPONSE_MESSAGES, INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
+const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEEDED } = PROGRESSES_RESPONSE_MESSAGES;
 
 /**
  * @typedef {Object} ProgressRequestBody

@@ -22,7 +22,7 @@ const updateUser = async (req, res, next) => {
         .optional()
         .min(4)
         .max(20)
-        .regex(/^[a-zA-Z0-9]+$/)
+        .regex(/^[a-zA-Z0-9-]+$/)
         .message("Username must be between 4 and 20 characters long and contain only letters or numbers."),
       first_name: joi.string().optional(),
       last_name: joi.string().optional(),
@@ -52,12 +52,9 @@ const updateUser = async (req, res, next) => {
         .optional(),
       discordId: joi.string().optional(),
       roles: joi.object().keys({
-        archived: joi.boolean().required(),
-        in_discord: joi.boolean().required(),
-        developer: joi.boolean().optional(),
         designer: joi.boolean().optional(),
         maven: joi.boolean().optional(),
-        productmanager: joi.boolean().optional(),
+        product_manager: joi.boolean().optional(),
       }),
     });
 
@@ -323,7 +320,24 @@ const validateGenerateUsernameQuery = async (req, res, next) => {
     res.boom.badRequest("Invalid Query Parameters Passed");
   }
 };
-
+const migrationsValidator = async (req, res, next) => {
+  const { action, page, size } = req.query;
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      page: joi.number(),
+      action: joi.string().valid("adds-github-id").required(),
+      size: joi.number().min(1).max(500).required(),
+    });
+  try {
+    await schema.validateAsync({ action, page: parseInt(page), size: parseInt(size) });
+    next();
+  } catch (error) {
+    logger.error("Invalid Query Parameters Passed", error);
+    res.boom.badRequest("Invalid Query Parameters Passed");
+  }
+};
 module.exports = {
   updateUser,
   updateProfileURL,
@@ -334,4 +348,5 @@ module.exports = {
   validateUpdateRoles,
   validateUsersPatchHandler,
   validateGenerateUsernameQuery,
+  migrationsValidator,
 };

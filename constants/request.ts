@@ -1,0 +1,5 @@
+export const REQUEST_STATE = {
+    APPROVED: "APPROVED",
+    PENDING: "PENDING",
+    REJECTED: "REJECTED",
+  };
