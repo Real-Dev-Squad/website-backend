@@ -722,12 +722,21 @@ const addDefaultArchivedRole = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
+const calculatePagination = (pageNumber, totalPages, reqQuery, limitNumber) => {
+  const nextPage = pageNumber < totalPages - 1 ? pageNumber + 1 : null;
+  const prevPage = pageNumber > 0 ? pageNumber - 1 : null;
+
+  return {
+    next: nextPage ? getFilteredPaginationLink(reqQuery, nextPage, limitNumber) : null,
+    prev: prevPage ? getFilteredPaginationLink(reqQuery, prevPage, limitNumber) : null,
+  };
+};
+
 const filterUsers = async (req, res) => {
   try {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-
     const { page, limit } = req.query;
     const pageNumber = parseInt(page) || 0;
     const limitNumber = parseInt(limit) || 100;
@@ -736,26 +745,14 @@ const filterUsers = async (req, res) => {
     const users = await dataAccess.retreiveFilteredUsers(req.query, skip, limitNumber);
     const totalCount = await users.length;
     const totalPages = Math.ceil(totalCount / limitNumber);
-    const nextPage = pageNumber < totalPages - 1 ? pageNumber + 1 : null;
-    const prevPage = pageNumber > 0 ? pageNumber - 1 : null;
 
-    const paginationLinks = {
-      next: nextPage ? getFilteredPaginationLink(req.query, nextPage, limitNumber) : null,
-      prev: prevPage ? getFilteredPaginationLink(req.query, prevPage, limitNumber) : null,
-    };
+    const paginationLinks = calculatePagination(pageNumber, totalPages, req.query, limitNumber);
 
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
       users: users,
+      links: paginationLinks,
       count: users.length,
-      pagination: {
-        totalCount,
-        totalPages,
-        currentPage: pageNumber,
-        nextPage,
-        prevPage,
-        links: paginationLinks,
-      },
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
