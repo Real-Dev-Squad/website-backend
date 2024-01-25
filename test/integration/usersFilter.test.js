@@ -169,13 +169,14 @@ describe("Filter Users", function () {
           expect(res.body).to.have.property("message");
           expect(res.body).to.have.property("users");
           expect(res.body).to.have.property("count");
-          expect(res.body).to.have.property("pagination");
-          expect(res.body.pagination).to.have.property("totalCount");
-          expect(res.body.pagination).to.have.property("totalPages");
-          expect(res.body.pagination).to.have.property("currentPage");
-          expect(res.body.pagination).to.have.property("nextPage");
-          expect(res.body.pagination).to.have.property("prevPage");
-          expect(res.body.pagination).to.have.property("links");
+          expect(res.body).to.have.property("links"); // Corrected property name
+          expect(res.body.links).to.have.property("totalCount");
+          expect(res.body.links).to.have.property("totalPages");
+          expect(res.body.links).to.have.property("currentPage");
+          expect(res.body.links).to.have.property("nextPage");
+          expect(res.body.links).to.have.property("prevPage");
+          expect(res.body.links).to.have.property("next"); // If applicable
+          expect(res.body.links).to.have.property("prev"); // If applicable
           return done();
         });
     });
