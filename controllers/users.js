@@ -747,9 +747,9 @@ const filterUsers = async (req, res) => {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
-    const { page, limit } = req.query;
+    const { page, size } = req.query;
     const pageNumber = parseInt(page) || 0;
-    const limitNumber = parseInt(limit) || 100;
+    const limitNumber = parseInt(size) || 100;
     const skip = (pageNumber - 1) * limitNumber;
 
     const users = await dataAccess.retreiveFilteredUsers(req.query, skip, limitNumber);
