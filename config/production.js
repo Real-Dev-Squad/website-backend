@@ -5,6 +5,7 @@
 module.exports = {
   discordUnverifiedRoleId: "1103047289330745386",
   discordDeveloperRoleId: "915490782939582485",
+  discordNewComersChannelId: "709080951824842783",
   discordMavenRoleId: "875564640438997043",
   discordMissedUpdatesRoleId: "1183553844811153458",
   userToken: {

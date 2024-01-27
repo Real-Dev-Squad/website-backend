@@ -311,14 +311,15 @@ const fetchLastMergedPR = async (username) => {
     const res = await fetch(createdURL, { headers });
 
     if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`GitHub API request failed: ${errorText}`);
+      logger.error(`GitHub API request failed. Status: ${res.status}, URL: ${createdURL}`);
+      return null;
     }
 
     const data = await res.json();
 
     if (!data || !data.items || !data.items.length) {
-      throw new Error(`No merged PRs found for user ${username}`);
+      logger.error(`No merged PRs found for user ${username}`);
+      return null;
     }
 
     return data;
@@ -336,6 +337,9 @@ const fetchLastMergedPR = async (username) => {
 const isLastPRMergedWithinDays = async (username, days) => {
   try {
     const res = await fetchLastMergedPR(username);
+    if (!res) {
+      return false;
+    }
     const mergedAt = res.items[0].pull_request.merged_at;
     const lastPRMergedDate = new Date(mergedAt);
     const currentDate = new Date();
