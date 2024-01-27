@@ -103,4 +103,8 @@ module.exports = {
     APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
     APP_SECRET: "EVENT_100MS_APP_SECRET",
   },
+
+  externalServices: {
+    EXTERNAL_SERVICE_PUBLIC_KEY: "EXTERNAL_SERVICE_PUBLIC_KEY",
+  },
 };

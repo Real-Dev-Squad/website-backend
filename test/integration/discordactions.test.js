@@ -237,6 +237,28 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Role added successfully!");
     });
+    it("should create a reason and pass it down to the bot, on adding the role to the user", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({}),
+        })
+      );
+
+      const body = { roleid, userid: userData[0].discordId };
+      const res = await chai
+        .request(app)
+        .post("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(body);
+
+      expect(res).to.have.status(201);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Role added successfully!");
+      expect(fetchStub.getCall(0).args[1].headers["X-Audit-Log-Reason"]).to.equal(
+        `Action initiator's username=>ankur and id=${userId}`
+      );
+    });
     it("should not allow unknown role to be added to user", async function () {
       const res = await chai
         .request(app)
@@ -304,6 +326,26 @@ describe("Discord actions", function () {
         });
     });
 
+    it("should create a reason and pass it down to the bot on deleting the role", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ roleId: "1234", wasSuccess: true }),
+        })
+      );
+      const res = await chai
+        .request(app)
+        .delete("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ roleid, userid: userData[0].discordId });
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Role deleted successfully");
+      expect(fetchStub.getCall(0).args[1].headers["X-Audit-Log-Reason"]).to.equal(
+        `Action initiator's username=>ankur and id=${userId}`
+      );
+    });
     it("should not allow unknown role to be deleted from user", async function () {
       const res = await chai
         .request(app)

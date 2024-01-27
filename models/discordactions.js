@@ -47,16 +47,12 @@ const createNewRole = async (roleData) => {
 
 const removeMemberGroup = async (roleId, discordId) => {
   try {
-    const discordResponse = await removeRoleFromUser(roleId, discordId);
-    if (discordResponse) {
-      const backendResponse = await deleteRoleFromDatabase(roleId, discordId);
-      return backendResponse;
-    }
+    const backendResponse = await deleteRoleFromDatabase(roleId, discordId);
+    return backendResponse;
   } catch (error) {
     logger.error(`Error while removing role: ${error}`);
     throw new Error(error);
   }
-  return false;
 };
 
 const deleteRoleFromDatabase = async (roleId, discordId) => {
