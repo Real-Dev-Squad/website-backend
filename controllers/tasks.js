@@ -254,13 +254,13 @@ const getSelfTasks = async (req, res) => {
 const getTask = async (req, res) => {
   try {
     const taskId = req.params.id;
-    const { taskData, dependencyDocReference } = await tasks.fetchTask(taskId);
+    const { taskData, dependencyDocReference, isPendingExtensionRequest } = await tasks.fetchTask(taskId);
     if (!taskData) {
       return res.boom.notFound("Task not found");
     }
     return res.json({
       message: "task returned successfully",
-      taskData: { ...taskData, dependsOn: dependencyDocReference },
+      taskData: { ...taskData, dependsOn: dependencyDocReference, isPendingExtensionRequest },
     });
   } catch (err) {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);

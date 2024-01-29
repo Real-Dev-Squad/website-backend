@@ -2,6 +2,7 @@ const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
 const ItemModel = firestore.collection("itemTags");
 const dependencyModel = firestore.collection("taskDependencies");
+const extensionRequestsModel = firestore.collection("extensionRequests");
 const userUtils = require("../utils/users");
 const { updateTaskStatusToDone } = require("../services/tasks");
 const { chunks } = require("../utils/array");
@@ -11,6 +12,7 @@ const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../const
 const { IN_PROGRESS, NEEDS_REVIEW, IN_REVIEW, ASSIGNED, BLOCKED, SMOKE_TESTING, COMPLETED, SANITY_CHECK } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
 
 /**
  * Adds and Updates tasks
@@ -281,6 +283,14 @@ const fetchActiveTaskMembers = async () => {
 const fetchTask = async (taskId) => {
   try {
     const task = await tasksModel.doc(taskId).get();
+    const extensionRequestSnapshot = await extensionRequestsModel.where("taskId", "==", taskId).get();
+    const extensionRequestsData = extensionRequestSnapshot.docs.map((doc) => {
+      const extensionRequestId = doc.id;
+      return { extensionRequestId, status: doc.get("status") };
+    });
+    const isPendingExtensionRequest = Boolean(
+      extensionRequestsData.filter((doc) => doc.status === EXTENSION_REQUEST_STATUS.PENDING).length
+    );
     const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
     const dependencyDocReference = dependencySnapshot.docs.map((doc) => {
       const dependency = doc.get("dependsOn");
@@ -290,7 +300,7 @@ const fetchTask = async (taskId) => {
     if (taskData?.status) {
       taskData.status = TASK_STATUS[taskData.status.toUpperCase()] || task.status;
     }
-    return { taskData, dependencyDocReference };
+    return { taskData, dependencyDocReference, isPendingExtensionRequest };
   } catch (err) {
     logger.error("Error retrieving task data", err);
     throw err;
