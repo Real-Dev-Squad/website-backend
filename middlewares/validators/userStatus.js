@@ -125,6 +125,7 @@ const validateGetQueryParams = async (req, res, next) => {
     .messages({
       "object.unknown": "Invalid query param provided.",
     });
+
   try {
     await schema.validateAsync(req.query);
     next();
