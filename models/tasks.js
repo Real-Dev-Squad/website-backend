@@ -286,9 +286,10 @@ const fetchTask = async (taskId) => {
     const extensionRequestSnapshot = await extensionRequestsModel.where("taskId", "==", taskId).get();
     const extensionRequestsData = extensionRequestSnapshot.docs.map((doc) => {
       const extensionRequestId = doc.id;
-      return { extensionRequestId, status: doc.get("status") };
+      const status = doc.get("status");
+      return { extensionRequestId, status};
     });
-    const isPendingExtensionRequest = Boolean(
+    const isExtensionRequestPending = Boolean(
       extensionRequestsData.filter((doc) => doc.status === EXTENSION_REQUEST_STATUS.PENDING).length
     );
     const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
@@ -300,7 +301,7 @@ const fetchTask = async (taskId) => {
     if (taskData?.status) {
       taskData.status = TASK_STATUS[taskData.status.toUpperCase()] || task.status;
     }
-    return { taskData, dependencyDocReference, isPendingExtensionRequest };
+    return { taskData, dependencyDocReference, isExtensionRequestPending };
   } catch (err) {
     logger.error("Error retrieving task data", err);
     throw err;
