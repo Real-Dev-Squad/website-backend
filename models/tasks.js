@@ -287,7 +287,7 @@ const fetchTask = async (taskId) => {
     const extensionRequestsData = extensionRequestSnapshot.docs.map((doc) => {
       const extensionRequestId = doc.id;
       const status = doc.get("status");
-      return { extensionRequestId, status};
+      return { extensionRequestId, status };
     });
     const isExtensionRequestPending = Boolean(
       extensionRequestsData.filter((doc) => doc.status === EXTENSION_REQUEST_STATUS.PENDING).length
