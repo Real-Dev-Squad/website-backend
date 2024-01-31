@@ -283,15 +283,13 @@ const fetchActiveTaskMembers = async () => {
 const fetchTask = async (taskId) => {
   try {
     const task = await tasksModel.doc(taskId).get();
-    const extensionRequestSnapshot = await extensionRequestsModel.where("taskId", "==", taskId).get();
-    const extensionRequestsData = extensionRequestSnapshot.docs.map((doc) => {
-      const extensionRequestId = doc.id;
-      const status = doc.get("status");
-      return { extensionRequestId, status };
-    });
-    const isExtensionRequestPending = Boolean(
-      extensionRequestsData.filter((doc) => doc.status === EXTENSION_REQUEST_STATUS.PENDING).length
-    );
+    const extensionRequestSnapshot = await extensionRequestsModel
+      .where("taskId", "==", taskId)
+      .where("status", "==", EXTENSION_REQUEST_STATUS.PENDING)
+      .count()
+      .get();
+    const extensionRequestsData = extensionRequestSnapshot.data().count;
+    const isExtensionRequestPending = Boolean(extensionRequestsData);
     const dependencySnapshot = await dependencyModel.where("taskId", "==", taskId).get();
     const dependencyDocReference = dependencySnapshot.docs.map((doc) => {
       const dependency = doc.get("dependsOn");
