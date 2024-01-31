@@ -4,6 +4,7 @@ import { userState } from "../constants/userStatus";
 import { Boom } from "express-boom";
 
 export type OooStatusRequest = {
+  type: string;
   from: number;
   until?: number;
   message?: string;
@@ -15,6 +16,8 @@ export type OooStatusRequest = {
   reason?: string;
 };
 export type OooStatusRequestBody = {
+  type: string;
+  userId?: string;
   from: number;
   until: number;
   message: string;
@@ -23,5 +26,9 @@ export type OooStatusRequestBody = {
   updatedAt?: admin.firestore.Timestamp;
 };
 
+export type userData= {
+  userId: string;
+};
+
 export type OooStatusRequestResponse = Response & { boom: Boom };
-export type OooStatusRequestRequest = Request & { OooStatusRequestBody };
+export type OooStatusRequestRequest = Request & { OooStatusRequestBody , userData};
