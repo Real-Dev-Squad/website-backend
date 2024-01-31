@@ -36,17 +36,16 @@ const addLog = async (type, meta, body) => {
  */
 const fetchLogs = async (query, param) => {
   try {
-    const remainingQuery = query;
     let call = logsModel.where("type", "==", param);
-    Object.keys(remainingQuery).forEach((key) => {
+    Object.keys(query).forEach((key) => {
       // eslint-disable-next-line security/detect-object-injection
       if (key !== "limit" && key !== "lastDocId") {
         // eslint-disable-next-line security/detect-object-injection
-        call = call.where(key, "==", remainingQuery[key]);
+        call = call.where(key, "==", query[key]);
       }
     });
 
-    const { limit, lastDocId, userId } = remainingQuery;
+    const { limit, lastDocId, userId } = query;
     let lastDoc;
     const limitDocuments = Number(limit);
 
