@@ -4,7 +4,6 @@ import { userState } from "../constants/userStatus";
 import { Boom } from "express-boom";
 
 export type OooStatusRequest = {
-  userId: string;
   from: number;
   until?: number;
   message?: string;
@@ -16,7 +15,6 @@ export type OooStatusRequest = {
   reason?: string;
 };
 export type OooStatusRequestBody = {
-  userId: string;
   from: number;
   until: number;
   message: string;

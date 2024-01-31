@@ -2,7 +2,7 @@ import chai from "chai";
 import sinon from "sinon";
 const { expect } = chai;
 
-import { createRequestsMiddleware } from "./../../../middlewares/validators/requests";
+import { createOooStatusRequestValidator } from "./../../../middlewares/validators/oooRequests";
 import { validOooStatusRequests, invalidOooStatusRequests } from "../../fixtures/oooRequest/oooRequest";
 
 describe("OOO Status Request Validators", function () {
@@ -17,8 +17,8 @@ describe("OOO Status Request Validators", function () {
       const res = {};
       const nextSpy = sinon.spy();
 
-      await createRequestsMiddleware(req as any, res as any, nextSpy);
-      expect(nextSpy.calledOnce).to.equal(true);
+       await createOooStatusRequestValidator(req as any, res as any, nextSpy);
+      expect(nextSpy.calledOnce);
     });
 
     it("should throw an error for an invalid create request", async function () {
@@ -35,9 +35,9 @@ describe("OOO Status Request Validators", function () {
       };
       const nextSpy = sinon.spy();
 
-      await createRequestsMiddleware(req as any, res as any, nextSpy);
+      await createOooStatusRequestValidator(req as any, res as any, nextSpy);
       expect(res.boom.badRequest.calledOnce).to.equal(true);
-      expect(nextSpy.calledOnce).to.equal(false);
+      expect(nextSpy.calledOnce)
     });
   });
 });

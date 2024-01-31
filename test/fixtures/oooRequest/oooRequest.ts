@@ -13,7 +13,6 @@ export const createOooStatusRequests = {
 
 export const validOooStatusRequests = {
   type: "OOO",
-  userId: "user123",
   from: Date.now() + 100000,
   until: Date.now() + 200000,
   message: "Out of office for personal reasons.",
@@ -22,7 +21,6 @@ export const validOooStatusRequests = {
 
 export const invalidOooStatusRequests = {
   type: "OOO",
-  userId: "user123",
   from: Date.now() + 100000,
   until: Date.now() + 200000,
   message: "Out of office for personal reasons.",

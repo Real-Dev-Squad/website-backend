@@ -1,24 +1,17 @@
 import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/request";
-import { OooStatusRequestRequest, OooStatusRequestResponse } from "../../types/oooStatusRequest";
+import { OooStatusRequestRequest, OooStatusRequestResponse } from "../../types/oooRequest";
 
 export const createOooStatusRequestValidator = async (
   req: OooStatusRequestRequest,
   res: OooStatusRequestResponse,
   next: NextFunction
 ) => {
-  const requestedUserId = req.userData.id;
-
   const schema = joi
     .object()
     .strict()
     .keys({
-      userId: joi.string().required().valid(requestedUserId).messages({
-        "any.required": "userId is required",
-        "string.empty": "userId cannot be empty",
-        "any.only": "User must be the same as the logged in user",
-      }),
       from: joi
         .number()
         .min(Date.now())

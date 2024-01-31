@@ -1,6 +1,6 @@
 import { NextFunction } from "express";
 import { REQUEST_TYPE } from "../../constants/request";
-import { OooStatusRequestRequest, OooStatusRequestResponse } from "../../types/oooStatusRequest";
+import { OooStatusRequestRequest, OooStatusRequestResponse } from "../../types/oooRequest";
 import { createOooStatusRequestValidator } from "./oooRequests";
 
 export const createRequestsMiddleware = async (
