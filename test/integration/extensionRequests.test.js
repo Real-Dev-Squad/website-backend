@@ -767,22 +767,22 @@ describe("Extension Requests", function () {
         });
     });
 
-    it("Should update the extensionRequest for the given extensionRequestId", function (done) {
-      chai
+    it("Should update the extensionRequest for the given extensionRequestId and create a log", async function () {
+      const previousLogs = await logsQuery.fetchLogs(
+        { "meta.extensionRequestId": extensionRequestId1 },
+        "extensionRequests"
+      );
+      expect(previousLogs).to.be("array").lengthOf(0);
+      const response = await chai
         .request(app)
         .patch(`/extension-requests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           title: "new-title",
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(204);
-          return done();
         });
+      expect(response).to.have.status(204);
+      const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId1 }, "extensionRequests");
+      expect(logs).to.be("array").lengthOf(1);
     });
 
     it("Should return 400 if assignee of the extensionrequest is upated with a different user", function (done) {

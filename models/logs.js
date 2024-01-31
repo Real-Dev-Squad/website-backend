@@ -36,7 +36,7 @@ const addLog = async (type, meta, body) => {
  */
 const fetchLogs = async (query, param) => {
   try {
-    const { dev, ...remainingQuery } = query;
+    const remainingQuery = query;
     let call = logsModel.where("type", "==", param);
     Object.keys(remainingQuery).forEach((key) => {
       // eslint-disable-next-line security/detect-object-injection
@@ -80,7 +80,7 @@ const fetchLogs = async (query, param) => {
     });
 
     // If dev flag is presend and extensionRequest logs are requested, populate userId
-    if (dev === "true" && param === "extensionRequests") {
+    if (param === "extensionRequests") {
       const userIdNameMap = {};
       for await (const log of logs) {
         if (log.meta.userId) {
