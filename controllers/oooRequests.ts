@@ -5,11 +5,14 @@ import { CREATE, ERRORS, ERROR_WHILE_CREATING_OOO_REQUEST, OOO_LOG_TYPE, OOO_STA
 
 export const createOooRequestController = async (req: OooStatusRequestRequest, res: OooStatusRequestResponse) => {
     const oooRequestBody = req.body;
-    const userId = req.userData.id;
+    const userId = req?.userData?.id;
+    if (!userId) {
+        return res.boom.unauthorized();
+    }
 
     try {
-        const oooRequestDoc = await createOooRequest({userId, ...oooRequestBody});
-        if ('error' in oooRequestDoc) {
+        const oooRequestResult = await createOooRequest({userId, ...oooRequestBody});
+        if ('error' in oooRequestResult) {
             const oooRequestLog = {
                 type: OOO_LOG_TYPE.OOO_REQUEST_BLOCKED,
                 meta: {
@@ -18,30 +21,30 @@ export const createOooRequestController = async (req: OooStatusRequestRequest, r
                     createdAt: Date.now(),
                 },
                 body: {
-                    error: oooRequestDoc.error,
+                    error: oooRequestResult.error,
                     ...oooRequestBody,
                 },
             };
             await addLog(oooRequestLog.type, oooRequestLog.meta, oooRequestLog.body);
 
-            return res.boom.badRequest(oooRequestDoc.error);
+            return res.boom.badRequest(oooRequestResult.error);
         } else {
             const oooRequestLog = {
                 type: OOO_LOG_TYPE.OOO_REQUEST_CREATED,
                 meta: {
-                    oooRequestId: oooRequestDoc.id,
+                    oooRequestId: oooRequestResult.id,
                     action: CREATE,
                     createdBy: userId,
                     createdAt: Date.now(),
                 },
-                body: oooRequestDoc,
+                body: oooRequestResult,
             };
             await addLog(oooRequestLog.type, oooRequestLog.meta, oooRequestLog.body);
             return res.status(201).json({
                 message: OOO_STATUS_REQUEST_CREATED_SUCCESSFULLY,
                 data: {
-                    id: oooRequestDoc.id,
-                    ...oooRequestDoc,
+                    id: oooRequestResult.id,
+                    ...oooRequestResult,
                 },
             });
         }

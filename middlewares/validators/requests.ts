@@ -1,10 +1,10 @@
 import { NextFunction } from "express";
 import { REQUEST_TYPE } from "../../constants/request";
-import { OooStatusRequestRequest, OooStatusRequestResponse } from "../../types/oooRequest";
+import { OooRequestCreateRequest, OooStatusRequestResponse } from "../../types/oooRequest";
 import { createOooStatusRequestValidator } from "./oooRequests";
 
 export const createRequestsMiddleware = async (
-  req: OooStatusRequestRequest,
+  req: OooRequestCreateRequest,
   res: OooStatusRequestResponse,
   next: NextFunction
 ) => {
@@ -17,7 +17,7 @@ export const createRequestsMiddleware = async (
   try {
     switch (type) {
       case REQUEST_TYPE.OOO:
-        await createOooStatusRequestValidator(req as OooStatusRequestRequest, res as OooStatusRequestResponse, next);
+        await createOooStatusRequestValidator(req as OooRequestCreateRequest, res as OooStatusRequestResponse, next);
         break;
       default:
         res.boom.badRequest(`Invalid request type: ${type}`);

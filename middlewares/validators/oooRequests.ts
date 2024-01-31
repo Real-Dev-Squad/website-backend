@@ -1,10 +1,10 @@
 import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/request";
-import { OooStatusRequestRequest, OooStatusRequestResponse } from "../../types/oooRequest";
+import { OooRequestCreateRequest, OooStatusRequestResponse } from "../../types/oooRequest";
 
 export const createOooStatusRequestValidator = async (
-  req: OooStatusRequestRequest,
+  req: OooRequestCreateRequest,
   res: OooStatusRequestResponse,
   next: NextFunction
 ) => {
@@ -16,7 +16,7 @@ export const createOooStatusRequestValidator = async (
         .number()
         .min(Date.now())
         .messages({
-          "number.min": "from date must be greater than or equal to current date",
+          "number.min": "from date must be greater than or equal to Today's date",
         })
         .required(),
       until: joi
