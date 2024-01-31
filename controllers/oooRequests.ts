@@ -1,9 +1,9 @@
 import { createOooRequest } from "../models/oooRequests";
-import { OooStatusRequestResponse, OooStatusRequestRequest } from "../types/oooRequest";
+import { OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
 import { addLog } from "../models/logs";
 import { CREATE, ERRORS, ERROR_WHILE_CREATING_OOO_REQUEST, OOO_LOG_TYPE, OOO_STATUS_REQUEST_CREATED_SUCCESSFULLY } from "../constants/oooRequest";
 
-export const createOooRequestController = async (req: OooStatusRequestRequest, res: OooStatusRequestResponse) => {
+export const createOooRequestController = async (req: OooRequestCreateRequest, res: OooRequestResponse) => {
     const oooRequestBody = req.body;
     const userId = req?.userData?.id;
     if (!userId) {
