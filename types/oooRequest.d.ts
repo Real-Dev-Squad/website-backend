@@ -27,8 +27,12 @@ export type OooStatusRequestBody = {
 };
 
 export type userData= {
-  userId: string;
+  id: string;
+};
+
+export type OooRequestParams = {
+  dev: string;
 };
 
 export type OooRequestResponse = Response & { boom: Boom };
-export type OooRequestCreateRequest = Request & { OooStatusRequestBody , userData};
+export type OooRequestCreateRequest = Request & { OooStatusRequestBody , userData: userData , params: OooRequestParams };
