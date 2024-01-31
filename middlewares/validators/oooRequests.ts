@@ -1,11 +1,11 @@
 import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/request";
-import { OooRequestCreateRequest, OooStatusRequestResponse } from "../../types/oooRequest";
+import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
 
 export const createOooStatusRequestValidator = async (
   req: OooRequestCreateRequest,
-  res: OooStatusRequestResponse,
+  res: OooRequestResponse,
   next: NextFunction
 ) => {
   const schema = joi
