@@ -1,6 +1,6 @@
 import { OooStatusRequestBody } from "../types/oooRequest";
 import firestore from "../utils/firestore";
-const oooRequesModel = firestore.collection("oooRequests");
+const oooRequestModel = firestore.collection("oooRequests");
 import { REQUEST_STATE } from "../constants/request";
 import { OOO_REQUEST_ALREADY_PENDING, ERROR_WHILE_CREATING_OOO_REQUEST } from "../constants/oooRequest";
 
@@ -8,7 +8,7 @@ export const createOooRequest = async (body: OooStatusRequestBody) => {
   try {
     const { userId, from, until, message, type } = body;
 
-    const existingOooRequest = await oooRequesModel
+    const existingOooRequest = await oooRequestModel
       .where("userId", "==", userId)
       .where("state", "==", REQUEST_STATE.PENDING)
       .get();
@@ -28,7 +28,7 @@ export const createOooRequest = async (body: OooStatusRequestBody) => {
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
-    const result = await oooRequesModel.add(requestBody);
+    const result = await oooRequestModel.add(requestBody);
 
     return {
       id: result.id,
