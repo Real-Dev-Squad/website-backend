@@ -23,8 +23,5 @@ export type OooStatusRequestBody = {
   updatedAt?: admin.firestore.Timestamp;
 };
 
-type UserData = {
-  id: string;
-};
 export type OooStatusRequestResponse = Response & { boom: Boom };
-export type OooStatusRequestRequest = Request & { OooStatusRequestBody , userData: UserData };
+export type OooStatusRequestRequest = Request & { OooStatusRequestBody };

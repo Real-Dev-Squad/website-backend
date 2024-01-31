@@ -10,9 +10,6 @@ describe("OOO Status Request Validators", function () {
     it("should pass validation for a valid create request", async function () {
       const req = {
         body: validOooStatusRequests,
-        userData: {
-          id: "user123",
-        },
       };
       const res = {};
       const nextSpy = sinon.spy();
@@ -24,9 +21,6 @@ describe("OOO Status Request Validators", function () {
     it("should throw an error for an invalid create request", async function () {
       const req = {
         body: invalidOooStatusRequests,
-        userData: {
-          id: "someUserId",
-        },
       };
       const res = {
         boom: {
