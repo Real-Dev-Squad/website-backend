@@ -9,6 +9,10 @@ export const createRequestsMiddleware = async (
   next: NextFunction
 ) => {
   const type = req.body.type;
+  // TODO: Remove this check once feature is tested and ready to be used
+  if ( req.query.dev !== "true") {
+    return res.boom.badRequest("Please use feature to make requests");
+  }
 
   try {
     switch (type) {

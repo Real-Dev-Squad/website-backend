@@ -26,8 +26,8 @@ describe("Requests",async  () => {
         it("should return 401 if user is not logged in", function (done) {
             chai
                 .request(app)
-                .post("/requests")
-                .send(validOooStatusRequests[0])
+                .post("/requests?dev=true")
+                .send(validOooStatusRequests)
                 .end(function (err, res) {
                     expect(res).to.have.status(401);
                     done();
@@ -37,7 +37,7 @@ describe("Requests",async  () => {
         it("should create a new request", function (done) {
             chai
             .request(app)
-            .post("/requests")
+            .post("/requests?dev=true")
             .set("cookie", `${cookieName}=${authToken}`)
             .send(validOooStatusRequests)
                 .end(function (err, res) {
