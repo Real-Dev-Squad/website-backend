@@ -30,9 +30,9 @@ export type userData= {
   id: string;
 };
 
-export type OooRequestParams = {
+export type OooRequestQuery = {
   dev: string;
 };
 
 export type OooRequestResponse = Response & { boom: Boom };
-export type OooRequestCreateRequest = Request & { OooStatusRequestBody , userData: userData , params: OooRequestParams };
+export type OooRequestCreateRequest = Request & { OooStatusRequestBody , userData: userData , query: OooRequestQuery };
