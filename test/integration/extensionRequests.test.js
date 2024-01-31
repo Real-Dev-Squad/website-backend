@@ -825,10 +825,10 @@ describe("Extension Requests", function () {
         });
     });
 
-    it("Extension request log should contain extensionRequestId upon approving request in dev mode", function (done) {
+    it("Extension request log should contain extensionRequestId upon approving", function (done) {
       chai
         .request(app)
-        .patch(`/extension-requests/${extensionRequestId3}/status?dev=true`)
+        .patch(`/extension-requests/${extensionRequestId3}/status`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           status: "APPROVED",
@@ -861,10 +861,10 @@ describe("Extension Requests", function () {
           return null;
         });
     });
-    it("Extension request log should contain extensionRequestId upon denying request in dev mode", function (done) {
+    it("Extension request log should contain extensionRequestId upon denying request", function (done) {
       chai
         .request(app)
-        .patch(`/extension-requests/${extensionRequestId4}/status?dev=true`)
+        .patch(`/extension-requests/${extensionRequestId4}/status`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           status: "DENIED",
@@ -898,13 +898,13 @@ describe("Extension Requests", function () {
         });
     });
   });
-  describe("PATCH /extension-requests/:id?dev=true", function () {
+  describe("Updating extension request detail", function () {
     it("Should create a log when SU changes the extension request's title", async function () {
       const newTitle = "new-title";
-      const oldTitle = "change ETA"; // from above
+      const oldTitle = "change ETA";
       await chai
         .request(app)
-        .patch(`/extension-requests/${extensionRequestId5}/?dev=true`)
+        .patch(`/extension-requests/${extensionRequestId5}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           title: newTitle,
@@ -924,7 +924,7 @@ describe("Extension Requests", function () {
       const suETA = 4444; // from above
       await chai
         .request(app)
-        .patch(`/extension-requests/${extensionRequestId5}/?dev=true`)
+        .patch(`/extension-requests/${extensionRequestId5}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           newEndsOn: suETA,
@@ -944,7 +944,7 @@ describe("Extension Requests", function () {
       const oldReason = "family event"; // from above
       await chai
         .request(app)
-        .patch(`/extension-requests/${extensionRequestId5}/?dev=true`)
+        .patch(`/extension-requests/${extensionRequestId5}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           reason: newReason,
