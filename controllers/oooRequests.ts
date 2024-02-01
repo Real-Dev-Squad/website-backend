@@ -11,7 +11,7 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
     }
 
     try {
-        const oooRequestResult = await createOooRequest({userId, ...oooRequestBody});
+        const oooRequestResult = await createOooRequest({requestedBy:userId, ...oooRequestBody});
         if ('error' in oooRequestResult) {
             const oooRequestLog = {
                 type: OOO_LOG_TYPE.OOO_REQUEST_BLOCKED,
