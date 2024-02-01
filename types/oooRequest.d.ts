@@ -10,20 +10,20 @@ export type OooStatusRequest = {
   message?: string;
   status: userState;
   state?: REQUEST_STATE;
-  lastUpdatedBy?: string;
-  createdAt?: admin.firestore.Timestamp;
-  updatedAt?: admin.firestore.Timestamp;
+  lastModifiedBy?: string;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
   reason?: string;
 };
 export type OooStatusRequestBody = {
   type: string;
-  userId?: string;
+  requestedBy?: string;
   from: number;
   until: number;
   message: string;
   state: REQUEST_STATE.PENDING;
-  createdAt?: admin.firestore.Timestamp;
-  updatedAt?: admin.firestore.Timestamp;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
 };
 
 export type userData= {

@@ -13,7 +13,7 @@ describe("models/oooRequests", () => {
             const oooRequest = await createOooRequest(createOooStatusRequests);
             expect(oooRequest).to.not.be.null;
             expect(oooRequest).to.have.property("id");
-            expect(oooRequest).to.have.property("userId");
+            expect(oooRequest).to.have.property("requestedBy");
         });
 
         it("should throw an error if the user already has an OOO request", async () => {

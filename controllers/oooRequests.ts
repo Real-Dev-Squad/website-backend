@@ -1,7 +1,7 @@
 import { createOooRequest } from "../models/oooRequests";
 import { OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
 import { addLog } from "../models/logs";
-import { CREATE, ERRORS, ERROR_WHILE_CREATING_OOO_REQUEST, OOO_LOG_TYPE, OOO_STATUS_REQUEST_CREATED_SUCCESSFULLY } from "../constants/oooRequest";
+import { ERROR_WHILE_CREATING_OOO_REQUEST,LOG_ACTION, OOO_LOG_TYPE, OOO_STATUS_REQUEST_CREATED_SUCCESSFULLY } from "../constants/oooRequest";
 
 export const createOooRequestController = async (req: OooRequestCreateRequest, res: OooRequestResponse) => {
     const oooRequestBody = req.body;
@@ -16,7 +16,7 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
             const oooRequestLog = {
                 type: OOO_LOG_TYPE.OOO_REQUEST_BLOCKED,
                 meta: {
-                    action: ERRORS,
+                    action: LOG_ACTION.ERRORS,
                     createdBy: userId,
                     createdAt: Date.now(),
                 },
@@ -33,7 +33,7 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
                 type: OOO_LOG_TYPE.OOO_REQUEST_CREATED,
                 meta: {
                     oooRequestId: oooRequestResult.id,
-                    action: CREATE,
+                    action: LOG_ACTION.CREATE,
                     createdBy: userId,
                     createdAt: Date.now(),
                 },
