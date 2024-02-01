@@ -199,6 +199,29 @@ describe("Filter Users", function () {
         });
     });
 
+    it("Should skip correct number of users", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ page: 1, size: 100 })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("No users found");
+          // eslint-disable-next-line no-unused-expressions
+          expect(res.body.users).to.be.an("array").that.is.empty;
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+          expect(res.body.count).to.equal(0);
+
+          return done();
+        });
+    });
+
     it("Should search users based on Onboarding state and discord join more then 31 days", function (done) {
       chai
         .request(app)
