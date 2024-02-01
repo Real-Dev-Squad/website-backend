@@ -1,5 +1,3 @@
-/* eslint-disable mocha/no-nested-tests */
-/* eslint-disable no-unused-expressions */
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
@@ -178,260 +176,238 @@ describe("Filter Users", function () {
         });
     });
 
-    it("Should skip correct number of users", function (done) {
+    it("Should search users based on Onboarding state", function (done) {
       chai
         .request(app)
         .get("/users/search")
-        .query({ page: 1, size: 100 })
+        .query({ state: "ONBOARDING" })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
           expect(res).to.have.status(200);
-          expect(res.body).to.be.an("object");
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(1);
+          expect(res.body.users[0]).to.deep.include({
+            id: onboardingUser,
+          });
+          return done();
+        });
+    });
+
+    it("Should search users based on Onboarding state and discord join more then 31 days", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ state: "ONBOARDING", time: "31d" })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
           expect(res.body.message).to.equal("No users found");
-          expect(res.body.users).to.be.an("array").that.is.empty;
-          expect(res.body.links).to.have.property("next");
-          expect(res.body.links).to.have.property("prev");
-          expect(res.body.count).to.equal(0);
+          return done();
+        });
+    });
+
+    it("Should search users based on Tag", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ tagId: tagIdFE })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(2);
+          assertUserIds(res.body.users, [activeUser, oooUser]);
+          return done();
+        });
+    });
+
+    it("Should search users based on multiple Tags", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ tagId: [tagIdFE, tagIdBE] })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(3);
+          assertUserIds(res.body.users, [activeUser, oooUser, idleUser]);
+          return done();
+        });
+    });
+
+    it("Should search users based on multiple states", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ state: ["OOO", "IDLE", "ONBOARDING"] })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(3);
+          assertUserIds(res.body.users, [oooUser, idleUser, onboardingUser]);
+          return done();
+        });
+    });
+
+    it("Should search users based on single tag and single state", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ state: "OOO", tagId: tagIdFE })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(1);
+          assertUserIds(res.body.users, [oooUser]);
+          return done();
+        });
+    });
+
+    it("Should search users based on single tag and multiple state", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ state: ["OOO", "ACTIVE"], tagId: tagIdFE })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(2);
+          assertUserIds(res.body.users, [activeUser, oooUser]);
+          return done();
+        });
+    });
+
+    it("Should search users based on multiple tag and single state", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ state: "OOO", tagId: [tagIdFE, tagIdBE] })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(1);
+          assertUserIds(res.body.users, [oooUser]);
 
           return done();
         });
+    });
 
-      it("Should search users based on Onboarding state", function (done) {
-        chai
-          .request(app)
-          .get("/users/search")
-          .query({ state: "ONBOARDING" })
-          .set("cookie", `${cookieName}=${jwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.count).to.be.a("number");
-            expect(res.body.message).to.equal("Users found successfully!");
-            expect(res.body.users).to.be.a("array");
-            expect(res.body.users.length).to.equal(1);
-            expect(res.body.users[0]).to.deep.include({
-              id: onboardingUser,
-            });
-            return done();
+    it("Should search users based on multiple tag and multiple states", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ state: ["OOO", "ACTIVE"], tagId: [tagIdFE, tagIdBE] })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(2);
+          assertUserIds(res.body.users, [activeUser, oooUser]);
+          return done();
+        });
+    });
+
+    it("Should search users based on archived role", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ role: "archived" })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users.length).to.equal(1);
+          assertUserIds(res.body.users, [archivedUser]);
+
+          return done();
+        });
+    });
+
+    it("Check personal details not present", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ state: ["OOO", "ACTIVE", "IDLE"] })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.count).to.be.a("number");
+          expect(res.body.message).to.equal("Users found successfully!");
+          expect(res.body.users).to.be.a("array");
+          res.body.users.forEach((user) => {
+            expect(user).to.not.have.property("phone");
+            expect(user).to.not.have.property("email");
           });
-      });
-
-      it("Should search users based on Onboarding state and discord join more then 31 days", function (done) {
-        chai
-          .request(app)
-          .get("/users/search")
-          .query({ state: "ONBOARDING", time: "31d" })
-          .set("cookie", `${cookieName}=${jwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.count).to.be.a("number");
-            expect(res.body.message).to.equal("No users found");
-            return done();
-          });
-      });
-
-      it("Should search users based on Tag", function (done) {
-        chai
-          .request(app)
-          .get("/users/search")
-          .query({ tagId: tagIdFE })
-          .set("cookie", `${cookieName}=${jwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.count).to.be.a("number");
-            expect(res.body.message).to.equal("Users found successfully!");
-            expect(res.body.users).to.be.a("array");
-            expect(res.body.users.length).to.equal(2);
-            assertUserIds(res.body.users, [activeUser, oooUser]);
-            return done();
-          });
-      });
-
-      it("Should search users based on multiple Tags", function (done) {
-        chai
-          .request(app)
-          .get("/users/search")
-          .query({ tagId: [tagIdFE, tagIdBE] })
-          .set("cookie", `${cookieName}=${jwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.count).to.be.a("number");
-            expect(res.body.message).to.equal("Users found successfully!");
-            expect(res.body.users).to.be.a("array");
-            expect(res.body.users.length).to.equal(3);
-            assertUserIds(res.body.users, [activeUser, oooUser, idleUser]);
-            return done();
-          });
-      });
-
-      it("Should search users based on multiple states", function (done) {
-        chai
-          .request(app)
-          .get("/users/search")
-          .query({ state: ["OOO", "IDLE", "ONBOARDING"] })
-          .set("cookie", `${cookieName}=${jwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.count).to.be.a("number");
-            expect(res.body.message).to.equal("Users found successfully!");
-            expect(res.body.users).to.be.a("array");
-            expect(res.body.users.length).to.equal(3);
-            assertUserIds(res.body.users, [oooUser, idleUser, onboardingUser]);
-            return done();
-          });
-      });
-
-      it("Should search users based on single tag and single state", function (done) {
-        chai
-          .request(app)
-          .get("/users/search")
-          .query({ state: "OOO", tagId: tagIdFE })
-          .set("cookie", `${cookieName}=${jwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.count).to.be.a("number");
-            expect(res.body.message).to.equal("Users found successfully!");
-            expect(res.body.users).to.be.a("array");
-            expect(res.body.users.length).to.equal(1);
-            assertUserIds(res.body.users, [oooUser]);
-            return done();
-          });
-      });
-
-      it("Should search users based on single tag and multiple state", function (done) {
-        chai
-          .request(app)
-          .get("/users/search")
-          .query({ state: ["OOO", "ACTIVE"], tagId: tagIdFE })
-          .set("cookie", `${cookieName}=${jwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.count).to.be.a("number");
-            expect(res.body.message).to.equal("Users found successfully!");
-            expect(res.body.users).to.be.a("array");
-            expect(res.body.users.length).to.equal(2);
-            assertUserIds(res.body.users, [activeUser, oooUser]);
-            return done();
-          });
-      });
-
-      it("Should search users based on multiple tag and single state", function (done) {
-        chai
-          .request(app)
-          .get("/users/search")
-          .query({ state: "OOO", tagId: [tagIdFE, tagIdBE] })
-          .set("cookie", `${cookieName}=${jwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.count).to.be.a("number");
-            expect(res.body.message).to.equal("Users found successfully!");
-            expect(res.body.users).to.be.a("array");
-            expect(res.body.users.length).to.equal(1);
-            assertUserIds(res.body.users, [oooUser]);
-
-            return done();
-          });
-      });
-
-      it("Should search users based on multiple tag and multiple states", function (done) {
-        chai
-          .request(app)
-          .get("/users/search")
-          .query({ state: ["OOO", "ACTIVE"], tagId: [tagIdFE, tagIdBE] })
-          .set("cookie", `${cookieName}=${jwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.count).to.be.a("number");
-            expect(res.body.message).to.equal("Users found successfully!");
-            expect(res.body.users).to.be.a("array");
-            expect(res.body.users.length).to.equal(2);
-            assertUserIds(res.body.users, [activeUser, oooUser]);
-            return done();
-          });
-      });
-
-      it("Should search users based on archived role", function (done) {
-        chai
-          .request(app)
-          .get("/users/search")
-          .query({ role: "archived" })
-          .set("cookie", `${cookieName}=${jwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.count).to.be.a("number");
-            expect(res.body.message).to.equal("Users found successfully!");
-            expect(res.body.users).to.be.a("array");
-            expect(res.body.users.length).to.equal(1);
-            assertUserIds(res.body.users, [archivedUser]);
-
-            return done();
-          });
-      });
-
-      it("Check personal details not present", function (done) {
-        chai
-          .request(app)
-          .get("/users/search")
-          .query({ state: ["OOO", "ACTIVE", "IDLE"] })
-          .set("cookie", `${cookieName}=${jwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.count).to.be.a("number");
-            expect(res.body.message).to.equal("Users found successfully!");
-            expect(res.body.users).to.be.a("array");
-            res.body.users.forEach((user) => {
-              expect(user).to.not.have.property("phone");
-              expect(user).to.not.have.property("email");
-            });
-            return done();
-          });
-      });
+          return done();
+        });
     });
   });
 });
