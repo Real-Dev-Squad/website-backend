@@ -6,10 +6,10 @@ import { OOO_REQUEST_ALREADY_PENDING, ERROR_WHILE_CREATING_OOO_REQUEST } from ".
 
 export const createOooRequest = async (body: OooStatusRequestBody) => {
   try {
-    const { userId, from, until, message, type } = body;
+    const { requestedBy, from, until, message, type } = body;
 
     const existingOooRequest = await oooRequestModel
-      .where("userId", "==", userId)
+      .where("userId", "==", requestedBy)
       .where("state", "==", REQUEST_STATE.PENDING)
       .get();
 
@@ -19,7 +19,7 @@ export const createOooRequest = async (body: OooStatusRequestBody) => {
       };
     }
     const requestBody: OooStatusRequestBody = {
-      userId,
+      requestedBy,
       type,
       from,
       until,
