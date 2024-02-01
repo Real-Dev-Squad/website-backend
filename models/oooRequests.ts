@@ -9,8 +9,8 @@ export const createOooRequest = async (body: OooStatusRequestBody) => {
     const { requestedBy, from, until, message, type } = body;
 
     const existingOooRequest = await oooRequestModel
-      .where("userId", "==", requestedBy)
-      .where("state", "==", REQUEST_STATE.PENDING)
+    .where("requestedBy", "==", requestedBy)
+    .where("state", "==", REQUEST_STATE.PENDING)
       .get();
 
     if (!existingOooRequest.empty) {
