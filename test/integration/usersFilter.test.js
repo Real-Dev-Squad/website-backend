@@ -176,29 +176,6 @@ describe("Filter Users", function () {
         });
     });
 
-    /* it("Should return paginated results when dev=true", function (done) {
-      chai
-        .request(app)
-        .get("/users/search")
-        .query({ page: 0, size: 100, dev: true }) // Set dev=true for paginated results
-        // eslint-disable-next-line consistent-return
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Users found successfully!");
-          expect(res.body.users).to.be.a("array");
-          expect(res.body).to.have.property("links");
-          expect(res.body.links).to.have.property("next");
-          expect(res.body.links).to.have.property("prev");
-
-          done();
-        });
-    }); */
-
     it("Should return paginated results when dev=true", function (done) {
       chai
         .request(app)
@@ -234,7 +211,7 @@ describe("Filter Users", function () {
       chai
         .request(app)
         .get("/users/search")
-        .query({ page: 1, size: 100 })
+        .query({ state: ["OOO", "IDLE", "ONBOARDING"] })
         // eslint-disable-next-line consistent-return
         .end((err, res) => {
           if (err) {
