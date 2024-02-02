@@ -758,7 +758,7 @@ const filterUsers = async (req, res) => {
     }
     const { page, size } = req.query;
     const pageNumber = parseInt(page) || 0;
-    const limitNumber = parseInt(size) || 10;
+    const limitNumber = parseInt(size) || 100;
     const skip = (pageNumber - 1) * limitNumber;
 
     const users = await dataAccess.retreiveFilteredUsers(req.query, skip, limitNumber);
