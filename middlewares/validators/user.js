@@ -226,9 +226,10 @@ async function validateUserQueryParams(req, res, next) {
         .regex(/^[1-9]\d*d$/)
         .optional(),
       page: joi.number().integer().min(0).message("Page must be a non-negative integer").optional(),
-      size: joi.number().integer().min(1).max(100).message("Limit must be a number between 1 and 100").optional(),
+      size: joi.number().integer().min(1).max(100).message("size must be a number between 1 and 100").optional(),
       prev: joi.string().allow("").optional(),
       next: joi.string().allow("").optional(),
+      dev: joi.bool().optional().sensitive(),
     })
     .min(1)
     .messages({ "object.min": "Please provide at least one filter criterion" });

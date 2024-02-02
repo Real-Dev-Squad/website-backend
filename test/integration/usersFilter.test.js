@@ -158,7 +158,7 @@ describe("Filter Users", function () {
       chai
         .request(app)
         .get("/users/search")
-        .query({ page: 0, size: 100 })
+        .query({ page: 0, size: 100, dev: true })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -203,7 +203,7 @@ describe("Filter Users", function () {
       chai
         .request(app)
         .get("/users/search")
-        .query({ page: 1, size: 100 })
+        .query({ page: 1, size: 100, dev: true })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
