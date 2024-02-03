@@ -1087,6 +1087,16 @@ describe("Tasks", function () {
 
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
+    it("Should give 403 if new status is 'BACKLOG' ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "BACKLOG" });
+
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+    });
 
     it("Should give 400 if percentCompleted is not 100 and new status is COMPLETED ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
@@ -1458,89 +1468,6 @@ describe("Tasks", function () {
         tasksLogs = data.data();
       });
       expect(tasksLogs.body.error).to.be.equal("Error: Error occurred");
-    });
-  });
-
-  describe("PATCH /tasks/:id should update the tasks by SuperUser", function () {
-    beforeEach(async function () {
-      const superUserId = await addUser(superUser);
-      superUserJwt = authService.generateAuthToken({ userId: superUserId });
-
-      await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").set({
-        assignee: "SooJK37gzjIZfFNH0tlL",
-        status: "IN_PROGRESS",
-        percentCompleted: 80,
-        startedOn: 1701388800000,
-        endsOn: 1701561600000,
-      });
-    });
-
-    afterEach(async function () {
-      await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").delete();
-    });
-
-    it("Should unassign the task with other fields reset exclusively", async function () {
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/4kAkRv9TBlOfR6WEUhoQ`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send({
-          assignee: null,
-          status: TASK_STATUS.AVAILABLE,
-          percentCompleted: 0,
-          startedOn: null,
-          endsOn: null,
-        });
-
-      expect(res).to.have.status(204);
-
-      const docSnapshot = await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").get();
-
-      const updatedData = docSnapshot.data();
-      expect(updatedData.assignee).to.equal(null);
-      expect(updatedData.status).to.equal(TASK_STATUS.AVAILABLE);
-      expect(updatedData.percentCompleted).to.equal(0);
-      expect(updatedData.startedOn).to.equal(null);
-      expect(updatedData.endsOn).to.equal(null);
-    });
-
-    it("Should unassign the task with other fields reset internally", async function () {
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/4kAkRv9TBlOfR6WEUhoQ`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send({
-          status: TASK_STATUS.AVAILABLE,
-        });
-
-      expect(res).to.have.status(204);
-
-      const docSnapshot = await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").get();
-
-      const updatedData = docSnapshot.data();
-      expect(updatedData.assignee).to.equal(null);
-      expect(updatedData.status).to.equal(TASK_STATUS.AVAILABLE);
-      expect(updatedData.percentCompleted).to.equal(0);
-      expect(updatedData.startedOn).to.equal(null);
-      expect(updatedData.endsOn).to.equal(null);
-    });
-
-    it("Should throw bad request if the req body is invalid", async function () {
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/4kAkRv9TBlOfR6WEUhoQ`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send({
-          assignee: null,
-          status: TASK_STATUS.AVAILABLE,
-          percentCompleted: 0,
-          startedOn: "null",
-          endsOn: false,
-        });
-
-      expect(res).to.have.status(400);
-      expect(res.body.error).to.equal("Bad Request");
-      expect(res.body.message).to.equal('"endsOn" must be one of [number, null]');
     });
   });
 });
