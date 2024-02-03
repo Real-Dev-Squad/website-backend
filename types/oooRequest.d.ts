@@ -4,29 +4,35 @@ import { userState } from "../constants/userStatus";
 import { Boom } from "express-boom";
 
 export type OooStatusRequest = {
-  userId: string;
+  type: string;
   from: number;
   until?: number;
   message?: string;
   status: userState;
   state?: REQUEST_STATE;
-  lastUpdatedBy?: string;
-  createdAt?: admin.firestore.Timestamp;
-  updatedAt?: admin.firestore.Timestamp;
+  lastModifiedBy?: string;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
   reason?: string;
 };
 export type OooStatusRequestBody = {
-  userId: string;
+  type: string;
+  requestedBy?: string;
   from: number;
   until: number;
   message: string;
   state: REQUEST_STATE.PENDING;
-  createdAt?: admin.firestore.Timestamp;
-  updatedAt?: admin.firestore.Timestamp;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
 };
 
-type UserData = {
+export type userData= {
   id: string;
 };
-export type OooStatusRequestResponse = Response & { boom: Boom };
-export type OooStatusRequestRequest = Request & { OooStatusRequestBody , userData: UserData };
+
+export type OooRequestQuery = {
+  dev: string;
+};
+
+export type OooRequestResponse = Response & { boom: Boom };
+export type OooRequestCreateRequest = Request & { OooStatusRequestBody , userData: userData , query: OooRequestQuery };
