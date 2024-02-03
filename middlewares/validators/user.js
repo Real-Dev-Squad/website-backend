@@ -232,7 +232,7 @@ async function validateUserQueryParams(req, res, next) {
       dev: joi.bool().optional().sensitive(),
     })
     .min(1)
-    .messages({ "object.min": "Please provide at least one filter criterion" });
+    .messages({ "object.min": "Please provide at least one filter criteria" });
 
   try {
     await schema.validateAsync(req.query);
