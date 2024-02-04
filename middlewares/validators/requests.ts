@@ -93,4 +93,3 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
     res.boom.badRequest(errorMessages);
   }
 };
-
