@@ -1,4 +1,4 @@
-import { OooStatusRequestBody, OooRequestUpdateBody } from "../types/oooRequest";
+import { OooStatusRequestBody, OooRequestUpdateBody, OooRequestQuery } from "../types/oooRequest";
 import firestore from "../utils/firestore";
 const oooRequestModel = firestore.collection("oooRequests");
 import { REQUEST_STATE } from "../constants/request";
@@ -71,6 +71,31 @@ export const updateOooRequest = async (id: string, body: OooRequestUpdateBody, l
     };
   } catch (error) {
     logger.error(ERROR_WHILE_CREATING_OOO_REQUEST, error);
+    throw error;
+  }
+};
+
+export const getOooRequests = async (type: string, requestedBy: string, state: string) => {
+  try {
+    const query = oooRequestModel;
+    if (type) {
+      query.where("type", "==", type);
+    }
+    if (requestedBy) {
+      query.where("requestedBy", "==", requestedBy);
+    }
+    if (state) {
+      query.where("state", "==", state);
+    }
+    const oooRequests = await query.get();
+    return oooRequests.docs.map((doc) => {
+      return {
+        id: doc.id,
+        ...doc.data(),
+      };
+    });
+  } catch (error) {
+    logger.error("Error while fetching OOO requests", error);
     throw error;
   }
 };
