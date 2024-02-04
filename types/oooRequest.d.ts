@@ -26,6 +26,24 @@ export type OooStatusRequestBody = {
   updatedAt?: Timestamp;
 };
 
+export type OooRequestUpdateBody = {
+  lastModifiedBy?: string;
+  type?: string;
+  id?: string;
+  reason?: string;
+  state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
+  updatedAt?: admin.firestore.Timestamp;
+};
+
+export type OooRequestUpdateBody = {
+  lastModifiedBy?: string;
+  type?: string;
+  id?: string;
+  reason?: string;
+  state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
+  updatedAt?: admin.firestore.Timestamp;
+};
+
 export type userData= {
   id: string;
 };
@@ -34,5 +52,11 @@ export type OooRequestQuery = {
   dev: string;
 };
 
+export type RequestParams = {
+  id: string;
+};
+
 export type OooRequestResponse = Response & { boom: Boom };
 export type OooRequestCreateRequest = Request & { OooStatusRequestBody , userData: userData , query: OooRequestQuery };
+
+export type OooRequestUpdateRequest = Request & { oooRequestUpdateBody , userData: userData , query: OooRequestQuery , params: RequestParams };

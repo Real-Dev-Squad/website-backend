@@ -1,4 +1,4 @@
-import { OooStatusRequestBody } from "../types/oooRequest";
+import { OooStatusRequestBody, OooRequestUpdateBody } from "../types/oooRequest";
 import firestore from "../utils/firestore";
 const oooRequestModel = firestore.collection("oooRequests");
 import { REQUEST_STATE } from "../constants/request";
@@ -32,6 +32,41 @@ export const createOooRequest = async (body: OooStatusRequestBody) => {
 
     return {
       id: result.id,
+      ...requestBody,
+    };
+  } catch (error) {
+    logger.error(ERROR_WHILE_CREATING_OOO_REQUEST, error);
+    throw error;
+  }
+};
+
+export const updateOooRequest = async (id: string, body: OooRequestUpdateBody, lastModifiedBy:string) => {
+  try {
+    const requestExists = await oooRequestModel.doc(id).get();
+    if (!requestExists.exists) {
+      return {
+        error: "Request does not exist"
+      };
+    }
+    if (requestExists.data().state === REQUEST_STATE.APPROVED) {
+      return {
+        error: "Request is already approved"
+      };
+    }
+    if (requestExists.data().state === REQUEST_STATE.REJECTED) {
+      return {
+        error: "Request is already rejected"
+      };
+    }
+
+    const requestBody: OooRequestUpdateBody = {
+      updatedAt: Date.now(),
+      lastModifiedBy,
+      ...body,
+    };
+    await oooRequestModel.doc(id).update(requestBody);
+    return {
+      id,
       ...requestBody,
     };
   } catch (error) {
