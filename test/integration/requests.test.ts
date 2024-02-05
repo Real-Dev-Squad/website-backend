@@ -6,34 +6,41 @@ import config from "config";
 import app from "../../server";
 import cleanDb from "../utils/cleanDb";
 import authService from "../../services/authService";
-import userData from "../fixtures/user/user";
+import userDataFixture from "../fixtures/user/user";
 const cookieName = config.get("userToken.cookieName");
 import addUser from "../utils/addUser";
-import {
-  validOooStatusRequests,
-  validOooStatusUpdate,
-  oooStatusRequests,
-} from "../fixtures/oooRequest/oooRequest";
+import { createOooRequests, validOooStatusRequests, validOooStatusUpdate,createOooRequests2 } from "../fixtures/oooRequest/oooRequest";
+import { createOooRequest, updateOooRequest } from "../../models/oooRequests";
 
+const userData = userDataFixture();
 chai.use(chaiHttp);
+
 let authToken: string;
 let superUserToken: string;
+let oooRequestId: string;
+let pendingOooRequestId: string;
+let approvedOooRequestId: string;
 
 describe("/requests", function () {
-  const oooRequestId=oooStatusRequests[2].id;
   beforeEach(async function () {
+    const { id: oooRequestStatusId }: any = await createOooRequest(createOooRequests);
+    oooRequestId = oooRequestStatusId;
+
+    const { id: pendingOooId }: any = await createOooRequest(createOooRequests2);
+    pendingOooRequestId = pendingOooId;
+
     const userIdPromises = [addUser(userData[16]), addUser(userData[4])];
     const [userId, superUserId] = await Promise.all(userIdPromises);
-    authToken = authService.generateAuthToken({ userId });
-    superUserToken = authService.generateAuthToken({ superUserId });
-  });
 
-  after(async function () {
-    await cleanDb();
+    const { id: approveOooId }: any = await updateOooRequest(oooRequestId, { state: "APPROVED" }, superUserId);
+    approvedOooRequestId = approveOooId;
+
+    authToken = authService.generateAuthToken({ userId });
+    superUserToken = authService.generateAuthToken({ userId: superUserId });
   });
 
   afterEach(async function () {
-    sinon.restore();
+    await cleanDb();
   });
 
   describe("POST /requests", function () {
@@ -76,19 +83,15 @@ describe("/requests", function () {
     });
 
     it("should update a request", function (done) {
-      console.log("🚀 ~ oooRequestId:", oooRequestId);
-      console.log("🚀 ~ superUserToken:", superUserToken);
       chai
         .request(app)
-        .put(`/requests/${oooRequestId}?dev=true`)
+        .put(`/requests/${pendingOooRequestId}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(validOooStatusUpdate)
         .end(function (err, res) {
-          const resBody = res.body;
-          console.log({ resBody });
-          expect(res).to.have.status(200);
+          expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("OOO status updated successfully");
+          expect(res.body.message).to.equal("OOO status request updated successfully");
           done();
         });
     });
@@ -96,13 +99,13 @@ describe("/requests", function () {
     it("should return 404 if request does not exist", function (done) {
       chai
         .request(app)
-        .put(`/requests/invalidId?dev=true`)
+        .put(`/requests/invalidoooRequestId?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(validOooStatusUpdate)
         .end(function (err, res) {
-          expect(res).to.have.status(404);
+          expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("OOO status request not found");
+          expect(res.body.message).to.equal("Request does not exist");
           done();
         });
     });
@@ -110,13 +113,13 @@ describe("/requests", function () {
     it("should return 400 if request is already approved", function (done) {
       chai
         .request(app)
-        .put(`/requests/${oooRequestId}?dev=true`)
+        .put(`/requests/${approvedOooRequestId}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send({ ...validOooStatusUpdate, status: "approved" })
+        .send(validOooStatusUpdate)
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("OOO status request has already been approved");
+          expect(res.body.message).to.equal("Request is already approved");
           done();
         });
     });
