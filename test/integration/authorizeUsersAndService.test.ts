@@ -54,7 +54,6 @@ describe("Middleware | Authorization", function () {
       req.headers.authorization = "InvalidHeader";
 
       await authorization([ROLES.APPOWNER], [Services.CRON_JOB_HANDLER])(req, res, next);
-      console.log(res.boom.unauthorized);
       expect(res.boom.unauthorized.calledOnce).to.be.equal(true);
     });
 
@@ -141,7 +140,6 @@ describe("Middleware | Authorization", function () {
           if (err) {
             return done(err);
           }
-          console.log(res);
           expect(res).to.have.status(401);
           return done();
         });
@@ -157,7 +155,6 @@ describe("Middleware | Authorization", function () {
           if (err) {
             return done(err);
           }
-          console.log(res);
           expect(res).to.have.status(200);
           return done();
         });
@@ -173,7 +170,6 @@ describe("Middleware | Authorization", function () {
           if (err) {
             return done(err);
           }
-          console.log(res);
           expect(res).to.have.status(500);
           return done();
         });
