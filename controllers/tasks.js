@@ -322,7 +322,7 @@ const updateTaskStatus = async (req, res, next) => {
     let userStatusUpdate;
     const taskId = req.params.id;
     const { userStatusFlag } = req.query;
-    const { status } = req.body;
+    const status = req.body?.status;
     const { id: userId, username } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
 
