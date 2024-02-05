@@ -1,4 +1,4 @@
-import { REQUEST_STATE } from "../../../constants/request";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/request";
 
 export const createOooStatusRequests = {
   type: "OOO",
@@ -25,6 +25,33 @@ export const invalidOooStatusRequests = {
   until: Date.now() + 200000,
   message: "Out of office for personal reasons.",
 };
+
+export const updateOooApprovedRequests = {
+  state: REQUEST_STATE.APPROVED,
+  lastModifiedBy: "admin123",
+  updatedAt: 1234567890,
+  reason: "Approval granted.",
+};
+
+export const updateOooRejectedRequests = {
+  state: REQUEST_STATE.REJECTED,
+  lastModifiedBy: "admin123",
+  updatedAt: 1234567890,
+  reason: "Sorry, we can't approve additional leave at this time.",
+};
+
+export const validOooStatusUpdate ={
+  state:REQUEST_STATE.APPROVED,
+  reason: "Welcome back! Enjoy the conference.",
+  type:REQUEST_TYPE.OOO
+}
+
+export const invalidOooStatusUpdate ={
+  reason: "Welcome back! Enjoy the conference.",
+  type:REQUEST_TYPE.OOO
+}
+
+
 
 export const oooStatusRequests = [
   {
