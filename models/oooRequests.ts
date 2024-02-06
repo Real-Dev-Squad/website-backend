@@ -42,18 +42,18 @@ export const createOooRequest = async (body: OooStatusRequestBody) => {
 
 export const updateOooRequest = async (id: string, body: OooRequestUpdateBody, lastModifiedBy:string) => {
   try {
-    const requestExists = await oooRequestModel.doc(id).get();
-    if (!requestExists.exists) {
+    const existingRequestDoc = await oooRequestModel.doc(id).get();
+    if (!existingRequestDoc.exists) {
       return {
         error: "Request does not exist"
       };
     }
-    if (requestExists.data().state === REQUEST_STATE.APPROVED) {
+    if (existingRequestDoc.data().state === REQUEST_STATE.APPROVED) {
       return {
         error: "Request is already approved"
       };
     }
-    if (requestExists.data().state === REQUEST_STATE.REJECTED) {
+    if (existingRequestDoc.data().state === REQUEST_STATE.REJECTED) {
       return {
         error: "Request is already rejected"
       };
