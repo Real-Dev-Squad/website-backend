@@ -28,7 +28,7 @@ export type OooStatusRequestBody = {
 
 export type OooRequestUpdateBody = {
   lastModifiedBy?: string;
-  type: REQUEST_TYPE.OOO;
+  type?: REQUEST_TYPE.OOO;
   id?: string;
   reason?: string;
   state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
