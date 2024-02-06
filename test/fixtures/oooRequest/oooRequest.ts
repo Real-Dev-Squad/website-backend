@@ -58,7 +58,7 @@ export const createOooRequests = {
   from: Date.now() + 100000,
   until: Date.now() + 200000,
   message: "Out of office for personal reasons.",
-  state: "PENDING",
+  state: REQUEST_STATE.PENDING,
 };
 export const createOooRequests2 = {
   requestedBy: "testUser2",
@@ -66,7 +66,7 @@ export const createOooRequests2 = {
   from: Date.now() + 100000,
   until: Date.now() + 200000,
   message: "Out of office for personal reasons.",
-  state: "PENDING",
+  state: REQUEST_STATE.PENDING,
 };
 
 
