@@ -35,15 +35,6 @@ export type OooRequestUpdateBody = {
   updatedAt?: admin.firestore.Timestamp;
 };
 
-export type OooRequestUpdateBody = {
-  lastModifiedBy?: string;
-  type?: string;
-  id?: string;
-  reason?: string;
-  state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
-  updatedAt?: admin.firestore.Timestamp;
-};
-
 export type userData= {
   id: string;
 };
