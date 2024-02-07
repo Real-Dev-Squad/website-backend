@@ -77,26 +77,7 @@ export const updateOooRequestController = async (req: OooRequestUpdateRequest, r
             return res.boom.badRequest(oooRequestResult.error);
         }
         if (oooRequestResult.state === REQUEST_STATE.REJECTED) {
-            const oooRequestLog = {
-                type: OOO_LOG_TYPE.OOO_REQUEST_REJECTED,
-                meta: {
-                    action: LOG_ACTION.ERRORS,
-                    createdBy: userId,
-                    createdAt: Date.now(),
-                },
-                body: {
-                    ...oooRequestResult,
-                },
-            };
-            await addLog(oooRequestLog.type, oooRequestLog.meta, oooRequestLog.body);
-            return res.status(201).json({
-                message: OOO_STATUS_REQUEST_UPDATED_SUCCESSFULLY,
-                data: {
-                    id: oooRequestId,
-                    ...oooRequestResult,
-                },
-            });
-
+            return res.boom.badRequest(oooRequestResult.error);
         } else {
             const oooRequestLog = {
                 type: OOO_LOG_TYPE.OOO_REQUEST_APPROVED,

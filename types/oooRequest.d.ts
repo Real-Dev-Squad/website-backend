@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { REQUEST_STATE } from "../constants/request";
+import { REQUEST_STATE, REQUEST_TYPE } from "../constants/request";
 import { userState } from "../constants/userStatus";
 import { Boom } from "express-boom";
 
 export type OooStatusRequest = {
-  type: string;
+  type: REQUEST_TYPE.OOO;
   from: number;
   until?: number;
   message?: string;
@@ -16,7 +16,7 @@ export type OooStatusRequest = {
   reason?: string;
 };
 export type OooStatusRequestBody = {
-  type: string;
+  type: REQUEST_TYPE.OOO;
   requestedBy?: string;
   from: number;
   until: number;
@@ -28,16 +28,7 @@ export type OooStatusRequestBody = {
 
 export type OooRequestUpdateBody = {
   lastModifiedBy?: string;
-  type?: string;
-  id?: string;
-  reason?: string;
-  state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
-  updatedAt?: admin.firestore.Timestamp;
-};
-
-export type OooRequestUpdateBody = {
-  lastModifiedBy?: string;
-  type?: string;
+  type?: REQUEST_TYPE.OOO;
   id?: string;
   reason?: string;
   state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;

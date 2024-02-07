@@ -10,11 +10,25 @@ const {
   getUsersValidator,
 } = require("../middlewares/validators/tasks");
 const authorizeRoles = require("../middlewares/authorizeRoles");
+const { authorization } = require("../middlewares/authorizeUsersAndService");
 const { APPOWNER, SUPERUSER } = require("../constants/roles");
 const assignTask = require("../middlewares/assignTask");
 const { cacheResponse, invalidateCache } = require("../utils/cache");
 const { ALL_TASKS } = require("../constants/cacheKeys");
 const { verifyCronJob } = require("../middlewares/authorizeBot");
+const { CLOUDFLARE_WORKER, CRON_JOB_HANDLER } = require("../constants/bot");
+
+const oldAuthorizationMiddleware = authorizeRoles([APPOWNER, SUPERUSER]);
+const newAuthorizationMiddleware = authorization([APPOWNER, SUPERUSER], [CLOUDFLARE_WORKER, CRON_JOB_HANDLER]);
+
+// Middleware to check if 'dev' query parameter is set to true
+const enableDevModeMiddleware = (req, res, next) => {
+  if (req.query.dev === "true") {
+    newAuthorizationMiddleware(req, res, next);
+  } else {
+    oldAuthorizationMiddleware(req, res, next);
+  }
+};
 
 router.get("/", getTasksValidator, cacheResponse({ invalidationKey: ALL_TASKS, expiry: 10 }), tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);
@@ -30,7 +44,7 @@ router.post(
 router.patch(
   "/:id",
   authenticate,
-  authorizeRoles([APPOWNER, SUPERUSER]),
+  enableDevModeMiddleware,
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
   updateTask,
   tasks.updateTask

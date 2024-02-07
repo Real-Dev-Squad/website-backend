@@ -154,6 +154,91 @@ describe("Filter Users", function () {
         });
     });
 
+    it("Should return the correct pagination information", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ page: 0, size: 100, dev: true })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.have.property("message");
+          expect(res.body).to.have.property("users");
+          expect(res.body).to.have.property("count");
+          expect(res.body).to.have.property("links");
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+          return done();
+        });
+    });
+
+    it("Should return paginated results when dev=true", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ dev: true, page: 1, size: 10 })
+        // eslint-disable-next-line consistent-return
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+
+          if (res.body.count > 0) {
+            expect(res.body.message).to.equal("Users found successfully!");
+            expect(res.body.users).to.be.a("array");
+
+            expect(res.body).to.have.property("links");
+            expect(res.body.links).to.have.property("next");
+            expect(res.body.links).to.have.property("prev");
+          } else {
+            expect(res.body.message).to.equal("No users found");
+            // eslint-disable-next-line no-unused-expressions
+            expect(res.body.users).to.be.a("array").that.is.empty;
+          }
+
+          done();
+        });
+    });
+
+    it("Should return non-paginated results when dev is not set or set to false", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ state: ["OOO", "IDLE", "ONBOARDING"] })
+        // eslint-disable-next-line consistent-return
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.have.property("message");
+          expect(res.body).to.have.property("users");
+          expect(res.body).to.have.property("count");
+
+          const { message, users, count } = res.body;
+
+          if (users.length > 0) {
+            expect(message).to.equal("Users found successfully!");
+            // Add assertions for the structure/content of the users array if needed
+          } else {
+            expect(message).to.equal("No users found");
+          }
+
+          expect(count).to.equal(users.length);
+
+          done();
+        });
+    });
+
     it("Should search users based on Onboarding state", function (done) {
       chai
         .request(app)
@@ -173,6 +258,29 @@ describe("Filter Users", function () {
           expect(res.body.users[0]).to.deep.include({
             id: onboardingUser,
           });
+          return done();
+        });
+    });
+
+    it("Should skip correct number of users", function (done) {
+      chai
+        .request(app)
+        .get("/users/search")
+        .query({ page: 1, size: 100, dev: true })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("No users found");
+          // eslint-disable-next-line no-unused-expressions
+          expect(res.body.users).to.be.an("array").that.is.empty;
+          expect(res.body.links).to.have.property("next");
+          expect(res.body.links).to.have.property("prev");
+          expect(res.body.count).to.equal(0);
+
           return done();
         });
     });
