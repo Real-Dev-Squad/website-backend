@@ -53,6 +53,7 @@ export type OooRequestQuery = {
   type?: string;
   requestedBy?: string;
   state?: REQUEST_STATE.APPROVED | REQUEST_STATE.PENDING | REQUEST_STATE.REJECTED;
+  id?: string;
 };
 
 export type RequestParams = {

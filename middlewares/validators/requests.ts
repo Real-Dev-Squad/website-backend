@@ -63,6 +63,7 @@ export const updateRequestsMiddleware = async (
 export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: OooRequestResponse, next: NextFunction) => {
   const schema = joi.object().keys({
     dev: joi.bool().sensitive(),
+    id: joi.string().optional(),
     type: joi
       .string()
       .valid(REQUEST_TYPE.OOO,"ALL")

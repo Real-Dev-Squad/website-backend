@@ -9,8 +9,8 @@ export const createOooRequest = async (body: OooStatusRequestBody) => {
     const { requestedBy, from, until, message, type } = body;
 
     const existingOooRequest = await oooRequestModel
-    .where("requestedBy", "==", requestedBy)
-    .where("state", "==", REQUEST_STATE.PENDING)
+      .where("requestedBy", "==", requestedBy)
+      .where("state", "==", REQUEST_STATE.PENDING)
       .get();
 
     if (!existingOooRequest.empty) {
@@ -40,7 +40,7 @@ export const createOooRequest = async (body: OooStatusRequestBody) => {
   }
 };
 
-export const updateOooRequest = async (id: string, body: OooRequestUpdateBody, lastModifiedBy:string) => {
+export const updateOooRequest = async (id: string, body: OooRequestUpdateBody, lastModifiedBy: string) => {
   try {
     const requestExists = await oooRequestModel.doc(id).get();
     if (!requestExists.exists) {
@@ -75,18 +75,32 @@ export const updateOooRequest = async (id: string, body: OooRequestUpdateBody, l
   }
 };
 
-export const getOooRequests = async (type: string, requestedBy: string, state: string) => {
+export const getOooRequests = async (type: string, requestedBy: string, state: string, id: string) => {
   try {
-    const query = oooRequestModel;
+    let query: any = oooRequestModel;
+    if (id) {
+      const oooRequest = await query.doc(id).get();
+      if (!oooRequest.exists) {
+        return {
+          error: "Request does not exist"
+        };
+      }
+      return {
+        id: oooRequest.id,
+        ...oooRequest.data(),
+      };
+
+    }
     if (type) {
-      query.where("type", "==", type);
+      query = query.where("type", "==", type);
     }
     if (requestedBy) {
-      query.where("requestedBy", "==", requestedBy);
+      query = query.where("requestedBy", "==", requestedBy);
     }
     if (state) {
-      query.where("state", "==", state);
+      query = query.where("state", "==", state);
     }
+
     const oooRequests = await query.get();
     return oooRequests.docs.map((doc) => {
       return {
