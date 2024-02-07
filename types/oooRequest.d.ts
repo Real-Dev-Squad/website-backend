@@ -51,6 +51,10 @@ export type RequestParams = {
   id: string;
 };
 
+export type RequestParams = {
+  id: string;
+};
+
 export type OooRequestResponse = Response & { boom: Boom };
 export type OooRequestCreateRequest = Request & { OooStatusRequestBody , userData: userData , query: OooRequestQuery };
 

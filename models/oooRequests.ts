@@ -1,4 +1,5 @@
 import { OooStatusRequestBody, OooRequestUpdateBody, OooRequestQuery } from "../types/oooRequest";
+
 import firestore from "../utils/firestore";
 const oooRequestModel = firestore.collection("oooRequests");
 import { REQUEST_STATE } from "../constants/request";
@@ -113,3 +114,4 @@ export const getOooRequests = async (type: string, requestedBy: string, state: s
     throw error;
   }
 };
+

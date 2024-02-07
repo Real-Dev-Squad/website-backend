@@ -2,7 +2,6 @@ import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/request";
 import { OooRequestCreateRequest, OooRequestResponse, OooRequestUpdateRequest } from "../../types/oooRequest";
 import { createOooStatusRequestValidator, updateOooStatusRequestValidator } from "./oooRequests";
-import joi from "joi";
 
 export const createRequestsMiddleware = async (
   req: OooRequestCreateRequest,
@@ -43,7 +42,6 @@ export const updateRequestsMiddleware = async (
   if ( req.query.dev !== "true") {
     return res.boom.badRequest("Please use feature flag to make this requests");
   }
-
 
   try {
     switch (type) {
@@ -94,3 +92,4 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
     res.boom.badRequest(errorMessages);
   }
 };
+
