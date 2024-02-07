@@ -1,7 +1,7 @@
 import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/request";
-import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
+import { OooRequestCreateRequest, OooRequestResponse,OooRequestUpdateRequest } from "../../types/oooRequest";
 
 export const createOooStatusRequestValidator = async (
   req: OooRequestCreateRequest,
@@ -33,6 +33,29 @@ export const createOooStatusRequestValidator = async (
       state: joi.string().valid(REQUEST_STATE.PENDING).required().messages({
         "any.only": "state must be PENDING",
       }),
+      type: joi.string().valid(REQUEST_TYPE.OOO).required(),
+    });
+
+  await schema.validateAsync(req.body, { abortEarly: false });
+};
+
+
+export const updateOooStatusRequestValidator = async (
+  req: OooRequestUpdateRequest,
+
+) => {
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      reason: joi.string().optional(),
+      state: joi
+        .string()
+        .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED)
+        .required()
+        .messages({
+          "any.only": "state must be APPROVED or REJECTED",
+        }),
       type: joi.string().valid(REQUEST_TYPE.OOO).required(),
     });
 

@@ -1,9 +1,18 @@
-import { createOooRequest } from "../models/oooRequests";
-import { OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
+import { createOooRequest, updateOooRequest } from "../models/oooRequests";
+import { OooRequestCreateRequest, OooRequestResponse, OooRequestUpdateRequest } from "../types/oooRequest";
 import { addLog } from "../models/logs";
-import { ERROR_WHILE_CREATING_OOO_REQUEST,LOG_ACTION, OOO_LOG_TYPE, OOO_STATUS_REQUEST_CREATED_SUCCESSFULLY } from "../constants/oooRequest";
+import {
+    ERROR_WHILE_CREATING_OOO_REQUEST,
+    ERROR_WHILE_UPDATING_OOO_REQUEST,
+    LOG_ACTION,
+    OOO_LOG_TYPE,
+    OOO_STATUS_REQUEST_CREATED_SUCCESSFULLY,
+    OOO_STATUS_REQUEST_UPDATED_SUCCESSFULLY,
+} from "../constants/oooRequest";
+import { REQUEST_STATE } from "../constants/request";
 
-export const createOooRequestController = async (req: OooRequestCreateRequest, res: OooRequestResponse) => {
+export const createOooRequestController = async (
+    req: OooRequestCreateRequest, res: OooRequestResponse) => {
     const oooRequestBody = req.body;
     const userId = req?.userData?.id;
     if (!userId) {
@@ -11,7 +20,7 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
     }
 
     try {
-        const oooRequestResult = await createOooRequest({requestedBy:userId, ...oooRequestBody});
+        const oooRequestResult = await createOooRequest({ requestedBy: userId, ...oooRequestBody });
         if ('error' in oooRequestResult) {
             const oooRequestLog = {
                 type: OOO_LOG_TYPE.OOO_REQUEST_BLOCKED,
@@ -51,5 +60,46 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
     } catch (err) {
         logger.error(ERROR_WHILE_CREATING_OOO_REQUEST, err);
         return res.boom.badImplementation(ERROR_WHILE_CREATING_OOO_REQUEST);
+    }
+}
+
+export const updateOooRequestController = async (req: OooRequestUpdateRequest, res: OooRequestResponse) => {
+    const oooRequestBody = req.body;
+    const userId = req?.userData?.id;
+    const oooRequestId = req.params.id;
+    if (!userId) {
+        return res.boom.unauthorized();
+    }
+
+    try {
+        const oooRequestResult = await updateOooRequest(oooRequestId, oooRequestBody, userId);
+        if ('error' in oooRequestResult) {
+            return res.boom.badRequest(oooRequestResult.error);
+        }
+        if (oooRequestResult.state === REQUEST_STATE.REJECTED) {
+            return res.boom.badRequest(oooRequestResult.error);
+        } else {
+            const oooRequestLog = {
+                type: OOO_LOG_TYPE.OOO_REQUEST_APPROVED,
+                meta: {
+                    oooRequestId: oooRequestId,
+                    action: LOG_ACTION.UPDATE,
+                    createdBy: userId,
+                    createdAt: Date.now(),
+                },
+                body: oooRequestResult,
+            };
+            await addLog(oooRequestLog.type, oooRequestLog.meta, oooRequestLog.body);
+            return res.status(201).json({
+                message: OOO_STATUS_REQUEST_UPDATED_SUCCESSFULLY,
+                data: {
+                    id: oooRequestId,
+                    ...oooRequestResult,
+                },
+            });
+        }
+    } catch (err) {
+        logger.error(ERROR_WHILE_UPDATING_OOO_REQUEST, err);
+        return res.boom.badImplementation(ERROR_WHILE_UPDATING_OOO_REQUEST);
     }
 };
