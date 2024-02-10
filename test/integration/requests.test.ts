@@ -17,7 +17,7 @@ import {
   createOooRequests2,
 } from "../fixtures/oooRequest/oooRequest";
 import { createOooRequest, updateOooRequest } from "../../models/oooRequests";
-import { REQUEST_STATE } from "../../constants/request";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/request";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -76,7 +76,26 @@ describe("/requests", function () {
         });
     });
 
-    it("should create a new request", function (done) {
+    it("should create a new request and have all the required fields in the response", function (done) {
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests)
+        .end(function (err, res) {
+          expect(res).to.have.status(201);
+          expect(res.body).to.have.property("message");
+          expect(Object.keys(res.body.data)).to.have.lengthOf(9);
+          expect(res.body.data.until).to.be.above(res.body.data.from);
+          expect(res.body.data).to.have.property("requestedBy");
+          expect(res.body.data.type).to.equal(REQUEST_TYPE.OOO);
+          expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING);
+          expect(res.body.message).to.equal("OOO status requested successfully");
+          done();
+        });
+    });
+
+    it("should return error if feature flag is not used", function (done) {
       chai
         .request(app)
         .post("/requests")
