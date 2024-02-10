@@ -2,12 +2,12 @@ import { RequestQuery } from "../types/oooRequest";
 import firestore from "../utils/firestore";
 const requestModel = firestore.collection("requests");
 import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests";
-import { 
+import {
   ERROR_WHILE_FETCHING_REQUEST,
   ERROR_WHILE_CREATING_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_DOES_NOT_EXIST,
-  REQUEST_ALREADY_PENDING
+  REQUEST_ALREADY_PENDING,
 } from "../constants/requests";
 
 export const createRequest = async (body: any) => {
@@ -45,17 +45,17 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
     const existingRequestDoc = await requestModel.doc(id).get();
     if (!existingRequestDoc.exists) {
       return {
-        error: REQUEST_DOES_NOT_EXIST
+        error: REQUEST_DOES_NOT_EXIST,
       };
     }
     if (existingRequestDoc.data().state === REQUEST_STATE.APPROVED) {
       return {
-        error: REQUEST_ALREADY_APPROVED
+        error: REQUEST_ALREADY_APPROVED,
       };
     }
     if (existingRequestDoc.data().state === REQUEST_STATE.REJECTED) {
       return {
-        error: REQUEST_ALREADY_REJECTED
+        error: REQUEST_ALREADY_REJECTED,
       };
     }
 
@@ -75,7 +75,7 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
   }
 };
 
-export const getRequests = async (query:RequestQuery) => {
+export const getRequests = async (query: RequestQuery) => {
   const { id, type, requestedBy, state } = query;
   try {
     let query: any = requestModel;
@@ -86,7 +86,7 @@ export const getRequests = async (query:RequestQuery) => {
         return null;
       }
       return {
-        id: request.id,
+        id,
         ...request,
       };
     }
@@ -104,7 +104,7 @@ export const getRequests = async (query:RequestQuery) => {
     if (requestsDoc.empty) {
       return null;
     }
-    return requestsDoc.docs.map((doc:any) => {
+    return requestsDoc.docs.map((doc: any) => {
       return {
         id: doc.id,
         ...doc.data(),

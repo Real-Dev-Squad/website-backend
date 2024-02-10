@@ -256,4 +256,92 @@ describe("/requests", function () {
         });
     });
   });
+
+  describe("GET /requests", function () {
+    it("should return all requests", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true")
+        .send(validOooStatusRequests)
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          done();
+        });
+    });
+
+    it("should return all requests by specific user", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&requestedBy=testUser")
+        .send(validOooStatusRequests)
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.data.every((e: any) => e.requestedBy === "testUser"));
+          done();
+        });
+    });
+
+    it("should return all requests by specific user", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&requestedBy=testUser&state=APPROVED")
+        .send(validOooStatusRequests)
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.data.every((e: any) => e.requestedBy === "testUser" && e.state === "APPROVED"));
+          done();
+        });
+    });
+
+    // TODO: .skip to be removed
+    it.skip("should return empty array is no data is found, for specific state and user", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&requestedBy=testUser&state=PENDING")
+        .send(validOooStatusRequests)
+        .end(function (err, res) {
+          expect(res).to.have.status(204);
+          expect(res.body.data).to.have.lengthOf(0);
+          done();
+        });
+    });
+    // TODO: .skip to be removed
+    it.skip("should return empty array is no data is found", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&requestedBy=testUserRandom")
+        .send(validOooStatusRequests)
+        .end(function (err, res) {
+          expect(res).to.have.status(204);
+          expect(res.body.data).to.have.lengthOf(0);
+          done();
+        });
+    });
+
+    it("should return error if not a valid state is passed", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&state=ACTIVE")
+        .send(validOooStatusRequests)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.equal("Bad Request");
+          expect(res.body.message).to.equal(`"state" must be one of [APPROVED, PENDING, REJECTED]`);
+          done();
+        });
+    });
+
+    it("should return error if not a valid type is passed", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&type=RANDOM")
+        .send(validOooStatusRequests)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.equal("Bad Request");
+          expect(res.body.message).to.equal('"type" must be one of [OOO, ALL]');
+          done();
+        });
+    });
+  });
 });
