@@ -12,6 +12,7 @@ export const LOG_ACTION = {
 
 export const REQUEST_TYPE = {
   OOO: "OOO",
+  ALL: "ALL",
 };
 
 export const REQUEST_LOG_TYPE = {
