@@ -36,4 +36,5 @@ export const ERROR_WHILE_CREATING_REQUEST = "Error while creating request";
 export const ERROR_WHILE_UPDATING_REQUEST = "Error while updating request";
 
 export const REQUEST_DOES_NOT_EXIST = "Request does not exist";
+export const REQUESTS_NOT_FOUND= "Requests not found";
 export const REQUEST_ALREADY_PENDING = "Request already exists please wait for approval or rejection";

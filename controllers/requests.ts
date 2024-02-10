@@ -10,6 +10,7 @@ import {
   LOG_ACTION,
   REQUEST_LOG_TYPE,
   REQUEST_DOES_NOT_EXIST,
+  REQUESTS_NOT_FOUND,
 } from "../constants/requests";
 import { createRequest, getRequests, updateRequest } from "../models/requests";
 import { addLog } from "../models/logs";
@@ -112,7 +113,13 @@ export const getRequestsController = async (req: any, res: any) => {
   try {
     const requests = await getRequests(query);
     if (!requests) {
-      return res.boom.notFound(REQUEST_DOES_NOT_EXIST);
+      if (query.id) {
+        return res.boom.notFound(REQUEST_DOES_NOT_EXIST);
+      }
+      return res.json({
+        message: REQUESTS_NOT_FOUND,
+        data: [],
+      });
     }
     return res.status(200).json({
       message: REQUEST_FETCHED_SUCCESSFULLY,
