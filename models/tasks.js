@@ -139,6 +139,29 @@ const fetchPaginatedTasks = async ({
   try {
     let initialQuery = tasksModel;
 
+    if (assignee) {
+      const assignees = assignee.split(",");
+      const users = [];
+      for (const singleAssignee of assignees) {
+        const user = await userUtils.getUserId(singleAssignee);
+        if (user) {
+          users.push(user);
+        }
+      }
+
+      if (users.length > 1) {
+        initialQuery = initialQuery.where("assignee", "in", users);
+      } else if (users.length === 1) {
+        initialQuery = initialQuery.where("assignee", "==", users[0]);
+      } else {
+        return {
+          allTasks: [],
+          next: "",
+          prev: "",
+        };
+      }
+    }
+
     if (status === TASK_STATUS.OVERDUE) {
       const currentTime = Math.floor(Date.now() / 1000);
       const OVERDUE_TASK_STATUSES = [
@@ -150,57 +173,28 @@ const fetchPaginatedTasks = async ({
         BLOCKED,
         SANITY_CHECK,
       ];
-      initialQuery = tasksModel.where("endsOn", "<", currentTime).where("status", "in", OVERDUE_TASK_STATUSES);
-
-      if (assignee) {
-        const user = await userUtils.getUserId(assignee);
-        if (user) {
-          initialQuery = initialQuery.where("assignee", "==", user);
-        }
-      }
-    } else {
-      initialQuery = tasksModel.orderBy("updatedAt", "desc");
-      if (status) {
-        initialQuery = initialQuery.where("status", "==", status);
-      }
-
-      if (assignee) {
-        const assignees = assignee.split(",");
-        if (assignees.length > 1) {
-          const users = [];
-          for (const singleAssignee of assignees) {
-            const user = await userUtils.getUserId(singleAssignee);
-            if (user) {
-              users.push(user);
-            }
-          }
-          if (users.length) {
-            initialQuery = initialQuery.where("assignee", "in", users);
-          } else {
-            return {
-              allTasks: [],
-              next: "",
-              prev: "",
-            };
-          }
-        } else {
-          const user = await userUtils.getUserId(assignees[0]);
-          if (user) {
-            initialQuery = initialQuery.where("assignee", "==", user);
-          } else {
-            return {
-              allTasks: [],
-              next: "",
-              prev: "",
-            };
-          }
-        }
-      }
-
-      if (title) {
-        initialQuery = initialQuery.where("title", ">=", title).where("title", "<=", title + "\uf8ff");
-      }
+      initialQuery = initialQuery
+        .where("endsOn", "<", currentTime)
+        .where("status", "in", OVERDUE_TASK_STATUSES)
+        .orderBy("endsOn", "desc");
+      /**
+       * Setting it undefined because when OVERDUE condition is applied, where 2 inEquality checks are being made
+       * firestore don't allow more inEquality checks, so for title where 2 more inEquality checks are being added,
+       * it will give error
+       */
+      title = undefined;
+    } else if (status) {
+      initialQuery = initialQuery.where("status", "==", status);
     }
+
+    if (title) {
+      initialQuery = initialQuery
+        .where("title", ">=", title)
+        .where("title", "<=", title + "\uf8ff")
+        .orderBy("title", "asc");
+    }
+
+    initialQuery = initialQuery.orderBy("updatedAt", "desc");
 
     let queryDoc = initialQuery;
 
@@ -222,19 +216,21 @@ const fetchPaginatedTasks = async ({
     }
 
     const snapshot = await queryDoc.get();
+    let nextDoc, prevDoc;
+    if (snapshot.size) {
+      const first = snapshot.docs[0];
+      prevDoc = await initialQuery.endBefore(first).limitToLast(1).get();
 
-    const first = snapshot.docs[0];
-    const prevDoc = await initialQuery.endBefore(first).limitToLast(1).get();
-
-    const last = snapshot.docs[snapshot.docs.length - 1];
-    const nextDoc = await initialQuery.startAfter(last).limit(1).get();
+      const last = snapshot.docs[snapshot.docs.length - 1];
+      nextDoc = await initialQuery.startAfter(last).limit(1).get();
+    }
 
     const allTasks = await getBuiltTasks(snapshot);
 
     return {
       allTasks,
-      next: nextDoc.docs[0]?.id ?? "",
-      prev: prevDoc.docs[0]?.id ?? "",
+      next: nextDoc?.docs[0]?.id ?? "",
+      prev: prevDoc?.docs[0]?.id ?? "",
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);

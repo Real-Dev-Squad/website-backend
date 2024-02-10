@@ -21,6 +21,7 @@ const TASK_STATUS = {
   VERIFIED: "VERIFIED",
   DONE: "DONE",
   OVERDUE: "OVERDUE",
+  BACKLOG: "BACKLOG",
 };
 
 // TODO: convert this to new task status
@@ -37,6 +38,24 @@ const MAPPED_TASK_STATUS = {
   UNASSIGNED: "AVAILABLE",
 };
 
+const COMPLETED_TASK_STATUS = {
+  VERIFIED: "VERIFIED",
+  DONE: "DONE",
+  COMPLETED: "COMPLETED",
+};
 const TASK_SIZE = 5;
 
-module.exports = { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS, TASK_SIZE, DEFAULT_TASK_PRIORITY };
+const tasksUsersStatus = {
+  MISSED_UPDATES: "missed-updates",
+};
+
+module.exports = {
+  TASK_TYPE,
+  TASK_STATUS,
+  TASK_STATUS_OLD,
+  MAPPED_TASK_STATUS,
+  TASK_SIZE,
+  DEFAULT_TASK_PRIORITY,
+  COMPLETED_TASK_STATUS,
+  tasksUsersStatus,
+};

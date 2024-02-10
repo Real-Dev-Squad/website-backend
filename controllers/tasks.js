@@ -1,5 +1,5 @@
 const tasks = require("../models/tasks");
-const { TASK_STATUS, TASK_STATUS_OLD } = require("../constants/tasks");
+const { TASK_STATUS, TASK_STATUS_OLD, tasksUsersStatus } = require("../constants/tasks");
 const { addLog } = require("../models/logs");
 const { USER_STATUS } = require("../constants/users");
 const { addOrUpdate, getRdsUserInfoByGitHubUsername } = require("../models/users");
@@ -7,12 +7,16 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
-const { transformQuery } = require("../utils/tasks");
+const { transformQuery, transformTasksUsersQuery } = require("../utils/tasks");
 const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 const dataAccess = require("../services/dataAccessLayer");
 const { parseSearchQuery } = require("../utils/tasks");
 const { addTaskCreatedAtAndUpdatedAtFields } = require("../services/tasks");
+const { RQLQueryParser } = require("../utils/RQLParser");
+const { getMissedProgressUpdatesUsers } = require("../models/discordactions");
+const { logType } = require("../constants/logs");
+
 /**
  * Creates new task
  *
@@ -318,25 +322,27 @@ const updateTaskStatus = async (req, res, next) => {
     let userStatusUpdate;
     const taskId = req.params.id;
     const { userStatusFlag } = req.query;
+    const status = req.body?.status;
     const { id: userId, username } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
 
     if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
     if (task.notAssignedToYou) return res.boom.forbidden("This task is not assigned to you");
-    if (task.taskData.status === TASK_STATUS.VERIFIED || req.body.status === TASK_STATUS.MERGED)
+    if (
+      task.taskData.status === TASK_STATUS.VERIFIED ||
+      status === TASK_STATUS.MERGED ||
+      status === TASK_STATUS.BACKLOG
+    )
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
     if (userStatusFlag) {
       if (task.taskData.status === TASK_STATUS.DONE && req.body.percentCompleted < 100) {
-        if (req.body.status === TASK_STATUS.DONE || !req.body.status) {
+        if (status === TASK_STATUS.DONE || !status) {
           return res.boom.badRequest("Task percentCompleted can't updated as status is DONE");
         }
       }
 
-      if (
-        (req.body.status === TASK_STATUS.DONE || req.body.status === TASK_STATUS.VERIFIED) &&
-        task.taskData.percentCompleted !== 100
-      ) {
+      if ((status === TASK_STATUS.DONE || status === TASK_STATUS.VERIFIED) && task.taskData.percentCompleted !== 100) {
         if (req.body.percentCompleted !== 100) {
           return res.boom.badRequest("Status cannot be updated. Task is not done yet");
         }
@@ -344,12 +350,12 @@ const updateTaskStatus = async (req, res, next) => {
     }
 
     if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
-      if (req.body.status === TASK_STATUS.COMPLETED || !req.body.status) {
+      if (status === TASK_STATUS.COMPLETED || !status) {
         return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
       }
     }
     if (
-      (req.body.status === TASK_STATUS.COMPLETED || req.body.status === TASK_STATUS.VERIFIED) &&
+      (status === TASK_STATUS.COMPLETED || status === TASK_STATUS.VERIFIED) &&
       task.taskData.percentCompleted !== 100
     ) {
       if (req.body.percentCompleted !== 100) {
@@ -370,16 +376,16 @@ const updateTaskStatus = async (req, res, next) => {
       },
     };
 
-    if (req.body.status && !req.body.percentCompleted) {
-      taskLog.body.new.status = req.body.status;
+    if (status && !req.body.percentCompleted) {
+      taskLog.body.new.status = status;
     }
-    if (req.body.percentCompleted && !req.body.status) {
+    if (req.body.percentCompleted && !status) {
       taskLog.body.new.percentCompleted = req.body.percentCompleted;
     }
 
-    if (req.body.percentCompleted && req.body.status) {
+    if (req.body.percentCompleted && status) {
       taskLog.body.new.percentCompleted = req.body.percentCompleted;
-      taskLog.body.new.status = req.body.status;
+      taskLog.body.new.status = status;
     }
 
     const [, taskLogResult] = await Promise.all([
@@ -388,7 +394,7 @@ const updateTaskStatus = async (req, res, next) => {
     ]);
     taskLog.id = taskLogResult.id;
 
-    if (req.body.status) {
+    if (status) {
       userStatusUpdate = await updateStatusOnTaskCompletion(userId);
     }
     return res.json({
@@ -463,6 +469,53 @@ const updateStatus = async (req, res) => {
   }
 };
 
+const getUsersHandler = async (req, res) => {
+  try {
+    const { size, cursor, q: queryString } = req.query;
+    const rqlParser = new RQLQueryParser(queryString);
+    const filterQueries = rqlParser.getFilterQueries();
+    const {
+      dateGap,
+      weekdayList,
+      dateList,
+      status,
+      size: transformedSize,
+    } = transformTasksUsersQuery({ ...filterQueries, size });
+    if (status === tasksUsersStatus.MISSED_UPDATES) {
+      const response = await getMissedProgressUpdatesUsers({
+        cursor: cursor,
+        size: transformedSize,
+        excludedDates: dateList,
+        excludedDays: weekdayList,
+        dateGap: dateGap,
+      });
+
+      if (response.error) {
+        return res.boom.badRequest(response.message);
+      }
+      return res
+        .status(200)
+        .json({ message: "Discord details of users with status missed updates fetched successfully", data: response });
+    } else {
+      return res.boom.badRequest(`Invalid status: ${status}`);
+    }
+  } catch (error) {
+    const taskRequestLog = {
+      type: logType.TASKS_MISSED_UPDATES_ERRORS,
+      meta: {
+        lastModifiedAt: Date.now(),
+      },
+      body: {
+        request: req.query,
+        error: error.toString(),
+      },
+    };
+    await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
+    logger.error("Error in fetching users details of tasks", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   addNewTask,
   fetchTasks,
@@ -474,4 +527,5 @@ module.exports = {
   overdueTasks,
   assignTask,
   updateStatus,
+  getUsersHandler,
 };
