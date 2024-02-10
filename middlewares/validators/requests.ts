@@ -1,6 +1,6 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/request";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
 import { OooRequestCreateRequest, OooRequestResponse, OooRequestUpdateRequest } from "../../types/oooRequest";
 import { createOooStatusRequestValidator, updateOooStatusRequestValidator } from "./oooRequests";
 
@@ -63,7 +63,7 @@ export const updateRequestsMiddleware = async (
 
 export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: OooRequestResponse, next: NextFunction) => {
   const schema = joi.object().keys({
-    dev: joi.bool().sensitive(),
+    dev: joi.bool().sensitive(),  // TODO: Remove this validator once feature is tested and ready to be used
     id: joi.string().optional(),
     type: joi
       .string()

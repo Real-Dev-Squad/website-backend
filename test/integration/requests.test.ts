@@ -1,5 +1,4 @@
 import chai from "chai";
-import sinon from "sinon";
 import chaiHttp from "chai-http";
 const { expect } = chai;
 import config from "config";
@@ -10,7 +9,8 @@ import userDataFixture from "../fixtures/user/user";
 const cookieName = config.get("userToken.cookieName");
 import addUser from "../utils/addUser";
 import { createOooRequests, validOooStatusRequests, validOooStatusUpdate,createOooRequests2 } from "../fixtures/oooRequest/oooRequest";
-import { createOooRequest, updateOooRequest } from "../../models/oooRequests";
+import { createRequest, updateRequest } from "../../models/requests";
+import { REQUEST_ALREADY_APPROVED, REQUEST_CREATED_SUCCESSFULLY, REQUEST_DOES_NOT_EXIST, REQUEST_UPDATED_SUCCESSFULLY } from "../../constants/requests";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -23,16 +23,16 @@ let approvedOooRequestId: string;
 
 describe("/requests", function () {
   beforeEach(async function () {
-    const { id: oooRequestStatusId }: any = await createOooRequest(createOooRequests);
+    const { id: oooRequestStatusId }: any = await createRequest(createOooRequests);
     oooRequestId = oooRequestStatusId;
 
-    const { id: pendingOooId }: any = await createOooRequest(createOooRequests2);
+    const { id: pendingOooId }: any = await createRequest(createOooRequests2);
     pendingOooRequestId = pendingOooId;
 
     const userIdPromises = [addUser(userData[16]), addUser(userData[4])];
     const [userId, superUserId] = await Promise.all(userIdPromises);
 
-    const { id: approveOooId }: any = await updateOooRequest(oooRequestId, { state: "APPROVED" }, superUserId);
+    const { id: approveOooId }: any = await updateRequest(oooRequestId, { state: "APPROVED" }, superUserId);
     approvedOooRequestId = approveOooId;
 
     authToken = authService.generateAuthToken({ userId });
@@ -64,7 +64,7 @@ describe("/requests", function () {
         .end(function (err, res) {
           expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("OOO status requested successfully");
+          expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
           done();
         });
     });
@@ -91,7 +91,7 @@ describe("/requests", function () {
         .end(function (err, res) {
           expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("OOO status request updated successfully");
+          expect(res.body.message).to.equal(REQUEST_UPDATED_SUCCESSFULLY);
           done();
         });
     });
@@ -105,7 +105,7 @@ describe("/requests", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("Request does not exist");
+          expect(res.body.message).to.equal(REQUEST_DOES_NOT_EXIST);
           done();
         });
     });
@@ -119,7 +119,7 @@ describe("/requests", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("Request is already approved");
+          expect(res.body.message).to.equal(REQUEST_ALREADY_APPROVED);
           done();
         });
     });

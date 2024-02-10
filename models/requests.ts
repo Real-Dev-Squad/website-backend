@@ -1,48 +1,48 @@
-import { OooStatusRequestBody, OooRequestUpdateBody, RequestQuery } from "../types/oooRequest";
+import { RequestQuery } from "../types/oooRequest";
 import firestore from "../utils/firestore";
-const oooRequestModel = firestore.collection("oooRequests");
-import { REQUEST_STATE } from "../constants/request";
-import { OOO_REQUEST_ALREADY_PENDING, ERROR_WHILE_CREATING_OOO_REQUEST, REQUEST_DOES_NOT_EXIST, ERROR_WHILE_FETCHING_REQUEST } from "../constants/oooRequest";
+const requestModel = firestore.collection("requests");
+import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests";
+import { 
+  ERROR_WHILE_FETCHING_REQUEST,
+  ERROR_WHILE_CREATING_REQUEST,
+  ERROR_WHILE_UPDATING_REQUEST,
+  REQUEST_DOES_NOT_EXIST,
+  REQUEST_ALREADY_PENDING
+} from "../constants/requests";
 
-export const createOooRequest = async (body: OooStatusRequestBody) => {
+export const createRequest = async (body: any) => {
   try {
-    const { requestedBy, from, until, message, type } = body;
-
-    const existingOooRequest = await oooRequestModel
-      .where("requestedBy", "==", requestedBy)
+    const existingRequest = await requestModel
+      .where("requestedBy", "==", body.requestedBy)
       .where("state", "==", REQUEST_STATE.PENDING)
+      .where("type", "==", body.type)
       .get();
 
-    if (!existingOooRequest.empty) {
+    if (!existingRequest.empty) {
       return {
-        error: OOO_REQUEST_ALREADY_PENDING,
+        error: REQUEST_ALREADY_PENDING,
       };
     }
-    const requestBody: OooStatusRequestBody = {
-      requestedBy,
-      type,
-      from,
-      until,
-      message,
-      state: REQUEST_STATE.PENDING,
+    const requestBody: any = {
       createdAt: Date.now(),
       updatedAt: Date.now(),
+      ...body,
     };
-    const result = await oooRequestModel.add(requestBody);
+    const result = await requestModel.add(requestBody);
 
     return {
       id: result.id,
       ...requestBody,
     };
   } catch (error) {
-    logger.error(ERROR_WHILE_CREATING_OOO_REQUEST, error);
+    logger.error(ERROR_WHILE_CREATING_REQUEST, error);
     throw error;
   }
 };
 
-export const updateOooRequest = async (id: string, body: OooRequestUpdateBody, lastModifiedBy: string) => {
+export const updateRequest = async (id: string, body: any, lastModifiedBy: string) => {
   try {
-    const existingRequestDoc = await oooRequestModel.doc(id).get();
+    const existingRequestDoc = await requestModel.doc(id).get();
     if (!existingRequestDoc.exists) {
       return {
         error: REQUEST_DOES_NOT_EXIST
@@ -50,27 +50,27 @@ export const updateOooRequest = async (id: string, body: OooRequestUpdateBody, l
     }
     if (existingRequestDoc.data().state === REQUEST_STATE.APPROVED) {
       return {
-        error: "Request is already approved"
+        error: REQUEST_ALREADY_APPROVED
       };
     }
     if (existingRequestDoc.data().state === REQUEST_STATE.REJECTED) {
       return {
-        error: "Request is already rejected"
+        error: REQUEST_ALREADY_REJECTED
       };
     }
 
-    const requestBody: OooRequestUpdateBody = {
+    const requestBody: any = {
       updatedAt: Date.now(),
       lastModifiedBy,
       ...body,
     };
-    await oooRequestModel.doc(id).update(requestBody);
+    await requestModel.doc(id).update(requestBody);
     return {
       id,
       ...requestBody,
     };
   } catch (error) {
-    logger.error(ERROR_WHILE_CREATING_OOO_REQUEST, error);
+    logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
     throw error;
   }
 };
@@ -78,7 +78,7 @@ export const updateOooRequest = async (id: string, body: OooRequestUpdateBody, l
 export const getRequests = async (query:RequestQuery) => {
   const { id, type, requestedBy, state } = query;
   try {
-    let query: any = oooRequestModel;
+    let query: any = requestModel;
     if (id) {
       const requestsDoc = await query.doc(id).get();
       const request = requestsDoc.data();
