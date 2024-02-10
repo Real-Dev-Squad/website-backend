@@ -15,7 +15,7 @@ import {
 } from "../../fixtures/oooRequest/oooRequest";
 import { OooRequestCreateRequest, OooRequestResponse } from "../../../types/oooRequest";
 
-describe.only("Create Request Validators", function () {
+describe("Create Request Validators", function () {
   let req: any;
   let res: any;
   let nextSpy;
