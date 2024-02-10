@@ -8,7 +8,7 @@ import {
 } from "./../../fixtures/oooRequest/oooRequest";
 import { REQUEST_ALREADY_PENDING } from "../../../constants/requests";
 
-describe.only("models/oooRequests", () => {
+describe("models/oooRequests", () => {
   afterEach(async () => {
     await cleanDb();
   });
