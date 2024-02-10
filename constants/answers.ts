@@ -1,0 +1,7 @@
+const ANSWER_STATUS = {
+  PENDING: "PENDING",
+  APPROVED:"APPROVED",
+  REJECTED: "REJECTED",
+}
+
+module.exports = { ANSWER_STATUS }

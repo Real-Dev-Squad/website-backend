@@ -1,6 +1,7 @@
 import express from "express";
 const app = express.Router();
 
+app.use("/answers", require("./answers"));
 app.use("/auctions", require("./auctions"));
 app.use("/arts", require("./arts"));
 app.use("/auth", require("./auth"));
@@ -36,4 +37,6 @@ app.use("/applications", require("./applications"));
 app.use("/v1/fcm-tokens", require("./fcmToken.js"));
 app.use("/v1/notifications", require("./notify"));
 app.use("/goals", require("./goals"));
+app.use("/invites", require("./invites"));
+app.use("/requests", require("./requests"));
 module.exports = app;
