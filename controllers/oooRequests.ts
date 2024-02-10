@@ -1,4 +1,4 @@
-import { createOooRequest, updateOooRequest, getOooRequests } from "../models/oooRequests";
+import { createOooRequest, updateOooRequest } from "../models/oooRequests";
 import { OooRequestCreateRequest, OooRequestResponse, OooRequestUpdateRequest } from "../types/oooRequest";
 import { addLog } from "../models/logs";
 import {
@@ -104,23 +104,3 @@ export const updateOooRequestController = async (req: OooRequestUpdateRequest, r
     }
 }
 
-export const getOooRequestsController = async (req: OooRequestCreateRequest, res: OooRequestResponse) => {
-    const { query } = req;
-    try {
-        const oooRequests = await getOooRequests(
-            query.type,
-            query.requestedBy,
-            query.state,
-            query.id
-        );
-        if ('error' in oooRequests) {
-            return res.status(400).json({
-                message: oooRequests.error,
-            });
-        }
-        return oooRequests;
-    } catch (err) {
-        logger.error(ERROR_WHILE_CREATING_OOO_REQUEST, err);
-        return res.boom.badImplementation(ERROR_WHILE_CREATING_OOO_REQUEST);
-    }
-};

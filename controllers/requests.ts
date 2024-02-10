@@ -1,6 +1,8 @@
 import { OooRequestResponse, OooRequestCreateRequest, OooRequestUpdateRequest } from "../types/oooRequest";
 import { REQUEST_TYPE } from "../constants/request";
-import { createOooRequestController, updateOooRequestController, getOooRequestsController } from "./oooRequests";
+import { createOooRequestController, updateOooRequestController } from "./oooRequests";
+import {  ERROR_WHILE_FETCHING_REQUEST, REQUEST_DOES_NOT_EXIST, REQUEST_FETCHED_SUCCESSFULLY } from "../constants/oooRequest";
+import {  getRequests } from "../models/oooRequests";
 
 export const createRequestController = async (
   req: OooRequestCreateRequest,
@@ -29,19 +31,18 @@ export const updateRequestController = async (
 };
 
 export const getRequestsController = async (req: any, res: any) => {
-  const type = req.query.type;
-  switch (type) {
-    case REQUEST_TYPE.OOO:
-      const ooRequestData = await getOooRequestsController(req, res);
+  const { query } = req;
+  try {
+      const requests = await getRequests(query);
+      if (!requests) {
+          return res.boom.notFound(REQUEST_DOES_NOT_EXIST);
+      }
       return res.status(200).json({
-        message: "OOO Request fetched successfully",
-        data: ooRequestData,
+          message: REQUEST_FETCHED_SUCCESSFULLY,
+          data: requests,
       });
-    default:
-      const oooRequestData = await getOooRequestsController(req, res);
-      return res.status(200).json({
-        message: "Request fetched successfully",
-        data: oooRequestData,
-      });
+  } catch (err) {
+      logger.error(ERROR_WHILE_FETCHING_REQUEST, err);
+      return res.boom.badImplementation(ERROR_WHILE_FETCHING_REQUEST);
   }
 };

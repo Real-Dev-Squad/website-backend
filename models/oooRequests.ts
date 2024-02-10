@@ -1,8 +1,8 @@
-import { OooStatusRequestBody, OooRequestUpdateBody, OooRequestQuery } from "../types/oooRequest";
+import { OooStatusRequestBody, OooRequestUpdateBody, RequestQuery } from "../types/oooRequest";
 import firestore from "../utils/firestore";
 const oooRequestModel = firestore.collection("oooRequests");
 import { REQUEST_STATE } from "../constants/request";
-import { OOO_REQUEST_ALREADY_PENDING, ERROR_WHILE_CREATING_OOO_REQUEST } from "../constants/oooRequest";
+import { OOO_REQUEST_ALREADY_PENDING, ERROR_WHILE_CREATING_OOO_REQUEST, REQUEST_DOES_NOT_EXIST, ERROR_WHILE_FETCHING_REQUEST } from "../constants/oooRequest";
 
 export const createOooRequest = async (body: OooStatusRequestBody) => {
   try {
@@ -45,7 +45,7 @@ export const updateOooRequest = async (id: string, body: OooRequestUpdateBody, l
     const existingRequestDoc = await oooRequestModel.doc(id).get();
     if (!existingRequestDoc.exists) {
       return {
-        error: "Request does not exist"
+        error: REQUEST_DOES_NOT_EXIST
       };
     }
     if (existingRequestDoc.data().state === REQUEST_STATE.APPROVED) {
@@ -75,21 +75,20 @@ export const updateOooRequest = async (id: string, body: OooRequestUpdateBody, l
   }
 };
 
-export const getOooRequests = async (type: string, requestedBy: string, state: string, id: string) => {
+export const getRequests = async (query:RequestQuery) => {
+  const { id, type, requestedBy, state } = query;
   try {
     let query: any = oooRequestModel;
     if (id) {
-      const oooRequest = await query.doc(id).get();
-      if (!oooRequest.exists) {
-        return {
-          error: "Request does not exist"
-        };
+      const requestsDoc = await query.doc(id).get();
+      const request = requestsDoc.data();
+      if (!request) {
+        return null;
       }
       return {
-        id: oooRequest.id,
-        ...oooRequest.data(),
+        id: request.id,
+        ...request,
       };
-
     }
     if (type) {
       query = query.where("type", "==", type);
@@ -101,15 +100,18 @@ export const getOooRequests = async (type: string, requestedBy: string, state: s
       query = query.where("state", "==", state);
     }
 
-    const oooRequests = await query.get();
-    return oooRequests.docs.map((doc) => {
+    const requestsDoc = await query.get();
+    if (requestsDoc.empty) {
+      return null;
+    }
+    return requestsDoc.docs.map((doc:any) => {
       return {
         id: doc.id,
         ...doc.data(),
       };
     });
   } catch (error) {
-    logger.error("Error while fetching OOO requests", error);
+    logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
     throw error;
   }
 };

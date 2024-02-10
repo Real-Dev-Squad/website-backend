@@ -39,7 +39,7 @@ export type userData= {
   id: string;
 };
 
-export type OooRequestQuery = {
+export type RequestQuery = {
   dev: string;
   type?: string;
   requestedBy?: string;
@@ -56,6 +56,6 @@ export type RequestParams = {
 };
 
 export type OooRequestResponse = Response & { boom: Boom };
-export type OooRequestCreateRequest = Request & { OooStatusRequestBody , userData: userData , query: OooRequestQuery };
+export type OooRequestCreateRequest = Request & { OooStatusRequestBody , userData: userData , query: RequestQuery };
 
-export type OooRequestUpdateRequest = Request & { oooRequestUpdateBody , userData: userData , query: OooRequestQuery , params: RequestParams };
+export type OooRequestUpdateRequest = Request & { oooRequestUpdateBody , userData: userData , query: RequestQuery , params: RequestParams };
