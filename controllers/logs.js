@@ -1,4 +1,5 @@
 const logsQuery = require("../models/logs");
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 /**
  * Fetches logs
@@ -15,7 +16,7 @@ const fetchLogs = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while fetching logs: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 

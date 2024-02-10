@@ -1,5 +1,5 @@
 const artsQuery = require("../models/arts");
-
+const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 /**
  * Adds art
  *
@@ -17,7 +17,7 @@ const addArt = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error adding art: ${error}`);
-    return res.boom.serverUnavailable("Something went wrong please contact admin");
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -36,7 +36,7 @@ const fetchArts = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while fetching arts ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -56,7 +56,7 @@ const getSelfArts = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while getting user arts ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -70,7 +70,7 @@ const getUserArts = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while getting user arts ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 

@@ -29,6 +29,8 @@ module.exports = {
     clientSecret: "GITHUB_CLIENT_SECRET",
   },
 
+  githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
+
   firestore: "FIRESTORE_CONFIG",
 
   services: {
@@ -41,6 +43,15 @@ module.exports = {
       routes: {
         authRedirection: "SERVICES_RDSUI_ROUTES_AUTH_REDIRECTION",
       },
+    },
+
+    goalAPI: {
+      baseUrl: "GOALS_BASE_URL",
+      secretKey: "GOALS_SECRET_KEY",
+    },
+
+    discordBot: {
+      baseUrl: "DISCORD_BASE_URL",
     },
   },
 
@@ -62,6 +73,15 @@ module.exports = {
     botPublicKey: "BOT_PUBLIC_KEY",
   },
 
+  cronJobHandler: {
+    publicKey: "CRON_JOB_PUBLIC_KEY",
+  },
+
+  rdsServerlessBot: {
+    rdsServerLessPrivateKey: "RDS_SERVERLESS_PRIVATE_KEY",
+    ttl: "RDS_SERVERLESS_TTL",
+  },
+
   cloudinary: {
     cloud_name: "CLOUDINARY_CLOUD_NAME",
     api_key: "CLOUDINARY_API_KEY",
@@ -77,5 +97,14 @@ module.exports = {
 
   routesCacheTTL: {
     "/members": "ROUTESCACHETTL_MEMBERS",
+  },
+
+  Event100ms: {
+    APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
+    APP_SECRET: "EVENT_100MS_APP_SECRET",
+  },
+
+  externalServices: {
+    EXTERNAL_SERVICE_PUBLIC_KEY: "EXTERNAL_SERVICE_PUBLIC_KEY",
   },
 };

@@ -1,0 +1,61 @@
+const TASK_TYPE = {
+  FEATURE: "feature",
+  GROUP: "group",
+  STORY: "story",
+};
+
+const TASK_STATUS = {
+  AVAILABLE: "AVAILABLE",
+  ASSIGNED: "ASSIGNED",
+  COMPLETED: "COMPLETED",
+  IN_PROGRESS: "IN_PROGRESS",
+  BLOCKED: "BLOCKED",
+  SMOKE_TESTING: "SMOKE_TESTING",
+  NEEDS_REVIEW: "NEEDS_REVIEW",
+  IN_REVIEW: "IN_REVIEW",
+  APPROVED: "APPROVED",
+  MERGED: "MERGED",
+  SANITY_CHECK: "SANITY_CHECK",
+  REGRESSION_CHECK: "REGRESSION_CHECK",
+  RELEASED: "RELEASED",
+  VERIFIED: "VERIFIED",
+  DONE: "DONE",
+  OVERDUE: "OVERDUE",
+  BACKLOG: "BACKLOG",
+};
+
+// TODO: convert this to new task status
+const TASK_STATUS_OLD = {
+  OLD_ACTIVE: "active",
+  OLD_BLOCKED: "blocked",
+  OLD_PENDING: "pending",
+  OLD_COMPLETED: "completed",
+};
+const DEFAULT_TASK_PRIORITY = "TBD";
+
+const MAPPED_TASK_STATUS = {
+  ...TASK_STATUS,
+  UNASSIGNED: "AVAILABLE",
+};
+
+const COMPLETED_TASK_STATUS = {
+  VERIFIED: "VERIFIED",
+  DONE: "DONE",
+  COMPLETED: "COMPLETED",
+};
+const TASK_SIZE = 5;
+
+const tasksUsersStatus = {
+  MISSED_UPDATES: "missed-updates",
+};
+
+module.exports = {
+  TASK_TYPE,
+  TASK_STATUS,
+  TASK_STATUS_OLD,
+  MAPPED_TASK_STATUS,
+  TASK_SIZE,
+  DEFAULT_TASK_PRIORITY,
+  COMPLETED_TASK_STATUS,
+  tasksUsersStatus,
+};

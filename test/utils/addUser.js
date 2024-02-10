@@ -6,7 +6,7 @@ const userData = require("../fixtures/user/user")();
 /**
  * File to be required in every test file where userId is required to generate the JWT
  *
- * @return {string} userId - userId for the added user
+ * @return {Promise<string>} userId - userId for the added user
  */
 module.exports = async (user) => {
   const isValid = user && Object.keys(user).length !== 0 && user.constructor === Object;

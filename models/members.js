@@ -27,9 +27,6 @@ const fetchUsers = async (queryParams = {}) => {
         const curatedMemberData = {
           id: doc.id,
           ...memberData,
-          tokens: undefined,
-          phone: undefined,
-          email: undefined,
         };
         curatedMemberData.isMember = !!(memberData.roles && memberData.roles.member);
         allMembers.push(curatedMemberData);
@@ -80,9 +77,6 @@ const fetchUsersWithRole = async (role) => {
         onlyMembers.push({
           id: doc.id,
           ...doc.data(),
-          phone: undefined,
-          email: undefined,
-          tokens: undefined,
         });
       });
     }

@@ -8,7 +8,8 @@ const {
   assignOrRemoveBadgesInBulk,
 } = require("../utils/badges");
 const { chunks } = require("../utils/array");
-const { DOCUMENT_WRITE_SIZE, ERROR_MESSAGES } = require("../constants/badges");
+const { ERROR_MESSAGES } = require("../constants/badges");
+const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const MODEL_ERROR_MESSAGES = ERROR_MESSAGES.MODELS;
 
 /**

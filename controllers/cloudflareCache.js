@@ -1,9 +1,9 @@
 const logsQuery = require("../models/logs");
-const userQuery = require("../models/users");
 const cloudflare = require("../services/cloudflareService");
 const { logType } = require("../constants/logs");
 const { MAX_CACHE_PURGE_COUNT } = require("../constants/cloudflareCache");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const dataAccess = require("../services/dataAccessLayer");
 
 /**
  * Purges the Cache of Members Profile Page
@@ -21,7 +21,7 @@ const purgeCache = async (req, res) => {
     if (req.body.user) {
       if (roles.super_user) {
         const { user } = req.body;
-        const userDetails = await userQuery.fetchUser({ username: user });
+        const userDetails = await dataAccess.retrieveUsers({ username: user });
         if (!userDetails.userExists) {
           return res.boom.badRequest();
         }
@@ -81,7 +81,7 @@ const fetchPurgedCacheMetadata = async (req, res) => {
       const { timestamp } = latestCacheMetadata;
       return res.json({
         message: "Purged cache metadata returned successfully!",
-        count: logs.length,
+        remainingCount: MAX_CACHE_PURGE_COUNT - logs.length,
         timeLastCleared: timestamp._seconds,
       });
     } else if ((await logsQuery.fetchLastAddedCacheLog(id)).length !== 0) {
@@ -89,13 +89,13 @@ const fetchPurgedCacheMetadata = async (req, res) => {
       const { timestamp } = lastLog[0];
       return res.json({
         message: "Purged cache metadata returned successfully!",
-        count: 0,
+        remainingCount: MAX_CACHE_PURGE_COUNT,
         timeLastCleared: timestamp._seconds,
       });
     } else {
       return res.json({
         message: "No cache is cleared yet",
-        count: 0,
+        remainingCount: MAX_CACHE_PURGE_COUNT,
       });
     }
   } catch (error) {
