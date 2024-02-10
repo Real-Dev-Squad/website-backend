@@ -1,8 +1,7 @@
 const { fetchWallet, createWallet } = require("../models/wallets");
 const userUtils = require("../utils/users");
 const walletConstants = require("../constants/wallets");
-
-const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 /**
  * Get the wallet for userId, or create default one for
@@ -42,7 +41,7 @@ const getOwnWallet = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while retriving wallet data ${err}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -64,7 +63,7 @@ const getUserWallet = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while retriving wallet data ${err}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 

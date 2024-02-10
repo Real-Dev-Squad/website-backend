@@ -14,7 +14,8 @@ const { createWallet } = require("../../models/wallets");
 const userData = require("../fixtures/user/user")();
 const { auctionData, auctionKeys, auctionWithIdKeys } = require("../fixtures/auctions/auctions");
 const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = auctionData;
-const currenciesData = require("../fixtures/currencies/currencies");
+const currencyDataArray = require("../fixtures/currencies/currencies");
+const currenciesData = currencyDataArray.default;
 
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");

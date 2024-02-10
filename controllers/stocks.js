@@ -1,4 +1,5 @@
 const stocks = require("../models/stocks");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 /**
  * Creates new stock
  *
@@ -16,7 +17,7 @@ const addNewStock = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while creating new stock: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 /**
@@ -34,7 +35,7 @@ const fetchStocks = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while fetching stocks ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 /**
@@ -53,7 +54,7 @@ const getSelfStocks = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while getting user stocks ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 

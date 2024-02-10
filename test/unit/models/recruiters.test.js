@@ -10,7 +10,7 @@ const cleanDb = require("../../utils/cleanDb");
 const recruiters = require("../../../models/recruiters");
 const firestore = require("../../../utils/firestore");
 const recruiterModel = firestore.collection("recruiters");
-const recruiterDataArray = require("../../fixtures/recruiter/recruiter")();
+const { recruiterDataArray } = require("../../fixtures/recruiter/recruiter");
 const userDataArray = require("../../fixtures/user/user")();
 const addUser = require("../../utils/addUser");
 

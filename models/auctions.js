@@ -150,7 +150,7 @@ const makeNewBid = async ({ bidder, auctionId, bid }) => {
 
     if (!auctionDataRef.data()) return { auctionNotFound: true };
 
-    const wallet = await walletModels.fetchWallet(bidder);
+    const wallet = (await walletModels.fetchWallet(bidder)) || {};
     let usersMoney = 0;
 
     if (Object.keys(wallet).length === 0) return { noWallet: true };

@@ -101,15 +101,19 @@ The following project structure should be followed:
 - Authorization header: `Authorization: Bearer <token>`
 
 ## Production login:
-https://github.com/login/oauth/authorize?client_id=23c78f66ab7964e5ef97
+
+https://api.realdevsquad.com/auth/github/login
 
 ### Production login - Cookie:
+
 rds-session
 
 ## Staging login:
-https://github.com/login/oauth/authorize?client_id=c4a84431feaf604e89d1
 
-### Staging login - Cookie: 
+https://staging-api.realdevsquad.com/auth/github/login
+
+### Staging login - Cookie:
+
 rds-session-staging
 
 ## Testing Guidelines
@@ -155,3 +159,16 @@ export FIRESTORE_EMULATOR_HOST="localhost:<Firebase emulator PORT>"
 - Every pull request should have associated issue(s) on our [issue tracker](https://github.com/Real-Dev-Squad/website-backend/issues).
 - For any non-trivial fixes and features, unit and integration tests must be added. The PR reviewer should not approve/merge PR(s) that lack these.
 - The PR(s) should be merged only after the CI passes.
+
+## Certain issues you may face while running the tests:
+
+- Java version is not above 11
+- When we run yarn test, it runs both the unit and integration tests (in this order). So after the unit tests are done, the java process is not killed automatically and when our integration test run it gives error.
+- Error: connect ECONNREFUSED ::1:8081
+
+## Possible solutions for above issues (in particular order):
+
+- Java version above 11 is needed for firebase tool version >= 11
+- Either manually kill the java process after unit tests are done or run both the tests separately by running the test commands.
+- Add 'host : 0.0.0.0' to both firestore and ui object in firebase.json file if it is not added.
+  for more info refer this : https://github.com/Real-Dev-Squad/website-backend/issues/918

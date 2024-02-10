@@ -11,7 +11,10 @@ module.exports = {
   port: 3000,
   enableFileLogs: true,
   enableConsoleLogs: false,
-
+  discordUnverifiedRoleId: "<discordUnverifiedRoleId>",
+  discordDeveloperRoleId: "<discordDeveloperRoleId>",
+  discordMavenRoleId: "<discordMavenRoleId>",
+  discordMissedUpdatesRoleId: "<discordMissedUpdatesRoleId>",
   githubApi: {
     baseUrl: "https://api.github.com",
     org: "Real-Dev-Squad",
@@ -45,11 +48,18 @@ module.exports = {
       routes: {
         authRedirection: "/goto",
       },
+      goalAPI: {
+        baseUrl: "https://goals-api.realdevsquad.com",
+        cookieName: `goals-session-${NODE_ENV}`,
+      },
+    },
+    discordBot: {
+      baseUrl: "<DISCORD_BOT_BASE_URL>",
     },
   },
 
   cors: {
-    allowedOrigins: /\.realdevsquad\.com$/,
+    allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)/, // Allow realdevsquad.com, *.realdevsquad.com
   },
 
   userToken: {
@@ -60,11 +70,31 @@ module.exports = {
     privateKey: "<privateKey>",
   },
 
+  botToken: {
+    botPublicKey: "<botpublicKey>",
+  },
+
   // Cloudinary keys
   cloudinary: {
     cloud_name: "Cloud_name",
     api_key: "API_KEY",
     api_secret: "api_secret_key",
+  },
+
+  // Cloudflare
+  cloudflare: {
+    CLOUDFLARE_ZONE_ID: "Cloudflare_Zone_ID_or_ID",
+    CLOUDFLARE_X_AUTH_KEY: "Cloudflare_API_Auth_Key",
+    CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare_User_Email",
+  },
+
+  rdsServerlessBot: {
+    rdsServerLessPrivateKey: "RDS_SERVERLESS_PRIVATE_KEY",
+    ttl: 60,
+  },
+
+  cronJobHandler: {
+    publicKey: "CRON_JOB_PUBLIC_KEY",
   },
 
   integrations: {
@@ -76,5 +106,15 @@ module.exports = {
 
   routesCacheTTL: {
     "/members": 900,
+  },
+
+  Event100ms: {
+    APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
+    APP_SECRET: "EVENT_100MS_APP_SECRET",
+  },
+  githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
+
+  externalServices: {
+    EXTERNAL_SERVICE_PUBLIC_KEY: "EXTERNAL_SERVICE_PUBLIC_KEY",
   },
 };

@@ -3,6 +3,11 @@
  * Defaults set from default.js
  */
 module.exports = {
+  discordUnverifiedRoleId: "1120875993771544687",
+  discordDeveloperRoleId: "1121445071213056071",
+  discordMavenRoleId: "1152361736456896586",
+  discordMissedUpdatesRoleId: "1184201657404362772",
+  discordNewComersChannelId: "896184507080769559",
   enableFileLogs: false,
   enableConsoleLogs: true,
 
@@ -14,10 +19,10 @@ module.exports = {
     rdsApi: {
       baseUrl: "https://staging-api.realdevsquad.com",
     },
-  },
-
-  cors: {
-    allowedOrigins: /(\.realdevsquad\.com$)|(localhost)/, // Allow *.realdevsquad.com and localhost for non-production envs
+    goalAPI: {
+      baseUrl: "https://staging-goals-api.realdevsquad.com",
+      secretKey: "123456789",
+    },
   },
 
   integrations: {
