@@ -24,8 +24,10 @@ export const REQUEST_LOG_TYPE = {
 };
 
 export const REQUEST_CREATED_SUCCESSFULLY = "Request created successfully";
-export const REQUEST_UPDATED_SUCCESSFULLY = "Request updated successfully";
+export const REQUEST_APPROVED_SUCCESSFULLY = "Request approved successfully";
+export const REQUEST_REJECTED_SUCCESSFULLY = "Request rejected successfully";
 export const REQUEST_FETCHED_SUCCESSFULLY = "Request fetched successfully";
+
 export const REQUEST_ALREADY_APPROVED = "Request already approved";
 export const REQUEST_ALREADY_REJECTED = "Request already rejected";
 

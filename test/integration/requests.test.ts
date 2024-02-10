@@ -8,9 +8,19 @@ import authService from "../../services/authService";
 import userDataFixture from "../fixtures/user/user";
 const cookieName = config.get("userToken.cookieName");
 import addUser from "../utils/addUser";
-import { createOooRequests, validOooStatusRequests, validOooStatusUpdate,createOooRequests2 } from "../fixtures/oooRequest/oooRequest";
+import {
+  createOooRequests,
+  validOooStatusRequests,
+  validOooStatusUpdate,
+  createOooRequests2,
+} from "../fixtures/oooRequest/oooRequest";
 import { createRequest, updateRequest } from "../../models/requests";
-import { REQUEST_ALREADY_APPROVED, REQUEST_CREATED_SUCCESSFULLY, REQUEST_DOES_NOT_EXIST, REQUEST_UPDATED_SUCCESSFULLY } from "../../constants/requests";
+import {
+  REQUEST_ALREADY_APPROVED,
+  REQUEST_APPROVED_SUCCESSFULLY,
+  REQUEST_CREATED_SUCCESSFULLY,
+  REQUEST_DOES_NOT_EXIST,
+} from "../../constants/requests";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -82,7 +92,7 @@ describe("/requests", function () {
         });
     });
 
-    it("should update a request", function (done) {
+    it("should approved a request", function (done) {
       chai
         .request(app)
         .put(`/requests/${pendingOooRequestId}?dev=true`)
@@ -91,7 +101,7 @@ describe("/requests", function () {
         .end(function (err, res) {
           expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal(REQUEST_UPDATED_SUCCESSFULLY);
+          expect(res.body.message).to.equal(REQUEST_APPROVED_SUCCESSFULLY);
           done();
         });
     });
