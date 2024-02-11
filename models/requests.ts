@@ -9,6 +9,7 @@ import {
   REQUEST_DOES_NOT_EXIST,
   REQUEST_ALREADY_PENDING
 } from "../constants/requests";
+import * as admin from "firebase-admin";
 
 export const createRequest = async (body: any) => {
   try {
@@ -78,9 +79,9 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
 export const getRequests = async (query:RequestQuery) => {
   const { id, type, requestedBy, state } = query;
   try {
-    let query: any = requestModel;
+    let requestQuery: admin.firestore.Query  = requestModel;
     if (id) {
-      const requestsDoc = await query.doc(id).get();
+      const requestsDoc = await requestModel.doc(id).get();
       const request = requestsDoc.data();
       if (!request) {
         return null;
@@ -91,16 +92,16 @@ export const getRequests = async (query:RequestQuery) => {
       };
     }
     if (type) {
-      query = query.where("type", "==", type);
+      requestQuery = requestQuery.where("type", "==", type);
     }
     if (requestedBy) {
-      query = query.where("requestedBy", "==", requestedBy);
+      requestQuery = requestQuery.where("requestedBy", "==", requestedBy);
     }
     if (state) {
-      query = query.where("state", "==", state);
+      requestQuery = requestQuery.where("state", "==", state);
     }
 
-    const requestsDoc = await query.get();
+    const requestsDoc = await requestQuery.get();
     if (requestsDoc.empty) {
       return null;
     }
