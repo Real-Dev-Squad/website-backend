@@ -1,14 +1,16 @@
-import { REQUEST_STATE } from "../constants/requests";
 import {
   ERROR_WHILE_FETCHING_REQUEST,
   ERROR_WHILE_CREATING_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
+  REQUEST_REJECTED_SUCCESSFULLY,
+  REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_FETCHED_SUCCESSFULLY,
   REQUEST_CREATED_SUCCESSFULLY,
-  REQUEST_UPDATED_SUCCESSFULLY,
+  REQUEST_STATE,
   LOG_ACTION,
   REQUEST_LOG_TYPE,
   REQUEST_DOES_NOT_EXIST,
+  REQUESTS_NOT_FOUND,
 } from "../constants/requests";
 import { createRequest, getRequests, updateRequest } from "../models/requests";
 import { addLog } from "../models/logs";
@@ -77,29 +79,29 @@ export const updateRequestController = async (req: any, res: any) => {
     if ("error" in requestResult) {
       return res.boom.badRequest(requestResult.error);
     }
+    const [logType, returnMessage] =
+      requestResult.state === REQUEST_STATE.APPROVED
+        ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
+        : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
 
-    if (requestResult.state === REQUEST_STATE.REJECTED) {
-      return res.boom.badRequest(requestResult.error);
-    } else {
-      const requestLog = {
-        type: REQUEST_LOG_TYPE.REQUEST_APPROVED,
-        meta: {
-          requestId: requestId,
-          action: LOG_ACTION.UPDATE,
-          createdBy: userId,
-          createdAt: Date.now(),
-        },
-        body: requestResult,
-      };
-      await addLog(requestLog.type, requestLog.meta, requestLog.body);
-      return res.status(201).json({
-        message: REQUEST_UPDATED_SUCCESSFULLY,
-        data: {
-          id: requestResult.id,
-          ...requestResult,
-        },
-      });
-    }
+    const requestLog = {
+      type: logType,
+      meta: {
+        requestId: requestId,
+        action: LOG_ACTION.UPDATE,
+        createdBy: userId,
+        createdAt: Date.now(),
+      },
+      body: requestResult,
+    };
+    await addLog(requestLog.type, requestLog.meta, requestLog.body);
+    return res.status(201).json({
+      message: returnMessage,
+      data: {
+        id: requestResult.id,
+        ...requestResult,
+      },
+    });
   } catch (err) {
     logger.error(ERROR_WHILE_UPDATING_REQUEST, err);
     return res.boom.badImplementation(ERROR_WHILE_UPDATING_REQUEST);
@@ -111,7 +113,13 @@ export const getRequestsController = async (req: any, res: any) => {
   try {
     const requests = await getRequests(query);
     if (!requests) {
-      return res.boom.notFound(REQUEST_DOES_NOT_EXIST);
+      if (query.id) {
+        return res.boom.notFound(REQUEST_DOES_NOT_EXIST);
+      }
+      return res.json({
+        message: REQUESTS_NOT_FOUND,
+        data: [],
+      });
     }
     return res.status(200).json({
       message: REQUEST_FETCHED_SUCCESSFULLY,

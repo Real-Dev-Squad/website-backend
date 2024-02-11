@@ -24,8 +24,10 @@ export const REQUEST_LOG_TYPE = {
 };
 
 export const REQUEST_CREATED_SUCCESSFULLY = "Request created successfully";
-export const REQUEST_UPDATED_SUCCESSFULLY = "Request updated successfully";
+export const REQUEST_APPROVED_SUCCESSFULLY = "Request approved successfully";
+export const REQUEST_REJECTED_SUCCESSFULLY = "Request rejected successfully";
 export const REQUEST_FETCHED_SUCCESSFULLY = "Request fetched successfully";
+
 export const REQUEST_ALREADY_APPROVED = "Request already approved";
 export const REQUEST_ALREADY_REJECTED = "Request already rejected";
 
@@ -34,4 +36,5 @@ export const ERROR_WHILE_CREATING_REQUEST = "Error while creating request";
 export const ERROR_WHILE_UPDATING_REQUEST = "Error while updating request";
 
 export const REQUEST_DOES_NOT_EXIST = "Request does not exist";
+export const REQUESTS_NOT_FOUND= "Requests not found";
 export const REQUEST_ALREADY_PENDING = "Request already exists please wait for approval or rejection";
