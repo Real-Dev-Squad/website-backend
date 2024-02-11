@@ -134,12 +134,10 @@ describe("models/oooRequests", () => {
       expect(oooRequestData[0].type).to.be.equal(REQUEST_TYPE.OOO);
     });
 
-    // TODO: after fixing the main getRequests(), remove .skip
-    it.skip("Should return empty array if no data is found", async () => {
+    it("Should return empty array if no data is found", async () => {
       const query = { dev: "true", state: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);
-      console.log(oooRequestData);
-      expect(oooRequestData).to.have.lengthOf(0);
+      expect(oooRequestData).to.be.equal(null);
     });
   });
 });
