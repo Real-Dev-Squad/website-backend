@@ -293,13 +293,13 @@ describe("/requests", function () {
         });
     });
 
-    it.skip("should return empty array is no data is found, for specific state and user", function (done) {
+    it("should return empty array is no data is found, for specific state and user", function (done) {
       chai
         .request(app)
         .get("/requests?dev=true&requestedBy=testUser&state=PENDING")
         .send(validOooStatusRequests)
         .end(function (err, res) {
-          expect(res).to.have.status(200);
+          expect(res).to.have.status(204);
           expect(res.body.data).to.have.lengthOf(0);
           done();
         });
