@@ -262,7 +262,6 @@ describe("/requests", function () {
       chai
         .request(app)
         .get("/requests?dev=true")
-        .send(validOooStatusRequests)
         .end(function (err, res) {
           expect(res).to.have.status(200);
           done();
@@ -273,7 +272,6 @@ describe("/requests", function () {
       chai
         .request(app)
         .get("/requests?dev=true&requestedBy=testUser")
-        .send(validOooStatusRequests)
         .end(function (err, res) {
           expect(res).to.have.status(200);
           expect(res.body.data.every((e: any) => e.requestedBy === "testUser"));
@@ -281,11 +279,10 @@ describe("/requests", function () {
         });
     });
 
-    it("should return all requests by specific user", function (done) {
+    it("should return all requests by specific user and state", function (done) {
       chai
         .request(app)
         .get("/requests?dev=true&requestedBy=testUser&state=APPROVED")
-        .send(validOooStatusRequests)
         .end(function (err, res) {
           expect(res).to.have.status(200);
           expect(res.body.data.every((e: any) => e.requestedBy === "testUser" && e.state === "APPROVED"));
@@ -297,8 +294,7 @@ describe("/requests", function () {
     it.skip("should return empty array is no data is found, for specific state and user", function (done) {
       chai
         .request(app)
-        .get("/requests?dev=true&requestedBy=testUser&state=PENDING")
-        .send(validOooStatusRequests)
+        .get("/requests?dev=true&requestedBy=testUser2&state=APPROVED")
         .end(function (err, res) {
           expect(res).to.have.status(204);
           expect(res.body.data).to.have.lengthOf(0);
@@ -311,10 +307,21 @@ describe("/requests", function () {
       chai
         .request(app)
         .get("/requests?dev=true&requestedBy=testUserRandom")
-        .send(validOooStatusRequests)
         .end(function (err, res) {
           expect(res).to.have.status(204);
           expect(res.body.data).to.have.lengthOf(0);
+          done();
+        });
+    });
+
+    it("should throw error if id doesn't match", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&id=ramdonId1")
+        .end(function (err, res) {
+          expect(res).to.have.status(404);
+          expect(res.body.error).to.equal("Not Found");
+          expect(res.body.message).to.equal(REQUEST_DOES_NOT_EXIST);
           done();
         });
     });
@@ -323,7 +330,6 @@ describe("/requests", function () {
       chai
         .request(app)
         .get("/requests?dev=true&state=ACTIVE")
-        .send(validOooStatusRequests)
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal("Bad Request");
@@ -336,7 +342,6 @@ describe("/requests", function () {
       chai
         .request(app)
         .get("/requests?dev=true&type=RANDOM")
-        .send(validOooStatusRequests)
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal("Bad Request");
