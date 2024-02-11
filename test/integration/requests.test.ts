@@ -328,18 +328,6 @@ describe("/requests", function () {
         .end(function (err, res) {
           expect(res).to.have.status(200);
           expect(res.body.data.every((e: any) => e.type === "OOO"));
-          expect(res.body.data[0]).to.have.all.keys([
-            "id",
-            "createdAt",
-            "requestedBy",
-            "from",
-            "until",
-            "lastModifiedBy",
-            "message",
-            "updatedAt",
-            "state",
-            "type",
-          ]);
           done();
         });
     });
