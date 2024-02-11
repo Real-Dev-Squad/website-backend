@@ -120,7 +120,7 @@ describe("models/oooRequests", () => {
 
     it("Should return a list of all the requests by specific user ", async () => {
       const oooRequest = await createRequest(createOooRequests);
-      const query = { dev: "true" };
+      const query = { dev: "true", requestedBy: oooRequest.requestedBy };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData).to.have.lengthOf(1);
       expect(oooRequestData[0].requestedBy).to.be.equal(oooRequest.requestedBy);

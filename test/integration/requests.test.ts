@@ -264,6 +264,19 @@ describe("/requests", function () {
         .get("/requests?dev=true")
         .end(function (err, res) {
           expect(res).to.have.status(200);
+          expect(res.body.data).to.have.lengthOf(2);
+          expect(res.body.data[0]).to.have.all.keys([
+            "id",
+            "createdAt",
+            "requestedBy",
+            "from",
+            "until",
+            "lastModifiedBy",
+            "message",
+            "updatedAt",
+            "state",
+            "type",
+          ]);
           done();
         });
     });
@@ -274,7 +287,7 @@ describe("/requests", function () {
         .get("/requests?dev=true&requestedBy=testUser")
         .end(function (err, res) {
           expect(res).to.have.status(200);
-          expect(res.body.data.every((e: any) => e.requestedBy === "testUser"));
+          expect(res.body.data.every((request: any) => request.requestedBy === "testUser"));
           done();
         });
     });
@@ -314,7 +327,7 @@ describe("/requests", function () {
         });
     });
 
-    it("should throw error if id doesn't match", function (done) {
+    it("should throw error if request id doesn't match", function (done) {
       chai
         .request(app)
         .get("/requests?dev=true&id=ramdonId1")
