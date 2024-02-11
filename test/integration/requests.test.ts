@@ -23,6 +23,8 @@ import {
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_CREATED_SUCCESSFULLY,
   REQUEST_DOES_NOT_EXIST,
+  REQUEST_ALREADY_PENDING,
+  REQUESTS_NOT_FOUND,
 } from "../../constants/requests";
 
 const userData = userDataFixture();
@@ -80,6 +82,22 @@ describe("/requests", function () {
           expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
           done();
         });
+    });
+
+    it("should return 400, if already created request is created again", async function () {
+      await chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests);
+      const response = await chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests);
+      expect(response).to.have.status(400);
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(REQUEST_ALREADY_PENDING);
     });
 
     it("should create a new request and have all the required fields in the response", function (done) {
@@ -213,7 +231,7 @@ describe("/requests", function () {
         });
     });
 
-    it("should update a request", function (done) {
+    it("should return error if wrong type is passed", function (done) {
       const type = "ACTIVE";
       chai
         .request(app)
@@ -303,13 +321,37 @@ describe("/requests", function () {
         });
     });
 
-    // TODO: .skip to be removed
-    it.skip("should return empty array is no data is found, for specific state and user", function (done) {
+    it("should return request of type OOO", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&type=OOO")
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.data.every((e: any) => e.type === "OOO"));
+          expect(res.body.data[0]).to.have.all.keys([
+            "id",
+            "createdAt",
+            "requestedBy",
+            "from",
+            "until",
+            "lastModifiedBy",
+            "message",
+            "updatedAt",
+            "state",
+            "type",
+          ]);
+          done();
+        });
+    });
+
+    it("should return empty array is no data is found, for specific state and user", function (done) {
       chai
         .request(app)
         .get("/requests?dev=true&requestedBy=testUser2&state=APPROVED")
         .end(function (err, res) {
-          expect(res).to.have.status(204);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal(REQUESTS_NOT_FOUND);
           expect(res.body.data).to.have.lengthOf(0);
           done();
         });
@@ -322,6 +364,8 @@ describe("/requests", function () {
         .get("/requests?dev=true&requestedBy=testUserRandom")
         .end(function (err, res) {
           expect(res).to.have.status(204);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal(REQUESTS_NOT_FOUND);
           expect(res.body.data).to.have.lengthOf(0);
           done();
         });
