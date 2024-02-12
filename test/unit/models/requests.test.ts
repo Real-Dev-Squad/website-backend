@@ -16,7 +16,7 @@ describe("models/oooRequests", () => {
   });
 
   describe("createRequest", () => {
-    it("should add a new OOO request to the database", async () => {
+    it("should successfully create a new OOO request", async () => {
       const oooRequest = await createRequest(createOooStatusRequests);
       expect(oooRequest).to.not.be.null;
       expect(oooRequest).to.have.property("id");
