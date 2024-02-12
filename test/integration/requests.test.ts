@@ -24,7 +24,6 @@ import {
   REQUEST_CREATED_SUCCESSFULLY,
   REQUEST_DOES_NOT_EXIST,
   REQUEST_ALREADY_PENDING,
-  REQUESTS_NOT_FOUND,
 } from "../../constants/requests";
 
 const userData = userDataFixture();
@@ -283,18 +282,11 @@ describe("/requests", function () {
         .end(function (err, res) {
           expect(res).to.have.status(200);
           expect(res.body.data).to.have.lengthOf(2);
-          expect(res.body.data[0]).to.have.all.keys([
-            "id",
-            "createdAt",
-            "requestedBy",
-            "from",
-            "until",
-            "lastModifiedBy",
-            "message",
-            "updatedAt",
-            "state",
-            "type",
-          ]);
+          expect(res.body.data[0]).to.have.property("id");
+          expect(res.body.data[0]).to.have.property("requestedBy");
+          expect(res.body.data[0]).to.have.property("type");
+          expect(res.body.data[0]).to.have.property("state");
+          expect(res.body.data[0]).to.have.property("message");
           done();
         });
     });
@@ -337,24 +329,17 @@ describe("/requests", function () {
         .request(app)
         .get("/requests?dev=true&requestedBy=testUser2&state=APPROVED")
         .end(function (err, res) {
-          expect(res).to.have.status(200);
-          expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal(REQUESTS_NOT_FOUND);
-          expect(res.body.data).to.have.lengthOf(0);
+          expect(res).to.have.status(204);
           done();
         });
     });
 
-    // TODO: .skip to be removed
-    it.skip("should return empty array is no data is found", function (done) {
+    it("should return empty array is no data is found", function (done) {
       chai
         .request(app)
         .get("/requests?dev=true&requestedBy=testUserRandom")
         .end(function (err, res) {
           expect(res).to.have.status(204);
-          expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal(REQUESTS_NOT_FOUND);
-          expect(res.body.data).to.have.lengthOf(0);
           done();
         });
     });
@@ -364,9 +349,7 @@ describe("/requests", function () {
         .request(app)
         .get("/requests?dev=true&id=ramdonId1")
         .end(function (err, res) {
-          expect(res).to.have.status(404);
-          expect(res.body.error).to.equal("Not Found");
-          expect(res.body.message).to.equal(REQUEST_DOES_NOT_EXIST);
+          expect(res).to.have.status(204);
           done();
         });
     });

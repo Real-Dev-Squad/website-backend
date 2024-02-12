@@ -90,9 +90,9 @@ describe("models/oooRequests", () => {
     it("Should return the request with the specified ID", async () => {
       const oooRequest = await createRequest(createOooRequests2);
       const query = { id: oooRequest.id, dev: "true" };
-      const oooRequestData = await getRequests(query);
+      const oooRequestData:any = await getRequests(query);
       expect(oooRequestData).to.have.property("id");
-      expect(oooRequest.id).to.be.equal(oooRequestData.id);
+      expect(oooRequestData.id).to.be.equal(oooRequest.id);
     });
 
     it("Should return a list of all the GET requests", async () => {
