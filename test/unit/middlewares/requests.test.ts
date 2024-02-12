@@ -2,7 +2,11 @@ import chai from "chai";
 import sinon from "sinon";
 const { expect } = chai;
 
-import { createRequestsMiddleware, updateRequestsMiddleware } from "../../../middlewares/validators/requests";
+import {
+  createRequestsMiddleware,
+  getRequestsMiddleware,
+  updateRequestsMiddleware,
+} from "../../../middlewares/validators/requests";
 import {
   validOooStatusRequests,
   invalidOooStatusRequests,
@@ -81,6 +85,37 @@ describe("Create Request Validators", function () {
         },
       };
       await updateRequestsMiddleware(req as any, res as any, nextSpy);
+      expect(res.boom.badRequest.calledOnce).to.equal(true);
+      expect(nextSpy.calledOnce).to.equal(false);
+    });
+  });
+
+  describe("Get Request Validator", function () {
+    it("Should pass validation for a valid get request", async function () {
+      req = {
+        query: {
+          dev: "true",
+        },
+      };
+      res = {};
+      await getRequestsMiddleware(req as any, res as any, nextSpy);
+      expect(nextSpy.calledOnce).to.equal(true);
+    });
+
+    it("Should throw an error for an invalid get request", async function () {
+      req = {
+        query: {
+          dev: "true",
+          type: "RANDOM",
+          state: "RANDOM",
+        },
+      };
+      res = {
+        boom: {
+          badRequest: sinon.spy(),
+        },
+      };
+      await getRequestsMiddleware(req as any, res as any, nextSpy);
       expect(res.boom.badRequest.calledOnce).to.equal(true);
       expect(nextSpy.calledOnce).to.equal(false);
     });

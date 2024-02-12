@@ -23,6 +23,7 @@ import {
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_CREATED_SUCCESSFULLY,
   REQUEST_DOES_NOT_EXIST,
+  REQUEST_ALREADY_PENDING,
 } from "../../constants/requests";
 
 const userData = userDataFixture();
@@ -80,6 +81,22 @@ describe("/requests", function () {
           expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
           done();
         });
+    });
+
+    it("should return 400, if already created request is created again", async function () {
+      await chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests);
+      const response = await chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests);
+      expect(response).to.have.status(400);
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(REQUEST_ALREADY_PENDING);
     });
 
     it("should create a new request and have all the required fields in the response", function (done) {
@@ -213,7 +230,7 @@ describe("/requests", function () {
         });
     });
 
-    it("should update a request", function (done) {
+    it("should return error if wrong type is passed", function (done) {
       const type = "ACTIVE";
       chai
         .request(app)
@@ -252,6 +269,111 @@ describe("/requests", function () {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
           expect(res.body.message).to.equal(REQUEST_ALREADY_APPROVED);
+          done();
+        });
+    });
+  });
+
+  describe("GET /requests", function () {
+    it("should return all requests", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true")
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.data).to.have.lengthOf(2);
+          expect(res.body.data[0]).to.have.property("id");
+          expect(res.body.data[0]).to.have.property("requestedBy");
+          expect(res.body.data[0]).to.have.property("type");
+          expect(res.body.data[0]).to.have.property("state");
+          expect(res.body.data[0]).to.have.property("message");
+          done();
+        });
+    });
+
+    it("should return all requests by specific user", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&requestedBy=testUser")
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.data.every((request: any) => request.requestedBy === "testUser"));
+          done();
+        });
+    });
+
+    it("should return all requests by specific user and state", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&requestedBy=testUser&state=APPROVED")
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.data.every((e: any) => e.requestedBy === "testUser" && e.state === "APPROVED"));
+          done();
+        });
+    });
+
+    it("should return request of type OOO", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&type=OOO")
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.data.every((e: any) => e.type === "OOO"));
+          done();
+        });
+    });
+
+    it("should return empty array is no data is found, for specific state and user", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&requestedBy=testUser2&state=APPROVED")
+        .end(function (err, res) {
+          expect(res).to.have.status(204);
+          done();
+        });
+    });
+
+    it("should return empty array is no data is found", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&requestedBy=testUserRandom")
+        .end(function (err, res) {
+          expect(res).to.have.status(204);
+          done();
+        });
+    });
+
+    it("should throw error if request id doesn't match", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&id=ramdonId1")
+        .end(function (err, res) {
+          expect(res).to.have.status(204);
+          done();
+        });
+    });
+
+    it("should return error if not a valid state is passed", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&state=ACTIVE")
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.equal("Bad Request");
+          expect(res.body.message).to.equal(`"state" must be one of [APPROVED, PENDING, REJECTED]`);
+          done();
+        });
+    });
+
+    it("should return error if not a valid type is passed", function (done) {
+      chai
+        .request(app)
+        .get("/requests?dev=true&type=RANDOM")
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.equal("Bad Request");
+          expect(res.body.message).to.equal('"type" must be one of [OOO, ALL]');
           done();
         });
     });
