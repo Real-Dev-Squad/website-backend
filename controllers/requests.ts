@@ -115,9 +115,18 @@ export const getRequestsController = async (req: any, res: any) => {
       return res.status(204).send();
     }
 
-    const { allRequests, next, prev } = requests;
+    const { allRequests, next, prev, page } = requests;
     if (allRequests.length === 0) {
       return res.status(204).send();
+    }
+
+    if(page) {
+      const pageLink = `/requests?page=${page}&dev=${query.dev}`;
+      return res.status(200).json({
+        message: REQUEST_FETCHED_SUCCESSFULLY,
+        data: allRequests,
+        page: pageLink,
+      });
     }
 
     let nextUrl = null;

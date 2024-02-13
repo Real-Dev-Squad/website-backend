@@ -74,7 +74,17 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
       .string()
       .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.PENDING, REQUEST_STATE.REJECTED)
       .optional(),
-    page: joi.number().integer().min(0),
+    page: joi.number().integer().min(0).when("next", {
+      is: joi.exist(),
+      then: joi.forbidden().messages({
+        "any.only": "next is not allowed when using page",
+      }),
+    }).when("prev", {
+      is: joi.exist(),
+      then: joi.forbidden().messages({
+        "any.only": "page is not allowed when using prev",
+      }),
+    }).optional(),
     next: joi
       .string()
       .optional(),

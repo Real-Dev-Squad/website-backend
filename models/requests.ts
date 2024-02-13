@@ -79,10 +79,26 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
 };
 
 export const getRequests = async (query: any) => {
-  let { type, requestedBy, state, prev, next, page, size = SIZE } = query;
+  let { id, type, requestedBy, state, prev, next, page, size = SIZE } = query;
   size = parseInt(size);
+  page = parseInt(page);
   try {
     let requestQuery: any = requestModel;
+
+    if (id) {
+      const requestDoc = await requestModel.doc(id).get();
+      if (!requestDoc.exists) {
+        return null;
+      }
+      return {
+        allRequests: [
+          {
+            id: requestDoc.id,
+            ...requestDoc.data(),
+          },
+        ],
+      };
+    }
 
     if (requestedBy) {
       const requestedByUserId = await getUserId(requestedBy);
@@ -106,7 +122,7 @@ export const getRequests = async (query: any) => {
     }
 
     if (page) {
-      const startAfter = size * page;
+      const startAfter = (page - 1) * size;
       requestQueryDoc = requestQueryDoc.offset(startAfter);
     } else if (next) {
       const doc = await requestModel.doc(next).get();
@@ -136,11 +152,15 @@ export const getRequests = async (query: any) => {
         });
       });
     }
+    if (allRequests.length === 0) {
+      return null;
+    }
 
     return {
       allRequests,
       prev: prevDoc.empty ? null : prevDoc.docs[0].id,
       next: nextDoc.empty ? null : nextDoc.docs[0].id,
+      page: page ? page + 1 : null,
     };
   } catch (error) {
     logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
