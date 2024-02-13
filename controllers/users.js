@@ -28,6 +28,8 @@ const {
 } = require("../constants/users");
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
+const config = require("config");
+const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -243,6 +245,26 @@ const getUsers = async (req, res) => {
   }
 };
 
+const isDeveloper = async (req, res) => {
+  try {
+    const { userData } = req;
+    if (userData.roles.in_discord) {
+      const membersInDiscord = await getDiscordMembers();
+      const discordMember = membersInDiscord.find((member) => member.user.id === userData.discordId);
+      if (discordMember) {
+        const { roles } = discordMember;
+        if (roles) {
+          return res.status(200).json({ devRoleExistsOnUser: roles.includes(discordDeveloperRoleId) });
+        }
+      }
+    }
+    return res.status(200).json({ devRoleExistsOnUser: false });
+  } catch (error) {
+    logger.error(`Error while fetching developer tag: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
 /**
  * Fetches the data about user with given id
  *
@@ -371,7 +393,7 @@ const getSelfDetails = async (req, res) => {
  */
 const updateSelf = async (req, res) => {
   try {
-    const { id: userId } = req.userData;
+    const { id: userId, roles: userRoles, discordId } = req.userData;
     const { user } = await dataAccess.retrieveUsers({ id: userId });
 
     if (req.body.username) {
@@ -384,6 +406,17 @@ const updateSelf = async (req, res) => {
     if (req.body.roles) {
       if (user && (user.roles.in_discord || user.roles.developer)) {
         return res.boom.forbidden("Cannot update roles");
+      }
+    }
+
+    if (userRoles.in_discord) {
+      const membersInDiscord = await getDiscordMembers();
+      const discordMember = membersInDiscord.find((member) => member.user.id === discordId);
+      if (discordMember) {
+        const { roles } = discordMember;
+        if (roles && roles.includes(discordDeveloperRoleId)) {
+          return res.boom.forbidden("Developers can't update their profile data. Use profile service for updating.");
+        }
       }
     }
 
@@ -930,4 +963,5 @@ module.exports = {
   archiveUserIfNotInDiscord,
   usersPatchHandler,
   migrations,
+  isDeveloper,
 };
