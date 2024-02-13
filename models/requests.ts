@@ -10,6 +10,8 @@ import {
   REQUEST_ALREADY_PENDING,
 } from "../constants/requests";
 import * as admin from "firebase-admin";
+import { getUserId } from "../utils/users";
+const SIZE = 5;
 
 export const createRequest = async (body: any) => {
   try {
@@ -76,41 +78,70 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
   }
 };
 
-export const getRequests = async (query: RequestQuery) => {
-  const { id, type, requestedBy, state } = query;
+export const getRequests = async (query: any) => {
+  let { type, requestedBy, state, prev, next, page, size = SIZE } = query;
+  size = parseInt(size);
   try {
-    let requestQuery: admin.firestore.Query  = requestModel;
-    if (id) {
-      const requestsDoc = await requestModel.doc(id).get();
-      const request = requestsDoc.data();
-      if (!request) {
-        return null;
-      }
-      return {
-        id,
-        ...request,
-      };
+    let requestQuery: any = requestModel;
+
+    if (requestedBy) {
+      const requestedByUserId = await getUserId(requestedBy);
+      requestQuery = requestQuery.where("requestedBy", "==", requestedByUserId);
     }
     if (type) {
       requestQuery = requestQuery.where("type", "==", type);
-    }
-    if (requestedBy) {
-      requestQuery = requestQuery.where("requestedBy", "==", requestedBy);
     }
     if (state) {
       requestQuery = requestQuery.where("state", "==", state);
     }
 
-    const requestsDoc = await requestQuery.get();
-    if (requestsDoc.empty) {
-      return null;
+    requestQuery = requestQuery.orderBy("createdAt", "desc");
+
+    let requestQueryDoc = requestQuery;
+
+    if (prev) {
+      requestQueryDoc = requestQueryDoc.limitToLast(size);
+    } else {
+      requestQueryDoc = requestQueryDoc.limit(size);
     }
-    return requestsDoc.docs.map((doc: any) => {
-      return {
-        id: doc.id,
-        ...doc.data(),
-      };
-    });
+
+    if (page) {
+      const startAfter = size * page;
+      requestQueryDoc = requestQueryDoc.offset(startAfter);
+    } else if (next) {
+      const doc = await requestModel.doc(next).get();
+      requestQueryDoc = requestQueryDoc.startAt(doc);
+    } else if (prev) {
+      const doc = await requestModel.doc(prev).get();
+      requestQueryDoc = requestQueryDoc.endAt(doc);
+    }
+
+    const snapshot = await requestQueryDoc.get();
+    let nextDoc: any, prevDoc: any;
+
+    if (!snapshot.empty) {
+      const first = snapshot.docs[0];
+      prevDoc = await requestQuery.endBefore(first).limitToLast(1).get();
+
+      const last = snapshot.docs[snapshot.docs.length - 1];
+      nextDoc = await requestQuery.startAfter(last).limit(1).get();
+    }
+
+    let allRequests = [];
+    if (!snapshot.empty) {
+      snapshot.forEach((doc: any) => {
+        allRequests.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+    }
+
+    return {
+      allRequests,
+      prev: prevDoc.empty ? null : prevDoc.docs[0].id,
+      next: nextDoc.empty ? null : nextDoc.docs[0].id,
+    };
   } catch (error) {
     logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
     throw error;
