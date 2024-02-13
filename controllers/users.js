@@ -254,11 +254,11 @@ const isDeveloper = async (req, res) => {
       if (discordMember) {
         const { roles } = discordMember;
         if (roles) {
-          return res.status(200).json({ devRoleExistsOnUser: roles.includes(discordDeveloperRoleId) });
+          return res.status(200).json({ developerRoleExistsOnUser: roles.includes(discordDeveloperRoleId) });
         }
       }
     }
-    return res.status(200).json({ devRoleExistsOnUser: false });
+    return res.status(200).json({ developerRoleExistsOnUser: false });
   } catch (error) {
     logger.error(`Error while fetching developer tag: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
