@@ -65,6 +65,20 @@ describe("Users", function () {
   });
 
   describe("PATCH /users/self", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+    });
+
+    afterEach(function () {
+      Sinon.restore();
+    });
+
     it("Should update the user", function (done) {
       chai
         .request(app)
