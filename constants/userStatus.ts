@@ -1,10 +1,14 @@
-const userState = {
+export const userState = {
   ACTIVE: "ACTIVE",
   IDLE: "IDLE",
   OOO: "OOO",
   ONBOARDING: "ONBOARDING",
 };
 
-const CANCEL_OOO = "cancelOoo";
+export const statusState = {
+  PENDING: "PENDING",
+  APPLIED: "APPLIED",
+  NOT_APPLIED: "NOT_APPLIED",
+};
 
-module.exports = { userState, CANCEL_OOO };
+export const CANCEL_OOO = "cancelOoo";
