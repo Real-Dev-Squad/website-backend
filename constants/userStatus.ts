@@ -6,7 +6,7 @@ export const userState = {
 };
 
 export const statusState = {
-  PENDING: "PENDING",
+  UPCOMING: "UPCOMING",
   APPLIED: "APPLIED",
   NOT_APPLIED: "NOT_APPLIED",
 };
