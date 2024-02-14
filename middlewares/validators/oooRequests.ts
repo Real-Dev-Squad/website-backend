@@ -1,6 +1,6 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/request";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
 import { OooRequestCreateRequest, OooRequestResponse,OooRequestUpdateRequest } from "../../types/oooRequest";
 
 export const createOooStatusRequestValidator = async (
