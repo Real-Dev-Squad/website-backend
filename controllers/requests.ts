@@ -9,10 +9,14 @@ import {
   REQUEST_STATE,
   LOG_ACTION,
   REQUEST_LOG_TYPE,
+  REQUEST_TYPE,
 } from "../constants/requests";
+import { statusState } from "../constants/userStatus";
 import { createRequest, getRequests, updateRequest } from "../models/requests";
 import { addLog } from "../models/logs";
 import { getPaginatedLink } from "../utils/helper";
+import { createUserFutureStatus } from "../models/userFutureStatus";
+import { OooStatusRequest } from "../types/oooRequest";
 
 export const createRequestController = async (req: any, res: any) => {
   const requestBody = req.body;
@@ -94,6 +98,25 @@ export const updateRequestController = async (req: any, res: any) => {
       body: requestResult,
     };
     await addLog(requestLog.type, requestLog.meta, requestLog.body);
+
+    if (requestResult.state === REQUEST_STATE.APPROVED) {
+      // TODO: We have to fix it, changed it as it is blocking another task
+      const requestData: any = await getRequests({ id: requestId });
+      if (requestData) {
+        const { from, until, requestedBy, message } = requestData;
+        const createUserFutureStatusData = {
+          requestId,
+          status: REQUEST_TYPE.OOO,
+          state: statusState.UPCOMING,
+          from,
+          endsOn: until,
+          userId: requestedBy,
+          message,
+        };
+        await createUserFutureStatus(createUserFutureStatusData);
+      }
+    }
+
     return res.status(201).json({
       message: returnMessage,
       data: {
