@@ -15,6 +15,7 @@ const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
 
 const config = require("config");
+const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const joinData = require("../fixtures/user/join");
 const {
@@ -65,6 +66,20 @@ describe("Users", function () {
   });
 
   describe("PATCH /users/self", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+    });
+
+    afterEach(function () {
+      Sinon.restore();
+    });
+
     it("Should update the user", function (done) {
       chai
         .request(app)
@@ -2164,6 +2179,116 @@ describe("Users", function () {
           expect(res).to.have.status(500);
           const response = res.body;
           expect(response.message).to.be.equal("An internal server error occurred");
+          return done();
+        });
+    });
+  });
+
+  describe("GET /users/isDeveloper for developers not in_discord", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+    });
+
+    afterEach(function () {
+      Sinon.restore();
+    });
+
+    it("Should return false if user is a developer and not in discord", function (done) {
+      chai
+        .request(app)
+        .get("/users/isDeveloper")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.developerRoleExistsOnUser).to.equal(false);
+
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /users/self for developers", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      const discordMembers = [...getDiscordMembers];
+      discordMembers[0].user.id = "12345";
+      discordMembers[0].roles.push(discordDeveloperRoleId);
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(discordMembers),
+        })
+      );
+    });
+
+    afterEach(function () {
+      Sinon.restore();
+    });
+
+    it("Should not update the user if user is a developer", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          first_name: "Test first_name",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(403);
+          expect(res.body.message).to.equal(
+            "Developers can't update their profile data. Use profile service for updating."
+          );
+
+          return done();
+        });
+    });
+  });
+
+  describe("GET /users/isDeveloper for developers", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      const discordMembers = [...getDiscordMembers];
+      discordMembers[0].user.id = "12345";
+      discordMembers[0].roles.push(discordDeveloperRoleId);
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(discordMembers),
+        })
+      );
+    });
+
+    afterEach(function () {
+      Sinon.restore();
+    });
+
+    it("Should return true if user is a developer", function (done) {
+      chai
+        .request(app)
+        .get("/users/isDeveloper")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.developerRoleExistsOnUser).to.equal(true);
+
           return done();
         });
     });
