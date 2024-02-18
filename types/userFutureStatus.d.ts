@@ -9,6 +9,5 @@ export type UserFutureStatusType = {
   endsOn?: number;
   userId: string;
   message?: string;
-  updatedAt?: number;
   createdAt?: number;
 };
