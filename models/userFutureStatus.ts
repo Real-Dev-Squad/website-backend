@@ -12,7 +12,6 @@ export const createUserFutureStatus = async (body: UserFutureStatusType) => {
   try {
     const statusBody: UserFutureStatusType = {
       createdAt: Date.now(),
-      updatedAt: Date.now(),
       ...body,
     };
     const resultDoc = await userFutureStatusModel.add(statusBody);
