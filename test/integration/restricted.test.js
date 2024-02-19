@@ -7,6 +7,8 @@ const authService = require("../../services/authService");
 const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
 const addUser = require("../utils/addUser");
+const sinon = require("sinon");
+const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 
 const cookieName = config.get("userToken.cookieName");
 const unrestrictedUser = userData[0];
@@ -17,15 +19,25 @@ chai.use(chaiHttp);
 describe("checkRestrictedUser", function () {
   let restrictedJwt;
   let unrestrictedJwt;
+  let fetchStub;
 
   before(async function () {
     const restrictedUserId = await addUser(restrictedUser);
     const unrestrictedUserId = await addUser(unrestrictedUser);
     restrictedJwt = authService.generateAuthToken({ userId: restrictedUserId });
     unrestrictedJwt = authService.generateAuthToken({ userId: unrestrictedUserId });
+
+    fetchStub = sinon.stub(global, "fetch");
+    fetchStub.returns(
+      Promise.resolve({
+        status: 200,
+        json: () => Promise.resolve(getDiscordMembers),
+      })
+    );
   });
 
   after(async function () {
+    sinon.restore();
     await cleanDb();
   });
 
