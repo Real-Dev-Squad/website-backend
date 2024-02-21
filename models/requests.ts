@@ -167,19 +167,3 @@ export const getRequests = async (query: any) => {
     throw error;
   }
 };
-
-// export const getRequestById = async (id: string) => {
-//   try {
-//     const requestDoc = await requestModel.doc(id).get();
-//     if (!requestDoc.exists) {
-//       return null;
-//     }
-//     return {
-//       id,
-//       ...requestDoc.data(),
-//     };
-//   } catch (error) {
-//     logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
-//     throw error;
-//   }
-// };
