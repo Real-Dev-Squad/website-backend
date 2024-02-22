@@ -102,7 +102,7 @@ export const updateRequestController = async (req: any, res: any) => {
       const requestData = await getRequests({ id: requestId });
       if (requestData) {
         const { from, until, requestedBy, message } = requestData as OooStatusRequest;
-        const createUserFutureStatusData = {
+        const userFutureStatusData = {
           requestId,
           status: REQUEST_TYPE.OOO,
           state: statusState.UPCOMING,
@@ -111,7 +111,7 @@ export const updateRequestController = async (req: any, res: any) => {
           userId: requestedBy,
           message,
         };
-        await createUserFutureStatus(createUserFutureStatusData);
+        await createUserFutureStatus(userFutureStatusData);
       }
     }
 
