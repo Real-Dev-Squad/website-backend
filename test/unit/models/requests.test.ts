@@ -9,8 +9,18 @@ import {
   updateOooRejectedRequests,
 } from "./../../fixtures/oooRequest/oooRequest";
 import { REQUEST_ALREADY_PENDING, REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
+import userDataFixture from "./../../fixtures/user/user";
+import addUser from "../../utils/addUser";
+const userData = userDataFixture();
 
+let testUserId: string;
 describe("models/oooRequests", () => {
+  beforeEach(async () => {
+    const userIdPromises = [addUser(userData[16])];
+    const [userId] = await Promise.all(userIdPromises);
+    testUserId = userId;
+  });
+
   afterEach(async () => {
     await cleanDb();
   });
@@ -90,7 +100,7 @@ describe("models/oooRequests", () => {
     it("Should return the request with the specified ID", async () => {
       const oooRequest = await createRequest(createOooRequests2);
       const query = { id: oooRequest.id, dev: "true" };
-      const oooRequestData:any = await getRequests(query);
+      const oooRequestData: any = await getRequests(query);
       expect(oooRequestData).to.have.property("allRequests");
       expect(oooRequestData.allRequests[0].id).to.be.equal(oooRequest.id);
       expect(oooRequestData.allRequests).to.have.lengthOf(1);
@@ -125,13 +135,13 @@ describe("models/oooRequests", () => {
       expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.PENDING);
     });
 
-    // TODO: Fix this test
-    it.skip("Should return a list of all the requests by specific user ", async () => {
-      const oooRequest = await createRequest(createOooRequests);
-      const query = { dev: "true", requestedBy: oooRequest.requestedBy };
+    it("Should return a list of all the requests by specific user ", async () => {
+      const oooRequestBodyData = { ...createOooRequests, requestedBy: testUserId };
+      await createRequest(oooRequestBodyData);
+      const query = { dev: "true", requestedBy: userData[16].username };
       const oooRequestData = await getRequests(query);
-      expect(oooRequestData).to.have.lengthOf(1);
-      expect(oooRequestData[0].requestedBy).to.be.equal(oooRequest.requestedBy);
+      expect(oooRequestData.allRequests).to.have.lengthOf(1);
+      expect(oooRequestData.allRequests[0].requestedBy).to.be.equal(testUserId);
     });
 
     it("Should return a list of all the requests for specific type ", async () => {
@@ -150,7 +160,7 @@ describe("models/oooRequests", () => {
     it("Should return a list of all the requests by page ", async () => {
       await createRequest(createOooRequests);
       await createRequest(createOooRequests2);
-      const query = { dev: "true", page: 1,  };
+      const query = { dev: "true", page: 1 };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.page).to.be.equal(2);
     });
@@ -158,7 +168,7 @@ describe("models/oooRequests", () => {
     it("Should return a list of all the requests by size ", async () => {
       await createRequest(createOooRequests);
       await createRequest(createOooRequests2);
-      const query = { dev: "true", size: 1,  };
+      const query = { dev: "true", size: 1 };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests).to.have.lengthOf(1);
     });
