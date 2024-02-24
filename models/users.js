@@ -22,6 +22,7 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { AUTHORITIES } = require("../constants/authorities");
 
 /**
  * Adds or updates the user data
@@ -61,11 +62,13 @@ const addOrUpdate = async (userData, userId = null) => {
     }
     if (user && !user.empty) {
       await userModel.doc(user.docs[0].id).set(userData, { merge: true });
+      const data = user.docs[0].data();
       return {
         isNewUser: false,
         userId: user.docs[0].id,
         incompleteUserDetails: user.docs[0].data().incompleteUserDetails,
         updated_at: Date.now(),
+        role: Object.values(AUTHORITIES).find((role) => data.roles[role]) || AUTHORITIES.USER,
       };
     }
 
@@ -78,7 +81,13 @@ const addOrUpdate = async (userData, userId = null) => {
     userData.roles = { archived: false, in_discord: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
-    return { isNewUser: true, userId: userInfo.id, incompleteUserDetails: true, updated_at: Date.now() };
+    return {
+      isNewUser: true,
+      role: AUTHORITIES.USER,
+      userId: userInfo.id,
+      incompleteUserDetails: true,
+      updated_at: Date.now(),
+    };
   } catch (err) {
     logger.error("Error in adding or updating user", err);
     throw err;
