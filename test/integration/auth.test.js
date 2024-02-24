@@ -249,14 +249,14 @@ describe("auth", function () {
 
         expect(res).to.have.status(302);
         // rds-session-v2=token; Domain=realdevsquad.com; Path=/; Expires=Tue, 06 Oct 2020 11:23:07 GMT; HttpOnly; Secure
-        expect(res.headers["set-cookie"]).to.have.length(2);
-        expect(res.headers["set-cookie"][0])
+        expect(res.headers["set-cookie"]).to.have.length(2); /* res has 2 cookies rds-session & rds-session-v2 */
+        expect(res.headers["set-cookie"][1])
           .to.be.a("string")
           .and.satisfy((msg) => msg.startsWith(config.get("userToken.cookieV2Name")));
-        expect(res.headers["set-cookie"][0]).to.include("HttpOnly");
-        expect(res.headers["set-cookie"][0]).to.include("Secure");
-        expect(res.headers["set-cookie"][0]).to.include(`Domain=${rdsUiUrl.hostname}`);
-        expect(res.headers["set-cookie"][0]).to.include("SameSite=Lax");
+        expect(res.headers["set-cookie"][1]).to.include("HttpOnly");
+        expect(res.headers["set-cookie"][1]).to.include("Secure");
+        expect(res.headers["set-cookie"][1]).to.include(`Domain=${rdsUiUrl.hostname}`);
+        expect(res.headers["set-cookie"][1]).to.include("SameSite=Lax");
 
         return done();
       });
