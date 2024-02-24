@@ -60,7 +60,7 @@ const addOrUpdate = async (userData, userId = null) => {
     if (!user || (user && user.empty)) {
       user = await userModel.where("github_id", "==", userData.github_id).limit(1).get();
     }
-    if (user && !user.empty) {
+    if (user && !user.empty && user.docs !== null) {
       await userModel.doc(user.docs[0].id).set(userData, { merge: true });
       const data = user.docs[0].data();
       return {
