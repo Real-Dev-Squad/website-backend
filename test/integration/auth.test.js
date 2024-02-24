@@ -229,8 +229,7 @@ describe("auth", function () {
   });
 
   it("should send rds-session-v2 in res cookie", async function (done) {
-    const redirectURL = "https://www.realdevsquad.com/?v2=true";
-    const rdsUiUrl = new URL(redirectURL).href;
+    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
 
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
       callback(null, "accessToken", githubUserInfo[0]);
@@ -240,7 +239,7 @@ describe("auth", function () {
     chai
       .request(app)
       .get("/auth/github/callback")
-      .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
+      .query({ code: "codeReturnedByGithub", state: rdsUiUrl.href + "?v2=true" })
       .redirects(0)
       .end((err, res) => {
         if (err) {
