@@ -10,6 +10,7 @@ module.exports = {
   discordMissedUpdatesRoleId: "1183553844811153458",
   userToken: {
     cookieName: "rds-session",
+    cookieV2Name: "rds-session-v2",
   },
 
   services: {
