@@ -85,40 +85,6 @@ describe("auth", function () {
     expect(res.headers.location).to.equal(rdsUiUrl);
   });
 
-  it("should send rds-session-v2 in res cookie", async function (done) {
-    const redirectURL = "https://www.realdevsquad.com/?v2=true";
-    const rdsUiUrl = new URL(redirectURL).href;
-
-    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-      callback(null, "accessToken", githubUserInfo[0]);
-      return (req, res, next) => {};
-    });
-
-    chai
-      .request(app)
-      .get("/auth/github/callback")
-      .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
-      .redirects(0)
-      .end((err, res) => {
-        if (err) {
-          return done(err);
-        }
-
-        expect(res).to.have.status(302);
-        // rds-session-v2=token; Domain=realdevsquad.com; Path=/; Expires=Tue, 06 Oct 2020 11:23:07 GMT; HttpOnly; Secure
-        expect(res.headers["set-cookie"]).to.have.length(1);
-        expect(res.headers["set-cookie"][0])
-          .to.be.a("string")
-          .and.satisfy((msg) => msg.startsWith(config.get("userToken.cookieV2Name")));
-        expect(res.headers["set-cookie"][0]).to.include("HttpOnly");
-        expect(res.headers["set-cookie"][0]).to.include("Secure");
-        expect(res.headers["set-cookie"][0]).to.include(`Domain=${rdsUiUrl.hostname}`);
-        expect(res.headers["set-cookie"][0]).to.include("SameSite=Lax");
-
-        return done();
-      });
-  });
-
   // same data should be return from github and same data should be added there
   it("should redirect the request to the goto page on successful login, if user has incomplete user details false", async function () {
     await addUserToDBForTest(userData[0]);
@@ -258,6 +224,40 @@ describe("auth", function () {
         expect(res.body).to.be.a("object");
         expect(res.body.message).to.equal("Signout successful");
         expect(res.headers["set-cookie"][0]).to.include(`${config.get("userToken.cookieName")}=;`);
+        return done();
+      });
+  });
+
+  it("should send rds-session-v2 in res cookie", async function (done) {
+    const redirectURL = "https://www.realdevsquad.com/?v2=true";
+    const rdsUiUrl = new URL(redirectURL).href;
+
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      callback(null, "accessToken", githubUserInfo[0]);
+      return (req, res, next) => {};
+    });
+
+    chai
+      .request(app)
+      .get("/auth/github/callback")
+      .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
+      .redirects(0)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        expect(res).to.have.status(302);
+        // rds-session-v2=token; Domain=realdevsquad.com; Path=/; Expires=Tue, 06 Oct 2020 11:23:07 GMT; HttpOnly; Secure
+        expect(res.headers["set-cookie"]).to.have.length(2);
+        expect(res.headers["set-cookie"][0])
+          .to.be.a("string")
+          .and.satisfy((msg) => msg.startsWith(config.get("userToken.cookieV2Name")));
+        expect(res.headers["set-cookie"][0]).to.include("HttpOnly");
+        expect(res.headers["set-cookie"][0]).to.include("Secure");
+        expect(res.headers["set-cookie"][0]).to.include(`Domain=${rdsUiUrl.hostname}`);
+        expect(res.headers["set-cookie"][0]).to.include("SameSite=Lax");
+
         return done();
       });
   });
