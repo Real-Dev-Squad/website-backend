@@ -25,7 +25,6 @@ const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
 const checkCanGenerateDiscordLink = require("../middlewares/checkCanGenerateDiscordLink");
 const { SUPERUSER } = require("../constants/roles");
 const authorizeRoles = require("../middlewares/authorizeRoles");
-const { verifyCronJob } = require("../middlewares/authorizeBot");
 const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
 const { authorization } = require("../middlewares/authorizeUsersAndService");
@@ -55,7 +54,12 @@ router.post(
   checkIsVerifiedDiscord,
   updateDiscordNicknames
 );
-router.post("/nickname/status", verifyCronJob, validateUpdateUsersNicknameStatusBody, updateUsersNicknameStatus);
+router.post(
+  "/nickname/status",
+  authorization([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
+  validateUpdateUsersNicknameStatusBody,
+  updateUsersNicknameStatus
+);
 router.post("/discord-roles", authenticate, authorizeRoles([SUPERUSER]), syncDiscordGroupRolesInFirestore);
 router.put(
   "/group-onboarding-31d-plus",
