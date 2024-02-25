@@ -17,13 +17,21 @@ const {
   validateMassUpdate,
   validateGetQueryParams,
 } = require("../middlewares/validators/userStatus");
+const { authorization } = require("../middlewares/authorizeUsersAndService");
+const ROLES = require("../constants/roles");
+const { Services } = require("../constants/bot");
 
 router.get("/", validateGetQueryParams, getUserStatusControllers);
 router.get("/self", authenticate, getUserStatus);
 router.get("/:userId", getUserStatus);
 router.patch("/self", authenticate, validateUserStatus, updateUserStatusController);
-router.patch("/update", authenticate, authorizeRoles([SUPERUSER]), updateAllUserStatus);
-router.patch("/batch", authenticate, authorizeRoles([SUPERUSER]), validateMassUpdate, batchUpdateUsersStatus);
+router.patch("/update", authorization([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), updateAllUserStatus);
+router.patch(
+  "/batch",
+  authorization([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
+  validateMassUpdate,
+  batchUpdateUsersStatus
+);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), validateUserStatus, updateUserStatus);
 router.delete("/:userId", authenticate, authorizeRoles([SUPERUSER]), deleteUserStatus);
 
