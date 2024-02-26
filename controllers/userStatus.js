@@ -74,7 +74,6 @@ const getAllUserStatus = async (req, res) => {
   try {
     const { allUserStatus } = await userStatusModel.getAllUserStatus(req.query);
     const activeUsers = [];
-    
     if (allUserStatus) {
       await Promise.all(
         allUserStatus.map(async (status) => {
