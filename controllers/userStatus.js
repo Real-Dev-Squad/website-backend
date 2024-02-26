@@ -74,15 +74,20 @@ const getAllUserStatus = async (req, res) => {
   try {
     const { allUserStatus } = await userStatusModel.getAllUserStatus(req.query);
     const activeUsers = [];
-    for (const status of allUserStatus) {
-      //  fetching users from users collection by userID in userStatus collection
-      const result = await dataAccess.retrieveUsers({ id: status.userId });
-      if (!result.user?.roles?.archived) {
-        status.full_name = `${result.user.first_name} ${result.user.last_name}`;
-        status.picture = result.user.picture;
-        status.username = result.user.username;
-        activeUsers.push(status);
-      }
+    
+    if (allUserStatus) {
+      await Promise.all(
+        allUserStatus.map(async (status) => {
+          //  fetching users from users collection by userID in userStatus collection
+          const result = await dataAccess.retrieveUsers({ id: status.userId });
+          if (!result.user?.roles?.archived) {
+            status.full_name = `${result.user.first_name} ${result.user.last_name}`;
+            status.picture = result.user.picture;
+            status.username = result.user.username;
+            activeUsers.push(status);
+          }
+        })
+      );
     }
     return res.json({
       message: "All User Status found successfully.",
