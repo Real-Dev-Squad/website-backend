@@ -10,7 +10,7 @@ const {
   getUsersValidator,
 } = require("../middlewares/validators/tasks");
 const authorizeRoles = require("../middlewares/authorizeRoles");
-const { authorizeOrAuthenticate } = require("../middlewares/authorizeUsersAndService");
+const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
 const { APPOWNER, SUPERUSER } = require("../constants/roles");
 const assignTask = require("../middlewares/assignTask");
 const { cacheResponse, invalidateCache } = require("../utils/cache");
@@ -19,7 +19,7 @@ const { verifyCronJob } = require("../middlewares/authorizeBot");
 const { CLOUDFLARE_WORKER, CRON_JOB_HANDLER } = require("../constants/bot");
 
 const oldAuthorizationMiddleware = authorizeRoles([APPOWNER, SUPERUSER]);
-const newAuthorizationMiddleware = authorizeOrAuthenticate(
+const newAuthorizationMiddleware = authorizeAndAuthenticate(
   [APPOWNER, SUPERUSER],
   [CLOUDFLARE_WORKER, CRON_JOB_HANDLER]
 );

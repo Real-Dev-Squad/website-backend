@@ -8,7 +8,7 @@ const { Services } = require("../constants/bot");
 const ROLES = require("../constants/roles");
 const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
 
-export const authorizeOrAuthenticate = (allowedRoles: string[], allowedServices: string[]) => {
+export const authorizeAndAuthenticate = (allowedRoles: string[], allowedServices: string[]) => {
   const isRolesValid = allowedRoles.every((role) => Object.values(ROLES).includes(role));
   if (!isRolesValid) {
     throw new Error("Invalid role");

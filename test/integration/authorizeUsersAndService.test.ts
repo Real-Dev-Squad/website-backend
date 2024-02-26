@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { authorizeOrAuthenticate } from "../../middlewares/authorizeUsersAndService";
+import { authorizeAndAuthenticate  } from "../../middlewares/authorizeUsersAndService";
 import bot from "../utils/generateBotToken";
 const userData = require("../fixtures/user/user")();
 import authService from "../../services/authService";
@@ -41,11 +41,11 @@ describe("Middleware | Authorization", function () {
   });
   describe("Input validations", function () {
     it("should throw an error for invalid roles", function () {
-      expect(() => authorizeOrAuthenticate(["invalid_role"], [Services.CRON_JOB_HANDLER])).to.throw("Invalid role");
+      expect(() => authorizeAndAuthenticate (["invalid_role"], [Services.CRON_JOB_HANDLER])).to.throw("Invalid role");
     });
 
     it("should throw an error for invalid services", function () {
-      expect(() => authorizeOrAuthenticate([ROLES.APPOWNER], ["invalid_service"])).to.throw("Invalid service name");
+      expect(() => authorizeAndAuthenticate ([ROLES.APPOWNER], ["invalid_service"])).to.throw("Invalid service name");
     });
   });
 
@@ -53,34 +53,34 @@ describe("Middleware | Authorization", function () {
     it("should return unauthorized for invalid authorization header format", async function () {
       req.headers.authorization = "InvalidHeader";
 
-      await authorizeOrAuthenticate([ROLES.APPOWNER], [Services.CRON_JOB_HANDLER])(req, res, next);
+      await authorizeAndAuthenticate ([ROLES.APPOWNER], [Services.CRON_JOB_HANDLER])(req, res, next);
       expect(res.boom.unauthorized.calledOnce).to.be.equal(true);
     });
 
     it("should return unauthorized for invalid JWT token", async function () {
       req.headers.authorization = "Bearer invalid_token";
-      await authorizeOrAuthenticate([ROLES.APPOWNER], [Services.CRON_JOB_HANDLER])(req, res, next);
+      await authorizeAndAuthenticate ([ROLES.APPOWNER], [Services.CRON_JOB_HANDLER])(req, res, next);
       expect(res.boom.unauthorized.calledOnce).to.be.equal(true);
     });
 
     it("should call verifyCronJob for valid cron job token", async function () {
       const jwtToken = bot.generateCronJobToken({ name: CRON_JOB_HANDLER });
       req.headers.authorization = `Bearer ${jwtToken}`;
-      await authorizeOrAuthenticate([ROLES.APPOWNER], [Services.CRON_JOB_HANDLER])(req, res, next);
+      await authorizeAndAuthenticate ([ROLES.APPOWNER], [Services.CRON_JOB_HANDLER])(req, res, next);
       expect(next.calledOnce).to.be.equal(true);
     });
 
     it("should call verifyDiscordBot for valid Discord bot token", async function () {
       const jwtToken = bot.generateToken({ name: CLOUDFLARE_WORKER });
       req.headers.authorization = `Bearer ${jwtToken}`;
-      await authorizeOrAuthenticate([ROLES.APPOWNER], [Services.CLOUDFLARE_WORKER])(req, res, next);
+      await authorizeAndAuthenticate ([ROLES.APPOWNER], [Services.CLOUDFLARE_WORKER])(req, res, next);
       expect(next.calledOnce).to.be.equal(true);
     });
 
     it("should return unauthorized for unknown service names", async function () {
       const jwtToken = bot.generateToken({ name: "Invalid name" });
       req.headers.authorization = `Bearer ${jwtToken}`;
-      await authorizeOrAuthenticate([ROLES.APPOWNER], [Services.CLOUDFLARE_WORKER])(req, res, next);
+      await authorizeAndAuthenticate ([ROLES.APPOWNER], [Services.CLOUDFLARE_WORKER])(req, res, next);
       expect(res.boom.unauthorized.calledOnce).to.be.equal(true);
     });
   });
@@ -89,7 +89,7 @@ describe("Middleware | Authorization", function () {
       return res.json({ message: "pong" });
     };
 
-    router.get("/for-super-user", authorizeOrAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), pongHandler);
+    router.get("/for-super-user", authorizeAndAuthenticate ([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), pongHandler);
 
     const app = express();
     AppMiddlewares(app);

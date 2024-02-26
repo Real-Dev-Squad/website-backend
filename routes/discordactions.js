@@ -27,7 +27,7 @@ const { SUPERUSER } = require("../constants/roles");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
-const { authorizeOrAuthenticate } = require("../middlewares/authorizeUsersAndService");
+const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
 
 const router = express.Router();
 
@@ -47,12 +47,12 @@ router.patch(
 );
 router.put(
   "/group-idle",
-  authorizeOrAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
+  authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
   setRoleIdleToIdleUsers
 );
 router.put(
   "/group-idle-7d",
-  authorizeOrAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
+  authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
   setRoleIdle7DToIdleUsers
 );
 router.post(
@@ -64,14 +64,14 @@ router.post(
 );
 router.post(
   "/nickname/status",
-  authorizeOrAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
+  authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
   validateUpdateUsersNicknameStatusBody,
   updateUsersNicknameStatus
 );
 router.post("/discord-roles", authenticate, authorizeRoles([SUPERUSER]), syncDiscordGroupRolesInFirestore);
 router.put(
   "/group-onboarding-31d-plus",
-  authorizeOrAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
+  authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
   setRoleToUsersWith31DaysPlusOnboarding
 );
 module.exports = router;

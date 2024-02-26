@@ -8,11 +8,11 @@ const userValidator = require("../middlewares/validators/user");
 const { upload } = require("../utils/multer");
 const { getUserBadges } = require("../controllers/badges");
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
-const { authorizeOrAuthenticate } = require("../middlewares/authorizeUsersAndService");
+const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
 const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
 
-router.post("/", authorizeOrAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), users.markUnverified);
+router.post("/", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), users.markUnverified);
 router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), users.setInDiscordScript);
 router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
