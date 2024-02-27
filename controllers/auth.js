@@ -45,6 +45,8 @@ const githubAuthCallback = (req, res, next) => {
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
   let authRedirectionUrl = rdsUiUrl;
   let devMode = false;
+  let isV2FlagPresent = false;
+
   if ("state" in req.query) {
     try {
       const redirectUrl = new URL(req.query.state);
@@ -52,6 +54,9 @@ const githubAuthCallback = (req, res, next) => {
         isMobileApp = true;
         redirectUrl.searchParams.delete("isMobileApp");
       }
+
+      if (redirectUrl.searchParams.get("v2") === "true") isV2FlagPresent = true;
+
       if (`.${redirectUrl.hostname}`.endsWith(`.${rdsUiUrl.hostname}`)) {
         // Matching *.realdevsquad.com
         authRedirectionUrl = redirectUrl;
@@ -78,18 +83,25 @@ const githubAuthCallback = (req, res, next) => {
         updated_at: Date.now(),
       };
 
-      const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);
+      const { userId, incompleteUserDetails, role } = await users.addOrUpdate(userData);
 
       const token = authService.generateAuthToken({ userId });
 
-      // respond with a cookie
-      res.cookie(config.get("userToken.cookieName"), token, {
+      const cookieOptions = {
         domain: rdsUiUrl.hostname,
         expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
         httpOnly: true,
         secure: true,
         sameSite: "lax",
-      });
+      };
+      // respond with a cookie
+      res.cookie(config.get("userToken.cookieName"), token, cookieOptions);
+
+      /* redirectUrl woud be like https://realdevsquad.com?v2=true */
+      if (isV2FlagPresent) {
+        const tokenV2 = authService.generateAuthToken({ userId, role });
+        res.cookie(config.get("userToken.cookieV2Name"), tokenV2, cookieOptions);
+      }
 
       if (!devMode) {
         // TODO: Revisit incompleteUserDetails redirect condition
@@ -112,12 +124,15 @@ const githubAuthCallback = (req, res, next) => {
 const signout = (req, res) => {
   const cookieName = config.get("userToken.cookieName");
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
-  res.clearCookie(cookieName, {
+  const cookieOptions = {
     domain: rdsUiUrl.hostname,
     httpOnly: true,
     secure: true,
     sameSite: "lax",
-  });
+  };
+  res.clearCookie(cookieName, cookieOptions);
+  const cookieV2Name = config.get("userToken.cookieV2Name");
+  res.clearCookie(cookieV2Name, cookieOptions);
   return res.json({
     message: "Signout successful",
   });
