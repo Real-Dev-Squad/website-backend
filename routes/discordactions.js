@@ -27,6 +27,7 @@ const { SUPERUSER } = require("../constants/roles");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
+const { verifyCronJob } = require("../middlewares/authorizeBot");
 const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
 
 const router = express.Router();
