@@ -9,8 +9,18 @@ import {
   updateOooRejectedRequests,
 } from "./../../fixtures/oooRequest/oooRequest";
 import { REQUEST_ALREADY_PENDING, REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
+import userDataFixture from "./../../fixtures/user/user";
+import addUser from "../../utils/addUser";
+const userData = userDataFixture();
 
+let testUserId: string;
 describe("models/oooRequests", () => {
+  beforeEach(async () => {
+    const userIdPromises = [addUser(userData[16])];
+    const [userId] = await Promise.all(userIdPromises);
+    testUserId = userId;
+  });
+
   afterEach(async () => {
     await cleanDb();
   });
@@ -90,9 +100,16 @@ describe("models/oooRequests", () => {
     it("Should return the request with the specified ID", async () => {
       const oooRequest = await createRequest(createOooRequests2);
       const query = { id: oooRequest.id, dev: "true" };
-      const oooRequestData:any = await getRequests(query);
-      expect(oooRequestData).to.have.property("id");
-      expect(oooRequestData.id).to.be.equal(oooRequest.id);
+      const oooRequestData: any = await getRequests(query);
+      expect(oooRequestData).to.have.property("allRequests");
+      expect(oooRequestData.allRequests[0].id).to.be.equal(oooRequest.id);
+      expect(oooRequestData.allRequests).to.have.lengthOf(1);
+    });
+
+    it("Should return null if the request with the specified ID does not exist", async () => {
+      const query = { id: "randomId", dev: "true" };
+      const oooRequestData = await getRequests(query);
+      expect(oooRequestData).to.be.equal(null);
     });
 
     it("Should return a list of all the GET requests", async () => {
@@ -100,7 +117,7 @@ describe("models/oooRequests", () => {
       await createRequest(createOooRequests2);
       const query = { dev: "true" };
       const oooRequestData = await getRequests(query);
-      expect(oooRequestData).to.be.have.length(2);
+      expect(oooRequestData.allRequests).to.be.have.length(2);
     });
 
     it("Should return a list of all the requests with specified state - APPROVED", async () => {
@@ -108,36 +125,52 @@ describe("models/oooRequests", () => {
       await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy);
       const query = { dev: "true", state: REQUEST_STATE.APPROVED };
       const oooRequestData = await getRequests(query);
-      expect(oooRequestData[0].state).to.be.equal(REQUEST_STATE.APPROVED);
+      expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.APPROVED);
     });
 
     it("Should return a list of all the requests with specified state - PENDING", async () => {
       await createRequest(createOooStatusRequests);
       const query = { dev: "true", state: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);
-      expect(oooRequestData[0].state).to.be.equal(REQUEST_STATE.PENDING);
+      expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.PENDING);
     });
 
     it("Should return a list of all the requests by specific user ", async () => {
-      const oooRequest = await createRequest(createOooRequests);
-      const query = { dev: "true", requestedBy: oooRequest.requestedBy };
+      const oooRequestBodyData = { ...createOooRequests, requestedBy: testUserId };
+      await createRequest(oooRequestBodyData);
+      const query = { dev: "true", requestedBy: userData[16].username };
       const oooRequestData = await getRequests(query);
-      expect(oooRequestData).to.have.lengthOf(1);
-      expect(oooRequestData[0].requestedBy).to.be.equal(oooRequest.requestedBy);
+      expect(oooRequestData.allRequests).to.have.lengthOf(1);
+      expect(oooRequestData.allRequests[0].requestedBy).to.be.equal(testUserId);
     });
 
     it("Should return a list of all the requests for specific type ", async () => {
       await createRequest(createOooRequests);
       const query = { dev: "true", type: REQUEST_TYPE.OOO };
       const oooRequestData = await getRequests(query);
-      expect(oooRequestData).to.have.lengthOf(1);
-      expect(oooRequestData[0].type).to.be.equal(REQUEST_TYPE.OOO);
+      expect(oooRequestData.allRequests[0].type).to.be.equal(REQUEST_TYPE.OOO);
     });
 
     it("Should return empty array if no data is found", async () => {
       const query = { dev: "true", state: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData).to.be.equal(null);
+    });
+
+    it("Should return a list of all the requests by page ", async () => {
+      await createRequest(createOooRequests);
+      await createRequest(createOooRequests2);
+      const query = { dev: "true", page: 1 };
+      const oooRequestData = await getRequests(query);
+      expect(oooRequestData.page).to.be.equal(2);
+    });
+
+    it("Should return a list of all the requests by size ", async () => {
+      await createRequest(createOooRequests);
+      await createRequest(createOooRequests2);
+      const query = { dev: "true", size: 1 };
+      const oooRequestData = await getRequests(query);
+      expect(oooRequestData.allRequests).to.have.lengthOf(1);
     });
   });
 });
