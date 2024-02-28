@@ -57,17 +57,11 @@ router.put(
 );
 router.post(
   "/nicknames/sync",
-  authenticate,
-  authorizeRoles([SUPERUSER]),
+  authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
   checkIsVerifiedDiscord,
   updateDiscordNicknames
 );
-router.post(
-  "/nickname/status",
-  authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
-  validateUpdateUsersNicknameStatusBody,
-  updateUsersNicknameStatus
-);
+router.post("/nickname/status", verifyCronJob, validateUpdateUsersNicknameStatusBody, updateUsersNicknameStatus);
 router.post("/discord-roles", authenticate, authorizeRoles([SUPERUSER]), syncDiscordGroupRolesInFirestore);
 router.put(
   "/group-onboarding-31d-plus",
