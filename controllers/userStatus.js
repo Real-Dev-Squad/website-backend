@@ -76,7 +76,7 @@ const getAllUserStatus = async (req, res) => {
     const activeUsers = [];
     if (allUserStatus) {
       const allUsersStatusFetchPromises = allUserStatus.map(async (status) => {
-        //  fetching users from users collection by userID in userStatus collection
+        //  fetching users from users collection with the help of userID in userStatus collection
         const result = await dataAccess.retrieveUsers({ id: status.userId });
         if (!result.user?.roles?.archived) {
           status.full_name = `${result.user.first_name} ${result.user.last_name}`;
