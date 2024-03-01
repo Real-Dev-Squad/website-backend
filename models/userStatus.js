@@ -673,6 +673,25 @@ const cancelOooStatus = async (userId) => {
   }
 };
 
+const addFutureStatus = async (userId, futureStatus) => {
+  delete futureStatus.userId;
+  try {
+    const userStatusDocs = await userStatusModel.where("userId", "==", userId).limit(1).get();
+    const [userStatusDoc] = userStatusDocs.docs;
+    const docId = userStatusDoc.id;
+    const userStatusData = userStatusDoc.data();
+    const newStatusData = {
+      ...userStatusData,
+      futureStatus,
+    };
+    await userStatusModel.doc(docId).update(newStatusData);
+    return { id: docId, userStatusExists: true, data: newStatusData };
+  } catch (error) {
+    logger.error(`error in updating User Status Document ${error}`);
+    throw error;
+  }
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -686,4 +705,5 @@ module.exports = {
   getTaskBasedUsersStatus,
   cancelOooStatus,
   getGroupRole,
+  addFutureStatus,
 };
