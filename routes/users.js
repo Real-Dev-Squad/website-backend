@@ -16,6 +16,7 @@ router.get("/userId/:userId", users.getUserById);
 router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
 router.get("/", userValidator.getUsers, users.getUsers);
 router.get("/self", authenticate, users.getSelfDetails);
+router.get("/isDeveloper", authenticate, users.isDeveloper);
 router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
 router.get("/username", authenticate, userValidator.validateGenerateUsernameQuery, users.generateUsername);
 router.get("/chaincode", authenticate, users.generateChaincode);
