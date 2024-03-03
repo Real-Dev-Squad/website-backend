@@ -184,6 +184,7 @@ const fetchPaginatedUsers = async (query) => {
       }
     }
     const snapshot = await dbQuery.get();
+    // getting data from here
 
     const firstDoc = snapshot.docs[0];
     const lastDoc = snapshot.docs[snapshot.docs.length - 1];
@@ -209,6 +210,8 @@ const fetchPaginatedUsers = async (query) => {
 };
 
 const fetchUsers = async (usernames = []) => {
+  // console.log("--------------------");
+  // console.log("Fetch USERS.................. ");
   try {
     const dbQuery = userModel;
     const users = [];
@@ -250,9 +253,13 @@ const fetchUsers = async (usernames = []) => {
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
 const fetchUser = async ({ userId = null, username = null, githubUsername = null, discordId = null }) => {
+  // console.log("--------------------");
+  // console.log("fetch user.....................");
   try {
+    // console.log("fetch user.....................");
     let userData, id;
     if (username) {
+      // console.log("search by username");
       const user = await userModel.where("username", "==", username).limit(1).get();
       user.forEach((doc) => {
         id = doc.id;
@@ -480,7 +487,7 @@ const getUsersBasedOnFilter = async (query) => {
   const allQueryKeys = Object.keys(query);
   const doesTagQueryExist = arraysHaveCommonItem(ITEM_TAG, allQueryKeys);
   const doesStateQueryExist = arraysHaveCommonItem(USER_STATE, allQueryKeys);
-
+  // console.log("All query key 483");
   const calls = {
     item: itemModel,
     state: userStatusModel,

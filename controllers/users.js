@@ -78,9 +78,11 @@ const getUserById = async (req, res) => {
  */
 
 const getUsers = async (req, res) => {
+  // console.log("Fetching users");
   try {
     // getting user details by id if present.
     const { q, dev: devParam, query } = req.query;
+    // console.log(query, "query");
     const dev = devParam === "true";
     const queryString = (dev ? q : query) || "";
     const transformedQuery = parseSearchQuery(queryString);
@@ -762,6 +764,7 @@ const filterUsers = async (req, res) => {
     const skip = (pageNumber - 1) * limitNumber;
 
     const users = await dataAccess.retreiveFilteredUsers(req.query, skip, limitNumber);
+    //
     const totalCount = users.length;
     const totalPages = Math.ceil(totalCount / limitNumber);
 

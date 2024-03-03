@@ -18,7 +18,6 @@ const {
  */
 const githubAuthLogin = (req, res, next) => {
   let { sourceUtm, redirectURL } = req.query;
-
   const isMobileApp = sourceUtm === "rds-mobile-app";
 
   if (isMobileApp) {
@@ -110,6 +109,7 @@ const githubAuthCallback = (req, res, next) => {
 };
 
 const signout = (req, res) => {
+  // console.log("signout.........................");
   const cookieName = config.get("userToken.cookieName");
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
   res.clearCookie(cookieName, {

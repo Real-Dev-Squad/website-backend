@@ -108,7 +108,7 @@ const levelSpecificAccess = (user, level = ACCESS_LEVEL.PUBLIC, role = null) => 
 };
 
 /**
- * Fetch users based on document key and value
+ * Fetch users based on dsiginocument key and value
  * @param documentKey {string | FieldPath} -  Model field path.
  * @param value {String | Array} - Single field value or list of values to be matched.
  */

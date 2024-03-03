@@ -129,6 +129,7 @@ const validateJoinData = async (req, res, next) => {
  * @param next {Object} - Express middelware function
  */
 async function getUsers(req, res, next) {
+  // console.log("Validator..................");
   const schema = joi
 
     .object()
