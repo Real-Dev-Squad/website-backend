@@ -113,7 +113,7 @@ export const updateRequestController = async (req: any, res: any) => {
           message,
         };
         await createUserFutureStatus(userFutureStatusData);
-        await addFutureStatus(userId, userFutureStatusData);
+        await addFutureStatus(userFutureStatusData);
       }
     }
 
