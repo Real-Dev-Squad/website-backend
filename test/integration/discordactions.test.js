@@ -210,7 +210,11 @@ describe("Discord actions", function () {
   describe("POST /discord-actions/roles", function () {
     let roleid;
     beforeEach(async function () {
-      const discordRoleModelPromise = [discordRoleModel.add(groupData[0]), discordRoleModel.add(groupData[1])];
+      const discordRoleModelPromise = [
+        discordRoleModel.add(groupData[0]),
+        discordRoleModel.add(groupData[1]),
+        discordRoleModel.add(groupData[3]),
+      ];
       roleid = groupData[0].roleid;
       await Promise.all(discordRoleModelPromise);
     });
@@ -219,7 +223,39 @@ describe("Discord actions", function () {
       sinon.restore();
       await cleanDb();
     });
+    it("should not be able to add role if it is not a group type role", async function () {
+      const fetchStub = sinon.stub(discordRolesModel, "isGroupRoleExists");
 
+      fetchStub.returns(
+        {
+          roleExists: true,
+          existingRoles: {
+            docs: [
+              {
+                data: () => ({
+                  date: new Date().toISOString(),
+                  createdBy: "CzI06Da1zPwciLcyIwU4",
+                  roleid: "1214641424516124823",
+                  rolename: "admin",
+                }),
+              },
+            ],
+          },
+        },
+        { user: userData[0] }
+      );
+
+      const res = await chai
+        .request(app)
+        .post("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ roleid, userid: userData[0].discordId });
+      expect(res).to.have.status(403);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Cannot use rolename that is not a group role");
+
+      fetchStub.restore();
+    });
     it("should allow role to be added", async function () {
       fetchStub.returns(
         Promise.resolve({
