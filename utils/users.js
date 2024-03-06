@@ -247,6 +247,7 @@ const parseSearchQuery = (queryString) => {
  * @returns {string} - Nickname of the user.
  */
 const generateOOONickname = (currentUsername = "", from, until, discordRoles) => {
+  // TODO : Update this function when we start storing the discord roles in the database
   let username = currentUsername;
   const discordMavenRoleId = config.get("discordMavenRoleId");
 
