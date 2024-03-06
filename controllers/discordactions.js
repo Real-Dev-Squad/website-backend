@@ -120,7 +120,7 @@ const addGroupRoleToMember = async (req, res) => {
 
     if (existingRoles.docs.length > 0) {
       const roleDetails = existingRoles.docs[0].data();
-      if (roleDetails.rolename && !roleDetails.rolename.startsWith("group")) {
+      if (roleDetails.rolename && !roleDetails.rolename.startsWith("group-")) {
         return res.boom.forbidden("Cannot use rolename that is not a group role");
       }
     }
