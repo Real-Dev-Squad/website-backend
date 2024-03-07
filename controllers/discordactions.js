@@ -115,7 +115,14 @@ const addGroupRoleToMember = async (req, res) => {
     const [{ roleExists, existingRoles }, userData] = await Promise.all([roleExistsPromise, userDataPromise]);
 
     if (!roleExists || req.userData.id !== userData.user.id) {
-      res.boom.forbidden("Permission denied. Cannot add the role.");
+      return res.boom.forbidden("Permission denied. Cannot add the role.");
+    }
+
+    if (existingRoles.docs.length > 0) {
+      const roleDetails = existingRoles.docs[0].data();
+      if (roleDetails.rolename && !roleDetails.rolename.startsWith("group-")) {
+        return res.boom.forbidden("Cannot use rolename that is not a group role");
+      }
     }
 
     const { roleData, wasSuccess } = await discordRolesModel.addGroupRoleToMember(memberGroupRole);
@@ -163,7 +170,7 @@ const deleteRole = async (req, res) => {
     const [{ roleExists }, userData] = await Promise.all([roleExistsPromise, userDataPromise]);
 
     if (!roleExists || req.userData.id !== userData.user.id) {
-      res.boom.forbidden("Permission denied. Cannot delete the role.");
+      return res.boom.forbidden("Permission denied. Cannot delete the role.");
     }
     await discordServices.removeRoleFromUser(roleid, userid, req.userData);
 
