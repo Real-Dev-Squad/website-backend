@@ -3,6 +3,7 @@ const groupData = [
   { rolename: "Group 2", roleid: "2" },
   { rolename: "Group 3", roleid: "3" },
   { rolename: "admin", roleid: "4" },
+  { rolename: "group-test", roleid: "5" },
 ];
 
 const groupIdle7d = { rolename: "group-idle-7d+", roleid: 4, createdBy: "1dad23q23j131j" };
