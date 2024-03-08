@@ -63,7 +63,7 @@
     "eslint-plugin-standard": "^4.1.0",
     "firebase-tools": "^13.4.0",
     "mocha": "^10.3.0",
-    "nock": "^13.2.9",
+    "nock": "~13.2.9",
     "nodemon": "^3.1.0",
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
@@ -71,7 +71,7 @@
     "sinon": "^17.0.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.3.3"
+    "typescript": "~5.3.3"
   },
   "engines": {
     "node": "18.x"
