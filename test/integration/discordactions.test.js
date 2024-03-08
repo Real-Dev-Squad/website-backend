@@ -214,6 +214,7 @@ describe("Discord actions", function () {
         discordRoleModel.add(groupData[0]),
         discordRoleModel.add(groupData[1]),
         discordRoleModel.add(groupData[3]),
+        discordRoleModel.add(groupData[4]),
       ];
       roleid = groupData[0].roleid;
       await Promise.all(discordRoleModelPromise);
@@ -263,11 +264,12 @@ describe("Discord actions", function () {
           json: () => Promise.resolve({}),
         })
       );
+      const roleId = groupData[4].roleid;
       const res = await chai
         .request(app)
         .post("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
-        .send({ roleid, userid: userData[0].discordId });
+        .send({ roleid: roleId, userid: userData[0].discordId });
 
       expect(res).to.have.status(201);
       expect(res.body).to.be.an("object");
@@ -281,7 +283,8 @@ describe("Discord actions", function () {
         })
       );
 
-      const body = { roleid, userid: userData[0].discordId };
+      const roleId = groupData[4].roleid;
+      const body = { roleid: roleId, userid: userData[0].discordId };
       const res = await chai
         .request(app)
         .post("/discord-actions/roles")
