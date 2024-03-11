@@ -169,7 +169,11 @@ const fetchPaginatedUsers = async (query) => {
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
 
-    let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+    let dbQuery = userModel
+      .where("roles.archived", "==", false)
+      .orderBy("username")
+      .orderBy("first_name")
+      .orderBy("last_name");
 
     if (query.prev) {
       dbQuery = dbQuery.limitToLast(size);
@@ -192,9 +196,8 @@ const fetchPaginatedUsers = async (query) => {
         dbQuery = dbQuery.endBefore(doc);
       }
     }
-    const snapshot = await dbQuery.get();
-    // getting data from here
 
+    const snapshot = await dbQuery.get();
     const firstDoc = snapshot.docs[0];
     const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
@@ -219,8 +222,6 @@ const fetchPaginatedUsers = async (query) => {
 };
 
 const fetchUsers = async (usernames = []) => {
-  // console.log("--------------------");
-  // console.log("Fetch USERS.................. ");
   try {
     const dbQuery = userModel;
     const users = [];

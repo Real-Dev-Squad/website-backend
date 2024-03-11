@@ -80,9 +80,7 @@ const getUserById = async (req, res) => {
  */
 
 const getUsers = async (req, res) => {
-  // console.log("Fetching users");
   try {
-    // getting user details by id if present.
     const { q, dev: devParam, query } = req.query;
     // console.log(query, "query");
     const dev = devParam === "true";
@@ -93,7 +91,6 @@ const getUsers = async (req, res) => {
     if (q && !dev) {
       return res.boom.notFound("Route not found");
     }
-    // getting user details by id if present.
 
     if (req.query.id) {
       const id = req.query.id;
