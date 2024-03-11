@@ -83,6 +83,7 @@ describe("removeObjectField", function () {
       },
     ]);
   });
+
   it("should handle wildcard at the root level", function () {
     const obj = {
       a: {

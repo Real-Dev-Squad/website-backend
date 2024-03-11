@@ -21,6 +21,7 @@ describe("qrCodeAuth", function () {
       await storeUserDeviceInfo(req, res, nextSpy);
       expect(nextSpy.callCount).to.be.equal(1);
     });
+
     it("It does not allow request to pass on invalid params", async function () {
       const req = {
         body: {
@@ -40,6 +41,7 @@ describe("qrCodeAuth", function () {
       expect(nextSpy.callCount).to.be.equal(0);
     });
   });
+
   describe("test auth status validator", function () {
     it("Allows request to pass on valid params", async function () {
       const req = {

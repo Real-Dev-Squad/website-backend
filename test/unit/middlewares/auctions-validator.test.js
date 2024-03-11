@@ -18,6 +18,7 @@ describe("auctions validator", function () {
       await createAuction(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
+
     it("stops the request to propogate to next", async function () {
       const req = {
         body: {
@@ -36,6 +37,7 @@ describe("auctions validator", function () {
       expect(nextSpy.callCount).to.be.equal(0);
     });
   });
+
   describe("place bid validator", function () {
     it("allows the request to pass", async function () {
       const req = {

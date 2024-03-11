@@ -10,12 +10,14 @@ describe("FCM token", function () {
     afterEach(async function () {
       await cleanDb();
     });
+
     it("it should save FCM token", async function () {
       const fcmTokenData = { userId: "jkkshdsjkh", fcmToken: "iedsijdsdj" };
       await saveFcmToken(fcmTokenData);
       const queryResponse = await fcmTokenModel.where("userId", "==", fcmTokenData.userId).get();
       expect(queryResponse.docs[0].data().fcmTokens).includes(fcmTokenData.fcmToken);
     });
+
     it("it should store another FCM token in same user-id", async function () {
       const fcmTokenData1 = { userId: "jkkshdsjkh", fcmToken: "sdjagkjsd" };
       const fcmTokenData2 = { userId: "jkkshdsjkh", fcmToken: "sdsnkj" };

@@ -28,10 +28,12 @@ describe("QrCodeAuth", function () {
       wrongUserDeviceInfoData = userDeviceInfoDataArray[0];
       wrongUserIdDeviceInfo = { ...userDeviceInfoDataArray[0], user_id: userId, device_info: 2 };
     });
+
     afterEach(async function () {
       await cleanDb();
       sinon.restore();
     });
+
     it("Should return success response after storing user device info for mobile auth", function (done) {
       chai
         .request(app)
@@ -90,6 +92,7 @@ describe("QrCodeAuth", function () {
         });
     });
   });
+
   describe("PATCH CALL for updating auth status", function () {
     let jwt;
     let userId = "";
@@ -106,6 +109,7 @@ describe("QrCodeAuth", function () {
     afterEach(async function () {
       await cleanDb();
     });
+
     it("Should fail with 401 when cookie is invalid", function (done) {
       chai
         .request(app)
@@ -186,6 +190,7 @@ describe("QrCodeAuth", function () {
   describe("GET call for fetching user device info", function () {
     let userId = "";
     let userDeviceInfoData;
+
     beforeEach(async function () {
       userId = await addUser(user);
       userDeviceInfoData = {
@@ -195,6 +200,7 @@ describe("QrCodeAuth", function () {
         access_token: "ACCESS_TOKEN",
       };
     });
+
     afterEach(async function () {
       await cleanDb();
     });

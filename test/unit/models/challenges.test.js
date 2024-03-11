@@ -19,9 +19,11 @@ describe("Challenges", function () {
   beforeEach(async function () {
     challengeId = await challengeQuery.postChallenge(challengeData);
   });
+
   afterEach(async function () {
     await cleanDb();
   });
+
   describe("postChallenge", function () {
     it("should add the challenge", async function () {
       const data = (await challengeModel.doc(challengeId).get()).data();
@@ -49,6 +51,7 @@ describe("Challenges", function () {
       expect(response).to.be.a("array").with.lengthOf(1);
       expect(response[0].id).to.be.equal(challengeId);
     });
+
     it("should return a empty array", async function () {
       await cleanDb();
       const response = await challengeQuery.fetchChallenges();
@@ -70,6 +73,7 @@ describe("Challenges", function () {
       expect(data.participants[0]).to.be.equal(userId1);
       expect(data.participants[1]).to.be.equal(userId2);
     });
+
     it("should throw an error on passing invalid userId", async function () {
       try {
         await challengeQuery.subscribeUserToChallenge("invalid_user", challengeId);
