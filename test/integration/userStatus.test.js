@@ -103,6 +103,7 @@ describe("UserStatus", function () {
           return done();
         });
     });
+
     it("Should return the User Status Document of the user requesting it", function (done) {
       chai
         .request(app)
@@ -127,6 +128,7 @@ describe("UserStatus", function () {
     let testUserId;
     let testUserJwt;
     let clock;
+
     beforeEach(async function () {
       clock = sinon.useFakeTimers({
         now: new Date(2022, 10, 12, 12, 0, 0).getTime(),
@@ -717,6 +719,7 @@ describe("UserStatus", function () {
           return done();
         });
     });
+
     it("Shouldn't delete User Status if the user doesnt have a superuser role", function (done) {
       chai
         .request(app)

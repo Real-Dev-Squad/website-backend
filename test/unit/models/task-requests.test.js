@@ -66,6 +66,7 @@ describe("Task requests | models", function () {
       expect(result.taskRequest).to.deep.equal(addedTaskRequest);
       expect(result.id).to.be.not.equal(undefined);
     });
+
     it("should let a new user request same task when request type is creation", async function () {
       await taskRequestsCollection.add(mockData.existingTaskRequest);
       const requestData = { ...mockData.taskRequestData, userId: "user456" };
@@ -98,12 +99,14 @@ describe("Task requests | models", function () {
       expect(result.taskRequest).to.deep.equal(addedTaskRequest);
       expect(result.id).to.be.not.equal(undefined);
     });
+
     it("should handle the case where the user is already requesting in the existing request when request type is creation", async function () {
       await taskRequestsCollection.add(mockData.existingTaskRequest);
       const requestData = mockData.taskRequestData;
       const result = await createRequest(requestData, authenticatedUsername);
       expect(result.alreadyRequesting).to.be.equal(true);
     });
+
     it("should create a new task request when request type is assignment", async function () {
       const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT, taskId: "abc" };
       const result = await createRequest(requestData, authenticatedUsername);
@@ -131,6 +134,7 @@ describe("Task requests | models", function () {
       expect(result.taskRequest).to.deep.equal(addedTaskRequest);
       expect(result.id).to.be.not.equal(undefined);
     });
+
     it("should let a new user request same task when request type is assignment", async function () {
       await taskRequestsCollection.add(mockData.existingTaskRequest);
       const requestData = {
@@ -169,6 +173,7 @@ describe("Task requests | models", function () {
       expect(result.taskRequest).to.deep.equal(addedTaskRequest);
       expect(result.id).to.be.not.equal(undefined);
     });
+
     it("should handle the case where the user is already requesting in the existing request when request type is assignment", async function () {
       await taskRequestsCollection.add(mockData.existingTaskRequest);
       const requestData = {
@@ -179,6 +184,7 @@ describe("Task requests | models", function () {
       const result = await createRequest(requestData, authenticatedUsername);
       expect(result.alreadyRequesting).to.be.equal(true);
     });
+
     it("should handle the case where the user is requesting an approved task/issue (CREATION)", async function () {
       await taskRequestsCollection.add({ ...mockData.existingTaskRequest, status: TASK_REQUEST_STATUS.APPROVED });
       const requestData = { ...mockData.taskRequestData };
@@ -218,6 +224,7 @@ describe("Task requests | models", function () {
       const result = await fetchTaskRequests();
       expect(result).to.be.an("array");
     });
+
     it("should fetch task requests with associated tasks and requestors of only the old task request models when dev is false", async function () {
       const taskData = { taskData: { title: "hello" } };
       const userData = { username: "hello" };
@@ -229,6 +236,7 @@ describe("Task requests | models", function () {
       expect(fetchedTaskRequest.task).to.deep.equal(taskData.taskData);
       expect(fetchedTaskRequest.requestors[0]).to.deep.equal(userData);
     });
+
     it("should fetch task requests in development mode with associated requestors of all task request models when dev is true", async function () {
       const taskData = { taskData: { title: "hello" } };
       const userData = { username: "hello" };
@@ -243,6 +251,7 @@ describe("Task requests | models", function () {
       expect(fetchedNewTaskRequest.task).to.equal(undefined);
       expect(fetchedNewTaskRequest.requestors[0]).to.deep.equal(userData);
     });
+
     it("should fetch all task requests when no queries are passed", async function () {
       const result = await fetchPaginatedTaskRequests();
       expect(result).to.have.any.key("data");
@@ -250,6 +259,7 @@ describe("Task requests | models", function () {
       expect(result).to.have.any.key("next");
       expect(result.data).to.be.an("array");
     });
+
     it("should fetch only task requests of status pending", async function () {
       const queries = {
         q: "status:pending",
@@ -259,6 +269,7 @@ describe("Task requests | models", function () {
         expect(taskRequest.status).to.equal(TASK_REQUEST_STATUS.PENDING);
       });
     });
+
     it("should fetch only task requests of status approved and request type of assignment", async function () {
       const queries = {
         q: "status:approved request-type:assignment",
@@ -269,6 +280,7 @@ describe("Task requests | models", function () {
         expect(taskRequest.requestType).to.equal(TASK_REQUEST_TYPE.ASSIGNMENT);
       });
     });
+
     it("should limit the response list to size 1", async function () {
       const queries = {
         size: "1",
@@ -276,6 +288,7 @@ describe("Task requests | models", function () {
       const result = await fetchPaginatedTaskRequests(queries);
       expect(result.data.length).to.be.equal(1);
     });
+
     it("should sort the response in descending order of created time", async function () {
       const queries = {
         q: "sort:created-desc",
@@ -286,6 +299,7 @@ describe("Task requests | models", function () {
       createdTimeListInDescending.sort((a, b) => b - a);
       expect(createdTimeList).to.be.deep.equal(createdTimeListInDescending);
     });
+
     it("should sort the response in ascending order of requestors count", async function () {
       const queries = {
         q: "sort:requestors-asc",
@@ -310,6 +324,7 @@ describe("Task requests | models", function () {
       expect(nextResult.data.length).to.be.equal(1);
       expect(nextResult.data[0].usersCount).to.be.greaterThan(result.data[0].usersCount);
     });
+
     it("should provide previous set of results when prev is passed in query param", async function () {
       const queries = {
         q: "sort:requestors-asc",
@@ -325,6 +340,7 @@ describe("Task requests | models", function () {
       const prevResult = await fetchPaginatedTaskRequests(queries);
       expect(prevResult.data[0]).to.be.deep.equal(result.data[0]);
     });
+
     it("should return error when an invalid next value is passed", async function () {
       const queries = {
         next: "abc",
@@ -337,6 +353,7 @@ describe("Task requests | models", function () {
         message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_NEXT}: ${queries.next}`,
       });
     });
+
     it("should return error when an invalid prev value is passed", async function () {
       const queries = {
         prev: "abc",
@@ -377,6 +394,7 @@ describe("Task requests | models", function () {
       expect(approvedTask.data().percentCompleted).to.equal(0);
       expect(approvedTask.data().priority).to.equal(DEFAULT_TASK_PRIORITY);
     });
+
     it("should approve a task request for assignment", async function () {
       const existingTaskRequest = { ...mockData.existingTaskRequest, requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
       await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
@@ -397,6 +415,7 @@ describe("Task requests | models", function () {
         "When existing task is updated, updatedAt field is updated so createdAt and updatedAt are not same"
       );
     });
+
     it("should handle invalid user for approval", async function () {
       const existingTaskRequest = { ...mockData.existingTaskRequest };
       await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
@@ -404,16 +423,19 @@ describe("Task requests | models", function () {
       const result = await approveTaskRequest(taskRequestId, invalidUser, authenticatedUserId);
       expect(result.isUserInvalid).to.be.equal(true);
     });
+
     it("should handle task request not found", async function () {
       const result = await approveTaskRequest("nonExistentTaskRequestId", user, authenticatedUserId);
       expect(result.taskRequestNotFound).to.be.equal(true);
     });
+
     it("should handle invalid task request status", async function () {
       const existingTaskRequest = { ...mockData.existingTaskRequest, status: TASK_REQUEST_STATUS.APPROVED };
       await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
       const result = await approveTaskRequest(taskRequestId, user, authenticatedUserId);
       expect(result.isTaskRequestInvalid).to.be.equal(true);
     });
+
     it("should throw an error for general approval failure", async function () {
       sinon.stub(firestore, "runTransaction").rejects(new Error("Transaction failed"));
       try {
@@ -428,6 +450,7 @@ describe("Task requests | models", function () {
   describe("rejectTaskRequest", function () {
     const taskRequestId = "taskRequest123";
     const authenticatedUserId = "userId";
+
     it("should reject a task request", async function () {
       const existingTaskRequest = { ...mockData.existingTaskRequest };
       await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
@@ -436,10 +459,12 @@ describe("Task requests | models", function () {
       expect(rejectedTaskRequest.status).to.equal(TASK_REQUEST_STATUS.DENIED);
       expect(rejectedTaskRequest.lastModifiedBy).to.equal("userId");
     });
+
     it("should handle task request not found", async function () {
       const result = await rejectTaskRequest("nonExistentTaskRequestId", authenticatedUserId);
       expect(result.taskRequestNotFound).to.be.equal(true);
     });
+
     it("should handle invalid task request status", async function () {
       const existingTaskRequest = { ...mockData.existingTaskRequest, status: TASK_REQUEST_STATUS.APPROVED };
       await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
@@ -459,6 +484,7 @@ describe("Task requests | models", function () {
         sinon.restore();
         await cleanDb();
       });
+
       beforeEach(function () {
         sinon.stub(tasksModel, "fetchTask").resolves(taskData);
       });
@@ -473,12 +499,14 @@ describe("Task requests | models", function () {
         expect(taskRequestData.users[0].userId).to.be.equal(mockData.existingOldTaskRequest.requestors[0]);
         expect(taskRequestData.requestType).to.be.equal(TASK_REQUEST_TYPE.ASSIGNMENT);
       });
+
       it("Should not update documents with new schema", async function () {
         await taskRequestsCollection.doc(taskRequestId1).set(mockData.existingTaskRequest);
         const response = await addNewFields();
         expect(response.totalDocuments).to.be.equal(1);
         expect(response.documentsModified).to.be.equal(0);
       });
+
       it("Should update the existing documents with multiple users", async function () {
         await Promise.all([
           taskRequestsCollection.doc(taskRequestId1).set(mockData.existingOldTaskRequest),
@@ -513,6 +541,7 @@ describe("Task requests | models", function () {
         expect(taskRequestData.requestors).to.be.equal(undefined);
         expect(taskRequestData.approvedTo).to.be.equal(undefined);
       });
+
       it("Should not update documents with new schema", async function () {
         const { requestors, ...taskRequest } = mockData.existingTaskRequest;
         await taskRequestsCollection.doc(taskRequestId1).set(taskRequest);
@@ -520,6 +549,7 @@ describe("Task requests | models", function () {
         expect(response.totalDocuments).to.be.equal(1);
         expect(response.documentsModified).to.be.equal(0);
       });
+
       it("Should not remove required fields", async function () {
         await taskRequestsCollection.doc(taskRequestId1).set(mockData.existingTaskRequest);
         const response = await removeOldField();
@@ -546,6 +576,7 @@ describe("Task requests | models", function () {
         expect(taskRequestData.usersCount).to.be.equal(1);
         expect(taskRequestData.createdAt).to.be.equal(taskRequestSnapshot.createTime.toMillis());
       });
+
       it("Should not update existing fields", async function () {
         const taskRequest = { ...mockData.existingTaskRequest };
         taskRequest.usersCount = 1;

@@ -47,6 +47,7 @@ describe("Arts", function () {
           return done();
         });
     });
+
     it("Should return 401, for Unauthenticated User", function (done) {
       chai
         .request(app)
@@ -111,6 +112,7 @@ describe("Arts", function () {
           return done();
         });
     });
+
     it("Should return 401, for Unauthenticated User", function (done) {
       chai
         .request(app)

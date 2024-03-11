@@ -14,6 +14,7 @@ describe("Middleware | Validators | Task Requests", function () {
         await postTaskRequests(req, res, nextSpy);
         expect(nextSpy.calledOnce).to.be.equal(true);
       });
+
       it("should not throw error when valid request body with description is passed", async function () {
         const req = {
           body: data.assignmentReqWithDescription,
@@ -23,6 +24,7 @@ describe("Middleware | Validators | Task Requests", function () {
         await postTaskRequests(req, res, nextSpy);
         expect(nextSpy.calledOnce).to.be.equal(true);
       });
+
       it("should not throw error when valid request body without external issue id is passed", async function () {
         const req = {
           body: data.assignmentReqWithoutExtIssueId,
@@ -32,6 +34,7 @@ describe("Middleware | Validators | Task Requests", function () {
         await postTaskRequests(req, res, nextSpy);
         expect(nextSpy.calledOnce).to.be.equal(true);
       });
+
       it("should throw error when request body without proposed deadline is passed", async function () {
         const req = {
           body: data.assignmentReqWithoutProposedDeadline,
@@ -47,6 +50,7 @@ describe("Middleware | Validators | Task Requests", function () {
         expect(badRequestSpy.calledOnce).to.be.equal(true);
         expect(nextSpy.callCount).to.be.equal(0);
       });
+
       it("should throw error when request body without task id is passed", async function () {
         const req = {
           body: data.assignmentReqWithoutTaskId,
@@ -62,6 +66,7 @@ describe("Middleware | Validators | Task Requests", function () {
         expect(badRequestSpy.calledOnce).to.be.equal(true);
         expect(nextSpy.callCount).to.be.equal(0);
       });
+
       it("should throw error when request body without used id is passed", async function () {
         const req = {
           body: data.assignmentReqWithoutUserId,
@@ -78,6 +83,7 @@ describe("Middleware | Validators | Task Requests", function () {
         expect(nextSpy.callCount).to.be.equal(0);
       });
     });
+
     describe("Task Creation Requests", function () {
       it("should not throw error when valid request body is passed", async function () {
         const req = {
@@ -88,6 +94,7 @@ describe("Middleware | Validators | Task Requests", function () {
         await postTaskRequests(req, res, nextSpy);
         expect(nextSpy.calledOnce).to.be.equal(true);
       });
+
       it("should not throw error when valid request body with description is passed", async function () {
         const req = {
           body: data.creationReqWithDescription,
@@ -97,6 +104,7 @@ describe("Middleware | Validators | Task Requests", function () {
         await postTaskRequests(req, res, nextSpy);
         expect(nextSpy.calledOnce).to.be.equal(true);
       });
+
       it("should throw error when request body without external issue id is passed", async function () {
         const req = {
           body: data.creationReqWithoutExtIssueId,
@@ -112,6 +120,7 @@ describe("Middleware | Validators | Task Requests", function () {
         expect(badRequestSpy.calledOnce).to.be.equal(true);
         expect(nextSpy.callCount).to.be.equal(0);
       });
+
       it("should throw error when request body without proposed deadline is passed", async function () {
         const req = {
           body: data.creationReqWithoutProposedDeadline,
@@ -127,6 +136,7 @@ describe("Middleware | Validators | Task Requests", function () {
         expect(badRequestSpy.calledOnce).to.be.equal(true);
         expect(nextSpy.callCount).to.be.equal(0);
       });
+
       it("should throw error when request body without used id is passed", async function () {
         const req = {
           body: data.creationReqWithoutUserId,
@@ -143,6 +153,7 @@ describe("Middleware | Validators | Task Requests", function () {
         expect(nextSpy.callCount).to.be.equal(0);
       });
     });
+
     it("should throw error when invalid request body is passed", async function () {
       const req = {
         body: data.invalidRequest,
@@ -159,6 +170,7 @@ describe("Middleware | Validators | Task Requests", function () {
       expect(nextSpy.callCount).to.be.equal(0);
     });
   });
+
   describe("getTaskRequests | Validator", function () {
     it("should pass the request when no values for query params are passed", async function () {
       const req = { query: {} };
@@ -167,6 +179,7 @@ describe("Middleware | Validators | Task Requests", function () {
       await getTaskRequests(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(1);
     });
+
     it("should pass validation for valid query parameters", async function () {
       const req = {
         query: {
@@ -178,6 +191,7 @@ describe("Middleware | Validators | Task Requests", function () {
       await getTaskRequests(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(1);
     });
+
     it("should pass validation for valid query parameters with multiple keys and values", async function () {
       const req = {
         query: {
@@ -189,6 +203,7 @@ describe("Middleware | Validators | Task Requests", function () {
       await getTaskRequests(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(1);
     });
+
     it("should pass validation for valid sort query parameters", async function () {
       const req = {
         query: {
@@ -200,6 +215,7 @@ describe("Middleware | Validators | Task Requests", function () {
       await getTaskRequests(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(1);
     });
+
     it("should pass validation for all valid query parameters", async function () {
       const req = {
         query: {
@@ -214,6 +230,7 @@ describe("Middleware | Validators | Task Requests", function () {
       await getTaskRequests(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(1);
     });
+
     it("should not pass validation when next and prev are passed together", async function () {
       const req = {
         query: {
@@ -231,6 +248,7 @@ describe("Middleware | Validators | Task Requests", function () {
       expect(nextMiddlewareSpy.callCount).to.be.equal(0);
       expect(res.boom.badRequest.callCount).to.be.equal(1);
     });
+
     it("should not pass validation when next is passed without size", async function () {
       const req = {
         query: {
@@ -247,6 +265,7 @@ describe("Middleware | Validators | Task Requests", function () {
       expect(nextMiddlewareSpy.callCount).to.be.equal(0);
       expect(res.boom.badRequest.callCount).to.be.equal(1);
     });
+
     it("should not pass validation when prev is passed without size", async function () {
       const req = {
         query: {
@@ -263,6 +282,7 @@ describe("Middleware | Validators | Task Requests", function () {
       expect(nextMiddlewareSpy.callCount).to.be.equal(0);
       expect(res.boom.badRequest.callCount).to.be.equal(1);
     });
+
     it("should not pass validation for invalid query parameters", async function () {
       const req = {
         query: {
@@ -279,6 +299,7 @@ describe("Middleware | Validators | Task Requests", function () {
       expect(nextMiddlewareSpy.callCount).to.be.equal(0);
       expect(res.boom.badRequest.callCount).to.be.equal(1);
     });
+
     it("should not pass validation for invalid query parameters in RQL format", async function () {
       const req = {
         query: {
@@ -295,6 +316,7 @@ describe("Middleware | Validators | Task Requests", function () {
       expect(nextMiddlewareSpy.callCount).to.be.equal(0);
       expect(res.boom.badRequest.callCount).to.be.equal(1);
     });
+
     it("should not pass validation for invalid sort query parameters", async function () {
       const req = {
         query: {
