@@ -190,6 +190,7 @@ describe("users", function () {
           .substring(0, usernameLen)} ${oooMessage}`
       );
     });
+
     it("should return username of the user as nickname when only username is passed and not from and until date ", async function () {
       const { username } = userData;
       const nickname = usersUtils.generateOOONickname(username);

@@ -7,10 +7,12 @@ const { getUserIdsFromRoleId } = require("../../../services/getUserIdsFromRoleId
 describe("FCM token services", function () {
   describe("get user id from role id", function () {
     beforeEach(async function () {});
+
     afterEach(async function () {
       await cleanDb();
     });
   });
+
   it("Should get user id's from role id", async function () {
     const memberRoleModelData = {
       roleid: "1147354535342383104",

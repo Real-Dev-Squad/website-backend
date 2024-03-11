@@ -195,6 +195,7 @@ describe("Task Based User Status Update Util Functions", function () {
   describe("updateCurrentStatusToState", function () {
     let latestStatusData;
     let newState;
+
     beforeEach(async function () {
       const currentTimeStamp = new Date().getTime();
       newState = userState.ACTIVE;
@@ -212,6 +213,7 @@ describe("Task Based User Status Update Util Functions", function () {
         },
       };
     });
+
     it("should update current status", async function () {
       const mockCollection = {
         doc: () => mockCollection,
@@ -242,6 +244,7 @@ describe("Task Based User Status Update Util Functions", function () {
   describe("updateFutureStatusToState", function () {
     let latestStatusData;
     let newState;
+
     beforeEach(async function () {
       const currentTimeStamp = new Date().getTime();
       newState = userState.ACTIVE;
@@ -259,6 +262,7 @@ describe("Task Based User Status Update Util Functions", function () {
         },
       };
     });
+
     it("should update the Future status", async function () {
       const mockCollection = {
         doc: () => mockCollection,

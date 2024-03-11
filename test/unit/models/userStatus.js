@@ -14,12 +14,14 @@ const { generateStatusDataForCancelOOO, generateDefaultFutureStatus } = require(
 describe("tasks", function () {
   let userId;
   let docRefUser0;
+
   beforeEach(async function () {
     userId = await addUser();
     docRefUser0 = userStatusModel.doc();
     const data = generateStatusDataForCancelOOO(userId, userState.OOO);
     await docRefUser0.set(data);
   });
+
   afterEach(async function () {
     sinon.restore();
     await cleanDb();

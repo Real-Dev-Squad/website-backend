@@ -18,6 +18,7 @@ describe("Middleware | Validators | Challenges", function () {
       await createChallenge(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
+
     it("Stops the propogation of the next", async function () {
       const req = {
         body: {

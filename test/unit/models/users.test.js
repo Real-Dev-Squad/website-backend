@@ -122,6 +122,7 @@ describe("users", function () {
 
   describe("fetch user details based on discord id", function () {
     let [userId0] = [];
+
     beforeEach(async function () {
       const userArr = userData();
       userId0 = await addUser(userArr[0]);
@@ -131,6 +132,7 @@ describe("users", function () {
     afterEach(async function () {
       await cleanDb();
     });
+
     it("It should fetch users who have archived:false role", async function () {
       const result = await users.fetchUser({ discordId: "12345" });
       expect(result.user.roles.archived).to.equal(false);
@@ -139,6 +141,7 @@ describe("users", function () {
 
   describe("user image verification", function () {
     let userId, discordId, profileImageUrl, discordImageUrl;
+
     beforeEach(async function () {
       const docRefUser0 = photoVerificationModel.doc();
       await docRefUser0.set(userPhotoVerificationData);
@@ -147,9 +150,11 @@ describe("users", function () {
       profileImageUrl = newUserPhotoVerificationData.profile.url;
       discordImageUrl = newUserPhotoVerificationData.discord.url;
     });
+
     afterEach(async function () {
       await cleanDb();
     });
+
     it("adds new user images For Verification", async function () {
       const result = await users.addForVerification(userId, discordId, profileImageUrl, discordImageUrl);
 
@@ -162,6 +167,7 @@ describe("users", function () {
 
       expect(result.message).to.be.equal("Profile data added for verification successfully");
     });
+
     it("adds user images For Verification", async function () {
       const userId = "1234567abcd";
       const verificationSnapshotBeforeUpdate = await photoVerificationModel
@@ -180,6 +186,7 @@ describe("users", function () {
 
       expect(result.message).to.be.equal("Profile data added for verification successfully");
     });
+
     it("marks user profile image as verified", async function () {
       const userId = "1234567abcd";
       const imageType = "profile";
@@ -196,6 +203,7 @@ describe("users", function () {
 
       expect(result.message).to.be.equal("User image data verified successfully");
     });
+
     it("throws an error if verification document not found", async function () {
       const userId = "non-existent-userId";
       const imageType = "profile";
@@ -206,6 +214,7 @@ describe("users", function () {
         expect(error.message).to.be.equal("No verification document record data for user was found");
       }
     });
+
     it("gets user image verification data", async function () {
       const userId = "1234567abcd";
 
@@ -215,6 +224,7 @@ describe("users", function () {
       const docData = verificationSnapshot.docs[0].data();
       expect(result).to.deep.equal(docData);
     });
+
     it("throws an error if verification document could not be found due to invalid user Id", async function () {
       const userId = "non-existent-userId";
 
@@ -258,6 +268,7 @@ describe("users", function () {
       joinData[0].userId = "12345";
       await users.addJoinData(joinData[0]);
     });
+
     it("gets joinData", async function () {
       const data = await users.getJoinData("12345");
       expect(data.length).to.be.equal(1);
@@ -339,6 +350,7 @@ describe("users", function () {
       });
       await Promise.all(addUsersPromises);
     });
+
     it("returns users with member role", async function () {
       const members = await users.getUsersByRole("member");
       expect(members.length).to.be.equal(7);
@@ -346,6 +358,7 @@ describe("users", function () {
         expect(member.roles.member).to.be.equal(true);
       });
     });
+
     it("throws an error", async function () {
       await users.getUsersByRole(32389434).catch((err) => {
         expect(err).to.be.instanceOf(Error);
@@ -369,6 +382,7 @@ describe("users", function () {
     afterEach(async function () {
       await cleanDb();
     });
+
     it("should render users with onboarding state and time as 31days", async function () {
       const query = {
         state: "ONBOARDING",
@@ -381,6 +395,7 @@ describe("users", function () {
 
   describe("fetch users by id", function () {
     let allIds = [];
+
     before(async function () {
       const addUsersPromises = [];
       userDataArray.forEach((user, index) => {
@@ -477,8 +492,10 @@ describe("users", function () {
       expect(userListResult[0].discordId).to.be.deep.equal(userDataArray[0].discordId);
     });
   });
+
   describe("Adding github_user_id for each user document", function () {
     let userId, userToken, superUserId, superUserToken;
+
     beforeEach(async function () {
       userId = await addUser(prodUsers[1]);
       userToken = authService.generateAuthToken({ userId: userId });
@@ -510,6 +527,7 @@ describe("users", function () {
           return done();
         });
     });
+
     it("Migration API should be not be accessible with invalid query params", async function () {
       const res = await chai
         .request(app)
@@ -522,6 +540,7 @@ describe("users", function () {
       expect(res.body.message).to.equal("Invalid Query Parameters Passed");
       expect(res.body.error).to.equal("Bad Request");
     });
+
     it("Migration API should be accessible by super user", async function () {
       const res = await chai
         .request(app)
