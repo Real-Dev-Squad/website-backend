@@ -88,6 +88,7 @@ describe("test discord actions", function () {
       ];
       await Promise.all(addGroupRolesPromises);
     });
+
     afterEach(async function () {
       await cleanDb();
     });

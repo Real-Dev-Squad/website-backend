@@ -356,6 +356,7 @@ describe("External Accounts", function () {
         rdsDiscordServerUsers: 3,
       });
     });
+
     it("Should Un-Archive Users With Archived as True and in RDS Discord Server", async function () {
       await userModel.add(usersFromRds[2]); // archivedAndInDiscord
 

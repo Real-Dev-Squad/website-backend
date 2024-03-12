@@ -85,6 +85,7 @@ describe("Multiple Extension Requests", function () {
           return done();
         });
     });
+
     it("Should return failure response after adding the extension request (sending wrong assignee info)", function (done) {
       chai
         .request(app)
@@ -108,6 +109,7 @@ describe("Multiple Extension Requests", function () {
           return done();
         });
     });
+
     it("Should return fail response if someone try to create an extension request for someone else and is not a super user", function (done) {
       chai
         .request(app)
@@ -135,6 +137,7 @@ describe("Multiple Extension Requests", function () {
           return done();
         });
     });
+
     it("Should return fail response if task with the taskId doesn't exists", function (done) {
       chai
         .request(app)
@@ -160,6 +163,7 @@ describe("Multiple Extension Requests", function () {
           return done();
         });
     });
+
     it("Should return fail response if task belongs to someone else", function (done) {
       chai
         .request(app)
@@ -278,6 +282,7 @@ describe("Multiple Extension Requests", function () {
   });
 
   let fetchLatestExtensionRequestStub;
+
   describe("GET /extension-requests/self **when dev flag is true**", function () {
     beforeEach(function () {
       fetchLatestExtensionRequestStub = sinon.stub(extensionRequests, "fetchLatestExtensionRequest");

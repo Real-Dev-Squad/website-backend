@@ -105,6 +105,7 @@ describe("discordactions", function () {
   describe("isGroupRoleExists", function () {
     let roleid;
     let rolename;
+
     beforeEach(async function () {
       const discordRoleModelPromise = [discordRoleModel.add(groupData[0]), discordRoleModel.add(groupData[1])];
       roleid = groupData[0].roleid;
@@ -122,35 +123,42 @@ describe("discordactions", function () {
       const result = await isGroupRoleExists({ rolename });
       expect(result.roleExists).to.equal(false);
     });
+
     it("should return false if roleid doesn't exist in the database", async function () {
       const roleid = "Test Role";
       const result = await isGroupRoleExists({ roleid });
       expect(result.roleExists).to.equal(false);
     });
+
     it("should return true if roleid exist in the database", async function () {
       const result = await isGroupRoleExists({ roleid });
       expect(result.roleExists).to.equal(true);
     });
+
     it("should return true if rolename exist in the database", async function () {
       const result = await isGroupRoleExists({ rolename });
       expect(result.roleExists).to.equal(true);
     });
+
     it("should return true if rolename and roleid exists in the database", async function () {
       const result = await isGroupRoleExists({ rolename, roleid });
       expect(result.roleExists).to.equal(true);
     });
+
     it("should return false if either rolename and roleid does not exist in the database", async function () {
       const rolenameResult = await isGroupRoleExists({ rolename: "adf", roleid });
       expect(rolenameResult.roleExists).to.equal(false);
       const roleIdResult = await isGroupRoleExists({ rolename, roleid: "abc44" });
       expect(roleIdResult.roleExists).to.equal(false);
     });
+
     it("should throw an error if rolename and roleid are not passed", async function () {
       return isGroupRoleExists({}).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Either rolename or roleId is required");
       });
     });
+
     it("should throw an error if getting group-roles fails", async function () {
       sinon.stub(discordRoleModel, "where").rejects(new Error("Database error"));
       const rolename = "Test Role";
@@ -274,11 +282,13 @@ describe("discordactions", function () {
 
   describe("updateDiscordImageForVerification", function () {
     let fetchStub;
+
     beforeEach(async function () {
       fetchStub = sinon.stub(global, "fetch");
       const docRefUser0 = photoVerificationModel.doc();
       await docRefUser0.set(userPhotoVerificationData);
     });
+
     afterEach(async function () {
       sinon.restore();
       await cleanDb();
@@ -313,6 +323,7 @@ describe("discordactions", function () {
         expect(err.message).to.equal("No user verification record found");
       }
     });
+
     it("should log and rethrow an error if an error occurs during the process", async function () {
       const userDiscordId = "12345";
       const error = new Error("Test error");
@@ -414,6 +425,7 @@ describe("discordactions", function () {
 
   describe("fetchGroupToMemberMapping", function () {
     const roleIds = [];
+
     before(async function () {
       // Add 50 different roles and user mapping
       const addGroupRolesPromises = Array.from({ length: 65 }).map((_, index) => {
@@ -596,6 +608,7 @@ describe("discordactions", function () {
     let idleUser;
     let userNotInDiscord;
     let activeUserId;
+
     beforeEach(async function () {
       idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
       activeUserWithProgressUpdates = { ...userData[10], discordId: getDiscordMembers[1].user.id };
@@ -648,10 +661,12 @@ describe("discordactions", function () {
       discordMembers[1].roles.push("9876543210");
       sinon.stub(discordService, "getDiscordMembers").returns(discordMembers);
     });
+
     afterEach(async function () {
       sinon.restore();
       await cleanDb();
     });
+
     it("should list of users who missed updating progress", async function () {
       const result = await getMissedProgressUpdatesUsers();
       expect(result).to.be.an("object");
@@ -700,6 +715,7 @@ describe("discordactions", function () {
         usersToAddRole: [],
       });
     });
+
     it("should not list any users since 5 days of weeks are excluded", async function () {
       const oneMonthOldTask = { ...tasksData[0] };
       oneMonthOldTask.assignee = activeUserId;
@@ -729,6 +745,7 @@ describe("discordactions", function () {
       expect(result).to.be.an("object");
       expect(result.tasks).to.be.equal(1);
     });
+
     it("should fetch process tasks when cursor is passed", async function () {
       const result = await getMissedProgressUpdatesUsers({ size: 4 });
 
@@ -767,6 +784,7 @@ describe("discordactions", function () {
       expect(invite.notFound).to.be.equal(true);
     });
   });
+
   describe("groupUpdateLastJoinDate", function () {
     beforeEach(function () {
       sinon.stub(discordRoleModel, "doc").returns({
@@ -777,6 +795,7 @@ describe("discordactions", function () {
     afterEach(function () {
       sinon.restore();
     });
+
     it("should add current date as lastUsedOn in groups doc", async function () {
       const res = await groupUpdateLastJoinDate({ id: "kbl" });
       expect(res.updated).to.be.equal(true);
