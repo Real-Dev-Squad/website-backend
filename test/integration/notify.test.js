@@ -17,6 +17,7 @@ describe("Notify Test", function () {
     userId0 = await addUser(userData0);
     userIdToken0 = authService.generateAuthToken({ userId: userId0 });
   });
+
   afterEach(async function () {
     await cleanDb();
   });

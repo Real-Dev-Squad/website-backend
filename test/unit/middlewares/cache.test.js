@@ -10,6 +10,7 @@ describe("Middleware | Utils | cache", function () {
   afterEach(function () {
     sinon.restore();
   });
+
   it("should cache the response", function () {
     const cacheTestKey = "__cache__1";
 

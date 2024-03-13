@@ -262,6 +262,7 @@ describe("Middleware | Validators | User", function () {
       });
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
+
     it("Allows a valid username", async function () {
       const req = {
         body: {

@@ -2,6 +2,7 @@
 
 # set 'test' environment
 export NODE_ENV='test'
+export NODE_CONFIG_DIR='./test/config'
 
 # get project_id value from firestore config
 json=$(node -e "console.log(require('config').get('firestore'))")

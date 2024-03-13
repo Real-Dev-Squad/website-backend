@@ -133,6 +133,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should have same time for createdAt and updatedAt for new tasks", function (done) {
       chai
         .request(app)
@@ -166,6 +167,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("should return fail response if task has a non-acceptable status value", function (done) {
       chai
         .request(app)
@@ -197,6 +199,7 @@ describe("Tasks", function () {
 
   describe("GET /tasks", function () {
     let taskId2, taskId3;
+
     before(async function () {
       taskId2 = (await tasks.updateTask({ ...taskData[0], createdAt: 1621717694, updatedAt: 1700680830 })).taskId;
       taskId3 = (await tasks.updateTask({ ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753 })).taskId;
@@ -408,6 +411,7 @@ describe("Tasks", function () {
       expect(previousPageResponse.body).to.have.property("prev");
       expect(previousPageResponse.body.tasks).to.have.length(1);
     });
+
     it("Should get tasks filtered by search term", function (done) {
       const searchTerm = "task";
       chai
@@ -431,6 +435,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should get tasks filtered by search term and handle no tasks found", function (done) {
       chai
         .request(app)
@@ -448,6 +453,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should return no task found when there is no searchterm", function (done) {
       chai
         .request(app)
@@ -465,6 +471,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should get paginated tasks ordered by updatedAt in desc order ", function (done) {
       chai
         .request(app)
@@ -506,6 +513,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should return isCollapsed property in response", function (done) {
       chai
         .request(app)
@@ -736,6 +744,7 @@ describe("Tasks", function () {
       expect(res2.body.taskData).to.have.property("startedOn");
       expect(res2.body.taskData.startedOn).to.be.equal(1695804041);
     });
+
     it("should check updated dependsOn", function (done) {
       chai
         .request(app)
@@ -754,6 +763,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should update the task status collapsed for the given taskid", function (done) {
       chai
         .request(app)
@@ -771,6 +781,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should return fail response if task data has a non-acceptable status value to update the task for the given taskid", function (done) {
       chai
         .request(app)
@@ -790,6 +801,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should return fail response if percent completed is < 0 or > 100", function (done) {
       chai
         .request(app)
@@ -1076,6 +1088,7 @@ describe("Tasks", function () {
       expect(res).to.have.status(403);
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
+
     it("Should give 403 if new status is 'MERGED' ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
       const res = await chai
@@ -1086,6 +1099,7 @@ describe("Tasks", function () {
 
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
+
     it("Should give 403 if new status is 'BACKLOG' ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
       const res = await chai
@@ -1247,9 +1261,11 @@ describe("Tasks", function () {
       await tasks.updateTask(tasksData[5]);
       await tasks.updateTask(tasksData[6]);
     });
+
     afterEach(async function () {
       await cleanDb();
     });
+
     it("Should return 401 if not super_user", async function () {
       const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${jwt}`);
       expect(res).to.have.status(401);
@@ -1318,6 +1334,7 @@ describe("Tasks", function () {
     let userNotInDiscord;
     let jwtToken;
     let getDiscordMembersStub;
+
     beforeEach(async function () {
       await cleanDb();
       idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
@@ -1376,10 +1393,12 @@ describe("Tasks", function () {
       getDiscordMembersStub.returns(discordMembers);
       jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
     });
+
     afterEach(async function () {
       sinon.restore();
       await cleanDb();
     });
+
     it("should return successful response with user id list", async function () {
       const response = await chai
         .request(app)
@@ -1396,6 +1415,7 @@ describe("Tasks", function () {
       });
       expect(response.status).to.be.equal(200);
     });
+
     it("should return successful response with user id when all params are passed", async function () {
       const response = await chai
         .request(app)
@@ -1429,6 +1449,7 @@ describe("Tasks", function () {
       });
       expect(response.status).to.be.equal(400);
     });
+
     it("should save logs when there is an error", async function () {
       getDiscordMembersStub.throws(new Error("Error occurred"));
       await chai
