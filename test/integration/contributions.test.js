@@ -58,9 +58,11 @@ describe("Contributions", function () {
     task.isNoteworthy = false;
     await testModel.updateTask(task);
   });
+
   afterEach(function () {
     sinon.restore();
   });
+
   describe("GET /contributions/{username}", function () {
     it("Should get all the contributions of the user", function (done) {
       sinon.stub(githubService, "fetchPRsByUser").returns(githubPRInfo.prakash);
@@ -104,6 +106,7 @@ describe("Contributions", function () {
           return done();
         });
     });
+
     it("Should respond 404 for unregistered user", function (done) {
       chai
         .request(app)
@@ -118,6 +121,7 @@ describe("Contributions", function () {
           return done();
         });
     });
+
     it("Should respond empty object when user has no pr and task available", function (done) {
       sinon.stub(githubService, "fetchPRsByUser").returns(githubPRInfo.userWithNoPrs);
       chai

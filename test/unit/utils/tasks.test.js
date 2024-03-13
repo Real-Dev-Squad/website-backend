@@ -52,6 +52,7 @@ describe("Utils | Tasks", function () {
       expect(weekdayList).to.equal(undefined);
       expect(dateList).to.equal(undefined);
     });
+
     it("should handle undefined queries gracefully", function () {
       const result = transformTasksUsersQuery(undefined);
       const { dateGap, status, size, weekdayList, dateList } = result;
@@ -61,6 +62,7 @@ describe("Utils | Tasks", function () {
       expect(weekdayList).to.equal(undefined);
       expect(dateList).to.equal(undefined);
     });
+
     it("should ignore unexpected query keys", function () {
       const queries = { unexpectedKey: [{ value: "someValue" }] };
       const result = transformTasksUsersQuery(queries);

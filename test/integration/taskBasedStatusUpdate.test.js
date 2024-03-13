@@ -490,6 +490,7 @@ describe("Task Based Status Updates", function () {
     afterEach(async function () {
       await cleanDb();
     });
+
     it("should get the users who without Assigned Or InProgress Tasks", async function () {
       const response = await chai
         .request(app)

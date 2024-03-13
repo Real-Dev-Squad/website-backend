@@ -13,6 +13,7 @@ describe("githubService", function () {
   beforeEach(async function () {
     sinon.stub(axios, "fetch").returnsArg(0);
   });
+
   afterEach(async function () {
     await cleanDb();
     sinon.restore();
@@ -235,10 +236,12 @@ describe("githubService", function () {
 
   describe("fetchIssuesById", function () {
     beforeEach(async function () {});
+
     afterEach(async function () {
       await cleanDb();
       sinon.restore();
     });
+
     it("should handle API call errors and return null", async function () {
       const repositoryName = "example-repo";
       const issueId = 123;
@@ -249,6 +252,7 @@ describe("githubService", function () {
         expect(err.message).to.be.equal("API call failed");
       }
     });
+
     it("should handle non-OK API response and return null", async function () {
       const repositoryName = "example-repo";
       const issueId = 123;
@@ -256,6 +260,7 @@ describe("githubService", function () {
       const response = await githubService.fetchIssuesById(repositoryName, issueId);
       expect(response).to.be.equal(null);
     });
+
     it("should handle a successful API response and return issue details", async function () {
       const repositoryName = "example-repo";
       const issueId = 123;

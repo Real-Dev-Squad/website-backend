@@ -92,6 +92,7 @@ describe("tasks", function () {
         expect(task).to.contain.all.keys(sameTask);
       });
     });
+
     it("should fetch tasks filtered by search term", async function () {
       const searchTerm = "task-dependency";
       const tasksSnapshot = await tasksModel.get();
@@ -102,12 +103,14 @@ describe("tasks", function () {
       });
       expect(tasksData[5].title.includes(searchTerm));
     });
+
     it("should return empty array when no search term is found", async function () {
       const searchTerm = "random";
       const tasksSnapshot = await tasksModel.get();
       const result = await getBuiltTasks(tasksSnapshot, searchTerm);
       expect(result).to.have.lengthOf(0);
     });
+
     it("should fetch tasks status have undefined value", async function () {
       const searchTerm = "Undefined";
       const tasksSnapshot = await tasksModel.get();
@@ -237,6 +240,7 @@ describe("tasks", function () {
         expect(dependsOn).to.include(taskId);
       });
     });
+
     it("should throw error when wrong id is passed", async function () {
       const taskId = (await tasks.updateTask(tasksData[5])).taskId;
       await firestore.collection("tasks").doc(taskId).set(tasksData[5]);
@@ -255,6 +259,7 @@ describe("tasks", function () {
       }
     });
   });
+
   describe("update tasks", function () {
     it("should update status when assignee pass as payload", async function () {
       const data = {
@@ -279,6 +284,7 @@ describe("tasks", function () {
       expect(firestoreResult.assignee).to.be.equal(userId1);
     });
   });
+
   describe("getOverdueTasks", function () {
     beforeEach(async function () {
       const tasksPromise = tasksData.map(async (task) => {

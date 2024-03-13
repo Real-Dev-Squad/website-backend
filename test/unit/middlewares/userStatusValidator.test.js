@@ -6,6 +6,7 @@ describe("Validation Tests for Cancel OOO", function () {
   let req;
   let res;
   let nextSpy;
+
   beforeEach(function () {
     res = {
       boom: {
@@ -14,6 +15,7 @@ describe("Validation Tests for Cancel OOO", function () {
     };
     nextSpy = Sinon.spy();
   });
+
   it("should validate for a valid request", async function () {
     req = {
       body: {
@@ -23,6 +25,7 @@ describe("Validation Tests for Cancel OOO", function () {
     await validateUserStatus(req, res, nextSpy);
     expect(nextSpy.calledOnce).to.be.equal(true);
   });
+
   it("should not validate for an invalid request", async function () {
     const req = {
       body: {

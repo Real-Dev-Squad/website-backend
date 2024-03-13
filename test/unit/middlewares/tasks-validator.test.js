@@ -353,6 +353,7 @@ describe("getTasks validator", function () {
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
+
   it("should pass the request when a valid query is provided", async function () {
     const req = {
       query: {
@@ -368,6 +369,7 @@ describe("getTasks validator", function () {
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
+
   it("should fail the request when an invalid query is provided", async function () {
     const req = {
       query: {
@@ -389,6 +391,7 @@ describe("getTasks validator", function () {
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
+
   it("should pass the request when correct parameters are passed: assignee, dev, status and title", async function () {
     const req = {
       query: {
@@ -403,6 +406,7 @@ describe("getTasks validator", function () {
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
+
   it("should pass when valid request body is provided", async function () {
     const validRequestBody = {
       title: "Sample Task",
@@ -617,6 +621,7 @@ describe("getTasks validator", function () {
     await updateTaskValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
+
   describe("getUsersValidator | Validator", function () {
     it("should pass the request when valid query parameters are provided", async function () {
       const req = {
@@ -631,6 +636,7 @@ describe("getTasks validator", function () {
       await getUsersValidator(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(1);
     });
+
     it("should pass the request when multiple valid query parameters are provided", async function () {
       const req = {
         query: {
@@ -644,6 +650,7 @@ describe("getTasks validator", function () {
       await getUsersValidator(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(1);
     });
+
     it("should pass the request when only required query parameters are provided", async function () {
       const req = {
         query: {
