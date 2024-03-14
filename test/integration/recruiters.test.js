@@ -22,6 +22,7 @@ describe("Recruiters", function () {
   let username;
   let recruiterData;
   let jwt;
+
   beforeEach(async function () {
     const superUserId = await addUser(superUser);
     jwt = authService.generateAuthToken({ userId: superUserId });

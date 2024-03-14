@@ -53,11 +53,13 @@ describe("Logs", function () {
   describe("GET /logs/archived-details", function () {
     let addLogsStub;
     let jwt;
+
     beforeEach(async function () {
       const superUserId = await addUser(superUser);
       jwt = authService.generateAuthToken({ userId: superUserId });
       await cleanDb();
     });
+
     afterEach(function () {
       Sinon.restore();
     });
@@ -72,6 +74,7 @@ describe("Logs", function () {
         expect(res.body.message).to.equal(INTERNAL_SERVER_ERROR);
       });
     });
+
     it("Should return empty array if no logs found", async function () {
       const { type } = logsData.archivedUserDetailsModal[0];
       const query = {};
@@ -80,6 +83,7 @@ describe("Logs", function () {
 
       expect(data).to.be.an("array").with.lengthOf(0);
     });
+
     it("Should fetch all archived logs", async function () {
       const { type, meta, body } = logsData.archivedUserDetailsModal[0];
       const query = {};
@@ -94,6 +98,7 @@ describe("Logs", function () {
       expect(data[0].body.archived_user).to.have.property("username").that.is.a("string");
       expect(data[0].body).to.have.property("reason").that.is.a("string");
     });
+
     it("Should fetch all archived logs for given user_id", async function () {
       const { type, meta, body } = logsData.archivedUserDetailsModal[0];
       const query = {
@@ -108,6 +113,7 @@ describe("Logs", function () {
       expect(data[0].timestamp).to.have.property("_nanoseconds").that.is.a("number");
       expect(data[0].body).to.have.property("reason").that.is.a("string");
     });
+
     it("Should throw response status 404, if username is incorrect in the query", async function () {
       const { type, meta, body } = logsData.archivedUserDetailsModal[0];
       const query = {
@@ -126,6 +132,7 @@ describe("Logs", function () {
   describe("GET /logs/extension-request", function () {
     let jwt;
     let userId;
+
     before(async function () {
       userId = await addUser(superUser);
       jwt = authService.generateAuthToken({ userId });
@@ -134,6 +141,7 @@ describe("Logs", function () {
     after(async function () {
       await cleanDb();
     });
+
     it("Should return all the logs related to extension requests", async function () {
       Sinon.stub(logsQuery, "fetchLogs").returns(extensionRequestLogs);
 

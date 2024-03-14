@@ -34,17 +34,23 @@ let superUserToken: string;
 let oooRequestId: string;
 let pendingOooRequestId: string;
 let approvedOooRequestId: string;
+let oooRequestData: any;
+let oooRequestData2: any;
+let testUserId: string;
 
 describe("/requests", function () {
   beforeEach(async function () {
-    const { id: oooRequestStatusId }: any = await createRequest(createOooRequests);
-    oooRequestId = oooRequestStatusId;
-
-    const { id: pendingOooId }: any = await createRequest(createOooRequests2);
-    pendingOooRequestId = pendingOooId;
-
     const userIdPromises = [addUser(userData[16]), addUser(userData[4])];
     const [userId, superUserId] = await Promise.all(userIdPromises);
+    testUserId = userId;
+
+    oooRequestData = { ...createOooRequests, requestedBy: userId };
+    oooRequestData2 = { ...createOooRequests2, requestedBy: superUserId };
+
+    const { id: oooRequestStatusId }: any = await createRequest(oooRequestData);
+    oooRequestId = oooRequestStatusId;
+    const { id: pendingOooId }: any = await createRequest(oooRequestData2);
+    pendingOooRequestId = pendingOooId;
 
     const { id: approveOooId }: any = await updateRequest(oooRequestId, { state: "APPROVED" }, superUserId);
     approvedOooRequestId = approveOooId;
@@ -294,10 +300,11 @@ describe("/requests", function () {
     it("should return all requests by specific user", function (done) {
       chai
         .request(app)
-        .get("/requests?dev=true&requestedBy=testUser")
+        .get(`/requests?dev=true&requestedBy=${userData[16].username}`)
         .end(function (err, res) {
+          console.log(res.body.data);
           expect(res).to.have.status(200);
-          expect(res.body.data.every((request: any) => request.requestedBy === "testUser"));
+          expect(res.body.data.every((request: any) => request.requestedBy === testUserId));
           done();
         });
     });
@@ -305,10 +312,11 @@ describe("/requests", function () {
     it("should return all requests by specific user and state", function (done) {
       chai
         .request(app)
-        .get("/requests?dev=true&requestedBy=testUser&state=APPROVED")
+        .get(`/requests?dev=true&state=APPROVED&requestedBy=${userData[16].username}`)
         .end(function (err, res) {
           expect(res).to.have.status(200);
-          expect(res.body.data.every((e: any) => e.requestedBy === "testUser" && e.state === "APPROVED"));
+          expect(res.body.data.every((e: any) => e.state === "APPROVED"));
+          expect(res.body.data.every((e: any) => e.requestedBy === testUserId));
           done();
         });
     });
