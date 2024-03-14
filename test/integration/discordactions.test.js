@@ -64,6 +64,7 @@ describe("Discord actions", function () {
   let discordId = "";
   let fetchStub;
   let jwt;
+
   beforeEach(async function () {
     fetchStub = sinon.stub(global, "fetch");
     userId = await addUser(userData[0]);
@@ -106,6 +107,7 @@ describe("Discord actions", function () {
           return done();
         });
     });
+
     it("Should throw error if failed to update a picture", function (done) {
       fetchStub.returns(
         Promise.resolve({
@@ -132,6 +134,7 @@ describe("Discord actions", function () {
   describe("GET /discord-actions/groups", function () {
     let newGroupData;
     let allIds = [];
+
     before(async function () {
       const addUsersPromises = userData.map((user) => userModel.add({ ...user }));
       const responses = await Promise.all(addUsersPromises);
@@ -209,6 +212,7 @@ describe("Discord actions", function () {
 
   describe("POST /discord-actions/roles", function () {
     let roleid;
+
     beforeEach(async function () {
       const discordRoleModelPromise = [
         discordRoleModel.add(groupData[0]),
@@ -224,6 +228,7 @@ describe("Discord actions", function () {
       sinon.restore();
       await cleanDb();
     });
+
     it("should not be able to add role if it is not a group type role", async function () {
       const fetchStub = sinon.stub(discordRolesModel, "isGroupRoleExists");
 
@@ -257,6 +262,7 @@ describe("Discord actions", function () {
 
       fetchStub.restore();
     });
+
     it("should allow role to be added", async function () {
       fetchStub.returns(
         Promise.resolve({
@@ -275,6 +281,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Role added successfully!");
     });
+
     it("should create a reason and pass it down to the bot, on adding the role to the user", async function () {
       fetchStub.returns(
         Promise.resolve({
@@ -298,6 +305,7 @@ describe("Discord actions", function () {
         `Action initiator's username=>ankur and id=${userId}`
       );
     });
+
     it("should not allow unknown role to be added to user", async function () {
       const res = await chai
         .request(app)
@@ -309,6 +317,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Permission denied. Cannot add the role.");
     });
+
     it("should not allow role to be added when userid does not belong to authenticated user", async function () {
       const res = await chai
         .request(app)
@@ -321,6 +330,7 @@ describe("Discord actions", function () {
       expect(res.body.message).to.equal("Permission denied. Cannot add the role.");
     });
   });
+
   describe("DELETE /discord-actions/roles", function () {
     let roleid;
 
@@ -385,6 +395,7 @@ describe("Discord actions", function () {
         `Action initiator's username=>ankur and id=${userId}`
       );
     });
+
     it("should not allow unknown role to be deleted from user", async function () {
       const res = await chai
         .request(app)
@@ -396,6 +407,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Permission denied. Cannot delete the role.");
     });
+
     it("should not allow role to be deleted when userid does not belong to authenticated user", async function () {
       const res = await chai
         .request(app)
@@ -407,6 +419,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Permission denied. Cannot delete the role.");
     });
+
     it("should handle internal server error", function (done) {
       chai
         .request(app)
@@ -472,6 +485,7 @@ describe("Discord actions", function () {
 
   describe("POST /discord-actions/nickname/status", function () {
     let jwtToken;
+
     beforeEach(async function () {
       const userData2 = { ...userData[1] };
       delete userData2.discordId;
@@ -562,6 +576,7 @@ describe("Discord actions", function () {
         });
     }).timeout(10000);
   });
+
   describe("POST /discord-actions/discord-roles", function () {
     before(async function () {
       const value = [discordRoleModel.add(groupData[0]), discordRoleModel.add(groupData[1])];
@@ -596,6 +611,7 @@ describe("Discord actions", function () {
 
   describe("PUT /discord-actions/group-idle-7d", function () {
     let allIds;
+
     beforeEach(async function () {
       userData[0].roles = { archived: false };
       userData[1].roles = { archived: false };
@@ -695,6 +711,7 @@ describe("Discord actions", function () {
         })
       );
     });
+
     afterEach(async function () {
       sinon.restore();
       await cleanDb();

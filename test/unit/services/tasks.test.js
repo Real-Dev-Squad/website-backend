@@ -11,6 +11,7 @@ describe("Tasks services", function () {
   describe("task status COMPLETED to DONE in bulk", function () {
     const tasks = [];
     const taskDetails = [];
+
     beforeEach(async function () {
       const addTasksPromises = [];
       taskDataArray.forEach((task) => {

@@ -29,6 +29,7 @@ describe("Test Progress Updates API for Users", function () {
     let userToken;
     let anotherUserId;
     let anotherUserToken;
+
     beforeEach(async function () {
       clock = sinon.useFakeTimers({
         now: new Date(Date.UTC(2023, 4, 2, 0, 25)).getTime(), // UTC time equivalent to 5:55 AM IST
@@ -256,6 +257,7 @@ describe("Test Progress Updates API for Users", function () {
   describe("Verify the GET date range progress records", function () {
     let userId;
     let userId2;
+
     beforeEach(async function () {
       userId = await addUser(userData[1]);
       userId2 = await addUser(userData[2]);
