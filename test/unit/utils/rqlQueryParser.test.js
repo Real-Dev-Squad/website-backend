@@ -10,6 +10,7 @@ describe("RQLQueryParser", function () {
       key: [{ operator: Operators.INCLUDE, value: "value" }],
     });
   });
+
   it("should parse multiple filter queries", function () {
     const queryString = "key:value key2:value key:value2";
     const parser = new RQLQueryParser(queryString);
@@ -22,6 +23,7 @@ describe("RQLQueryParser", function () {
       key2: [{ operator: Operators.INCLUDE, value: "value" }],
     });
   });
+
   it("should parse multiple filter with exclude queries", function () {
     const queryString = "key:value -key2:value -key:value2";
     const parser = new RQLQueryParser(queryString);
@@ -34,6 +36,7 @@ describe("RQLQueryParser", function () {
       key2: [{ operator: Operators.EXCLUDE, value: "value" }],
     });
   });
+
   it("should parse sort queries", function () {
     const queryString = "sort:key-desc";
     const parser = new RQLQueryParser(queryString);
@@ -42,6 +45,7 @@ describe("RQLQueryParser", function () {
       key: "desc",
     });
   });
+
   it("should parse all queries", function () {
     const queryString = "key:value1 -key:value2 key2:value1 sort:key-asc";
     const parser = new RQLQueryParser(queryString);
@@ -53,6 +57,7 @@ describe("RQLQueryParser", function () {
       { value: "asc", operator: Operators.INCLUDE, type: QueryTypes.SORT, key: "key" },
     ]);
   });
+
   it("should handle empty queries", function () {
     const queryString = "";
     const parser = new RQLQueryParser(queryString);
@@ -63,6 +68,7 @@ describe("RQLQueryParser", function () {
     expect(sortQueries).to.deep.equal({});
     expect(allQueries).to.deep.equal([]);
   });
+
   it("should handle invalid query param format", function () {
     const queryString = "invalidKey()&value";
     expect(() => new RQLQueryParser(queryString)).to.throw("Invalid query param format");

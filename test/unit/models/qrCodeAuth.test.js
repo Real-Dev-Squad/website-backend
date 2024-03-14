@@ -16,6 +16,7 @@ describe("mobile auth", function () {
   afterEach(async function () {
     await cleanDb();
   });
+
   describe("storeUserDeviceInfo", function () {
     it("should store user Id and device info of user for mobile auth", async function () {
       const userData = userDataArray[0];

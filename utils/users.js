@@ -246,7 +246,17 @@ const parseSearchQuery = (queryString) => {
  * @param {string} username - The discord username of the user.
  * @returns {string} - Nickname of the user.
  */
-const generateOOONickname = (username = "", from, until) => {
+const generateOOONickname = (currentUsername = "", from, until, discordRoles) => {
+  // TODO : Update this function when we start storing the discord roles in the database
+  let username = currentUsername;
+  const discordMavenRoleId = config.get("discordMavenRoleId");
+
+  if (discordRoles?.includes(discordMavenRoleId)) {
+    username = username
+      .split("-")
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join("-");
+  }
   if (!from && !until) return username;
   const untilDate = new Date(Number(until));
   const untilDay = untilDate.getDate();

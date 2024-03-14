@@ -16,6 +16,7 @@ import { createRequest, getRequests, updateRequest } from "../models/requests";
 import { addLog } from "../models/logs";
 import { createUserFutureStatus } from "../models/userFutureStatus";
 import { OooStatusRequest } from "../types/oooRequest";
+import { getPaginatedLink } from "../utils/helper";
 
 export const createRequestController = async (req: any, res: any) => {
   const requestBody = req.body;
@@ -135,9 +136,47 @@ export const getRequestsController = async (req: any, res: any) => {
     if (!requests) {
       return res.status(204).send();
     }
-    return res.status(200).send({
+
+    const { allRequests, next, prev, page } = requests;
+    if (allRequests.length === 0) {
+      return res.status(204).send();
+    }
+
+    if(page) {
+      const pageLink = `/requests?page=${page}&dev=${query.dev}`;
+      return res.status(200).json({
+        message: REQUEST_FETCHED_SUCCESSFULLY,
+        data: allRequests,
+        page: pageLink,
+      });
+    }
+
+    let nextUrl = null;
+    let prevUrl = null;
+    if (next) {
+      const nextLink = getPaginatedLink({
+        endpoint: "/requests",
+        query,
+        cursorKey: "next",
+        docId: next,
+      });
+      nextUrl = nextLink;
+    }
+    if (prev) {
+      const prevLink = getPaginatedLink({
+        endpoint: "/requests",
+        query,
+        cursorKey: "prev",
+        docId: prev,
+      });
+      prevUrl = prevLink;
+    }
+
+    return res.status(200).json({
       message: REQUEST_FETCHED_SUCCESSFULLY,
-      data: requests,
+      data: allRequests,
+      next: nextUrl,
+      prev: prevUrl,
     });
   } catch (err) {
     logger.error(ERROR_WHILE_FETCHING_REQUEST, err);

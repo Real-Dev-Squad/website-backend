@@ -212,6 +212,7 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+
     it("should return success response and all extension requests with query params", function (done) {
       chai
         .request(app)
@@ -283,6 +284,7 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+
     it("Should return success response after adding the extension request (sending assignee username)", function (done) {
       chai
         .request(app)
@@ -310,6 +312,7 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+
     it("Should return failure response after adding the extension request (sending wrong assignee info)", function (done) {
       chai
         .request(app)
@@ -333,6 +336,7 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+
     it("Should return fail response if someone try to create a extension request for someone else and is not a super user", function (done) {
       chai
         .request(app)
@@ -360,6 +364,7 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+
     it("Should return fail response if task with the taskId doesn't exists", function (done) {
       chai
         .request(app)
@@ -385,6 +390,7 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+
     it("Should return fail response if task belongs to someone else", function (done) {
       chai
         .request(app)
@@ -410,6 +416,7 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+
     it("Should return fail response if the new ETA falls before old ETA", function (done) {
       chai
         .request(app)
@@ -434,6 +441,7 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+
     it("Should return fail response if extension request for a task already exists", function (done) {
       chai
         .request(app)
@@ -458,6 +466,7 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+
     it("Should return success response after adding the extension request and also there should be a log for the same", function (done) {
       chai
         .request(app)
@@ -524,6 +533,7 @@ describe("Extension Requests", function () {
           return done();
         });
     });
+
     it("should return failure response if no extension request found with :id", function (done) {
       chai
         .request(app)
@@ -861,6 +871,7 @@ describe("Extension Requests", function () {
           return null;
         });
     });
+
     it("Extension request log should contain extensionRequestId upon denying request", function (done) {
       chai
         .request(app)
@@ -898,6 +909,7 @@ describe("Extension Requests", function () {
         });
     });
   });
+
   describe("Updating extension request detail", function () {
     it("Should create a log when SU changes the extension request's title", async function () {
       const newTitle = "new-title";

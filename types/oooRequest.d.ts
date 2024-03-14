@@ -47,6 +47,10 @@ export type RequestQuery = {
   requestedBy?: string;
   state?: REQUEST_STATE.APPROVED | REQUEST_STATE.PENDING | REQUEST_STATE.REJECTED;
   id?: string;
+  prev?: string;
+  next?: string;
+  page?: number;
+  size?: number;
 };
 
 export type RequestParams = {
