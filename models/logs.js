@@ -2,9 +2,10 @@ const firestore = require("../utils/firestore");
 const { getBeforeHourTime } = require("../utils/time");
 const logsModel = firestore.collection("logs");
 const admin = require("firebase-admin");
-const { logType } = require("../constants/logs");
+const { logType, ERROR_WHILE_FETCHING_LOGS } = require("../constants/logs");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFullName } = require("../utils/users");
+const SIZE = 5;
 
 /**
  * Adds log
@@ -155,9 +156,126 @@ const fetchLastAddedCacheLog = async (id) => {
   }
 };
 
+const fetchAllLogs = async (query) => {
+  try {
+    let { type, prev, next, page, size = SIZE } = query;
+    size = parseInt(size);
+    page = parseInt(page);
+
+    try {
+      let requestQuery = logsModel;
+
+      if (type) {
+        const logType = type.split(",");
+        if (logType.length >= 1) requestQuery = requestQuery.where("type", "in", logType);
+      }
+
+      requestQuery = requestQuery.orderBy("timestamp", "desc");
+      let requestQueryDoc = requestQuery;
+
+      if (prev) {
+        requestQueryDoc = requestQueryDoc.limitToLast(size);
+      } else {
+        requestQueryDoc = requestQueryDoc.limit(size);
+      }
+
+      if (page) {
+        const startAfter = (page - 1) * size;
+        requestQueryDoc = requestQueryDoc.offset(startAfter);
+      } else if (next) {
+        const doc = await logsModel.doc(next).get();
+        requestQueryDoc = requestQueryDoc.startAt(doc);
+      } else if (prev) {
+        const doc = await logsModel.doc(prev).get();
+        requestQueryDoc = requestQueryDoc.endAt(doc);
+      }
+
+      const snapshot = await requestQueryDoc.get();
+      let nextDoc, prevDoc;
+      if (!snapshot.empty) {
+        const first = snapshot.docs[0];
+        prevDoc = await requestQuery.endBefore(first).limitToLast(1).get();
+
+        const last = snapshot.docs[snapshot.docs.length - 1];
+        nextDoc = await requestQuery.startAfter(last).limit(1).get();
+      }
+      const allLogs = [];
+      if (!snapshot.empty) {
+        snapshot.forEach((doc) => {
+          allLogs.push({ ...doc.data() });
+        });
+      }
+
+      if (allLogs.length === 0) {
+        return null;
+      }
+
+      return {
+        allLogs,
+        prev: prevDoc.empty ? null : prevDoc.docs[0].id,
+        next: nextDoc.empty ? null : nextDoc.docs[0].id,
+        page: page ? page + 1 : null,
+      };
+    } catch (error) {
+      logger.error(ERROR_WHILE_FETCHING_LOGS, error);
+      throw error;
+    }
+    // if (type) {
+    //   const logType = type.split(",");
+    //   if (logType.length >= 1) initialQuery = initialQuery.where("type", "in", logType);
+    // }
+    //
+    // let queryDoc = initialQuery;
+    //
+    // if (prev) {
+    //   queryDoc = queryDoc.limitToLast(size);
+    // } else {
+    //   queryDoc = queryDoc.limit(size);
+    // }
+    //
+    // const snapshot = await queryDoc.get();
+    // let logsData = [];
+    //
+    // if (!snapshot.empty) {
+    //   snapshot.forEach((doc) => {
+    //     logsData.push({ ...doc.data() });
+    //   });
+    // }
+    // if (format === "feed") {
+    //   const extensionLog = {
+    //     type: logType.EXTENSION_REQUESTS,
+    //     meta: {
+    //       taskId: "6yH97tlNH053Z8oSvW9E",
+    //       createdBy:"S5d1xNU1ZTYMWTaahjqp",
+    //     },
+    //     body: {
+    //       extensionRequestId: "HKEMNTbaRzIiTVeTLbAM",
+    //       oldEndsOn: 1707264000,
+    //       newEndsOn: 1706918400,
+    //       assignee: "S5d1xNU1ZTYMWTaahjqp",
+    //       status: EXTENSION_REQUEST_STATUS.PENDING,
+    //     },
+    //   };
+    //
+    //   await addLog(extensionLog.type, extensionLog.meta, extensionLog.body);
+    //
+    //
+    //   logsData = logsData.map(async (data) => {
+    //     return await formatLogs(data);
+    //   });
+    //   return await Promise.all(logsData);
+
+    // return logsData ?? [];
+  } catch (err) {
+    logger.error("Error in fetching all logs", err);
+    throw err;
+  }
+};
+
 module.exports = {
   addLog,
   fetchLogs,
   fetchCacheLogs,
   fetchLastAddedCacheLog,
+  fetchAllLogs,
 };
