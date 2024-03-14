@@ -1196,6 +1196,7 @@ describe("Tasks", function () {
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is DONE");
     });
+
     it("Should give 400 if current status of task is In Progress  and new status is not Blocked and both current and new percentCompleted are not 100 ", async function () {
       const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 80 };
       taskId = (await tasks.updateTask(newDate)).taskId;
@@ -1210,6 +1211,7 @@ describe("Tasks", function () {
         "The status of task can not be changed from In progress until progress of task is not 100%."
       );
     });
+
     it("Should give 400 if new status of task is In Progress and current status of task is not Blocked and both current and new percentCompleted are not 0 ", async function () {
       const newDate = { ...updateTaskStatus[0], status: "NEEDS_REVIEW", percentCompleted: 100 };
       taskId = (await tasks.updateTask(newDate)).taskId;
@@ -1224,6 +1226,7 @@ describe("Tasks", function () {
         "The status of task can not be changed to In progress until progress task is not 0%."
       );
     });
+
     it("Should give 400 if current status of task is Blocked and new status is not In Progress and both current and new percentCompleted are not 100 ", async function () {
       const newDate = { ...updateTaskStatus[0], status: "BLOCKED", percentCompleted: 52 };
       taskId = (await tasks.updateTask(newDate)).taskId;
@@ -1238,6 +1241,7 @@ describe("Tasks", function () {
         "The status of task can not be changed from Blocked until progress of task is not 100%."
       );
     });
+
     it("Should give 200 if new status of task is In Progress and current status of task is Blocked", async function () {
       const newDate = { ...updateTaskStatus[0], status: "BLOCKED", percentCompleted: 56 };
       taskId = (await tasks.updateTask(newDate)).taskId;
@@ -1250,6 +1254,7 @@ describe("Tasks", function () {
       expect(res).to.have.status(200);
       expect(res.body.message).to.be.equal("Task updated successfully!");
     });
+
     it("Should give 200 if new status of task is Blocked and current status of task is In Progress", async function () {
       const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 59 };
       taskId = (await tasks.updateTask(newDate)).taskId;
