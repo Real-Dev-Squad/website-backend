@@ -22,10 +22,12 @@ describe("Update Status based on task update", function () {
   describe("Tests for the Model Function to Update Status Based on Task Completion", function () {
     let userId;
     let taskArr;
+
     beforeEach(async function () {
       userId = await addUser(userData()[6]);
       taskArr = allTasks();
     });
+
     afterEach(async function () {
       sinon.restore();
       await cleanDb();
@@ -139,14 +141,17 @@ describe("Update Status based on task update", function () {
 
   describe("Test the Model Function for Status update on Task Assignment/Update", function () {
     let userId;
+
     beforeEach(async function () {
       const userInfo = userData()[6];
       userId = await addUser(userInfo);
     });
+
     afterEach(async function () {
       sinon.restore();
       await cleanDb();
     });
+
     it("Should Create a new user status Document with status ACTIVE if the status document doesn't exist.", async function () {
       const res = await updateUserStatusOnNewTaskAssignment(userId);
       expect(res.status).to.equal("success");

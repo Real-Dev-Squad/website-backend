@@ -10,6 +10,7 @@ describe("getExtensionRequestsValidator", function () {
     await getExtensionRequestsValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
+
   it("should pass validation for valid query parameters", async function () {
     const req = {
       query: {
@@ -40,6 +41,7 @@ describe("getExtensionRequestsValidator", function () {
 
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
+
   it("should pass validation for valid multiple keys and values of query parameters", async function () {
     const req = {
       query: {
@@ -53,6 +55,7 @@ describe("getExtensionRequestsValidator", function () {
 
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
+
   it("should not pass validation for invalid query parameters query string", async function () {
     const req = {
       query: {
@@ -71,6 +74,7 @@ describe("getExtensionRequestsValidator", function () {
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
     expect(res.boom.badRequest.callCount).to.be.equal(1);
   });
+
   it("should not pass validation for invalid query parameters", async function () {
     const req = {
       query: {

@@ -24,6 +24,7 @@ describe("Issues", function () {
       expect(res.body.message).to.equal("Issues returned successfully!");
       expect(res.body.issues).to.deep.equal([issuesMockData.issuesData]);
     });
+
     it("Should not call fetch issues by id function when random string is passed", async function () {
       const fetchIssuesByIdSpy = sinon.spy(githubService, "fetchIssuesById");
       await chai.request(app).get("/issues").query({ q: "abc+def" });

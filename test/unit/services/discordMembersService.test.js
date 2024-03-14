@@ -53,6 +53,7 @@ describe("getDiscordMemberDetails", function () {
       expect(err.message).to.equal("User does not exist");
     }
   });
+
   it("should throw an error", async function () {
     const discordId = "memberId123";
     const expectedError = new Error("Test error");

@@ -4,6 +4,7 @@ const { cachedKeysStore } = require("../../../utils/cache");
 describe("cachedKeysStore", function () {
   let keyStore;
   const modelKey = "modelKey";
+
   beforeEach(function () {
     keyStore = cachedKeysStore();
   });

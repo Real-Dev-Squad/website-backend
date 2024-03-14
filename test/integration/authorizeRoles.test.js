@@ -182,6 +182,7 @@ describe("authorizeRoles", function () {
           return done();
         });
     });
+
     it("should return server error for super user on route with invalid required role", function (done) {
       chai
         .request(app)
@@ -195,6 +196,7 @@ describe("authorizeRoles", function () {
           return done();
         });
     });
+
     it("should return server error for app owner on route with invalid required role", function (done) {
       chai
         .request(app)
