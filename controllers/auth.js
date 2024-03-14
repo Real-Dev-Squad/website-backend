@@ -121,7 +121,6 @@ const githubAuthCallback = (req, res, next) => {
 };
 
 const signout = (req, res) => {
-  // console.log("signout.........................");
   const cookieName = config.get("userToken.cookieName");
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
   const cookieOptions = {

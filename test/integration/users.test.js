@@ -1234,6 +1234,54 @@ describe("Users", function () {
           return done();
         });
     });
+    it("Should return users with first_name starting with '23' and response status code 200 - First Name", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues.number23 })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+
+          // Check first_name
+          res.body.users.forEach((user) => {
+            expect(user.first_name.slice(0, 2)).to.equal(`${searchParamValues.number23}`);
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return users with last_name starting with '23' and response status code 200 - Last Name", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: searchParamValues.number23 })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+
+          // Check last_name
+          res.body.users.forEach((user) => {
+            expect(user.last_name.slice(0, 2)).to.equal(`${searchParamValues.number23}`);
+          });
+
+          return done();
+        });
+    });
+
     it("Should return an empty array with response status code 200", function (done) {
       chai
         .request(app)

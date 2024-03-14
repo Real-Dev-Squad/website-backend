@@ -82,7 +82,7 @@ const getUserById = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const { q, dev: devParam, query } = req.query;
-    // console.log(query, "query");
+
     const dev = devParam === "true";
     const queryString = (dev ? q : query) || "";
     const transformedQuery = parseSearchQuery(queryString);
