@@ -11,9 +11,11 @@ describe("FCM token services", function () {
 
       await saveFcmToken(fcmTokenData);
     });
+
     afterEach(async function () {
       await cleanDb();
     });
+
     it("Get FCM token from user id", async function () {
       const fcmToken = await getFcmTokenFromUserId("jkkshdsjkh");
       expect(fcmToken[0]).equals("iedsijdsdj");

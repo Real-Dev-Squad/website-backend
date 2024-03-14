@@ -245,6 +245,7 @@ describe("events", function () {
     let service;
     let superUserAuthToken;
     let memberAuthToken;
+
     beforeEach(async function () {
       const superUser = userData[4];
       const member = userData[6];
@@ -483,6 +484,7 @@ describe("events", function () {
     let service;
     let superUserAuthToken;
     let memberAuthToken;
+
     beforeEach(async function () {
       const superUser = userData[4];
       const member = userData[6];
@@ -552,6 +554,7 @@ describe("events", function () {
   describe("POST /events/:id/codes", function () {
     let service;
     let superUserAuthToken;
+
     beforeEach(async function () {
       const superUser = userData[4];
       const superUserId = await addUser(superUser);
@@ -674,6 +677,7 @@ describe("events", function () {
   describe("GET /events/:id/codes - getEventCodes", function () {
     let service;
     let superUserAuthToken;
+
     beforeEach(async function () {
       const superUser = userData[4];
       const superUserId = await addUser(superUser);
@@ -728,6 +732,7 @@ describe("events", function () {
     let service;
     let superUserAuthToken;
     let memberAuthToken;
+
     beforeEach(async function () {
       const superUser = userData[4];
       const member = userData[6];

@@ -13,10 +13,12 @@ const userDataArray = require("../../fixtures/user/user")();
 describe("wallets", function () {
   let userId;
   let wallet;
+
   beforeEach(async function () {
     userId = await addUser();
     wallet = await walletQuery.createWallet(userId, currencies.default);
   });
+
   afterEach(async function () {
     await cleanDb();
   });

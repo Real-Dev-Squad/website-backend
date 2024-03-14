@@ -31,6 +31,7 @@ describe("Test the notify validator", function () {
     await notifyValidator(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(1);
   });
+
   it("Stops the request if both user and role id are pass", async function () {
     const req = {
       body: {

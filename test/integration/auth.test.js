@@ -51,6 +51,7 @@ describe("auth", function () {
     expect(res).to.have.status(302);
     expect(res.headers.location).to.equal(githubOauthURL);
   });
+
   it("should redirect the user to new sign up flow if they are have incomplete user details true", async function () {
     const redirectURL = "https://my.realdevsquad.com/new-signup";
 

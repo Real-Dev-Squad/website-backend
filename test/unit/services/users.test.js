@@ -11,6 +11,7 @@ describe("Users services", function () {
   describe("archive inactive discord users in bulk", function () {
     const users = [];
     const userDetails = [];
+
     beforeEach(async function () {
       const addUsersPromises = [];
       userDataArray.forEach((user) => {

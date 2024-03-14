@@ -18,9 +18,11 @@ describe("Recruiters", function () {
   beforeEach(async function () {
     await addUser();
   });
+
   after(async function () {
     await cleanDb();
   });
+
   describe("addRecruiterInfo", function () {
     it("should add the recruiter data", async function () {
       const recruiterData = recruiterDataArray[0];
