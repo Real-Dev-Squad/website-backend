@@ -236,52 +236,6 @@ const fetchAllLogs = async (query) => {
       logger.error(ERROR_WHILE_FETCHING_LOGS, error);
       throw error;
     }
-    // if (type) {
-    //   const logType = type.split(",");
-    //   if (logType.length >= 1) initialQuery = initialQuery.where("type", "in", logType);
-    // }
-    //
-    // let queryDoc = initialQuery;
-    //
-    // if (prev) {
-    //   queryDoc = queryDoc.limitToLast(size);
-    // } else {
-    //   queryDoc = queryDoc.limit(size);
-    // }
-    //
-    // const snapshot = await queryDoc.get();
-    // let logsData = [];
-    //
-    // if (!snapshot.empty) {
-    //   snapshot.forEach((doc) => {
-    //     logsData.push({ ...doc.data() });
-    //   });
-    // }
-    // if (format === "feed") {
-    //   const extensionLog = {
-    //     type: logType.EXTENSION_REQUESTS,
-    //     meta: {
-    //       taskId: "6yH97tlNH053Z8oSvW9E",
-    //       createdBy:"S5d1xNU1ZTYMWTaahjqp",
-    //     },
-    //     body: {
-    //       extensionRequestId: "HKEMNTbaRzIiTVeTLbAM",
-    //       oldEndsOn: 1707264000,
-    //       newEndsOn: 1706918400,
-    //       assignee: "S5d1xNU1ZTYMWTaahjqp",
-    //       status: EXTENSION_REQUEST_STATUS.PENDING,
-    //     },
-    //   };
-    //
-    //   await addLog(extensionLog.type, extensionLog.meta, extensionLog.body);
-    //
-    //
-    //   logsData = logsData.map(async (data) => {
-    //     return await formatLogs(data);
-    //   });
-    //   return await Promise.all(logsData);
-
-    // return logsData ?? [];
   } catch (err) {
     logger.error("Error in fetching all logs", err);
     throw err;
