@@ -164,17 +164,21 @@ const getSuggestedUsers = async (skill) => {
  */
 const fetchPaginatedUsers = async (query) => {
   try {
-    // INFO: default user size set to 100
-    // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
 
     let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+    const usernameQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+    const firstNameQuery = userModel.where("roles.archived", "==", false).orderBy("first_name");
+    const lastNameQuery = userModel.where("roles.archived", "==", false).orderBy("last_name");
+    let compositeQuery = [usernameQuery, firstNameQuery, lastNameQuery];
 
     if (query.prev) {
       dbQuery = dbQuery.limitToLast(size);
+      compositeQuery = compositeQuery.map((query) => query.limitToLast(size));
     } else {
       dbQuery = dbQuery.limit(size);
+      compositeQuery = compositeQuery.map((query) => query.limit(size));
     }
 
     if (Object.keys(query).length) {
@@ -182,28 +186,65 @@ const fetchPaginatedUsers = async (query) => {
         dbQuery = dbQuery
           .startAt(query.search.toLowerCase().trim())
           .endAt(query.search.toLowerCase().trim() + "\uf8ff");
+
+        compositeQuery = compositeQuery.map((query_) =>
+          query_.startAt(query.search.toLowerCase().trim()).endAt(query.search.toLowerCase().trim() + "\uf8ff")
+        );
       }
       if (query.page) {
         const offsetValue = size * parseInt(query.page);
         dbQuery = dbQuery.offset(offsetValue);
+        compositeQuery = compositeQuery.map((query) => query.offset(offsetValue));
       } else if (query.next) {
         dbQuery = dbQuery.startAfter(doc);
+        compositeQuery = compositeQuery.map((query) => query.startAfter(doc));
       } else if (query.prev) {
         dbQuery = dbQuery.endBefore(doc);
+        compositeQuery = compositeQuery.map((query) => query.endBefore(doc));
       }
     }
     const snapshot = await dbQuery.get();
+    const snapshots = await Promise.all(compositeQuery.map((query) => query.get()));
 
     const firstDoc = snapshot.docs[0];
     const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
     const allUsers = [];
 
-    snapshot.forEach((doc) => {
-      allUsers.push({
-        id: doc.id,
-        ...doc.data(),
+    snapshots.forEach((snapshot) => {
+      snapshot.forEach((doc) => {
+        const userId = doc.id;
+        let userExists = false;
+        for (const user of allUsers) {
+          if (user.id === userId) {
+            userExists = true;
+            break;
+          }
+        }
+        if (!userExists) {
+          allUsers.push({
+            id: userId,
+            ...doc.data(),
+          });
+        }
       });
+    });
+
+    snapshot.forEach((doc) => {
+      const userId = doc.id;
+      let userExists = false;
+      for (const user of allUsers) {
+        if (user.id === userId) {
+          userExists = true;
+          break;
+        }
+      }
+      if (!userExists) {
+        allUsers.push({
+          id: userId,
+          ...doc.data(),
+        });
+      }
     });
 
     return {
