@@ -11,6 +11,7 @@ export const logType = {
   DISCORD_INVITES: "DISCORD_INVITES",
   EXTERNAL_SERVICE: "EXTERNAL_SERVICE",
   EXTENSION_REQUESTS: "extensionRequests",
+  TASK: "task",
   ...REQUEST_LOG_TYPE,
 };
 

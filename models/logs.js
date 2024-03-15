@@ -5,7 +5,8 @@ const admin = require("firebase-admin");
 const { logType, ERROR_WHILE_FETCHING_LOGS } = require("../constants/logs");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFullName } = require("../utils/users");
-const SIZE = 5;
+const { getUsersListFromLogs, formatLogsForFeed, mapify, convertTimestamp } = require("../utils/logs");
+const SIZE = 25;
 
 /**
  * Adds log
@@ -158,7 +159,7 @@ const fetchLastAddedCacheLog = async (id) => {
 
 const fetchAllLogs = async (query) => {
   try {
-    let { type, prev, next, page, size = SIZE } = query;
+    let { type, prev, next, page, size = SIZE, format } = query;
     size = parseInt(size);
     page = parseInt(page);
 
@@ -205,13 +206,28 @@ const fetchAllLogs = async (query) => {
           allLogs.push({ ...doc.data() });
         });
       }
+      const userList = await getUsersListFromLogs(allLogs);
+      const usersMap = mapify(userList, "id");
 
       if (allLogs.length === 0) {
         return null;
       }
+      if (format === "feed") {
+        let logsData = [];
+        logsData = allLogs.map((data) => {
+          if (!Object.keys(formatLogsForFeed(data, usersMap)).length) return null;
+          return { ...formatLogsForFeed(data, usersMap), type: data.type, timestamp: convertTimestamp(data.timestamp) };
+        });
+        return {
+          allLogs: logsData.filter((log) => log),
+          prev: prevDoc.empty ? null : prevDoc.docs[0].id,
+          next: nextDoc.empty ? null : nextDoc.docs[0].id,
+          page: page ? page + 1 : null,
+        };
+      }
 
       return {
-        allLogs,
+        allLogs: allLogs.filter((log) => log),
         prev: prevDoc.empty ? null : prevDoc.docs[0].id,
         next: nextDoc.empty ? null : nextDoc.docs[0].id,
         page: page ? page + 1 : null,
