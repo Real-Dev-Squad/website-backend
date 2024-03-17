@@ -49,6 +49,7 @@ const existingTaskRequest = {
   users: [
     {
       userId: "user123",
+      markdownEnabled: false,
       proposedDeadline: 1697452226789,
       proposedStartDate: 1697452226789,
       description: "Task description",
