@@ -147,6 +147,7 @@ describe("Logs", function () {
       // eslint-disable-next-line no-unused-expressions
       expect(result.next).to.not.be.null;
     });
+
     it("Should return all the logs as per the size passed = 3 and page passed", async function () {
       const PAGE = 1;
       const result = await logsQuery.fetchAllLogs({ size: 3, page: PAGE });

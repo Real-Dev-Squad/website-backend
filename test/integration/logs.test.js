@@ -145,6 +145,7 @@ describe("/logs", function () {
           return done();
         });
     });
+
     it("should return logs of type = extensionRequests with status code 200", function (done) {
       chai
         .request(app)
