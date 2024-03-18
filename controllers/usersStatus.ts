@@ -9,12 +9,7 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
  */
 const getUserStatus = async (req: any, res: any) => {
   try {
-    let userId: string;
-    if (req.route.path === "/self") {
-      userId = req.userData.id;
-    } else {
-      userId = req.params.userId;
-    }
+    let userId: string = req.params.userId;
     if (userId) {
       const userData: any = await getUserStatusFromModel(userId);
       const { userStatusExists, id, data } = userData;
@@ -45,24 +40,22 @@ const getUserStatus = async (req: any, res: any) => {
  */
 const updateUserStatus = async (req: any, res: any) => {
   try {
-    let userId: string;
-    if (req.route.path === "/self") {
-      userId = req.userData.id;
-    } else {
-      userId = req.params.userId;
-    }
+    let userId: string = req.params.userId;
     if (userId) {
       const dataToUpdate = {
         state: "CURRENT",
         ...req.body,
       };
       const updateStatus = await updateUserStatusFromModel(userId, dataToUpdate);
-      const { userStatusExists, id, data } = updateStatus;
-      const responseObject = { id, userId, data: null, message: "" };
+      const { userStatusExists, id, data, futureStatus } = updateStatus;
+      const responseObject = { id, data: null, message: "" };
       let statusCode;
       if (data) responseObject.data = data;
       if (userStatusExists) {
         responseObject.message = "User Status updated successfully.";
+        statusCode = 200;
+      } else if(futureStatus){
+        responseObject.message = "Future Status of user updated successfully.";
         statusCode = 200;
       } else {
         statusCode = 201;

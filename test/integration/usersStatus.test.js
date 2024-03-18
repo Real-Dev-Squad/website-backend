@@ -47,6 +47,7 @@ describe("UserStatus", function () {
           return done();
         });
     });
+
     it("Should return the User Status Document of the user requesting it", function (done) {
       chai
         .request(app)

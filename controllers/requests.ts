@@ -102,7 +102,7 @@ export const updateRequestController = async (req: any, res: any) => {
     if (requestResult.state === REQUEST_STATE.APPROVED) {
       const requestData = await getRequests({ id: requestId });
       if (requestData) {
-        const { from, until, requestedBy, message } = requestData as OooStatusRequest;
+        const { from, until, requestedBy, message } = requestData as any;
         const userFutureStatusData = {
           requestId,
           status: REQUEST_TYPE.OOO,

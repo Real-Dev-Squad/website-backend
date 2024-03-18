@@ -26,4 +26,18 @@ const authorizeOwnOrSuperUser = (req: CustomRequest, res: CustomResponse, next: 
   }
 };
 
-export { authorizeOwnOrSuperUser };
+const authorizeOwnUserIdParamOrSuperUser = (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
+  try {
+    const isSuperUser = req.userData.roles.super_user;
+    const { id } = req.userData;
+    const userIdInQuery = req.params.userId;
+
+    if (isSuperUser || userIdInQuery === id) return next();
+    else return res.boom.forbidden("Unauthorized User");
+  } catch (err) {
+    logger.error(err);
+    return res.boom.badImplementation("Something went wrong please contact admin");
+  }
+};
+
+export { authorizeOwnOrSuperUser, authorizeOwnUserIdParamOrSuperUser };
