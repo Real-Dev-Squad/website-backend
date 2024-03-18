@@ -1,4 +1,4 @@
-const extensionRequestLogs = [
+export const extensionRequestLogs = [
   {
     meta: {
       extensionRequestId: "y79PXir0s82qNAzeIn8S",
@@ -33,10 +33,16 @@ const extensionRequestLogs = [
   },
   {
     meta: {
-      oldETA: 1695832836,
-      newETA: 1695832936,
+      taskId: "mZB0akqPUa1GQQdrgsx7",
+      createdBy: "XBucw7nHW1wOxdWrmLVa",
+      username: "joygupta",
+    },
+    body: {
+      assignee: "XBucw7nHW1wOxdWrmLVa",
       extensionRequestId: "y79PXir0s82qNAzeIn8S",
-      userId: "XBucw7nHW1wOxdWrmLVa",
+      oldEndsOn: 1707264000,
+      newEndsOn: 1706918400,
+      status: "PENDING",
     },
     type: "extensionRequests",
     timestamp: {
@@ -46,10 +52,16 @@ const extensionRequestLogs = [
   },
   {
     meta: {
+      taskId: "mZB0akqPUa1GQQdrgsx7",
+      createdBy: "XBucw7nHW1wOxdWrmLVa",
+      username: "joygupta",
+    },
+    body: {
+      assignee: "XBucw7nHW1wOxdWrmLVa",
       oldTitle: "Hello World",
       newTitle: "Hello JS",
       extensionRequestId: "y79PXir0s82qNAzeIn8S",
-      userId: "XBucw7nHW1wOxdWrmLVa",
+      status: "PENDING",
     },
     type: "extensionRequests",
     timestamp: {
@@ -58,7 +70,3 @@ const extensionRequestLogs = [
     },
   },
 ];
-
-module.exports = {
-  extensionRequestLogs,
-};
