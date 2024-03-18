@@ -14,6 +14,7 @@ const userData = require("../fixtures/user/user")();
 const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
 const { EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests");
+const { LOGS_FETCHED_SUCCESSFULLY } = require("../../constants/logs");
 
 chai.use(chaiHttp);
 
@@ -500,7 +501,7 @@ describe("Extension Requests", function () {
               }
               expect(res).to.have.status(200);
               expect(res.body).to.be.a("object");
-              expect(res.body.message).to.equal("Logs returned successfully!");
+              expect(res.body.message).to.equal(LOGS_FETCHED_SUCCESSFULLY);
               expect(res.body.logs).to.be.a("array");
               expect(res.body.logs[0].body.extensionRequestId).to.equal(extensionRequestId1);
               expect(res.body.logs[0].body.assignee).to.equal(user.id);
