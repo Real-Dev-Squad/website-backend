@@ -366,7 +366,7 @@ const updateTaskStatus = async (req, res, next) => {
         ) {
           return res.boom.badRequest(
             `The status of task can not be changed from ${
-              isCurrentTaskStatusInProgress ? "In progress" : "Block"
+              isCurrentTaskStatusInProgress ? "In progress" : "Blocked"
             } until progress of task is not 100%.`
           );
         }
