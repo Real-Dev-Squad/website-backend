@@ -30,50 +30,61 @@ export const getUserStatus = async (
   }
 };
 
-export const updateUserStatus = async (userId: string, updatedStatusData: any) => {
+const updateFutureStatus = async (userId: string, dataToAddInFutureStatus: any) => {
+  const data: any = {
+    userId,
+    from: dataToAddInFutureStatus.appliedOn,
+    status: dataToAddInFutureStatus.status,
+    state: "UPCOMING",
+    message: dataToAddInFutureStatus.message || "",
+  };
+  if (dataToAddInFutureStatus.status === userState.OOO) {
+    data.endsOn = dataToAddInFutureStatus.endsOn;
+  }
+  const { id } = await futureStatusModel.add(dataToAddInFutureStatus);
+  return { id, data, userStatusExists: undefined, futureStatus: true };
+};
+
+const updateCurrentStatus = async (userId: string, dataToAddInCurrentStatus: any) => {
+  const userStatusDocs = await userStatusModel
+    .where("userId", "==", userId)
+    .where("state", "==", "CURRENT")
+    .limit(1)
+    .get();
+  const [userStatusDoc] = userStatusDocs.docs;
+  if (userStatusDoc) {
+    const today = new Date();
+    const todaysTime = Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate(),
+      today.getUTCHours(),
+      today.getUTCMinutes(),
+      today.getUTCSeconds()
+    );
+    await userStatusModel.doc(userStatusDoc.id).set({ state: "PAST", endedOn: todaysTime }, { merge: true });
+  }
+  if (dataToAddInCurrentStatus.status === userState.OOO) {
+    await futureStatusModel.add({
+      userId,
+      from: dataToAddInCurrentStatus.endsOn,
+      status: userStatusDoc?.data()?.status || userState.IDLE,
+      state: "UPCOMING",
+      message: "",
+    });
+    delete dataToAddInCurrentStatus.endsOn;
+  }
+  const { id } = await userStatusModel.add({ userId, ...dataToAddInCurrentStatus });
+  return { id, data: dataToAddInCurrentStatus, userStatusExists: !!userStatusDoc, futureStatus: false };
+};
+
+export const updateUserStatus = async (userId: string, statusData: any) => {
   try {
     const tomorrow = getTomorrowTimeStamp();
-    if (updatedStatusData.appliedOn >= tomorrow) {
-      const { id } = await futureStatusModel.add({
-        userId,
-        from: updatedStatusData.appliedOn,
-        status: updatedStatusData.status,
-        state: "UPCOMING",
-        endsOn: updatedStatusData.endsOn,
-        message: updatedStatusData.message,
-      });
-      return { id, userId, data: updatedStatusData, futureStatus: true };
+    if (statusData.appliedOn >= tomorrow) {
+      return await updateFutureStatus(userId, statusData);
     } else {
-      const userStatusDocs = await userStatusModel
-        .where("userId", "==", userId)
-        .where("state", "==", "CURRENT")
-        .limit(1)
-        .get();
-      const [userStatusDoc] = userStatusDocs.docs;
-      if (userStatusDoc) {
-        const today = new Date();
-        const todaysTime = Date.UTC(
-          today.getUTCFullYear(),
-          today.getUTCMonth(),
-          today.getUTCDate(),
-          today.getUTCHours(),
-          today.getUTCMinutes(),
-          today.getUTCSeconds()
-        );
-        await userStatusModel.doc(userStatusDoc.id).set({ state: "PAST", endedOn: todaysTime }, { merge: true });
-      }
-      if(updatedStatusData.status === userState.OOO) {
-        await futureStatusModel.add({
-          userId,
-          from: updatedStatusData.endsOn,
-          status: userStatusDoc?.data()?.status || userState.IDLE,
-          state: "UPCOMING",
-          message: "",
-        });
-        delete updatedStatusData.endsOn;
-      }
-      const { id } = await userStatusModel.add({ userId, ...updatedStatusData });
-      return { id, userId, data: updatedStatusData, userStatusExists: !!userStatusDoc, futureStatus: false };
+      return await updateCurrentStatus(userId, statusData);
     }
   } catch (error) {
     logger.error(`Error in updating the User Status Document. Reason - ${error}`);
