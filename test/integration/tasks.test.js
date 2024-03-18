@@ -1223,7 +1223,7 @@ describe("Tasks", function () {
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed to In progress until progress task is not 0%."
+        "The status of task can not be changed to In progress until progress of task is not 0%."
       );
     });
 
