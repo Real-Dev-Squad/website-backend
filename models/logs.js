@@ -158,87 +158,82 @@ const fetchLastAddedCacheLog = async (id) => {
 };
 
 const fetchAllLogs = async (query) => {
+  let { type, prev, next, page, size = SIZE, format } = query;
+  size = parseInt(size);
+  page = parseInt(page);
+
   try {
-    let { type, prev, next, page, size = SIZE, format } = query;
-    size = parseInt(size);
-    page = parseInt(page);
+    let requestQuery = logsModel;
 
-    try {
-      let requestQuery = logsModel;
+    if (type) {
+      const logType = type.split(",");
+      if (logType.length >= 1) requestQuery = requestQuery.where("type", "in", logType);
+    }
 
-      if (type) {
-        const logType = type.split(",");
-        if (logType.length >= 1) requestQuery = requestQuery.where("type", "in", logType);
-      }
+    requestQuery = requestQuery.orderBy("timestamp", "desc");
+    let requestQueryDoc = requestQuery;
 
-      requestQuery = requestQuery.orderBy("timestamp", "desc");
-      let requestQueryDoc = requestQuery;
+    if (prev) {
+      requestQueryDoc = requestQueryDoc.limitToLast(size);
+    } else {
+      requestQueryDoc = requestQueryDoc.limit(size);
+    }
 
-      if (prev) {
-        requestQueryDoc = requestQueryDoc.limitToLast(size);
-      } else {
-        requestQueryDoc = requestQueryDoc.limit(size);
-      }
+    if (page) {
+      const startAfter = (page - 1) * size;
+      requestQueryDoc = requestQueryDoc.offset(startAfter);
+    } else if (next) {
+      const doc = await logsModel.doc(next).get();
+      requestQueryDoc = requestQueryDoc.startAt(doc);
+    } else if (prev) {
+      const doc = await logsModel.doc(prev).get();
+      requestQueryDoc = requestQueryDoc.endAt(doc);
+    }
 
-      if (page) {
-        const startAfter = (page - 1) * size;
-        requestQueryDoc = requestQueryDoc.offset(startAfter);
-      } else if (next) {
-        const doc = await logsModel.doc(next).get();
-        requestQueryDoc = requestQueryDoc.startAt(doc);
-      } else if (prev) {
-        const doc = await logsModel.doc(prev).get();
-        requestQueryDoc = requestQueryDoc.endAt(doc);
-      }
+    const snapshot = await requestQueryDoc.get();
+    let nextDoc, prevDoc;
+    if (!snapshot.empty) {
+      const first = snapshot.docs[0];
+      prevDoc = await requestQuery.endBefore(first).limitToLast(1).get();
 
-      const snapshot = await requestQueryDoc.get();
-      let nextDoc, prevDoc;
-      if (!snapshot.empty) {
-        const first = snapshot.docs[0];
-        prevDoc = await requestQuery.endBefore(first).limitToLast(1).get();
+      const last = snapshot.docs[snapshot.docs.length - 1];
+      nextDoc = await requestQuery.startAfter(last).limit(1).get();
+    }
+    const allLogs = [];
+    if (!snapshot.empty) {
+      snapshot.forEach((doc) => {
+        allLogs.push({ ...doc.data() });
+      });
+    }
+    const userList = await getUsersListFromLogs(allLogs);
+    const usersMap = mapify(userList, "id");
 
-        const last = snapshot.docs[snapshot.docs.length - 1];
-        nextDoc = await requestQuery.startAfter(last).limit(1).get();
-      }
-      const allLogs = [];
-      if (!snapshot.empty) {
-        snapshot.forEach((doc) => {
-          allLogs.push({ ...doc.data() });
-        });
-      }
-      const userList = await getUsersListFromLogs(allLogs);
-      const usersMap = mapify(userList, "id");
-
-      if (allLogs.length === 0) {
-        return null;
-      }
-      if (format === "feed") {
-        let logsData = [];
-        logsData = allLogs.map((data) => {
-          if (!Object.keys(formatLogsForFeed(data, usersMap)).length) return null;
-          return { ...formatLogsForFeed(data, usersMap), type: data.type, timestamp: convertTimestamp(data.timestamp) };
-        });
-        return {
-          allLogs: logsData.filter((log) => log),
-          prev: prevDoc.empty ? null : prevDoc.docs[0].id,
-          next: nextDoc.empty ? null : nextDoc.docs[0].id,
-          page: page ? page + 1 : null,
-        };
-      }
-
+    if (allLogs.length === 0) {
+      return null;
+    }
+    if (format === "feed") {
+      let logsData = [];
+      logsData = allLogs.map((data) => {
+        if (!Object.keys(formatLogsForFeed(data, usersMap)).length) return null;
+        return { ...formatLogsForFeed(data, usersMap), type: data.type, timestamp: convertTimestamp(data.timestamp) };
+      });
       return {
-        allLogs: allLogs.filter((log) => log),
+        allLogs: logsData.filter((log) => log),
         prev: prevDoc.empty ? null : prevDoc.docs[0].id,
         next: nextDoc.empty ? null : nextDoc.docs[0].id,
         page: page ? page + 1 : null,
       };
-    } catch (error) {
-      logger.error(ERROR_WHILE_FETCHING_LOGS, error);
-      throw error;
     }
-  } catch (err) {
-    logger.error("Error in fetching all logs", err);
-    throw err;
+
+    return {
+      allLogs: allLogs.filter((log) => log),
+      prev: prevDoc.empty ? null : prevDoc.docs[0].id,
+      next: nextDoc.empty ? null : nextDoc.docs[0].id,
+      page: page ? page + 1 : null,
+    };
+  } catch (error) {
+    logger.error(ERROR_WHILE_FETCHING_LOGS, error);
+    throw error;
   }
 };
 

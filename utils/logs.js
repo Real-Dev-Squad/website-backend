@@ -4,13 +4,13 @@ const usersService = require("../services/dataAccessLayer");
 const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
 
 async function getUsersListFromLogs(allLogs) {
-  const userIds = [];
+  const userIds = new Set();
   for (const log of allLogs) {
     if (!userIds.includes(log.meta.userId || log.meta.createdBy)) {
-      userIds.push(log.meta.userId || log.meta.createdBy);
+      userIds.add(log.meta.userId || log.meta.createdBy);
     }
   }
-  return await usersService.fetchUsersForKeyValues(admin.firestore.FieldPath.documentId(), userIds);
+  return await usersService.fetchUsersForKeyValues(admin.firestore.FieldPath.documentId(), Array.from(userIds));
 }
 
 function formatLogsForFeed(logs, usersMap) {
@@ -104,7 +104,12 @@ function formatProfileDiffLogs(logsSnapshot, usersMap, type) {
 }
 
 function mapify(array, key) {
-  return array.map((o) => ({ key: o[key], val: o })).reduce((m, { key, val }) => Object.assign(m, { [key]: val }), {});
+  const mappifiedObj = {};
+  array.forEach((element) => {
+    // eslint-disable-next-line security/detect-object-injection
+    mappifiedObj[element[key]] = element;
+  });
+  return mappifiedObj;
 }
 
 function convertTimestamp(timestamp) {
