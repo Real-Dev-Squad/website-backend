@@ -161,7 +161,7 @@ describe("Logs", function () {
       const result = await logsQuery.fetchAllLogs({ size: 3, page: PAGE });
       expect(result.allLogs).to.have.lengthOf(3);
       const nextData = await logsQuery.fetchAllLogs({ next: result.next });
-      expect(nextData.allLogs).to.have.lengthOf(3);
+      expect(nextData.allLogs).to.have.lengthOf(4);
       expect(nextData).to.have.any.key("prev");
       expect(nextData).to.have.any.key("next");
       // eslint-disable-next-line no-unused-expressions

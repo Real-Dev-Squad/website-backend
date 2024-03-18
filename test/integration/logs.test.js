@@ -8,8 +8,10 @@ import userDataFixture from "../fixtures/user/user";
 import addUser from "../utils/addUser";
 import { createOooRequests } from "../fixtures/oooRequest/oooRequest";
 import { createRequest } from "../../models/requests";
-import { addLog } from "../../models/logs";
+import logsQuery, { addLog } from "../../models/logs";
 import { LOG_ACTION, REQUEST_LOG_TYPE } from "../../constants/requests";
+import { requestsLogs } from "../fixtures/logs/requests";
+import { extensionRequestLogs } from "../fixtures/logs/extensionRequests";
 const { expect } = chai;
 const cookieName = config.get("userToken.cookieName");
 
@@ -37,7 +39,7 @@ describe("/logs", function () {
       body: requestResult,
     };
     await addLog(requestLog.type, requestLog.meta, requestLog.body);
-
+    await addLogs();
     authToken = authService.generateAuthToken({ userId });
     superUserToken = authService.generateAuthToken({ userId: superUserId });
   });
@@ -58,7 +60,7 @@ describe("/logs", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.equal("Logs fetched successfully");
-          expect(res.body.logs).to.have.lengthOf(1);
+          expect(res.body.logs).to.have.lengthOf(3);
           const log = res.body.logs[0];
           expect(log).to.have.property("meta");
           expect(log).to.have.property("body");
@@ -123,7 +125,7 @@ describe("/logs", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.equal("All Logs fetched successfully");
-          expect(res.body.data).to.lengthOf(1);
+          expect(res.body.data).to.lengthOf(7);
           return done();
         });
     });
@@ -139,9 +141,80 @@ describe("/logs", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.equal("All Logs fetched successfully");
-          expect(res.body.data).to.lengthOf(1);
+          expect(res.body.data).to.lengthOf(7);
+          return done();
+        });
+    });
+    it("should return logs of type = extensionRequests with status code 200", function (done) {
+      chai
+        .request(app)
+        .get("/logs?type=extensionRequests&dev=true")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.data).to.have.lengthOf(4);
+          return done();
+        });
+    });
+
+    it("should return 204, if no logs are present", function (done) {
+      chai
+        .request(app)
+        .get("/logs?type=REQUEST_CREATED1&dev=true")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("should return proper link if page is mentioned in the query", function (done) {
+      chai
+        .request(app)
+        .get("/logs?page=1&dev=true&size=3")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body.message).to.equal("All Logs fetched successfully");
+          expect(res.body.data).to.lengthOf(3);
+          expect(res.body.page).to.equal("/logs?page=2&dev=true");
+          return done();
+        });
+    });
+
+    it("should proper next Link if next is mentioned in the query", function (done) {
+      chai
+        .request(app)
+        .get("/logs?dev=true&size=3")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body.message).to.equal("All Logs fetched successfully");
+          expect(res.body.data).to.lengthOf(3);
+          expect(res.body.next).to.contain("/logs?dev=true&size=3&next=");
           return done();
         });
     });
   });
 });
+
+async function addLogs() {
+  for (const request of requestsLogs) {
+    const { type, meta, body } = request;
+    await logsQuery.addLog(type, meta, body);
+  }
+  for (const request of extensionRequestLogs) {
+    const { type, meta, body } = request;
+    await logsQuery.addLog(type, meta, body);
+  }
+}
