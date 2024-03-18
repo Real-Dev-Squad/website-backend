@@ -13,6 +13,7 @@ const addUser = require("../../utils/addUser");
 const cookieName = config.get("userToken.cookieName");
 const authService = require("../../../services/authService");
 const { extensionRequestLogs } = require("../../fixtures/logs/extensionRequests");
+const { LOGS_FETCHED_SUCCESSFULLY } = require("../../../constants/logs");
 chai.use(chaiHttp);
 const superUser = userData[4];
 const userToBeMadeMember = userData[1];
@@ -154,7 +155,7 @@ describe("Logs", function () {
 
       const logs = response.body.logs;
 
-      expect(response.body.message).to.equal("Logs returned successfully!");
+      expect(response.body.message).to.equal(LOGS_FETCHED_SUCCESSFULLY);
       expect(logs).to.be.a("array").length(4);
 
       // Checking new fields that must be present in APPROVED Log
