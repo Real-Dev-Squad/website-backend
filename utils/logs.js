@@ -47,33 +47,21 @@ function formatRequestCreatedLogs(logsSnapshot, usersMap) {
   }
 }
 function formatExtensionRequestsLog(logsSnapshot, usersMap) {
-  switch (logsSnapshot.body.status) {
-    case EXTENSION_REQUEST_STATUS.PENDING:
-      return {
-        user: logsSnapshot.meta.username ?? usersMap[logsSnapshot.meta.assignee]?.username,
-        taskId: logsSnapshot.meta.taskId,
-        newEndsOn: logsSnapshot.body.newEndsOn,
-        oldEndsOn: logsSnapshot.body.oldEndsOn,
-        extensionRequestId: logsSnapshot.body.extensionRequestId,
-        status: logsSnapshot.body.status,
-      };
-    case EXTENSION_REQUEST_STATUS.APPROVED:
-      return {
-        user: logsSnapshot.meta.username ?? usersMap[logsSnapshot.meta.userId]?.username,
-        taskId: logsSnapshot.meta.taskId,
-        extensionRequestId: logsSnapshot.body.extensionRequestId,
-        status: logsSnapshot.body.status,
-      };
-    case EXTENSION_REQUEST_STATUS.DENIED:
-      return {
-        user: logsSnapshot.meta.username ?? usersMap[logsSnapshot.meta.userId]?.username,
-        taskId: logsSnapshot.meta.taskId,
-        extensionRequestId: logsSnapshot.body.extensionRequestId,
-        status: logsSnapshot.body.status,
-      };
-    default:
-      return {};
+  const { meta, body } = logsSnapshot;
+  const formattedLog = {
+    user: logsSnapshot.meta.username ?? usersMap[logsSnapshot.meta.userId]?.username,
+    taskId: meta.taskId,
+    extensionRequestId: body.extensionRequestId,
+    status: body.status,
+  };
+
+  if (body.status === EXTENSION_REQUEST_STATUS.PENDING) {
+    formattedLog.user = logsSnapshot.meta.username ?? usersMap[logsSnapshot.meta.assignee]?.username;
+    formattedLog.newEndsOn = body.newEndsOn;
+    formattedLog.oldEndsOn = body.oldEndsOn;
   }
+
+  return formattedLog;
 }
 
 function formatTaskUpdateLogs(logsSnapshot, usersMap) {
