@@ -1120,7 +1120,7 @@ describe("Tasks", function () {
         .send({ ...taskStatusData, status: "COMPLETED" });
 
       expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
+      expect(res.body.message).to.be.equal("Status cannot be updated as progress of task is not 100%.");
     });
 
     it("Should give 403 if current task status is DONE", async function () {
@@ -1144,7 +1144,7 @@ describe("Tasks", function () {
         .send({ ...taskStatusData, status: "VERIFIED" });
 
       expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
+      expect(res.body.message).to.be.equal("Status cannot be updated as progress of task is not 100%.");
     });
 
     it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {
