@@ -22,9 +22,8 @@ function formatLogsForFeed(logs, usersMap) {
     case logType.TASK:
       return formatTaskUpdateLogs(logs, usersMap);
     case logType.PROFILE_DIFF_APPROVED:
-      return formatProfileDiffLogs(logs, usersMap, logType.PROFILE_DIFF_APPROVED);
     case logType.PROFILE_DIFF_REJECTED:
-      return formatProfileDiffLogs(logs, usersMap, logType.PROFILE_DIFF_REJECTED);
+      return formatProfileDiffLogs(logs, usersMap, logs.type);
     default:
       return {};
   }

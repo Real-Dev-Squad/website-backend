@@ -214,8 +214,9 @@ const fetchAllLogs = async (query) => {
     if (format === "feed") {
       let logsData = [];
       logsData = allLogs.map((data) => {
-        if (!Object.keys(formatLogsForFeed(data, usersMap)).length) return null;
-        return { ...formatLogsForFeed(data, usersMap), type: data.type, timestamp: convertTimestamp(data.timestamp) };
+        const formattedLogs = formatLogsForFeed(data, usersMap);
+        if (!Object.keys(formattedLogs).length) return null;
+        return { ...formattedLogs, type: data.type, timestamp: convertTimestamp(data.timestamp) };
       });
       return {
         allLogs: logsData.filter((log) => log),
