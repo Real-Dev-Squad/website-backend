@@ -1,7 +1,7 @@
 const externalAccountsModel = require("../models/external-accounts");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getDiscordMembers } = require("../services/discordService");
-const { addOrUpdate, updateUsersInBatch } = require("../models/users");
+const { addOrUpdate, getUsersByRole, updateUsersInBatch } = require("../models/users");
 const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/dataAccessLayer");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
 const logger = require("../utils/logger");
@@ -65,20 +65,29 @@ const syncExternalAccountData = async (req, res) => {
       if (rdsUser.roles?.in_discord && !discordUser) {
         userData = {
           "roles.in_discord": false,
-          "roles.archived": true,
         };
         userUpdatedWithInDiscordFalse.push(rdsUser);
       } else if (discordUser) {
         userData = {
           discordJoinedAt: discordUser.joined_at,
           "roles.in_discord": true,
-          "roles.archived": false,
         };
       }
       updateUserDataPromises.push(addOrUpdate(userData, rdsUser.id));
     }
 
     await Promise.all(updateUserDataPromises);
+    const inDiscordUsers = await getUsersByRole("in_discord");
+    inDiscordUsers.forEach((user) => {
+      if (user.roles.archived === true) {
+        const userData = {
+          "roles.archived": false,
+        };
+        updateArchivedPromises.push(addOrUpdate(userData, user.id));
+      }
+    });
+
+    await Promise.all(updateArchivedPromises);
 
     return res.json({
       rdsUsers: rdsUserData.length,

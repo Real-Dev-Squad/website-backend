@@ -29,6 +29,7 @@ const {
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
+const flattenObject = require("../utils/flattenObject");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 const verifyUser = async (req, res) => {
@@ -420,7 +421,8 @@ const updateSelf = async (req, res) => {
       }
     }
 
-    const updatedUser = await userQuery.addOrUpdate(req.body, userId);
+    const updatePayload = flattenObject(req.body);
+    const updatedUser = await userQuery.addOrUpdate(updatePayload, userId);
 
     if (!updatedUser.isNewUser) {
       // Success criteria, user finished the sign-up process.
@@ -837,7 +839,8 @@ const updateRoles = async (req, res) => {
 
       const response = await getRoleToUpdate(result.user, dataToUpdate);
       if (response.updateRole) {
-        await userQuery.addOrUpdate(response.newUserRoles, result.user.id);
+        const rolesToBeUpdated = flattenObject(response.newUserRoles);
+        await userQuery.addOrUpdate(rolesToBeUpdated, result.user.id);
         if (dataToUpdate?.archived) {
           const body = {
             reason: reason || "",
