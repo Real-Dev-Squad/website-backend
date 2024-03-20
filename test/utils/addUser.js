@@ -1,5 +1,5 @@
 const users = require("../../models/users");
-const { default: flattenObject } = require("../../utils/flattenObject");
+const { flattenObject } = require("../../utils/flattenObject");
 
 // Import fixtures
 const userData = require("../fixtures/user/user")();

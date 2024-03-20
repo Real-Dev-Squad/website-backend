@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-import flattenObject from "../../../utils/flattenObject";
+import { flattenObject } from "../../../utils/flattenObject";
 
 describe("flattenObject", function () {
   it("flattenObject should flatten nested objects", () => {

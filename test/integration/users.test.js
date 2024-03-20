@@ -39,7 +39,7 @@ const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../../constants/errorMessages");
-const flattenObject = require("../../utils/flattenObject");
+const { flattenObject } = require("../../utils/flattenObject");
 const photoVerificationModel = firestore.collection("photo-verification");
 
 chai.use(chaiHttp);

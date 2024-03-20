@@ -1,5 +1,5 @@
 const { addOrUpdate, getUsersByRole } = require("../models/users");
-const flattenObject = require("../utils/flattenObject");
+const { flattenObject } = require("../utils/flattenObject");
 
 const updateRoles = async (req, res) => {
   try {

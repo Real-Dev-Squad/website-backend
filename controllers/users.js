@@ -29,7 +29,7 @@ const {
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
-const flattenObject = require("../utils/flattenObject");
+const { flattenObject } = require("../utils/flattenObject");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 const verifyUser = async (req, res) => {

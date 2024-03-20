@@ -6,7 +6,7 @@
  * @return {object} The flattened object.
  */
 
-export default function flattenObject(obj, parentKey = "") {
+export function flattenObject(obj, parentKey = "") {
   return Object.keys(obj).reduce((acc, key) => {
     const newKey = parentKey ? `${parentKey}.${key}` : key;
     if (Array.isArray(obj[key])) {
