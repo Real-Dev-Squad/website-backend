@@ -1,3 +1,5 @@
+import { getPaginatedLink } from "../utils/helper";
+import { ALL_LOGS_FETCHED_SUCCESSFULLY, ERROR_WHILE_FETCHING_LOGS, LOGS_FETCHED_SUCCESSFULLY } from "../constants/logs";
 const logsQuery = require("../models/logs");
 const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
@@ -11,15 +13,73 @@ const fetchLogs = async (req, res) => {
   try {
     const logs = await logsQuery.fetchLogs(req.query, req.params.type);
     return res.json({
-      message: "Logs returned successfully!",
+      message: LOGS_FETCHED_SUCCESSFULLY,
       logs,
     });
   } catch (error) {
-    logger.error(`Error while fetching logs: ${error}`);
+    logger.error(`${ERROR_WHILE_FETCHING_LOGS}: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
+const fetchAllLogs = async (req, res) => {
+  const { query } = req;
+  try {
+    if (query.dev !== "true") {
+      return res.boom.badRequest("Please use feature flag to make this request!");
+    }
+    const logs = await logsQuery.fetchAllLogs(query);
+    if (!logs) {
+      return res.status(204).send();
+    }
+    const { allLogs, next, prev, page } = logs;
+    if (allLogs.length === 0) {
+      return res.status(204).send();
+    }
+
+    if (page) {
+      const pageLink = `/logs?page=${page}&dev=${query.dev}`;
+      return res.status(200).json({
+        message: ALL_LOGS_FETCHED_SUCCESSFULLY,
+        data: allLogs,
+        page: pageLink,
+      });
+    }
+
+    let nextUrl = null;
+    let prevUrl = null;
+    if (next) {
+      const nextLink = getPaginatedLink({
+        endpoint: "/logs",
+        query,
+        cursorKey: "next",
+        docId: next,
+      });
+      nextUrl = nextLink;
+    }
+    if (prev) {
+      const prevLink = getPaginatedLink({
+        endpoint: "/logs",
+        query,
+        cursorKey: "prev",
+        docId: prev,
+      });
+      prevUrl = prevLink;
+    }
+
+    return res.status(200).json({
+      message: ALL_LOGS_FETCHED_SUCCESSFULLY,
+      data: allLogs,
+      next: nextUrl,
+      prev: prevUrl,
+    });
+  } catch (err) {
+    logger.error(ERROR_WHILE_FETCHING_LOGS, err);
+    return res.boom.badImplementation(ERROR_WHILE_FETCHING_LOGS);
   }
 };
 
 module.exports = {
   fetchLogs,
+  fetchAllLogs,
 };
