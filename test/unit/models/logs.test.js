@@ -177,6 +177,10 @@ describe("Logs", function () {
     it("Should return all the logs in formatted view", async function () {
       const result = await logsQuery.fetchAllLogs({ size: 3, format: "feed" });
       expect(result.allLogs).to.have.lengthOf(3);
+      expect(result.allLogs[1]).to.have.property("timestamp").that.is.a("number");
+      expect(result.allLogs[1]).to.not.have.property("body");
+      expect(result.allLogs[1]).to.not.have.property("meta");
+      expect(result.allLogs[1]).to.have.property("type");
       expect(result).to.have.any.key("prev");
       expect(result).to.have.any.key("next");
     });
