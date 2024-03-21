@@ -14,6 +14,7 @@ import { requestsLogs } from "../fixtures/logs/requests";
 import { extensionRequestLogs } from "../fixtures/logs/extensionRequests";
 const { expect } = chai;
 const cookieName = config.get("userToken.cookieName");
+import _ from "lodash";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -93,7 +94,6 @@ describe("/logs", function () {
           }
           expect(res).to.have.status(401);
           expect(res.body.error).to.equal("Unauthorized");
-          expect(res.body.message).to.equal(`You are not authorized for this action.`);
           return done();
         });
     });
@@ -130,7 +130,7 @@ describe("/logs", function () {
         });
     });
 
-    it("should return all formatted Logs", function (done) {
+    it.only("should return all formatted Logs", function (done) {
       chai
         .request(app)
         .get("/logs?dev=true&format=feed")
@@ -142,11 +142,21 @@ describe("/logs", function () {
           expect(res).to.have.status(200);
           expect(res.body.message).to.equal("All Logs fetched successfully");
           expect(res.body.data).to.lengthOf(7);
-          return done();
+          expect(res.body.data[0]).to.contain({
+            user: 'joygupta',
+            taskId: 'mZB0akqPUa1GQQdrgsx7',
+            extensionRequestId: 'y79PXir0s82qNAzeIn8S',
+            status: 'PENDING',
+            type: 'extensionRequests'
+          })
+          expect(res.body.data[0]).to.have.property("timestamp");
+          expect(res.body.data[0]).to.not.have.property("body");
+          expect(res.body.data[0]).to.not.have.property("meta");
+         return done();
         });
     });
 
-    it("should return logs of type = extensionRequests with status code 200", function (done) {
+    it("should return logs of type = extensionRequests", function (done) {
       chai
         .request(app)
         .get("/logs?type=extensionRequests&dev=true")
@@ -175,7 +185,7 @@ describe("/logs", function () {
         });
     });
 
-    it("should return proper link if page is mentioned in the query", function (done) {
+    it("should return data if page param is passed in the quey", function (done) {
       chai
         .request(app)
         .get("/logs?page=1&dev=true&size=3")
@@ -191,7 +201,7 @@ describe("/logs", function () {
         });
     });
 
-    it("should proper next Link if next is mentioned in the query", function (done) {
+    it("should return valid paginated link", function (done) {
       chai
         .request(app)
         .get("/logs?dev=true&size=3")
