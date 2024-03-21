@@ -14,7 +14,6 @@ import { requestsLogs } from "../fixtures/logs/requests";
 import { extensionRequestLogs } from "../fixtures/logs/extensionRequests";
 const { expect } = chai;
 const cookieName = config.get("userToken.cookieName");
-import _ from "lodash";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -130,7 +129,7 @@ describe("/logs", function () {
         });
     });
 
-    it.only("should return all formatted Logs", function (done) {
+    it("should return all formatted Logs", function (done) {
       chai
         .request(app)
         .get("/logs?dev=true&format=feed")
@@ -143,16 +142,16 @@ describe("/logs", function () {
           expect(res.body.message).to.equal("All Logs fetched successfully");
           expect(res.body.data).to.lengthOf(7);
           expect(res.body.data[0]).to.contain({
-            user: 'joygupta',
-            taskId: 'mZB0akqPUa1GQQdrgsx7',
-            extensionRequestId: 'y79PXir0s82qNAzeIn8S',
-            status: 'PENDING',
-            type: 'extensionRequests'
-          })
+            user: "joygupta",
+            taskId: "mZB0akqPUa1GQQdrgsx7",
+            extensionRequestId: "y79PXir0s82qNAzeIn8S",
+            status: "PENDING",
+            type: "extensionRequests",
+          });
           expect(res.body.data[0]).to.have.property("timestamp");
           expect(res.body.data[0]).to.not.have.property("body");
           expect(res.body.data[0]).to.not.have.property("meta");
-         return done();
+          return done();
         });
     });
 
