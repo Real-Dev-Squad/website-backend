@@ -82,7 +82,7 @@ describe("/logs", function () {
         });
     });
 
-    it("should return 401 if user is authorized to access the logs", function (done) {
+    it("should return 401 if the user is not authorized to access the logs", function (done) {
       chai
         .request(app)
         .get("/logs")
