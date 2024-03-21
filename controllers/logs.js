@@ -29,14 +29,10 @@ const fetchAllLogs = async (req, res) => {
       return res.boom.badRequest("Please use feature flag to make this request!");
     }
     const logs = await logsQuery.fetchAllLogs(query);
-    if (!logs) {
+    if (logs.length === 0) {
       return res.status(204).send();
     }
     const { allLogs, next, prev, page } = logs;
-    if (allLogs.length === 0) {
-      return res.status(204).send();
-    }
-
     if (page) {
       const pageLink = `/logs?page=${page}&dev=${query.dev}`;
       return res.status(200).json({
