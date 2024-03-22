@@ -1121,19 +1121,19 @@ describe("Tasks", function () {
         .send({ ...taskStatusData, status: "COMPLETED" });
 
       expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
+      expect(res.body.message).to.be.equal("Status cannot be updated as progress of task is not 100%.");
     });
 
-    it("Should give 400 if percentCompleted is not 100 and new status is DONE under feature flag ", async function () {
-      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+    it("Should give 403 if current task status is DONE", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "DONE", assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send({ ...taskStatusData, status: "DONE" });
+        .send({ ...taskStatusData, status: "IN_REVIEW" });
 
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+      expect(res).to.have.status(403);
     });
 
     it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED ", async function () {
@@ -1145,19 +1145,7 @@ describe("Tasks", function () {
         .send({ ...taskStatusData, status: "VERIFIED" });
 
       expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
-    });
-
-    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED under feature flag", async function () {
-      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ ...taskStatusData, status: "VERIFIED" });
-
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
+      expect(res.body.message).to.be.equal("Status cannot be updated as progress of task is not 100%.");
     });
 
     it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {

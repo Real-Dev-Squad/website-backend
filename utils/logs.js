@@ -6,7 +6,7 @@ const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
 async function getUsersListFromLogs(allLogs) {
   const userIds = new Set();
   for (const log of allLogs) {
-    if (!userIds.includes(log.meta.userId || log.meta.createdBy)) {
+    if (!userIds.has(log.meta.userId || log.meta.createdBy)) {
       userIds.add(log.meta.userId || log.meta.createdBy);
     }
   }

@@ -328,23 +328,28 @@ const updateTaskStatus = async (req, res, next) => {
 
     if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
     if (task.notAssignedToYou) return res.boom.forbidden("This task is not assigned to you");
-    if (
-      task.taskData.status === TASK_STATUS.VERIFIED ||
-      status === TASK_STATUS.MERGED ||
-      status === TASK_STATUS.BACKLOG
-    )
+    if (TASK_STATUS.BACKLOG === status) {
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
-
+    }
     if (userStatusFlag) {
-      if (task.taskData.status === TASK_STATUS.DONE && req.body.percentCompleted < 100) {
-        if (status === TASK_STATUS.DONE || !status) {
-          return res.boom.badRequest("Task percentCompleted can't updated as status is DONE");
+      if (task.taskData.status === TASK_STATUS.DONE) {
+        return res.boom.forbidden("Status cannot be updated. Please contact admin.");
+      }
+    } else {
+      if (task.taskData.status === TASK_STATUS.VERIFIED || TASK_STATUS.MERGED === status) {
+        return res.boom.forbidden("Status cannot be updated. Please contact admin.");
+      }
+      if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
+        if (status === TASK_STATUS.COMPLETED || !status) {
+          return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
         }
       }
-
-      if ((status === TASK_STATUS.DONE || status === TASK_STATUS.VERIFIED) && task.taskData.percentCompleted !== 100) {
+      if (
+        (status === TASK_STATUS.COMPLETED || status === TASK_STATUS.VERIFIED) &&
+        task.taskData.percentCompleted !== 100
+      ) {
         if (req.body.percentCompleted !== 100) {
-          return res.boom.badRequest("Status cannot be updated. Task is not done yet");
+          return res.boom.badRequest("Status cannot be updated as progress of task is not 100%.");
         }
       }
       if (status) {
@@ -375,20 +380,6 @@ const updateTaskStatus = async (req, res, next) => {
             "The status of task can not be changed to In progress until progress of task is not 0%."
           );
         }
-      }
-    }
-
-    if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
-      if (status === TASK_STATUS.COMPLETED || !status) {
-        return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
-      }
-    }
-    if (
-      (status === TASK_STATUS.COMPLETED || status === TASK_STATUS.VERIFIED) &&
-      task.taskData.percentCompleted !== 100
-    ) {
-      if (req.body.percentCompleted !== 100) {
-        return res.boom.badRequest("Status cannot be updated. Task is not completed yet");
       }
     }
 
