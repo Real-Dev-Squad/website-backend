@@ -335,6 +335,35 @@ const updateTaskStatus = async (req, res, next) => {
       if (task.taskData.status === TASK_STATUS.DONE) {
         return res.boom.forbidden("Status cannot be updated. Please contact admin.");
       }
+      if (status) {
+        const isCurrentTaskStatusInProgress = task.taskData.status === TASK_STATUS.IN_PROGRESS;
+        const isCurrentTaskStatusBlock = task.taskData.status === TASK_STATUS.BLOCKED;
+        const isNewTaskStatusInProgress = status === TASK_STATUS.IN_PROGRESS;
+        const isNewTaskStatusBlock = status === TASK_STATUS.BLOCKED;
+        const isCurrProgress100 = parseInt(task.taskData.percentCompleted || 0) === 100;
+        const isCurrProgress0 = parseInt(task.taskData.percentCompleted || 0) === 0;
+        const isNewProgress100 = !!req.body.percentCompleted && parseInt(req.body.percentCompleted) === 100;
+        const isNewProgress0 = !!req.body.percentCompleted !== undefined && parseInt(req.body.percentCompleted) === 0;
+
+        if (
+          !isCurrProgress100 &&
+          !isNewProgress100 &&
+          (isCurrentTaskStatusBlock || isCurrentTaskStatusInProgress) &&
+          !isNewTaskStatusBlock &&
+          !isNewTaskStatusInProgress
+        ) {
+          return res.boom.badRequest(
+            `The status of task can not be changed from ${
+              isCurrentTaskStatusInProgress ? "In progress" : "Blocked"
+            } until progress of task is not 100%.`
+          );
+        }
+        if (isNewTaskStatusInProgress && !isCurrentTaskStatusBlock && !isCurrProgress0 && !isNewProgress0) {
+          return res.boom.badRequest(
+            "The status of task can not be changed to In progress until progress of task is not 0%."
+          );
+        }
+      }
     } else {
       if (task.taskData.status === TASK_STATUS.VERIFIED || TASK_STATUS.MERGED === status) {
         return res.boom.forbidden("Status cannot be updated. Please contact admin.");
