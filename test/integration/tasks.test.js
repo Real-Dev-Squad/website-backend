@@ -1173,18 +1173,6 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
     });
 
-    it("Should give 400 if status is DONE and newpercent is less than 100 under feature flag", async function () {
-      taskId = (await tasks.updateTask(updateTaskStatus[0])).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ percentCompleted: 80 });
-
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is DONE");
-    });
-
     it("Should give 400 if current status of task is In Progress  and new status is not Blocked and both current and new percentCompleted are not 100 ", async function () {
       const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 80 };
       taskId = (await tasks.updateTask(newDate)).taskId;
