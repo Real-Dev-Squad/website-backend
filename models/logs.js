@@ -209,7 +209,7 @@ const fetchAllLogs = async (query) => {
     const usersMap = mapify(userList, "id");
 
     if (allLogs.length === 0) {
-      return null;
+      return [];
     }
     if (format === "feed") {
       let logsData = [];
