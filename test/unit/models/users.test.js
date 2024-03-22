@@ -7,7 +7,6 @@
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
-
 const cleanDb = require("../../utils/cleanDb");
 const users = require("../../../models/users");
 const firestore = require("../../../utils/firestore");
@@ -22,6 +21,10 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const userData = require("../../fixtures/user/user");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
+const app = require("../../../server");
+const prodUsers = require("../../fixtures/user/prodUsers");
+const authService = require("../../../services/authService");
+const cookieName = config.get("userToken.cookieName");
 /**
  * Test the model functions and validate the data stored
  */
@@ -119,6 +122,7 @@ describe("users", function () {
 
   describe("fetch user details based on discord id", function () {
     let [userId0] = [];
+
     beforeEach(async function () {
       const userArr = userData();
       userId0 = await addUser(userArr[0]);
@@ -128,6 +132,7 @@ describe("users", function () {
     afterEach(async function () {
       await cleanDb();
     });
+
     it("It should fetch users who have archived:false role", async function () {
       const result = await users.fetchUser({ discordId: "12345" });
       expect(result.user.roles.archived).to.equal(false);
@@ -136,6 +141,7 @@ describe("users", function () {
 
   describe("user image verification", function () {
     let userId, discordId, profileImageUrl, discordImageUrl;
+
     beforeEach(async function () {
       const docRefUser0 = photoVerificationModel.doc();
       await docRefUser0.set(userPhotoVerificationData);
@@ -144,9 +150,11 @@ describe("users", function () {
       profileImageUrl = newUserPhotoVerificationData.profile.url;
       discordImageUrl = newUserPhotoVerificationData.discord.url;
     });
+
     afterEach(async function () {
       await cleanDb();
     });
+
     it("adds new user images For Verification", async function () {
       const result = await users.addForVerification(userId, discordId, profileImageUrl, discordImageUrl);
 
@@ -159,6 +167,7 @@ describe("users", function () {
 
       expect(result.message).to.be.equal("Profile data added for verification successfully");
     });
+
     it("adds user images For Verification", async function () {
       const userId = "1234567abcd";
       const verificationSnapshotBeforeUpdate = await photoVerificationModel
@@ -177,6 +186,7 @@ describe("users", function () {
 
       expect(result.message).to.be.equal("Profile data added for verification successfully");
     });
+
     it("marks user profile image as verified", async function () {
       const userId = "1234567abcd";
       const imageType = "profile";
@@ -193,6 +203,7 @@ describe("users", function () {
 
       expect(result.message).to.be.equal("User image data verified successfully");
     });
+
     it("throws an error if verification document not found", async function () {
       const userId = "non-existent-userId";
       const imageType = "profile";
@@ -203,6 +214,7 @@ describe("users", function () {
         expect(error.message).to.be.equal("No verification document record data for user was found");
       }
     });
+
     it("gets user image verification data", async function () {
       const userId = "1234567abcd";
 
@@ -212,6 +224,7 @@ describe("users", function () {
       const docData = verificationSnapshot.docs[0].data();
       expect(result).to.deep.equal(docData);
     });
+
     it("throws an error if verification document could not be found due to invalid user Id", async function () {
       const userId = "non-existent-userId";
 
@@ -255,6 +268,7 @@ describe("users", function () {
       joinData[0].userId = "12345";
       await users.addJoinData(joinData[0]);
     });
+
     it("gets joinData", async function () {
       const data = await users.getJoinData("12345");
       expect(data.length).to.be.equal(1);
@@ -336,6 +350,7 @@ describe("users", function () {
       });
       await Promise.all(addUsersPromises);
     });
+
     it("returns users with member role", async function () {
       const members = await users.getUsersByRole("member");
       expect(members.length).to.be.equal(7);
@@ -343,6 +358,7 @@ describe("users", function () {
         expect(member.roles.member).to.be.equal(true);
       });
     });
+
     it("throws an error", async function () {
       await users.getUsersByRole(32389434).catch((err) => {
         expect(err).to.be.instanceOf(Error);
@@ -366,6 +382,7 @@ describe("users", function () {
     afterEach(async function () {
       await cleanDb();
     });
+
     it("should render users with onboarding state and time as 31days", async function () {
       const query = {
         state: "ONBOARDING",
@@ -378,6 +395,7 @@ describe("users", function () {
 
   describe("fetch users by id", function () {
     let allIds = [];
+
     before(async function () {
       const addUsersPromises = [];
       userDataArray.forEach((user, index) => {
@@ -472,6 +490,101 @@ describe("users", function () {
 
       expect(userListResult.length).to.be.equal(1);
       expect(userListResult[0].discordId).to.be.deep.equal(userDataArray[0].discordId);
+    });
+  });
+
+  describe("Adding github_user_id for each user document", function () {
+    let userId, userToken, superUserId, superUserToken;
+
+    beforeEach(async function () {
+      userId = await addUser(prodUsers[1]);
+      userToken = authService.generateAuthToken({ userId: userId });
+      superUserId = await addUser(prodUsers[0]);
+      superUserToken = authService.generateAuthToken({ userId: superUserId });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("Migration API should not be accessible by any regular user", function (done) {
+      chai
+        .request(app)
+        .post("/users/migrations?action=adds-github-id&page=0&size=10")
+        .set("cookie", `${cookieName}=${userToken}`)
+        .send()
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "You are not authorized for this action.",
+          });
+          return done();
+        });
+    });
+
+    it("Migration API should be not be accessible with invalid query params", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/migrations")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+      expect(res).to.have.status(400);
+      expect(res.body).to.have.property("message");
+      expect(res.body).to.have.property("error");
+      expect(res.body.message).to.equal("Invalid Query Parameters Passed");
+      expect(res.body.error).to.equal("Bad Request");
+    });
+
+    it("Migration API should be accessible by super user", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/migrations?action=adds-github-id&page=0&size=10")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+      expect(res).to.have.status(200);
+    });
+
+    it("Migration API to add github_user_id should work", async function () {
+      for (const user of prodUsers.slice(2)) {
+        await addUser(user);
+      }
+      const allUsers = await chai.request(app).get("/users").set("cookie", `${cookieName}=${superUserToken}`).send();
+      const usersWithoutGithubId = allUsers.body.users.filter((user) => {
+        return !user.github_user_id;
+      });
+
+      expect(usersWithoutGithubId).to.not.have.length(0);
+
+      const res = await chai
+        .request(app)
+        .post("/users/migrations?action=adds-github-id&page=0&size=10")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.have.property("data").that.is.an("object");
+      expect(res.body.data).to.have.property("totalUsers").that.is.a("number");
+      expect(res.body.data).to.have.property("usersUpdated").that.is.a("number");
+      expect(res.body.data).to.have.property("usersNotUpdated").that.is.a("number");
+      expect(res.body.data).to.have.property("invalidUsersDetails").that.is.an("array");
+
+      const updatedUsers = await chai
+        .request(app)
+        .get("/users")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+
+      const updatedUsersWithoutGithubId = updatedUsers.body.users.filter((user) => {
+        return !user.github_user_id;
+      });
+      // For invalid username
+      expect(updatedUsersWithoutGithubId).to.have.length(1);
     });
   });
 });

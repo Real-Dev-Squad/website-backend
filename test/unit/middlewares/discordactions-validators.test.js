@@ -19,6 +19,7 @@ describe("Middleware | Validators | discord actions", function () {
       await validateGroupRoleBody(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
+
     it("stops the propogation of the event to next function", async function () {
       const res = {
         boom: {
@@ -35,6 +36,7 @@ describe("Middleware | Validators | discord actions", function () {
       expect(nextSpy.callCount).to.be.equal(0);
     });
   });
+
   describe("validateMemberRoleBody", function () {
     it("lets the request pass to the next function", async function () {
       const req = {
@@ -48,6 +50,7 @@ describe("Middleware | Validators | discord actions", function () {
       await validateMemberRoleBody(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
+
     it("stops the propogation to the next function", async function () {
       const res = {
         boom: {

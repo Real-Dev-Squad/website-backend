@@ -134,6 +134,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should have same time for createdAt and updatedAt for new tasks", function (done) {
       chai
         .request(app)
@@ -167,6 +168,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("should return fail response if task has a non-acceptable status value", function (done) {
       chai
         .request(app)
@@ -198,6 +200,7 @@ describe("Tasks", function () {
 
   describe("GET /tasks", function () {
     let taskId2, taskId3;
+
     before(async function () {
       taskId2 = (await tasks.updateTask({ ...taskData[0], createdAt: 1621717694, updatedAt: 1700680830 })).taskId;
       taskId3 = (await tasks.updateTask({ ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753 })).taskId;
@@ -409,6 +412,7 @@ describe("Tasks", function () {
       expect(previousPageResponse.body).to.have.property("prev");
       expect(previousPageResponse.body.tasks).to.have.length(1);
     });
+
     it("Should get tasks filtered by search term", function (done) {
       const searchTerm = "task";
       chai
@@ -432,6 +436,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should get tasks filtered by search term and handle no tasks found", function (done) {
       chai
         .request(app)
@@ -449,6 +454,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should return no task found when there is no searchterm", function (done) {
       chai
         .request(app)
@@ -466,6 +472,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should get paginated tasks ordered by updatedAt in desc order ", function (done) {
       chai
         .request(app)
@@ -507,6 +514,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should return isCollapsed property in response", function (done) {
       chai
         .request(app)
@@ -737,6 +745,7 @@ describe("Tasks", function () {
       expect(res2.body.taskData).to.have.property("startedOn");
       expect(res2.body.taskData.startedOn).to.be.equal(1695804041);
     });
+
     it("should check updated dependsOn", function (done) {
       chai
         .request(app)
@@ -755,6 +764,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should update the task status collapsed for the given taskid", function (done) {
       chai
         .request(app)
@@ -772,6 +782,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should return fail response if task data has a non-acceptable status value to update the task for the given taskid", function (done) {
       chai
         .request(app)
@@ -791,6 +802,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should return fail response if percent completed is < 0 or > 100", function (done) {
       chai
         .request(app)
@@ -1077,6 +1089,7 @@ describe("Tasks", function () {
       expect(res).to.have.status(403);
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
+
     it("Should give 403 if new status is 'MERGED' ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
       const res = await chai
@@ -1084,6 +1097,17 @@ describe("Tasks", function () {
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "MERGED" });
+
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+    });
+
+    it("Should give 403 if new status is 'BACKLOG' ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "BACKLOG" });
 
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
@@ -1262,9 +1286,11 @@ describe("Tasks", function () {
       await tasks.updateTask(tasksData[5]);
       await tasks.updateTask(tasksData[6]);
     });
+
     afterEach(async function () {
       await cleanDb();
     });
+
     it("Should return 401 if not super_user", async function () {
       const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${jwt}`);
       expect(res).to.have.status(401);
@@ -1333,6 +1359,7 @@ describe("Tasks", function () {
     let userNotInDiscord;
     let jwtToken;
     let getDiscordMembersStub;
+
     beforeEach(async function () {
       await cleanDb();
       idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
@@ -1391,10 +1418,12 @@ describe("Tasks", function () {
       getDiscordMembersStub.returns(discordMembers);
       jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
     });
+
     afterEach(async function () {
       sinon.restore();
       await cleanDb();
     });
+
     it("should return successful response with user id list", async function () {
       const response = await chai
         .request(app)
@@ -1411,6 +1440,7 @@ describe("Tasks", function () {
       });
       expect(response.status).to.be.equal(200);
     });
+
     it("should return successful response with user id when all params are passed", async function () {
       const response = await chai
         .request(app)
@@ -1444,6 +1474,7 @@ describe("Tasks", function () {
       });
       expect(response.status).to.be.equal(400);
     });
+
     it("should save logs when there is an error", async function () {
       getDiscordMembersStub.throws(new Error("Error occurred"));
       await chai
@@ -1458,89 +1489,6 @@ describe("Tasks", function () {
         tasksLogs = data.data();
       });
       expect(tasksLogs.body.error).to.be.equal("Error: Error occurred");
-    });
-  });
-
-  describe("PATCH /tasks/:id should update the tasks by SuperUser", function () {
-    beforeEach(async function () {
-      const superUserId = await addUser(superUser);
-      superUserJwt = authService.generateAuthToken({ userId: superUserId });
-
-      await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").set({
-        assignee: "SooJK37gzjIZfFNH0tlL",
-        status: "IN_PROGRESS",
-        percentCompleted: 80,
-        startedOn: 1701388800000,
-        endsOn: 1701561600000,
-      });
-    });
-
-    afterEach(async function () {
-      await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").delete();
-    });
-
-    it("Should unassign the task with other fields reset exclusively", async function () {
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/4kAkRv9TBlOfR6WEUhoQ`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send({
-          assignee: null,
-          status: TASK_STATUS.AVAILABLE,
-          percentCompleted: 0,
-          startedOn: null,
-          endsOn: null,
-        });
-
-      expect(res).to.have.status(204);
-
-      const docSnapshot = await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").get();
-
-      const updatedData = docSnapshot.data();
-      expect(updatedData.assignee).to.equal(null);
-      expect(updatedData.status).to.equal(TASK_STATUS.AVAILABLE);
-      expect(updatedData.percentCompleted).to.equal(0);
-      expect(updatedData.startedOn).to.equal(null);
-      expect(updatedData.endsOn).to.equal(null);
-    });
-
-    it("Should unassign the task with other fields reset internally", async function () {
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/4kAkRv9TBlOfR6WEUhoQ`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send({
-          status: TASK_STATUS.AVAILABLE,
-        });
-
-      expect(res).to.have.status(204);
-
-      const docSnapshot = await firestore.collection("tasks").doc("4kAkRv9TBlOfR6WEUhoQ").get();
-
-      const updatedData = docSnapshot.data();
-      expect(updatedData.assignee).to.equal(null);
-      expect(updatedData.status).to.equal(TASK_STATUS.AVAILABLE);
-      expect(updatedData.percentCompleted).to.equal(0);
-      expect(updatedData.startedOn).to.equal(null);
-      expect(updatedData.endsOn).to.equal(null);
-    });
-
-    it("Should throw bad request if the req body is invalid", async function () {
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/4kAkRv9TBlOfR6WEUhoQ`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .send({
-          assignee: null,
-          status: TASK_STATUS.AVAILABLE,
-          percentCompleted: 0,
-          startedOn: "null",
-          endsOn: false,
-        });
-
-      expect(res).to.have.status(400);
-      expect(res.body.error).to.equal("Bad Request");
-      expect(res.body.message).to.equal('"endsOn" must be one of [number, null]');
     });
   });
 });

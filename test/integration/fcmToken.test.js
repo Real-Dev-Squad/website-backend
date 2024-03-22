@@ -17,6 +17,7 @@ describe("Fcm Token Test", function () {
     userId0 = await addUser(userData0);
     userIdToken0 = authService.generateAuthToken({ userId: userId0 });
   });
+
   afterEach(async function () {
     await cleanDb();
   });
@@ -58,6 +59,7 @@ describe("Fcm Token Test", function () {
       expect(response).to.have.status(409);
       expect(response.body.message).equals("Device Already Registered");
     });
+
     it("should have fcm token", async function () {
       const fcmTokenData = {};
       const response = await chai
@@ -70,6 +72,7 @@ describe("Fcm Token Test", function () {
       expect(response).to.have.status(400);
       expect(response.body.message).equals('"fcmToken" is required');
     });
+
     it("should have user token", async function () {
       const fcmTokenData = { fcmToken: "iedsijdsdj" };
 

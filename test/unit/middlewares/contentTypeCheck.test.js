@@ -1,6 +1,8 @@
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
+const { getDiscordMembers } = require("../../fixtures/discordResponse/discord-response");
+const sinon = require("sinon");
 
 const app = require("../../../server");
 const authService = require("../../../services/authService");
@@ -13,13 +15,23 @@ chai.use(chaiHttp);
 
 describe("contentTypeCheck", function () {
   let jwt;
+  let fetchStub;
 
   beforeEach(async function () {
     const userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
+
+    fetchStub = sinon.stub(global, "fetch");
+    fetchStub.returns(
+      Promise.resolve({
+        status: 200,
+        json: () => Promise.resolve(getDiscordMembers),
+      })
+    );
   });
 
   afterEach(async function () {
+    sinon.restore();
     await cleanDb();
   });
 

@@ -207,20 +207,17 @@ async function getUsers(req, res, next) {
  * @param res {Object} - Express response object
  * @param next {Object} - Express middleware function
  */
+
 async function validateUserQueryParams(req, res, next) {
   const validUserStates = [userState.OOO, userState.ONBOARDING, userState.IDLE, userState.ACTIVE];
   const schema = joi
-    .object()
-    .strict()
-    .min(1)
-    .keys({
+    .object({
       levelId: joi.array().items(joi.string()).single().optional(),
       levelName: joi.array().items(joi.string()).single().optional(),
       levelValue: joi.array().items(joi.number()).single().optional(),
       tagId: joi.array().items(joi.string()).single().optional(),
       state: joi
-        .alternatives()
-        .try(joi.string().valid(...validUserStates), joi.array().items(joi.string().valid(...validUserStates)))
+        .alternatives(joi.string().valid(...validUserStates), joi.array().items(joi.string().valid(...validUserStates)))
         .optional(),
       role: joi.string().valid(ROLES.MEMBER, ROLES.INDISCORD, ROLES.ARCHIVED).optional(),
       verified: joi.string().optional(),
@@ -228,17 +225,21 @@ async function validateUserQueryParams(req, res, next) {
         .string()
         .regex(/^[1-9]\d*d$/)
         .optional(),
+      page: joi.number().integer().min(0).message("Page must be a non-negative integer").optional(),
+      size: joi.number().integer().min(1).max(100).message("size must be a number between 1 and 100").optional(),
+      prev: joi.string().allow("").optional(),
+      next: joi.string().allow("").optional(),
+      dev: joi.bool().optional().sensitive(),
     })
-    .messages({
-      "object.min": "Please provide at least one filter criteria",
-    });
+    .min(1)
+    .messages({ "object.min": "Please provide at least one filter criteria" });
 
   try {
     await schema.validateAsync(req.query);
     next();
   } catch (error) {
-    logger.error(`Error validating query params : ${error}`);
-    res.boom.badRequest(error);
+    logger.error(`Error validating query parameters: ${error}`);
+    res.boom.badRequest(error.details.map((err) => err.message).join(", "));
   }
 }
 
@@ -320,7 +321,24 @@ const validateGenerateUsernameQuery = async (req, res, next) => {
     res.boom.badRequest("Invalid Query Parameters Passed");
   }
 };
-
+const migrationsValidator = async (req, res, next) => {
+  const { action, page, size } = req.query;
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      page: joi.number(),
+      action: joi.string().valid("adds-github-id").required(),
+      size: joi.number().min(1).max(500).required(),
+    });
+  try {
+    await schema.validateAsync({ action, page: parseInt(page), size: parseInt(size) });
+    next();
+  } catch (error) {
+    logger.error("Invalid Query Parameters Passed", error);
+    res.boom.badRequest("Invalid Query Parameters Passed");
+  }
+};
 module.exports = {
   updateUser,
   updateProfileURL,
@@ -331,4 +349,5 @@ module.exports = {
   validateUpdateRoles,
   validateUsersPatchHandler,
   validateGenerateUsernameQuery,
+  migrationsValidator,
 };

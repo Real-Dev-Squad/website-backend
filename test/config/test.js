@@ -4,8 +4,9 @@
  */
 
 const port = 3000;
-
+const NODE_ENV = process.env.NODE_ENV;
 module.exports = {
+  port: 3000,
   enableFileLogs: false,
   // Console logs are set to avoid the winston error of no defined transports
   enableConsoleLogs: true,
@@ -13,6 +14,11 @@ module.exports = {
   discordDeveloperRoleId: "9876543210",
   discordNewComersChannelId: "709080951824842783",
   discordMavenRoleId: "1212121212",
+  discordMissedUpdatesRoleId: "<discordMissedUpdatesRoleId>",
+  githubApi: {
+    baseUrl: "https://api.github.com",
+    org: "Real-Dev-Squad",
+  },
   githubOauth: {
     clientId: "clientId",
     clientSecret: "clientSecret",
@@ -33,6 +39,17 @@ module.exports = {
     rdsApi: {
       baseUrl: `http://localhost:${port}`,
     },
+    rdsUi: {
+      baseUrl: "https://realdevsquad.com",
+      routes: {
+        authRedirection: "/goto",
+      },
+      goalAPI: {
+        baseUrl: "<goalBaseUrl>",
+        secretKey: "<goalSecretKey>",
+        cookieName: `goals-session-test`,
+      },
+    },
     discordBot: {
       baseUrl: "DISCORD_BASE_URL",
     },
@@ -48,6 +65,10 @@ module.exports = {
   },
 
   userToken: {
+    cookieName: `rds-session-${NODE_ENV}`,
+    cookieV2Name: `rds-session-v2-${NODE_ENV}`,
+    ttl: 30 * 24 * 60 * 60, // in seconds
+    refreshTtl: 180 * 24 * 60 * 60, // in seconds
     publicKey:
       "-----BEGIN PUBLIC KEY-----\n" +
       "MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHo6sGbw8qk+XU9sBVa4w2aEq01i\n" +
@@ -197,8 +218,39 @@ module.exports = {
       "-----END PUBLIC KEY-----",
   },
 
+  // Cloudinary keys
+  cloudinary: {
+    cloud_name: "Cloud_name",
+    api_key: "API_KEY",
+    api_secret: "api_secret_key",
+  },
+
+  // Cloudflare
+  cloudflare: {
+    CLOUDFLARE_ZONE_ID: "Cloudflare_Zone_ID_or_ID",
+    CLOUDFLARE_X_AUTH_KEY: "Cloudflare_API_Auth_Key",
+    CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare_User_Email",
+  },
+
+  integrations: {
+    newrelic: {
+      appName: "RDS_API_production",
+      licenseKey: "<newrelicLicenseKey>",
+    },
+  },
+
+  routesCacheTTL: {
+    "/members": 900,
+  },
+
+  githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
+
   Event100ms: {
     APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
     APP_SECRET: "EVENT_100MS_APP_SECRET",
+  },
+
+  externalServices: {
+    EXTERNAL_SERVICE_PUBLIC_KEY: "EXTERNAL_SERVICE_PUBLIC_KEY",
   },
 };

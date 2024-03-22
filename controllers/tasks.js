@@ -289,18 +289,6 @@ const updateTask = async (req, res) => {
       }
     }
 
-    // currently the task is assigned to a user and the superuser is trying to un assign this task from them.
-    if (
-      requestData?.status === TASK_STATUS.AVAILABLE &&
-      task.taskData.status !== TASK_STATUS.AVAILABLE &&
-      Object.keys(req.body).length === 1
-    ) {
-      requestData.assignee = null;
-      requestData.percentCompleted = 0;
-      requestData.startedOn = null;
-      requestData.endsOn = null;
-    }
-
     await tasks.updateTask(requestData, req.params.id);
     if (requestData.assignee) {
       // New Assignee Status Update
@@ -334,25 +322,27 @@ const updateTaskStatus = async (req, res, next) => {
     let userStatusUpdate;
     const taskId = req.params.id;
     const { userStatusFlag } = req.query;
+    const status = req.body?.status;
     const { id: userId, username } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
 
     if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
     if (task.notAssignedToYou) return res.boom.forbidden("This task is not assigned to you");
-    if (task.taskData.status === TASK_STATUS.VERIFIED || req.body.status === TASK_STATUS.MERGED)
+    if (
+      task.taskData.status === TASK_STATUS.VERIFIED ||
+      status === TASK_STATUS.MERGED ||
+      status === TASK_STATUS.BACKLOG
+    )
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
 
     if (userStatusFlag) {
       if (task.taskData.status === TASK_STATUS.DONE && req.body.percentCompleted < 100) {
-        if (req.body.status === TASK_STATUS.DONE || !req.body.status) {
+        if (status === TASK_STATUS.DONE || !status) {
           return res.boom.badRequest("Task percentCompleted can't updated as status is DONE");
         }
       }
 
-      if (
-        (req.body.status === TASK_STATUS.DONE || req.body.status === TASK_STATUS.VERIFIED) &&
-        task.taskData.percentCompleted !== 100
-      ) {
+      if ((status === TASK_STATUS.DONE || status === TASK_STATUS.VERIFIED) && task.taskData.percentCompleted !== 100) {
         if (req.body.percentCompleted !== 100) {
           return res.boom.badRequest("Status cannot be updated. Task is not done yet");
         }
@@ -360,12 +350,12 @@ const updateTaskStatus = async (req, res, next) => {
     }
 
     if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
-      if (req.body.status === TASK_STATUS.COMPLETED || !req.body.status) {
+      if (status === TASK_STATUS.COMPLETED || !status) {
         return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
       }
     }
     if (
-      (req.body.status === TASK_STATUS.COMPLETED || req.body.status === TASK_STATUS.VERIFIED) &&
+      (status === TASK_STATUS.COMPLETED || status === TASK_STATUS.VERIFIED) &&
       task.taskData.percentCompleted !== 100
     ) {
       if (req.body.percentCompleted !== 100) {
@@ -386,16 +376,16 @@ const updateTaskStatus = async (req, res, next) => {
       },
     };
 
-    if (req.body.status && !req.body.percentCompleted) {
-      taskLog.body.new.status = req.body.status;
+    if (status && !req.body.percentCompleted) {
+      taskLog.body.new.status = status;
     }
-    if (req.body.percentCompleted && !req.body.status) {
+    if (req.body.percentCompleted && !status) {
       taskLog.body.new.percentCompleted = req.body.percentCompleted;
     }
 
-    if (req.body.percentCompleted && req.body.status) {
+    if (req.body.percentCompleted && status) {
       taskLog.body.new.percentCompleted = req.body.percentCompleted;
-      taskLog.body.new.status = req.body.status;
+      taskLog.body.new.status = status;
     }
 
     const [, taskLogResult] = await Promise.all([
@@ -404,7 +394,7 @@ const updateTaskStatus = async (req, res, next) => {
     ]);
     taskLog.id = taskLogResult.id;
 
-    if (req.body.status) {
+    if (status) {
       userStatusUpdate = await updateStatusOnTaskCompletion(userId);
     }
     return res.json({

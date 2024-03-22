@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
 const discordServices = require("../services/discordService");
 const { fetchAllUsers, fetchUser } = require("../models/users");
+const { generateCloudFlareHeaders } = require("../utils/discord-actions");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
 
@@ -39,15 +40,13 @@ const createGroupRole = async (req, res) => {
       createdBy: req.userData.id,
       date: admin.firestore.Timestamp.fromDate(new Date()),
     };
-    const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
-      algorithm: "RS256",
-      expiresIn: config.get("rdsServerlessBot.ttl"),
-    });
+
+    const headers = generateCloudFlareHeaders(req.userData);
 
     const responseForCreatedRole = await fetch(`${DISCORD_BASE_URL}/roles/create`, {
       method: "PUT",
       body: JSON.stringify(dataForDiscord),
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      headers,
     }).then((response) => response.json());
 
     groupRoleData.roleid = responseForCreatedRole.id;
@@ -116,7 +115,14 @@ const addGroupRoleToMember = async (req, res) => {
     const [{ roleExists, existingRoles }, userData] = await Promise.all([roleExistsPromise, userDataPromise]);
 
     if (!roleExists || req.userData.id !== userData.user.id) {
-      res.boom.forbidden("Permission denied. Cannot add the role.");
+      return res.boom.forbidden("Permission denied. Cannot add the role.");
+    }
+
+    if (existingRoles.docs.length > 0) {
+      const roleDetails = existingRoles.docs[0].data();
+      if (roleDetails.rolename && !roleDetails.rolename.startsWith("group-")) {
+        return res.boom.forbidden("Cannot use rolename that is not a group role");
+      }
     }
 
     const { roleData, wasSuccess } = await discordRolesModel.addGroupRoleToMember(memberGroupRole);
@@ -132,14 +138,12 @@ const addGroupRoleToMember = async (req, res) => {
     const dataForDiscord = {
       ...req.body,
     };
-    const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
-      algorithm: "RS256",
-      expiresIn: config.get("rdsServerlessBot.ttl"),
-    });
+    const headers = generateCloudFlareHeaders(req.userData);
+
     const apiCallToDiscord = fetch(`${DISCORD_BASE_URL}/roles/add`, {
       method: "PUT",
       body: JSON.stringify(dataForDiscord),
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      headers,
     });
     const discordLastJoinedDateUpdate = discordRolesModel.groupUpdateLastJoinDate({
       id: existingRoles.docs[0].id,
@@ -166,8 +170,9 @@ const deleteRole = async (req, res) => {
     const [{ roleExists }, userData] = await Promise.all([roleExistsPromise, userDataPromise]);
 
     if (!roleExists || req.userData.id !== userData.user.id) {
-      res.boom.forbidden("Permission denied. Cannot delete the role.");
+      return res.boom.forbidden("Permission denied. Cannot delete the role.");
     }
+    await discordServices.removeRoleFromUser(roleid, userid, req.userData);
 
     const { wasSuccess } = await discordRolesModel.removeMemberGroup(roleid, userid);
     if (wasSuccess) {

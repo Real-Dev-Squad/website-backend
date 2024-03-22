@@ -15,12 +15,12 @@ const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
-const { fetchAllUsers } = require("../models/users");
+const { fetchAllUsers, addGithubUserId } = require("../models/users");
 const { getOverdueTasks } = require("../models/tasks");
 const { getQualifiers } = require("../utils/helper");
 const { parseSearchQuery } = require("../utils/users");
 const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
-
+const { getFilteredPaginationLink } = require("../utils/userStatus");
 const {
   USERS_PATCH_HANDLER_ACTIONS,
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
@@ -28,6 +28,8 @@ const {
 } = require("../constants/users");
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
+const config = require("config");
+const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -243,6 +245,26 @@ const getUsers = async (req, res) => {
   }
 };
 
+const isDeveloper = async (req, res) => {
+  try {
+    const { userData } = req;
+    if (userData.roles.in_discord) {
+      const membersInDiscord = await getDiscordMembers();
+      const discordMember = membersInDiscord.find((member) => member.user.id === userData.discordId);
+      if (discordMember) {
+        const { roles } = discordMember;
+        if (roles) {
+          return res.status(200).json({ developerRoleExistsOnUser: roles.includes(discordDeveloperRoleId) });
+        }
+      }
+    }
+    return res.status(200).json({ developerRoleExistsOnUser: false });
+  } catch (error) {
+    logger.error(`Error while fetching developer tag: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
 /**
  * Fetches the data about user with given id
  *
@@ -371,7 +393,7 @@ const getSelfDetails = async (req, res) => {
  */
 const updateSelf = async (req, res) => {
   try {
-    const { id: userId } = req.userData;
+    const { id: userId, roles: userRoles, discordId } = req.userData;
     const { user } = await dataAccess.retrieveUsers({ id: userId });
 
     if (req.body.username) {
@@ -384,6 +406,17 @@ const updateSelf = async (req, res) => {
     if (req.body.roles) {
       if (user && (user.roles.in_discord || user.roles.developer)) {
         return res.boom.forbidden("Cannot update roles");
+      }
+    }
+
+    if (userRoles.in_discord) {
+      const membersInDiscord = await getDiscordMembers();
+      const discordMember = membersInDiscord.find((member) => member.user.id === discordId);
+      if (discordMember) {
+        const { roles } = discordMember;
+        if (roles && roles.includes(discordDeveloperRoleId)) {
+          return res.boom.forbidden("Developers can't update their profile data. Use profile service for updating.");
+        }
       }
     }
 
@@ -732,16 +765,45 @@ const addDefaultArchivedRole = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
+const calculatePagination = (pageNumber, totalPages, reqQuery, limitNumber) => {
+  const nextPage = pageNumber < totalPages - 1 ? pageNumber + 1 : null;
+  const prevPage = pageNumber > 0 ? pageNumber - 1 : null;
+
+  return {
+    next: nextPage ? getFilteredPaginationLink(reqQuery, nextPage, limitNumber) : null,
+    prev: prevPage ? getFilteredPaginationLink(reqQuery, prevPage, limitNumber) : null,
+  };
+};
+
 const filterUsers = async (req, res) => {
   try {
     if (!Object.keys(req.query).length) {
       return res.boom.badRequest("filter for item not provided");
     }
+    const dev = req.query.dev;
+    if (dev !== "true") {
+      const users = await dataAccess.retreiveFilteredUsers(req.query);
+      return res.json({
+        message: users.length ? "Users found successfully!" : "No users found",
+        users: users,
+        count: users.length,
+      });
+    }
+    const { page, size } = req.query;
+    const pageNumber = parseInt(page) || 0;
+    const limitNumber = parseInt(size) || 100;
+    const skip = (pageNumber - 1) * limitNumber;
 
-    const users = await dataAccess.retreiveFilteredUsers(req.query);
+    const users = await dataAccess.retreiveFilteredUsers(req.query, skip, limitNumber);
+    const totalCount = users.length;
+    const totalPages = Math.ceil(totalCount / limitNumber);
+
+    const paginationLinks = calculatePagination(pageNumber, totalPages, req.query, limitNumber);
+
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
       users: users,
+      links: paginationLinks,
       count: users.length,
     });
   } catch (error) {
@@ -856,6 +918,20 @@ async function usersPatchHandler(req, res) {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 }
+const migrations = async (req, res) => {
+  const { page = 0, size } = req.query;
+
+  try {
+    const result = await addGithubUserId(parseInt(page), parseInt(size));
+    return res.status(200).json({
+      message: "Result of migration",
+      data: result,
+    });
+  } catch (error) {
+    logger.error(`Internal Server Error: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
 
 module.exports = {
   verifyUser,
@@ -886,4 +962,6 @@ module.exports = {
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
+  migrations,
+  isDeveloper,
 };

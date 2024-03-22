@@ -64,6 +64,7 @@ describe("Discord actions", function () {
   let discordId = "";
   let fetchStub;
   let jwt;
+
   beforeEach(async function () {
     fetchStub = sinon.stub(global, "fetch");
     userId = await addUser(userData[0]);
@@ -106,6 +107,7 @@ describe("Discord actions", function () {
           return done();
         });
     });
+
     it("Should throw error if failed to update a picture", function (done) {
       fetchStub.returns(
         Promise.resolve({
@@ -132,6 +134,7 @@ describe("Discord actions", function () {
   describe("GET /discord-actions/groups", function () {
     let newGroupData;
     let allIds = [];
+
     before(async function () {
       const addUsersPromises = userData.map((user) => userModel.add({ ...user }));
       const responses = await Promise.all(addUsersPromises);
@@ -209,8 +212,14 @@ describe("Discord actions", function () {
 
   describe("POST /discord-actions/roles", function () {
     let roleid;
+
     beforeEach(async function () {
-      const discordRoleModelPromise = [discordRoleModel.add(groupData[0]), discordRoleModel.add(groupData[1])];
+      const discordRoleModelPromise = [
+        discordRoleModel.add(groupData[0]),
+        discordRoleModel.add(groupData[1]),
+        discordRoleModel.add(groupData[3]),
+        discordRoleModel.add(groupData[4]),
+      ];
       roleid = groupData[0].roleid;
       await Promise.all(discordRoleModelPromise);
     });
@@ -220,6 +229,40 @@ describe("Discord actions", function () {
       await cleanDb();
     });
 
+    it("should not be able to add role if it is not a group type role", async function () {
+      const fetchStub = sinon.stub(discordRolesModel, "isGroupRoleExists");
+
+      fetchStub.returns(
+        {
+          roleExists: true,
+          existingRoles: {
+            docs: [
+              {
+                data: () => ({
+                  date: new Date().toISOString(),
+                  createdBy: "CzI06Da1zPwciLcyIwU4",
+                  roleid: "1214641424516124823",
+                  rolename: "admin",
+                }),
+              },
+            ],
+          },
+        },
+        { user: userData[0] }
+      );
+
+      const res = await chai
+        .request(app)
+        .post("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ roleid, userid: userData[0].discordId });
+      expect(res).to.have.status(403);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Cannot use rolename that is not a group role");
+
+      fetchStub.restore();
+    });
+
     it("should allow role to be added", async function () {
       fetchStub.returns(
         Promise.resolve({
@@ -227,16 +270,42 @@ describe("Discord actions", function () {
           json: () => Promise.resolve({}),
         })
       );
+      const roleId = groupData[4].roleid;
       const res = await chai
         .request(app)
         .post("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
-        .send({ roleid, userid: userData[0].discordId });
+        .send({ roleid: roleId, userid: userData[0].discordId });
 
       expect(res).to.have.status(201);
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Role added successfully!");
     });
+
+    it("should create a reason and pass it down to the bot, on adding the role to the user", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({}),
+        })
+      );
+
+      const roleId = groupData[4].roleid;
+      const body = { roleid: roleId, userid: userData[0].discordId };
+      const res = await chai
+        .request(app)
+        .post("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(body);
+
+      expect(res).to.have.status(201);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Role added successfully!");
+      expect(fetchStub.getCall(0).args[1].headers["X-Audit-Log-Reason"]).to.equal(
+        `Action initiator's username=>ankur and id=${userId}`
+      );
+    });
+
     it("should not allow unknown role to be added to user", async function () {
       const res = await chai
         .request(app)
@@ -248,6 +317,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Permission denied. Cannot add the role.");
     });
+
     it("should not allow role to be added when userid does not belong to authenticated user", async function () {
       const res = await chai
         .request(app)
@@ -260,6 +330,7 @@ describe("Discord actions", function () {
       expect(res.body.message).to.equal("Permission denied. Cannot add the role.");
     });
   });
+
   describe("DELETE /discord-actions/roles", function () {
     let roleid;
 
@@ -304,6 +375,27 @@ describe("Discord actions", function () {
         });
     });
 
+    it("should create a reason and pass it down to the bot on deleting the role", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ roleId: "1234", wasSuccess: true }),
+        })
+      );
+      const res = await chai
+        .request(app)
+        .delete("/discord-actions/roles")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ roleid, userid: userData[0].discordId });
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.an("object");
+      expect(res.body.message).to.equal("Role deleted successfully");
+      expect(fetchStub.getCall(0).args[1].headers["X-Audit-Log-Reason"]).to.equal(
+        `Action initiator's username=>ankur and id=${userId}`
+      );
+    });
+
     it("should not allow unknown role to be deleted from user", async function () {
       const res = await chai
         .request(app)
@@ -315,6 +407,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Permission denied. Cannot delete the role.");
     });
+
     it("should not allow role to be deleted when userid does not belong to authenticated user", async function () {
       const res = await chai
         .request(app)
@@ -326,6 +419,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Permission denied. Cannot delete the role.");
     });
+
     it("should handle internal server error", function (done) {
       chai
         .request(app)
@@ -391,6 +485,7 @@ describe("Discord actions", function () {
 
   describe("POST /discord-actions/nickname/status", function () {
     let jwtToken;
+
     beforeEach(async function () {
       const userData2 = { ...userData[1] };
       delete userData2.discordId;
@@ -481,6 +576,7 @@ describe("Discord actions", function () {
         });
     }).timeout(10000);
   });
+
   describe("POST /discord-actions/discord-roles", function () {
     before(async function () {
       const value = [discordRoleModel.add(groupData[0]), discordRoleModel.add(groupData[1])];
@@ -515,6 +611,7 @@ describe("Discord actions", function () {
 
   describe("PUT /discord-actions/group-idle-7d", function () {
     let allIds;
+
     beforeEach(async function () {
       userData[0].roles = { archived: false };
       userData[1].roles = { archived: false };
@@ -614,6 +711,7 @@ describe("Discord actions", function () {
         })
       );
     });
+
     afterEach(async function () {
       sinon.restore();
       await cleanDb();

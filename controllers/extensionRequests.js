@@ -290,7 +290,6 @@ const getSelfExtensionRequests = async (req, res) => {
  */
 const updateExtensionRequest = async (req, res) => {
   try {
-    const { dev = "false" } = req.query;
     const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
@@ -305,34 +304,32 @@ const updateExtensionRequest = async (req, res) => {
 
     const promises = [extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id)];
     // If flag is present, then only create log for change in ETA/reason by SU
-    if (dev === "true") {
-      let body = {};
-      // Check if reason has been changed
-      if (req.body.reason && req.body.reason !== extensionRequest.extensionRequestData.reason) {
-        body = { ...body, oldReason: extensionRequest.extensionRequestData.reason, newReason: req.body.reason };
-      }
-      // Check if newEndsOn has been changed
-      if (req.body.newEndsOn && req.body.newEndsOn !== extensionRequest.extensionRequestData.newEndsOn) {
-        body = { ...body, oldEndsOn: extensionRequest.extensionRequestData.newEndsOn, newEndsOn: req.body.newEndsOn };
-      }
-      // Check if title has been changed
-      if (req.body.title && req.body.title !== extensionRequest.extensionRequestData.title) {
-        body = { ...body, oldTitle: extensionRequest.extensionRequestData.title, newTitle: req.body.title };
-      }
+    let body = {};
+    // Check if reason has been changed
+    if (req.body.reason && req.body.reason !== extensionRequest.extensionRequestData.reason) {
+      body = { ...body, oldReason: extensionRequest.extensionRequestData.reason, newReason: req.body.reason };
+    }
+    // Check if newEndsOn has been changed
+    if (req.body.newEndsOn && req.body.newEndsOn !== extensionRequest.extensionRequestData.newEndsOn) {
+      body = { ...body, oldEndsOn: extensionRequest.extensionRequestData.newEndsOn, newEndsOn: req.body.newEndsOn };
+    }
+    // Check if title has been changed
+    if (req.body.title && req.body.title !== extensionRequest.extensionRequestData.title) {
+      body = { ...body, oldTitle: extensionRequest.extensionRequestData.title, newTitle: req.body.title };
+    }
 
-      // Validate if there's any update that actually happened, then only create the log
-      if (Object.keys(body).length > 0) {
-        const extensionLog = {
-          type: "extensionRequests",
-          meta: {
-            extensionRequestId: req.params.id,
-            taskId: extensionRequest.extensionRequestData.taskId,
-            userId: req.userData.id,
-          },
-          body,
-        };
-        promises.push(addLog(extensionLog.type, extensionLog.meta, extensionLog.body));
-      }
+    // Validate if there's any update that actually happened, then only create the log
+    if (Object.keys(body).length > 0) {
+      const extensionLog = {
+        type: "extensionRequests",
+        meta: {
+          extensionRequestId: req.params.id,
+          taskId: extensionRequest.extensionRequestData.taskId,
+          userId: req.userData.id,
+        },
+        body,
+      };
+      promises.push(addLog(extensionLog.type, extensionLog.meta, extensionLog.body));
     }
     await Promise.all(promises);
 
@@ -351,7 +348,6 @@ const updateExtensionRequest = async (req, res) => {
  */
 const updateExtensionRequestStatus = async (req, res) => {
   try {
-    const { dev = "false" } = req.query;
     const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
@@ -361,7 +357,7 @@ const updateExtensionRequestStatus = async (req, res) => {
     const extensionLog = {
       type: "extensionRequests",
       meta: {
-        ...(dev === "true" && { extensionRequestId: req.params.id }), // if flag is present, add extensionRequestId
+        extensionRequestId: req.params.id,
         taskId: extensionRequest.extensionRequestData.taskId,
         username: req.userData.username,
         userId: req.userData.id,
