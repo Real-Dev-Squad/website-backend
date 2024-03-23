@@ -7,6 +7,7 @@ const {
   batchUpdateUsersStatus,
   getUserStatusControllers,
   updateUserStatusController,
+  syncUserStatus,
 } = require("../controllers/userStatus");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
@@ -24,6 +25,8 @@ const { Services } = require("../constants/bot");
 router.get("/", validateGetQueryParams, getUserStatusControllers);
 router.get("/self", authenticate, getUserStatus);
 router.get("/:userId", getUserStatus);
+router.patch("/sync", authenticate, authorizeRoles([SUPERUSER]), syncUserStatus);
+
 router.patch("/self", authenticate, validateUserStatus, updateUserStatusController);
 router.patch("/update", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), updateAllUserStatus);
 router.patch(

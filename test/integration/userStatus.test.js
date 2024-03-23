@@ -275,6 +275,10 @@ describe("UserStatus", function () {
     });
   });
 
+  describe("PATCH /users/status/sync", function () {
+    // TODO: Added test cases here
+  });
+
   describe("PATCH /users/status/:userid", function () {
     let testUserId;
     let testUserJwt;
