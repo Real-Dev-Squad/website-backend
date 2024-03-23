@@ -240,6 +240,31 @@ const updateUserStatusController = async (req, res, next) => {
   }
 };
 
+const syncUserStatus = async (req, res, next) => {
+  try {
+    await updateAllUserStatus(req, res, next);
+    const usersData = await getTaskBasedUsersStatus(req, res, next);
+
+    if (!usersData?.data?.users || usersData.data.users.length === 0) {
+      const errorMessage = "Error: Users data is not in the expected format or no users found";
+      logger.error(errorMessage);
+      return res.boom.badImplementation(errorMessage);
+    }
+
+    const data = await userStatusModel.batchUpdateUsersStatus(usersData.data.users);
+
+    return res.json({
+      message: "Users status updated successfully.",
+      data,
+    });
+  } catch (error) {
+    logger.error(error.message);
+    return res.status(500).json({
+      message: "The server has encountered an unexpected error. Please contact the administrator for more information.",
+    });
+  }
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -250,4 +275,5 @@ module.exports = {
   getUserStatusControllers,
   batchUpdateUsersStatus,
   updateUserStatusController,
+  syncUserStatus,
 };
