@@ -79,9 +79,9 @@ function formatExtensionRequestsLog(logsSnapshot, usersMap, tasksMap) {
   const { meta } = logsSnapshot;
   return {
     user:
-      logsSnapshot.meta.username ??
       usersMap[logsSnapshot.meta.userId]?.username ??
-      usersMap[logsSnapshot.meta.createdBy]?.username,
+      usersMap[logsSnapshot.meta.createdBy]?.username ??
+      logsSnapshot.body.username,
     taskId: meta.taskId,
     taskTitle: tasksMap[logsSnapshot.meta.taskId]?.title ?? "Untitled Task",
     ...flattenObject(logsSnapshot),
@@ -91,7 +91,7 @@ function formatExtensionRequestsLog(logsSnapshot, usersMap, tasksMap) {
 function formatTaskUpdateLogs(logsSnapshot, usersMap, tasksMap) {
   const { meta } = logsSnapshot;
   return {
-    user: usersMap[meta.userId]?.username,
+    user: logsSnapshot.meta.username ?? usersMap[meta.userId]?.username,
     taskId: meta.taskId,
     taskTitle: tasksMap[meta.taskId]?.title,
     ...flattenObject(logsSnapshot),
@@ -110,12 +110,12 @@ function formatProfileDiffLogs(logsSnapshot, usersMap, type) {
 }
 
 function formatTaskRequestsLogs(logsSnapshot, usersMap, tasksMap) {
-  const { meta } = logsSnapshot;
+  const { meta, body } = logsSnapshot;
   const formattedData = flattenObject(logsSnapshot);
   return {
-    user: usersMap[meta.createdBy]?.username,
+    user: usersMap[meta.lastModifiedBy]?.username,
     taskId: meta.taskId,
-    taskTitle: tasksMap[meta.taskId]?.title,
+    taskTitle: tasksMap[body.taskId]?.title,
     proposedStartDate: formattedData.users[0].proposedStartDate,
     proposedDeadline: formattedData.users[0].proposedDeadline,
     ..._.omit(formattedData, "users"),
