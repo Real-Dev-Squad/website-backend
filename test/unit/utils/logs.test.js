@@ -76,7 +76,7 @@ describe("logs utils", function () {
         taskId: "task1",
         taskTitle: "Link details page to status site",
         type: "extensionRequests",
-        user: "techlord",
+        user: "mock-2",
         userId: "user2",
         username: "techlord",
       });
@@ -128,7 +128,7 @@ describe("logs utils", function () {
         taskId: "task2",
         taskTitle: "Introduce /ooo command on discord",
         type: "task",
-        user: "palak-gupta",
+        user: "shubham-sharma",
         userId: "user1",
         username: "shubham-sharma",
       });
