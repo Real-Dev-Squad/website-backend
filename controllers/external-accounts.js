@@ -55,52 +55,33 @@ const getExternalAccountData = async (req, res) => {
 const syncExternalAccountData = async (req, res) => {
   try {
     const [discordUserData, rdsUserData] = await Promise.all([getDiscordMembers(), retrieveDiscordUsers()]);
-    const rdsUserDataMap = {};
     const updateUserDataPromises = [];
     const userUpdatedWithInDiscordFalse = [];
     const updateArchivedPromises = [];
 
-    rdsUserData.forEach((rdsUser) => {
-      rdsUserDataMap[rdsUser.discordId] = {
-        id: rdsUser.id,
-        roles: rdsUser.roles,
-      };
-    });
-
     for (const rdsUser of rdsUserData) {
       const discordUser = discordUserData.find((discordUser) => discordUser.user.id === rdsUser.discordId);
-
       let userData = {};
       if (rdsUser.roles?.in_discord && !discordUser) {
         userData = {
-          roles: {
-            ...rdsUser.roles,
-            in_discord: false,
-          },
+          "roles.in_discord": false,
         };
         userUpdatedWithInDiscordFalse.push(rdsUser);
       } else if (discordUser) {
         userData = {
           discordJoinedAt: discordUser.joined_at,
-          roles: {
-            ...rdsUser.roles,
-            in_discord: true,
-          },
+          "roles.in_discord": true,
         };
       }
       updateUserDataPromises.push(addOrUpdate(userData, rdsUser.id));
     }
 
     await Promise.all(updateUserDataPromises);
-
     const inDiscordUsers = await getUsersByRole("in_discord");
     inDiscordUsers.forEach((user) => {
       if (user.roles.archived === true) {
         const userData = {
-          roles: {
-            ...user.roles,
-            archived: false,
-          },
+          "roles.archived": false,
         };
         updateArchivedPromises.push(addOrUpdate(userData, user.id));
       }
