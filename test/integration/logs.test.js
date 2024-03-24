@@ -142,7 +142,8 @@ describe("/logs", function () {
           expect(res.body.message).to.equal("All Logs fetched successfully");
           expect(res.body.data).to.lengthOf(7);
           expect(res.body.data[0]).to.contain({
-            user: "joygupta",
+            username: "joygupta",
+            taskTitle: "Untitled Task",
             taskId: "mZB0akqPUa1GQQdrgsx7",
             extensionRequestId: "y79PXir0s82qNAzeIn8S",
             status: "PENDING",
