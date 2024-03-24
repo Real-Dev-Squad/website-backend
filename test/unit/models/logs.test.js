@@ -201,7 +201,7 @@ describe("Logs", function () {
     it("Should return null if no logs are presnet  the logs for specific types", async function () {
       await cleanDb();
       const result = await logsQuery.fetchAllLogs({});
-      expect(result).to.lengthOf(0);
+      expect(result.allLogs).to.lengthOf(0);
     });
 
     it("should throw an error and log it", async function () {

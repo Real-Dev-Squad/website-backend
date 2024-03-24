@@ -170,7 +170,7 @@ describe("/logs", function () {
         });
     });
 
-    it("should return 204, if no logs are present", function (done) {
+    it("if no logs are present, should return valid response", function (done) {
       chai
         .request(app)
         .get("/logs?type=REQUEST_CREATED1&dev=true")
@@ -179,7 +179,8 @@ describe("/logs", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(204);
+          expect(res).to.have.status(200);
+          expect(res.body.data).to.have.lengthOf(0);
           return done();
         });
     });

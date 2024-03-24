@@ -15,27 +15,28 @@ async function getUsersListFromLogs(allLogs) {
 }
 
 async function getTasksFromLogs(allLogs) {
+  const taskDetails = [];
   const taskIds = new Set();
   for (const log of allLogs) {
     if (!taskIds.has(log.meta?.taskId || log.body?.taskId)) {
       taskIds.add(log.meta?.taskId || log.body?.taskId);
     }
   }
-  const data = await tasksModel
-    .where(
-      admin.firestore.FieldPath.documentId(),
-      "in",
-      Array.from(taskIds).filter((e) => e)
-    )
-    .get();
-
-  const taskDetails = [];
-  data.forEach((doc) => {
-    taskDetails.push({
-      id: doc.id,
-      ...doc.data(),
+  if (Array.from(taskIds).filter((e) => e).length !== 0) {
+    const data = await tasksModel
+      .where(
+        admin.firestore.FieldPath.documentId(),
+        "in",
+        Array.from(taskIds).filter((e) => e)
+      )
+      .get();
+    data.forEach((doc) => {
+      taskDetails.push({
+        id: doc.id,
+        ...doc.data(),
+      });
     });
-  });
+  }
   return taskDetails;
 }
 
