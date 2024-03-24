@@ -15,6 +15,8 @@ const cookieName = config.get("userToken.cookieName");
 const authService = require("../../../services/authService");
 const { extensionRequestLogs } = require("../../fixtures/logs/extensionRequests");
 const { LOGS_FETCHED_SUCCESSFULLY } = require("../../../constants/logs");
+const tasks = require("../../../models/tasks");
+const tasksData = require("../../fixtures/tasks/tasks")();
 chai.use(chaiHttp);
 const superUser = userData[4];
 const userToBeMadeMember = userData[1];
@@ -133,6 +135,10 @@ describe("Logs", function () {
   describe("GET /logs", function () {
     before(async function () {
       await addLogs();
+      const tasksPromise = tasksData.map(async (task) => {
+        await tasks.updateTask(task);
+      });
+      await Promise.all(tasksPromise);
     });
 
     after(async function () {
