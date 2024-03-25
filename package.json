@@ -63,7 +63,7 @@
     "eslint-plugin-standard": "^4.1.0",
     "firebase-tools": "^13.4.0",
     "mocha": "^10.3.0",
-    "nock": "~13.2.9",
+    "nock": "~13.5.0",
     "nodemon": "^3.1.0",
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
