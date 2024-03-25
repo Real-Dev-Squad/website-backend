@@ -18,7 +18,7 @@
   "dependencies": {
     "axios": "^1.6.7",
     "cloudinary": "^2.0.3",
-    "config": "3.3.7",
+    "config": "3.3.11",
     "cookie-parser": "~1.4.6",
     "cors": "^2.8.5",
     "datauri": "^4.1.0",
