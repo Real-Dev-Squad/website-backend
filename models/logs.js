@@ -2,9 +2,17 @@ const firestore = require("../utils/firestore");
 const { getBeforeHourTime } = require("../utils/time");
 const logsModel = firestore.collection("logs");
 const admin = require("firebase-admin");
-const { logType } = require("../constants/logs");
+const { logType, ERROR_WHILE_FETCHING_LOGS } = require("../constants/logs");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFullName } = require("../utils/users");
+const {
+  getUsersListFromLogs,
+  formatLogsForFeed,
+  mapify,
+  convertTimestamp,
+  getTasksFromLogs,
+} = require("../utils/logs");
+const SIZE = 25;
 
 /**
  * Adds log
@@ -155,9 +163,97 @@ const fetchLastAddedCacheLog = async (id) => {
   }
 };
 
+const fetchAllLogs = async (query) => {
+  let { type, prev, next, page, size = SIZE, format } = query;
+  size = parseInt(size);
+  page = parseInt(page);
+
+  try {
+    let requestQuery = logsModel;
+
+    if (type) {
+      const logType = type.split(",");
+      if (logType.length >= 1) requestQuery = requestQuery.where("type", "in", logType);
+    }
+
+    requestQuery = requestQuery.orderBy("timestamp", "desc");
+    let requestQueryDoc = requestQuery;
+
+    if (prev) {
+      requestQueryDoc = requestQueryDoc.limitToLast(size);
+    } else {
+      requestQueryDoc = requestQueryDoc.limit(size);
+    }
+
+    if (page) {
+      const startAfter = (page - 1) * size;
+      requestQueryDoc = requestQueryDoc.offset(startAfter);
+    } else if (next) {
+      const doc = await logsModel.doc(next).get();
+      requestQueryDoc = requestQueryDoc.startAt(doc);
+    } else if (prev) {
+      const doc = await logsModel.doc(prev).get();
+      requestQueryDoc = requestQueryDoc.endAt(doc);
+    }
+
+    const snapshot = await requestQueryDoc.get();
+    let nextDoc, prevDoc;
+    if (!snapshot.empty) {
+      const first = snapshot.docs[0];
+      prevDoc = await requestQuery.endBefore(first).limitToLast(1).get();
+
+      const last = snapshot.docs[snapshot.docs.length - 1];
+      nextDoc = await requestQuery.startAfter(last).limit(1).get();
+    }
+    const allLogs = [];
+    if (!snapshot.empty) {
+      snapshot.forEach((doc) => {
+        allLogs.push({ ...doc.data() });
+      });
+    }
+    if (allLogs.length === 0) {
+      return {
+        allLogs: [],
+        prev: null,
+        next: null,
+        page: page ? page + 1 : null,
+      };
+    }
+    if (format === "feed") {
+      let logsData = [];
+      const userList = await getUsersListFromLogs(allLogs);
+      const taskIdList = await getTasksFromLogs(allLogs);
+      const usersMap = mapify(userList, "id");
+      const tasksMap = mapify(taskIdList, "id");
+      logsData = allLogs.map((data) => {
+        const formattedLogs = formatLogsForFeed(data, usersMap, tasksMap);
+        if (!Object.keys(formattedLogs).length) return null;
+        return { ...formattedLogs, type: data.type, timestamp: convertTimestamp(data.timestamp) };
+      });
+      return {
+        allLogs: logsData.filter((log) => log),
+        prev: prevDoc.empty ? null : prevDoc.docs[0].id,
+        next: nextDoc.empty ? null : nextDoc.docs[0].id,
+        page: page ? page + 1 : null,
+      };
+    }
+
+    return {
+      allLogs: allLogs.filter((log) => log),
+      prev: prevDoc.empty ? null : prevDoc.docs[0].id,
+      next: nextDoc.empty ? null : nextDoc.docs[0].id,
+      page: page ? page + 1 : null,
+    };
+  } catch (error) {
+    logger.error(ERROR_WHILE_FETCHING_LOGS, error);
+    throw error;
+  }
+};
+
 module.exports = {
   addLog,
   fetchLogs,
   fetchCacheLogs,
   fetchLastAddedCacheLog,
+  fetchAllLogs,
 };
