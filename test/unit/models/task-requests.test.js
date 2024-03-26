@@ -56,6 +56,7 @@ describe("Task requests | models", function () {
           proposedStartDate: requestData.proposedStartDate,
           status: TASK_REQUEST_STATUS.PENDING,
           description: requestData.description,
+          markdownEnabled: requestData.markdownEnabled,
         },
       ]);
       expect(addedTaskRequest.createdBy).to.equal(authenticatedUsername);
@@ -89,6 +90,7 @@ describe("Task requests | models", function () {
           proposedStartDate: requestData.proposedStartDate,
           status: TASK_REQUEST_STATUS.PENDING,
           description: requestData.description,
+          markdownEnabled: requestData.markdownEnabled,
         },
       ]);
       expect(addedTaskRequest.createdBy).to.equal(mockData.existingTaskRequest.createdBy);
@@ -124,6 +126,7 @@ describe("Task requests | models", function () {
           proposedStartDate: requestData.proposedStartDate,
           status: TASK_REQUEST_STATUS.PENDING,
           description: requestData.description,
+          markdownEnabled: requestData.markdownEnabled,
         },
       ]);
       expect(addedTaskRequest.createdBy).to.equal(authenticatedUsername);
@@ -163,6 +166,7 @@ describe("Task requests | models", function () {
           proposedStartDate: requestData.proposedStartDate,
           status: TASK_REQUEST_STATUS.PENDING,
           description: requestData.description,
+          markdownEnabled: requestData.markdownEnabled,
         },
       ]);
       expect(addedTaskRequest.createdBy).to.equal(mockData.existingTaskRequest.createdBy);

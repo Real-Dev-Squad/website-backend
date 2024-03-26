@@ -5,7 +5,13 @@ const admin = require("firebase-admin");
 const { logType, ERROR_WHILE_FETCHING_LOGS } = require("../constants/logs");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFullName } = require("../utils/users");
-const { getUsersListFromLogs, formatLogsForFeed, mapify, convertTimestamp } = require("../utils/logs");
+const {
+  getUsersListFromLogs,
+  formatLogsForFeed,
+  mapify,
+  convertTimestamp,
+  getTasksFromLogs,
+} = require("../utils/logs");
 const SIZE = 25;
 
 /**
@@ -205,16 +211,22 @@ const fetchAllLogs = async (query) => {
         allLogs.push({ ...doc.data() });
       });
     }
-    const userList = await getUsersListFromLogs(allLogs);
-    const usersMap = mapify(userList, "id");
-
     if (allLogs.length === 0) {
-      return null;
+      return {
+        allLogs: [],
+        prev: null,
+        next: null,
+        page: page ? page + 1 : null,
+      };
     }
     if (format === "feed") {
       let logsData = [];
+      const userList = await getUsersListFromLogs(allLogs);
+      const taskIdList = await getTasksFromLogs(allLogs);
+      const usersMap = mapify(userList, "id");
+      const tasksMap = mapify(taskIdList, "id");
       logsData = allLogs.map((data) => {
-        const formattedLogs = formatLogsForFeed(data, usersMap);
+        const formattedLogs = formatLogsForFeed(data, usersMap, tasksMap);
         if (!Object.keys(formattedLogs).length) return null;
         return { ...formattedLogs, type: data.type, timestamp: convertTimestamp(data.timestamp) };
       });

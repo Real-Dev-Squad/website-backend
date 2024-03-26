@@ -61,7 +61,7 @@ const addOrUpdate = async (userData, userId = null) => {
       user = await userModel.where("github_id", "==", userData.github_id).limit(1).get();
     }
     if (user && !user.empty && user.docs !== null) {
-      await userModel.doc(user.docs[0].id).set(userData, { merge: true });
+      await userModel.doc(user.docs[0].id).set({ ...userData, updated_at: Date.now() }, { merge: true });
       const data = user.docs[0].data();
       return {
         isNewUser: false,
@@ -329,6 +329,7 @@ const setIncompleteUserDetails = async (userId) => {
   if (doc.exists) {
     return userRef.update({
       incompleteUserDetails: false,
+      updated_at: Date.now(),
     });
   }
   return {};
@@ -444,6 +445,7 @@ const updateUserPicture = async (image, userId) => {
     const userDoc = userModel.doc(userId);
     await userDoc.update({
       picture: image,
+      updated_at: Date.now(),
     });
   } catch (err) {
     logger.error("Error updating user picture data", err);
@@ -809,7 +811,7 @@ const updateUsersInBatch = async (usersData) => {
     usersData.forEach((user) => {
       const id = user.id;
       delete user.id;
-      bulkWriter.update(userModel.doc(id), user);
+      bulkWriter.update(userModel.doc(id), { ...user, updated_at: Date.now() });
     });
 
     await bulkWriter.close();
@@ -934,7 +936,7 @@ const addGithubUserId = async (page, size) => {
         })
         .then((data) => {
           const githubUserId = data.id;
-          batchWrite.update(userDoc.ref, { github_user_id: `${githubUserId}` });
+          batchWrite.update(userDoc.ref, { github_user_id: `${githubUserId}`, updated_at: Date.now() });
           countUserFound++;
         })
         .catch((error) => {
