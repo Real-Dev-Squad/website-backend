@@ -302,7 +302,6 @@ describe("/requests", function () {
         .request(app)
         .get(`/requests?dev=true&requestedBy=${userData[16].username}`)
         .end(function (err, res) {
-          console.log(res.body.data);
           expect(res).to.have.status(200);
           expect(res.body.data.every((request: any) => request.requestedBy === testUserId));
           done();
