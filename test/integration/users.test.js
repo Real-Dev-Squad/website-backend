@@ -1260,9 +1260,6 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Users returned successfully!");
           expect(res.body.users).to.be.a("array");
-
-          // Additional assertions as needed
-
           return done();
         });
     });
@@ -1281,9 +1278,6 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Users returned successfully!");
           expect(res.body.users).to.be.a("array");
-
-          // Additional assertions as needed
-
           return done();
         });
     });
