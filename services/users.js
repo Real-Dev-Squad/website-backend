@@ -19,6 +19,7 @@ const archiveUsers = async (usersData) => {
         ...user.roles,
         archived: true,
       },
+      updated_at: Date.now(),
     };
     batch.update(userModel.doc(id), updatedUserData);
     usersBatch.push({ id, firstName, lastName });
