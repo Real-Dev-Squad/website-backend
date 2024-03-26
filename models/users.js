@@ -163,53 +163,74 @@ const getSuggestedUsers = async (skill) => {
  * @return {Promise<userModel|Array>}
  */
 const fetchPaginatedUsers = async (query) => {
+  const isDevMode = query.dev === "true";
+
   try {
-    // INFO: default user size set to 100
-    // INFO: https://github.com/Real-Dev-Squad/website-backend/pull/873#discussion_r1064229932
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
 
     let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+    let compositeQuery = [dbQuery];
+    if (isDevMode) {
+      const usernameQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+      const firstNameQuery = userModel.where("roles.archived", "==", false).orderBy("first_name");
+      const lastNameQuery = userModel.where("roles.archived", "==", false).orderBy("last_name");
+      compositeQuery = [usernameQuery, firstNameQuery, lastNameQuery];
+    }
 
     if (query.prev) {
+      compositeQuery = compositeQuery.map((query) => query.limitToLast(size));
       dbQuery = dbQuery.limitToLast(size);
     } else {
+      compositeQuery = compositeQuery.map((query) => query.limit(size));
       dbQuery = dbQuery.limit(size);
     }
 
     if (Object.keys(query).length) {
       if (query.search) {
-        dbQuery = dbQuery
-          .startAt(query.search.toLowerCase().trim())
-          .endAt(query.search.toLowerCase().trim() + "\uf8ff");
+        const searchValue = query.search.toLowerCase().trim();
+        dbQuery = dbQuery.startAt(searchValue).endAt(searchValue + "\uf8ff");
+        compositeQuery = compositeQuery.map((query) => query.startAt(searchValue).endAt(searchValue + "\uf8ff"));
       }
       if (query.page) {
         const offsetValue = size * parseInt(query.page);
         dbQuery = dbQuery.offset(offsetValue);
+        compositeQuery = compositeQuery.map((query) => query.offset(offsetValue));
       } else if (query.next) {
         dbQuery = dbQuery.startAfter(doc);
+        compositeQuery = compositeQuery.map((query) => query.startAfter(doc));
       } else if (query.prev) {
         dbQuery = dbQuery.endBefore(doc);
+        compositeQuery = compositeQuery.map((query) => query.endBefore(doc));
       }
     }
+
     const snapshot = await dbQuery.get();
+    const snapshots = await Promise.all(compositeQuery.map((query) => query.get()));
+
+    const allUsers = [];
+    const userMap = new Map();
+
+    const processSnapshot = (snapshot) => {
+      snapshot.forEach((doc) => {
+        const userId = doc.id;
+        if (!userMap.has(userId)) {
+          userMap.set(userId, doc.data());
+          allUsers.push({ id: userId, ...doc.data() });
+        }
+      });
+    };
+
+    processSnapshot(snapshot);
+    snapshots.forEach(processSnapshot);
 
     const firstDoc = snapshot.docs[0];
     const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
-    const allUsers = [];
-
-    snapshot.forEach((doc) => {
-      allUsers.push({
-        id: doc.id,
-        ...doc.data(),
-      });
-    });
-
     return {
       allUsers,
-      nextId: lastDoc?.id ?? "",
-      prevId: firstDoc?.id ?? "",
+      nextId: lastDoc?.id || "",
+      prevId: firstDoc?.id || "",
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
