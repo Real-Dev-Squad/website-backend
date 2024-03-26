@@ -20,6 +20,7 @@ const postTaskRequests = async (req, res, next) => {
       proposedStartDate: joi.number().required(),
       proposedDeadline: joi.number().required(),
       description: joi.string().optional(),
+      markdownEnabled: joi.boolean().optional(),
     });
 
   const taskCreationSchema = joi
@@ -33,6 +34,7 @@ const postTaskRequests = async (req, res, next) => {
       proposedStartDate: joi.number().required(),
       proposedDeadline: joi.number().required(),
       description: joi.string().optional(),
+      markdownEnabled: joi.boolean().optional(),
     });
   const schema = joi.alternatives().try(taskAssignmentSchema, taskCreationSchema);
 

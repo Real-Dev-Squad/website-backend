@@ -54,6 +54,7 @@ const moveToMembers = async (userId) => {
     const roles = user.roles ? { ...user.roles, member: true } : { member: true };
     await userModel.doc(userId).update({
       roles,
+      updated_at: Date.now(),
     });
     return { isAlreadyMember: false, movedToMember: true };
   } catch (err) {
@@ -101,6 +102,7 @@ const addArchiveRoleToMembers = async (userId) => {
     const roles = { ...user.roles, [ROLES.ARCHIVED]: true };
     await userModel.doc(userId).update({
       roles,
+      updated_at: Date.now(),
     });
     return { isArchived: false };
   } catch (err) {

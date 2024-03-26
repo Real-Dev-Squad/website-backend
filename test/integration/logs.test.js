@@ -142,7 +142,8 @@ describe("/logs", function () {
           expect(res.body.message).to.equal("All Logs fetched successfully");
           expect(res.body.data).to.lengthOf(7);
           expect(res.body.data[0]).to.contain({
-            user: "joygupta",
+            username: "joygupta",
+            taskTitle: "Untitled Task",
             taskId: "mZB0akqPUa1GQQdrgsx7",
             extensionRequestId: "y79PXir0s82qNAzeIn8S",
             status: "PENDING",
@@ -170,7 +171,7 @@ describe("/logs", function () {
         });
     });
 
-    it("should return 204, if no logs are present", function (done) {
+    it("if no logs are present, should return valid response", function (done) {
       chai
         .request(app)
         .get("/logs?type=REQUEST_CREATED1&dev=true")
@@ -179,7 +180,8 @@ describe("/logs", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(204);
+          expect(res).to.have.status(200);
+          expect(res.body.data).to.have.lengthOf(0);
           return done();
         });
     });
