@@ -15,6 +15,7 @@ import { statusState } from "../constants/userStatus";
 import { createRequest, getRequests, updateRequest } from "../models/requests";
 import { addLog } from "../models/logs";
 import { createUserFutureStatus } from "../models/userFutureStatus";
+import {addFutureStatus} from "../models/userStatus";
 import { OooStatusRequest } from "../types/oooRequest";
 import { getPaginatedLink } from "../utils/helper";
 
@@ -113,6 +114,7 @@ export const updateRequestController = async (req: any, res: any) => {
           message,
         };
         await createUserFutureStatus(userFutureStatusData);
+        await addFutureStatus(userFutureStatusData);
       }
     }
 
