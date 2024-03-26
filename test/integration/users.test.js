@@ -1268,7 +1268,7 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .query({ search: "Narkhede", dev: true }) // Search for users with last name 'Narkhede' in dev mode
+        .query({ search: "Narkhede", dev: true })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -1278,6 +1278,25 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Users returned successfully!");
           expect(res.body.users).to.be.a("array");
+          return done();
+        });
+    });
+
+    it("Should return exactly 2 users with last name 'Narkhede'", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: "Narkhede", dev: true })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.users).to.have.lengthOf(2);
           return done();
         });
     });
