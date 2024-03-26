@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { REQUEST_STATE, REQUEST_TYPE } from "../constants/request";
+import { REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
 import { userState } from "../constants/userStatus";
 import { Boom } from "express-boom";
 
 export type OooStatusRequest = {
+  id: string;
   type: REQUEST_TYPE.OOO;
   from: number;
   until?: number;
@@ -11,6 +12,7 @@ export type OooStatusRequest = {
   status: userState;
   state?: REQUEST_STATE;
   lastModifiedBy?: string;
+  requestedBy?: string;
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
   reason?: string;
@@ -40,7 +42,7 @@ export type userData= {
 };
 
 export type RequestQuery = {
-  dev: string;
+  dev?: string;
   type?: string;
   requestedBy?: string;
   state?: REQUEST_STATE.APPROVED | REQUEST_STATE.PENDING | REQUEST_STATE.REJECTED;
