@@ -10,7 +10,14 @@ describe("Middleware | Validators | external accounts", function () {
         body: {
           type: "some type",
           token: "some token",
-          attributes: {},
+          attributes: {
+            userName: "some name",
+            discriminator: "some discriminator",
+            userAvatar: "some avatar",
+            discordId: "some id",
+            discordJoinedAt: "some date",
+            expiry: Date.now(),
+          },
         },
       };
       const res = {};
