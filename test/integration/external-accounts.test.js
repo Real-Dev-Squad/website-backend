@@ -425,4 +425,54 @@ describe("External Accounts", function () {
         });
     });
   });
+
+  describe("PATCH /external-accounts/link", function () {
+    let newUserJWT;
+
+    beforeEach(async function () {
+      const userId = await addUser(userData[3]);
+      newUserJWT = authService.generateAuthToken({ userId });
+    });
+
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
+    });
+
+    it("Should return 404 when token is not provided in path variable", async function () {
+      const res = await chai.request(app).patch("/external-accounts/link").set("Cookie", `${cookieName}=${newUserJWT}`);
+      expect(res).to.have.status(404);
+      expect(res.body.message).to.equal("Not Found");
+    });
+
+    it("Should return 204 when valid action is provided", async function () {
+      await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
+      const getUserResponseBeforeUpdate = await chai
+        .request(app)
+        .get("/users/self")
+        .set("cookie", `${cookieName}=${newUserJWT}`);
+
+      expect(getUserResponseBeforeUpdate).to.have.status(200);
+      expect(getUserResponseBeforeUpdate.body.roles.in_discord).to.equal(false);
+      expect(getUserResponseBeforeUpdate.body).to.not.have.property("discordId");
+      expect(getUserResponseBeforeUpdate.body).to.not.have.property("discordJoinedAt");
+
+      const response = await chai
+        .request(app)
+        .patch(`/external-accounts/link/${externalAccountData[2].token}`)
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
+        .set("Cookie", `${cookieName}=${newUserJWT}`);
+
+      expect(response).to.have.status(204);
+
+      const updatedUserDetails = await chai
+        .request(app)
+        .get("/users/self")
+        .set("cookie", `${cookieName}=${newUserJWT}`);
+
+      expect(updatedUserDetails.body.roles.in_discord).to.equal(true);
+      expect(updatedUserDetails.body).to.have.property("discordId");
+      expect(updatedUserDetails.body).to.have.property("discordJoinedAt");
+    });
+  });
 });
