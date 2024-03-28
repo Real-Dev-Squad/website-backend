@@ -33,7 +33,11 @@ describe("External Accounts", function () {
       expect(response.token).to.equal(externalAccountData[2].token);
       expect(response.attributes).to.be.eql({
         discordId: externalAccountData[2].attributes.discordId,
+        discordJoinedAt: externalAccountData[2].attributes.discordJoinedAt,
         expiry: externalAccountData[2].attributes.expiry,
+        userName: externalAccountData[2].attributes.userName,
+        discriminator: externalAccountData[2].attributes.discriminator,
+        userAvatar: externalAccountData[2].attributes.userAvatar,
       });
     });
 

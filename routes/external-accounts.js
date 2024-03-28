@@ -12,6 +12,7 @@ const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndSe
 
 router.post("/", validator.externalAccountData, authorizeBot.verifyDiscordBot, externalAccount.addExternalAccountData);
 router.get("/:token", authenticate, externalAccount.getExternalAccountData);
+router.patch("/link/:token", authenticate, validator.linkDiscord, externalAccount.linkExternalAccount);
 router.patch("/discord-sync", authenticate, authorizeRoles([SUPERUSER]), externalAccount.syncExternalAccountData);
 router.post(
   "/users",
