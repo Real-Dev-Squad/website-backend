@@ -23,7 +23,7 @@
     "cors": "^2.8.5",
     "datauri": "^4.1.0",
     "debug": "~4.3.4",
-    "express": "~4.18.3",
+    "express": "~4.19.2",
     "express-boom": "^3.0.0",
     "firebase-admin": "^11.11.1",
     "helmet": "^7.1.0",
