@@ -196,6 +196,7 @@ const fetchTaskRequestById = async (taskRequestId) => {
  * @param {string} data.proposedDeadline - The proposed deadline for the task.
  * @param {string} data.proposedStartDate - The proposed start date for the task.
  * @param {string} data.description - The description of the task request.
+ * @param {string} data.markdownEnabled - If markdown is enabled in task request's description.
  * @param {string} data.taskTitle - The title of the task.
  * @param {string} data.taskId - The ID of the task (optional).
  * @param {string} data.externalIssueUrl - The external issue URL (optional).
@@ -239,6 +240,7 @@ const createRequest = async (data, authorUserId) => {
         proposedDeadline: data.proposedDeadline,
         proposedStartDate: data.proposedStartDate,
         description: data.description,
+        markdownEnabled: data?.markdownEnabled ?? false,
         status: TASK_REQUEST_STATUS.PENDING,
       };
       if (!userRequest.description) delete userRequest.description;
