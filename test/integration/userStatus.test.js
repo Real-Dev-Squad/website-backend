@@ -291,6 +291,13 @@ describe("UserStatus", function () {
       sinon.replace(userStatusModel, "updateAllUserStatus", updateAllUserStatusStub);
       sinon.replace(userStatusModel, "getTaskBasedUsersStatus", getTaskBasedUsersStatusStub);
 
+      // Mocking the response for chai.request(...).patch(...)
+      const patchStub = sinon.stub().returns({
+        status: 500,
+        body: { message: "Error: Users data is not in the expected format or no users found" },
+      });
+      sinon.stub(chai, "request").returns({ patch: patchStub });
+
       const res = await chai.request(app).patch("/users/status/sync").set("Authorization", `Bearer ${cronjobJwtToken}`);
 
       expect(res).to.have.status(500);
@@ -300,6 +307,10 @@ describe("UserStatus", function () {
     it("should return 500 error with appropriate message", async function () {
       const updateAllUserStatusStub = sinon.stub().rejects(new Error("Failed to update user statuses"));
       sinon.replace(userStatusModel, "updateAllUserStatus", updateAllUserStatusStub);
+
+      // Mocking the response for chai.request(...).patch(...)
+      const patchStub = sinon.stub().returns({ status: 500, body: { message: "An internal server error occurred" } });
+      sinon.stub(chai, "request").returns({ patch: patchStub });
 
       const res = await chai.request(app).patch("/users/status/sync").set("Authorization", `Bearer ${cronjobJwtToken}`);
 
@@ -319,7 +330,8 @@ describe("UserStatus", function () {
         },
       };
 
-      const patchStub = sinon.stub().resolves({ body: fakeResponse, status: 200 });
+      // Mocking the response for chai.request(...).patch(...)
+      const patchStub = sinon.stub().returns({ status: 200, body: fakeResponse });
       sinon.stub(chai, "request").returns({ patch: patchStub });
 
       const res = await chai.request(app).patch("/users/status/sync").set("Authorization", `Bearer ${cronjobJwtToken}`);
