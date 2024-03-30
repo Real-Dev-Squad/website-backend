@@ -260,7 +260,7 @@ const syncUserStatus = async (req, res, next) => {
   } catch (error) {
     logger.error(error.message);
     return res.status(500).json({
-      message: "The server has encountered an unexpected error. Please contact the administrator for more information.",
+      message: "An internal server error occurred",
     });
   }
 };
