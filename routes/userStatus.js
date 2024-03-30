@@ -25,7 +25,7 @@ const { Services } = require("../constants/bot");
 router.get("/", validateGetQueryParams, getUserStatusControllers);
 router.get("/self", authenticate, getUserStatus);
 router.get("/:userId", getUserStatus);
-router.patch("/sync", authenticate, authorizeRoles([SUPERUSER]), syncUserStatus);
+router.patch("/sync", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), syncUserStatus);
 
 router.patch("/self", authenticate, validateUserStatus, updateUserStatusController);
 router.patch("/update", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), updateAllUserStatus);
