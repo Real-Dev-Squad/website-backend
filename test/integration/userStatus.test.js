@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
@@ -24,6 +25,8 @@ const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
 const userStatusModel = require("../../models/userStatus");
 const { convertTimestampToUTCStartOrEndOfDay } = require("../../utils/time");
+const bot = require("../utils/generateBotToken");
+const { CRON_JOB_HANDLER } = require("../../constants/bot");
 
 chai.use(chaiHttp);
 
@@ -32,6 +35,7 @@ describe("UserStatus", function () {
   let superUserId;
   let superUserAuthToken;
   let userId = "";
+  let cronjobJwtToken;
 
   beforeEach(async function () {
     userId = await addUser();
@@ -39,6 +43,7 @@ describe("UserStatus", function () {
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
     await updateUserStatus(userId, userStatusDataForNewUser);
+    cronjobJwtToken = bot.generateCronJobToken({ name: CRON_JOB_HANDLER });
   });
 
   afterEach(async function () {
@@ -276,7 +281,89 @@ describe("UserStatus", function () {
   });
 
   describe("PATCH /users/status/sync", function () {
-    // TODO: Added test cases here
+    describe("PATCH /users/status/sync", function () {
+      it("should return all user statuses", function (done) {
+        const fakeResponse = {
+          message: "All User Status updated successfully.",
+          data: {
+            usersCount: 5,
+            oooUsersAltered: 0,
+            oooUsersUnaltered: 0,
+            nonOooUsersAltered: 3,
+            nonOooUsersUnaltered: 0,
+          },
+        };
+
+        const chaiRequestStub = sinon.stub(chai, "request").returns({
+          patch: sinon.stub().returnsThis(),
+          set: sinon.stub().returnsThis(),
+          end: (callback) => {
+            callback(null, { body: fakeResponse, status: 200 });
+          },
+        });
+
+        chai
+          .request(app)
+          .patch("/users/status/sync")
+          .set("Authorization", `Bearer ${cronjobJwtToken}`)
+          .end((err, res) => {
+            chaiRequestStub.restore();
+            if (err) {
+              return done(err);
+            }
+            expect(res).to.have.status(200);
+            expect(res.body.message).to.equal("All User Status updated successfully.");
+            expect(res.body.data).to.deep.equal(fakeResponse.data);
+            done();
+          });
+      });
+
+      describe("No users found for status update", function () {
+        it("should return 500 error with appropriate message", function (done) {
+          const updateAllUserStatusStub = sinon.stub().resolves();
+          const getTaskBasedUsersStatusStub = sinon.stub().resolves({ data: { users: [] } });
+
+          sinon.replace(userStatusModel, "updateAllUserStatus", updateAllUserStatusStub);
+          sinon.replace(userStatusModel, "getTaskBasedUsersStatus", getTaskBasedUsersStatusStub);
+
+          chai
+            .request(app)
+            .patch("/users/status/sync")
+            .set("Authorization", `Bearer ${cronjobJwtToken}`)
+            .end((err, res) => {
+              sinon.restore();
+              if (err) {
+                return done(err);
+              }
+              expect(res).to.have.status(500);
+              expect(res.body.message).to.equal("Error: Users data is not in the expected format or no users found");
+              done();
+            });
+        });
+      });
+
+      describe("Error while updating user statuses", function () {
+        it("should return 500 error with appropriate message", function (done) {
+          const updateAllUserStatusStub = sinon.stub().rejects(new Error("Failed to update user statuses"));
+          sinon.replace(userStatusModel, "updateAllUserStatus", updateAllUserStatusStub);
+          chai
+            .request(app)
+            .patch("/users/status/sync")
+            .set("Authorization", `Bearer ${cronjobJwtToken}`)
+            .end((err, res) => {
+              sinon.restore();
+              if (err) {
+                return done(err);
+              }
+              expect(res).to.have.status(500);
+              expect(res.body.message).to.equal(
+                "The server has encountered an unexpected error. Please contact the administrator for more information."
+              );
+              done();
+            });
+        });
+      });
+    });
   });
 
   describe("PATCH /users/status/:userid", function () {
