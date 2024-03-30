@@ -4,8 +4,11 @@ module.exports = () => {
       type: "discord",
       token: "<TOKEN>",
       attributes: {
-        discordId: "<DISCORD_ID>",
+        discordId: 121201,
         expiry: 1674041460211,
+        username: "test",
+        discriminator: "1234",
+        avatar: "https://cdn.discordapp.com/avatars/123/123.png",
       },
     },
     {
@@ -13,7 +16,7 @@ module.exports = () => {
       type: "discord",
       token: 123,
       attributes: {
-        discordId: "<DISCORD_ID>",
+        discordId: 121202,
         expiry: 1674041460211,
       },
     },
@@ -21,7 +24,7 @@ module.exports = () => {
       type: "discord",
       token: "<TOKEN>",
       attributes: {
-        discordId: "<DISCORD_ID>",
+        discordId: 121203,
         expiry: Date.now() + 600000,
       },
     },
@@ -29,7 +32,7 @@ module.exports = () => {
       type: "discord",
       token: "<TOKEN_1>",
       attributes: {
-        discordId: "<DISCORD_ID>",
+        discordId: 121204,
         expiry: Date.now() - 600000,
       },
     },
