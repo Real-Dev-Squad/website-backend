@@ -285,28 +285,6 @@ describe("UserStatus", function () {
       sinon.restore();
     });
 
-    it("should return all user statuses", async function () {
-      const fakeResponse = {
-        message: "All User Status updated successfully.",
-        data: {
-          usersCount: 5,
-          oooUsersAltered: 0,
-          oooUsersUnaltered: 0,
-          nonOooUsersAltered: 3,
-          nonOooUsersUnaltered: 0,
-        },
-      };
-
-      const patchStub = sinon.stub().resolves({ body: fakeResponse, status: 200 });
-      sinon.stub(chai, "request").returns({ patch: patchStub });
-
-      const res = await chai.request(app).patch("/users/status/sync").set("Authorization", `Bearer ${cronjobJwtToken}`);
-
-      expect(res).to.have.status(200);
-      expect(res.body.message).to.equal(fakeResponse.message);
-      expect(res.body.data).to.deep.equal(fakeResponse.data);
-    });
-
     it("should return 500 error with appropriate message when no users found", async function () {
       const updateAllUserStatusStub = sinon.stub().resolves();
       const getTaskBasedUsersStatusStub = sinon.stub().resolves({ data: { users: [] } });
@@ -327,6 +305,28 @@ describe("UserStatus", function () {
 
       expect(res).to.have.status(500);
       expect(res.body.message).to.equal("An internal server error occurred");
+    });
+
+    it("should return all user statuses", async function () {
+      const fakeResponse = {
+        message: "All User Status updated successfully.",
+        data: {
+          usersCount: 5,
+          oooUsersAltered: 0,
+          oooUsersUnaltered: 0,
+          nonOooUsersAltered: 3,
+          nonOooUsersUnaltered: 0,
+        },
+      };
+
+      const patchStub = sinon.stub().resolves({ body: fakeResponse, status: 200 });
+      sinon.stub(chai, "request").returns({ patch: patchStub });
+
+      const res = await chai.request(app).patch("/users/status/sync").set("Authorization", `Bearer ${cronjobJwtToken}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.equal(fakeResponse.message);
+      expect(res.body.data).to.deep.equal(fakeResponse.data);
     });
   });
 
