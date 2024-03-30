@@ -1,4 +1,3 @@
-/* eslint-disable consistent-return */
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
@@ -27,6 +26,7 @@ const userStatusModel = require("../../models/userStatus");
 const { convertTimestampToUTCStartOrEndOfDay } = require("../../utils/time");
 const bot = require("../utils/generateBotToken");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
+const userStatusController = require("../../controllers/userStatus");
 
 chai.use(chaiHttp);
 
@@ -285,13 +285,34 @@ describe("UserStatus", function () {
       sinon.restore();
     });
 
+    it("should return all user statuses", async function () {
+      const fakeResponse = {
+        message: "All User Status updated successfully.",
+        data: {
+          usersCount: 5,
+          oooUsersAltered: 0,
+          oooUsersUnaltered: 0,
+          nonOooUsersAltered: 3,
+          nonOooUsersUnaltered: 0,
+        },
+      };
+
+      const patchStub = sinon.stub().returns({ status: 200, body: fakeResponse });
+      sinon.stub(chai, "request").returns({ patch: patchStub });
+
+      const res = await chai.request(app).patch(`/users/status/sync`).set("Authorization", `Bearer ${cronjobJwtToken}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.equal(fakeResponse.message);
+      expect(res.body.data).to.deep.equal(fakeResponse.data);
+    });
+
     it("should return 500 error with appropriate message when no users found", async function () {
       const updateAllUserStatusStub = sinon.stub().resolves();
       const getTaskBasedUsersStatusStub = sinon.stub().resolves({ data: { users: [] } });
-      sinon.replace(userStatusModel, "updateAllUserStatus", updateAllUserStatusStub);
-      sinon.replace(userStatusModel, "getTaskBasedUsersStatus", getTaskBasedUsersStatusStub);
+      sinon.replace(userStatusController, "updateAllUserStatus", updateAllUserStatusStub);
+      sinon.replace(userStatusController, "getTaskBasedUsersStatus", getTaskBasedUsersStatusStub);
 
-      // Mocking the response for chai.request(...).patch(...)
       const patchStub = sinon.stub().returns({
         status: 500,
         body: { message: "Error: Users data is not in the expected format or no users found" },
@@ -306,9 +327,8 @@ describe("UserStatus", function () {
 
     it("should return 500 error with appropriate message", async function () {
       const updateAllUserStatusStub = sinon.stub().rejects(new Error("Failed to update user statuses"));
-      sinon.replace(userStatusModel, "updateAllUserStatus", updateAllUserStatusStub);
+      sinon.replace(userStatusController, "updateAllUserStatus", updateAllUserStatusStub);
 
-      // Mocking the response for chai.request(...).patch(...)
       const patchStub = sinon.stub().returns({ status: 500, body: { message: "An internal server error occurred" } });
       sinon.stub(chai, "request").returns({ patch: patchStub });
 
@@ -316,29 +336,6 @@ describe("UserStatus", function () {
 
       expect(res).to.have.status(500);
       expect(res.body.message).to.equal("An internal server error occurred");
-    });
-
-    it("should return all user statuses", async function () {
-      const fakeResponse = {
-        message: "All User Status updated successfully.",
-        data: {
-          usersCount: 5,
-          oooUsersAltered: 0,
-          oooUsersUnaltered: 0,
-          nonOooUsersAltered: 3,
-          nonOooUsersUnaltered: 0,
-        },
-      };
-
-      // Mocking the response for chai.request(...).patch(...)
-      const patchStub = sinon.stub().returns({ status: 200, body: fakeResponse });
-      sinon.stub(chai, "request").returns({ patch: patchStub });
-
-      const res = await chai.request(app).patch("/users/status/sync").set("Authorization", `Bearer ${cronjobJwtToken}`);
-
-      expect(res).to.have.status(200);
-      expect(res.body.message).to.equal(fakeResponse.message);
-      expect(res.body.data).to.deep.equal(fakeResponse.data);
     });
   });
 
