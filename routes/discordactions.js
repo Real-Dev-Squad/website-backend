@@ -59,7 +59,6 @@ router.put(
 router.post(
   "/nicknames/sync",
   authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
-  checkIsVerifiedDiscord,
   updateDiscordNicknames
 );
 router.post("/nickname/status", verifyCronJob, validateUpdateUsersNicknameStatusBody, updateUsersNicknameStatus);
