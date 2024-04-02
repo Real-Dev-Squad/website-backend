@@ -2,6 +2,7 @@ import Joi from "joi";
 import { userState, CANCEL_OOO } from "../../constants/userStatus";
 import { NextFunction } from "express";
 import { CustomResponse } from "../../typeDefinitions/global";
+import dataAccess from "../../services/dataAccessLayer";
 const threeDaysInMilliseconds = 172800000;
 
 const validateUsersStatusData = async (todaysTime: number, req: any, res: any, next: any) => {
@@ -55,6 +56,15 @@ const validateUsersStatusData = async (todaysTime: number, req: any, res: any, n
     .unknown(false);
 
   let schema: any;
+
+  const validateUserId = async (userId: string) => {
+    // @ts-expect-error
+    const result = await dataAccess.retrieveUsers({ id: userId });
+    if(!result.userExists) {
+      throw new Error("No user found with this userId.")
+    }
+  }
+
   try {
     if (Object.keys(req.body).includes(CANCEL_OOO)) {
       schema = cancelOooSchema;
@@ -62,6 +72,7 @@ const validateUsersStatusData = async (todaysTime: number, req: any, res: any, n
       schema = statusSchema;
     }
     await schema.validateAsync(req.body);
+    await validateUserId(req.params.userId);
     next();
   } catch (error) {
     logger.error(`Error validating UserStatus ${error}`);
