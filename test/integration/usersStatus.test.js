@@ -30,11 +30,11 @@ describe("UserStatus", function () {
     await cleanDb();
   });
 
-  describe("GET /user/status/:userid", function () {
+  describe("GET /v1/users/status/:userid", function () {
     it("Should return the User Status Document with the given id", function (done) {
       chai
         .request(app)
-        .get(`/user/status/${userId}`)
+        .get(`/v1/users/status/${userId}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -48,20 +48,20 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should return the User Status Document of the user requesting it", function (done) {
+    it("Should not return the User Status Document of the user requesting it", function (done) {
       chai
         .request(app)
-        .get(`/user/status/self`)
+        .get(`/v1/users/status/self`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(200);
+          expect(res).to.have.status(404);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User Status found successfully.");
-          expect(res.body.userId).to.equal(userId);
-          expect(res.body.data.state).to.equal("CURRENT");
+          expect(res.body.message).to.equal("User Status couldn't be found.");
+          expect(res.body.userId).to.equal("self");
+          expect(res.body.data).to.equal(null);
           return done();
         });
     });
