@@ -15,6 +15,7 @@ const updateRoles = async (req, res) => {
           ...userData.roles,
           ...req.body,
         },
+        updated_at: Date.now(),
       },
       userId
     );
@@ -48,6 +49,7 @@ const removePrivileges = async (req, res) => {
               ...member.roles,
               member: false,
             },
+            updated_at: Date.now(),
           },
           member.id
         )
@@ -61,6 +63,7 @@ const removePrivileges = async (req, res) => {
               ...superUser.roles,
               super_user: false,
             },
+            updated_at: Date.now(),
           },
           superUser.id
         )
