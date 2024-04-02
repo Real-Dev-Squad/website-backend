@@ -489,6 +489,19 @@ const updateStatus = async (req, res) => {
   }
 };
 
+const orphanTasks = async (req, res) => {
+  try {
+    const { lastOrphanTasksFilteration = 0 } = req.body;
+
+    const tasksData = await tasks.updateOrphanTasksStatus(lastOrphanTasksFilteration);
+
+    return res.status(200).json({ message: "Orphan tasks filtered", tasksData });
+  } catch (error) {
+    logger.error("Error in filtering orphan tasks", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 const getUsersHandler = async (req, res) => {
   try {
     const { size, cursor, q: queryString } = req.query;
@@ -548,4 +561,5 @@ module.exports = {
   assignTask,
   updateStatus,
   getUsersHandler,
+  orphanTasks,
 };
