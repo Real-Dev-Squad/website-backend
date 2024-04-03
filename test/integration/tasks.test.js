@@ -1573,13 +1573,13 @@ describe("Tasks", function () {
     });
     it("Should update status of orphan tasks to BACKLOG", async function () {
       const res = await chai.request(app).post("/tasks/orphanTasks").set("Authorization", `Bearer ${jwtToken}`).send({
-        lastOrphanTasksFilteration: 1712040715000,
+        lastOrphanTasksFilterationTimestamp: 1712040715000,
       });
 
       expect(res).to.have.status(200);
       expect(res.body).to.deep.equal({
         message: "Orphan tasks filtered successfully",
-        tasksData: {
+        updatedTasksData: {
           orphanTasksUpdatedCount: 2,
         },
       });
@@ -1593,7 +1593,7 @@ describe("Tasks", function () {
         .post("/tasks/orphanTasks")
         .set("Authorization", `Bearer ${nonSuperUserJwt}`)
         .send({
-          lastOrphanTasksFilteration: 1712040715000,
+          lastOrphanTasksFilterationTimestamp: 1712040715000,
         });
 
       expect(res).to.have.status(400);

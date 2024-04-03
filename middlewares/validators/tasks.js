@@ -266,7 +266,7 @@ const getUsersValidator = async (req, res, next) => {
 
 const filterOrphanTasksValidator = async (req, res, next) => {
   try {
-    await validateMillisecondsTimestamp(req.body, "lastOrphanTasksFilteration");
+    await validateMillisecondsTimestamp(req.body, "lastOrphanTasksFilterationTimestamp");
     next();
   } catch (error) {
     logger.error(`Error while validating request body for Orphan Tasks Filteration payload : ${error}`);

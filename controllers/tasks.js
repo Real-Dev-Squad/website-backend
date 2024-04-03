@@ -491,11 +491,11 @@ const updateStatus = async (req, res) => {
 
 const orphanTasks = async (req, res) => {
   try {
-    const { lastOrphanTasksFilteration = 0 } = req.body;
+    const { lastOrphanTasksFilterationTimestamp = 0 } = req.body;
 
-    const tasksData = await tasks.updateOrphanTasksStatus(lastOrphanTasksFilteration);
+    const updatedTasksData = await tasks.updateOrphanTasksStatus(lastOrphanTasksFilterationTimestamp);
 
-    return res.status(200).json({ message: "Orphan tasks filtered successfully", tasksData });
+    return res.status(200).json({ message: "Orphan tasks filtered successfully", updatedTasksData });
   } catch (error) {
     logger.error("Error in filtering orphan tasks", error);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);

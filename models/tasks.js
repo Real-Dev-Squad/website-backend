@@ -632,8 +632,8 @@ const updateTaskStatus = async () => {
   }
 };
 
-const updateOrphanTasksStatus = async (lastOrphanTasksFilteration) => {
-  const lastTimestamp = Number(lastOrphanTasksFilteration);
+const updateOrphanTasksStatus = async (lastOrphanTasksFilterationTimestamp) => {
+  const lastTimestamp = Number(lastOrphanTasksFilterationTimestamp);
   try {
     const users = [];
     const currentTimeStamp = Date.now();
