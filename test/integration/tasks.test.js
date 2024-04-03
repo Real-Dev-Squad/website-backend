@@ -1598,11 +1598,14 @@ describe("Tasks", function () {
     it("Should return 400 if not cron worker", async function () {
       const nonSuperUserId = await addUser(appOwner);
       const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
-      const res = (
-        await chai.request(app).post("/tasks/orphanTasks").set("cookie", `${cookieName}=${nonSuperUserJwt}`)
-      ).send({
-        lastOrphanTasksFilteration: 1712040715000,
-      });
+      const res = await chai
+        .request(app)
+        .post("/tasks/orphanTasks")
+        .set("Authorization", `Bearer ${nonSuperUserJwt}`)
+        .send({
+          lastOrphanTasksFilteration: 1712040715000,
+        });
+
       expect(res).to.have.status(400);
       expect(res.body).to.deep.equal({
         statusCode: 400,

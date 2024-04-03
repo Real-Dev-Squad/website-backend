@@ -654,8 +654,8 @@ const updateOrphanTasksStatus = async (lastOrphanTasksFilteration) => {
         .where("status", "not-in", ["COMPLETED", "BACKLOG"])
         .get();
       tasksQuerySnapshot.forEach(async (taskDoc) => {
-        await tasksModel.doc(taskDoc.id).update({ status: "BACKLOG" });
         orphanTasksUpdatedCount++;
+        await tasksModel.doc(taskDoc.id).update({ status: "BACKLOG" });
       });
     }
 
