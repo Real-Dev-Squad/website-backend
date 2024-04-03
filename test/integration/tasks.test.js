@@ -1571,28 +1571,18 @@ describe("Tasks", function () {
     afterEach(async function () {
       await cleanDb();
     });
-    it("Should update status of orphan tasks to BACKLOG", async function (done) {
-      chai
-        .request(app)
-        .post("/tasks/orphanTasks")
-        .set("Authorization", `Bearer ${jwtToken}`)
-        .send({
-          lastOrphanTasksFilteration: 1712040715000,
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res).to.be.an("object");
-          expect(res.body).to.deep.equal({
-            message: "Orphan tasks filtered successfully",
-            tasksData: {
-              orphanTasksUpdatedCount: 2,
-            },
-          });
-          return done();
-        });
+    it("Should update status of orphan tasks to BACKLOG", async function () {
+      const res = await chai.request(app).post("/tasks/orphanTasks").set("Authorization", `Bearer ${jwtToken}`).send({
+        lastOrphanTasksFilteration: 1712040715000,
+      });
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.deep.equal({
+        message: "Orphan tasks filtered successfully",
+        tasksData: {
+          orphanTasksUpdatedCount: 2,
+        },
+      });
     }).timeout(10000);
 
     it("Should return 400 if not cron worker", async function () {
