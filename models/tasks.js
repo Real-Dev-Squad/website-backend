@@ -1,5 +1,6 @@
 const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
+const userModel = firestore.collection("users");
 const ItemModel = firestore.collection("itemTags");
 const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
@@ -8,7 +9,8 @@ const { chunks } = require("../utils/array");
 const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
-const { IN_PROGRESS, NEEDS_REVIEW, IN_REVIEW, ASSIGNED, BLOCKED, SMOKE_TESTING, COMPLETED, SANITY_CHECK } = TASK_STATUS;
+const { IN_PROGRESS, NEEDS_REVIEW, IN_REVIEW, ASSIGNED, BLOCKED, SMOKE_TESTING, COMPLETED, SANITY_CHECK, BACKLOG } =
+  TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
@@ -631,6 +633,40 @@ const updateTaskStatus = async () => {
   }
 };
 
+const updateOrphanTasksStatus = async (lastOrphanTasksFilterationTimestamp) => {
+  const lastTimestamp = Number(lastOrphanTasksFilterationTimestamp);
+  try {
+    const users = [];
+    const currentTimeStamp = Date.now();
+
+    const usersQuerySnapshot = await userModel
+      .where("roles.in_discord", "==", false)
+      .where("updated_at", ">=", lastTimestamp)
+      .where("updated_at", "<=", currentTimeStamp)
+      .get();
+
+    usersQuerySnapshot.forEach((user) => users.push({ ...user.data(), id: user.id }));
+
+    let orphanTasksUpdatedCount = 0;
+
+    for (const user of users) {
+      const tasksQuerySnapshot = await tasksModel
+        .where("assigneeId", "==", user.id)
+        .where("status", "not-in", [COMPLETED, BACKLOG])
+        .get();
+      tasksQuerySnapshot.forEach(async (taskDoc) => {
+        orphanTasksUpdatedCount++;
+        await tasksModel.doc(taskDoc.id).update({ status: BACKLOG });
+      });
+    }
+
+    return { orphanTasksUpdatedCount };
+  } catch (error) {
+    logger.error("Error marking tasks as backlog:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   updateTask,
   fetchTasks,
@@ -648,4 +684,5 @@ module.exports = {
   getBuiltTasks,
   getOverdueTasks,
   updateTaskStatus,
+  updateOrphanTasksStatus,
 };
