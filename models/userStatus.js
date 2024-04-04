@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const { Forbidden, NotFound } = require("http-errors");
 const admin = require("firebase-admin");
 const firestore = require("../utils/firestore");
@@ -673,6 +674,30 @@ const cancelOooStatus = async (userId) => {
   }
 };
 
+const addFutureStatus = async (futureStatusData) => {
+  console.log("🚀 ~ addFutureStatus ~ futureStatusData:", futureStatusData);
+  try {
+    const userStatusDocs = await userStatusModel.where("userId", "==", futureStatusData.userId).limit(1).get();
+    const [userStatusDoc] = userStatusDocs.docs;
+    console.log("🚀 ~ addFutureStatus ~ userStatusDoc:", userStatusDoc);
+    const docId = userStatusDoc.id;
+    console.log("🚀 ~ addFutureStatus ~ docId:", docId);
+    const userStatusData = userStatusDoc.data();
+    delete futureStatusData.userId;
+    const newStatusData = {
+      ...userStatusData,
+      futureStatusData,
+    };
+    console.log("🚀 ~ addFutureStatus ~ newStatusData", newStatusData);
+    await userStatusModel.doc(docId).update(newStatusData);
+    console.log("🚀 ~ addFutureStatus ~ newStatusData", newStatusData);
+    return { id: docId, userStatusExists: true, data: newStatusData };
+  } catch (error) {
+    logger.error(`error in updating User Status Document ${error}`);
+    throw error;
+  }
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -686,4 +711,5 @@ module.exports = {
   getTaskBasedUsersStatus,
   cancelOooStatus,
   getGroupRole,
+  addFutureStatus,
 };

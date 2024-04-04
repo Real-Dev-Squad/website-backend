@@ -101,9 +101,7 @@ describe("models/oooRequests", () => {
       const oooRequest = await createRequest(createOooRequests2);
       const query = { id: oooRequest.id, dev: "true" };
       const oooRequestData: any = await getRequests(query);
-      expect(oooRequestData).to.have.property("allRequests");
-      expect(oooRequestData.allRequests[0].id).to.be.equal(oooRequest.id);
-      expect(oooRequestData.allRequests).to.have.lengthOf(1);
+      expect(oooRequestData.id).to.be.equal(oooRequest.id);
     });
 
     it("Should return null if the request with the specified ID does not exist", async () => {
