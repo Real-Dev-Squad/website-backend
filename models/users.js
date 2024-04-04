@@ -23,6 +23,7 @@ const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { AUTHORITIES } = require("../constants/authorities");
+const { photoVerificationRequestStatus } = require("../constants/users");
 
 /**
  * Adds or updates the user data
@@ -338,10 +339,13 @@ const initializeUser = async (userId) => {
  * @return {Promise<{message: string}|{message: string}>}
  * @throws {Error} - If error occurs while creating Verification Entry
  */
-const addForVerification = async (userId, discordId, profileImageUrl, discordImageUrl) => {
+const addForVerification = async (userId, discordId, profileImageUrl, profileImageID, discordImageUrl) => {
   let isNotVerifiedSnapshot;
   try {
-    isNotVerifiedSnapshot = await photoVerificationModel.where("userId", "==", userId).get();
+    isNotVerifiedSnapshot = await photoVerificationModel
+      .where("userId", "==", userId)
+      .where("status", "==", photoVerificationRequestStatus.PENDING)
+      .get();
   } catch (err) {
     logger.error("Error in creating Verification Entry", err);
     throw err;
@@ -350,7 +354,13 @@ const addForVerification = async (userId, discordId, profileImageUrl, discordIma
     userId,
     discordId,
     discord: { url: discordImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
-    profile: { url: profileImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+    profile: {
+      url: profileImageUrl,
+      publicId: profileImageID,
+      approved: false,
+      date: admin.firestore.Timestamp.fromDate(new Date()),
+    },
+    status: photoVerificationRequestStatus.PENDING,
   };
   try {
     if (!isNotVerifiedSnapshot.empty) {
@@ -375,9 +385,12 @@ const addForVerification = async (userId, discordId, profileImageUrl, discordIma
  * @return {Promise<{message: string}|{message: string}>}
  * @throws {Error} - If error occurs while verifying user's image
  */
-const markAsVerified = async (userId, imageType) => {
+const markAsVerified = async (userId, imageType, status) => {
   try {
-    const verificationUserDataSnapshot = await photoVerificationModel.where("userId", "==", userId).get();
+    const verificationUserDataSnapshot = await photoVerificationModel
+      .where("userId", "==", userId)
+      .where("status", "==", photoVerificationRequestStatus.PENDING)
+      .get();
     // THROWS ERROR IF NO DOCUMENT FOUND
     if (verificationUserDataSnapshot.empty) {
       throw new Error("No verification document record data for user was found");
@@ -385,7 +398,7 @@ const markAsVerified = async (userId, imageType) => {
     // VERIFIES BASED ON THE TYPE OF IMAGE
     const imageVerificationType = imageType === "discord" ? "discord.approved" : "profile.approved";
     const documentRef = verificationUserDataSnapshot.docs[0].ref;
-    await documentRef.update({ [imageVerificationType]: true });
+    await documentRef.update({ [imageVerificationType]: true, status });
     return { message: "User image data verified successfully" };
   } catch (err) {
     logger.error("Error while Removing Verification Entry", err);
@@ -401,7 +414,15 @@ const markAsVerified = async (userId, imageType) => {
  */
 const getUserImageForVerification = async (userId) => {
   try {
-    const verificationImagesSnapshot = await photoVerificationModel.where("userId", "==", userId).get();
+    const verificationImagesSnapshotQuery = photoVerificationModel.where(
+      "status",
+      "==",
+      photoVerificationRequestStatus.PENDING
+    );
+    if (!userId) {
+      verificationImagesSnapshotQuery.where("userId", "==", userId);
+    }
+    const verificationImagesSnapshot = await verificationImagesSnapshotQuery.get();
     if (verificationImagesSnapshot.empty) {
       throw new Error(`No document with userId: ${userId} was found!`);
     }
