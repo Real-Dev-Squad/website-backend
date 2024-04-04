@@ -675,22 +675,28 @@ const cancelOooStatus = async (userId) => {
 };
 
 const addFutureStatus = async (futureStatusData) => {
-  console.log("🚀 ~ addFutureStatus ~ futureStatusData:", futureStatusData);
   try {
     const userStatusDocs = await userStatusModel.where("userId", "==", futureStatusData.userId).limit(1).get();
     const [userStatusDoc] = userStatusDocs.docs;
-    console.log("🚀 ~ addFutureStatus ~ userStatusDoc:", userStatusDoc);
-    const docId = userStatusDoc.id;
-    console.log("🚀 ~ addFutureStatus ~ docId:", docId);
-    const userStatusData = userStatusDoc.data();
+    let docId;
+    let userStatusData;
+
+    if (userStatusDoc) {
+      docId = userStatusDoc.id;
+      userStatusData = userStatusDoc.data();
+    } else {
+      const newUserStatusRef = userStatusModel.doc();
+      await newUserStatusRef.set({ userId: futureStatusData.userId });
+      docId = newUserStatusRef.id;
+      userStatusData = { userId: futureStatusData.userId };
+    }
+
     delete futureStatusData.userId;
     const newStatusData = {
       ...userStatusData,
       futureStatusData,
     };
-    console.log("🚀 ~ addFutureStatus ~ newStatusData", newStatusData);
     await userStatusModel.doc(docId).update(newStatusData);
-    console.log("🚀 ~ addFutureStatus ~ newStatusData", newStatusData);
     return { id: docId, userStatusExists: true, data: newStatusData };
   } catch (error) {
     logger.error(`error in updating User Status Document ${error}`);

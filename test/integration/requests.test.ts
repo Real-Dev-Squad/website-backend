@@ -208,7 +208,7 @@ describe("/requests", function () {
         });
     });
 
-    it.only("should approved a request", function (done) {
+    it("should approved a request", function (done) {
       chai
         .request(app)
         .put(`/requests/${pendingOooRequestId}?dev=true`)
