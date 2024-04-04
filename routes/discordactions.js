@@ -25,7 +25,10 @@ const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
 const checkCanGenerateDiscordLink = require("../middlewares/checkCanGenerateDiscordLink");
 const { SUPERUSER } = require("../constants/roles");
 const authorizeRoles = require("../middlewares/authorizeRoles");
+const ROLES = require("../constants/roles");
+const { Services } = require("../constants/bot");
 const { verifyCronJob } = require("../middlewares/authorizeBot");
+const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
 
 const router = express.Router();
 
@@ -43,21 +46,26 @@ router.patch(
   checkIsVerifiedDiscord,
   updateDiscordImageForVerification
 );
-router.put("/group-idle", authenticate, authorizeRoles([SUPERUSER]), setRoleIdleToIdleUsers);
-router.put("/group-idle-7d", authenticate, authorizeRoles([SUPERUSER]), setRoleIdle7DToIdleUsers);
+router.put(
+  "/group-idle",
+  authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
+  setRoleIdleToIdleUsers
+);
+router.put(
+  "/group-idle-7d",
+  authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
+  setRoleIdle7DToIdleUsers
+);
 router.post(
   "/nicknames/sync",
-  authenticate,
-  authorizeRoles([SUPERUSER]),
-  checkIsVerifiedDiscord,
+  authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
   updateDiscordNicknames
 );
 router.post("/nickname/status", verifyCronJob, validateUpdateUsersNicknameStatusBody, updateUsersNicknameStatus);
 router.post("/discord-roles", authenticate, authorizeRoles([SUPERUSER]), syncDiscordGroupRolesInFirestore);
 router.put(
   "/group-onboarding-31d-plus",
-  authenticate,
-  authorizeRoles([SUPERUSER]),
+  authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
   setRoleToUsersWith31DaysPlusOnboarding
 );
 module.exports = router;

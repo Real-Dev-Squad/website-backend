@@ -1,4 +1,4 @@
-const archivedUserDetailsModal = [
+export const archivedUserDetailsModal = [
   {
     type: "archived-details",
     meta: {},
@@ -63,6 +63,3 @@ const archivedUserDetailsModal = [
     },
   },
 ];
-module.exports = {
-  archivedUserDetailsModal,
-};

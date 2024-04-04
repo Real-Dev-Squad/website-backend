@@ -200,6 +200,7 @@ describe("Data Access Layer", function () {
     afterEach(async function () {
       sinon.restore();
     });
+
     it("should return list of users for a single value", async function () {
       const fetchUserStub = sinon.stub(userQuery, "fetchUserForKeyValue");
       fetchUserStub.returns(Promise.resolve([userData[12], userData[11]]));
