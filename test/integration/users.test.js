@@ -1,6 +1,7 @@
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
+const multer = require("multer");
 
 const firestore = require("../../utils/firestore");
 const app = require("../../server");
@@ -8,6 +9,8 @@ const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
 const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
+const discordActionsUtils = require("../../utils/discord-actions");
+const discordMembersService = require("../../services/discordMembersService");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
@@ -25,6 +28,7 @@ const {
 } = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
+const imageService = require("../../services/imageService");
 
 const userRoleUpdate = userData[4];
 const userRoleUnArchived = userData[13];
@@ -1651,6 +1655,84 @@ describe("Users", function () {
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("POST /users/picture", function () {
+    let uploadStub, fetchStub, discordAvatarUrlStub, discordMembersServiceStub, uploadProfilePictureStub;
+
+    beforeEach(function () {
+      // fetch call
+      // uploadStub = Sinon.stub(global, "fetch").callsFake(() => {
+      //   return Promise.resolve({
+      //     status: 200,
+      //     json: () => Promise.resolve(getDiscordMembers[0]),
+      //   });
+      // });
+
+      // Stub the memoryStorage function of multer
+      uploadStub = Sinon.stub(multer, "memoryStorage").callsFake(() => {
+        return {
+          _handleFile: (req, file, cb) => {
+            cb(null, {
+              originalname: "mocked_image.jpg",
+              buffer: Buffer.from("mocked_image_content"),
+            });
+          },
+          _removeFile: (req, file, cb) => {
+            cb(null);
+          },
+        };
+      });
+
+      uploadProfilePictureStub = Sinon.stub(imageService, "uploadProfilePicture").callsFake(() => {
+        return { url: "mocked_image_url", publicId: "mocked_public_id" };
+      });
+
+      discordMembersServiceStub = Sinon.stub(discordMembersService, "getDiscordMemberDetails").callsFake(() => {
+        return { user: null };
+      });
+
+      discordAvatarUrlStub = Sinon.stub(discordActionsUtils, "generateDiscordProfileImageUrl").callsFake(() => {
+        return "mocked_discord_avatar_url";
+      });
+
+      fetchStub = Sinon.stub(global, "fetch").callsFake(() => {
+        return Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers[0]),
+        });
+      });
+    });
+
+    afterEach(function () {
+      // Restore the stub
+      uploadStub?.restore();
+      fetchStub?.restore();
+      discordAvatarUrlStub?.restore();
+      discordMembersServiceStub?.restore();
+      uploadProfilePictureStub?.restore();
+    });
+
+    it("should verify the discord image of the user", function (done) {
+      // Stub the uploadProfilePicture function
+      this.timeout(80000);
+
+      chai
+        .request(app)
+        .post(`/users/picture`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          // expect(res.body.message).to.equal(expectedMessage);
+
           return done();
         });
     });

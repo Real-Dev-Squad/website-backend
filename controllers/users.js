@@ -10,7 +10,7 @@ const dataAccess = require("../services/dataAccessLayer");
 const { isLastPRMergedWithinDays } = require("../services/githubService");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { OVERDUE_TASKS } = require("../constants/users");
+const { OVERDUE_TASKS, photoVerificationRequestStatus } = require("../constants/users");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
@@ -443,9 +443,10 @@ const updateSelf = async (req, res) => {
  */
 const postUserPicture = async (req, res) => {
   const { file } = req;
+  const { dev } = req.query;
   const { id: userId, discordId } = req.userData;
   const { coordinates } = req.body;
-  let discordAvatarUrl = "";
+  let discordAvatarUrl;
   let imageData;
   let verificationResult;
   try {
@@ -456,17 +457,26 @@ const postUserPicture = async (req, res) => {
   }
   try {
     const coordinatesObject = coordinates && JSON.parse(coordinates);
-    imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
+    imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject }, dev);
   } catch (error) {
     logger.error(`Error while adding profile picture of user: ${error}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
-  try {
-    verificationResult = await userQuery.addForVerification(userId, discordId, imageData.url, discordAvatarUrl);
-  } catch (error) {
-    logger.error(`Error while adding profile picture of user: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  if (dev) {
+    try {
+      verificationResult = await userQuery.addForVerification(
+        userId,
+        discordId,
+        imageData.url,
+        imageData.publicId,
+        discordAvatarUrl
+      );
+    } catch (error) {
+      logger.error(`Error while adding profile picture of user: ${error}`);
+      return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    }
   }
+
   return res.status(201).json({
     message: `Profile picture uploaded successfully! ${verificationResult.message}`,
     image: imageData,
@@ -482,9 +492,14 @@ const postUserPicture = async (req, res) => {
 
 const verifyUserImage = async (req, res) => {
   try {
-    const { type: imageType } = req.query;
+    const { type: imageType, status } = req.query;
     const { id: userId } = req.params;
-    await userQuery.markAsVerified(userId, imageType);
+
+    if (status !== photoVerificationRequestStatus.APPROVED && status !== photoVerificationRequestStatus.REJECTED) {
+      return res.boom.badRequest("Invalid status in query params");
+    }
+
+    await userQuery.markAsVerified(userId, imageType, status);
     return res.json({
       message: `${imageType} image was verified successfully!`,
     });
@@ -568,6 +583,10 @@ const markUnverified = async (req, res) => {
 const getUserImageForVerification = async (req, res) => {
   try {
     const { id: userId } = req.params;
+    const userData = req.userData;
+    if (userData.id !== userId && !userData.roles[ROLES.SUPERUSER]) {
+      return res.boom.unauthorized("You are not authorized to view this user's image verification data");
+    }
     const userImageVerificationData = await userQuery.getUserImageForVerification(userId);
     return res.json({
       message: "User image verification record fetched successfully!",
