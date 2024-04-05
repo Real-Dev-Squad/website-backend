@@ -2,7 +2,7 @@ import { createUserFutureStatus, getUserFutureStatus } from "../../../models/use
 import { expect } from "chai";
 import cleanDb from "../../utils/cleanDb";
 import { UserFutureStatusType } from "../../../types/userFutureStatus";
-import { userFutureStatusData } from "../../fixtures/userFutureStatus/userFutureDTatusData";
+import { userFutureStatusData } from "../../fixtures/userFutureStatus/userFutureStatusData";
 
 describe("models/userFutureStatus", () => {
   afterEach(async () => {
