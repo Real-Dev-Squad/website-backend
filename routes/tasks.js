@@ -8,6 +8,7 @@ const {
   updateSelfTask,
   getTasksValidator,
   getUsersValidator,
+  filterOrphanTasksValidator,
 } = require("../middlewares/validators/tasks");
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
@@ -67,5 +68,6 @@ router.patch("/assign/self", authenticate, invalidateCache({ invalidationKeys: [
 router.get("/users/discord", verifyCronJob, getUsersValidator, tasks.getUsersHandler);
 
 router.post("/migration", authenticate, authorizeRoles([SUPERUSER]), tasks.updateStatus);
+router.post("/orphanTasks", verifyCronJob, filterOrphanTasksValidator, tasks.orphanTasks);
 
 module.exports = router;

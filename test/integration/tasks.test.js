@@ -21,6 +21,7 @@ const { TASK_STATUS, tasksUsersStatus } = require("../../constants/tasks");
 const updateTaskStatus = require("../fixtures/tasks/tasks1")();
 const userStatusData = require("../fixtures/userStatus/userStatus");
 const tasksModel = firestore.collection("tasks");
+const userDBModel = firestore.collection("users");
 const discordService = require("../../services/discordService");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
 const { logType } = require("../../constants/logs");
@@ -1536,6 +1537,71 @@ describe("Tasks", function () {
         tasksLogs = data.data();
       });
       expect(tasksLogs.body.error).to.be.equal("Error: Error occurred");
+    });
+  });
+
+  describe("POST /tasks/orphanTasks", function () {
+    let jwtToken;
+
+    beforeEach(async function () {
+      const user1 = userData[6];
+      user1.roles.in_discord = false;
+      user1.updated_at = 1712053284000;
+      const user2 = userData[18];
+      user2.updated_at = 1712064084000;
+      const [{ id: userId }, { id: userId2 }] = await Promise.all([userDBModel.add(user1), userDBModel.add(user2)]);
+
+      const task1 = {
+        assigneeId: userId,
+        status: "ACTIVE",
+      };
+      const task2 = {
+        assigneeId: userId2,
+        status: "COMPLETED",
+      };
+      const task3 = {
+        assigneeId: userId2,
+        status: "IN_PROGRESS",
+      };
+      await Promise.all([tasksModel.add(task1), tasksModel.add(task2), tasksModel.add(task3)]);
+
+      jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("Should update status of orphan tasks to BACKLOG", async function () {
+      const res = await chai.request(app).post("/tasks/orphanTasks").set("Authorization", `Bearer ${jwtToken}`).send({
+        lastOrphanTasksFilterationTimestamp: 1712040715000,
+      });
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.deep.equal({
+        message: "Orphan tasks filtered successfully",
+        updatedTasksData: {
+          orphanTasksUpdatedCount: 2,
+        },
+      });
+    }).timeout(10000);
+
+    it("Should return 400 if not cron worker", async function () {
+      const nonSuperUserId = await addUser(appOwner);
+      const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+      const res = await chai
+        .request(app)
+        .post("/tasks/orphanTasks")
+        .set("Authorization", `Bearer ${nonSuperUserJwt}`)
+        .send({
+          lastOrphanTasksFilterationTimestamp: 1712040715000,
+        });
+
+      expect(res).to.have.status(400);
+      expect(res.body).to.deep.equal({
+        statusCode: 400,
+        error: "Bad Request",
+        message: "Unauthorized Cron Worker",
+      });
     });
   });
 });

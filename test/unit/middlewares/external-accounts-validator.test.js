@@ -1,5 +1,9 @@
 const Sinon = require("sinon");
-const { externalAccountData, postExternalAccountsUsers } = require("../../../middlewares/validators/external-accounts");
+const {
+  externalAccountData,
+  postExternalAccountsUsers,
+  linkDiscord,
+} = require("../../../middlewares/validators/external-accounts");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../../constants/external-accounts");
 const { expect } = require("chai");
 
@@ -10,7 +14,14 @@ describe("Middleware | Validators | external accounts", function () {
         body: {
           type: "some type",
           token: "some token",
-          attributes: {},
+          attributes: {
+            userName: "some name",
+            discriminator: "some discriminator",
+            userAvatar: "some avatar",
+            discordId: "some id",
+            discordJoinedAt: "some date",
+            expiry: Date.now(),
+          },
         },
       };
       const res = {};
@@ -60,6 +71,24 @@ describe("Middleware | Validators | external accounts", function () {
       await postExternalAccountsUsers(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(false);
       expect(res.boom.badRequest.callCount).to.be.equal(1);
+    });
+  });
+
+  describe("linkDiscord", function () {
+    it("should call next with a valid token", async function () {
+      const req = { params: { token: "validToken" } };
+      const res = {};
+      const nextSpy = Sinon.spy();
+      await linkDiscord(req, res, nextSpy);
+      expect(nextSpy.calledOnce).to.be.equal(true);
+    });
+
+    it("should throw an error when token is empty", async function () {
+      const req = { params: { token: "" } };
+      const res = { boom: { badRequest: Sinon.spy() } };
+      const nextSpy = Sinon.spy();
+      await linkDiscord(req, res, nextSpy);
+      expect(res.boom.badRequest.calledOnce).to.be.equal(true);
     });
   });
 });
