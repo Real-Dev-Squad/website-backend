@@ -11,7 +11,6 @@ module.exports = async (userId) => {
     logger.info("User id is required to delete roles object");
     return false;
   }
-
   try {
     const userDoc = await userCollection.doc(userId).get();
 
