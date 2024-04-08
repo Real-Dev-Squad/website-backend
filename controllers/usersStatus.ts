@@ -1,4 +1,4 @@
-import { getUserStatus as getUserStatusFromModel, updateUserStatus as updateUserStatusFromModel } from "../models/usersStatus";
+import { getUserStatus as getUserStatusFromModel, updateUserStatus as updateUserStatusFromModel, updateAllUserStatus as updateAllUserStatusModel } from "../models/usersStatus";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
@@ -27,6 +27,7 @@ const getUserStatus = async (req: any, res: any) => {
     }
     return res.boom.notFound("User Status doesn't exist.");
   } catch (err) {
+    // @ts-ignore
     logger.error(`Error while fetching the User Status: ${err}`);
     return res.boom.notFound("The User Status could not be found as an internal server error occurred.");
   }
@@ -65,6 +66,27 @@ const updateUserStatus = async (req: any, res: any) => {
     }
     return res.boom.badImplementation("The User doesn't exist.");
   } catch (err) {
+    // @ts-ignore
+    logger.error(`Error while updating the User Data: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
+ * Update All Users Status
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const updateAllUserStatus = async (req, res) => {
+  try {
+    const data = await updateAllUserStatusModel();
+    return res.status(200).json({
+      message: "All User Status updated successfully.",
+      data,
+    });
+  } catch (err) {
+    // @ts-ignore
     logger.error(`Error while updating the User Data: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
@@ -72,5 +94,6 @@ const updateUserStatus = async (req: any, res: any) => {
 
 export default {
   getUserStatus,
-  updateUserStatus
+  updateUserStatus,
+  updateAllUserStatus
 };
