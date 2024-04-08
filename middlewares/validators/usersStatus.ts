@@ -75,6 +75,7 @@ const validateUsersStatusData = async (todaysTime: number, req: any, res: any, n
     await validateUserId(req.params.userId);
     next();
   } catch (error) {
+    // @ts-ignore
     logger.error(`Error validating UserStatus ${error}`);
     res.boom.badRequest(error);
   }

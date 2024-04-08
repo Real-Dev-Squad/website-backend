@@ -21,6 +21,7 @@ const authorizeOwnOrSuperUser = (req: CustomRequest, res: CustomResponse, next: 
     if (isSuperUser || userIdInQuery === id) return next();
     else return res.boom.forbidden("Unauthorized User");
   } catch (err) {
+    // @ts-ignore
     logger.error(err);
     return res.boom.badImplementation("Something went wrong please contact admin");
   }
@@ -35,6 +36,7 @@ const authorizeOwnUserIdParamOrSuperUser = (req: CustomRequest, res: CustomRespo
     if (isSuperUser || userIdInQuery === id) return next();
     else return res.boom.forbidden("Unauthorized User");
   } catch (err) {
+    // @ts-ignore
     logger.error(err);
     return res.boom.badImplementation("Something went wrong please contact admin");
   }
