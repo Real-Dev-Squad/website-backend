@@ -684,10 +684,6 @@ const addFutureStatus = async (futureStatusData) => {
     if (userStatusDoc) {
       docId = userStatusDoc.id;
       userStatusData = userStatusDoc.data();
-
-      if (userStatusData.futureStatus && userStatusData.futureStatus.state === "approved") {
-        return { id: docId, userStatusExists: true, data: userStatusData };
-      }
     } else {
       const newUserStatusRef = userStatusModel.doc();
       await newUserStatusRef.set({ userId: futureStatusData.userId });
