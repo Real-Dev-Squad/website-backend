@@ -5,6 +5,7 @@ const {
   USER_STATUS,
   USERS_PATCH_HANDLER_ACTIONS,
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
+  photoVerificationRequestStatus,
 } = require("../../constants/users");
 const ROLES = require("../../constants/roles");
 const { IMAGE_VERIFICATION_TYPES } = require("../../constants/imageVerificationTypes");
@@ -251,11 +252,16 @@ async function validateUserQueryParams(req, res, next) {
  * @param next {Object} - Express middleware function
  */
 const validateImageVerificationQuery = async (req, res, next) => {
-  const { type: imageType } = req.query;
+  const { type: imageType, status } = req.query;
   try {
     if (!IMAGE_VERIFICATION_TYPES.includes(imageType)) {
       throw new Error("Invalid verification type was provided!");
     }
+
+    if (status !== photoVerificationRequestStatus.APPROVED && status !== photoVerificationRequestStatus.REJECTED) {
+      throw new Error("Invalid verification status was provided!");
+    }
+
     next();
   } catch (error) {
     logger.error(`Error validating createLevel payload : ${error}`);

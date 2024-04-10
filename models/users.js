@@ -407,21 +407,45 @@ const addForVerification = async (userId, discordId, profileImageUrl, profileIma
  * @return {Promise<{message: string}|{message: string}>}
  * @throws {Error} - If error occurs while verifying user's image
  */
-const markAsVerified = async (userId, imageType, status) => {
+const changePhotoVerificationStatus = async (userId, imageType, status) => {
   try {
     const verificationUserDataSnapshot = await photoVerificationModel
       .where("userId", "==", userId)
       .where("status", "==", photoVerificationRequestStatus.PENDING)
       .get();
+
     // THROWS ERROR IF NO DOCUMENT FOUND
     if (verificationUserDataSnapshot.empty) {
       throw new Error("No verification document record data for user was found");
     }
-    // VERIFIES BASED ON THE TYPE OF IMAGE
-    const imageVerificationType = imageType === "discord" ? "discord.approved" : "profile.approved";
+
     const documentRef = verificationUserDataSnapshot.docs[0].ref;
-    await documentRef.update({ [imageVerificationType]: true, status });
-    return { message: "User image data verified successfully" };
+
+    // if status is rejected then remove the verification entry
+    if (status === photoVerificationRequestStatus.REJECTED) {
+      await documentRef.update({ status });
+      return "User photo verification request rejected successfully";
+    }
+
+    // VERIFIES BASED ON THE TYPE OF IMAGE
+    if (imageType === "both") {
+      await documentRef.update({ "discord.approved": true, "profile.approved": true });
+    } else {
+      const imageVerificationType = imageType === "discord" ? "discord.approved" : "profile.approved";
+      await documentRef.update({ [imageVerificationType]: true });
+    }
+
+    // IF BOTH IMAGES ARE VERIFIED THEN REMOVE THE ENTRY
+    const photoVerificationObject = (await documentRef.get()).data();
+    if (photoVerificationObject.discord.approved && photoVerificationObject.profile.approved) {
+      await documentRef.update({ status: photoVerificationRequestStatus.APPROVED });
+      await updateUserPicture(
+        { url: photoVerificationObject.profile.url, publicId: photoVerificationObject.profile.publicId },
+        userId
+      );
+    }
+
+    return "User image data verified successfully";
   } catch (err) {
     logger.error("Error while Removing Verification Entry", err);
     throw err;
@@ -429,26 +453,104 @@ const markAsVerified = async (userId, imageType, status) => {
 };
 
 /**
- * Removes if user passed a valid image; ignores if no unverified record
+ * Returns the user's image verification requests (PENDING only) based on the userId
  * @param userId {String} - RDS user Id
  * @return {Promise<{Object}|{Object}>}
  * @throws {Error} - If error occurs while fetching user's image verification entry
  */
-const getUserImageForVerification = async (userId) => {
+const getUserPhotoVerificationRequests = async (userId) => {
   try {
     const verificationImagesSnapshotQuery = photoVerificationModel.where(
       "status",
       "==",
       photoVerificationRequestStatus.PENDING
     );
-    if (!userId) {
-      verificationImagesSnapshotQuery.where("userId", "==", userId);
+
+    const user = await userModel.doc(userId).get();
+    if (!user.exists) {
+      throw new Error(`No document with userId: ${userId} was found!`);
     }
+    const userData = user.data();
+    verificationImagesSnapshotQuery.where("userId", "==", userId);
     const verificationImagesSnapshot = await verificationImagesSnapshotQuery.get();
     if (verificationImagesSnapshot.empty) {
       throw new Error(`No document with userId: ${userId} was found!`);
     }
-    return verificationImagesSnapshot.docs[0].data();
+
+    const photoVerificationObject = [
+      {
+        ...verificationImagesSnapshot.docs[0].data(),
+        user: {
+          username: userData.username,
+          picture: userData.picture.url,
+        },
+      },
+    ];
+    return photoVerificationObject;
+  } catch (err) {
+    logger.error("Error while Querying Photo Verification Entry", err);
+    throw err;
+  }
+};
+
+/**
+ * Returns all users image verification requests (PENDING only), optionally filtered by username
+ * @param username {String} - RDS username
+ * @return {Promise<{Object}|{Object}>}
+ * @throws {Error} - If error occurs while fetching user's image verification entry
+ */
+const getAllUsersPhotoVerificationRequests = async (username = null) => {
+  try {
+    const verificationImagesSnapshotQuery = photoVerificationModel.where(
+      "status",
+      "==",
+      photoVerificationRequestStatus.PENDING
+    );
+
+    if (username && username !== "") {
+      const user = await userModel.where("username", "==", username).limit(1).get();
+      if (user.empty) {
+        logger.error(`No document with username: ${username} was found!`);
+        return [];
+      }
+      const userData = { id: user.docs[0].id, ...user.docs[0].data() };
+      verificationImagesSnapshotQuery.where("userId", "==", userData.id);
+      const verificationImagesSnapshot = await verificationImagesSnapshotQuery.get();
+      if (verificationImagesSnapshot.empty) {
+        logger.error(`No document with username: ${username} was found!`);
+        return [];
+      }
+
+      const photoVerificationObject = [
+        {
+          ...verificationImagesSnapshot.docs[0].data(),
+          user: {
+            username: userData.username,
+            picture: userData.picture.url,
+          },
+        },
+      ];
+      return photoVerificationObject;
+    }
+
+    const verificationImagesSnapshot = await verificationImagesSnapshotQuery.get();
+    if (verificationImagesSnapshot.empty) {
+      return [];
+    }
+
+    const photoVerificationPromises = verificationImagesSnapshot.docs.map(async (doc) => {
+      const data = doc.data();
+      const user = await userModel.doc(data.userId).get();
+      const userData = user.data();
+      return {
+        id: doc.id,
+        ...data,
+        user: { username: userData.username, picture: userData.picture.url },
+      };
+    });
+
+    const photoVerificationObject = await Promise.all(photoVerificationPromises);
+    return photoVerificationObject;
   } catch (err) {
     logger.error("Error while Removing Verification Entry", err);
     throw err;
@@ -461,7 +563,7 @@ const getUserImageForVerification = async (userId) => {
  * @param image { Object }: image data ( {publicId, url} )
  * @param userId { string }: User id
  */
-const updateUserPicture = async (image, userId) => {
+async function updateUserPicture(image, userId) {
   try {
     const userDoc = userModel.doc(userId);
     await userDoc.update({
@@ -472,7 +574,7 @@ const updateUserPicture = async (image, userId) => {
     logger.error("Error updating user picture data", err);
     throw err;
   }
-};
+}
 
 /**
  * fetch the users image by passing array of users
@@ -997,9 +1099,10 @@ module.exports = {
   getRdsUserInfoByGitHubUsername,
   fetchUsers,
   getUsersBasedOnFilter,
-  markAsVerified,
+  changePhotoVerificationStatus,
   addForVerification,
-  getUserImageForVerification,
+  getUserPhotoVerificationRequests,
+  getAllUsersPhotoVerificationRequests,
   getDiscordUsers,
   fetchAllUsers,
   archiveUserIfNotInDiscord,
