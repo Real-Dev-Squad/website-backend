@@ -21,6 +21,7 @@ const { TASK_STATUS, tasksUsersStatus } = require("../../constants/tasks");
 const updateTaskStatus = require("../fixtures/tasks/tasks1")();
 const userStatusData = require("../fixtures/userStatus/userStatus");
 const tasksModel = firestore.collection("tasks");
+const userDBModel = firestore.collection("users");
 const discordService = require("../../services/discordService");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
 const { logType } = require("../../constants/logs");
@@ -134,6 +135,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should have same time for createdAt and updatedAt for new tasks", function (done) {
       chai
         .request(app)
@@ -167,6 +169,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("should return fail response if task has a non-acceptable status value", function (done) {
       chai
         .request(app)
@@ -198,6 +201,7 @@ describe("Tasks", function () {
 
   describe("GET /tasks", function () {
     let taskId2, taskId3;
+
     before(async function () {
       taskId2 = (await tasks.updateTask({ ...taskData[0], createdAt: 1621717694, updatedAt: 1700680830 })).taskId;
       taskId3 = (await tasks.updateTask({ ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753 })).taskId;
@@ -409,6 +413,7 @@ describe("Tasks", function () {
       expect(previousPageResponse.body).to.have.property("prev");
       expect(previousPageResponse.body.tasks).to.have.length(1);
     });
+
     it("Should get tasks filtered by search term", function (done) {
       const searchTerm = "task";
       chai
@@ -432,6 +437,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should get tasks filtered by search term and handle no tasks found", function (done) {
       chai
         .request(app)
@@ -449,6 +455,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should return no task found when there is no searchterm", function (done) {
       chai
         .request(app)
@@ -466,6 +473,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should get paginated tasks ordered by updatedAt in desc order ", function (done) {
       chai
         .request(app)
@@ -507,6 +515,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should return isCollapsed property in response", function (done) {
       chai
         .request(app)
@@ -737,6 +746,7 @@ describe("Tasks", function () {
       expect(res2.body.taskData).to.have.property("startedOn");
       expect(res2.body.taskData.startedOn).to.be.equal(1695804041);
     });
+
     it("should check updated dependsOn", function (done) {
       chai
         .request(app)
@@ -755,6 +765,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should update the task status collapsed for the given taskid", function (done) {
       chai
         .request(app)
@@ -772,6 +783,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should return fail response if task data has a non-acceptable status value to update the task for the given taskid", function (done) {
       chai
         .request(app)
@@ -791,6 +803,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should return fail response if percent completed is < 0 or > 100", function (done) {
       chai
         .request(app)
@@ -1077,6 +1090,7 @@ describe("Tasks", function () {
       expect(res).to.have.status(403);
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
+
     it("Should give 403 if new status is 'MERGED' ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
       const res = await chai
@@ -1087,6 +1101,7 @@ describe("Tasks", function () {
 
       expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
     });
+
     it("Should give 403 if new status is 'BACKLOG' ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
       const res = await chai
@@ -1107,19 +1122,19 @@ describe("Tasks", function () {
         .send({ ...taskStatusData, status: "COMPLETED" });
 
       expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
+      expect(res.body.message).to.be.equal("Status cannot be updated as progress of task is not 100%.");
     });
 
-    it("Should give 400 if percentCompleted is not 100 and new status is DONE under feature flag ", async function () {
-      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+    it("Should give 403 if current task status is DONE", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "DONE", assignee: appOwner.username })).taskId;
       const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send({ ...taskStatusData, status: "DONE" });
+        .send({ ...taskStatusData, status: "IN_REVIEW" });
 
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+      expect(res).to.have.status(403);
     });
 
     it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED ", async function () {
@@ -1131,19 +1146,7 @@ describe("Tasks", function () {
         .send({ ...taskStatusData, status: "VERIFIED" });
 
       expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not completed yet");
-    });
-
-    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED under feature flag", async function () {
-      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ ...taskStatusData, status: "VERIFIED" });
-
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated. Task is not done yet");
+      expect(res.body.message).to.be.equal("Status cannot be updated as progress of task is not 100%.");
     });
 
     it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {
@@ -1171,16 +1174,75 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
     });
 
-    it("Should give 400 if status is DONE and newpercent is less than 100 under feature flag", async function () {
-      taskId = (await tasks.updateTask(updateTaskStatus[0])).taskId;
+    it("Should give 400 if current status of task is In Progress  and new status is not Blocked and both current and new percentCompleted are not 100 ", async function () {
+      const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 80 };
+      taskId = (await tasks.updateTask(newDate)).taskId;
       const res = await chai
         .request(app)
         .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send({ percentCompleted: 80 });
+        .send({ status: "NEEDS_REVIEW" });
 
       expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is DONE");
+      expect(res.body.message).to.be.equal(
+        "The status of task can not be changed from In progress until progress of task is not 100%."
+      );
+    });
+
+    it("Should give 400 if new status of task is In Progress and current status of task is not Blocked and both current and new percentCompleted are not 0 ", async function () {
+      const newDate = { ...updateTaskStatus[0], status: "NEEDS_REVIEW", percentCompleted: 100 };
+      taskId = (await tasks.updateTask(newDate)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "IN_PROGRESS" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal(
+        "The status of task can not be changed to In progress until progress of task is not 0%."
+      );
+    });
+
+    it("Should give 400 if current status of task is Blocked and new status is not In Progress and both current and new percentCompleted are not 100 ", async function () {
+      const newDate = { ...updateTaskStatus[0], status: "BLOCKED", percentCompleted: 52 };
+      taskId = (await tasks.updateTask(newDate)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "NEEDS_REVIEW" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal(
+        "The status of task can not be changed from Blocked until progress of task is not 100%."
+      );
+    });
+
+    it("Should give 200 if new status of task is In Progress and current status of task is Blocked", async function () {
+      const newDate = { ...updateTaskStatus[0], status: "BLOCKED", percentCompleted: 56 };
+      taskId = (await tasks.updateTask(newDate)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "IN_PROGRESS" });
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.be.equal("Task updated successfully!");
+    });
+
+    it("Should give 200 if new status of task is Blocked and current status of task is In Progress", async function () {
+      const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 59 };
+      taskId = (await tasks.updateTask(newDate)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "BLOCKED" });
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.be.equal("Task updated successfully!");
     });
   });
 
@@ -1272,9 +1334,11 @@ describe("Tasks", function () {
       await tasks.updateTask(tasksData[5]);
       await tasks.updateTask(tasksData[6]);
     });
+
     afterEach(async function () {
       await cleanDb();
     });
+
     it("Should return 401 if not super_user", async function () {
       const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${jwt}`);
       expect(res).to.have.status(401);
@@ -1343,6 +1407,7 @@ describe("Tasks", function () {
     let userNotInDiscord;
     let jwtToken;
     let getDiscordMembersStub;
+
     beforeEach(async function () {
       await cleanDb();
       idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
@@ -1401,10 +1466,12 @@ describe("Tasks", function () {
       getDiscordMembersStub.returns(discordMembers);
       jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
     });
+
     afterEach(async function () {
       sinon.restore();
       await cleanDb();
     });
+
     it("should return successful response with user id list", async function () {
       const response = await chai
         .request(app)
@@ -1421,6 +1488,7 @@ describe("Tasks", function () {
       });
       expect(response.status).to.be.equal(200);
     });
+
     it("should return successful response with user id when all params are passed", async function () {
       const response = await chai
         .request(app)
@@ -1454,6 +1522,7 @@ describe("Tasks", function () {
       });
       expect(response.status).to.be.equal(400);
     });
+
     it("should save logs when there is an error", async function () {
       getDiscordMembersStub.throws(new Error("Error occurred"));
       await chai
@@ -1468,6 +1537,71 @@ describe("Tasks", function () {
         tasksLogs = data.data();
       });
       expect(tasksLogs.body.error).to.be.equal("Error: Error occurred");
+    });
+  });
+
+  describe("POST /tasks/orphanTasks", function () {
+    let jwtToken;
+
+    beforeEach(async function () {
+      const user1 = userData[6];
+      user1.roles.in_discord = false;
+      user1.updated_at = 1712053284000;
+      const user2 = userData[18];
+      user2.updated_at = 1712064084000;
+      const [{ id: userId }, { id: userId2 }] = await Promise.all([userDBModel.add(user1), userDBModel.add(user2)]);
+
+      const task1 = {
+        assigneeId: userId,
+        status: "ACTIVE",
+      };
+      const task2 = {
+        assigneeId: userId2,
+        status: "COMPLETED",
+      };
+      const task3 = {
+        assigneeId: userId2,
+        status: "IN_PROGRESS",
+      };
+      await Promise.all([tasksModel.add(task1), tasksModel.add(task2), tasksModel.add(task3)]);
+
+      jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+    it("Should update status of orphan tasks to BACKLOG", async function () {
+      const res = await chai.request(app).post("/tasks/orphanTasks").set("Authorization", `Bearer ${jwtToken}`).send({
+        lastOrphanTasksFilterationTimestamp: 1712040715000,
+      });
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.deep.equal({
+        message: "Orphan tasks filtered successfully",
+        updatedTasksData: {
+          orphanTasksUpdatedCount: 2,
+        },
+      });
+    }).timeout(10000);
+
+    it("Should return 400 if not cron worker", async function () {
+      const nonSuperUserId = await addUser(appOwner);
+      const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+      const res = await chai
+        .request(app)
+        .post("/tasks/orphanTasks")
+        .set("Authorization", `Bearer ${nonSuperUserJwt}`)
+        .send({
+          lastOrphanTasksFilterationTimestamp: 1712040715000,
+        });
+
+      expect(res).to.have.status(400);
+      expect(res.body).to.deep.equal({
+        statusCode: 400,
+        error: "Bad Request",
+        message: "Unauthorized Cron Worker",
+      });
     });
   });
 });

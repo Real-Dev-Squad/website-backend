@@ -2,11 +2,21 @@ const joi = require("joi");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../constants/external-accounts");
 
 const externalAccountData = async (req, res, next) => {
-  const schema = joi.object().strict().keys({
-    type: joi.string().required(),
-    token: joi.string().required(),
-    attributes: joi.object().strict().required(),
-  });
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      type: joi.string().required(),
+      token: joi.string().required(),
+      attributes: {
+        userName: joi.string().required(),
+        discriminator: joi.string().required(),
+        userAvatar: joi.string().required(),
+        discordId: joi.string().required(),
+        discordJoinedAt: joi.string().required(),
+        expiry: joi.number().required(),
+      },
+    });
 
   try {
     await schema.validateAsync(req.body);
@@ -35,4 +45,23 @@ const postExternalAccountsUsers = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
-module.exports = { externalAccountData, postExternalAccountsUsers };
+
+const linkDiscord = async (req, res, next) => {
+  const { token } = req.params;
+
+  const schema = joi.object({
+    token: joi.string().required(),
+  });
+
+  const validationOptions = { abortEarly: false };
+
+  try {
+    await schema.validateAsync({ token }, validationOptions);
+    next();
+  } catch (error) {
+    logger.error(`Error retrieving event: ${error}`);
+    res.boom.badRequest(error.details.map((detail) => detail.message));
+  }
+};
+
+module.exports = { externalAccountData, postExternalAccountsUsers, linkDiscord };

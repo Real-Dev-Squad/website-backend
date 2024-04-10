@@ -22,6 +22,7 @@ describe("Discord services", function () {
       });
       await Promise.all(addUsersPromises);
     });
+
     it("sets in_discord false for each user", async function () {
       await setInDiscordFalseScript();
       const updatedUsers = await fetchAllUsers();
@@ -31,13 +32,16 @@ describe("Discord services", function () {
       });
     });
   });
+
   describe("add role to user", function () {
     beforeEach(function () {
       fetchStub = Sinon.stub(global, "fetch");
     });
+
     afterEach(function () {
       fetchStub.restore();
     });
+
     it("makes a fetch call", async function () {
       fetchStub.returns(
         Promise.resolve({
@@ -56,9 +60,11 @@ describe("Discord services", function () {
     beforeEach(function () {
       fetchStub = Sinon.stub(global, "fetch");
     });
+
     afterEach(function () {
       fetchStub.restore();
     });
+
     it("Gets all the members from discord server", async function () {
       fetchStub.returns(
         Promise.resolve({
@@ -85,9 +91,11 @@ describe("Discord services", function () {
     beforeEach(function () {
       fetchStub = Sinon.stub(global, "fetch");
     });
+
     afterEach(function () {
       fetchStub.restore();
     });
+
     it("makes a successful fetch call to discord", async function () {
       fetchStub.returns(
         Promise.resolve({

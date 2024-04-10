@@ -468,6 +468,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should get all the users with archived false", function (done) {
       chai
         .request(app)
@@ -723,6 +724,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should return 503 if something went wrong if data not fetch from github for new query format under feature flag", function (done) {
       chai
         .request(app)
@@ -741,6 +743,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should throw an error when there is no feature flag when using the new query parameter format(q)", function (done) {
       chai
         .request(app)
@@ -758,6 +761,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should return 400 if days is not passed for filterBy unmerged_prs", function (done) {
       chai
         .request(app)
@@ -772,6 +776,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should return 400 if days is not passed for filterBy unmerged_prs with new query format and feature flag", function (done) {
       chai
         .request(app)
@@ -1068,6 +1073,7 @@ describe("Users", function () {
     beforeEach(async function () {
       await addJoinData(joinData(userId)[0]);
     });
+
     it("Should return data of the given username", function (done) {
       chai
         .request(app)
@@ -1083,6 +1089,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should return 404 if user not Found", function (done) {
       chai
         .request(app)
@@ -1097,6 +1104,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should return 401 is not Logged In", function (done) {
       chai
         .request(app)
@@ -1183,6 +1191,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should return users successfully converting search param value to small case", function (done) {
       chai
         .request(app)
@@ -1203,6 +1212,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should return 400 for empty value of search param", function (done) {
       chai
         .request(app)
@@ -1218,6 +1228,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should return users of username starting with '23' with response status code 200", function (done) {
       chai
         .request(app)
@@ -1238,6 +1249,43 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should return users with first name 'Ankur' successfully", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: "Ankur", dev: true }) // Search for users with first name 'Ankur' in dev mode
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          return done();
+        });
+    });
+
+    it("Should return users with last name 'Narkhede' successfully", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: "Narkhede", dev: true })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          return done();
+        });
+    });
+
     it("Should return an empty array with response status code 200", function (done) {
       chai
         .request(app)
@@ -1259,11 +1307,13 @@ describe("Users", function () {
 
   describe("PUT /users/self/intro", function () {
     let userStatusData;
+
     beforeEach(async function () {
       await userStatusModel.updateUserStatus(userId, userStatusDataAfterSignup);
       const updateStatus = await userStatusModel.updateUserStatus(userId, userStatusDataAfterFillingJoinSection);
       userStatusData = (await firestore.collection("usersStatus").doc(updateStatus.id).get()).data();
     });
+
     it("should return 409 if the data already present", function (done) {
       addJoinData(joinData(userId)[3]);
       chai
@@ -1339,9 +1389,11 @@ describe("Users", function () {
 
   describe("PATCH /users/rejectDiff", function () {
     let profileDiffsId;
+
     beforeEach(async function () {
       profileDiffsId = await profileDiffs.add({ userId, ...profileDiffData[0] });
     });
+
     it("Should update reject the profileDiff specified, using authorized user (super_user)", function (done) {
       chai
         .request(app)
@@ -1401,9 +1453,11 @@ describe("Users", function () {
 
   describe("PATCH /users/:userId", function () {
     let profileDiffsId;
+
     beforeEach(async function () {
       profileDiffsId = await profileDiffs.add({ userId, ...profileDiffData[0] });
     });
+
     it("Should update the user profile with latest pending profileDiffs, using authorized user (super_user)", function (done) {
       chai
         .request(app)
@@ -1524,6 +1578,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should return 400 for invalid profileURL value", function (done) {
       chai
         .request(app)
@@ -1548,6 +1603,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should return 400 for no profileURL value", function (done) {
       chai
         .request(app)
@@ -1697,6 +1753,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should throw for wrong query while verifying the discord image of the user", function (done) {
       chai
         .request(app)
@@ -1712,6 +1769,7 @@ describe("Users", function () {
         });
     });
   });
+
   describe("GET /users/picture/id", function () {
     it("Should get the user's verification record", function (done) {
       chai
@@ -1729,6 +1787,7 @@ describe("Users", function () {
           return done();
         });
     });
+
     it("Should throw error if no user's verification record was found", function (done) {
       chai
         .request(app)
@@ -1744,6 +1803,7 @@ describe("Users", function () {
         });
     });
   });
+
   describe("POST /update-in-discord", function () {
     it("it returns proper response", function (done) {
       chai
@@ -1763,13 +1823,16 @@ describe("Users", function () {
 
   describe("POST /", function () {
     let fetchStub;
+
     beforeEach(async function () {
       fetchStub = Sinon.stub(global, "fetch");
     });
+
     afterEach(async function () {
       Sinon.restore();
       await cleanDb();
     });
+
     it("tests adding unverified role to user", function (done) {
       fetchStub.returns(
         Promise.resolve({
@@ -2199,15 +2262,18 @@ describe("Users", function () {
         });
     });
   });
+
   describe("PATCH /:userId/update-nickname", function () {
     beforeEach(async function () {
       fetchStub = Sinon.stub(global, "fetch");
       userId = await addUser(userData[0]);
     });
+
     afterEach(async function () {
       await cleanDb();
       Sinon.restore();
     });
+
     it("returns 200 for successfully updating nickname with patch method", function (done) {
       fetchStub.returns(
         Promise.resolve({
@@ -2238,10 +2304,12 @@ describe("Users", function () {
       superUserId = await addUser(superUser);
       superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
     });
+
     afterEach(async function () {
       await cleanDb();
       Sinon.restore();
     });
+
     it("throw error if discordId is not present and user is not verified", function (done) {
       fetchStub.returns({
         update: function () {},

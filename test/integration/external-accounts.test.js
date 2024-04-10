@@ -356,6 +356,7 @@ describe("External Accounts", function () {
         rdsDiscordServerUsers: 3,
       });
     });
+
     it("Should Un-Archive Users With Archived as True and in RDS Discord Server", async function () {
       await userModel.add(usersFromRds[2]); // archivedAndInDiscord
 
@@ -422,6 +423,116 @@ describe("External Accounts", function () {
           });
           return done();
         });
+    });
+  });
+
+  describe("PATCH /external-accounts/link/:token", function () {
+    let newUserJWT;
+
+    beforeEach(async function () {
+      const userId = await addUser(userData[3]);
+      newUserJWT = authService.generateAuthToken({ userId });
+      await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
+      await externalAccountsModel.addExternalAccountData(externalAccountData[3]);
+    });
+
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
+    });
+
+    it("Should return 404 when token is not provided in path variable", async function () {
+      const res = await chai.request(app).patch("/external-accounts/link").set("Cookie", `${cookieName}=${newUserJWT}`);
+      expect(res).to.have.status(404);
+      expect(res.body.message).to.equal("Not Found");
+    });
+
+    it("Should return 404 when no data found", function (done) {
+      chai
+        .request(app)
+        .get("/external-accounts/<TOKEN_2>")
+        .set("Authorization", `Bearer ${newUserJWT}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal("No data found");
+
+          return done();
+        });
+    });
+
+    it("Should return 401 when token is expired", function (done) {
+      chai
+        .request(app)
+        .get("/external-accounts/<TOKEN_1>")
+        .set("Authorization", `Bearer ${newUserJWT}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Token Expired. Please generate it again",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 401 when user is not authenticated", function (done) {
+      chai
+        .request(app)
+        .get("/external-accounts/<TOKEN>")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 204 when valid action is provided", async function () {
+      await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
+      const getUserResponseBeforeUpdate = await chai
+        .request(app)
+        .get("/users/self")
+        .set("cookie", `${cookieName}=${newUserJWT}`);
+
+      expect(getUserResponseBeforeUpdate).to.have.status(200);
+      expect(getUserResponseBeforeUpdate.body.roles.in_discord).to.equal(false);
+      expect(getUserResponseBeforeUpdate.body).to.not.have.property("discordId");
+      expect(getUserResponseBeforeUpdate.body).to.not.have.property("discordJoinedAt");
+
+      const response = await chai
+        .request(app)
+        .patch(`/external-accounts/link/${externalAccountData[2].token}`)
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
+        .set("Cookie", `${cookieName}=${newUserJWT}`);
+
+      expect(response).to.have.status(204);
+
+      const updatedUserDetails = await chai
+        .request(app)
+        .get("/users/self")
+        .set("cookie", `${cookieName}=${newUserJWT}`);
+
+      expect(updatedUserDetails.body.roles.in_discord).to.equal(true);
+      expect(updatedUserDetails.body).to.have.property("discordId");
+      expect(updatedUserDetails.body).to.have.property("discordJoinedAt");
     });
   });
 });

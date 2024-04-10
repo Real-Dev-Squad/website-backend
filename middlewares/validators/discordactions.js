@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const { validateMillisecondsTimestamp } = require("./utils");
 
 const validateGroupRoleBody = async (req, res, next) => {
   const schema = Joi.object({
@@ -26,13 +27,6 @@ const validateMemberRoleBody = async (req, res, next) => {
     logger.error(`Error validating member role payload : ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
-};
-
-const validateMillisecondsTimestamp = async (reqBody, timestampProperty) => {
-  const schema = Joi.object({
-    [timestampProperty]: Joi.number().unit("milliseconds").required(),
-  });
-  return schema.validateAsync(reqBody);
 };
 
 const validateUpdateUsersNicknameStatusBody = async (req, res, next) => {

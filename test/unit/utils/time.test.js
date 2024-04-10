@@ -11,6 +11,7 @@ describe("time", function () {
   afterEach(async function () {
     await cleanDb();
   });
+
   describe("convertMinutesToMilliseconds", function () {
     it("should convert and return Minutes in Milliseconds", function () {
       for (const query of timeData.minutesToMilliseconds) {
@@ -45,6 +46,7 @@ describe("time", function () {
         expect(result).to.be.equal(query.result);
       }
     });
+
     it("should return the current time", function () {
       const currentTime = Date.now();
       sinon.stub(Date, "now").returns(currentTime);

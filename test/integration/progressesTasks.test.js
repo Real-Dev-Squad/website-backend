@@ -31,6 +31,7 @@ describe("Test Progress Updates API for Tasks", function () {
     let userToken;
     let taskId1;
     let taskId2;
+
     beforeEach(async function () {
       clock = sinon.useFakeTimers({
         now: new Date(Date.UTC(2023, 4, 2, 0, 25)).getTime(), // UTC time equivalent to 5:55 AM IST
@@ -344,6 +345,7 @@ describe("Test Progress Updates API for Tasks", function () {
     let taskId1;
     let taskObject2;
     let taskId2;
+
     beforeEach(async function () {
       userId = await addUser(userData[1]);
       taskObject1 = await tasks.updateTask(taskData[0]);

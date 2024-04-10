@@ -166,11 +166,50 @@ describe("users", function () {
       expect(nickname).to.be.equal(`${username.substring(0, usernameLen)} ${oooMessage}`);
     });
 
+    it("should return first letters of nickname in capital case of the mavens with from and until date when username, from and until OOO dates are passed", async function () {
+      const { username } = userData;
+      const from = new Date();
+      const until = new Date();
+      const nickname = usersUtils.generateOOONickname(username, from.getTime(), until.getTime(), [
+        config.get("discordMavenRoleId"),
+      ]);
+
+      const fromDate = from.getDate();
+      const untilDate = until.getDate();
+      const fromMonth = months[from.getMonth()];
+      const untilMonth = months[until.getMonth()];
+
+      const oooMessage = `(OOO ${fromMonth} ${fromDate} - ${untilMonth} ${untilDate})`;
+      const oooMessageLen = oooMessage.length;
+      const usernameLen = discordNicknameLength - oooMessageLen - 1;
+      expect(nickname).to.be.equal(
+        `${username
+          .split("-")
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join("-")
+          .substring(0, usernameLen)} ${oooMessage}`
+      );
+    });
+
     it("should return username of the user as nickname when only username is passed and not from and until date ", async function () {
       const { username } = userData;
       const nickname = usersUtils.generateOOONickname(username);
 
       expect(nickname).to.be.equal(username);
+    });
+
+    it("should return first letters of nickname in capital case of the mavens as nickname when only username is passed and not from and until date ", async function () {
+      const { username } = userData;
+      const nickname = usersUtils.generateOOONickname(username, undefined, undefined, [
+        config.get("discordMavenRoleId"),
+      ]);
+
+      expect(nickname).to.be.equal(
+        username
+          .split("-")
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join("-")
+      );
     });
   });
 
