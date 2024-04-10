@@ -57,7 +57,8 @@ router.patch(
   userValidator.validateImageVerificationQuery,
   users.verifyUserImage
 );
-router.get("/picture/:id", authenticate, authorizeRoles([SUPERUSER]), users.getUserImageForVerification);
+router.get("/picture/all", authenticate, authorizeRoles([SUPERUSER]), users.getAllUsersPhotoVerificationRequests);
+router.get("/picture/:id", authenticate, users.getUserPhotoVerificationRequests);
 router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);

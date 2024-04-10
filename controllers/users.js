@@ -10,7 +10,7 @@ const dataAccess = require("../services/dataAccessLayer");
 const { isLastPRMergedWithinDays } = require("../services/githubService");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { OVERDUE_TASKS, photoVerificationRequestStatus } = require("../constants/users");
+const { OVERDUE_TASKS } = require("../constants/users");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
@@ -495,13 +495,9 @@ const verifyUserImage = async (req, res) => {
     const { type: imageType, status } = req.query;
     const { id: userId } = req.params;
 
-    if (status !== photoVerificationRequestStatus.APPROVED && status !== photoVerificationRequestStatus.REJECTED) {
-      return res.boom.badRequest("Invalid status in query params");
-    }
-
-    await userQuery.markAsVerified(userId, imageType, status);
-    return res.json({
-      message: `${imageType} image was verified successfully!`,
+    const verificationResponse = await userQuery.changePhotoVerificationStatus(userId, imageType, status);
+    return res.status(200).json({
+      message: verificationResponse,
     });
   } catch (error) {
     logger.error(`Error while verifying image of user: ${error}`);
@@ -580,21 +576,42 @@ const markUnverified = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getUserImageForVerification = async (req, res) => {
+const getUserPhotoVerificationRequests = async (req, res) => {
   try {
     const { id: userId } = req.params;
     const userData = req.userData;
-    if (userData.id !== userId && !userData.roles[ROLES.SUPERUSER]) {
+    if ((userData.id !== userId && !userData.roles[ROLES.SUPERUSER]) || !userId) {
       return res.boom.unauthorized("You are not authorized to view this user's image verification data");
     }
-    const userImageVerificationData = await userQuery.getUserImageForVerification(userId);
+    const userImageVerificationData = await userQuery.getUserPhotoVerificationRequests(userId);
+    return res.json({
+      message: "User image verification record fetched successfully!",
+      data: userImageVerificationData[0],
+    });
+  } catch (error) {
+    logger.error(`Error while querying image of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
+ * Updates the user data
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getAllUsersPhotoVerificationRequests = async (req, res) => {
+  const { username } = req.query;
+  try {
+    const userImageVerificationData = await userQuery.getAllUsersPhotoVerificationRequests(username);
     return res.json({
       message: "User image verification record fetched successfully!",
       data: userImageVerificationData,
     });
   } catch (error) {
-    logger.error(`Error while verifying image of user: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    logger.error(`Error while querying image of user: ${error}`);
+    return res.boom.badImplementation(`Error while querying image verification data for ${username}`);
   }
 };
 
@@ -973,7 +990,8 @@ module.exports = {
   getUserSkills,
   filterUsers,
   verifyUserImage,
-  getUserImageForVerification,
+  getAllUsersPhotoVerificationRequests,
+  getUserPhotoVerificationRequests,
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,
