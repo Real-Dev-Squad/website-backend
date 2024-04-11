@@ -667,6 +667,28 @@ const updateOrphanTasksStatus = async (lastOrphanTasksFilterationTimestamp) => {
   }
 };
 
+const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
+  try {
+    let orphanTasksUpdatedCount = 0;
+
+    for (const user of users) {
+      const tasksQuerySnapshot = await tasksModel
+        .where("assigneeId", "==", user.id)
+        .where("status", "not-in", [COMPLETED, BACKLOG])
+        .get();
+      tasksQuerySnapshot.forEach(async (taskDoc) => {
+        orphanTasksUpdatedCount++;
+        await tasksModel.doc(taskDoc.id).update({ status: BACKLOG, updated_at: Date.now() });
+      });
+    }
+
+    return orphanTasksUpdatedCount;
+  } catch (error) {
+    logger.error("Error marking tasks as backlog:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   updateTask,
   fetchTasks,
@@ -685,4 +707,5 @@ module.exports = {
   getOverdueTasks,
   updateTaskStatus,
   updateOrphanTasksStatus,
+  markUnDoneTasksOfArchivedUsersBacklog,
 };
