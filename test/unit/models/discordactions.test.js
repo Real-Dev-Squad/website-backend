@@ -282,11 +282,13 @@ describe("discordactions", function () {
 
   describe("updateDiscordImageForVerification", function () {
     let fetchStub;
+    let photoVerificationFixture;
 
     beforeEach(async function () {
       fetchStub = sinon.stub(global, "fetch");
       const docRefUser0 = photoVerificationModel.doc();
-      await docRefUser0.set(userPhotoVerificationData);
+      await docRefUser0.set(userPhotoVerificationData[0]);
+      photoVerificationFixture = userPhotoVerificationData[0];
     });
 
     afterEach(async function () {
@@ -295,7 +297,7 @@ describe("discordactions", function () {
     });
 
     it("should update the user's discord image for verification", async function () {
-      const userDiscordId = "12345";
+      const userDiscordId = photoVerificationFixture.discordId;
       const discordAvatarUrl = "https://cdn.discordapp.com/avatars/12345/12345.png";
       fetchStub.returns(
         Promise.resolve({
@@ -325,7 +327,7 @@ describe("discordactions", function () {
     });
 
     it("should log and rethrow an error if an error occurs during the process", async function () {
-      const userDiscordId = "12345";
+      const userDiscordId = photoVerificationFixture.discordId;
       const error = new Error("Test error");
 
       fetchStub.returns(

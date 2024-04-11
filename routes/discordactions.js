@@ -39,8 +39,16 @@ router.get("/invite", authenticate, getUserDiscordInvite);
 router.post("/invite", authenticate, checkCanGenerateDiscordLink, generateInviteForUser);
 router.delete("/roles", authenticate, checkIsVerifiedDiscord, deleteRole);
 router.get("/roles", authenticate, checkIsVerifiedDiscord, getGroupsRoleId);
+// TODO deprecate the below API, for incorrect naming
 router.patch(
   "/avatar/verify/:id",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  checkIsVerifiedDiscord,
+  updateDiscordImageForVerification
+);
+router.patch(
+  "/avatar/update/:id",
   authenticate,
   authorizeRoles([SUPERUSER]),
   checkIsVerifiedDiscord,
