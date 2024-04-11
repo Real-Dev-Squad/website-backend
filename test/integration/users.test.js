@@ -1247,6 +1247,42 @@ describe("Users", function () {
         });
     });
 
+    it("Should return users with first name 'Ankur' successfully", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: "Ankur", dev: true }) // Search for users with first name 'Ankur' in dev mode
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          return done();
+        });
+    });
+
+    it("Should return users with last name 'Narkhede' successfully", function (done) {
+      chai
+        .request(app)
+        .get("/users")
+        .query({ search: "Narkhede", dev: true })
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          return done();
+        });
+    });
+
     it("Should return an empty array with response status code 200", function (done) {
       chai
         .request(app)

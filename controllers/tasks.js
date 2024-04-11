@@ -328,38 +328,58 @@ const updateTaskStatus = async (req, res, next) => {
 
     if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
     if (task.notAssignedToYou) return res.boom.forbidden("This task is not assigned to you");
-    if (
-      task.taskData.status === TASK_STATUS.VERIFIED ||
-      status === TASK_STATUS.MERGED ||
-      status === TASK_STATUS.BACKLOG
-    )
+    if (TASK_STATUS.BACKLOG === status) {
       return res.boom.forbidden("Status cannot be updated. Please contact admin.");
-
+    }
     if (userStatusFlag) {
-      if (task.taskData.status === TASK_STATUS.DONE && req.body.percentCompleted < 100) {
-        if (status === TASK_STATUS.DONE || !status) {
-          return res.boom.badRequest("Task percentCompleted can't updated as status is DONE");
+      if (task.taskData.status === TASK_STATUS.DONE) {
+        return res.boom.forbidden("Status cannot be updated. Please contact admin.");
+      }
+      if (status) {
+        const isCurrentTaskStatusInProgress = task.taskData.status === TASK_STATUS.IN_PROGRESS;
+        const isCurrentTaskStatusBlock = task.taskData.status === TASK_STATUS.BLOCKED;
+        const isNewTaskStatusInProgress = status === TASK_STATUS.IN_PROGRESS;
+        const isNewTaskStatusBlock = status === TASK_STATUS.BLOCKED;
+        const isCurrProgress100 = parseInt(task.taskData.percentCompleted || 0) === 100;
+        const isCurrProgress0 = parseInt(task.taskData.percentCompleted || 0) === 0;
+        const isNewProgress100 = !!req.body.percentCompleted && parseInt(req.body.percentCompleted) === 100;
+        const isNewProgress0 = !!req.body.percentCompleted !== undefined && parseInt(req.body.percentCompleted) === 0;
+
+        if (
+          !isCurrProgress100 &&
+          !isNewProgress100 &&
+          (isCurrentTaskStatusBlock || isCurrentTaskStatusInProgress) &&
+          !isNewTaskStatusBlock &&
+          !isNewTaskStatusInProgress
+        ) {
+          return res.boom.badRequest(
+            `The status of task can not be changed from ${
+              isCurrentTaskStatusInProgress ? "In progress" : "Blocked"
+            } until progress of task is not 100%.`
+          );
+        }
+        if (isNewTaskStatusInProgress && !isCurrentTaskStatusBlock && !isCurrProgress0 && !isNewProgress0) {
+          return res.boom.badRequest(
+            "The status of task can not be changed to In progress until progress of task is not 0%."
+          );
         }
       }
-
-      if ((status === TASK_STATUS.DONE || status === TASK_STATUS.VERIFIED) && task.taskData.percentCompleted !== 100) {
+    } else {
+      if (task.taskData.status === TASK_STATUS.VERIFIED || TASK_STATUS.MERGED === status) {
+        return res.boom.forbidden("Status cannot be updated. Please contact admin.");
+      }
+      if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
+        if (status === TASK_STATUS.COMPLETED || !status) {
+          return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
+        }
+      }
+      if (
+        (status === TASK_STATUS.COMPLETED || status === TASK_STATUS.VERIFIED) &&
+        task.taskData.percentCompleted !== 100
+      ) {
         if (req.body.percentCompleted !== 100) {
-          return res.boom.badRequest("Status cannot be updated. Task is not done yet");
+          return res.boom.badRequest("Status cannot be updated as progress of task is not 100%.");
         }
-      }
-    }
-
-    if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
-      if (status === TASK_STATUS.COMPLETED || !status) {
-        return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
-      }
-    }
-    if (
-      (status === TASK_STATUS.COMPLETED || status === TASK_STATUS.VERIFIED) &&
-      task.taskData.percentCompleted !== 100
-    ) {
-      if (req.body.percentCompleted !== 100) {
-        return res.boom.badRequest("Status cannot be updated. Task is not completed yet");
       }
     }
 
@@ -469,6 +489,19 @@ const updateStatus = async (req, res) => {
   }
 };
 
+const orphanTasks = async (req, res) => {
+  try {
+    const { lastOrphanTasksFilterationTimestamp = 0 } = req.body;
+
+    const updatedTasksData = await tasks.updateOrphanTasksStatus(lastOrphanTasksFilterationTimestamp);
+
+    return res.status(200).json({ message: "Orphan tasks filtered successfully", updatedTasksData });
+  } catch (error) {
+    logger.error("Error in filtering orphan tasks", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 const getUsersHandler = async (req, res) => {
   try {
     const { size, cursor, q: queryString } = req.query;
@@ -528,4 +561,5 @@ module.exports = {
   assignTask,
   updateStatus,
   getUsersHandler,
+  orphanTasks,
 };

@@ -45,6 +45,35 @@ const getExternalAccountData = async (req, res) => {
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
+const linkExternalAccount = async (req, res) => {
+  try {
+    const { id: userId, roles } = req.userData;
+
+    const externalAccountData = await externalAccountsModel.fetchExternalAccountData(req.query, req.params.token);
+    if (!externalAccountData.id) {
+      return res.boom.notFound("No data found");
+    }
+
+    const attributes = externalAccountData.attributes;
+    if (attributes.expiry && attributes.expiry < Date.now()) {
+      return res.boom.unauthorized("Token Expired. Please generate it again");
+    }
+
+    await addOrUpdate(
+      {
+        roles: { ...roles, in_discord: true },
+        discordId: attributes.discordId,
+        discordJoinedAt: attributes.discordJoinedAt,
+      },
+      userId
+    );
+
+    return res.status(204).json({ message: "Your discord profile has been linked successfully" });
+  } catch (error) {
+    logger.error(`Error getting external account data: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
 
 /**
  * @deprecated
@@ -203,6 +232,7 @@ const newSyncExternalAccountData = async (req, res) => {
 module.exports = {
   addExternalAccountData,
   getExternalAccountData,
+  linkExternalAccount,
   syncExternalAccountData,
   newSyncExternalAccountData,
   externalAccountsUsersPostHandler,

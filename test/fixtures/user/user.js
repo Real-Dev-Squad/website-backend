@@ -91,7 +91,6 @@ module.exports = () => {
       linkedin_id: "sagarbajpai",
       github_id: "sagarbajpai",
       github_display_name: "Sagar Bajpai",
-      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567890",
       email: "abc@gmail.com",
       status: "active",

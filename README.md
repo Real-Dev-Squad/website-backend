@@ -51,6 +51,7 @@ yarn install --frozen-lockfile
 
 This command should be successful, before moving to development.
 
+
 ```shell
 yarn validate-setup
 ```
