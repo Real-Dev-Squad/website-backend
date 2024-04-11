@@ -82,6 +82,7 @@ describe("Discord actions", function () {
 
   describe("PATCH /discord-actions/avatar/update/discordId", function () {
     let photoVerificationData;
+
     beforeEach(async function () {
       photoVerificationData = userPhotoVerificationData[0];
 
