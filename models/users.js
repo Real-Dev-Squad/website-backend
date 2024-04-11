@@ -361,7 +361,7 @@ const initializeUser = async (userId) => {
  * @return {Promise<{message: string}|{message: string}>}
  * @throws {Error} - If error occurs while creating Verification Entry
  */
-const addForVerification = async (userId, discordId, profileImageUrl, profileImageID, discordImageUrl) => {
+const addForVerification = async (userId, discordId, profileImageUrl, discordImageUrl, profileImageID) => {
   let isNotVerifiedSnapshot;
   try {
     isNotVerifiedSnapshot = await photoVerificationModel
