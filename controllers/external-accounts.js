@@ -47,7 +47,7 @@ const getExternalAccountData = async (req, res) => {
 };
 const linkExternalAccount = async (req, res) => {
   try {
-    const { id: userId, roles } = req.userData;
+    const { id: userId } = req.userData;
 
     const externalAccountData = await externalAccountsModel.fetchExternalAccountData(req.query, req.params.token);
     if (!externalAccountData.id) {
@@ -61,7 +61,7 @@ const linkExternalAccount = async (req, res) => {
 
     await addOrUpdate(
       {
-        roles: { ...roles, in_discord: true },
+        "roles.in_discord": true,
         discordId: attributes.discordId,
         discordJoinedAt: attributes.discordJoinedAt,
       },
