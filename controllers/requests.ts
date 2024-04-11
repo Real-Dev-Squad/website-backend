@@ -9,7 +9,11 @@ import {
   REQUEST_STATE,
   LOG_ACTION,
   REQUEST_LOG_TYPE,
+  REQUEST_TYPE,
 } from "../constants/requests";
+import { statusState } from "../constants/userStatus";
+import {addFutureStatus} from "../models/userStatus";
+import { createUserFutureStatus } from "../models/userFutureStatus";
 import { createRequest, getRequests, updateRequest } from "../models/requests";
 import { addLog } from "../models/logs";
 import { getPaginatedLink } from "../utils/helper";
@@ -94,6 +98,24 @@ export const updateRequestController = async (req: any, res: any) => {
       body: requestResult,
     };
     await addLog(requestLog.type, requestLog.meta, requestLog.body);
+    if (requestResult.state === REQUEST_STATE.APPROVED) {
+      const requestData = await getRequests({ id: requestId });
+
+      if (requestData) {
+        const { from, until, requestedBy, message } = requestData as any;
+        const userFutureStatusData = {
+          requestId,
+          status: REQUEST_TYPE.OOO,
+          state: statusState.UPCOMING,
+          from,
+          endsOn: until,
+          userId: requestedBy,
+          message,
+        };
+        await createUserFutureStatus(userFutureStatusData);
+        await addFutureStatus(userFutureStatusData);
+      }
+    }
     return res.status(201).json({
       message: returnMessage,
       data: {
