@@ -493,7 +493,7 @@ const postUserPicture = async (req, res) => {
 const verifyUserImage = async (req, res) => {
   try {
     const { type: imageType, status } = req.query;
-    const { id: userId } = req.params;
+    const { userId } = req.params;
 
     const verificationResponse = await userQuery.changePhotoVerificationStatus(userId, imageType, status);
     return res.status(200).json({
@@ -578,7 +578,7 @@ const markUnverified = async (req, res) => {
 
 const getUserPhotoVerificationRequests = async (req, res) => {
   try {
-    const { id: userId } = req.params;
+    const { userId } = req.params;
     const userData = req.userData;
     if ((userData.id !== userId && !userData.roles[ROLES.SUPERUSER]) || !userId) {
       return res.boom.unauthorized("You are not authorized to view this user's image verification data");

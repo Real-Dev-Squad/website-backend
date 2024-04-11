@@ -54,14 +54,14 @@ router.patch(
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
 router.post("/picture", authenticate, checkIsVerifiedDiscord, upload.single("profile"), users.postUserPicture);
 router.patch(
-  "/picture/verify/:id",
+  "/picture/verify/:userId",
   authenticate,
   authorizeRoles([SUPERUSER]),
   userValidator.validateImageVerificationQuery,
   users.verifyUserImage
 );
 router.get("/picture/all", authenticate, authorizeRoles([SUPERUSER]), users.getAllUsersPhotoVerificationRequests);
-router.get("/picture/:id", authenticate, users.getUserPhotoVerificationRequests);
+router.get("/picture/:userId", authenticate, users.getUserPhotoVerificationRequests);
 router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);

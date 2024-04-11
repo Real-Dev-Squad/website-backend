@@ -72,12 +72,7 @@ describe("Discord actions", function () {
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
     userAuthToken = authService.generateAuthToken({ userId: userId });
     jwt = authService.generateAuthToken({ userId });
-    discordId = "12345";
-
-    const docRefUser0 = photoVerificationModel.doc();
-    userPhotoVerificationData.userId = userId;
-    userPhotoVerificationData.discordId = discordId;
-    await docRefUser0.set(userPhotoVerificationData);
+    discordId = userData[0].discordId;
   });
 
   afterEach(async function () {
@@ -85,49 +80,61 @@ describe("Discord actions", function () {
     await cleanDb();
   });
 
-  describe("PATCH /discord-actions/picture/id", function () {
-    it("Should successfully update a picture", function (done) {
-      fetchStub.returns(
-        Promise.resolve({
-          status: 200,
-          json: () => Promise.resolve({ user: { avatar: 12345 } }),
-        })
-      );
-      chai
-        .request(app)
-        .patch(`/discord-actions/avatar/verify/${discordId}`)
-        .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Discord avatar URL updated successfully!");
-          return done();
-        });
+  describe("PATCH /discord-actions/avatar/update/discordId", function () {
+    let photoVerificationData;
+    beforeEach(async function () {
+      photoVerificationData = userPhotoVerificationData[0];
+
+      const userDocRef = photoVerificationModel.doc();
+      photoVerificationData.userId = userId;
+      photoVerificationData.discordId = discordId;
+      await userDocRef.set(photoVerificationData);
+      photoVerificationData.id = userDocRef.id;
     });
 
-    it("Should throw error if failed to update a picture", function (done) {
+    it("Should successfully update a picture", async function () {
+      const newDiscordAvatarLink = "https://cdn.discordapp.com/avatars/12345/12345.png";
+      const newDiscordAvatarName = "12345";
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ user: { avatar: newDiscordAvatarName } }),
+        })
+      );
+
+      const res = await chai
+        .request(app)
+        .patch(`/discord-actions/avatar/update/${photoVerificationData.discordId}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("Discord avatar URL updated successfully!");
+
+      const updatedPhotoVerificationSnapshot = await photoVerificationModel.doc(photoVerificationData.id).get();
+      const updatedPhotoVerificationData = updatedPhotoVerificationSnapshot.data();
+      expect(updatedPhotoVerificationData.profile.approved).to.equal(false);
+      expect(updatedPhotoVerificationData.discord.approved).to.equal(false);
+      expect(updatedPhotoVerificationData.discord.url).to.equal(newDiscordAvatarLink);
+    });
+
+    it("Should throw error if failed to update a picture", async function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ user: { avatar: 12345 } }),
         })
       );
-      chai
+
+      const res = await chai
         .request(app)
-        .patch(`/discord-actions/avatar/verify/${discordId + "random-error-string"}`)
-        .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(500);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("An internal server error occurred");
-          return done();
-        });
+        .patch(`/discord-actions/avatar/update/${discordId + "random-error-string"}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`);
+
+      expect(res).to.have.status(500);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("An internal server error occurred");
     });
   });
 
