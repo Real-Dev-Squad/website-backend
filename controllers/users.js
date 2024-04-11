@@ -468,8 +468,8 @@ const postUserPicture = async (req, res) => {
         userId,
         discordId,
         imageData.url,
-        imageData.publicId,
-        discordAvatarUrl
+        discordAvatarUrl,
+        imageData.publicId
       );
     } catch (error) {
       logger.error(`Error while adding profile picture of user: ${error}`);

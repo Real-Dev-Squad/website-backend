@@ -10,7 +10,7 @@ const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const users = require("../../../models/users");
 const firestore = require("../../../utils/firestore");
-const { userPhotoVerificationData, newUserPhotoVerificationData } = require("../../fixtures/user/photo-verification");
+const { userPhotoVerificationData } = require("../../fixtures/user/photo-verification");
 const { generateStatusDataForState } = require("../../fixtures/userStatus/userStatus");
 const userModel = firestore.collection("users");
 const userStatusModel = firestore.collection("usersStatus");
@@ -21,6 +21,7 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const userData = require("../../fixtures/user/user");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
+const { photoVerificationRequestStatus } = require("../../../constants/users");
 const app = require("../../../server");
 const prodUsers = require("../../fixtures/user/prodUsers");
 const authService = require("../../../services/authService");
@@ -140,15 +141,18 @@ describe("users", function () {
   });
 
   describe("user image verification", function () {
-    let userId, discordId, profileImageUrl, discordImageUrl;
+    let photoVerificationData = {};
 
     beforeEach(async function () {
+      const userData = userDataArray[0];
+      const { userId } = await users.addOrUpdate(userData);
+
+      const photoVerificationDataFix = userPhotoVerificationData[0];
+      photoVerificationDataFix.userId = userId;
+
       const docRefUser0 = photoVerificationModel.doc();
-      await docRefUser0.set(userPhotoVerificationData);
-      userId = newUserPhotoVerificationData.userId;
-      discordId = newUserPhotoVerificationData.discordId;
-      profileImageUrl = newUserPhotoVerificationData.profile.url;
-      discordImageUrl = newUserPhotoVerificationData.discord.url;
+      await docRefUser0.set(photoVerificationDataFix);
+      photoVerificationData = userPhotoVerificationData[0];
     });
 
     afterEach(async function () {
@@ -156,59 +160,136 @@ describe("users", function () {
     });
 
     it("adds new user images For Verification", async function () {
-      const result = await users.addForVerification(userId, discordId, profileImageUrl, discordImageUrl);
+      const userId = photoVerificationData.userId;
+      const result = await users.addForVerification(
+        photoVerificationData.userId,
+        photoVerificationData.discordId,
+        photoVerificationData.profile.url,
+        photoVerificationData.discord.url,
+        photoVerificationData.profile.publicId
+      );
 
       const verificationSnapshot = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
       expect(verificationSnapshot.empty).to.be.equal(false);
-      newUserPhotoVerificationData.profile.date = verificationSnapshot.docs[0].data().profile.date;
-      newUserPhotoVerificationData.discord.date = verificationSnapshot.docs[0].data().discord.date;
+      photoVerificationData.profile.date = verificationSnapshot.docs[0].data().profile.date;
+      photoVerificationData.discord.date = verificationSnapshot.docs[0].data().discord.date;
       const docData = verificationSnapshot.docs[0].data();
-      expect(docData).to.deep.equal(newUserPhotoVerificationData);
-
-      expect(result.message).to.be.equal("Profile data added for verification successfully");
-    });
-
-    it("adds user images For Verification", async function () {
-      const userId = "1234567abcd";
-      const verificationSnapshotBeforeUpdate = await photoVerificationModel
-        .where("userId", "==", userId)
-        .limit(1)
-        .get();
-      const docDataPrev = verificationSnapshotBeforeUpdate.docs[0].data();
-      const result = await users.addForVerification(userId, discordId, profileImageUrl, discordImageUrl);
-
-      const verificationSnapshot = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
-      const docData = verificationSnapshot.docs[0].data();
-      expect(docData).to.have.all.keys(["userId", "discordId", "discord", "profile"]);
-      expect(docData.discord.approved).to.be.equal(docDataPrev.discord.approved);
-      expect(docData.discord.url).to.be.equal(discordImageUrl);
-      expect(docData.profile.url).to.be.equal(profileImageUrl);
+      expect(docData).to.deep.equal(photoVerificationData);
 
       expect(result.message).to.be.equal("Profile data added for verification successfully");
     });
 
     it("marks user profile image as verified", async function () {
-      const userId = "1234567abcd";
+      const userId = photoVerificationData.userId;
+      const imageType = "profile";
+      const verificationSnapshotBeforeUpdate = await photoVerificationModel
+        .where("userId", "==", userId)
+        .where("status", "==", photoVerificationRequestStatus.PENDING)
+        .limit(1)
+        .get();
+
+      const docRef = verificationSnapshotBeforeUpdate.docs[0].ref;
+
+      const docDataPrev = (await docRef.get()).data();
+      const result = await users.changePhotoVerificationStatus(
+        userId,
+        imageType,
+        photoVerificationRequestStatus.APPROVED
+      );
+
+      const docData = (await docRef.get()).data();
+      expect(docData.profile.approved).to.not.be.equal(docDataPrev.profile.approved);
+      expect(docData.profile.approved).to.be.equal(true);
+
+      expect(result).to.be.equal("User image data verified successfully");
+    });
+
+    it("adds user images For Verification, updates the pending verification object", async function () {
+      const userId = photoVerificationData.userId;
       const imageType = "profile";
       const verificationSnapshotBeforeUpdate = await photoVerificationModel
         .where("userId", "==", userId)
         .limit(1)
         .get();
-      const docDataPrev = verificationSnapshotBeforeUpdate.docs[0].data();
-      const result = await users.markAsVerified(userId, imageType);
 
-      const verificationSnapshot = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
-      const docData = verificationSnapshot.docs[0].data();
-      expect(docData.profile.approved).to.not.be.equal(docDataPrev.profile.approved);
+      // Update the status of the profile image to approved
+      await users.changePhotoVerificationStatus(userId, imageType, photoVerificationRequestStatus.APPROVED);
 
-      expect(result.message).to.be.equal("User image data verified successfully");
+      const docRef = verificationSnapshotBeforeUpdate.docs[0].ref;
+
+      const docDataPrev = (await docRef.get()).data();
+      const result = await users.addForVerification(
+        photoVerificationData.userId,
+        photoVerificationData.discordId,
+        photoVerificationData.profile.url,
+        photoVerificationData.discord.url,
+        photoVerificationData.profile.publicId
+      );
+
+      const docData = (await docRef.get()).data();
+      expect(docData).to.have.all.keys(["userId", "discordId", "discord", "profile", "status"]);
+      expect(docData.discord.approved).to.be.equal(docDataPrev.discord.approved);
+      expect(docData.discord.url).to.be.equal(photoVerificationData.discord.url);
+      expect(docData.profile.url).to.be.equal(photoVerificationData.profile.url);
+      expect(docDataPrev.profile.approved).to.be.equal(true);
+      expect(docData.profile.approved).to.be.equal(false);
+
+      expect(result.message).to.be.equal("Profile data added for verification successfully");
+    });
+
+    it("marks photo verification object status as APPROVED", async function () {
+      const imageType = "both";
+      const userId = photoVerificationData.userId;
+      const verificationSnapshotBeforeUpdate = await photoVerificationModel
+        .where("userId", "==", userId)
+        .where("status", "==", photoVerificationRequestStatus.PENDING)
+        .limit(1)
+        .get();
+
+      const docRef = verificationSnapshotBeforeUpdate.docs[0].ref;
+      const result = await users.changePhotoVerificationStatus(
+        userId,
+        imageType,
+        photoVerificationRequestStatus.APPROVED
+      );
+
+      const docData = (await docRef.get()).data();
+      expect(docData.profile.approved).to.be.equal(true);
+      expect(docData.discord.approved).to.be.equal(true);
+      expect(docData.status).to.be.equal(photoVerificationRequestStatus.APPROVED);
+
+      expect(result).to.be.equal("User image data verified successfully");
+    });
+
+    it("marks photo verification object status as APPROVED, when both images are approved one by one", async function () {
+      const userId = photoVerificationData.userId;
+      let imageType = "profile";
+      const verificationSnapshotBeforeUpdate = await photoVerificationModel
+        .where("userId", "==", userId)
+        .limit(1)
+        .get();
+
+      const docRef = verificationSnapshotBeforeUpdate.docs[0].ref;
+      await users.changePhotoVerificationStatus(userId, imageType, photoVerificationRequestStatus.APPROVED);
+
+      let docData = (await docRef.get()).data();
+      expect(docData.profile.approved).to.be.equal(true);
+      expect(docData.discord.approved).to.be.equal(false);
+      expect(docData.status).to.be.equal(photoVerificationRequestStatus.PENDING);
+
+      imageType = "discord";
+      await users.changePhotoVerificationStatus(userId, imageType, photoVerificationRequestStatus.APPROVED);
+      docData = (await docRef.get()).data();
+      expect(docData.profile.approved).to.be.equal(true);
+      expect(docData.discord.approved).to.be.equal(true);
+      expect(docData.status).to.be.equal(photoVerificationRequestStatus.APPROVED);
     });
 
     it("throws an error if verification document not found", async function () {
       const userId = "non-existent-userId";
       const imageType = "profile";
       try {
-        await users.markAsVerified(userId, imageType);
+        await users.changePhotoVerificationStatus(userId, imageType, photoVerificationRequestStatus.APPROVED);
       } catch (error) {
         expect(error).to.be.instanceOf(Error);
         expect(error.message).to.be.equal("No verification document record data for user was found");
@@ -216,20 +297,25 @@ describe("users", function () {
     });
 
     it("gets user image verification data", async function () {
-      const userId = "1234567abcd";
+      const userId = photoVerificationData.userId;
 
-      const result = await users.getUserImageForVerification(userId);
+      const result = (await users.getUserPhotoVerificationRequests(userId))[0];
 
       const verificationSnapshot = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
       const docData = verificationSnapshot.docs[0].data();
-      expect(result).to.deep.equal(docData);
+      expect(result.profile.url).to.deep.equal(docData.profile.url);
+      expect(result.profile.publicId).to.deep.equal(docData.profile.publicId);
+      expect(result.discord.url).to.deep.equal(docData.discord.url);
+      expect(result.discordId).to.deep.equal(docData.discordId);
+      expect(result.userId).to.deep.equal(docData.userId);
+      expect(result.status).to.deep.equal(docData.status);
     });
 
     it("throws an error if verification document could not be found due to invalid user Id", async function () {
       const userId = "non-existent-userId";
 
       try {
-        await users.getUserImageForVerification(userId);
+        await users.getUserPhotoVerificationRequests(userId);
       } catch (error) {
         expect(error).to.be.instanceOf(Error);
         expect(error.message).to.be.equal(`No document with userId: ${userId} was found!`);
