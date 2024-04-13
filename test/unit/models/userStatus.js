@@ -1,3 +1,4 @@
+import { userFutureStatusData } from "../../fixtures/userFutureStatus/userFutureStatusData";
 const chai = require("chai");
 const sinon = require("sinon");
 const { NotFound, Forbidden } = require("http-errors");
@@ -5,7 +6,7 @@ const { expect } = chai;
 const firestore = require("../../../utils/firestore");
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
-const { cancelOooStatus } = require("../../../models/userStatus");
+const { cancelOooStatus, addFutureStatus } = require("../../../models/userStatus");
 const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
@@ -78,5 +79,11 @@ describe("tasks", function () {
       expect(err).to.be.an.instanceOf(Error);
       expect(err.message).to.be.equal("Task not found");
     });
+  });
+
+  it("Should add future status to the User", async function () {
+    const response = await addFutureStatus(userFutureStatusData);
+    expect(response.userStatusExists).to.equal(true);
+    expect(response.data.futureStatus.state).to.equal("UPCOMING");
   });
 });

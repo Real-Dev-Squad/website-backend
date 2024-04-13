@@ -91,12 +91,8 @@ export const getRequests = async (query: any) => {
         return null;
       }
       return {
-        allRequests: [
-          {
-            id: requestDoc.id,
-            ...requestDoc.data(),
-          },
-        ],
+        id: requestDoc.id,
+        ...requestDoc.data(),
       };
     }
 
