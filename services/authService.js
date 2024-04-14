@@ -13,6 +13,19 @@ const generateAuthToken = (payload) => {
 };
 
 /**
+ * Generates the JWT
+ *
+ * @param payload {Object} - Payload to be added in the JWT
+ * @return {String} - Generated JWT
+ */
+const generateAuthTokenV2 = (payload) => {
+  return jwt.sign(payload, config.get("userTokenV2.privateKey"), {
+    algorithm: "RS256",
+    expiresIn: config.get("userToken.ttl"),
+  });
+};
+
+/**
  * Verifies if the JWT is valid. Throws error in case of signature error or expiry
  *
  * @param token {String} - JWT to be verified
@@ -34,6 +47,7 @@ const decodeAuthToken = (token) => {
 
 module.exports = {
   generateAuthToken,
+  generateAuthTokenV2,
   verifyAuthToken,
   decodeAuthToken,
 };

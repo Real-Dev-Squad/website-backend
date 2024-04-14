@@ -64,11 +64,14 @@ module.exports = {
 
   userToken: {
     cookieName: `rds-session-${NODE_ENV}`,
-    cookieV2Name: `rds-session-v2-${NODE_ENV}`,
     ttl: 30 * 24 * 60 * 60, // in seconds
     refreshTtl: 180 * 24 * 60 * 60, // in seconds
     publicKey: "<publicKey>",
     privateKey: "<privateKey>",
+  },
+  userTokenV2: {
+    cookieName: `rds-session-v2-${NODE_ENV}`,
+    publicKey: "<publicKey>", // a 2048/4096 bit key
   },
 
   botToken: {

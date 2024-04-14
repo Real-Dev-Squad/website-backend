@@ -247,7 +247,7 @@ describe("auth", function () {
     expect(res.headers["set-cookie"]).to.have.length(2); /* res has 2 cookies rds-session & rds-session-v2 */
     expect(res.headers["set-cookie"][1])
       .to.be.a("string")
-      .and.satisfy((msg) => msg.startsWith(config.get("userToken.cookieV2Name")));
+      .and.satisfy((msg) => msg.startsWith(config.get("userTokenV2.cookieName")));
     expect(res.headers["set-cookie"][1]).to.include("HttpOnly");
     expect(res.headers["set-cookie"][1]).to.include("Secure");
     expect(res.headers["set-cookie"][1]).to.include(`Domain=${rdsUiUrl.hostname}`);

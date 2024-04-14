@@ -89,7 +89,7 @@ const githubAuthCallback = (req, res, next) => {
 
       const cookieOptions = {
         domain: rdsUiUrl.hostname,
-        expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
+        expires: new Date(2147483647 * 1000),
         httpOnly: true,
         secure: true,
         sameSite: "lax",
@@ -99,8 +99,8 @@ const githubAuthCallback = (req, res, next) => {
 
       /* redirectUrl woud be like https://realdevsquad.com?v2=true */
       if (isV2FlagPresent) {
-        const tokenV2 = authService.generateAuthToken({ userId, role });
-        res.cookie(config.get("userToken.cookieV2Name"), tokenV2, cookieOptions);
+        const tokenV2 = authService.generateAuthTokenV2({ userId, role });
+        res.cookie(config.get("userTokenV2.cookieName"), tokenV2, cookieOptions);
       }
 
       if (!devMode) {
@@ -131,7 +131,7 @@ const signout = (req, res) => {
     sameSite: "lax",
   };
   res.clearCookie(cookieName, cookieOptions);
-  const cookieV2Name = config.get("userToken.cookieV2Name");
+  const cookieV2Name = config.get("userTokenV2.cookieName");
   res.clearCookie(cookieV2Name, cookieOptions);
   return res.json({
     message: "Signout successful",
