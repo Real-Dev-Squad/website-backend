@@ -670,7 +670,7 @@ const updateOrphanTasksStatus = async (lastOrphanTasksFilterationTimestamp) => {
 const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
   try {
     let orphanTasksUpdatedCount = 0;
-
+    const batch = firestore.batch();
     for (const user of users) {
       const tasksQuerySnapshot = await tasksModel
         .where("assigneeId", "==", user.id)
@@ -678,10 +678,12 @@ const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
         .get();
       tasksQuerySnapshot.forEach(async (taskDoc) => {
         orphanTasksUpdatedCount++;
-        await tasksModel.doc(taskDoc.id).update({ status: BACKLOG, updated_at: Date.now() });
+        const taskRef = tasksModel.doc(taskDoc.id);
+        batch.update(taskRef, { status: BACKLOG, updated_at: Date.now() });
       });
     }
 
+    await batch.commit();
     return orphanTasksUpdatedCount;
   } catch (error) {
     logger.error("Error marking tasks as backlog:", error);
