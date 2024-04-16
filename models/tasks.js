@@ -9,8 +9,18 @@ const { chunks } = require("../utils/array");
 const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
 const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
-const { IN_PROGRESS, NEEDS_REVIEW, IN_REVIEW, ASSIGNED, BLOCKED, SMOKE_TESTING, COMPLETED, SANITY_CHECK, BACKLOG } =
-  TASK_STATUS;
+const {
+  IN_PROGRESS,
+  NEEDS_REVIEW,
+  IN_REVIEW,
+  ASSIGNED,
+  BLOCKED,
+  SMOKE_TESTING,
+  COMPLETED,
+  SANITY_CHECK,
+  BACKLOG,
+  DONE,
+} = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
@@ -674,7 +684,7 @@ const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
     for (const user of users) {
       const tasksQuerySnapshot = await tasksModel
         .where("assigneeId", "==", user.id)
-        .where("status", "not-in", [COMPLETED, BACKLOG])
+        .where("status", "not-in", [COMPLETED, DONE, BACKLOG])
         .get();
       tasksQuerySnapshot.forEach(async (taskDoc) => {
         orphanTasksUpdatedCount++;
