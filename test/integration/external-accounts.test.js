@@ -311,7 +311,6 @@ describe("External Accounts", function () {
       await userModel.add(usersFromRds[4]); // nonArchivedAndNotInDiscord
 
       const userId = usersFromRds[4].id;
-
       const task1 = {
         assigneeId: userId,
         status: "ACTIVE",
