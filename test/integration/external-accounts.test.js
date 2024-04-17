@@ -15,6 +15,7 @@ const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const firestore = require("../../utils/firestore");
 const userData = require("../fixtures/user/user")();
 const userModel = firestore.collection("users");
+const tasksModel = firestore.collection("tasks");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../constants/external-accounts");
 chai.use(chaiHttp);
 const cookieName = config.get("userToken.cookieName");
@@ -309,6 +310,21 @@ describe("External Accounts", function () {
     it("Should Archive Users With Archived as False and Not in RDS Discord Server", async function () {
       await userModel.add(usersFromRds[4]); // nonArchivedAndNotInDiscord
 
+      const userId = usersFromRds[4].id;
+      const task1 = {
+        assigneeId: userId,
+        status: "ACTIVE",
+      };
+      const task2 = {
+        assigneeId: userId,
+        status: "COMPLETED",
+      };
+      const task3 = {
+        assigneeId: userId,
+        status: "IN_PROGRESS",
+      };
+      await Promise.all([tasksModel.add(task1), tasksModel.add(task2), tasksModel.add(task3)]);
+
       fetchStub.returns(
         Promise.resolve({
           status: 200,
@@ -329,6 +345,7 @@ describe("External Accounts", function () {
         usersUnArchivedCount: 0,
         totalUsersProcessed: 2,
         rdsDiscordServerUsers: 3,
+        backlogTasksCount: 2,
       });
     });
 
@@ -354,6 +371,7 @@ describe("External Accounts", function () {
         usersUnArchivedCount: 0,
         totalUsersProcessed: 2,
         rdsDiscordServerUsers: 3,
+        backlogTasksCount: 0,
       });
     });
 
@@ -379,6 +397,7 @@ describe("External Accounts", function () {
         usersUnArchivedCount: 1,
         totalUsersProcessed: 2,
         rdsDiscordServerUsers: 3,
+        backlogTasksCount: 0,
       });
     });
 
@@ -404,6 +423,7 @@ describe("External Accounts", function () {
         usersUnArchivedCount: 0,
         totalUsersProcessed: 1,
         rdsDiscordServerUsers: 3,
+        backlogTasksCount: 0,
       });
     });
 
