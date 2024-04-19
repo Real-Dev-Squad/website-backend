@@ -135,6 +135,7 @@ const usersFromRds = [
       in_discord: false,
       archived: false,
     },
+    id: "nonArchivedAndNotInDiscord",
   },
 ];
 

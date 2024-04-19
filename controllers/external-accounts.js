@@ -5,6 +5,7 @@ const { addOrUpdate, getUsersByRole, updateUsersInBatch } = require("../models/u
 const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/dataAccessLayer");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
 const logger = require("../utils/logger");
+const { markUnDoneTasksOfArchivedUsersBacklog } = require("../models/tasks");
 
 const addExternalAccountData = async (req, res) => {
   const createdOn = Date.now();
@@ -163,6 +164,7 @@ const newSyncExternalAccountData = async (req, res) => {
     discordUserData.forEach((discordUser) => discordUserIdSet.add(discordUser.user.id));
 
     let updateUserList = [];
+    const archiveUserList = [];
 
     for (const rdsUser of unArchivedRdsUsersData) {
       let userData = {};
@@ -191,10 +193,13 @@ const newSyncExternalAccountData = async (req, res) => {
             archived: true,
           },
         };
+        archiveUserList.push({ id: rdsUser.id }); // adding users which are to be archived
       }
       updateUserList.push(userData);
     }
     const unArchiveUsersInBatchPromise = updateUsersInBatch(updateUserList);
+    // Mark un done tasks assigned to archived users BACKLOG
+    const markTasksBacklogPromise = markUnDoneTasksOfArchivedUsersBacklog(archiveUserList);
 
     const archivedUsersInDiscordList = await fetchUsersForKeyValues("discordId", [...discordUserIdSet]);
     totalUsersProcessed += archivedUsersInDiscordList.length;
@@ -214,7 +219,11 @@ const newSyncExternalAccountData = async (req, res) => {
     }
     const archiveUsersInBatchPromise = updateUsersInBatch(updateUserList);
 
-    await Promise.all([unArchiveUsersInBatchPromise, archiveUsersInBatchPromise]);
+    const [, , backlogTasksCount] = await Promise.all([
+      unArchiveUsersInBatchPromise,
+      archiveUsersInBatchPromise,
+      markTasksBacklogPromise,
+    ]);
 
     return res.json({
       message: "Data Sync Complete",
@@ -222,6 +231,7 @@ const newSyncExternalAccountData = async (req, res) => {
       usersUnArchivedCount: usersUnArchivedCount,
       totalUsersProcessed: totalUsersProcessed,
       rdsDiscordServerUsers: discordUserData.length,
+      backlogTasksCount: backlogTasksCount,
     });
   } catch (err) {
     logger.error("Error in syncing users discord joined at");
