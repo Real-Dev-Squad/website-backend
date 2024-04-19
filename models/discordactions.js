@@ -221,7 +221,7 @@ const updateDiscordImageForVerification = async (userDiscordId) => {
       .get();
     const unverifiedUserDiscordImage = {
       discord: { url: discordAvatarUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
-      profile: { approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+      "profile.approved": false,
     };
     if (verificationDataSnapshot.empty) {
       throw new Error("No user verification record found");

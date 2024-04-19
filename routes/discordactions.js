@@ -47,8 +47,9 @@ router.patch(
   checkIsVerifiedDiscord,
   updateDiscordImageForVerification
 );
+// here "id" is the user's discord id
 router.patch(
-  "/avatar/update/:discordId",
+  "/avatar/photo-verification-update/:id",
   authenticate,
   authorizeRoles([SUPERUSER]),
   checkIsVerifiedDiscord,
