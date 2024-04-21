@@ -1,11 +1,9 @@
 import {
   ERROR_WHILE_FETCHING_REQUEST,
-  ERROR_WHILE_CREATING_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_REJECTED_SUCCESSFULLY,
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_FETCHED_SUCCESSFULLY,
-  REQUEST_CREATED_SUCCESSFULLY,
   REQUEST_STATE,
   LOG_ACTION,
   REQUEST_LOG_TYPE,
@@ -14,58 +12,26 @@ import {
 import { statusState } from "../constants/userStatus";
 import {addFutureStatus} from "../models/userStatus";
 import { createUserFutureStatus } from "../models/userFutureStatus";
-import { createRequest, getRequests, updateRequest } from "../models/requests";
+import { getRequests, updateRequest } from "../models/requests";
 import { addLog } from "../models/logs";
 import { getPaginatedLink } from "../utils/helper";
+import { createOooRequestController } from "./oooRequests";
+import { OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
+// import {createTaskExtensionRequest} from "./extensionRequestsv2";
+import { CustomResponse } from "../typeDefinitions/global";
+import { ExtensionRequestRequest, ExtensionRequestResponse } from "../types/extensionRequests";
 
-export const createRequestController = async (req: any, res: any) => {
-  const requestBody = req.body;
-  const userId = req?.userData?.id;
-  if (!userId) {
-    return res.boom.unauthorized();
-  }
-
-  try {
-    const requestResult = await createRequest({ requestedBy: userId, ...requestBody });
-    if ("error" in requestResult) {
-      const requestLog = {
-        type: REQUEST_LOG_TYPE.REQUEST_BLOCKED,
-        meta: {
-          action: LOG_ACTION.ERRORS,
-          createdBy: userId,
-          createdAt: Date.now(),
-        },
-        body: {
-          error: requestResult.error,
-          ...requestBody,
-        },
-      };
-      await addLog(requestLog.type, requestLog.meta, requestLog.body);
-
-      return res.boom.badRequest(requestResult.error);
-    } else {
-      const requestLog = {
-        type: REQUEST_LOG_TYPE.REQUEST_CREATED,
-        meta: {
-          requestId: requestResult.id,
-          action: LOG_ACTION.CREATE,
-          createdBy: userId,
-          createdAt: Date.now(),
-        },
-        body: requestResult,
-      };
-      await addLog(requestLog.type, requestLog.meta, requestLog.body);
-      return res.status(201).json({
-        message: REQUEST_CREATED_SUCCESSFULLY,
-        data: {
-          id: requestResult.id,
-          ...requestResult,
-        },
-      });
-    }
-  } catch (err) {
-    logger.error(ERROR_WHILE_CREATING_REQUEST, err);
-    return res.boom.badImplementation(ERROR_WHILE_CREATING_REQUEST);
+export const createRequestController = async (req: OooRequestCreateRequest | ExtensionRequestRequest
+  , res: CustomResponse) => {
+  const type = req.body.type;
+  switch (type) {
+    case REQUEST_TYPE.OOO:
+      return await createOooRequestController(req as OooRequestCreateRequest, res as OooRequestResponse);
+      // TODO: Will be implemented in next PR
+    // case REQUEST_TYPE.EXTENSION:
+      // return await createTaskExtensionRequest(req as ExtensionRequestRequest, res as ExtensionRequestResponse);
+    default:
+      return res.boom.badRequest("Invalid request type");
   }
 };
 

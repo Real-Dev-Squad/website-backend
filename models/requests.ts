@@ -7,7 +7,6 @@ import {
   ERROR_WHILE_CREATING_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_DOES_NOT_EXIST,
-  REQUEST_ALREADY_PENDING,
 } from "../constants/requests";
 import * as admin from "firebase-admin";
 import { getUserId } from "../utils/users";
@@ -15,17 +14,6 @@ const SIZE = 5;
 
 export const createRequest = async (body: any) => {
   try {
-    const existingRequest = await requestModel
-      .where("requestedBy", "==", body.requestedBy)
-      .where("state", "==", REQUEST_STATE.PENDING)
-      .where("type", "==", body.type)
-      .get();
-
-    if (!existingRequest.empty) {
-      return {
-        error: REQUEST_ALREADY_PENDING,
-      };
-    }
     const requestBody: any = {
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -158,6 +146,36 @@ export const getRequests = async (query: any) => {
       next: nextDoc.empty ? null : nextDoc.docs[0].id,
       page: page ? page + 1 : null,
     };
+  } catch (error) {
+    logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
+    throw error;
+  }
+};
+
+interface KeyValues {
+  [key: string]: string;
+}
+
+export const getRequestByKeyValues = async (keyValues: KeyValues) => {
+  try {
+    let requestQuery: any = requestModel;
+    Object.entries(keyValues).forEach(([key, value]) => {
+      requestQuery = requestQuery.where(key, "==", value);
+    });
+
+    const requestQueryDoc = await requestQuery.get();
+    if (requestQueryDoc.empty) {
+      return null;
+    }
+
+    let requests: any;
+    requestQueryDoc.forEach((doc: any) => {
+      requests = {
+        id: doc.id,
+        ...doc.data(),
+      };
+    });
+    return requests;
   } catch (error) {
     logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
     throw error;
