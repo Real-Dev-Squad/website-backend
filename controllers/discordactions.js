@@ -193,7 +193,7 @@ const deleteRole = async (req, res) => {
  */
 const updateDiscordImageForVerification = async (req, res) => {
   try {
-    const { discordId } = req.params;
+    const { id: discordId } = req.params;
     const discordAvatarUrl = await discordRolesModel.updateDiscordImageForVerification(discordId);
     return res.json({
       message: "Discord avatar URL updated successfully!",
