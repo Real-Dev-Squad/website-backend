@@ -17,11 +17,9 @@ import { addLog } from "../models/logs";
 import { getPaginatedLink } from "../utils/helper";
 import { createOooRequestController } from "./oooRequests";
 import { OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
-// import {createTaskExtensionRequest} from "./extensionRequestsv2";
 import { CustomResponse } from "../typeDefinitions/global";
-import { ExtensionRequestRequest, ExtensionRequestResponse } from "../types/extensionRequests";
 
-export const createRequestController = async (req: OooRequestCreateRequest | ExtensionRequestRequest
+export const createRequestController = async (req: OooRequestCreateRequest
   , res: CustomResponse) => {
   const type = req.body.type;
   switch (type) {
