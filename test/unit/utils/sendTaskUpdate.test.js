@@ -4,18 +4,18 @@ import { sendTaskUpdate } from "../../../utils/sendTaskUpdate";
 const { expect } = chai;
 
 describe("sendTaskUpdate function", function () {
-  let fetchStub;
+  let fetchMock;
 
   beforeEach(function () {
-    fetchStub = sinon.stub(global, "fetch");
+    fetchMock = sinon.stub(global, "fetch");
   });
 
   afterEach(function () {
-    fetchStub.restore();
+    fetchMock.restore();
   });
 
   it("should send task update successfully", async function () {
-    fetchStub.resolves({ ok: true });
+    fetchMock.resolves({ ok: true });
 
     const result = await sendTaskUpdate("Task completed", "No blockers", "Plan for the next phase");
     expect(result).to.equal(undefined);
@@ -23,7 +23,7 @@ describe("sendTaskUpdate function", function () {
 
   it("should throw an error if fails", async function () {
     const error = new Error("Error");
-    fetchStub.rejects(error);
+    fetchMock.rejects(error);
     try {
       await sendTaskUpdate("Task completed", "No blockers", "Plan for the next phase");
     } catch (err) {
