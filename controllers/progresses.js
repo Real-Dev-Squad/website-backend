@@ -50,7 +50,7 @@ const createProgress = async (req, res) => {
   } = req;
   try {
     const data = await createProgressDocument({ ...req.body, userId: req.userData.id });
-    await sendTaskUpdate(completed, planned, blockers);
+    await sendTaskUpdate(completed, blockers, planned);
     return res.status(201).json({
       data,
       message: `${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_DOCUMENT_CREATED_SUCCEEDED}`,
