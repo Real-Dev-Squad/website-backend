@@ -312,15 +312,15 @@ describe("External Accounts", function () {
 
       const userId = usersFromRds[4].id;
       const task1 = {
-        assigneeId: userId,
+        assignee: userId,
         status: "ACTIVE",
       };
       const task2 = {
-        assigneeId: userId,
+        assignee: userId,
         status: "COMPLETED",
       };
       const task3 = {
-        assigneeId: userId,
+        assignee: userId,
         status: "IN_PROGRESS",
       };
       await Promise.all([tasksModel.add(task1), tasksModel.add(task2), tasksModel.add(task3)]);
