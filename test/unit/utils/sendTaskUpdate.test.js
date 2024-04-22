@@ -22,11 +22,12 @@ describe("sendTaskUpdate function", function () {
   });
 
   it("should throw an error if fails", async function () {
+    const error = new Error("Error");
+    fetchStub.rejects(error);
     try {
       await sendTaskUpdate("Task completed", "No blockers", "Plan for the next phase");
     } catch (err) {
-      expect(err).to.equal(new Error(err.message));
-      fetchStub.rejects(err.message);
+      expect(err).to.be.equal(error);
     }
   });
 });

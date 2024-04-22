@@ -18,6 +18,6 @@ export const sendTaskUpdate = async (completed, blockers, planned) => {
     });
   } catch (error) {
     logger.error("Something went wrong", error);
-    throw new Error(error.message);
+    throw error;
   }
 };
