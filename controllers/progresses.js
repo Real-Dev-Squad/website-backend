@@ -6,6 +6,7 @@ const {
   getProgressByDate,
 } = require("../models/progresses");
 const { PROGRESSES_RESPONSE_MESSAGES, INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
+const { sendTaskUpdate } = require("../utils/sendTaskUpdate");
 const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEEDED } = PROGRESSES_RESPONSE_MESSAGES;
 
 /**
@@ -45,10 +46,11 @@ const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEED
 
 const createProgress = async (req, res) => {
   const {
-    body: { type },
+    body: { type, completed, planned, blockers },
   } = req;
   try {
     const data = await createProgressDocument({ ...req.body, userId: req.userData.id });
+    await sendTaskUpdate(completed, blockers, planned);
     return res.status(201).json({
       data,
       message: `${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_DOCUMENT_CREATED_SUCCEEDED}`,
