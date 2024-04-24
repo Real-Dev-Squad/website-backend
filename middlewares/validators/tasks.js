@@ -7,7 +7,6 @@ const { Operators } = require("../../typeDefinitions/rqlParser");
 const { daysOfWeek } = require("../../constants/constants");
 const TASK_STATUS_ENUM = Object.values(TASK_STATUS);
 const MAPPED_TASK_STATUS_ENUM = Object.keys(MAPPED_TASK_STATUS);
-const { validateMillisecondsTimestamp } = require("./utils");
 
 const createTask = async (req, res, next) => {
   const schema = joi
@@ -264,20 +263,10 @@ const getUsersValidator = async (req, res, next) => {
   }
 };
 
-const filterOrphanTasksValidator = async (req, res, next) => {
-  try {
-    await validateMillisecondsTimestamp(req.body, "lastOrphanTasksFilterationTimestamp");
-    next();
-  } catch (error) {
-    logger.error(`Error while validating request body for Orphan Tasks Filteration payload : ${error}`);
-    res.boom.badRequest(error);
-  }
-};
 module.exports = {
   createTask,
   updateTask,
   updateSelfTask,
   getTasksValidator,
   getUsersValidator,
-  filterOrphanTasksValidator,
 };
