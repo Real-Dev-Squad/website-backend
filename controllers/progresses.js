@@ -46,11 +46,11 @@ const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEED
 
 const createProgress = async (req, res) => {
   const {
-    body: { type, completed, planned, blockers },
+    body: { type, completed, planned, blockers, taskId },
   } = req;
   try {
     const data = await createProgressDocument({ ...req.body, userId: req.userData.id });
-    await sendTaskUpdate(completed, blockers, planned);
+    await sendTaskUpdate(completed, blockers, planned, req.userData.username, taskId);
     return res.status(201).json({
       data,
       message: `${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_DOCUMENT_CREATED_SUCCEEDED}`,
