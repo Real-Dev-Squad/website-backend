@@ -683,7 +683,7 @@ const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
     const batch = firestore.batch();
     for (const user of users) {
       const tasksQuerySnapshot = await tasksModel
-        .where("assigneeId", "==", user.id)
+        .where("assignee", "==", user.id)
         .where("status", "not-in", [COMPLETED, DONE, BACKLOG])
         .get();
       tasksQuerySnapshot.forEach(async (taskDoc) => {
