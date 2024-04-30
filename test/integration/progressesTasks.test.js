@@ -31,8 +31,10 @@ describe("Test Progress Updates API for Tasks", function () {
     let userToken;
     let taskId1;
     let taskId2;
+    let fetchMock;
 
     beforeEach(async function () {
+      fetchMock = sinon.stub(global, "fetch");
       clock = sinon.useFakeTimers({
         now: new Date(Date.UTC(2023, 4, 2, 0, 25)).getTime(), // UTC time equivalent to 5:55 AM IST
         toFake: ["Date"],
@@ -49,10 +51,17 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     afterEach(function () {
+      sinon.restore();
       clock.restore();
     });
 
     it("Stores the task progress entry", function (done) {
+      fetchMock.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({}),
+        })
+      );
       chai
         .request(app)
         .post(`/progresses`)
