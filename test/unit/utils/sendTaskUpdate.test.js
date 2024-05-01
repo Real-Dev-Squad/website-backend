@@ -22,7 +22,8 @@ describe("sendTaskUpdate function", function () {
       "No blockers",
       "Plan for the next phase",
       "userName",
-      "taskId"
+      "taskId",
+      "Task title"
     );
     expect(result).to.equal(undefined);
   });
@@ -31,7 +32,14 @@ describe("sendTaskUpdate function", function () {
     const error = new Error("Error");
     fetchMock.rejects(error);
     try {
-      await sendTaskUpdate("Task completed", "No blockers", "Plan for the next phase", "userName", "taskId");
+      await sendTaskUpdate(
+        "Task completed",
+        "No blockers",
+        "Plan for the next phase",
+        "userName",
+        "taskId",
+        "task title"
+      );
     } catch (err) {
       expect(err).to.be.equal(error);
     }

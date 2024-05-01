@@ -25,8 +25,9 @@ const createProgressDocument = async (progressData) => {
   const { type, taskId } = progressData;
   const createdAtTimestamp = new Date().getTime();
   const progressDateTimestamp = getProgressDateTimestamp();
+  let taskTitle;
   if (taskId) {
-    await assertTaskExists(taskId);
+    taskTitle = await assertTaskExists(taskId);
   }
   const query = buildQueryForPostingProgress(progressData);
   const existingDocumentSnapshot = await query.where("date", "==", progressDateTimestamp).get();
@@ -35,7 +36,8 @@ const createProgressDocument = async (progressData) => {
   }
   const progressDocumentData = { ...progressData, createdAt: createdAtTimestamp, date: progressDateTimestamp };
   const { id } = await progressesCollection.add(progressDocumentData);
-  return { id, ...progressDocumentData };
+  const data = { id, ...progressDocumentData };
+  return { data, taskTitle };
 };
 
 /**
