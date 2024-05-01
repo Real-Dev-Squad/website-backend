@@ -64,7 +64,7 @@ describe("Extension Request Validators", function () {
                 await createExtensionRequestValidator(req as any, res as any, nextSpy);
             } catch (error) {
                 expect(error).to.be.an.instanceOf(Error);
-                expect(error.details[0].message).to.equal(`"taskId cannot be empty`);
+                expect(error.details[0].message).to.equal(`taskId cannot be empty`);
             }
         });
     });
