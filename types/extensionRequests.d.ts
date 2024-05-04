@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Boom } from "express-boom";
 import { REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
+import { userData } from "./global";
 
 export type ExtensionRequest = {
     id: string;
@@ -40,9 +41,6 @@ export type ExtensionRequestUpdateBody = {
     state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
 };
 
-export type userData = {
-    id: string;
-};
 
 export type RequestQuery = {
     dev?: string;
