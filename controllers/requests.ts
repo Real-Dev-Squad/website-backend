@@ -24,6 +24,7 @@ import { createTaskExtensionRequest } from "./extensionRequestsv2";
 export const createRequestController = async (
   req: OooRequestCreateRequest | ExtensionRequestRequest,
   res: CustomResponse) => {
+
   const type = req.body.type;
   switch (type) {
     case REQUEST_TYPE.OOO:

@@ -41,7 +41,6 @@ export type ExtensionRequestUpdateBody = {
     state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
 };
 
-
 export type RequestQuery = {
     dev?: string;
     type?: string;
