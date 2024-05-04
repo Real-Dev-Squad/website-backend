@@ -9,6 +9,7 @@ export type UserData = {
     archived: boolean;
     in_discord: boolean;
     member: boolean;
+    super_user: boolean;
   };
   profileStatus: string;
   created_at: number;

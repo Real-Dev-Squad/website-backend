@@ -3,10 +3,13 @@ import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
 import { OooRequestCreateRequest, OooRequestResponse, OooRequestUpdateRequest } from "../../types/oooRequest";
 import { createOooStatusRequestValidator, updateOooStatusRequestValidator } from "./oooRequests";
+import { createExtensionRequestValidator } from "./extensionRequestsv2";
+import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests";
+import { CustomResponse } from "../../typeDefinitions/global";
 
 export const createRequestsMiddleware = async (
-  req: OooRequestCreateRequest,
-  res: OooRequestResponse,
+  req: OooRequestCreateRequest|ExtensionRequestRequest,
+  res: CustomResponse,
   next: NextFunction
 ) => {
   const type = req.body.type;
@@ -20,13 +23,16 @@ export const createRequestsMiddleware = async (
       case REQUEST_TYPE.OOO:
         await createOooStatusRequestValidator(req as OooRequestCreateRequest, res as OooRequestResponse, next);
         break;
+      case REQUEST_TYPE.EXTENSION:
+        await createExtensionRequestValidator(req as ExtensionRequestRequest, res as ExtensionRequestResponse, next);
+        break;
       default:
         res.boom.badRequest(`Invalid request type: ${type}`);
     }
 
     next();
   } catch (error) {
-    const errorMessages = error.details.map((detail) => detail.message);
+    const errorMessages = error.details.map((detail:any) => detail.message);
     logger.error(`Error while validating request payload : ${errorMessages}`);
     res.boom.badRequest(errorMessages);
   }
