@@ -73,7 +73,7 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
     id: joi.string().optional(),
     type: joi
       .string()
-      .valid(REQUEST_TYPE.OOO, REQUEST_TYPE.ALL)
+      .valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.ALL)
       .optional(),
     requestedBy: joi.string().insensitive().optional(),
     state: joi

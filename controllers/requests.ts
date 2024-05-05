@@ -10,7 +10,7 @@ import {
   REQUEST_TYPE,
 } from "../constants/requests";
 import { statusState } from "../constants/userStatus";
-import {addFutureStatus} from "../models/userStatus";
+import { addFutureStatus } from "../models/userStatus";
 import { createUserFutureStatus } from "../models/userFutureStatus";
 import { getRequests, updateRequest } from "../models/requests";
 import { addLog } from "../models/logs";
@@ -18,16 +18,19 @@ import { getPaginatedLink } from "../utils/helper";
 import { createOooRequestController } from "./oooRequests";
 import { OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
+import { ExtensionRequestRequest, ExtensionRequestResponse } from "../types/extensionRequests";
+import { createTaskExtensionRequest } from "./extensionRequestsv2";
 
-export const createRequestController = async (req: OooRequestCreateRequest
-  , res: CustomResponse) => {
+export const createRequestController = async (
+  req: OooRequestCreateRequest | ExtensionRequestRequest,
+  res: CustomResponse) => {
+
   const type = req.body.type;
   switch (type) {
     case REQUEST_TYPE.OOO:
       return await createOooRequestController(req as OooRequestCreateRequest, res as OooRequestResponse);
-      // TODO: Will be implemented in next PR
-    // case REQUEST_TYPE.EXTENSION:
-      // return await createTaskExtensionRequest(req as ExtensionRequestRequest, res as ExtensionRequestResponse);
+    case REQUEST_TYPE.EXTENSION:
+      return await createTaskExtensionRequest(req as ExtensionRequestRequest, res as ExtensionRequestResponse);
     default:
       return res.boom.badRequest("Invalid request type");
   }
@@ -106,7 +109,7 @@ export const getRequestsController = async (req: any, res: any) => {
       return res.status(204).send();
     }
 
-    if(page) {
+    if (page) {
       const pageLink = `/requests?page=${page}&dev=${query.dev}`;
       return res.status(200).json({
         message: REQUEST_FETCHED_SUCCESSFULLY,
