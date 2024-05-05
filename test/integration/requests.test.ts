@@ -25,6 +25,7 @@ import {
   REQUEST_DOES_NOT_EXIST,
   REQUEST_ALREADY_PENDING,
 } from "../../constants/requests";
+import { updateTask } from "../../models/tasks";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -38,7 +39,7 @@ let oooRequestData: any;
 let oooRequestData2: any;
 let testUserId: string;
 
-describe("/requests", function () {
+describe("/requests OOO", function () {
   beforeEach(async function () {
     const userIdPromises = [addUser(userData[16]), addUser(userData[4])];
     const [userId, superUserId] = await Promise.all(userIdPromises);
@@ -380,7 +381,222 @@ describe("/requests", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal("Bad Request");
-          expect(res.body.message).to.equal('"type" must be one of [OOO, ALL]');
+          expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION, ALL]');
+          done();
+        });
+    });
+  });
+});
+
+
+describe("/requests Extension", function () {
+  let taskId1: string;
+  let taskId2: string;
+  let userId1: string;
+  let userId2: string;
+  let superUserId: string;
+  let userJwtToken1: string;
+  let userJwtToken2: string;
+  let superUserJwtToken: string;
+
+  let extensionRequest = {
+    type: "EXTENSION",
+    title: "change ETA",
+    oldEndsOn: 1694736000,
+    newEndsOn: 1709674980000,
+    message: "Due to some reasons",
+    state: "PENDING"
+  };
+
+  const taskData = [
+    {
+      title: "Test task 1",
+      type: "feature",
+      endsOn: 1694736000,
+      startedOn: 1694736000,
+      status: "ACTIVE",
+      percentCompleted: 10,
+      participants: [],
+      isNoteworthy: true,
+    },
+    {
+      title: "Test task",
+      type: "feature",
+      endsOn: 1234,
+      startedOn: 4567,
+      status: "AVAILABLE",
+      percentCompleted: 10,
+      participants: [],
+      isNoteworthy: true,
+    },
+  ];
+
+  beforeEach(async function () {
+    userId1 = await addUser(userData[16]);
+    userId2 = await addUser(userData[17]);
+    superUserId = await addUser(userData[4]);
+
+    userJwtToken1 = authService.generateAuthToken({ userId: userId1 });
+    userJwtToken2 = authService.generateAuthToken({ userId: userId2 });
+    superUserJwtToken = authService.generateAuthToken({ userId: superUserId });
+
+    taskId1 = (await updateTask({ ...taskData[0], assigneeId: userId1 })).taskId;
+    taskId2 = (await updateTask({ ...taskData[1] })).taskId;
+
+  });
+
+  afterEach(async function () {
+    await cleanDb();
+  });
+
+  describe("POST /requests", function () {
+    it("should return 401(Unauthorized) if user is not logged in", function (done) {
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .send(extensionRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(401);
+          done();
+        });
+    });
+    it("should create a new extension request", function (done) {
+      const extensionRequestObj = {
+        taskId: taskId1,
+        ...extensionRequest
+      };
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${userJwtToken1}`)
+        .send(extensionRequestObj)
+        .end(function (err, res) {
+          expect(res).to.have.status(201);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal('Extension Request created successfully!');
+          done();
+        });
+    });
+
+    it("should create a new extension request by super user", function (done) {
+      const extensionRequestObj = {
+        taskId: taskId1,
+        ...extensionRequest
+      };
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${superUserJwtToken}`)
+        .send(extensionRequestObj)
+        .end(function (err, res) {
+          expect(res).to.have.status(201);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal('Extension Request created successfully!');
+          done();
+        });
+    });
+
+    it("should not create a new extension request by another user", function (done) {
+      const extensionRequestObj = {
+        taskId: taskId1,
+        ...extensionRequest
+      };
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${userJwtToken2}`)
+        .send(extensionRequestObj)
+        .end(function (err, res) {
+          expect(res).to.have.status(403);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal('Only assigned user and super user can create an extension request for this task.');
+          done();
+        });
+    });
+
+    it("should not create a new extension request if task is not exist", function (done) {
+      const extensionRequestObj = {
+        taskId: "randomId",
+        ...extensionRequest
+      };
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${userJwtToken1}`)
+        .send(extensionRequestObj)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal('Task Not Found');
+          done();
+        });
+    });
+
+    it("should not create a new extension request if assignee is not present", function (done) {
+      const extensionRequestObj = {
+        taskId: taskId2,
+        ...extensionRequest
+      };
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${userJwtToken1}`)
+        .send(extensionRequestObj)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal('Assignee is not present for this task');
+          done();
+        });
+    });
+
+    it("should not create a new extension request if old ETA does not match the task's ETA", function (done) {
+      const extensionRequestObj = {
+        taskId: taskId1,
+        ...extensionRequest,
+        oldEndsOn: 1234
+      };
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${userJwtToken1}`)
+        .send(extensionRequestObj)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal('Old ETA does not match the task\'s ETA');
+          done();
+        });
+    });
+
+    // Should Return Bad Request for Existing Pending Extension Request
+    it("should not create a new extension request if an extension request for this task already exists", function (done) {
+      const extensionRequestObj = {
+        taskId: taskId1,
+        ...extensionRequest
+      };
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${userJwtToken1}`)
+        .send(extensionRequestObj)
+        .end(async function (err, res) {
+          expect(res).to.have.status(201);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal('Extension Request created successfully!');
+
+          const extensionRequestObj2 = {
+            taskId: taskId1,
+            ...extensionRequest
+          };
+          const response = await chai
+            .request(app)
+            .post("/requests?dev=true")
+            .set("cookie", `${cookieName}=${userJwtToken1}`)
+            .send(extensionRequestObj2);
+          expect(response).to.have.status(400);
+          expect(response.body).to.have.property("message");
+          expect(response.body.message).to.equal('An extension request for this task already exists.');
           done();
         });
     });
