@@ -69,7 +69,7 @@ const assertTaskExists = async (taskId) => {
   if (!taskData) {
     throw new NotFound(`Task with id ${taskId} does not exist.`);
   }
-  return taskData;
+  return taskData.title;
 };
 
 /**
