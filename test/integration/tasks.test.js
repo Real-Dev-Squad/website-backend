@@ -494,6 +494,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should get tasks with COMPLETED status task when fetching task of status Done", function (done) {
       chai
         .request(app)
@@ -1271,6 +1272,7 @@ describe("Tasks", function () {
       expect(res).to.have.status(200);
       expect(res.body.message).to.be.equal("Task updated successfully!");
     });
+
     it("Should give 400 if new status of task is DONE and progress is not 100% and dev flag is true", async function () {
       const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 50 };
       taskId = (await tasks.updateTask(newDate)).taskId;
@@ -1283,6 +1285,7 @@ describe("Tasks", function () {
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal("Status cannot be updated as progress of task is not 100%.");
     });
+
     it("Should give 400 if new progress is 90% and current status of task is DONE and dev flag is true", async function () {
       const newDate = { ...updateTaskStatus[0], status: "DONE", percentCompleted: 100 };
       taskId = (await tasks.updateTask(newDate)).taskId;
@@ -1295,6 +1298,7 @@ describe("Tasks", function () {
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
     });
+
     it("Should give 400 if new progress is 90% and current status of task is COMPLETED and dev flag is true", async function () {
       const newDate = { ...updateTaskStatus[0], status: "COMPLETED", percentCompleted: 100 };
       taskId = (await tasks.updateTask(newDate)).taskId;
@@ -1307,6 +1311,7 @@ describe("Tasks", function () {
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
     });
+
     it("Should give 200 if new progress is 100% and new status is DONE and current status of task is IN_PROGRESS and dev flag is true", async function () {
       const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 80 };
       taskId = (await tasks.updateTask(newDate)).taskId;
