@@ -53,7 +53,7 @@ describe("/requests OOO", function () {
     const { id: pendingOooId }: any = await createRequest(oooRequestData2);
     pendingOooRequestId = pendingOooId;
 
-    const { id: approveOooId }: any = await updateRequest(oooRequestId, { state: "APPROVED" }, superUserId);
+    const { id: approveOooId }: any = await updateRequest(oooRequestId, { state: REQUEST_STATE.APPROVED }, superUserId, REQUEST_TYPE.OOO);
     approvedOooRequestId = approveOooId;
 
     authToken = authService.generateAuthToken({ userId });
@@ -247,7 +247,7 @@ describe("/requests OOO", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("Invalid request type: ACTIVE");
+          expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION]');
           done();
         });
     });
