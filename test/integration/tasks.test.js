@@ -1308,7 +1308,7 @@ describe("Tasks", function () {
       expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
     });
     it("Should give 200 if new progress is 100% and new status is DONE and current status of task is IN_PROGRESS and dev flag is true", async function () {
-      const newDate = { ...updateTaskStatus[0], status: "DONE", percentCompleted: 100 };
+      const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 80 };
       taskId = (await tasks.updateTask(newDate)).taskId;
       const res = await chai
         .request(app)
