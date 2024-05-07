@@ -147,6 +147,7 @@ const fetchPaginatedTasks = async ({
   dev = false,
   assignee,
   title,
+  userFeatureFlag,
 }) => {
   try {
     let initialQuery = tasksModel;
@@ -196,7 +197,11 @@ const fetchPaginatedTasks = async ({
        */
       title = undefined;
     } else if (status) {
-      initialQuery = initialQuery.where("status", "==", status);
+      if (userFeatureFlag === "true" && [DONE, COMPLETED].includes(status)) {
+        initialQuery = initialQuery.where("status", "in", [DONE, COMPLETED]);
+      } else {
+        initialQuery = initialQuery.where("status", "==", status);
+      }
     }
 
     if (title) {
@@ -346,6 +351,7 @@ const fetchSelfTask = async (taskId, userId) => {
     const task = await tasksModel.doc(taskId).get();
     const taskData = task.data();
     if (!taskData) return { taskNotFound: true };
+    // console.log("userId,taskDate.assignee", userId, taskData.assignee);
     if (userId !== taskData.assignee) return { notAssignedToYou: true };
     const taskfromFirestoreData = await fromFirestoreData(taskData);
     const taskList = {

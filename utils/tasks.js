@@ -147,6 +147,15 @@ const transformTasksUsersQuery = (queries) => {
   }
   return { dateGap: transformedDateGap, status: transformedStatus, size: transformedSize, weekdayList, dateList };
 };
+const checkCompletedOrDoneByFeatureFlag = (status, isDev, statusCanBeCompleted) => {
+  if (isDev) {
+    if (statusCanBeCompleted) {
+      return [TASK_STATUS.DONE, TASK_STATUS.COMPLETED].includes(status);
+    }
+    return status === TASK_STATUS.DONE;
+  }
+  return status === TASK_STATUS.COMPLETED;
+};
 module.exports = {
   fromFirestoreData,
   toFirestoreData,
@@ -155,4 +164,5 @@ module.exports = {
   parseSearchQuery,
   buildTasksQueryForMissedUpdates,
   transformTasksUsersQuery,
+  checkCompletedOrDoneByFeatureFlag,
 };

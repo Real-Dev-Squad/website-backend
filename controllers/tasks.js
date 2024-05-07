@@ -7,7 +7,7 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
-const { transformQuery, transformTasksUsersQuery } = require("../utils/tasks");
+const { transformQuery, transformTasksUsersQuery, checkCompletedOrDoneByFeatureFlag } = require("../utils/tasks");
 const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 const dataAccess = require("../services/dataAccessLayer");
@@ -134,11 +134,11 @@ const fetchPaginatedTasks = async (query) => {
 
 const fetchTasks = async (req, res) => {
   try {
-    const { dev, status, page, size, prev, next, q: queryString, assignee, title } = req.query;
+    const { dev, status, page, size, prev, next, q: queryString, assignee, title, userFeatureFlag } = req.query;
     const transformedQuery = transformQuery(dev, status, size, page, assignee, title);
 
     if (dev) {
-      const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next });
+      const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next, userFeatureFlag });
       return res.json({
         message: "Tasks returned successfully!",
         ...paginatedTasks,
@@ -321,7 +321,8 @@ const updateTaskStatus = async (req, res, next) => {
     req.body.updatedAt = Math.round(new Date().getTime() / 1000);
     let userStatusUpdate;
     const taskId = req.params.id;
-    const { userStatusFlag } = req.query;
+    const { userStatusFlag, dev } = req.query;
+    const isDev = dev === "true";
     const status = req.body?.status;
     const { id: userId, username } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
@@ -368,13 +369,17 @@ const updateTaskStatus = async (req, res, next) => {
       if (task.taskData.status === TASK_STATUS.VERIFIED || TASK_STATUS.MERGED === status) {
         return res.boom.forbidden("Status cannot be updated. Please contact admin.");
       }
-      if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
-        if (status === TASK_STATUS.COMPLETED || !status) {
+      const statusCanBeCompleted = true;
+      if (
+        checkCompletedOrDoneByFeatureFlag(task.taskData.status, isDev, statusCanBeCompleted) &&
+        req.body.percentCompleted < 100
+      ) {
+        if (checkCompletedOrDoneByFeatureFlag(status, isDev) || !status) {
           return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
         }
       }
       if (
-        (status === TASK_STATUS.COMPLETED || status === TASK_STATUS.VERIFIED) &&
+        (checkCompletedOrDoneByFeatureFlag(status, isDev) || status === TASK_STATUS.VERIFIED) &&
         task.taskData.percentCompleted !== 100
       ) {
         if (req.body.percentCompleted !== 100) {
