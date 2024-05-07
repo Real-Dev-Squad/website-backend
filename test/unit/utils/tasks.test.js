@@ -69,15 +69,18 @@ describe("Utils | Tasks", function () {
       expect(result).to.not.have.property("unexpectedKey");
     });
   });
+
   describe("checkCompletedOrDoneByFeatureFlag", function () {
     it("should return true if feature flag is turned on and status is DONE or feature flag is not turned off and status is COMPLETED", function () {
       expect(checkCompletedOrDoneByFeatureFlag(TASK_STATUS.COMPLETED, false)).to.equal(true);
       expect(checkCompletedOrDoneByFeatureFlag(TASK_STATUS.DONE, true)).to.equal(true);
     });
+
     it("should return false if feature flag is turned off and status is DONE or feature flag is turned on and status is COMPLETED", function () {
       expect(checkCompletedOrDoneByFeatureFlag(TASK_STATUS.COMPLETED, true)).to.equal(false);
       expect(checkCompletedOrDoneByFeatureFlag(TASK_STATUS.DONE, false)).to.equal(false);
     });
+
     it("should return false if status other than completed or done ", function () {
       expect(checkCompletedOrDoneByFeatureFlag(TASK_STATUS.IN_PROGRESS, false)).to.equal(false);
       expect(checkCompletedOrDoneByFeatureFlag(TASK_STATUS.IN_PROGRESS, true)).to.equal(false);
