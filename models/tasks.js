@@ -351,7 +351,6 @@ const fetchSelfTask = async (taskId, userId) => {
     const task = await tasksModel.doc(taskId).get();
     const taskData = task.data();
     if (!taskData) return { taskNotFound: true };
-    // console.log("userId,taskDate.assignee", userId, taskData.assignee);
     if (userId !== taskData.assignee) return { notAssignedToYou: true };
     const taskfromFirestoreData = await fromFirestoreData(taskData);
     const taskList = {
