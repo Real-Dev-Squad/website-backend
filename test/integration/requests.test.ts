@@ -24,6 +24,8 @@ import {
   REQUEST_CREATED_SUCCESSFULLY,
   REQUEST_DOES_NOT_EXIST,
   REQUEST_ALREADY_PENDING,
+  REQUEST_REJECTED_SUCCESSFULLY,
+  REQUEST_ALREADY_REJECTED,
 } from "../../constants/requests";
 import { updateTask } from "../../models/tasks";
 
@@ -388,7 +390,6 @@ describe("/requests OOO", function () {
   });
 });
 
-
 describe("/requests Extension", function () {
   let taskId1: string;
   let taskId2: string;
@@ -569,7 +570,6 @@ describe("/requests Extension", function () {
         });
     });
 
-    // Should Return Bad Request for Existing Pending Extension Request
     it("should not create a new extension request if an extension request for this task already exists", function (done) {
       const extensionRequestObj = {
         taskId: taskId1,
@@ -601,4 +601,161 @@ describe("/requests Extension", function () {
         });
     });
   });
+
+  describe("PUT /requests/:id", function () {
+    let approvedExtensionRequestId: string;
+    let rejectedExtensionRequestId: string;
+    let pendingExtensionRequestId: string;
+
+    const approvedExtensionRequest = {
+      state: REQUEST_STATE.APPROVED,
+      type: REQUEST_TYPE.EXTENSION,
+    };
+
+    const rejectedExtensionRequest = {
+      state: REQUEST_STATE.REJECTED,
+      type: REQUEST_TYPE.EXTENSION,
+    };
+
+    const invalidExtensionRequest = {
+      state: "ACTIVE",
+      type: REQUEST_TYPE.EXTENSION,
+    };
+
+    beforeEach(async function () {
+      const extensionRequestObj = {
+        taskId: taskId1,
+        ...extensionRequest
+      };
+      const { id: approvedId } = await createRequest({ ...extensionRequestObj, requestedBy: userId1 });
+      approvedExtensionRequestId = await updateRequest(approvedId, approvedExtensionRequest, superUserId, REQUEST_TYPE.EXTENSION);
+
+      const { id: rejectedId } = await createRequest({ ...extensionRequestObj, requestedBy: userId1 });
+      rejectedExtensionRequestId = await updateRequest(rejectedId, rejectedExtensionRequest, superUserId, REQUEST_TYPE.EXTENSION);
+
+      const { id: pendingId } = await createRequest({ ...extensionRequestObj, requestedBy: userId1 });
+      pendingExtensionRequestId = pendingId;
+
+    });
+
+    it("should return 401(Unauthorized) if user is not logged in", function (done) {
+      chai
+        .request(app)
+        .put(`/requests/${pendingExtensionRequestId}?dev=true`)
+        .send(approvedExtensionRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(401);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal("Unauthenticated User");
+          done();
+        });
+    });
+
+    it("should return 401 if user is not super user", function (done) {
+      chai
+        .request(app)
+        .put(`/requests/${pendingExtensionRequestId}?dev=true`)
+        .set("cookie", `${cookieName}=${userJwtToken1}`)
+        .send(approvedExtensionRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(401);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal("You are not authorized for this action.");
+          done();
+        });
+    });
+
+    it("should return 400(Bad Request) if request is already approved", function (done) {
+      chai
+        .request(app)
+        .put(`/requests/${pendingExtensionRequestId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwtToken}`)
+        .send(approvedExtensionRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(201);
+          const id = res.body.data.id;
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal(REQUEST_APPROVED_SUCCESSFULLY);
+
+          chai
+            .request(app)
+            .put(`/requests/${id}?dev=true`)
+            .set("cookie", `${cookieName}=${superUserJwtToken}`)
+            .send(approvedExtensionRequest)
+            .end(function (err, res) {
+              expect(res).to.have.status(400);
+              expect(res.body).to.have.property("message");
+              expect(res.body.message).to.equal(REQUEST_ALREADY_APPROVED);
+              done();
+            });
+        });
+    });
+
+    it("should return 400(Bad Request) if request is already rejected", function (done) {
+      chai
+        .request(app)
+        .put(`/requests/${pendingExtensionRequestId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwtToken}`)
+        .send(rejectedExtensionRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(201);
+          const id = res.body.data.id;
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal(REQUEST_REJECTED_SUCCESSFULLY);
+
+          chai
+            .request(app)
+            .put(`/requests/${id}?dev=true`)
+            .set("cookie", `${cookieName}=${superUserJwtToken}`)
+            .send(rejectedExtensionRequest)
+            .end(function (err, res) {
+              expect(res).to.have.status(400);
+              expect(res.body).to.have.property("message");
+              expect(res.body.message).to.equal(REQUEST_ALREADY_REJECTED);
+              done();
+            });
+        });
+    });
+
+    it("should approve an extension request", function (done) {
+      chai
+        .request(app)
+        .put(`/requests/${pendingExtensionRequestId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwtToken}`)
+        .send(approvedExtensionRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(201);
+          done();
+        });
+    });
+
+    it("should return 400(Bad Request) if invalid state is passed", function (done) {
+      chai
+        .request(app)
+        .put(`/requests/${pendingExtensionRequestId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwtToken}`)
+        .send(invalidExtensionRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal('state must be APPROVED or REJECTED');
+          done();
+        });
+    });
+
+    it("should return 404(Not Found) if request does not exist", function (done) {
+      chai
+        .request(app)
+        .put(`/requests/randomId?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwtToken}`)
+        .send(approvedExtensionRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal(REQUEST_DOES_NOT_EXIST);
+          done();
+        });
+    });
+  });
+
 });
