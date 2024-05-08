@@ -206,6 +206,7 @@ describe("Tasks", function () {
       taskId2 = (await tasks.updateTask({ ...taskData[0], createdAt: 1621717694, updatedAt: 1700680830 })).taskId;
       taskId3 = (await tasks.updateTask({ ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753 })).taskId;
     });
+
     after(async function () {
       await tasks.updateTask(
         { ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753, dependsOn: [], status: "IN_PROGRESS" },
@@ -500,6 +501,7 @@ describe("Tasks", function () {
           return done();
         });
     });
+
     it("Should get tasks with COMPLETED status task when fetching task of status Done", async function () {
       await tasks.updateTask(
         {
