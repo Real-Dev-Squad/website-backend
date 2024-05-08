@@ -7,7 +7,7 @@ const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
-const { transformQuery, transformTasksUsersQuery, checkCompletedOrDoneByFeatureFlag } = require("../utils/tasks");
+const { transformQuery, transformTasksUsersQuery } = require("../utils/tasks");
 const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 const dataAccess = require("../services/dataAccessLayer");
@@ -321,8 +321,7 @@ const updateTaskStatus = async (req, res, next) => {
     req.body.updatedAt = Math.round(new Date().getTime() / 1000);
     let userStatusUpdate;
     const taskId = req.params.id;
-    const { userStatusFlag, dev } = req.query;
-    const isDev = dev === "true";
+    const { userStatusFlag } = req.query;
     const status = req.body?.status;
     const { id: userId, username } = req.userData;
     const task = await tasks.fetchSelfTask(taskId, userId);
@@ -369,17 +368,13 @@ const updateTaskStatus = async (req, res, next) => {
       if (task.taskData.status === TASK_STATUS.VERIFIED || TASK_STATUS.MERGED === status) {
         return res.boom.forbidden("Status cannot be updated. Please contact admin.");
       }
-      const statusCanBeCompleted = true;
-      if (
-        checkCompletedOrDoneByFeatureFlag(task.taskData.status, isDev, statusCanBeCompleted) &&
-        req.body.percentCompleted < 100
-      ) {
-        if (checkCompletedOrDoneByFeatureFlag(status, isDev) || !status) {
+      if (task.taskData.status === TASK_STATUS.COMPLETED && req.body.percentCompleted < 100) {
+        if (status === TASK_STATUS.COMPLETED || !status) {
           return res.boom.badRequest("Task percentCompleted can't updated as status is COMPLETED");
         }
       }
       if (
-        (checkCompletedOrDoneByFeatureFlag(status, isDev) || status === TASK_STATUS.VERIFIED) &&
+        (status === TASK_STATUS.COMPLETED || status === TASK_STATUS.VERIFIED) &&
         task.taskData.percentCompleted !== 100
       ) {
         if (req.body.percentCompleted !== 100) {

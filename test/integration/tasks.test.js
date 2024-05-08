@@ -61,7 +61,7 @@ const taskData = [
     links: ["test1"],
     endsOn: 1234,
     startedOn: 54321,
-    status: "COMPLETED",
+    status: "completed",
     percentCompleted: 10,
     dependsOn: ["d12", "d23"],
     participants: [appOwner.username],
@@ -205,6 +205,12 @@ describe("Tasks", function () {
     before(async function () {
       taskId2 = (await tasks.updateTask({ ...taskData[0], createdAt: 1621717694, updatedAt: 1700680830 })).taskId;
       taskId3 = (await tasks.updateTask({ ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753 })).taskId;
+    });
+    after(async function () {
+      await tasks.updateTask(
+        { ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753, dependsOn: [], status: "IN_PROGRESS" },
+        taskId2
+      );
     });
 
     it("Should get all the list of tasks", function (done) {
@@ -494,33 +500,29 @@ describe("Tasks", function () {
           return done();
         });
     });
+    it("Should get tasks with COMPLETED status task when fetching task of status Done", async function () {
+      await tasks.updateTask(
+        {
+          status: "COMPLETED",
+        },
+        taskId2
+      );
+      const res = await chai.request(app).get(`/tasks?dev=true&status=DONE&userFeatureFlag=true`);
 
-    it("Should get tasks with COMPLETED status task when fetching task of status Done", function (done) {
-      chai
-        .request(app)
-        .get(`/tasks?status=${TASK_STATUS.DONE}&dev=true&userFeatureFlag=true`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Tasks returned successfully!");
-          expect(res.body.tasks).to.be.a("array");
-          expect(res.body).to.have.property("next");
-          expect(res.body).to.have.property("prev");
-
-          const tasksData = res.body.tasks ?? [];
-          let countCompletedTasks = 0;
-          tasksData.forEach((task) => {
-            if (TASK_STATUS.COMPLETED === task.status) {
-              countCompletedTasks += 1;
-            }
-          });
-          expect(countCompletedTasks).to.be.not.equal(0);
-          return done();
-        });
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("Tasks returned successfully!");
+      expect(res.body.tasks).to.be.a("array");
+      expect(res.body).to.have.property("next");
+      expect(res.body).to.have.property("prev");
+      const tasksData = res.body.tasks ?? [];
+      let countCompletedTask = 0;
+      tasksData.forEach((task, i) => {
+        if (task.status === "COMPLETED") {
+          countCompletedTask += 1;
+        }
+      });
+      expect(countCompletedTask).to.be.not.equal(0);
     });
   });
 
@@ -1268,58 +1270,6 @@ describe("Tasks", function () {
         .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "BLOCKED" });
-
-      expect(res).to.have.status(200);
-      expect(res.body.message).to.be.equal("Task updated successfully!");
-    });
-
-    it("Should give 400 if new status of task is DONE and progress is not 100% and dev flag is true", async function () {
-      const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 50 };
-      taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}?dev=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ status: "DONE" });
-
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Status cannot be updated as progress of task is not 100%.");
-    });
-
-    it("Should give 400 if new progress is 90% and current status of task is DONE and dev flag is true", async function () {
-      const newDate = { ...updateTaskStatus[0], status: "DONE", percentCompleted: 100 };
-      taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}?dev=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ percentCompleted: 90 });
-
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
-    });
-
-    it("Should give 400 if new progress is 90% and current status of task is COMPLETED and dev flag is true", async function () {
-      const newDate = { ...updateTaskStatus[0], status: "COMPLETED", percentCompleted: 100 };
-      taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}?dev=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ percentCompleted: 90 });
-
-      expect(res).to.have.status(400);
-      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
-    });
-
-    it("Should give 200 if new progress is 100% and new status is DONE and current status of task is IN_PROGRESS and dev flag is true", async function () {
-      const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 80 };
-      taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
-        .patch(`/tasks/self/${taskId}?dev=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({ percentCompleted: 100, status: "DONE" });
 
       expect(res).to.have.status(200);
       expect(res.body.message).to.be.equal("Task updated successfully!");
