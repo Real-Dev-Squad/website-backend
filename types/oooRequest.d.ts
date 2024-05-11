@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
 import { userState } from "../constants/userStatus";
 import { Boom } from "express-boom";
+import { RequestParams, RequestQuery } from "./requests";
+import { userData } from "./global";
 
 export type OooStatusRequest = {
   id: string;
@@ -35,30 +37,6 @@ export type OooRequestUpdateBody = {
   reason?: string;
   state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
   updatedAt?: admin.firestore.Timestamp;
-};
-
-export type userData= {
-  id: string;
-};
-
-export type RequestQuery = {
-  dev?: string;
-  type?: string;
-  requestedBy?: string;
-  state?: REQUEST_STATE.APPROVED | REQUEST_STATE.PENDING | REQUEST_STATE.REJECTED;
-  id?: string;
-  prev?: string;
-  next?: string;
-  page?: number;
-  size?: number;
-};
-
-export type RequestParams = {
-  id: string;
-};
-
-export type RequestParams = {
-  id: string;
 };
 
 export type OooRequestResponse = Response & { boom: Boom };
