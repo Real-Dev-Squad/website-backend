@@ -147,6 +147,7 @@ const transformTasksUsersQuery = (queries) => {
   }
   return { dateGap: transformedDateGap, status: transformedStatus, size: transformedSize, weekdayList, dateList };
 };
+
 module.exports = {
   fromFirestoreData,
   toFirestoreData,
