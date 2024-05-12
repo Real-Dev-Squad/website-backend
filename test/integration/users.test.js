@@ -25,6 +25,7 @@ const {
 } = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
+const { IMAGE_VERIFICATION_TYPES } = require("../../constants/imageVerificationTypes");
 
 const userRoleUpdate = userData[4];
 const userRoleUnArchived = userData[13];
@@ -1684,7 +1685,9 @@ describe("Users", function () {
     it("Should verify both the images of the user", async function () {
       const res = await chai
         .request(app)
-        .patch(`/users/picture/verify/${userId}?status=${photoVerificationRequestStatus.APPROVED}&type=both`)
+        .patch(
+          `/users/picture/verify/${userId}?status=${photoVerificationRequestStatus.APPROVED}&type=${IMAGE_VERIFICATION_TYPES.PROFILE_DISCORD}`
+        )
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
 
       expect(res).to.have.status(200);
@@ -1702,7 +1705,9 @@ describe("Users", function () {
     it("Should reject both the images of the user", async function () {
       const res = await chai
         .request(app)
-        .patch(`/users/picture/verify/${userId}?status=${photoVerificationRequestStatus.REJECTED}&type=both`)
+        .patch(
+          `/users/picture/verify/${userId}?status=${photoVerificationRequestStatus.REJECTED}&type=${IMAGE_VERIFICATION_TYPES.PROFILE_DISCORD}`
+        )
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
 
       expect(res).to.have.status(200);

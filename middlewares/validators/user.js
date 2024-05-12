@@ -254,14 +254,13 @@ async function validateUserQueryParams(req, res, next) {
 const validateImageVerificationQuery = async (req, res, next) => {
   const { type: imageType, status } = req.query;
   try {
-    if (!IMAGE_VERIFICATION_TYPES.includes(imageType)) {
+    if (!Object.values(IMAGE_VERIFICATION_TYPES).includes(imageType)) {
       throw new Error("Invalid verification type was provided!");
     }
 
-    if (status !== photoVerificationRequestStatus.APPROVED && status !== photoVerificationRequestStatus.REJECTED) {
+    if (![photoVerificationRequestStatus.APPROVED, photoVerificationRequestStatus.REJECTED].includes(status)) {
       throw new Error("Invalid verification status was provided!");
     }
-
     next();
   } catch (error) {
     logger.error(`Error validating createLevel payload : ${error}`);

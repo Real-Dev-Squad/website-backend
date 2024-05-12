@@ -219,8 +219,9 @@ const updateDiscordImageForVerification = async (userDiscordId) => {
       .where("discordId", "==", userDiscordId)
       .where("status", "==", photoVerificationRequestStatus.PENDING)
       .get();
+    const currentTime = new Date();
     const unverifiedUserDiscordImage = {
-      discord: { url: discordAvatarUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+      discord: { url: discordAvatarUrl, approved: false, updatedAt: currentTime.getTime() / 1000 },
       "profile.approved": false,
     };
     if (verificationDataSnapshot.empty) {

@@ -22,6 +22,7 @@ const userData = require("../../fixtures/user/user");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
 const { photoVerificationRequestStatus } = require("../../../constants/users");
+const { IMAGE_VERIFICATION_TYPES } = require("../../../constants/imageVerificationTypes");
 const app = require("../../../server");
 const prodUsers = require("../../fixtures/user/prodUsers");
 const authService = require("../../../services/authService");
@@ -171,8 +172,8 @@ describe("users", function () {
 
       const verificationSnapshot = await photoVerificationModel.where("userId", "==", userId).limit(1).get();
       expect(verificationSnapshot.empty).to.be.equal(false);
-      photoVerificationData.profile.date = verificationSnapshot.docs[0].data().profile.date;
-      photoVerificationData.discord.date = verificationSnapshot.docs[0].data().discord.date;
+      photoVerificationData.profile.updatedAt = verificationSnapshot.docs[0].data().profile.updatedAt;
+      photoVerificationData.discord.updatedAt = verificationSnapshot.docs[0].data().discord.updatedAt;
       const docData = verificationSnapshot.docs[0].data();
       expect(docData).to.deep.equal(photoVerificationData);
 
@@ -181,7 +182,7 @@ describe("users", function () {
 
     it("marks user profile image as verified", async function () {
       const userId = photoVerificationData.userId;
-      const imageType = "profile";
+      const imageType = IMAGE_VERIFICATION_TYPES.PROFILE;
       const verificationSnapshotBeforeUpdate = await photoVerificationModel
         .where("userId", "==", userId)
         .where("status", "==", photoVerificationRequestStatus.PENDING)
@@ -206,7 +207,7 @@ describe("users", function () {
 
     it("adds user images For Verification, updates the pending verification object", async function () {
       const userId = photoVerificationData.userId;
-      const imageType = "profile";
+      const imageType = IMAGE_VERIFICATION_TYPES.PROFILE;
       const verificationSnapshotBeforeUpdate = await photoVerificationModel
         .where("userId", "==", userId)
         .limit(1)
@@ -238,7 +239,7 @@ describe("users", function () {
     });
 
     it("marks photo verification object status as APPROVED", async function () {
-      const imageType = "both";
+      const imageType = IMAGE_VERIFICATION_TYPES.PROFILE_DISCORD;
       const userId = photoVerificationData.userId;
       const verificationSnapshotBeforeUpdate = await photoVerificationModel
         .where("userId", "==", userId)
@@ -263,7 +264,7 @@ describe("users", function () {
 
     it("marks photo verification object status as APPROVED, when both images are approved one by one", async function () {
       const userId = photoVerificationData.userId;
-      let imageType = "profile";
+      let imageType = IMAGE_VERIFICATION_TYPES.PROFILE;
       const verificationSnapshotBeforeUpdate = await photoVerificationModel
         .where("userId", "==", userId)
         .limit(1)
@@ -277,7 +278,7 @@ describe("users", function () {
       expect(docData.discord.approved).to.be.equal(false);
       expect(docData.status).to.be.equal(photoVerificationRequestStatus.PENDING);
 
-      imageType = "discord";
+      imageType = IMAGE_VERIFICATION_TYPES.PROFILE_DISCORD;
       await users.changePhotoVerificationStatus(userId, imageType, photoVerificationRequestStatus.APPROVED);
       docData = (await docRef.get()).data();
       expect(docData.profile.approved).to.be.equal(true);
@@ -287,7 +288,7 @@ describe("users", function () {
 
     it("throws an error if verification document not found", async function () {
       const userId = "non-existent-userId";
-      const imageType = "profile";
+      const imageType = IMAGE_VERIFICATION_TYPES.PROFILE;
       try {
         await users.changePhotoVerificationStatus(userId, imageType, photoVerificationRequestStatus.APPROVED);
       } catch (error) {

@@ -5,18 +5,12 @@ const userPhotoVerificationData = [
     discord: {
       url: "https://cdn.discordapp.com/avatars/abc/1234abcd.png",
       approved: false,
-      date: {
-        _seconds: 1686518413,
-        _nanoseconds: 453000000,
-      },
+      updatedAt: 1712788779,
     },
     profile: {
       url: "https://res.cloudinary.com/avatars/1234/something.png",
       approved: false,
-      date: {
-        _seconds: 1686518413,
-        _nanoseconds: 453000000,
-      },
+      updatedAt: 1712788779,
       publicId: "profile/1234567abcd/umgnk8o7ujrzbmy",
     },
     status: "PENDING",
@@ -27,18 +21,12 @@ const userPhotoVerificationData = [
     discord: {
       url: "https://cdn.discordapp.com/avatars/def/5678efgh.png",
       approved: false,
-      date: {
-        _seconds: 1787518423,
-        _nanoseconds: 563000000,
-      },
+      updatedAt: 1712788779,
     },
     profile: {
       url: "https://res.cloudinary.com/avatars/5678/another.png",
       approved: true,
-      date: {
-        _seconds: 1787518423,
-        _nanoseconds: 563000000,
-      },
+      updatedAt: 1712788779,
       publicId: "profile/abcdefg1234567/xyzabc123",
     },
     status: "PENDING",
@@ -49,18 +37,12 @@ const userPhotoVerificationData = [
     discord: {
       url: "https://cdn.discordapp.com/avatars/abc/1234ijkl.png",
       approved: true,
-      date: {
-        _seconds: 1987618423,
-        _nanoseconds: 663000000,
-      },
+      updatedAt: 1712788779,
     },
     profile: {
       url: "https://res.cloudinary.com/avatars/1234/different.png",
       approved: false,
-      date: {
-        _seconds: 1987618423,
-        _nanoseconds: 663000000,
-      },
+      updatedAt: 1712788779,
       publicId: "profile/hijklmn8901234/defghi456",
     },
     status: "PENDING",
@@ -73,18 +55,12 @@ const newUserPhotoVerificationData = {
   discord: {
     url: "https://discord.example.com/demo.png",
     approved: false,
-    date: {
-      _seconds: 1686518413,
-      _nanoseconds: 453000000,
-    },
+    updatedAt: 1712788779,
   },
   profile: {
     url: "https://cloudinary.example.com/demo.png",
     approved: false,
-    date: {
-      _seconds: 1686518413,
-      _nanoseconds: 453000000,
-    },
+    updatedAt: 1712788779,
   },
 };
 

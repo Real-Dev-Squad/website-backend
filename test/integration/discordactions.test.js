@@ -80,7 +80,7 @@ describe("Discord actions", function () {
     await cleanDb();
   });
 
-  describe("PATCH /discord-actions/avatar/photo-verification-update/discordId", function () {
+  describe("PATCH /discord-actions/avatar/discordId/photo-verification/update", function () {
     let photoVerificationData;
 
     beforeEach(async function () {
@@ -106,7 +106,7 @@ describe("Discord actions", function () {
 
       const res = await chai
         .request(app)
-        .patch(`/discord-actions/avatar/photo-verification-update/${photoVerificationData.discordId}`)
+        .patch(`/discord-actions/avatar/${photoVerificationData.discordId}/photo-verification/update`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
 
       expect(res).to.have.status(200);
@@ -130,7 +130,7 @@ describe("Discord actions", function () {
 
       const res = await chai
         .request(app)
-        .patch(`/discord-actions/avatar/photo-verification-update/${discordId + "random-error-string"}`)
+        .patch(`/discord-actions/avatar/${discordId + "random-error-string"}/photo-verification/update/`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
 
       expect(res).to.have.status(500);

@@ -10,6 +10,7 @@ const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
 const { archiveUsers } = require("../services/users");
 const { ALLOWED_FILTER_PARAMS, FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
+const { IMAGE_VERIFICATION_TYPES } = require("../constants/imageVerificationTypes");
 const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
@@ -372,15 +373,16 @@ const addForVerification = async (userId, discordId, profileImageUrl, discordIma
     logger.error("Error in creating Verification Entry", err);
     throw err;
   }
+  const currentTime = new Date();
   const unverifiedUserData = {
     userId,
     discordId,
-    discord: { url: discordImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+    discord: { url: discordImageUrl, approved: false, updatedAt: currentTime.getTime() / 1000 },
     profile: {
       url: profileImageUrl,
       publicId: profileImageID,
       approved: false,
-      date: admin.firestore.Timestamp.fromDate(new Date()),
+      updatedAt: currentTime.getTime() / 1000,
     },
     status: photoVerificationRequestStatus.PENDING,
   };
@@ -423,19 +425,20 @@ const changePhotoVerificationStatus = async (userId, imageType, status) => {
 
     // if status is rejected then remove the verification entry
     if (status === photoVerificationRequestStatus.REJECTED) {
-      await documentRef.update({ status });
+      await documentRef.update({ status, "discord.approved": false, "profile.approved": false });
       return "User photo verification request rejected successfully";
     }
 
     // VERIFIES BASED ON THE TYPE OF IMAGE
-    if (imageType === "both") {
+    if (imageType === IMAGE_VERIFICATION_TYPES.PROFILE_DISCORD) {
       await documentRef.update({ "discord.approved": true, "profile.approved": true });
     } else {
-      const imageVerificationType = imageType === "discord" ? "discord.approved" : "profile.approved";
+      const imageVerificationType =
+        imageType === IMAGE_VERIFICATION_TYPES.DISCORD ? "discord.approved" : "profile.approved";
       await documentRef.update({ [imageVerificationType]: true });
     }
 
-    // IF BOTH IMAGES ARE VERIFIED THEN REMOVE THE ENTRY
+    // IF BOTH IMAGES ARE VERIFIED THEN APPROVE THE ENTRY ITSELF
     const photoVerificationObject = (await documentRef.get()).data();
     if (photoVerificationObject.discord.approved && photoVerificationObject.profile.approved) {
       await documentRef.update({ status: photoVerificationRequestStatus.APPROVED });
@@ -460,17 +463,18 @@ const changePhotoVerificationStatus = async (userId, imageType, status) => {
  */
 const getUserPhotoVerificationRequests = async (userId) => {
   try {
+    const user = await userModel.doc(userId).get();
+    if (!user.exists) {
+      throw new Error(`No document with userId: ${userId} was found!`);
+    }
+    const userData = user.data();
+
     const verificationImagesSnapshotQuery = photoVerificationModel.where(
       "status",
       "==",
       photoVerificationRequestStatus.PENDING
     );
 
-    const user = await userModel.doc(userId).get();
-    if (!user.exists) {
-      throw new Error(`No document with userId: ${userId} was found!`);
-    }
-    const userData = user.data();
     verificationImagesSnapshotQuery.where("userId", "==", userId);
     const verificationImagesSnapshot = await verificationImagesSnapshotQuery.get();
     if (verificationImagesSnapshot.empty) {
