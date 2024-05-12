@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import cleanDb from "../../utils/cleanDb";
-import { createRequest, getRequests, updateRequest } from "../../../models/requests";
+import { createRequest, getRequests, updateRequest, getRequestByKeyValues } from "../../../models/requests";
 import {
   createOooRequests,
   createOooRequests2,
@@ -8,7 +8,7 @@ import {
   updateOooApprovedRequests,
   updateOooRejectedRequests,
 } from "./../../fixtures/oooRequest/oooRequest";
-import { REQUEST_ALREADY_PENDING, REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
 import userDataFixture from "./../../fixtures/user/user";
 import addUser from "../../utils/addUser";
 const userData = userDataFixture();
@@ -41,13 +41,6 @@ describe("models/oooRequests", () => {
       } catch (error) {
         expect(error.message).to.equal("User already has an OOO request");
       }
-    });
-
-    it("should throw an error if the user already has an OOO request", async () => {
-      await createRequest(createOooStatusRequests);
-      const oooRequest = await createRequest(createOooStatusRequests);
-      expect(oooRequest).to.not.be.null;
-      expect(oooRequest.error).to.equal(REQUEST_ALREADY_PENDING);
     });
   });
 
@@ -169,6 +162,20 @@ describe("models/oooRequests", () => {
       const query = { dev: "true", size: 1 };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests).to.have.lengthOf(1);
+    });
+  });
+
+  describe("getRequestByKeyValue", () => {
+    it("Should return the request with the specified key value", async () => {
+      const oooRequestObj = { ...createOooRequests2, requestedBy: testUserId };
+      const oooRequest = await createRequest(oooRequestObj);
+      const oooRequestData: any = await getRequestByKeyValues({ requestedBy: testUserId, type: REQUEST_TYPE.OOO });
+      expect(oooRequestData.requestedBy).to.be.equal(oooRequest.requestedBy);
+    });
+
+    it("Should return null if the request with the specified key value does not exist", async () => {
+      const oooRequestData = await getRequestByKeyValues({ requestedBy: "randomId", type: REQUEST_TYPE.OOO });
+      expect(oooRequestData).to.be.equal(null);
     });
   });
 });
