@@ -20,7 +20,6 @@ const {
   SANITY_CHECK,
   BACKLOG,
   DONE,
-  VERIFIED,
 } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
@@ -657,7 +656,7 @@ const updateOrphanTasksStatus = async () => {
     for (const user of users) {
       const tasksQuerySnapshot = await tasksModel
         .where("assignee", "==", user.id)
-        .where("status", "not-in", [BACKLOG, COMPLETED, DONE, VERIFIED])
+        .where("status", "not-in", [BACKLOG, COMPLETED, DONE])
         .get();
       tasksQuerySnapshot.forEach((taskDoc) => {
         orphanTasksUpdatedCount++;
@@ -681,7 +680,7 @@ const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
     for (const user of users) {
       const tasksQuerySnapshot = await tasksModel
         .where("assignee", "==", user.id)
-        .where("status", "not-in", [COMPLETED, DONE, BACKLOG, VERIFIED])
+        .where("status", "not-in", [COMPLETED, DONE, BACKLOG])
         .get();
       tasksQuerySnapshot.forEach((taskDoc) => {
         orphanTasksUpdatedCount++;
