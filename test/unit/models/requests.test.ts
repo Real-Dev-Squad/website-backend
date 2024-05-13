@@ -51,6 +51,7 @@ describe("models/oooRequests", () => {
         oooRequest.id,
         updateOooApprovedRequests,
         updateOooApprovedRequests.lastModifiedBy
+        , REQUEST_TYPE.OOO
       );
       expect(updatedOooRequest).to.not.be.null;
       expect(updatedOooRequest).to.have.property("state");
@@ -59,7 +60,7 @@ describe("models/oooRequests", () => {
 
     it("should throw an error if the OOO request does not exist", async () => {
       try {
-        await updateRequest("randomId", updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy);
+        await updateRequest("randomId", updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy, REQUEST_TYPE.OOO);
         expect.fail("OOO request does not exist");
       } catch (error) {
         expect(error.message).to.equal("OOO request does not exist");
@@ -68,9 +69,9 @@ describe("models/oooRequests", () => {
 
     it("should throw an error if the OOO request is already approved", async () => {
       const oooRequest: any = await createRequest(createOooStatusRequests);
-      await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy);
+      await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy, REQUEST_TYPE.OOO);
       try {
-        await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy);
+        await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy, REQUEST_TYPE.OOO);
         expect.fail("OOO request is already approved");
       } catch (error) {
         expect(error.message).to.equal("OOO request is already approved");
@@ -79,9 +80,9 @@ describe("models/oooRequests", () => {
 
     it("should throw an error if the OOO request is already rejected", async () => {
       const oooRequest: any = await createRequest(createOooStatusRequests);
-      await updateRequest(oooRequest.id, updateOooRejectedRequests, updateOooRejectedRequests.lastModifiedBy);
+      await updateRequest(oooRequest.id, updateOooRejectedRequests, updateOooRejectedRequests.lastModifiedBy, REQUEST_TYPE.OOO);
       try {
-        await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy);
+        await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy, REQUEST_TYPE.OOO);
         expect.fail("OOO request is already rejected");
       } catch (error) {
         expect(error.message).to.equal("OOO request is already rejected");
@@ -113,7 +114,7 @@ describe("models/oooRequests", () => {
 
     it("Should return a list of all the requests with specified state - APPROVED", async () => {
       const oooRequest: any = await createRequest(createOooStatusRequests);
-      await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy);
+      await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy, REQUEST_TYPE.OOO)
       const query = { dev: "true", state: REQUEST_STATE.APPROVED };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.APPROVED);

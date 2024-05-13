@@ -1,5 +1,14 @@
-import { getRequestByKeyValues } from "../models/requests";
-import { LOG_ACTION, REQUEST_LOG_TYPE, REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
+import { getRequestByKeyValues, updateRequest } from "../models/requests";
+import {
+  ERROR_WHILE_CREATING_REQUEST,
+  ERROR_WHILE_UPDATING_REQUEST,
+  LOG_ACTION,
+  REQUEST_APPROVED_SUCCESSFULLY,
+  REQUEST_LOG_TYPE,
+  REQUEST_REJECTED_SUCCESSFULLY,
+  REQUEST_STATE,
+  REQUEST_TYPE,
+} from "../constants/requests";
 import { addLog } from "../models/logs";
 import { createRequest } from "../models/requests";
 import { fetchTask } from "../models/tasks";
@@ -52,15 +61,16 @@ export const createTaskExtensionRequest = async (req: ExtensionRequestRequest, r
 
     const latestExtensionRequest: ExtensionRequest | undefined = await getRequestByKeyValues({
       taskId,
-      state: REQUEST_STATE.PENDING,
       type: REQUEST_TYPE.EXTENSION,
     });
 
     if (latestExtensionRequest && latestExtensionRequest.state === REQUEST_STATE.PENDING) {
       return res.boom.badRequest("An extension request for this task already exists.");
     }
-
-    let requestNumber: number = latestExtensionRequest?.requestedBy === requestedBy && latestExtensionRequest.requestNumber ? latestExtensionRequest.requestNumber + 1 : 1;
+    const requestNumber: number =
+      latestExtensionRequest?.requestedBy === requestedBy && latestExtensionRequest.requestNumber
+        ? latestExtensionRequest.requestNumber + 1
+        : 1;
     extensionBody = { ...extensionBody, requestNumber };
 
     const extensionRequest = await createRequest(extensionBody);
@@ -87,7 +97,51 @@ export const createTaskExtensionRequest = async (req: ExtensionRequestRequest, r
       extensionRequest: { ...extensionBody, id: extensionRequest.id },
     });
   } catch (err) {
-    logger.error(`Error while creating new extension request: ${err}`);
-    return res.boom.badImplementation('Internal Server Error');
+    logger.error(ERROR_WHILE_CREATING_REQUEST, err);
+    return res.boom.badImplementation(ERROR_WHILE_CREATING_REQUEST);
+  }
+};
+
+export const updateTaskExtensionRequest = async (req: any, res: any) => {
+  const requestBody = req.body;
+  const userId = req?.userData?.id;
+  const requestId = req.params.id;
+
+  if (!userId) {
+    return res.boom.unauthorized();
+  }
+
+  try {
+    const requestResult = await updateRequest(requestId, requestBody, userId,REQUEST_TYPE.EXTENSION)
+    if ("error" in requestResult) {
+      return res.boom.badRequest(requestResult.error);
+    }
+    const [logType, returnMessage] =
+      requestResult.state === REQUEST_STATE.APPROVED
+        ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
+        : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
+
+    const requestLog = {
+      type: logType,
+      meta: {
+        requestId: requestId,
+        action: LOG_ACTION.UPDATE,
+        createdBy: userId,
+        createdAt: Date.now(),
+      },
+      body: requestResult,
+    };
+    await addLog(requestLog.type, requestLog.meta, requestLog.body);
+
+    return res.status(201).json({
+      message: returnMessage,
+      data: {
+        id: requestResult.id,
+        ...requestResult,
+      },
+    });
+  } catch (err) {
+    logger.error(ERROR_WHILE_UPDATING_REQUEST, err);
+    return res.boom.badImplementation(ERROR_WHILE_UPDATING_REQUEST);
   }
 };
