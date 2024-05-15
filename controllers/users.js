@@ -372,10 +372,13 @@ const generateUsername = async (req, res) => {
 const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
+      const id = req.params.id;
       const user = await dataAccess.retrieveUsers({
         userdata: req.userData,
       });
-      return res.send(user);
+      if (id === user.id) {
+        return res.send(user);
+      }
     }
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
