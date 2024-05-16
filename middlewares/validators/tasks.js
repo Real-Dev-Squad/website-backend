@@ -192,6 +192,7 @@ const getTasksValidator = async (req, res, next) => {
         }
         return value;
       }, "Invalid query format"),
+    userFeatureFlag: joi.string().optional(),
   });
 
   try {

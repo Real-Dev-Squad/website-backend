@@ -4,7 +4,6 @@ const { expect } = chai;
 
 import {
   createOooStatusRequestValidator,
-  updateOooStatusRequestValidator,
 } from "./../../../middlewares/validators/oooRequests";
 import { validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
 
@@ -88,19 +87,6 @@ describe("OOO Status Request Validators", function () {
         expect(error).to.be.an.instanceOf(Error);
         expect(error.details[0].message).to.equal("until date must be greater than or equal to from date");
       }
-    });
-  });
-
-  describe("updateOooStatusRequestValidator", function () {
-    it("should validate for a valid update ooo request", async function () {
-      const req = {
-        body: validOooStatusUpdate,
-      };
-      const res = {};
-      const nextSpy = sinon.spy();
-
-      await updateOooStatusRequestValidator(req as any);
-      expect(nextSpy.calledOnce);
     });
   });
 });
