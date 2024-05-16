@@ -1,11 +1,12 @@
 import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
-import { OooRequestCreateRequest, OooRequestResponse, OooRequestUpdateRequest } from "../../types/oooRequest";
-import { createOooStatusRequestValidator, updateOooStatusRequestValidator } from "./oooRequests";
+import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
+import { createOooStatusRequestValidator } from "./oooRequests";
 import { createExtensionRequestValidator } from "./extensionRequestsv2";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests";
 import { CustomResponse } from "../../typeDefinitions/global";
+import { UpdateRequest } from "../../types/requests";
 
 export const createRequestsMiddleware = async (
   req: OooRequestCreateRequest|ExtensionRequestRequest,
@@ -39,29 +40,37 @@ export const createRequestsMiddleware = async (
 };
 
 export const updateRequestsMiddleware = async (
-  req: OooRequestUpdateRequest,
-  res: OooRequestResponse,
+  req: UpdateRequest,
+  res: CustomResponse,
   next: NextFunction
 ) => {
-  const type = req.body.type;
-
   // TODO: Remove this check once feature is tested and ready to be used
   if ( req.query.dev !== "true") {
     return res.boom.badRequest("Please use feature flag to make this requests");
   }
+  const schema = joi
+  .object()
+  .strict()
+  .keys({
+    reason: joi.string().optional()
+      .messages({
+        "string.empty": "reason cannot be empty",
+      }),
+    state: joi
+      .string()
+      .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED)
+      .required()
+      .messages({
+        "any.only": "state must be APPROVED or REJECTED",
+      }),
+    type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION).required(),
+  });
 
   try {
-    switch (type) {
-      case REQUEST_TYPE.OOO:
-        await updateOooStatusRequestValidator(req as OooRequestUpdateRequest);
-        break;
-      default:
-        res.boom.badRequest(`Invalid request type: ${type}`);
-    }
-
+    await schema.validateAsync(req.body, { abortEarly: false });
     next();
   } catch (error) {
-    const errorMessages = error.details.map((detail) => detail.message);
+    const errorMessages = error.details.map((detail:any) => detail.message);
     logger.error(`Error while validating request payload : ${errorMessages}`);
     res.boom.badRequest(errorMessages);
   }
