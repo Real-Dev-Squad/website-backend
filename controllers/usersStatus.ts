@@ -1,4 +1,9 @@
-import { getUserStatus as getUserStatusFromModel, updateUserStatus as updateUserStatusFromModel, updateAllUserStatus as updateAllUserStatusModel } from "../models/usersStatus";
+import {
+  getUserStatus as getUserStatusFromModel,
+  updateUserStatus as updateUserStatusFromModel,
+  updateAllUserStatus as updateAllUserStatusModel,
+  batchUpdateUsersStatus as batchUpdateUsersStatusModel,
+} from "../models/usersStatus";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
@@ -55,7 +60,7 @@ const updateUserStatus = async (req: any, res: any) => {
       if (userStatusExists) {
         responseObject.message = "User Status updated successfully.";
         statusCode = 200;
-      } else if(futureStatus){
+      } else if (futureStatus) {
         responseObject.message = "Future Status of user updated successfully.";
         statusCode = 200;
       } else {
@@ -92,8 +97,24 @@ const updateAllUserStatus = async (req, res) => {
   }
 };
 
+const batchUpdateUsersStatus = async (req, res) => {
+  try {
+    const data = await batchUpdateUsersStatusModel(req.body.users);
+    return res.json({
+      message: "users status updated successfully.",
+      data,
+    });
+  } catch (error) {
+    logger.error(error.message);
+    return res.status(500).json({
+      message: "The server has encountered an unexpected error. Please contact the administrator for more information.",
+    });
+  }
+};
+
 export default {
   getUserStatus,
   updateUserStatus,
-  updateAllUserStatus
+  updateAllUserStatus,
+  batchUpdateUsersStatus,
 };
