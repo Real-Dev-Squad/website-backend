@@ -207,6 +207,13 @@ describe("Tasks", function () {
       taskId3 = (await tasks.updateTask({ ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753 })).taskId;
     });
 
+    after(async function () {
+      await tasks.updateTask(
+        { ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753, dependsOn: [], status: "IN_PROGRESS" },
+        taskId2
+      );
+    });
+
     it("Should get all the list of tasks", function (done) {
       chai
         .request(app)
@@ -274,7 +281,7 @@ describe("Tasks", function () {
     it("Should get all tasks filtered with status ,assignee, title when passed to GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&dev=true&assignee=sagar&title=Test`)
+        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&userFeatureFlag=true&dev=true&assignee=sagar&title=Test`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -493,6 +500,31 @@ describe("Tasks", function () {
           }
           return done();
         });
+    });
+
+    it("Should get tasks with COMPLETED status task when fetching task of status Done", async function () {
+      await tasks.updateTask(
+        {
+          status: "COMPLETED",
+        },
+        taskId2
+      );
+      const res = await chai.request(app).get(`/tasks?dev=true&status=DONE&userFeatureFlag=true`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("Tasks returned successfully!");
+      expect(res.body.tasks).to.be.a("array");
+      expect(res.body).to.have.property("next");
+      expect(res.body).to.have.property("prev");
+      const tasksData = res.body.tasks ?? [];
+      let countCompletedTask = 0;
+      tasksData.forEach((task, i) => {
+        if (task.status === "COMPLETED") {
+          countCompletedTask += 1;
+        }
+      });
+      expect(countCompletedTask).to.be.not.equal(0);
     });
   });
 
@@ -1541,41 +1573,41 @@ describe("Tasks", function () {
   });
 
   describe("POST /tasks/orphanTasks", function () {
-    let jwtToken;
-
     beforeEach(async function () {
+      const superUserId = await addUser(superUser);
+      superUserJwt = authService.generateAuthToken({ userId: superUserId });
       const user1 = userData[6];
       user1.roles.in_discord = false;
       user1.updated_at = 1712053284000;
       const user2 = userData[18];
-      user2.updated_at = 1712064084000;
+      user2.roles.in_discord = false;
       const [{ id: userId }, { id: userId2 }] = await Promise.all([userDBModel.add(user1), userDBModel.add(user2)]);
 
       const task1 = {
-        assigneeId: userId,
+        assignee: userId,
         status: "ACTIVE",
       };
       const task2 = {
-        assigneeId: userId2,
+        assignee: userId2,
         status: "COMPLETED",
       };
       const task3 = {
-        assigneeId: userId2,
+        assignee: userId2,
         status: "IN_PROGRESS",
       };
-      await Promise.all([tasksModel.add(task1), tasksModel.add(task2), tasksModel.add(task3)]);
-
-      jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
+      const task4 = {
+        assignee: userId,
+        status: "DONE",
+      };
+      await Promise.all([tasksModel.add(task1), tasksModel.add(task2), tasksModel.add(task3), tasksModel.add(task4)]);
     });
 
     afterEach(async function () {
       await cleanDb();
     });
-    it("Should update status of orphan tasks to BACKLOG", async function () {
-      const res = await chai.request(app).post("/tasks/orphanTasks").set("Authorization", `Bearer ${jwtToken}`).send({
-        lastOrphanTasksFilterationTimestamp: 1712040715000,
-      });
 
+    it("Should update status of orphan tasks to BACKLOG", async function () {
+      const res = await chai.request(app).post("/tasks/orphanTasks").set("cookie", `${cookieName}=${superUserJwt}`);
       expect(res).to.have.status(200);
       expect(res.body).to.deep.equal({
         message: "Orphan tasks filtered successfully",
@@ -1583,24 +1615,18 @@ describe("Tasks", function () {
           orphanTasksUpdatedCount: 2,
         },
       });
-    }).timeout(10000);
+    });
 
-    it("Should return 400 if not cron worker", async function () {
+    it("Should return 400 if not super user", async function () {
       const nonSuperUserId = await addUser(appOwner);
       const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
-      const res = await chai
-        .request(app)
-        .post("/tasks/orphanTasks")
-        .set("Authorization", `Bearer ${nonSuperUserJwt}`)
-        .send({
-          lastOrphanTasksFilterationTimestamp: 1712040715000,
-        });
+      const res = await chai.request(app).post("/tasks/orphanTasks").set("Authorization", `Bearer ${nonSuperUserJwt}`);
 
-      expect(res).to.have.status(400);
+      expect(res).to.have.status(401);
       expect(res.body).to.deep.equal({
-        statusCode: 400,
-        error: "Bad Request",
-        message: "Unauthorized Cron Worker",
+        statusCode: 401,
+        error: "Unauthorized",
+        message: "You are not authorized for this action.",
       });
     });
   });

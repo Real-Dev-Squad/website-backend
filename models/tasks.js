@@ -147,6 +147,7 @@ const fetchPaginatedTasks = async ({
   dev = false,
   assignee,
   title,
+  userFeatureFlag,
 }) => {
   try {
     let initialQuery = tasksModel;
@@ -196,7 +197,11 @@ const fetchPaginatedTasks = async ({
        */
       title = undefined;
     } else if (status) {
-      initialQuery = initialQuery.where("status", "==", status);
+      if (userFeatureFlag === "true" && [DONE, COMPLETED].includes(status)) {
+        initialQuery = initialQuery.where("status", "in", [DONE, COMPLETED]);
+      } else {
+        initialQuery = initialQuery.where("status", "==", status);
+      }
     }
 
     if (title) {
@@ -643,17 +648,11 @@ const updateTaskStatus = async () => {
   }
 };
 
-const updateOrphanTasksStatus = async (lastOrphanTasksFilterationTimestamp) => {
-  const lastTimestamp = Number(lastOrphanTasksFilterationTimestamp);
+const updateOrphanTasksStatus = async () => {
   try {
     const users = [];
-    const currentTimeStamp = Date.now();
-
-    const usersQuerySnapshot = await userModel
-      .where("roles.in_discord", "==", false)
-      .where("updated_at", ">=", lastTimestamp)
-      .where("updated_at", "<=", currentTimeStamp)
-      .get();
+    const batch = firestore.batch();
+    const usersQuerySnapshot = await userModel.where("roles.in_discord", "==", false).get();
 
     usersQuerySnapshot.forEach((user) => users.push({ ...user.data(), id: user.id }));
 
@@ -661,15 +660,17 @@ const updateOrphanTasksStatus = async (lastOrphanTasksFilterationTimestamp) => {
 
     for (const user of users) {
       const tasksQuerySnapshot = await tasksModel
-        .where("assigneeId", "==", user.id)
-        .where("status", "not-in", [COMPLETED, BACKLOG])
+        .where("assignee", "==", user.id)
+        .where("status", "not-in", [BACKLOG, COMPLETED, DONE])
         .get();
-      tasksQuerySnapshot.forEach(async (taskDoc) => {
+      tasksQuerySnapshot.forEach((taskDoc) => {
         orphanTasksUpdatedCount++;
-        await tasksModel.doc(taskDoc.id).update({ status: BACKLOG });
+        const taskRef = tasksModel.doc(taskDoc.id);
+        batch.update(taskRef, { status: BACKLOG, updated_at: Date.now() });
       });
     }
 
+    await batch.commit();
     return { orphanTasksUpdatedCount };
   } catch (error) {
     logger.error("Error marking tasks as backlog:", error);
@@ -683,10 +684,10 @@ const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
     const batch = firestore.batch();
     for (const user of users) {
       const tasksQuerySnapshot = await tasksModel
-        .where("assigneeId", "==", user.id)
+        .where("assignee", "==", user.id)
         .where("status", "not-in", [COMPLETED, DONE, BACKLOG])
         .get();
-      tasksQuerySnapshot.forEach(async (taskDoc) => {
+      tasksQuerySnapshot.forEach((taskDoc) => {
         orphanTasksUpdatedCount++;
         const taskRef = tasksModel.doc(taskDoc.id);
         batch.update(taskRef, { status: BACKLOG, updated_at: Date.now() });

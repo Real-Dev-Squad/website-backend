@@ -134,11 +134,11 @@ const fetchPaginatedTasks = async (query) => {
 
 const fetchTasks = async (req, res) => {
   try {
-    const { dev, status, page, size, prev, next, q: queryString, assignee, title } = req.query;
+    const { dev, status, page, size, prev, next, q: queryString, assignee, title, userFeatureFlag } = req.query;
     const transformedQuery = transformQuery(dev, status, size, page, assignee, title);
 
     if (dev) {
-      const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next });
+      const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next, userFeatureFlag });
       return res.json({
         message: "Tasks returned successfully!",
         ...paginatedTasks,
@@ -491,9 +491,7 @@ const updateStatus = async (req, res) => {
 
 const orphanTasks = async (req, res) => {
   try {
-    const { lastOrphanTasksFilterationTimestamp = 0 } = req.body;
-
-    const updatedTasksData = await tasks.updateOrphanTasksStatus(lastOrphanTasksFilterationTimestamp);
+    const updatedTasksData = await tasks.updateOrphanTasksStatus();
 
     return res.status(200).json({ message: "Orphan tasks filtered successfully", updatedTasksData });
   } catch (error) {
