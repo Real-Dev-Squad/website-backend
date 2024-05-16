@@ -17,7 +17,14 @@ describe("sendTaskUpdate function", function () {
   it("should send task update successfully", async function () {
     fetchMock.resolves({ ok: true });
 
-    const result = await sendTaskUpdate("Task completed", "No blockers", "Plan for the next phase");
+    const result = await sendTaskUpdate(
+      "Task completed",
+      "No blockers",
+      "Plan for the next phase",
+      "userName",
+      "taskId",
+      "Task title"
+    );
     expect(result).to.equal(undefined);
   });
 
@@ -25,7 +32,14 @@ describe("sendTaskUpdate function", function () {
     const error = new Error("Error");
     fetchMock.rejects(error);
     try {
-      await sendTaskUpdate("Task completed", "No blockers", "Plan for the next phase");
+      await sendTaskUpdate(
+        "Task completed",
+        "No blockers",
+        "Plan for the next phase",
+        "userName",
+        "taskId",
+        "task title"
+      );
     } catch (err) {
       expect(err).to.be.equal(error);
     }

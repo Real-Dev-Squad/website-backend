@@ -207,6 +207,13 @@ describe("Tasks", function () {
       taskId3 = (await tasks.updateTask({ ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753 })).taskId;
     });
 
+    after(async function () {
+      await tasks.updateTask(
+        { ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753, dependsOn: [], status: "IN_PROGRESS" },
+        taskId2
+      );
+    });
+
     it("Should get all the list of tasks", function (done) {
       chai
         .request(app)
@@ -274,7 +281,7 @@ describe("Tasks", function () {
     it("Should get all tasks filtered with status ,assignee, title when passed to GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&dev=true&assignee=sagar&title=Test`)
+        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&userFeatureFlag=true&dev=true&assignee=sagar&title=Test`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -493,6 +500,31 @@ describe("Tasks", function () {
           }
           return done();
         });
+    });
+
+    it("Should get tasks with COMPLETED status task when fetching task of status Done", async function () {
+      await tasks.updateTask(
+        {
+          status: "COMPLETED",
+        },
+        taskId2
+      );
+      const res = await chai.request(app).get(`/tasks?dev=true&status=DONE&userFeatureFlag=true`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("Tasks returned successfully!");
+      expect(res.body.tasks).to.be.a("array");
+      expect(res.body).to.have.property("next");
+      expect(res.body).to.have.property("prev");
+      const tasksData = res.body.tasks ?? [];
+      let countCompletedTask = 0;
+      tasksData.forEach((task, i) => {
+        if (task.status === "COMPLETED") {
+          countCompletedTask += 1;
+        }
+      });
+      expect(countCompletedTask).to.be.not.equal(0);
     });
   });
 

@@ -12,6 +12,7 @@ export type userData = {
     maven?: boolean;
     designer?: boolean;
     product_manager?: boolean;
+    super_user?: boolean;
   };
   profileStatus: string;
   created_at: number;

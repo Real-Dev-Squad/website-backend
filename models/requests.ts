@@ -1,4 +1,3 @@
-import { RequestQuery } from "../types/oooRequest";
 import firestore from "../utils/firestore";
 const requestModel = firestore.collection("requests");
 import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests";
@@ -7,25 +6,12 @@ import {
   ERROR_WHILE_CREATING_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_DOES_NOT_EXIST,
-  REQUEST_ALREADY_PENDING,
 } from "../constants/requests";
-import * as admin from "firebase-admin";
 import { getUserId } from "../utils/users";
 const SIZE = 5;
 
 export const createRequest = async (body: any) => {
   try {
-    const existingRequest = await requestModel
-      .where("requestedBy", "==", body.requestedBy)
-      .where("state", "==", REQUEST_STATE.PENDING)
-      .where("type", "==", body.type)
-      .get();
-
-    if (!existingRequest.empty) {
-      return {
-        error: REQUEST_ALREADY_PENDING,
-      };
-    }
     const requestBody: any = {
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -43,7 +29,7 @@ export const createRequest = async (body: any) => {
   }
 };
 
-export const updateRequest = async (id: string, body: any, lastModifiedBy: string) => {
+export const updateRequest = async (id: string, body: any, lastModifiedBy: string, type:string) => {
   try {
     const existingRequestDoc = await requestModel.doc(id).get();
     if (!existingRequestDoc.exists) {
@@ -59,6 +45,11 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
     if (existingRequestDoc.data().state === REQUEST_STATE.REJECTED) {
       return {
         error: REQUEST_ALREADY_REJECTED,
+      };
+    }
+    if (existingRequestDoc.data().type !== type) {
+      return {
+        error: REQUEST_DOES_NOT_EXIST,
       };
     }
 
@@ -163,3 +154,34 @@ export const getRequests = async (query: any) => {
     throw error;
   }
 };
+
+interface KeyValues {
+  [key: string]: string;
+}
+
+export const getRequestByKeyValues = async (keyValues: KeyValues) => {
+  try {
+    let requestQuery: any = requestModel;
+    Object.entries(keyValues).forEach(([key, value]) => {
+      requestQuery = requestQuery.where(key, "==", value);
+    });
+
+    const requestQueryDoc = await requestQuery.orderBy("createdAt", "desc").limit(1).get();
+    if (requestQueryDoc.empty) {
+      return null;
+    }
+
+    let requests: any;
+    requestQueryDoc.forEach((doc: any) => {
+      requests = {
+        id: doc.id,
+        ...doc.data(),
+      };
+    });
+    return requests;
+  } catch (error) {
+    logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
+    throw error;
+  }
+};
+
