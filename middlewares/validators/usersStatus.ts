@@ -5,7 +5,7 @@ import { CustomResponse } from "../../typeDefinitions/global";
 import dataAccess from "../../services/dataAccessLayer";
 const threeDaysInMilliseconds = 172800000;
 
-const validateUsersStatusData = async (todaysTime: number, req: any, res: any, next: any) => {
+const validateUsersStatusData = async (todaysTime: number, req: any, res: CustomResponse, next: NextFunction) => {
   const validUserStatuses = [userState.OOO, userState.ONBOARDING];
 
   const statusSchema = Joi.object({
@@ -81,9 +81,36 @@ const validateUsersStatusData = async (todaysTime: number, req: any, res: any, n
   }
 };
 
-export const validateUsersStatus = (req: any, res: any, next: any) => {
+export const validateUsersStatus = (req: any, res: CustomResponse, next: NextFunction) => {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
   const todaysTime = today.getTime();
   validateUsersStatusData(todaysTime, req, res, next);
+};
+
+export const validateMassUpdate = async (req: any, res: CustomResponse, next: NextFunction) => {
+  const schema = Joi.object()
+    .keys({
+      users: Joi.array()
+        .items(
+          Joi.object({
+            userId: Joi.string().trim().required(),
+            state: Joi.string().valid(userState.IDLE, userState.ACTIVE).required(),
+          })
+        )
+        .min(1)
+        .required()
+        .error(new Error(`Invalid object passed in users.`)),
+    })
+    .messages({
+      "object.unknown": "Invalid key in Request payload.",
+    });
+
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error(`Error validating Query Params for GET ${error.message}`);
+    res.boom.badRequest(error);
+  }
 };

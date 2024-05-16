@@ -352,6 +352,22 @@ const convertTimestampsToUTC = (obj) => {
   return obj;
 };
 
+const convertTimestampsInUserStatusToUTC = (obj) => {
+  const { appliedOn, endsOn } = obj;
+  const appliedOnType = typeof appliedOn;
+  const endsOnType = typeof endsOn;
+
+  if ((appliedOnType === "string" || appliedOnType === "number") && String(appliedOn).trim() !== "") {
+    obj.appliedOn = convertTimestampToUTCStartOrEndOfDay(appliedOn, false);
+  }
+
+  if ((endsOnType === "string" || endsOnType === "number") && String(endsOn).trim() !== "") {
+    obj.endsOn = convertTimestampToUTCStartOrEndOfDay(endsOn, true);
+  }
+
+  return obj;
+};
+
 module.exports = {
   getUserIdBasedOnRoute,
   getTomorrowTimeStamp,
@@ -368,4 +384,5 @@ module.exports = {
   getNextDayTimeStamp,
   getFilteredPaginationLink,
   convertTimestampsToUTC,
+  convertTimestampsInUserStatusToUTC,
 };
