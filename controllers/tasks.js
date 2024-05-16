@@ -491,9 +491,7 @@ const updateStatus = async (req, res) => {
 
 const orphanTasks = async (req, res) => {
   try {
-    const { lastOrphanTasksFilterationTimestamp = 0 } = req.body;
-
-    const updatedTasksData = await tasks.updateOrphanTasksStatus(lastOrphanTasksFilterationTimestamp);
+    const updatedTasksData = await tasks.updateOrphanTasksStatus();
 
     return res.status(200).json({ message: "Orphan tasks filtered successfully", updatedTasksData });
   } catch (error) {
