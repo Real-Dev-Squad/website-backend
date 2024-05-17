@@ -448,9 +448,10 @@ describe("External Accounts", function () {
 
   describe("PATCH /external-accounts/link/:token", function () {
     let newUserJWT;
+    let userId;
 
     beforeEach(async function () {
-      const userId = await addUser(userData[3]);
+      userId = await addUser(userData[3]);
       newUserJWT = authService.generateAuthToken({ userId });
       await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
       await externalAccountsModel.addExternalAccountData(externalAccountData[3]);
@@ -529,7 +530,7 @@ describe("External Accounts", function () {
       await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
       const getUserResponseBeforeUpdate = await chai
         .request(app)
-        .get("/users/self")
+        .get(`/users/${userId}`)
         .set("cookie", `${cookieName}=${newUserJWT}`);
 
       expect(getUserResponseBeforeUpdate).to.have.status(200);
@@ -547,7 +548,7 @@ describe("External Accounts", function () {
 
       const updatedUserDetails = await chai
         .request(app)
-        .get("/users/self")
+        .get(`/users/${userId}`)
         .set("cookie", `${cookieName}=${newUserJWT}`);
 
       expect(updatedUserDetails.body.roles.in_discord).to.equal(true);
