@@ -16,13 +16,14 @@ const restrictedUser = userData[2];
 
 chai.use(chaiHttp);
 
-describe("checkRestrictedUser", function () {
+describe("checkRestrictedUser", function() {
   let restrictedJwt;
   let unrestrictedJwt;
   let fetchStub;
+  let restrictedUserId;
 
-  before(async function () {
-    const restrictedUserId = await addUser(restrictedUser);
+  before(async function() {
+    restrictedUserId = await addUser(restrictedUser);
     const unrestrictedUserId = await addUser(unrestrictedUser);
     restrictedJwt = authService.generateAuthToken({ userId: restrictedUserId });
     unrestrictedJwt = authService.generateAuthToken({ userId: unrestrictedUserId });
@@ -36,15 +37,15 @@ describe("checkRestrictedUser", function () {
     );
   });
 
-  after(async function () {
+  after(async function() {
     sinon.restore();
     await cleanDb();
   });
 
-  it("should allow GET request coming from restricted user", function (done) {
+  it("should allow GET request coming from restricted user", function(done) {
     chai
       .request(app)
-      .get("/users/self")
+      .get(`/users/${restrictedUserId}`)
       .set("cookie", `${cookieName}=${restrictedJwt}`)
       .end((err, res) => {
         if (err) {
@@ -57,7 +58,7 @@ describe("checkRestrictedUser", function () {
       });
   });
 
-  it("should allow non-GET request coming from unrestricted user", function (done) {
+  it("should allow non-GET request coming from unrestricted user", function(done) {
     chai
       .request(app)
       .patch("/users/self")
@@ -75,7 +76,7 @@ describe("checkRestrictedUser", function () {
       });
   });
 
-  it("should deny non-GET request coming from restricted user", function (done) {
+  it("should deny non-GET request coming from restricted user", function(done) {
     chai
       .request(app)
       .patch("/users/self")
