@@ -16,13 +16,13 @@ const restrictedUser = userData[2];
 
 chai.use(chaiHttp);
 
-describe("checkRestrictedUser", function() {
+describe("checkRestrictedUser", function () {
   let restrictedJwt;
   let unrestrictedJwt;
   let fetchStub;
   let restrictedUserId;
 
-  before(async function() {
+  before(async function () {
     restrictedUserId = await addUser(restrictedUser);
     const unrestrictedUserId = await addUser(unrestrictedUser);
     restrictedJwt = authService.generateAuthToken({ userId: restrictedUserId });
@@ -37,12 +37,12 @@ describe("checkRestrictedUser", function() {
     );
   });
 
-  after(async function() {
+  after(async function () {
     sinon.restore();
     await cleanDb();
   });
 
-  it("should allow GET request coming from restricted user", function(done) {
+  it("should allow GET request coming from restricted user", function (done) {
     chai
       .request(app)
       .get(`/users/${restrictedUserId}`)
@@ -58,7 +58,7 @@ describe("checkRestrictedUser", function() {
       });
   });
 
-  it("should allow non-GET request coming from unrestricted user", function(done) {
+  it("should allow non-GET request coming from unrestricted user", function (done) {
     chai
       .request(app)
       .patch("/users/self")
@@ -76,7 +76,7 @@ describe("checkRestrictedUser", function() {
       });
   });
 
-  it("should deny non-GET request coming from restricted user", function(done) {
+  it("should deny non-GET request coming from restricted user", function (done) {
     chai
       .request(app)
       .patch("/users/self")
