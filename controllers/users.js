@@ -443,9 +443,10 @@ const updateSelf = async (req, res) => {
  */
 const postUserPicture = async (req, res) => {
   const { file } = req;
+  const { dev } = req.query;
   const { id: userId, discordId } = req.userData;
   const { coordinates } = req.body;
-  let discordAvatarUrl = "";
+  let discordAvatarUrl;
   let imageData;
   let verificationResult;
   try {
@@ -456,17 +457,26 @@ const postUserPicture = async (req, res) => {
   }
   try {
     const coordinatesObject = coordinates && JSON.parse(coordinates);
-    imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject });
+    imageData = await imageService.uploadProfilePicture({ file, userId, coordinates: coordinatesObject }, dev);
   } catch (error) {
     logger.error(`Error while adding profile picture of user: ${error}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
-  try {
-    verificationResult = await userQuery.addForVerification(userId, discordId, imageData.url, discordAvatarUrl);
-  } catch (error) {
-    logger.error(`Error while adding profile picture of user: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  if (dev) {
+    try {
+      verificationResult = await userQuery.addForVerification(
+        userId,
+        discordId,
+        imageData.url,
+        discordAvatarUrl,
+        imageData.publicId
+      );
+    } catch (error) {
+      logger.error(`Error while adding profile picture of user: ${error}`);
+      return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    }
   }
+
   return res.status(201).json({
     message: `Profile picture uploaded successfully! ${verificationResult.message}`,
     image: imageData,
@@ -482,11 +492,12 @@ const postUserPicture = async (req, res) => {
 
 const verifyUserImage = async (req, res) => {
   try {
-    const { type: imageType } = req.query;
-    const { id: userId } = req.params;
-    await userQuery.markAsVerified(userId, imageType);
-    return res.json({
-      message: `${imageType} image was verified successfully!`,
+    const { type: imageType, status } = req.query;
+    const { userId } = req.params;
+
+    const verificationResponse = await userQuery.changePhotoVerificationStatus(userId, imageType, status);
+    return res.status(200).json({
+      message: verificationResponse,
     });
   } catch (error) {
     logger.error(`Error while verifying image of user: ${error}`);
@@ -565,17 +576,42 @@ const markUnverified = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getUserImageForVerification = async (req, res) => {
+const getUserPhotoVerificationRequests = async (req, res) => {
   try {
-    const { id: userId } = req.params;
-    const userImageVerificationData = await userQuery.getUserImageForVerification(userId);
+    const { userId } = req.params;
+    const userData = req.userData;
+    if ((userData.id !== userId && !userData.roles[ROLES.SUPERUSER]) || !userId) {
+      return res.boom.unauthorized("You are not authorized to view this user's image verification data");
+    }
+    const userImageVerificationData = await userQuery.getUserPhotoVerificationRequests(userId);
+    return res.json({
+      message: "User image verification record fetched successfully!",
+      data: userImageVerificationData[0],
+    });
+  } catch (error) {
+    logger.error(`Error while querying image of user: ${error}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
+ * Updates the user data
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getAllUsersPhotoVerificationRequests = async (req, res) => {
+  const { username } = req.query;
+  try {
+    const userImageVerificationData = await userQuery.getAllUsersPhotoVerificationRequests(username);
     return res.json({
       message: "User image verification record fetched successfully!",
       data: userImageVerificationData,
     });
   } catch (error) {
-    logger.error(`Error while verifying image of user: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    logger.error(`Error while querying image of user: ${error}`);
+    return res.boom.badImplementation(`Error while querying image verification data for ${username}`);
   }
 };
 
@@ -954,7 +990,8 @@ module.exports = {
   getUserSkills,
   filterUsers,
   verifyUserImage,
-  getUserImageForVerification,
+  getAllUsersPhotoVerificationRequests,
+  getUserPhotoVerificationRequests,
   nonVerifiedDiscordUsers,
   setInDiscordScript,
   markUnverified,

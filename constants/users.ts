@@ -1,3 +1,9 @@
+const photoVerificationRequestStatus = {
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+};
+
 const profileStatus = {
   PENDING: "PENDING",
   APPROVED: "APPROVED",
@@ -61,4 +67,5 @@ module.exports = {
   months,
   discordNicknameLength,
   SIMULTANEOUS_WORKER_CALLS,
+  photoVerificationRequestStatus
 };

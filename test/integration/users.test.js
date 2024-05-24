@@ -25,6 +25,7 @@ const {
 } = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
+const { IMAGE_VERIFICATION_TYPES } = require("../../constants/imageVerificationTypes");
 
 const userRoleUpdate = userData[4];
 const userRoleUnArchived = userData[13];
@@ -39,6 +40,7 @@ const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../../constants/errorMessages");
+const { photoVerificationRequestStatus } = require("../../constants/users");
 const photoVerificationModel = firestore.collection("photo-verification");
 
 chai.use(chaiHttp);
@@ -51,14 +53,10 @@ describe("Users", function () {
   let fetchStub;
 
   beforeEach(async function () {
-    userId = await addUser();
+    userId = await addUser(nonSuperUser);
     jwt = authService.generateAuthToken({ userId });
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-
-    const userDocRef = photoVerificationModel.doc();
-    userPhotoVerificationData.userId = userId;
-    await userDocRef.set(userPhotoVerificationData);
   });
 
   afterEach(async function () {
@@ -1657,10 +1655,21 @@ describe("Users", function () {
   });
 
   describe("PATCH /users/picture/verify/id", function () {
+    let photoVerificationData;
+
+    beforeEach(async function () {
+      photoVerificationData = userPhotoVerificationData[0];
+
+      const userDocRef = photoVerificationModel.doc();
+      photoVerificationData.userId = userId;
+      await userDocRef.set(photoVerificationData);
+      photoVerificationData.id = userDocRef.id;
+    });
+
     it("Should verify the discord image of the user", function (done) {
       chai
         .request(app)
-        .patch(`/users/picture/verify/${userId}?type=discord`)
+        .patch(`/users/picture/verify/${userId}?status=${photoVerificationRequestStatus.APPROVED}&type=discord`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -1668,15 +1677,55 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("discord image was verified successfully!");
+          expect(res.body.message).to.equal("User image data verified successfully");
           return done();
         });
+    });
+
+    it("Should verify both the images of the user", async function () {
+      const res = await chai
+        .request(app)
+        .patch(
+          `/users/picture/verify/${userId}?status=${photoVerificationRequestStatus.APPROVED}&type=${IMAGE_VERIFICATION_TYPES.PROFILE_DISCORD}`
+        )
+        .set("cookie", `${cookieName}=${superUserAuthToken}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("User image data verified successfully");
+
+      const doc = await photoVerificationModel.doc(photoVerificationData.id).get();
+      const data = doc.data();
+
+      expect(data.discord.approved).to.equal(true);
+      expect(data.profile.approved).to.equal(true);
+      expect(data.status).to.equal(photoVerificationRequestStatus.APPROVED);
+    });
+
+    it("Should reject both the images of the user", async function () {
+      const res = await chai
+        .request(app)
+        .patch(
+          `/users/picture/verify/${userId}?status=${photoVerificationRequestStatus.REJECTED}&type=${IMAGE_VERIFICATION_TYPES.PROFILE_DISCORD}`
+        )
+        .set("cookie", `${cookieName}=${superUserAuthToken}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.message).to.equal("User photo verification request rejected successfully");
+
+      const doc = await photoVerificationModel.doc(photoVerificationData.id).get();
+      const data = doc.data();
+
+      expect(data.discord.approved).to.equal(false);
+      expect(data.profile.approved).to.equal(false);
+      expect(data.status).to.equal(photoVerificationRequestStatus.REJECTED);
     });
 
     it("Should throw for wrong query while verifying the discord image of the user", function (done) {
       chai
         .request(app)
-        .patch(`/users/picture/verify/${userId}?type=RANDOM`)
+        .patch(`/users/picture/verify/${userId}?status=${photoVerificationRequestStatus.APPROVED}&type=RANDOM`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -1689,7 +1738,98 @@ describe("Users", function () {
     });
   });
 
-  describe("GET /users/picture/id", function () {
+  describe("GET /users/picture/all", function () {
+    let photoVerificationData;
+
+    beforeEach(async function () {
+      photoVerificationData = userPhotoVerificationData[0];
+
+      const userDocRef = photoVerificationModel.doc();
+      photoVerificationData.userId = userId;
+      await userDocRef.set(photoVerificationData);
+      photoVerificationData.id = userDocRef.id;
+    });
+
+    it("Should get the all users photo verification record", function (done) {
+      chai
+        .request(app)
+        .get(`/users/picture/all`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User image verification record fetched successfully!");
+
+          const resultData = res.body.data[0];
+
+          expect(resultData.userId).to.be.equal(photoVerificationData.userId);
+          expect(resultData.discordId).to.be.equal(photoVerificationData.discordId);
+          expect(resultData.profile).to.deep.equal(photoVerificationData.profile);
+          expect(resultData.discord).to.deep.equal(photoVerificationData.discord);
+          return done();
+        });
+    });
+
+    it("Should get the user's photo verification record, for a given username", function (done) {
+      chai
+        .request(app)
+        .get(`/users/picture/all?username=${nonSuperUser.username}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User image verification record fetched successfully!");
+
+          const resultData = res.body.data[0];
+
+          expect(resultData.user.username).to.be.equal(nonSuperUser.username);
+          expect(resultData.userId).to.be.equal(photoVerificationData.userId);
+          expect(resultData.discordId).to.be.equal(photoVerificationData.discordId);
+          expect(resultData.profile).to.deep.equal(photoVerificationData.profile);
+          expect(resultData.discord).to.deep.equal(photoVerificationData.discord);
+          return done();
+        });
+    });
+
+    it("Should not get any photo verification object for random username", function (done) {
+      chai
+        .request(app)
+        .get(`/users/picture/all?username=randomUsername`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User image verification record fetched successfully!");
+
+          const resultDataLen = res.body.data.length;
+
+          expect(resultDataLen).to.be.equal(0);
+          return done();
+        });
+    });
+  });
+
+  describe("GET /users/picture/userId", function () {
+    let photoVerificationData;
+
+    beforeEach(async function () {
+      photoVerificationData = userPhotoVerificationData[0];
+
+      const userDocRef = photoVerificationModel.doc();
+      photoVerificationData.userId = userId;
+      await userDocRef.set(photoVerificationData);
+      photoVerificationData.id = userDocRef.id;
+    });
+
     it("Should get the user's verification record", function (done) {
       chai
         .request(app)
@@ -1701,7 +1841,10 @@ describe("Users", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.data).to.deep.equal(userPhotoVerificationData);
+          expect(res.body.data.userId).to.be.equal(photoVerificationData.userId);
+          expect(res.body.data.discordId).to.be.equal(photoVerificationData.discordId);
+          expect(res.body.data.profile).to.deep.equal(photoVerificationData.profile);
+          expect(res.body.data.discord).to.deep.equal(photoVerificationData.discord);
           expect(res.body.message).to.equal("User image verification record fetched successfully!");
           return done();
         });

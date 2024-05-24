@@ -9,7 +9,7 @@ const { retrieveUsers } = require("../services/dataAccessLayer");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const { getAllUserStatus, getGroupRole, getUserStatus } = require("./userStatus");
 const { userState } = require("../constants/userStatus");
-const { ONE_DAY_IN_MS, SIMULTANEOUS_WORKER_CALLS } = require("../constants/users");
+const { ONE_DAY_IN_MS, SIMULTANEOUS_WORKER_CALLS, photoVerificationRequestStatus } = require("../constants/users");
 const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
 const dataAccess = require("../services/dataAccessLayer");
@@ -215,9 +215,14 @@ const addGroupRoleToMember = async (roleData) => {
 const updateDiscordImageForVerification = async (userDiscordId) => {
   try {
     const discordAvatarUrl = await generateDiscordProfileImageUrl(userDiscordId);
-    const verificationDataSnapshot = await photoVerificationModel.where("discordId", "==", userDiscordId).get();
+    const verificationDataSnapshot = await photoVerificationModel
+      .where("discordId", "==", userDiscordId)
+      .where("status", "==", photoVerificationRequestStatus.PENDING)
+      .get();
+    const currentTime = new Date();
     const unverifiedUserDiscordImage = {
-      discord: { url: discordAvatarUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+      discord: { url: discordAvatarUrl, approved: false, updatedAt: currentTime.getTime() / 1000 },
+      "profile.approved": false,
     };
     if (verificationDataSnapshot.empty) {
       throw new Error("No user verification record found");

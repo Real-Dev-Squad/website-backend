@@ -9,7 +9,7 @@ const cloudinaryMetaData = require("../constants/cloudinary");
  * @param file { Object }: multipart file data
  * @param userId { string }: User id
  */
-const uploadProfilePicture = async ({ file, userId, coordinates }) => {
+const uploadProfilePicture = async ({ file, userId, coordinates }, dev = false) => {
   try {
     const parser = new DatauriParser();
     const imageDataUri = parser.format(file.originalname, file.buffer);
@@ -24,6 +24,9 @@ const uploadProfilePicture = async ({ file, userId, coordinates }) => {
       },
     });
     const { public_id: publicId, secure_url: url } = uploadResponse;
+    if (dev) {
+      return { publicId, url };
+    }
     await userModel.updateUserPicture({ publicId, url }, userId);
     return { publicId, url };
   } catch (err) {
