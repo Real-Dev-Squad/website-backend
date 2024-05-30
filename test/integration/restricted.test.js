@@ -20,9 +20,10 @@ describe("checkRestrictedUser", function () {
   let restrictedJwt;
   let unrestrictedJwt;
   let fetchStub;
+  let restrictedUserId;
 
   before(async function () {
-    const restrictedUserId = await addUser(restrictedUser);
+    restrictedUserId = await addUser(restrictedUser);
     const unrestrictedUserId = await addUser(unrestrictedUser);
     restrictedJwt = authService.generateAuthToken({ userId: restrictedUserId });
     unrestrictedJwt = authService.generateAuthToken({ userId: unrestrictedUserId });
@@ -44,7 +45,7 @@ describe("checkRestrictedUser", function () {
   it("should allow GET request coming from restricted user", function (done) {
     chai
       .request(app)
-      .get("/users/self")
+      .get(`/users?id=${restrictedUserId}`)
       .set("cookie", `${cookieName}=${restrictedJwt}`)
       .end((err, res) => {
         if (err) {
