@@ -6,7 +6,7 @@
 const port = 7337;
 const NODE_ENV = process.env.NODE_ENV;
 module.exports = {
-  port: 7337,
+  port,
   enableFileLogs: false,
   // Console logs are set to avoid the winston error of no defined transports
   enableConsoleLogs: true,
