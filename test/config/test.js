@@ -3,10 +3,10 @@
  * Defaults set from default.js
  */
 
-const port = 3000;
+const port = 7337;
 const NODE_ENV = process.env.NODE_ENV;
 module.exports = {
-  port: 3000,
+  port: 7337,
   enableFileLogs: false,
   // Console logs are set to avoid the winston error of no defined transports
   enableConsoleLogs: true,
