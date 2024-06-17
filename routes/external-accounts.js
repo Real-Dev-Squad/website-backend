@@ -18,7 +18,7 @@ router.post(
   "/users",
   authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
   validator.postExternalAccountsUsers,
-  externalAccount.externalAccountsUsersPostHandler
+  externalAccount.externalAccountsUsersPostHandler,
 );
 
 module.exports = router;

@@ -90,7 +90,7 @@ describe("Contributions", function () {
             "startedOn",
             "status",
             "title",
-            "id"
+            "id",
           );
           expect(noteworthyObj.prList[0]).to.have.all.keys(
             "title",
@@ -98,7 +98,7 @@ describe("Contributions", function () {
             "url",
             "createdAt",
             "updatedAt",
-            "raisedBy"
+            "raisedBy",
           );
           const [noteworthyObj2] = res.body.all;
           expect(noteworthyObj2).to.contain.keys("task", "prList");

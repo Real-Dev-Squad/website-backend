@@ -282,7 +282,7 @@ const updateDiscordNicknames = async (req, res) => {
         } catch (error) {
           logger.error(`error getting user with matching discordId ${error.message}`);
         }
-      })
+      }),
     );
 
     const totalNicknamesUpdated = { count: 0 };
@@ -366,7 +366,7 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
             {
               roleid: role.id,
             },
-            roleInFirestore.id
+            roleInFirestore.id,
           );
         }
       } else {

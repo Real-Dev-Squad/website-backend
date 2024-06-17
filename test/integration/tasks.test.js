@@ -210,7 +210,7 @@ describe("Tasks", function () {
     after(async function () {
       await tasks.updateTask(
         { ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753, dependsOn: [], status: "IN_PROGRESS" },
-        taskId2
+        taskId2,
       );
     });
 
@@ -507,7 +507,7 @@ describe("Tasks", function () {
         {
           status: "COMPLETED",
         },
-        taskId2
+        taskId2,
       );
       const res = await chai.request(app).get(`/tasks?dev=true&status=DONE&userFeatureFlag=true`);
 
@@ -1217,7 +1217,7 @@ describe("Tasks", function () {
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed from In progress until progress of task is not 100%."
+        "The status of task can not be changed from In progress until progress of task is not 100%.",
       );
     });
 
@@ -1232,7 +1232,7 @@ describe("Tasks", function () {
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed to In progress until progress of task is not 0%."
+        "The status of task can not be changed to In progress until progress of task is not 0%.",
       );
     });
 
@@ -1247,7 +1247,7 @@ describe("Tasks", function () {
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed from Blocked until progress of task is not 100%."
+        "The status of task can not be changed from Blocked until progress of task is not 100%.",
       );
     });
 

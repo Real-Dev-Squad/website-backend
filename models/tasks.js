@@ -543,7 +543,7 @@ const overdueTasks = async (overDueTasks) => {
           unassignedMember: assignee,
           unassignedTask,
         };
-      })
+      }),
     );
     return newAvailableTasks;
   } catch (err) {
@@ -624,7 +624,7 @@ const updateTaskStatus = async () => {
           updatedTaskDetails: res.updatedTaskDetails,
           failedTaskDetails: res.failedTaskDetails,
         };
-      })
+      }),
     );
 
     updatedTasksPromises.forEach((res) => {

@@ -393,7 +393,7 @@ describe("Task requests | models", function () {
       expect(approvedTask.data().updatedAt).to.be.a("number");
       expect(approvedTask.data().createdAt).to.be.equal(
         approvedTask.data().updatedAt,
-        "When new task is created createdAt and updatedAt both are same"
+        "When new task is created createdAt and updatedAt both are same",
       );
       expect(approvedTask.data().percentCompleted).to.equal(0);
       expect(approvedTask.data().priority).to.equal(DEFAULT_TASK_PRIORITY);
@@ -416,7 +416,7 @@ describe("Task requests | models", function () {
       expect(approvedTask.data().updatedAt).to.be.a("number");
       expect(approvedTask.data().createdAt).to.be.not.equal(
         approvedTask.data().updatedAt,
-        "When existing task is updated, updatedAt field is updated so createdAt and updatedAt are not same"
+        "When existing task is updated, updatedAt field is updated so createdAt and updatedAt are not same",
       );
     });
 
@@ -526,10 +526,10 @@ describe("Task requests | models", function () {
         const taskRequestData2 = (await taskRequestsCollection.doc(taskRequestId2).get()).data();
         expect(taskRequestData2.taskTitle).to.be.equal(taskData.taskData.title);
         expect(taskRequestData2.users[0].userId).to.be.equal(
-          mockData.existingOldTaskRequestWithMultipleUsers.requestors[0]
+          mockData.existingOldTaskRequestWithMultipleUsers.requestors[0],
         );
         expect(taskRequestData2.users[1].userId).to.be.equal(
-          mockData.existingOldTaskRequestWithMultipleUsers.requestors[1]
+          mockData.existingOldTaskRequestWithMultipleUsers.requestors[1],
         );
         expect(taskRequestData2.requestType).to.be.equal(TASK_REQUEST_TYPE.ASSIGNMENT);
       });

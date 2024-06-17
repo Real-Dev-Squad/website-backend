@@ -355,12 +355,12 @@ const updateTaskStatus = async (req, res, next) => {
           return res.boom.badRequest(
             `The status of task can not be changed from ${
               isCurrentTaskStatusInProgress ? "In progress" : "Blocked"
-            } until progress of task is not 100%.`
+            } until progress of task is not 100%.`,
           );
         }
         if (isNewTaskStatusInProgress && !isCurrentTaskStatusBlock && !isCurrProgress0 && !isNewProgress0) {
           return res.boom.badRequest(
-            "The status of task can not be changed to In progress until progress of task is not 0%."
+            "The status of task can not be changed to In progress until progress of task is not 0%.",
           );
         }
       }
@@ -439,7 +439,7 @@ const overdueTasks = async (req, res) => {
     const allTasks = await tasks.fetchTasks();
     const now = Math.floor(Date.now() / 1000);
     const overDueTasks = allTasks.filter(
-      (task) => (task.status === ASSIGNED || task.status === IN_PROGRESS) && task.endsOn < now
+      (task) => (task.status === ASSIGNED || task.status === IN_PROGRESS) && task.endsOn < now,
     );
     const newAvailableTasks = await tasks.overdueTasks(overDueTasks);
     return res.json({

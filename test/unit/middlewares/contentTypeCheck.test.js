@@ -26,7 +26,7 @@ describe("contentTypeCheck", function () {
       Promise.resolve({
         status: 200,
         json: () => Promise.resolve(getDiscordMembers),
-      })
+      }),
     );
   });
 

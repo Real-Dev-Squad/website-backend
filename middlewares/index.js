@@ -30,7 +30,7 @@ const middleware = (app) => {
       ieNoOpen: false,
       referrerPolicy: false,
       xssFilter: false,
-    })
+    }),
   );
 
   app.use(
@@ -38,7 +38,7 @@ const middleware = (app) => {
       origin: config.get("cors.allowedOrigins"),
       credentials: true,
       optionsSuccessStatus: 200,
-    })
+    }),
   );
   app.use(contentTypeCheck);
 

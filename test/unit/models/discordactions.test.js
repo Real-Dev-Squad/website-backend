@@ -301,7 +301,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ user: { avatar: 12345 } }),
-        })
+        }),
       );
 
       const result = await updateDiscordImageForVerification(userDiscordId);
@@ -314,7 +314,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ user: { avatar: 12345 } }),
-        })
+        }),
       );
 
       try {
@@ -332,7 +332,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ user: { avatar: 12345 } }),
-        })
+        }),
       );
       sinon.stub(logger, "error");
 
@@ -529,7 +529,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(fetchStubResponse),
-        })
+        }),
       );
 
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
@@ -555,7 +555,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(fetchStubResponse),
-        })
+        }),
       );
 
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
@@ -577,7 +577,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(fetchStubResponse),
-        })
+        }),
       );
 
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;

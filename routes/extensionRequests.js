@@ -20,14 +20,14 @@ router.patch(
   authenticate,
   authorizeRoles([SUPERUSER, APPOWNER]),
   updateExtensionRequest,
-  extensionRequests.updateExtensionRequest
+  extensionRequests.updateExtensionRequest,
 );
 router.patch(
   "/:id/status",
   authenticate,
   authorizeRoles([SUPERUSER, APPOWNER]),
   updateExtensionRequestStatus,
-  extensionRequests.updateExtensionRequestStatus
+  extensionRequests.updateExtensionRequestStatus,
 );
 
 module.exports = router;

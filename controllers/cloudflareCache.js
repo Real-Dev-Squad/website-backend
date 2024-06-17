@@ -53,7 +53,7 @@ const purge = async (res, id, username, isSuperUser, userDetails) => {
         await logsQuery.addLog(
           logType.CLOUDFLARE_CACHE_PURGED,
           { userId: id, purgedFor: userDetails.user.id },
-          { message: "Cache Purged" }
+          { message: "Cache Purged" },
         );
       } else {
         await logsQuery.addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Cache Purged" });

@@ -35,7 +35,7 @@ const extractPRdetails = (data) => {
         labels: allLabels,
         assignees: allAssignees,
       });
-    }
+    },
   );
   return allPRs;
 };
@@ -147,7 +147,7 @@ const fetchOpenPRs = async (params = {}) => {
         ...resultOptions,
         per_page: perPage,
         page,
-      }
+      },
     );
     return getFetch(url);
   } catch (err) {
@@ -171,7 +171,7 @@ const fetchMergedPRs = async (params = {}) => {
         ...resultOptions,
         per_page: perPage,
         page,
-      }
+      },
     );
 
     return getFetch(url);
@@ -197,7 +197,7 @@ const fetchOpenIssues = async (params = {}) => {
         per_page: perPage,
         page,
       },
-      searchString
+      searchString,
     );
     return getFetch(url);
   } catch (err) {
@@ -221,7 +221,7 @@ const fetchClosedIssues = async (params = {}) => {
         ...resultOptions,
         per_page: perPage,
         page,
-      }
+      },
     );
     return getFetch(url);
   } catch (err) {
@@ -251,7 +251,7 @@ const fetchIssues = async () => {
         // TODO: replace <AUTH-TOKEN> with RDS org PAT
         Authorization: `Bearer <AUTH-TOKEN>`,
         org: config.get("githubApi.org"),
-      }
+      },
     );
     return res;
   } catch (err) {

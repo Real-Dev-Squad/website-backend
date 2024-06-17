@@ -114,7 +114,7 @@ async function removeBadges({ userId, badgeIds }) {
     const documentRefferences = snapshot.docs.map((doc) => doc.ref);
     const documentsRefferencesChunks = chunks(documentRefferences, DOCUMENT_WRITE_SIZE);
     const bulkWriterBatches = documentsRefferencesChunks.map((value) =>
-      assignOrRemoveBadgesInBulk({ userId, array: value, isRemove: true })
+      assignOrRemoveBadgesInBulk({ userId, array: value, isRemove: true }),
     );
     return await Promise.all(bulkWriterBatches);
   } catch (err) {

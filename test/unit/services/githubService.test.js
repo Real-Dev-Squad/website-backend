@@ -23,7 +23,7 @@ describe("githubService", function () {
     it("Should generate the correct url to fetch open PRs", async function () {
       const response = await githubService.fetchOpenPRs();
       expect(response).to.be.equal(
-        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Apr+is%3Aopen&sort=created&per_page=100&page=1"
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Apr+is%3Aopen&sort=created&per_page=100&page=1",
       );
     });
   });
@@ -40,7 +40,7 @@ describe("githubService", function () {
       };
       const response = await githubService.fetchOpenPRs(params);
       expect(response).to.be.equal(
-        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Apr+is%3Aopen+created%3A2023-01-01..2023-02-01&sort=created&order=desc&per_page=100&page=1"
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Apr+is%3Aopen+created%3A2023-01-01..2023-02-01&sort=created&order=desc&per_page=100&page=1",
       );
     });
   });
@@ -50,7 +50,7 @@ describe("githubService", function () {
       await addUser();
       const response = await githubService.fetchPRsByUser(githubUserInfo[0].username);
       expect(response).to.be.equal(
-        `https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+author%3A${githubUserInfo[0].username}+type%3Apr`
+        `https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+author%3A${githubUserInfo[0].username}+type%3Apr`,
       );
     });
   });
@@ -59,7 +59,7 @@ describe("githubService", function () {
     it("Should generate the correct url to fetch merged Prs", async function () {
       const response = await githubService.fetchMergedPRs();
       expect(response).to.be.equal(
-        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Apr+is%3Amerged&sort=updated&per_page=100&page=1"
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Apr+is%3Amerged&sort=updated&per_page=100&page=1",
       );
     });
   });
@@ -76,7 +76,7 @@ describe("githubService", function () {
       };
       const response = await githubService.fetchMergedPRs(params);
       expect(response).to.be.equal(
-        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Apr+is%3Amerged+merged%3A%3C%3D2023-01-01&sort=updated&order=asc&per_page=100&page=1"
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Apr+is%3Amerged+merged%3A%3C%3D2023-01-01&sort=updated&order=asc&per_page=100&page=1",
       );
     });
   });
@@ -85,7 +85,7 @@ describe("githubService", function () {
     it("Should generate the correct url to fetch open issues", async function () {
       const response = await githubService.fetchOpenIssues();
       expect(response).to.be.equal(
-        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Aissue+is%3Aopen&sort=created&per_page=100&page=1"
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Aissue+is%3Aopen&sort=created&per_page=100&page=1",
       );
     });
   });
@@ -102,7 +102,7 @@ describe("githubService", function () {
       };
       const response = await githubService.fetchOpenIssues(params);
       expect(response).to.be.equal(
-        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Aissue+is%3Aopen+created%3A%3E%3D2023-01-01&sort=created&order=desc&per_page=100&page=1"
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Aissue+is%3Aopen+created%3A%3E%3D2023-01-01&sort=created&order=desc&per_page=100&page=1",
       );
     });
   });
@@ -111,7 +111,7 @@ describe("githubService", function () {
     it("Should generate the correct url to fetch closed issues", async function () {
       const response = await githubService.fetchClosedIssues();
       expect(response).to.be.equal(
-        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Aissue+is%3Aclosed&sort=updated&per_page=100&page=1"
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Aissue+is%3Aclosed&sort=updated&per_page=100&page=1",
       );
     });
   });
@@ -128,7 +128,7 @@ describe("githubService", function () {
       };
       const response = await githubService.fetchClosedIssues(params);
       expect(response).to.be.equal(
-        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Aissue+is%3Aclosed+closed%3A2023-01-01..2023-02-01&sort=updated&order=desc&per_page=100&page=1"
+        "https://api.github.com/search/issues?q=org%3AReal-Dev-Squad+type%3Aissue+is%3Aclosed+closed%3A2023-01-01..2023-02-01&sort=updated&order=desc&per_page=100&page=1",
       );
     });
   });

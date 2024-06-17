@@ -180,7 +180,7 @@ async function getUsers(req, res, next) {
           joi.string().when("page", {
             is: joi.exist(),
             then: joi.custom((_, helpers) => helpers.message("Both page and prev can't be passed")),
-          })
+          }),
         )
         .messages({
           "string.empty": "prev value cannot be empty",

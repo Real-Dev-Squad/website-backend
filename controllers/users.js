@@ -652,7 +652,7 @@ const rejectProfileDiff = async (req, res) => {
     const { profileDiffId, message } = req.body;
     const profileResponse = await profileDiffsQuery.updateProfileDiff(
       { approval: profileDiffStatus.REJECTED },
-      profileDiffId
+      profileDiffId,
     );
 
     if (profileResponse.notFound) return res.boom.notFound("Profile Diff doesn't exist");

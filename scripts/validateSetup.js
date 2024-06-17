@@ -16,7 +16,7 @@ try {
   console.info("✅ Firestore config is correct.");
 } catch (error) {
   throw new Error(
-    "⚠️ Please make sure firestore config exists as a String (not an object) and is correctly set up. ⚠️"
+    "⚠️ Please make sure firestore config exists as a String (not an object) and is correctly set up. ⚠️",
   );
 }
 

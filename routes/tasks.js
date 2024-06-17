@@ -21,7 +21,7 @@ const { CLOUDFLARE_WORKER, CRON_JOB_HANDLER } = require("../constants/bot");
 const oldAuthorizationMiddleware = authorizeRoles([APPOWNER, SUPERUSER]);
 const newAuthorizationMiddleware = authorizeAndAuthenticate(
   [APPOWNER, SUPERUSER],
-  [CLOUDFLARE_WORKER, CRON_JOB_HANDLER]
+  [CLOUDFLARE_WORKER, CRON_JOB_HANDLER],
 );
 
 // Middleware to check if 'dev' query parameter is set to true
@@ -42,7 +42,7 @@ router.post(
   authorizeRoles([APPOWNER, SUPERUSER]),
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
   createTask,
-  tasks.addNewTask
+  tasks.addNewTask,
 );
 router.patch(
   "/:id",
@@ -50,7 +50,7 @@ router.patch(
   enableDevModeMiddleware,
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
   updateTask,
-  tasks.updateTask
+  tasks.updateTask,
 );
 router.get("/:id/details", tasks.getTask);
 router.get("/:username", tasks.getUserTasks);
@@ -60,7 +60,7 @@ router.patch(
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
   updateSelfTask,
   tasks.updateTaskStatus,
-  assignTask
+  assignTask,
 );
 router.patch("/assign/self", authenticate, invalidateCache({ invalidationKeys: [ALL_TASKS] }), tasks.assignTask);
 

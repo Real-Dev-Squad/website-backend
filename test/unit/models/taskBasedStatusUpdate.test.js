@@ -56,7 +56,7 @@ describe("Update Status based on task update", function () {
         const res = await updateStatusOnTaskCompletion(userId);
         expect(res.status).to.equal("success");
         expect(res.message).to.equal(
-          "UserStatus Document did not previously exist, New UserStatus Document created and updated to an IDLE status."
+          "UserStatus Document did not previously exist, New UserStatus Document created and updated to an IDLE status.",
         );
         expect(res.data.currentStatus).to.equal(userState.IDLE);
       });
@@ -103,7 +103,7 @@ describe("Update Status based on task update", function () {
         const res = await updateStatusOnTaskCompletion(userId);
         expect(res.status).to.equal("success");
         expect(res.message).to.equal(
-          "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status."
+          "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status.",
         );
         expect(res.data.currentStatus).to.equal(userState.ACTIVE);
       });
@@ -156,7 +156,7 @@ describe("Update Status based on task update", function () {
       const res = await updateUserStatusOnNewTaskAssignment(userId);
       expect(res.status).to.equal("success");
       expect(res.message).to.equal(
-        "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status."
+        "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status.",
       );
       expect(res.data.currentStatus).to.equal(userState.ACTIVE);
     });
@@ -204,7 +204,7 @@ describe("Update Status based on task update", function () {
       await updateUserStatusOnNewTaskAssignment(userId).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.be.equal(
-          "Please reach out to the administrator as your user status is not recognized as valid."
+          "Please reach out to the administrator as your user status is not recognized as valid.",
         );
       });
     });
@@ -298,7 +298,7 @@ describe("Update Status based on task update", function () {
         "activeUsersAltered",
         "activeUsersUnaltered",
         "idleUsersAltered",
-        "idleUsersUnaltered"
+        "idleUsersUnaltered",
       );
       expect(result.usersCount).to.equal(12);
       expect(result.unprocessedUsers).to.equal(0);
