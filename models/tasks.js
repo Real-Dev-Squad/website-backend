@@ -19,7 +19,7 @@ const {
   COMPLETED,
   SANITY_CHECK,
   BACKLOG,
-  DONE,
+  DONE
 } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
@@ -45,7 +45,7 @@ const updateTask = async (taskData, taskId = null) => {
       const { dependsOn, ...taskWithoutDependsOn } = taskData;
       await tasksModel.doc(taskId).set({
         ...task.data(),
-        ...taskWithoutDependsOn,
+        ...taskWithoutDependsOn
       });
       if (dependsOn) {
         await firestore.runTransaction(async (transaction) => {
@@ -59,7 +59,7 @@ const updateTask = async (taskData, taskId = null) => {
               if (dependencyDoc.exists) {
                 const taskDependsOn = {
                   taskId: taskId,
-                  dependsOn: dependency,
+                  dependsOn: dependency
                 };
                 const docRef = dependencyModel.doc();
                 transaction.set(docRef, taskDependsOn);
@@ -75,7 +75,7 @@ const updateTask = async (taskData, taskId = null) => {
     const taskInfo = await tasksModel.add(taskData);
     const result = {
       taskId: taskInfo.id,
-      taskDetails: await fromFirestoreData(taskData),
+      taskDetails: await fromFirestoreData(taskData)
     };
     return result;
   } catch (err) {
@@ -93,7 +93,7 @@ const addDependency = async (data) => {
     for (const dependency of dependsOn) {
       const taskDependOn = {
         taskId: taskId,
-        dependsOn: dependency,
+        dependsOn: dependency
       };
       const docid = dependencyModel.doc();
       batch.set(docid, taskDependOn);
@@ -147,7 +147,7 @@ const fetchPaginatedTasks = async ({
   dev = false,
   assignee,
   title,
-  userFeatureFlag,
+  userFeatureFlag
 }) => {
   try {
     let initialQuery = tasksModel;
@@ -170,7 +170,7 @@ const fetchPaginatedTasks = async ({
         return {
           allTasks: [],
           next: "",
-          prev: "",
+          prev: ""
         };
       }
     }
@@ -184,7 +184,7 @@ const fetchPaginatedTasks = async ({
         IN_REVIEW,
         SMOKE_TESTING,
         BLOCKED,
-        SANITY_CHECK,
+        SANITY_CHECK
       ];
       initialQuery = initialQuery
         .where("endsOn", "<", currentTime)
@@ -247,7 +247,7 @@ const fetchPaginatedTasks = async ({
     return {
       allTasks,
       next: nextDoc?.docs[0]?.id ?? "",
-      prev: prevDoc?.docs[0]?.id ?? "",
+      prev: prevDoc?.docs[0]?.id ?? ""
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
@@ -355,7 +355,7 @@ const fetchSelfTask = async (taskId, userId) => {
     const taskfromFirestoreData = await fromFirestoreData(taskData);
     const taskList = {
       ...taskfromFirestoreData,
-      status: TASK_STATUS[taskfromFirestoreData.status.toUpperCase()] || task.status,
+      status: TASK_STATUS[taskfromFirestoreData.status.toUpperCase()] || task.status
     };
     return { taskData: taskList };
   } catch (err) {
@@ -462,8 +462,8 @@ const getNewTask = async (skill = undefined, level = undefined) => {
       return {
         task: {
           id,
-          ...taskData,
-        },
+          ...taskData
+        }
       };
     }
   }
@@ -536,14 +536,14 @@ const overdueTasks = async (overDueTasks) => {
           status: TASK_STATUS.AVAILABLE,
           assignee: null,
           endsOn: null,
-          startedOn: null,
+          startedOn: null
         });
         const { taskData: unassignedTask } = await fetchTask(id);
         return {
           unassignedMember: assignee,
-          unassignedTask,
+          unassignedTask
         };
-      }),
+      })
     );
     return newAvailableTasks;
   } catch (err) {
@@ -569,7 +569,7 @@ const getOverdueTasks = async (days = 0) => {
       IN_REVIEW,
       SMOKE_TESTING,
       BLOCKED,
-      SANITY_CHECK,
+      SANITY_CHECK
     ];
 
     const query = tasksModel.where("endsOn", "<", targetTime).where("status", "in", OVERDUE_TASK_STATUSES);
@@ -582,7 +582,7 @@ const getOverdueTasks = async (days = 0) => {
     const taskData = snapshot.docs.map((doc) => {
       return {
         id: doc.id,
-        ...doc.data(),
+        ...doc.data()
       };
     });
     return taskData;
@@ -601,7 +601,7 @@ const updateTaskStatus = async () => {
       totalUpdatedStatus: 0,
       totalOperationsFailed: 0,
       updatedTaskDetails: [],
-      failedTaskDetails: [],
+      failedTaskDetails: []
     };
 
     if (snapshot.size === 0) {
@@ -622,9 +622,9 @@ const updateTaskStatus = async () => {
           totalUpdatedStatus: res.totalUpdatedStatus,
           totalOperationsFailed: res.totalOperationsFailed,
           updatedTaskDetails: res.updatedTaskDetails,
-          failedTaskDetails: res.failedTaskDetails,
+          failedTaskDetails: res.failedTaskDetails
         };
-      }),
+      })
     );
 
     updatedTasksPromises.forEach((res) => {
@@ -633,7 +633,7 @@ const updateTaskStatus = async () => {
         totalUpdatedStatus: (summary.totalUpdatedStatus += res.totalUpdatedStatus),
         totalOperationsFailed: (summary.totalOperationsFailed += res.totalOperationsFailed),
         updatedTaskDetails: [...summary.updatedTaskDetails, ...res.updatedTaskDetails],
-        failedTaskDetails: [...summary.failedTaskDetails, ...res.failedTaskDetails],
+        failedTaskDetails: [...summary.failedTaskDetails, ...res.failedTaskDetails]
       };
     });
 
@@ -720,5 +720,5 @@ module.exports = {
   getOverdueTasks,
   updateTaskStatus,
   updateOrphanTasksStatus,
-  markUnDoneTasksOfArchivedUsersBacklog,
+  markUnDoneTasksOfArchivedUsersBacklog
 };

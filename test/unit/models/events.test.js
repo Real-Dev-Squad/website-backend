@@ -49,7 +49,7 @@ describe("Events", function () {
         await eventQuery.endActiveEvent({
           id: docRef.id,
           reason: "test reason",
-          lock: true,
+          lock: true
         });
 
         const docSnapshot = await eventModel.doc(docRef.id).get();
@@ -74,7 +74,7 @@ describe("Events", function () {
         name: "NonExistingPeer",
         eventId: docRef.id,
         role: "participant",
-        joinedAt: new Date(),
+        joinedAt: new Date()
       };
 
       const result = await eventQuery.addPeerToEvent(peerData);
@@ -96,13 +96,13 @@ describe("Events", function () {
         name: "ExistingPeer",
         eventId: docRef.id,
         role: "participant",
-        joinedAt: new Date(),
+        joinedAt: new Date()
       };
 
       await peerModel.add({
         peerId: peerData.peerId,
         name: peerData.name,
-        joinedEvents: [],
+        joinedEvents: []
       });
 
       await eventQuery.addPeerToEvent(peerData);
@@ -123,7 +123,7 @@ describe("Events", function () {
         code: "test-code",
         role: "maven",
         event_id: eventDocRef.id,
-        id: "test-id",
+        id: "test-id"
       };
 
       const result = await eventQuery.createEventCode(eventCodeData);
@@ -141,14 +141,14 @@ describe("Events", function () {
         code: "test-code-1",
         role: "maven",
         event_id: eventDocRef.id,
-        id: "test-id-1",
+        id: "test-id-1"
       };
 
       const eventCodeDataSecond = {
         code: "test-code-2",
         role: "maven",
         event_id: eventDocRef.id,
-        id: "test-id-2",
+        id: "test-id-2"
       };
 
       await eventQuery.createEventCode(eventCodeDataFirst);
@@ -198,7 +198,7 @@ describe("Events", function () {
         name: "Satyam Bajpai",
         eventId: docRef.id,
         role: "guest",
-        joinedAt: new Date(),
+        joinedAt: new Date()
       };
 
       await eventQuery.addPeerToEvent(peerData);

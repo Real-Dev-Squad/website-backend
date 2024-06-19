@@ -16,12 +16,12 @@ describe("FCM token services", function () {
   it("Should get user id's from role id", async function () {
     const memberRoleModelData = {
       roleid: "1147354535342383104",
-      userid: "jskdhaskjhdkasjh",
+      userid: "jskdhaskjhdkasjh"
     };
     await addGroupRoleToMember(memberRoleModelData);
     const memberRoleModelData2 = {
       roleid: "1147354535342383104",
-      userid: "EFEGFHERIUGHIUER",
+      userid: "EFEGFHERIUGHIUER"
     };
     await addGroupRoleToMember(memberRoleModelData2);
 

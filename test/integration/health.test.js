@@ -40,7 +40,7 @@ describe("health", function () {
         expect(res.body).to.eql({
           statusCode: 401,
           error: "Unauthorized",
-          message: "Unauthenticated User",
+          message: "Unauthenticated User"
         });
 
         return done();

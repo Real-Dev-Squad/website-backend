@@ -1,7 +1,7 @@
 const joi = require("joi");
 const { ERROR_MESSAGES } = require("../../constants/badges");
 const {
-  VALIDATORS: { CREATE_BADGE, ASSIGN_OR_REMOVE_BADGES, API_PAYLOAD_VALIDATION_FAILED },
+  VALIDATORS: { CREATE_BADGE, ASSIGN_OR_REMOVE_BADGES, API_PAYLOAD_VALIDATION_FAILED }
 } = ERROR_MESSAGES;
 const logger = require("../../utils/logger");
 
@@ -18,7 +18,7 @@ async function createBadge(req, res, next) {
     .keys({
       name: joi.string().min(3).max(30).required(),
       description: joi.string().min(3).max(130).optional(),
-      createdBy: joi.string().min(1).required(),
+      createdBy: joi.string().min(1).required()
     });
   try {
     if (!req.file) {
@@ -44,7 +44,7 @@ async function assignOrRemoveBadges(req, res, next) {
     .strict()
     .keys({
       userId: joi.string().required(),
-      badgeIds: joi.array().min(1).items(joi.string().required()).unique().required(),
+      badgeIds: joi.array().min(1).items(joi.string().required()).unique().required()
     });
   try {
     const { badgeIds, userId } = req.body;
@@ -58,5 +58,5 @@ async function assignOrRemoveBadges(req, res, next) {
 
 module.exports = {
   createBadge,
-  assignOrRemoveBadges,
+  assignOrRemoveBadges
 };

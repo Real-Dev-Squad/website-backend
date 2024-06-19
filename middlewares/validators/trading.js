@@ -7,7 +7,7 @@ const newTrade = async (req, res, next) => {
     stockName: joi.string().required(),
     quantity: joi.number().required(),
     listedPrice: joi.number().required(),
-    totalPrice: joi.number().required(),
+    totalPrice: joi.number().required()
   });
 
   try {
@@ -20,5 +20,5 @@ const newTrade = async (req, res, next) => {
 };
 
 module.exports = {
-  newTrade,
+  newTrade
 };

@@ -17,12 +17,12 @@ const getUserPRs = async (req, res) => {
       const allPRs = githubService.extractPRdetails(data);
       return res.json({
         message: "Pull requests returned successfully!",
-        pullRequests: allPRs,
+        pullRequests: allPRs
       });
     }
     return res.json({
       message: "No pull requests found!",
-      pullRequests: [],
+      pullRequests: []
     });
   } catch (err) {
     logger.error(`Error while processing pull requests: ${err}`);
@@ -47,12 +47,12 @@ const getStalePRs = async (req, res) => {
       const allPRs = githubService.extractPRdetails(data);
       return res.json({
         message: "Stale PRs",
-        pullRequests: allPRs,
+        pullRequests: allPRs
       });
     }
     return res.json({
       message: "No pull requests found!",
-      pullRequests: [],
+      pullRequests: []
     });
   } catch (err) {
     logger.error(`Error while processing pull requests: ${err}`);
@@ -77,12 +77,12 @@ const getOpenPRs = async (req, res) => {
       const allPRs = githubService.extractPRdetails(data);
       return res.json({
         message: "Open PRs",
-        pullRequests: allPRs,
+        pullRequests: allPRs
       });
     }
     return res.json({
       message: "No pull requests found!",
-      pullRequests: [],
+      pullRequests: []
     });
   } catch (err) {
     logger.error(`Error while processing pull requests: ${err}`);
@@ -93,5 +93,5 @@ const getOpenPRs = async (req, res) => {
 module.exports = {
   getUserPRs,
   getStalePRs,
-  getOpenPRs,
+  getOpenPRs
 };

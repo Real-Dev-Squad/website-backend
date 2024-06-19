@@ -7,7 +7,7 @@ describe("Middleware | Validators | Task Requests", function () {
     describe("Task Assignment Requests", function () {
       it("should not throw error when valid request body is passed", async function () {
         const req = {
-          body: data.validAssignmentRequest,
+          body: data.validAssignmentRequest
         };
         const res = {};
         const nextSpy = Sinon.spy();
@@ -17,7 +17,7 @@ describe("Middleware | Validators | Task Requests", function () {
 
       it("should not throw error when valid request body with description is passed", async function () {
         const req = {
-          body: data.assignmentReqWithDescription,
+          body: data.assignmentReqWithDescription
         };
         const res = {};
         const nextSpy = Sinon.spy();
@@ -27,7 +27,7 @@ describe("Middleware | Validators | Task Requests", function () {
 
       it("should not throw error when valid request body without external issue id is passed", async function () {
         const req = {
-          body: data.assignmentReqWithoutExtIssueId,
+          body: data.assignmentReqWithoutExtIssueId
         };
         const res = {};
         const nextSpy = Sinon.spy();
@@ -37,13 +37,13 @@ describe("Middleware | Validators | Task Requests", function () {
 
       it("should throw error when request body without proposed deadline is passed", async function () {
         const req = {
-          body: data.assignmentReqWithoutProposedDeadline,
+          body: data.assignmentReqWithoutProposedDeadline
         };
         const badRequestSpy = Sinon.spy();
         const res = {
           boom: {
-            badRequest: badRequestSpy,
-          },
+            badRequest: badRequestSpy
+          }
         };
         const nextSpy = Sinon.spy();
         await postTaskRequests(req, res, nextSpy);
@@ -53,13 +53,13 @@ describe("Middleware | Validators | Task Requests", function () {
 
       it("should throw error when request body without task id is passed", async function () {
         const req = {
-          body: data.assignmentReqWithoutTaskId,
+          body: data.assignmentReqWithoutTaskId
         };
         const badRequestSpy = Sinon.spy();
         const res = {
           boom: {
-            badRequest: badRequestSpy,
-          },
+            badRequest: badRequestSpy
+          }
         };
         const nextSpy = Sinon.spy();
         await postTaskRequests(req, res, nextSpy);
@@ -69,13 +69,13 @@ describe("Middleware | Validators | Task Requests", function () {
 
       it("should throw error when request body without used id is passed", async function () {
         const req = {
-          body: data.assignmentReqWithoutUserId,
+          body: data.assignmentReqWithoutUserId
         };
         const badRequestSpy = Sinon.spy();
         const res = {
           boom: {
-            badRequest: badRequestSpy,
-          },
+            badRequest: badRequestSpy
+          }
         };
         const nextSpy = Sinon.spy();
         await postTaskRequests(req, res, nextSpy);
@@ -87,7 +87,7 @@ describe("Middleware | Validators | Task Requests", function () {
     describe("Task Creation Requests", function () {
       it("should not throw error when valid request body is passed", async function () {
         const req = {
-          body: data.validCreationRequest,
+          body: data.validCreationRequest
         };
         const res = {};
         const nextSpy = Sinon.spy();
@@ -97,7 +97,7 @@ describe("Middleware | Validators | Task Requests", function () {
 
       it("should not throw error when valid request body with description is passed", async function () {
         const req = {
-          body: data.creationReqWithDescription,
+          body: data.creationReqWithDescription
         };
         const res = {};
         const nextSpy = Sinon.spy();
@@ -107,13 +107,13 @@ describe("Middleware | Validators | Task Requests", function () {
 
       it("should throw error when request body without external issue id is passed", async function () {
         const req = {
-          body: data.creationReqWithoutExtIssueId,
+          body: data.creationReqWithoutExtIssueId
         };
         const badRequestSpy = Sinon.spy();
         const res = {
           boom: {
-            badRequest: badRequestSpy,
-          },
+            badRequest: badRequestSpy
+          }
         };
         const nextSpy = Sinon.spy();
         await postTaskRequests(req, res, nextSpy);
@@ -123,13 +123,13 @@ describe("Middleware | Validators | Task Requests", function () {
 
       it("should throw error when request body without proposed deadline is passed", async function () {
         const req = {
-          body: data.creationReqWithoutProposedDeadline,
+          body: data.creationReqWithoutProposedDeadline
         };
         const badRequestSpy = Sinon.spy();
         const res = {
           boom: {
-            badRequest: badRequestSpy,
-          },
+            badRequest: badRequestSpy
+          }
         };
         const nextSpy = Sinon.spy();
         await postTaskRequests(req, res, nextSpy);
@@ -139,13 +139,13 @@ describe("Middleware | Validators | Task Requests", function () {
 
       it("should throw error when request body without used id is passed", async function () {
         const req = {
-          body: data.creationReqWithoutUserId,
+          body: data.creationReqWithoutUserId
         };
         const badRequestSpy = Sinon.spy();
         const res = {
           boom: {
-            badRequest: badRequestSpy,
-          },
+            badRequest: badRequestSpy
+          }
         };
         const nextSpy = Sinon.spy();
         await postTaskRequests(req, res, nextSpy);
@@ -156,13 +156,13 @@ describe("Middleware | Validators | Task Requests", function () {
 
     it("should throw error when invalid request body is passed", async function () {
       const req = {
-        body: data.invalidRequest,
+        body: data.invalidRequest
       };
       const badRequestSpy = Sinon.spy();
       const res = {
         boom: {
-          badRequest: badRequestSpy,
-        },
+          badRequest: badRequestSpy
+        }
       };
       const nextSpy = Sinon.spy();
       await postTaskRequests(req, res, nextSpy);
@@ -183,8 +183,8 @@ describe("Middleware | Validators | Task Requests", function () {
     it("should pass validation for valid query parameters", async function () {
       const req = {
         query: {
-          q: "status:approved",
-        },
+          q: "status:approved"
+        }
       };
       const res = {};
       const nextMiddlewareSpy = Sinon.spy();
@@ -195,8 +195,8 @@ describe("Middleware | Validators | Task Requests", function () {
     it("should pass validation for valid query parameters with multiple keys and values", async function () {
       const req = {
         query: {
-          q: "status:approved request-type:assignment",
-        },
+          q: "status:approved request-type:assignment"
+        }
       };
       const res = {};
       const nextMiddlewareSpy = Sinon.spy();
@@ -207,8 +207,8 @@ describe("Middleware | Validators | Task Requests", function () {
     it("should pass validation for valid sort query parameters", async function () {
       const req = {
         query: {
-          q: "sort:created-desc",
-        },
+          q: "sort:created-desc"
+        }
       };
       const res = {};
       const nextMiddlewareSpy = Sinon.spy();
@@ -222,8 +222,8 @@ describe("Middleware | Validators | Task Requests", function () {
           dev: "true",
           next: "id",
           size: "20",
-          q: "status:pending request-type:creation status:denied sort:created-desc",
-        },
+          q: "status:pending request-type:creation status:denied sort:created-desc"
+        }
       };
       const res = {};
       const nextMiddlewareSpy = Sinon.spy();
@@ -235,13 +235,13 @@ describe("Middleware | Validators | Task Requests", function () {
       const req = {
         query: {
           next: "value",
-          prev: "value",
-        },
+          prev: "value"
+        }
       };
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
-        },
+          badRequest: Sinon.spy()
+        }
       };
       const nextMiddlewareSpy = Sinon.spy();
       await getTaskRequests(req, res, nextMiddlewareSpy);
@@ -252,13 +252,13 @@ describe("Middleware | Validators | Task Requests", function () {
     it("should not pass validation when next is passed without size", async function () {
       const req = {
         query: {
-          next: "value",
-        },
+          next: "value"
+        }
       };
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
-        },
+          badRequest: Sinon.spy()
+        }
       };
       const nextMiddlewareSpy = Sinon.spy();
       await getTaskRequests(req, res, nextMiddlewareSpy);
@@ -269,13 +269,13 @@ describe("Middleware | Validators | Task Requests", function () {
     it("should not pass validation when prev is passed without size", async function () {
       const req = {
         query: {
-          prev: "value",
-        },
+          prev: "value"
+        }
       };
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
-        },
+          badRequest: Sinon.spy()
+        }
       };
       const nextMiddlewareSpy = Sinon.spy();
       await getTaskRequests(req, res, nextMiddlewareSpy);
@@ -286,13 +286,13 @@ describe("Middleware | Validators | Task Requests", function () {
     it("should not pass validation for invalid query parameters", async function () {
       const req = {
         query: {
-          invalidParam: "value",
-        },
+          invalidParam: "value"
+        }
       };
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
-        },
+          badRequest: Sinon.spy()
+        }
       };
       const nextMiddlewareSpy = Sinon.spy();
       await getTaskRequests(req, res, nextMiddlewareSpy);
@@ -303,13 +303,13 @@ describe("Middleware | Validators | Task Requests", function () {
     it("should not pass validation for invalid query parameters in RQL format", async function () {
       const req = {
         query: {
-          q: "invalidKey:value",
-        },
+          q: "invalidKey:value"
+        }
       };
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
-        },
+          badRequest: Sinon.spy()
+        }
       };
       const nextMiddlewareSpy = Sinon.spy();
       await getTaskRequests(req, res, nextMiddlewareSpy);
@@ -320,13 +320,13 @@ describe("Middleware | Validators | Task Requests", function () {
     it("should not pass validation for invalid sort query parameters", async function () {
       const req = {
         query: {
-          q: "status:approved sort:af:sdv",
-        },
+          q: "status:approved sort:af:sdv"
+        }
       };
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
-        },
+          badRequest: Sinon.spy()
+        }
       };
       const nextMiddlewareSpy = Sinon.spy();
       await getTaskRequests(req, res, nextMiddlewareSpy);

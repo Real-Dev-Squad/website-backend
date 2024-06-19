@@ -3,7 +3,7 @@ const {
   getDateTimeRangeForPRs,
   getQualifiers,
   getPaginatedLink,
-  findSubscribedGroupIds,
+  findSubscribedGroupIds
 } = require("../../../utils/helper");
 const { TASK_STATUS, TASK_SIZE } = require("../../../constants/tasks");
 const { expect } = chai;
@@ -43,7 +43,7 @@ describe("helper", function () {
         filterBy: "OPEN_PRS",
         sortBy: "RECENT_FIRST",
         startDate: "2023-01-01",
-        endDate: "2023-03-01",
+        endDate: "2023-03-01"
       });
     });
   });
@@ -54,7 +54,7 @@ describe("helper", function () {
       const dev = true;
       const query = {
         dev,
-        status,
+        status
       };
       const endpoint = "/tasks";
       const cursorKey = "next";
@@ -63,7 +63,7 @@ describe("helper", function () {
         query,
         endpoint: "/tasks",
         cursorKey,
-        docId,
+        docId
       });
       expect(result).to.contain(endpoint);
       expect(result).to.contain(`status=${status}`);
@@ -80,7 +80,7 @@ describe("helper", function () {
       const query = {
         dev,
         status,
-        next: nextId,
+        next: nextId
       };
       const endpoint = "/tasks";
       const cursorKey = "prev";
@@ -89,7 +89,7 @@ describe("helper", function () {
         query,
         endpoint: "/tasks",
         cursorKey,
-        docId,
+        docId
       });
       expect(result).to.contain(endpoint);
       expect(result).to.contain(`status=${status}`);
@@ -103,7 +103,7 @@ describe("helper", function () {
     it("should return set of member groupIds", function () {
       const memberGroupIds = findSubscribedGroupIds("1234", [
         { userid: "1234", roleid: "1" },
-        { userid: "12345", roleid: "3" },
+        { userid: "12345", roleid: "3" }
       ]);
       expect(memberGroupIds).to.deep.equal(new Set(["1"]));
     });

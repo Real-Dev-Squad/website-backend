@@ -37,7 +37,7 @@ const fetchAuctionById = async (auctionId) => {
       ...auctionMetadata,
       bidders_and_bids: biddersAndBids,
       seller: sellerUsername,
-      highest_bidder: highestBidderUsername,
+      highest_bidder: highestBidderUsername
     };
   } catch (error) {
     logger.error(`Error fetching auction ${auctionId}: ${error}`);
@@ -86,7 +86,7 @@ const fetchAvailableAuctions = async () => {
     auctionsRef.forEach((auction) => {
       auctions.push({
         id: auction.id,
-        ...auction.data(),
+        ...auction.data()
       });
     });
 
@@ -127,7 +127,7 @@ const createNewAuction = async ({ seller, initialPrice, endTime, itemType, quant
       highest_bidder: null,
       highest_bid: parseInt(initialPrice),
       start_time: new Date().getTime(),
-      end_time: parseInt(endTime),
+      end_time: parseInt(endTime)
     });
 
     return auctionRef.id;
@@ -167,14 +167,14 @@ const makeNewBid = async ({ bidder, auctionId, bid }) => {
 
     await auctionRef.update({
       highest_bidder: bidder,
-      highest_bid: parseInt(bid),
+      highest_bid: parseInt(bid)
     });
 
     const bidRef = await bidsModel.add({
       auction_id: auctionId,
       bidder: bidder,
       bid: parseInt(bid),
-      time: new Date().getTime(),
+      time: new Date().getTime()
     });
 
     return bidRef.id;
@@ -189,5 +189,5 @@ module.exports = {
   fetchAvailableAuctions,
   fetchAuctionBidders,
   createNewAuction,
-  makeNewBid,
+  makeNewBid
 };

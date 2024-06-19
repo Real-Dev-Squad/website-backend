@@ -12,7 +12,7 @@ const trade = async (req, res) => {
     const tradeStockData = {
       ...req.body,
       username,
-      userId,
+      userId
     };
     const { canUserTrade, errorMessage, userBalance } = await tradeService.trade(tradeStockData);
 
@@ -28,5 +28,5 @@ const trade = async (req, res) => {
 };
 
 module.exports = {
-  trade,
+  trade
 };

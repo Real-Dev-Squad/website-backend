@@ -20,8 +20,8 @@ describe("Users services", function () {
           roles: {
             ...user.roles,
             in_discord: false,
-            archived: false,
-          },
+            archived: false
+          }
         };
         addUsersPromises.push(userModel.add(userData));
       });
@@ -57,7 +57,7 @@ describe("Users services", function () {
         totalUsersArchived: 20,
         totalOperationsFailed: 0,
         updatedUserDetails: userDetails,
-        failedUserDetails: [],
+        failedUserDetails: []
       });
     });
 
@@ -67,7 +67,7 @@ describe("Users services", function () {
         update: function () {},
         commit: function () {
           throw new Error("Firebase batch operation failed");
-        },
+        }
       });
 
       const res = await archiveUsers(users);
@@ -77,7 +77,7 @@ describe("Users services", function () {
         totalUsersArchived: 0,
         totalOperationsFailed: 20,
         updatedUserDetails: [],
-        failedUserDetails: userDetails,
+        failedUserDetails: userDetails
       });
     });
   });

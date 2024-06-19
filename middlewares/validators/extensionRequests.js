@@ -16,7 +16,7 @@ const createExtensionRequest = async (req, res, next) => {
       oldEndsOn: joi.number().required(),
       newEndsOn: joi.number().required(),
       reason: joi.string().required(),
-      status: joi.string().valid(EXTENSION_REQUEST_STATUS.PENDING).required(),
+      status: joi.string().valid(EXTENSION_REQUEST_STATUS.PENDING).required()
     });
 
   try {
@@ -33,7 +33,7 @@ const updateExtensionRequestStatus = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      status: joi.string().valid(EXTENSION_REQUEST_STATUS.APPROVED, EXTENSION_REQUEST_STATUS.DENIED).required(),
+      status: joi.string().valid(EXTENSION_REQUEST_STATUS.APPROVED, EXTENSION_REQUEST_STATUS.DENIED).required()
     });
 
   try {
@@ -52,7 +52,7 @@ const updateExtensionRequest = async (req, res, next) => {
     assignee: joi.string().optional(),
     oldEndsOn: joi.number().optional(),
     newEndsOn: joi.number().optional(),
-    reason: joi.string().optional(),
+    reason: joi.string().optional()
   });
 
   try {
@@ -70,7 +70,7 @@ const getExtensionRequestsValidator = async (req, res, next) => {
     cursor: joi.string().optional(),
     order: joi.string().valid("asc", "desc").optional(),
     size: joi.number().integer().positive().min(1).max(100).optional(),
-    q: joi.string().optional(),
+    q: joi.string().optional()
   });
 
   const querySchema = joi.object().keys({
@@ -85,12 +85,12 @@ const getExtensionRequestsValidator = async (req, res, next) => {
           joi
             .string()
             .valid(...ER_STATUS_ENUM)
-            .insensitive(),
-        ),
+            .insensitive()
+        )
       )
       .optional(),
     assignee: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),
-    taskId: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),
+    taskId: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional()
   });
 
   try {
@@ -110,5 +110,5 @@ module.exports = {
   createExtensionRequest,
   updateExtensionRequest,
   updateExtensionRequestStatus,
-  getExtensionRequestsValidator,
+  getExtensionRequestsValidator
 };

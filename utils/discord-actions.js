@@ -9,7 +9,7 @@ const generateAuthTokenForCloudflare = () => {
   const privateKey = config.get("rdsServerlessBot.rdsServerLessPrivateKey");
   const authToken = jwt.sign({}, privateKey, {
     algorithm: "RS256",
-    expiresIn: expiry,
+    expiresIn: expiry
   });
   return authToken;
 };
@@ -17,7 +17,7 @@ const generateCloudFlareHeaders = ({ username, id } = {}) => {
   const authToken = generateAuthTokenForCloudflare();
   const headers = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${authToken}`,
+    Authorization: `Bearer ${authToken}`
   };
   if (username && id) {
     headers["X-Audit-Log-Reason"] = `Action initiator's username=>${username} and id=${id}`;
@@ -45,16 +45,16 @@ const generateDiscordInviteLink = async () => {
     const channelId = config.get("discordNewComersChannelId");
     const authToken = jwt.sign({}, RDS_SERVERLESS_PRIVATE_KEY, {
       algorithm: "RS256",
-      expiresIn: RDS_SERVERLESS_TTL,
+      expiresIn: RDS_SERVERLESS_TTL
     });
 
     const inviteOptions = {
-      channelId: channelId,
+      channelId: channelId
     };
     const response = await fetch(`${DISCORD_BASE_URL}/invite`, {
       method: "POST",
       body: JSON.stringify(inviteOptions),
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` }
     });
     if (!response.ok) {
       const error = await response.json();
@@ -75,5 +75,5 @@ module.exports = {
   generateDiscordProfileImageUrl,
   generateAuthTokenForCloudflare,
   generateCloudFlareHeaders,
-  generateDiscordInviteLink,
+  generateDiscordInviteLink
 };

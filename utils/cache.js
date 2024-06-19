@@ -169,7 +169,7 @@ const cacheResponse = (options = {}) => {
             priority: priority,
             response: body,
             expiry: new Date().getTime() + minutesToMilliseconds(expiry),
-            size: Buffer.byteLength(body),
+            size: Buffer.byteLength(body)
           };
           pool.set(key, cacheValue);
           if (modelKey) {

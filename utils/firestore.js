@@ -6,7 +6,7 @@ const config = require("config");
 const credentialsObject = JSON.parse(config.firestore);
 
 admin.initializeApp({
-  credential: admin.credential.cert(credentialsObject),
+  credential: admin.credential.cert(credentialsObject)
 });
 
 const db = admin.firestore();

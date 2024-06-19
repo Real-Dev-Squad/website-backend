@@ -16,7 +16,7 @@ class EventTokenService {
     const token = jwt.sign(payload, EventTokenService.#app_secret, {
       algorithm: "HS256",
       expiresIn: "24h",
-      jwtid: crypto.randomUUID({ disableEntropyCache: true }),
+      jwtid: crypto.randomUUID({ disableEntropyCache: true })
     });
     return token;
   }
@@ -41,7 +41,7 @@ class EventTokenService {
         access_key: EventTokenService.#app_access_key,
         type: "management",
         version: 2,
-        iat: Math.floor(Date.now() / 1000),
+        iat: Math.floor(Date.now() / 1000)
       };
       this.#managementToken = this.#signPayloadToToken(payload);
     }
@@ -57,7 +57,7 @@ class EventTokenService {
       role: role,
       type: "app",
       version: 2,
-      iat: Math.floor(Date.now() / 1000),
+      iat: Math.floor(Date.now() / 1000)
     };
     return this.#signPayloadToToken(payload);
   }

@@ -44,12 +44,12 @@ describe("Filter Users", function () {
     oooUser = await addUser(userData[0]);
     await updateUserStatus(
       oooUser,
-      generateUserStatusData(userState.OOO, updatedAtDate, updatedAtDate, untilDate, "Bad Health"),
+      generateUserStatusData(userState.OOO, updatedAtDate, updatedAtDate, untilDate, "Bad Health")
     );
     idleUser = await addUser(userData[1]);
     await updateUserStatus(
       idleUser,
-      generateUserStatusData(userState.IDLE, updatedAtDate, updatedAtDate, untilDate, "CSS"),
+      generateUserStatusData(userState.IDLE, updatedAtDate, updatedAtDate, untilDate, "CSS")
     );
     activeUser = await addUser(userData[8]);
     await updateUserStatus(activeUser, generateUserStatusData(userState.ACTIVE, updatedAtDate, updatedAtDate));
@@ -60,23 +60,23 @@ describe("Filter Users", function () {
     const { id: id1 } = await addTag({
       name: "Vue JS",
       type: "SKILL",
-      reason: "Web Dev FE",
+      reason: "Web Dev FE"
     });
     tagIdFE = id1;
     const { id: id2 } = await addTag({
       name: "Node JS",
       type: "SKILL",
-      reason: "Web Dev BE",
+      reason: "Web Dev BE"
     });
     tagIdBE = id2;
     const { id: id3 } = await addLevel({
       name: "level 1",
-      value: 1,
+      value: 1
     });
     levelId1 = id3;
     const { id: id4 } = await addLevel({
       name: "level 2",
-      value: 2,
+      value: 2
     });
     levelId2 = id4;
 
@@ -87,13 +87,13 @@ describe("Filter Users", function () {
       tagPayload: [
         {
           tagId: tagIdFE,
-          levelId: levelId1,
+          levelId: levelId1
         },
         {
           tagId: tagIdFE,
-          levelId: levelId2,
-        },
-      ],
+          levelId: levelId2
+        }
+      ]
     });
     await addTagsToItem({
       itemId: idleUser,
@@ -101,13 +101,13 @@ describe("Filter Users", function () {
       tagPayload: [
         {
           tagId: tagIdBE,
-          levelId: levelId1,
+          levelId: levelId1
         },
         {
           tagId: tagIdBE,
-          levelId: levelId2,
-        },
-      ],
+          levelId: levelId2
+        }
+      ]
     });
     await addTagsToItem({
       itemId: activeUser,
@@ -115,13 +115,13 @@ describe("Filter Users", function () {
       tagPayload: [
         {
           tagId: tagIdFE,
-          levelId: levelId1,
+          levelId: levelId1
         },
         {
           tagId: tagIdBE,
-          levelId: levelId1,
-        },
-      ],
+          levelId: levelId1
+        }
+      ]
     });
   });
 
@@ -148,7 +148,7 @@ describe("Filter Users", function () {
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(1);
           expect(res.body.users[0]).to.deep.include({
-            id: oooUser,
+            id: oooUser
           });
           return done();
         });
@@ -256,7 +256,7 @@ describe("Filter Users", function () {
           expect(res.body.users).to.be.a("array");
           expect(res.body.users.length).to.equal(1);
           expect(res.body.users[0]).to.deep.include({
-            id: onboardingUser,
+            id: onboardingUser
           });
           return done();
         });

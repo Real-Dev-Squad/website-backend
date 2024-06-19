@@ -31,8 +31,8 @@ describe("checkRestrictedUser", function () {
     fetchStub.returns(
       Promise.resolve({
         status: 200,
-        json: () => Promise.resolve(getDiscordMembers),
-      }),
+        json: () => Promise.resolve(getDiscordMembers)
+      })
     );
   });
 
@@ -63,7 +63,7 @@ describe("checkRestrictedUser", function () {
       .patch("/users/self")
       .set("cookie", `${cookieName}=${unrestrictedJwt}`)
       .send({
-        first_name: "Test",
+        first_name: "Test"
       })
       .end((err, res) => {
         if (err) {
@@ -81,7 +81,7 @@ describe("checkRestrictedUser", function () {
       .patch("/users/self")
       .set("cookie", `${cookieName}=${restrictedJwt}`)
       .send({
-        first_name: "Test",
+        first_name: "Test"
       })
       .end((err, res) => {
         if (err) {

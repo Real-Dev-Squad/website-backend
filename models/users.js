@@ -43,9 +43,9 @@ const addOrUpdate = async (userData, userId = null) => {
           {
             ...user.data(),
             ...userData,
-            updated_at: Date.now(),
+            updated_at: Date.now()
           },
-          { merge: true },
+          { merge: true }
         );
       }
 
@@ -68,7 +68,7 @@ const addOrUpdate = async (userData, userId = null) => {
         userId: user.docs[0].id,
         incompleteUserDetails: user.docs[0].data().incompleteUserDetails,
         updated_at: Date.now(),
-        role: Object.values(AUTHORITIES).find((role) => data.roles[role]) || AUTHORITIES.USER,
+        role: Object.values(AUTHORITIES).find((role) => data.roles[role]) || AUTHORITIES.USER
       };
     }
 
@@ -86,7 +86,7 @@ const addOrUpdate = async (userData, userId = null) => {
       role: AUTHORITIES.USER,
       userId: userInfo.id,
       incompleteUserDetails: true,
-      updated_at: Date.now(),
+      updated_at: Date.now()
     };
   } catch (err) {
     logger.error("Error in adding or updating user", err);
@@ -99,7 +99,7 @@ const addJoinData = async (userData) => {
     await joinModel.add(userData);
     await updateUserStatus(userData.userId, {
       currentStatus: { state: userState.ONBOARDING },
-      monthlyHours: { committed: 4 * userData.intro.numberOfHours },
+      monthlyHours: { committed: 4 * userData.intro.numberOfHours }
     });
   } catch (err) {
     logger.error("Error in adding data", err);
@@ -114,7 +114,7 @@ const getJoinData = async (userId) => {
     joinData.forEach((data) => {
       userData.push({
         id: data.id,
-        ...data.data(),
+        ...data.data()
       });
     });
     return userData;
@@ -230,7 +230,7 @@ const fetchPaginatedUsers = async (query) => {
     return {
       allUsers,
       nextId: lastDoc?.id || "",
-      prevId: firstDoc?.id || "",
+      prevId: firstDoc?.id || ""
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
@@ -259,13 +259,13 @@ const fetchUsers = async (usernames = []) => {
       snapshot.forEach((doc) => {
         users.push({
           id: doc.id,
-          ...doc.data(),
+          ...doc.data()
         });
       });
     });
 
     return {
-      users,
+      users
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
@@ -309,8 +309,8 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       userExists: !!userData,
       user: {
         id,
-        ...userData,
-      },
+        ...userData
+      }
     };
   } catch (err) {
     logger.error("Error retrieving user data", err);
@@ -329,7 +329,7 @@ const setIncompleteUserDetails = async (userId) => {
   if (doc.exists) {
     return userRef.update({
       incompleteUserDetails: false,
-      updated_at: Date.now(),
+      updated_at: Date.now()
     });
   }
   return {};
@@ -372,7 +372,7 @@ const addForVerification = async (userId, discordId, profileImageUrl, discordIma
     userId,
     discordId,
     discord: { url: discordImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
-    profile: { url: profileImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+    profile: { url: profileImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) }
   };
   try {
     if (!isNotVerifiedSnapshot.empty) {
@@ -445,7 +445,7 @@ const updateUserPicture = async (image, userId) => {
     const userDoc = userModel.doc(userId);
     await userDoc.update({
       picture: image,
-      updated_at: Date.now(),
+      updated_at: Date.now()
     });
   } catch (err) {
     logger.error("Error updating user picture data", err);
@@ -490,7 +490,7 @@ const getRdsUserInfoByGitHubUsername = async (githubUsername) => {
   return {
     firstName: user.first_name ?? "",
     lastName: user.last_name ?? "",
-    username: user.username ?? "",
+    username: user.username ?? ""
   };
 };
 
@@ -515,7 +515,7 @@ const getUsersBasedOnFilter = async (query) => {
 
   const calls = {
     item: itemModel,
-    state: userStatusModel,
+    state: userStatusModel
   };
   calls.item = calls.item.where("itemType", "==", "USER").where("tagType", "==", "SKILL");
 
@@ -559,7 +559,7 @@ const getUsersBasedOnFilter = async (query) => {
       const fetchUsersWithOnBoardingState = await getUsersWithOnboardingStateInRange(
         filteredUserDocs,
         stateItems,
-        query.time,
+        query.time
       );
       return fetchUsersWithOnBoardingState;
     }
@@ -574,7 +574,7 @@ const getUsersBasedOnFilter = async (query) => {
     snapshot.forEach((doc) => {
       filteredUsers.push({
         id: doc.id,
-        ...doc.data(),
+        ...doc.data()
       });
     });
 
@@ -590,7 +590,7 @@ const getUsersBasedOnFilter = async (query) => {
     snapshot.forEach((doc) => {
       filteredUsers.push({
         id: doc.id,
-        ...doc.data(),
+        ...doc.data()
       });
     });
 
@@ -634,7 +634,7 @@ const getDiscordUsers = async () => {
       if (userData?.discordId)
         users.push({
           id: user.id,
-          ...userData,
+          ...userData
         });
     });
     return users;
@@ -660,7 +660,7 @@ const archiveUserIfNotInDiscord = async () => {
       totalUsersArchived: 0,
       totalOperationsFailed: 0,
       updatedUserDetails: [],
-      failedUserDetails: [],
+      failedUserDetails: []
     };
 
     if (snapshot.size === 0) {
@@ -681,7 +681,7 @@ const archiveUserIfNotInDiscord = async () => {
         totalUsersArchived: (summary.totalUsersArchived += res.totalUsersArchived),
         totalOperationsFailed: (summary.totalOperationsFailed += res.totalOperationsFailed),
         updatedUserDetails: [...summary.updatedUserDetails, ...res.updatedUserDetails],
-        failedUserDetails: [...summary.failedUserDetails, ...res.failedUserDetails],
+        failedUserDetails: [...summary.failedUserDetails, ...res.failedUserDetails]
       };
     }
 
@@ -712,7 +712,7 @@ const fetchUserByIds = async (userIds = []) => {
       if (snapshot.exists) {
         users.push({
           id: snapshot.id,
-          ...snapshot.data(),
+          ...snapshot.data()
         });
       }
     });
@@ -768,7 +768,7 @@ const getUsersByRole = async (role) => {
       const userData = user.data();
       users.push({
         id: user.id,
-        ...userData,
+        ...userData
       });
     });
     return users;
@@ -834,7 +834,7 @@ const fetchUserForKeyValue = async (documentKey, value) => {
       if (userData)
         users.push({
           id: user.id,
-          ...userData,
+          ...userData
         });
     });
     return users;
@@ -867,7 +867,7 @@ const fetchUsersListForMultipleValues = async (documentKey, valueList) => {
         if (userData)
           users.push({
             id: user.id,
-            ...userData,
+            ...userData
           });
       });
     }
@@ -891,7 +891,7 @@ const getNonNickNameSyncedUsers = async () => {
       if (userData?.discordId)
         users.push({
           id: user.id,
-          ...userData,
+          ...userData
         });
     });
     return users;
@@ -929,5 +929,5 @@ module.exports = {
   updateUsersInBatch,
   fetchUsersListForMultipleValues,
   fetchUserForKeyValue,
-  getNonNickNameSyncedUsers,
+  getNonNickNameSyncedUsers
 };

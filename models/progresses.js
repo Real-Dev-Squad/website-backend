@@ -11,7 +11,7 @@ const {
   buildQueryForPostingProgress,
   assertTaskExists,
   getProgressDateTimestamp,
-  buildQueryToSearchProgressByDay,
+  buildQueryToSearchProgressByDay
 } = require("../utils/progresses");
 const { PROGRESS_ALREADY_CREATED, PROGRESS_DOCUMENT_NOT_FOUND } = PROGRESSES_RESPONSE_MESSAGES;
 
@@ -67,7 +67,7 @@ const getRangeProgressData = async (queryParams) => {
   return {
     startDate,
     endDate,
-    progressRecords,
+    progressRecords
   };
 };
 

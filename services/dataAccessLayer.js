@@ -11,7 +11,7 @@ const retrieveUsers = async ({
   userdata,
   level = ACCESS_LEVEL.PUBLIC,
   role = null,
-  userIds = null,
+  userIds = null
 }) => {
   let result;
   if (id || username) {
@@ -131,5 +131,5 @@ module.exports = {
   retrieveUsersWithRole,
   retreiveFilteredUsers,
   levelSpecificAccess,
-  fetchUsersForKeyValues,
+  fetchUsersForKeyValues
 };

@@ -7,7 +7,7 @@ const progressesModel = fireStore.collection("progresses");
 const {
   PROGRESSES_RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
   MILLISECONDS_IN_DAY,
-  PROGRESS_VALID_SORT_FIELDS,
+  PROGRESS_VALID_SORT_FIELDS
 } = require("../constants/progresses");
 const { convertTimestampToUTCStartOrEndOfDay } = require("./time");
 const progressesCollection = fireStore.collection("progresses");
@@ -234,5 +234,5 @@ module.exports = {
   buildRangeProgressQuery,
   getProgressRecords,
   buildQueryToSearchProgressByDay,
-  buildProgressQueryForMissedUpdates,
+  buildProgressQueryForMissedUpdates
 };

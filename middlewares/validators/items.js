@@ -15,9 +15,9 @@ const validateItemsPayload = async (req, res, next) => {
     tagPayload: Joi.array().items(
       Joi.object({
         tagId: Joi.string().required(),
-        levelId: Joi.string().required(),
-      }),
-    ),
+        levelId: Joi.string().required()
+      })
+    )
   });
 
   try {
@@ -37,7 +37,7 @@ const validateItemQuery = async (req, res, next) => {
     levelName: Joi.string().optional(),
     levelNumber: Joi.number().optional(),
     tagId: Joi.string().optional,
-    tagType: Joi.string().uppercase().optional(),
+    tagType: Joi.string().uppercase().optional()
   });
 
   try {
@@ -51,5 +51,5 @@ const validateItemQuery = async (req, res, next) => {
 
 module.exports = {
   validateItemsPayload,
-  validateItemQuery,
+  validateItemQuery
 };

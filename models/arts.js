@@ -28,7 +28,7 @@ const fetchArts = async () => {
     artSnapshot.forEach((art) => {
       arts.push({
         id: art.id,
-        ...art.data(),
+        ...art.data()
       });
     });
     return arts;
@@ -51,7 +51,7 @@ const fetchUserArts = async (id) => {
     userArtsRef.forEach((art) => {
       userArts.push({
         id: art.id,
-        ...art.data(),
+        ...art.data()
       });
     });
 
@@ -65,5 +65,5 @@ const fetchUserArts = async (id) => {
 module.exports = {
   addArt,
   fetchArts,
-  fetchUserArts,
+  fetchUserArts
 };

@@ -2,7 +2,7 @@ const Sinon = require("sinon");
 const {
   externalAccountData,
   postExternalAccountsUsers,
-  linkDiscord,
+  linkDiscord
 } = require("../../../middlewares/validators/external-accounts");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../../constants/external-accounts");
 const { expect } = require("chai");
@@ -20,9 +20,9 @@ describe("Middleware | Validators | external accounts", function () {
             userAvatar: "some avatar",
             discordId: "some id",
             discordJoinedAt: "some date",
-            expiry: Date.now(),
-          },
-        },
+            expiry: Date.now()
+          }
+        }
       };
       const res = {};
       const nextSpy = Sinon.spy();
@@ -32,12 +32,12 @@ describe("Middleware | Validators | external accounts", function () {
 
     it("stops the propogation of request to the next function", async function () {
       const req = {
-        body: {},
+        body: {}
       };
       const res = {
         boom: {
-          badRequest: () => {},
-        },
+          badRequest: () => {}
+        }
       };
       const nextSpy = Sinon.spy();
       await externalAccountData(req, res, nextSpy).catch((err) => {
@@ -50,7 +50,7 @@ describe("Middleware | Validators | external accounts", function () {
   describe("postExternalAccountsUsers", function () {
     it("should be successful when valid query params are passed", async function () {
       const req = {
-        query: { action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC },
+        query: { action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC }
       };
       const res = {};
       const nextSpy = Sinon.spy();
@@ -60,12 +60,12 @@ describe("Middleware | Validators | external accounts", function () {
 
     it("should be respond with bad request when invalid query params are passed", async function () {
       const req = {
-        query: { action: "abc" },
+        query: { action: "abc" }
       };
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
-        },
+          badRequest: Sinon.spy()
+        }
       };
       const nextSpy = Sinon.spy();
       await postExternalAccountsUsers(req, res, nextSpy);

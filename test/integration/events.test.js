@@ -55,7 +55,7 @@ describe("events", function () {
         name: "TestingEvent",
         description: "Hello world! How are you",
         region: "in",
-        userId: userId,
+        userId: userId
       };
 
       service = sinon.stub(EventAPIService.prototype, "post").returns(event1Data);
@@ -91,7 +91,7 @@ describe("events", function () {
           name: "Test Event",
           description: "This is a test event",
           region: "in",
-          userId: userId,
+          userId: userId
         })
         .end((error, response) => {
           if (error) {
@@ -111,7 +111,7 @@ describe("events", function () {
         name: "Test Room",
         description: "This is a test room",
         region: "in",
-        userId: userId,
+        userId: userId
       };
       chai
         .request(app)
@@ -213,13 +213,13 @@ describe("events", function () {
 
     it("should return a token when the request is successful", function (done) {
       const eventsData = {
-        data: [event1Data],
+        data: [event1Data]
       };
       service = sinon.stub(EventAPIService.prototype, "get").returns(eventsData);
       const payload = {
         roomId: event1Data.id,
         userId: "5678",
-        role: "guest",
+        role: "guest"
       };
       tokenService = sinon.stub(EventTokenService.prototype, "getAuthToken").returns("test-token");
 
@@ -262,14 +262,14 @@ describe("events", function () {
 
     it("should return a token when the request is successful for host", function (done) {
       const eventsData = {
-        data: [event1Data],
+        data: [event1Data]
       };
       service = sinon.stub(EventAPIService.prototype, "get").returns(eventsData);
 
       const payload = {
         roomId: event1Data.id,
         userId: "5678",
-        role: "host",
+        role: "host"
       };
       tokenService = sinon.stub(EventTokenService.prototype, "getAuthToken").returns("test-token");
 
@@ -293,13 +293,13 @@ describe("events", function () {
 
     it("should return a token when the request is successful for moderator", function (done) {
       const eventsData = {
-        data: [event1Data],
+        data: [event1Data]
       };
       service = sinon.stub(EventAPIService.prototype, "get").returns(eventsData);
       const payload = {
         roomId: event1Data.id,
         userId: "5678",
-        role: "moderator",
+        role: "moderator"
       };
       tokenService = sinon.stub(EventTokenService.prototype, "getAuthToken").returns("test-token");
 
@@ -325,7 +325,7 @@ describe("events", function () {
       const payload = {
         roomId: event1Data.id,
         userId: "5678",
-        role: "host",
+        role: "host"
       };
 
       tokenService = sinon.stub(EventTokenService.prototype, "getAuthToken").returns("test-token");
@@ -412,7 +412,7 @@ describe("events", function () {
 
     it("returns the enabled event data when the request is successful", function (done) {
       const payload = {
-        enabled: true,
+        enabled: true
       };
       service = sinon.stub(EventAPIService.prototype, "post").returns(payload);
       sinon.stub(eventQuery, "updateEvent").resolves({ ...event1Data, enabled: true });
@@ -437,7 +437,7 @@ describe("events", function () {
 
     it("returns the disabled room data when the request is successful", function (done) {
       const payload = {
-        enabled: false,
+        enabled: false
       };
 
       service = sinon.stub(EventAPIService.prototype, "post").returns(payload);
@@ -502,7 +502,7 @@ describe("events", function () {
     it("returns a success message when the request is successful", function (done) {
       const payload = {
         reason: "Event ended by user",
-        lock: true,
+        lock: true
       };
       service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "session is ending" });
 
@@ -531,7 +531,7 @@ describe("events", function () {
       const id = event1Data.id;
       const payload = {
         eventCode: "test-code",
-        role: "moderator",
+        role: "moderator"
       };
       chai
         .request(app)
@@ -569,14 +569,14 @@ describe("events", function () {
     it("creates an event code when the request is successful", function (done) {
       const payload = {
         eventCode: "test-code",
-        role: EVENT_ROLES.MAVEN,
+        role: EVENT_ROLES.MAVEN
       };
 
       service = sinon
         .stub(eventQuery, "createEventCode")
         .returns([
           ...eventCodeDataFirst,
-          { code: "test-code", role: "maven", id: "test-id", event_id: event1Data.room_id },
+          { code: "test-code", role: "maven", id: "test-id", event_id: event1Data.room_id }
         ]);
 
       chai
@@ -602,7 +602,7 @@ describe("events", function () {
       const id = event1Data.id;
       const payload = {
         eventCode: "test-code",
-        role: "moderator",
+        role: "moderator"
       };
       chai
         .request(app)
@@ -626,7 +626,7 @@ describe("events", function () {
     it("returns an error message when code creation fails", function (done) {
       const payload = {
         eventCode: "test-code",
-        role: EVENT_ROLES.MAVEN,
+        role: EVENT_ROLES.MAVEN
       };
 
       const errorMessage = "Error creating event code.";
@@ -654,7 +654,7 @@ describe("events", function () {
       const id = event1Data.id;
       const payload = {
         eventCode: "test-code",
-        role: "moderator",
+        role: "moderator"
       };
       chai
         .request(app)
@@ -750,7 +750,7 @@ describe("events", function () {
     it("returns a success message when the request is successful for super user", function (done) {
       const payload = {
         peerId: "peer123",
-        reason: "Kicked out for a reason",
+        reason: "Kicked out for a reason"
       };
 
       service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "peer remove request submitted" });
@@ -780,7 +780,7 @@ describe("events", function () {
     it("returns a success message when the request is successful for member user", function (done) {
       const payload = {
         peerId: "peer123",
-        reason: "Kicked out for a reason",
+        reason: "Kicked out for a reason"
       };
 
       service = sinon.stub(EventAPIService.prototype, "post").returns({ message: "peer remove request submitted" });

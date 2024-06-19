@@ -20,7 +20,7 @@ const addRecruiterInfo = async (recruiterData, username) => {
     // Fetch the user from DB
     const {
       userExists,
-      user: { first_name: userFirstName, last_name: userLastName, email: userEmail },
+      user: { first_name: userFirstName, last_name: userLastName, email: userEmail }
     } = await userModel.fetchUser({ username });
     if (!userExists) {
       return userExists;
@@ -36,7 +36,7 @@ const addRecruiterInfo = async (recruiterData, username) => {
       recruiterId: id,
       recruiterName: `${firstName} ${lastName}`,
       userInfo: userInfo,
-      timestamp: timestamp,
+      timestamp: timestamp
     };
   } catch (err) {
     logger.error("Error in adding recruiter", err);
@@ -56,7 +56,7 @@ const fetchRecruitersInfo = async () => {
     recruiterSnapshot.forEach((recruiter) => {
       recruiters.push({
         id: recruiter.id,
-        ...recruiter.data(),
+        ...recruiter.data()
       });
     });
     return recruiters;
@@ -68,5 +68,5 @@ const fetchRecruitersInfo = async () => {
 
 module.exports = {
   addRecruiterInfo,
-  fetchRecruitersInfo,
+  fetchRecruitersInfo
 };

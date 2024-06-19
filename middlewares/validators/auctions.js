@@ -5,7 +5,7 @@ const createAuction = async (req, res, next) => {
     item_type: joi.string().required(),
     quantity: joi.number().required(),
     initial_price: joi.number().required(),
-    end_time: joi.number().required(),
+    end_time: joi.number().required()
   });
   try {
     await schema.validateAsync(req.body);
@@ -18,7 +18,7 @@ const createAuction = async (req, res, next) => {
 
 const placeBid = async (req, res, next) => {
   const schema = joi.object().strict().keys({
-    bid: joi.number().required(),
+    bid: joi.number().required()
   });
   try {
     await schema.validateAsync(req.body);
@@ -31,5 +31,5 @@ const placeBid = async (req, res, next) => {
 
 module.exports = {
   createAuction,
-  placeBid,
+  placeBid
 };

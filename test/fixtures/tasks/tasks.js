@@ -19,7 +19,7 @@ module.exports = () => {
       status: "IN_PROGRESS",
       percentCompleted: 50,
       endsOn: 1647172800, // 13 march
-      startedOn: 1644753600, //  13 feb
+      startedOn: 1644753600 //  13 feb
     },
     {
       title: "Overdue task 2",
@@ -32,7 +32,7 @@ module.exports = () => {
       status: "ASSIGNED",
       percentCompleted: 50,
       endsOn: 1647172800, // 13 march
-      startedOn: 1644753600, //  13 feb
+      startedOn: 1644753600 //  13 feb
     },
     {
       title: "Testing purpose",
@@ -45,7 +45,7 @@ module.exports = () => {
       status: "BLOCKED",
       percentCompleted: 50,
       endsOn: 1647172800,
-      startedOn: 1644753600,
+      startedOn: 1644753600
     },
     {
       title: "check is task form is working",
@@ -58,7 +58,7 @@ module.exports = () => {
       endsOn: 1650032259,
       startedOn: 1644753600,
       createdAt: 1644753600,
-      updatedAt: 1644753600,
+      updatedAt: 1644753600
     },
     {
       title: "Test task",
@@ -76,7 +76,7 @@ module.exports = () => {
       isNoteworthy: true,
       assignee: false,
       createdAt: 1644753600,
-      updatedAt: 1644753600,
+      updatedAt: 1644753600
     },
     {
       title: "Test task-dependency",
@@ -91,7 +91,7 @@ module.exports = () => {
       isNoteworthy: true,
       assignee: false,
       createdAt: 1644753600,
-      updatedAt: 1644753600,
+      updatedAt: 1644753600
     },
     {
       id: "P86Y1hVrS0zR5ZcVPwLZ",
@@ -101,21 +101,21 @@ module.exports = () => {
       createdBy: "sahsi",
       lossRate: {
         dinero: 100,
-        neelam: 0,
+        neelam: 0
       },
       assignee: "narendra",
       type: "feature",
       priority: "HIGH",
       completionAward: {
         dinero: 1000,
-        neelam: 0,
+        neelam: 0
       },
       title: "Implement user authentication and authorization",
       status: "IN_PROGRESS",
       assigneeId: "WbceXEPcohuJ5IxHHecf",
       dependsOn: [],
       createdAt: 1644753600,
-      updatedAt: 1644753600,
+      updatedAt: 1644753600
     },
     {
       id: "P86Y1fsvS0zR5ZcVPwLZ",
@@ -125,20 +125,20 @@ module.exports = () => {
       createdBy: "ramchandra",
       lossRate: {
         dinero: 100,
-        neelam: 0,
+        neelam: 0
       },
       assignee: "ravan",
       type: "feature",
       priority: "HIGH",
       completionAward: {
         dinero: 10000,
-        neelam: 0,
+        neelam: 0
       },
       title: "Undefined status",
       assigneeId: "WbceXEPcdsuJ5IxHHecf",
       dependsOn: [],
       createdAt: 1644753600,
-      updatedAt: 1644753600,
-    },
+      updatedAt: 1644753600
+    }
   ];
 };

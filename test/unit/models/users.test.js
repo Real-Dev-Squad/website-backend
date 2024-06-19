@@ -281,8 +281,8 @@ describe("users", function () {
           roles: {
             ...user.roles,
             in_discord: false,
-            archived: false,
-          },
+            archived: false
+          }
         };
         addUsersPromises.push(userModel.add(userData));
       });
@@ -315,7 +315,7 @@ describe("users", function () {
         update: function () {},
         commit: function () {
           throw new Error("Firestore batch update failed");
-        },
+        }
       });
 
       try {
@@ -382,7 +382,7 @@ describe("users", function () {
     it("should render users with onboarding state and time as 31days", async function () {
       const query = {
         state: "ONBOARDING",
-        time: "31d",
+        time: "31d"
       };
       const result = await users.getUsersBasedOnFilter(query);
       expect(result.length).to.equal(1);

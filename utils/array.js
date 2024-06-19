@@ -34,5 +34,5 @@ function arraysHaveCommonItem(array1, array2) {
 
 module.exports = {
   chunks,
-  arraysHaveCommonItem,
+  arraysHaveCommonItem
 };

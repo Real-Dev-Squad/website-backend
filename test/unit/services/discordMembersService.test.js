@@ -22,14 +22,14 @@ describe("getDiscordMemberDetails", function () {
     const expectedMemberDetails = {
       discordId: discordId,
       username: "Test User",
-      discriminator: "0001",
+      discriminator: "0001"
     };
 
     fetchStub.returns(
       Promise.resolve({
         status: 200,
-        json: () => Promise.resolve(expectedMemberDetails),
-      }),
+        json: () => Promise.resolve(expectedMemberDetails)
+      })
     );
 
     const response = await getDiscordMemberDetails(discordId);
@@ -43,8 +43,8 @@ describe("getDiscordMemberDetails", function () {
     fetchStub.returns(
       Promise.resolve({
         status: 404,
-        json: () => Promise.resolve({ message: "User does not exist" }),
-      }),
+        json: () => Promise.resolve({ message: "User does not exist" })
+      })
     );
 
     try {

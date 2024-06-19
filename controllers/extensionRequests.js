@@ -52,7 +52,7 @@ const createTaskExtensionRequest = async (req, res) => {
       }
 
       const latestExtensionRequest = await extensionRequestsQuery.fetchLatestExtensionRequest({
-        taskId: extensionBody.taskId,
+        taskId: extensionBody.taskId
       });
 
       if (latestExtensionRequest && latestExtensionRequest.status === EXTENSION_REQUEST_STATUS.PENDING) {
@@ -76,22 +76,22 @@ const createTaskExtensionRequest = async (req, res) => {
         type: "extensionRequests",
         meta: {
           taskId: extensionBody.taskId,
-          createdBy: req.userData.id,
+          createdBy: req.userData.id
         },
         body: {
           extensionRequestId: extensionRequest.id,
           oldEndsOn: task.endsOn,
           newEndsOn: extensionBody.newEndsOn,
           assignee: extensionBody.assignee,
-          status: EXTENSION_REQUEST_STATUS.PENDING,
-        },
+          status: EXTENSION_REQUEST_STATUS.PENDING
+        }
       };
 
       await addLog(extensionLog.type, extensionLog.meta, extensionLog.body);
 
       return res.json({
         message: "Extension Request created successfully!",
-        extensionRequest: { ...extensionBody, id: extensionRequest.id },
+        extensionRequest: { ...extensionBody, id: extensionRequest.id }
       });
     } catch (err) {
       logger.error(`Error while creating new extension request: ${err}`);
@@ -133,7 +133,7 @@ const createTaskExtensionRequest = async (req, res) => {
 
       const prevExtensionRequest = await extensionRequestsQuery.fetchExtensionRequests({
         taskId: extensionBody.taskId,
-        assignee: extensionBody.assignee,
+        assignee: extensionBody.assignee
       });
       if (prevExtensionRequest.length) {
         return res.boom.forbidden("An extension request for this task already exists.");
@@ -145,22 +145,22 @@ const createTaskExtensionRequest = async (req, res) => {
         type: "extensionRequests",
         meta: {
           taskId: extensionBody.taskId,
-          createdBy: req.userData.id,
+          createdBy: req.userData.id
         },
         body: {
           extensionRequestId: extensionRequest.id,
           oldEndsOn: task.endsOn,
           newEndsOn: extensionBody.newEndsOn,
           assignee: extensionBody.assignee,
-          status: EXTENSION_REQUEST_STATUS.PENDING,
-        },
+          status: EXTENSION_REQUEST_STATUS.PENDING
+        }
       };
 
       await addLog(extensionLog.type, extensionLog.meta, extensionLog.body);
 
       return res.json({
         message: "Extension Request created successfully!",
-        extensionRequest: { ...extensionBody, id: extensionRequest.id },
+        extensionRequest: { ...extensionBody, id: extensionRequest.id }
       });
     } catch (err) {
       logger.error(`Error while creating new extension request: ${err}`);
@@ -183,11 +183,11 @@ const fetchExtensionRequests = async (req, res) => {
 
     const allExtensionRequests = await extensionRequestsQuery.fetchPaginatedExtensionRequests(
       { taskId, status: transformedStatus, assignee },
-      { cursor, order, size: transformedSize },
+      { cursor, order, size: transformedSize }
     );
     return res.json({
       message: "Extension Requests returned successfully!",
-      ...allExtensionRequests,
+      ...allExtensionRequests
     });
   } catch (err) {
     logger.error(`Error while fetching Extension Requests ${err}`);
@@ -228,7 +228,7 @@ const getSelfExtensionRequests = async (req, res) => {
         let allExtensionRequests;
         if (taskId) {
           const latestExtensionRequest = await extensionRequestsQuery.fetchLatestExtensionRequest({
-            taskId,
+            taskId
           });
 
           if (latestExtensionRequest && latestExtensionRequest.assigneeId !== userId) {
@@ -238,7 +238,7 @@ const getSelfExtensionRequests = async (req, res) => {
             if (latestExtensionRequest.status === "APPROVED" || latestExtensionRequest.status === "DENIED") {
               const logs = await logsQuery.fetchLogs(
                 { "meta.extensionRequestId": latestExtensionRequest.id, limit: 1 },
-                "extensionRequests",
+                "extensionRequests"
               );
 
               if (
@@ -257,7 +257,7 @@ const getSelfExtensionRequests = async (req, res) => {
         } else {
           allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
             assignee: userId,
-            status: status || undefined,
+            status: status || undefined
           });
         }
         return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
@@ -269,7 +269,7 @@ const getSelfExtensionRequests = async (req, res) => {
         const allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
           taskId,
           assignee: userId,
-          status: status || undefined,
+          status: status || undefined
         });
         return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
       } else {
@@ -325,9 +325,9 @@ const updateExtensionRequest = async (req, res) => {
         meta: {
           extensionRequestId: req.params.id,
           taskId: extensionRequest.extensionRequestData.taskId,
-          userId: req.userData.id,
+          userId: req.userData.id
         },
-        body,
+        body
       };
       promises.push(addLog(extensionLog.type, extensionLog.meta, extensionLog.body));
     }
@@ -360,16 +360,16 @@ const updateExtensionRequestStatus = async (req, res) => {
         extensionRequestId: req.params.id,
         taskId: extensionRequest.extensionRequestData.taskId,
         username: req.userData.username,
-        userId: req.userData.id,
+        userId: req.userData.id
       },
       body: {
-        status: extensionStatus,
-      },
+        status: extensionStatus
+      }
     };
 
     const promises = [
       extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id),
-      addLog(extensionLog.type, extensionLog.meta, extensionLog.body),
+      addLog(extensionLog.type, extensionLog.meta, extensionLog.body)
     ];
 
     if (extensionStatus === EXTENSION_REQUEST_STATUS.APPROVED) {
@@ -378,20 +378,20 @@ const updateExtensionRequestStatus = async (req, res) => {
         meta: {
           taskId: extensionRequest.extensionRequestData.taskId,
           username: req.userData.username,
-          userId: req.userData.id,
+          userId: req.userData.id
         },
         body: {
           subType: "update",
           new: {
-            endsOn: extensionRequest.extensionRequestData.newEndsOn,
-          },
-        },
+            endsOn: extensionRequest.extensionRequestData.newEndsOn
+          }
+        }
       };
       promises.push(
         tasks.updateTask(
           { endsOn: extensionRequest.extensionRequestData.newEndsOn },
-          extensionRequest.extensionRequestData.taskId,
-        ),
+          extensionRequest.extensionRequestData.taskId
+        )
       );
       promises.push(addLog(taskLog.type, taskLog.meta, taskLog.body));
     }
@@ -412,5 +412,5 @@ module.exports = {
   getExtensionRequest,
   getSelfExtensionRequests,
   updateExtensionRequest,
-  updateExtensionRequestStatus,
+  updateExtensionRequestStatus
 };

@@ -29,12 +29,12 @@ const createWallet = async (userId, currencies = {}) => {
     const walletData = {
       userId,
       isActive: true,
-      currencies,
+      currencies
     };
     const { id } = await walletModel.add(walletData);
     return {
       id,
-      data: walletData,
+      data: walletData
     };
   } catch (err) {
     logger.error("Error creating user wallet", err);
@@ -58,7 +58,7 @@ const updateWallet = async (userId, currencies) => {
     }
     const walletRef = walletModel.doc(userWallet.id);
     const res = await walletRef.update({
-      ...firestoreKeysObject,
+      ...firestoreKeysObject
     });
     if (res) {
       return true;
@@ -73,5 +73,5 @@ const updateWallet = async (userId, currencies) => {
 module.exports = {
   fetchWallet,
   updateWallet,
-  createWallet,
+  createWallet
 };

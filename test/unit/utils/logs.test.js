@@ -5,12 +5,12 @@ describe("logs utils", function () {
   describe("formatLogsForFeed", function () {
     const usersMap = {
       user1: { username: "palak-gupta" },
-      user2: { username: "mock-2" },
+      user2: { username: "mock-2" }
     };
 
     const tasksMap = {
       task1: { title: "Link details page to status site" },
-      task2: { title: "Introduce /ooo command on discord" },
+      task2: { title: "Introduce /ooo command on discord" }
     };
 
     it("should format logs for OOO type", function () {
@@ -19,7 +19,7 @@ describe("logs utils", function () {
           createdAt: 1710181066410,
           createdBy: "user1",
           requestId: "request123",
-          action: "create",
+          action: "create"
         },
         type: "REQUEST_CREATED",
         body: {
@@ -31,12 +31,12 @@ describe("logs utils", function () {
           state: "PENDING",
           type: "OOO",
           message: "For testing purpose",
-          updatedAt: 1710181064968,
+          updatedAt: 1710181064968
         },
         timestamp: {
           _seconds: 1710181066,
-          _nanoseconds: 410000000,
-        },
+          _nanoseconds: 410000000
+        }
       };
 
       const formattedLog = formatLogsForFeed(logsSnapshot, usersMap);
@@ -46,7 +46,7 @@ describe("logs utils", function () {
         requestId: "request123",
         from: 1710288000000,
         until: 1710288050000,
-        message: "For testing purpose",
+        message: "For testing purpose"
       });
     });
 
@@ -56,16 +56,16 @@ describe("logs utils", function () {
           extensionRequestId: "po1gNOCXUP2IFsChcmn8",
           userId: "user2",
           taskId: "task1",
-          username: "techlord",
+          username: "techlord"
         },
         type: "extensionRequests",
         body: {
-          status: "APPROVED",
+          status: "APPROVED"
         },
         timestamp: {
           _seconds: 1709316797,
-          _nanoseconds: 616000000,
-        },
+          _nanoseconds: 616000000
+        }
       };
 
       const formattedLog = formatLogsForFeed(logsSnapshot, usersMap, tasksMap);
@@ -78,7 +78,7 @@ describe("logs utils", function () {
         type: "extensionRequests",
         user: "mock-2",
         userId: "user2",
-        username: "techlord",
+        username: "techlord"
       });
     });
 
@@ -91,8 +91,8 @@ describe("logs utils", function () {
           from: "2024-03-24",
           until: "2024-03-25",
           message: "Out of office",
-          extensionRequestId: "extension123",
-        },
+          extensionRequestId: "extension123"
+        }
       };
 
       const formattedLog = formatLogsForFeed(invalidLogsSnapshot, usersMap);
@@ -105,19 +105,19 @@ describe("logs utils", function () {
         meta: {
           userId: "user1",
           taskId: "task2",
-          username: "shubham-sharma",
+          username: "shubham-sharma"
         },
         type: "task",
         body: {
           new: {
-            percentCompleted: 40,
+            percentCompleted: 40
           },
-          subType: "update",
+          subType: "update"
         },
         timestamp: {
           _seconds: 1711273137,
-          _nanoseconds: 96000000,
-        },
+          _nanoseconds: 96000000
+        }
       };
 
       const formattedLog = formatLogsForFeed(logsSnapshot, usersMap, tasksMap);
@@ -130,7 +130,7 @@ describe("logs utils", function () {
         type: "task",
         user: "shubham-sharma",
         userId: "user1",
-        username: "shubham-sharma",
+        username: "shubham-sharma"
       });
     });
 
@@ -138,17 +138,17 @@ describe("logs utils", function () {
       const logsSnapshot = {
         meta: {
           rejectedBy: "user2",
-          userId: "user1",
+          userId: "user1"
         },
         type: "PROFILE_DIFF_REJECTED",
         body: {
           profileDiffId: "F8e0II1X7qZwzA1CbF0l",
-          message: "",
+          message: ""
         },
         timestamp: {
           _seconds: 1708098695,
-          _nanoseconds: 709000000,
-        },
+          _nanoseconds: 709000000
+        }
       };
 
       const formattedLog = formatLogsForFeed(logsSnapshot, usersMap);
@@ -156,7 +156,7 @@ describe("logs utils", function () {
       expect(formattedLog).to.deep.equal({
         user: "palak-gupta",
         rejectedBy: "mock-2",
-        message: "",
+        message: ""
       });
     });
 
@@ -164,17 +164,17 @@ describe("logs utils", function () {
       const logsSnapshot = {
         meta: {
           approvedBy: "user1",
-          userId: "user2",
+          userId: "user2"
         },
         type: "PROFILE_DIFF_APPROVED",
         body: {
           profileDiffId: "7sPvm4ooC1PyC91A5KVS",
-          message: "",
+          message: ""
         },
         timestamp: {
           _seconds: 1707253607,
-          _nanoseconds: 697000000,
-        },
+          _nanoseconds: 697000000
+        }
       };
 
       const formattedLog = formatLogsForFeed(logsSnapshot, usersMap);
@@ -182,7 +182,7 @@ describe("logs utils", function () {
       expect(formattedLog).to.deep.equal({
         approvedBy: "palak-gupta",
         user: "mock-2",
-        message: "",
+        message: ""
       });
     });
   });
@@ -191,7 +191,7 @@ describe("logs utils", function () {
     const data = [
       { username: "palak", id: "100", task: "task2" },
       { username: "mock-user-1", id: "101", task: "task23" },
-      { username: "mock-user-2", id: "102", task: "task4" },
+      { username: "mock-user-2", id: "102", task: "task4" }
     ];
 
     it("mapify data based on username", function () {
@@ -200,18 +200,18 @@ describe("logs utils", function () {
         "mock-user-1": {
           id: "101",
           username: "mock-user-1",
-          task: "task23",
+          task: "task23"
         },
         "mock-user-2": {
           id: "102",
           username: "mock-user-2",
-          task: "task4",
+          task: "task4"
         },
         palak: {
           id: "100",
           username: "palak",
-          task: "task2",
-        },
+          task: "task2"
+        }
       });
     });
   });

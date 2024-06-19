@@ -5,7 +5,7 @@ const {
   addRoleToUser,
   getDiscordMembers,
   removeRoleFromUser,
-  setUserDiscordNickname,
+  setUserDiscordNickname
 } = require("../../../services/discordService");
 const { fetchAllUsers } = require("../../../models/users");
 const Sinon = require("sinon");
@@ -46,8 +46,8 @@ describe("Discord services", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve({ message: "done" }),
-        }),
+          json: () => Promise.resolve({ message: "done" })
+        })
       );
 
       const response = await addRoleToUser("123456789", "987654321");
@@ -69,8 +69,8 @@ describe("Discord services", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(discordMembersArray.getDiscordMembers),
-        }),
+          json: () => Promise.resolve(discordMembersArray.getDiscordMembers)
+        })
       );
 
       const response = await getDiscordMembers();
@@ -103,14 +103,14 @@ describe("Discord services", function () {
           json: () =>
             Promise.resolve({
               message: "Role Removed Successfully",
-              userAffected: { userid: "987654321123456789", roleid: "112233445566778899" },
-            }),
-        }),
+              userAffected: { userid: "987654321123456789", roleid: "112233445566778899" }
+            })
+        })
       );
       const response = await removeRoleFromUser("112233445566778899", "987654321123456789");
       expect(response).to.deep.equal({
         message: "Role Removed Successfully",
-        userAffected: { userid: "987654321123456789", roleid: "112233445566778899" },
+        userAffected: { userid: "987654321123456789", roleid: "112233445566778899" }
       });
       expect(fetchStub.calledOnce).to.be.equal(true);
     });
@@ -140,9 +140,9 @@ describe("Discord services", function () {
           json: () =>
             Promise.resolve({
               userEffected: "Kotesh",
-              message: "User nickname changed successfully",
-            }),
-        }),
+              message: "User nickname changed successfully"
+            })
+        })
       );
 
       const response = await setUserDiscordNickname("Kotesh", "aMYlI7sxQ4JMPwiqLQlp");

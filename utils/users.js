@@ -20,7 +20,7 @@ const getUserId = async (username) => {
   try {
     const {
       userExists,
-      user: { id },
+      user: { id }
     } = await fetchUser({ username });
 
     return userExists ? id : false;
@@ -38,7 +38,7 @@ const getUserId = async (username) => {
 const getUsername = async (userId) => {
   try {
     const {
-      user: { username },
+      user: { username }
     } = await fetchUser({ userId });
     return username;
   } catch (error) {
@@ -57,7 +57,7 @@ const getFullName = async (userId) => {
   try {
     const {
       // eslint-disable-next-line camelcase
-      user: { first_name, last_name },
+      user: { first_name, last_name }
     } = await fetchUser({ userId });
     // eslint-disable-next-line camelcase
     return { first_name, last_name };
@@ -75,7 +75,7 @@ const getFullName = async (userId) => {
 const getUsernameElseUndefined = async (userId) => {
   try {
     const {
-      user: { username },
+      user: { username }
     } = await fetchUser({ userId });
     return username;
   } catch (error) {
@@ -95,7 +95,7 @@ const getUserIdElseUndefined = async (username) => {
   try {
     const {
       userExists,
-      user: { id },
+      user: { id }
     } = await fetchUser({ username });
 
     return userExists ? id : false;
@@ -283,7 +283,7 @@ const updateNickname = async (userId, status = {}) => {
   try {
     const {
       user: { discordId, username, roles = {} },
-      discordJoinedAt = {},
+      discordJoinedAt = {}
     } = await dataAccessLayer.retrieveUsers({ id: userId });
 
     if (!discordId || !username || !discordJoinedAt || roles[ROLES.ARCHIVED]) {
@@ -320,5 +320,5 @@ module.exports = {
   getRoleToUpdate,
   parseSearchQuery,
   generateOOONickname,
-  updateNickname,
+  updateNickname
 };

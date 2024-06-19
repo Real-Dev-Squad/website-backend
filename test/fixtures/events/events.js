@@ -14,7 +14,7 @@ module.exports = () => {
       customer: "627cdddff2e4e30487862ad1",
       customer_id: "6407de59edc7c8f3674c0d12",
       app_id: "6407de59edc7c8f3674c0d13",
-      recording_info: null,
+      recording_info: null
     },
     {
       description: "The RDS live",
@@ -39,11 +39,11 @@ module.exports = () => {
             "81b84e08-0769-4d4c-8439-f28d632256f4",
             "d6274e0a-5368-4d4a-a635-a1c1e8728ef9",
             "97a7f8c6-882b-4760-901a-3247bd3ae167",
-            "90bf6af3-08c6-42c1-b888-2a332f5f8e67",
-          ],
-        },
+            "90bf6af3-08c6-42c1-b888-2a332f5f8e67"
+          ]
+        }
       },
-      peers: ["11c33e90-42d9-4db3-9d06-96d0a2f7de1e"],
-    },
+      peers: ["11c33e90-42d9-4db3-9d06-96d0a2f7de1e"]
+    }
   ];
 };

@@ -9,13 +9,13 @@ async function purgeCache(files) {
     { files: files },
     {
       "X-Auth-Key": config.get("cloudflare.CLOUDFLARE_X_AUTH_KEY"),
-      "X-Auth-Email": config.get("cloudflare.CLOUDFLARE_X_AUTH_EMAIL"),
-    },
+      "X-Auth-Email": config.get("cloudflare.CLOUDFLARE_X_AUTH_EMAIL")
+    }
   );
 
   return response;
 }
 
 module.exports = {
-  purgeCache,
+  purgeCache
 };

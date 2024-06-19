@@ -70,8 +70,8 @@ const generateNewStatus = (isActive) => {
       message: "",
       from: currentTimeStamp,
       until: "",
-      updatedAt: currentTimeStamp,
-    },
+      updatedAt: currentTimeStamp
+    }
   };
 
   if (isActive) {
@@ -96,8 +96,8 @@ const generateAlreadyExistingStatusResponse = (state) => {
     status: "success",
     message: `The status is already ${state}`,
     data: {
-      currentStatus: state,
-    },
+      currentStatus: state
+    }
   };
 };
 
@@ -121,7 +121,7 @@ const updateCurrentStatusToState = async (collection, latestStatusData, newState
     data: {
       currentStatus: { state },
       ...docData
-    },
+    }
   } = latestStatusData;
   const currentTimeStamp = new Date().getTime();
   const updatedStatusData = {
@@ -131,8 +131,8 @@ const updateCurrentStatusToState = async (collection, latestStatusData, newState
       message: "",
       from: currentTimeStamp,
       until: "",
-      updatedAt: currentTimeStamp,
-    },
+      updatedAt: currentTimeStamp
+    }
   };
   try {
     await collection.doc(id).update(updatedStatusData);
@@ -146,8 +146,8 @@ const updateCurrentStatusToState = async (collection, latestStatusData, newState
     message: `The status has been updated to ${newState}`,
     data: {
       previousStatus: state,
-      currentStatus: newState,
-    },
+      currentStatus: newState
+    }
   };
 };
 
@@ -167,10 +167,10 @@ const updateCurrentStatusToState = async (collection, latestStatusData, newState
 const updateFutureStatusToState = async (collection, latestStatusData, newState) => {
   const {
     id,
-    data: { futureStatus, ...docData },
+    data: { futureStatus, ...docData }
   } = latestStatusData;
   const {
-    currentStatus: { state, until },
+    currentStatus: { state, until }
   } = docData;
   const currentTimeStamp = new Date().getTime();
   const updatedStatusData = {
@@ -180,8 +180,8 @@ const updateFutureStatusToState = async (collection, latestStatusData, newState)
       message: "",
       from: until,
       until: "",
-      updatedAt: currentTimeStamp,
-    },
+      updatedAt: currentTimeStamp
+    }
   };
   try {
     await collection.doc(id).update(updatedStatusData);
@@ -194,8 +194,8 @@ const updateFutureStatusToState = async (collection, latestStatusData, newState)
     message: `As the user is currently ${state}, the future status has been updated to ${newState}.`,
     data: {
       currentStatus: state,
-      futureStatus: newState,
-    },
+      futureStatus: newState
+    }
   };
 };
 
@@ -222,8 +222,8 @@ const createUserStatusWithState = async (userId, collection, state) => {
         message: "",
         from: currentTimeStamp,
         until: "",
-        updatedAt: currentTimeStamp,
-      },
+        updatedAt: currentTimeStamp
+      }
     });
   } catch (err) {
     logger.error(`error creating the current status for user id ${userId} - ${err.message}`);
@@ -233,8 +233,8 @@ const createUserStatusWithState = async (userId, collection, state) => {
     status: "success",
     message: `UserStatus Document did not previously exist, New UserStatus Document created and updated to an ${state} status.`,
     data: {
-      currentStatus: state,
-    },
+      currentStatus: state
+    }
   };
 };
 
@@ -291,7 +291,7 @@ const generateErrorResponse = (message) => {
   return {
     status: 500,
     error: "Internal Server Error",
-    message: message,
+    message: message
   };
 };
 
@@ -367,5 +367,5 @@ module.exports = {
   generateNewStatus,
   getNextDayTimeStamp,
   getFilteredPaginationLink,
-  convertTimestampsToUTC,
+  convertTimestampsToUTC
 };

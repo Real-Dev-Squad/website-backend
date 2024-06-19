@@ -23,7 +23,7 @@ describe("Contributions", function () {
       yoe: 0,
       img: "./img.png",
       github_id: "prakashchoudhary07",
-      username: "prakash",
+      username: "prakash"
     };
     // Adding user
     await userModel.addOrUpdate(user);
@@ -50,7 +50,7 @@ describe("Contributions", function () {
       participants: ["prakash"],
       completionAward: { gold: 3, bronze: 300 },
       lossRate: { gold: 1 },
-      isNoteworthy: true,
+      isNoteworthy: true
     };
     await testModel.updateTask(task);
     // Creating second task
@@ -90,7 +90,7 @@ describe("Contributions", function () {
             "startedOn",
             "status",
             "title",
-            "id",
+            "id"
           );
           expect(noteworthyObj.prList[0]).to.have.all.keys(
             "title",
@@ -98,7 +98,7 @@ describe("Contributions", function () {
             "url",
             "createdAt",
             "updatedAt",
-            "raisedBy",
+            "raisedBy"
           );
           const [noteworthyObj2] = res.body.all;
           expect(noteworthyObj2).to.contain.keys("task", "prList");

@@ -7,7 +7,7 @@ describe("RQLQueryParser", function () {
     const parser = new RQLQueryParser(queryString);
     const filterQueries = parser.getFilterQueries();
     expect(filterQueries).to.deep.equal({
-      key: [{ operator: Operators.INCLUDE, value: "value" }],
+      key: [{ operator: Operators.INCLUDE, value: "value" }]
     });
   });
 
@@ -18,9 +18,9 @@ describe("RQLQueryParser", function () {
     expect(filterQueries).to.deep.equal({
       key: [
         { operator: Operators.INCLUDE, value: "value" },
-        { operator: Operators.INCLUDE, value: "value2" },
+        { operator: Operators.INCLUDE, value: "value2" }
       ],
-      key2: [{ operator: Operators.INCLUDE, value: "value" }],
+      key2: [{ operator: Operators.INCLUDE, value: "value" }]
     });
   });
 
@@ -31,9 +31,9 @@ describe("RQLQueryParser", function () {
     expect(filterQueries).to.deep.equal({
       key: [
         { operator: Operators.INCLUDE, value: "value" },
-        { operator: Operators.EXCLUDE, value: "value2" },
+        { operator: Operators.EXCLUDE, value: "value2" }
       ],
-      key2: [{ operator: Operators.EXCLUDE, value: "value" }],
+      key2: [{ operator: Operators.EXCLUDE, value: "value" }]
     });
   });
 
@@ -42,7 +42,7 @@ describe("RQLQueryParser", function () {
     const parser = new RQLQueryParser(queryString);
     const sortQueries = parser.getSortQueries();
     expect(sortQueries).to.deep.equal({
-      key: "desc",
+      key: "desc"
     });
   });
 
@@ -54,7 +54,7 @@ describe("RQLQueryParser", function () {
       { operator: Operators.INCLUDE, value: "value1", type: QueryTypes.FILTER, key: "key" },
       { operator: Operators.EXCLUDE, value: "value2", type: QueryTypes.FILTER, key: "key" },
       { operator: Operators.INCLUDE, value: "value1", type: QueryTypes.FILTER, key: "key2" },
-      { value: "asc", operator: Operators.INCLUDE, type: QueryTypes.SORT, key: "key" },
+      { value: "asc", operator: Operators.INCLUDE, type: QueryTypes.SORT, key: "key" }
     ]);
   });
 

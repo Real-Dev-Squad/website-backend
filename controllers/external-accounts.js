@@ -64,9 +64,9 @@ const linkExternalAccount = async (req, res) => {
       {
         roles: { ...roles, in_discord: true },
         discordId: attributes.discordId,
-        discordJoinedAt: attributes.discordJoinedAt,
+        discordJoinedAt: attributes.discordJoinedAt
       },
-      userId,
+      userId
     );
 
     return res.status(204).json({ message: "Your discord profile has been linked successfully" });
@@ -93,7 +93,7 @@ const syncExternalAccountData = async (req, res) => {
     rdsUserData.forEach((rdsUser) => {
       rdsUserDataMap[rdsUser.discordId] = {
         id: rdsUser.id,
-        roles: rdsUser.roles,
+        roles: rdsUser.roles
       };
     });
 
@@ -105,8 +105,8 @@ const syncExternalAccountData = async (req, res) => {
         userData = {
           roles: {
             ...rdsUser.roles,
-            in_discord: false,
-          },
+            in_discord: false
+          }
         };
         userUpdatedWithInDiscordFalse.push(rdsUser);
       } else if (discordUser) {
@@ -114,8 +114,8 @@ const syncExternalAccountData = async (req, res) => {
           discordJoinedAt: discordUser.joined_at,
           roles: {
             ...rdsUser.roles,
-            in_discord: true,
-          },
+            in_discord: true
+          }
         };
       }
       updateUserDataPromises.push(addOrUpdate(userData, rdsUser.id));
@@ -129,8 +129,8 @@ const syncExternalAccountData = async (req, res) => {
         const userData = {
           roles: {
             ...user.roles,
-            archived: false,
-          },
+            archived: false
+          }
         };
         updateArchivedPromises.push(addOrUpdate(userData, user.id));
       }
@@ -143,7 +143,7 @@ const syncExternalAccountData = async (req, res) => {
       discordUsers: discordUserData.length,
       userUpdatedWithInDiscordFalse: userUpdatedWithInDiscordFalse.length,
       usersMarkedUnArchived: updateArchivedPromises.length,
-      message: "Data Sync Complete",
+      message: "Data Sync Complete"
     });
   } catch (err) {
     logger.error("Error in syncing users discord joined at", err);
@@ -172,7 +172,7 @@ const newSyncExternalAccountData = async (req, res) => {
   try {
     const [discordUserData, unArchivedRdsUsersData] = await Promise.all([
       getDiscordMembers(),
-      fetchUsersForKeyValues("roles.archived", false),
+      fetchUsersForKeyValues("roles.archived", false)
     ]);
     let usersArchivedCount = 0;
     let usersUnArchivedCount = 0;
@@ -199,8 +199,8 @@ const newSyncExternalAccountData = async (req, res) => {
           roles: {
             ...rdsUser.roles,
             in_discord: true,
-            archived: false,
-          },
+            archived: false
+          }
         };
       } else {
         usersArchivedCount++;
@@ -209,8 +209,8 @@ const newSyncExternalAccountData = async (req, res) => {
           roles: {
             ...rdsUser.roles,
             in_discord: false,
-            archived: true,
-          },
+            archived: true
+          }
         };
         archiveUserList.push({ id: rdsUser.id }); // adding users which are to be archived
       }
@@ -231,8 +231,8 @@ const newSyncExternalAccountData = async (req, res) => {
         roles: {
           ...rdsUser.roles,
           in_discord: true,
-          archived: false,
-        },
+          archived: false
+        }
       };
       updateUserList.push(userData);
     }
@@ -241,7 +241,7 @@ const newSyncExternalAccountData = async (req, res) => {
     const [, , backlogTasksCount] = await Promise.all([
       unArchiveUsersInBatchPromise,
       archiveUsersInBatchPromise,
-      markTasksBacklogPromise,
+      markTasksBacklogPromise
     ]);
 
     return res.json({
@@ -250,7 +250,7 @@ const newSyncExternalAccountData = async (req, res) => {
       usersUnArchivedCount: usersUnArchivedCount,
       totalUsersProcessed: totalUsersProcessed,
       rdsDiscordServerUsers: discordUserData.length,
-      backlogTasksCount: backlogTasksCount,
+      backlogTasksCount: backlogTasksCount
     });
   } catch (err) {
     logger.error("Error in syncing users discord joined at");
@@ -264,5 +264,5 @@ module.exports = {
   linkExternalAccount,
   syncExternalAccountData,
   newSyncExternalAccountData,
-  externalAccountsUsersPostHandler,
+  externalAccountsUsersPostHandler
 };

@@ -17,7 +17,7 @@ describe("Tasks services", function () {
       taskDataArray.forEach((task) => {
         const taskData = {
           ...task,
-          status: "COMPLETED",
+          status: "COMPLETED"
         };
         addTasksPromises.push(tasksModel.add(taskData));
       });
@@ -49,7 +49,7 @@ describe("Tasks services", function () {
         totalUpdatedStatus: 8,
         totalOperationsFailed: 0,
         updatedTaskDetails: taskDetails,
-        failedTaskDetails: [],
+        failedTaskDetails: []
       });
     });
 
@@ -59,7 +59,7 @@ describe("Tasks services", function () {
         update: function () {},
         commit: function () {
           throw new Error("Firebase batch operation failed");
-        },
+        }
       });
 
       const res = await updateTaskStatusToDone(tasks);
@@ -68,7 +68,7 @@ describe("Tasks services", function () {
         totalUpdatedStatus: 0,
         totalOperationsFailed: 8,
         updatedTaskDetails: [],
-        failedTaskDetails: taskDetails,
+        failedTaskDetails: taskDetails
       });
     });
   });

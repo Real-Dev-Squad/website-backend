@@ -30,7 +30,7 @@ const fetchExternalAccountData = async (query, param) => {
 
     return {
       id: id,
-      ...data,
+      ...data
     };
   } catch (err) {
     logger.error("Error in fetching external account data", err);

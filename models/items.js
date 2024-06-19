@@ -25,7 +25,7 @@ const addTagsToItem = async (itemData) => {
         tagType: tagData.data().type,
         levelId: tag.levelId,
         levelName: levelData.data().name,
-        levelValue: levelData.data().value,
+        levelValue: levelData.data().value
       };
       const docid = itemTagsModel.doc();
       batch.set(docid, itemTag);
@@ -79,7 +79,7 @@ const getItemBasedOnFilter = async (query) => {
     data.forEach((doc) => {
       const item = {
         id: doc.id,
-        ...doc.data(),
+        ...doc.data()
       };
       items.push(item);
     });
@@ -94,5 +94,5 @@ const getItemBasedOnFilter = async (query) => {
 module.exports = {
   addTagsToItem,
   removeTagsFromItem,
-  getItemBasedOnFilter,
+  getItemBasedOnFilter
 };

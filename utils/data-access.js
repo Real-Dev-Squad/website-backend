@@ -110,5 +110,5 @@ function removeObjectField(path, object) {
 
 module.exports = {
   removeObjectField,
-  dataAccessMiddleware,
+  dataAccessMiddleware
 };

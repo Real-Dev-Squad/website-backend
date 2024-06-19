@@ -15,21 +15,21 @@ router.post(
   authorizeRoles([SUPERUSER]),
   upload.single("file"),
   badgesValidator.createBadge,
-  badgesController.postBadge,
+  badgesController.postBadge
 );
 router.post(
   "/assign",
   authenticate,
   authorizeRoles([SUPERUSER]),
   badgesValidator.assignOrRemoveBadges,
-  badgesController.postUserBadges,
+  badgesController.postUserBadges
 );
 router.delete(
   "/remove",
   authenticate,
   authorizeRoles([SUPERUSER]),
   badgesValidator.assignOrRemoveBadges,
-  badgesController.deleteUserBadges,
+  badgesController.deleteUserBadges
 );
 
 module.exports = router;

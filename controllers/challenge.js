@@ -14,7 +14,7 @@ const fetchChallenges = async (req, res) => {
     const challengesWithParticipants = await Promise.all(promiseArray);
     return res.json({
       message: challengesWithParticipants.length ? "Challenges returned successfully!" : "No Challenges found",
-      challenges: challengesWithParticipants,
+      challenges: challengesWithParticipants
     });
   } catch (err) {
     logger.error(`Error while retrieving challenges ${err}`);
@@ -33,7 +33,7 @@ const createChallenge = async (req, res) => {
     const challengeAdded = await challengeQuery.postChallenge(req.body);
     if (challengeAdded) {
       return res.json({
-        message: "Challenge added successfully",
+        message: "Challenge added successfully"
       });
     } else {
       return res.boom.badRequest("Unable to add challenge");
@@ -53,7 +53,7 @@ const getParticipantsofChallenges = async (allChallenges) => {
     const participants = await challengeQuery.fetchParticipantsData(challenge.participants);
     return {
       ...challenge,
-      participants,
+      participants
     };
   });
 };
@@ -71,7 +71,7 @@ const subscribeToChallenge = async (req, res) => {
     if (subscribeUser) {
       return res.status(200).json({
         challenge_id: challengeId,
-        is_user_subscribed: 1,
+        is_user_subscribed: 1
       });
     } else {
       return res.boom.notFound("User cannot be subscribed to challenge");
@@ -85,5 +85,5 @@ const subscribeToChallenge = async (req, res) => {
 module.exports = {
   fetchChallenges,
   createChallenge,
-  subscribeToChallenge,
+  subscribeToChallenge
 };

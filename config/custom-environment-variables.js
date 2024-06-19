@@ -8,25 +8,25 @@
 module.exports = {
   port: {
     __name: "PORT",
-    __format: "number",
+    __format: "number"
   },
   enableFileLogs: {
     __name: "ENABLE_FILE_LOGS",
-    __format: "boolean",
+    __format: "boolean"
   },
   enableConsoleLogs: {
     __name: "ENABLE_CONSOLE_LOGS",
-    __format: "boolean",
+    __format: "boolean"
   },
 
   githubApi: {
     baseUrl: "GITHUB_API_BASE_URL",
-    org: "GITHUB_ORGANISATION",
+    org: "GITHUB_ORGANISATION"
   },
 
   githubOauth: {
     clientId: "GITHUB_CLIENT_ID",
-    clientSecret: "GITHUB_CLIENT_SECRET",
+    clientSecret: "GITHUB_CLIENT_SECRET"
   },
 
   githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
@@ -35,76 +35,76 @@ module.exports = {
 
   services: {
     rdsApi: {
-      baseUrl: "SERVICES_RDSAPI_BASEURL",
+      baseUrl: "SERVICES_RDSAPI_BASEURL"
     },
 
     rdsUi: {
       baseUrl: "SERVICES_RDSUI_BASEURL",
       routes: {
-        authRedirection: "SERVICES_RDSUI_ROUTES_AUTH_REDIRECTION",
-      },
+        authRedirection: "SERVICES_RDSUI_ROUTES_AUTH_REDIRECTION"
+      }
     },
 
     goalAPI: {
       baseUrl: "GOALS_BASE_URL",
-      secretKey: "GOALS_SECRET_KEY",
+      secretKey: "GOALS_SECRET_KEY"
     },
 
     discordBot: {
-      baseUrl: "DISCORD_BASE_URL",
-    },
+      baseUrl: "DISCORD_BASE_URL"
+    }
   },
 
   userToken: {
     cookieName: "COOKIE_NAME",
     ttl: {
       __name: "USER_TOKEN_TTL",
-      __format: "number",
+      __format: "number"
     },
     refreshTtl: {
       __name: "USER_TOKEN_REFRESH_TTL",
-      __format: "number",
+      __format: "number"
     },
     publicKey: "PUBLIC_KEY",
-    privateKey: "PRIVATE_KEY",
+    privateKey: "PRIVATE_KEY"
   },
 
   botToken: {
-    botPublicKey: "BOT_PUBLIC_KEY",
+    botPublicKey: "BOT_PUBLIC_KEY"
   },
 
   cronJobHandler: {
-    publicKey: "CRON_JOB_PUBLIC_KEY",
+    publicKey: "CRON_JOB_PUBLIC_KEY"
   },
 
   rdsServerlessBot: {
     rdsServerLessPrivateKey: "RDS_SERVERLESS_PRIVATE_KEY",
-    ttl: "RDS_SERVERLESS_TTL",
+    ttl: "RDS_SERVERLESS_TTL"
   },
 
   cloudinary: {
     cloud_name: "CLOUDINARY_CLOUD_NAME",
     api_key: "CLOUDINARY_API_KEY",
-    api_secret: "CLOUDINARY_API_SECRET_KEY",
+    api_secret: "CLOUDINARY_API_SECRET_KEY"
   },
 
   integrations: {
     newrelic: {
       appName: "INTEGRATIONS_NEWRELIC_APPNAME",
-      licenseKey: "INTEGRATIONS_NEWRELIC_LICENSEKEY",
-    },
+      licenseKey: "INTEGRATIONS_NEWRELIC_LICENSEKEY"
+    }
   },
 
   routesCacheTTL: {
-    "/members": "ROUTESCACHETTL_MEMBERS",
+    "/members": "ROUTESCACHETTL_MEMBERS"
   },
 
   Event100ms: {
     APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
-    APP_SECRET: "EVENT_100MS_APP_SECRET",
+    APP_SECRET: "EVENT_100MS_APP_SECRET"
   },
 
   externalServices: {
-    EXTERNAL_SERVICE_PUBLIC_KEY: "EXTERNAL_SERVICE_PUBLIC_KEY",
-  },
+    EXTERNAL_SERVICE_PUBLIC_KEY: "EXTERNAL_SERVICE_PUBLIC_KEY"
+  }
 };

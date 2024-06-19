@@ -16,7 +16,7 @@ const addRecruiter = async (req, res) => {
     }
     return res.json({
       message: "Request Submission Successful!!",
-      result,
+      result
     });
   } catch (error) {
     logger.error(`Error while adding recruiterInfo: ${error}`);
@@ -35,7 +35,7 @@ const fetchRecruitersInfo = async (req, res) => {
     const allRecruiter = await recruiterQuery.fetchRecruitersInfo();
     return res.json({
       message: "Recruiters returned successfully!",
-      recruiters: allRecruiter.length > 0 ? allRecruiter : [],
+      recruiters: allRecruiter.length > 0 ? allRecruiter : []
     });
   } catch (error) {
     logger.error(`Error while fetching recruiters: ${error}`);
@@ -45,5 +45,5 @@ const fetchRecruitersInfo = async (req, res) => {
 
 module.exports = {
   addRecruiter,
-  fetchRecruitersInfo,
+  fetchRecruitersInfo
 };

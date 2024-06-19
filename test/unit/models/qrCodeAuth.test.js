@@ -25,7 +25,7 @@ describe("mobile auth", function () {
       const userDeviceInfoData = {
         ...userDeviceInfoDataArray[0],
         user_id: userId,
-        authorization_status: "NOT_INIT",
+        authorization_status: "NOT_INIT"
       };
 
       const response = await qrCodeAuth.storeUserDeviceInfo(userDeviceInfoData);
@@ -34,7 +34,7 @@ describe("mobile auth", function () {
         user_id: userID,
         device_info: deviceInfo,
         device_id: deviceId,
-        authorization_status: authorizationStatus,
+        authorization_status: authorizationStatus
       } = response.userDeviceInfoData;
       const data = (await qrCodeAuthModel.doc(userID).get()).data();
 
@@ -58,7 +58,7 @@ describe("mobile auth", function () {
         user_id: userId,
         device_info: "TEST_DEVICE_INFO",
         device_id: "TEST_DEVICE_ID",
-        authorization_status: "NOT_INIT",
+        authorization_status: "NOT_INIT"
       };
       await qrCodeAuth.storeUserDeviceInfo(userDeviceInfoData);
       const response = await qrCodeAuth.updateStatus(userId, "AUTHORIZED");
@@ -89,7 +89,7 @@ describe("mobile auth", function () {
         ...userDeviceInfoDataArray[0],
         user_id: userId,
         authorization_status: "NOT_INIT",
-        access_token: "ACCESS_TOKEN",
+        access_token: "ACCESS_TOKEN"
       };
 
       await qrCodeAuth.storeUserDeviceInfo(userDeviceInfoData);
@@ -100,7 +100,7 @@ describe("mobile auth", function () {
         device_info: deviceInfo,
         device_id: deviceId,
         authorization_status: authorizationStatus,
-        access_token: accessToken,
+        access_token: accessToken
       } = userDeviceInfo;
 
       const data = (await qrCodeAuthModel.doc(userId).get()).data();
@@ -127,7 +127,7 @@ describe("mobile auth", function () {
         ...userDeviceInfoDataArray[0],
         user_id: userId,
         authorization_status: "NOT_INIT",
-        access_token: "ACCESS_TOKEN",
+        access_token: "ACCESS_TOKEN"
       };
 
       await qrCodeAuth.storeUserDeviceInfo(userDeviceInfoData);
@@ -138,7 +138,7 @@ describe("mobile auth", function () {
         device_info: deviceInfo,
         device_id: deviceId,
         authorization_status: authorizationStatus,
-        access_token: accessToken,
+        access_token: accessToken
       } = userDeviceInfo;
 
       const data = (await qrCodeAuthModel.doc(userId).get()).data();

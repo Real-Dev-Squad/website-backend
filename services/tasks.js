@@ -10,7 +10,7 @@ const updateTaskStatusToDone = async (tasksData) => {
     totalUpdatedStatus: 0,
     totalOperationsFailed: 0,
     updatedTaskDetails: [],
-    failedTaskDetails: [],
+    failedTaskDetails: []
   };
   tasksData.forEach((task) => {
     const updateTaskData = { ...task, status: "DONE" };
@@ -36,7 +36,7 @@ const addTaskCreatedAtAndUpdatedAtFields = async () => {
     totalTaskToBeUpdate: 0,
     totalTasksUpdated: 0,
     totalFailedTasks: 0,
-    failedTasksIds: [],
+    failedTasksIds: []
   };
   const updatedTasks = [];
   const tasks = await tasksModel.get();
@@ -85,5 +85,5 @@ const addTaskCreatedAtAndUpdatedAtFields = async () => {
 
 module.exports = {
   updateTaskStatusToDone,
-  addTaskCreatedAtAndUpdatedAtFields,
+  addTaskCreatedAtAndUpdatedAtFields
 };

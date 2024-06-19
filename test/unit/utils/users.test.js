@@ -33,7 +33,7 @@ describe("users", function () {
     participants: ["ankur"],
     completionAward: { gold: 3, bronze: 300 },
     lossRate: { gold: 1 },
-    isNoteworthy: true,
+    isNoteworthy: true
   };
 
   beforeEach(async function () {
@@ -94,7 +94,7 @@ describe("users", function () {
         "SanketDhabarde",
         "prakashchoudhary07",
         "Pratiyushkumar",
-        "YashJain24-chief",
+        "YashJain24-chief"
       ];
       expect(usernames).to.have.members(expectedUsernames);
     });
@@ -104,12 +104,12 @@ describe("users", function () {
     it("should return updateRole as false when the role already exists in userData", async function () {
       const userData = {
         roles: {
-          member: true,
-        },
+          member: true
+        }
       };
 
       const newRoles = {
-        member: true,
+        member: true
       };
 
       const result = await usersUtils.getRoleToUpdate(userData, newRoles);
@@ -121,11 +121,11 @@ describe("users", function () {
   it("should return updateRole as true and new user roles when the role doesn't exist in userData", async function () {
     const userData = {
       roles: {
-        member: true,
-      },
+        member: true
+      }
     };
     const newRoles = {
-      member: false,
+      member: false
     };
 
     const result = await usersUtils.getRoleToUpdate(userData, newRoles);
@@ -134,9 +134,9 @@ describe("users", function () {
       updateRole: true,
       newUserRoles: {
         roles: {
-          member: false,
-        },
-      },
+          member: false
+        }
+      }
     });
   });
 
@@ -171,7 +171,7 @@ describe("users", function () {
       const from = new Date();
       const until = new Date();
       const nickname = usersUtils.generateOOONickname(username, from.getTime(), until.getTime(), [
-        config.get("discordMavenRoleId"),
+        config.get("discordMavenRoleId")
       ]);
 
       const fromDate = from.getDate();
@@ -187,7 +187,7 @@ describe("users", function () {
           .split("-")
           .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
           .join("-")
-          .substring(0, usernameLen)} ${oooMessage}`,
+          .substring(0, usernameLen)} ${oooMessage}`
       );
     });
 
@@ -201,14 +201,14 @@ describe("users", function () {
     it("should return first letters of nickname in capital case of the mavens as nickname when only username is passed and not from and until date ", async function () {
       const { username } = userData;
       const nickname = usersUtils.generateOOONickname(username, undefined, undefined, [
-        config.get("discordMavenRoleId"),
+        config.get("discordMavenRoleId")
       ]);
 
       expect(nickname).to.be.equal(
         username
           .split("-")
           .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-          .join("-"),
+          .join("-")
       );
     });
   });
@@ -232,19 +232,19 @@ describe("users", function () {
         Promise.resolve({
           status: 200,
           ok: true,
-          json: () => Promise.resolve(response),
-        }),
+          json: () => Promise.resolve(response)
+        })
       );
 
       const status = {
         from: new Date().getTime(),
-        until: new Date().getTime(),
+        until: new Date().getTime()
       };
       const nickname = usersUtils.generateOOONickname(userData.username, status.from, status.until);
 
       const responseObj = {
         userEffected: nickname,
-        message: response,
+        message: response
       };
 
       const res = await usersUtils.updateNickname(userId, status);
@@ -261,7 +261,7 @@ describe("users", function () {
       await usersUtils
         .updateNickname("1234", {
           from: new Date().getTime(),
-          until: new Date().getTime(),
+          until: new Date().getTime()
         })
         .catch((err) => expect(err).to.be.equal(error));
       expect(fetchStub.calledOnce).to.be.equal(false);
@@ -277,7 +277,7 @@ describe("users", function () {
       await usersUtils
         .updateNickname(userId, {
           from: new Date().getTime(),
-          until: new Date().getTime(),
+          until: new Date().getTime()
         })
         .catch((err) => expect(err).to.be.equal(err));
     });

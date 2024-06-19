@@ -26,7 +26,7 @@ const fetchUsers = async (queryParams = {}) => {
         const memberData = doc.data();
         const curatedMemberData = {
           id: doc.id,
-          ...memberData,
+          ...memberData
         };
         curatedMemberData.isMember = !!(memberData.roles && memberData.roles.member);
         allMembers.push(curatedMemberData);
@@ -54,7 +54,7 @@ const moveToMembers = async (userId) => {
     const roles = user.roles ? { ...user.roles, member: true } : { member: true };
     await userModel.doc(userId).update({
       roles,
-      updated_at: Date.now(),
+      updated_at: Date.now()
     });
     return { isAlreadyMember: false, movedToMember: true };
   } catch (err) {
@@ -77,7 +77,7 @@ const fetchUsersWithRole = async (role) => {
       snapshot.forEach((doc) => {
         onlyMembers.push({
           id: doc.id,
-          ...doc.data(),
+          ...doc.data()
         });
       });
     }
@@ -102,7 +102,7 @@ const addArchiveRoleToMembers = async (userId) => {
     const roles = { ...user.roles, [ROLES.ARCHIVED]: true };
     await userModel.doc(userId).update({
       roles,
-      updated_at: Date.now(),
+      updated_at: Date.now()
     });
     return { isArchived: false };
   } catch (err) {
@@ -115,5 +115,5 @@ module.exports = {
   moveToMembers,
   addArchiveRoleToMembers,
   fetchUsers,
-  fetchUsersWithRole,
+  fetchUsersWithRole
 };

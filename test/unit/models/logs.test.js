@@ -105,7 +105,7 @@ describe("Logs", function () {
     it("Should fetch all archived logs for given user_id", async function () {
       const { type, meta, body } = logsData.archivedUserDetailsModal[0];
       const query = {
-        userId: body.archived_user.user_id,
+        userId: body.archived_user.user_id
       };
       await logsQuery.addLog(type, meta, body);
       const data = await logsQuery.fetchLogs(query, type);
@@ -120,7 +120,7 @@ describe("Logs", function () {
     it("Should throw response status 404, if username is incorrect in the query", async function () {
       const { type, meta, body } = logsData.archivedUserDetailsModal[0];
       const query = {
-        userId: "1234_test", // incorrect username
+        userId: "1234_test" // incorrect username
       };
       await logsQuery.addLog(type, meta, body);
       const data = await logsQuery.fetchLogs(query, type);

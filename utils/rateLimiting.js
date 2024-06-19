@@ -9,5 +9,5 @@ function getRetrySeconds(msBeforeNext, fallbackValue = 1) {
 }
 
 module.exports = {
-  getRetrySeconds,
+  getRetrySeconds
 };

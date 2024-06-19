@@ -9,7 +9,7 @@ const {
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
   batchUpdateUsersStatus,
-  getTaskBasedUsersStatus,
+  getTaskBasedUsersStatus
 } = require("../../../models/userStatus");
 const cleanDb = require("../../utils/cleanDb");
 const addUser = require("../../utils/addUser");
@@ -56,7 +56,7 @@ describe("Update Status based on task update", function () {
         const res = await updateStatusOnTaskCompletion(userId);
         expect(res.status).to.equal("success");
         expect(res.message).to.equal(
-          "UserStatus Document did not previously exist, New UserStatus Document created and updated to an IDLE status.",
+          "UserStatus Document did not previously exist, New UserStatus Document created and updated to an IDLE status."
         );
         expect(res.data.currentStatus).to.equal(userState.IDLE);
       });
@@ -103,7 +103,7 @@ describe("Update Status based on task update", function () {
         const res = await updateStatusOnTaskCompletion(userId);
         expect(res.status).to.equal("success");
         expect(res.message).to.equal(
-          "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status.",
+          "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status."
         );
         expect(res.data.currentStatus).to.equal(userState.ACTIVE);
       });
@@ -156,7 +156,7 @@ describe("Update Status based on task update", function () {
       const res = await updateUserStatusOnNewTaskAssignment(userId);
       expect(res.status).to.equal("success");
       expect(res.message).to.equal(
-        "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status.",
+        "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status."
       );
       expect(res.data.currentStatus).to.equal(userState.ACTIVE);
     });
@@ -204,7 +204,7 @@ describe("Update Status based on task update", function () {
       await updateUserStatusOnNewTaskAssignment(userId).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.be.equal(
-          "Please reach out to the administrator as your user status is not recognized as valid.",
+          "Please reach out to the administrator as your user status is not recognized as valid."
         );
       });
     });
@@ -214,7 +214,7 @@ describe("Update Status based on task update", function () {
       expect(res).to.deep.equal({
         status: 404,
         error: "Not Found",
-        message: "Something went wrong. Username funkeyMonkey123 could not be found.",
+        message: "Something went wrong. Username funkeyMonkey123 could not be found."
       });
     });
 
@@ -279,7 +279,7 @@ describe("Update Status based on task update", function () {
         { userId: userId8, state: "ACTIVE" },
         { userId: userId9, state: "ACTIVE" },
         { userId: userId10, state: "ACTIVE" },
-        { userId: userId11, state: "IDLE" },
+        { userId: userId11, state: "IDLE" }
       ];
     });
 
@@ -298,7 +298,7 @@ describe("Update Status based on task update", function () {
         "activeUsersAltered",
         "activeUsersUnaltered",
         "idleUsersAltered",
-        "idleUsersUnaltered",
+        "idleUsersUnaltered"
       );
       expect(result.usersCount).to.equal(12);
       expect(result.unprocessedUsers).to.equal(0);
@@ -391,14 +391,14 @@ describe("Update Status based on task update", function () {
         totalIdleUsers: 1,
         totalActiveUsers: 2,
         totalUnprocessedUsers: 0,
-        unprocessedUsers: [],
+        unprocessedUsers: []
       });
       expect(result)
         .to.have.deep.property("users")
         .that.has.deep.members([
           { userId: userId1, state: "ACTIVE" },
           { userId: userId3, state: "IDLE" },
-          { userId: userId2, state: "ACTIVE" },
+          { userId: userId2, state: "ACTIVE" }
         ]);
     });
 

@@ -7,8 +7,8 @@ describe("Test the fcmToken validator", function () {
   it("Allows the request to pass", async function () {
     const req = {
       body: {
-        fcmToken: "some token",
-      },
+        fcmToken: "some token"
+      }
     };
     const res = {};
     const nextSpy = Sinon.spy();
@@ -19,13 +19,13 @@ describe("Test the fcmToken validator", function () {
   it("Stops the request to propogate to next", async function () {
     const req = {
       body: {
-        "": "",
-      },
+        "": ""
+      }
     };
     const res = {
       boom: {
-        badRequest: () => {},
-      },
+        badRequest: () => {}
+      }
     };
     const nextSpy = Sinon.spy();
     await fcmTokenValidator(req, res, nextSpy);

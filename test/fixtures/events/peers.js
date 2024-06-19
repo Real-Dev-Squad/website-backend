@@ -6,7 +6,7 @@ const eventOnePeerData = {
   name: "Satyam Bajpai",
   eventId: event1Data.room_id,
   role: "guest",
-  joinedAt: new Date(),
+  joinedAt: new Date()
 };
 
 module.exports = { eventOnePeerData };

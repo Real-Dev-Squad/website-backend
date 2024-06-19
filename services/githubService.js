@@ -18,7 +18,7 @@ const extractPRdetails = (data) => {
       updated_at: updatedAt,
       repository_url: repositoryUrl,
       labels,
-      assignees,
+      assignees
     }) => {
       const allAssignees = assignees.map((object) => object.login);
       const allLabels = labels.map((object) => object.name);
@@ -33,9 +33,9 @@ const extractPRdetails = (data) => {
         repository,
         url,
         labels: allLabels,
-        assignees: allAssignees,
+        assignees: allAssignees
       });
-    },
+    }
   );
   return allPRs;
 };
@@ -56,7 +56,7 @@ const getGithubURL = (searchParams, resultsOptions = {}, searchString) => {
   urlObj.pathname = issuesAndPRsPath;
 
   const defaultParams = {
-    org: config.get("githubApi.org"),
+    org: config.get("githubApi.org")
   };
 
   const finalSearchParams = Object.assign({}, defaultParams, searchParams);
@@ -91,8 +91,8 @@ function getFetch(url) {
   return utils.fetch(url, "get", null, null, null, {
     auth: {
       username: config.get("githubOauth.clientId"),
-      password: config.get("githubOauth.clientSecret"),
-    },
+      password: config.get("githubOauth.clientSecret")
+    }
   });
 }
 
@@ -116,7 +116,7 @@ const fetchPRsByUser = async (username) => {
     const { user } = await fetchUser({ username });
     const url = getGithubURL({
       author: user.github_id,
-      type: "pr",
+      type: "pr"
     });
     return getFetch(url);
   } catch (err) {
@@ -140,14 +140,14 @@ const fetchOpenPRs = async (params = {}) => {
       {
         type: "pr",
         is: "open",
-        ...searchParams,
+        ...searchParams
       },
       {
         sort: "created",
         ...resultOptions,
         per_page: perPage,
-        page,
-      },
+        page
+      }
     );
     return getFetch(url);
   } catch (err) {
@@ -164,14 +164,14 @@ const fetchMergedPRs = async (params = {}) => {
       {
         type: "pr",
         is: "merged",
-        ...searchParams,
+        ...searchParams
       },
       {
         sort: "updated",
         ...resultOptions,
         per_page: perPage,
-        page,
-      },
+        page
+      }
     );
 
     return getFetch(url);
@@ -189,15 +189,15 @@ const fetchOpenIssues = async (params = {}) => {
       {
         type: "issue",
         is: "open",
-        ...searchParams,
+        ...searchParams
       },
       {
         sort: "created",
         ...resultOptions,
         per_page: perPage,
-        page,
+        page
       },
-      searchString,
+      searchString
     );
     return getFetch(url);
   } catch (err) {
@@ -214,14 +214,14 @@ const fetchClosedIssues = async (params = {}) => {
       {
         type: "issue",
         is: "closed",
-        ...searchParams,
+        ...searchParams
       },
       {
         sort: "updated",
         ...resultOptions,
         per_page: perPage,
-        page,
-      },
+        page
+      }
     );
     return getFetch(url);
   } catch (err) {
@@ -244,14 +244,14 @@ const fetchIssues = async () => {
       createdURL,
       {
         filter: "all",
-        state: "open",
+        state: "open"
       },
       {
         Accept: "application/vnd.github+json",
         // TODO: replace <AUTH-TOKEN> with RDS org PAT
         Authorization: `Bearer <AUTH-TOKEN>`,
-        org: config.get("githubApi.org"),
-      },
+        org: config.get("githubApi.org")
+      }
     );
     return res;
   } catch (err) {
@@ -274,7 +274,7 @@ const fetchIssuesById = async (repositoryName, issueId) => {
     const headers = {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${config.get("githubAccessToken")}`,
-      org: org,
+      org: org
     };
     const res = await fetch(url, { headers });
     if (!res.ok) {
@@ -298,14 +298,14 @@ const fetchLastMergedPR = async (username) => {
     const searchParams = {
       type: "pr",
       is: "merged",
-      author: username,
+      author: username
     };
     const createdURL = getGithubURL(searchParams, { sort: "merged", order: "desc", per_page: "1" });
 
     const headers = {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${config.get("githubAccessToken")}`,
-      org: config.get("githubApi.org"),
+      org: config.get("githubApi.org")
     };
 
     const res = await fetch(createdURL, { headers });
@@ -365,5 +365,5 @@ module.exports = {
   fetchClosedIssues,
   fetchLastMergedPR,
   isLastPRMergedWithinDays,
-  fetchIssuesById,
+  fetchIssuesById
 };

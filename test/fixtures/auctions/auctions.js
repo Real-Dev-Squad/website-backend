@@ -11,7 +11,7 @@ const auctionData = {
   item_type: NEELAM,
   quantity: 2,
   initial_price: 100,
-  end_time: Date.now() + 60 * 60 * 1000,
+  end_time: Date.now() + 60 * 60 * 1000
 };
 
 const auctionKeys = ["auctions", "message"];

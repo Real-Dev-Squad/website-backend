@@ -16,7 +16,7 @@ const fetchTaskRequests = async (_, res) => {
 
     return res.status(200).json({
       message: "Task requests returned successfully",
-      ...data,
+      ...data
     });
   } catch (err) {
     logger.error("Error while fetching task requests", err);
@@ -31,12 +31,12 @@ const fetchTaskRequestById = async (req, res) => {
 
     if (!data.taskRequestExists) {
       return res.status(404).json({
-        message: "Task request not found",
+        message: "Task request not found"
       });
     }
     return res.status(200).json({
       message: "Task request returned successfully",
-      data: data.taskRequestData,
+      data: data.taskRequestData
     });
   } catch (err) {
     logger.error("Error while fetching task requests", err);
@@ -107,9 +107,9 @@ const addTaskRequests = async (req, res) => {
         createdBy: req.userData.id,
         createdAt: Date.now(),
         lastModifiedBy: req.userData.id,
-        lastModifiedAt: Date.now(),
+        lastModifiedAt: Date.now()
       },
-      body: newTaskRequest.taskRequest,
+      body: newTaskRequest.taskRequest
     };
     await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
 
@@ -118,8 +118,8 @@ const addTaskRequests = async (req, res) => {
       message: "Task request successful.",
       data: {
         id: newTaskRequest.id,
-        ...newTaskRequest.taskRequest,
-      },
+        ...newTaskRequest.taskRequest
+      }
     });
   } catch (err) {
     logger.error("Error while creating task request");
@@ -148,13 +148,13 @@ const addOrUpdate = async (req, res) => {
     if (response.isCreate) {
       return res.status(201).json({
         message: "Task request successfully created",
-        taskRequest: response.taskRequest,
+        taskRequest: response.taskRequest
       });
     }
 
     return res.status(200).json({
       message: "Task request successfully updated",
-      requestors: response.requestors,
+      requestors: response.requestors
     });
   } catch (err) {
     logger.error("Error while creating task request");
@@ -209,15 +209,15 @@ const updateTaskRequests = async (req, res) => {
         createdBy: req.userData.id,
         createdAt: Date.now(),
         lastModifiedBy: req.userData.id,
-        lastModifiedAt: Date.now(),
+        lastModifiedAt: Date.now()
       },
-      body: updateTaskRequestResponse.taskRequest,
+      body: updateTaskRequestResponse.taskRequest
     };
     await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
 
     return res.status(200).json({
       message: `Task updated successfully.`,
-      taskRequest: updateTaskRequestResponse?.taskRequest,
+      taskRequest: updateTaskRequestResponse?.taskRequest
     });
   } catch (err) {
     logger.error("Error while approving task request", err);
@@ -258,5 +258,5 @@ module.exports = {
   fetchTaskRequests,
   fetchTaskRequestById,
   addTaskRequests,
-  migrateTaskRequests,
+  migrateTaskRequests
 };

@@ -128,7 +128,7 @@ describe("External Accounts", function () {
           expect(res.body).to.be.eql({
             statusCode: 409,
             error: "Conflict",
-            message: "Token already exists",
+            message: "Token already exists"
           });
 
           return done();
@@ -201,7 +201,7 @@ describe("External Accounts", function () {
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
-            message: "Token Expired. Please generate it again",
+            message: "Token Expired. Please generate it again"
           });
 
           return done();
@@ -221,7 +221,7 @@ describe("External Accounts", function () {
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
-            message: "Unauthenticated User",
+            message: "Unauthenticated User"
           });
 
           return done();
@@ -251,8 +251,8 @@ describe("External Accounts", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(getDiscordMembers),
-        }),
+          json: () => Promise.resolve(getDiscordMembers)
+        })
       );
       chai
         .request(app)
@@ -268,7 +268,7 @@ describe("External Accounts", function () {
             discordUsers: 3,
             userUpdatedWithInDiscordFalse: 0,
             usersMarkedUnArchived: 1,
-            message: "Data Sync Complete",
+            message: "Data Sync Complete"
           });
           return done();
         });
@@ -285,7 +285,7 @@ describe("External Accounts", function () {
             return done(err);
           }
           expect(res.body).to.deep.equal({
-            message: INTERNAL_SERVER_ERROR,
+            message: INTERNAL_SERVER_ERROR
           });
           return done();
         });
@@ -313,23 +313,23 @@ describe("External Accounts", function () {
       const userId = usersFromRds[4].id;
       const task1 = {
         assignee: userId,
-        status: "ACTIVE",
+        status: "ACTIVE"
       };
       const task2 = {
         assignee: userId,
-        status: "COMPLETED",
+        status: "COMPLETED"
       };
       const task3 = {
         assignee: userId,
-        status: "IN_PROGRESS",
+        status: "IN_PROGRESS"
       };
       await Promise.all([tasksModel.add(task1), tasksModel.add(task2), tasksModel.add(task3)]);
 
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(getDiscordMembers),
-        }),
+          json: () => Promise.resolve(getDiscordMembers)
+        })
       );
 
       const res = await chai
@@ -345,7 +345,7 @@ describe("External Accounts", function () {
         usersUnArchivedCount: 0,
         totalUsersProcessed: 2,
         rdsDiscordServerUsers: 3,
-        backlogTasksCount: 2,
+        backlogTasksCount: 2
       });
     });
 
@@ -355,8 +355,8 @@ describe("External Accounts", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(getDiscordMembers),
-        }),
+          json: () => Promise.resolve(getDiscordMembers)
+        })
       );
       const res = await chai
         .request(app)
@@ -371,7 +371,7 @@ describe("External Accounts", function () {
         usersUnArchivedCount: 0,
         totalUsersProcessed: 2,
         rdsDiscordServerUsers: 3,
-        backlogTasksCount: 0,
+        backlogTasksCount: 0
       });
     });
 
@@ -381,8 +381,8 @@ describe("External Accounts", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(getDiscordMembers),
-        }),
+          json: () => Promise.resolve(getDiscordMembers)
+        })
       );
       const res = await chai
         .request(app)
@@ -397,7 +397,7 @@ describe("External Accounts", function () {
         usersUnArchivedCount: 1,
         totalUsersProcessed: 2,
         rdsDiscordServerUsers: 3,
-        backlogTasksCount: 0,
+        backlogTasksCount: 0
       });
     });
 
@@ -407,8 +407,8 @@ describe("External Accounts", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(getDiscordMembers),
-        }),
+          json: () => Promise.resolve(getDiscordMembers)
+        })
       );
       const res = await chai
         .request(app)
@@ -423,7 +423,7 @@ describe("External Accounts", function () {
         usersUnArchivedCount: 0,
         totalUsersProcessed: 1,
         rdsDiscordServerUsers: 3,
-        backlogTasksCount: 0,
+        backlogTasksCount: 0
       });
     });
 
@@ -439,7 +439,7 @@ describe("External Accounts", function () {
             return done(err);
           }
           expect(res.body).to.deep.equal({
-            message: INTERNAL_SERVER_ERROR,
+            message: INTERNAL_SERVER_ERROR
           });
           return done();
         });
@@ -498,7 +498,7 @@ describe("External Accounts", function () {
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
-            message: "Token Expired. Please generate it again",
+            message: "Token Expired. Please generate it again"
           });
 
           return done();
@@ -518,7 +518,7 @@ describe("External Accounts", function () {
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
-            message: "Unauthenticated User",
+            message: "Unauthenticated User"
           });
 
           return done();

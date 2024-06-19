@@ -91,7 +91,7 @@ describe("auctions", function () {
         initialPrice,
         itemType,
         endTime: Date.now() - 60 * 60 * 1000,
-        quantity,
+        quantity
       });
       const response = await auctions.fetchAvailableAuctions();
 

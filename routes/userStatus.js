@@ -6,7 +6,7 @@ const {
   updateAllUserStatus,
   batchUpdateUsersStatus,
   getUserStatusControllers,
-  updateUserStatusController,
+  updateUserStatusController
 } = require("../controllers/userStatus");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
@@ -15,7 +15,7 @@ const { SUPERUSER } = require("../constants/roles");
 const {
   validateUserStatus,
   validateMassUpdate,
-  validateGetQueryParams,
+  validateGetQueryParams
 } = require("../middlewares/validators/userStatus");
 const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
 const ROLES = require("../constants/roles");
@@ -30,7 +30,7 @@ router.patch(
   "/batch",
   authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
   validateMassUpdate,
-  batchUpdateUsersStatus,
+  batchUpdateUsersStatus
 );
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), validateUserStatus, updateUserStatus);
 router.delete("/:userId", authenticate, authorizeRoles([SUPERUSER]), deleteUserStatus);

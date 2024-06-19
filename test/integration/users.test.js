@@ -21,7 +21,7 @@ const joinData = require("../fixtures/user/join");
 const {
   userStatusDataForNewUser,
   userStatusDataAfterSignup,
-  userStatusDataAfterFillingJoinSection,
+  userStatusDataAfterFillingJoinSection
 } = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
@@ -71,8 +71,8 @@ describe("Users", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(getDiscordMembers),
-        }),
+          json: () => Promise.resolve(getDiscordMembers)
+        })
       );
     });
 
@@ -86,7 +86,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          first_name: "Test first_name",
+          first_name: "Test first_name"
         })
         .end((err, res) => {
           if (err) {
@@ -105,7 +105,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          status: "ooo",
+          status: "ooo"
         })
         .end((err, res) => {
           if (err) {
@@ -124,7 +124,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          username: "validUsername123",
+          username: "validUsername123"
         })
         .end((err, res) => {
           if (err) {
@@ -146,8 +146,8 @@ describe("Users", function () {
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
             roles: {
-              maven: true,
-            },
+              maven: true
+            }
           })
           .end((err, res) => {
             if (err) {
@@ -179,8 +179,8 @@ describe("Users", function () {
         .set("cookie", `${cookieName}=${newUserJwt}`)
         .send({
           roles: {
-            maven: true,
-          },
+            maven: true
+          }
         });
 
       expect(updateRolesResponse).to.have.status(204);
@@ -203,8 +203,8 @@ describe("Users", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           roles: {
-            maven: true,
-          },
+            maven: true
+          }
         })
         .end((err, res) => {
           if (err) {
@@ -223,7 +223,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          status: "blah",
+          status: "blah"
         })
         .end((err, res) => {
           if (err) {
@@ -235,7 +235,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: '"status" must be one of [ooo, idle, active, onboarding]',
+            message: '"status" must be one of [ooo, idle, active, onboarding]'
           });
 
           return done();
@@ -250,8 +250,8 @@ describe("Users", function () {
         .send({
           roles: {
             in_discord: false,
-            developer: true,
-          },
+            developer: true
+          }
         })
         .end((err, res) => {
           if (err) {
@@ -273,8 +273,8 @@ describe("Users", function () {
           roles: {
             archived: "false",
             in_discord: false,
-            developer: true,
-          },
+            developer: true
+          }
         })
         .end((err, res) => {
           if (err) {
@@ -293,7 +293,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          username: "@invalidUser-name",
+          username: "@invalidUser-name"
         })
         .end((err, res) => {
           if (err) {
@@ -305,7 +305,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Username must be between 4 and 20 characters long and contain only letters or numbers.",
+            message: "Username must be between 4 and 20 characters long and contain only letters or numbers."
           });
 
           return done();
@@ -318,7 +318,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          twitter_id: "Valid_twitterId",
+          twitter_id: "Valid_twitterId"
         })
         .end((err, res) => {
           if (err) {
@@ -336,7 +336,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          twitter_id: "invalid@twitter_id",
+          twitter_id: "invalid@twitter_id"
         })
         .end((err, res) => {
           if (err) {
@@ -348,7 +348,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Invalid Twitter ID. ID should not contain special character @ or spaces",
+            message: "Invalid Twitter ID. ID should not contain special character @ or spaces"
           });
 
           return done();
@@ -361,7 +361,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          linkedin_id: "invalid@linkedin_id",
+          linkedin_id: "invalid@linkedin_id"
         })
         .end((err, res) => {
           if (err) {
@@ -373,7 +373,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Invalid Linkedin ID. ID should not contain special character @ or spaces",
+            message: "Invalid Linkedin ID. ID should not contain special character @ or spaces"
           });
 
           return done();
@@ -386,7 +386,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          instagram_id: "invalid@instagram_id",
+          instagram_id: "invalid@instagram_id"
         })
         .end((err, res) => {
           if (err) {
@@ -398,7 +398,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Invalid Instagram ID. ID should not contain special character @ or spaces",
+            message: "Invalid Instagram ID. ID should not contain special character @ or spaces"
           });
 
           return done();
@@ -411,7 +411,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          linkedin_id: "Linkedin 123",
+          linkedin_id: "Linkedin 123"
         })
         .end((err, res) => {
           if (err) {
@@ -423,7 +423,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Invalid Linkedin ID. ID should not contain special character @ or spaces",
+            message: "Invalid Linkedin ID. ID should not contain special character @ or spaces"
           });
 
           return done();
@@ -495,7 +495,7 @@ describe("Users", function () {
         .get("/users")
         .query({
           size: 1,
-          page: 0,
+          page: 0
         })
         .end((err, res) => {
           if (err) {
@@ -520,7 +520,7 @@ describe("Users", function () {
         .get("/users")
         .query({
           size: -1,
-          page: -1,
+          page: -1
         })
         .end((err, res) => {
           if (err) {
@@ -541,7 +541,7 @@ describe("Users", function () {
         .request(app)
         .get("/users")
         .query({
-          size: 101,
+          size: 101
         })
         .end((err, res) => {
           if (err) {
@@ -708,7 +708,7 @@ describe("Users", function () {
         .request(app)
         .get("/users")
         .query({
-          query: "filterBy:unmerged_prs+days:30",
+          query: "filterBy:unmerged_prs+days:30"
         })
         .end((err, res) => {
           if (err) {
@@ -727,7 +727,7 @@ describe("Users", function () {
         .get("/users")
         .query({
           q: "filterBy:unmerged_prs+days:30",
-          dev: true,
+          dev: true
         })
         .end((err, res) => {
           if (err) {
@@ -745,7 +745,7 @@ describe("Users", function () {
         .request(app)
         .get("/users")
         .query({
-          q: "filterBy:unmerged_prs+days:30",
+          q: "filterBy:unmerged_prs+days:30"
         })
         .end((err, res) => {
           if (err) {
@@ -880,7 +880,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
-            message: "Unauthenticated User",
+            message: "Unauthenticated User"
           });
 
           return done();
@@ -1137,7 +1137,7 @@ describe("Users", function () {
         "linkedin_id",
         "github_id",
         "isMember",
-        "roles",
+        "roles"
       ]);
       expect(Object.keys(res.body.user)).to.not.include.members(["phone", "email", "tokens", "chaincode"]);
       expect(res.body.user.id).to.equal(userId);
@@ -1397,7 +1397,7 @@ describe("Users", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({
           profileDiffId: `${profileDiffsId}`,
-          message: "",
+          message: ""
         })
         .end((err, res) => {
           if (err) {
@@ -1440,7 +1440,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
-            message: "Unauthenticated User",
+            message: "Unauthenticated User"
           });
           return done();
         });
@@ -1471,7 +1471,7 @@ describe("Users", function () {
           twitter_id: "ankur909",
           instagram_id: "",
           website: "",
-          message: "",
+          message: ""
         })
         .end((err, res) => {
           if (err) {
@@ -1514,7 +1514,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
-            message: "Unauthenticated User",
+            message: "Unauthenticated User"
           });
           return done();
         });
@@ -1562,7 +1562,7 @@ describe("Users", function () {
         .patch("/users/profileURL")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          profileURL: "http://localhost:3000/healthcheck",
+          profileURL: "http://localhost:3000/healthcheck"
         })
         .end((err, res) => {
           if (err) {
@@ -1581,7 +1581,7 @@ describe("Users", function () {
         .patch("/users/profileURL")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          profileURL: "random",
+          profileURL: "random"
         })
         .end((err, res) => {
           if (err) {
@@ -1593,7 +1593,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: '"profileURL" must be a valid uri',
+            message: '"profileURL" must be a valid uri'
           });
 
           return done();
@@ -1616,7 +1616,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: '"profileURL" is required',
+            message: '"profileURL" is required'
           });
           return done();
         });
@@ -1756,8 +1756,8 @@ describe("Users", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(getDiscordMembers),
-        }),
+          json: () => Promise.resolve(getDiscordMembers)
+        })
       );
       chai
         .request(app)
@@ -1799,7 +1799,7 @@ describe("Users", function () {
           .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
-            member: true,
+            member: true
           })
           .end((err, res) => {
             if (err) {
@@ -1820,7 +1820,7 @@ describe("Users", function () {
           .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
-            member: false,
+            member: false
           })
           .end((err, res) => {
             if (err) {
@@ -1841,7 +1841,7 @@ describe("Users", function () {
           .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
-            archived: true,
+            archived: true
           })
           .end((err, res) => {
             if (err) {
@@ -1862,7 +1862,7 @@ describe("Users", function () {
           .patch(`/users/${userRoleUnArchivedId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
-            archived: false,
+            archived: false
           })
           .end((err, res) => {
             if (err) {
@@ -1885,7 +1885,7 @@ describe("Users", function () {
           .send({
             member: true,
             archived: true,
-            reason: "test reason",
+            reason: "test reason"
           })
           .end((err, res) => {
             if (err) {
@@ -1906,7 +1906,7 @@ describe("Users", function () {
           .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
-            in_discord: true,
+            in_discord: true
           })
           .end((err, res) => {
             if (err) {
@@ -1927,7 +1927,7 @@ describe("Users", function () {
           .patch(`/users/${userAlreadyMemberId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
-            member: true,
+            member: true
           })
           .end((err, res) => {
             if (err) {
@@ -1948,7 +1948,7 @@ describe("Users", function () {
           .patch(`/users/${userAlreadyNotMemberId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
-            member: false,
+            member: false
           })
           .end((err, res) => {
             if (err) {
@@ -1969,7 +1969,7 @@ describe("Users", function () {
           .patch(`/users/${userAlreadyArchivedId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
-            archived: true,
+            archived: true
           })
           .end((err, res) => {
             if (err) {
@@ -1990,7 +1990,7 @@ describe("Users", function () {
           .patch(`/users/${userAlreadyUnArchivedId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
-            archived: false,
+            archived: false
           })
           .end((err, res) => {
             if (err) {
@@ -2009,7 +2009,7 @@ describe("Users", function () {
         .patch(`/users/111111111111/temporary/data`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({
-          archived: true,
+          archived: true
         })
         .end((err, res) => {
           if (err) {
@@ -2029,7 +2029,7 @@ describe("Users", function () {
           .patch(`/users/${nonSuperUserId}/temporary/data`)
           .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
           .send({
-            archived: true,
+            archived: true
           })
           .end((err, res) => {
             if (err) {
@@ -2053,7 +2053,7 @@ describe("Users", function () {
     beforeEach(async function () {
       const rolesToBeAdded = {
         archived: false,
-        in_discord: false,
+        in_discord: false
       };
       userId1 = await addUser({ ...userData[0], roles: rolesToBeAdded });
       userId2 = await addUser({ ...userData[1], roles: rolesToBeAdded });
@@ -2100,7 +2100,7 @@ describe("Users", function () {
           expect(res.body.summary.totalUsers).to.be.equal(3);
           expect(res.body.summary.totalOperationsFailed).to.be.equal(0);
           expect(res.body.message).to.equal(
-            "Successfully updated users archived role to true if in_discord role is false",
+            "Successfully updated users archived role to true if in_discord role is false"
           );
           return done();
         });
@@ -2109,7 +2109,7 @@ describe("Users", function () {
     it("should return proper response if no documents are found to update for api archiveUsersIfNotInDiscord", async function () {
       const roles = {
         archived: true,
-        in_discord: false,
+        in_discord: false
       };
       await addOrUpdate({ ...userData[0], roles }, userId1);
       await addOrUpdate({ ...userData[1], roles }, userId2);
@@ -2136,7 +2136,7 @@ describe("Users", function () {
         update: function () {},
         commit: function () {
           throw new Error("Firestore batch commit failed!");
-        },
+        }
       });
 
       const res = await chai
@@ -2167,7 +2167,7 @@ describe("Users", function () {
             "totalOperationsFailed",
             "totalUsers",
             "updatedUserDetails",
-            "failedUserDetails",
+            "failedUserDetails"
           ]);
           expect(res.body.summary.totalUsersArchived).to.be.equal(3);
           expect(res.body.summary.totalUsers).to.be.equal(3);
@@ -2175,7 +2175,7 @@ describe("Users", function () {
           expect(res.body.summary.updatedUserDetails.length).to.equal(3);
           expect(res.body.summary.failedUserDetails.length).to.equal(0);
           expect(res.body.message).to.equal(
-            "Successfully updated users archived role to true if in_discord role is false",
+            "Successfully updated users archived role to true if in_discord role is false"
           );
           return done();
         });
@@ -2197,8 +2197,8 @@ describe("Users", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(),
-        }),
+          json: () => Promise.resolve()
+        })
       );
       chai
         .request(app)
@@ -2234,7 +2234,7 @@ describe("Users", function () {
         update: function () {},
         commit: function () {
           throw new Error("User not verified");
-        },
+        }
       });
       chai
         .request(app)
@@ -2258,8 +2258,8 @@ describe("Users", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(getDiscordMembers),
-        }),
+          json: () => Promise.resolve(getDiscordMembers)
+        })
       );
     });
 
@@ -2294,8 +2294,8 @@ describe("Users", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(discordMembers),
-        }),
+          json: () => Promise.resolve(discordMembers)
+        })
       );
     });
 
@@ -2309,7 +2309,7 @@ describe("Users", function () {
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          first_name: "Test first_name",
+          first_name: "Test first_name"
         })
         .end((err, res) => {
           if (err) {
@@ -2318,7 +2318,7 @@ describe("Users", function () {
 
           expect(res).to.have.status(403);
           expect(res.body.message).to.equal(
-            "Developers can't update their profile data. Use profile service for updating.",
+            "Developers can't update their profile data. Use profile service for updating."
           );
 
           return done();
@@ -2335,8 +2335,8 @@ describe("Users", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(discordMembers),
-        }),
+          json: () => Promise.resolve(discordMembers)
+        })
       );
     });
 

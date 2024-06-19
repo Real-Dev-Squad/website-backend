@@ -25,8 +25,8 @@ describe("contentTypeCheck", function () {
     fetchStub.returns(
       Promise.resolve({
         status: 200,
-        json: () => Promise.resolve(getDiscordMembers),
-      }),
+        json: () => Promise.resolve(getDiscordMembers)
+      })
     );
   });
 
@@ -51,7 +51,7 @@ describe("contentTypeCheck", function () {
         expect(res.body).to.eql({
           statusCode: 415,
           error: "Unsupported Media Type",
-          message: "Invalid content-type header: application/xml, expected: application/json or multipart/form-data",
+          message: "Invalid content-type header: application/xml, expected: application/json or multipart/form-data"
         });
 
         return done();
@@ -79,7 +79,7 @@ describe("contentTypeCheck", function () {
       .patch("/users/self")
       .set("cookie", `${cookieName}=${jwt}`)
       .send({
-        first_name: "Test first_name",
+        first_name: "Test first_name"
       })
       .end((err, res) => {
         if (err) {

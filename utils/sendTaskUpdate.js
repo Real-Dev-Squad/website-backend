@@ -11,13 +11,13 @@ export const sendTaskUpdate = async (completed, blockers, planned, userName, tas
         planned,
         userName,
         taskId,
-        taskTitle,
-      },
+        taskTitle
+      }
     };
     await fetch(`${DISCORD_BASE_URL}/task/update`, {
       method: "POST",
       headers,
-      body: JSON.stringify(body),
+      body: JSON.stringify(body)
     });
   } catch (error) {
     logger.error("Something went wrong", error);

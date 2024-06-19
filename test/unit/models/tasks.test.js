@@ -33,7 +33,7 @@ describe("tasks", function () {
 
       const newAvailableTasks = await tasks.overdueTasks([
         { ...taskData1, id: taskId1 },
-        { ...taskData2, id: taskId2 },
+        { ...taskData2, id: taskId2 }
       ]);
 
       newAvailableTasks.forEach((task) => {
@@ -52,7 +52,7 @@ describe("tasks", function () {
     it("should add dependencies to firestore and return dependsOn array", async function () {
       const data = {
         taskId: "taskId1",
-        dependsOn: ["taskId2", "taskId3"],
+        dependsOn: ["taskId2", "taskId3"]
       };
       const result = await addDependency(data);
       expect(result).to.deep.equal(data.dependsOn);
@@ -61,7 +61,7 @@ describe("tasks", function () {
     it("should throw an error if there is an error while creating dependencies", async function () {
       const data = {
         taskId: "taskId1",
-        dependsOn: ["taskId2", "taskId3"],
+        dependsOn: ["taskId2", "taskId3"]
       };
       const expectedError = new Error("test error");
       dependencyModel.doc = () => {
@@ -148,7 +148,7 @@ describe("tasks", function () {
     it("should paginate and fetch tasks with the passed size", async function () {
       const SIZE = 3;
       const result = await tasks.fetchPaginatedTasks({
-        size: SIZE,
+        size: SIZE
       });
 
       expect(result).to.have.property("allTasks");
@@ -231,7 +231,7 @@ describe("tasks", function () {
       const taskId2 = (await tasks.updateTask(tasksData[4])).taskId;
       const dependsOn = [taskId1, taskId2];
       const data = {
-        dependsOn,
+        dependsOn
       };
 
       await updateTask(data, taskId);
@@ -247,7 +247,7 @@ describe("tasks", function () {
 
       const dependsOn = ["taskId1", "taskId2"];
       const data = {
-        dependsOn,
+        dependsOn
       };
 
       try {
@@ -263,7 +263,7 @@ describe("tasks", function () {
   describe("update tasks", function () {
     it("should update status when assignee pass as payload", async function () {
       const data = {
-        assignee: "sagar",
+        assignee: "sagar"
       };
       const taskId = (await tasks.updateTask(tasksData[4])).taskId;
 
@@ -318,7 +318,7 @@ describe("tasks", function () {
       tasksData.forEach((task) => {
         const taskData = {
           ...task,
-          status: "COMPLETED",
+          status: "COMPLETED"
         };
         addTasksPromises.push(tasksModel.add(taskData));
       });
@@ -342,7 +342,7 @@ describe("tasks", function () {
         update: function () {},
         commit: function () {
           throw new Error("Firestore batch update failed");
-        },
+        }
       });
       try {
         await tasks.updateTaskStatus();

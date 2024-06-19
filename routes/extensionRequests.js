@@ -8,7 +8,7 @@ const {
   createExtensionRequest,
   updateExtensionRequest,
   updateExtensionRequestStatus,
-  getExtensionRequestsValidator,
+  getExtensionRequestsValidator
 } = require("../middlewares/validators/extensionRequests");
 
 router.post("/", authenticate, createExtensionRequest, extensionRequests.createTaskExtensionRequest);
@@ -20,14 +20,14 @@ router.patch(
   authenticate,
   authorizeRoles([SUPERUSER, APPOWNER]),
   updateExtensionRequest,
-  extensionRequests.updateExtensionRequest,
+  extensionRequests.updateExtensionRequest
 );
 router.patch(
   "/:id/status",
   authenticate,
   authorizeRoles([SUPERUSER, APPOWNER]),
   updateExtensionRequestStatus,
-  extensionRequests.updateExtensionRequestStatus,
+  extensionRequests.updateExtensionRequestStatus
 );
 
 module.exports = router;

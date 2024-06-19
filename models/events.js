@@ -62,7 +62,7 @@ const endActiveEvent = async ({ id, reason, lock }) => {
       lock,
       reason,
       enabled: false,
-      status: "inactive",
+      status: "inactive"
     });
   } catch (error) {
     logger.error("Error in ending event.", error);
@@ -99,9 +99,9 @@ const addPeerToEvent = async (peerData) => {
           {
             event_id: peerData.eventId,
             role: peerData.role,
-            joined_at: peerData.joinedAt,
-          },
-        ],
+            joined_at: peerData.joinedAt
+          }
+        ]
       };
       batch.set(peerRef, peerDocData);
     } else {
@@ -110,14 +110,14 @@ const addPeerToEvent = async (peerData) => {
         joinedEvents: Firestore.FieldValue.arrayUnion({
           event_id: peerData.eventId,
           role: peerData.role,
-          joined_at: peerData.joinedAt,
-        }),
+          joined_at: peerData.joinedAt
+        })
       });
     }
 
     const eventRef = eventModel.doc(peerData.eventId);
     batch.update(eventRef, {
-      peers: Firestore.FieldValue.arrayUnion(peerRef.id),
+      peers: Firestore.FieldValue.arrayUnion(peerRef.id)
     });
 
     await batch.commit();
@@ -180,7 +180,7 @@ const kickoutPeer = async ({ eventId, peerId, reason }) => {
     }
 
     const updatedJoinedEvents = joinedEvents.map((event, index) =>
-      index === eventIndex ? { ...event, left_at: new Date(), reason: reason, isKickedout: true } : event,
+      index === eventIndex ? { ...event, left_at: new Date(), reason: reason, isKickedout: true } : event
     );
 
     await peerRef.update({ joinedEvents: updatedJoinedEvents });
@@ -214,7 +214,7 @@ const createEventCode = async (eventCodeData) => {
     const data = docSnapshot.data();
 
     const previouslyPresentEventCodes = eventSnapshotData?.event_codes?.by_role?.mavens && [
-      ...eventSnapshotData?.event_codes?.by_role?.mavens,
+      ...eventSnapshotData?.event_codes?.by_role?.mavens
     ];
 
     if (!data) throw new Error();
@@ -223,17 +223,17 @@ const createEventCode = async (eventCodeData) => {
       await eventRef.update({
         event_codes: {
           by_role: {
-            mavens: [...previouslyPresentEventCodes, data?.id],
-          },
-        },
+            mavens: [...previouslyPresentEventCodes, data?.id]
+          }
+        }
       });
     } else {
       await eventRef.update({
         event_codes: {
           by_role: {
-            mavens: [data?.id],
-          },
-        },
+            mavens: [data?.id]
+          }
+        }
       });
     }
 
@@ -304,5 +304,5 @@ module.exports = {
   createEventCode,
   getEventById,
   getEventCodes,
-  getPeerById,
+  getPeerById
 };

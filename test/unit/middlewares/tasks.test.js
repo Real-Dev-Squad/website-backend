@@ -9,8 +9,8 @@ describe("updateTask function", function () {
   // Helper function to create a response object with a mocked boom function
   const createResponse = () => ({
     boom: {
-      badRequest: sinon.stub().returns({ error: true, message: "Bad Request" }),
-    },
+      badRequest: sinon.stub().returns({ error: true, message: "Bad Request" })
+    }
   });
 
   // Helper function to create a next function that simply calls done
@@ -27,7 +27,7 @@ describe("updateTask function", function () {
       type: "Sample Type",
       status: "active",
       isNoteworthy: true,
-      isCollapsed: false,
+      isCollapsed: false
     };
 
     const req = createRequest(validRequestBody);
@@ -49,7 +49,7 @@ describe("updateTask function", function () {
       status: "invalid_status",
       isNoteworthy: "yes",
       isCollapsed: "no",
-      assignee: "",
+      assignee: ""
     };
 
     const req = createRequest(invalidRequestBody);

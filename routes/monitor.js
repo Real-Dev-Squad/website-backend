@@ -6,12 +6,12 @@ const { SUPERUSER } = require("../constants/roles");
 const {
   createTrackedProgressController,
   updateTrackedProgressController,
-  getTrackedProgressController,
+  getTrackedProgressController
 } = require("../controllers/monitor");
 const {
   validateCreateTrackedProgressRecord,
   validateUpdateTrackedProgress,
-  validateGetTrackedProgressQueryParams,
+  validateGetTrackedProgressQueryParams
 } = require("../middlewares/validators/monitor");
 
 router.post(
@@ -19,7 +19,7 @@ router.post(
   authenticate,
   authorizeRoles([SUPERUSER]),
   validateCreateTrackedProgressRecord,
-  createTrackedProgressController,
+  createTrackedProgressController
 );
 
 router.patch(
@@ -27,7 +27,7 @@ router.patch(
   authenticate,
   authorizeRoles([SUPERUSER]),
   validateUpdateTrackedProgress,
-  updateTrackedProgressController,
+  updateTrackedProgressController
 );
 
 router.get("/", validateGetTrackedProgressQueryParams, getTrackedProgressController);

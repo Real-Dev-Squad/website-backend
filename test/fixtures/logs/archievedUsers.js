@@ -11,14 +11,14 @@ export const archivedUserDetailsModal = [
           in_discord: true,
           super_user: false,
           member: true,
-          archived: false,
-        },
-      },
+          archived: false
+        }
+      }
     },
     timestamp: {
       _seconds: 1657193216,
-      _nanoseconds: 912000000,
-    },
+      _nanoseconds: 912000000
+    }
   },
   {
     type: "archived-details",
@@ -32,14 +32,14 @@ export const archivedUserDetailsModal = [
           in_discord: true,
           super_user: false,
           member: true,
-          archived: false,
-        },
-      },
+          archived: false
+        }
+      }
     },
     timestamp: {
       _seconds: 1657193216,
-      _nanoseconds: 912000000,
-    },
+      _nanoseconds: 912000000
+    }
   },
   {
     type: "archived-details",
@@ -53,13 +53,13 @@ export const archivedUserDetailsModal = [
           in_discord: true,
           super_user: false,
           member: true,
-          archived: false,
-        },
-      },
+          archived: false
+        }
+      }
     },
     timestamp: {
       _seconds: 1657193216,
-      _nanoseconds: 912000000,
-    },
-  },
+      _nanoseconds: 912000000
+    }
+  }
 ];

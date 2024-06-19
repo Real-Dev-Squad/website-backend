@@ -7,12 +7,12 @@ try {
       {
         clientID: config.get("githubOauth.clientId"),
         clientSecret: config.get("githubOauth.clientSecret"),
-        callbackURL: `${config.get("services.rdsApi.baseUrl")}/auth/github/callback`,
+        callbackURL: `${config.get("services.rdsApi.baseUrl")}/auth/github/callback`
       },
       (accessToken, refreshToken, profile, done) => {
         return done(null, accessToken, profile);
-      },
-    ),
+      }
+    )
   );
 } catch (err) {
   logger.error("Error initialising passport:", err);

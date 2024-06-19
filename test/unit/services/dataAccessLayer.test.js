@@ -13,7 +13,7 @@ const {
   retrieveMembers,
   retreiveFilteredUsers,
   levelSpecificAccess,
-  fetchUsersForKeyValues,
+  fetchUsersForKeyValues
 } = require("../../../services/dataAccessLayer");
 
 const { KEYS_NOT_ALLOWED, ACCESS_LEVEL } = require("../../../constants/userDataLevels");

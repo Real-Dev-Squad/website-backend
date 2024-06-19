@@ -31,7 +31,7 @@ describe("Fcm Token Test", function () {
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
-          ...fcmTokenData,
+          ...fcmTokenData
         });
 
       expect(response).to.have.status(200);
@@ -45,7 +45,7 @@ describe("Fcm Token Test", function () {
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
-          ...fcmTokenData,
+          ...fcmTokenData
         });
 
       const response = await chai
@@ -53,7 +53,7 @@ describe("Fcm Token Test", function () {
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
-          ...fcmTokenData,
+          ...fcmTokenData
         });
 
       expect(response).to.have.status(409);
@@ -67,7 +67,7 @@ describe("Fcm Token Test", function () {
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
-          ...fcmTokenData,
+          ...fcmTokenData
         });
       expect(response).to.have.status(400);
       expect(response.body.message).equals('"fcmToken" is required');
@@ -80,7 +80,7 @@ describe("Fcm Token Test", function () {
         .request(app)
         .post("/v1/fcm-tokens")
         .send({
-          ...fcmTokenData,
+          ...fcmTokenData
         });
 
       expect(response).to.have.status(401);
@@ -94,7 +94,7 @@ describe("Fcm Token Test", function () {
         .request(app)
         .post("/v1/fcm-tokens")
         .send({
-          ...fcmTokenData,
+          ...fcmTokenData
         });
       expect(response).to.have.status(401);
       expect(response.body.message).equals("Unauthenticated User");

@@ -4,7 +4,7 @@ const joi = require("joi");
 const {
   USER_STATUS,
   USERS_PATCH_HANDLER_ACTIONS,
-  USERS_PATCH_HANDLER_ERROR_MESSAGES,
+  USERS_PATCH_HANDLER_ERROR_MESSAGES
 } = require("../../constants/users");
 const ROLES = require("../../constants/roles");
 const { IMAGE_VERIFICATION_TYPES } = require("../../constants/imageVerificationTypes");
@@ -54,8 +54,8 @@ const updateUser = async (req, res, next) => {
       roles: joi.object().keys({
         designer: joi.boolean().optional(),
         maven: joi.boolean().optional(),
-        product_manager: joi.boolean().optional(),
-      }),
+        product_manager: joi.boolean().optional()
+      })
     });
 
   try {
@@ -69,7 +69,7 @@ const updateUser = async (req, res, next) => {
 
 const updateProfileURL = async (req, res, next) => {
   const schema = joi.object().strict().keys({
-    profileURL: joi.string().uri().required(),
+    profileURL: joi.string().uri().required()
   });
 
   try {
@@ -109,7 +109,7 @@ const validateJoinData = async (req, res, next) => {
         .custom((value, helpers) => customWordCountValidator(value, helpers, 100))
         .required(),
       flowState: joi.string().optional(),
-      numberOfHours: joi.number().min(1).max(100).required(),
+      numberOfHours: joi.number().min(1).max(100).required()
     });
 
   try {
@@ -140,7 +140,7 @@ async function getUsers(req, res, next) {
         .pattern(/^[1-9]\d?$|^100$/)
         .messages({
           "string.empty": "size must contain value in range 1-100",
-          "string.pattern.base": "size must be in range 1-100",
+          "string.pattern.base": "size must be in range 1-100"
         }),
       page: joi
         .string()
@@ -148,48 +148,48 @@ async function getUsers(req, res, next) {
         .pattern(/^0$|^[1-9]\d*$/)
         .messages({
           "string.empty": "page must contain a positive number or zero",
-          "string.pattern.base": "page value either be a positive number or zero",
+          "string.pattern.base": "page value either be a positive number or zero"
         }),
       search: joi.string().optional().messages({
-        "string.empty": "search value must not be empty",
+        "string.empty": "search value must not be empty"
       }),
       id: joi.string().optional().messages({
-        "string.empty": "id value must not be empty",
+        "string.empty": "id value must not be empty"
       }),
       discordId: joi.string().optional().messages({
-        "string.empty": "discord id value must not be empty",
+        "string.empty": "discord id value must not be empty"
       }),
       next: joi
         .string()
         .optional()
         .when("page", {
           is: joi.exist(),
-          then: joi.custom((_, helpers) => helpers.message("Both page and next can't be passed")),
+          then: joi.custom((_, helpers) => helpers.message("Both page and next can't be passed"))
         })
         .messages({
-          "string.empty": "next value cannot be empty",
+          "string.empty": "next value cannot be empty"
         }),
       prev: joi
         .string()
         .optional()
         .when("next", {
           is: joi.exist(),
-          then: joi.custom((_, helpers) => helpers.message("Both prev and next can't be passed")),
+          then: joi.custom((_, helpers) => helpers.message("Both prev and next can't be passed"))
         })
         .concat(
           joi.string().when("page", {
             is: joi.exist(),
-            then: joi.custom((_, helpers) => helpers.message("Both page and prev can't be passed")),
-          }),
+            then: joi.custom((_, helpers) => helpers.message("Both page and prev can't be passed"))
+          })
         )
         .messages({
-          "string.empty": "prev value cannot be empty",
+          "string.empty": "prev value cannot be empty"
         }),
       query: joi.string().optional(),
       q: joi.string().optional(),
       filterBy: joi.string().optional(),
       days: joi.string().optional(),
-      dev: joi.string().optional(),
+      dev: joi.string().optional()
     });
   try {
     await schema.validateAsync(req.query);
@@ -229,7 +229,7 @@ async function validateUserQueryParams(req, res, next) {
       size: joi.number().integer().min(1).max(100).message("size must be a number between 1 and 100").optional(),
       prev: joi.string().allow("").optional(),
       next: joi.string().allow("").optional(),
-      dev: joi.bool().optional().sensitive(),
+      dev: joi.bool().optional().sensitive()
     })
     .min(1)
     .messages({ "object.min": "Please provide at least one filter criteria" });
@@ -268,7 +268,7 @@ async function validateUpdateRoles(req, res, next) {
     // either member or archived with reason (optional) is allowed
     member: joi.boolean(),
     archived: joi.boolean(),
-    reason: joi.string().optional(), // reason is optional
+    reason: joi.string().optional() // reason is optional
   });
   try {
     await schema.validateAsync(req.body);
@@ -284,7 +284,7 @@ async function validateUsersPatchHandler(req, res, next) {
     action: joi
       .string()
       .valid(USERS_PATCH_HANDLER_ACTIONS.ARCHIVE_USERS, USERS_PATCH_HANDLER_ACTIONS.NON_VERFIED_DISCORD_USERS)
-      .required(),
+      .required()
   });
 
   try {
@@ -310,7 +310,7 @@ const validateGenerateUsernameQuery = async (req, res, next) => {
     .keys({
       firstname: joi.string().min(1).required(),
       lastname: joi.string().min(1).required(),
-      dev: joi.string().valid("true").optional(),
+      dev: joi.string().valid("true").optional()
     });
 
   try {
@@ -329,7 +329,7 @@ const migrationsValidator = async (req, res, next) => {
     .keys({
       page: joi.number(),
       action: joi.string().valid("adds-github-id").required(),
-      size: joi.number().min(1).max(500).required(),
+      size: joi.number().min(1).max(500).required()
     });
   try {
     await schema.validateAsync({ action, page: parseInt(page), size: parseInt(size) });
@@ -349,5 +349,5 @@ module.exports = {
   validateUpdateRoles,
   validateUsersPatchHandler,
   validateGenerateUsernameQuery,
-  migrationsValidator,
+  migrationsValidator
 };

@@ -26,7 +26,7 @@ const fetchChallenges = async () => {
     challengesSnapshot.forEach((challengeDoc) => {
       challenges.push({
         id: challengeDoc.id,
-        ...challengeDoc.data(),
+        ...challengeDoc.data()
       });
     });
     return challenges;
@@ -48,7 +48,7 @@ const fetchParticipantsData = async (participants) => {
       return {
         ...user,
         phone: undefined,
-        email: undefined,
+        email: undefined
       };
     });
     const fetchedparticipants = await Promise.all(promises);
@@ -74,7 +74,7 @@ const postChallenge = async (challengeData) => {
       start_date: startdate,
       end_date: enddate,
       participants: [],
-      is_active: true,
+      is_active: true
     });
     return challengeRef.id;
   } catch (err) {
@@ -110,5 +110,5 @@ module.exports = {
   fetchChallenges,
   postChallenge,
   subscribeUserToChallenge,
-  fetchParticipantsData,
+  fetchParticipantsData
 };

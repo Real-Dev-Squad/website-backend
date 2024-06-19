@@ -10,8 +10,8 @@ describe("Middleware | Validators | Challenges", function () {
           level: "Noob",
           title: "The noob challenge",
           start_date: 1254324345,
-          end_date: 354654345,
-        },
+          end_date: 354654345
+        }
       };
       const res = {};
       const nextSpy = Sinon.spy();
@@ -22,13 +22,13 @@ describe("Middleware | Validators | Challenges", function () {
     it("Stops the propogation of the next", async function () {
       const req = {
         body: {
-          level: "Noob",
-        },
+          level: "Noob"
+        }
       };
       const res = {
         boom: {
-          badRequest: () => {},
-        },
+          badRequest: () => {}
+        }
       };
       const nextSpy = Sinon.spy();
       await createChallenge(req, res, nextSpy).catch((err) => {

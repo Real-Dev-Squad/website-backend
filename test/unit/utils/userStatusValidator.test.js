@@ -11,14 +11,14 @@ describe("Middleware | Validators | massUpdateUserStatus", function () {
           users: [
             {
               userId: "4kAkRv9TBlOfR6WEUhoQ",
-              state: "IDLE",
+              state: "IDLE"
             },
             {
               userId: "SooJK37gzjIZfFNH0tlL",
-              state: "ACTIVE",
-            },
-          ],
-        },
+              state: "ACTIVE"
+            }
+          ]
+        }
       };
       const nextSpy = Sinon.spy();
       await validateMassUpdate(req, res, nextSpy);
@@ -29,13 +29,13 @@ describe("Middleware | Validators | massUpdateUserStatus", function () {
       const badRequestSpy = Sinon.spy();
       const res = {
         boom: {
-          badRequest: badRequestSpy,
-        },
+          badRequest: badRequestSpy
+        }
       };
       const req = {
         body: {
-          users: [],
-        },
+          users: []
+        }
       };
       const nextSpy = Sinon.spy();
       await validateMassUpdate(req, res, nextSpy).catch((err) => {
@@ -49,13 +49,13 @@ describe("Middleware | Validators | massUpdateUserStatus", function () {
       const badRequestSpy = Sinon.spy();
       const res = {
         boom: {
-          badRequest: badRequestSpy,
-        },
+          badRequest: badRequestSpy
+        }
       };
       const req = {
         body: {
-          users: [123],
-        },
+          users: [123]
+        }
       };
       const nextSpy = Sinon.spy();
       await validateMassUpdate(req, res, nextSpy).catch((err) => {

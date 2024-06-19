@@ -86,7 +86,7 @@ const trade = async (tradeData) => {
     const updatedStockData = {
       ...stockData,
       quantity: quantityToUpdate,
-      price: stockPriceToBeUpdated,
+      price: stockPriceToBeUpdated
     };
 
     // Update user stocks
@@ -96,7 +96,7 @@ const trade = async (tradeData) => {
       stockName,
       quantity: userStocksQty,
       orderValue: userStocksQty * stockData.price,
-      initialStockValue,
+      initialStockValue
     });
 
     // Transaction Log
@@ -108,21 +108,21 @@ const trade = async (tradeData) => {
       orderValue,
       quantity: qtyUserCanPurchase,
       price: stockData.price,
-      timestamp: +Date.now(),
+      timestamp: +Date.now()
     });
 
     await transactionsModel.add({
       userId: userId,
       type: `STOCK_${tradeType}`,
       refId: id,
-      timestamp: +Date.now(),
+      timestamp: +Date.now()
     });
 
     // update user wallet
 
     await updateWallet(userId, {
       ...currencies,
-      ...updatedCurrencyData,
+      ...updatedCurrencyData
     });
 
     await stocksModel.doc(stockId).set(updatedStockData);
@@ -134,5 +134,5 @@ const trade = async (tradeData) => {
 };
 
 module.exports = {
-  trade,
+  trade
 };

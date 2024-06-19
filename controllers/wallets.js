@@ -37,7 +37,7 @@ const getOwnWallet = async (req, res) => {
 
     return res.json({
       message: "Wallet returned successfully for user",
-      wallet,
+      wallet
     });
   } catch (err) {
     logger.error(`Error while retriving wallet data ${err}`);
@@ -59,7 +59,7 @@ const getUserWallet = async (req, res) => {
 
     return res.json({
       message: "Wallet returned successfully",
-      wallet,
+      wallet
     });
   } catch (err) {
     logger.error(`Error while retriving wallet data ${err}`);
@@ -69,5 +69,5 @@ const getUserWallet = async (req, res) => {
 
 module.exports = {
   getOwnWallet,
-  getUserWallet,
+  getUserWallet
 };

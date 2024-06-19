@@ -27,19 +27,19 @@ module.exports = () => {
       joined_discord: "2023-01-13T18:21:09.278000+00:00",
       roles: {
         member: true,
-        in_discord: true,
+        in_discord: true
       },
       tokens: {
-        githubAccessToken: "githubAccessToken",
+        githubAccessToken: "githubAccessToken"
       },
       status: "active",
       profileURL: "https://abcde.com",
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
       },
       incompleteUserDetails: false,
-      nickname_synced: false,
+      nickname_synced: false
     },
     {
       username: "nikhil",
@@ -56,9 +56,9 @@ module.exports = () => {
       email: "abc1@gmail.com",
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
       },
-      nickname_synced: false,
+      nickname_synced: false
     },
     {
       username: "pranavg",
@@ -74,13 +74,13 @@ module.exports = () => {
       phone: "1234567891",
       email: "pgajjewar@gmail.com",
       roles: {
-        restricted: true,
+        restricted: true
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
       },
-      nickname_synced: false,
+      nickname_synced: false
     },
     {
       username: "sagar",
@@ -95,16 +95,16 @@ module.exports = () => {
       email: "abc@gmail.com",
       status: "active",
       tokens: {
-        githubAccessToken: "githubAccessToken",
+        githubAccessToken: "githubAccessToken"
       },
       roles: {
         restricted: false,
-        app_owner: true,
+        app_owner: true
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
-      },
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
+      }
     },
     {
       username: "ankush",
@@ -121,17 +121,17 @@ module.exports = () => {
       joined_discord: "2023-01-13T18:21:09.278000+00:00",
       status: "idle",
       tokens: {
-        githubAccessToken: "githubAccessToken",
+        githubAccessToken: "githubAccessToken"
       },
       roles: {
         super_user: true,
         archived: false,
-        in_discord: true,
+        in_discord: true
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
-      },
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
+      }
     },
     {
       username: "ankita",
@@ -146,17 +146,17 @@ module.exports = () => {
       phone: "1234567890",
       email: "abc@gmail.com",
       tokens: {
-        githubAccessToken: "githubAccessToken",
+        githubAccessToken: "githubAccessToken"
       },
       status: "active",
       roles: {
         app_owner: true,
-        archived: true,
+        archived: true
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
-      },
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
+      }
     },
     {
       username: "mehul",
@@ -170,18 +170,18 @@ module.exports = () => {
       phone: "1234567891",
       email: "mehul@gmail.com",
       tokens: {
-        githubAccessToken: "githubAccessToken",
+        githubAccessToken: "githubAccessToken"
       },
       status: "active",
       roles: {
         member: true,
         archived: false,
-        in_discord: true,
+        in_discord: true
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
-      },
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
+      }
     },
     {
       username: "23ankur",
@@ -193,7 +193,7 @@ module.exports = () => {
       github_id: "ankur1234",
       github_display_name: "ankur-xyz",
       phone: "1234567890",
-      email: "abc@gmail.com",
+      email: "abc@gmail.com"
     },
     {
       username: "ritvik",
@@ -202,7 +202,7 @@ module.exports = () => {
       yoe: 1,
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
       },
       incompleteUserDetails: false,
       status: "active",
@@ -216,10 +216,10 @@ module.exports = () => {
         archived: false,
         member: true,
         in_discord: true,
-        designer: true,
+        designer: true
       },
       twitter_id: "RitvikJamwal4u",
-      linkedin_id: "ritvik-jamwal4u",
+      linkedin_id: "ritvik-jamwal4u"
     },
     {
       username: "Tanishq",
@@ -233,18 +233,18 @@ module.exports = () => {
       phone: "1234567890",
       email: "ts@gmail.com",
       tokens: {
-        githubAccessToken: "githubAccessToken",
+        githubAccessToken: "githubAccessToken"
       },
       roles: {
         member: true,
         archived: false,
         in_discord: true,
-        product_manager: true,
+        product_manager: true
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
-      },
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
+      }
     },
     {
       username: "darthvader",
@@ -258,16 +258,16 @@ module.exports = () => {
       phone: "1234567890",
       email: "dv@gmail.com",
       tokens: {
-        githubAccessToken: "githubAccessToken",
+        githubAccessToken: "githubAccessToken"
       },
       roles: {
         member: true,
-        maven: true,
+        maven: true
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
-      },
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
+      }
     },
     {
       id: 11,
@@ -280,12 +280,12 @@ module.exports = () => {
       github_id: "testuser1",
       github_display_name: "Test User",
       roles: {
-        member: true,
+        member: true
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
-      },
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
+      }
     },
     {
       id: 12,
@@ -301,15 +301,15 @@ module.exports = () => {
       email: "tu@gmail.com",
       chaincode: "12345",
       tokens: {
-        githubAccessToken: "githubAccessToken",
+        githubAccessToken: "githubAccessToken"
       },
       roles: {
-        member: true,
+        member: true
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
-      },
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
+      }
     },
     {
       username: "ram",
@@ -318,7 +318,7 @@ module.exports = () => {
       yoe: 1,
       picture: {
         publicId: "profile/abc/abc",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/123.jpg",
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/123.jpg"
       },
       incompleteUserDetails: false,
       status: "active",
@@ -330,10 +330,10 @@ module.exports = () => {
       instagram_id: "ramsingh",
       roles: {
         archived: true,
-        member: false,
+        member: false
       },
       twitter_id: "ramsingh123",
-      linkedin_id: "ramsingh123",
+      linkedin_id: "ramsingh123"
     },
     {
       username: "testuser3",
@@ -348,15 +348,15 @@ module.exports = () => {
       email: "abcd@gmail.com",
       chaincode: "12345",
       tokens: {
-        githubAccessToken: "githubAccessToken",
+        githubAccessToken: "githubAccessToken"
       },
       roles: {
-        member: true,
+        member: true
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
-      },
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
+      }
     },
     {
       username: "shubham-sigdar",
@@ -366,11 +366,11 @@ module.exports = () => {
       github_display_name: githubUserInfo[1].name,
       roles: {
         member: true,
-        in_discord: true,
+        in_discord: true
       },
       incompleteUserDetails: false,
       updated_at: Date.now(),
-      created_at: Date.now(),
+      created_at: Date.now()
     },
     {
       username: "satyam-bajpai",
@@ -381,11 +381,11 @@ module.exports = () => {
       roles: {
         member: false,
         in_discord: true,
-        archived: false,
+        archived: false
       },
       incompleteUserDetails: false,
       updated_at: Date.now(),
-      created_at: Date.now(),
+      created_at: Date.now()
     },
     {
       first_name: "Kotesh",
@@ -395,11 +395,11 @@ module.exports = () => {
       roles: {
         member: false,
         in_discord: true,
-        archived: false,
+        archived: false
       },
       incompleteUserDetails: false,
       updated_at: Date.now(),
-      created_at: Date.now(),
+      created_at: Date.now()
     },
     {
       first_name: "vinit",
@@ -407,11 +407,11 @@ module.exports = () => {
       github_id: "vinit717",
       github_display_name: "vinit717",
       roles: {
-        in_discord: false,
+        in_discord: false
       },
       incompleteUserDetails: false,
       updated_at: Date.now(),
-      created_at: Date.now(),
+      created_at: Date.now()
     },
     {
       username: "Vinayak",
@@ -427,17 +427,17 @@ module.exports = () => {
       email: "abc@gmail.com",
       status: "active",
       tokens: {
-        githubAccessToken: "githubAccessToken",
+        githubAccessToken: "githubAccessToken"
       },
       roles: {
         restricted: false,
         app_owner: true,
-        archived: true,
+        archived: true
       },
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
-      },
-    },
+        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg"
+      }
+    }
   ];
 };

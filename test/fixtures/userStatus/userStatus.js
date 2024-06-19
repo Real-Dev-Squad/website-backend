@@ -7,22 +7,22 @@ const userStatusDataForNewUser = {
     message: "Bad Health",
     state: "OOO",
     updatedAt: 1668215609000,
-    from: 1668215609000,
+    from: 1668215609000
   },
   monthlyHours: {
     updatedAt: 1668215609000,
-    committed: 40,
-  },
+    committed: 40
+  }
 };
 
 const userStatusDataAfterSignup = {
   currentStatus: { state: "ONBOARDING" },
-  monthlyHours: { committed: 0 },
+  monthlyHours: { committed: 0 }
 };
 
 const userStatusDataAfterFillingJoinSection = {
   currentStatus: { state: "ONBOARDING" },
-  monthlyHours: { committed: 40 },
+  monthlyHours: { committed: 40 }
 };
 
 const oooStatusDataForShortDuration = {
@@ -31,12 +31,12 @@ const oooStatusDataForShortDuration = {
     state: "OOO",
     updatedAt: 1673893800000,
     from: 1673893800000,
-    until: 1674066600000,
+    until: 1674066600000
   },
   monthlyHours: {
     updatedAt: 1668215609000,
-    committed: 40,
-  },
+    committed: 40
+  }
 };
 const userStatusDataForOooState = {
   currentStatus: {
@@ -44,35 +44,35 @@ const userStatusDataForOooState = {
     message: "Bad Health",
     updatedAt: 1668211200000,
     from: 1668211200000,
-    until: 1668709800000,
+    until: 1668709800000
   },
   monthlyHours: {
     updatedAt: 1668215609000,
-    committed: 40,
-  },
+    committed: 40
+  }
 };
 
 const idleStatus = {
   currentStatus: {
     message: "",
     state: userState.IDLE,
-    updatedAt: 1673893800000,
+    updatedAt: 1673893800000
   },
   monthlyHours: {
     updatedAt: 1668215609000,
-    committed: 40,
-  },
+    committed: 40
+  }
 };
 const activeStatus = {
   currentStatus: {
     message: "",
     state: userState.ACTIVE,
-    updatedAt: 1673893800000,
+    updatedAt: 1673893800000
   },
   monthlyHours: {
     updatedAt: 1668215609000,
-    committed: 40,
-  },
+    committed: 40
+  }
 };
 
 const generateUserStatusData = (state, updatedAt, from, until = "", message = "") => {
@@ -82,8 +82,8 @@ const generateUserStatusData = (state, updatedAt, from, until = "", message = ""
       message,
       from,
       until,
-      updatedAt,
-    },
+      updatedAt
+    }
   };
 };
 
@@ -102,8 +102,8 @@ const generateStatusDataForState = (userId, state) => {
       from: nowTimeStamp,
       until,
       updatedAt: nowTimeStamp,
-      state,
-    },
+      state
+    }
   };
 };
 
@@ -122,8 +122,8 @@ const generateStatusDataForCancelOOO = (userId, state) => {
       from: nowTimeStamp,
       until,
       updatedAt: nowTimeStamp,
-      state,
-    },
+      state
+    }
   };
 };
 
@@ -134,77 +134,77 @@ const getStatusData = () => {
       futureStatus: {
         from: today + 1000 * 36 * 60 * 60,
         state: "IDLE",
-        updatedAt: today - ONE_DAY_IN_MS,
+        updatedAt: today - ONE_DAY_IN_MS
       },
       currentStatus: {
         from: today - ONE_DAY_IN_MS,
         until: today + 1000 * 36 * 60 * 60,
         state: "OOO",
-        updatedAt: today - ONE_DAY_IN_MS,
-      },
+        updatedAt: today - ONE_DAY_IN_MS
+      }
     },
     {
       currentStatus: {
         from: today - ONE_DAY_IN_MS * 2,
         state: "ACTIVE",
-        updatedAt: today - ONE_DAY_IN_MS * 2,
+        updatedAt: today - ONE_DAY_IN_MS * 2
       },
       futureStatus: {
         from: today + 1000 * 100 * 60 * 60,
         until: today + ONE_DAY_IN_MS * 5,
         state: "OOO",
-        updatedAt: today,
-      },
+        updatedAt: today
+      }
     },
     {
       currentStatus: {
         from: today - 1000 * 77 * 60 * 60,
         state: "ACTIVE",
-        updatedAt: today - 1000 * 77 * 60 * 60,
+        updatedAt: today - 1000 * 77 * 60 * 60
       },
       futureStatus: {
         from: today + 1000 * 36 * 60 * 60,
         until: today + ONE_DAY_IN_MS * 4,
         state: "OOO",
-        updatedAt: today,
-      },
+        updatedAt: today
+      }
     },
     {
       currentStatus: {
         from: today - 1000 * 77 * 60 * 60,
         state: "IDLE",
-        updatedAt: today - 1000 * 77 * 60 * 60,
+        updatedAt: today - 1000 * 77 * 60 * 60
       },
       futureStatus: {
         from: today + ONE_DAY_IN_MS * 5,
         until: today + ONE_DAY_IN_MS * 8,
         state: "OOO",
-        updatedAt: today - 1000 * 77 * 60 * 60,
-      },
-    },
+        updatedAt: today - 1000 * 77 * 60 * 60
+      }
+    }
   ];
 };
 
 const inputFixtureForFnConvertTimestampsToUTC = {
   currentStatus: {
     from: 1696439365987, // Wed Oct 04 2023 17:09:25 UTC
-    until: 1697124600000, // Thu Oct 12, 2023, 15:30:00
+    until: 1697124600000 // Thu Oct 12, 2023, 15:30:00
   },
   futureStatus: {
     from: 1696439365987, // Wed Oct 04 2023 17:09:25 UTC
-    until: "", // An empty string
-  },
+    until: "" // An empty string
+  }
 };
 
 const OutputFixtureForFnConvertTimestampsToUTC = {
   currentStatus: {
     from: 1696377600000, // October 4, 2023, 00:00:00 UTC
-    until: 1697155199999, // Thu Oct 12, 2023, 23:59:59 UTC
+    until: 1697155199999 // Thu Oct 12, 2023, 23:59:59 UTC
   },
   futureStatus: {
     from: 1696377600000, // October 4, 2023, 00:00:00 UTC
-    until: "", // No conversion for an empty string
-  },
+    until: "" // No conversion for an empty string
+  }
 };
 
 const generateDefaultFutureStatus = (state, from, until) => {
@@ -213,7 +213,7 @@ const generateDefaultFutureStatus = (state, from, until) => {
     from,
     until,
     message: "",
-    updatedAt: new Date().getTime(),
+    updatedAt: new Date().getTime()
   };
   return futureStatusData;
 };
@@ -232,5 +232,5 @@ module.exports = {
   getStatusData,
   inputFixtureForFnConvertTimestampsToUTC,
   OutputFixtureForFnConvertTimestampsToUTC,
-  generateDefaultFutureStatus,
+  generateDefaultFutureStatus
 };

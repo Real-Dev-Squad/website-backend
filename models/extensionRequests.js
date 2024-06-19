@@ -10,7 +10,7 @@ const createExtensionRequest = async (extensionRequestData) => {
   try {
     const request = {
       timestamp: Number((new Date().getTime() / 1000).toFixed(0)),
-      ...extensionRequestData,
+      ...extensionRequestData
     };
     return await extensionRequestsModel.add(request);
   } catch (err) {
@@ -31,7 +31,7 @@ const updateExtensionRequest = async (extensionRequestData, extensionRequestId) 
     const extensionRequest = await extensionRequestsModel.doc(extensionRequestId).get();
     await extensionRequestsModel.doc(extensionRequestId).set({
       ...extensionRequest.data(),
-      ...extensionRequestData,
+      ...extensionRequestData
     });
     return extensionRequestId;
   } catch (err) {
@@ -117,7 +117,7 @@ const fetchPaginatedExtensionRequests = async (extensionRequestQuery, pagination
     const nextPageParams = {
       ...extensionRequestQuery,
       ...paginationQuery,
-      cursor: lastVisible?.id,
+      cursor: lastVisible?.id
     };
 
     let nextLink = "";
@@ -172,5 +172,5 @@ module.exports = {
   fetchExtensionRequest,
   updateExtensionRequest,
   fetchPaginatedExtensionRequests,
-  fetchLatestExtensionRequest,
+  fetchLatestExtensionRequest
 };

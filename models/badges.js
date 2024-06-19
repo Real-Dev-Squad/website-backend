@@ -5,7 +5,7 @@ const userBadgeModel = firestore.collection("userBadges");
 const {
   convertFirebaseTimestampToDateTime,
   convertFirebaseDocumentToBadgeDocument,
-  assignOrRemoveBadgesInBulk,
+  assignOrRemoveBadgesInBulk
 } = require("../utils/badges");
 const { chunks } = require("../utils/array");
 const { ERROR_MESSAGES } = require("../constants/badges");
@@ -71,7 +71,7 @@ async function createBadge(badgeInfo) {
     const docRef = await badgeModel.add({
       ...badgeInfo,
       description,
-      createdAt,
+      createdAt
     });
     const { date, time } = convertFirebaseTimestampToDateTime(createdAt);
     const snapshot = await docRef.get();
@@ -114,7 +114,7 @@ async function removeBadges({ userId, badgeIds }) {
     const documentRefferences = snapshot.docs.map((doc) => doc.ref);
     const documentsRefferencesChunks = chunks(documentRefferences, DOCUMENT_WRITE_SIZE);
     const bulkWriterBatches = documentsRefferencesChunks.map((value) =>
-      assignOrRemoveBadgesInBulk({ userId, array: value, isRemove: true }),
+      assignOrRemoveBadgesInBulk({ userId, array: value, isRemove: true })
     );
     return await Promise.all(bulkWriterBatches);
   } catch (err) {
@@ -128,5 +128,5 @@ module.exports = {
   fetchUserBadges,
   createBadge,
   assignBadges,
-  removeBadges,
+  removeBadges
 };

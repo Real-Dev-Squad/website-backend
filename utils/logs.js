@@ -27,13 +27,13 @@ async function getTasksFromLogs(allLogs) {
       .where(
         admin.firestore.FieldPath.documentId(),
         "in",
-        Array.from(taskIds).filter((e) => e),
+        Array.from(taskIds).filter((e) => e)
       )
       .get();
     data.forEach((doc) => {
       taskDetails.push({
         id: doc.id,
-        ...doc.data(),
+        ...doc.data()
       });
     });
   }
@@ -69,7 +69,7 @@ function formatOOORequestLogs(logsSnapshot, usersMap, type) {
         requestId: meta.requestId,
         from: body.from,
         until: body.until,
-        message: body.message,
+        message: body.message
       };
     default:
       return {};
@@ -84,7 +84,7 @@ function formatExtensionRequestsLog(logsSnapshot, usersMap, tasksMap) {
       logsSnapshot.body.username,
     taskId: meta.taskId,
     taskTitle: tasksMap[logsSnapshot.meta.taskId]?.title ?? "Untitled Task",
-    ...flattenObject(logsSnapshot),
+    ...flattenObject(logsSnapshot)
   };
 }
 
@@ -94,7 +94,7 @@ function formatTaskUpdateLogs(logsSnapshot, usersMap, tasksMap) {
     user: logsSnapshot.meta.username ?? usersMap[meta.userId]?.username,
     taskId: meta.taskId,
     taskTitle: tasksMap[meta.taskId]?.title,
-    ...flattenObject(logsSnapshot),
+    ...flattenObject(logsSnapshot)
   };
 }
 
@@ -105,7 +105,7 @@ function formatProfileDiffLogs(logsSnapshot, usersMap, type) {
     user: usersMap[meta.userId]?.username,
     message: body.message,
     // eslint-disable-next-line security/detect-object-injection
-    [actionKey]: usersMap[meta[actionKey]]?.username,
+    [actionKey]: usersMap[meta[actionKey]]?.username
   };
 }
 
@@ -118,7 +118,7 @@ function formatTaskRequestsLogs(logsSnapshot, usersMap, tasksMap) {
     taskTitle: tasksMap[body.taskId]?.title,
     proposedStartDate: formattedData.users[0].proposedStartDate,
     proposedDeadline: formattedData.users[0].proposedDeadline,
-    ..._.omit(formattedData, "users"),
+    ..._.omit(formattedData, "users")
   };
 }
 
@@ -156,5 +156,5 @@ module.exports = {
   convertTimestamp,
   getTasksFromLogs,
   formatLogsForFeed,
-  getUsersListFromLogs,
+  getUsersListFromLogs
 };

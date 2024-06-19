@@ -29,16 +29,16 @@ const middleware = (app) => {
       dnsPrefetchControl: false,
       ieNoOpen: false,
       referrerPolicy: false,
-      xssFilter: false,
-    }),
+      xssFilter: false
+    })
   );
 
   app.use(
     cors({
       origin: config.get("cors.allowedOrigins"),
       credentials: true,
-      optionsSuccessStatus: 200,
-    }),
+      optionsSuccessStatus: 200
+    })
   );
   app.use(contentTypeCheck);
 

@@ -5,7 +5,7 @@ const validateUserRoles = async (req, res, next) => {
     super_user: joi.boolean().optional(),
     member: joi.boolean().optional(),
     archived: joi.boolean().optional(),
-    in_discord: joi.boolean().optional(),
+    in_discord: joi.boolean().optional()
   });
 
   try {
@@ -22,7 +22,7 @@ const validateRevokePrivileges = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      action: joi.string().equal("revoke"),
+      action: joi.string().equal("revoke")
     });
   try {
     await schema.validateAsync(req.body);
@@ -35,5 +35,5 @@ const validateRevokePrivileges = async (req, res, next) => {
 
 module.exports = {
   validateUserRoles,
-  validateRevokePrivileges,
+  validateRevokePrivileges
 };

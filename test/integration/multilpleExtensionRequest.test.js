@@ -70,7 +70,7 @@ describe("Multiple Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING",
+          status: "PENDING"
         })
         .end((err, res) => {
           if (err) {
@@ -98,7 +98,7 @@ describe("Multiple Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING",
+          status: "PENDING"
         })
         .end((err, res) => {
           if (err) {
@@ -122,7 +122,7 @@ describe("Multiple Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING",
+          status: "PENDING"
         })
         .end((err, res) => {
           if (err) {
@@ -132,7 +132,7 @@ describe("Multiple Extension Requests", function () {
           expect(res).to.have.status(403);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal(
-            "Only assigned user and super user can create an extension request for this task.",
+            "Only assigned user and super user can create an extension request for this task."
           );
           return done();
         });
@@ -150,7 +150,7 @@ describe("Multiple Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING",
+          status: "PENDING"
         })
         .end((err, res) => {
           if (err) {
@@ -176,7 +176,7 @@ describe("Multiple Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING",
+          status: "PENDING"
         })
         .end((err, res) => {
           if (err) {
@@ -200,7 +200,7 @@ describe("Multiple Extension Requests", function () {
         oldEndsOn: 1234,
         newEndsOn: 1235,
         reason: "family event",
-        status: "PENDING",
+        status: "PENDING"
       };
 
       const res = await chai
@@ -224,7 +224,7 @@ describe("Multiple Extension Requests", function () {
         oldEndsOn: 1234,
         newEndsOn: 1235,
         reason: "family event",
-        status: "PENDING",
+        status: "PENDING"
       });
 
       const requestData = {
@@ -234,7 +234,7 @@ describe("Multiple Extension Requests", function () {
         oldEndsOn: 1235,
         newEndsOn: 1236,
         reason: "family event",
-        status: "PENDING",
+        status: "PENDING"
       };
 
       const res = await chai
@@ -257,8 +257,8 @@ describe("Multiple Extension Requests", function () {
           oldEndsOn: 1235,
           newEndsOn: 1236,
           reason: "family event",
-          status: "APPROVED",
-        },
+          status: "APPROVED"
+        }
       ]);
 
       const requestData = {
@@ -269,7 +269,7 @@ describe("Multiple Extension Requests", function () {
         // fail as newETA<oldETA
         newEndsOn: 1230,
         reason: "family event",
-        status: "PENDING",
+        status: "PENDING"
       };
       const res = await chai
         .request(app)
@@ -302,7 +302,7 @@ describe("Multiple Extension Requests", function () {
         reason: "family event",
         status: "APPROVED",
         requestNumber: 5,
-        userId: "ajdf",
+        userId: "ajdf"
       });
       chai
         .request(app)
@@ -334,7 +334,7 @@ describe("Multiple Extension Requests", function () {
         status: "APPROVED",
         requestNumber: 5,
         userId: user.id,
-        id: "12234",
+        id: "12234"
       });
       chai
         .request(app)
@@ -368,7 +368,7 @@ describe("Multiple Extension Requests", function () {
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
-            message: "Unauthenticated User",
+            message: "Unauthenticated User"
           });
 
           return done();

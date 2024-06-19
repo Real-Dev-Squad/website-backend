@@ -4,7 +4,7 @@ const { generateNewStatus, checkIfUserHasLiveTasks, convertTimestampsToUTC } = r
 const { userState } = require("../../../constants/userStatus");
 const {
   OutputFixtureForFnConvertTimestampsToUTC,
-  inputFixtureForFnConvertTimestampsToUTC,
+  inputFixtureForFnConvertTimestampsToUTC
 } = require("../../fixtures/userStatus/userStatus");
 
 describe("User Status Functions", function () {
@@ -41,15 +41,15 @@ describe("User Status Functions", function () {
     it("should return true if the user has active tasks", async function () {
       const userId = "user123";
       const mockSnapshot = {
-        size: 2,
+        size: 2
       };
       const mockGet = () => Promise.resolve(mockSnapshot);
       const mockWhere = () => ({
         where: mockWhere,
-        get: mockGet,
+        get: mockGet
       });
       const tasksModel = {
-        where: mockWhere,
+        where: mockWhere
       };
 
       const result = await checkIfUserHasLiveTasks(userId, tasksModel);
@@ -59,15 +59,15 @@ describe("User Status Functions", function () {
     it("should return false if the user does not have any active tasks", async function () {
       const userId = "user123";
       const mockSnapshot = {
-        size: 0,
+        size: 0
       };
       const mockGet = () => Promise.resolve(mockSnapshot);
       const mockWhere = () => ({
         where: mockWhere,
-        get: mockGet,
+        get: mockGet
       });
       const tasksModel = {
-        where: mockWhere,
+        where: mockWhere
       };
 
       const result = await checkIfUserHasLiveTasks(userId, tasksModel);
@@ -81,10 +81,10 @@ describe("User Status Functions", function () {
       const mockGet = () => Promise.reject(mockError);
       const mockWhere = () => ({
         where: mockWhere,
-        get: mockGet,
+        get: mockGet
       });
       const tasksModel = {
-        where: mockWhere,
+        where: mockWhere
       };
 
       try {

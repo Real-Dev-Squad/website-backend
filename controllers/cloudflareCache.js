@@ -53,7 +53,7 @@ const purge = async (res, id, username, isSuperUser, userDetails) => {
         await logsQuery.addLog(
           logType.CLOUDFLARE_CACHE_PURGED,
           { userId: id, purgedFor: userDetails.user.id },
-          { message: "Cache Purged" },
+          { message: "Cache Purged" }
         );
       } else {
         await logsQuery.addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Cache Purged" });
@@ -82,7 +82,7 @@ const fetchPurgedCacheMetadata = async (req, res) => {
       return res.json({
         message: "Purged cache metadata returned successfully!",
         remainingCount: MAX_CACHE_PURGE_COUNT - logs.length,
-        timeLastCleared: timestamp._seconds,
+        timeLastCleared: timestamp._seconds
       });
     } else if ((await logsQuery.fetchLastAddedCacheLog(id)).length !== 0) {
       const lastLog = await logsQuery.fetchLastAddedCacheLog(id);
@@ -90,12 +90,12 @@ const fetchPurgedCacheMetadata = async (req, res) => {
       return res.json({
         message: "Purged cache metadata returned successfully!",
         remainingCount: MAX_CACHE_PURGE_COUNT,
-        timeLastCleared: timestamp._seconds,
+        timeLastCleared: timestamp._seconds
       });
     } else {
       return res.json({
         message: "No cache is cleared yet",
-        remainingCount: MAX_CACHE_PURGE_COUNT,
+        remainingCount: MAX_CACHE_PURGE_COUNT
       });
     }
   } catch (error) {
@@ -106,5 +106,5 @@ const fetchPurgedCacheMetadata = async (req, res) => {
 
 module.exports = {
   purgeCache,
-  fetchPurgedCacheMetadata,
+  fetchPurgedCacheMetadata
 };

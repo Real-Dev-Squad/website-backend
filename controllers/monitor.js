@@ -3,7 +3,7 @@ const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
 const {
   createTrackedProgressDocument,
   updateTrackedProgressDocument,
-  getTrackedProgressDocuments,
+  getTrackedProgressDocuments
 } = require("../models/monitor");
 const { RESPONSE_MESSAGES } = require("../constants/monitor");
 const { RESOURCE_CREATED_SUCCESSFULLY, RESOURCE_UPDATED_SUCCESSFULLY, RESOURCE_RETRIEVED_SUCCESSFULLY } =
@@ -48,20 +48,20 @@ const createTrackedProgressController = async (req, res) => {
     const data = await createTrackedProgressDocument({ ...req.body });
     return res.status(201).json({
       message: RESOURCE_CREATED_SUCCESSFULLY,
-      data,
+      data
     });
   } catch (error) {
     if (error instanceof Conflict) {
       return res.status(409).json({
-        message: error.message,
+        message: error.message
       });
     } else if (error instanceof NotFound) {
       return res.status(404).json({
-        message: error.message,
+        message: error.message
       });
     }
     return res.status(500).json({
-      message: INTERNAL_SERVER_ERROR_MESSAGE,
+      message: INTERNAL_SERVER_ERROR_MESSAGE
     });
   }
 };
@@ -110,16 +110,16 @@ const updateTrackedProgressController = async (req, res) => {
     const data = await updateTrackedProgressDocument({ ...req });
     return res.status(200).json({
       data,
-      message: RESOURCE_UPDATED_SUCCESSFULLY,
+      message: RESOURCE_UPDATED_SUCCESSFULLY
     });
   } catch (error) {
     if (error instanceof NotFound) {
       return res.status(404).json({
-        message: error.message,
+        message: error.message
       });
     }
     return res.status(500).json({
-      message: INTERNAL_SERVER_ERROR_MESSAGE,
+      message: INTERNAL_SERVER_ERROR_MESSAGE
     });
   }
 };
@@ -163,12 +163,12 @@ const getTrackedProgressController = async (req, res) => {
     const data = await getTrackedProgressDocuments({ ...req.query });
     return res.status(200).json({
       message: RESOURCE_RETRIEVED_SUCCESSFULLY,
-      data,
+      data
     });
   } catch (error) {
     if (error instanceof NotFound) {
       const response = {
-        message: error.message,
+        message: error.message
       };
       if (req.query.type) {
         response.data = [];
@@ -176,7 +176,7 @@ const getTrackedProgressController = async (req, res) => {
       return res.status(404).json(response);
     }
     return res.status(500).json({
-      message: INTERNAL_SERVER_ERROR_MESSAGE,
+      message: INTERNAL_SERVER_ERROR_MESSAGE
     });
   }
 };
@@ -184,5 +184,5 @@ const getTrackedProgressController = async (req, res) => {
 module.exports = {
   createTrackedProgressController,
   updateTrackedProgressController,
-  getTrackedProgressController,
+  getTrackedProgressController
 };
