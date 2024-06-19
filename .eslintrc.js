@@ -22,6 +22,7 @@ module.exports = {
     "no-trailing-spaces": "error",
     "consistent-return": "error",
     "no-console": "error",
+    "comma-dangle": "off",
 
     // Custom mocha rules
     "mocha/no-skipped-tests": "error",
