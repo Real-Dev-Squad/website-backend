@@ -30,7 +30,7 @@ const {
   getMissedProgressUpdatesUsers,
   addInviteToInviteModel,
   getUserDiscordInvite,
-  groupUpdateLastJoinDate
+  groupUpdateLastJoinDate,
 } = require("../../../models/discordactions");
 const { groupData, roleData, existingRole, memberGroupData } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
@@ -80,7 +80,7 @@ describe("discordactions", function () {
 
     beforeEach(function () {
       getStub = sinon.stub(discordRoleModel, "get").resolves({
-        forEach: (callback) => groupData.forEach(callback)
+        forEach: (callback) => groupData.forEach(callback),
       });
     });
 
@@ -184,7 +184,7 @@ describe("discordactions", function () {
 
     it("should add role to member and return success", async function () {
       getStub.resolves({
-        empty: true
+        empty: true,
       });
       addStub.resolves();
 
@@ -202,8 +202,8 @@ describe("discordactions", function () {
       getStub.returns({
         limit: sinon.stub().resolves({
           empty: false,
-          forEach: callbackFunction
-        })
+          forEach: callbackFunction,
+        }),
       });
       const result = await addGroupRoleToMember(roleData);
       delete result.id;
@@ -214,7 +214,7 @@ describe("discordactions", function () {
     it("should throw an error if adding role fails", async function () {
       const error = new Error("Database error");
       getStub.resolves({
-        empty: true
+        empty: true,
       });
       addStub.rejects(error);
 
@@ -237,7 +237,7 @@ describe("discordactions", function () {
 
       deleteStub = sinon.stub();
       sinon.stub(memberRoleModel, "doc").returns({
-        delete: deleteStub.resolves()
+        delete: deleteStub.resolves(),
       });
     });
 
@@ -300,8 +300,8 @@ describe("discordactions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve({ user: { avatar: 12345 } })
-        })
+          json: () => Promise.resolve({ user: { avatar: 12345 } }),
+        }),
       );
 
       const result = await updateDiscordImageForVerification(userDiscordId);
@@ -313,8 +313,8 @@ describe("discordactions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve({ user: { avatar: 12345 } })
-        })
+          json: () => Promise.resolve({ user: { avatar: 12345 } }),
+        }),
       );
 
       try {
@@ -331,8 +331,8 @@ describe("discordactions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve({ user: { avatar: 12345 } })
-        })
+          json: () => Promise.resolve({ user: { avatar: 12345 } }),
+        }),
       );
       sinon.stub(logger, "error");
 
@@ -357,21 +357,21 @@ describe("discordactions", function () {
       newGroupData = groupData.map((group, index) => {
         return {
           ...group,
-          createdBy: allIds[Math.min(index, allIds.length - 1)]
+          createdBy: allIds[Math.min(index, allIds.length - 1)],
         };
       });
 
       const addRolesPromises = [
         discordRoleModel.add(newGroupData[0]),
         discordRoleModel.add(newGroupData[1]),
-        discordRoleModel.add(newGroupData[2])
+        discordRoleModel.add(newGroupData[2]),
       ];
       await Promise.all(addRolesPromises);
 
       const addGroupRolesPromises = [
         addGroupRoleToMember({ roleid: newGroupData[0].roleid, userid: userData[0].discordId }),
         addGroupRoleToMember({ roleid: newGroupData[0].roleid, userid: userData[1].discordId }),
-        addGroupRoleToMember({ roleid: newGroupData[1].roleid, userid: userData[0].discordId })
+        addGroupRoleToMember({ roleid: newGroupData[1].roleid, userid: userData[0].discordId }),
       ];
       await Promise.all(addGroupRolesPromises);
     });
@@ -400,7 +400,7 @@ describe("discordactions", function () {
         firstName: userData[0].first_name,
         lastName: userData[0].last_name,
         image: userData[0].picture.url,
-        isMember: true
+        isMember: true,
       });
 
       expect(result[1]).to.deep.equal({
@@ -409,7 +409,7 @@ describe("discordactions", function () {
         firstName: userData[1].first_name,
         lastName: userData[1].last_name,
         image: userData[1].picture.url,
-        isMember: true
+        isMember: true,
       });
 
       expect(result[2]).to.deep.equal({
@@ -418,7 +418,7 @@ describe("discordactions", function () {
         firstName: userData[2].first_name,
         lastName: userData[2].last_name,
         image: userData[2].picture.url,
-        isMember: false
+        isMember: false,
       });
     });
   });
@@ -434,7 +434,7 @@ describe("discordactions", function () {
         return addGroupRoleToMember({
           roleid: roleId,
           userid: index,
-          date: admin.firestore.Timestamp.fromDate(new Date())
+          date: admin.firestore.Timestamp.fromDate(new Date()),
         });
       });
       await Promise.all(addGroupRolesPromises);
@@ -478,8 +478,8 @@ describe("discordactions", function () {
         dataAccessLayerStub.withArgs(sinon.match({ id })).resolves({
           user: {
             username,
-            discordId
-          }
+            discordId,
+          },
         });
       });
     });
@@ -528,8 +528,8 @@ describe("discordactions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(fetchStubResponse)
-        })
+          json: () => Promise.resolve(fetchStubResponse),
+        }),
       );
 
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
@@ -537,7 +537,7 @@ describe("discordactions", function () {
       const responseObj = {
         totalUsersStatus: length,
         successfulNicknameUpdates: length,
-        unsuccessfulNicknameUpdates: 0
+        unsuccessfulNicknameUpdates: 0,
       };
 
       const response = await updateUsersNicknameStatus(lastTimestamp);
@@ -554,8 +554,8 @@ describe("discordactions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(fetchStubResponse)
-        })
+          json: () => Promise.resolve(fetchStubResponse),
+        }),
       );
 
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
@@ -576,8 +576,8 @@ describe("discordactions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(fetchStubResponse)
-        })
+          json: () => Promise.resolve(fetchStubResponse),
+        }),
       );
 
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
@@ -617,20 +617,20 @@ describe("discordactions", function () {
       const {
         idleStatus: idleUserStatus,
         activeStatus: activeUserStatus,
-        userStatusDataForOooState: oooUserStatus
+        userStatusDataForOooState: oooUserStatus,
       } = userStatusData;
       const userIdList = await Promise.all([
         await addUser(idleUser), // idle user with no task progress updates
         await addUser(activeUserWithProgressUpdates), // active user with task progress updates
         await addUser(activeUserWithNoUpdates), // active user with no task progress updates
-        await addUser(userNotInDiscord) // OOO user with no task progress updates
+        await addUser(userNotInDiscord), // OOO user with no task progress updates
       ]);
       activeUserId = userIdList[2];
       await Promise.all([
         await userStatusModel.updateUserStatus(userIdList[0], idleUserStatus),
         await userStatusModel.updateUserStatus(userIdList[1], activeUserStatus),
         await userStatusModel.updateUserStatus(userIdList[2], activeUserStatus),
-        await userStatusModel.updateUserStatus(userIdList[3], oooUserStatus)
+        await userStatusModel.updateUserStatus(userIdList[3], oooUserStatus),
       ]);
 
       const tasksPromise = [];
@@ -642,7 +642,7 @@ describe("discordactions", function () {
           assignee: userIdList[index],
           startedOn: (new Date().getTime() - convertDaysToMilliseconds(7)) / 1000,
           endsOn: (new Date().getTime() + convertDaysToMilliseconds(4)) / 1000,
-          status: TASK_STATUS.IN_PROGRESS
+          status: TASK_STATUS.IN_PROGRESS,
         };
 
         tasksPromise.push(tasksModel.add(validTask));
@@ -673,7 +673,7 @@ describe("discordactions", function () {
       expect(result).to.be.deep.equal({
         tasks: 4,
         missedUpdatesTasks: 3,
-        usersToAddRole: [activeUserWithProgressUpdates.discordId]
+        usersToAddRole: [activeUserWithProgressUpdates.discordId],
       });
     });
 
@@ -694,25 +694,25 @@ describe("discordactions", function () {
       const date4 = new Date();
       date4.setDate(date4.getDate() - 4);
       const result = await getMissedProgressUpdatesUsers({
-        excludedDates: [date.valueOf(), date2.valueOf(), date3.valueOf(), date4.valueOf()]
+        excludedDates: [date.valueOf(), date2.valueOf(), date3.valueOf(), date4.valueOf()],
       });
       expect(result).to.be.an("object");
       expect(result).to.be.deep.equal({
         tasks: 4,
         missedUpdatesTasks: 0,
-        usersToAddRole: []
+        usersToAddRole: [],
       });
     });
 
     it("should not list of users when all days of week are excluded", async function () {
       const result = await getMissedProgressUpdatesUsers({
-        excludedDays: [0, 1, 2, 3, 4, 5, 6]
+        excludedDays: [0, 1, 2, 3, 4, 5, 6],
       });
       expect(result).to.be.an("object");
       expect(result).to.be.deep.equal({
         tasks: 0,
         missedUpdatesTasks: 0,
-        usersToAddRole: []
+        usersToAddRole: [],
       });
     });
 
@@ -729,13 +729,13 @@ describe("discordactions", function () {
 
       const result = await getMissedProgressUpdatesUsers({
         excludedDays: [0, 1, 2, 3, 4, 5],
-        dateGap: 3
+        dateGap: 3,
       });
       expect(result).to.be.an("object");
       expect(result).to.be.deep.equal({
         tasks: 5,
         missedUpdatesTasks: 0,
-        usersToAddRole: []
+        usersToAddRole: [],
       });
     });
 
@@ -788,7 +788,7 @@ describe("discordactions", function () {
   describe("groupUpdateLastJoinDate", function () {
     beforeEach(function () {
       sinon.stub(discordRoleModel, "doc").returns({
-        set: Promise.resolve()
+        set: Promise.resolve(),
       });
     });
 

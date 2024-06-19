@@ -4,7 +4,7 @@ const buildExtensionRequests = (extensionRequests, initialArray = []) => {
     extensionRequests.forEach((extensionRequests) => {
       initialArray.push({
         id: extensionRequests.id,
-        ...extensionRequests.data()
+        ...extensionRequests.data(),
       });
     });
   }
@@ -70,5 +70,5 @@ module.exports = {
   buildExtensionRequests,
   formatExtensionRequest,
   transformQuery,
-  generateNextLink
+  generateNextLink,
 };

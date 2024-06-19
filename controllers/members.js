@@ -16,7 +16,7 @@ const getMembers = async (req, res) => {
     const allUsers = await dataAccess.retrieveMembers(req.query);
     return res.json({
       message: allUsers.length ? "Members returned successfully!" : "No member found",
-      members: allUsers
+      members: allUsers,
     });
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`);
@@ -40,7 +40,7 @@ const getIdleMembers = async (req, res) => {
 
     return res.json({
       message: idleMemberUserNames.length ? "Idle members returned successfully!" : "No idle member found",
-      idleMemberUserNames
+      idleMemberUserNames,
     });
   } catch (error) {
     logger.error(`Error while fetching all members: ${error}`);
@@ -96,12 +96,12 @@ const archiveMembers = async (req, res) => {
         reason: reason || "",
         archived_user: {
           user_id: user.user.id,
-          username: user.user.username
+          username: user.user.username,
         },
         archived_by: {
           user_id: superUserId,
-          roles: roles
-        }
+          roles: roles,
+        },
       };
 
       addLog("archived-details", {}, body);
@@ -118,5 +118,5 @@ module.exports = {
   archiveMembers,
   getMembers,
   getIdleMembers,
-  moveToMembers
+  moveToMembers,
 };

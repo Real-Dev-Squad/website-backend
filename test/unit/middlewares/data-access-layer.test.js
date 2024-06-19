@@ -10,21 +10,21 @@ describe("dataAccessMiddleware", function () {
     const res = {
       send: (body) => {
         expect(body).to.deep.equal({
-          publicField: "publicValue"
+          publicField: "publicValue",
         });
-      }
+      },
     };
 
     const next = sinon.spy();
     const rules = [
       {
         allowedRoles: [SUPERUSER],
-        keyPath: "privateField"
+        keyPath: "privateField",
       },
       {
         allowedRoles: [SUPERUSER],
-        keyPath: "privateField2"
-      }
+        keyPath: "privateField2",
+      },
     ];
 
     const middleware = dataAccessMiddleware({ rules });
@@ -40,15 +40,15 @@ describe("dataAccessMiddleware", function () {
     const res = {
       send: (body) => {
         expect(body).to.deep.equal({ privateField: "privateValue", publicField: "publicValue" });
-      }
+      },
     };
 
     const next = sinon.spy();
     const rules = [
       {
         allowedRoles: [SUPERUSER],
-        keyPath: "privateField"
-      }
+        keyPath: "privateField",
+      },
     ];
 
     const middleware = dataAccessMiddleware({ rules });

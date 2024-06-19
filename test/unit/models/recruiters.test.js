@@ -31,7 +31,7 @@ describe("Recruiters", function () {
       // Add recruiter data
       const { recruiterId, recruiterName, userInfo, timestamp } = await recruiters.addRecruiterInfo(
         recruiterData,
-        username
+        username,
       );
       const data = (await recruiterModel.doc(recruiterId).get()).data();
 

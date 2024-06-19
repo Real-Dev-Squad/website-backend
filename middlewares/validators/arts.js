@@ -7,7 +7,7 @@ const createArt = async (req, res, next) => {
     .keys({
       title: joi.string().required(),
       price: joi.number().min(0).required(),
-      css: joi.string().required()
+      css: joi.string().required(),
     });
   try {
     await schema.validateAsync(req.body);
@@ -19,5 +19,5 @@ const createArt = async (req, res, next) => {
 };
 
 module.exports = {
-  createArt
+  createArt,
 };

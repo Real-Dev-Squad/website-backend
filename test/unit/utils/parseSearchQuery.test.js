@@ -9,7 +9,7 @@ describe("parseSearchQuery", function () {
     expect(result).to.deep.equal({
       searchTerm: "example",
       assignee: "john.doe",
-      status: "in_progress"
+      status: "in_progress",
     });
   });
 
@@ -26,7 +26,7 @@ describe("parseSearchQuery", function () {
 
     expect(result).to.deep.equal({
       searchTerm: "example",
-      assignee: "john.doe"
+      assignee: "john.doe",
     });
   });
 
@@ -36,7 +36,7 @@ describe("parseSearchQuery", function () {
 
     expect(result).to.deep.equal({
       searchTerm: "test",
-      assignee: "john.doe"
+      assignee: "john.doe",
     });
   });
 });

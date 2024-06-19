@@ -14,7 +14,7 @@ function convertFirebaseTimestampToDateTime(createdAt) {
   const time = serverTimestampDateTime.toLocaleTimeString();
   return {
     date,
-    time
+    time,
   };
 }
 
@@ -35,8 +35,8 @@ function convertFirebaseDocumentToBadgeDocument(id, data) {
     createdBy,
     createdAt: {
       date,
-      time
-    }
+      time,
+    },
   };
 }
 
@@ -60,5 +60,5 @@ async function assignOrRemoveBadgesInBulk({ userId, array, isRemove = false }) {
 module.exports = {
   convertFirebaseDocumentToBadgeDocument,
   convertFirebaseTimestampToDateTime,
-  assignOrRemoveBadgesInBulk
+  assignOrRemoveBadgesInBulk,
 };

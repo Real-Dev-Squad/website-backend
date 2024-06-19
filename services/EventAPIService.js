@@ -9,7 +9,7 @@ class EventAPIService {
     // Set Axios baseURL to 100ms API BaseURI
     this.#axiosInstance = axios.create({
       baseURL: API_100MS_BASE_URL,
-      timeout: 3 * 60000
+      timeout: 3 * 60000,
     });
     this.#tokenServiceInstance = tokenService;
     this.#configureAxios();
@@ -30,11 +30,11 @@ class EventAPIService {
         config.headers = {
           Authorization: `Bearer ${this.#tokenServiceInstance.getManagementToken()}`,
           Accept: "application/json",
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         };
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
     this.#axiosInstance.interceptors.response.use(
       (response) => {
@@ -48,7 +48,7 @@ class EventAPIService {
           originalRequest._retry = true;
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 

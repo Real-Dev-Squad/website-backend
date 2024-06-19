@@ -20,5 +20,5 @@ const getGoalSiteToken = async (req, res) => {
 };
 
 module.exports = {
-  getGoalSiteToken
+  getGoalSiteToken,
 };

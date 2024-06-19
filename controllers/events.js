@@ -34,7 +34,7 @@ const createEvent = async (req, res) => {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "Couldn't create event. Please try again later"
+      message: "Couldn't create event. Please try again later",
     });
   }
 };
@@ -69,8 +69,8 @@ const getAllEvents = async (req, res) => {
         data: events.map(({ id, ...event }) => ({
           id,
           room_id: id,
-          ...event
-        }))
+          ...event,
+        })),
       };
       return res.status(200).json(filteredEventsData);
     }
@@ -79,7 +79,7 @@ const getAllEvents = async (req, res) => {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "Couldn't get events. Please try again later"
+      message: "Couldn't get events. Please try again later",
     });
   }
 };
@@ -108,21 +108,21 @@ const joinEvent = async (req, res) => {
 
       if (!isEventCodeValid) {
         return res.status(400).json({
-          message: "Provided event code is invalid for the role!"
+          message: "Provided event code is invalid for the role!",
         });
       }
       const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
 
       return res.status(201).json({
         token: token,
-        message: "Token generated successfully!"
+        message: "Token generated successfully!",
       });
     }
 
     if (role === EVENT_ROLES.HOST || role === EVENT_ROLES.MODERATOR) {
       if (!req.userData) {
         return res.status(400).json({
-          message: "Unauthorized, please login to perform this action!"
+          message: "Unauthorized, please login to perform this action!",
         });
       }
 
@@ -131,7 +131,7 @@ const joinEvent = async (req, res) => {
 
         return res.status(201).json({
           token: token,
-          message: "Token generated successfully!"
+          message: "Token generated successfully!",
         });
       }
 
@@ -140,7 +140,7 @@ const joinEvent = async (req, res) => {
 
         return res.status(201).json({
           token: token,
-          message: "Token generated successfully!"
+          message: "Token generated successfully!",
         });
       }
     }
@@ -149,7 +149,7 @@ const joinEvent = async (req, res) => {
 
     return res.status(201).json({
       token: token,
-      message: "Token generated successfully!"
+      message: "Token generated successfully!",
     });
   } catch (error) {
     logger.error({ error });
@@ -182,7 +182,7 @@ const getEventById = async (req, res) => {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "Unable to retrieve event details"
+      message: "Unable to retrieve event details",
     });
   }
 };
@@ -199,7 +199,7 @@ const getEventById = async (req, res) => {
  */
 const updateEvent = async (req, res) => {
   const payload = {
-    enabled: req.body.enabled
+    enabled: req.body.enabled,
   };
   try {
     const eventData = await apiService.post(`/rooms/${req.body.id}`, payload);
@@ -207,13 +207,13 @@ const updateEvent = async (req, res) => {
     const event = removeUnwantedProperties(UNWANTED_PROPERTIES_FROM_100MS, eventData);
     return res.status(200).json({
       data: { room_id: event.id, ...event },
-      message: `Event is ${req.body.enabled ? "enabled" : "disabled"}`
+      message: `Event is ${req.body.enabled ? "enabled" : "disabled"}`,
     });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error,
-      message: "Couldn't update event. Please try again later."
+      message: "Couldn't update event. Please try again later.",
     });
   }
 };
@@ -231,7 +231,7 @@ const updateEvent = async (req, res) => {
 const endActiveEvent = async (req, res) => {
   const payload = {
     reason: req.body.reason,
-    lock: req.body.lock
+    lock: req.body.lock,
   };
   try {
     await apiService.post(`/active-rooms/${req.body.id}/end-room`, payload);
@@ -241,7 +241,7 @@ const endActiveEvent = async (req, res) => {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "Couldn't end the event. Please try again later"
+      message: "Couldn't end the event. Please try again later",
     });
   }
 };
@@ -263,17 +263,17 @@ const addPeerToEvent = async (req, res) => {
       name: req.body.name,
       role: req.body.role,
       joinedAt: req.body.joinedAt,
-      eventId: req.params.id
+      eventId: req.params.id,
     });
     return res.status(200).json({
       data,
-      message: `Selected Participant is added to the event.`
+      message: `Selected Participant is added to the event.`,
     });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "You can't add selected Participant. Please ask Admin or Host for help."
+      message: "You can't add selected Participant. Please ask Admin or Host for help.",
     });
   }
 };
@@ -292,7 +292,7 @@ const kickoutPeer = async (req, res) => {
   const { id } = req.params;
   const payload = {
     peer_id: req.body.peerId,
-    reason: req.body.reason
+    reason: req.body.reason,
   };
 
   try {
@@ -302,17 +302,17 @@ const kickoutPeer = async (req, res) => {
     addLog(
       logType.EVENTS_REMOVE_PEER,
       { removed_by_id: req.userData.id, removed_by_username: req.userData.username },
-      { ...payload, event_id: id, peer_name: peer.name }
+      { ...payload, event_id: id, peer_name: peer.name },
     );
 
     return res.status(200).json({
-      message: `Selected Participant is removed from event.`
+      message: `Selected Participant is removed from event.`,
     });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "You can't remove selected Participant from Remove, Please ask Admin or Host for help."
+      message: "You can't remove selected Participant from Remove, Please ask Admin or Host for help.",
     });
   }
 };
@@ -325,7 +325,7 @@ const generateEventCode = async (req, res) => {
 
   if (role !== EVENT_ROLES.MAVEN) {
     return res.status(400).json({
-      message: "Currently the room codes feature is only for mavens!"
+      message: "Currently the room codes feature is only for mavens!",
     });
   }
 
@@ -334,14 +334,14 @@ const generateEventCode = async (req, res) => {
       id: eventCodeUuid,
       event_id: id,
       code: eventCode,
-      role
+      role,
     });
     return res.status(201).json({ message: "Event code created succesfully!", data: [...allEventCodeObjectFromDB] });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "Couldn't create event code. Please try again later"
+      message: "Couldn't create event code. Please try again later",
     });
   }
 };
@@ -364,13 +364,13 @@ const getEventCodes = async (req, res) => {
 
     return res.status(200).json({
       message: "Event codes is successfully fetched for the event!",
-      data: eventCodes
+      data: eventCodes,
     });
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
       error: error.code,
-      message: "Something went wrong while getting the event codes!"
+      message: "Something went wrong while getting the event codes!",
     });
   }
 };
@@ -385,5 +385,5 @@ module.exports = {
   addPeerToEvent,
   kickoutPeer,
   generateEventCode,
-  getEventCodes
+  getEventCodes,
 };

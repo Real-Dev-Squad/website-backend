@@ -3,7 +3,7 @@ const { validateMillisecondsTimestamp } = require("./utils");
 
 const validateGroupRoleBody = async (req, res, next) => {
   const schema = Joi.object({
-    rolename: Joi.string().trim().required()
+    rolename: Joi.string().trim().required(),
   });
 
   try {
@@ -17,7 +17,7 @@ const validateGroupRoleBody = async (req, res, next) => {
 const validateMemberRoleBody = async (req, res, next) => {
   const schema = Joi.object({
     userid: Joi.string().trim().required(),
-    roleid: Joi.string().trim().required()
+    roleid: Joi.string().trim().required(),
   });
 
   try {
@@ -42,5 +42,5 @@ const validateUpdateUsersNicknameStatusBody = async (req, res, next) => {
 module.exports = {
   validateGroupRoleBody,
   validateMemberRoleBody,
-  validateUpdateUsersNicknameStatusBody
+  validateUpdateUsersNicknameStatusBody,
 };

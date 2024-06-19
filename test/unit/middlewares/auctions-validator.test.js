@@ -10,8 +10,8 @@ describe("auctions validator", function () {
           item_type: "css art",
           quantity: 100,
           initial_price: 100,
-          end_time: 1234234234
-        }
+          end_time: 1234234234,
+        },
       };
       const res = {};
       const nextSpy = Sinon.spy();
@@ -22,13 +22,13 @@ describe("auctions validator", function () {
     it("stops the request to propogate to next", async function () {
       const req = {
         body: {
-          "": ""
-        }
+          "": "",
+        },
       };
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
       const nextSpy = Sinon.spy();
       await createAuction(req, res, nextSpy).catch((err) => {
@@ -42,8 +42,8 @@ describe("auctions validator", function () {
     it("allows the request to pass", async function () {
       const req = {
         body: {
-          bid: 100
-        }
+          bid: 100,
+        },
       };
       const res = {};
       const nextSpy = Sinon.spy();
@@ -54,13 +54,13 @@ describe("auctions validator", function () {
     it("stops the request to propogate to next", async function () {
       const req = {
         body: {
-          "": ""
-        }
+          "": "",
+        },
       };
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
       const nextSpy = Sinon.spy();
       await placeBid(req, res, nextSpy).catch((err) => {

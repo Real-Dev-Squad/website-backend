@@ -92,5 +92,5 @@ const getTrackedProgressDocuments = async (reqQuery) => {
 module.exports = {
   createTrackedProgressDocument,
   updateTrackedProgressDocument,
-  getTrackedProgressDocuments
+  getTrackedProgressDocuments,
 };

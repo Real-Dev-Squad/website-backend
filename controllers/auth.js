@@ -6,7 +6,7 @@ const dataAccess = require("../services/dataAccessLayer");
 const {
   SOMETHING_WENT_WRONG,
   DATA_ADDED_SUCCESSFULLY,
-  USER_DOES_NOT_EXIST_ERROR
+  USER_DOES_NOT_EXIST_ERROR,
 } = require("../constants/errorMessages");
 
 /**
@@ -28,7 +28,7 @@ const githubAuthLogin = (req, res, next) => {
   }
   return passport.authenticate("github", {
     scope: ["user:email"],
-    state: redirectURL
+    state: redirectURL,
   })(req, res, next);
 };
 
@@ -80,7 +80,7 @@ const githubAuthCallback = (req, res, next) => {
         github_created_at: Number(new Date(user._json.created_at).getTime()),
         github_user_id: user.id,
         created_at: Date.now(),
-        updated_at: null
+        updated_at: null,
       };
 
       const { userId, incompleteUserDetails, role } = await users.addOrUpdate(userData);
@@ -92,7 +92,7 @@ const githubAuthCallback = (req, res, next) => {
         expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
         httpOnly: true,
         secure: true,
-        sameSite: "lax"
+        sameSite: "lax",
       };
       // respond with a cookie
       res.cookie(config.get("userToken.cookieName"), token, cookieOptions);
@@ -128,13 +128,13 @@ const signout = (req, res) => {
     domain: rdsUiUrl.hostname,
     httpOnly: true,
     secure: true,
-    sameSite: "lax"
+    sameSite: "lax",
   };
   res.clearCookie(cookieName, cookieOptions);
   const cookieV2Name = config.get("userToken.cookieV2Name");
   res.clearCookie(cookieV2Name, cookieOptions);
   return res.json({
-    message: "Signout successful"
+    message: "Signout successful",
   });
 };
 
@@ -151,7 +151,7 @@ const storeUserDeviceInfo = async (req, res) => {
       user_id: req.body.user_id,
       device_info: req.body.device_info,
       device_id: req.body.device_id,
-      authorization_status: "NOT_INIT"
+      authorization_status: "NOT_INIT",
     };
 
     const userInfoData = await dataAccess.retrieveUsers({ id: userJson.user_id });
@@ -163,7 +163,7 @@ const storeUserDeviceInfo = async (req, res) => {
 
     return res.status(201).json({
       ...userInfo,
-      message: DATA_ADDED_SUCCESSFULLY
+      message: DATA_ADDED_SUCCESSFULLY,
     });
   } catch (err) {
     logger.error(`Error while storing user device info : ${err}`);
@@ -187,7 +187,7 @@ const updateAuthStatus = async (req, res) => {
 
     return res.json({
       message: `Authentication document for user ${userId} updated successfully`,
-      data: { ...result.data }
+      data: { ...result.data },
     });
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
@@ -204,7 +204,7 @@ const fetchUserDeviceInfo = async (req, res) => {
     }
     return res.json({
       message: "Authentication document retrieved successfully.",
-      data: { ...userDeviceInfoData.data }
+      data: { ...userDeviceInfoData.data },
     });
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
@@ -221,7 +221,7 @@ const fetchDeviceDetails = async (req, res) => {
     }
     return res.json({
       message: "Authentication document Exists",
-      data: { device_info: userDeviceInfoData.data?.device_info }
+      data: { device_info: userDeviceInfoData.data?.device_info },
     });
   } catch (error) {
     logger.error(`Error while fetching user device info: ${error}`);
@@ -236,5 +236,5 @@ module.exports = {
   storeUserDeviceInfo,
   updateAuthStatus,
   fetchUserDeviceInfo,
-  fetchDeviceDetails
+  fetchDeviceDetails,
 };

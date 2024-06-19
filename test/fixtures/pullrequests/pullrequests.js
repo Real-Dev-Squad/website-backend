@@ -8,7 +8,7 @@ const filteredPRs = [
     repository: "website-my",
     url: "https://github.com/Real-Dev-Squad/website-my/pull/407",
     labels: ["UX", "UI"],
-    assignees: ["RitikJaiswal75"]
+    assignees: ["RitikJaiswal75"],
   },
   {
     title: "Added a link on logo ",
@@ -19,7 +19,7 @@ const filteredPRs = [
     repository: "website-www",
     url: "https://github.com/Real-Dev-Squad/website-www/pull/465",
     labels: [],
-    assignees: []
+    assignees: [],
   },
   {
     title: "nuke: links to crypto site",
@@ -30,7 +30,7 @@ const filteredPRs = [
     repository: "website-www",
     url: "https://github.com/Real-Dev-Squad/website-www/pull/473",
     labels: [],
-    assignees: []
+    assignees: [],
   },
   {
     title: "[Ember-Migration] Embroider Setup",
@@ -41,7 +41,7 @@ const filteredPRs = [
     repository: "website-www",
     url: "https://github.com/Real-Dev-Squad/website-www/pull/490",
     labels: ["ember-migration", "config"],
-    assignees: ["rohan09-raj"]
+    assignees: ["rohan09-raj"],
   },
   {
     title: "Added task-dependency data model",
@@ -52,7 +52,7 @@ const filteredPRs = [
     repository: "website-data-models",
     url: "https://github.com/Real-Dev-Squad/website-data-models/pull/46",
     labels: ["documentation"],
-    assignees: ["vinit717"]
+    assignees: ["vinit717"],
   },
   {
     title: "[Live-Site] create a modal for joining the live session",
@@ -63,7 +63,7 @@ const filteredPRs = [
     repository: "website-www",
     url: "https://github.com/Real-Dev-Squad/website-www/pull/477",
     labels: ["live-site"],
-    assignees: ["SanketDhabarde"]
+    assignees: ["SanketDhabarde"],
   },
   {
     title: "Set github actions timeout to 5 mins",
@@ -74,7 +74,7 @@ const filteredPRs = [
     repository: "website-backend",
     url: "https://github.com/Real-Dev-Squad/website-backend/pull/1117",
     labels: [],
-    assignees: []
+    assignees: [],
   },
   {
     title: "create a social share image for realdevsquad.com/join",
@@ -85,7 +85,7 @@ const filteredPRs = [
     repository: "website-www",
     url: "https://github.com/Real-Dev-Squad/website-www/pull/487",
     labels: [],
-    assignees: ["Pratiyushkumar"]
+    assignees: ["Pratiyushkumar"],
   },
   {
     title: "Sync dev to main",
@@ -96,7 +96,7 @@ const filteredPRs = [
     repository: "website-status",
     url: "https://github.com/Real-Dev-Squad/website-status/pull/586",
     labels: [],
-    assignees: []
+    assignees: [],
   },
   {
     title: "Task details page",
@@ -107,28 +107,28 @@ const filteredPRs = [
     repository: "website-status",
     url: "https://github.com/Real-Dev-Squad/website-status/pull/341",
     labels: ["feature task"],
-    assignees: ["kotesh-arya"]
-  }
+    assignees: ["kotesh-arya"],
+  },
 ];
 
 const prDates = [
   {
     pull_request: {
-      merged_at: "2023-08-18T11:56:45Z"
-    }
+      merged_at: "2023-08-18T11:56:45Z",
+    },
   },
   {
     pull_request: {
-      merged_at: "2023-08-18T11:56:45Z"
-    }
+      merged_at: "2023-08-18T11:56:45Z",
+    },
   },
   {
     pull_request: {
-      merged_at: "2023-08-18T11:56:45Z"
-    }
-  }
+      merged_at: "2023-08-18T11:56:45Z",
+    },
+  },
 ];
 module.exports = {
   filteredPRs,
-  prDates
+  prDates,
 };

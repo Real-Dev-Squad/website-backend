@@ -8,7 +8,7 @@
 const REQUIRED_ROLES_PRIORITY = {
   superUser: ["super_user"],
   appOwner: ["app_owner", "super_user"],
-  default: ["default", "super_user", "app_owner"]
+  default: ["default", "super_user", "app_owner"],
 };
 
 /**
@@ -50,5 +50,5 @@ const authorizeUser = (requiredRole) => {
 
 module.exports = {
   authorizeUser,
-  userHasPermission
+  userHasPermission,
 };

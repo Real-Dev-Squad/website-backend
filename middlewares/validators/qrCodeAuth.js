@@ -4,7 +4,7 @@ const storeUserDeviceInfo = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     user_id: joi.string().required(),
     device_info: joi.string().required(),
-    device_id: joi.string().required()
+    device_id: joi.string().required(),
   });
 
   try {
@@ -21,7 +21,7 @@ const validateAuthStatus = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      authorization_status: joi.string().valid("AUTHORIZED", "REJECTED", "NOT_INIT")
+      authorization_status: joi.string().valid("AUTHORIZED", "REJECTED", "NOT_INIT"),
     });
 
   try {
@@ -35,7 +35,7 @@ const validateAuthStatus = async (req, res, next) => {
 
 const validateFetchingUserDocument = async (req, res, next) => {
   const schema = joi.object().strict().keys({
-    device_id: joi.string().required()
+    device_id: joi.string().required(),
   });
 
   try {
@@ -50,5 +50,5 @@ const validateFetchingUserDocument = async (req, res, next) => {
 module.exports = {
   storeUserDeviceInfo,
   validateAuthStatus,
-  validateFetchingUserDocument
+  validateFetchingUserDocument,
 };

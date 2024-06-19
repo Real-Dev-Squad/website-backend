@@ -8,5 +8,5 @@ const obfuscateMail = (email) => {
 
 module.exports = {
   obfuscatePhone,
-  obfuscateMail
+  obfuscateMail,
 };

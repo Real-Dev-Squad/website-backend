@@ -5,7 +5,7 @@ const createChallenge = async (req, res, next) => {
     title: joi.string().required(),
     level: joi.string().required(),
     start_date: joi.number().required(),
-    end_date: joi.number().required()
+    end_date: joi.number().required(),
   });
 
   try {
@@ -18,5 +18,5 @@ const createChallenge = async (req, res, next) => {
 };
 
 module.exports = {
-  createChallenge
+  createChallenge,
 };

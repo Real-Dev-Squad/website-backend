@@ -6,7 +6,7 @@ const storeChaincode = async (userId) => {
   try {
     const userChaincode = await chaincodeModel.add({
       userId,
-      timestamp: admin.firestore.Timestamp.fromDate(new Date())
+      timestamp: admin.firestore.Timestamp.fromDate(new Date()),
     });
     return userChaincode.id;
   } catch (error) {
@@ -16,5 +16,5 @@ const storeChaincode = async (userId) => {
 };
 
 module.exports = {
-  storeChaincode
+  storeChaincode,
 };

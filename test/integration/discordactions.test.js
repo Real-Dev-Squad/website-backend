@@ -32,7 +32,7 @@ const {
   groupIdle7d,
   roleDataFromDiscord,
   memberGroupData,
-  groupOnboarding31dPlus
+  groupOnboarding31dPlus,
 } = require("../fixtures/discordactions/discordactions");
 const discordServices = require("../../services/discordService");
 const { addGroupRoleToMember, addInviteToInviteModel } = require("../../models/discordactions");
@@ -90,8 +90,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve({ user: { avatar: 12345 } })
-        })
+          json: () => Promise.resolve({ user: { avatar: 12345 } }),
+        }),
       );
       chai
         .request(app)
@@ -112,8 +112,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve({ user: { avatar: 12345 } })
-        })
+          json: () => Promise.resolve({ user: { avatar: 12345 } }),
+        }),
       );
       chai
         .request(app)
@@ -142,21 +142,21 @@ describe("Discord actions", function () {
       newGroupData = groupData.map((group, index) => {
         return {
           ...group,
-          createdBy: allIds[Math.min(index, allIds.length - 1)]
+          createdBy: allIds[Math.min(index, allIds.length - 1)],
         };
       });
 
       const addRolesPromises = [
         discordRoleModel.add(newGroupData[0]),
         discordRoleModel.add(newGroupData[1]),
-        discordRoleModel.add(newGroupData[2])
+        discordRoleModel.add(newGroupData[2]),
       ];
       await Promise.all(addRolesPromises);
 
       const addGroupRolesPromises = [
         addGroupRoleToMember({ roleid: newGroupData[0].roleid, userid: userData[0].discordId }),
         addGroupRoleToMember({ roleid: newGroupData[0].roleid, userid: userData[1].discordId }),
-        addGroupRoleToMember({ roleid: newGroupData[1].roleid, userid: userData[0].discordId })
+        addGroupRoleToMember({ roleid: newGroupData[1].roleid, userid: userData[0].discordId }),
       ];
       await Promise.all(addGroupRolesPromises);
     });
@@ -218,7 +218,7 @@ describe("Discord actions", function () {
         discordRoleModel.add(groupData[0]),
         discordRoleModel.add(groupData[1]),
         discordRoleModel.add(groupData[3]),
-        discordRoleModel.add(groupData[4])
+        discordRoleModel.add(groupData[4]),
       ];
       roleid = groupData[0].roleid;
       await Promise.all(discordRoleModelPromise);
@@ -242,13 +242,13 @@ describe("Discord actions", function () {
                   date: new Date().toISOString(),
                   createdBy: "CzI06Da1zPwciLcyIwU4",
                   roleid: "1214641424516124823",
-                  rolename: "admin"
-                })
-              }
-            ]
-          }
+                  rolename: "admin",
+                }),
+              },
+            ],
+          },
         },
-        { user: userData[0] }
+        { user: userData[0] },
       );
 
       const res = await chai
@@ -267,8 +267,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve({})
-        })
+          json: () => Promise.resolve({}),
+        }),
       );
       const roleId = groupData[4].roleid;
       const res = await chai
@@ -286,8 +286,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve({})
-        })
+          json: () => Promise.resolve({}),
+        }),
       );
 
       const roleId = groupData[4].roleid;
@@ -302,7 +302,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Role added successfully!");
       expect(fetchStub.getCall(0).args[1].headers["X-Audit-Log-Reason"]).to.equal(
-        `Action initiator's username=>ankur and id=${userId}`
+        `Action initiator's username=>ankur and id=${userId}`,
       );
     });
 
@@ -354,8 +354,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve({ roleId: "1234", wasSuccess: true })
-        })
+          json: () => Promise.resolve({ roleId: "1234", wasSuccess: true }),
+        }),
       );
       chai
         .request(app)
@@ -379,8 +379,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve({ roleId: "1234", wasSuccess: true })
-        })
+          json: () => Promise.resolve({ roleId: "1234", wasSuccess: true }),
+        }),
       );
       const res = await chai
         .request(app)
@@ -392,7 +392,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Role deleted successfully");
       expect(fetchStub.getCall(0).args[1].headers["X-Audit-Log-Reason"]).to.equal(
-        `Action initiator's username=>ankur and id=${userId}`
+        `Action initiator's username=>ankur and id=${userId}`,
       );
     });
 
@@ -462,8 +462,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(discordUsers)
-        })
+          json: () => Promise.resolve(discordUsers),
+        }),
       );
       chai
         .request(app)
@@ -491,25 +491,25 @@ describe("Discord actions", function () {
       delete userData2.discordId;
       const [{ id }, { id: userId2 }] = await Promise.all([
         userModel.add({ ...userData[0] }),
-        userModel.add(userData2)
+        userModel.add(userData2),
       ]);
       const statusData = {
         ...userStatusDataForOooState,
         futureStatus: {
           state: "ACTIVE",
           updatedAt: 1668211200000,
-          from: 1668709800000
+          from: 1668709800000,
         },
-        userId: id
+        userId: id,
       };
       const statusData2 = {
         ...userStatusDataForOooState,
         futureStatus: {
           state: "ACTIVE",
           updatedAt: 1668211200000,
-          from: 1668709800000
+          from: 1668709800000,
         },
-        userId: userId2
+        userId: userId2,
       };
       await Promise.all([userStatusModel.add(statusData), userStatusModel.add(statusData2)]);
 
@@ -525,8 +525,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(response)
-        })
+          json: () => Promise.resolve(response),
+        }),
       );
 
       chai
@@ -534,7 +534,7 @@ describe("Discord actions", function () {
         .post("/discord-actions/nickname/status")
         .set("Authorization", `Bearer ${jwtToken}`)
         .send({
-          lastNicknameUpdate: (userStatusDataForOooState.currentStatus.updatedAt - 1000 * 60 * 10).toString()
+          lastNicknameUpdate: (userStatusDataForOooState.currentStatus.updatedAt - 1000 * 60 * 10).toString(),
         })
         .end((err, res) => {
           if (err) {
@@ -547,8 +547,8 @@ describe("Discord actions", function () {
             data: {
               totalUsersStatus: 2,
               successfulNicknameUpdates: 1,
-              unsuccessfulNicknameUpdates: 1
-            }
+              unsuccessfulNicknameUpdates: 1,
+            },
           });
           return done();
         });
@@ -563,7 +563,7 @@ describe("Discord actions", function () {
         .post("/discord-actions/nickname/status")
         .set("Authorization", `Bearer ${jwtToken}`)
         .send({
-          lastNicknameUpdate: (userStatusDataForOooState.currentStatus.updatedAt - 1000 * 60 * 10).toString()
+          lastNicknameUpdate: (userStatusDataForOooState.currentStatus.updatedAt - 1000 * 60 * 10).toString(),
         })
         .end((err, res) => {
           if (err) {
@@ -635,8 +635,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(getDiscordMembers)
-        })
+          json: () => Promise.resolve(getDiscordMembers),
+        }),
       );
     });
 
@@ -670,25 +670,25 @@ describe("Discord actions", function () {
         ...userData[0],
         discordId: "123456789098765432",
         discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
-        roles: { archived: false, in_discord: true }
+        roles: { archived: false, in_discord: true },
       };
       userData[1] = {
         ...userData[1],
         discordId: "12345678909867666",
         discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
-        roles: { archived: false, in_discord: true }
+        roles: { archived: false, in_discord: true },
       };
       userData[2] = {
         ...userData[2],
         discordId: "123456",
         discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
-        roles: { archived: false, in_discord: true }
+        roles: { archived: false, in_discord: true },
       };
       userData[3] = {
         ...userData[3],
         discordId: "9653710123456",
         discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
-        roles: { archived: false, in_discord: true }
+        roles: { archived: false, in_discord: true },
       };
 
       const allUsers = [userData[0], userData[1], userData[2], userData[3]];
@@ -707,8 +707,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve(getOnboarding31DPlusMembers)
-        })
+          json: () => Promise.resolve(getOnboarding31DPlusMembers),
+        }),
       );
     });
 
@@ -748,7 +748,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.a("object");
       expect(res.body).to.deep.equal({
         message: "Invite returned successfully",
-        inviteLink: "discord.gg/apQYT7HB"
+        inviteLink: "discord.gg/apQYT7HB",
       });
     });
 
@@ -762,7 +762,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.a("object");
       expect(res.body).to.deep.equal({
         message: "Invite returned successfully",
-        inviteLink: "discord.gg/apQYT7HA"
+        inviteLink: "discord.gg/apQYT7HA",
       });
     });
 
@@ -813,7 +813,7 @@ describe("Discord actions", function () {
     it("should return 403 if the user doesn't have role designer, product_manager, or mavens", async function () {
       developerUserWithoutApprovedProfileStatusId = await addUser(developerUserWithoutApprovedProfileStatus);
       developerUserWithoutApprovedProfileStatusToken = authService.generateAuthToken({
-        userId: developerUserWithoutApprovedProfileStatusId
+        userId: developerUserWithoutApprovedProfileStatusId,
       });
       const res = await chai
         .request(app)
@@ -828,8 +828,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 201,
-          json: () => Promise.resolve({ data: { code: "xyz" } })
-        })
+          json: () => Promise.resolve({ data: { code: "xyz" } }),
+        }),
       );
 
       productManagerUserId = await addUser(productManagerUser);
@@ -848,8 +848,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 201,
-          json: () => Promise.resolve({ data: { code: "zlmfasd" } })
-        })
+          json: () => Promise.resolve({ data: { code: "zlmfasd" } }),
+        }),
       );
 
       designerUserId = await addUser(designerUser);
@@ -868,8 +868,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 201,
-          json: () => Promise.resolve({ data: { code: "asdfdsfsd" } })
-        })
+          json: () => Promise.resolve({ data: { code: "asdfdsfsd" } }),
+        }),
       );
 
       mavenUserId = await addUser(mavenUser);
@@ -888,8 +888,8 @@ describe("Discord actions", function () {
       fetchStub.returns(
         Promise.resolve({
           status: 201,
-          json: () => Promise.resolve({ data: { code: "asdfdsfsd" } })
-        })
+          json: () => Promise.resolve({ data: { code: "asdfdsfsd" } }),
+        }),
       );
 
       const res = await chai

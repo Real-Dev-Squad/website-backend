@@ -15,7 +15,7 @@ module.exports = () => {
       twitter_id: "ankur909",
       instagram_id: "",
       website: "",
-      message: ""
-    }
+      message: "",
+    },
   ];
 };

@@ -8,14 +8,14 @@ describe("removeUnwantedProperties", function () {
       property1: "value1",
       property2: "value2",
       property3: "value3",
-      property4: "value4"
+      property4: "value4",
     };
 
     const cleanData = removeUnwantedProperties(propertiesToRemove, data);
 
     expect(cleanData).to.deep.equal({
       property1: "value1",
-      property3: "value3"
+      property3: "value3",
     });
   });
 
@@ -26,14 +26,14 @@ describe("removeUnwantedProperties", function () {
         property1: "value1",
         property2: "value2",
         property3: "value3",
-        property4: "value4"
+        property4: "value4",
       },
       {
         property1: "value5",
         property2: "value6",
         property3: "value7",
-        property4: "value8"
-      }
+        property4: "value8",
+      },
     ];
 
     const cleanData = removeUnwantedProperties(propertiesToRemove, data);
@@ -41,12 +41,12 @@ describe("removeUnwantedProperties", function () {
     expect(cleanData).to.deep.equal([
       {
         property1: "value1",
-        property3: "value3"
+        property3: "value3",
       },
       {
         property1: "value5",
-        property3: "value7"
-      }
+        property3: "value7",
+      },
     ]);
   });
 

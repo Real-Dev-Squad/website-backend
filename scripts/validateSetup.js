@@ -16,7 +16,7 @@ try {
   console.info("✅ Firestore config is correct.");
 } catch (error) {
   throw new Error(
-    "⚠️ Please make sure firestore config exists as a String (not an object) and is correctly set up. ⚠️"
+    "⚠️ Please make sure firestore config exists as a String (not an object) and is correctly set up. ⚠️",
   );
 }
 
@@ -31,7 +31,7 @@ if (!firestoreConfig) {
 (async () => {
   const docRef = await Firestore.collection("dummy").doc("users");
   await docRef.set({
-    user: "dummy"
+    user: "dummy",
   });
   const resp = await docRef.get("user");
   if (resp.data().user !== "dummy") {

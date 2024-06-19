@@ -7,7 +7,7 @@ const generateGithubAuthRedirectUrl = function ({
   redirectUri = `${baseURL}/auth/github/callback`,
   scope = "user:email",
   state = "",
-  clientId = defaultClientId
+  clientId = defaultClientId,
 }) {
   const encodedBaseUrl = encodeURI(baseUrl);
   const encodedRedirectUri = encodeURIComponent(redirectUri);

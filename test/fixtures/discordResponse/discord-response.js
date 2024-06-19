@@ -17,10 +17,10 @@ const getDiscordMembers = [
       avatar: "56yu6567uuju7636w4e6yr7e4utbw8r4", // avatar hash
       discriminator: "4455", // 4-digit discord-tag
       public_flags: 0,
-      avatar_decoration: null
+      avatar_decoration: null,
     },
     mute: false,
-    deaf: false
+    deaf: false,
   },
   {
     avatar: "",
@@ -40,10 +40,10 @@ const getDiscordMembers = [
       avatar: "56yu6567uuju7636w4e6yr7e4utbw8r4", // avatar hash
       discriminator: "4455", // 4-digit discord-tag
       public_flags: 0,
-      avatar_decoration: null
+      avatar_decoration: null,
     },
     mute: false,
-    deaf: false
+    deaf: false,
   },
   {
     avatar: "",
@@ -63,11 +63,11 @@ const getDiscordMembers = [
       avatar: "56yu6567uuju7636w4e6yr7e9utbw8r4", // avatar hash
       discriminator: "44551", // 4-digit discord-tag
       public_flags: 0,
-      avatar_decoration: null
+      avatar_decoration: null,
     },
     mute: false,
-    deaf: false
-  }
+    deaf: false,
+  },
 ];
 
 const usersFromRds = [
@@ -81,8 +81,8 @@ const usersFromRds = [
     discordId: "123456789098765432",
     roles: {
       in_discord: false,
-      archived: false
-    }
+      archived: false,
+    },
   },
   {
     username: "nonArchivedAndInDiscord",
@@ -94,8 +94,8 @@ const usersFromRds = [
     discordId: "12345678909867666",
     roles: {
       in_discord: false,
-      archived: false
-    }
+      archived: false,
+    },
   },
   {
     username: "archivedAndInDiscord",
@@ -107,8 +107,8 @@ const usersFromRds = [
     discordId: "12345678909867666",
     roles: {
       in_discord: true,
-      archived: true
-    }
+      archived: true,
+    },
   },
   {
     username: "archivedAndNotInDiscord",
@@ -120,8 +120,8 @@ const usersFromRds = [
     discordId: "90438342",
     roles: {
       in_discord: true,
-      archived: true
-    }
+      archived: true,
+    },
   },
   {
     username: "nonArchivedAndNotInDiscord",
@@ -133,19 +133,19 @@ const usersFromRds = [
     discordId: "457298342",
     roles: {
       in_discord: false,
-      archived: false
+      archived: false,
     },
-    id: "nonArchivedAndNotInDiscord"
-  }
+    id: "nonArchivedAndNotInDiscord",
+  },
 ];
 
 const updatedNicknameResponse = {
   userAffected: {
     userId: "X0H3paYveEWh7Q2fPhor",
     username: "test-name-007",
-    discordId: "1123566257019568232"
+    discordId: "1123566257019568232",
   },
-  message: "User nickname changed successfully"
+  message: "User nickname changed successfully",
 };
 
 const getOnboarding31DPlusMembers = [
@@ -167,10 +167,10 @@ const getOnboarding31DPlusMembers = [
       avatar: "56yu6567uuju7636w4e6yr7e4utbw8r4", // avatar hash
       discriminator: "4455", // 4-digit discord-tag
       public_flags: 0,
-      avatar_decoration: null
+      avatar_decoration: null,
     },
     mute: false,
-    deaf: false
+    deaf: false,
   },
   {
     avatar: "",
@@ -190,10 +190,10 @@ const getOnboarding31DPlusMembers = [
       avatar: "56yu6567uuju7636w4e6yr7e4utbw8r4", // avatar hash
       discriminator: "4455", // 4-digit discord-tag
       public_flags: 0,
-      avatar_decoration: null
+      avatar_decoration: null,
     },
     mute: false,
-    deaf: false
+    deaf: false,
   },
   {
     avatar: "",
@@ -213,10 +213,10 @@ const getOnboarding31DPlusMembers = [
       avatar: "56yu6567uuju7636w4e6yr7e9utbw8r4", // avatar hash
       discriminator: "44551", // 4-digit discord-tag
       public_flags: 0,
-      avatar_decoration: null
+      avatar_decoration: null,
     },
     mute: false,
-    deaf: false
+    deaf: false,
   },
   {
     avatar: "",
@@ -237,16 +237,16 @@ const getOnboarding31DPlusMembers = [
       avatar: "56yu6567uuju7636w4e6yr7e9utbw8r4", // avatar hash
       discriminator: "4451", // 4-digit discord-tag
       public_flags: 0,
-      avatar_decoration: null
+      avatar_decoration: null,
     },
     mute: false,
-    deaf: false
-  }
+    deaf: false,
+  },
 ];
 
 module.exports = {
   getDiscordMembers,
   usersFromRds,
   updatedNicknameResponse,
-  getOnboarding31DPlusMembers
+  getOnboarding31DPlusMembers,
 };

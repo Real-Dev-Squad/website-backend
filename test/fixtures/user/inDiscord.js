@@ -20,10 +20,10 @@ module.exports = () => {
         accent_color: null,
         global_name: "Shardul",
         avatar_decoration_data: null,
-        banner_color: null
+        banner_color: null,
       },
       mute: false,
-      deaf: false
+      deaf: false,
     },
     {
       avatar: null,
@@ -45,10 +45,10 @@ module.exports = () => {
         accent_color: null,
         global_name: "fmk",
         avatar_decoration_data: null,
-        banner_color: null
+        banner_color: null,
       },
       mute: false,
-      deaf: false
+      deaf: false,
     },
     {
       avatar: null,
@@ -70,10 +70,10 @@ module.exports = () => {
         accent_color: null,
         global_name: "Anirban",
         avatar_decoration_data: null,
-        banner_color: null
+        banner_color: null,
       },
       mute: false,
-      deaf: false
+      deaf: false,
     },
     {
       avatar: null,
@@ -95,10 +95,10 @@ module.exports = () => {
         accent_color: null,
         global_name: "Anish",
         avatar_decoration_data: null,
-        banner_color: null
+        banner_color: null,
       },
       mute: false,
-      deaf: false
-    }
+      deaf: false,
+    },
   ];
 };

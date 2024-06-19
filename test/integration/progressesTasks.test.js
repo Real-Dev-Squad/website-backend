@@ -11,7 +11,7 @@ const cleanDb = require("../utils/cleanDb");
 const {
   taskProgressDay1,
   stubbedModelTaskProgressData,
-  incompleteTaskProgress
+  incompleteTaskProgress,
 } = require("../fixtures/progress/progresses");
 
 const userData = require("../fixtures/user/user")();
@@ -37,7 +37,7 @@ describe("Test Progress Updates API for Tasks", function () {
       fetchMock = sinon.stub(global, "fetch");
       clock = sinon.useFakeTimers({
         now: new Date(Date.UTC(2023, 4, 2, 0, 25)).getTime(), // UTC time equivalent to 5:55 AM IST
-        toFake: ["Date"]
+        toFake: ["Date"],
       });
       userId = await addUser(userData[1]);
       userToken = authService.generateAuthToken({ userId: userId });
@@ -59,8 +59,8 @@ describe("Test Progress Updates API for Tasks", function () {
       fetchMock.returns(
         Promise.resolve({
           status: 200,
-          json: () => Promise.resolve({})
-        })
+          json: () => Promise.resolve({}),
+        }),
       );
       chai
         .request(app)
@@ -80,7 +80,7 @@ describe("Test Progress Updates API for Tasks", function () {
             "planned",
             "blockers",
             "createdAt",
-            "date"
+            "date",
           ]);
           expect(res.body.message).to.be.equal("Task Progress document created successfully.");
           expect(res.body.data.userId).to.be.equal(userId);
@@ -215,7 +215,7 @@ describe("Test Progress Updates API for Tasks", function () {
               "blockers",
               "userId",
               "createdAt",
-              "date"
+              "date",
             ]);
           });
           return done();
@@ -304,7 +304,7 @@ describe("Test Progress Updates API for Tasks", function () {
               "blockers",
               "userId",
               "createdAt",
-              "date"
+              "date",
             ]);
           });
           return done();
@@ -460,7 +460,7 @@ describe("Test Progress Updates API for Tasks", function () {
             "userId",
             "taskId",
             "createdAt",
-            "date"
+            "date",
           ]);
           return done();
         });

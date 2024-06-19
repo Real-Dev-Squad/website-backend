@@ -24,7 +24,7 @@ const { getFilteredPaginationLink } = require("../utils/userStatus");
 const {
   USERS_PATCH_HANDLER_ACTIONS,
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
-  USERS_PATCH_HANDLER_SUCCESS_MESSAGES
+  USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
 } = require("../constants/users");
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
@@ -45,10 +45,10 @@ const verifyUser = async (req, res) => {
   fetch(process.env.IDENTITY_SERVICE_URL, {
     method: "POST",
     body: JSON.stringify({ userId }),
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
   });
   return res.json({
-    message: "Your request has been queued successfully"
+    message: "Your request has been queued successfully",
   });
 };
 
@@ -68,7 +68,7 @@ const getUserById = async (req, res) => {
 
   return res.json({
     message: "User returned successfully!",
-    user
+    user,
   });
 };
 
@@ -108,7 +108,7 @@ const getUsers = async (req, res) => {
       }
       return res.json({
         message: "User returned successfully!",
-        user
+        user,
       });
     }
     if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
@@ -132,7 +132,7 @@ const getUsers = async (req, res) => {
         return res.json({
           message: "Inactive users returned successfully!",
           count: users.length,
-          users: users
+          users: users,
         });
       } catch (error) {
         logger.error(`Error while fetching all users: ${error}`);
@@ -152,7 +152,7 @@ const getUsers = async (req, res) => {
           if (!result.userExists) {
             return res.json({
               message: "User not found",
-              user: null
+              user: null,
             });
           }
 
@@ -166,7 +166,7 @@ const getUsers = async (req, res) => {
         }
         return res.json({
           message: "User returned successfully!",
-          user
+          user,
         });
       } else {
         return res.boom.notFound("Route not found");
@@ -179,7 +179,7 @@ const getUsers = async (req, res) => {
         if (!tasksData.length) {
           return res.json({
             message: "No users found",
-            users: []
+            users: [],
           });
         }
         const userIds = new Set();
@@ -198,7 +198,7 @@ const getUsers = async (req, res) => {
             const userData = {
               id: user.id,
               discordId: user.discordId,
-              username: user.username
+              username: user.username,
             };
             if (dev) {
               userData.tasks = userTasks;
@@ -210,7 +210,7 @@ const getUsers = async (req, res) => {
         return res.json({
           message: "Users returned successfully!",
           count: usersData.length,
-          users: usersData
+          users: usersData,
         });
       } catch (error) {
         const errorMessage = `Error while fetching users and tasks: ${error}`;
@@ -225,7 +225,7 @@ const getUsers = async (req, res) => {
       const users = await dataAccess.retrieveUsers({ usernames: usernames });
       return res.json({
         message: "Users returned successfully!",
-        users
+        users,
       });
     }
 
@@ -236,8 +236,8 @@ const getUsers = async (req, res) => {
       users: data.users,
       links: {
         next: data.nextId ? getPaginationLink(req.query, "next", data.nextId) : "",
-        prev: data.prevId ? getPaginationLink(req.query, "prev", data.prevId) : ""
-      }
+        prev: data.prevId ? getPaginationLink(req.query, "prev", data.prevId) : "",
+      },
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
@@ -279,7 +279,7 @@ const getUser = async (req, res) => {
     if (result.userExists) {
       return res.json({
         message: "User returned successfully!",
-        user
+        user,
       });
     }
 
@@ -297,7 +297,7 @@ const getUserSkills = async (req, res) => {
 
     return res.json({
       message: "Skills returned successfully",
-      skills
+      skills,
     });
   } catch (err) {
     logger.error(`Error fetching skills ${err}`);
@@ -318,7 +318,7 @@ const getSuggestedUsers = async (req, res) => {
 
     return res.json({
       message: "Users returned successfully!",
-      users
+      users,
     });
   } catch (err) {
     logger.error(`Error while fetching suggested users: ${err}`);
@@ -337,7 +337,7 @@ const getUsernameAvailabilty = async (req, res) => {
   try {
     const result = await dataAccess.retrieveUsers({ username: req.params.username });
     return res.json({
-      isUsernameAvailable: !result.userExists
+      isUsernameAvailable: !result.userExists,
     });
   } catch (error) {
     logger.error(`Error while checking user: ${error}`);
@@ -353,7 +353,7 @@ const generateUsername = async (req, res) => {
       return res.json({ username });
     } else {
       return res.status(404).json({
-        message: "UserName Not Found"
+        message: "UserName Not Found",
       });
     }
   } catch (error) {
@@ -373,7 +373,7 @@ const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
       const user = await dataAccess.retrieveUsers({
-        userdata: req.userData
+        userdata: req.userData,
       });
       return res.send(user);
     }
@@ -469,7 +469,7 @@ const postUserPicture = async (req, res) => {
   }
   return res.status(201).json({
     message: `Profile picture uploaded successfully! ${verificationResult.message}`,
-    image: imageData
+    image: imageData,
   });
 };
 
@@ -486,7 +486,7 @@ const verifyUserImage = async (req, res) => {
     const { id: userId } = req.params;
     await userQuery.markAsVerified(userId, imageType);
     return res.json({
-      message: `${imageType} image was verified successfully!`
+      message: `${imageType} image was verified successfully!`,
     });
   } catch (error) {
     logger.error(`Error while verifying image of user: ${error}`);
@@ -514,9 +514,9 @@ const updateDiscordUserNickname = async (req, res) => {
       userAffected: {
         userId,
         username,
-        discordId
+        discordId,
       },
-      message: "User nickname changed successfully"
+      message: "User nickname changed successfully",
     });
   } catch (err) {
     logger.error(`Error while updating nickname: ${err}`);
@@ -571,7 +571,7 @@ const getUserImageForVerification = async (req, res) => {
     const userImageVerificationData = await userQuery.getUserImageForVerification(userId);
     return res.json({
       message: "User image verification record fetched successfully!",
-      data: userImageVerificationData
+      data: userImageVerificationData,
     });
   } catch (error) {
     logger.error(`Error while verifying image of user: ${error}`);
@@ -603,13 +603,13 @@ const updateUser = async (req, res) => {
 
     const meta = {
       approvedBy: req.userData.id,
-      userId: userId
+      userId: userId,
     };
 
     await logsQuery.addLog(logType.PROFILE_DIFF_APPROVED, meta, { profileDiffId, message });
 
     return res.json({
-      message: "Updated user's data successfully!"
+      message: "Updated user's data successfully!",
     });
   } catch (error) {
     logger.error(`Error while updating user data: ${error}`);
@@ -625,7 +625,7 @@ const generateChaincode = async (req, res) => {
     await userQuery.addOrUpdate({ chaincode }, id);
     return res.json({
       chaincode,
-      message: "Chaincode returned successfully"
+      message: "Chaincode returned successfully",
     });
   } catch (error) {
     logger.error(`Error while generating chaincode: ${error}`);
@@ -639,7 +639,7 @@ const profileURL = async (req, res) => {
     const { profileURL } = req.body;
     await userQuery.addOrUpdate({ profileURL }, userId);
     return res.json({
-      message: "updated profile URL!!"
+      message: "updated profile URL!!",
     });
   } catch (error) {
     logger.error(`Internal Server Error: ${error}`);
@@ -652,20 +652,20 @@ const rejectProfileDiff = async (req, res) => {
     const { profileDiffId, message } = req.body;
     const profileResponse = await profileDiffsQuery.updateProfileDiff(
       { approval: profileDiffStatus.REJECTED },
-      profileDiffId
+      profileDiffId,
     );
 
     if (profileResponse.notFound) return res.boom.notFound("Profile Diff doesn't exist");
 
     const meta = {
       rejectedBy: req.userData.id,
-      userId: profileResponse.userId
+      userId: profileResponse.userId,
     };
 
     await logsQuery.addLog(logType.PROFILE_DIFF_REJECTED, meta, { profileDiffId, message });
 
     return res.json({
-      message: "Profile Diff Rejected successfully!"
+      message: "Profile Diff Rejected successfully!",
     });
   } catch (error) {
     logger.error(`Error while rejecting profile diff: ${error}`);
@@ -680,7 +680,7 @@ const addUserIntro = async (req, res) => {
 
     if (joinData.length === 1) {
       return res.status(409).json({
-        message: "User data is already present!"
+        message: "User data is already present!",
       });
     }
 
@@ -688,30 +688,30 @@ const addUserIntro = async (req, res) => {
       userId: req.userData.id,
       biodata: {
         firstName: rawData.firstName,
-        lastName: rawData.lastName
+        lastName: rawData.lastName,
       },
       location: {
         city: rawData.city,
         state: rawData.state,
-        country: rawData.country
+        country: rawData.country,
       },
       professional: {
         institution: rawData.college,
-        skills: rawData.skills
+        skills: rawData.skills,
       },
       intro: {
         introduction: rawData.introduction,
         funFact: rawData.funFact,
         forFun: rawData.forFun,
         whyRds: rawData.whyRds,
-        numberOfHours: rawData.numberOfHours
+        numberOfHours: rawData.numberOfHours,
       },
-      foundFrom: rawData.foundFrom
+      foundFrom: rawData.foundFrom,
     };
     await userQuery.addJoinData(data);
 
     return res.status(201).json({
-      message: "User join data and newstatus data added and updated successfully"
+      message: "User join data and newstatus data added and updated successfully",
     });
   } catch (err) {
     logger.error("Could not save user data");
@@ -725,11 +725,11 @@ const getUserIntro = async (req, res) => {
     if (data.length) {
       return res.json({
         message: "User data returned",
-        data: data
+        data: data,
       });
     } else {
       return res.status(404).json({
-        message: "Data Not Found"
+        message: "Data Not Found",
       });
     }
   } catch (err) {
@@ -750,7 +750,7 @@ const addDefaultArchivedRole = async (req, res) => {
     const addedDefaultArchivedRoleData = await userQuery.addDefaultArchivedRole();
     return res.json({
       message: "Users default archived role added successfully!",
-      ...addedDefaultArchivedRoleData
+      ...addedDefaultArchivedRoleData,
     });
   } catch (error) {
     logger.error(`Error adding default archived role: ${error}`);
@@ -771,7 +771,7 @@ const calculatePagination = (pageNumber, totalPages, reqQuery, limitNumber) => {
 
   return {
     next: nextPage ? getFilteredPaginationLink(reqQuery, nextPage, limitNumber) : null,
-    prev: prevPage ? getFilteredPaginationLink(reqQuery, prevPage, limitNumber) : null
+    prev: prevPage ? getFilteredPaginationLink(reqQuery, prevPage, limitNumber) : null,
   };
 };
 
@@ -786,7 +786,7 @@ const filterUsers = async (req, res) => {
       return res.json({
         message: users.length ? "Users found successfully!" : "No users found",
         users: users,
-        count: users.length
+        count: users.length,
       });
     }
     const { page, size } = req.query;
@@ -804,7 +804,7 @@ const filterUsers = async (req, res) => {
       message: users.length ? "Users found successfully!" : "No users found",
       users: users,
       links: paginationLinks,
-      count: users.length
+      count: users.length,
     });
   } catch (error) {
     logger.error(`Error while fetching all users: ${error}`);
@@ -843,17 +843,17 @@ const updateRoles = async (req, res) => {
             reason: reason || "",
             archived_user: {
               user_id: result.user.id,
-              username: result.user.username
+              username: result.user.username,
             },
             archived_by: {
               user_id: superUserId,
-              roles: roles
-            }
+              roles: roles,
+            },
           };
           addLog("archived-details", {}, body);
         }
         return res.json({
-          message: "role updated successfully!"
+          message: "role updated successfully!",
         });
       } else {
         return res.boom.conflict("Role already exist!");
@@ -874,13 +874,13 @@ const archiveUserIfNotInDiscord = async () => {
     if (data.totalUsers === 0) {
       return {
         message: USERS_PATCH_HANDLER_ERROR_MESSAGES.ARCHIVE_USERS.NO_USERS_DATA_TO_UPDATE,
-        summary: data
+        summary: data,
       };
     }
 
     return {
       message: USERS_PATCH_HANDLER_SUCCESS_MESSAGES.ARCHIVE_USERS.SUCCESSFULLY_UPDATED_DATA,
-      summary: data
+      summary: data,
     };
   } catch (error) {
     logger.error(`Error while updating the archived role: ${error}`);
@@ -948,5 +948,5 @@ module.exports = {
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
-  isDeveloper
+  isDeveloper,
 };

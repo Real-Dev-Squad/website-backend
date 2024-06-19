@@ -48,13 +48,13 @@ const notifyController = async (req, res) => {
   const message = {
     notification: {
       title: title || "Notification Title",
-      body: body || "Notification Body"
+      body: body || "Notification Body",
     },
     data: {
       key1: "value1",
-      key2: "value2"
+      key2: "value2",
     },
-    tokens: Array.from(setOfFcmTokens)
+    tokens: Array.from(setOfFcmTokens),
   };
   function calculateMessageSize(message) {
     const byteArray = new TextEncoder().encode(message);
@@ -79,5 +79,5 @@ const notifyController = async (req, res) => {
 };
 
 module.exports = {
-  notifyController
+  notifyController,
 };

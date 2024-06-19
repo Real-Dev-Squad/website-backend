@@ -48,7 +48,7 @@ const getFilteredPRsOrIssues = async (qualifiers) => {
 
   allPRs = await fetchMultiplePageResults(githubServiceCallback, {
     searchParams,
-    resultOptions
+    resultOptions,
   });
 
   return allPRs;
@@ -56,10 +56,10 @@ const getFilteredPRsOrIssues = async (qualifiers) => {
 
 const ORDER_TYPE = {
   ASC: "asc",
-  DESC: "desc"
+  DESC: "desc",
 };
 
 module.exports = {
   getFilteredPRsOrIssues,
-  ORDER_TYPE
+  ORDER_TYPE,
 };

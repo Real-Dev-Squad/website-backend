@@ -14,20 +14,20 @@ module.exports = {
 
   services: {
     rdsApi: {
-      baseUrl: localUrl
+      baseUrl: localUrl,
     },
 
     rdsUi: {
       baseUrl: localUrl,
       routes: {
-        authRedirection: "/healthcheck"
-      }
+        authRedirection: "/healthcheck",
+      },
     },
 
     goalAPI: {
       baseUrl: "https://staging-goals-api.realdevsquad.com",
-      secretKey: "123456789"
-    }
+      secretKey: "123456789",
+    },
   },
 
   userToken: {
@@ -53,7 +53,7 @@ module.exports = {
       "NoWsgW64Z/+89cbKFMzgHdvhvL7rQNhBAAm1byPmn8aTV7LlTclMWfb4sV6e+ef8\n" +
       "QnrvpfRSihRktA2dDQJAH+dQBx3nG3bZ9khVAZQ1jTJ7j0cKixaGndFuYS1TJvJ2\n" +
       "Zzn584h/xbSIcP9/4SXmEK3wtoueUtMkvS3yKTvk+w==\n" +
-      "-----END RSA PRIVATE KEY-----"
+      "-----END RSA PRIVATE KEY-----",
   },
 
   botToken: {
@@ -66,12 +66,12 @@ module.exports = {
       "GJhpAAmD6vk0MeZk1NeQmyQp/uOPpWmVRzgyK+XVc6AwZHV+/n6xAIT91/DjJlD1\n" +
       "N+nS7Sqo3RJ04+KlNRUclzINOC7JBYkKtG7YQ0U9nNLkRrRlON+O6tY4OT86T1O1\n" +
       "AgMBAAE=\n" +
-      "-----END PUBLIC KEY-----"
+      "-----END PUBLIC KEY-----",
   },
 
   integrations: {
     newrelic: {
-      appName: "RDS_API_development"
-    }
-  }
+      appName: "RDS_API_development",
+    },
+  },
 };

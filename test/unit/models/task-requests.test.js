@@ -9,12 +9,12 @@ const {
   addNewFields,
   removeOldField,
   addUsersCountAndCreatedAt,
-  rejectTaskRequest
+  rejectTaskRequest,
 } = require("./../../../models/taskRequests");
 const {
   TASK_REQUEST_TYPE,
   TASK_REQUEST_STATUS,
-  TASK_REQUEST_ERROR_MESSAGE
+  TASK_REQUEST_ERROR_MESSAGE,
 } = require("./../../../constants/taskRequests");
 
 const mockData = require("../../fixtures/task-requests/task-requests");
@@ -56,8 +56,8 @@ describe("Task requests | models", function () {
           proposedStartDate: requestData.proposedStartDate,
           status: TASK_REQUEST_STATUS.PENDING,
           description: requestData.description,
-          markdownEnabled: requestData.markdownEnabled
-        }
+          markdownEnabled: requestData.markdownEnabled,
+        },
       ]);
       expect(addedTaskRequest.createdBy).to.equal(authenticatedUsername);
       expect(addedTaskRequest.createdAt).to.be.a("number");
@@ -76,7 +76,7 @@ describe("Task requests | models", function () {
       expect(addedTaskRequest).to.not.be.equal(undefined);
       expect(addedTaskRequest.requestors).to.deep.equal([
         ...mockData.existingTaskRequest.requestors,
-        requestData.userId
+        requestData.userId,
       ]);
       expect(addedTaskRequest.status).to.equal(TASK_REQUEST_STATUS.PENDING);
       expect(addedTaskRequest.taskTitle).to.not.be.equal(undefined);
@@ -90,8 +90,8 @@ describe("Task requests | models", function () {
           proposedStartDate: requestData.proposedStartDate,
           status: TASK_REQUEST_STATUS.PENDING,
           description: requestData.description,
-          markdownEnabled: requestData.markdownEnabled
-        }
+          markdownEnabled: requestData.markdownEnabled,
+        },
       ]);
       expect(addedTaskRequest.createdBy).to.equal(mockData.existingTaskRequest.createdBy);
       expect(addedTaskRequest.createdAt).to.be.a("number");
@@ -126,8 +126,8 @@ describe("Task requests | models", function () {
           proposedStartDate: requestData.proposedStartDate,
           status: TASK_REQUEST_STATUS.PENDING,
           description: requestData.description,
-          markdownEnabled: requestData.markdownEnabled
-        }
+          markdownEnabled: requestData.markdownEnabled,
+        },
       ]);
       expect(addedTaskRequest.createdBy).to.equal(authenticatedUsername);
       expect(addedTaskRequest.createdAt).to.be.a("number");
@@ -144,14 +144,14 @@ describe("Task requests | models", function () {
         ...mockData.taskRequestData,
         userId: "user456",
         requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
-        taskId: "task123"
+        taskId: "task123",
       };
       const result = await createRequest(requestData, authenticatedUsername);
       const addedTaskRequest = result.taskRequest;
       expect(addedTaskRequest).to.not.be.equal(undefined);
       expect(addedTaskRequest.requestors).to.deep.equal([
         ...mockData.existingTaskRequest.requestors,
-        requestData.userId
+        requestData.userId,
       ]);
       expect(addedTaskRequest.status).to.equal(TASK_REQUEST_STATUS.PENDING);
       expect(addedTaskRequest.taskTitle).to.not.be.equal(undefined);
@@ -166,8 +166,8 @@ describe("Task requests | models", function () {
           proposedStartDate: requestData.proposedStartDate,
           status: TASK_REQUEST_STATUS.PENDING,
           description: requestData.description,
-          markdownEnabled: requestData.markdownEnabled
-        }
+          markdownEnabled: requestData.markdownEnabled,
+        },
       ]);
       expect(addedTaskRequest.createdBy).to.equal(mockData.existingTaskRequest.createdBy);
       expect(addedTaskRequest.createdAt).to.be.a("number");
@@ -183,7 +183,7 @@ describe("Task requests | models", function () {
       const requestData = {
         ...mockData.taskRequestData,
         requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
-        taskId: "task123"
+        taskId: "task123",
       };
       const result = await createRequest(requestData, authenticatedUsername);
       expect(result.alreadyRequesting).to.be.equal(true);
@@ -203,20 +203,20 @@ describe("Task requests | models", function () {
         ...mockData.existingTaskRequest,
         status: TASK_REQUEST_STATUS.APPROVED,
         createdAt: Date.now(),
-        usersCount: 1
+        usersCount: 1,
       };
       const assignmentTaskRequest = {
         ...mockData.existingTaskRequest,
         requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
         createdAt: Date.now() + 10000,
-        usersCount: 2
+        usersCount: 2,
       };
       const existingTaskRequest = { ...mockData.existingTaskRequest, createdAt: Date.now() + 20000, usersCount: 3 };
       await Promise.all([
         taskRequestsCollection.add(existingTaskRequest),
         taskRequestsCollection.add(mockData.existingOldTaskRequest),
         taskRequestsCollection.add(approvedTaskRequest),
-        taskRequestsCollection.add(assignmentTaskRequest)
+        taskRequestsCollection.add(assignmentTaskRequest),
       ]);
       const userDetails = userData[0];
       userDetails.id = mockData.existingTaskRequest.users[0].userId;
@@ -266,7 +266,7 @@ describe("Task requests | models", function () {
 
     it("should fetch only task requests of status pending", async function () {
       const queries = {
-        q: "status:pending"
+        q: "status:pending",
       };
       const result = await fetchPaginatedTaskRequests(queries);
       result.data.forEach((taskRequest) => {
@@ -276,7 +276,7 @@ describe("Task requests | models", function () {
 
     it("should fetch only task requests of status approved and request type of assignment", async function () {
       const queries = {
-        q: "status:approved request-type:assignment"
+        q: "status:approved request-type:assignment",
       };
       const result = await fetchPaginatedTaskRequests(queries);
       result.data.forEach((taskRequest) => {
@@ -287,7 +287,7 @@ describe("Task requests | models", function () {
 
     it("should limit the response list to size 1", async function () {
       const queries = {
-        size: "1"
+        size: "1",
       };
       const result = await fetchPaginatedTaskRequests(queries);
       expect(result.data.length).to.be.equal(1);
@@ -295,7 +295,7 @@ describe("Task requests | models", function () {
 
     it("should sort the response in descending order of created time", async function () {
       const queries = {
-        q: "sort:created-desc"
+        q: "sort:created-desc",
       };
       const result = await fetchPaginatedTaskRequests(queries);
       const createdTimeList = result.data.map((data) => data.createdAt);
@@ -306,7 +306,7 @@ describe("Task requests | models", function () {
 
     it("should sort the response in ascending order of requestors count", async function () {
       const queries = {
-        q: "sort:requestors-asc"
+        q: "sort:requestors-asc",
       };
       const result = await fetchPaginatedTaskRequests(queries);
       const usersCountList = result.data.map((data) => data.usersCount);
@@ -318,7 +318,7 @@ describe("Task requests | models", function () {
     it("should provide next set of results when next is passed in query param", async function () {
       const queries = {
         q: "sort:requestors-asc",
-        size: "1"
+        size: "1",
       };
       const result = await fetchPaginatedTaskRequests(queries);
       expect(result.next).to.be.not.equal(undefined);
@@ -332,7 +332,7 @@ describe("Task requests | models", function () {
     it("should provide previous set of results when prev is passed in query param", async function () {
       const queries = {
         q: "sort:requestors-asc",
-        size: "1"
+        size: "1",
       };
       const result = await fetchPaginatedTaskRequests(queries);
       expect(result.next).to.be.not.equal(undefined);
@@ -348,26 +348,26 @@ describe("Task requests | models", function () {
     it("should return error when an invalid next value is passed", async function () {
       const queries = {
         next: "abc",
-        size: "1"
+        size: "1",
       };
       const result = await fetchPaginatedTaskRequests(queries);
       expect(result).to.be.deep.equal({
         statusCode: 400,
         error: "Bad Request",
-        message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_NEXT}: ${queries.next}`
+        message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_NEXT}: ${queries.next}`,
       });
     });
 
     it("should return error when an invalid prev value is passed", async function () {
       const queries = {
         prev: "abc",
-        size: "1"
+        size: "1",
       };
       const result = await fetchPaginatedTaskRequests(queries);
       expect(result).to.be.deep.equal({
         statusCode: 400,
         error: "Bad Request",
-        message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_PREV}: ${queries.prev}`
+        message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_PREV}: ${queries.prev}`,
       });
     });
   });
@@ -393,7 +393,7 @@ describe("Task requests | models", function () {
       expect(approvedTask.data().updatedAt).to.be.a("number");
       expect(approvedTask.data().createdAt).to.be.equal(
         approvedTask.data().updatedAt,
-        "When new task is created createdAt and updatedAt both are same"
+        "When new task is created createdAt and updatedAt both are same",
       );
       expect(approvedTask.data().percentCompleted).to.equal(0);
       expect(approvedTask.data().priority).to.equal(DEFAULT_TASK_PRIORITY);
@@ -416,7 +416,7 @@ describe("Task requests | models", function () {
       expect(approvedTask.data().updatedAt).to.be.a("number");
       expect(approvedTask.data().createdAt).to.be.not.equal(
         approvedTask.data().updatedAt,
-        "When existing task is updated, updatedAt field is updated so createdAt and updatedAt are not same"
+        "When existing task is updated, updatedAt field is updated so createdAt and updatedAt are not same",
       );
     });
 
@@ -514,7 +514,7 @@ describe("Task requests | models", function () {
       it("Should update the existing documents with multiple users", async function () {
         await Promise.all([
           taskRequestsCollection.doc(taskRequestId1).set(mockData.existingOldTaskRequest),
-          taskRequestsCollection.doc(taskRequestId2).set(mockData.existingOldTaskRequestWithMultipleUsers)
+          taskRequestsCollection.doc(taskRequestId2).set(mockData.existingOldTaskRequestWithMultipleUsers),
         ]);
         const response = await addNewFields();
         expect(response.totalDocuments).to.be.equal(2);
@@ -526,10 +526,10 @@ describe("Task requests | models", function () {
         const taskRequestData2 = (await taskRequestsCollection.doc(taskRequestId2).get()).data();
         expect(taskRequestData2.taskTitle).to.be.equal(taskData.taskData.title);
         expect(taskRequestData2.users[0].userId).to.be.equal(
-          mockData.existingOldTaskRequestWithMultipleUsers.requestors[0]
+          mockData.existingOldTaskRequestWithMultipleUsers.requestors[0],
         );
         expect(taskRequestData2.users[1].userId).to.be.equal(
-          mockData.existingOldTaskRequestWithMultipleUsers.requestors[1]
+          mockData.existingOldTaskRequestWithMultipleUsers.requestors[1],
         );
         expect(taskRequestData2.requestType).to.be.equal(TASK_REQUEST_TYPE.ASSIGNMENT);
       });

@@ -23,7 +23,7 @@ const fetchProfileDiffs = async () => {
         id: doc.id,
         ...doc.data(),
         email: emailRedacted,
-        phone: phoneRedacted
+        phone: phoneRedacted,
       });
     });
     return profileDiffs;
@@ -57,7 +57,7 @@ const fetchProfileDiff = async (profileDiffId) => {
 const add = async (profileDiffData) => {
   try {
     const profileDiff = await profileDiffsModel.add({
-      ...profileDiffData
+      ...profileDiffData,
     });
     return profileDiff.id;
   } catch (err) {
@@ -81,7 +81,7 @@ const updateProfileDiff = async (profileDiffData, profileId) => {
 
     await profileDiffsModel.doc(profileId).set({
       ...data,
-      ...profileDiffData
+      ...profileDiffData,
     });
 
     return { id: profileDiff.id, userId: data.userId };
@@ -95,5 +95,5 @@ module.exports = {
   fetchProfileDiffs,
   fetchProfileDiff,
   add,
-  updateProfileDiff
+  updateProfileDiff,
 };

@@ -10,7 +10,7 @@ const getDiscordMembers = async () => {
     const response = await (
       await fetch(`${DISCORD_BASE_URL}/discord-members`, {
         method: "GET",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` }
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
       })
     ).json();
     return response;
@@ -26,7 +26,7 @@ const getDiscordRoles = async () => {
     const response = await (
       await fetch(`${DISCORD_BASE_URL}/roles`, {
         method: "GET",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` }
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
       })
     ).json();
     return response;
@@ -34,7 +34,7 @@ const getDiscordRoles = async () => {
     logger.error("Error in fetching the discord data", err);
     return {
       status: 500,
-      message: "Something went wrong"
+      message: "Something went wrong",
     };
   }
 };
@@ -50,9 +50,9 @@ const setInDiscordFalseScript = async () => {
       ...user,
       roles: {
         ...user.roles,
-        in_discord: false
+        in_discord: false,
       },
-      updated_at: Date.now()
+      updated_at: Date.now(),
     };
     updateUsersPromises.push(userModel.doc(id).update(userData));
   });
@@ -64,7 +64,7 @@ const addRoleToUser = async (userid, roleid) => {
   const data = await fetch(`${DISCORD_BASE_URL}/roles/add`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-    body: JSON.stringify({ userid, roleid })
+    body: JSON.stringify({ userid, roleid }),
   });
   const response = await data.json();
   return response;
@@ -76,7 +76,7 @@ const removeRoleFromUser = async (roleId, discordId, userData) => {
     const data = await fetch(`${DISCORD_BASE_URL}/roles`, {
       method: "DELETE",
       headers,
-      body: JSON.stringify({ userid: discordId, roleid: roleId })
+      body: JSON.stringify({ userid: discordId, roleid: roleId }),
     });
     const response = await data.json();
     return response;
@@ -94,12 +94,12 @@ const setUserDiscordNickname = async (userName, discordId) => {
       await fetch(`${DISCORD_BASE_URL}/guild/member`, {
         method: "PATCH",
         body: JSON.stringify({ userName, discordId }),
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` }
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
       })
     ).json();
     return {
       userEffected: userName,
-      message: response
+      message: response,
     };
   } catch (err) {
     logger.error("Error in updating discord Nickname", err);
@@ -113,5 +113,5 @@ module.exports = {
   setInDiscordFalseScript,
   addRoleToUser,
   removeRoleFromUser,
-  setUserDiscordNickname
+  setUserDiscordNickname,
 };

@@ -4,7 +4,7 @@ export const requestsLogs = [
       createdAt: 1709175284035,
       createdBy: "iODXB6ns8jaZB9p0XlBw",
       requestId: "CNExxpR1F4UPbtYIpxFP",
-      action: "create"
+      action: "create",
     },
     type: "REQUEST_CREATED",
     body: {
@@ -16,19 +16,19 @@ export const requestsLogs = [
       state: "PENDING",
       type: "OOO",
       message: "Out of office for personal reasons.",
-      updatedAt: 1709175282967
+      updatedAt: 1709175282967,
     },
     timestamp: {
       _seconds: 1709175284,
-      _nanoseconds: 35000000
-    }
+      _nanoseconds: 35000000,
+    },
   },
   {
     meta: {
       createdAt: 1709170848580,
       createdBy: "iODXB6ns8jaZB9p0XlBw",
       requestId: "K7ioni8arDgRCBAWwYxp",
-      action: "create"
+      action: "create",
     },
     type: "REQUEST_CREATED",
     body: {
@@ -40,11 +40,11 @@ export const requestsLogs = [
       state: "PENDING",
       type: "OOO",
       message: "Out of office for personal reasons.",
-      updatedAt: 1709170848318
+      updatedAt: 1709170848318,
     },
     timestamp: {
       _seconds: 1709170848,
-      _nanoseconds: 580000000
-    }
-  }
+      _nanoseconds: 580000000,
+    },
+  },
 ];

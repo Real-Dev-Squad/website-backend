@@ -27,7 +27,7 @@ const fromFirestoreData = async (task) => {
   const updatedTask = {
     ...task,
     createdBy,
-    participants
+    participants,
   };
 
   if (assigneeName || assigneeId) {
@@ -59,7 +59,7 @@ const buildTasks = (tasks, initialTaskArray = []) => {
     tasks.forEach((task) => {
       initialTaskArray.push({
         id: task.id,
-        ...task.data()
+        ...task.data(),
       });
     });
   }
@@ -87,7 +87,7 @@ const transformQuery = (dev = false, status = "", size, page, assignee = "", tit
     dev: transformedDev,
     assignee: transformedAssignee,
     title: transformedTitle,
-    ...query
+    ...query,
   };
 };
 
@@ -155,5 +155,5 @@ module.exports = {
   transformQuery,
   parseSearchQuery,
   buildTasksQueryForMissedUpdates,
-  transformTasksUsersQuery
+  transformTasksUsersQuery,
 };

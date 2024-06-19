@@ -9,8 +9,8 @@ module.exports = () => {
         userAvatar: "<USER_AVATAR>",
         discordId: "<DISCORD_ID>",
         discordJoinedAt: "<DISCORD_JOINED_AT>",
-        expiry: 1674041460211
-      }
+        expiry: 1674041460211,
+      },
     },
     {
       // Bad Data
@@ -22,8 +22,8 @@ module.exports = () => {
         userAvatar: "<USER_AVATAR>",
         discordId: "<DISCORD_ID>",
         discordJoinedAt: "<DISCORD_JOINED_AT>",
-        expiry: 1674041460211
-      }
+        expiry: 1674041460211,
+      },
     },
     {
       type: "discord",
@@ -34,8 +34,8 @@ module.exports = () => {
         userAvatar: "<USER_AVATAR>",
         discordId: "<DISCORD_ID>",
         discordJoinedAt: "<DISCORD_JOINED_AT>",
-        expiry: Date.now() + 600000
-      }
+        expiry: Date.now() + 600000,
+      },
     },
     {
       type: "discord",
@@ -46,8 +46,8 @@ module.exports = () => {
         userAvatar: "<USER_AVATAR>",
         discordId: "<DISCORD_ID>",
         discordJoinedAt: "<DISCORD_JOINED_AT>",
-        expiry: Date.now() - 600000
-      }
-    }
+        expiry: Date.now() - 600000,
+      },
+    },
   ];
 };

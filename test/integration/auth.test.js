@@ -205,7 +205,7 @@ describe("auth", function () {
         expect(res.body).to.eql({
           statusCode: 401,
           error: "Unauthorized",
-          message: "User cannot be authenticated"
+          message: "User cannot be authenticated",
         });
 
         return done();

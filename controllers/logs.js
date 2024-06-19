@@ -14,7 +14,7 @@ const fetchLogs = async (req, res) => {
     const logs = await logsQuery.fetchLogs(req.query, req.params.type);
     return res.json({
       message: LOGS_FETCHED_SUCCESSFULLY,
-      logs
+      logs,
     });
   } catch (error) {
     logger.error(`${ERROR_WHILE_FETCHING_LOGS}: ${error}`);
@@ -38,7 +38,7 @@ const fetchAllLogs = async (req, res) => {
       return res.status(200).json({
         message: ALL_LOGS_FETCHED_SUCCESSFULLY,
         data: allLogs,
-        page: pageLink
+        page: pageLink,
       });
     }
 
@@ -49,7 +49,7 @@ const fetchAllLogs = async (req, res) => {
         endpoint: "/logs",
         query,
         cursorKey: "next",
-        docId: next
+        docId: next,
       });
       nextUrl = nextLink;
     }
@@ -58,7 +58,7 @@ const fetchAllLogs = async (req, res) => {
         endpoint: "/logs",
         query,
         cursorKey: "prev",
-        docId: prev
+        docId: prev,
       });
       prevUrl = prevLink;
     }
@@ -67,7 +67,7 @@ const fetchAllLogs = async (req, res) => {
       message: ALL_LOGS_FETCHED_SUCCESSFULLY,
       data: allLogs,
       next: nextUrl,
-      prev: prevUrl
+      prev: prevUrl,
     });
   } catch (err) {
     logger.error(ERROR_WHILE_FETCHING_LOGS, err);
@@ -77,5 +77,5 @@ const fetchAllLogs = async (req, res) => {
 
 module.exports = {
   fetchLogs,
-  fetchAllLogs
+  fetchAllLogs,
 };

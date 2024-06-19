@@ -36,7 +36,7 @@ describe("Notify Test", function () {
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
-          ...fcmTokenData
+          ...fcmTokenData,
         });
 
       const response = await chai
@@ -44,7 +44,7 @@ describe("Notify Test", function () {
         .post("/v1/notifications")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
-          ...notifyData
+          ...notifyData,
         });
       expect(response).to.have.status(200);
       expect(response.body.message).equals("User notified successfully");
@@ -60,7 +60,7 @@ describe("Notify Test", function () {
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
-          ...fcmTokenData
+          ...fcmTokenData,
         });
 
       const response = await chai
@@ -68,7 +68,7 @@ describe("Notify Test", function () {
         .post("/v1/notifications")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
-          ...notifyData
+          ...notifyData,
         });
 
       expect(response).to.have.status(400);
@@ -85,7 +85,7 @@ describe("Notify Test", function () {
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
-          ...fcmTokenData
+          ...fcmTokenData,
         });
 
       const response = await chai
@@ -93,7 +93,7 @@ describe("Notify Test", function () {
         .post("/v1/notifications")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
-          ...notifyData
+          ...notifyData,
         });
 
       expect(response).to.have.status(400);
@@ -109,14 +109,14 @@ describe("Notify Test", function () {
         .request(app)
         .post("/v1/fcm-tokens")
         .send({
-          ...fcmTokenData
+          ...fcmTokenData,
         });
 
       const response = await chai
         .request(app)
         .post("/v1/notifications")
         .send({
-          ...notifyData
+          ...notifyData,
         });
 
       expect(response).to.have.status(401);

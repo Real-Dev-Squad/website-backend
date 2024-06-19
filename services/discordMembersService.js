@@ -11,13 +11,13 @@ const getDiscordMemberDetails = async (discordId) => {
   try {
     const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
       algorithm: "RS256",
-      expiresIn: config.get("rdsServerlessBot.ttl")
+      expiresIn: config.get("rdsServerlessBot.ttl"),
     });
 
     const memberDiscordDetails = await (
       await fetch(`${DISCORD_BASE_URL}/member/${discordId}`, {
         method: "GET",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` }
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
       })
     ).json();
     return memberDiscordDetails;

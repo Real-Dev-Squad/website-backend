@@ -14,8 +14,8 @@ const recruiterDataArray = [
     reason: "Test",
     email: "abc@gmail.com",
     currency: "$",
-    package: 100000
-  }
+    package: 100000,
+  },
 ];
 
 const recruiterWithIdKeys = [
@@ -29,7 +29,7 @@ const recruiterWithIdKeys = [
   "package",
   "timestamp",
   "id",
-  "username"
+  "username",
 ];
 
 module.exports = { recruiterDataArray, recruiterWithIdKeys };

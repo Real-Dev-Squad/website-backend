@@ -13,7 +13,7 @@ const addTagsToItem = async (req, res) => {
     const { itemId } = await ItemTagsModel.addTagsToItem(req.body);
     return res.json({
       message: "Tags added successfully!",
-      itemId
+      itemId,
     });
   } catch (err) {
     logger.error(`Error while creating new item: ${err}`);
@@ -34,7 +34,7 @@ const removeTagsFromItem = async (req, res) => {
     return res.json({
       message: "Tags removed successfully!",
       itemId,
-      tagId
+      tagId,
     });
   } catch (err) {
     logger.error(`Error while creating new item: ${err}`);
@@ -57,7 +57,7 @@ const getItemBasedOnFilter = async (req, res) => {
     const items = await ItemTagsModel.getItemBasedOnFilter(req.query);
     return res.json({
       message: "Items fetched Successfully",
-      data: items
+      data: items,
     });
   } catch (err) {
     logger.error(`Error while creating new item: ${err}`);
@@ -68,5 +68,5 @@ const getItemBasedOnFilter = async (req, res) => {
 module.exports = {
   addTagsToItem,
   removeTagsFromItem,
-  getItemBasedOnFilter
+  getItemBasedOnFilter,
 };

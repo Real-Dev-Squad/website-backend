@@ -67,7 +67,7 @@ const getUserContributions = async (username) => {
     for (const prDetails of prMaps.values()) {
       const allObject = {
         prList: [prDetails],
-        task: {}
+        task: {},
       };
       all.push(allObject);
     }
@@ -91,7 +91,7 @@ const extractPRdetails = (data) => {
       createdAt,
       updatedAt,
       url,
-      raisedBy: user.login
+      raisedBy: user.login,
     });
   });
   return allPRs;
@@ -114,7 +114,7 @@ const extractTaskdetails = (data) => {
     participants,
     featureUrl,
     isNoteworthy,
-    isCollapsed
+    isCollapsed,
   } = data;
   return {
     id,
@@ -127,7 +127,7 @@ const extractTaskdetails = (data) => {
     participants,
     featureUrl,
     isNoteworthy,
-    isCollapsed
+    isCollapsed,
   };
 };
 
@@ -154,7 +154,7 @@ const extractUserDetails = (data) => {
       firstname,
       lastname,
       img,
-      username
+      username,
     };
   } else {
     return { username };
@@ -162,5 +162,5 @@ const extractUserDetails = (data) => {
 };
 
 module.exports = {
-  getUserContributions
+  getUserContributions,
 };

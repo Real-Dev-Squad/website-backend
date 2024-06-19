@@ -51,7 +51,7 @@ const getPaginatedLink = ({
   query = {},
   paramsToExclude = ["page", "next", "prev"],
   cursorKey,
-  docId
+  docId,
 }) => {
   let paginatedLink = endpoint + "?";
 
@@ -92,5 +92,5 @@ module.exports = {
   getQualifiers,
   getDateTimeRangeForPRs,
   getPaginatedLink,
-  findSubscribedGroupIds
+  findSubscribedGroupIds,
 };

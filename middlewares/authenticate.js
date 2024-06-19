@@ -75,7 +75,7 @@ module.exports = async (req, res, next) => {
           expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
           httpOnly: true,
           secure: true,
-          sameSite: "lax"
+          sameSite: "lax",
         });
 
         // add user data to `req.userData` for further use

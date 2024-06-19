@@ -10,7 +10,7 @@ const {
   formatLogsForFeed,
   mapify,
   convertTimestamp,
-  getTasksFromLogs
+  getTasksFromLogs,
 } = require("../utils/logs");
 const SIZE = 25;
 
@@ -27,7 +27,7 @@ const addLog = async (type, meta, body) => {
       type,
       timestamp: admin.firestore.Timestamp.fromDate(new Date()),
       meta,
-      body
+      body,
     };
     return await logsModel.add(log);
   } catch (err) {
@@ -69,7 +69,7 @@ const fetchLogs = async (query, param) => {
       const logs = [];
       logsSnapshot.forEach((doc) => {
         logs.push({
-          ...doc.data()
+          ...doc.data(),
         });
       });
       return logs;
@@ -82,7 +82,7 @@ const fetchLogs = async (query, param) => {
     const logs = [];
     snapshot.forEach((doc) => {
       logs.push({
-        ...doc.data()
+        ...doc.data(),
       });
     });
 
@@ -216,7 +216,7 @@ const fetchAllLogs = async (query) => {
         allLogs: [],
         prev: null,
         next: null,
-        page: page ? page + 1 : null
+        page: page ? page + 1 : null,
       };
     }
     if (format === "feed") {
@@ -234,7 +234,7 @@ const fetchAllLogs = async (query) => {
         allLogs: logsData.filter((log) => log),
         prev: prevDoc.empty ? null : prevDoc.docs[0].id,
         next: nextDoc.empty ? null : nextDoc.docs[0].id,
-        page: page ? page + 1 : null
+        page: page ? page + 1 : null,
       };
     }
 
@@ -242,7 +242,7 @@ const fetchAllLogs = async (query) => {
       allLogs: allLogs.filter((log) => log),
       prev: prevDoc.empty ? null : prevDoc.docs[0].id,
       next: nextDoc.empty ? null : nextDoc.docs[0].id,
-      page: page ? page + 1 : null
+      page: page ? page + 1 : null,
     };
   } catch (error) {
     logger.error(ERROR_WHILE_FETCHING_LOGS, error);
@@ -255,5 +255,5 @@ module.exports = {
   fetchLogs,
   fetchCacheLogs,
   fetchLastAddedCacheLog,
-  fetchAllLogs
+  fetchAllLogs,
 };

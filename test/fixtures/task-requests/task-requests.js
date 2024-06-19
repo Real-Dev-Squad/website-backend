@@ -6,7 +6,7 @@ const validAssignmentRequest = {
   externalIssueHtmlUrl: "https://github.com/Real-Dev-Squad/website-status/issues/1564672",
   userId: "7890",
   proposedDeadline: 1243455234,
-  proposedStartDate: 1243405234
+  proposedStartDate: 1243405234,
 };
 const { taskId: tarTaskId, ...assignmentReqWithoutTaskId } = validAssignmentRequest;
 const { userId: tarUserId, ...assignmentReqWithoutUserId } = validAssignmentRequest;
@@ -19,7 +19,7 @@ const validCreationRequest = {
   requestType: "CREATION",
   userId: "7890",
   proposedDeadline: 1243455234,
-  proposedStartDate: 1243405234
+  proposedStartDate: 1243405234,
 };
 const creationReqWithTaskId = { ...validCreationRequest, taskId: "1234" };
 const { userId: tcrUserId, ...creationReqWithoutUserId } = validCreationRequest;
@@ -27,7 +27,7 @@ const { proposedDeadline: tcrProposedDeadline, ...creationReqWithoutProposedDead
 const { externalIssueUrl: tcrExternalIssueUrl, ...creationReqWithoutExtIssueId } = validCreationRequest;
 const creationReqWithDescription = { ...validCreationRequest, description: "something something" };
 const invalidRequest = {
-  hello: "world"
+  hello: "world",
 };
 const taskRequestData = {
   userId: "user123",
@@ -37,7 +37,7 @@ const taskRequestData = {
   requestType: TASK_REQUEST_TYPE.CREATION,
   externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-backend/issues/1599",
   externalIssueHtmlUrl: "https://github.com/Real-Dev-Squad/website-backend/issues/1599",
-  markdownEnabled: false
+  markdownEnabled: false,
 };
 const existingTaskRequest = {
   requestors: ["user123"],
@@ -54,23 +54,23 @@ const existingTaskRequest = {
       proposedDeadline: 1697452226789,
       proposedStartDate: 1697452226789,
       description: "Task description",
-      status: "PENDING"
-    }
+      status: "PENDING",
+    },
   ],
   createdBy: "testUser",
   createdAt: 1697452229369,
   lastModifiedBy: "testUser",
-  lastModifiedAt: 1697452229369
+  lastModifiedAt: 1697452229369,
 };
 const existingOldTaskRequest = {
   requestors: ["user123"],
   status: "PENDING",
-  taskId: "task123"
+  taskId: "task123",
 };
 const existingOldTaskRequestWithMultipleUsers = {
   requestors: ["user123", "user456"],
   status: "PENDING",
-  taskId: "task456"
+  taskId: "task456",
 };
 module.exports = {
   existingOldTaskRequest,
@@ -89,5 +89,5 @@ module.exports = {
   creationReqWithoutExtIssueId,
   creationReqWithDescription,
   invalidRequest,
-  existingOldTaskRequestWithMultipleUsers
+  existingOldTaskRequestWithMultipleUsers,
 };

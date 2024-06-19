@@ -8,7 +8,7 @@ const archiveUsers = async (usersData) => {
     totalUsersArchived: 0,
     totalOperationsFailed: 0,
     updatedUserDetails: [],
-    failedUserDetails: []
+    failedUserDetails: [],
   };
 
   usersData.forEach((user) => {
@@ -17,9 +17,9 @@ const archiveUsers = async (usersData) => {
       ...user,
       roles: {
         ...user.roles,
-        archived: true
+        archived: true,
       },
-      updated_at: Date.now()
+      updated_at: Date.now(),
     };
     batch.update(userModel.doc(id), updatedUserData);
     usersBatch.push({ id, firstName, lastName });
@@ -31,7 +31,7 @@ const archiveUsers = async (usersData) => {
     summary.updatedUserDetails = [...usersBatch];
     return {
       message: USERS_PATCH_HANDLER_SUCCESS_MESSAGES.ARCHIVE_USERS.SUCCESSFULLY_COMPLETED_BATCH_UPDATES,
-      ...summary
+      ...summary,
     };
   } catch (err) {
     logger.error("Firebase batch Operation Failed!");
@@ -42,5 +42,5 @@ const archiveUsers = async (usersData) => {
 };
 
 module.exports = {
-  archiveUsers
+  archiveUsers,
 };

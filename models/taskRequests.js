@@ -5,7 +5,7 @@ const {
   TASK_REQUEST_FILTER_VALUES,
   TASK_REQUEST_SORT_KEYS,
   TASK_REQUEST_SORT_VALUES,
-  TASK_REQUEST_ERROR_MESSAGE
+  TASK_REQUEST_ERROR_MESSAGE,
 } = require("../constants/taskRequests");
 const { TASK_TYPE, TASK_STATUS, DEFAULT_TASK_PRIORITY } = require("../constants/tasks");
 const { Operators } = require("../typeDefinitions/rqlParser");
@@ -85,7 +85,7 @@ const fetchPaginatedTaskRequests = async (queries = {}) => {
 
     Object.entries(rqlQueryParser.getFilterQueries()).forEach(([key, value]) => {
       const valuesList = value.map(
-        (query) => query.operator === Operators.INCLUDE && TASK_REQUEST_FILTER_VALUES[query.value]
+        (query) => query.operator === Operators.INCLUDE && TASK_REQUEST_FILTER_VALUES[query.value],
       );
       taskRequestsSnapshot = taskRequestsSnapshot.where(TASK_REQUEST_FILTER_KEYS[key], "in", valuesList);
     });
@@ -97,7 +97,7 @@ const fetchPaginatedTaskRequests = async (queries = {}) => {
       sortQueryEntries.forEach(([key, value]) => {
         taskRequestsSnapshot = taskRequestsSnapshot.orderBy(
           TASK_REQUEST_SORT_KEYS[key],
-          TASK_REQUEST_SORT_VALUES[value]
+          TASK_REQUEST_SORT_VALUES[value],
         );
       });
     } else {
@@ -110,7 +110,7 @@ const fetchPaginatedTaskRequests = async (queries = {}) => {
         return {
           statusCode: 400,
           error: "Bad Request",
-          message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_NEXT}: ${next}`
+          message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_NEXT}: ${next}`,
         };
       }
       taskRequestsSnapshot = taskRequestsSnapshot.startAfter(data).limit(size);
@@ -120,7 +120,7 @@ const fetchPaginatedTaskRequests = async (queries = {}) => {
         return {
           statusCode: 400,
           error: "Bad Request",
-          message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_PREV}: ${prev}`
+          message: `${TASK_REQUEST_ERROR_MESSAGE.INVALID_PREV}: ${prev}`,
         };
       }
       taskRequestsSnapshot = taskRequestsSnapshot.endBefore(data).limitToLast(size);
@@ -138,12 +138,12 @@ const fetchPaginatedTaskRequests = async (queries = {}) => {
     const firstDoc = taskRequestsSnapshot.docs[0];
     const nextPageParams = {
       ...queries,
-      next: lastVisibleDoc?.id
+      next: lastVisibleDoc?.id,
     };
     delete nextPageParams.prev;
     const prevPageParams = {
       ...queries,
-      prev: firstDoc?.id
+      prev: firstDoc?.id,
     };
     delete prevPageParams.next;
     const nextLink = lastVisibleDoc ? generateLink(nextPageParams) : "";
@@ -152,7 +152,7 @@ const fetchPaginatedTaskRequests = async (queries = {}) => {
     return {
       data: taskRequestsList,
       next: nextLink,
-      prev: prevLink
+      prev: prevLink,
     };
   } catch (err) {
     logger.error("error getting task requests", err);
@@ -177,14 +177,14 @@ const fetchTaskRequestById = async (taskRequestId) => {
     }
     return {
       taskRequestData,
-      taskRequestExists: true
+      taskRequestExists: true,
     };
   } catch (err) {
     logger.error("Error in updating task", err);
   }
 
   return {
-    taskRequestExists: false
+    taskRequestExists: false,
   };
 };
 
@@ -241,7 +241,7 @@ const createRequest = async (data, authorUserId) => {
         proposedStartDate: data.proposedStartDate,
         description: data.description,
         markdownEnabled: data?.markdownEnabled ?? false,
-        status: TASK_REQUEST_STATUS.PENDING
+        status: TASK_REQUEST_STATUS.PENDING,
       };
       if (!userRequest.description) delete userRequest.description;
       if (taskRequestData) {
@@ -263,7 +263,7 @@ const createRequest = async (data, authorUserId) => {
           users: updatedUsers,
           usersCount: updatedUsers.length,
           lastModifiedBy: authorUserId,
-          lastModifiedAt: Date.now()
+          lastModifiedAt: Date.now(),
         };
 
         transaction.update(taskRequestsCollection.doc(taskRequestRef.id), updatedTaskRequest);
@@ -272,8 +272,8 @@ const createRequest = async (data, authorUserId) => {
           isCreate: false,
           taskRequest: {
             ...taskRequestData,
-            ...updatedTaskRequest
-          }
+            ...updatedTaskRequest,
+          },
         };
       }
       const newTaskRequest = {
@@ -289,7 +289,7 @@ const createRequest = async (data, authorUserId) => {
         createdBy: authorUserId,
         createdAt: Date.now(),
         lastModifiedBy: authorUserId,
-        lastModifiedAt: Date.now()
+        lastModifiedAt: Date.now(),
       };
       if (!newTaskRequest.externalIssueUrl) delete newTaskRequest.externalIssueUrl;
       if (!newTaskRequest.taskId) delete newTaskRequest.taskId;
@@ -301,7 +301,7 @@ const createRequest = async (data, authorUserId) => {
       return {
         isCreate: true,
         taskRequest: newTaskRequest,
-        id: newTaskRequestsDocRef.id
+        id: newTaskRequestsDocRef.id,
       };
     });
   } catch (err) {
@@ -333,14 +333,14 @@ const addOrUpdate = async (taskId, userId) => {
 
       return {
         isCreate: false,
-        requestors: updatedRequestors
+        requestors: updatedRequestors,
       };
     }
 
     const newTaskRequest = {
       requestors: [userId],
       status: TASK_REQUEST_STATUS.WAITING,
-      taskId
+      taskId,
     };
 
     const newTaskRequestRef = await taskRequestsCollection.add(newTaskRequest);
@@ -348,7 +348,7 @@ const addOrUpdate = async (taskId, userId) => {
     return {
       isCreate: true,
       taskRequest: newTaskRequest,
-      id: newTaskRequestRef.id
+      id: newTaskRequestRef.id,
     };
   } catch (err) {
     logger.error("Error in updating task", err);
@@ -408,7 +408,7 @@ const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
           approvedTo: user.id,
           status: TASK_REQUEST_STATUS.APPROVED,
           lastModifiedBy: authorUserId,
-          lastModifiedAt: Date.now()
+          lastModifiedAt: Date.now(),
         };
         // End of TODO
         const updateTaskRequestPromise = transaction.update(taskRequestDocRef, updatedTaskRequest);
@@ -427,9 +427,9 @@ const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
           github: {
             issue: {
               url: taskRequestData.externalIssueUrl,
-              html_url: taskRequestData.externalIssueHtmlUrl
-            }
-          }
+              html_url: taskRequestData.externalIssueHtmlUrl,
+            },
+          },
         };
         const newTaskDocRef = tasksCollection.doc();
         const addTaskPromise = transaction.set(newTaskDocRef, newTaskRequestData);
@@ -438,8 +438,8 @@ const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
           approvedTo: user.username,
           taskRequest: {
             ...updatedTaskRequest,
-            taskId: newTaskDocRef.id
-          }
+            taskId: newTaskDocRef.id,
+          },
         };
       } else {
         // TODO : extract the common code and remove the unnecessary if-condition after the migration of the task request model. https://github.com/Real-Dev-Squad/website-backend/issues/1613
@@ -447,7 +447,7 @@ const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
           approvedTo: user.id,
           status: TASK_REQUEST_STATUS.APPROVED,
           lastModifiedBy: authorUserId,
-          lastModifiedAt: Date.now()
+          lastModifiedAt: Date.now(),
         };
         let userRequestData;
         if (taskRequestData.users) {
@@ -475,8 +475,8 @@ const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
           approvedTo: user.username,
           taskRequest: {
             ...updatedTaskRequest,
-            taskId: oldTaskDocRef.id
-          }
+            taskId: oldTaskDocRef.id,
+          },
         };
       }
     });
@@ -512,7 +512,7 @@ const rejectTaskRequest = async (taskRequestId, authorUserId) => {
   const updatedTaskRequest = {
     status: TASK_REQUEST_STATUS.DENIED,
     lastModifiedBy: authorUserId,
-    lastModifiedAt: Date.now()
+    lastModifiedAt: Date.now(),
   };
   await taskRequestDoc.update(updatedTaskRequest);
   return { taskRequest: { ...taskRequestData, ...updatedTaskRequest } };
@@ -539,20 +539,20 @@ const addNewFields = async () => {
 
           return {
             userId: requestorId,
-            status: userStatus
+            status: userStatus,
           };
         });
         const updatedTaskRequestData = {
           ...taskRequestData,
           requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
           taskTitle: taskData.title,
-          users: usersRequestList
+          users: usersRequestList,
         };
 
         bulkWriter.update(taskRequestsCollection.doc(taskRequestsSnapshot.id), updatedTaskRequestData);
         documentsModified++;
       }
-    })
+    }),
   );
 
   await bulkWriter.close();
@@ -617,5 +617,5 @@ module.exports = {
   addNewFields,
   removeOldField,
   addUsersCountAndCreatedAt,
-  rejectTaskRequest
+  rejectTaskRequest,
 };

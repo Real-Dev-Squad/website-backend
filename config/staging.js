@@ -12,22 +12,22 @@ module.exports = {
   enableConsoleLogs: true,
 
   githubOauth: {
-    clientId: "c4a84431feaf604e89d1"
+    clientId: "c4a84431feaf604e89d1",
   },
 
   services: {
     rdsApi: {
-      baseUrl: "https://staging-api.realdevsquad.com"
+      baseUrl: "https://staging-api.realdevsquad.com",
     },
     goalAPI: {
       baseUrl: "https://staging-goals-api.realdevsquad.com",
-      secretKey: "123456789"
-    }
+      secretKey: "123456789",
+    },
   },
 
   integrations: {
     newrelic: {
-      appName: "RDS_API_staging"
-    }
-  }
+      appName: "RDS_API_staging",
+    },
+  },
 };

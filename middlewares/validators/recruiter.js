@@ -9,7 +9,7 @@ const validateRecruiter = async (req, res, next) => {
     reason: joi.string().required(),
     email: joi.string().required(),
     currency: joi.string().required(),
-    package: joi.number().optional()
+    package: joi.number().optional(),
   });
 
   try {
@@ -22,5 +22,5 @@ const validateRecruiter = async (req, res, next) => {
 };
 
 module.exports = {
-  validateRecruiter
+  validateRecruiter,
 };

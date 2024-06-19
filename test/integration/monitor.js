@@ -14,7 +14,7 @@ const {
   isISOString,
   trackedProgressUserDataForPost,
   trackedProgressTaskDataForPost,
-  trackedProgressDataForPatch
+  trackedProgressDataForPatch,
 } = require("../fixtures/trackedProgress");
 
 const userData = require("../fixtures/user/user")();
@@ -59,7 +59,7 @@ describe("Test the tracked Progress API", function () {
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
           ...trackedProgressUserDataForPost,
-          userId: userId1
+          userId: userId1,
         });
       expect(response).to.have.status(201);
       expect(response.body).to.be.an("object");
@@ -74,7 +74,7 @@ describe("Test the tracked Progress API", function () {
         "monitored",
         "frequency",
         "createdAt",
-        "updatedAt"
+        "updatedAt",
       ]);
       const { id, type, userId, monitored, frequency, createdAt, updatedAt } = response.body.data;
       expect(id).to.be.a("string");
@@ -93,7 +93,7 @@ describe("Test the tracked Progress API", function () {
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
           ...trackedProgressUserDataForPost,
-          userId: userId0
+          userId: userId0,
         });
       expect(response).to.have.status(409);
       expect(response.body).to.be.an("object");
@@ -108,7 +108,7 @@ describe("Test the tracked Progress API", function () {
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
           ...trackedProgressTaskDataForPost,
-          taskId: taskId1
+          taskId: taskId1,
         });
       expect(response).to.have.status(201);
       expect(response.body).to.be.an("object");
@@ -123,7 +123,7 @@ describe("Test the tracked Progress API", function () {
         "monitored",
         "frequency",
         "createdAt",
-        "updatedAt"
+        "updatedAt",
       ]);
       const { id, type, taskId, monitored, frequency, createdAt, updatedAt } = response.body.data;
       expect(id).to.be.a("string");
@@ -142,7 +142,7 @@ describe("Test the tracked Progress API", function () {
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
           ...trackedProgressTaskDataForPost,
-          taskId: taskId0
+          taskId: taskId0,
         });
       expect(response).to.have.status(409);
       expect(response.body).to.be.an("object");
@@ -158,7 +158,7 @@ describe("Test the tracked Progress API", function () {
         .send({
           ...trackedProgressTaskDataForPost,
           type: "event", // passing incorrect type
-          taskId: taskId0
+          taskId: taskId0,
         });
       expect(response).to.have.status(400);
       expect(response.body).to.be.an("object");
@@ -173,7 +173,7 @@ describe("Test the tracked Progress API", function () {
         .post("/monitor")
         .send({
           ...trackedProgressUserDataForPost,
-          userId: userId0
+          userId: userId0,
         });
       expect(response).to.have.status(401);
       expect(response.body).to.be.an("object");
@@ -189,7 +189,7 @@ describe("Test the tracked Progress API", function () {
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...trackedProgressUserDataForPost,
-          userId: userId0
+          userId: userId0,
         });
       expect(response).to.have.status(401);
       expect(response.body).to.be.an("object");
@@ -206,7 +206,7 @@ describe("Test the tracked Progress API", function () {
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
           ...trackedProgressUserDataForPost,
-          userId: "invalid-user"
+          userId: "invalid-user",
         });
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
@@ -235,7 +235,7 @@ describe("Test the tracked Progress API", function () {
         "monitored",
         "frequency",
         "createdAt",
-        "updatedAt"
+        "updatedAt",
       ]);
       const { id, type, userId, monitored, frequency, createdAt, updatedAt } = response.body.data;
       expect(id).to.be.a("string");
@@ -277,7 +277,7 @@ describe("Test the tracked Progress API", function () {
         "monitored",
         "frequency",
         "createdAt",
-        "updatedAt"
+        "updatedAt",
       ]);
 
       const { id, type, taskId, monitored, frequency, createdAt, updatedAt } = response.body.data;
@@ -368,7 +368,7 @@ describe("Test the tracked Progress API", function () {
         "monitored",
         "frequency",
         "createdAt",
-        "updatedAt"
+        "updatedAt",
       ]);
     });
 
@@ -385,7 +385,7 @@ describe("Test the tracked Progress API", function () {
         "monitored",
         "frequency",
         "createdAt",
-        "updatedAt"
+        "updatedAt",
       ]);
     });
 
@@ -434,7 +434,7 @@ describe("Test the tracked Progress API", function () {
         "userId",
         "frequency",
         "updatedAt",
-        "monitored"
+        "monitored",
       ]);
       const { id, createdAt, type, userId, frequency, updatedAt, monitored } = trackedProgress;
       expect(id).to.be.a("string");
@@ -464,7 +464,7 @@ describe("Test the tracked Progress API", function () {
         "userId",
         "frequency",
         "updatedAt",
-        "monitored"
+        "monitored",
       ]);
       const { id, createdAt, type, userId, frequency, updatedAt, monitored } = trackedProgress;
       expect(id).to.be.a("string");
@@ -501,7 +501,7 @@ describe("Test the tracked Progress API", function () {
         "monitored",
         "frequency",
         "createdAt",
-        "updatedAt"
+        "updatedAt",
       ]);
       const { id, createdAt, type, taskId, frequency, updatedAt, monitored } = trackedProgress;
       expect(id).to.be.a("string");
@@ -530,7 +530,7 @@ describe("Test the tracked Progress API", function () {
         "monitored",
         "frequency",
         "createdAt",
-        "updatedAt"
+        "updatedAt",
       ]);
       const { id, createdAt, type, taskId, frequency, updatedAt, monitored } = trackedProgress;
       expect(id).to.be.a("string");

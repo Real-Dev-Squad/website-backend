@@ -43,7 +43,7 @@ const getIssues = async (req, res) => {
     const updatedIsuees = await Promise.all(issuesData);
     return res.json({
       message: "Issues returned successfully!",
-      issues: updatedIsuees
+      issues: updatedIsuees,
     });
   } catch (err) {
     logger.error(`Error while retriving issues ${err}`);
@@ -70,8 +70,8 @@ const issueUpdates = async (req, res) => {
         updatedTaskData.github = {
           issue: {
             ...updatedTaskData.github.issue,
-            status: issue.state
-          }
+            status: issue.state,
+          },
         };
 
         // If the issue has any updates with the assignee
@@ -92,16 +92,16 @@ const issueUpdates = async (req, res) => {
 
         await tasks.updateTask(updatedTaskData, taskData.id);
         return res.json({
-          message: "Task updated successfully"
+          message: "Task updated successfully",
         });
       } else {
         return res.json({
-          message: "No task was found for the updated issue"
+          message: "No task was found for the updated issue",
         });
       }
     }
     return res.json({
-      message: "No issue was updated"
+      message: "No issue was updated",
     });
   } catch (err) {
     logger.error(`Error while retriving issues ${err}`);
@@ -111,5 +111,5 @@ const issueUpdates = async (req, res) => {
 
 module.exports = {
   getIssues,
-  issueUpdates
+  issueUpdates,
 };

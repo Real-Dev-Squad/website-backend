@@ -34,9 +34,9 @@ describe("/logs", function () {
         requestId: requestResult.id,
         action: LOG_ACTION.CREATE,
         createdBy: userId,
-        createdAt: Date.now()
+        createdAt: Date.now(),
       },
-      body: requestResult
+      body: requestResult,
     };
     await addLog(requestLog.type, requestLog.meta, requestLog.body);
     await addLogs();
@@ -147,7 +147,7 @@ describe("/logs", function () {
             taskId: "mZB0akqPUa1GQQdrgsx7",
             extensionRequestId: "y79PXir0s82qNAzeIn8S",
             status: "PENDING",
-            type: "extensionRequests"
+            type: "extensionRequests",
           });
           expect(res.body.data[0]).to.have.property("timestamp");
           expect(res.body.data[0]).to.not.have.property("body");

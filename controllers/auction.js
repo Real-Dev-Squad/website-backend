@@ -13,7 +13,7 @@ const fetchAvailableAuctions = async (_req, res) => {
     const availableAuctions = await auctions.fetchAvailableAuctions();
     return res.json({
       message: "Auctions returned successfully!",
-      auctions: availableAuctions
+      auctions: availableAuctions,
     });
   } catch (error) {
     logger.error(`Error fetching available auctions: ${error}`);
@@ -93,5 +93,5 @@ module.exports = {
   fetchAuctionById,
   fetchAvailableAuctions,
   createNewAuction,
-  makeNewBid
+  makeNewBid,
 };

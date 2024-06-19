@@ -14,7 +14,7 @@ module.exports = () => {
       assignee: user.username,
       isNoteworthy: true,
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-      lossRate: { [DINERO]: 1 }
+      lossRate: { [DINERO]: 1 },
     },
     {
       title: "Test task 2",
@@ -26,7 +26,7 @@ module.exports = () => {
       assignee: user.username,
       isNoteworthy: true,
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-      lossRate: { [DINERO]: 1 }
+      lossRate: { [DINERO]: 1 },
     },
     {
       title: "Test task 3",
@@ -42,7 +42,7 @@ module.exports = () => {
       isNoteworthy: false,
       assignee: appOwner.username,
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-      lossRate: { [DINERO]: 1 }
+      lossRate: { [DINERO]: 1 },
     },
     {
       title: "Test task 4",
@@ -54,7 +54,7 @@ module.exports = () => {
       assignee: appOwner.username,
       isNoteworthy: true,
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-      lossRate: { [DINERO]: 1 }
-    }
+      lossRate: { [DINERO]: 1 },
+    },
   ];
 };

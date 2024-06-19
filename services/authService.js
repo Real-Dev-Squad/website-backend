@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 const generateAuthToken = (payload) => {
   return jwt.sign(payload, config.get("userToken.privateKey"), {
     algorithm: "RS256",
-    expiresIn: config.get("userToken.ttl")
+    expiresIn: config.get("userToken.ttl"),
   });
 };
 
@@ -35,5 +35,5 @@ const decodeAuthToken = (token) => {
 module.exports = {
   generateAuthToken,
   verifyAuthToken,
-  decodeAuthToken
+  decodeAuthToken,
 };

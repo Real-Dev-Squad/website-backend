@@ -37,7 +37,7 @@ describe("External Accounts", function () {
         expiry: externalAccountData[2].attributes.expiry,
         userName: externalAccountData[2].attributes.userName,
         discriminator: externalAccountData[2].attributes.discriminator,
-        userAvatar: externalAccountData[2].attributes.userAvatar
+        userAvatar: externalAccountData[2].attributes.userAvatar,
       });
     });
 

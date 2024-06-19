@@ -23,5 +23,5 @@ const getUserContributions = async (req, res) => {
 };
 
 module.exports = {
-  getUserContributions
+  getUserContributions,
 };

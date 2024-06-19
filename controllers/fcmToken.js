@@ -16,7 +16,7 @@ const fcmTokenController = async (req, res) => {
   } catch (error) {
     if (error instanceof Conflict) {
       return res.status(409).json({
-        message: error.message
+        message: error.message,
       });
     }
     res.status(500).send("Something went wrong, please contact admin");
@@ -25,5 +25,5 @@ const fcmTokenController = async (req, res) => {
 };
 
 module.exports = {
-  fcmTokenController
+  fcmTokenController,
 };

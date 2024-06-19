@@ -30,7 +30,7 @@ const fetchStocks = async () => {
     stockSnapshot.forEach((stock) => {
       stocks.push({
         id: stock.id,
-        ...stock.data()
+        ...stock.data(),
       });
     });
     return stocks;
@@ -62,7 +62,7 @@ const fetchUserStocks = async (userId, stockId = null) => {
     userStocksRef.forEach((stock) => {
       userStocks.push({
         id: stock.id,
-        ...stock.data()
+        ...stock.data(),
       });
     });
     return userStocks;
@@ -82,7 +82,7 @@ const updateUserStocks = async (userId, stockData) => {
     if (!userStocks.id) {
       await userStocksModel.add({
         userId,
-        ...stockData
+        ...stockData,
       });
       return true;
     }
@@ -100,5 +100,5 @@ module.exports = {
   addStock,
   fetchStocks,
   fetchUserStocks,
-  updateUserStocks
+  updateUserStocks,
 };

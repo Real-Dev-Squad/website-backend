@@ -23,10 +23,10 @@ const validateUserStatusData = async (todaysTime, req, res, next) => {
           .required()
           .error(
             new Error(
-              `The 'until' field must have a value that is either 'from' date or a date that comes after 'from' day.`
-            )
+              `The 'until' field must have a value that is either 'from' date or a date that comes after 'from' day.`,
+            ),
           ),
-        otherwise: Joi.optional()
+        otherwise: Joi.optional(),
       }),
       message: Joi.when("state", {
         is: userState.IDLE,
@@ -38,29 +38,29 @@ const validateUserStatusData = async (todaysTime, req, res, next) => {
           then: Joi.when(Joi.ref("until"), {
             is: Joi.number().greater(
               Joi.ref("from", {
-                adjust: (value) => value + threeDaysInMilliseconds
-              })
+                adjust: (value) => value + threeDaysInMilliseconds,
+              }),
             ),
             then: Joi.string()
               .optional()
               .error(
-                new Error(`The value for the 'message' field is mandatory when State is OOO for more than three days.`)
+                new Error(`The value for the 'message' field is mandatory when State is OOO for more than three days.`),
               ),
-            otherwise: Joi.required()
+            otherwise: Joi.required(),
           }),
-          otherwise: Joi.optional()
-        })
-      })
+          otherwise: Joi.optional(),
+        }),
+      }),
     }),
     monthlyHours: Joi.object().keys({
       committed: Joi.number().required(),
-      updatedAt: Joi.number().required()
-    })
+      updatedAt: Joi.number().required(),
+    }),
   });
 
   const cancelOooSchema = Joi.object()
     .keys({
-      cancelOoo: Joi.boolean().valid(true).required()
+      cancelOoo: Joi.boolean().valid(true).required(),
     })
     .unknown(false);
 
@@ -93,15 +93,15 @@ const validateMassUpdate = async (req, res, next) => {
         .items(
           Joi.object({
             userId: Joi.string().trim().required(),
-            state: Joi.string().valid(userState.IDLE, userState.ACTIVE).required()
-          })
+            state: Joi.string().valid(userState.IDLE, userState.ACTIVE).required(),
+          }),
         )
         .min(1)
         .required()
-        .error(new Error(`Invalid object passed in users.`))
+        .error(new Error(`Invalid object passed in users.`)),
     })
     .messages({
-      "object.unknown": "Invalid key in Request payload."
+      "object.unknown": "Invalid key in Request payload.",
     });
 
   try {
@@ -120,10 +120,10 @@ const validateGetQueryParams = async (req, res, next) => {
       state: Joi.string()
         .trim()
         .valid(userState.IDLE, userState.ACTIVE, userState.OOO, userState.ONBOARDING)
-        .error(new Error(`Invalid State. State must be either IDLE, ACTIVE, OOO, or ONBOARDING`))
+        .error(new Error(`Invalid State. State must be either IDLE, ACTIVE, OOO, or ONBOARDING`)),
     })
     .messages({
-      "object.unknown": "Invalid query param provided."
+      "object.unknown": "Invalid query param provided.",
     });
 
   try {
@@ -138,5 +138,5 @@ const validateGetQueryParams = async (req, res, next) => {
 module.exports = {
   validateUserStatus,
   validateMassUpdate,
-  validateGetQueryParams
+  validateGetQueryParams,
 };

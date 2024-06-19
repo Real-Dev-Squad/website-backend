@@ -6,8 +6,8 @@ describe("Test the roles update validator", function () {
   it("Allows the request to pass with member property", async function () {
     const req = {
       body: {
-        member: true
-      }
+        member: true,
+      },
     };
     const res = {};
     const nextSpy = Sinon.spy();
@@ -19,8 +19,8 @@ describe("Test the roles update validator", function () {
     const req = {
       query: {
         state: "ONBOARDING",
-        time: "31d"
-      }
+        time: "31d",
+      },
     };
     const res = {};
     const nextSpy = Sinon.spy();
@@ -31,8 +31,8 @@ describe("Test the roles update validator", function () {
   it("Allows the request to pass with archived property", async function () {
     const req = {
       body: {
-        archived: true
-      }
+        archived: true,
+      },
     };
     const res = {};
     const nextSpy = Sinon.spy();
@@ -45,13 +45,13 @@ describe("Test the roles update validator", function () {
       body: {
         member: true,
         archived: true,
-        reason: "test reason"
-      }
+        reason: "test reason",
+      },
     };
     const res = {
       boom: {
-        badRequest: Sinon.stub().returns("Bad Request")
-      }
+        badRequest: Sinon.stub().returns("Bad Request"),
+      },
     };
     const nextSpy = Sinon.spy();
     await validateUpdateRoles(req, res, nextSpy);
@@ -60,12 +60,12 @@ describe("Test the roles update validator", function () {
 
   it("Throws an error if neither member nor archived properties are present", async function () {
     const req = {
-      body: {}
+      body: {},
     };
     const res = {
       boom: {
-        badRequest: Sinon.stub().returns("Bad Request")
-      }
+        badRequest: Sinon.stub().returns("Bad Request"),
+      },
     };
     const nextSpy = Sinon.spy();
     await validateUpdateRoles(req, res, nextSpy);

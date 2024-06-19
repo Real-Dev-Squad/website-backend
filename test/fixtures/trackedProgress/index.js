@@ -3,7 +3,7 @@ const predefinedTrackedProgressDataForUser = {
   monitored: true,
   frequency: 1,
   createdAt: "2023-05-20T03:49:20.298Z",
-  updatedAt: "2023-05-20T03:49:20.298Z"
+  updatedAt: "2023-05-20T03:49:20.298Z",
 };
 
 const predefinedTrackedProgressDataForTask = {
@@ -11,22 +11,22 @@ const predefinedTrackedProgressDataForTask = {
   monitored: true,
   frequency: 4,
   createdAt: "2023-05-20T03:49:20.298Z",
-  updatedAt: "2023-05-20T03:49:20.298Z"
+  updatedAt: "2023-05-20T03:49:20.298Z",
 };
 
 const trackedProgressUserDataForPost = {
   type: "user",
-  monitored: true
+  monitored: true,
 };
 
 const trackedProgressTaskDataForPost = {
   type: "task",
   monitored: true,
-  frequency: 2
+  frequency: 2,
 };
 
 const trackedProgressDataForPatch = {
-  monitored: false
+  monitored: false,
 };
 
 /**
@@ -46,5 +46,5 @@ module.exports = {
   trackedProgressUserDataForPost,
   trackedProgressTaskDataForPost,
   trackedProgressDataForPatch,
-  isISOString
+  isISOString,
 };

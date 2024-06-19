@@ -23,7 +23,7 @@ describe("sendTaskUpdate function", function () {
       "Plan for the next phase",
       "userName",
       "taskId",
-      "Task title"
+      "Task title",
     );
     expect(result).to.equal(undefined);
   });
@@ -38,7 +38,7 @@ describe("sendTaskUpdate function", function () {
         "Plan for the next phase",
         "userName",
         "taskId",
-        "task title"
+        "task title",
       );
     } catch (err) {
       expect(err).to.be.equal(error);

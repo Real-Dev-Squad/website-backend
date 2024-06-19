@@ -19,7 +19,7 @@ const fetch = async (url, method = "get", params = null, data = null, headers = 
       params,
       data,
       headers,
-      ...options
+      ...options,
     });
     return response;
   } catch (err) {
@@ -29,5 +29,5 @@ const fetch = async (url, method = "get", params = null, data = null, headers = 
 };
 
 module.exports = {
-  fetch
+  fetch,
 };

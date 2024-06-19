@@ -10,12 +10,12 @@ module.exports = {
   discordMissedUpdatesRoleId: "1183553844811153458",
   userToken: {
     cookieName: "rds-session",
-    cookieV2Name: "rds-session-v2"
+    cookieV2Name: "rds-session-v2",
   },
 
   services: {
     goalAPI: {
-      baseUrl: "https://goals-api.realdevsquad.com"
-    }
-  }
+      baseUrl: "https://goals-api.realdevsquad.com",
+    },
+  },
 };

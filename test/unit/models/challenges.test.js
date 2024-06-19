@@ -35,11 +35,11 @@ describe("Challenges", function () {
 
       expect(data.start_date).to.be.deep.equal({
         _seconds: challengeData.start_date,
-        _nanoseconds: 0
+        _nanoseconds: 0,
       });
       expect(data.end_date).to.be.deep.equal({
         _seconds: challengeData.end_date,
-        _nanoseconds: 0
+        _nanoseconds: 0,
       });
     });
   });

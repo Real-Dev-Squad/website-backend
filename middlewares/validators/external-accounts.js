@@ -14,8 +14,8 @@ const externalAccountData = async (req, res, next) => {
         userAvatar: joi.string().required(),
         discordId: joi.string().required(),
         discordJoinedAt: joi.string().required(),
-        expiry: joi.number().required()
-      }
+        expiry: joi.number().required(),
+      },
     });
 
   try {
@@ -34,7 +34,7 @@ const postExternalAccountsUsers = async (req, res, next) => {
       action: joi
         .string()
         .valid(...Object.values(EXTERNAL_ACCOUNTS_POST_ACTIONS))
-        .required()
+        .required(),
     });
 
   try {
@@ -50,7 +50,7 @@ const linkDiscord = async (req, res, next) => {
   const { token } = req.params;
 
   const schema = joi.object({
-    token: joi.string().required()
+    token: joi.string().required(),
   });
 
   const validationOptions = { abortEarly: false };

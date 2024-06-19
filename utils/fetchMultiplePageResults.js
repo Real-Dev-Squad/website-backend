@@ -15,5 +15,5 @@ const fetchMultiplePageResults = async (callbackFn, params) => {
 };
 
 module.exports = {
-  fetchMultiplePageResults
+  fetchMultiplePageResults,
 };

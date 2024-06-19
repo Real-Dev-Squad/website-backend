@@ -14,7 +14,7 @@ const {
   generateErrorResponse,
   generateNewStatus,
   getNextDayTimeStamp,
-  convertTimestampsToUTC
+  convertTimestampsToUTC,
 } = require("../utils/userStatus");
 const { TASK_STATUS } = require("../constants/tasks");
 const userStatusModel = firestore.collection("usersStatus");
@@ -38,15 +38,15 @@ const getGroupRole = async (rolename) => {
     const data = await discordRoleModel.where("rolename", "==", rolename).limit(1).get();
     if (data.empty) {
       return {
-        roleExists: false
+        roleExists: false,
       };
     }
     return {
       roleExists: true,
       role: {
         id: data.docs[0].id,
-        ...data.docs[0].data()
-      }
+        ...data.docs[0].data(),
+      },
     };
   } catch (err) {
     logger.error("Error in getting role", err);
@@ -78,7 +78,7 @@ const removeGroupIdleRoleFromDiscordUser = async (userId) => {
         await fetch(`${DISCORD_BASE_URL}/roles`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-          body: JSON.stringify({ userid: discordId, roleid: groupIdleRoleId })
+          body: JSON.stringify({ userid: discordId, roleid: groupIdleRoleId }),
         });
       }
     }
@@ -106,7 +106,7 @@ const addGroupIdleRoleToDiscordUser = async (userId) => {
           await memberRoleModel.add({
             roleid: groupIdleRoleId,
             userid: discordId,
-            date: admin.firestore.Timestamp.fromDate(new Date())
+            date: admin.firestore.Timestamp.fromDate(new Date()),
           });
         }
 
@@ -114,7 +114,7 @@ const addGroupIdleRoleToDiscordUser = async (userId) => {
         await fetch(`${DISCORD_BASE_URL}/roles/add`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-          body: JSON.stringify({ userid: discordId, roleid: groupIdleRoleId })
+          body: JSON.stringify({ userid: discordId, roleid: groupIdleRoleId }),
         });
       }
     }
@@ -186,7 +186,7 @@ const getAllUserStatus = async (query) => {
         id: doc.id,
         userId: doc.data().userId,
         currentStatus: doc.data().currentStatus,
-        monthlyHours: doc.data().monthlyHours
+        monthlyHours: doc.data().monthlyHours,
       };
       allUserStatus.push(currentUserStatus);
     });
@@ -275,7 +275,7 @@ const updateAllUserStatus = async () => {
     oooUsersAltered: 0,
     oooUsersUnaltered: 0,
     nonOooUsersAltered: 0,
-    nonOooUsersUnaltered: 0
+    nonOooUsersUnaltered: 0,
   };
   try {
     const userStatusDocs = await userStatusModel.where("futureStatus.state", "in", ["ACTIVE", "IDLE", "OOO"]).get();
@@ -335,7 +335,7 @@ const updateAllUserStatus = async () => {
     });
     if (batch._ops.length > 100) {
       logger.info(
-        `Warning: More than 100 User Status documents to update. The max limit permissible is 500. Refer https://github.com/Real-Dev-Squad/website-backend/issues/890 for more details.`
+        `Warning: More than 100 User Status documents to update. The max limit permissible is 500. Refer https://github.com/Real-Dev-Squad/website-backend/issues/890 for more details.`,
       );
     }
     await batch.commit();
@@ -370,8 +370,8 @@ const updateUserStatusOnNewTaskAssignment = async (userId) => {
     }
     const {
       data: {
-        currentStatus: { state }
-      }
+        currentStatus: { state },
+      },
     } = latestStatusData;
     if (state === userState.ACTIVE) {
       return generateAlreadyExistingStatusResponse(userState.ACTIVE);
@@ -414,13 +414,13 @@ const updateUserStatusOnTaskUpdate = async (userName) => {
       return {
         status: 404,
         error: "Not Found",
-        message: error.message
+        message: error.message,
       };
     }
     return {
       status: 500,
       error: "Internal Server Error",
-      message: error.message
+      message: error.message,
     };
   }
 };
@@ -440,8 +440,8 @@ const updateStatusOnTaskCompletion = async (userId) => {
     }
     const {
       data: {
-        currentStatus: { state }
-      }
+        currentStatus: { state },
+      },
     } = latestStatusData;
     if (hasActiveTask) {
       switch (state) {
@@ -480,7 +480,7 @@ const batchUpdateUsersStatus = async (users) => {
     activeUsersAltered: 0,
     activeUsersUnaltered: 0,
     idleUsersAltered: 0,
-    idleUsersUnaltered: 0
+    idleUsersUnaltered: 0,
   };
 
   for (const { userId, state } of users) {
@@ -497,21 +497,21 @@ const batchUpdateUsersStatus = async (users) => {
       message: "",
       from: new Date().setUTCHours(0, 0, 0, 0),
       until: "",
-      updatedAt: currentTimeStamp
+      updatedAt: currentTimeStamp,
     };
 
     if (!userStatusExists || !data?.currentStatus) {
       const newUserStatusRef = userStatusModel.doc();
       const newUserStatusData = {
         userId,
-        currentStatus: statusToUpdate
+        currentStatus: statusToUpdate,
       };
       state === userState.ACTIVE ? summary.activeUsersAltered++ : summary.idleUsersAltered++;
       if (state === userState.IDLE) await addGroupIdleRoleToDiscordUser(userId);
       batch.set(newUserStatusRef, newUserStatusData);
     } else {
       const {
-        currentStatus: { state: currentState, until }
+        currentStatus: { state: currentState, until },
       } = data;
       if (currentState === state) {
         currentState === userState.ACTIVE ? summary.activeUsersUnaltered++ : summary.idleUsersUnaltered++;
@@ -520,7 +520,7 @@ const batchUpdateUsersStatus = async (users) => {
         const docRef = userStatusModel.doc(id);
         if (state === userState.ACTIVE) {
           const updatedStatusData = {
-            currentStatus: statusToUpdate
+            currentStatus: statusToUpdate,
           };
           summary.onboardingUsersAltered++;
           batch.update(docRef, updatedStatusData);
@@ -540,15 +540,15 @@ const batchUpdateUsersStatus = async (users) => {
         if (timeDifferenceDays >= 1) {
           if (state === userState.IDLE) await addGroupIdleRoleToDiscordUser(userId);
           batch.update(docRef, {
-            currentStatus: statusToUpdate
+            currentStatus: statusToUpdate,
           });
         } else {
           const getNextDayAfterUntil = getNextDayTimeStamp(until);
           batch.update(docRef, {
             futureStatus: {
               ...statusToUpdate,
-              from: getNextDayAfterUntil
-            }
+              from: getNextDayAfterUntil,
+            },
           });
         }
       } else {
@@ -556,7 +556,7 @@ const batchUpdateUsersStatus = async (users) => {
         state === userState.ACTIVE ? summary.activeUsersAltered++ : summary.idleUsersAltered++;
         if (state === userState.IDLE) await addGroupIdleRoleToDiscordUser(userId);
         const updatedStatusData = {
-          currentStatus: statusToUpdate
+          currentStatus: statusToUpdate,
         };
         batch.update(docRef, updatedStatusData);
       }
@@ -610,7 +610,7 @@ const getTaskBasedUsersStatus = async () => {
           unprocessedUsers.push(assigneeId);
           logger.error(`Error retrieving tasks for user ${assigneeId}: ${error.message}`);
         }
-      })
+      }),
     );
   }
 
@@ -620,7 +620,7 @@ const getTaskBasedUsersStatus = async () => {
     totalActiveUsers,
     totalUnprocessedUsers: errorCount,
     unprocessedUsers,
-    users
+    users,
   };
 };
 
@@ -649,7 +649,7 @@ const cancelOooStatus = async (userId) => {
     const { futureStatus, ...docData } = userStatusDocument.data();
     if (docData.currentStatus.state !== userState.OOO) {
       throw new Forbidden(
-        `The ${userState.OOO} Status cannot be canceled because the current status is ${docData.currentStatus.state}.`
+        `The ${userState.OOO} Status cannot be canceled because the current status is ${docData.currentStatus.state}.`,
       );
     }
     try {
@@ -694,7 +694,7 @@ const addFutureStatus = async (futureStatusData) => {
     delete futureStatusData.userId;
     const newStatusData = {
       ...userStatusData,
-      futureStatus: futureStatusData
+      futureStatus: futureStatusData,
     };
     await userStatusModel.doc(docId).update(newStatusData);
     return { id: docId, userStatusExists: true, data: newStatusData };
@@ -717,5 +717,5 @@ module.exports = {
   getTaskBasedUsersStatus,
   cancelOooStatus,
   getGroupRole,
-  addFutureStatus
+  addFutureStatus,
 };

@@ -42,16 +42,16 @@ describe("Goals Site", function () {
                 rds_id: userId,
                 token: {
                   exp: 1694625316,
-                  access: "access-token-goal-site-backend"
+                  access: "access-token-goal-site-backend",
                 },
                 created_at: "2023-09-12T17:07:28.242030Z",
                 modified_at: "2023-09-12T17:15:16.383069Z",
                 roles: {
-                  restricted: false
+                  restricted: false,
                 },
-                id: goalsBackendUserId
-              }
-            }
+                id: goalsBackendUserId,
+              },
+            },
           ];
         }
         return [400, { data: "something went wrong" }];

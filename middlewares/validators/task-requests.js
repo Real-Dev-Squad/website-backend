@@ -20,7 +20,7 @@ const postTaskRequests = async (req, res, next) => {
       proposedStartDate: joi.number().required(),
       proposedDeadline: joi.number().required(),
       description: joi.string().optional(),
-      markdownEnabled: joi.boolean().optional()
+      markdownEnabled: joi.boolean().optional(),
     });
 
   const taskCreationSchema = joi
@@ -34,7 +34,7 @@ const postTaskRequests = async (req, res, next) => {
       proposedStartDate: joi.number().required(),
       proposedDeadline: joi.number().required(),
       description: joi.string().optional(),
-      markdownEnabled: joi.boolean().optional()
+      markdownEnabled: joi.boolean().optional(),
     });
   const schema = joi.alternatives().try(taskAssignmentSchema, taskCreationSchema);
 
@@ -55,7 +55,7 @@ const getTaskRequests = async (req, res, next) => {
       prev: joi.string().optional(),
       next: joi.string().optional(),
       size: joi.number().integer().positive().min(1).max(100).optional(),
-      q: joi.string().optional()
+      q: joi.string().optional(),
     })
     .without("prev", "next")
     .with("prev", "size")
@@ -67,8 +67,8 @@ const getTaskRequests = async (req, res, next) => {
       .items(
         joi.object().keys({
           value: joi.string().valid(...Object.values(TASK_REQUEST_STATUS).map((value) => value.toLowerCase())),
-          operator: joi.string().optional()
-        })
+          operator: joi.string().optional(),
+        }),
       )
       .optional(),
     "request-type": joi
@@ -76,15 +76,15 @@ const getTaskRequests = async (req, res, next) => {
       .items(
         joi.object().keys({
           value: joi.string().valid(...Object.values(TASK_REQUEST_TYPE).map((value) => value.toLowerCase())),
-          operator: joi.string().optional()
-        })
+          operator: joi.string().optional(),
+        }),
       )
-      .optional()
+      .optional(),
   });
 
   const sortSchema = joi.object().keys({
     created: joi.string().valid("asc", "desc").optional(),
-    requestors: joi.string().valid("asc", "desc").optional()
+    requestors: joi.string().valid("asc", "desc").optional(),
   });
   try {
     const { q: queryString } = req.query;
@@ -93,7 +93,7 @@ const getTaskRequests = async (req, res, next) => {
     await Promise.all([
       filtersSchema.validateAsync(rqlQueryParser.getFilterQueries()),
       sortSchema.validateAsync(rqlQueryParser.getSortQueries()),
-      queryParamsSchema.validateAsync(req.query)
+      queryParamsSchema.validateAsync(req.query),
     ]);
     next();
   } catch (error) {
@@ -103,5 +103,5 @@ const getTaskRequests = async (req, res, next) => {
 };
 module.exports = {
   getTaskRequests,
-  postTaskRequests
+  postTaskRequests,
 };

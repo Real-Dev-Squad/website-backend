@@ -8,7 +8,7 @@ describe("parseQueryParams", function () {
 
     expect(parsedParams).to.deep.equal({
       status: ["APPROVED", "DENIED"],
-      assignee: "user1"
+      assignee: "user1",
     });
   });
 
@@ -25,7 +25,7 @@ describe("parseQueryParams", function () {
 
     expect(parsedParams).to.deep.equal({
       status: ["APPROVED", "DENIED"],
-      assignee: "user1"
+      assignee: "user1",
     });
   });
 });

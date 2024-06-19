@@ -63,7 +63,7 @@ describe("Arts", function () {
           expect(res.body).to.deep.equal({
             statusCode: 401,
             error: "Unauthorized",
-            message: "Unauthenticated User"
+            message: "Unauthenticated User",
           });
 
           return done();
@@ -127,7 +127,7 @@ describe("Arts", function () {
           expect(res.body).to.deep.equal({
             statusCode: 401,
             error: "Unauthorized",
-            message: "Unauthenticated User"
+            message: "Unauthenticated User",
           });
 
           return done();

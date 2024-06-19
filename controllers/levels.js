@@ -14,14 +14,14 @@ const addLevel = async (req, res) => {
     const { id, levelData } = await LevelModel.addLevel({
       ...req.body,
       createdBy: req.userData.id,
-      date: admin.firestore.Timestamp.fromDate(new Date())
+      date: admin.firestore.Timestamp.fromDate(new Date()),
     });
     return res.json({
       message: "Level created successfully!",
       data: {
         level: levelData,
-        id
-      }
+        id,
+      },
     });
   } catch (err) {
     logger.error(`Error while creating new level: ${err}`);
@@ -40,7 +40,7 @@ const deleteLevel = async (req, res) => {
   try {
     await LevelModel.deleteLevel(req.params.levelid);
     return res.json({
-      message: "Level Deleted successfully!"
+      message: "Level Deleted successfully!",
     });
   } catch (err) {
     logger.error(`Error while creating new Level: ${err}`);
@@ -59,7 +59,7 @@ const getAllLevels = async (req, res) => {
     const { allLevels } = await LevelModel.getAllLevels();
     return res.json({
       message: "Levels returned Successfully",
-      levels: allLevels
+      levels: allLevels,
     });
   } catch (err) {
     logger.error(`Error while creating new Level: ${err}`);
@@ -70,5 +70,5 @@ const getAllLevels = async (req, res) => {
 module.exports = {
   addLevel,
   deleteLevel,
-  getAllLevels
+  getAllLevels,
 };

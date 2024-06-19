@@ -20,8 +20,8 @@ const uploadProfilePicture = async ({ file, userId, coordinates }) => {
       transformation: {
         ...coordinates,
         crop: "crop",
-        fetch_format: "auto"
-      }
+        fetch_format: "auto",
+      },
     });
     const { public_id: publicId, secure_url: url } = uploadResponse;
     await userModel.updateUserPicture({ publicId, url }, userId);
@@ -45,7 +45,7 @@ async function uploadBadgeImage({ file, badgeName }) {
     const imageDataInBase64 = imageDataUri.content;
     const uploadResponse = await upload(imageDataInBase64, {
       folder: `${cloudinaryMetaData.BADGE.FOLDER}/${badgeName}`,
-      tags: cloudinaryMetaData.BADGE.TAGS
+      tags: cloudinaryMetaData.BADGE.TAGS,
     });
     const { public_id: id, secure_url: imageUrl } = uploadResponse;
     return { id, imageUrl };
@@ -57,5 +57,5 @@ async function uploadBadgeImage({ file, badgeName }) {
 
 module.exports = {
   uploadProfilePicture,
-  uploadBadgeImage
+  uploadBadgeImage,
 };

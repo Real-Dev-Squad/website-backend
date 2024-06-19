@@ -10,8 +10,8 @@ describe("Validation Tests for Cancel OOO", function () {
   beforeEach(function () {
     res = {
       boom: {
-        badRequest: Sinon.spy()
-      }
+        badRequest: Sinon.spy(),
+      },
     };
     nextSpy = Sinon.spy();
   });
@@ -19,8 +19,8 @@ describe("Validation Tests for Cancel OOO", function () {
   it("should validate for a valid request", async function () {
     req = {
       body: {
-        cancelOoo: true
-      }
+        cancelOoo: true,
+      },
     };
     await validateUserStatus(req, res, nextSpy);
     expect(nextSpy.calledOnce).to.be.equal(true);
@@ -29,8 +29,8 @@ describe("Validation Tests for Cancel OOO", function () {
   it("should not validate for an invalid request", async function () {
     const req = {
       body: {
-        cancelOoo: "not a boolean"
-      }
+        cancelOoo: "not a boolean",
+      },
     };
     try {
       await validateUserStatus(req, res, nextSpy);

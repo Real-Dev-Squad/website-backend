@@ -9,7 +9,7 @@ describe("Middleware | Validators | User", function () {
   describe("Create user validator for validateJoinData", function () {
     it("lets the request pass to next", async function () {
       const req = {
-        body: joinData[0]
+        body: joinData[0],
       };
 
       const res = {};
@@ -21,13 +21,13 @@ describe("Middleware | Validators | User", function () {
     it("Stops the propagation of the next", async function () {
       const req = {
         body: {
-          firstName: "Neha"
-        }
+          firstName: "Neha",
+        },
       };
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
       const nextSpy = sinon.spy();
       await validateJoinData(req, res, nextSpy).catch((err) => {
@@ -43,8 +43,8 @@ describe("Middleware | Validators | User", function () {
 
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
 
       const next = sinon.spy();
@@ -55,8 +55,8 @@ describe("Middleware | Validators | User", function () {
     it("should call the next for api nonVerifiedDiscordUsers", async function () {
       const req = {
         body: {
-          action: "nonVerifiedDiscordUsers"
-        }
+          action: "nonVerifiedDiscordUsers",
+        },
       };
 
       const res = {};
@@ -69,14 +69,14 @@ describe("Middleware | Validators | User", function () {
     it("should stop the propagation of next", async function () {
       const req = {
         body: {
-          action: ""
-        }
+          action: "",
+        },
       };
 
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
 
       const next = sinon.spy();
@@ -90,7 +90,7 @@ describe("Middleware | Validators | User", function () {
   describe("Create user validator for updateUser", function () {
     it("lets the request pass to next", async function () {
       const req = {
-        body: userData[1]
+        body: userData[1],
       };
 
       const res = {};
@@ -103,9 +103,9 @@ describe("Middleware | Validators | User", function () {
       const req = {
         body: {
           roles: {
-            maven: true
-          }
-        }
+            maven: true,
+          },
+        },
       };
 
       const res = {};
@@ -119,14 +119,14 @@ describe("Middleware | Validators | User", function () {
         body: {
           roles: {
             in_discord: false,
-            developer: true
-          }
-        }
+            developer: true,
+          },
+        },
       };
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
       const nextSpy = sinon.spy();
       await updateUser(req, res, nextSpy).catch((err) => {
@@ -141,13 +141,13 @@ describe("Middleware | Validators | User", function () {
           last_name: "patil",
           first_name: "Abhay",
           username: "@invalidusername-12",
-          twitter_id: "abhayisawesome"
-        }
+          twitter_id: "abhayisawesome",
+        },
       };
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
       const nextSpy = sinon.spy();
       await updateUser(req, res, nextSpy).catch((err) => {
@@ -162,13 +162,13 @@ describe("Middleware | Validators | User", function () {
           last_name: "patil",
           first_name: "Abhay",
           username: "invalidusername",
-          twitter_id: "@abhayisawesome"
-        }
+          twitter_id: "@abhayisawesome",
+        },
       };
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
       const nextSpy = sinon.spy();
       await updateUser(req, res, nextSpy).catch((err) => {
@@ -183,13 +183,13 @@ describe("Middleware | Validators | User", function () {
           last_name: "patil",
           first_name: "Abhay",
           username: "invalidusername",
-          twitter_id: "abhayisawesome"
-        }
+          twitter_id: "abhayisawesome",
+        },
       };
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
       const nextSpy = sinon.spy();
       await updateUser(req, res, nextSpy).catch((err) => {
@@ -204,13 +204,13 @@ describe("Middleware | Validators | User", function () {
           last_name: "patil",
           first_name: "Abhay",
           username: "invalidusername",
-          instagram_id: "@abhayisawesome"
-        }
+          instagram_id: "@abhayisawesome",
+        },
       };
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
       const nextSpy = sinon.spy();
       await updateUser(req, res, nextSpy).catch((err) => {
@@ -226,13 +226,13 @@ describe("Middleware | Validators | User", function () {
           first_name: "Abhay",
           username: "invalidusername12",
           twitter_id: "abhayisawesome",
-          linkedin_id: "@abhay2011"
-        }
+          linkedin_id: "@abhay2011",
+        },
       };
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
       const nextSpy = sinon.spy();
       await updateUser(req, res, nextSpy).catch((err) => {
@@ -248,13 +248,13 @@ describe("Middleware | Validators | User", function () {
           first_name: "Abhay",
           username: "invalidusername12",
           twitter_id: "abhayisawesome",
-          linkedin_id: "abhay 2011"
-        }
+          linkedin_id: "abhay 2011",
+        },
       };
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
       const nextSpy = sinon.spy();
       await updateUser(req, res, nextSpy).catch((err) => {
@@ -266,16 +266,16 @@ describe("Middleware | Validators | User", function () {
     it("Allows a valid username", async function () {
       const req = {
         body: {
-          username: "john-doe"
-        }
+          username: "john-doe",
+        },
       };
 
       const res = {
         boom: {
           badRequest: (message) => {
             throw new Error(message);
-          }
-        }
+          },
+        },
       };
 
       const next = sinon.spy();
@@ -288,14 +288,14 @@ describe("Middleware | Validators | User", function () {
     it("Stops the propagation of next for an invalid username", async function () {
       const req = {
         body: {
-          username: "@john_doe"
-        }
+          username: "@john_doe",
+        },
       };
 
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
 
       const nextSpy = sinon.spy();
@@ -313,8 +313,8 @@ describe("Middleware | Validators | User", function () {
       const req = {
         query: {
           filterBy: "unmerged_prs",
-          days: "30"
-        }
+          days: "30",
+        },
       };
 
       const res = {};
@@ -327,14 +327,14 @@ describe("Middleware | Validators | User", function () {
     it("Stops the propagation of the next", async function () {
       const req = {
         query: {
-          filterBy: 45
-        }
+          filterBy: 45,
+        },
       };
 
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
       const nextSpy = sinon.spy();
 

@@ -19,7 +19,7 @@ module.exports = () => {
       assignee: appOwner.username,
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
       lossRate: { [DINERO]: 1 },
-      isNoteworthy: true
-    }
+      isNoteworthy: true,
+    },
   ];
 };

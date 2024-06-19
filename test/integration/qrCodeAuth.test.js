@@ -197,7 +197,7 @@ describe("QrCodeAuth", function () {
         ...userDeviceInfoDataArray[0],
         user_id: userId,
         authorization_status: "NOT_INIT",
-        access_token: "ACCESS_TOKEN"
+        access_token: "ACCESS_TOKEN",
       };
     });
 

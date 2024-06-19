@@ -12,7 +12,7 @@ const validTagBody = async (req, res, next) => {
         }
         return value;
       }),
-    reason: Joi.string().exist()
+    reason: Joi.string().exist(),
   });
 
   try {
@@ -25,5 +25,5 @@ const validTagBody = async (req, res, next) => {
 };
 
 module.exports = {
-  validTagBody
+  validTagBody,
 };

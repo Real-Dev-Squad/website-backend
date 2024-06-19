@@ -6,16 +6,16 @@ module.exports = {
     commonjs: true,
     es2021: true,
     node: true,
-    mocha: true
+    mocha: true,
   },
   extends: ["standard", "plugin:mocha/recommended", "plugin:security/recommended", "plugin:prettier/recommended"],
   plugins: ["mocha", "security", "prettier"],
   parserOptions: {
-    ecmaVersion: 13
+    ecmaVersion: 13,
   },
   globals: {
     config: "readonly",
-    logger: "readonly"
+    logger: "readonly",
   },
   rules: {
     // Custom eslint rules
@@ -28,12 +28,7 @@ module.exports = {
     "mocha/no-exclusive-tests": "error",
 
     // Prettier for formatting
-    "prettier/prettier": [
-      "error",
-      {
-        trailingComma: "none"
-      }
-    ]
+    "prettier/prettier": ["error"],
   },
-  ignorePatterns: ["public/*", "dist/*"]
+  ignorePatterns: ["public/*", "dist/*"],
 };

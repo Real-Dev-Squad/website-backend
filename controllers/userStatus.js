@@ -90,7 +90,7 @@ const getAllUserStatus = async (req, res) => {
     return res.json({
       message: "All User Status found successfully.",
       totalUserStatus: activeUsers.length,
-      allUserStatus: activeUsers
+      allUserStatus: activeUsers,
     });
   } catch (err) {
     logger.error(`Error while fetching all the User Status: ${err}`);
@@ -141,7 +141,7 @@ const updateAllUserStatus = async (req, res) => {
     const data = await userStatusModel.updateAllUserStatus();
     return res.status(200).json({
       message: "All User Status updated successfully.",
-      data
+      data,
     });
   } catch (err) {
     logger.error(`Error while updating the User Data: ${err}`);
@@ -160,12 +160,12 @@ const getTaskBasedUsersStatus = async (req, res) => {
     const data = await userStatusModel.getTaskBasedUsersStatus();
     return res.json({
       message: "All users based on tasks found successfully.",
-      data
+      data,
     });
   } catch (error) {
     logger.error(error.message);
     return res.status(500).json({
-      message: "The server has encountered an unexpected error. Please contact the administrator for more information."
+      message: "The server has encountered an unexpected error. Please contact the administrator for more information.",
     });
   }
 };
@@ -189,12 +189,12 @@ const batchUpdateUsersStatus = async (req, res) => {
     const data = await userStatusModel.batchUpdateUsersStatus(req.body.users);
     return res.json({
       message: "users status updated successfully.",
-      data
+      data,
     });
   } catch (error) {
     logger.error(error.message);
     return res.status(500).json({
-      message: "The server has encountered an unexpected error. Please contact the administrator for more information."
+      message: "The server has encountered an unexpected error. Please contact the administrator for more information.",
     });
   }
 };
@@ -210,13 +210,13 @@ const cancelOOOStatus = async (req, res) => {
       return res.status(403).json({
         statusCode: 403,
         error: "Forbidden",
-        message: error.message
+        message: error.message,
       });
     } else if (error instanceof NotFound) {
       return res.status(404).json({
         statusCode: 404,
         error: "NotFound",
-        message: error.message
+        message: error.message,
       });
     }
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
@@ -249,5 +249,5 @@ module.exports = {
   getTaskBasedUsersStatus,
   getUserStatusControllers,
   batchUpdateUsersStatus,
-  updateUserStatusController
+  updateUserStatusController,
 };

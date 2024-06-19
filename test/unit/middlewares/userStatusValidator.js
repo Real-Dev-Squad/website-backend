@@ -8,8 +8,8 @@ describe("Middleware | Validators | userStatus", function () {
       const res = {};
       const req = {
         query: {
-          state: "IDLE"
-        }
+          state: "IDLE",
+        },
       };
       const nextSpy = Sinon.spy();
       await validateGetQueryParams(req, res, nextSpy);
@@ -24,14 +24,14 @@ describe("Middleware | Validators | userStatus", function () {
     it("stops the propogation of the event to next function", async function () {
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
       const nextSpy = Sinon.spy();
       const req = {
         query: {
-          taskStatus: "invalidKey"
-        }
+          taskStatus: "invalidKey",
+        },
       };
       await validateGetQueryParams(req, res, nextSpy).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);

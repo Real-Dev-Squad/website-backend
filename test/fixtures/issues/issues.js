@@ -27,7 +27,7 @@ const issuesData = {
     events_url: "https://api.github.com/users/SanketDhabarde/events{/privacy}",
     received_events_url: "https://api.github.com/users/SanketDhabarde/received_events",
     type: "User",
-    site_admin: false
+    site_admin: false,
   },
   labels: [
     {
@@ -37,8 +37,8 @@ const issuesData = {
       name: "live-site",
       color: "FA3DCD",
       default: false,
-      description: ""
-    }
+      description: "",
+    },
   ],
   state: "open",
   locked: false,
@@ -60,7 +60,7 @@ const issuesData = {
     events_url: "https://api.github.com/users/SanketDhabarde/events{/privacy}",
     received_events_url: "https://api.github.com/users/SanketDhabarde/received_events",
     type: "User",
-    site_admin: false
+    site_admin: false,
   },
   assignees: [
     {
@@ -81,8 +81,8 @@ const issuesData = {
       events_url: "https://api.github.com/users/SanketDhabarde/events{/privacy}",
       received_events_url: "https://api.github.com/users/SanketDhabarde/received_events",
       type: "User",
-      site_admin: false
-    }
+      site_admin: false,
+    },
   ],
   milestone: null,
   comments: 0,
@@ -102,12 +102,12 @@ const issuesData = {
     confused: 0,
     heart: 0,
     rocket: 0,
-    eyes: 0
+    eyes: 0,
   },
   timeline_url: "https://api.github.com/repos/Real-Dev-Squad/website-www/issues/679/timeline",
   performed_via_github_app: null,
   state_reason: null,
-  score: 1
+  score: 1,
 };
 
 const issuesHtmlUrl = "https://github.com/Real-Dev-Squad/website-www/issues/679";

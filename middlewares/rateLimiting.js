@@ -7,7 +7,7 @@ const opts = {
   keyPrefix: "commonRateLimiter--login_fail_by_ip_per_minute",
   points: 5,
   duration: 30,
-  blockDuration: 60 * 10
+  blockDuration: 60 * 10,
 };
 const globalRateLimiter = new RateLimiterMemory(opts);
 
@@ -40,7 +40,7 @@ async function commonRateLimiter(req, res, next) {
       "Retry-After": retrySeconds,
       "X-RateLimit-Limit": opts.points,
       "X-RateLimit-Remaining": error?.remainingPoints ?? 0,
-      "X-RateLimit-Reset": new Date(Date.now() + error?.msBeforeNext)
+      "X-RateLimit-Reset": new Date(Date.now() + error?.msBeforeNext),
     });
     const message = `${TOO_MANY_REQUESTS.ERROR_TYPE}: Retry After ${retrySeconds} seconds, requests limit reached`;
     return res.status(TOO_MANY_REQUESTS.STATUS_CODE).json({ message });
@@ -48,5 +48,5 @@ async function commonRateLimiter(req, res, next) {
 }
 
 module.exports = {
-  commonRateLimiter
+  commonRateLimiter,
 };

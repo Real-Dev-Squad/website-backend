@@ -51,7 +51,7 @@ const taskData = [
     completionAward: { [DINERO]: 3, [NEELAM]: 300 },
     lossRate: { [DINERO]: 1 },
     isNoteworthy: true,
-    isCollapsed: true
+    isCollapsed: true,
   },
   {
     title: "Test task",
@@ -68,8 +68,8 @@ const taskData = [
     completionAward: { [DINERO]: 3, [NEELAM]: 300 },
     lossRate: { [DINERO]: 1 },
     isNoteworthy: false,
-    assignee: appOwner.username
-  }
+    assignee: appOwner.username,
+  },
 ];
 
 describe("Tasks", function () {
@@ -115,7 +115,7 @@ describe("Tasks", function () {
           lossRate: { [DINERO]: 1 },
           assignee: appOwner.username,
           participants: [],
-          dependsOn: []
+          dependsOn: [],
         })
         .end((err, res) => {
           if (err) {
@@ -153,7 +153,7 @@ describe("Tasks", function () {
           lossRate: { [DINERO]: 1 },
           assignee: appOwner.username,
           participants: [],
-          dependsOn: []
+          dependsOn: [],
         })
         .end((err, res) => {
           if (err) {
@@ -185,7 +185,7 @@ describe("Tasks", function () {
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
           assignee: appOwner.username,
-          participants: []
+          participants: [],
         })
         .end((err, res) => {
           if (err) return done(err);
@@ -210,7 +210,7 @@ describe("Tasks", function () {
     after(async function () {
       await tasks.updateTask(
         { ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753, dependsOn: [], status: "IN_PROGRESS" },
-        taskId2
+        taskId2,
       );
     });
 
@@ -505,9 +505,9 @@ describe("Tasks", function () {
     it("Should get tasks with COMPLETED status task when fetching task of status Done", async function () {
       await tasks.updateTask(
         {
-          status: "COMPLETED"
+          status: "COMPLETED",
         },
-        taskId2
+        taskId2,
       );
       const res = await chai.request(app).get(`/tasks?dev=true&status=DONE&userFeatureFlag=true`);
 
@@ -585,7 +585,7 @@ describe("Tasks", function () {
     it("Should return all assignee task", async function () {
       const { userId: assignedUser } = await userModel.addOrUpdate({
         github_id: "prakashchoudhary07",
-        username: "user1"
+        username: "user1",
       });
       const assignedTask = [
         {
@@ -599,7 +599,7 @@ describe("Tasks", function () {
           assignee: "user1",
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
-          isNoteworthy: true
+          isNoteworthy: true,
         },
         {
           title: "Test task",
@@ -612,8 +612,8 @@ describe("Tasks", function () {
           assignee: "user1",
           completionAward: { [DINERO]: 3, [NEELAM]: 300 },
           lossRate: { [DINERO]: 1 },
-          isNoteworthy: true
-        }
+          isNoteworthy: true,
+        },
       ];
       const { taskId: taskId1 } = await tasks.updateTask(assignedTask[0]);
       const { taskId: taskId2 } = await tasks.updateTask(assignedTask[1]);
@@ -640,7 +640,7 @@ describe("Tasks", function () {
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
-            message: "Unauthenticated User"
+            message: "Unauthenticated User",
           });
 
           return done();
@@ -655,7 +655,7 @@ describe("Tasks", function () {
         .patch("/tasks/" + taskId1)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          title: "new-title"
+          title: "new-title",
         })
         .end((err, res) => {
           if (err) {
@@ -672,7 +672,7 @@ describe("Tasks", function () {
         .patch("/tasks/" + taskId1)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          title: "new-title"
+          title: "new-title",
         })
         .end((err, res) => {
           if (err) {
@@ -804,7 +804,7 @@ describe("Tasks", function () {
         .patch("/tasks/" + taskId1)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          isCollapsed: true
+          isCollapsed: true,
         })
         .end((err, res) => {
           if (err) {
@@ -823,7 +823,7 @@ describe("Tasks", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
-          status: "invalidStatus"
+          status: "invalidStatus",
         })
         .end((err, res) => {
           if (err) {
@@ -843,7 +843,7 @@ describe("Tasks", function () {
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           status: TASK_STATUS.IN_REVIEW,
-          percentCompleted: 120
+          percentCompleted: 120,
         })
         .end((err, res) => {
           if (err) {
@@ -862,7 +862,7 @@ describe("Tasks", function () {
         .patch("/tasks/taskid")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          title: "new-title"
+          title: "new-title",
         })
         .end((err, res) => {
           if (err) {
@@ -953,7 +953,7 @@ describe("Tasks", function () {
   describe("PATCH /tasks/self/:id", function () {
     const taskStatusData = {
       status: "AVAILABLE",
-      percentCompleted: 50
+      percentCompleted: 50,
     };
 
     const taskData = {
@@ -966,7 +966,7 @@ describe("Tasks", function () {
       participants: [],
       completionAward: { [DINERO]: 3, [NEELAM]: 300 },
       lossRate: { [DINERO]: 1 },
-      isNoteworthy: true
+      isNoteworthy: true,
     };
 
     it("Should throw 400 Bad Request if the user tries to update the status of a task to AVAILABLE", function (done) {
@@ -1193,7 +1193,7 @@ describe("Tasks", function () {
         assignee: appOwner.username,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
-        isNoteworthy: true
+        isNoteworthy: true,
       };
       taskId = (await tasks.updateTask(taskData)).taskId;
       const res = await chai
@@ -1217,7 +1217,7 @@ describe("Tasks", function () {
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed from In progress until progress of task is not 100%."
+        "The status of task can not be changed from In progress until progress of task is not 100%.",
       );
     });
 
@@ -1232,7 +1232,7 @@ describe("Tasks", function () {
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed to In progress until progress of task is not 0%."
+        "The status of task can not be changed to In progress until progress of task is not 0%.",
       );
     });
 
@@ -1247,7 +1247,7 @@ describe("Tasks", function () {
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed from Blocked until progress of task is not 100%."
+        "The status of task can not be changed from Blocked until progress of task is not 100%.",
       );
     });
 
@@ -1334,7 +1334,7 @@ describe("Tasks", function () {
         update: function () {},
         commit: function () {
           throw new Error("Firestore batch commit failed!");
-        }
+        },
       });
       const taskData1 = { status: "COMPLETED" };
       await firestore.collection("tasks").doc("updateTaskStatus1").set(taskData1);
@@ -1385,7 +1385,7 @@ describe("Tasks", function () {
       await tasks.updateTask({ ...tasksData[10], createdAt: null });
       const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
         action: "ADD",
-        field: "CREATED_AT+UPDATED_AT"
+        field: "CREATED_AT+UPDATED_AT",
       });
       expect(res).to.have.status(200);
       expect(res.body.totalTasks).to.be.equal(10);
@@ -1398,7 +1398,7 @@ describe("Tasks", function () {
     it("Should update status createdAt and updatedAt, if filed doesn't exists", async function () {
       const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
         action: "ADD",
-        field: "CREATED_AT+UPDATED_AT"
+        field: "CREATED_AT+UPDATED_AT",
       });
       expect(res).to.have.status(200);
       expect(res.body.totalTasks).to.be.equal(6);
@@ -1418,11 +1418,11 @@ describe("Tasks", function () {
         update: function () {},
         commit: function () {
           throw new Error("Firestore batch commit failed!");
-        }
+        },
       });
       const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
         action: "ADD",
-        field: "CREATED_AT+UPDATED_AT"
+        field: "CREATED_AT+UPDATED_AT",
       });
       expect(res).to.have.status(200);
       expect(res.body.totalTasks).to.be.equal(10);
@@ -1449,19 +1449,19 @@ describe("Tasks", function () {
       const {
         idleStatus: idleUserStatus,
         activeStatus: activeUserStatus,
-        userStatusDataForOooState: oooUserStatus
+        userStatusDataForOooState: oooUserStatus,
       } = userStatusData;
       const userIdList = await Promise.all([
         await addUser(idleUser), // idle user with no task progress updates
         await addUser(activeUserWithProgressUpdates), // active user with task progress updates
         await addUser(activeUserWithNoUpdates), // active user with no task progress updates
-        await addUser(userNotInDiscord) // OOO user with
+        await addUser(userNotInDiscord), // OOO user with
       ]);
       await Promise.all([
         await userStatusModel.updateUserStatus(userIdList[0], idleUserStatus),
         await userStatusModel.updateUserStatus(userIdList[1], activeUserStatus),
         await userStatusModel.updateUserStatus(userIdList[2], activeUserStatus),
-        await userStatusModel.updateUserStatus(userIdList[3], oooUserStatus)
+        await userStatusModel.updateUserStatus(userIdList[3], oooUserStatus),
       ]);
 
       const tasksPromise = [];
@@ -1473,7 +1473,7 @@ describe("Tasks", function () {
           assignee: userIdList[index],
           startedOn: (new Date().getTime() - convertDaysToMilliseconds(7)) / 1000,
           endsOn: (new Date().getTime() + convertDaysToMilliseconds(4)) / 1000,
-          status: TASK_STATUS.IN_PROGRESS
+          status: TASK_STATUS.IN_PROGRESS,
         };
 
         tasksPromise.push(tasksModel.add(validTask));
@@ -1515,8 +1515,8 @@ describe("Tasks", function () {
         data: {
           usersToAddRole: [activeUserWithProgressUpdates.discordId],
           tasks: 4,
-          missedUpdatesTasks: 3
-        }
+          missedUpdatesTasks: 3,
+        },
       });
       expect(response.status).to.be.equal(200);
     });
@@ -1527,7 +1527,7 @@ describe("Tasks", function () {
         .get("/tasks/users/discord")
         .query({
           size: 5,
-          q: `status:${tasksUsersStatus.MISSED_UPDATES} -weekday:sun -weekday:mon -weekday:tue -weekday:wed -weekday:thu -weekday:fri -date:231423432 -days-count:4`
+          q: `status:${tasksUsersStatus.MISSED_UPDATES} -weekday:sun -weekday:mon -weekday:tue -weekday:wed -weekday:thu -weekday:fri -date:231423432 -days-count:4`,
         })
         .set("Authorization", `Bearer ${jwtToken}`);
       expect(response.body).to.be.deep.equal({
@@ -1535,8 +1535,8 @@ describe("Tasks", function () {
         data: {
           usersToAddRole: [],
           tasks: 4,
-          missedUpdatesTasks: 0
-        }
+          missedUpdatesTasks: 0,
+        },
       });
       expect(response.status).to.be.equal(200);
     });
@@ -1550,7 +1550,7 @@ describe("Tasks", function () {
       expect(response.body).to.be.deep.equal({
         error: "Bad Request",
         message: '"status" is required',
-        statusCode: 400
+        statusCode: 400,
       });
       expect(response.status).to.be.equal(400);
     });
@@ -1585,19 +1585,19 @@ describe("Tasks", function () {
 
       const task1 = {
         assignee: userId,
-        status: "ACTIVE"
+        status: "ACTIVE",
       };
       const task2 = {
         assignee: userId2,
-        status: "COMPLETED"
+        status: "COMPLETED",
       };
       const task3 = {
         assignee: userId2,
-        status: "IN_PROGRESS"
+        status: "IN_PROGRESS",
       };
       const task4 = {
         assignee: userId,
-        status: "DONE"
+        status: "DONE",
       };
       await Promise.all([tasksModel.add(task1), tasksModel.add(task2), tasksModel.add(task3), tasksModel.add(task4)]);
     });
@@ -1612,8 +1612,8 @@ describe("Tasks", function () {
       expect(res.body).to.deep.equal({
         message: "Orphan tasks filtered successfully",
         updatedTasksData: {
-          orphanTasksUpdatedCount: 2
-        }
+          orphanTasksUpdatedCount: 2,
+        },
       });
     });
 
@@ -1626,7 +1626,7 @@ describe("Tasks", function () {
       expect(res.body).to.deep.equal({
         statusCode: 401,
         error: "Unauthorized",
-        message: "You are not authorized for this action."
+        message: "You are not authorized for this action.",
       });
     });
   });

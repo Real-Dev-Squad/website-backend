@@ -11,7 +11,7 @@ const {
   createUserStatusWithState,
   updateCurrentStatusToState,
   updateFutureStatusToState,
-  getNextDayTimeStamp
+  getNextDayTimeStamp,
 } = require("../../../utils/userStatus");
 
 describe("Task Based User Status Update Util Functions", function () {
@@ -21,8 +21,8 @@ describe("Task Based User Status Update Util Functions", function () {
       status: "success",
       message: `The status is already ${userState.ACTIVE}`,
       data: {
-        currentStatus: userState.ACTIVE
-      }
+        currentStatus: userState.ACTIVE,
+      },
     });
   });
 
@@ -32,7 +32,7 @@ describe("Task Based User Status Update Util Functions", function () {
     expect(result).to.deep.equal({
       status: 500,
       message: "user not found",
-      error: "Internal Server Error"
+      error: "Internal Server Error",
     });
   });
 
@@ -40,15 +40,15 @@ describe("Task Based User Status Update Util Functions", function () {
     it("should return true if the user has active tasks", async function () {
       const userId = "user123";
       const mockSnapshot = {
-        size: 2
+        size: 2,
       };
       const mockGet = () => Promise.resolve(mockSnapshot);
       const mockWhere = () => ({
         where: mockWhere,
-        get: mockGet
+        get: mockGet,
       });
       const tasksModel = {
-        where: mockWhere
+        where: mockWhere,
       };
 
       const result = await checkIfUserHasLiveTasks(userId, tasksModel);
@@ -58,15 +58,15 @@ describe("Task Based User Status Update Util Functions", function () {
     it("should return false if the user does not have any active tasks", async function () {
       const userId = "user123";
       const mockSnapshot = {
-        size: 0
+        size: 0,
       };
       const mockGet = () => Promise.resolve(mockSnapshot);
       const mockWhere = () => ({
         where: mockWhere,
-        get: mockGet
+        get: mockGet,
       });
       const tasksModel = {
-        where: mockWhere
+        where: mockWhere,
       };
 
       const result = await checkIfUserHasLiveTasks(userId, tasksModel);
@@ -80,10 +80,10 @@ describe("Task Based User Status Update Util Functions", function () {
       const mockGet = () => Promise.reject(mockError);
       const mockWhere = () => ({
         where: mockWhere,
-        get: mockGet
+        get: mockGet,
       });
       const tasksModel = {
-        where: mockWhere
+        where: mockWhere,
       };
 
       try {
@@ -101,15 +101,15 @@ describe("Task Based User Status Update Util Functions", function () {
       const userId = "user123";
       const mockSnapshot = {
         size: 1,
-        docs: [{ id: userId }]
+        docs: [{ id: userId }],
       };
       const mockGet = () => Promise.resolve(mockSnapshot);
       const mockWhere = () => ({
         where: mockWhere,
-        get: mockGet
+        get: mockGet,
       });
       const usersModel = {
-        where: mockWhere
+        where: mockWhere,
       };
 
       const result = await getUserIdFromUserName(userName, usersModel);
@@ -119,15 +119,15 @@ describe("Task Based User Status Update Util Functions", function () {
     it("should throw error if query size is 0", async function () {
       const userName = "randhir";
       const mockSnapshot = {
-        size: 0
+        size: 0,
       };
       const mockGet = () => Promise.resolve(mockSnapshot);
       const mockWhere = () => ({
         where: mockWhere,
-        get: mockGet
+        get: mockGet,
       });
       const usersModel = {
-        where: mockWhere
+        where: mockWhere,
       };
 
       try {
@@ -145,10 +145,10 @@ describe("Task Based User Status Update Util Functions", function () {
       const mockGet = () => Promise.reject(mockError);
       const mockWhere = () => ({
         where: mockWhere,
-        get: mockGet
+        get: mockGet,
       });
       const usersModel = {
-        where: mockWhere
+        where: mockWhere,
       };
 
       try {
@@ -165,15 +165,15 @@ describe("Task Based User Status Update Util Functions", function () {
       const userId = "user123";
       const state = userState.ACTIVE;
       const mockCollection = {
-        add: sinon.stub().resolves()
+        add: sinon.stub().resolves(),
       };
       const result = await createUserStatusWithState(userId, mockCollection, state);
       expect(result).to.deep.equal({
         status: "success",
         message: `UserStatus Document did not previously exist, New UserStatus Document created and updated to an ${state} status.`,
         data: {
-          currentStatus: state
-        }
+          currentStatus: state,
+        },
       });
     });
 
@@ -181,7 +181,7 @@ describe("Task Based User Status Update Util Functions", function () {
       const userId = "user123";
       const state = userState.ACTIVE;
       const mockCollection = {
-        add: sinon.stub().rejects(new Error("FireStore Error"))
+        add: sinon.stub().rejects(new Error("FireStore Error")),
       };
       try {
         await createUserStatusWithState(userId, mockCollection, state);
@@ -208,29 +208,29 @@ describe("Task Based User Status Update Util Functions", function () {
             message: "",
             from: currentTimeStamp,
             until: "",
-            updatedAt: currentTimeStamp
-          }
-        }
+            updatedAt: currentTimeStamp,
+          },
+        },
       };
     });
 
     it("should update current status", async function () {
       const mockCollection = {
         doc: () => mockCollection,
-        update: sinon.stub().resolves()
+        update: sinon.stub().resolves(),
       };
       const response = await updateCurrentStatusToState(mockCollection, latestStatusData, newState);
       expect(response).to.deep.equal({
         status: "success",
         message: "The status has been updated to ACTIVE",
-        data: { previousStatus: "IDLE", currentStatus: "ACTIVE" }
+        data: { previousStatus: "IDLE", currentStatus: "ACTIVE" },
       });
     });
 
     it("should throw an error if firebase query fails", async function () {
       const mockCollection = {
         doc: () => mockCollection,
-        update: sinon.stub().rejects(new Error("Firestore error"))
+        update: sinon.stub().rejects(new Error("Firestore error")),
       };
       try {
         await updateCurrentStatusToState(mockCollection, latestStatusData, newState);
@@ -257,29 +257,29 @@ describe("Task Based User Status Update Util Functions", function () {
             message: "",
             from: currentTimeStamp,
             until: "",
-            updatedAt: currentTimeStamp
-          }
-        }
+            updatedAt: currentTimeStamp,
+          },
+        },
       };
     });
 
     it("should update the Future status", async function () {
       const mockCollection = {
         doc: () => mockCollection,
-        update: sinon.stub().resolves()
+        update: sinon.stub().resolves(),
       };
       const response = await updateFutureStatusToState(mockCollection, latestStatusData, newState);
       expect(response).to.deep.equal({
         status: "success",
         message: "As the user is currently OOO, the future status has been updated to ACTIVE.",
-        data: { currentStatus: "OOO", futureStatus: "ACTIVE" }
+        data: { currentStatus: "OOO", futureStatus: "ACTIVE" },
       });
     });
 
     it("should throw an error if firebase query fails", async function () {
       const mockCollection = {
         doc: () => mockCollection,
-        update: sinon.stub().rejects(new Error("Firestore error"))
+        update: sinon.stub().rejects(new Error("Firestore error")),
       };
       try {
         await updateFutureStatusToState(mockCollection, latestStatusData, newState);

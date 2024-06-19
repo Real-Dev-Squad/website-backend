@@ -76,7 +76,7 @@ describe("test discord actions", function () {
 
       const addRolesPromises = [
         discordRoleModel.add({ roleid: groupData[0].roleid, rolename: groupData[0].rolename, createdBy: allIds[1] }),
-        discordRoleModel.add({ roleid: groupData[1].roleid, rolename: groupData[1].rolename, createdBy: allIds[0] })
+        discordRoleModel.add({ roleid: groupData[1].roleid, rolename: groupData[1].rolename, createdBy: allIds[0] }),
       ];
       await Promise.all(addRolesPromises);
 
@@ -84,7 +84,7 @@ describe("test discord actions", function () {
         addGroupRoleToMember({ roleid: groupData[0].roleid, userid: allIds[0] }),
         addGroupRoleToMember({ roleid: groupData[0].roleid, userid: allIds[1] }),
         addGroupRoleToMember({ roleid: groupData[0].roleid, userid: allIds[1] }),
-        addGroupRoleToMember({ roleid: groupData[1].roleid, userid: allIds[0] })
+        addGroupRoleToMember({ roleid: groupData[1].roleid, userid: allIds[0] }),
       ];
       await Promise.all(addGroupRolesPromises);
     });

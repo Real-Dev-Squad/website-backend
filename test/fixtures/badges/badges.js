@@ -8,8 +8,8 @@ const BADGES = [
     createdBy: "shmbajaj",
     createdAt: {
       _seconds: "1234567890",
-      _nanoseconds: "1234567890"
-    }
+      _nanoseconds: "1234567890",
+    },
   },
   {
     id: 2,
@@ -20,8 +20,8 @@ const BADGES = [
     createdBy: "shmbajaj",
     createdAt: {
       _seconds: "1234567890",
-      _nanoseconds: "1234567890"
-    }
+      _nanoseconds: "1234567890",
+    },
   },
   {
     id: 3,
@@ -32,9 +32,9 @@ const BADGES = [
     createdBy: "shmbajaj",
     createdAt: {
       _seconds: "1234567890",
-      _nanoseconds: "1234567890"
-    }
-  }
+      _nanoseconds: "1234567890",
+    },
+  },
 ];
 
 const CLOUNDINARY_IMAGE_URL = "https://imageUrl.cloudinary.com/badges/something.jpg";
@@ -45,16 +45,16 @@ const EXPECTED_BADGE_OBJECT = {
   createdBy: "shmbajaj",
   description: "",
   imageUrl: CLOUNDINARY_IMAGE_URL,
-  createdAt: {}
+  createdAt: {},
 };
 
 const CLOUNDINARY_BADGE_IMAGE_UPLOAD_RESPONSE = {
   id: "badge-image-random-id",
-  imageUrl: CLOUNDINARY_IMAGE_URL
+  imageUrl: CLOUNDINARY_IMAGE_URL,
 };
 
 module.exports = {
   BADGES,
   EXPECTED_BADGE_OBJECT,
-  CLOUNDINARY_BADGE_IMAGE_UPLOAD_RESPONSE
+  CLOUNDINARY_BADGE_IMAGE_UPLOAD_RESPONSE,
 };

@@ -45,7 +45,7 @@ const getAllLevels = async () => {
     data.forEach((doc) => {
       const Level = {
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       };
       allLevels.push(Level);
     });
@@ -59,5 +59,5 @@ const getAllLevels = async () => {
 module.exports = {
   addLevel,
   deleteLevel,
-  getAllLevels
+  getAllLevels,
 };

@@ -28,17 +28,17 @@ const createGroupRole = async (req, res) => {
 
     if (roleExists) {
       return res.status(400).json({
-        message: "Role already exists!"
+        message: "Role already exists!",
       });
     }
     const dataForDiscord = {
       rolename,
-      mentionable: true
+      mentionable: true,
     };
     const groupRoleData = {
       rolename,
       createdBy: req.userData.id,
-      date: admin.firestore.Timestamp.fromDate(new Date())
+      date: admin.firestore.Timestamp.fromDate(new Date()),
     };
 
     const headers = generateCloudFlareHeaders(req.userData);
@@ -46,7 +46,7 @@ const createGroupRole = async (req, res) => {
     const responseForCreatedRole = await fetch(`${DISCORD_BASE_URL}/roles/create`, {
       method: "PUT",
       body: JSON.stringify(dataForDiscord),
-      headers
+      headers,
     }).then((response) => response.json());
 
     groupRoleData.roleid = responseForCreatedRole.id;
@@ -54,7 +54,7 @@ const createGroupRole = async (req, res) => {
     const { id } = await discordRolesModel.createNewRole(groupRoleData);
     return res.status(201).json({
       message: "Role created successfully!",
-      id
+      id,
     });
   } catch (err) {
     logger.error(`Error while creating new Role: ${err}`);
@@ -75,7 +75,7 @@ const getAllGroupRoles = async (req, res) => {
     const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
     return res.json({
       message: "Roles fetched successfully!",
-      groups: groupsWithMembershipInfo
+      groups: groupsWithMembershipInfo,
     });
   } catch (err) {
     logger.error(`Error while getting roles: ${err}`);
@@ -89,7 +89,7 @@ const getGroupsRoleId = async (req, res) => {
     const userGroupRoles = await discordRolesModel.getGroupRolesForUser(discordId);
     return res.json({
       message: "User group roles Id fetched successfully!",
-      ...userGroupRoles
+      ...userGroupRoles,
     });
   } catch (error) {
     logger.error(`Error while getting user roles: ${error}`);
@@ -106,10 +106,10 @@ const addGroupRoleToMember = async (req, res) => {
   try {
     const memberGroupRole = {
       ...req.body,
-      date: admin.firestore.Timestamp.fromDate(new Date())
+      date: admin.firestore.Timestamp.fromDate(new Date()),
     };
     const roleExistsPromise = discordRolesModel.isGroupRoleExists({
-      roleid: memberGroupRole.roleid
+      roleid: memberGroupRole.roleid,
     });
     const userDataPromise = fetchUser({ discordId: memberGroupRole.userid });
     const [{ roleExists, existingRoles }, userData] = await Promise.all([roleExistsPromise, userDataPromise]);
@@ -131,27 +131,27 @@ const addGroupRoleToMember = async (req, res) => {
       return res.status(400).json({
         message: "Role already exists!",
         data: {
-          ...roleData
-        }
+          ...roleData,
+        },
       });
     }
     const dataForDiscord = {
-      ...req.body
+      ...req.body,
     };
     const headers = generateCloudFlareHeaders(req.userData);
 
     const apiCallToDiscord = fetch(`${DISCORD_BASE_URL}/roles/add`, {
       method: "PUT",
       body: JSON.stringify(dataForDiscord),
-      headers
+      headers,
     });
     const discordLastJoinedDateUpdate = discordRolesModel.groupUpdateLastJoinDate({
-      id: existingRoles.docs[0].id
+      id: existingRoles.docs[0].id,
     });
     await Promise.all([apiCallToDiscord, discordLastJoinedDateUpdate]);
 
     return res.status(201).json({
-      message: "Role added successfully!"
+      message: "Role added successfully!",
     });
   } catch (err) {
     logger.error(`Error while adding new Role: ${err}`);
@@ -164,7 +164,7 @@ const deleteRole = async (req, res) => {
     const { roleid, userid } = req.body;
 
     const roleExistsPromise = discordRolesModel.isGroupRoleExists({
-      roleid
+      roleid,
     });
     const userDataPromise = fetchUser({ discordId: userid });
     const [{ roleExists }, userData] = await Promise.all([roleExistsPromise, userDataPromise]);
@@ -197,7 +197,7 @@ const updateDiscordImageForVerification = async (req, res) => {
     const discordAvatarUrl = await discordRolesModel.updateDiscordImageForVerification(userDiscordId);
     return res.json({
       message: "Discord avatar URL updated successfully!",
-      discordAvatarUrl
+      discordAvatarUrl,
     });
   } catch (err) {
     logger.error(`Error while updating discord image url verification document: ${err}`);
@@ -215,7 +215,7 @@ const setRoleIdleToIdleUsers = async (req, res) => {
     const result = await discordRolesModel.updateIdleUsersOnDiscord();
     return res.status(201).json({
       message: "All Idle Users updated successfully.",
-      ...result
+      ...result,
     });
   } catch (err) {
     logger.error(`Error while setting idle role: ${err}`);
@@ -233,7 +233,7 @@ const setRoleIdle7DToIdleUsers = async (req, res) => {
     const result = await discordRolesModel.updateIdle7dUsersOnDiscord();
     return res.status(201).json({
       message: "All Idle 7d+ Users updated successfully.",
-      ...result
+      ...result,
     });
   } catch (err) {
     logger.error(`Error while setting idle role: ${err}`);
@@ -253,7 +253,7 @@ const updateDiscordNicknames = async (req, res) => {
     const { dev } = req.query;
     if (dev !== "true") {
       return res.status(404).json({
-        message: "Users Nicknames not updated"
+        message: "Users Nicknames not updated",
       });
     }
 
@@ -275,14 +275,14 @@ const updateDiscordNicknames = async (req, res) => {
                 discordId: foundUserWithDiscordId.discordId,
                 username: foundUserWithDiscordId.username,
                 first_name: foundUserWithDiscordId.first_name,
-                id: foundUserWithDiscordId.id
+                id: foundUserWithDiscordId.id,
               });
             }
           }
         } catch (error) {
           logger.error(`error getting user with matching discordId ${error.message}`);
         }
-      })
+      }),
     );
 
     const totalNicknamesUpdated = { count: 0 };
@@ -318,7 +318,7 @@ const updateDiscordNicknames = async (req, res) => {
     return res.json({
       totalNicknamesUpdated,
       totalNicknamesNotUpdated,
-      message: `Users Nicknames updated successfully`
+      message: `Users Nicknames updated successfully`,
     });
   } catch (error) {
     logger.error(`Error while updating nicknames: ${error}`);
@@ -339,7 +339,7 @@ const updateUsersNicknameStatus = async (req, res) => {
     const data = await discordRolesModel.updateUsersNicknameStatus(lastNicknameUpdate);
     return res.json({
       message: "Updated discord users nickname based on status",
-      data
+      data,
     });
   } catch (err) {
     logger.error(`Error while updating users nickname based on status: ${err}`);
@@ -359,14 +359,14 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
       if (!data.data.empty) {
         const roleInFirestore = {
           id: data.data.docs[0].id,
-          ...data.data.docs[0].data()
+          ...data.data.docs[0].data(),
         };
         if (roleInFirestore.roleid !== role.id) {
           await discordRolesModel.updateGroupRole(
             {
-              roleid: role.id
+              roleid: role.id,
             },
-            roleInFirestore.id
+            roleInFirestore.id,
           );
         }
       } else {
@@ -374,7 +374,7 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
           createdBy: req.userData.id,
           rolename: role.name,
           roleid: role.id,
-          date: admin.firestore.Timestamp.fromDate(new Date())
+          date: admin.firestore.Timestamp.fromDate(new Date()),
         });
       }
     });
@@ -384,7 +384,7 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
 
     return res.json({
       response: allRolesInFirestore.groups,
-      message: `Discord groups synced with firestore successfully`
+      message: `Discord groups synced with firestore successfully`,
     });
   } catch (error) {
     logger.error(`Error while updating discord groups ${error}`);
@@ -403,7 +403,7 @@ const setRoleToUsersWith31DaysPlusOnboarding = async (req, res) => {
     const result = await discordRolesModel.updateUsersWith31DaysPlusOnboarding();
     return res.status(201).json({
       message: "All Users with 31 Days Plus Onboarding are updated successfully.",
-      ...result
+      ...result,
     });
   } catch (error) {
     logger.error(`Error while setting group-onboarding-31d+ role : ${error}`);
@@ -420,23 +420,23 @@ const generateInviteForUser = async (req, res) => {
 
     if (!modelResponse.notFound) {
       return res.status(409).json({
-        message: "User invite is already present!"
+        message: "User invite is already present!",
       });
     }
 
     const channelId = config.get("discordNewComersChannelId");
     const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
       algorithm: "RS256",
-      expiresIn: config.get("rdsServerlessBot.ttl")
+      expiresIn: config.get("rdsServerlessBot.ttl"),
     });
 
     const inviteOptions = {
-      channelId: channelId
+      channelId: channelId,
     };
     const response = await fetch(`${DISCORD_BASE_URL}/invite`, {
       method: "POST",
       body: JSON.stringify(inviteOptions),
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` }
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
     });
     const discordInviteResponse = await response.json();
 
@@ -447,7 +447,7 @@ const generateInviteForUser = async (req, res) => {
 
     return res.status(201).json({
       message: "invite generated successfully",
-      inviteLink
+      inviteLink,
     });
   } catch (err) {
     logger.error(`Error in generating invite for user: ${err}`);
@@ -472,7 +472,7 @@ const getUserDiscordInvite = async (req, res) => {
 
     return res.json({
       message: "Invite returned successfully",
-      inviteLink: invite?.inviteLink
+      inviteLink: invite?.inviteLink,
     });
   } catch (err) {
     logger.error(`Error in fetching user invite: ${err}`);
@@ -494,5 +494,5 @@ module.exports = {
   syncDiscordGroupRolesInFirestore,
   setRoleToUsersWith31DaysPlusOnboarding,
   getUserDiscordInvite,
-  generateInviteForUser
+  generateInviteForUser,
 };

@@ -17,11 +17,11 @@ module.exports = {
   discordMissedUpdatesRoleId: "<discordMissedUpdatesRoleId>",
   githubApi: {
     baseUrl: "https://api.github.com",
-    org: "Real-Dev-Squad"
+    org: "Real-Dev-Squad",
   },
   githubOauth: {
     clientId: "clientId",
-    clientSecret: "clientSecret"
+    clientSecret: "clientSecret",
   },
   firestore: `{
     "type": "service_account",
@@ -37,31 +37,31 @@ module.exports = {
   }`,
   services: {
     rdsApi: {
-      baseUrl: `http://localhost:${port}`
+      baseUrl: `http://localhost:${port}`,
     },
     rdsUi: {
       baseUrl: "https://realdevsquad.com",
       routes: {
-        authRedirection: "/goto"
+        authRedirection: "/goto",
       },
       goalAPI: {
         baseUrl: "<goalBaseUrl>",
         secretKey: "<goalSecretKey>",
-        cookieName: `goals-session-test`
-      }
+        cookieName: `goals-session-test`,
+      },
     },
     discordBot: {
-      baseUrl: "DISCORD_BASE_URL"
+      baseUrl: "DISCORD_BASE_URL",
     },
     goalAPI: {
       baseUrl: "<goalBaseUrl>",
       secretKey: "<goalSecretKey>",
-      cookieName: `goals-session-test`
-    }
+      cookieName: `goals-session-test`,
+    },
   },
 
   cors: {
-    allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)|(localhost)/ // Allow realdevsquad.com, *.realdevsquad.com and localhost for non-production envs
+    allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)|(localhost)/, // Allow realdevsquad.com, *.realdevsquad.com and localhost for non-production envs
   },
 
   userToken: {
@@ -91,7 +91,7 @@ module.exports = {
       "NoWsgW64Z/+89cbKFMzgHdvhvL7rQNhBAAm1byPmn8aTV7LlTclMWfb4sV6e+ef8\n" +
       "QnrvpfRSihRktA2dDQJAH+dQBx3nG3bZ9khVAZQ1jTJ7j0cKixaGndFuYS1TJvJ2\n" +
       "Zzn584h/xbSIcP9/4SXmEK3wtoueUtMkvS3yKTvk+w==\n" +
-      "-----END RSA PRIVATE KEY-----"
+      "-----END RSA PRIVATE KEY-----",
   },
 
   botToken: {
@@ -132,7 +132,7 @@ module.exports = {
       "7UcCgYBHdbFcXWGHfEqLJZChRrKhWLxn9jkJ0apvnO1j6c5yiAo3yJkSV5Z9IdAc\n" +
       "lgOC/dJBTZLcBtixdERqcJ+o4P7oFRS6hz/9n4s+kkzxXVqEmtJmBQvHUo3I/Qgc\n" +
       "Ba+XMCP64pXPC3r1llhKRwIl+6UFn+QlpbxtgQjhbULnSbc7fw==\n" +
-      "-----END RSA PRIVATE KEY-----"
+      "-----END RSA PRIVATE KEY-----",
   },
 
   rdsServerlessBot: {
@@ -174,7 +174,7 @@ module.exports = {
       "lgOC/dJBTZLcBtixdERqcJ+o4P7oFRS6hz/9n4s+kkzxXVqEmtJmBQvHUo3I/Qgc\n" +
       "Ba+XMCP64pXPC3r1llhKRwIl+6UFn+QlpbxtgQjhbULnSbc7fw==\n" +
       "-----END RSA PRIVATE KEY-----",
-    ttl: 60
+    ttl: 60,
   },
 
   cronJobHandler: {
@@ -215,42 +215,42 @@ module.exports = {
       "XFFmNp6sqcQD1P15HkJtleodzcKgmsqo8RTk8t+urdWIdoLFAugwqFE9jor8UxAp\n" +
       "wT5xr8c84VDfbPgc10V2XTda4SXaIRP7QY+9agGmZIYp0LWxUOhB37PNFDhUEw9d\n" +
       "VwIDAQAB\n" +
-      "-----END PUBLIC KEY-----"
+      "-----END PUBLIC KEY-----",
   },
 
   // Cloudinary keys
   cloudinary: {
     cloud_name: "Cloud_name",
     api_key: "API_KEY",
-    api_secret: "api_secret_key"
+    api_secret: "api_secret_key",
   },
 
   // Cloudflare
   cloudflare: {
     CLOUDFLARE_ZONE_ID: "Cloudflare_Zone_ID_or_ID",
     CLOUDFLARE_X_AUTH_KEY: "Cloudflare_API_Auth_Key",
-    CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare_User_Email"
+    CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare_User_Email",
   },
 
   integrations: {
     newrelic: {
       appName: "RDS_API_production",
-      licenseKey: "<newrelicLicenseKey>"
-    }
+      licenseKey: "<newrelicLicenseKey>",
+    },
   },
 
   routesCacheTTL: {
-    "/members": 900
+    "/members": 900,
   },
 
   githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
 
   Event100ms: {
     APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
-    APP_SECRET: "EVENT_100MS_APP_SECRET"
+    APP_SECRET: "EVENT_100MS_APP_SECRET",
   },
 
   externalServices: {
-    EXTERNAL_SERVICE_PUBLIC_KEY: "EXTERNAL_SERVICE_PUBLIC_KEY"
-  }
+    EXTERNAL_SERVICE_PUBLIC_KEY: "EXTERNAL_SERVICE_PUBLIC_KEY",
+  },
 };

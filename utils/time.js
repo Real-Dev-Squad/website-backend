@@ -99,5 +99,5 @@ module.exports = {
   getBeforeHourTime,
   convertTimestampToUTCStartOrEndOfDay,
   getCurrentEpochTime,
-  convertMillisToSeconds
+  convertMillisToSeconds,
 };

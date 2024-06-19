@@ -2,7 +2,7 @@ const Sinon = require("sinon");
 const {
   validateAuthStatus,
   storeUserDeviceInfo,
-  validateFetchingUserDocument
+  validateFetchingUserDocument,
 } = require("../../../middlewares/validators/qrCodeAuth");
 const { expect } = require("chai");
 const { userDeviceInfoDataArray } = require("../../fixtures/qrCodeAuth/qrCodeAuth");
@@ -11,8 +11,8 @@ describe("qrCodeAuth", function () {
     it("Allows request to pass on valid params", async function () {
       const req = {
         body: {
-          ...userDeviceInfoDataArray[0]
-        }
+          ...userDeviceInfoDataArray[0],
+        },
       };
 
       const res = {};
@@ -26,14 +26,14 @@ describe("qrCodeAuth", function () {
       const req = {
         body: {
           ...userDeviceInfoDataArray[0],
-          user_id: 12
-        }
+          user_id: 12,
+        },
       };
 
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
 
       const nextSpy = Sinon.spy();
@@ -46,8 +46,8 @@ describe("qrCodeAuth", function () {
     it("Allows request to pass on valid params", async function () {
       const req = {
         params: {
-          authorization_status: "AUTHORIZED"
-        }
+          authorization_status: "AUTHORIZED",
+        },
       };
 
       const res = {};
@@ -60,14 +60,14 @@ describe("qrCodeAuth", function () {
     it("Does not allow request to pass on invalid params", async function () {
       const req = {
         params: {
-          authorization_status: "OK"
-        }
+          authorization_status: "OK",
+        },
       };
 
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
 
       const nextSpy = Sinon.spy();
@@ -80,8 +80,8 @@ describe("qrCodeAuth", function () {
     it("Allows request to pass on valid params", async function () {
       const req = {
         query: {
-          device_id: "DEVICE_ID"
-        }
+          device_id: "DEVICE_ID",
+        },
       };
 
       const res = {};
@@ -95,14 +95,14 @@ describe("qrCodeAuth", function () {
       const req = {
         query: {
           user_id: "ID",
-          device_type: "DEVICE_TYPE"
-        }
+          device_type: "DEVICE_TYPE",
+        },
       };
 
       const res = {
         boom: {
-          badRequest: () => {}
-        }
+          badRequest: () => {},
+        },
       };
 
       const nextSpy = Sinon.spy();

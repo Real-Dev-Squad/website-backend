@@ -14,7 +14,7 @@ const getProfileDiffs = async (req, res) => {
 
     return res.json({
       message: "Profile Diffs returned successfully!",
-      profileDiffs: pendingProfileDiffs
+      profileDiffs: pendingProfileDiffs,
     });
   } catch (error) {
     logger.error(`Error while fetching profile diffs: ${error}`);
@@ -23,5 +23,5 @@ const getProfileDiffs = async (req, res) => {
 };
 
 module.exports = {
-  getProfileDiffs
+  getProfileDiffs,
 };

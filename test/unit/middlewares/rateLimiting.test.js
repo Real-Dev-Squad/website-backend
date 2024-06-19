@@ -5,11 +5,11 @@ const { commonRateLimiter } = require("../../../middlewares/rateLimiting");
 function mockRequest(ipAddress) {
   return {
     headers: {
-      "x-forwarded-for": ipAddress
+      "x-forwarded-for": ipAddress,
     },
     socket: {
-      remoteAddress: ipAddress
-    }
+      remoteAddress: ipAddress,
+    },
   };
 }
 

@@ -59,5 +59,5 @@ const getTrackedProgressDocs = async (query) => {
 module.exports = {
   buildQueryByTypeId,
   buildQueryForFetchingDocsOfType,
-  getTrackedProgressDocs
+  getTrackedProgressDocs,
 };

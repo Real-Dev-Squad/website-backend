@@ -13,7 +13,7 @@ const addNewStock = async (req, res) => {
     return res.json({
       message: "Stock created successfully!",
       stock: stockData,
-      id
+      id,
     });
   } catch (err) {
     logger.error(`Error while creating new stock: ${err}`);
@@ -31,7 +31,7 @@ const fetchStocks = async (req, res) => {
     const allStock = await stocks.fetchStocks();
     return res.json({
       message: allStock.length > 0 ? "Stocks returned successfully!" : "No stocks found",
-      stock: allStock.length > 0 ? allStock : []
+      stock: allStock.length > 0 ? allStock : [],
     });
   } catch (err) {
     logger.error(`Error while fetching stocks ${err}`);
@@ -50,7 +50,7 @@ const getSelfStocks = async (req, res) => {
     const userStocks = await stocks.fetchUserStocks(userId);
     return res.json({
       message: userStocks.length > 0 ? "User stocks returned successfully!" : "No stocks found",
-      userStocks
+      userStocks,
     });
   } catch (err) {
     logger.error(`Error while getting user stocks ${err}`);
@@ -61,5 +61,5 @@ const getSelfStocks = async (req, res) => {
 module.exports = {
   addNewStock,
   fetchStocks,
-  getSelfStocks
+  getSelfStocks,
 };

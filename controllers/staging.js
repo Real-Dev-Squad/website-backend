@@ -5,7 +5,7 @@ const updateRoles = async (req, res) => {
     const userData = await req.userData;
     if (process.env.NODE_ENV === "production") {
       return res.status(403).json({
-        message: "FORBIDDEN | To be used only in staging and development"
+        message: "FORBIDDEN | To be used only in staging and development",
       });
     }
     const userId = req.userData.id;
@@ -13,19 +13,19 @@ const updateRoles = async (req, res) => {
       {
         roles: {
           ...userData.roles,
-          ...req.body
+          ...req.body,
         },
-        updated_at: Date.now()
+        updated_at: Date.now(),
       },
-      userId
+      userId,
     );
     return res.status(200).json({
-      message: "Roles Updated successfully"
+      message: "Roles Updated successfully",
     });
   } catch (err) {
     logger.error(`Oops an error occured: ${err}`);
     return res.status(500).json({
-      message: "Oops an internal error occured"
+      message: "Oops an internal error occured",
     });
   }
 };
@@ -33,7 +33,7 @@ const updateRoles = async (req, res) => {
 const removePrivileges = async (req, res) => {
   if (process.env.NODE_ENV === "production") {
     return res.status(403).json({
-      message: "FORBIDDEN | To be used only in staging and development"
+      message: "FORBIDDEN | To be used only in staging and development",
     });
   }
   try {
@@ -47,12 +47,12 @@ const removePrivileges = async (req, res) => {
           {
             roles: {
               ...member.roles,
-              member: false
+              member: false,
             },
-            updated_at: Date.now()
+            updated_at: Date.now(),
           },
-          member.id
-        )
+          member.id,
+        ),
       );
     });
     superUsers.forEach((superUser) => {
@@ -61,29 +61,29 @@ const removePrivileges = async (req, res) => {
           {
             roles: {
               ...superUser.roles,
-              super_user: false
+              super_user: false,
             },
-            updated_at: Date.now()
+            updated_at: Date.now(),
           },
-          superUser.id
-        )
+          superUser.id,
+        ),
       );
     });
 
     await Promise.all(updateUserPromises);
 
     return res.status(200).json({
-      message: "Roles Updated successfully"
+      message: "Roles Updated successfully",
     });
   } catch (err) {
     logger.error(`Oops an error occurred: ${err}`);
     return res.status(500).json({
-      message: "Oops an internal error occurred"
+      message: "Oops an internal error occurred",
     });
   }
 };
 
 module.exports = {
   updateRoles,
-  removePrivileges
+  removePrivileges,
 };

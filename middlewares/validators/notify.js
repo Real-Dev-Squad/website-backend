@@ -11,7 +11,7 @@ export const notifyValidator = async (req, res, next) => {
       title: joi.string().required().max(MAX_TITLE_LENGTH).required(),
       body: joi.string().required().max(MAX_BODY_LENGTH).required(),
       userId: joi.string(),
-      groupRoleId: joi.string()
+      groupRoleId: joi.string(),
     })
     .xor("userId", "groupRoleId");
   try {

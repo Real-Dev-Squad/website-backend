@@ -10,7 +10,7 @@ const saveFcmToken = async (fcmTokenData) => {
     if (fcmTokenSnapshot.empty) {
       const fcmToken = await fcmTokenModel.add({
         userId: fcmTokenData.userId,
-        fcmTokens: [fcmTokenData.fcmToken]
+        fcmTokens: [fcmTokenData.fcmToken],
       });
       return fcmToken.id;
     } else {
@@ -18,13 +18,13 @@ const saveFcmToken = async (fcmTokenData) => {
       fcmTokenSnapshot.forEach((fcmToken) => {
         fcmTokenObj = {
           id: fcmToken.id,
-          ...fcmToken.data()
+          ...fcmToken.data(),
         };
       });
       if (!fcmTokenObj.fcmTokens.includes(fcmTokenData.fcmToken)) {
         fcmTokenObj.fcmTokens.push(fcmTokenData.fcmToken);
         await fcmTokenModel.doc(fcmTokenObj.id).update({
-          fcmTokens: fcmTokenObj.fcmTokens
+          fcmTokens: fcmTokenObj.fcmTokens,
         });
         return fcmTokenObj.id;
       } else {

@@ -16,7 +16,7 @@ const getBadges = async (req, res) => {
     const allBadges = await badgeQuery.fetchBadges(req.query);
     return res.json({
       message: CONTROLLERS_SUCCESS_MESSAGES.GET_BADGES,
-      badges: allBadges
+      badges: allBadges,
     });
   } catch (error) {
     logger.error(`${CONTROLLERS_ERROR_MESSAGES.GET_BADGES}: ${error}`);
@@ -53,11 +53,11 @@ async function postBadge(req, res) {
     const { imageUrl } = await imageService.uploadBadgeImage({ file, badgeName: req.body.name });
     const badge = await badgeQuery.createBadge({
       ...req.body,
-      imageUrl
+      imageUrl,
     });
     return res.json({
       message: CONTROLLERS_SUCCESS_MESSAGES.POST_BADGE,
-      badge
+      badge,
     });
   } catch (error) {
     logger.error(`${CONTROLLERS_ERROR_MESSAGES.POST_BADGE}: ${error}`);
@@ -82,7 +82,7 @@ async function postUserBadges(req, res) {
     }
     await badgeQuery.assignBadges({ userId, badgeIds });
     return res.json({
-      message: CONTROLLERS_SUCCESS_MESSAGES.POST_USER_BADGES
+      message: CONTROLLERS_SUCCESS_MESSAGES.POST_USER_BADGES,
     });
   } catch (error) {
     logger.error(`${CONTROLLERS_ERROR_MESSAGES.POST_USER_BADGES}: ${error}`);
@@ -101,7 +101,7 @@ async function deleteUserBadges(req, res) {
     const { badgeIds, userId } = req.body;
     await badgeQuery.removeBadges({ userId, badgeIds });
     return res.json({
-      message: CONTROLLERS_SUCCESS_MESSAGES.DELETE_USER_BADGES
+      message: CONTROLLERS_SUCCESS_MESSAGES.DELETE_USER_BADGES,
     });
   } catch (error) {
     logger.error(`${CONTROLLERS_ERROR_MESSAGES.DELETE_USER_BADGES}: ${error}`);
@@ -114,5 +114,5 @@ module.exports = {
   getUserBadges,
   postBadge,
   postUserBadges,
-  deleteUserBadges
+  deleteUserBadges,
 };

@@ -57,7 +57,7 @@ describe("Extension Requests", function () {
         assignee: appOwner.username,
         isNoteworthy: true,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 }
+        lossRate: { [DINERO]: 1 },
       },
       {
         title: "Test task",
@@ -70,7 +70,7 @@ describe("Extension Requests", function () {
         assignee: appOwner.username,
         isNoteworthy: true,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 }
+        lossRate: { [DINERO]: 1 },
       },
       {
         title: "Test task",
@@ -87,7 +87,7 @@ describe("Extension Requests", function () {
         isNoteworthy: false,
         assignee: user.username,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 }
+        lossRate: { [DINERO]: 1 },
       },
       {
         title: "Test task",
@@ -100,7 +100,7 @@ describe("Extension Requests", function () {
         assignee: appOwner.username,
         isNoteworthy: true,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 }
+        lossRate: { [DINERO]: 1 },
       },
       {
         title: "Test task for dev flag",
@@ -113,8 +113,8 @@ describe("Extension Requests", function () {
         assignee: user.username,
         isNoteworthy: true,
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-        lossRate: { [DINERO]: 1 }
-      }
+        lossRate: { [DINERO]: 1 },
+      },
     ];
 
     // Add the active task
@@ -135,7 +135,7 @@ describe("Extension Requests", function () {
       oldEndsOn: 1234,
       newEndsOn: 1235,
       reason: "family event",
-      status: "PENDING"
+      status: "PENDING",
     };
     const extensionRequest1 = {
       taskId: taskId2,
@@ -144,7 +144,7 @@ describe("Extension Requests", function () {
       oldEndsOn: 1234,
       newEndsOn: 1235,
       reason: "family event",
-      status: "APPROVED"
+      status: "APPROVED",
     };
 
     const extensionRequest2 = {
@@ -154,7 +154,7 @@ describe("Extension Requests", function () {
       oldEndsOn: 1234,
       newEndsOn: 1235,
       reason: "family event",
-      status: "PENDING"
+      status: "PENDING",
     };
 
     const extensionRequest3 = {
@@ -164,7 +164,7 @@ describe("Extension Requests", function () {
       oldEndsOn: 1234,
       newEndsOn: 1235,
       reason: "family event",
-      status: "PENDING"
+      status: "PENDING",
     };
 
     const extensionRequest4 = {
@@ -174,7 +174,7 @@ describe("Extension Requests", function () {
       oldEndsOn: 1234,
       newEndsOn: 1235,
       reason: "family event",
-      status: "PENDING"
+      status: "PENDING",
     };
     extensionRequestId1 = (await extensionRequests.createExtensionRequest(extensionRequest)).id;
     extensionRequestId2 = (await extensionRequests.createExtensionRequest(extensionRequest1)).id;
@@ -249,7 +249,7 @@ describe("Extension Requests", function () {
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
-            message: "Unauthenticated User"
+            message: "Unauthenticated User",
           });
 
           return done();
@@ -270,7 +270,7 @@ describe("Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING"
+          status: "PENDING",
         })
         .end((err, res) => {
           if (err) {
@@ -298,7 +298,7 @@ describe("Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING"
+          status: "PENDING",
         })
         .end((err, res) => {
           if (err) {
@@ -326,7 +326,7 @@ describe("Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING"
+          status: "PENDING",
         })
         .end((err, res) => {
           if (err) {
@@ -350,7 +350,7 @@ describe("Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING"
+          status: "PENDING",
         })
         .end((err, res) => {
           if (err) {
@@ -360,7 +360,7 @@ describe("Extension Requests", function () {
           expect(res).to.have.status(403);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal(
-            "Only assigned user and super user can create an extension request for this task."
+            "Only assigned user and super user can create an extension request for this task.",
           );
           return done();
         });
@@ -378,7 +378,7 @@ describe("Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING"
+          status: "PENDING",
         })
         .end((err, res) => {
           if (err) {
@@ -404,7 +404,7 @@ describe("Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING"
+          status: "PENDING",
         })
         .end((err, res) => {
           if (err) {
@@ -430,7 +430,7 @@ describe("Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 0,
           reason: "family event",
-          status: "PENDING"
+          status: "PENDING",
         })
         .end((err, res) => {
           if (err) {
@@ -455,7 +455,7 @@ describe("Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING"
+          status: "PENDING",
         })
         .end((err, res) => {
           if (err) {
@@ -480,7 +480,7 @@ describe("Extension Requests", function () {
           oldEndsOn: 1234,
           newEndsOn: 1235,
           reason: "family event",
-          status: "PENDING"
+          status: "PENDING",
         })
         .end((err, res) => {
           if (err) {
@@ -643,7 +643,7 @@ describe("Extension Requests", function () {
           extensionRequestsList.forEach((extensionReq) => {
             expect(extensionReq.status).to.be.oneOf([
               EXTENSION_REQUEST_STATUS.APPROVED,
-              EXTENSION_REQUEST_STATUS.PENDING
+              EXTENSION_REQUEST_STATUS.PENDING,
             ]);
           });
           return done();
@@ -667,7 +667,7 @@ describe("Extension Requests", function () {
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
-            message: "You are not authorized for this action."
+            message: "You are not authorized for this action.",
           });
 
           return done();
@@ -680,7 +680,7 @@ describe("Extension Requests", function () {
         .patch(`/extension-requests/${extensionRequestId1}/status`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
-          status: "APPROVED"
+          status: "APPROVED",
         })
         .end((err, res) => {
           if (err) {
@@ -720,7 +720,7 @@ describe("Extension Requests", function () {
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           title: "Hello World",
-          status: "APPROVED"
+          status: "APPROVED",
         })
         .end((err, res) => {
           if (err) {
@@ -740,7 +740,7 @@ describe("Extension Requests", function () {
         .patch(`/extension-requests/${extensionRequestId1}/status`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
-          title: "Hello World"
+          title: "Hello World",
         })
         .end((err, res) => {
           if (err) {
@@ -771,7 +771,7 @@ describe("Extension Requests", function () {
           expect(res.body).to.eql({
             statusCode: 401,
             error: "Unauthorized",
-            message: "You are not authorized for this action."
+            message: "You are not authorized for this action.",
           });
 
           return done();
@@ -784,7 +784,7 @@ describe("Extension Requests", function () {
         .patch(`/extension-requests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
-          title: "new-title"
+          title: "new-title",
         })
         .end((err, res) => {
           if (err) {
@@ -802,7 +802,7 @@ describe("Extension Requests", function () {
         .patch(`/extension-requests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
-          assignee: user.id
+          assignee: user.id,
         })
         .end((err, res) => {
           if (err) {
@@ -822,7 +822,7 @@ describe("Extension Requests", function () {
         .patch(`/extension-requests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
-          status: "APPROVED"
+          status: "APPROVED",
         })
         .end((err, res) => {
           if (err) {
@@ -842,7 +842,7 @@ describe("Extension Requests", function () {
         .patch(`/extension-requests/${extensionRequestId3}/status`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
-          status: "APPROVED"
+          status: "APPROVED",
         })
         .end((err, res) => {
           if (err) {
@@ -879,7 +879,7 @@ describe("Extension Requests", function () {
         .patch(`/extension-requests/${extensionRequestId4}/status`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
-          status: "DENIED"
+          status: "DENIED",
         })
         .end((err, res) => {
           if (err) {
@@ -920,11 +920,11 @@ describe("Extension Requests", function () {
         .patch(`/extension-requests/${extensionRequestId5}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
-          title: newTitle
+          title: newTitle,
         });
       const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId5 }, "extensionRequests");
       const updationLogs = logs.find(
-        (log) => log.meta.userId === superUserId && log.body.newTitle === newTitle && log.body.oldTitle === oldTitle
+        (log) => log.meta.userId === superUserId && log.body.newTitle === newTitle && log.body.oldTitle === oldTitle,
       );
       expect(updationLogs.meta.extensionRequestId).to.equal(extensionRequestId5);
       expect(updationLogs.body.newTitle).to.equal(newTitle);
@@ -940,11 +940,11 @@ describe("Extension Requests", function () {
         .patch(`/extension-requests/${extensionRequestId5}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
-          newEndsOn: suETA
+          newEndsOn: suETA,
         });
       const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId5 }, "extensionRequests");
       const updationLogs = logs.find(
-        (log) => log.meta.userId === superUserId && log.body.newEndsOn === suETA && log.body.oldEndsOn === usersETA
+        (log) => log.meta.userId === superUserId && log.body.newEndsOn === suETA && log.body.oldEndsOn === usersETA,
       );
       expect(updationLogs.meta.extensionRequestId).to.equal(extensionRequestId5);
       expect(updationLogs.body.newEndsOn).to.equal(suETA);
@@ -960,11 +960,12 @@ describe("Extension Requests", function () {
         .patch(`/extension-requests/${extensionRequestId5}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
-          reason: newReason
+          reason: newReason,
         });
       const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId5 }, "extensionRequests");
       const updationLogs = logs.find(
-        (log) => log.meta.userId === superUserId && log.body.newReason === newReason && log.body.oldReason === oldReason
+        (log) =>
+          log.meta.userId === superUserId && log.body.newReason === newReason && log.body.oldReason === oldReason,
       );
       expect(updationLogs.meta.extensionRequestId).to.equal(extensionRequestId5);
       expect(updationLogs.body.newReason).to.equal(newReason);

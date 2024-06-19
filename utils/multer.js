@@ -19,7 +19,7 @@ const fileFilterImagesOnly = (req, file, cb) => {
 const upload = multer({
   storage: multerMemoryStorage,
   limits: { fileSize: profileFileSize },
-  fileFilter: fileFilterImagesOnly
+  fileFilter: fileFilterImagesOnly,
 });
 
 const multerErrorHandling = (err, req, res, next) => {
@@ -41,5 +41,5 @@ const isMulterError = (err) => {
 module.exports = {
   upload,
   multerErrorHandling,
-  isMulterError
+  isMulterError,
 };

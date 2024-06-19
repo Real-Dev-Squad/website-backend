@@ -23,5 +23,5 @@ const removeUnwantedProperties = (propertiesToRemove, data) => {
 };
 
 module.exports = {
-  removeUnwantedProperties
+  removeUnwantedProperties,
 };

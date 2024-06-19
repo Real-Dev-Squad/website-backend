@@ -23,7 +23,7 @@ describe("CORS", function () {
         expect(res).to.have.status(200);
         expect(res.body).to.eql({});
         expect(res.headers).to.include({
-          "access-control-allow-origin": origin
+          "access-control-allow-origin": origin,
         });
 
         return done();
@@ -46,7 +46,7 @@ describe("CORS", function () {
         expect(res).to.have.status(200);
         expect(res.body).to.eql({});
         expect(res.headers).to.include({
-          "access-control-allow-origin": origin
+          "access-control-allow-origin": origin,
         });
 
         return done();

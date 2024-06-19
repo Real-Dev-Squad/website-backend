@@ -8,13 +8,13 @@ describe("Middleware | Authorize Bot", function () {
   describe("Check authorization of bot", function (done) {
     it("return false when token is invalid", function () {
       const request = {
-        headers: `Bearer ${BAD_TOKEN}`
+        headers: `Bearer ${BAD_TOKEN}`,
       };
 
       const response = {
         statusCode: 401,
         error: "Unauthorized",
-        message: "Unauthorized Bot"
+        message: "Unauthorized Bot",
       };
 
       const nextSpy = sinon.spy();
@@ -28,7 +28,7 @@ describe("Middleware | Authorize Bot", function () {
       const response = {
         statusCode: 400,
         error: "Invalid Request",
-        message: "Invalid Request"
+        message: "Invalid Request",
       };
 
       const nextSpy = sinon.spy();
@@ -41,8 +41,8 @@ describe("Middleware | Authorize Bot", function () {
 
       const request = {
         headers: {
-          authorization: `Bearer ${jwtToken}`
-        }
+          authorization: `Bearer ${jwtToken}`,
+        },
       };
 
       const response = {};
@@ -57,8 +57,8 @@ describe("Middleware | Authorize Bot", function () {
     it("Check fails on bad auth token", function () {
       const request = {
         headers: {
-          authorization: `Bearer ${BAD_TOKEN}`
-        }
+          authorization: `Bearer ${BAD_TOKEN}`,
+        },
       };
 
       const response = {};
@@ -71,7 +71,7 @@ describe("Middleware | Authorize Bot", function () {
 
     it("Should stop propagation for no auth token", function () {
       const request = {
-        headers: {}
+        headers: {},
       };
 
       const response = {};
@@ -88,8 +88,8 @@ describe("Middleware | Authorize Bot", function () {
       const jwtToken = bot.generateCronJobToken({ name: "Some Random Name" });
       const request = {
         headers: {
-          authorization: `Bearer ${jwtToken}`
-        }
+          authorization: `Bearer ${jwtToken}`,
+        },
       };
 
       const response = {};
@@ -106,8 +106,8 @@ describe("Middleware | Authorize Bot", function () {
       const jwtToken = bot.generateCronJobToken({ name: CRON_JOB_HANDLER });
       const request = {
         headers: {
-          authorization: `Bearer ${jwtToken}`
-        }
+          authorization: `Bearer ${jwtToken}`,
+        },
       };
       const response = {};
       const nextSpy = sinon.spy();

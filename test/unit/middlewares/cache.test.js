@@ -16,12 +16,12 @@ describe("Middleware | Utils | cache", function () {
 
     const request = {
       method: "GET",
-      originalUrl: "/test1"
+      originalUrl: "/test1",
     };
 
     const response = {
       statusCode: 200,
-      send: sinon.spy()
+      send: sinon.spy(),
     };
 
     const nextSpy = sinon.spy();
@@ -46,12 +46,12 @@ describe("Middleware | Utils | cache", function () {
 
     const request = {
       method: "GET",
-      originalUrl: "/test2"
+      originalUrl: "/test2",
     };
     const response = {
       on: sinon.spy(),
       statusCode: 200,
-      send: sinon.spy()
+      send: sinon.spy(),
     };
 
     const nextSpy = sinon.spy();
@@ -87,12 +87,12 @@ describe("Middleware | Utils | cache", function () {
     const cacheTestKey = "__cache__3";
     const request = {
       method: "GET",
-      originalUrl: "/test3"
+      originalUrl: "/test3",
     };
 
     const response = {
       statusCode: 400,
-      send: sinon.spy()
+      send: sinon.spy(),
     };
 
     const nextSpy = sinon.spy();
@@ -119,12 +119,12 @@ describe("Middleware | Utils | cache", function () {
 
     const request = {
       method: "GET",
-      originalUrl: "/test4"
+      originalUrl: "/test4",
     };
     const response = {
       on: sinon.spy(),
       statusCode: 200,
-      send: sinon.spy()
+      send: sinon.spy(),
     };
 
     const nextSpy = sinon.spy();

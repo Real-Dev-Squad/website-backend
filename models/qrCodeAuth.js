@@ -14,21 +14,21 @@ const updateStatus = async (userId, authStatus = "NOT_INIT", token) => {
 
     if (!authData.data()) {
       return {
-        userExists: false
+        userExists: false,
       };
     }
 
     await QrCodeAuthModel.doc(userId).set({
       ...authData.data(),
       authorization_status: authStatus,
-      token: `${token}`
+      token: `${token}`,
     });
     return {
       userExists: true,
       data: {
         ...authData.data(),
-        authorization_status: authStatus
-      }
+        authorization_status: authStatus,
+      },
     };
   } catch (err) {
     logger.error("Error in updating auth status", err);
@@ -62,12 +62,12 @@ const retrieveUserDeviceInfo = async ({ deviceId, userId }) => {
 
     if (!userData) {
       return {
-        userExists: false
+        userExists: false,
       };
     }
     return {
       userExists: true,
-      data: userData.data()
+      data: userData.data(),
     };
   } catch (err) {
     logger.error("Error in retrieving user device info", err);
@@ -78,5 +78,5 @@ const retrieveUserDeviceInfo = async ({ deviceId, userId }) => {
 module.exports = {
   updateStatus,
   storeUserDeviceInfo,
-  retrieveUserDeviceInfo
+  retrieveUserDeviceInfo,
 };

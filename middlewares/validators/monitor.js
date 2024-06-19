@@ -11,11 +11,11 @@ const baseSchema = joi
       .required()
       .messages({
         "any.required": "Required field 'type' is missing.",
-        "any.only": "Type field is restricted to either 'user' or 'task'."
+        "any.only": "Type field is restricted to either 'user' or 'task'.",
       }),
     monitored: joi.boolean().required().messages({
       "any.required": "Required field 'monitored' is missing.",
-      "boolean.base": "monitored field must be a boolean value."
+      "boolean.base": "monitored field must be a boolean value.",
     }),
     frequency: joi
       .number()
@@ -24,38 +24,38 @@ const baseSchema = joi
       .when("type", {
         is: "user",
         then: joi.number().equal(1).messages({
-          "number.equal": "'frequency' field must be equal to 1"
+          "number.equal": "'frequency' field must be equal to 1",
         }),
-        otherwise: joi.optional()
+        otherwise: joi.optional(),
       })
       .messages({
         "number.base": "'frequency' field must be a number",
         "number.integer": "'frequency' field must be an integer",
         "number.positive": "'frequency' field must be a positive integer",
-        "any.only": "'frequency' field must be equal to 1 for type 'user'"
+        "any.only": "'frequency' field must be equal to 1 for type 'user'",
       }),
     taskId: joi.string().when("type", {
       is: "task",
       then: joi.required().messages({
-        "any.required": "Required field 'taskId' is missing."
+        "any.required": "Required field 'taskId' is missing.",
       }),
-      otherwise: joi.optional()
+      otherwise: joi.optional(),
     }),
     userId: joi.string().when("type", {
       is: "user",
       then: joi.required().messages({
-        "any.required": "Required field 'userId' is missing."
+        "any.required": "Required field 'userId' is missing.",
       }),
-      otherwise: joi.optional()
-    })
+      otherwise: joi.optional(),
+    }),
   })
   .messages({ "object.unknown": "Invalid field provided." });
 
 const validateCreateTrackedProgressRecord = async (req, res, next) => {
   const monitoredSchema = joi.object().keys({
     monitored: joi.boolean().required().messages({
-      "boolean.base": "monitored field must be a boolean value."
-    })
+      "boolean.base": "monitored field must be a boolean value.",
+    }),
   });
   const createSchema = baseSchema.concat(monitoredSchema);
   try {
@@ -73,8 +73,8 @@ const validateUpdateTrackedProgress = async (req, res, next) => {
   const updatedData = { type, [TYPE_MAP[type]]: typeId, monitored, frequency };
   const monitoredSchema = joi.object().keys({
     monitored: joi.boolean().optional().messages({
-      "boolean.base": "monitored field must be a boolean value."
-    })
+      "boolean.base": "monitored field must be a boolean value.",
+    }),
   });
   const updateSchema = baseSchema.concat(monitoredSchema).or("monitored", "frequency");
   try {
@@ -92,7 +92,7 @@ const validateGetTrackedProgressQueryParams = async (req, res, next) => {
       type: joi.string().valid(...VALID_PROGRESS_TYPES),
       userId: joi.string(),
       taskId: joi.string(),
-      monitored: joi.bool().optional()
+      monitored: joi.bool().optional(),
     })
     .xor("type", "userId", "taskId")
     .with("monitored", "type")
@@ -101,7 +101,7 @@ const validateGetTrackedProgressQueryParams = async (req, res, next) => {
       "object.xor": "Invalid combination of request params.",
       "object.missing": "One of the following fields is required: type, userId, or taskId.",
       "object.unknown": "Invalid field provided.",
-      "object.with": "The monitored param is missing a required field type."
+      "object.with": "The monitored param is missing a required field type.",
     });
 
   try {
@@ -116,5 +116,5 @@ const validateGetTrackedProgressQueryParams = async (req, res, next) => {
 module.exports = {
   validateCreateTrackedProgressRecord,
   validateUpdateTrackedProgress,
-  validateGetTrackedProgressQueryParams
+  validateGetTrackedProgressQueryParams,
 };

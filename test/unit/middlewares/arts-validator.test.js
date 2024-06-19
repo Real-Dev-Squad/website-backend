@@ -8,8 +8,8 @@ describe("Test the arts validator", function () {
       body: {
         title: "some title",
         price: 100,
-        css: "random css"
-      }
+        css: "random css",
+      },
     };
     const res = {};
     const nextSpy = Sinon.spy();
@@ -20,13 +20,13 @@ describe("Test the arts validator", function () {
   it("Stops the request to propogate to next", async function () {
     const req = {
       body: {
-        "": ""
-      }
+        "": "",
+      },
     };
     const res = {
       boom: {
-        badRequest: () => {}
-      }
+        badRequest: () => {},
+      },
     };
     const nextSpy = Sinon.spy();
     await createArt(req, res, nextSpy);

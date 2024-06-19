@@ -9,8 +9,8 @@ describe("Test the notify validator", function () {
       body: {
         title: "some title",
         body: "some body",
-        userId: "user id"
-      }
+        userId: "user id",
+      },
     };
     const res = {};
     const nextSpy = Sinon.spy();
@@ -23,8 +23,8 @@ describe("Test the notify validator", function () {
       body: {
         title: "some title",
         body: "some body",
-        groupRoleId: "group role id"
-      }
+        groupRoleId: "group role id",
+      },
     };
     const res = {};
     const nextSpy = Sinon.spy();
@@ -38,13 +38,13 @@ describe("Test the notify validator", function () {
         title: "some title",
         body: "some body",
         userId: "user id",
-        groupRoleId: "some role id"
-      }
+        groupRoleId: "some role id",
+      },
     };
     const res = {
       boom: {
-        badRequest: () => {}
-      }
+        badRequest: () => {},
+      },
     };
     const nextSpy = Sinon.spy();
     await notifyValidator(req, res, nextSpy);
@@ -54,13 +54,13 @@ describe("Test the notify validator", function () {
   it("Stops the request to propogate to next", async function () {
     const req = {
       body: {
-        "": ""
-      }
+        "": "",
+      },
     };
     const res = {
       boom: {
-        badRequest: () => {}
-      }
+        badRequest: () => {},
+      },
     };
     const nextSpy = Sinon.spy();
     await notifyValidator(req, res, nextSpy);

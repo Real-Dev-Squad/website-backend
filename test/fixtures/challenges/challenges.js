@@ -6,7 +6,7 @@ module.exports = () => {
       title: "Sherlock and Anagrams",
       level: "Easy",
       start_date: timeUtils.getTimeInSecondAfter({}),
-      end_date: timeUtils.getTimeInSecondAfter({ days: 10 })
-    }
+      end_date: timeUtils.getTimeInSecondAfter({ days: 10 }),
+    },
   ];
 };

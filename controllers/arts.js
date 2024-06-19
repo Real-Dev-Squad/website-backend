@@ -13,7 +13,7 @@ const addArt = async (req, res) => {
 
     return res.json({
       message: "Art successfully added!",
-      id: artId
+      id: artId,
     });
   } catch (error) {
     logger.error(`Error adding art: ${error}`);
@@ -32,7 +32,7 @@ const fetchArts = async (req, res) => {
     const allArt = await artsQuery.fetchArts();
     return res.json({
       message: allArt.length > 0 ? "Arts returned successfully!" : "No arts found",
-      arts: allArt.length > 0 ? allArt : []
+      arts: allArt.length > 0 ? allArt : [],
     });
   } catch (err) {
     logger.error(`Error while fetching arts ${err}`);
@@ -52,7 +52,7 @@ const getSelfArts = async (req, res) => {
     const arts = await artsQuery.fetchUserArts(id);
     return res.json({
       message: "User arts returned successfully!",
-      arts
+      arts,
     });
   } catch (err) {
     logger.error(`Error while getting user arts ${err}`);
@@ -66,7 +66,7 @@ const getUserArts = async (req, res) => {
     const arts = await artsQuery.fetchUserArts(userId);
     return res.json({
       message: `User Arts of userId ${userId} returned successfully`,
-      arts
+      arts,
     });
   } catch (err) {
     logger.error(`Error while getting user arts ${err}`);
@@ -78,5 +78,5 @@ module.exports = {
   addArt,
   fetchArts,
   getSelfArts,
-  getUserArts
+  getUserArts,
 };

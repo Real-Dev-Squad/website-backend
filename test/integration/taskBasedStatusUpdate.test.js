@@ -22,7 +22,7 @@ describe("Task Based Status Updates", function () {
     let taskArr;
     const reqBody = {
       status: "COMPLETED",
-      percentCompleted: 100
+      percentCompleted: 100,
     };
 
     beforeEach(async function () {
@@ -49,7 +49,7 @@ describe("Task Based Status Updates", function () {
           .send(reqBody);
         expect(res.body.userStatus.status).to.equal("success");
         expect(res.body.userStatus.message).to.equal(
-          "UserStatus Document did not previously exist, New UserStatus Document created and updated to an IDLE status."
+          "UserStatus Document did not previously exist, New UserStatus Document created and updated to an IDLE status.",
         );
         expect(res.body.userStatus.data.currentStatus).to.equal(userState.IDLE);
       });
@@ -64,7 +64,7 @@ describe("Task Based Status Updates", function () {
           .send(reqBody);
         expect(res.body.userStatus.status).to.equal("success");
         expect(res.body.userStatus.message).to.equal(
-          "As the user is currently OOO, the future status has been updated to IDLE."
+          "As the user is currently OOO, the future status has been updated to IDLE.",
         );
         expect(res.body.userStatus.data.currentStatus).to.equal(userState.OOO);
         expect(res.body.userStatus.data.futureStatus).to.equal(userState.IDLE);
@@ -143,7 +143,7 @@ describe("Task Based Status Updates", function () {
           .send(reqBody);
         expect(res.body.userStatus.status).to.equal("success");
         expect(res.body.userStatus.message).to.equal(
-          "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status."
+          "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status.",
         );
         expect(res.body.userStatus.data.currentStatus).to.equal(userState.ACTIVE);
       });
@@ -158,7 +158,7 @@ describe("Task Based Status Updates", function () {
           .send(reqBody);
         expect(res.body.userStatus.status).to.equal("success");
         expect(res.body.userStatus.message).to.equal(
-          "As the user is currently OOO, the future status has been updated to ACTIVE."
+          "As the user is currently OOO, the future status has been updated to ACTIVE.",
         );
         expect(res.body.userStatus.data.currentStatus).to.equal(userState.OOO);
         expect(res.body.userStatus.data.futureStatus).to.equal(userState.ACTIVE);
@@ -232,7 +232,7 @@ describe("Task Based Status Updates", function () {
       type: "feature",
       status: "ASSIGNED",
       priority: "HIGH",
-      percentCompleted: 0
+      percentCompleted: 0,
     };
 
     beforeEach(async function () {
@@ -257,7 +257,7 @@ describe("Task Based Status Updates", function () {
       expect(res.status).to.equal(200);
       expect(res.body.userStatus.status).to.equal("success");
       expect(res.body.userStatus.message).to.equal(
-        "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status."
+        "UserStatus Document did not previously exist, New UserStatus Document created and updated to an ACTIVE status.",
       );
       expect(res.body.userStatus.data.currentStatus).to.equal(userState.ACTIVE);
     });
@@ -269,7 +269,7 @@ describe("Task Based Status Updates", function () {
       expect(res.status).to.equal(200);
       expect(res.body.userStatus.status).to.equal("success");
       expect(res.body.userStatus.message).to.equal(
-        "As the user is currently OOO, the future status has been updated to ACTIVE."
+        "As the user is currently OOO, the future status has been updated to ACTIVE.",
       );
       expect(res.body.userStatus.data.currentStatus).to.equal(userState.OOO);
       expect(res.body.userStatus.data.futureStatus).to.equal(userState.ACTIVE);
@@ -304,7 +304,7 @@ describe("Task Based Status Updates", function () {
       expect(res.body.userStatus.status).to.equal(500);
       expect(res.body.userStatus.error).to.equal("Internal Server Error");
       expect(res.body.userStatus.message).to.equal(
-        "Please reach out to the administrator as your user status is not recognized as valid."
+        "Please reach out to the administrator as your user status is not recognized as valid.",
       );
     });
 
@@ -315,7 +315,7 @@ describe("Task Based Status Updates", function () {
       expect(res.body.userStatus.status).to.equal(404);
       expect(res.body.userStatus.error).to.equal("Not Found");
       expect(res.body.userStatus.message).to.equal(
-        "Something went wrong. Username funkeyMonkey123 could not be found."
+        "Something went wrong. Username funkeyMonkey123 could not be found.",
       );
     });
   });
@@ -353,7 +353,7 @@ describe("Task Based Status Updates", function () {
         { userId: userId8, state: "ACTIVE" },
         { userId: userId9, state: "ACTIVE" },
         { userId: userId10, state: "ACTIVE" },
-        { userId: userId11, state: "IDLE" }
+        { userId: userId11, state: "IDLE" },
       ];
       reqBody.users = listUsers;
       await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.ACTIVE));
@@ -394,7 +394,7 @@ describe("Task Based Status Updates", function () {
         "activeUsersAltered",
         "activeUsersUnaltered",
         "idleUsersAltered",
-        "idleUsersUnaltered"
+        "idleUsersUnaltered",
       );
       expect(response.usersCount).to.equal(12);
       expect(response.unprocessedUsers).to.equal(0);
@@ -448,7 +448,7 @@ describe("Task Based Status Updates", function () {
       expect(res.status).to.equal(500);
       const response = res.body;
       expect(response.message).to.be.equal(
-        "The server has encountered an unexpected error. Please contact the administrator for more information."
+        "The server has encountered an unexpected error. Please contact the administrator for more information.",
       );
     });
   });
@@ -509,7 +509,7 @@ describe("Task Based Status Updates", function () {
           { userId: userId1, state: "ACTIVE" },
           { userId: userId2, state: "ACTIVE" },
           { userId: userId3, state: "IDLE" },
-          { userId: superUserId, state: "IDLE" }
+          { userId: superUserId, state: "IDLE" },
         ]);
     });
 
@@ -518,8 +518,8 @@ describe("Task Based Status Updates", function () {
         .stub(userStatusModelFunction, "getTaskBasedUsersStatus")
         .throws(
           new Error(
-            "The server has encountered an unexpected error. Please contact the administrator for more information."
-          )
+            "The server has encountered an unexpected error. Please contact the administrator for more information.",
+          ),
         );
       const response = await chai
         .request(app)
@@ -527,7 +527,7 @@ describe("Task Based Status Updates", function () {
         .set("cookie", `${cookieName}=${superUserJwt}`);
       expect(response.status).to.equal(500);
       expect(response.body.message).to.equal(
-        "The server has encountered an unexpected error. Please contact the administrator for more information."
+        "The server has encountered an unexpected error. Please contact the administrator for more information.",
       );
     });
   });

@@ -3,7 +3,7 @@ const {
   createProgressDocument,
   getProgressDocument,
   getRangeProgressData,
-  getProgressByDate
+  getProgressByDate,
 } = require("../models/progresses");
 const { PROGRESSES_RESPONSE_MESSAGES, INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
 const { sendTaskUpdate } = require("../utils/sendTaskUpdate");
@@ -46,28 +46,28 @@ const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEED
 
 const createProgress = async (req, res) => {
   const {
-    body: { type, completed, planned, blockers, taskId }
+    body: { type, completed, planned, blockers, taskId },
   } = req;
   try {
     const { data, taskTitle } = await createProgressDocument({ ...req.body, userId: req.userData.id });
     await sendTaskUpdate(completed, blockers, planned, req.userData.username, taskId, taskTitle);
     return res.status(201).json({
       data,
-      message: `${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_DOCUMENT_CREATED_SUCCEEDED}`
+      message: `${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_DOCUMENT_CREATED_SUCCEEDED}`,
     });
   } catch (error) {
     if (error instanceof Conflict) {
       return res.status(409).json({
-        message: error.message
+        message: error.message,
       });
     } else if (error instanceof NotFound) {
       return res.status(404).json({
-        message: error.message
+        message: error.message,
       });
     }
     logger.error(error.message);
     return res.status(500).json({
-      message: INTERNAL_SERVER_ERROR_MESSAGE
+      message: INTERNAL_SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -112,17 +112,17 @@ const getProgress = async (req, res) => {
     return res.json({
       message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
       count: data.length,
-      data
+      data,
     });
   } catch (error) {
     if (error instanceof NotFound) {
       return res.status(404).json({
-        message: error.message
+        message: error.message,
       });
     }
     logger.error(error.message);
     return res.status(500).json({
-      message: INTERNAL_SERVER_ERROR_MESSAGE
+      message: INTERNAL_SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -166,17 +166,17 @@ const getProgressRangeData = async (req, res) => {
     const data = await getRangeProgressData(req.query);
     return res.json({
       message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
-      data
+      data,
     });
   } catch (error) {
     if (error instanceof NotFound) {
       return res.status(404).json({
-        message: error.message
+        message: error.message,
       });
     }
     logger.error(error.message);
     return res.status(500).json({
-      message: INTERNAL_SERVER_ERROR_MESSAGE
+      message: INTERNAL_SERVER_ERROR_MESSAGE,
     });
   }
 };
@@ -220,17 +220,17 @@ const getProgressBydDateController = async (req, res) => {
     const data = await getProgressByDate(req.params);
     return res.json({
       message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
-      data
+      data,
     });
   } catch (error) {
     if (error instanceof NotFound) {
       return res.status(404).json({
-        message: error.message
+        message: error.message,
       });
     }
     logger.error(error.message);
     return res.status(500).json({
-      message: INTERNAL_SERVER_ERROR_MESSAGE
+      message: INTERNAL_SERVER_ERROR_MESSAGE,
     });
   }
 };

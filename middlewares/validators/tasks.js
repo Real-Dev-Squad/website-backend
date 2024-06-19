@@ -36,14 +36,14 @@ const createTask = async (req, res, next) => {
         .object()
         .keys({
           [DINERO]: joi.number().optional(),
-          [NEELAM]: joi.number().optional()
+          [NEELAM]: joi.number().optional(),
         })
         .optional(),
       lossRate: joi
         .object()
         .keys({
           [DINERO]: joi.number().optional(),
-          [NEELAM]: joi.number().optional()
+          [NEELAM]: joi.number().optional(),
         })
         .optional(),
       isNoteworthy: joi.bool().optional(),
@@ -56,10 +56,10 @@ const createTask = async (req, res, next) => {
             assignee: joi.string().optional(),
             id: joi.number().optional(),
             closedAt: joi.string().optional(),
-            html_url: joi.string().uri().optional()
-          })
+            html_url: joi.string().uri().optional(),
+          }),
         })
-        .optional()
+        .optional(),
     });
 
   try {
@@ -97,18 +97,18 @@ const updateTask = async (req, res, next) => {
         .object()
         .keys({
           [DINERO]: joi.number().optional(),
-          [NEELAM]: joi.number().optional()
+          [NEELAM]: joi.number().optional(),
         })
         .optional(),
       lossRate: joi
         .object()
         .keys({
           [DINERO]: joi.number().optional(),
-          [NEELAM]: joi.number().optional()
+          [NEELAM]: joi.number().optional(),
         })
         .optional(),
       isNoteworthy: joi.bool().optional(),
-      isCollapsed: joi.bool().optional()
+      isCollapsed: joi.bool().optional(),
     });
   try {
     await schema.validateAsync(req.body);
@@ -121,7 +121,7 @@ const updateTask = async (req, res, next) => {
 
 const updateSelfTask = async (req, res, next) => {
   const validStatus = [...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD)].filter(
-    (item) => item !== TASK_STATUS.AVAILABLE
+    (item) => item !== TASK_STATUS.AVAILABLE,
   );
   const schema = joi
     .object()
@@ -132,7 +132,7 @@ const updateSelfTask = async (req, res, next) => {
         .valid(...validStatus)
         .optional()
         .error(new BadRequest(`The value for the 'status' field is invalid.`)),
-      percentCompleted: joi.number().integer().min(0).max(100).optional()
+      percentCompleted: joi.number().integer().min(0).max(100).optional(),
     });
   try {
     await schema.validateAsync(req.body);
@@ -163,20 +163,20 @@ const getTasksValidator = async (req, res, next) => {
       .optional()
       .when("page", {
         is: joi.exist(),
-        then: joi.custom((_, helpers) => helpers.message("Both next and page cannot be passed"))
+        then: joi.custom((_, helpers) => helpers.message("Both next and page cannot be passed")),
       }),
     prev: joi
       .string()
       .optional()
       .when("page", {
         is: joi.exist(),
-        then: joi.custom((_, helpers) => helpers.message("Both prev and page cannot be passed"))
+        then: joi.custom((_, helpers) => helpers.message("Both prev and page cannot be passed")),
       })
       .concat(
         joi.when("next", {
           is: joi.exist(),
-          then: joi.custom((_, helpers) => helpers.message("Both prev and next cannot be passed"))
-        })
+          then: joi.custom((_, helpers) => helpers.message("Both prev and next cannot be passed")),
+        }),
       ),
     size: joi.number().integer().positive().min(1).max(100).optional(),
     q: joi
@@ -192,7 +192,7 @@ const getTasksValidator = async (req, res, next) => {
         }
         return value;
       }, "Invalid query format"),
-    userFeatureFlag: joi.string().optional()
+    userFeatureFlag: joi.string().optional(),
   });
 
   try {
@@ -207,7 +207,7 @@ const getUsersValidator = async (req, res, next) => {
   const queryParamsSchema = joi.object().keys({
     cursor: joi.string().optional(),
     q: joi.string().optional(),
-    size: joi.number().integer().min(1).max(2000)
+    size: joi.number().integer().min(1).max(2000),
   });
   const filtersSchema = joi.object().keys({
     status: joi
@@ -215,8 +215,8 @@ const getUsersValidator = async (req, res, next) => {
       .items(
         joi.object().keys({
           value: joi.string().valid(...Object.values(tasksUsersStatus)),
-          operator: joi.string().valid(Operators.INCLUDE)
-        })
+          operator: joi.string().valid(Operators.INCLUDE),
+        }),
       )
       .required(),
     "days-count": joi
@@ -224,8 +224,8 @@ const getUsersValidator = async (req, res, next) => {
       .items(
         joi.object().keys({
           value: joi.number().integer().min(1).max(10),
-          operator: joi.string().valid(Operators.EXCLUDE)
-        })
+          operator: joi.string().valid(Operators.EXCLUDE),
+        }),
       )
       .max(1)
       .optional(),
@@ -234,8 +234,8 @@ const getUsersValidator = async (req, res, next) => {
       .items(
         joi.object().keys({
           value: joi.string().valid(...Object.keys(daysOfWeek)),
-          operator: joi.string().valid(Operators.EXCLUDE)
-        })
+          operator: joi.string().valid(Operators.EXCLUDE),
+        }),
       )
       .max(7)
       .optional(),
@@ -244,11 +244,11 @@ const getUsersValidator = async (req, res, next) => {
       .items(
         joi.object().keys({
           value: joi.date().timestamp(),
-          operator: joi.string().valid(Operators.EXCLUDE)
-        })
+          operator: joi.string().valid(Operators.EXCLUDE),
+        }),
       )
       .max(20)
-      .optional()
+      .optional(),
   });
 
   try {
@@ -256,7 +256,7 @@ const getUsersValidator = async (req, res, next) => {
     const rqlQueryParser = new RQLQueryParser(queryString);
     await Promise.all([
       queryParamsSchema.validateAsync(req.query),
-      filtersSchema.validateAsync(rqlQueryParser.getFilterQueries())
+      filtersSchema.validateAsync(rqlQueryParser.getFilterQueries()),
     ]);
     next();
   } catch (error) {
@@ -280,5 +280,5 @@ module.exports = {
   updateSelfTask,
   getTasksValidator,
   getUsersValidator,
-  filterOrphanTasksValidator
+  filterOrphanTasksValidator,
 };

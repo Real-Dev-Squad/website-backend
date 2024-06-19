@@ -5,7 +5,7 @@ const createEvent = async (req, res, next) => {
     name: joi.string().required(),
     description: joi.string().required(),
     region: joi.string().required(),
-    userId: joi.string().required()
+    userId: joi.string().required(),
   });
 
   try {
@@ -21,7 +21,7 @@ const getAllEvents = async (req, res, next) => {
   const schema = joi.object({
     enabled: joi.boolean(),
     limit: joi.number().integer().min(10),
-    offset: joi.string()
+    offset: joi.string(),
   });
 
   try {
@@ -38,7 +38,7 @@ const joinEvent = async (req, res, next) => {
     roomId: joi.string().required(),
     userId: joi.string().required(),
     eventCode: joi.optional(),
-    role: joi.string().valid("host", "moderator", "guest", "maven").required()
+    role: joi.string().valid("host", "moderator", "guest", "maven").required(),
   });
 
   try {
@@ -56,7 +56,7 @@ const getEventById = async (req, res, next) => {
 
   const schema = joi.object({
     id: joi.string().required(),
-    isActiveRoom: joi.boolean()
+    isActiveRoom: joi.boolean(),
   });
 
   const validationOptions = { abortEarly: false };
@@ -73,7 +73,7 @@ const getEventById = async (req, res, next) => {
 const updateEvent = async (req, res, next) => {
   const schema = joi.object({
     id: joi.string().required(),
-    enabled: joi.boolean().required()
+    enabled: joi.boolean().required(),
   });
 
   try {
@@ -89,7 +89,7 @@ const endActiveEvent = async (req, res, next) => {
   const schema = joi.object({
     id: joi.string().required(),
     reason: joi.string().required(),
-    lock: joi.boolean().required()
+    lock: joi.boolean().required(),
   });
 
   try {
@@ -110,7 +110,7 @@ const addPeerToEvent = async (req, res, next) => {
     name: joi.string().required(),
     id: joi.string().required(),
     role: joi.string().required(),
-    joinedAt: joi.date().required()
+    joinedAt: joi.date().required(),
   });
 
   const validationOptions = { abortEarly: false };
@@ -131,7 +131,7 @@ const kickoutPeer = async (req, res, next) => {
   const schema = joi.object({
     id: joi.string().required(),
     peerId: joi.string().required(),
-    reason: joi.string().required()
+    reason: joi.string().required(),
   });
 
   const validationOptions = { abortEarly: false };
@@ -152,7 +152,7 @@ const generateEventCode = async (req, res, next) => {
   const schema = joi.object({
     id: joi.string().required(),
     eventCode: joi.string().required(),
-    role: joi.string().required()
+    role: joi.string().required(),
   });
 
   const validationOptions = { abortEarly: false };
@@ -170,7 +170,7 @@ const getEventCodes = async (req, res, next) => {
   const { id } = req.params;
 
   const schema = joi.object({
-    id: joi.string().required()
+    id: joi.string().required(),
   });
 
   const validationOptions = { abortEarly: false };
@@ -194,5 +194,5 @@ module.exports = {
   addPeerToEvent,
   kickoutPeer,
   generateEventCode,
-  getEventCodes
+  getEventCodes,
 };

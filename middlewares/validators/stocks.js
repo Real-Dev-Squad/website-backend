@@ -4,7 +4,7 @@ const createStock = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     name: joi.string().required(),
     quantity: joi.number().required(),
-    price: joi.number().required()
+    price: joi.number().required(),
   });
 
   try {
@@ -17,5 +17,5 @@ const createStock = async (req, res, next) => {
 };
 
 module.exports = {
-  createStock
+  createStock,
 };

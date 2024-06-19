@@ -34,13 +34,13 @@ const addNewTask = async (req, res) => {
       ...req.body,
       createdBy,
       createdAt: timeStamp,
-      updatedAt: timeStamp
+      updatedAt: timeStamp,
     };
     delete body.dependsOn;
     const { taskId, taskDetails } = await tasks.updateTask(body);
     const data = {
       taskId,
-      dependsOn
+      dependsOn,
     };
     const taskDependency = dependsOn && (await dependencyModel.addDependency(data));
     if (req.body.assignee) {
@@ -51,9 +51,9 @@ const addNewTask = async (req, res) => {
       task: {
         ...taskDetails,
         ...(taskDependency && { dependsOn: taskDependency }),
-        id: taskId
+        id: taskId,
       },
-      ...(userStatusUpdate && { userStatus: userStatusUpdate })
+      ...(userStatusUpdate && { userStatus: userStatusUpdate }),
     });
   } catch (err) {
     logger.error(`Error while creating new task: ${err}`);
@@ -81,9 +81,9 @@ const fetchTasksWithRdsAssigneeInfo = async (allTasks) => {
             ...task.github,
             issue: {
               ...task.github.issue,
-              assigneeRdsInfo: await getRdsUserInfoByGitHubUsername(task.github.issue.assignee)
-            }
-          }
+              assigneeRdsInfo: await getRdsUserInfoByGitHubUsername(task.github.issue.assignee),
+            },
+          },
         };
       }
     }
@@ -102,7 +102,7 @@ const fetchPaginatedTasks = async (query) => {
     const result = {
       tasks: tasksWithRdsAssigneeInfo.length > 0 ? tasksWithRdsAssigneeInfo : [],
       prev,
-      next
+      next,
     };
 
     if (next) {
@@ -110,7 +110,7 @@ const fetchPaginatedTasks = async (query) => {
         endpoint: "/tasks",
         query,
         cursorKey: "next",
-        docId: next
+        docId: next,
       });
       result.next = nextLink;
     }
@@ -120,7 +120,7 @@ const fetchPaginatedTasks = async (query) => {
         endpoint: "/tasks",
         query,
         cursorKey: "prev",
-        docId: prev
+        docId: prev,
       });
       result.prev = prevLink;
     }
@@ -141,7 +141,7 @@ const fetchTasks = async (req, res) => {
       const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next, userFeatureFlag });
       return res.json({
         message: "Tasks returned successfully!",
-        ...paginatedTasks
+        ...paginatedTasks,
       });
     }
 
@@ -150,7 +150,7 @@ const fetchTasks = async (req, res) => {
       if (!searchParams.searchTerm) {
         return res.status(404).json({
           message: "No tasks found.",
-          tasks: []
+          tasks: [],
         });
       }
       const filterTasks = await tasks.fetchTasks(searchParams.searchTerm);
@@ -158,12 +158,12 @@ const fetchTasks = async (req, res) => {
       if (tasksWithRdsAssigneeInfo.length === 0) {
         return res.status(404).json({
           message: "No tasks found.",
-          tasks: []
+          tasks: [],
         });
       }
       return res.json({
         message: "Filter tasks returned successfully!",
-        tasks: tasksWithRdsAssigneeInfo
+        tasks: tasksWithRdsAssigneeInfo,
       });
     }
 
@@ -172,12 +172,12 @@ const fetchTasks = async (req, res) => {
     if (tasksWithRdsAssigneeInfo.length === 0) {
       return res.status(404).json({
         message: "No tasks found",
-        tasks: []
+        tasks: [],
       });
     }
     return res.json({
       message: "Tasks returned successfully!",
-      tasks: tasksWithRdsAssigneeInfo
+      tasks: tasksWithRdsAssigneeInfo,
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);
@@ -216,7 +216,7 @@ const getUserTasks = async (req, res) => {
 
     return res.json({
       message: "Tasks returned successfully!",
-      tasks: allTasks.length > 0 ? allTasks : []
+      tasks: allTasks.length > 0 ? allTasks : [],
     });
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`);
@@ -260,7 +260,7 @@ const getTask = async (req, res) => {
     }
     return res.json({
       message: "task returned successfully",
-      taskData: { ...taskData, dependsOn: dependencyDocReference }
+      taskData: { ...taskData, dependsOn: dependencyDocReference },
     });
   } catch (err) {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
@@ -355,12 +355,12 @@ const updateTaskStatus = async (req, res, next) => {
           return res.boom.badRequest(
             `The status of task can not be changed from ${
               isCurrentTaskStatusInProgress ? "In progress" : "Blocked"
-            } until progress of task is not 100%.`
+            } until progress of task is not 100%.`,
           );
         }
         if (isNewTaskStatusInProgress && !isCurrentTaskStatusBlock && !isCurrProgress0 && !isNewProgress0) {
           return res.boom.badRequest(
-            "The status of task can not be changed to In progress until progress of task is not 0%."
+            "The status of task can not be changed to In progress until progress of task is not 0%.",
           );
         }
       }
@@ -388,12 +388,12 @@ const updateTaskStatus = async (req, res, next) => {
       meta: {
         userId,
         taskId,
-        username
+        username,
       },
       body: {
         subType: "update",
-        new: {}
-      }
+        new: {},
+      },
     };
 
     if (status && !req.body.percentCompleted) {
@@ -410,7 +410,7 @@ const updateTaskStatus = async (req, res, next) => {
 
     const [, taskLogResult] = await Promise.all([
       tasks.updateTask(req.body, taskId),
-      addLog(taskLog.type, taskLog.meta, taskLog.body)
+      addLog(taskLog.type, taskLog.meta, taskLog.body),
     ]);
     taskLog.id = taskLogResult.id;
 
@@ -420,7 +420,7 @@ const updateTaskStatus = async (req, res, next) => {
     return res.json({
       message: "Task updated successfully!",
       taskLog,
-      ...(userStatusUpdate && { userStatus: userStatusUpdate })
+      ...(userStatusUpdate && { userStatus: userStatusUpdate }),
     });
   } catch (err) {
     logger.error(`Error while updating task status : ${err}`);
@@ -439,12 +439,12 @@ const overdueTasks = async (req, res) => {
     const allTasks = await tasks.fetchTasks();
     const now = Math.floor(Date.now() / 1000);
     const overDueTasks = allTasks.filter(
-      (task) => (task.status === ASSIGNED || task.status === IN_PROGRESS) && task.endsOn < now
+      (task) => (task.status === ASSIGNED || task.status === IN_PROGRESS) && task.endsOn < now,
     );
     const newAvailableTasks = await tasks.overdueTasks(overDueTasks);
     return res.json({
       message: newAvailableTasks.length ? "Overdue Tasks returned successfully!" : "No overdue tasks found",
-      newAvailableTasks
+      newAvailableTasks,
     });
   } catch (err) {
     logger.error(`Error while fetching overdue tasks : ${err}`);
@@ -510,7 +510,7 @@ const getUsersHandler = async (req, res) => {
       weekdayList,
       dateList,
       status,
-      size: transformedSize
+      size: transformedSize,
     } = transformTasksUsersQuery({ ...filterQueries, size });
     if (status === tasksUsersStatus.MISSED_UPDATES) {
       const response = await getMissedProgressUpdatesUsers({
@@ -518,7 +518,7 @@ const getUsersHandler = async (req, res) => {
         size: transformedSize,
         excludedDates: dateList,
         excludedDays: weekdayList,
-        dateGap: dateGap
+        dateGap: dateGap,
       });
 
       if (response.error) {
@@ -534,12 +534,12 @@ const getUsersHandler = async (req, res) => {
     const taskRequestLog = {
       type: logType.TASKS_MISSED_UPDATES_ERRORS,
       meta: {
-        lastModifiedAt: Date.now()
+        lastModifiedAt: Date.now(),
       },
       body: {
         request: req.query,
-        error: error.toString()
-      }
+        error: error.toString(),
+      },
     };
     await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
     logger.error("Error in fetching users details of tasks", error);
@@ -559,5 +559,5 @@ module.exports = {
   assignTask,
   updateStatus,
   getUsersHandler,
-  orphanTasks
+  orphanTasks,
 };

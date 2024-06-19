@@ -14,17 +14,17 @@ const addTag = async (req, res) => {
     const { id, tagData, message } = await TagModel.addTag({
       ...req.body,
       createdBy: req.userData.id,
-      date: admin.firestore.Timestamp.fromDate(new Date())
+      date: admin.firestore.Timestamp.fromDate(new Date()),
     });
     if (id) {
       return res.json({
         message,
-        data: { tag: tagData, id }
+        data: { tag: tagData, id },
       });
     } else {
       return res.status(400).json({
         message,
-        data: { tag: tagData }
+        data: { tag: tagData },
       });
     }
   } catch (err) {
@@ -45,7 +45,7 @@ const deleteTag = async (req, res) => {
     const { id } = await TagModel.deleteTag(req.params.tagid);
     return res.json({
       message: "Tag Deleted successfully!",
-      id
+      id,
     });
   } catch (err) {
     logger.error(`Error while deleting the tag: ${err}`);
@@ -64,7 +64,7 @@ const getAllTags = async (req, res) => {
     const { allTags } = await TagModel.getAllTags();
     return res.json({
       message: "Tags returned successfully",
-      tags: allTags
+      tags: allTags,
     });
   } catch (err) {
     logger.error(`Error while fetching all the tag: ${err}`);
@@ -78,7 +78,7 @@ const getTagsByType = async (req, res) => {
     const { tags } = await TagModel.getTagByType(type);
     return res.json({
       message: `Tags of type: ${type} returned successfully`,
-      tags
+      tags,
     });
   } catch (err) {
     logger.error(`Error while fetching the tags: ${err}`);
@@ -90,5 +90,5 @@ module.exports = {
   addTag,
   deleteTag,
   getAllTags,
-  getTagsByType
+  getTagsByType,
 };

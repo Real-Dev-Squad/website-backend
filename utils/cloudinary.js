@@ -9,5 +9,5 @@ const upload = async (file, options = {}) => {
 };
 
 module.exports = {
-  upload
+  upload,
 };

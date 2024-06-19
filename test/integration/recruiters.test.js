@@ -76,7 +76,7 @@ describe("Recruiters", function () {
           expect(res.body).to.eql({
             statusCode: 404,
             error: "Not Found",
-            message: "User doesn't exist"
+            message: "User doesn't exist",
           });
 
           return done();

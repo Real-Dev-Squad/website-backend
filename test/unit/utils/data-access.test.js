@@ -7,9 +7,9 @@ describe("removeObjectField", function () {
       a: {
         b: {
           c: 42,
-          d: "hello"
-        }
-      }
+          d: "hello",
+        },
+      },
     };
 
     removeObjectField("a.b.c", obj);
@@ -17,9 +17,9 @@ describe("removeObjectField", function () {
     expect(obj).to.deep.equal({
       a: {
         b: {
-          d: "hello"
-        }
-      }
+          d: "hello",
+        },
+      },
     });
   });
 
@@ -27,7 +27,7 @@ describe("removeObjectField", function () {
     const arr = [
       { id: 1, a: "abc" },
       { id: 2, a: "def" },
-      { id: 3, b: "ghi" }
+      { id: 3, b: "ghi" },
     ];
 
     removeObjectField("*.a", arr);
@@ -42,25 +42,25 @@ describe("removeObjectField", function () {
         a: "abc",
         z: [
           { a: "abc", b: "def" },
-          { a: "def", b: "def" }
-        ]
+          { a: "def", b: "def" },
+        ],
       },
       {
         id: 2,
         a: "def",
         z: [
           { a: "abc", b: "def" },
-          { a: "def", b: "def" }
-        ]
+          { a: "def", b: "def" },
+        ],
       },
       {
         id: 3,
         b: "ghi",
         z: [
           { a: "abc", b: "def" },
-          { a: "def", b: "def" }
-        ]
-      }
+          { a: "def", b: "def" },
+        ],
+      },
     ];
 
     removeObjectField("*.z.*.a", arr);
@@ -69,18 +69,18 @@ describe("removeObjectField", function () {
       {
         id: 1,
         a: "abc",
-        z: [{ b: "def" }, { b: "def" }]
+        z: [{ b: "def" }, { b: "def" }],
       },
       {
         id: 2,
         a: "def",
-        z: [{ b: "def" }, { b: "def" }]
+        z: [{ b: "def" }, { b: "def" }],
       },
       {
         id: 3,
         b: "ghi",
-        z: [{ b: "def" }, { b: "def" }]
-      }
+        z: [{ b: "def" }, { b: "def" }],
+      },
     ]);
   });
 
@@ -89,9 +89,9 @@ describe("removeObjectField", function () {
       a: {
         b: {
           c: 42,
-          d: "hello"
-        }
-      }
+          d: "hello",
+        },
+      },
     };
 
     removeObjectField("*", obj);
@@ -103,8 +103,8 @@ describe("removeObjectField", function () {
     const obj = {
       b: {
         c: 42,
-        d: "hello"
-      }
+        d: "hello",
+      },
     };
 
     removeObjectField("x.y.z", obj);
@@ -112,8 +112,8 @@ describe("removeObjectField", function () {
     expect(obj).to.deep.equal({
       b: {
         c: 42,
-        d: "hello"
-      }
+        d: "hello",
+      },
     });
   });
 

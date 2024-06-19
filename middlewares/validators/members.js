@@ -2,7 +2,7 @@ const joi = require("joi");
 
 const validateGetMembers = async (req, res, next) => {
   const querySchema = joi.object().keys({
-    showArchived: joi.boolean().optional()
+    showArchived: joi.boolean().optional(),
   });
 
   try {
@@ -15,5 +15,5 @@ const validateGetMembers = async (req, res, next) => {
 };
 
 module.exports = {
-  validateGetMembers
+  validateGetMembers,
 };
