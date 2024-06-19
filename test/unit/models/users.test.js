@@ -21,6 +21,10 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const userData = require("../../fixtures/user/user");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
+const app = require("../../../server");
+const prodUsers = require("../../fixtures/user/prodUsers");
+const authService = require("../../../services/authService");
+const cookieName = config.get("userToken.cookieName");
 /**
  * Test the model functions and validate the data stored
  */
@@ -486,6 +490,101 @@ describe("users", function () {
 
       expect(userListResult.length).to.be.equal(1);
       expect(userListResult[0].discordId).to.be.deep.equal(userDataArray[0].discordId);
+    });
+  });
+
+  describe("Adding github_user_id for each user document", function () {
+    let userId, userToken, superUserId, superUserToken;
+
+    beforeEach(async function () {
+      userId = await addUser(prodUsers[1]);
+      userToken = authService.generateAuthToken({ userId: userId });
+      superUserId = await addUser(prodUsers[0]);
+      superUserToken = authService.generateAuthToken({ userId: superUserId });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("Migration API should not be accessible by any regular user", function (done) {
+      chai
+        .request(app)
+        .post("/users/migrations?action=adds-github-id&page=0&size=10")
+        .set("cookie", `${cookieName}=${userToken}`)
+        .send()
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "You are not authorized for this action.",
+          });
+          return done();
+        });
+    });
+
+    it("Migration API should be not be accessible with invalid query params", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/migrations")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+      expect(res).to.have.status(400);
+      expect(res.body).to.have.property("message");
+      expect(res.body).to.have.property("error");
+      expect(res.body.message).to.equal("Invalid Query Parameters Passed");
+      expect(res.body.error).to.equal("Bad Request");
+    });
+
+    it("Migration API should be accessible by super user", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/migrations?action=adds-github-id&page=0&size=10")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+      expect(res).to.have.status(200);
+    });
+
+    it("Migration API to add github_user_id should work", async function () {
+      for (const user of prodUsers.slice(2)) {
+        await addUser(user);
+      }
+      const allUsers = await chai.request(app).get("/users").set("cookie", `${cookieName}=${superUserToken}`).send();
+      const usersWithoutGithubId = allUsers.body.users.filter((user) => {
+        return !user.github_user_id;
+      });
+
+      expect(usersWithoutGithubId).to.not.have.length(0);
+
+      const res = await chai
+        .request(app)
+        .post("/users/migrations?action=adds-github-id&page=0&size=10")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.have.property("data").that.is.an("object");
+      expect(res.body.data).to.have.property("totalUsers").that.is.a("number");
+      expect(res.body.data).to.have.property("usersUpdated").that.is.a("number");
+      expect(res.body.data).to.have.property("usersNotUpdated").that.is.a("number");
+      expect(res.body.data).to.have.property("invalidUsersDetails").that.is.an("array");
+
+      const updatedUsers = await chai
+        .request(app)
+        .get("/users")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+
+      const updatedUsersWithoutGithubId = updatedUsers.body.users.filter((user) => {
+        return !user.github_user_id;
+      });
+      // For invalid username
+      expect(updatedUsersWithoutGithubId).to.have.length(1);
     });
   });
 });
