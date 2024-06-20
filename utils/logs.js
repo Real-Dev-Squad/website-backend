@@ -27,7 +27,7 @@ async function getTasksFromLogs(allLogs) {
       .where(
         admin.firestore.FieldPath.documentId(),
         "in",
-        Array.from(taskIds).filter((e) => e),
+        Array.from(taskIds).filter((e) => e)
       )
       .get();
     data.forEach((doc) => {

@@ -85,8 +85,8 @@ const getExtensionRequestsValidator = async (req, res, next) => {
           joi
             .string()
             .valid(...ER_STATUS_ENUM)
-            .insensitive(),
-        ),
+            .insensitive()
+        )
       )
       .optional(),
     assignee: joi.alternatives().try(joi.string(), joi.array().items(joi.string())).optional(),

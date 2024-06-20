@@ -302,7 +302,7 @@ const kickoutPeer = async (req, res) => {
     addLog(
       logType.EVENTS_REMOVE_PEER,
       { removed_by_id: req.userData.id, removed_by_username: req.userData.username },
-      { ...payload, event_id: id, peer_name: peer.name },
+      { ...payload, event_id: id, peer_name: peer.name }
     );
 
     return res.status(200).json({

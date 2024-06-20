@@ -360,7 +360,7 @@ describe("Extension Requests", function () {
           expect(res).to.have.status(403);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal(
-            "Only assigned user and super user can create an extension request for this task.",
+            "Only assigned user and super user can create an extension request for this task."
           );
           return done();
         });
@@ -924,7 +924,7 @@ describe("Extension Requests", function () {
         });
       const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId5 }, "extensionRequests");
       const updationLogs = logs.find(
-        (log) => log.meta.userId === superUserId && log.body.newTitle === newTitle && log.body.oldTitle === oldTitle,
+        (log) => log.meta.userId === superUserId && log.body.newTitle === newTitle && log.body.oldTitle === oldTitle
       );
       expect(updationLogs.meta.extensionRequestId).to.equal(extensionRequestId5);
       expect(updationLogs.body.newTitle).to.equal(newTitle);
@@ -944,7 +944,7 @@ describe("Extension Requests", function () {
         });
       const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId5 }, "extensionRequests");
       const updationLogs = logs.find(
-        (log) => log.meta.userId === superUserId && log.body.newEndsOn === suETA && log.body.oldEndsOn === usersETA,
+        (log) => log.meta.userId === superUserId && log.body.newEndsOn === suETA && log.body.oldEndsOn === usersETA
       );
       expect(updationLogs.meta.extensionRequestId).to.equal(extensionRequestId5);
       expect(updationLogs.body.newEndsOn).to.equal(suETA);
@@ -964,8 +964,7 @@ describe("Extension Requests", function () {
         });
       const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId5 }, "extensionRequests");
       const updationLogs = logs.find(
-        (log) =>
-          log.meta.userId === superUserId && log.body.newReason === newReason && log.body.oldReason === oldReason,
+        (log) => log.meta.userId === superUserId && log.body.newReason === newReason && log.body.oldReason === oldReason
       );
       expect(updationLogs.meta.extensionRequestId).to.equal(extensionRequestId5);
       expect(updationLogs.body.newReason).to.equal(newReason);

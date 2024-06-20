@@ -132,7 +132,7 @@ describe("Multiple Extension Requests", function () {
           expect(res).to.have.status(403);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal(
-            "Only assigned user and super user can create an extension request for this task.",
+            "Only assigned user and super user can create an extension request for this task."
           );
           return done();
         });

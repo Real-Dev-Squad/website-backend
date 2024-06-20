@@ -23,8 +23,8 @@ const validateUserStatusData = async (todaysTime, req, res, next) => {
           .required()
           .error(
             new Error(
-              `The 'until' field must have a value that is either 'from' date or a date that comes after 'from' day.`,
-            ),
+              `The 'until' field must have a value that is either 'from' date or a date that comes after 'from' day.`
+            )
           ),
         otherwise: Joi.optional(),
       }),
@@ -39,12 +39,12 @@ const validateUserStatusData = async (todaysTime, req, res, next) => {
             is: Joi.number().greater(
               Joi.ref("from", {
                 adjust: (value) => value + threeDaysInMilliseconds,
-              }),
+              })
             ),
             then: Joi.string()
               .optional()
               .error(
-                new Error(`The value for the 'message' field is mandatory when State is OOO for more than three days.`),
+                new Error(`The value for the 'message' field is mandatory when State is OOO for more than three days.`)
               ),
             otherwise: Joi.required(),
           }),
@@ -94,7 +94,7 @@ const validateMassUpdate = async (req, res, next) => {
           Joi.object({
             userId: Joi.string().trim().required(),
             state: Joi.string().valid(userState.IDLE, userState.ACTIVE).required(),
-          }),
+          })
         )
         .min(1)
         .required()

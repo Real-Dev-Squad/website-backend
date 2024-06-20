@@ -45,7 +45,7 @@ const addOrUpdate = async (userData, userId = null) => {
             ...userData,
             updated_at: Date.now(),
           },
-          { merge: true },
+          { merge: true }
         );
       }
 
@@ -559,7 +559,7 @@ const getUsersBasedOnFilter = async (query) => {
       const fetchUsersWithOnBoardingState = await getUsersWithOnboardingStateInRange(
         filteredUserDocs,
         stateItems,
-        query.time,
+        query.time
       );
       return fetchUsersWithOnBoardingState;
     }

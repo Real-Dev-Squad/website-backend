@@ -44,12 +44,12 @@ describe("Filter Users", function () {
     oooUser = await addUser(userData[0]);
     await updateUserStatus(
       oooUser,
-      generateUserStatusData(userState.OOO, updatedAtDate, updatedAtDate, untilDate, "Bad Health"),
+      generateUserStatusData(userState.OOO, updatedAtDate, updatedAtDate, untilDate, "Bad Health")
     );
     idleUser = await addUser(userData[1]);
     await updateUserStatus(
       idleUser,
-      generateUserStatusData(userState.IDLE, updatedAtDate, updatedAtDate, untilDate, "CSS"),
+      generateUserStatusData(userState.IDLE, updatedAtDate, updatedAtDate, untilDate, "CSS")
     );
     activeUser = await addUser(userData[8]);
     await updateUserStatus(activeUser, generateUserStatusData(userState.ACTIVE, updatedAtDate, updatedAtDate));

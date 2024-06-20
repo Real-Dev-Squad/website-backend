@@ -66,7 +66,7 @@ const linkExternalAccount = async (req, res) => {
         discordId: attributes.discordId,
         discordJoinedAt: attributes.discordJoinedAt,
       },
-      userId,
+      userId
     );
 
     return res.status(204).json({ message: "Your discord profile has been linked successfully" });

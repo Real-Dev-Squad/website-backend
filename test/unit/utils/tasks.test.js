@@ -7,7 +7,7 @@ describe("Utils | Tasks", function () {
   describe("transformTasksUsersQuery", function () {
     it("should correctly transform given queries", function () {
       const rqlParser = new RQLQueryParser(
-        `status:${tasksUsersStatus.MISSED_UPDATES} -weekday:sun -date:231423432 -days-count:4`,
+        `status:${tasksUsersStatus.MISSED_UPDATES} -weekday:sun -date:231423432 -days-count:4`
       );
       const filterQueries = rqlParser.getFilterQueries();
       const result = transformTasksUsersQuery({ ...filterQueries, size: 40 });
@@ -21,7 +21,7 @@ describe("Utils | Tasks", function () {
 
     it("should correctly transform multiple queries", function () {
       const rqlParser = new RQLQueryParser(
-        `status:${tasksUsersStatus.MISSED_UPDATES} -weekday:sun -weekday:mon -date:231423432 -date:231423433434 -days-count:4`,
+        `status:${tasksUsersStatus.MISSED_UPDATES} -weekday:sun -weekday:mon -date:231423432 -date:231423433434 -days-count:4`
       );
       const filterQueries = rqlParser.getFilterQueries();
       const result = transformTasksUsersQuery({ ...filterQueries, size: 40 });

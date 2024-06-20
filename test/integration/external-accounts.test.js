@@ -252,7 +252,7 @@ describe("External Accounts", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        }),
+        })
       );
       chai
         .request(app)
@@ -329,7 +329,7 @@ describe("External Accounts", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        }),
+        })
       );
 
       const res = await chai
@@ -356,7 +356,7 @@ describe("External Accounts", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        }),
+        })
       );
       const res = await chai
         .request(app)
@@ -382,7 +382,7 @@ describe("External Accounts", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        }),
+        })
       );
       const res = await chai
         .request(app)
@@ -408,7 +408,7 @@ describe("External Accounts", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        }),
+        })
       );
       const res = await chai
         .request(app)

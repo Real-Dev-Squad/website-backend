@@ -183,7 +183,7 @@ const fetchExtensionRequests = async (req, res) => {
 
     const allExtensionRequests = await extensionRequestsQuery.fetchPaginatedExtensionRequests(
       { taskId, status: transformedStatus, assignee },
-      { cursor, order, size: transformedSize },
+      { cursor, order, size: transformedSize }
     );
     return res.json({
       message: "Extension Requests returned successfully!",
@@ -238,7 +238,7 @@ const getSelfExtensionRequests = async (req, res) => {
             if (latestExtensionRequest.status === "APPROVED" || latestExtensionRequest.status === "DENIED") {
               const logs = await logsQuery.fetchLogs(
                 { "meta.extensionRequestId": latestExtensionRequest.id, limit: 1 },
-                "extensionRequests",
+                "extensionRequests"
               );
 
               if (
@@ -390,8 +390,8 @@ const updateExtensionRequestStatus = async (req, res) => {
       promises.push(
         tasks.updateTask(
           { endsOn: extensionRequest.extensionRequestData.newEndsOn },
-          extensionRequest.extensionRequestData.taskId,
-        ),
+          extensionRequest.extensionRequestData.taskId
+        )
       );
       promises.push(addLog(taskLog.type, taskLog.meta, taskLog.body));
     }

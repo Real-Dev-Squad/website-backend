@@ -29,7 +29,7 @@ router.patch(
   authenticate,
   authorizeRoles([SUPERUSER]),
   checkIsVerifiedDiscord,
-  users.updateDiscordUserNickname,
+  users.updateDiscordUserNickname
 );
 router.get("/:username", users.getUser);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
@@ -41,14 +41,14 @@ router.patch(
   authenticate,
   authorizeRoles([SUPERUSER]),
   userValidator.validateUsersPatchHandler,
-  users.usersPatchHandler,
+  users.usersPatchHandler
 );
 router.patch(
   "/:id/temporary/data",
   authenticate,
   authorizeRoles([SUPERUSER]),
   userValidator.validateUpdateRoles,
-  users.updateRoles,
+  users.updateRoles
 );
 
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
@@ -58,7 +58,7 @@ router.patch(
   authenticate,
   authorizeRoles([SUPERUSER]),
   userValidator.validateImageVerificationQuery,
-  users.verifyUserImage,
+  users.verifyUserImage
 );
 router.get("/picture/:id", authenticate, authorizeRoles([SUPERUSER]), users.getUserImageForVerification);
 router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);

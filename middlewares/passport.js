@@ -11,8 +11,8 @@ try {
       },
       (accessToken, refreshToken, profile, done) => {
         return done(null, accessToken, profile);
-      },
-    ),
+      }
+    )
   );
 } catch (err) {
   logger.error("Error initialising passport:", err);

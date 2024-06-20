@@ -180,7 +180,7 @@ const kickoutPeer = async ({ eventId, peerId, reason }) => {
     }
 
     const updatedJoinedEvents = joinedEvents.map((event, index) =>
-      index === eventIndex ? { ...event, left_at: new Date(), reason: reason, isKickedout: true } : event,
+      index === eventIndex ? { ...event, left_at: new Date(), reason: reason, isKickedout: true } : event
     );
 
     await peerRef.update({ joinedEvents: updatedJoinedEvents });

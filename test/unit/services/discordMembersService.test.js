@@ -29,7 +29,7 @@ describe("getDiscordMemberDetails", function () {
       Promise.resolve({
         status: 200,
         json: () => Promise.resolve(expectedMemberDetails),
-      }),
+      })
     );
 
     const response = await getDiscordMemberDetails(discordId);
@@ -44,7 +44,7 @@ describe("getDiscordMemberDetails", function () {
       Promise.resolve({
         status: 404,
         json: () => Promise.resolve({ message: "User does not exist" }),
-      }),
+      })
     );
 
     try {

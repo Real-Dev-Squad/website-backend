@@ -109,7 +109,7 @@ describe("Badges", function () {
           }
           expect(response).to.have.status(400);
           expect(response.body.message).to.equal(
-            `${ERROR_MESSAGES_VALIDATORS.API_PAYLOAD_VALIDATION_FAILED}, "createdBy" is required`,
+            `${ERROR_MESSAGES_VALIDATORS.API_PAYLOAD_VALIDATION_FAILED}, "createdBy" is required`
           );
           expect(response.body.error).to.equal("Bad Request");
 
@@ -156,7 +156,7 @@ describe("Badges", function () {
           expect(response).to.have.status(400);
           expect(response.body.error).to.equal("Bad Request");
           expect(response.body.message).to.equal(
-            `${ERROR_MESSAGES_VALIDATORS.API_PAYLOAD_VALIDATION_FAILED}, "userId" is required`,
+            `${ERROR_MESSAGES_VALIDATORS.API_PAYLOAD_VALIDATION_FAILED}, "userId" is required`
           );
           return done();
         });

@@ -16,7 +16,7 @@ const validateItemsPayload = async (req, res, next) => {
       Joi.object({
         tagId: Joi.string().required(),
         levelId: Joi.string().required(),
-      }),
+      })
     ),
   });
 

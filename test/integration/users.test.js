@@ -72,7 +72,7 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        }),
+        })
       );
     });
 
@@ -1757,7 +1757,7 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        }),
+        })
       );
       chai
         .request(app)
@@ -2100,7 +2100,7 @@ describe("Users", function () {
           expect(res.body.summary.totalUsers).to.be.equal(3);
           expect(res.body.summary.totalOperationsFailed).to.be.equal(0);
           expect(res.body.message).to.equal(
-            "Successfully updated users archived role to true if in_discord role is false",
+            "Successfully updated users archived role to true if in_discord role is false"
           );
           return done();
         });
@@ -2175,7 +2175,7 @@ describe("Users", function () {
           expect(res.body.summary.updatedUserDetails.length).to.equal(3);
           expect(res.body.summary.failedUserDetails.length).to.equal(0);
           expect(res.body.message).to.equal(
-            "Successfully updated users archived role to true if in_discord role is false",
+            "Successfully updated users archived role to true if in_discord role is false"
           );
           return done();
         });
@@ -2198,7 +2198,7 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(),
-        }),
+        })
       );
       chai
         .request(app)
@@ -2259,7 +2259,7 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        }),
+        })
       );
     });
 
@@ -2295,7 +2295,7 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(discordMembers),
-        }),
+        })
       );
     });
 
@@ -2318,7 +2318,7 @@ describe("Users", function () {
 
           expect(res).to.have.status(403);
           expect(res.body.message).to.equal(
-            "Developers can't update their profile data. Use profile service for updating.",
+            "Developers can't update their profile data. Use profile service for updating."
           );
 
           return done();
@@ -2336,7 +2336,7 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(discordMembers),
-        }),
+        })
       );
     });
 

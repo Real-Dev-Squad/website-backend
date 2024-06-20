@@ -335,7 +335,7 @@ const updateAllUserStatus = async () => {
     });
     if (batch._ops.length > 100) {
       logger.info(
-        `Warning: More than 100 User Status documents to update. The max limit permissible is 500. Refer https://github.com/Real-Dev-Squad/website-backend/issues/890 for more details.`,
+        `Warning: More than 100 User Status documents to update. The max limit permissible is 500. Refer https://github.com/Real-Dev-Squad/website-backend/issues/890 for more details.`
       );
     }
     await batch.commit();
@@ -610,7 +610,7 @@ const getTaskBasedUsersStatus = async () => {
           unprocessedUsers.push(assigneeId);
           logger.error(`Error retrieving tasks for user ${assigneeId}: ${error.message}`);
         }
-      }),
+      })
     );
   }
 
@@ -649,7 +649,7 @@ const cancelOooStatus = async (userId) => {
     const { futureStatus, ...docData } = userStatusDocument.data();
     if (docData.currentStatus.state !== userState.OOO) {
       throw new Forbidden(
-        `The ${userState.OOO} Status cannot be canceled because the current status is ${docData.currentStatus.state}.`,
+        `The ${userState.OOO} Status cannot be canceled because the current status is ${docData.currentStatus.state}.`
       );
     }
     try {

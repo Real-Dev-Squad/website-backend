@@ -431,7 +431,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal(`Bad Request`);
           expect(res.body.message).to.equal(
-            `The value for the 'message' field is mandatory when State is OOO for more than three days.`,
+            `The value for the 'message' field is mandatory when State is OOO for more than three days.`
           );
           return done();
         });
@@ -452,7 +452,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal(`Bad Request`);
           expect(res.body.message).to.equal(
-            `The 'from' field must have a value that is either today or a date that follows today.`,
+            `The 'from' field must have a value that is either today or a date that follows today.`
           );
           return done();
         });
@@ -474,7 +474,7 @@ describe("UserStatus", function () {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal(`Bad Request`);
           expect(res.body.message).to.equal(
-            `The 'until' field must have a value that is either 'from' date or a date that comes after 'from' day.`,
+            `The 'until' field must have a value that is either 'from' date or a date that comes after 'from' day.`
           );
           return done();
         });

@@ -12,7 +12,7 @@ module.exports = (req, res, next) => {
     const notMultiPart = !contentType.includes("multipart/form-data");
     if (notMultiPart) {
       return res.boom.unsupportedMediaType(
-        `Invalid content-type header: ${contentType}, expected: application/json or multipart/form-data`,
+        `Invalid content-type header: ${contentType}, expected: application/json or multipart/form-data`
       );
     }
   }

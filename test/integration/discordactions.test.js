@@ -91,7 +91,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ user: { avatar: 12345 } }),
-        }),
+        })
       );
       chai
         .request(app)
@@ -113,7 +113,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ user: { avatar: 12345 } }),
-        }),
+        })
       );
       chai
         .request(app)
@@ -248,7 +248,7 @@ describe("Discord actions", function () {
             ],
           },
         },
-        { user: userData[0] },
+        { user: userData[0] }
       );
 
       const res = await chai
@@ -268,7 +268,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({}),
-        }),
+        })
       );
       const roleId = groupData[4].roleid;
       const res = await chai
@@ -287,7 +287,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({}),
-        }),
+        })
       );
 
       const roleId = groupData[4].roleid;
@@ -302,7 +302,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Role added successfully!");
       expect(fetchStub.getCall(0).args[1].headers["X-Audit-Log-Reason"]).to.equal(
-        `Action initiator's username=>ankur and id=${userId}`,
+        `Action initiator's username=>ankur and id=${userId}`
       );
     });
 
@@ -355,7 +355,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ roleId: "1234", wasSuccess: true }),
-        }),
+        })
       );
       chai
         .request(app)
@@ -380,7 +380,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ roleId: "1234", wasSuccess: true }),
-        }),
+        })
       );
       const res = await chai
         .request(app)
@@ -392,7 +392,7 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Role deleted successfully");
       expect(fetchStub.getCall(0).args[1].headers["X-Audit-Log-Reason"]).to.equal(
-        `Action initiator's username=>ankur and id=${userId}`,
+        `Action initiator's username=>ankur and id=${userId}`
       );
     });
 
@@ -463,7 +463,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(discordUsers),
-        }),
+        })
       );
       chai
         .request(app)
@@ -526,7 +526,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(response),
-        }),
+        })
       );
 
       chai
@@ -636,7 +636,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        }),
+        })
       );
     });
 
@@ -708,7 +708,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getOnboarding31DPlusMembers),
-        }),
+        })
       );
     });
 
@@ -829,7 +829,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 201,
           json: () => Promise.resolve({ data: { code: "xyz" } }),
-        }),
+        })
       );
 
       productManagerUserId = await addUser(productManagerUser);
@@ -849,7 +849,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 201,
           json: () => Promise.resolve({ data: { code: "zlmfasd" } }),
-        }),
+        })
       );
 
       designerUserId = await addUser(designerUser);
@@ -869,7 +869,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 201,
           json: () => Promise.resolve({ data: { code: "asdfdsfsd" } }),
-        }),
+        })
       );
 
       mavenUserId = await addUser(mavenUser);
@@ -889,7 +889,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 201,
           json: () => Promise.resolve({ data: { code: "asdfdsfsd" } }),
-        }),
+        })
       );
 
       const res = await chai

@@ -17,7 +17,7 @@ const updateRoles = async (req, res) => {
         },
         updated_at: Date.now(),
       },
-      userId,
+      userId
     );
     return res.status(200).json({
       message: "Roles Updated successfully",
@@ -51,8 +51,8 @@ const removePrivileges = async (req, res) => {
             },
             updated_at: Date.now(),
           },
-          member.id,
-        ),
+          member.id
+        )
       );
     });
     superUsers.forEach((superUser) => {
@@ -65,8 +65,8 @@ const removePrivileges = async (req, res) => {
             },
             updated_at: Date.now(),
           },
-          superUser.id,
-        ),
+          superUser.id
+        )
       );
     });
 

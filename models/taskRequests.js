@@ -85,7 +85,7 @@ const fetchPaginatedTaskRequests = async (queries = {}) => {
 
     Object.entries(rqlQueryParser.getFilterQueries()).forEach(([key, value]) => {
       const valuesList = value.map(
-        (query) => query.operator === Operators.INCLUDE && TASK_REQUEST_FILTER_VALUES[query.value],
+        (query) => query.operator === Operators.INCLUDE && TASK_REQUEST_FILTER_VALUES[query.value]
       );
       taskRequestsSnapshot = taskRequestsSnapshot.where(TASK_REQUEST_FILTER_KEYS[key], "in", valuesList);
     });
@@ -97,7 +97,7 @@ const fetchPaginatedTaskRequests = async (queries = {}) => {
       sortQueryEntries.forEach(([key, value]) => {
         taskRequestsSnapshot = taskRequestsSnapshot.orderBy(
           TASK_REQUEST_SORT_KEYS[key],
-          TASK_REQUEST_SORT_VALUES[value],
+          TASK_REQUEST_SORT_VALUES[value]
         );
       });
     } else {
@@ -552,7 +552,7 @@ const addNewFields = async () => {
         bulkWriter.update(taskRequestsCollection.doc(taskRequestsSnapshot.id), updatedTaskRequestData);
         documentsModified++;
       }
-    }),
+    })
   );
 
   await bulkWriter.close();

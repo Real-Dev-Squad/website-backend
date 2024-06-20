@@ -55,7 +55,7 @@ describe("Test Progress Updates API for Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({}),
-        }),
+        })
       );
       chai
         .request(app)
