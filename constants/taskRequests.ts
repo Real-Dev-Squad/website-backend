@@ -13,7 +13,7 @@ const TASK_REQUEST_ERROR_MESSAGE = {
   INVALID_PREV: "Invalid 'prev' value",
   INVALID_NEXT: "Invalid 'next' value",
 };
-const TASK_REQUEST_TYPE = {
+export const TASK_REQUEST_TYPE = {
   ASSIGNMENT: "ASSIGNMENT",
   CREATION: "CREATION",
 };
