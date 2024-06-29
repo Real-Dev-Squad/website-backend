@@ -38,6 +38,7 @@ const createGroupRole = async (req, res) => {
     const groupRoleData = {
       rolename,
       createdBy: req.userData.id,
+      description: req.body.description || "",
       date: admin.firestore.Timestamp.fromDate(new Date()),
     };
 
