@@ -16,7 +16,6 @@ export const createTaskRequestValidator = async (
     res: TaskRequestResponse,
     next: NextFunction
 ) => {
-    console.log(req.body);
     const schema = joi
         .object()
         .strict()
