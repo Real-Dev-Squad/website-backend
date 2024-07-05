@@ -4,12 +4,14 @@ import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
 import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
 import { createOooStatusRequestValidator } from "./oooRequests";
 import { createExtensionRequestValidator } from "./extensionRequestsv2";
+import {createTaskRequestValidator} from "./taskRequests";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests";
 import { CustomResponse } from "../../typeDefinitions/global";
 import { UpdateRequest } from "../../types/requests";
+import { TaskRequestRequest, TaskRequestResponse } from "../../types/taskRequests";
 
 export const createRequestsMiddleware = async (
-  req: OooRequestCreateRequest|ExtensionRequestRequest,
+  req: OooRequestCreateRequest|ExtensionRequestRequest | TaskRequestRequest,
   res: CustomResponse,
   next: NextFunction
 ) => {
@@ -26,6 +28,9 @@ export const createRequestsMiddleware = async (
         break;
       case REQUEST_TYPE.EXTENSION:
         await createExtensionRequestValidator(req as ExtensionRequestRequest, res as ExtensionRequestResponse, next);
+        break;
+      case REQUEST_TYPE.TASK:
+        await createTaskRequestValidator(req as TaskRequestRequest, res as TaskRequestResponse, next);
         break;
       default:
         res.boom.badRequest(`Invalid request type: ${type}`);
@@ -82,7 +87,7 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
     id: joi.string().optional(),
     type: joi
       .string()
-      .valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.ALL)
+      .valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.TASK, REQUEST_TYPE.ALL)
       .optional(),
     requestedBy: joi.string().insensitive().optional(),
     state: joi

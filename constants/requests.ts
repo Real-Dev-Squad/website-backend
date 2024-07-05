@@ -13,6 +13,7 @@ export const LOG_ACTION = {
 export const REQUEST_TYPE = {
   OOO: "OOO",
   EXTENSION: "EXTENSION",
+  TASK: "TASK",
   ALL: "ALL",
 };
 
