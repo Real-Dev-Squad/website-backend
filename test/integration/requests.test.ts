@@ -759,3 +759,62 @@ describe("/requests Extension", function () {
   });
 
 });
+
+
+describe("/requests Task", function () {
+  let userId1: string;
+  let userJwtToken1: string;
+
+  let taskRequest = {
+    externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-my/issues/601",
+    externalIssueHtmlUrl: "https://github.com/Real-Dev-Squad/website-my/issues/601",
+    requestType: "CREATION",
+    proposedStartDate: 1718845551203,
+    proposedDeadline: 1719532800000,
+    description: "This is a test task",
+    markdownEnabled: true,
+    type: "TASK",
+    state: "PENDING",
+  };
+
+  beforeEach(async function () {
+    userId1 = await addUser(userData[16]);
+    userJwtToken1 = authService.generateAuthToken({ userId: userId1 });
+  });
+
+  afterEach(async function () {
+    await cleanDb();
+  });
+
+  describe("POST /requests", function () {
+    it("should return 401(Unauthorized) if user is not logged in", function (done) {
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .send(taskRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(401);
+          done();
+        });
+    });
+
+    it("should not create a new task request if issue does not exist", function (done) {
+      const taskRequestObj = {
+        ...taskRequest,
+        userId: userId1,
+        externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-my/issues/601",
+      };
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${userJwtToken1}`)
+        .send(taskRequestObj)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal("Issue does not exist");
+          done();
+        });
+    });
+  });
+});
