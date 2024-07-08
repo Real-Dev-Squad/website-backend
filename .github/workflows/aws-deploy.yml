@@ -1,0 +1,56 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+      - feat/deploy-on-aws # Remove this after testing it, Do not merge without removeing this line
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AWS_EC2_HOST }}
+          username: ${{ secrets.AWS_EC2_USERNAME }}
+          key: ${{ secrets.AWS_EC2_SSH_PRIVATE_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+            docker stop ${{ github.event.repository.name }}-${{vars.ENV}} || true
+            docker rm ${{ github.event.repository.name }}-${{vars.ENV}} || true
+            docker run -d -p ${{vars.PORT}}:${{vars.PORT}} \
+              --name ${{ github.event.repository.name }}-${{vars.ENV}} \
+              --network=${{vars.DOCKER_NETWORK}} \
+              -e ENV=${{vars.ENV}} \
+              ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
