@@ -28,6 +28,7 @@ import {
   REQUEST_ALREADY_REJECTED,
 } from "../../constants/requests";
 import { updateTask } from "../../models/tasks";
+import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -758,4 +759,65 @@ describe("/requests Extension", function () {
     });
   });
 
+});
+
+
+describe("/requests Task", function () {
+  let userId1: string;
+  let userJwtToken1: string;
+
+  beforeEach(async function () {
+    userId1 = await addUser(userData[16]);
+    userJwtToken1 = authService.generateAuthToken({ userId: userId1 });
+  });
+
+  afterEach(async function () {
+    await cleanDb();
+  });
+
+  describe("POST /requests", function () {
+    it("should return 401(Unauthorized) if user is not logged in", function (done) {
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .send(validTaskCreqtionRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(401);
+          done();
+        });
+    });
+
+    it("should not create a new task request if issue does not exist", function (done) {
+      let taskRequestObj = validTaskCreqtionRequest
+      taskRequestObj.externalIssueUrl = "https://api.github.com/repos/Real-Dev-Squad/website-my/issues/1245";
+      taskRequestObj.userId = userId1;
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${userJwtToken1}`)
+        .send(taskRequestObj)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal("Issue does not exist");
+          done();
+        });
+    });
+
+    it("should not create a new task request if task id is not present in the request body", function (done) {
+      let taskRequestObj = validTaskAssignmentRequest
+      delete taskRequestObj.taskId;
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${userJwtToken1}`)
+        .send(taskRequestObj)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal('taskId is required when requestType is ASSIGNMENT');
+          done();
+        });
+    });
+  });
 });
