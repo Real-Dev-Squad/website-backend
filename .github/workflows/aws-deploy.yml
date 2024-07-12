@@ -52,5 +52,30 @@ jobs:
             docker run -d -p ${{vars.PORT}}:${{vars.PORT}} \
               --name ${{ github.event.repository.name }}-${{vars.ENV}} \
               --network=${{vars.DOCKER_NETWORK}} \
-              -e ENV=${{vars.ENV}} \
+              -e BOT_PUBLIC_KEY=${{secrets.BOT_PUBLIC_KEY}} \
+              -e CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}} \
+              -e CLOUDINARY_API_SECRET_KEY=${{secrets.CLOUDINARY_API_SECRET_KEY}} \
+              -e CLOUDINARY_CLOUD_NAME=${{secrets.CLOUDINARY_CLOUD_NAME}} \
+              -e CRON_JOB_PUBLIC_KEY=${{secrets.CRON_JOB_PUBLIC_KEY}} \
+              -e DISCORD_BASE_URL=${{vars.DISCORD_BASE_URL}} \
+              -e ENABLE_CONSOLE_LOGS=${{vars.ENABLE_CONSOLE_LOGS}} \
+              -e EVENT_100MS_APP_ACCESS_KEY=${{secrets.EVENT_100MS_APP_ACCESS_KEY}} \
+              -e EVENT_100MS_APP_SECRET=${{secrets.EVENT_100MS_APP_SECRET}} \
+              -e EXTERNAL_SERVICE_PUBLIC_KEY=${{secrets.EXTERNAL_SERVICE_PUBLIC_KEY}} \
+              -e FIRESTORE_CONFIG=${{secrets.FIRESTORE_CONFIG}} \
+              -e GITHUB_CLIENT_ID=${{secrets.GITHUB_CLIENT_ID}} \
+              -e GITHUB_CLIENT_SECRET=${{secrets.GITHUB_CLIENT_SECRET}} \
+              -e GITHUB_PERSONAL_ACCESS_TOKEN=${{secrets.GITHUB_PERSONAL_ACCESS_TOKEN}} \
+              -e IDENTITY_SERVICE_URL=${{secrets.IDENTITY_SERVICE_URL}} \
+              -e INTEGRATIONS_NEWRELIC_APPNAME=${{secrets.INTEGRATIONS_NEWRELIC_APPNAME}} \
+              -e INTEGRATIONS_NEWRELIC_LICENSEKEY=${{secrets.INTEGRATIONS_NEWRELIC_LICENSEKEY}} \
+              -e NODE_ENV=${{vars.ENV}} \
+              -e PRIVATE_KEY=${{secrets.PRIVATE_KEY}} \
+              -e PUBLIC_KEY=${{secrets.PUBLIC_KEY}} \
+              -e RDS_SERVERLESS_PRIVATE_KEY=${{secrets.RDS_SERVERLESS_PRIVATE_KEY}} \
+              -e RDS_SERVERLESS_PUBLIC_KEY=${{secrets.RDS_SERVERLESS_PUBLIC_KEY}} \
+              -e RDS_SERVERLESS_TTL=${{secrets.RDS_SERVERLESS_TTL}} \
+              -e SERVICES_RDSAPI_BASEURL=${{secrets.SERVICES_RDSAPI_BASEURL}} \
+              -e USER_TOKEN_REFRESH_TTL=${{secrets.USER_TOKEN_REFRESH_TTL}} \
+              -e USER_TOKEN_TTL=${{secrets.USER_TOKEN_TTL}} \
               ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
