@@ -239,17 +239,20 @@ describe("Tasks", function () {
         });
     });
 
-    it("Should call paginated tasks when dev flag passed to GET /tasks is true", function (done) {
-      const fetchPaginatedUserStub = sinon.stub(tasks, "fetchPaginatedTasks");
+    it("Should return paginated tasks", function (done) {
       chai
         .request(app)
-        .get("/tasks?dev=true")
+        .get("/tasks")
         .end((err, res) => {
           if (err) {
             return done(err);
           }
-          expect(fetchPaginatedUserStub.calledOnce).to.be.equal(true);
-
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
           return done();
         });
     });
@@ -257,7 +260,7 @@ describe("Tasks", function () {
     it("Should get all tasks filtered with status when passed to GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?dev=true&status=${TASK_STATUS.IN_PROGRESS}`)
+        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -281,7 +284,7 @@ describe("Tasks", function () {
     it("Should get all tasks filtered with status ,assignee, title when passed to GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&userFeatureFlag=true&dev=true&assignee=sagar&title=Test`)
+        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&userFeatureFlag=true&assignee=sagar&title=Test`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -307,7 +310,7 @@ describe("Tasks", function () {
     it("Should get all tasks filtered with status, multiple assignees, title when passed to GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&dev=true&assignee=sagar,ankur&title=Test`)
+        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&assignee=sagar,ankur&title=Test`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -333,7 +336,7 @@ describe("Tasks", function () {
     it("Should get all overdue tasks GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?dev=true&status=overdue`)
+        .get(`/tasks?status=overdue`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -348,7 +351,7 @@ describe("Tasks", function () {
     it("Should get all overdue tasks filtered with assignee when passed to GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?dev=true&status=overdue&assignee=${appOwner.username}`)
+        .get(`/tasks?status=overdue&assignee=${appOwner.username}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -373,7 +376,7 @@ describe("Tasks", function () {
     it("Should get tasks when correct query parameters are passed", function (done) {
       chai
         .request(app)
-        .get("/tasks?dev=true&size=1&page=0")
+        .get("/tasks?size=1&page=0")
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -391,7 +394,7 @@ describe("Tasks", function () {
     });
 
     it("Should get next and previous page results based returned by the links in the response", async function () {
-      const initialReq = `/tasks?size=1&dev=true`;
+      const initialReq = `/tasks?size=1`;
       const response = await chai.request(app).get(initialReq);
       expect(response).to.have.status(200);
       expect(response.body).to.be.a("object");
@@ -484,7 +487,7 @@ describe("Tasks", function () {
     it("Should get paginated tasks ordered by updatedAt in desc order ", function (done) {
       chai
         .request(app)
-        .get("/tasks?dev=true&size=5&page=0")
+        .get("/tasks?size=5&page=0")
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -509,7 +512,7 @@ describe("Tasks", function () {
         },
         taskId2
       );
-      const res = await chai.request(app).get(`/tasks?dev=true&status=DONE&userFeatureFlag=true`);
+      const res = await chai.request(app).get(`/tasks?status=DONE&userFeatureFlag=true`);
 
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
