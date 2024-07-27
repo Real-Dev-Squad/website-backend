@@ -372,10 +372,21 @@ const generateUsername = async (req, res) => {
 const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
+      const id = req.params.id;
+      const params = req.query.params;
       const user = await dataAccess.retrieveUsers({
         userdata: req.userData,
       });
-      return res.send(user);
+      if (params === undefined) {
+        if (id === user.id) {
+          return res.send(user);
+        }
+      }
+      const paramsArray = params.split(",");
+      const commonKeysObject = Object.fromEntries(paramsArray.map((key) => [key, user[key]]));
+      if (id === user.id) {
+        return res.send(commonKeysObject);
+      }
     }
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
