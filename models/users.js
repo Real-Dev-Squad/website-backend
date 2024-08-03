@@ -33,6 +33,11 @@ const { AUTHORITIES } = require("../constants/authorities");
  */
 const addOrUpdate = async (userData, userId = null) => {
   try {
+    // Populate lowercase fields
+    if (userData.username) userData.username_lowercase = userData.username.toLowerCase();
+    if (userData.first_name) userData.first_name_lowercase = userData.first_name.toLowerCase();
+    if (userData.last_name) userData.last_name_lowercase = userData.last_name.toLowerCase();
+
     // userId exists Update user
     if (userId !== null) {
       const user = await userModel.doc(userId).get();
@@ -73,11 +78,6 @@ const addOrUpdate = async (userData, userId = null) => {
     }
 
     // Add new user
-    /*
-       Adding default archived role enables us to query for only
-       the unarchived users in the /members endpoint
-       For more info : https://github.com/Real-Dev-Squad/website-backend/issues/651
-     */
     userData.roles = { archived: false, in_discord: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
@@ -172,9 +172,9 @@ const fetchPaginatedUsers = async (query) => {
     let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
     let compositeQuery = [dbQuery];
     if (isDevMode) {
-      const usernameQuery = userModel.where("roles.archived", "==", false).orderBy("username");
-      const firstNameQuery = userModel.where("roles.archived", "==", false).orderBy("first_name");
-      const lastNameQuery = userModel.where("roles.archived", "==", false).orderBy("last_name");
+      const usernameQuery = userModel.where("roles.archived", "==", false).orderBy("username_lowercase");
+      const firstNameQuery = userModel.where("roles.archived", "==", false).orderBy("first_name_lowercase");
+      const lastNameQuery = userModel.where("roles.archived", "==", false).orderBy("last_name_lowercase");
       compositeQuery = [usernameQuery, firstNameQuery, lastNameQuery];
     }
 
