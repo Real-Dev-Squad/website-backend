@@ -34,6 +34,7 @@ module.exports = () => {
       },
       status: "active",
       profileURL: "https://abcde.com",
+      profileStatus: "BLOCKED",
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
@@ -59,6 +60,7 @@ module.exports = () => {
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
       nickname_synced: false,
+      profileStatus: "BLOCKED",
     },
     {
       username: "pranavg",
@@ -81,6 +83,7 @@ module.exports = () => {
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
       nickname_synced: false,
+      profileStatus: "VERIFIED",
     },
     {
       username: "sagar",

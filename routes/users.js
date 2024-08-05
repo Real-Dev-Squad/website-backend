@@ -24,6 +24,7 @@ router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvai
 router.get("/username", authenticate, userValidator.validateGenerateUsernameQuery, users.generateUsername);
 router.get("/chaincode", authenticate, users.generateChaincode);
 router.get("/search", userValidator.validateUserQueryParams, users.filterUsers);
+router.get("/identity-stats", authenticate, authorizeRoles([SUPERUSER]), users.getIdentityStats);
 router.patch(
   "/:userId/update-nickname",
   authenticate,
