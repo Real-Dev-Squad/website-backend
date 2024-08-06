@@ -60,7 +60,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-security": "^1.7.1",
-    "firebase-tools": "13.4.0",
+    "firebase-tools": "13.6.0",
     "mocha": "10.3.0",
     "nock": "13.2.9",
     "nodemon": "3.1.3",
