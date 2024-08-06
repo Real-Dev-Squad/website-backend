@@ -65,6 +65,64 @@ describe("Users", function () {
     await cleanDb();
   });
 
+  describe("GET /users/identity-stats", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+    });
+
+    afterEach(function () {
+      Sinon.restore();
+    });
+
+    it("Should return when only one user", function (done) {
+      chai
+        .request(app)
+        .get("/users/identity-stats")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.blockedDeveloperCount).to.equal(0);
+          expect(res.body.blockedUsersCount).to.equal(1);
+          expect(res.body.developersCount).to.equal(0);
+          expect(res.body.developersLeftToVerifyCount).to.equal(0);
+          expect(res.body.verifiedDeveloperCount).to.equal(0);
+          expect(res.body.verifiedUsersCount).to.equal(0);
+
+          return done();
+        });
+    });
+
+    it("Should return verified and blocked users", async function () {
+      await addOrUpdate(userData[0]);
+      await addOrUpdate(userData[1]);
+      await addOrUpdate(userData[2]);
+      await addOrUpdate(userData[3]);
+
+      const res = await chai
+        .request(app)
+        .get("/users/identity-stats")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body.blockedDeveloperCount).to.equal(0);
+      expect(res.body.blockedUsersCount).to.equal(2);
+      expect(res.body.developersCount).to.equal(0);
+      expect(res.body.developersLeftToVerifyCount).to.equal(0);
+      expect(res.body.verifiedDeveloperCount).to.equal(0);
+      expect(res.body.verifiedUsersCount).to.equal(1);
+    });
+  });
+
   describe("PATCH /users/self", function () {
     beforeEach(function () {
       fetchStub = Sinon.stub(global, "fetch");
