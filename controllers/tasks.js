@@ -134,16 +134,8 @@ const fetchPaginatedTasks = async (query) => {
 
 const fetchTasks = async (req, res) => {
   try {
-    const { dev, status, page, size, prev, next, q: queryString, assignee, title, userFeatureFlag } = req.query;
-    const transformedQuery = transformQuery(dev, status, size, page, assignee, title);
-
-    if (dev) {
-      const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next, userFeatureFlag });
-      return res.json({
-        message: "Tasks returned successfully!",
-        ...paginatedTasks,
-      });
-    }
+    const { status, page, size, prev, next, q: queryString, assignee, title, userFeatureFlag } = req.query;
+    const transformedQuery = transformQuery(status, size, page, assignee, title);
 
     if (queryString !== undefined) {
       const searchParams = parseSearchQuery(queryString);
@@ -167,17 +159,10 @@ const fetchTasks = async (req, res) => {
       });
     }
 
-    const allTasks = await tasks.fetchTasks();
-    const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
-    if (tasksWithRdsAssigneeInfo.length === 0) {
-      return res.status(404).json({
-        message: "No tasks found",
-        tasks: [],
-      });
-    }
+    const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next, userFeatureFlag });
     return res.json({
       message: "Tasks returned successfully!",
-      tasks: tasksWithRdsAssigneeInfo,
+      ...paginatedTasks,
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);

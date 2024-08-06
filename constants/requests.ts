@@ -13,6 +13,7 @@ export const LOG_ACTION = {
 export const REQUEST_TYPE = {
   OOO: "OOO",
   EXTENSION: "EXTENSION",
+  TASK: "TASK",
   ALL: "ALL",
 };
 
@@ -38,3 +39,17 @@ export const ERROR_WHILE_UPDATING_REQUEST = "Error while updating request";
 
 export const REQUEST_DOES_NOT_EXIST = "Request does not exist";
 export const REQUEST_ALREADY_PENDING = "Request already exists please wait for approval or rejection";
+
+export const TASK_REQUEST_MESSAGES = {
+  NOT_AUTHORIZED_TO_CREATE_REQUEST: "Not authorized to create the request",
+  USER_NOT_FOUND: "User not found",
+  TASK_NOT_EXIST: "Task does not exist",
+  INVALID_EXTERNAL_ISSUE_URL: "External issue url is not valid",
+  ISSUE_NOT_EXIST: "Issue does not exist",
+  TASK_REQUEST_EXISTS: "Task request already exists",
+  TASK_EXISTS_FOR_GIVEN_ISSUE: "Task exists for the given issue.",
+  TASK_ALREADY_REQUESTED: "Task was already requested",
+  TASK_REQUEST_CREATED_SUCCESS: "Task request created successfully",
+  ERROR_CREATING_TASK_REQUEST: "Error while creating task request",
+  TASK_REQUEST_UPDATED_SUCCESS: "Task request updated successfully",
+};

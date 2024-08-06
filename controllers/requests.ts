@@ -11,9 +11,11 @@ import { CustomResponse } from "../typeDefinitions/global";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../types/extensionRequests";
 import { createTaskExtensionRequest, updateTaskExtensionRequest } from "./extensionRequestsv2";
 import { UpdateRequest } from "../types/requests";
+import { TaskRequestRequest } from "../types/taskRequests";
+import { createTaskRequestController } from "./taskRequestsv2";
 
 export const createRequestController = async (
-  req: OooRequestCreateRequest | ExtensionRequestRequest,
+  req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest,
   res: CustomResponse
 ) => {
   const type = req.body.type;
@@ -22,6 +24,8 @@ export const createRequestController = async (
       return await createOooRequestController(req as OooRequestCreateRequest, res as OooRequestResponse);
     case REQUEST_TYPE.EXTENSION:
       return await createTaskExtensionRequest(req as ExtensionRequestRequest, res as ExtensionRequestResponse);
+    case REQUEST_TYPE.TASK:
+      return await createTaskRequestController(req as TaskRequestRequest, res as CustomResponse);
     default:
       return res.boom.badRequest("Invalid request type");
   }

@@ -4,6 +4,7 @@ const { validateMillisecondsTimestamp } = require("./utils");
 const validateGroupRoleBody = async (req, res, next) => {
   const schema = Joi.object({
     rolename: Joi.string().trim().required(),
+    description: Joi.string().trim(),
   });
 
   try {

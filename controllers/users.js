@@ -15,7 +15,7 @@ const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
-const { fetchAllUsers, addGithubUserId } = require("../models/users");
+const { fetchAllUsers } = require("../models/users");
 const { getOverdueTasks } = require("../models/tasks");
 const { getQualifiers } = require("../utils/helper");
 const { parseSearchQuery } = require("../utils/users");
@@ -918,19 +918,40 @@ async function usersPatchHandler(req, res) {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 }
-const migrations = async (req, res) => {
-  const { page = 0, size } = req.query;
 
-  try {
-    const result = await addGithubUserId(parseInt(page), parseInt(size));
-    return res.status(200).json({
-      message: "Result of migration",
-      data: result,
-    });
-  } catch (error) {
-    logger.error(`Internal Server Error: ${error}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+const getIdentityStats = async (req, res) => {
+  const verifiedUsers = await userQuery.fetchUserForKeyValue("profileStatus", "VERIFIED");
+  const blockedUsers = await userQuery.fetchUserForKeyValue("profileStatus", "BLOCKED");
+  let developers = [];
+  const membersInDiscord = await getDiscordMembers();
+  if (membersInDiscord) {
+    const developersInDiscord = membersInDiscord.filter(
+      (discordMember) => discordMember && discordMember.roles && discordMember.roles.includes(discordDeveloperRoleId)
+    );
+    developers = developersInDiscord;
   }
+
+  const findUserByDiscordId = (usersArray, discordId) => usersArray.find((user) => user.discordId === discordId);
+
+  const verifiedDeveloperCount = developers.filter((developer) =>
+    findUserByDiscordId(verifiedUsers, developer.user.id)
+  ).length;
+  const blockedDeveloperCount = developers.filter((developer) =>
+    findUserByDiscordId(blockedUsers, developer.user.id)
+  ).length;
+  const developersLeftToVerifyCount = developers.filter(
+    (developer) =>
+      !findUserByDiscordId(verifiedUsers, developer.user.id) && !findUserByDiscordId(blockedUsers, developer.user.id)
+  ).length;
+
+  return res.status(200).json({
+    verifiedUsersCount: verifiedUsers.length,
+    blockedUsersCount: blockedUsers.length,
+    verifiedDeveloperCount,
+    blockedDeveloperCount,
+    developersLeftToVerifyCount,
+    developersCount: developers.length,
+  });
 };
 
 module.exports = {
@@ -962,6 +983,6 @@ module.exports = {
   updateDiscordUserNickname,
   archiveUserIfNotInDiscord,
   usersPatchHandler,
-  migrations,
   isDeveloper,
+  getIdentityStats,
 };

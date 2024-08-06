@@ -144,7 +144,6 @@ const fetchPaginatedTasks = async ({
   page,
   next,
   prev,
-  dev = false,
   assignee,
   title,
   userFeatureFlag,
