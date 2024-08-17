@@ -112,21 +112,6 @@ const getUsers = async (req, res) => {
       });
     }
 
-    /**
-     * !!NOTE: At the time of writing we are only supporting the member role
-     * this will be fixed in the new onboarding flow, contact @tejaskh3 for more info
-     *
-     * if you're making changes to this code remove the role === 'member' check from middleware/validators/user.js
-     */
-    if (req.query.roles === "member") {
-      const data = await dataAccess.retrieveUsers({ query: req.query });
-
-      return res.json({
-        message: "members returned successfully!",
-        users: data.users,
-      });
-    }
-
     if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
       return res.boom.badRequest(`Days is required for filterBy ${transformedQuery?.filterBy}`);
     }
