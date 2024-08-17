@@ -935,15 +935,40 @@ async function usersPatchHandler(req, res) {
   }
 }
 
-async function addMembersRole(params) {
-  try {
-    const data = await userQuery.batchUpdateAllUsersRoles();
-    return data;
-  } catch (error) {
-    logger.error(`Error while updating all users roles: ${error}`);
-    throw Error(INTERNAL_SERVER_ERROR);
+const getIdentityStats = async (req, res) => {
+  const verifiedUsers = await userQuery.fetchUserForKeyValue("profileStatus", "VERIFIED");
+  const blockedUsers = await userQuery.fetchUserForKeyValue("profileStatus", "BLOCKED");
+  let developers = [];
+  const membersInDiscord = await getDiscordMembers();
+  if (membersInDiscord) {
+    const developersInDiscord = membersInDiscord.filter(
+      (discordMember) => discordMember && discordMember.roles && discordMember.roles.includes(discordDeveloperRoleId)
+    );
+    developers = developersInDiscord;
   }
-}
+
+  const findUserByDiscordId = (usersArray, discordId) => usersArray.find((user) => user.discordId === discordId);
+
+  const verifiedDeveloperCount = developers.filter((developer) =>
+    findUserByDiscordId(verifiedUsers, developer.user.id)
+  ).length;
+  const blockedDeveloperCount = developers.filter((developer) =>
+    findUserByDiscordId(blockedUsers, developer.user.id)
+  ).length;
+  const developersLeftToVerifyCount = developers.filter(
+    (developer) =>
+      !findUserByDiscordId(verifiedUsers, developer.user.id) && !findUserByDiscordId(blockedUsers, developer.user.id)
+  ).length;
+
+  return res.status(200).json({
+    verifiedUsersCount: verifiedUsers.length,
+    blockedUsersCount: blockedUsers.length,
+    verifiedDeveloperCount,
+    blockedDeveloperCount,
+    developersLeftToVerifyCount,
+    developersCount: developers.length,
+  });
+};
 
 module.exports = {
   verifyUser,
@@ -975,5 +1000,5 @@ module.exports = {
   archiveUserIfNotInDiscord,
   usersPatchHandler,
   isDeveloper,
-  addMembersRole,
+  getIdentityStats,
 };
