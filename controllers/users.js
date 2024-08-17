@@ -111,6 +111,7 @@ const getUsers = async (req, res) => {
         user,
       });
     }
+
     if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
       return res.boom.badRequest(`Days is required for filterBy ${transformedQuery?.filterBy}`);
     }
