@@ -2345,6 +2345,7 @@ describe("Users", function () {
 
   describe("PATCH /users/self for developers", function () {
     let id, jwtoken;
+
     beforeEach(async function () {
       id = await addUser();
       jwtoken = authService.generateAuthToken({ userId: id });
