@@ -11,7 +11,7 @@
 - [About the Project](#about-the-project)
 - [Running the Project](#running-the-project)
 - [Prerequisites](#prerequisites)
-- [API Documentation](#api-documentation)
+- [API Documentation](https://github.com/Real-Dev-Squad/website-api-contracts/)
 - [CONTRIBUTING](CONTRIBUTING.md)
 
 ## About the Project
