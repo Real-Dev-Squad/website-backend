@@ -33,7 +33,7 @@ router.patch(
   users.updateDiscordUserNickname
 );
 router.get("/:username", users.getUser);
-router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
+router.get("/:userId/intro", authenticate, users.getUserIntro);
 router.put("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);
 router.get("/:id/skills", users.getUserSkills);
 router.get("/:id/badges", getUserBadges);
