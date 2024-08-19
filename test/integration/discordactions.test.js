@@ -784,12 +784,13 @@ describe("Discord actions", function () {
     let clock;
 
     beforeEach(function () {
-      clock = sinon.useFakeTimers(new Date("2024-08-24").getTime()); // Set up fake timers once
+      clock = sinon.useFakeTimers(new Date("2024-08-24").getTime());
     });
 
     afterEach(function () {
-      sinon.restore(); // Restore all stubs and fake timers
+      sinon.restore();
     });
+
     it("should return 403 if the userId in the query param is not equal to the userId of the user and user is not a super user", async function () {
       const res = await chai
         .request(app)
