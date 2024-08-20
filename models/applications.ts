@@ -184,8 +184,9 @@ const updateApplicantsStatus = async () => {
   try {
     const operationStats = {
       failedApplicantUpdateIds: [],
-      totalFailedApplicantUpdates: 0,
-      totalApplicantUpdates: 0,
+      applicantUpdatesFailed: 0,
+      applicantUpdated: 0,
+      totalApplicant: 0,
     };
 
     const updatedApplicants = [];
@@ -195,30 +196,44 @@ const updateApplicantsStatus = async () => {
       return operationStats;
     }
 
-    operationStats.totalApplicantUpdates = applicantsSnapshot.size;
+    operationStats.totalApplicant = applicantsSnapshot.size;
 
     applicantsSnapshot.forEach((applicant) => {
       const applicantData = applicant.data();
-      if (!applicantData.hasOwnProperty("status")) {
+
+      const createdAt = applicant.createTime.seconds * 1000 + applicant.createTime.nanoseconds / 1000000;
+
+      let propertyUpdated = false;
+
+      if ("createdAt" in applicantData === false) {
+        const createdAtISO = new Date(createdAt).toISOString();
+        applicantData.createdAt = createdAtISO;
+        propertyUpdated = true;
+      }
+      if ("status" in applicantData === false) {
         applicantData.status = "pending";
+        propertyUpdated = true;
+      }
+      if (propertyUpdated === true) {
+        operationStats.applicantUpdated += 1;
         updatedApplicants.push({ id: applicant.id, data: applicantData });
       }
     });
 
     const multipleApplicantUpdateBatch = [];
-    const chunkedApplicants = chunks(updatedApplicants, DOCUMENT_WRITE_SIZE);
+    const chunkedApplicants = chunks(updatedApplicants, FIRESTORE_BATCH_OPERATIONS_LIMIT);
 
     for (const applicants of chunkedApplicants) {
-      const batch = firestore().batch();
+      const batch = firestore.batch();
       applicants.forEach(({ id, data }) => {
-        batch.update(firestore().collection("applicants").doc(id), data);
+        batch.update(firestore.collection("applicants").doc(id), data);
       });
 
       try {
         await batch.commit();
         multipleApplicantUpdateBatch.push(batch);
       } catch (error) {
-        operationStats.totalFailedApplicantUpdates += applicants.length;
+        operationStats.applicantUpdatesFailed += applicants.length;
         applicants.forEach(({ id }) => operationStats.failedApplicantUpdateIds.push(id));
       }
     }
@@ -239,5 +254,5 @@ module.exports = {
   getApplicationsBasedOnStatus,
   getApplicationById,
   batchUpdateApplications,
-  updateApplicantsStatus
+  updateApplicantsStatus,
 };
