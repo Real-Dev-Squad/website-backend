@@ -24,6 +24,7 @@ router.patch(
   applicationValidator.validateApplicationUpdateData,
   applications.updateApplication
 );
+router.patch("/batch/update", authenticate, authorizeRoles([SUPERUSER]), applications.batchUpdateApplications);
 router.post("/batch", authenticate, authorizeRoles([SUPERUSER]), applications.batchUpdateApplicantsStatus);
 
 module.exports = router;
