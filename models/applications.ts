@@ -60,8 +60,10 @@ const getAllApplications = async (limit: number, lastDocId?: string) => {
     if (lastDocId) {
       lastDoc = await ApplicationsModel.doc(lastDocId).get();
     }
-
-    let dbQuery = ApplicationsModel.orderBy("createdAt", "desc");
+  // Hot-fix: Sorting by userId due to missing created field in some entries. 
+  // Revert to createdAt once the field is updated.
+  // https://github.com/Real-Dev-Squad/website-backend/issues/2084
+    let dbQuery = ApplicationsModel.orderBy("userId", "desc");
 
     if (lastDoc) {
       dbQuery = dbQuery.startAfter(lastDoc);
@@ -114,7 +116,10 @@ const getApplicationsBasedOnStatus = async (status: string, limit: number, lastD
       lastDoc = await ApplicationsModel.doc(lastDocId).get();
     }
 
-    dbQuery = dbQuery.orderBy("createdAt", "desc");
+  // Hot-fix: Sorting by userId due to missing created field in some entries. 
+  // Revert to createdAt once the field is updated.
+  // https://github.com/Real-Dev-Squad/website-backend/issues/2084
+  dbQuery = dbQuery.orderBy("userId", "desc");
 
     if (lastDoc) {
       dbQuery = dbQuery.startAfter(lastDoc);
