@@ -180,6 +180,72 @@ const updateApplication = async (dataToUpdate: object, applicationId: string) =>
   }
 };
 
+const updateApplicantsStatus = async () => {
+  try {
+    const operationStats = {
+      failedApplicantUpdateIds: [],
+      applicantUpdatesFailed: 0,
+      applicantUpdated: 0,
+      totalApplicant: 0,
+    };
+
+    const updatedApplicants = [];
+    const applicantsSnapshot = await ApplicationsModel.get();
+
+    if (applicantsSnapshot.empty) {
+      return operationStats;
+    }
+
+    operationStats.totalApplicant = applicantsSnapshot.size;
+
+    applicantsSnapshot.forEach((applicant) => {
+      const applicantData = applicant.data();
+
+      const createdAt = applicant.createTime.seconds * 1000 + applicant.createTime.nanoseconds / 1000000;
+
+      let propertyUpdated = false;
+
+      if ("createdAt" in applicantData === false) {
+        const createdAtISO = new Date(createdAt).toISOString();
+        applicantData.createdAt = createdAtISO;
+        propertyUpdated = true;
+      }
+      if ("status" in applicantData === false) {
+        applicantData.status = "pending";
+        propertyUpdated = true;
+      }
+      if (propertyUpdated === true) {
+        operationStats.applicantUpdated += 1;
+        updatedApplicants.push({ id: applicant.id, data: applicantData });
+      }
+    });
+
+    const multipleApplicantUpdateBatch = [];
+    const chunkedApplicants = chunks(updatedApplicants, FIRESTORE_BATCH_OPERATIONS_LIMIT);
+
+    for (const applicants of chunkedApplicants) {
+      const batch = firestore.batch();
+      applicants.forEach(({ id, data }) => {
+        batch.update(firestore.collection("applicants").doc(id), data);
+      });
+
+      try {
+        await batch.commit();
+        multipleApplicantUpdateBatch.push(batch);
+      } catch (error) {
+        operationStats.applicantUpdatesFailed += applicants.length;
+        applicants.forEach(({ id }) => operationStats.failedApplicantUpdateIds.push(id));
+      }
+    }
+
+    await Promise.allSettled(multipleApplicantUpdateBatch);
+    return operationStats;
+  } catch (err) {
+    logger.error("Error in batch update", err);
+    throw err;
+  }
+};
+
 module.exports = {
   getAllApplications,
   getUserApplications,
@@ -188,4 +254,5 @@ module.exports = {
   getApplicationsBasedOnStatus,
   getApplicationById,
   batchUpdateApplications,
+  updateApplicantsStatus,
 };
