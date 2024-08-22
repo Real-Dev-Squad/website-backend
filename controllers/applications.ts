@@ -115,14 +115,14 @@ const updateApplication = async (req: CustomRequest, res: CustomResponse) => {
       body: rawBody,
     };
 
-    const promises = [
+    await Promise.all([
       ApplicationModel.updateApplication(rawBody, applicationId),
       addLog(applicationLog.type, applicationLog.meta, applicationLog.body),
-    ];
-
-    await Promise.all(promises);
+    ]);
+console.log("Updated application", rawBody);
     return res.json({
       message: "Application updated successfully!",
+      data: rawBody,
     });
   } catch (err) {
     logger.error(`Error while updating the application: ${err}`);
