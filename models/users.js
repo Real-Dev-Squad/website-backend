@@ -39,14 +39,9 @@ const addOrUpdate = async (userData, userId = null) => {
       const isNewUser = !user.data();
       // user exists update user
       if (user.data()) {
-        await userModel.doc(userId).set(
-          {
-            ...user.data(),
-            ...userData,
-            updated_at: Date.now(),
-          },
-          { merge: true }
-        );
+        const userRef = userModel.doc(userId);
+        userData.updated_at = Date.now();
+        await userRef.update(userData);
       }
 
       return { isNewUser, userId };

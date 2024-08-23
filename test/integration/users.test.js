@@ -39,6 +39,7 @@ const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../../constants/errorMessages");
+const { flattenObject } = require("../../utils/flattenObject");
 const photoVerificationModel = firestore.collection("photo-verification");
 
 chai.use(chaiHttp);
@@ -2169,9 +2170,10 @@ describe("Users", function () {
         archived: true,
         in_discord: false,
       };
-      await addOrUpdate({ ...userData[0], roles }, userId1);
-      await addOrUpdate({ ...userData[1], roles }, userId2);
-      await addOrUpdate({ ...userData[2], roles }, userId3);
+      const newRolesToBeAdded = flattenObject({ roles: roles });
+      await addOrUpdate(newRolesToBeAdded, userId1);
+      await addOrUpdate(newRolesToBeAdded, userId2);
+      await addOrUpdate(newRolesToBeAdded, userId3);
 
       const res = await chai
         .request(app)

@@ -1,4 +1,5 @@
 const users = require("../../models/users");
+const { flattenObject } = require("../../utils/flattenObject");
 
 // Import fixtures
 const userData = require("../fixtures/user/user")();
@@ -23,10 +24,8 @@ module.exports = async (user) => {
   const { userId } = await users.addOrUpdate(userWithoutRoles);
 
   if (rolesToBeAdded) {
-    const persistedUser = (await users.fetchUser({ userId })).user;
-    const existingRoles = persistedUser.roles;
-    const rolesToBeUpdated = { ...existingRoles, ...rolesToBeAdded };
-    await users.addOrUpdate({ roles: rolesToBeUpdated }, userId);
+    const rolesToBeUpdated = flattenObject({ roles: rolesToBeAdded });
+    await users.addOrUpdate(rolesToBeUpdated, userId);
   }
   return userId;
 };

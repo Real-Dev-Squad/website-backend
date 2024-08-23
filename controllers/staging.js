@@ -1,24 +1,16 @@
 const { addOrUpdate, getUsersByRole } = require("../models/users");
+const { flattenObject } = require("../utils/flattenObject");
 
 const updateRoles = async (req, res) => {
   try {
-    const userData = await req.userData;
     if (process.env.NODE_ENV === "production") {
       return res.status(403).json({
         message: "FORBIDDEN | To be used only in staging and development",
       });
     }
     const userId = req.userData.id;
-    await addOrUpdate(
-      {
-        roles: {
-          ...userData.roles,
-          ...req.body,
-        },
-        updated_at: Date.now(),
-      },
-      userId
-    );
+    const rolesToBeAdded = flattenObject({ roles: req.body });
+    await addOrUpdate(rolesToBeAdded, userId);
     return res.status(200).json({
       message: "Roles Updated successfully",
     });
@@ -42,28 +34,13 @@ const removePrivileges = async (req, res) => {
     const superUsers = await getUsersByRole("super_user");
 
     members.forEach((member) => {
-      updateUserPromises.push(
-        addOrUpdate(
-          {
-            roles: {
-              ...member.roles,
-              member: false,
-            },
-            updated_at: Date.now(),
-          },
-          member.id
-        )
-      );
+      updateUserPromises.push(addOrUpdate({ "roles.member": false }, member.id));
     });
     superUsers.forEach((superUser) => {
       updateUserPromises.push(
         addOrUpdate(
           {
-            roles: {
-              ...superUser.roles,
-              super_user: false,
-            },
-            updated_at: Date.now(),
+            "roles.super_user": false,
           },
           superUser.id
         )
