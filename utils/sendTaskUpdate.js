@@ -14,7 +14,7 @@ export const sendTaskUpdate = async (completed, blockers, planned, userName, tas
         taskTitle,
       },
     };
-    await fetch(`${DISCORD_BASE_URL}/task/update`, {
+    await fetch(`${DISCORD_BASE_URL}/progress`, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
