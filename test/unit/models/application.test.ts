@@ -48,7 +48,7 @@ describe("applications", function () {
   });
 
   describe("getUserApplications", function () {
-    it("should return all the user applications", async function () {
+    it("should return users most recent application", async function () {
       const applications = await ApplicationModel.getUserApplications("kfasdjfkdlfjkasdjflsdjfk");
       expect(applications).to.be.a("array");
       expect(applications.length).to.be.equal(1);

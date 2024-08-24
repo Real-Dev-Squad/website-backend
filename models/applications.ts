@@ -143,6 +143,7 @@ const getUserApplications = async (userId: string) => {
     const applicationsResult = [];
     const applications = await ApplicationsModel.where("userId", "==", userId)
     .orderBy("createdAt", "desc")
+    .limit(1)
     .get();
 
     applications.forEach((application) => {
@@ -151,7 +152,8 @@ const getUserApplications = async (userId: string) => {
         ...application.data(),
       });
     });
-    return applicationsResult[0];
+    
+    return applicationsResult;
   } catch (err) {
     logger.log("error in getting user intro", err);
     throw err;
