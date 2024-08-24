@@ -6,7 +6,6 @@ const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/da
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
 const logger = require("../utils/logger");
 const { markUnDoneTasksOfArchivedUsersBacklog } = require("../models/tasks");
-const inDiscord = require("../test/fixtures/user/inDiscord");
 
 const addExternalAccountData = async (req, res) => {
   const createdOn = Date.now();
@@ -63,7 +62,7 @@ const linkExternalAccount = async (req, res) => {
 
     await addOrUpdate(
       {
-        roles: { ...roles, in_discord: true, inDiscord: true, archived: false },
+        roles: { ...roles, in_discord: true, archived: false },
         discordId: attributes.discordId,
         discordJoinedAt: attributes.discordJoinedAt,
       },
