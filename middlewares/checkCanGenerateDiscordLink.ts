@@ -34,7 +34,7 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
       return res.boom.forbidden("Only users with an approved application can generate a Discord invite link.");
     }
 
-    // return next();
+    return next();
   } catch (error) {
     return res.boom.badImplementation("An error occurred while checking user applications.");
   }
