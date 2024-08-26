@@ -163,8 +163,6 @@ const getSuggestedUsers = async (skill) => {
  * @return {Promise<userModel|Array>}
  */
 const fetchPaginatedUsers = async (query) => {
-  const isDevMode = query.dev === "true";
-
   try {
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
@@ -183,12 +181,10 @@ const fetchPaginatedUsers = async (query) => {
     }
 
     let compositeQuery = [dbQuery];
-    if (isDevMode) {
-      const usernameQuery = userModel.where("roles.archived", "==", false).orderBy("username_lowercase");
-      const firstNameQuery = userModel.where("roles.archived", "==", false).orderBy("first_name_lowercase");
-      const lastNameQuery = userModel.where("roles.archived", "==", false).orderBy("last_name_lowercase");
-      compositeQuery = [usernameQuery, firstNameQuery, lastNameQuery];
-    }
+    const usernameQuery = userModel.where("roles.archived", "==", false).orderBy("username_lowercase", "desc");
+    const firstNameQuery = userModel.where("roles.archived", "==", false).orderBy("first_name_lowercase", "desc");
+    const lastNameQuery = userModel.where("roles.archived", "==", false).orderBy("last_name_lowercase", "desc");
+    compositeQuery = [usernameQuery, firstNameQuery, lastNameQuery];
 
     if (query.prev) {
       compositeQuery = compositeQuery.map((query) => query.limitToLast(size));
