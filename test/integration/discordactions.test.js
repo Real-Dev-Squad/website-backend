@@ -784,7 +784,7 @@ describe("Discord actions", function () {
     let clock;
 
     beforeEach(function () {
-      clock = sinon.useFakeTimers(new Date("2024-08-24").getTime());
+      clock = sinon.useFakeTimers(new Date("2024-08-31").getTime());
     });
 
     afterEach(function () {
@@ -904,7 +904,7 @@ describe("Discord actions", function () {
     });
 
     it("should return 403 if current date is after 25 August 2024", async function () {
-      clock.tick(2 * 24 * 60 * 60 * 1000); // Move time forward to after 25 August 2024
+      clock.tick(2 * 24 * 60 * 60 * 1000); // Move time forward to after 31 August 2024
       sinon.stub(ApplicationModel, "getUserApplications").resolves([{ status: "accepted" }]);
 
       const res = await chai
