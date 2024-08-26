@@ -149,22 +149,10 @@ const getApplicationById = async (req: CustomRequest, res: CustomResponse) => {
   }
 };
 
-
-const batchUpdateApplicantsStatus = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
-  try {
-    const updateStats = await ApplicationModel.updateApplicantsStatus();
-    return res.json(updateStats);
-  } catch (err) {
-    logger.error(`Error in batch updating applicants: ${err}`);
-    return res.boom.badImplementation("Internal Server Error");
-  }
-};
-
 module.exports = {
   getAllOrUserApplication,
   addApplication,
   updateApplication,
   getApplicationById,
   batchUpdateApplications,
-  batchUpdateApplicantsStatus
 };
