@@ -62,7 +62,7 @@ const linkExternalAccount = async (req, res) => {
 
     await addOrUpdate(
       {
-        roles: { ...roles, in_discord: true },
+        roles: { ...roles, in_discord: true, archived: false },
         discordId: attributes.discordId,
         discordJoinedAt: attributes.discordJoinedAt,
       },
