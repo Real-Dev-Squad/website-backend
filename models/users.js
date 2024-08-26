@@ -184,9 +184,9 @@ const fetchPaginatedUsers = async (query) => {
 
     let compositeQuery = [dbQuery];
     if (isDevMode) {
-      const usernameQuery = userModel.where("roles.archived", "==", false).orderBy("username");
-      const firstNameQuery = userModel.where("roles.archived", "==", false).orderBy("first_name");
-      const lastNameQuery = userModel.where("roles.archived", "==", false).orderBy("last_name");
+      const usernameQuery = userModel.where("roles.archived", "==", false).orderBy("username_lowercase");
+      const firstNameQuery = userModel.where("roles.archived", "==", false).orderBy("first_name_lowercase");
+      const lastNameQuery = userModel.where("roles.archived", "==", false).orderBy("last_name_lowercase");
       compositeQuery = [usernameQuery, firstNameQuery, lastNameQuery];
     }
 
