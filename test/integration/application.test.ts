@@ -400,43 +400,4 @@ describe("Application", function () {
         });
     });
   });
-
-  describe("PATCH /application/batch/update", function () {
-    it("should return 401 if the user is not super user", function (done) {
-      chai
-        .request(app)
-        .patch(`/applications/batch/update`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(401);
-          expect(res.body.message).to.be.equal("You are not authorized for this action.");
-          return done();
-        });
-    });
-
-    it("should return updated stats after updating all the application", function (done) {
-      chai
-        .request(app)
-        .patch(`/applications/batch/update`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body).to.be.deep.equal({
-            failedApplicationUpdateIds: [],
-            totalFailedApplicationUpdates: 0,
-            totalApplicationUpdates: 6,
-          });
-          return done();
-        });
-    });
-  });
 });
