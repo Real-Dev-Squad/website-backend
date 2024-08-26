@@ -30,7 +30,6 @@ const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
-const { fetchPaginatedUsers } = require("../models/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -231,11 +230,11 @@ const getUsers = async (req, res) => {
       });
     }
 
-    const data = await fetchPaginatedUsers(req.query);
+    const data = await dataAccess.retrieveUsers(req.query);
 
     return res.json({
       message: "Users returned successfully!",
-      users: data.allUsers,
+      users: data.user,
       links: {
         next: data.nextId ? getPaginationLink(req.query, "next", data.nextId) : "",
         prev: data.prevId ? getPaginationLink(req.query, "prev", data.prevId) : "",
