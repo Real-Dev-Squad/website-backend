@@ -1,8 +1,6 @@
 import { application } from "../types/application";
 const firestore = require("../utils/firestore");
 const ApplicationsModel = firestore.collection("applicants");
-const { DOCUMENT_WRITE_SIZE: FIRESTORE_BATCH_OPERATIONS_LIMIT } = require("../constants/constants");
-import { chunks } from "../utils/array";
 
 const getAllApplications = async (limit: number, lastDocId?: string) => {
   try {
@@ -134,6 +132,4 @@ module.exports = {
   updateApplication,
   getApplicationsBasedOnStatus,
   getApplicationById,
-  updateApplicantsStatus,
-  batchUpdateApplications,
 };

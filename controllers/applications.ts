@@ -144,6 +144,4 @@ module.exports = {
   addApplication,
   updateApplication,
   getApplicationById,
-  batchUpdateApplicantsStatus
-  batchUpdateApplications,
 };
