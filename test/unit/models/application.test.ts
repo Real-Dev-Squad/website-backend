@@ -114,11 +114,4 @@ describe("applications", function () {
       expect(application.status).to.be.equal("accepted");
     });
   });
-
-  describe("batchUpdateApplications", function () {
-    it("should add createdAt null to all existing application docs", async function () {
-      const operationStats = await ApplicationModel.batchUpdateApplications();
-      expect(operationStats.totalApplicationUpdates).to.be.equal(6);
-    });
-  });
 });

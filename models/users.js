@@ -169,12 +169,24 @@ const fetchPaginatedUsers = async (query) => {
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
 
-    let dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+    let dbQuery;
+    /**
+     * !!NOTE : At the time of writing we only support member in the role query
+     * this will get fixed with the new onboarding flow, contact @tejaskh3 for more info
+     *
+     * if you're making changes to this code remove the archived check in the role query, example: role=archived,member
+     */
+    if (query.roles === "member") {
+      dbQuery = userModel.where("roles.archived", "==", false).where("roles.member", "==", true);
+    } else {
+      dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+    }
+
     let compositeQuery = [dbQuery];
     if (isDevMode) {
-      const usernameQuery = userModel.where("roles.archived", "==", false).orderBy("username");
-      const firstNameQuery = userModel.where("roles.archived", "==", false).orderBy("first_name");
-      const lastNameQuery = userModel.where("roles.archived", "==", false).orderBy("last_name");
+      const usernameQuery = userModel.where("roles.archived", "==", false).orderBy("username_lowercase");
+      const firstNameQuery = userModel.where("roles.archived", "==", false).orderBy("first_name_lowercase");
+      const lastNameQuery = userModel.where("roles.archived", "==", false).orderBy("last_name_lowercase");
       compositeQuery = [usernameQuery, firstNameQuery, lastNameQuery];
     }
 
