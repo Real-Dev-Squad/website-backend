@@ -2344,7 +2344,11 @@ describe("Users", function () {
   });
 
   describe("PATCH /users/self for developers", function () {
-    beforeEach(function () {
+    let id, jwtoken;
+
+    beforeEach(async function () {
+      id = await addUser();
+      jwtoken = authService.generateAuthToken({ userId: id });
       fetchStub = Sinon.stub(global, "fetch");
       const discordMembers = [...getDiscordMembers];
       discordMembers[0].user.id = "12345";
@@ -2365,7 +2369,7 @@ describe("Users", function () {
       chai
         .request(app)
         .patch("/users/self")
-        .set("cookie", `${cookieName}=${jwt}`)
+        .set("cookie", `${cookieName}=${jwtoken}`)
         .send({
           first_name: "Test first_name",
         })
