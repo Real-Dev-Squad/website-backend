@@ -924,6 +924,42 @@ describe("Users", function () {
         });
     });
 
+    it("Should return the logged in super_user with modified privilege, super_user : false, based on superUserAccess in jwt token", async function () {
+      const superUser = userData[4];
+      const userId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId, superUserAccess: false });
+      const res = await chai.request(app).get("/users/self").set("cookie", `${cookieName}=${jwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.roles.super_user).to.be.equal(false);
+      await cleanDb();
+    });
+
+    it("Should return the logged in super_user with unmodified privileges, super_user : true, based on superUserAccess in jwt token", async function () {
+      const superUser = userData[4];
+      const userId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId, superUserAccess: true });
+      const res = await chai.request(app).get("/users/self").set("cookie", `${cookieName}=${jwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.roles.super_user).to.be.equal(true);
+      await cleanDb();
+    });
+
+    it("Should return the logged in super_user as it is if the superUserAccess not found in jwt token", async function () {
+      const superUser = userData[4];
+      const userId = await addUser(superUser);
+      jwt = authService.generateAuthToken({ userId });
+      const res = await chai.request(app).get("/users/self").set("cookie", `${cookieName}=${jwt}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("object");
+      expect(res.body.roles.super_user).to.be.equal(true);
+      await cleanDb();
+    });
+
     it("Should return 401 if not logged in", function (done) {
       chai
         .request(app)
@@ -2415,6 +2451,144 @@ describe("Users", function () {
           expect(res).to.have.status(200);
           expect(res.body.developerRoleExistsOnUser).to.equal(true);
 
+          return done();
+        });
+    });
+  });
+
+  describe("GET /get-super-user-access-status", function () {
+    beforeEach(async function () {
+      userId = await addUser();
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("Should return true if the token has superUserAccess role in it, and it's set to be true", function (done) {
+      jwt = authService.generateAuthToken({ userId, superUserAccess: true });
+      chai
+        .request(app)
+        .get("/users/get-super-user-access-status")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.have.a.property("currentAccess");
+          expect(res.body.currentAccess).to.be.equal(true);
+          return done();
+        });
+    });
+
+    it("Should return false if the token has superUserAccess role in it, and it's set to be false", function (done) {
+      jwt = authService.generateAuthToken({ userId, superUserAccess: false });
+      chai
+        .request(app)
+        .get("/users/get-super-user-access-status")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.have.property("currentAccess");
+          expect(res.body.currentAccess).to.be.equal(false);
+          return done();
+        });
+    });
+
+    it("Should return a message: 'Super User Access Modifier Not Set!', if superUserAccess not set in jwt token", function (done) {
+      jwt = authService.generateAuthToken({ userId });
+      chai
+        .request(app)
+        .get("/users/get-super-user-access-status")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.not.have.property("currentAccess");
+          expect(res.body).to.have.property("message");
+          expect(res.body.currentAccess).to.be.equal(undefined);
+          expect(res.body.message).to.be.equal("Super User Access Modifier Not Set!");
+          return done();
+        });
+    });
+  });
+
+  describe("GET /set-super-user-access", function () {
+    beforeEach(async function () {
+      userId = await addUser();
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("Should return currentAccess: true, with message: 'Super User Privilege Access Set!'", function (done) {
+      jwt = authService.generateAuthToken({ userId });
+      chai
+        .request(app)
+        .get("/users/set-super-user-access?value=true")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.have.a.property("currentAccess");
+          expect(res.body).to.have.a.property("message");
+          expect(res.body.currentAccess).to.be.equal(true);
+          expect(res.body.message).to.be.equal("Super User Privilege Access Set!");
+          return done();
+        });
+    });
+
+    it("Should return currentAccess: false, with message: 'Super User Privilege Access Set!'", function (done) {
+      jwt = authService.generateAuthToken({ userId });
+      chai
+        .request(app)
+        .get("/users/set-super-user-access?value=false")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.have.a.property("currentAccess");
+          expect(res.body).to.have.a.property("message");
+          expect(res.body.currentAccess).to.be.equal(false);
+          expect(res.body.message).to.be.equal("Super User Privilege Access Set!");
+          return done();
+        });
+    });
+
+    it("Should return status 400", function (done) {
+      jwt = authService.generateAuthToken({ userId });
+      chai
+        .request(app)
+        .get("/users/set-super-user-access?value=xyz")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.not.have.a.property("currentAccess");
+          expect(res.body).to.have.a.property("message");
+          expect(res.body.currentAccess).to.be.equal(undefined);
+          expect(res.body.message).to.be.equal("Wrong value in query param, value can be either true or false");
           return done();
         });
     });
