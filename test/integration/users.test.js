@@ -363,7 +363,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: "Username must be between 4 and 20 characters long and contain only letters or numbers.",
+            message: "Username must be between 4 and 32 characters long and contain only letters or numbers.",
           });
 
           return done();
