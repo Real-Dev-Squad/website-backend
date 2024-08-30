@@ -1,56 +1,6 @@
 import { application } from "../types/application";
 const firestore = require("../utils/firestore");
 const ApplicationsModel = firestore.collection("applicants");
-const { DOCUMENT_WRITE_SIZE: FIRESTORE_BATCH_OPERATIONS_LIMIT } = require("../constants/constants");
-import { chunks } from "../utils/array";
-
-const batchUpdateApplications = async () => {
-  try {
-    const operationStats = {
-      failedApplicationUpdateIds: [],
-      totalFailedApplicationUpdates: 0,
-      totalApplicationUpdates: 0,
-    };
-
-    const updatedApplications = [];
-    const applications = await ApplicationsModel.get();
-
-    if (applications.empty) {
-      return operationStats;
-    }
-
-    operationStats.totalApplicationUpdates = applications.size;
-
-    applications.forEach((application) => {
-      const taskData = application.data();
-      taskData.createdAt = null;
-      updatedApplications.push({ id: application.id, data: taskData });
-    });
-
-    const multipleApplicationUpdateBatch = [];
-    const chunkedApplication = chunks(updatedApplications, FIRESTORE_BATCH_OPERATIONS_LIMIT);
-
-    chunkedApplication.forEach(async (applications) => {
-      const batch = firestore.batch();
-      applications.forEach(({ id, data }) => {
-        batch.update(ApplicationsModel.doc(id), data);
-      });
-      try {
-        await batch.commit();
-        multipleApplicationUpdateBatch.push(batch);
-      } catch (error) {
-        operationStats.totalFailedApplicationUpdates += applications.length;
-        applications.forEach(({ id }) => operationStats.failedApplicationUpdateIds.push(id));
-      }
-    });
-
-    await Promise.allSettled(multipleApplicationUpdateBatch);
-    return operationStats;
-  } catch (err) {
-    logger.log("Error in batch update", err);
-    throw err;
-  }
-};
 
 const getAllApplications = async (limit: number, lastDocId?: string) => {
   try {
@@ -114,7 +64,7 @@ const getApplicationsBasedOnStatus = async (status: string, limit: number, lastD
       lastDoc = await ApplicationsModel.doc(lastDocId).get();
     }
 
-    dbQuery = dbQuery.orderBy("createdAt", "desc");
+  dbQuery = dbQuery.orderBy("createdAt", "desc");
 
     if (lastDoc) {
       dbQuery = dbQuery.startAfter(lastDoc);
@@ -182,5 +132,4 @@ module.exports = {
   updateApplication,
   getApplicationsBasedOnStatus,
   getApplicationById,
-  batchUpdateApplications,
 };

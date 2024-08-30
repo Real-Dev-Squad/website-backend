@@ -414,7 +414,7 @@ const updateSelf = async (req, res) => {
       }
     }
 
-    if (userRoles.in_discord) {
+    if (userRoles.in_discord && !user.incompleteUserDetails) {
       const membersInDiscord = await getDiscordMembers();
       const discordMember = membersInDiscord.find((member) => member.user.id === discordId);
       if (discordMember) {
