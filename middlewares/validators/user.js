@@ -23,7 +23,7 @@ const updateUser = async (req, res, next) => {
         .min(4)
         .max(32)
         .regex(/^[a-zA-Z0-9-]+$/)
-        .message("Username can contain only letters, numbers, and hyphens."),
+        .message("Username must be between 4 and 32 characters long and contain only letters or numbers."),
       first_name: joi.string().optional(),
       last_name: joi.string().optional(),
       yoe: joi.number().min(0).optional(),
