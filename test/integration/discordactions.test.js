@@ -919,7 +919,7 @@ describe("Discord actions", function () {
 
       expect(res).to.have.status(403);
       expect(res.body.message).to.be.equal(
-        "Only users with an approved application can generate a Discord invite link."
+        "Only users with an accepted application can generate a Discord invite link."
       );
     });
 
@@ -933,7 +933,7 @@ describe("Discord actions", function () {
 
       expect(res).to.have.status(403);
       expect(res.body.message).to.be.equal(
-        "Only users with an approved application can generate a Discord invite link."
+        "Only users with an accepted application can generate a Discord invite link."
       );
     });
 
