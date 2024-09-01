@@ -6,7 +6,6 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
   const { id: userId, roles } = req.userData;
   const isSuperUser = roles.super_user;
   const userIdInQuery = req.query.userId;
-  const currentTime = Date.now();
 
   if (isSuperUser) {
     return next();
@@ -26,7 +25,7 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
     const approvedApplication = applications.find((application: { status: string; }) => application.status === 'accepted');
     
     if (!approvedApplication) {
-      return res.boom.forbidden("Only users with an approved application can generate a Discord invite link.");
+      return res.boom.forbidden("Only users with an accepted application can generate a Discord invite link.");
     }
 
     return next();
