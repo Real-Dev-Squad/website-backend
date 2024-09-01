@@ -6,8 +6,6 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
   const { id: userId, roles } = req.userData;
   const isSuperUser = roles.super_user;
   const userIdInQuery = req.query.userId;
-  const currentTime = Date.now();
-  const cutoffTime = 1725147849000;  // Todo will remove this Hotfix time for 31 August 2024
 
   if (isSuperUser) {
     return next();
@@ -15,10 +13,6 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
 
   if (userIdInQuery && userIdInQuery !== userId && !isSuperUser) {
     return res.boom.forbidden("User should be super user to generate link for other users");
-  }
-
-  if (currentTime >= cutoffTime) {
-    return res.boom.forbidden("Discord invite link generation is not allowed after the cutoff time.");
   }
 
   try {
@@ -31,7 +25,7 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
     const approvedApplication = applications.find((application: { status: string; }) => application.status === 'accepted');
     
     if (!approvedApplication) {
-      return res.boom.forbidden("Only users with an approved application can generate a Discord invite link.");
+      return res.boom.forbidden("Only users with an accepted application can generate a Discord invite link.");
     }
 
     return next();
