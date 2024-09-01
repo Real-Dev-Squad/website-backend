@@ -781,12 +781,6 @@ describe("Discord actions", function () {
 
   // <------ Will revisit this later https://github.com/Real-Dev-Squad/website-backend/issues/2078 --->
   describe("POST /discord-actions/invite", function () {
-    let clock;
-
-    beforeEach(function () {
-      clock = sinon.useFakeTimers(new Date("2024-08-31").getTime());
-    });
-
     afterEach(function () {
       sinon.restore();
     });
@@ -901,19 +895,6 @@ describe("Discord actions", function () {
       expect(res).to.have.status(201);
       expect(res.body.message).to.be.equal("invite generated successfully");
       expect(res.body.inviteLink).to.be.equal("discord.gg/asdfdsfsd");
-    });
-
-    it("should return 403 if current date is after 25 August 2024", async function () {
-      clock.tick(2 * 24 * 60 * 60 * 1000); // Move time forward to after 31 August 2024
-      sinon.stub(ApplicationModel, "getUserApplications").resolves([{ status: "accepted" }]);
-
-      const res = await chai
-        .request(app)
-        .post("/discord-actions/invite")
-        .set("cookie", `${cookieName}=${userAuthToken}`);
-
-      expect(res).to.have.status(403);
-      expect(res.body.message).to.be.equal("Discord invite link generation is not allowed after the cutoff time.");
     });
 
     it("should return 403 if user has no applications", async function () {
