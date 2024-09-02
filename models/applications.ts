@@ -1,56 +1,6 @@
 import { application } from "../types/application";
 const firestore = require("../utils/firestore");
 const ApplicationsModel = firestore.collection("applicants");
-const { DOCUMENT_WRITE_SIZE: FIRESTORE_BATCH_OPERATIONS_LIMIT } = require("../constants/constants");
-import { chunks } from "../utils/array";
-
-const batchUpdateApplications = async () => {
-  try {
-    const operationStats = {
-      failedApplicationUpdateIds: [],
-      totalFailedApplicationUpdates: 0,
-      totalApplicationUpdates: 0,
-    };
-
-    const updatedApplications = [];
-    const applications = await ApplicationsModel.get();
-
-    if (applications.empty) {
-      return operationStats;
-    }
-
-    operationStats.totalApplicationUpdates = applications.size;
-
-    applications.forEach((application) => {
-      const taskData = application.data();
-      taskData.createdAt = null;
-      updatedApplications.push({ id: application.id, data: taskData });
-    });
-
-    const multipleApplicationUpdateBatch = [];
-    const chunkedApplication = chunks(updatedApplications, FIRESTORE_BATCH_OPERATIONS_LIMIT);
-
-    chunkedApplication.forEach(async (applications) => {
-      const batch = firestore.batch();
-      applications.forEach(({ id, data }) => {
-        batch.update(ApplicationsModel.doc(id), data);
-      });
-      try {
-        await batch.commit();
-        multipleApplicationUpdateBatch.push(batch);
-      } catch (error) {
-        operationStats.totalFailedApplicationUpdates += applications.length;
-        applications.forEach(({ id }) => operationStats.failedApplicationUpdateIds.push(id));
-      }
-    });
-
-    await Promise.allSettled(multipleApplicationUpdateBatch);
-    return operationStats;
-  } catch (err) {
-    logger.log("Error in batch update", err);
-    throw err;
-  }
-};
 
 const getAllApplications = async (limit: number, lastDocId?: string) => {
   try {
@@ -179,72 +129,6 @@ const updateApplication = async (dataToUpdate: object, applicationId: string) =>
   }
 };
 
-const updateApplicantsStatus = async () => {
-  try {
-    const operationStats = {
-      failedApplicantUpdateIds: [],
-      applicantUpdatesFailed: 0,
-      applicantUpdated: 0,
-      totalApplicant: 0,
-    };
-
-    const updatedApplicants = [];
-    const applicantsSnapshot = await ApplicationsModel.get();
-
-    if (applicantsSnapshot.empty) {
-      return operationStats;
-    }
-
-    operationStats.totalApplicant = applicantsSnapshot.size;
-
-    applicantsSnapshot.forEach((applicant) => {
-      const applicantData = applicant.data();
-
-      const createdAt = applicant.createTime.seconds * 1000 + applicant.createTime.nanoseconds / 1000000;
-
-      let propertyUpdated = false;
-
-      if ("createdAt" in applicantData === false) {
-        const createdAtISO = new Date(createdAt).toISOString();
-        applicantData.createdAt = createdAtISO;
-        propertyUpdated = true;
-      }
-      if ("status" in applicantData === false) {
-        applicantData.status = "pending";
-        propertyUpdated = true;
-      }
-      if (propertyUpdated === true) {
-        operationStats.applicantUpdated += 1;
-        updatedApplicants.push({ id: applicant.id, data: applicantData });
-      }
-    });
-
-    const multipleApplicantUpdateBatch = [];
-    const chunkedApplicants = chunks(updatedApplicants, FIRESTORE_BATCH_OPERATIONS_LIMIT);
-
-    for (const applicants of chunkedApplicants) {
-      const batch = firestore.batch();
-      applicants.forEach(({ id, data }) => {
-        batch.update(firestore.collection("applicants").doc(id), data);
-      });
-
-      try {
-        await batch.commit();
-        multipleApplicantUpdateBatch.push(batch);
-      } catch (error) {
-        operationStats.applicantUpdatesFailed += applicants.length;
-        applicants.forEach(({ id }) => operationStats.failedApplicantUpdateIds.push(id));
-      }
-    }
-
-    await Promise.allSettled(multipleApplicantUpdateBatch);
-    return operationStats;
-  } catch (err) {
-    logger.error("Error in batch update", err);
-    throw err;
-  }
-};
-
 module.exports = {
   getAllApplications,
   getUserApplications,
@@ -252,6 +136,4 @@ module.exports = {
   updateApplication,
   getApplicationsBasedOnStatus,
   getApplicationById,
-  batchUpdateApplications,
-  updateApplicantsStatus,
 };
