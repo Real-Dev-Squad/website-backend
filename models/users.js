@@ -23,7 +23,6 @@ const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { AUTHORITIES } = require("../constants/authorities");
-const { updateUsernamesInBatch, formatUsername } = require("../utils/users");
 
 /**
  * Adds or updates the user data
@@ -912,6 +911,51 @@ const getNonNickNameSyncedUsers = async () => {
     logger.error(`Error while fetching all users: ${err}`);
     throw err;
   }
+};
+
+const updateUsernamesInBatch = async (usersData) => {
+  const batch = firestore.batch();
+  const usersBatch = [];
+  const summary = {
+    totalUpdatedUsernames: 0,
+    totalOperationsFailed: 0,
+    failedUserDetails: [],
+  };
+
+  usersData.forEach((user) => {
+    const updateUserData = { ...user, username: user.username };
+    batch.update(userModel.doc(user.id), updateUserData);
+    usersBatch.push(user.id);
+  });
+
+  try {
+    await batch.commit();
+    summary.totalUpdatedUsernames += usersData.length;
+    return { ...summary };
+  } catch (err) {
+    logger.error("Firebase batch Operation Failed!");
+    summary.totalOperationsFailed += usersData.length;
+    summary.failedUserDetails = [...usersBatch];
+    return { ...summary };
+  }
+};
+
+const sanitizeString = (str) => {
+  if (!str) return "";
+  return str.replace(/[^a-zA-Z0-9-]/g, "-");
+};
+
+const formatUsername = (firstName, lastName, suffix) => {
+  const actualFirstName = firstName.split(" ")[0].toLowerCase();
+  const sanitizedFirstName = sanitizeString(actualFirstName);
+  const sanitizedLastName = sanitizeString(lastName).toLowerCase();
+
+  const baseUsername = `${sanitizedFirstName}-${sanitizedLastName}`;
+  const fullUsername = `${baseUsername}-${suffix}`;
+
+  return fullUsername.length <= 32
+    ? fullUsername
+    : `${baseUsername.slice(0, 32 - suffix.toString().length - 1)}-${suffix}`;
 };
 
 const updateUsersWithNewUsernames = async () => {
