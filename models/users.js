@@ -958,7 +958,10 @@ const updateUsersWithNewUsernames = async () => {
       usersWithSameName.forEach((user, index) => {
         const suffix = index + 1;
         const formattedUsername = formatUsername(user.userData.first_name, user.userData.last_name, suffix);
-        usersToUpdate.push({ ...user.userData, id: user.id, username: formattedUsername });
+
+        if (user.userData.username !== formattedUsername) {
+          usersToUpdate.push({ ...user.userData, id: user.id, username: formattedUsername });
+        }
       });
     }
 
