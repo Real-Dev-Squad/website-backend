@@ -324,6 +324,7 @@ const updateIdleUsersOnDiscord = async () => {
   let allUsersHavingGroupIdle = [];
   let groupIdleRole;
   let groupIdleRoleId;
+  const allMavens = [];
 
   try {
     groupIdleRole = await getGroupRole("group-idle");
@@ -335,6 +336,11 @@ const updateIdleUsersOnDiscord = async () => {
     discordUsers?.forEach((discordUser) => {
       const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
       const haveIdleRole = discordUser.roles.includes(groupIdleRole.role.roleid);
+      const isMaven = discordUser.roles.includes(discordMavenRoleId);
+
+      if (isMaven) {
+        allMavens.push(discordUser.user.id);
+      }
 
       if (isDeveloper && haveIdleRole) {
         usersHavingIdleRole.push({ userid: discordUser.user.id });
@@ -349,7 +355,7 @@ const updateIdleUsersOnDiscord = async () => {
             if (userData.exists) {
               if (isUserArchived) {
                 totalArchivedUsers++;
-              } else {
+              } else if (!allMavens.includes(userData.data().discordId)) {
                 userStatus.userid = userData.data().discordId;
                 allIdleUsers.push(userStatus);
               }
@@ -549,6 +555,7 @@ const updateIdle7dUsersOnDiscord = async () => {
   let allUsersHavingGroupIdle7d = [];
   let groupIdle7dRole;
   let groupIdle7dRoleId;
+  const allMavens = [];
 
   try {
     groupIdle7dRole = await getGroupRole("group-idle-7d+");
@@ -562,6 +569,11 @@ const updateIdle7dUsersOnDiscord = async () => {
     discordUsers?.forEach((discordUser) => {
       const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
       const haveIdle7dRole = discordUser.roles.includes(groupIdle7dRoleId);
+      const isMaven = discordUser.roles.includes(discordMavenRoleId);
+
+      if (isMaven) {
+        allMavens.push(discordUser.user.id);
+      }
 
       if (isDeveloper && haveIdle7dRole) {
         usersHavingIdle7dRole.push({ userid: discordUser.user.id });
@@ -583,7 +595,7 @@ const updateIdle7dUsersOnDiscord = async () => {
               if (userData.exists) {
                 if (isUserArchived) {
                   totalArchivedUsers++;
-                } else {
+                } else if (!allMavens.includes(userData.data().discordId)) {
                   userStatus.userid = userData.data().discordId;
                   allIdle7dUsers.push(userStatus);
                 }
