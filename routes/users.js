@@ -19,6 +19,8 @@ router.get("/userId/:userId", users.getUserById);
 router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
 router.get("/", userValidator.getUsers, users.getUsers);
 router.get("/self", authenticate, users.getSelfDetails);
+router.get("/set-super-user-access", authenticate, users.setSuperUserAccessLimiter);
+router.get("/get-super-user-access-status", authenticate, users.getSuperUserAccessStatus);
 router.get("/isDeveloper", authenticate, users.isDeveloper);
 router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
 router.get("/username", authenticate, userValidator.validateGenerateUsernameQuery, users.generateUsername);

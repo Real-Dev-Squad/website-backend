@@ -30,6 +30,7 @@ const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const authService = require("../services/authService");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -376,6 +377,9 @@ const getSelfDetails = async (req, res) => {
       const user = await dataAccess.retrieveUsers({
         userdata: req.userData,
       });
+      if (req.userData.superUserAccess === false) {
+        user.roles.super_user = false;
+      }
       return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");
@@ -827,6 +831,53 @@ const setInDiscordScript = async (req, res) => {
   }
 };
 
+const getSuperUserAccessStatus = async (req, res) => {
+  try {
+    if (req.userData.superUserAccess !== undefined) {
+      return res.json({ currentAccess: req.userData.superUserAccess });
+    } else {
+      return res.json({ message: "Super User Access Modifier Not Set!" });
+    }
+  } catch (error) {
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
+const setSuperUserAccessLimiter = async (req, res) => {
+  try {
+    let value;
+    switch (req.query.value) {
+      case "true":
+        value = true;
+        break;
+      case "false":
+        value = false;
+        break;
+      default:
+        break;
+    }
+    if (value !== undefined) {
+      const token = req.cookies[config.get("userToken.cookieName")];
+      const { userId } = authService.decodeAuthToken(token);
+      const newToken = authService.generateAuthToken({ userId, superUserAccess: value });
+      const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+      res.cookie(config.get("userToken.cookieName"), newToken, {
+        domain: rdsUiUrl.hostname,
+        expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+      return res.json({ message: "Super User Privilege Access Set!", currentAccess: value });
+    } else {
+      return res.boom.badRequest("Wrong value in query param, value can be either true or false");
+    }
+  } catch (error) {
+    logger.error(`Error while Setting Super Privilege Access Limiter: ${error}`);
+    return res.boom.badImplementation({ message: INTERNAL_SERVER_ERROR });
+  }
+};
+
 const updateRoles = async (req, res) => {
   try {
     const result = await dataAccess.retrieveUsers({ id: req.params.id });
@@ -985,5 +1036,7 @@ module.exports = {
   archiveUserIfNotInDiscord,
   usersPatchHandler,
   isDeveloper,
+  setSuperUserAccessLimiter,
+  getSuperUserAccessStatus,
   getIdentityStats,
 };
