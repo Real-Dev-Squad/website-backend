@@ -2423,4 +2423,17 @@ describe("Users", function () {
         });
     });
   });
+
+  describe("POST USERS MIGRATION", function () {
+    it("should run the migration and update usernames successfully", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/migration/update-usernames")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      expect(res.body.totalUpdatedUsernames).to.be.greaterThan(0);
+    });
+  });
 });
