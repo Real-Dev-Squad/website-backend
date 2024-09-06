@@ -964,7 +964,7 @@ const updateUsersWithNewUsernames = async () => {
 
     const nonMemberUsers = snapshot.docs.filter((doc) => {
       const roles = doc.data().roles;
-      return roles?.member !== true;
+      return !(roles?.member === true || roles?.super_user === true);
     });
 
     const summary = {
