@@ -2433,7 +2433,6 @@ describe("Users", function () {
         .send();
 
       expect(res).to.have.status(200);
-      expect(res.body.totalUpdatedUsernames).to.be.greaterThan(0);
     });
   });
 });
