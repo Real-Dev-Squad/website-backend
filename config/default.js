@@ -25,6 +25,11 @@ module.exports = {
     clientSecret: "<clientSecret>",
   },
 
+  emailCredentials: {
+    user: "<RDS_EMAIL>",
+    pass: "<EMAIL PASS GENERATED AFTER 2FA>",
+  },
+
   firestore: `{
     "type": "service_account",
     "project_id": "<project-name>",

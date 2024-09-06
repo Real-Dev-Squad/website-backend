@@ -55,6 +55,11 @@ module.exports = {
     },
   },
 
+  emailCredentials: {
+    user: "<RDS_EMAIL>",
+    pass: "<EMAIL PASS GENERATED AFTER 2FA>",
+  },
+
   userToken: {
     cookieName: "COOKIE_NAME",
     ttl: {
