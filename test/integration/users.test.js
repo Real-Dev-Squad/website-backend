@@ -2423,4 +2423,58 @@ describe("Users", function () {
         });
     });
   });
+
+  describe("POST USERS MIGRATION", function () {
+    it("should run the migration and update usernames successfully", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/migration/update-usernames")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+    });
+
+    it("should not update usernames for super_user or member", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/migration/update-usernames")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      const affectedUsers = res.body.totalUpdatedUsernames;
+      expect(affectedUsers).to.equal(0);
+    });
+
+    it("should return 401 for unauthorized user attempting migration", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/migration/update-usernames")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send();
+
+      expect(res).to.have.status(401);
+    });
+
+    it("should update username for users without member and super user true", async function () {
+      const userWithoutRoles = userData[2];
+      const userId = await addUser(userWithoutRoles);
+
+      const res = await chai
+        .request(app)
+        .post("/users/migration/update-usernames")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      expect(res.body.totalUpdatedUsernames).to.be.greaterThan(0);
+
+      const updatedUser = await firestore.collection("users").doc(userId).get();
+
+      expect(updatedUser.data().username).to.include(
+        `${userWithoutRoles.first_name.toLowerCase()}-${userWithoutRoles.last_name.toLowerCase()}-1`
+      );
+    });
+  });
 });

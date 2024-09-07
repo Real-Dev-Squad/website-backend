@@ -955,6 +955,16 @@ const getIdentityStats = async (req, res) => {
   });
 };
 
+const updateUsernames = async (req, res) => {
+  try {
+    const response = await userQuery.updateUsersWithNewUsernames();
+    return res.status(200).json(response);
+  } catch (error) {
+    logger.error("Error in username update script", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -986,4 +996,5 @@ module.exports = {
   usersPatchHandler,
   isDeveloper,
   getIdentityStats,
+  updateUsernames,
 };
