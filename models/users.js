@@ -991,10 +991,6 @@ const updateUsersWithNewUsernames = async () => {
       const lastName = userData.last_name?.toLowerCase();
 
       if (!firstName || !lastName) {
-        summary.failedUserDetails.push({
-          id,
-          reason: "Missing first_name or last_name",
-        });
         return;
       }
 
