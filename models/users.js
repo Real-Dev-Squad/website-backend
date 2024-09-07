@@ -317,6 +317,16 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
         userData = doc.data();
       });
     }
+
+    if (userData && userData.revoked_roles !== undefined) {
+      const updatedRoles = { ...userData.roles };
+      if (userData.revoked_roles.length > 0) {
+        for (const role of userData.revoked_roles) {
+          updatedRoles[`${role}`] = false;
+        }
+        userData.roles = updatedRoles;
+      }
+    }
     return {
       userExists: !!userData,
       user: {
