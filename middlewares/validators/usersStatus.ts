@@ -114,3 +114,27 @@ export const validateMassUpdate = async (req: any, res: CustomResponse, next: Ne
     res.boom.badRequest(error);
   }
 };
+
+export const validateGetQueryParams = async (req: any, res: CustomResponse, next: NextFunction) => {
+  const schema = Joi.object()
+    .keys({
+      aggregate: Joi.boolean().valid(true).error(new Error(`Invalid boolean value passed for aggregate.`)),
+      status: Joi.string()
+        .trim()
+        .valid(userState.IDLE, userState.ACTIVE, userState.OOO, userState.ONBOARDING)
+        .error(new Error(`Invalid State. State must be either IDLE, ACTIVE, OOO, or ONBOARDING`)),
+      size: Joi.number().optional(),
+      next: Joi.optional()
+    })
+    .messages({
+      "object.unknown": "Invalid query param provided.",
+    });
+
+  try {
+    await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    logger.error(`Error validating Query Params for GET ${error.message}`);
+    res.boom.badRequest(error);
+  }
+};

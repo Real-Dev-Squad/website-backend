@@ -2,12 +2,14 @@ import express from "express";
 const router = express.Router();
 import authenticate from "../middlewares/authenticate";
 import usersStatusController from "../controllers/usersStatus";
-import { validateUsersStatus, validateMassUpdate } from "../middlewares/validators/usersStatus";
+import { validateUsersStatus, validateMassUpdate, validateGetQueryParams } from "../middlewares/validators/usersStatus";
 import { authorizeOwnUserIdParamOrSuperUser } from "../middlewares/authorizeOwnOrSuperUser";
 import { authorizeAndAuthenticate } from "../middlewares/authorizeUsersAndService";
+const authorizeRoles = require("../middlewares/authorizeRoles");
 const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
 
+router.get("/", validateGetQueryParams, usersStatusController.getAllUserStatus);
 router.get("/:userId", usersStatusController.getUserStatus);
 router.patch(
   "/update",
@@ -19,7 +21,7 @@ router.patch(
   authenticate,
   authorizeOwnUserIdParamOrSuperUser,
   validateUsersStatus,
-  usersStatusController.updateUserStatus
+  usersStatusController.updateUserStatusController
 );
 router.patch(
   "/batch",
@@ -27,4 +29,5 @@ router.patch(
   validateMassUpdate,
   usersStatusController.batchUpdateUsersStatus
 );
+router.delete("/:userId", authenticate, authorizeRoles([ROLES.SUPERUSER]), usersStatusController.deleteUserStatus);
 module.exports = router;
