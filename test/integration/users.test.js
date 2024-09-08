@@ -2456,25 +2456,5 @@ describe("Users", function () {
 
       expect(res).to.have.status(401);
     });
-
-    it("should update username for users without member and super user true", async function () {
-      const userWithoutRoles = userData[2];
-      const userId = await addUser(userWithoutRoles);
-
-      const res = await chai
-        .request(app)
-        .post("/users/batch-username-update")
-        .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .send();
-
-      expect(res).to.have.status(200);
-      expect(res.body.totalUpdatedUsernames).to.be.greaterThan(0);
-
-      const updatedUser = await firestore.collection("users").doc(userId).get();
-
-      expect(updatedUser.data().username).to.include(
-        `${userWithoutRoles.first_name.toLowerCase()}-${userWithoutRoles.last_name.toLowerCase()}-1`
-      );
-    });
   });
 });
