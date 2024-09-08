@@ -2428,7 +2428,7 @@ describe("Users", function () {
     it("should run the migration and update usernames successfully", async function () {
       const res = await chai
         .request(app)
-        .post("/users/migration/update-usernames")
+        .post("/users/batch-username-update")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send();
 
@@ -2438,7 +2438,7 @@ describe("Users", function () {
     it("should not update usernames for super_user or member", async function () {
       const res = await chai
         .request(app)
-        .post("/users/migration/update-usernames")
+        .post("/users/batch-username-update")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send();
 
@@ -2450,7 +2450,7 @@ describe("Users", function () {
     it("should return 401 for unauthorized user attempting migration", async function () {
       const res = await chai
         .request(app)
-        .post("/users/migration/update-usernames")
+        .post("/users/batch-username-update")
         .set("cookie", `${cookieName}=${jwt}`)
         .send();
 
@@ -2463,7 +2463,7 @@ describe("Users", function () {
 
       const res = await chai
         .request(app)
-        .post("/users/migration/update-usernames")
+        .post("/users/batch-username-update")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send();
 
