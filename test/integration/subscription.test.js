@@ -9,10 +9,11 @@ const chaiHttp = require("chai-http");
 chai.use(chaiHttp);
 const nodemailer = require("nodemailer");
 const nodemailerMock = require("nodemailer-mock");
-
+const userData = require("../fixtures/user/user")();
 const { expect } = chai;
 let userId = "";
-
+const superUser = userData[4];
+let superUserAuthToken = "";
 describe("/subscription email notifications", function () {
   let jwt;
 
@@ -70,13 +71,30 @@ describe("/subscription email notifications", function () {
   });
 
   describe("/send-email endpoint", function () {
-    beforeEach(function () {
+    beforeEach(async function () {
+      const superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
       sinon.stub(nodemailerMock, "createTransport").callsFake(nodemailerMock.createTransport);
     });
 
     afterEach(function () {
       sinon.restore();
       nodemailerMock.mock.reset();
+    });
+
+    it("Should return 401 if the super user is not logged in", function (done) {
+      chai
+        .request(app)
+        .post("/subscription")
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
     });
 
     it("should handle errors if sending email fails", function (done) {
@@ -87,9 +105,9 @@ describe("/subscription email notifications", function () {
       chai
         .request(app)
         .get("/subscription/send-email")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) return done(err);
-
           expect(res).to.have.status(500);
           expect(res.body).to.have.property("message", "Failed to send email");
           expect(res.body).to.have.property("error");
