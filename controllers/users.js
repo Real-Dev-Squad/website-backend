@@ -410,6 +410,15 @@ const updateSelf = async (req, res) => {
       }
     }
 
+    if (req.body.revoked_roles) {
+      // filter roles which are 'true'
+      const revokableRoles = req.body.revoked_roles.filter((role) => user.roles[`${role}`] === true);
+      const updatedUser = await userQuery.addOrUpdate({ revoked_roles: revokableRoles }, userId);
+      if (updatedUser) {
+        return res.status(200).send({ message: "privilege modified successfully!", revoked_roles: revokableRoles });
+      }
+    }
+
     if (userRoles.in_discord && !user.incompleteUserDetails) {
       const membersInDiscord = await getDiscordMembers();
       const discordMember = membersInDiscord.find((member) => member.user.id === discordId);
