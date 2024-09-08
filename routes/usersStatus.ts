@@ -10,7 +10,9 @@ const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
 
 router.get("/", validateGetQueryParams, usersStatusController.getAllUserStatus);
+router.get('/self', authenticate, usersStatusController.getUserStatus);
 router.get("/:userId", usersStatusController.getUserStatus);
+router.patch('/self', authenticate, usersStatusController.updateUserStatusController);
 router.patch(
   "/update",
   authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
@@ -19,7 +21,7 @@ router.patch(
 router.patch(
   "/:userId",
   authenticate,
-  authorizeOwnUserIdParamOrSuperUser,
+  authorizeRoles([SUPERUSER]),
   validateUsersStatus,
   usersStatusController.updateUserStatusController
 );
