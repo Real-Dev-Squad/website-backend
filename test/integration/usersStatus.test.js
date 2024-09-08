@@ -74,7 +74,7 @@ describe("UserStatus", function () {
           }
           expect(res).to.have.status(404);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User Status couldn't be found.");
+          expect(res.body.message).to.equal("User Status doesn't exist.");
           expect(res.body.userId).to.equal("self");
           expect(res.body.data).to.equal(null);
           return done();
@@ -119,7 +119,7 @@ describe("UserStatus", function () {
       const response2 = await chai
         .request(app)
         .patch(`/v1/users/status/${testUserId}`)
-        .set("Cookie", `${cookieName}=${testUserJwt}`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .send(generateUserStatusData("OOO", appliedOnDate, endsOnDate, "Vacation Trip"));
       expect(response2).to.have.status(200);
       expect(response2.body.message).to.equal("Future Status of user updated successfully.");
@@ -202,7 +202,7 @@ describe("UserStatus", function () {
       const response2 = await chai
         .request(app)
         .patch(`/v1/users/status/${testUserId}`)
-        .set("Cookie", `${cookieName}=${testUserJwt}`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .send(generateUserStatusData("OOO", appliedOnDate, endsOnDate, "Vacation Trip"));
       expect(response2).to.have.status(200);
       expect(response2.body.message).to.equal("Future Status of user updated successfully.");
@@ -279,7 +279,7 @@ describe("UserStatus", function () {
       chai
         .request(app)
         .patch(`/v1/users/status/${testUserId}`)
-        .set("Cookie", `${cookieName}=${testUserJwt}`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .send(userStatusDataForOooState)
         .end((err, res) => {
           if (err) {
@@ -315,7 +315,7 @@ describe("UserStatus", function () {
       chai
         .request(app)
         .patch(`/v1/users/status/${testUserId}`)
-        .set("cookie", `${cookieName}=${testUserJwt}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send(oooStatusDataForShortDuration)
         .end((err, res) => {
           if (err) {
@@ -348,7 +348,7 @@ describe("UserStatus", function () {
       chai
         .request(app)
         .patch(`/v1/users/status/${testUserId}`)
-        .set("cookie", `${cookieName}=${testUserJwt}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send(generateUserStatusData("IN_OFFICE", Date.now()))
         .end((err, res) => {
           if (err) {
@@ -368,7 +368,7 @@ describe("UserStatus", function () {
       chai
         .request(app)
         .patch(`/v1/users/status/${testUserId}`)
-        .set("cookie", `${cookieName}=${testUserJwt}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send(generateUserStatusData("OOO", Date.now(), endsOnDate, ""))
         .end((err, res) => {
           if (err) {
@@ -389,7 +389,7 @@ describe("UserStatus", function () {
       chai
         .request(app)
         .patch(`/v1/users/status/${testUserId}`)
-        .set("cookie", `${cookieName}=${testUserJwt}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send(generateUserStatusData("OOO", appliedOnDate, "", ""))
         .end((err, res) => {
           if (err) {
@@ -411,7 +411,7 @@ describe("UserStatus", function () {
       chai
         .request(app)
         .patch(`/v1/users/status/${testUserId}`)
-        .set("cookie", `${cookieName}=${testUserJwt}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send(generateUserStatusData("OOO", appliedOnDate, endsOnDate, "Semester Exams"))
         .end((err, res) => {
           if (err) {

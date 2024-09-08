@@ -21,7 +21,7 @@ router.patch(
 router.patch(
   "/:userId",
   authenticate,
-  authorizeRoles([SUPERUSER]),
+  authorizeRoles([ROLES.SUPERUSER]),
   validateUsersStatus,
   usersStatusController.updateUserStatusController
 );
