@@ -1,11 +1,11 @@
 import { NextFunction } from "express";
 import { CustomRequest, CustomResponse } from "../../types/global";
-const joi = require("joi");
+import Joi from 'joi';
 
 export const validateSubscribe = (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   const subscribeSchema = Joi.object({
-    phoneNumber: joi.string().required(),
-    email: joi.string().required()
+    phoneNumber: Joi.string().required(),
+    email: Joi.string().required()
   });
   const { error } = subscribeSchema.validate(req.body);
   if (error) {
