@@ -67,5 +67,5 @@ router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rej
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
 module.exports = router;
-router.post("/migration/update-usernames", authenticate, authorizeRoles([SUPERUSER]), users.updateUsernames);
+router.post("/batch-username-update", authenticate, authorizeRoles([SUPERUSER]), users.updateUsernames);
 module.exports = router;

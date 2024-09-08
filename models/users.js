@@ -963,8 +963,10 @@ const updateUsersWithNewUsernames = async () => {
     const snapshot = await userModel.get();
 
     const nonMemberUsers = snapshot.docs.filter((doc) => {
-      const roles = doc.data().roles;
-      return !(roles?.member === true || roles?.super_user === true);
+      const userData = doc.data();
+      const roles = userData.roles;
+
+      return !(roles?.member === true || roles?.super_user === true || userData.incompleteUserDetails === true);
     });
 
     const summary = {
@@ -985,10 +987,14 @@ const updateUsersWithNewUsernames = async () => {
       const userData = userDoc.data();
       const id = userDoc.id;
 
-      const firstName = userData.first_name.split(" ")[0].toLowerCase();
-      const lastName = userData.last_name.toLowerCase();
-      const fullName = `${firstName}-${lastName}`;
+      const firstName = userData.first_name?.split(" ")[0]?.toLowerCase();
+      const lastName = userData.last_name?.toLowerCase();
 
+      if (!firstName || !lastName) {
+        return;
+      }
+
+      const fullName = `${firstName}-${lastName}`;
       if (!nameToUsersMap.has(fullName)) {
         nameToUsersMap.set(fullName, []);
       }
