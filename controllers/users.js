@@ -415,7 +415,7 @@ const updateSelf = async (req, res) => {
       const revokableRoles = req.body.revoked_roles.filter((role) => user.roles[`${role}`] === true);
       const updatedUser = await userQuery.addOrUpdate({ revoked_roles: revokableRoles }, userId);
       if (updatedUser) {
-        return res.status(200).send({ message: "privilege modified successfully!", revoked_roles: revokableRoles });
+        return res.status(200).send({ message: "Privilege modified successfully!" });
       }
     }
 
