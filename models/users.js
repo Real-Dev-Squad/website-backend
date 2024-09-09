@@ -913,6 +913,136 @@ const getNonNickNameSyncedUsers = async () => {
   }
 };
 
+const updateUsernamesInBatch = async (usersData) => {
+  const batch = firestore.batch();
+  const usersBatch = [];
+  const summary = {
+    totalUpdatedUsernames: 0,
+    totalOperationsFailed: 0,
+    failedUserDetails: [],
+  };
+
+  usersData.forEach((user) => {
+    const updateUserData = { ...user, username: user.username };
+    batch.update(userModel.doc(user.id), updateUserData);
+    usersBatch.push(user.id);
+  });
+
+  try {
+    await batch.commit();
+    summary.totalUpdatedUsernames += usersData.length;
+    return { ...summary };
+  } catch (err) {
+    logger.error("Firebase batch Operation Failed!");
+    summary.totalOperationsFailed += usersData.length;
+    summary.failedUserDetails = [...usersBatch];
+    return { ...summary };
+  }
+};
+
+const sanitizeString = (str) => {
+  if (!str) return "";
+  return str.replace(/[^a-zA-Z0-9-]/g, "-");
+};
+
+const formatUsername = (firstName, lastName, suffix) => {
+  const actualFirstName = firstName.split(" ")[0].toLowerCase();
+  const sanitizedFirstName = sanitizeString(actualFirstName);
+  const sanitizedLastName = sanitizeString(lastName).toLowerCase();
+
+  const baseUsername = `${sanitizedFirstName}-${sanitizedLastName}`;
+  const fullUsername = `${baseUsername}-${suffix}`;
+
+  return fullUsername.length <= 32
+    ? fullUsername
+    : `${baseUsername.slice(0, 32 - suffix.toString().length - 1)}-${suffix}`;
+};
+
+const updateUsersWithNewUsernames = async () => {
+  try {
+    const snapshot = await userModel.get();
+
+    const nonMemberUsers = snapshot.docs.filter((doc) => {
+      const userData = doc.data();
+      const roles = userData.roles;
+
+      return !(roles?.member === true || roles?.super_user === true || userData.incompleteUserDetails === true);
+    });
+
+    const summary = {
+      totalUsers: nonMemberUsers.length,
+      totalUpdatedUsernames: 0,
+      totalOperationsFailed: 0,
+      failedUserDetails: [],
+    };
+
+    if (nonMemberUsers.length === 0) {
+      return summary;
+    }
+
+    const usersToUpdate = [];
+    const nameToUsersMap = new Map();
+
+    nonMemberUsers.forEach((userDoc) => {
+      const userData = userDoc.data();
+      const id = userDoc.id;
+
+      const firstName = userData.first_name?.split(" ")[0]?.toLowerCase();
+      const lastName = userData.last_name?.toLowerCase();
+
+      if (!firstName || !lastName) {
+        return;
+      }
+
+      const fullName = `${firstName}-${lastName}`;
+      if (!nameToUsersMap.has(fullName)) {
+        nameToUsersMap.set(fullName, []);
+      }
+
+      nameToUsersMap.get(fullName).push({ id, userData, createdAt: userData.created_at });
+    });
+
+    for (const [, usersWithSameName] of nameToUsersMap.entries()) {
+      usersWithSameName.sort((a, b) => a.createdAt - b.createdAt);
+
+      usersWithSameName.forEach((user, index) => {
+        const suffix = index + 1;
+        const formattedUsername = formatUsername(user.userData.first_name, user.userData.last_name, suffix);
+
+        if (user.userData.username !== formattedUsername) {
+          usersToUpdate.push({ ...user.userData, id: user.id, username: formattedUsername });
+        }
+      });
+    }
+
+    const userChunks = chunks(usersToUpdate, DOCUMENT_WRITE_SIZE);
+
+    const updatedUsersPromises = await Promise.all(
+      userChunks.map(async (users) => {
+        const res = await updateUsernamesInBatch(users);
+        return res;
+      })
+    );
+
+    updatedUsersPromises.forEach((res) => {
+      summary.totalUpdatedUsernames += res.totalUpdatedUsernames;
+      summary.totalOperationsFailed += res.totalOperationsFailed;
+      if (res.failedUserDetails.length > 0) {
+        summary.failedUserDetails.push(...res.failedUserDetails);
+      }
+    });
+
+    if (summary.totalOperationsFailed === summary.totalUsers) {
+      throw new Error("INTERNAL_SERVER_ERROR");
+    }
+
+    return summary;
+  } catch (error) {
+    logger.error(`Error in updating usernames: ${error}`);
+    throw error;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -942,4 +1072,5 @@ module.exports = {
   fetchUsersListForMultipleValues,
   fetchUserForKeyValue,
   getNonNickNameSyncedUsers,
+  updateUsersWithNewUsernames,
 };

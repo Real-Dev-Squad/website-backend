@@ -2423,4 +2423,38 @@ describe("Users", function () {
         });
     });
   });
+
+  describe("POST USERS MIGRATION", function () {
+    it("should run the migration and update usernames successfully", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/batch-username-update")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+    });
+
+    it("should not update usernames for super_user or member", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/batch-username-update")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      const affectedUsers = res.body.totalUpdatedUsernames;
+      expect(affectedUsers).to.equal(0);
+    });
+
+    it("should return 401 for unauthorized user attempting migration", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/batch-username-update")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send();
+
+      expect(res).to.have.status(401);
+    });
+  });
 });
