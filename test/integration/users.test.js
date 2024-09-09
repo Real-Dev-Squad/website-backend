@@ -487,6 +487,100 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should return 200 when revoked_roles is being set to [super_user] in userObject ", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          revoked_roles: ["super_user"],
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            message: "Privilege modified successfully!",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 200 when revoked_roles is being set to [super_user, member] in userObject", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          revoked_roles: ["super_user", "member"],
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            message: "Privilege modified successfully!",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 200 when revoked_roles is being set to [], member in userObject", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          revoked_roles: [],
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            message: "Privilege modified successfully!",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 when revoked_roles is being set to ['admin'], member in userObject", function (done) {
+      chai
+        .request(app)
+        .patch("/users/self")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          revoked_roles: ["admin"],
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: '"revoked_roles[0]" must be one of [super_user, member]',
+          });
+
+          return done();
+        });
+    });
   });
 
   describe("GET /users", function () {

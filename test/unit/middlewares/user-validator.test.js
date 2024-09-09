@@ -308,6 +308,56 @@ describe("Middleware | Validators | User", function () {
     });
   });
 
+  describe("Test the update Self Validator for revoked_roles property", function () {
+    it("Allows the request to pass with revoked_roles property", async function () {
+      const req = {
+        body: {
+          revoked_roles: [],
+        },
+      };
+      const res = {};
+      const nextSpy = sinon.spy();
+      await updateUser(req, res, nextSpy);
+      expect(nextSpy.callCount).to.be.equal(1);
+    });
+
+    it("Allows the request to pass with revoked_roles property with roles `super_user` & `member'", async function () {
+      const req = {
+        body: {
+          revoked_roles: ["super_user", "member"],
+        },
+      };
+      const res = {};
+      const nextSpy = sinon.spy();
+      await updateUser(req, res, nextSpy);
+      expect(nextSpy.notCalled).to.be.equal(false);
+    });
+
+    it("Allows the request to pass with revoked_roles property with role `member'", async function () {
+      const req = {
+        body: {
+          revoked_roles: ["member"],
+        },
+      };
+      const res = {};
+      const nextSpy = sinon.spy();
+      await updateUser(req, res, nextSpy);
+      expect(nextSpy.callCount).to.be.equal(1);
+    });
+
+    it("Allows the request to pass with revoked_roles property with role `super_user` ", async function () {
+      const req = {
+        body: {
+          revoked_roles: ["super_user"],
+        },
+      };
+      const res = {};
+      const nextSpy = sinon.spy();
+      await updateUser(req, res, nextSpy);
+      expect(nextSpy.callCount).to.be.equal(1);
+    });
+  });
+
   describe("Create user validator for getUsers", function () {
     it("lets the request pass to next", async function () {
       const req = {
