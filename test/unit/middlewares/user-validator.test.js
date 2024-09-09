@@ -308,11 +308,11 @@ describe("Middleware | Validators | User", function () {
     });
   });
 
-  describe("Test the update Self Validator for revoked_roles property", function () {
-    it("Allows the request to pass with revoked_roles property", async function () {
+  describe("Test the update Self Validator for disabled_roles property", function () {
+    it("Allows the request to pass with disabled_roles property", async function () {
       const req = {
         body: {
-          revoked_roles: [],
+          disabled_roles: [],
         },
       };
       const res = {};
@@ -321,10 +321,10 @@ describe("Middleware | Validators | User", function () {
       expect(nextSpy.callCount).to.be.equal(1);
     });
 
-    it("Allows the request to pass with revoked_roles property with roles `super_user` & `member'", async function () {
+    it("Allows the request to pass with disabled_roles property with roles `super_user` & `member'", async function () {
       const req = {
         body: {
-          revoked_roles: ["super_user", "member"],
+          disabled_roles: ["super_user", "member"],
         },
       };
       const res = {};
@@ -333,10 +333,10 @@ describe("Middleware | Validators | User", function () {
       expect(nextSpy.notCalled).to.be.equal(false);
     });
 
-    it("Allows the request to pass with revoked_roles property with role `member'", async function () {
+    it("Allows the request to pass with disabled_roles property with role `member'", async function () {
       const req = {
         body: {
-          revoked_roles: ["member"],
+          disabled_roles: ["member"],
         },
       };
       const res = {};
@@ -345,10 +345,10 @@ describe("Middleware | Validators | User", function () {
       expect(nextSpy.callCount).to.be.equal(1);
     });
 
-    it("Allows the request to pass with revoked_roles property with role `super_user` ", async function () {
+    it("Allows the request to pass with disabled_roles property with role `super_user` ", async function () {
       const req = {
         body: {
-          revoked_roles: ["super_user"],
+          disabled_roles: ["super_user"],
         },
       };
       const res = {};

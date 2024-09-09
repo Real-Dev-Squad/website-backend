@@ -51,7 +51,7 @@ const updateUser = async (req, res, next) => {
         .valid(...Object.values(USER_STATUS))
         .optional(),
       discordId: joi.string().optional(),
-      revoked_roles: joi.array().items(joi.string().valid("super_user", "member")).optional(),
+      disabled_roles: joi.array().items(joi.string().valid("super_user", "member")).optional(),
       roles: joi.object().keys({
         designer: joi.boolean().optional(),
         maven: joi.boolean().optional(),

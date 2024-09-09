@@ -489,35 +489,35 @@ describe("users", function () {
     });
   });
 
-  describe("fetchUser with revoked rples", function () {
+  describe("fetchUser with disabled roles", function () {
     afterEach(async function () {
       await cleanDb();
     });
 
     it("should fetch users with modified roles : []", async function () {
-      const superUser = { ...userData()[4], revoked_roles: [] };
+      const superUser = { ...userData()[4], disabled_roles: [] };
       const userId = await addUser(superUser);
 
       const userDoc = await users.fetchUser({ userId });
-      expect(userDoc.user.revoked_roles.length).to.be.equal(0);
+      expect(userDoc.user.disabled_roles.length).to.be.equal(0);
       expect(userDoc.user.roles.super_user).to.be.equal(true);
     });
 
     it("should fetch users with modified roles : super_user", async function () {
-      const superUser = { ...userData()[4], revoked_roles: ["super_user"] };
+      const superUser = { ...userData()[4], disabled_roles: ["super_user"] };
       const userId = await addUser(superUser);
 
       const userDoc = await users.fetchUser({ userId });
-      expect(userDoc.user.revoked_roles.length).to.be.equal(1);
+      expect(userDoc.user.disabled_roles.length).to.be.equal(1);
       expect(userDoc.user.roles.super_user).to.be.equal(false);
     });
 
     it("should fetch users with modified roles : member", async function () {
-      const memberUser = { ...userData()[6], revoked_roles: ["member"] };
+      const memberUser = { ...userData()[6], disabled_roles: ["member"] };
       const userId = await addUser(memberUser);
 
       const userDoc = await users.fetchUser({ userId });
-      expect(userDoc.user.revoked_roles.length).to.be.equal(1);
+      expect(userDoc.user.disabled_roles.length).to.be.equal(1);
       expect(userDoc.user.roles.member).to.be.equal(false);
     });
 
@@ -525,14 +525,14 @@ describe("users", function () {
       // super_user & member
       const userWithBothRoles = {
         ...userData()[4],
-        revoked_roles: ["super_user", "member"],
+        disabled_roles: ["super_user", "member"],
         roles: { ...userData()[4].roles, member: true },
       };
 
       const userId = await addUser(userWithBothRoles);
 
       const userDoc = await users.fetchUser({ userId });
-      expect(userDoc.user.revoked_roles.length).to.be.equal(2);
+      expect(userDoc.user.disabled_roles.length).to.be.equal(2);
       expect(userDoc.user.roles.member).to.be.equal(false);
       expect(userDoc.user.roles.super_user).to.be.equal(false);
     });

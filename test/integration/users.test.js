@@ -488,13 +488,13 @@ describe("Users", function () {
         });
     });
 
-    it("Should return 200 when revoked_roles is being set to [super_user] in userObject ", function (done) {
+    it("Should return 200 when disabled_roles is being set to [super_user] in userObject ", function (done) {
       chai
         .request(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          revoked_roles: ["super_user"],
+          disabled_roles: ["super_user"],
         })
         .end((err, res) => {
           if (err) {
@@ -511,13 +511,13 @@ describe("Users", function () {
         });
     });
 
-    it("Should return 200 when revoked_roles is being set to [super_user, member] in userObject", function (done) {
+    it("Should return 200 when disabled_roles is being set to [super_user, member] in userObject", function (done) {
       chai
         .request(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          revoked_roles: ["super_user", "member"],
+          disabled_roles: ["super_user", "member"],
         })
         .end((err, res) => {
           if (err) {
@@ -534,13 +534,13 @@ describe("Users", function () {
         });
     });
 
-    it("Should return 200 when revoked_roles is being set to [], member in userObject", function (done) {
+    it("Should return 200 when disabled_roles is being set to [], member in userObject", function (done) {
       chai
         .request(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          revoked_roles: [],
+          disabled_roles: [],
         })
         .end((err, res) => {
           if (err) {
@@ -557,13 +557,13 @@ describe("Users", function () {
         });
     });
 
-    it("Should return 400 when revoked_roles is being set to ['admin'], member in userObject", function (done) {
+    it("Should return 400 when disabled_roles is being set to ['admin'], member in userObject", function (done) {
       chai
         .request(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          revoked_roles: ["admin"],
+          disabled_roles: ["admin"],
         })
         .end((err, res) => {
           if (err) {
@@ -575,7 +575,7 @@ describe("Users", function () {
           expect(res.body).to.eql({
             statusCode: 400,
             error: "Bad Request",
-            message: '"revoked_roles[0]" must be one of [super_user, member]',
+            message: '"disabled_roles[0]" must be one of [super_user, member]',
           });
 
           return done();

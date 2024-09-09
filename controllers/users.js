@@ -410,10 +410,10 @@ const updateSelf = async (req, res) => {
       }
     }
 
-    if (req.body.revoked_roles) {
+    if (req.body.disabled_roles) {
       // filter roles which are 'true'
-      const revokableRoles = req.body.revoked_roles.filter((role) => user.roles[`${role}`] === true);
-      const updatedUser = await userQuery.addOrUpdate({ revoked_roles: revokableRoles }, userId);
+      const toggleableRoles = req.body.disabled_roles.filter((role) => user.roles[`${role}`] === true);
+      const updatedUser = await userQuery.addOrUpdate({ disabled_roles: toggleableRoles }, userId);
       if (updatedUser) {
         return res.status(200).send({ message: "Privilege modified successfully!" });
       }
