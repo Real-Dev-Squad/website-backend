@@ -614,6 +614,7 @@ describe("Discord actions", function () {
 
   describe("PUT /discord-actions/group-idle-7d", function () {
     let allIds;
+
     beforeEach(async function () {
       userData[0] = {
         ...userData[0],
@@ -974,6 +975,7 @@ describe("Discord actions", function () {
 
   describe("PUT /discord-actions/group-idle", function () {
     let allIds;
+
     beforeEach(async function () {
       userData[0] = {
         ...userData[0],
