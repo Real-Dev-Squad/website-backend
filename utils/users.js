@@ -1,7 +1,7 @@
 const { fetchUser } = require("../models/users");
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
-const { months, discordNicknameLength } = require("../constants/users");
+const { months, discordNicknameLength, MAX_USERNAME_LENGTH } = require("../constants/users");
 const dataAccessLayer = require("../services/dataAccessLayer");
 const discordService = require("../services/discordService");
 const ROLES = require("../constants/roles");
@@ -305,6 +305,26 @@ const updateNickname = async (userId, status = {}) => {
   }
 };
 
+const formatUsername = (firstName, lastName, suffix) => {
+  const trimmedFirstName = firstName ? firstName.trim() : "";
+  const trimmedLastName = lastName ? lastName.trim() : "";
+
+  const actualFirstName = /^[a-zA-Z]+$/.test(trimmedFirstName) ? trimmedFirstName.split(" ")[0].toLowerCase() : "null";
+  const actualLastName = /^[a-zA-Z]+$/.test(trimmedLastName) ? trimmedLastName.toLowerCase() : "null";
+
+  let baseUsername = `${actualFirstName}-${actualLastName}`;
+
+  let finalUsername = `${baseUsername}-${suffix}`;
+
+  if (finalUsername.length > MAX_USERNAME_LENGTH) {
+    const excessLength = finalUsername.length - MAX_USERNAME_LENGTH;
+    baseUsername = `${actualFirstName}-${actualLastName.slice(0, actualLastName.length - excessLength)}`;
+    finalUsername = `${baseUsername}-${suffix}`;
+  }
+
+  return finalUsername;
+};
+
 module.exports = {
   addUserToDBForTest,
   getUserId,
@@ -321,4 +341,5 @@ module.exports = {
   parseSearchQuery,
   generateOOONickname,
   updateNickname,
+  formatUsername,
 };
