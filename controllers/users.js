@@ -411,20 +411,25 @@ const updateSelf = async (req, res) => {
     }
 
     if (req.body.disabled_roles) {
-      let roles = [...req.body.disabled_roles];
+      let rolesToDisable;
+      const data = req.body.disabled_roles;
+
       if (user.disabled_roles !== undefined) {
-        roles = [...user.disabled_roles];
-        req.body.disabled_roles.forEach((role) => {
-          if (user.disabled_roles.includes(role)) {
-            const index = roles.indexOf(role);
-            roles.splice(index, 1);
+        rolesToDisable = user.disabled_roles;
+
+        data.forEach((role) => {
+          const roleIndex = rolesToDisable.indexOf(role);
+          if (roleIndex !== -1) {
+            rolesToDisable.splice(roleIndex, 1);
           } else {
-            roles.push(role);
+            rolesToDisable.push(role);
           }
         });
+      } else {
+        rolesToDisable = data;
       }
 
-      const updatedUser = await userQuery.addOrUpdate({ disabled_roles: roles }, userId);
+      const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId);
       if (updatedUser) {
         return res.status(200).send({ message: "Privilege modified successfully!" });
       }

@@ -522,7 +522,6 @@ describe("users", function () {
     });
 
     it("should fetch users with modified roles : super_user & member", async function () {
-      // super_user & member
       const userWithBothRoles = {
         ...userData()[4],
         disabled_roles: ["super_user", "member"],
