@@ -2,7 +2,7 @@ import express from "express";
 import authenticate from "../middlewares/authenticate";
 import { subscribe, unsubscribe, sendEmail } from "../controllers/subscription";
 import { validateSubscribe } from "../middlewares/validators/subscription";
-import authorizeRoles from "../middlewares/authorizeRoles";
+const authorizeRoles = require("../middlewares/authorizeRoles");
 const router = express.Router();
 const { SUPERUSER } = require("../constants/roles");
 
