@@ -1,6 +1,5 @@
 const { MAX_USERNAME_LENGTH } = require("../constants/users");
 
-
 export const formatUsername = (firstName: string, lastName: string, suffix: number) => {
     const trimmedFirstName = firstName ? firstName.trim() : "";
     const trimmedLastName = lastName ? lastName.trim() : "";
