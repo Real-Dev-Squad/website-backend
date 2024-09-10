@@ -28,6 +28,7 @@ const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const discordService = require("../services/discordService");
 const { buildTasksQueryForMissedUpdates } = require("../utils/tasks");
 const { buildProgressQueryForMissedUpdates } = require("../utils/progresses");
+let allMavens = [];
 
 /**
  *
@@ -324,7 +325,7 @@ const updateIdleUsersOnDiscord = async () => {
   let allUsersHavingGroupIdle = [];
   let groupIdleRole;
   let groupIdleRoleId;
-  const allMavens = [];
+  allMavens = [];
 
   try {
     groupIdleRole = await getGroupRole("group-idle");
@@ -355,7 +356,7 @@ const updateIdleUsersOnDiscord = async () => {
             if (userData.exists) {
               if (isUserArchived) {
                 totalArchivedUsers++;
-              } else if (!allMavens.includes(userData.discordId)) {
+              } else if (!allMavens.includes(userData.data().discordId)) {
                 userStatus.userid = userData.data().discordId;
                 allIdleUsers.push(userStatus);
               }
@@ -555,7 +556,7 @@ const updateIdle7dUsersOnDiscord = async () => {
   let allUsersHavingGroupIdle7d = [];
   let groupIdle7dRole;
   let groupIdle7dRoleId;
-  const allMavens = [];
+  allMavens = [];
 
   try {
     groupIdle7dRole = await getGroupRole("group-idle-7d+");
@@ -595,7 +596,7 @@ const updateIdle7dUsersOnDiscord = async () => {
               if (userData.exists) {
                 if (isUserArchived) {
                   totalArchivedUsers++;
-                } else if (!allMavens.includes(userData.discordId)) {
+                } else if (!allMavens.includes(userData.data().discordId)) {
                   userStatus.userid = userData.data().discordId;
                   allIdle7dUsers.push(userStatus);
                 }
