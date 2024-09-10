@@ -411,9 +411,20 @@ const updateSelf = async (req, res) => {
     }
 
     if (req.body.disabled_roles) {
-      // filter roles which are 'true'
-      const toggleableRoles = req.body.disabled_roles.filter((role) => user.roles[`${role}`] === true);
-      const updatedUser = await userQuery.addOrUpdate({ disabled_roles: toggleableRoles }, userId);
+      let roles = [...req.body.disabled_roles];
+      if (user.disabled_roles !== undefined) {
+        roles = [...user.disabled_roles];
+        req.body.disabled_roles.forEach((role) => {
+          if (user.disabled_roles.includes(role)) {
+            const index = roles.indexOf(role);
+            roles.splice(index, 1);
+          } else {
+            roles.push(role);
+          }
+        });
+      }
+
+      const updatedUser = await userQuery.addOrUpdate({ disabled_roles: roles }, userId);
       if (updatedUser) {
         return res.status(200).send({ message: "Privilege modified successfully!" });
       }
