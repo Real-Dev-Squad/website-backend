@@ -23,7 +23,7 @@ const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { AUTHORITIES } = require("../constants/authorities");
-const { formatUsername } = require("../utils/users");
+const { formatUsername } = require("../utils/username");
 
 /**
  * Adds or updates the user data
