@@ -288,7 +288,7 @@ describe("/requests OOO", function () {
     it("should return all requests", function (done) {
       chai
         .request(app)
-        .get("/requests?dev=true")
+        .get("/requests")
         .end(function (err, res) {
           expect(res).to.have.status(200);
           expect(res.body.data).to.have.lengthOf(2);
@@ -304,7 +304,7 @@ describe("/requests OOO", function () {
     it("should return all requests by specific user", function (done) {
       chai
         .request(app)
-        .get(`/requests?dev=true&requestedBy=${userData[16].username}`)
+        .get(`/requests?requestedBy=${userData[16].username}`)
         .end(function (err, res) {
           expect(res).to.have.status(200);
           expect(res.body.data.every((request: any) => request.requestedBy === testUserId));
@@ -315,7 +315,7 @@ describe("/requests OOO", function () {
     it("should return all requests by specific user and state", function (done) {
       chai
         .request(app)
-        .get(`/requests?dev=true&state=APPROVED&requestedBy=${userData[16].username}`)
+        .get(`/requests?state=APPROVED&requestedBy=${userData[16].username}`)
         .end(function (err, res) {
           expect(res).to.have.status(200);
           expect(res.body.data.every((e: any) => e.state === "APPROVED"));
@@ -327,7 +327,7 @@ describe("/requests OOO", function () {
     it("should return request of type OOO", function (done) {
       chai
         .request(app)
-        .get("/requests?dev=true&type=OOO")
+        .get("/requests?type=OOO")
         .end(function (err, res) {
           expect(res).to.have.status(200);
           expect(res.body.data.every((e: any) => e.type === "OOO"));
@@ -338,7 +338,7 @@ describe("/requests OOO", function () {
     it("should return empty array is no data is found, for specific state and user", function (done) {
       chai
         .request(app)
-        .get("/requests?dev=true&requestedBy=testUser2&state=APPROVED")
+        .get("/requests?requestedBy=testUser2&state=APPROVED")
         .end(function (err, res) {
           expect(res).to.have.status(204);
           done();
@@ -348,7 +348,7 @@ describe("/requests OOO", function () {
     it("should return empty array is no data is found", function (done) {
       chai
         .request(app)
-        .get("/requests?dev=true&requestedBy=testUserRandom")
+        .get("/requests?requestedBy=testUserRandom")
         .end(function (err, res) {
           expect(res).to.have.status(204);
           done();
@@ -358,7 +358,7 @@ describe("/requests OOO", function () {
     it("should throw error if request id doesn't match", function (done) {
       chai
         .request(app)
-        .get("/requests?dev=true&id=ramdonId1")
+        .get("/requests?id=ramdonId1")
         .end(function (err, res) {
           expect(res).to.have.status(204);
           done();
@@ -368,7 +368,7 @@ describe("/requests OOO", function () {
     it("should return error if not a valid state is passed", function (done) {
       chai
         .request(app)
-        .get("/requests?dev=true&state=ACTIVE")
+        .get("/requests?state=ACTIVE")
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal("Bad Request");
@@ -380,7 +380,7 @@ describe("/requests OOO", function () {
     it("should return error if not a valid type is passed", function (done) {
       chai
         .request(app)
-        .get("/requests?dev=true&type=RANDOM")
+        .get("/requests?type=RANDOM")
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal("Bad Request");

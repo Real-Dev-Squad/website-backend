@@ -93,9 +93,7 @@ describe("Create Request Validators", function () {
   describe("Get Request Validator", function () {
     it("Should pass validation for a valid get request", async function () {
       req = {
-        query: {
-          dev: "true",
-        },
+        query: {},
       };
       res = {};
       await getRequestsMiddleware(req as any, res as any, nextSpy);
@@ -105,7 +103,6 @@ describe("Create Request Validators", function () {
     it("Should throw an error for an invalid get request", async function () {
       req = {
         query: {
-          dev: "true",
           type: "RANDOM",
           state: "RANDOM",
         },

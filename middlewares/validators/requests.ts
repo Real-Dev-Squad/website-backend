@@ -83,7 +83,7 @@ export const updateRequestsMiddleware = async (
 
 export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: OooRequestResponse, next: NextFunction) => {
   const schema = joi.object().keys({
-    dev: joi.bool().sensitive(),  // TODO: Remove this validator once feature is tested and ready to be used
+    dev: joi.bool().sensitive().optional(), // TODO: Remove this validator once feature is tested and ready to be used
     id: joi.string().optional(),
     type: joi
       .string()
