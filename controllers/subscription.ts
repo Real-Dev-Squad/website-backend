@@ -3,7 +3,7 @@ const { addOrUpdate } = require("../models/users");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const nodemailer = require("nodemailer");
 const config = require("config");
-const emailCredentials = config.get("emailCredentials");
+const emailSubscriptionCredentials = config.get("emailSubscriptionCredentials");
 
 export const subscribe = async (req: CustomRequest, res: CustomResponse) => {
   try {
@@ -45,17 +45,17 @@ export const unsubscribe = async (req: CustomRequest, res: CustomResponse) => {
 export const sendEmail = async (req: CustomRequest, res: CustomResponse) => {
   try { 
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
+      host: emailSubscriptionCredentials.host,
+      port:  emailSubscriptionCredentials.port,
       secure: false,
       auth: {
-        user: emailCredentials.user,
-        pass: emailCredentials.pass,
+        user: emailSubscriptionCredentials.user,
+        pass: emailSubscriptionCredentials.pass,
       },
     });
 
     const info = await transporter.sendMail({
-      from: `"Real Dev Squad" <${emailCredentials.user}>`,
+      from: `"Real Dev Squad" <${emailSubscriptionCredentials.user}>`,
       // TODO: after approving this  PR we need to send email to TEJAS sir via this API as a POC.
       to: "dgandhrav@gmail.com",
       subject: "Hello local, Testing in progress.",
@@ -68,6 +68,5 @@ export const sendEmail = async (req: CustomRequest, res: CustomResponse) => {
     console.error("Error occurred:", error);
     res.status(500).send({ message: "Failed to send email", error });
   }
-  console.log(emailCredentials);
-  res.send(emailCredentials)
+  res.send(emailSubscriptionCredentials)
 };

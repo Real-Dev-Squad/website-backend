@@ -56,7 +56,6 @@ describe("Middleware | Validators | Subscription", function () {
     req.body = {};
 
     await validateSubscribe(req, res, nextSpy);
-
     expect(nextSpy.called).to.be.equal(false);
     expect(res.status.calledOnceWith(400)).to.be.equal(true);
     expect(res.json.calledOnce).to.be.equal(true);

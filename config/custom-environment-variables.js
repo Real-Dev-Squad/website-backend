@@ -55,9 +55,11 @@ module.exports = {
     },
   },
 
-  emailCredentials: {
+  emailSubscriptionCredentials: {
     user: "<RDS_EMAIL>",
     pass: "<EMAIL PASS GENERATED AFTER 2FA>",
+    host: "<smtp host>",
+    port: "<number>",
   },
 
   userToken: {
