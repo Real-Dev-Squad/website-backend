@@ -32,6 +32,7 @@ describe("Extension Requests", function () {
     taskId4,
     taskId5,
     taskId6,
+    taskId7,
     extensionRequestId1,
     extensionRequestId2,
     extensionRequestId3,
@@ -141,6 +142,22 @@ describe("Extension Requests", function () {
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
       },
+      {
+        title: "Test task 5",
+        purpose: "To Test mocha",
+        featureUrl: "<testUrl>",
+        type: "group",
+        links: ["test1"],
+        endsOn: 1234,
+        startedOn: 54321,
+        status: "active",
+        percentCompleted: 10,
+        dependsOn: ["d12", "d23"],
+        isNoteworthy: false,
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+      },
     ];
 
     // Add the active task
@@ -155,6 +172,7 @@ describe("Extension Requests", function () {
     taskId4 = (await tasks.updateTask(taskData[4])).taskId;
     taskId5 = (await tasks.updateTask(taskData[5])).taskId;
     taskId6 = (await tasks.updateTask(taskData[6])).taskId;
+    taskId7 = (await tasks.updateTask(taskData[7])).taskId;
 
     const extensionRequest = {
       taskId: taskId3,
@@ -204,6 +222,16 @@ describe("Extension Requests", function () {
       reason: "family event",
       status: "PENDING",
     };
+    const extensionRequest5 = {
+      taskId: taskId7,
+      title: "change ETA",
+      assignee: user.id,
+      oldEndsOn: 1234,
+      newEndsOn: 1235,
+      reason: "family event",
+      status: "APPROVED",
+    };
+
     const extensionRequest6 = {
       taskId: taskId6,
       title: "change ETA",
@@ -218,6 +246,7 @@ describe("Extension Requests", function () {
     extensionRequestId3 = (await extensionRequests.createExtensionRequest(extensionRequest2)).id;
     extensionRequestId4 = (await extensionRequests.createExtensionRequest(extensionRequest3)).id;
     extensionRequestId5 = (await extensionRequests.createExtensionRequest(extensionRequest4)).id;
+    await extensionRequests.createExtensionRequest(extensionRequest5);
     await extensionRequests.createExtensionRequest(extensionRequest6);
   });
 
@@ -269,6 +298,44 @@ describe("Extension Requests", function () {
           expect(res.body.allExtensionRequests).to.be.a("array");
           expect(res.body.allExtensionRequests[0].assignee).to.equal(appOwner.username);
           expect(res.body.allExtensionRequests[0].id).to.equal(extensionRequestId2);
+          return done();
+        });
+    });
+
+    it("should return success response and an empty array of extensionRequest if assignee is not same as latest one", function (done) {
+      chai
+        .request(app)
+        .get(`/extension-requests/self`)
+        .query({ taskId: taskId7 })
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
+          expect(res.body.allExtensionRequests).to.be.a("array").with.lengthOf(0);
+          return done();
+        });
+    });
+
+    it("should return success response and a single latestExtensionRequest if assignee same as latest one", function (done) {
+      chai
+        .request(app)
+        .get(`/extension-requests/self`)
+        .query({ taskId: taskId2 })
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
+          expect(res.body.allExtensionRequests).to.be.a("array").with.lengthOf(1);
           return done();
         });
     });
