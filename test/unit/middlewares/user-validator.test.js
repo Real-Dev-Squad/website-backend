@@ -349,8 +349,7 @@ describe("Middleware | Validators | User", function () {
     });
   });
 
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only("validateGenerateUsernameQuery Middleware", function () {
+  describe("validateGenerateUsernameQuery Middleware", function () {
     it("should pass valid query parameters to next", async function () {
       const req = {
         query: {

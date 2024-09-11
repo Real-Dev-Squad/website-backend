@@ -1065,8 +1065,7 @@ describe("Users", function () {
     });
   });
 
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only("GET /users/username", function () {
+  describe("GET /users/username", function () {
     const firstname = "shubham";
     const lastname = "sigdar";
 
