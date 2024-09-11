@@ -119,4 +119,34 @@ describe("formatUsername", function () {
   
     expect(result).to.equal("vinit-null-1");
   });  
+
+  it("should return 'null' for invalid first name part containing non-alphabetical characters", function () {
+    const firstName = "Vinit123";
+    const lastName = "Khandal";
+    const suffix = 1;
+  
+    const result = formatUsername(firstName, lastName, suffix);
+  
+    expect(result).to.equal("null-khandal-1");
+  });
+
+  it("should return 'null' for invalid last name part containing non-alphabetical characters", function () {
+    const firstName = "Vinit";
+    const lastName = "Khand@l";
+    const suffix = 1;
+  
+    const result = formatUsername(firstName, lastName, suffix);
+  
+    expect(result).to.equal("vinit-null-1");
+  });
+
+  it("should return 'null' for both invalid first and last name parts", function () {
+    const firstName = "Vinit123";
+    const lastName = "Kh@nd@l";
+    const suffix = 1;
+  
+    const result = formatUsername(firstName, lastName, suffix);
+  
+    expect(result).to.equal("null-null-1");
+  });  
 });
