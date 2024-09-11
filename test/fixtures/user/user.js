@@ -63,7 +63,6 @@ module.exports = () => {
       profileStatus: "BLOCKED",
     },
     {
-      id: "12345678",
       username: "pranavg",
       first_name: "Pranav",
       last_name: "Gajjewar",
