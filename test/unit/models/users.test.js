@@ -427,21 +427,10 @@ describe("users", function () {
     });
 
     it("should generate a unique username when no existing users are present", async function () {
-      const firstName = "john";
-      const lastName = "doe";
+      const userData = userDataArray[15];
+      await users.addOrUpdate(userData);
 
-      const whereStub = sinon.stub(userModel, "where").returnsThis();
-      const countStub = sinon.stub().returnsThis();
-      const getStub = sinon.stub().resolves({
-        data: () => ({ count: 0 }),
-      });
-
-      whereStub.withArgs("first_name", "==", firstName).returnsThis();
-      whereStub.withArgs("last_name", "==", lastName).returnsThis();
-      whereStub.count = countStub;
-      countStub.get = getStub;
-
-      const newUsername = await users.generateUniqueUsername(firstName, lastName);
+      const newUsername = await users.generateUniqueUsername("john", "doe");
 
       expect(newUsername).to.equal("john-doe-1");
     });
