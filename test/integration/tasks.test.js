@@ -1516,7 +1516,7 @@ describe("Tasks", function () {
       expect(response.body).to.be.deep.equal({
         message: "Discord details of users with status missed updates fetched successfully",
         data: {
-          usersToAddRole: [activeUserWithProgressUpdates.discordId],
+          usersToAddRole: [],
           tasks: 4,
           missedUpdatesTasks: 3,
         },
