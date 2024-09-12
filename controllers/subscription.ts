@@ -9,6 +9,11 @@ export const subscribe = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const { email, phoneNumber } = req.body;
     const userId = req.userData.id;
+    const dev = req.query.dev === "true";
+    if (!dev) {
+      return res.boom.notFound("Route not found");
+    }
+
     await addOrUpdate(
       {
         phoneNumber,
@@ -28,6 +33,10 @@ export const subscribe = async (req: CustomRequest, res: CustomResponse) => {
 export const unsubscribe = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const userId = req.userData.id;
+    const dev = req.query.dev === "true";
+    if (!dev) {
+      return res.boom.notFound("Route not found");
+    }
     await addOrUpdate(
       {
         isSubscribed: false,
@@ -44,6 +53,10 @@ export const unsubscribe = async (req: CustomRequest, res: CustomResponse) => {
 
 export const sendEmail = async (req: CustomRequest, res: CustomResponse) => {
   try { 
+    const dev = req.query.dev === "true";
+    if (!dev) {
+      return res.boom.notFound("Route not found");
+    }
     const transporter = nodemailer.createTransport({
       host: emailSubscriptionCredentials.host,
       port:  emailSubscriptionCredentials.port,

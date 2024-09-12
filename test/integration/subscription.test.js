@@ -25,7 +25,7 @@ describe("/subscription email notifications", function () {
   it("Should return 401 if the user is not logged in", function (done) {
     chai
       .request(app)
-      .post("/subscription")
+      .post("/subscription?dev=true")
       .end((err, res) => {
         if (err) {
           return done();
@@ -40,7 +40,7 @@ describe("/subscription email notifications", function () {
   it("should add user's data and make them subscribe to us.", function (done) {
     chai
       .request(app)
-      .post(`/subscription`)
+      .post(`/subscription?dev=true`)
       .set("cookie", `${cookieName}=${jwt}`)
       .send(subscriptionData)
       .end((err, res) => {
@@ -54,10 +54,26 @@ describe("/subscription email notifications", function () {
       });
   });
 
+  it("shouldn't add user's data and return 404 when dev is not equal to true", function (done) {
+    chai
+      .request(app)
+      .post(`/subscription`)
+      .set("cookie", `${cookieName}=${jwt}`)
+      .send(subscriptionData)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        expect(res).to.have.status(404);
+        expect(res.body).to.have.property("message", "Route not found");
+        return done();
+      });
+  });
+
   it("should unsubscribe the user", function (done) {
     chai
       .request(app)
-      .put(`/subscription`)
+      .put(`/subscription?dev=true`)
       .set("cookie", `${cookieName}=${jwt}`)
       .end((err, res) => {
         if (err) {
@@ -66,6 +82,21 @@ describe("/subscription email notifications", function () {
         expect(res).to.have.status(200);
         expect(res.body).to.have.keys(["message"]);
         expect(res.body.message).to.equal(unSubscribedMessage);
+        return done();
+      });
+  });
+
+  it("shouldn't unsubscribe the user return 404 when dev is not equal to true", function (done) {
+    chai
+      .request(app)
+      .put(`/subscription`)
+      .set("cookie", `${cookieName}=${jwt}`)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        expect(res).to.have.status(404);
+        expect(res.body).to.have.property("message", "Route not found");
         return done();
       });
   });
@@ -85,7 +116,7 @@ describe("/subscription email notifications", function () {
     it("Should return 401 if the super user is not logged in", function (done) {
       chai
         .request(app)
-        .post("/subscription")
+        .post("/subscription?dev=true")
         .end((err, res) => {
           if (err) {
             return done();
@@ -104,13 +135,30 @@ describe("/subscription email notifications", function () {
 
       chai
         .request(app)
-        .get("/subscription/send-email")
+        .get("/subscription/send-email?dev=true")
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) return done(err);
           expect(res).to.have.status(500);
           expect(res.body).to.have.property("message", "Failed to send email");
           expect(res.body).to.have.property("error");
+          return done();
+        });
+    });
+
+    it("Sending mail should return 404 if dev is not equal to true", function (done) {
+      sinon.stub(nodemailer, "createTransport").callsFake(() => {
+        throw new Error("Transport error");
+      });
+
+      chai
+        .request(app)
+        .get("/subscription/send-email")
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(404);
+          expect(res.body).to.have.property("message", "Route not found");
           return done();
         });
     });
