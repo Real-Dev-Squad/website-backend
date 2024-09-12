@@ -983,7 +983,7 @@ describe("discordactions", function () {
       await cleanDb();
     });
 
-    it("should return  totalIdleUsers as 3,totalRolesApplied as 3, totalRoleToBeAdded as 3 as no one is maven", async function () {
+    it("should return  totalIdleUsers as 2,totalArchivedUsers as 2, totalRoleToBeAdded as 2", async function () {
       const res = await updateIdleUsersOnDiscord();
       expect(res.totalIdleUsers).to.be.equal(2);
       expect(res.totalUserRoleToBeAdded).to.be.equal(2);

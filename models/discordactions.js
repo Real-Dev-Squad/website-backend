@@ -325,7 +325,6 @@ const updateIdleUsersOnDiscord = async () => {
   let allUsersHavingGroupIdle = [];
   let groupIdleRole;
   let groupIdleRoleId;
-  allMavens = [];
 
   try {
     groupIdleRole = await getGroupRole("group-idle");
@@ -556,7 +555,6 @@ const updateIdle7dUsersOnDiscord = async () => {
   let allUsersHavingGroupIdle7d = [];
   let groupIdle7dRole;
   let groupIdle7dRoleId;
-  allMavens = [];
 
   try {
     groupIdle7dRole = await getGroupRole("group-idle-7d+");
