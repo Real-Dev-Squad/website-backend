@@ -630,13 +630,13 @@ describe("Discord actions", function () {
       };
       userData[2] = {
         ...userData[2],
-        discordId: "123456",
+        discordId: "1234567",
         discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
         roles: { archived: false, in_discord: true },
       };
 
-      getDiscordMembers[1] = {
-        ...getDiscordMembers[1],
+      getDiscordMembers[3] = {
+        ...getDiscordMembers[3],
         roles: ["1212121212"],
       };
 
@@ -997,19 +997,19 @@ describe("Discord actions", function () {
       };
       userData[2] = {
         ...userData[2],
-        discordId: "123456",
+        discordId: "1234567",
         discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
         roles: { archived: false, in_discord: true },
+      };
+
+      getDiscordMembers[3] = {
+        ...getDiscordMembers[3],
+        roles: ["1212121212"],
       };
 
       await addUser(userData[0]);
       await addUser(userData[1]);
       await addUser(userData[2]);
-
-      getDiscordMembers[1] = {
-        ...getDiscordMembers[1],
-        roles: ["1212121212"],
-      };
 
       const addUsersPromises = userData.slice(0, 3).map((user) => userModel.add({ ...user }));
       const responses = await Promise.all(addUsersPromises);
