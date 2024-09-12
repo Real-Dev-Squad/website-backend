@@ -57,18 +57,20 @@ export const sendEmail = async (req: CustomRequest, res: CustomResponse) => {
     if (!dev) {
       return res.boom.notFound("Route not found");
     }
+    
     const transporter = nodemailer.createTransport({
       host: emailSubscriptionCredentials.host,
       port:  emailSubscriptionCredentials.port,
       secure: false,
+
       auth: {
-        user: emailSubscriptionCredentials.user,
-        pass: emailSubscriptionCredentials.pass,
+        user: emailSubscriptionCredentials.email,
+        pass: emailSubscriptionCredentials.password,
       },
     });
 
     const info = await transporter.sendMail({
-      from: `"Real Dev Squad" <${emailSubscriptionCredentials.user}>`,
+      from: `"Real Dev Squad" <${emailSubscriptionCredentials.email}>`,
       // TODO: after approving this  PR we need to send email to TEJAS sir via this API as a POC.
       to: "dgandhrav@gmail.com",
       subject: "Hello local, Testing in progress.",
