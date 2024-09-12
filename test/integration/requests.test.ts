@@ -71,7 +71,7 @@ describe("/requests OOO", function () {
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .send(validOooStatusRequests)
         .end(function (err, res) {
           expect(res).to.have.status(401);
@@ -82,7 +82,7 @@ describe("/requests OOO", function () {
     it("should create a new request", function (done) {
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests)
         .end(function (err, res) {
@@ -96,12 +96,12 @@ describe("/requests OOO", function () {
     it("should return 400, if already created request is created again", async function () {
       await chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests);
       const response = await chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests);
       expect(response).to.have.status(400);
@@ -112,7 +112,7 @@ describe("/requests OOO", function () {
     it("should create a new request and have all the required fields in the response", function (done) {
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests)
         .end(function (err, res) {
@@ -128,24 +128,10 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should return error if feature flag is not used", function (done) {
-      chai
-        .request(app)
-        .post("/requests")
-        .set("cookie", `${cookieName}=${authToken}`)
-        .send(validOooStatusRequests)
-        .end(function (err, res) {
-          expect(res).to.have.status(400);
-          expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("Please use feature flag to make this requests");
-          done();
-        });
-    });
-
     it("should create a new request", function (done) {
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests)
         .end(function (err, res) {
@@ -160,7 +146,7 @@ describe("/requests OOO", function () {
       const type = "ACTIVE";
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${authToken}`)
         .send({ ...validOooStatusRequests, type })
         .end(function (err, res) {
@@ -174,7 +160,7 @@ describe("/requests OOO", function () {
     it("should return error if message is not present in body", function (done) {
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${authToken}`)
         .send(_.omit(validOooStatusRequests, "message"))
         .end(function (err, res) {
@@ -188,7 +174,7 @@ describe("/requests OOO", function () {
     it("should return error if state in the body is not PENDING", function (done) {
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${authToken}`)
         .send({ ...validOooStatusRequests, state: REQUEST_STATE.APPROVED })
         .end(function (err, res) {
@@ -455,7 +441,7 @@ describe("/requests Extension", function () {
     it("should return 401(Unauthorized) if user is not logged in", function (done) {
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .send(extensionRequest)
         .end(function (err, res) {
           expect(res).to.have.status(401);
@@ -469,7 +455,7 @@ describe("/requests Extension", function () {
       };
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${userJwtToken1}`)
         .send(extensionRequestObj)
         .end(function (err, res) {
@@ -487,7 +473,7 @@ describe("/requests Extension", function () {
       };
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${superUserJwtToken}`)
         .send(extensionRequestObj)
         .end(function (err, res) {
@@ -505,7 +491,7 @@ describe("/requests Extension", function () {
       };
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${userJwtToken2}`)
         .send(extensionRequestObj)
         .end(function (err, res) {
@@ -523,7 +509,7 @@ describe("/requests Extension", function () {
       };
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${userJwtToken1}`)
         .send(extensionRequestObj)
         .end(function (err, res) {
@@ -541,7 +527,7 @@ describe("/requests Extension", function () {
       };
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${userJwtToken1}`)
         .send(extensionRequestObj)
         .end(function (err, res) {
@@ -560,7 +546,7 @@ describe("/requests Extension", function () {
       };
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${userJwtToken1}`)
         .send(extensionRequestObj)
         .end(function (err, res) {
@@ -578,7 +564,7 @@ describe("/requests Extension", function () {
       };
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${userJwtToken1}`)
         .send(extensionRequestObj)
         .end(async function (err, res) {
@@ -592,7 +578,7 @@ describe("/requests Extension", function () {
           };
           const response = await chai
             .request(app)
-            .post("/requests?dev=true")
+            .post("/requests")
             .set("cookie", `${cookieName}=${userJwtToken1}`)
             .send(extensionRequestObj2);
           expect(response).to.have.status(400);
@@ -779,7 +765,7 @@ describe("/requests Task", function () {
     it("should return 401(Unauthorized) if user is not logged in", function (done) {
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .send(validTaskCreqtionRequest)
         .end(function (err, res) {
           expect(res).to.have.status(401);
@@ -793,7 +779,7 @@ describe("/requests Task", function () {
       taskRequestObj.userId = userId1;
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${userJwtToken1}`)
         .send(taskRequestObj)
         .end(function (err, res) {
@@ -809,7 +795,7 @@ describe("/requests Task", function () {
       delete taskRequestObj.taskId;
       chai
         .request(app)
-        .post("/requests?dev=true")
+        .post("/requests")
         .set("cookie", `${cookieName}=${userJwtToken1}`)
         .send(taskRequestObj)
         .end(function (err, res) {
