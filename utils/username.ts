@@ -1,29 +1,25 @@
 const { MAX_USERNAME_LENGTH } = require("../constants/users");
 
 export const formatUsername = (firstName: string, lastName: string, suffix: number): string => {
-    const trimmedFirstName = firstName.trim();
-    const trimmedLastName = lastName.trim();
+    const sanitizeName = (name: string): string => {
+        return name.replace(/[^a-zA-Z]/g, '').toLowerCase();
+    };
 
-    const firstNamePart = trimmedFirstName.split(/[\s-]/)[0];
-    const validFirstName = /^[a-zA-Z]+$/.test(firstNamePart)
-        ? firstNamePart.toLowerCase()
-        : "null";
+    const sanitizedFirstName = sanitizeName(firstName.trim().split(/\s+/)[0]);
+    const sanitizedLastName = sanitizeName(lastName.trim());
 
-    const lastNameParts = trimmedLastName.split(/[\s-]/);
-    const lastNamePart = lastNameParts[lastNameParts.length - 1];
-    const validLastName = /^[a-zA-Z]+$/.test(lastNamePart)
-        ? lastNamePart.toLowerCase()
-        : "null";
+    const validFirstName = sanitizedFirstName || "null";
+    const validLastName = sanitizedLastName || "null";
 
-    const baseUsername = `${validFirstName}-${validLastName}`;
-    let finalUsername = `${baseUsername}-${suffix}`;
+    let baseUsername = `${validFirstName}-${validLastName}`;
 
-    if (finalUsername.length > MAX_USERNAME_LENGTH) {
-        const availableLength = MAX_USERNAME_LENGTH - validFirstName.length - suffix.toString().length - 2;
-        const truncatedLastName = validLastName.slice(0, Math.max(1, availableLength));
-        const truncatedBaseUsername = `${validFirstName}-${truncatedLastName}`;
-        finalUsername = `${truncatedBaseUsername}-${suffix}`;
+    const maxBaseLength = MAX_USERNAME_LENGTH - suffix.toString().length - 1;
+    if (baseUsername.length > maxBaseLength) {
+        const availableLastNameLength = maxBaseLength - validFirstName.length - 1;
+        baseUsername = `${validFirstName}-${validLastName.slice(0, availableLastNameLength)}`;
     }
+
+    const finalUsername = `${baseUsername}-${suffix}`;
 
     return finalUsername;
 };
