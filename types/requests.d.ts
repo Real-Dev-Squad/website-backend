@@ -9,7 +9,6 @@ export type UpdateRequestBody = {
 };
 
 export type RequestQuery = {
-  dev?: string;
   type?: string;
   requestedBy?: string;
   state?: REQUEST_STATE.APPROVED | REQUEST_STATE.PENDING | REQUEST_STATE.REJECTED;
