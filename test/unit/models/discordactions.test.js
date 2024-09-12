@@ -815,6 +815,7 @@ describe("discordactions", function () {
   describe("updateGroupIdle7d+", function () {
     let fetchStub;
     let allIds;
+
     beforeEach(async function () {
       fetchStub = fetchStub = sinon.stub(global, "fetch");
 
@@ -891,6 +892,7 @@ describe("discordactions", function () {
       sinon.restore();
       await cleanDb();
     });
+
     it("should return  totalIdleUsers as 3,totalRolesApplied as 3, totalRoleToBeAdded as 3 as no one is maven", async function () {
       const res = await updateIdle7dUsersOnDiscord();
       expect(res.totalIdle7dUsers).to.be.equal(2);
@@ -903,6 +905,7 @@ describe("discordactions", function () {
   describe("updateGroupIdle", function () {
     let fetchStub;
     let allIds;
+
     beforeEach(async function () {
       fetchStub = fetchStub = sinon.stub(global, "fetch");
 
@@ -979,6 +982,7 @@ describe("discordactions", function () {
       sinon.restore();
       await cleanDb();
     });
+
     it("should return  totalIdleUsers as 3,totalRolesApplied as 3, totalRoleToBeAdded as 3 as no one is maven", async function () {
       const res = await updateIdleUsersOnDiscord();
       expect(res.totalIdleUsers).to.be.equal(2);
