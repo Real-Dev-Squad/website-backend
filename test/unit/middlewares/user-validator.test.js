@@ -312,7 +312,7 @@ describe("Middleware | Validators | User", function () {
     it("Allows the request to pass with disabled_roles property", async function () {
       const req = {
         body: {
-          disabled_roles: [],
+          disabledRoles: [],
         },
       };
       const res = {};
@@ -324,7 +324,7 @@ describe("Middleware | Validators | User", function () {
     it("Allows the request to pass with disabled_roles property with roles `super_user` & `member'", async function () {
       const req = {
         body: {
-          disabled_roles: ["super_user", "member"],
+          disabledRoles: ["super_user", "member"],
         },
       };
       const res = {};
@@ -336,7 +336,7 @@ describe("Middleware | Validators | User", function () {
     it("Allows the request to pass with disabled_roles property with role `member'", async function () {
       const req = {
         body: {
-          disabled_roles: ["member"],
+          disabledRoles: ["member"],
         },
       };
       const res = {};
@@ -348,7 +348,7 @@ describe("Middleware | Validators | User", function () {
     it("Allows the request to pass with disabled_roles property with role `super_user` ", async function () {
       const req = {
         body: {
-          disabled_roles: ["super_user"],
+          disabledRoles: ["super_user"],
         },
       };
       const res = {};

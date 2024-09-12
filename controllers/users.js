@@ -396,6 +396,7 @@ const updateSelf = async (req, res) => {
   try {
     const { id: userId, roles: userRoles, discordId } = req.userData;
     const { user } = await dataAccess.retrieveUsers({ id: userId });
+    let rolesToDisable = [];
 
     if (req.body.username) {
       if (!user.incompleteUserDetails) {
@@ -410,10 +411,8 @@ const updateSelf = async (req, res) => {
       }
     }
 
-    if (req.body.disabled_roles) {
-      let rolesToDisable;
-      const data = req.body.disabled_roles;
-
+    if (req.body.disabledRoles) {
+      const data = req.body.disabledRoles;
       if (user.disabled_roles !== undefined) {
         rolesToDisable = user.disabled_roles;
 
@@ -428,11 +427,6 @@ const updateSelf = async (req, res) => {
       } else {
         rolesToDisable = data;
       }
-
-      const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId);
-      if (updatedUser) {
-        return res.status(200).send({ message: "Privilege modified successfully!" });
-      }
     }
 
     if (userRoles.in_discord && !user.incompleteUserDetails) {
@@ -441,7 +435,17 @@ const updateSelf = async (req, res) => {
       if (discordMember) {
         const { roles } = discordMember;
         if (roles && roles.includes(discordDeveloperRoleId)) {
-          return res.boom.forbidden("Developers can't update their profile data. Use profile service for updating.");
+          if (req.body.disabledRoles) {
+            const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId);
+            if (updatedUser) {
+              return res
+                .status(200)
+                .send({ message: "Privilege modified successfully!", disabled_roles: rolesToDisable });
+            }
+          }
+          return res.boom.forbidden(
+            "Developers can only update disabled_roles. Use profile service for updating other attributes."
+          );
         }
       }
     }
