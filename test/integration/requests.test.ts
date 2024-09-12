@@ -190,7 +190,7 @@ describe("/requests OOO", function () {
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
-        .put(`/requests/${oooRequestId}?dev=true`)
+        .put(`/requests/${oooRequestId}`)
         .send(validOooStatusUpdate)
         .end(function (err, res) {
           expect(res).to.have.status(401);
@@ -201,7 +201,7 @@ describe("/requests OOO", function () {
     it("should approved a request", function (done) {
       chai
         .request(app)
-        .put(`/requests/${pendingOooRequestId}?dev=true`)
+        .put(`/requests/${pendingOooRequestId}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(validOooStatusUpdate)
         .end(function (err, res) {
@@ -212,25 +212,11 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should update a request", function (done) {
-      chai
-        .request(app)
-        .put(`/requests/${pendingOooRequestId}`)
-        .set("cookie", `${cookieName}=${superUserToken}`)
-        .send(validOooStatusUpdate)
-        .end(function (err, res) {
-          expect(res).to.have.status(400);
-          expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("Please use feature flag to make this requests");
-          done();
-        });
-    });
-
     it("should return error if wrong type is passed", function (done) {
       const type = "ACTIVE";
       chai
         .request(app)
-        .put(`/requests/${pendingOooRequestId}?dev=true`)
+        .put(`/requests/${pendingOooRequestId}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({ ...validOooStatusUpdate, type })
         .end(function (err, res) {
@@ -244,7 +230,7 @@ describe("/requests OOO", function () {
     it("should return 404 if request does not exist", function (done) {
       chai
         .request(app)
-        .put(`/requests/invalidoooRequestId?dev=true`)
+        .put(`/requests/invalidoooRequestId`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(validOooStatusUpdate)
         .end(function (err, res) {
@@ -258,7 +244,7 @@ describe("/requests OOO", function () {
     it("should return 400 if request is already approved", function (done) {
       chai
         .request(app)
-        .put(`/requests/${approvedOooRequestId}?dev=true`)
+        .put(`/requests/${approvedOooRequestId}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(validOooStatusUpdate)
         .end(function (err, res) {
@@ -628,7 +614,7 @@ describe("/requests Extension", function () {
     it("should return 401(Unauthorized) if user is not logged in", function (done) {
       chai
         .request(app)
-        .put(`/requests/${pendingExtensionRequestId}?dev=true`)
+        .put(`/requests/${pendingExtensionRequestId}`)
         .send(approvedExtensionRequest)
         .end(function (err, res) {
           expect(res).to.have.status(401);
@@ -641,7 +627,7 @@ describe("/requests Extension", function () {
     it("should return 401 if user is not super user", function (done) {
       chai
         .request(app)
-        .put(`/requests/${pendingExtensionRequestId}?dev=true`)
+        .put(`/requests/${pendingExtensionRequestId}`)
         .set("cookie", `${cookieName}=${userJwtToken1}`)
         .send(approvedExtensionRequest)
         .end(function (err, res) {
@@ -655,7 +641,7 @@ describe("/requests Extension", function () {
     it("should return 400(Bad Request) if request is already approved", function (done) {
       chai
         .request(app)
-        .put(`/requests/${pendingExtensionRequestId}?dev=true`)
+        .put(`/requests/${pendingExtensionRequestId}`)
         .set("cookie", `${cookieName}=${superUserJwtToken}`)
         .send(approvedExtensionRequest)
         .end(function (err, res) {
@@ -666,7 +652,7 @@ describe("/requests Extension", function () {
 
           chai
             .request(app)
-            .put(`/requests/${id}?dev=true`)
+            .put(`/requests/${id}`)
             .set("cookie", `${cookieName}=${superUserJwtToken}`)
             .send(approvedExtensionRequest)
             .end(function (err, res) {
@@ -681,7 +667,7 @@ describe("/requests Extension", function () {
     it("should return 400(Bad Request) if request is already rejected", function (done) {
       chai
         .request(app)
-        .put(`/requests/${pendingExtensionRequestId}?dev=true`)
+        .put(`/requests/${pendingExtensionRequestId}`)
         .set("cookie", `${cookieName}=${superUserJwtToken}`)
         .send(rejectedExtensionRequest)
         .end(function (err, res) {
@@ -692,7 +678,7 @@ describe("/requests Extension", function () {
 
           chai
             .request(app)
-            .put(`/requests/${id}?dev=true`)
+            .put(`/requests/${id}`)
             .set("cookie", `${cookieName}=${superUserJwtToken}`)
             .send(rejectedExtensionRequest)
             .end(function (err, res) {
@@ -707,7 +693,7 @@ describe("/requests Extension", function () {
     it("should approve an extension request", function (done) {
       chai
         .request(app)
-        .put(`/requests/${pendingExtensionRequestId}?dev=true`)
+        .put(`/requests/${pendingExtensionRequestId}`)
         .set("cookie", `${cookieName}=${superUserJwtToken}`)
         .send(approvedExtensionRequest)
         .end(function (err, res) {
@@ -719,7 +705,7 @@ describe("/requests Extension", function () {
     it("should return 400(Bad Request) if invalid state is passed", function (done) {
       chai
         .request(app)
-        .put(`/requests/${pendingExtensionRequestId}?dev=true`)
+        .put(`/requests/${pendingExtensionRequestId}`)
         .set("cookie", `${cookieName}=${superUserJwtToken}`)
         .send(invalidExtensionRequest)
         .end(function (err, res) {
@@ -733,7 +719,7 @@ describe("/requests Extension", function () {
     it("should return 404(Not Found) if request does not exist", function (done) {
       chai
         .request(app)
-        .put(`/requests/randomId?dev=true`)
+        .put(`/requests/randomId`)
         .set("cookie", `${cookieName}=${superUserJwtToken}`)
         .send(approvedExtensionRequest)
         .end(function (err, res) {

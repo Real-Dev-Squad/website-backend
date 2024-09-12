@@ -45,10 +45,6 @@ export const updateRequestsMiddleware = async (
   res: CustomResponse,
   next: NextFunction
 ) => {
-  // TODO: Remove this check once feature is tested and ready to be used
-  if ( req.query.dev !== "true") {
-    return res.boom.badRequest("Please use feature flag to make this requests");
-  }
   const schema = joi
   .object()
   .strict()
