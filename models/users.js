@@ -793,23 +793,16 @@ const getUsersByRole = async (role) => {
 
 const generateUniqueUsername = async (firstName, lastName) => {
   try {
-    let suffix = 1;
-    let finalUsername;
-    let isUnique = false;
+    const snapshot = await userModel
+      .where("first_name", "==", firstName)
+      .where("last_name", "==", lastName)
+      .count()
+      .get();
 
-    while (!isUnique) {
-      finalUsername = formatUsername(firstName, lastName, suffix);
+    const existingUserCount = snapshot.data().count || 0;
 
-      const snapshot = await userModel.where("username", "==", finalUsername).count().get();
-
-      const existingCount = snapshot.data().count || 0;
-
-      if (existingCount === 0) {
-        isUnique = true;
-      } else {
-        suffix++;
-      }
-    }
+    const suffix = existingUserCount + 1;
+    const finalUsername = formatUsername(firstName, lastName, suffix);
 
     return finalUsername;
   } catch (err) {
