@@ -31,8 +31,17 @@ const {
   addInviteToInviteModel,
   getUserDiscordInvite,
   groupUpdateLastJoinDate,
+  updateIdleUsersOnDiscord,
+  updateIdle7dUsersOnDiscord,
 } = require("../../../models/discordactions");
-const { groupData, roleData, existingRole, memberGroupData } = require("../../fixtures/discordactions/discordactions");
+const {
+  groupData,
+  roleData,
+  existingRole,
+  memberGroupData,
+  groupIdle,
+  groupIdle7d,
+} = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
 const { userPhotoVerificationData } = require("../../fixtures/user/photo-verification");
 const userData = require("../../fixtures/user/user")();
@@ -44,6 +53,7 @@ const { ONE_DAY_IN_MS } = require("../../../constants/users");
 const { createProgressDocument } = require("../../../models/progresses");
 const { stubbedModelTaskProgressData } = require("../../fixtures/progress/progresses");
 const { convertDaysToMilliseconds } = require("../../../utils/time");
+const { generateUserStatusData } = require("../../fixtures/userStatus/userStatus");
 
 chai.should();
 
@@ -799,6 +809,186 @@ describe("discordactions", function () {
     it("should add current date as lastUsedOn in groups doc", async function () {
       const res = await groupUpdateLastJoinDate({ id: "kbl" });
       expect(res.updated).to.be.equal(true);
+    });
+  });
+
+  describe("updateGroupIdle7d+", function () {
+    let fetchStub;
+    let allIds;
+
+    beforeEach(async function () {
+      fetchStub = fetchStub = sinon.stub(global, "fetch");
+
+      userData[0] = {
+        ...userData[0],
+        discordId: "123456789098765432",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[1] = {
+        ...userData[1],
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[2] = {
+        ...userData[2],
+        discordId: "1234567",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+
+      userData[3] = {
+        ...userData[3],
+        roles: { archived: true, in_discord: false },
+      };
+
+      userData[4] = {
+        ...userData[4],
+        discordId: "2131234453456545656765767876",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+
+      getDiscordMembers[3] = {
+        ...getDiscordMembers[3],
+        roles: ["1212121212"],
+      };
+
+      await addUser(userData[0]);
+      await addUser(userData[1]);
+      await addUser(userData[2]);
+      await addUser(userData[3]);
+      await addUser(userData[4]);
+
+      getDiscordMembers[4] = {
+        ...getDiscordMembers[4],
+        roles: [...getDiscordMembers[4].roles, groupIdle7d.roleid, "9876543210"],
+      };
+      const addUsersPromises = userData.slice(0, 5).map((user) => userModel.add({ ...user }));
+      const responses = await Promise.all(addUsersPromises);
+      allIds = responses.map((response) => response.id);
+
+      const userStatusPromises = allIds.map(async (userId, index) => {
+        if (index === 4) {
+          await userStatusModel.updateUserStatus(userId, generateUserStatusData("ACTIVE", new Date(), new Date()));
+        } else {
+          await userStatusModel.updateUserStatus(userId, generateUserStatusData("IDLE", 1690829925336, 1690829925336));
+        }
+      });
+      await Promise.all(userStatusPromises);
+
+      const addRolesPromises = [discordRoleModel.add(groupIdle7d)];
+      await Promise.all(addRolesPromises);
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return  totalIdleUsers as 3,totalRolesApplied as 3, totalRoleToBeAdded as 3 as no one is maven", async function () {
+      const res = await updateIdle7dUsersOnDiscord();
+      expect(res.totalIdle7dUsers).to.be.equal(2);
+      expect(res.totalUserRoleToBeAdded).to.be.equal(2);
+      expect(res.totalUserRoleToBeRemoved).to.be.equal(1);
+      expect(res.totalArchivedUsers).to.be.equal(1);
+    });
+  });
+
+  describe("updateGroupIdle", function () {
+    let fetchStub;
+    let allIds;
+
+    beforeEach(async function () {
+      fetchStub = fetchStub = sinon.stub(global, "fetch");
+
+      userData[0] = {
+        ...userData[0],
+        discordId: "123456789098765432",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[1] = {
+        ...userData[1],
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[2] = {
+        ...userData[2],
+        discordId: "1234567",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+
+      userData[3] = {
+        ...userData[3],
+        roles: { archived: true, in_discord: false },
+      };
+
+      userData[4] = {
+        ...userData[4],
+        discordId: "2131234453456545656765767876",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+
+      getDiscordMembers[3] = {
+        ...getDiscordMembers[3],
+        roles: ["1212121212"],
+      };
+
+      await addUser(userData[0]);
+      await addUser(userData[1]);
+      await addUser(userData[2]);
+      await addUser(userData[3]);
+      await addUser(userData[4]);
+
+      getDiscordMembers[4] = {
+        ...getDiscordMembers[4],
+        roles: [...getDiscordMembers[4].roles, groupIdle.roleid, "9876543210"],
+      };
+      const addUsersPromises = userData.slice(0, 5).map((user) => userModel.add({ ...user }));
+      const responses = await Promise.all(addUsersPromises);
+      allIds = responses.map((response) => response.id);
+
+      const userStatusPromises = allIds.map(async (userId, index) => {
+        if (index === 4) {
+          await userStatusModel.updateUserStatus(userId, generateUserStatusData("ACTIVE", new Date(), new Date()));
+        } else {
+          await userStatusModel.updateUserStatus(userId, generateUserStatusData("IDLE", 1690829925336, 1690829925336));
+        }
+      });
+      await Promise.all(userStatusPromises);
+
+      const addRolesPromises = [discordRoleModel.add(groupIdle)];
+      await Promise.all(addRolesPromises);
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return  totalIdleUsers as 2,totalArchivedUsers as 2, totalRoleToBeAdded as 2", async function () {
+      const res = await updateIdleUsersOnDiscord();
+      expect(res.totalIdleUsers).to.be.equal(2);
+      expect(res.totalUserRoleToBeAdded).to.be.equal(2);
+      expect(res.totalUserRoleToBeRemoved).to.be.equal(1);
+      expect(res.totalArchivedUsers).to.be.equal(1);
     });
   });
 });

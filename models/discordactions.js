@@ -28,6 +28,7 @@ const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const discordService = require("../services/discordService");
 const { buildTasksQueryForMissedUpdates } = require("../utils/tasks");
 const { buildProgressQueryForMissedUpdates } = require("../utils/progresses");
+const allMavens = [];
 
 /**
  *
@@ -335,6 +336,11 @@ const updateIdleUsersOnDiscord = async () => {
     discordUsers?.forEach((discordUser) => {
       const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
       const haveIdleRole = discordUser.roles.includes(groupIdleRole.role.roleid);
+      const isMaven = discordUser.roles.includes(discordMavenRoleId);
+
+      if (isMaven) {
+        allMavens.push(discordUser.user.id);
+      }
 
       if (isDeveloper && haveIdleRole) {
         usersHavingIdleRole.push({ userid: discordUser.user.id });
@@ -349,7 +355,7 @@ const updateIdleUsersOnDiscord = async () => {
             if (userData.exists) {
               if (isUserArchived) {
                 totalArchivedUsers++;
-              } else {
+              } else if (!allMavens.includes(userData.data().discordId)) {
                 userStatus.userid = userData.data().discordId;
                 allIdleUsers.push(userStatus);
               }
@@ -562,6 +568,11 @@ const updateIdle7dUsersOnDiscord = async () => {
     discordUsers?.forEach((discordUser) => {
       const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
       const haveIdle7dRole = discordUser.roles.includes(groupIdle7dRoleId);
+      const isMaven = discordUser.roles.includes(discordMavenRoleId);
+
+      if (isMaven) {
+        allMavens.push(discordUser.user.id);
+      }
 
       if (isDeveloper && haveIdle7dRole) {
         usersHavingIdle7dRole.push({ userid: discordUser.user.id });
@@ -583,7 +594,7 @@ const updateIdle7dUsersOnDiscord = async () => {
               if (userData.exists) {
                 if (isUserArchived) {
                   totalArchivedUsers++;
-                } else {
+                } else if (!allMavens.includes(userData.data().discordId)) {
                   userStatus.userid = userData.data().discordId;
                   allIdle7dUsers.push(userStatus);
                 }
