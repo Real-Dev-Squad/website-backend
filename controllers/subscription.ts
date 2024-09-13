@@ -71,8 +71,7 @@ export const sendEmail = async (req: CustomRequest, res: CustomResponse) => {
 
     const info = await transporter.sendMail({
       from: `"Real Dev Squad" <${emailSubscriptionCredentials.email}>`,
-      // TODO: after approving this  PR we need to send email to TEJAS sir via this API as a POC.
-      to: "dgandhrav@gmail.com",
+      to: "tejasatrds@gmail.com ",
       subject: "Hello local, Testing in progress.",
       text: "working for notification feature",
       html: "<b>Hello world!</b>",
