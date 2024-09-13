@@ -35,6 +35,7 @@ const {
   roleDataFromDiscord,
   memberGroupData,
   groupOnboarding31dPlus,
+  groupIdle,
 } = require("../fixtures/discordactions/discordactions");
 const discordServices = require("../../services/discordService");
 const { addGroupRoleToMember, addInviteToInviteModel } = require("../../models/discordactions");
@@ -615,9 +616,30 @@ describe("Discord actions", function () {
     let allIds;
 
     beforeEach(async function () {
-      userData[0].roles = { archived: false };
-      userData[1].roles = { archived: false };
-      userData[2].roles = { archived: false };
+      userData[0] = {
+        ...userData[0],
+        discordId: "123456789098765432",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[1] = {
+        ...userData[1],
+        discordId: "12345678909867666",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[2] = {
+        ...userData[2],
+        discordId: "1234567",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+
+      getDiscordMembers[3] = {
+        ...getDiscordMembers[3],
+        roles: ["1212121212"],
+      };
+
       await addUser(userData[0]);
       await addUser(userData[1]);
       await addUser(userData[2]);
@@ -658,9 +680,9 @@ describe("Discord actions", function () {
           }
           expect(res).to.have.status(201);
           expect(res.body.message).to.be.equal("All Idle 7d+ Users updated successfully.");
-          expect(res.body.totalIdle7dUsers).to.be.equal(3);
-          expect(res.body.totalGroupIdle7dRolesApplied.count).to.be.equal(3);
-          expect(res.body.totalUserRoleToBeAdded).to.be.equal(3);
+          expect(res.body.totalIdle7dUsers).to.be.equal(2);
+          expect(res.body.totalGroupIdle7dRolesApplied.count).to.be.equal(2);
+          expect(res.body.totalUserRoleToBeAdded).to.be.equal(2);
           return done();
         });
     });
@@ -954,6 +976,82 @@ describe("Discord actions", function () {
       expect(res).to.have.status(201);
       expect(res.body.message).to.be.equal("invite generated successfully");
       expect(res.body.inviteLink).to.be.equal("discord.gg/asdfdsfsd");
+    });
+  });
+
+  describe("PUT /discord-actions/group-idle", function () {
+    let allIds;
+
+    beforeEach(async function () {
+      userData[0] = {
+        ...userData[0],
+        discordId: "123456789098765432",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[1] = {
+        ...userData[1],
+        discordId: "12345678909867666",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[2] = {
+        ...userData[2],
+        discordId: "1234567",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+
+      getDiscordMembers[3] = {
+        ...getDiscordMembers[3],
+        roles: ["1212121212"],
+      };
+
+      await addUser(userData[0]);
+      await addUser(userData[1]);
+      await addUser(userData[2]);
+
+      const addUsersPromises = userData.slice(0, 3).map((user) => userModel.add({ ...user }));
+      const responses = await Promise.all(addUsersPromises);
+      allIds = responses.map((response) => response.id);
+
+      const userStatusPromises = allIds.map(async (userId) => {
+        await updateUserStatus(userId, generateUserStatusData("IDLE", 1690829925336, 1690829925336));
+      });
+      await Promise.all(userStatusPromises);
+
+      const addRolesPromises = [discordRoleModel.add(groupIdle)];
+      await Promise.all(addRolesPromises);
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should update Idle Users successfully and return a 201 status code", function (done) {
+      chai
+        .request(app)
+        .put(`/discord-actions/group-idle`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(201);
+          expect(res.body.message).to.be.equal("All Idle Users updated successfully.");
+          expect(res.body.totalIdleUsers).to.be.equal(2);
+          expect(res.body.totalGroupIdleRolesApplied.count).to.be.equal(2);
+          expect(res.body.totalUserRoleToBeAdded).to.be.equal(2);
+          return done();
+        });
     });
   });
 });
