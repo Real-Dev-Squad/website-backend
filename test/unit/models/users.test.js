@@ -418,24 +418,6 @@ describe("users", function () {
     });
   });
 
-  describe("generateUniqueUsername", function () {
-    it("should generate a unique username when existing users are present", async function () {
-      const userData = userDataArray[15];
-      await users.addOrUpdate(userData);
-      const newUsername = await users.generateUniqueUsername("shubham", "sigdar");
-      expect(newUsername).to.deep.equal("shubham-sigdar-2");
-    });
-
-    it("should generate a unique username when no existing users are present", async function () {
-      const userData = userDataArray[15];
-      await users.addOrUpdate(userData);
-
-      const newUsername = await users.generateUniqueUsername("john", "doe");
-
-      expect(newUsername).to.equal("john-doe-1");
-    });
-  });
-
   describe("updateUsersInBatch", function () {
     it("should update existing users", async function () {
       const addUserPromiseList = [];

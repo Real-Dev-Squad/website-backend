@@ -29,6 +29,7 @@ const {
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
+const { generateUniqueUsername } = require("../services/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 const verifyUser = async (req, res) => {
@@ -350,7 +351,7 @@ const generateUsername = async (req, res) => {
   try {
     const { firstname, lastname, dev } = req.query;
     if (dev === "true") {
-      const username = await userQuery.generateUniqueUsername(firstname, lastname);
+      const username = await generateUniqueUsername(firstname, lastname);
       return res.json({ username });
     } else {
       return res.status(404).json({
