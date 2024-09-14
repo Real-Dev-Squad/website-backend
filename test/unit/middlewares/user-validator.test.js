@@ -309,52 +309,67 @@ describe("Middleware | Validators | User", function () {
   });
 
   describe("Test the update Self Validator for disabled_roles property", function () {
-    it("Allows the request to pass with disabled_roles property", async function () {
-      const req = {
+    let req, res, nextSpy;
+
+    beforeEach(function () {
+      res = {
+        boom: {
+          badRequest: sinon.stub(), // Stub the badRequest method
+        },
+      };
+
+      nextSpy = sinon.spy(); // Spy on the next function
+    });
+
+    it("Allows the request to pass with disabled_roles property []", async function () {
+      req = {
         body: {
           disabledRoles: [],
         },
       };
-      const res = {};
-      const nextSpy = sinon.spy();
       await updateUser(req, res, nextSpy);
       expect(nextSpy.callCount).to.be.equal(1);
     });
 
     it("Allows the request to pass with disabled_roles property with roles `super_user` & `member'", async function () {
-      const req = {
+      req = {
         body: {
           disabledRoles: ["super_user", "member"],
         },
       };
-      const res = {};
-      const nextSpy = sinon.spy();
       await updateUser(req, res, nextSpy);
-      expect(nextSpy.notCalled).to.be.equal(false);
+      expect(nextSpy.callCount).to.be.equal(1);
     });
 
     it("Allows the request to pass with disabled_roles property with role `member'", async function () {
-      const req = {
+      req = {
         body: {
           disabledRoles: ["member"],
         },
       };
-      const res = {};
-      const nextSpy = sinon.spy();
+
       await updateUser(req, res, nextSpy);
       expect(nextSpy.callCount).to.be.equal(1);
     });
 
     it("Allows the request to pass with disabled_roles property with role `super_user` ", async function () {
-      const req = {
+      req = {
         body: {
           disabledRoles: ["super_user"],
         },
       };
-      const res = {};
-      const nextSpy = sinon.spy();
       await updateUser(req, res, nextSpy);
       expect(nextSpy.callCount).to.be.equal(1);
+    });
+
+    it("shouldn't allow the request to pass with disabled_roles property with role `admin` ", async function () {
+      req = {
+        body: {
+          disabledRoles: ["admin"],
+        },
+      };
+      await updateUser(req, res, nextSpy);
+      expect(res.boom.badRequest.calledOnce).to.be.equal(true);
     });
   });
 
