@@ -1,6 +1,9 @@
 const externalAccountsModel = require("../models/external-accounts");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getDiscordMembers } = require("../services/discordService");
+const discordRolesModel = require("../models/discordactions");
+const discordServices = require("../services/discordService");
+const { fetchUser } = require("../models/users");
 const { addOrUpdate, getUsersByRole, updateUsersInBatch } = require("../models/users");
 const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/dataAccessLayer");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
@@ -38,6 +41,38 @@ const getExternalAccountData = async (req, res) => {
     const attributes = externalAccountData.attributes;
     if (attributes.expiry && attributes.expiry < Date.now()) {
       return res.boom.unauthorized("Token Expired. Please generate it again");
+    }
+
+    const { id: userId, roles } = req.userData;
+
+    if (!roles.in_discord) {
+      const roleExistsPromise = discordRolesModel.isGroupRoleExists({
+        rolename: "unverified",
+      });
+      const userDataPromise = fetchUser({ discordId: attributes.discordId });
+      const [role, userData] = await Promise.all([roleExistsPromise, userDataPromise]);
+
+      if (!role.roleExists || req.userData.id !== userData.user.id) {
+        return res.boom.forbidden("Permission denied. Cannot delete the role.");
+      }
+
+      await addOrUpdate(
+        {
+          roles: { ...roles, in_discord: true, archived: false },
+          discordId: attributes.discordId,
+          discordJoinedAt: attributes.discordJoinedAt,
+        },
+        userId
+      );
+
+      const roleData = role.existingRoles.docs[0].data();
+
+      await discordServices.removeRoleFromUser(roleData.roleid, attributes.discordId, req.userData);
+
+      const { wasSuccess } = await discordRolesModel.removeMemberGroup(roleData.roleid, attributes.discordId);
+      if (!wasSuccess) {
+        return res.status(400).json({ message: "Role deletion failed" });
+      }
     }
 
     return res.status(200).json({ message: "Data returned successfully", attributes: attributes });
