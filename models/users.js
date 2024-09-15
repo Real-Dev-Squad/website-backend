@@ -319,12 +319,10 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
     }
 
     if (userData && userData.disabled_roles !== undefined) {
-      const updatedRoles = userData.roles;
-      if (userData.disabled_roles.length > 0) {
+      if (userData.disabled_roles.length > 0 && userData.roles !== undefined) {
         for (const role of userData.disabled_roles) {
-          updatedRoles[`${role}`] = false;
+          userData.roles[`${role}`] = false;
         }
-        userData.roles = updatedRoles;
       }
     }
     return {
