@@ -318,6 +318,14 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
         userData = doc.data();
       });
     }
+
+    if (userData && userData.disabled_roles !== undefined) {
+      if (userData.disabled_roles.length > 0 && userData.roles !== undefined) {
+        for (const role of userData.disabled_roles) {
+          userData.roles[`${role}`] = false;
+        }
+      }
+    }
     return {
       userExists: !!userData,
       user: {
