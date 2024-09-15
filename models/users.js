@@ -23,6 +23,7 @@ const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
 const admin = require("firebase-admin");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { AUTHORITIES } = require("../constants/authorities");
+const { formatUsername } = require("../utils/username");
 
 /**
  * Adds or updates the user data
@@ -790,27 +791,6 @@ const getUsersByRole = async (role) => {
   }
 };
 
-const generateUniqueUsername = async (firstname, lastname) => {
-  try {
-    const snapshot = await userModel
-      .where("first_name", "==", firstname)
-      .where("last_name", "==", lastname)
-      .count()
-      .get();
-    const existingUserCount = snapshot.data().count;
-    const initialUsername = `${firstname}-${lastname}`;
-    if (existingUserCount === 0) {
-      return initialUsername;
-    } else {
-      const uniqueUsername = `${initialUsername}-${existingUserCount + 1}`;
-      return uniqueUsername;
-    }
-  } catch (err) {
-    logger.error(`Error while generating unique username: ${err.message}`);
-    throw err;
-  }
-};
-
 /**
  * Updates given list of users in batch
  * @param usersData {Array} - Users list as an array.
@@ -940,24 +920,6 @@ const updateUsernamesInBatch = async (usersData) => {
   }
 };
 
-const sanitizeString = (str) => {
-  if (!str) return "";
-  return str.replace(/[^a-zA-Z0-9-]/g, "-");
-};
-
-const formatUsername = (firstName, lastName, suffix) => {
-  const actualFirstName = firstName.split(" ")[0].toLowerCase();
-  const sanitizedFirstName = sanitizeString(actualFirstName);
-  const sanitizedLastName = sanitizeString(lastName).toLowerCase();
-
-  const baseUsername = `${sanitizedFirstName}-${sanitizedLastName}`;
-  const fullUsername = `${baseUsername}-${suffix}`;
-
-  return fullUsername.length <= 32
-    ? fullUsername
-    : `${baseUsername.slice(0, 32 - suffix.toString().length - 1)}-${suffix}`;
-};
-
 const updateUsersWithNewUsernames = async () => {
   try {
     const snapshot = await userModel.get();
@@ -1067,7 +1029,6 @@ module.exports = {
   removeGitHubToken,
   getUsersByRole,
   fetchUserByIds,
-  generateUniqueUsername,
   updateUsersInBatch,
   fetchUsersListForMultipleValues,
   fetchUserForKeyValue,
