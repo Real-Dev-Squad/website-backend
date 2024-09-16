@@ -672,7 +672,7 @@ describe("Discord actions", function () {
     it("should update Idle 7d+ Users successfully and return a 201 status code", function (done) {
       chai
         .request(app)
-        .put(`/discord-actions/group-idle-7d`)
+        .put(`/discord-actions/group-idle-7d?dev=true`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -1039,7 +1039,7 @@ describe("Discord actions", function () {
     it("should update Idle Users successfully and return a 201 status code", function (done) {
       chai
         .request(app)
-        .put(`/discord-actions/group-idle`)
+        .put(`/discord-actions/group-idle?dev=true`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
