@@ -894,7 +894,8 @@ describe("discordactions", function () {
     });
 
     it("should return  totalIdleUsers as 3,totalRolesApplied as 3, totalRoleToBeAdded as 3 as no one is maven", async function () {
-      const res = await updateIdle7dUsersOnDiscord();
+      const dev = "true";
+      const res = await updateIdle7dUsersOnDiscord(dev);
       expect(res.totalIdle7dUsers).to.be.equal(2);
       expect(res.totalUserRoleToBeAdded).to.be.equal(2);
       expect(res.totalUserRoleToBeRemoved).to.be.equal(1);
@@ -984,7 +985,8 @@ describe("discordactions", function () {
     });
 
     it("should return  totalIdleUsers as 2,totalArchivedUsers as 2, totalRoleToBeAdded as 2", async function () {
-      const res = await updateIdleUsersOnDiscord();
+      const dev = "true";
+      const res = await updateIdleUsersOnDiscord(dev);
       expect(res.totalIdleUsers).to.be.equal(2);
       expect(res.totalUserRoleToBeAdded).to.be.equal(2);
       expect(res.totalUserRoleToBeRemoved).to.be.equal(1);
