@@ -2427,7 +2427,7 @@ describe("Users", function () {
     it("Should return 200 when disabled_roles is being set to [super_user] in userObject ", async function () {
       const res = await chai
         .request(app)
-        .patch("/users/self")
+        .patch("/users/self?dev=true")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           disabledRoles: ["super_user"],
@@ -2450,7 +2450,7 @@ describe("Users", function () {
     it("Should return 200 when disabled_roles is being set to [super_user, member] in userObject", async function () {
       const res = await chai
         .request(app)
-        .patch("/users/self")
+        .patch("/users/self?dev=true")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           disabledRoles: ["super_user", "member"],
@@ -2472,7 +2472,7 @@ describe("Users", function () {
     });
 
     it("Should return 200 when disabled_roles is being set to [], member in userObject", async function () {
-      const res = await chai.request(app).patch("/users/self").set("cookie", `${cookieName}=${jwt}`).send({
+      const res = await chai.request(app).patch("/users/self?dev=true").set("cookie", `${cookieName}=${jwt}`).send({
         disabledRoles: [],
       });
       expect(res).to.have.status(200);
@@ -2489,10 +2489,34 @@ describe("Users", function () {
       expect(res2.body.roles.member).to.be.equal(true);
     });
 
+    it("Should return 403 when disabled_roles is being set to [], member in userObject without the dev flag", async function () {
+      const res = await chai.request(app).patch("/users/self").set("cookie", `${cookieName}=${jwt}`).send({
+        disabledRoles: [],
+      });
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.equal(
+        "Developers can only update disabled_roles. Use profile service for updating other attributes."
+      );
+    });
+
+    it("Should return 404 when disabled_roles is being set to [], but discord reponds with an error", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ error: "🚫 Bad Request Signature" }),
+        })
+      );
+      const res = await chai.request(app).patch("/users/self").set("cookie", `${cookieName}=${jwt}`).send({
+        disabledRoles: [],
+      });
+      expect(res).to.have.status(404);
+      expect(res.body.message).to.equal("Error Fetching Members From Discord");
+    });
+
     it("Should return 400 when disabled_roles is being set to ['admin'], member in userObject", async function () {
       const res = await chai
         .request(app)
-        .patch("/users/self")
+        .patch("/users/self?dev=true")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           disabledRoles: ["admin"],
