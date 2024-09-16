@@ -1,5 +1,9 @@
 const sinon = require("sinon");
-const { validateJoinData, validateUsersPatchHandler } = require("./../../../middlewares/validators/user");
+const {
+  validateJoinData,
+  validateUsersPatchHandler,
+  validateGenerateUsernameQuery,
+} = require("./../../../middlewares/validators/user");
 const joinData = require("./../../fixtures/user/join");
 const userData = require("./../../fixtures/user/user");
 const { expect } = require("chai");
@@ -308,6 +312,71 @@ describe("Middleware | Validators | User", function () {
     });
   });
 
+  describe("Test the update Self Validator for disabled_roles property", function () {
+    let req, res, nextSpy;
+
+    beforeEach(function () {
+      res = {
+        boom: {
+          badRequest: sinon.stub(), // Stub the badRequest method
+        },
+      };
+
+      nextSpy = sinon.spy(); // Spy on the next function
+    });
+
+    it("Allows the request to pass with disabled_roles property []", async function () {
+      req = {
+        body: {
+          disabledRoles: [],
+        },
+      };
+      await updateUser(req, res, nextSpy);
+      expect(nextSpy.callCount).to.be.equal(1);
+    });
+
+    it("Allows the request to pass with disabled_roles property with roles `super_user` & `member'", async function () {
+      req = {
+        body: {
+          disabledRoles: ["super_user", "member"],
+        },
+      };
+      await updateUser(req, res, nextSpy);
+      expect(nextSpy.callCount).to.be.equal(1);
+    });
+
+    it("Allows the request to pass with disabled_roles property with role `member'", async function () {
+      req = {
+        body: {
+          disabledRoles: ["member"],
+        },
+      };
+
+      await updateUser(req, res, nextSpy);
+      expect(nextSpy.callCount).to.be.equal(1);
+    });
+
+    it("Allows the request to pass with disabled_roles property with role `super_user` ", async function () {
+      req = {
+        body: {
+          disabledRoles: ["super_user"],
+        },
+      };
+      await updateUser(req, res, nextSpy);
+      expect(nextSpy.callCount).to.be.equal(1);
+    });
+
+    it("shouldn't allow the request to pass with disabled_roles property with role `admin` ", async function () {
+      req = {
+        body: {
+          disabledRoles: ["admin"],
+        },
+      };
+      await updateUser(req, res, nextSpy);
+      expect(res.boom.badRequest.calledOnce).to.be.equal(true);
+    });
+  });
+
   describe("Create user validator for getUsers", function () {
     it("lets the request pass to next", async function () {
       const req = {
@@ -342,6 +411,199 @@ describe("Middleware | Validators | User", function () {
         expect(err).to.be.an.instanceOf(Error);
       });
       expect(nextSpy.calledOnce).to.be.equal(false);
+    });
+  });
+
+  describe("validateGenerateUsernameQuery Middleware", function () {
+    it("should pass valid query parameters to next", async function () {
+      const req = {
+        query: {
+          firstname: "John",
+          lastname: "Doe",
+          dev: "true",
+        },
+      };
+
+      const res = {};
+      const next = sinon.spy();
+
+      await validateGenerateUsernameQuery(req, res, next);
+      expect(next.calledOnce).to.be.equal(true);
+    });
+
+    it("should return 400 for missing firstname", async function () {
+      const req = {
+        query: {
+          lastname: "Doe",
+          dev: "true",
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: (message) => {
+            expect(message).to.equal("Invalid Query Parameters Passed");
+          },
+        },
+      };
+      const next = sinon.spy();
+
+      await validateGenerateUsernameQuery(req, res, next);
+
+      expect(next.called).to.be.equal(false);
+    });
+
+    it("should return 400 for missing lastname", async function () {
+      const req = {
+        query: {
+          firstname: "John",
+          dev: "true",
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: (message) => {
+            expect(message).to.equal("Invalid Query Parameters Passed");
+          },
+        },
+      };
+      const next = sinon.spy();
+
+      await validateGenerateUsernameQuery(req, res, next);
+
+      expect(next.called).to.be.equal(false);
+    });
+
+    it("should return 400 for invalid firstname with special characters", async function () {
+      const req = {
+        query: {
+          firstname: "John123",
+          lastname: "Doe",
+          dev: "true",
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: (message) => {
+            expect(message).to.equal("Invalid Query Parameters Passed");
+          },
+        },
+      };
+      const next = sinon.spy();
+
+      await validateGenerateUsernameQuery(req, res, next);
+
+      expect(next.called).to.be.equal(false);
+    });
+
+    it("should return 400 for invalid lastname with special characters", async function () {
+      const req = {
+        query: {
+          firstname: "John",
+          lastname: "Doe@",
+          dev: "true",
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: (message) => {
+            expect(message).to.equal("Invalid Query Parameters Passed");
+          },
+        },
+      };
+      const next = sinon.spy();
+
+      await validateGenerateUsernameQuery(req, res, next);
+
+      expect(next.called).to.be.equal(false);
+    });
+
+    it("should return 400 for empty firstname", async function () {
+      const req = {
+        query: {
+          firstname: "",
+          lastname: "Doe",
+          dev: "true",
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: (message) => {
+            expect(message).to.equal("Invalid Query Parameters Passed");
+          },
+        },
+      };
+      const next = sinon.spy();
+
+      await validateGenerateUsernameQuery(req, res, next);
+
+      expect(next.called).to.be.equal(false);
+    });
+
+    it("should return 400 for empty lastname", async function () {
+      const req = {
+        query: {
+          firstname: "John",
+          lastname: "",
+          dev: "true",
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: (message) => {
+            expect(message).to.equal("Invalid Query Parameters Passed");
+          },
+        },
+      };
+      const next = sinon.spy();
+
+      await validateGenerateUsernameQuery(req, res, next);
+
+      expect(next.called).to.be.equal(false);
+    });
+
+    it("should pass without dev parameter", async function () {
+      const req = {
+        query: {
+          firstname: "John",
+          lastname: "Doe",
+        },
+      };
+
+      const res = {};
+      const next = sinon.spy();
+
+      await validateGenerateUsernameQuery(req, res, next);
+
+      expect(next.calledOnce).to.be.equal(true);
+    });
+
+    it("should return 400 for invalid dev parameter", async function () {
+      const req = {
+        query: {
+          firstname: "John",
+          lastname: "Doe",
+          dev: "false",
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: (message) => {
+            expect(message).to.equal("Invalid Query Parameters Passed");
+          },
+        },
+      };
+      const next = sinon.spy();
+
+      await validateGenerateUsernameQuery(req, res, next);
+
+      expect(next.called).to.be.equal(false);
     });
   });
 });

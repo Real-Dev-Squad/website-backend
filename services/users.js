@@ -1,5 +1,6 @@
 const { USERS_PATCH_HANDLER_SUCCESS_MESSAGES, USERS_PATCH_HANDLER_ERROR_MESSAGES } = require("../constants/users");
 const firestore = require("../utils/firestore");
+const { formatUsername } = require("../utils/username");
 const userModel = firestore.collection("users");
 const archiveUsers = async (usersData) => {
   const batch = firestore.batch();
@@ -41,6 +42,27 @@ const archiveUsers = async (usersData) => {
   }
 };
 
+const generateUniqueUsername = async (firstName, lastName) => {
+  try {
+    const snapshot = await userModel
+      .where("first_name", "==", firstName)
+      .where("last_name", "==", lastName)
+      .count()
+      .get();
+
+    const existingUserCount = snapshot.data().count || 0;
+
+    const suffix = existingUserCount + 1;
+    const finalUsername = formatUsername(firstName, lastName, suffix);
+
+    return finalUsername;
+  } catch (err) {
+    logger.error(`Error while generating unique username: ${err.message}`);
+    throw err;
+  }
+};
+
 module.exports = {
   archiveUsers,
+  generateUniqueUsername,
 };
