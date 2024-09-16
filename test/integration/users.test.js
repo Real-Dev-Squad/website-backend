@@ -25,6 +25,7 @@ const {
 } = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
+const { MAX_USERNAME_LENGTH } = require("../../constants/users.ts");
 
 const userRoleUpdate = userData[4];
 const userRoleUnArchived = userData[13];
@@ -1118,6 +1119,41 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Invalid Query Parameters Passed");
 
+          return done();
+        });
+    });
+
+    it("Should handle long names and truncate them to fit within the max length", function (done) {
+      const longFirstname = "ChristopherJonathan";
+      const longLastname = "MontgomeryWellington";
+
+      chai
+        .request(app)
+        .get(`/users/username?firstname=${longFirstname}&lastname=${longLastname}&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.username).to.have.lengthOf.at.most(MAX_USERNAME_LENGTH);
+          return done();
+        });
+    });
+
+    it("Should return 400 if firstname or lastname is missing", function (done) {
+      chai
+        .request(app)
+        .get(`/users/username?firstname=${firstname}&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Invalid Query Parameters Passed");
           return done();
         });
     });
@@ -2528,6 +2564,40 @@ describe("Users", function () {
 
           return done();
         });
+    });
+  });
+
+  describe("POST USERS MIGRATION", function () {
+    it("should run the migration and update usernames successfully", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/batch-username-update")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+    });
+
+    it("should not update usernames for super_user or member", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/batch-username-update")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      const affectedUsers = res.body.totalUpdatedUsernames;
+      expect(affectedUsers).to.equal(0);
+    });
+
+    it("should return 401 for unauthorized user attempting migration", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/batch-username-update")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send();
+
+      expect(res).to.have.status(401);
     });
   });
 });

@@ -29,6 +29,7 @@ const {
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
+const { generateUniqueUsername } = require("../services/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 const verifyUser = async (req, res) => {
@@ -350,7 +351,7 @@ const generateUsername = async (req, res) => {
   try {
     const { firstname, lastname, dev } = req.query;
     if (dev === "true") {
-      const username = await userQuery.generateUniqueUsername(firstname, lastname);
+      const username = await generateUniqueUsername(firstname, lastname);
       return res.json({ username });
     } else {
       return res.status(404).json({
@@ -438,7 +439,9 @@ const updateSelf = async (req, res) => {
       if (discordMember) {
         const { roles } = discordMember;
         if (roles && roles.includes(discordDeveloperRoleId)) {
+
           if (req.body.disabledRoles && devFeatureFlag) {
+
             const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId);
             if (updatedUser) {
               return res
@@ -987,6 +990,16 @@ const getIdentityStats = async (req, res) => {
   });
 };
 
+const updateUsernames = async (req, res) => {
+  try {
+    const response = await userQuery.updateUsersWithNewUsernames();
+    return res.status(200).json(response);
+  } catch (error) {
+    logger.error("Error in username update script", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -1018,4 +1031,5 @@ module.exports = {
   usersPatchHandler,
   isDeveloper,
   getIdentityStats,
+  updateUsernames,
 };
