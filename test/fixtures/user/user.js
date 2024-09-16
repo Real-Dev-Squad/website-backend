@@ -362,7 +362,7 @@ module.exports = () => {
       },
     },
     {
-      username: "shubham-sigdar",
+      username: "shubham-sigdar-1",
       first_name: "shubham",
       last_name: "sigdar",
       github_id: githubUserInfo[1].login,
