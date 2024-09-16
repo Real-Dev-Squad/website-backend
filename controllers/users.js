@@ -439,9 +439,7 @@ const updateSelf = async (req, res) => {
       if (discordMember) {
         const { roles } = discordMember;
         if (roles && roles.includes(discordDeveloperRoleId)) {
-
           if (req.body.disabledRoles && devFeatureFlag) {
-
             const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId);
             if (updatedUser) {
               return res
