@@ -395,6 +395,7 @@ const getSelfDetails = async (req, res) => {
 const updateSelf = async (req, res) => {
   try {
     const { id: userId, roles: userRoles, discordId } = req.userData;
+    const devFeatureFlag = req.query.dev === "true";
     const { user } = await dataAccess.retrieveUsers({ id: userId });
     let rolesToDisable = [];
 
@@ -431,11 +432,13 @@ const updateSelf = async (req, res) => {
 
     if (userRoles.in_discord && !user.incompleteUserDetails) {
       const membersInDiscord = await getDiscordMembers();
+      if (!Array.isArray(membersInDiscord))
+        return res.status(404).send({ message: "Error Fetching Members From Discord" });
       const discordMember = membersInDiscord.find((member) => member.user.id === discordId);
       if (discordMember) {
         const { roles } = discordMember;
         if (roles && roles.includes(discordDeveloperRoleId)) {
-          if (req.body.disabledRoles) {
+          if (req.body.disabledRoles && devFeatureFlag) {
             const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId);
             if (updatedUser) {
               return res
