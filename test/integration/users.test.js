@@ -2398,7 +2398,6 @@ describe("Users", function () {
     });
 
     afterEach(function () {
-      cleanDb();
       Sinon.restore();
     });
 
@@ -2417,93 +2416,11 @@ describe("Users", function () {
 
           expect(res).to.have.status(403);
           expect(res.body.message).to.equal(
-            "Developers can only update disabled_roles. Use profile service for updating other attributes."
+            "Developers can't update their profile data. Use profile service for updating."
           );
 
           return done();
         });
-    });
-
-    it("Should return 200 when disabled_roles is being set to [super_user] in userObject ", async function () {
-      const res = await chai
-        .request(app)
-        .patch("/users/self")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          disabledRoles: ["super_user"],
-        });
-
-      expect(res).to.have.status(200);
-      expect(res.body).to.be.an("object");
-      expect(res.body).to.eql({
-        message: "Privilege modified successfully!",
-        disabled_roles: ["super_user"],
-      });
-
-      const res2 = await chai.request(app).get("/users/self").set("cookie", `${cookieName}=${jwt}`);
-
-      expect(res2).to.have.status(200);
-      expect(res2.body).to.be.an("object");
-      expect(res2.body.roles.super_user).to.be.equal(false);
-    });
-
-    it("Should return 200 when disabled_roles is being set to [super_user, member] in userObject", async function () {
-      const res = await chai
-        .request(app)
-        .patch("/users/self")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          disabledRoles: ["super_user", "member"],
-        });
-
-      expect(res).to.have.status(200);
-      expect(res.body).to.be.an("object");
-      expect(res.body).to.eql({
-        message: "Privilege modified successfully!",
-        disabled_roles: ["super_user", "member"],
-      });
-
-      const res2 = await chai.request(app).get("/users/self").set("cookie", `${cookieName}=${jwt}`);
-
-      expect(res2).to.have.status(200);
-      expect(res2.body).to.be.an("object");
-      expect(res2.body.roles.super_user).to.be.equal(false);
-      expect(res2.body.roles.member).to.be.equal(false);
-    });
-
-    it("Should return 200 when disabled_roles is being set to [], member in userObject", async function () {
-      const res = await chai.request(app).patch("/users/self").set("cookie", `${cookieName}=${jwt}`).send({
-        disabledRoles: [],
-      });
-      expect(res).to.have.status(200);
-      expect(res.body).to.be.an("object");
-      expect(res.body).to.eql({
-        message: "Privilege modified successfully!",
-        disabled_roles: [],
-      });
-
-      const res2 = await chai.request(app).get("/users/self").set("cookie", `${cookieName}=${jwt}`);
-
-      expect(res2).to.have.status(200);
-      expect(res2.body).to.be.an("object");
-      expect(res2.body.roles.member).to.be.equal(true);
-    });
-
-    it("Should return 400 when disabled_roles is being set to ['admin'], member in userObject", async function () {
-      const res = await chai
-        .request(app)
-        .patch("/users/self")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          disabledRoles: ["admin"],
-        });
-      expect(res).to.have.status(400);
-      expect(res.body).to.be.an("object");
-      expect(res.body).to.eql({
-        statusCode: 400,
-        error: "Bad Request",
-        message: '"disabledRoles[0]" must be one of [super_user, member]',
-      });
     });
   });
 
