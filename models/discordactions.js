@@ -355,7 +355,7 @@ const updateIdleUsersOnDiscord = async (dev) => {
             if (userData.exists) {
               if (isUserArchived) {
                 totalArchivedUsers++;
-              } else if (!allMavens.includes(userData.data().discordId)) {
+              } else if (dev === "true" && !allMavens.includes(userData.data().discordId)) {
                 userStatus.userid = userData.data().discordId;
                 allIdleUsers.push(userStatus);
               }
@@ -594,7 +594,7 @@ const updateIdle7dUsersOnDiscord = async (dev) => {
               if (userData.exists) {
                 if (isUserArchived) {
                   totalArchivedUsers++;
-                } else if (!allMavens.includes(userData.data().discordId)) {
+                } else if (dev === "true" && !allMavens.includes(userData.data().discordId)) {
                   userStatus.userid = userData.data().discordId;
                   allIdle7dUsers.push(userStatus);
                 }
