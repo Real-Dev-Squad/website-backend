@@ -29,6 +29,7 @@ const {
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
+const { generateUniqueUsername } = require("../services/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 const verifyUser = async (req, res) => {
@@ -350,7 +351,7 @@ const generateUsername = async (req, res) => {
   try {
     const { firstname, lastname, dev } = req.query;
     if (dev === "true") {
-      const username = await userQuery.generateUniqueUsername(firstname, lastname);
+      const username = await generateUniqueUsername(firstname, lastname);
       return res.json({ username });
     } else {
       return res.status(404).json({
@@ -395,7 +396,9 @@ const getSelfDetails = async (req, res) => {
 const updateSelf = async (req, res) => {
   try {
     const { id: userId, roles: userRoles, discordId } = req.userData;
+    const devFeatureFlag = req.query.dev === "true";
     const { user } = await dataAccess.retrieveUsers({ id: userId });
+    let rolesToDisable = [];
 
     if (req.body.username) {
       if (!user.incompleteUserDetails) {
@@ -410,13 +413,43 @@ const updateSelf = async (req, res) => {
       }
     }
 
+    if (req.body.disabledRoles) {
+      const data = req.body.disabledRoles;
+      if (user.disabled_roles !== undefined) {
+        rolesToDisable = user.disabled_roles;
+
+        data.forEach((role) => {
+          const roleIndex = rolesToDisable.indexOf(role);
+          if (roleIndex !== -1) {
+            rolesToDisable.splice(roleIndex, 1);
+          } else {
+            rolesToDisable.push(role);
+          }
+        });
+      } else {
+        rolesToDisable = data;
+      }
+    }
+
     if (userRoles.in_discord && !user.incompleteUserDetails) {
       const membersInDiscord = await getDiscordMembers();
+      if (!Array.isArray(membersInDiscord))
+        return res.status(404).send({ message: "Error Fetching Members From Discord" });
       const discordMember = membersInDiscord.find((member) => member.user.id === discordId);
       if (discordMember) {
         const { roles } = discordMember;
         if (roles && roles.includes(discordDeveloperRoleId)) {
-          return res.boom.forbidden("Developers can't update their profile data. Use profile service for updating.");
+          if (req.body.disabledRoles && devFeatureFlag) {
+            const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId);
+            if (updatedUser) {
+              return res
+                .status(200)
+                .send({ message: "Privilege modified successfully!", disabled_roles: rolesToDisable });
+            }
+          }
+          return res.boom.forbidden(
+            "Developers can only update disabled_roles. Use profile service for updating other attributes."
+          );
         }
       }
     }
