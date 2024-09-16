@@ -313,7 +313,7 @@ const fetchGroupToUserMapping = async (roleIds) => {
   }
 };
 
-const updateIdleUsersOnDiscord = async () => {
+const updateIdleUsersOnDiscord = async (dev) => {
   let totalIdleUsers = 0;
   const totalGroupIdleRolesApplied = { count: 0, response: [] };
   const totalGroupIdleRolesNotApplied = { count: 0, errors: [] };
@@ -338,7 +338,7 @@ const updateIdleUsersOnDiscord = async () => {
       const haveIdleRole = discordUser.roles.includes(groupIdleRole.role.roleid);
       const isMaven = discordUser.roles.includes(discordMavenRoleId);
 
-      if (isMaven) {
+      if (dev === "true" && isMaven) {
         allMavens.push(discordUser.user.id);
       }
 
@@ -543,7 +543,7 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
   }
 };
 
-const updateIdle7dUsersOnDiscord = async () => {
+const updateIdle7dUsersOnDiscord = async (dev) => {
   let totalIdle7dUsers = 0;
   const totalGroupIdle7dRolesApplied = { count: 0, response: [] };
   const totalGroupIdle7dRolesNotApplied = { count: 0, errors: [] };
@@ -570,7 +570,7 @@ const updateIdle7dUsersOnDiscord = async () => {
       const haveIdle7dRole = discordUser.roles.includes(groupIdle7dRoleId);
       const isMaven = discordUser.roles.includes(discordMavenRoleId);
 
-      if (isMaven) {
+      if (dev === "true" && isMaven) {
         allMavens.push(discordUser.user.id);
       }
 

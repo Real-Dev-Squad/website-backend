@@ -213,7 +213,8 @@ const updateDiscordImageForVerification = async (req, res) => {
  */
 const setRoleIdleToIdleUsers = async (req, res) => {
   try {
-    const result = await discordRolesModel.updateIdleUsersOnDiscord();
+    const { dev } = req.query;
+    const result = await discordRolesModel.updateIdleUsersOnDiscord(dev);
     return res.status(201).json({
       message: "All Idle Users updated successfully.",
       ...result,
@@ -231,7 +232,8 @@ const setRoleIdleToIdleUsers = async (req, res) => {
  */
 const setRoleIdle7DToIdleUsers = async (req, res) => {
   try {
-    const result = await discordRolesModel.updateIdle7dUsersOnDiscord();
+    const { dev } = req.query;
+    const result = await discordRolesModel.updateIdle7dUsersOnDiscord(dev);
     return res.status(201).json({
       message: "All Idle 7d+ Users updated successfully.",
       ...result,
