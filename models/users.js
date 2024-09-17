@@ -911,13 +911,7 @@ const updateUsernamesInBatch = async (usersData) => {
   };
 
   usersData.forEach((user) => {
-    const updateUserData = {
-      ...user,
-      username: user.username,
-      first_name: user.first_name.toLowerCase(),
-      last_name: user.last_name.toLowerCase(),
-    };
-
+    const updateUserData = { ...user, username: user.username };
     batch.update(userModel.doc(user.id), updateUserData);
     usersBatch.push(user.id);
   });
@@ -985,13 +979,9 @@ const updateUsersWithNewUsernames = async () => {
         const suffix = index + 1;
         const formattedUsername = formatUsername(user.userData.first_name, user.userData.last_name, suffix);
 
-        usersToUpdate.push({
-          ...user.userData,
-          id: user.id,
-          username: formattedUsername,
-          first_name: user.userData.first_name.toLowerCase(),
-          last_name: user.userData.last_name.toLowerCase(),
-        });
+        if (user.userData.username !== formattedUsername) {
+          usersToUpdate.push({ ...user.userData, id: user.id, username: formattedUsername });
+        }
       });
     }
 
