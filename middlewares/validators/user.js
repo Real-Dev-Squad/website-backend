@@ -62,10 +62,10 @@ const updateUser = async (req, res, next) => {
   try {
     await schema.validateAsync(req.body);
 
-    if (req.body.first_name && typeof req.body.first_name === "string") {
+    if (req.body.first_name) {
       req.body.first_name = req.body.first_name.toLowerCase();
     }
-    if (req.body.last_name && typeof req.body.last_name === "string") {
+    if (req.body.last_name) {
       req.body.last_name = req.body.last_name.toLowerCase();
     }
 
