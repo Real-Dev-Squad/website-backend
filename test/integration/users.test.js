@@ -25,6 +25,7 @@ const {
 } = require("../fixtures/userStatus/userStatus");
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
+const { MAX_USERNAME_LENGTH } = require("../../constants/users.ts");
 
 const userRoleUpdate = userData[4];
 const userRoleUnArchived = userData[13];
@@ -1118,6 +1119,41 @@ describe("Users", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Invalid Query Parameters Passed");
 
+          return done();
+        });
+    });
+
+    it("Should handle long names and truncate them to fit within the max length", function (done) {
+      const longFirstname = "ChristopherJonathan";
+      const longLastname = "MontgomeryWellington";
+
+      chai
+        .request(app)
+        .get(`/users/username?firstname=${longFirstname}&lastname=${longLastname}&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.username).to.have.lengthOf.at.most(MAX_USERNAME_LENGTH);
+          return done();
+        });
+    });
+
+    it("Should return 400 if firstname or lastname is missing", function (done) {
+      chai
+        .request(app)
+        .get(`/users/username?firstname=${firstname}&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Invalid Query Parameters Passed");
           return done();
         });
     });
@@ -2362,6 +2398,7 @@ describe("Users", function () {
     });
 
     afterEach(function () {
+      cleanDb();
       Sinon.restore();
     });
 
@@ -2380,11 +2417,117 @@ describe("Users", function () {
 
           expect(res).to.have.status(403);
           expect(res.body.message).to.equal(
-            "Developers can't update their profile data. Use profile service for updating."
+            "Developers can only update disabled_roles. Use profile service for updating other attributes."
           );
 
           return done();
         });
+    });
+
+    it("Should return 200 when disabled_roles is being set to [super_user] in userObject ", async function () {
+      const res = await chai
+        .request(app)
+        .patch("/users/self?dev=true")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          disabledRoles: ["super_user"],
+        });
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.an("object");
+      expect(res.body).to.eql({
+        message: "Privilege modified successfully!",
+        disabled_roles: ["super_user"],
+      });
+
+      const res2 = await chai.request(app).get("/users/self").set("cookie", `${cookieName}=${jwt}`);
+
+      expect(res2).to.have.status(200);
+      expect(res2.body).to.be.an("object");
+      expect(res2.body.roles.super_user).to.be.equal(false);
+    });
+
+    it("Should return 200 when disabled_roles is being set to [super_user, member] in userObject", async function () {
+      const res = await chai
+        .request(app)
+        .patch("/users/self?dev=true")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          disabledRoles: ["super_user", "member"],
+        });
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.an("object");
+      expect(res.body).to.eql({
+        message: "Privilege modified successfully!",
+        disabled_roles: ["super_user", "member"],
+      });
+
+      const res2 = await chai.request(app).get("/users/self").set("cookie", `${cookieName}=${jwt}`);
+
+      expect(res2).to.have.status(200);
+      expect(res2.body).to.be.an("object");
+      expect(res2.body.roles.super_user).to.be.equal(false);
+      expect(res2.body.roles.member).to.be.equal(false);
+    });
+
+    it("Should return 200 when disabled_roles is being set to [], member in userObject", async function () {
+      const res = await chai.request(app).patch("/users/self?dev=true").set("cookie", `${cookieName}=${jwt}`).send({
+        disabledRoles: [],
+      });
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.an("object");
+      expect(res.body).to.eql({
+        message: "Privilege modified successfully!",
+        disabled_roles: [],
+      });
+
+      const res2 = await chai.request(app).get("/users/self").set("cookie", `${cookieName}=${jwt}`);
+
+      expect(res2).to.have.status(200);
+      expect(res2.body).to.be.an("object");
+      expect(res2.body.roles.member).to.be.equal(true);
+    });
+
+    it("Should return 403 when disabled_roles is being set to [], member in userObject without the dev flag", async function () {
+      const res = await chai.request(app).patch("/users/self").set("cookie", `${cookieName}=${jwt}`).send({
+        disabledRoles: [],
+      });
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.equal(
+        "Developers can only update disabled_roles. Use profile service for updating other attributes."
+      );
+    });
+
+    it("Should return 404 when disabled_roles is being set to [], but discord reponds with an error", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({ error: "🚫 Bad Request Signature" }),
+        })
+      );
+      const res = await chai.request(app).patch("/users/self").set("cookie", `${cookieName}=${jwt}`).send({
+        disabledRoles: [],
+      });
+      expect(res).to.have.status(404);
+      expect(res.body.message).to.equal("Error Fetching Members From Discord");
+    });
+
+    it("Should return 400 when disabled_roles is being set to ['admin'], member in userObject", async function () {
+      const res = await chai
+        .request(app)
+        .patch("/users/self?dev=true")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          disabledRoles: ["admin"],
+        });
+      expect(res).to.have.status(400);
+      expect(res.body).to.be.an("object");
+      expect(res.body).to.eql({
+        statusCode: 400,
+        error: "Bad Request",
+        message: '"disabledRoles[0]" must be one of [super_user, member]',
+      });
     });
   });
 
@@ -2421,6 +2564,40 @@ describe("Users", function () {
 
           return done();
         });
+    });
+  });
+
+  describe("POST USERS MIGRATION", function () {
+    it("should run the migration and update usernames successfully", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/batch-username-update")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+    });
+
+    it("should not update usernames for super_user or member", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/batch-username-update")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      const affectedUsers = res.body.totalUpdatedUsernames;
+      expect(affectedUsers).to.equal(0);
+    });
+
+    it("should return 401 for unauthorized user attempting migration", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/batch-username-update")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send();
+
+      expect(res).to.have.status(401);
     });
   });
 });

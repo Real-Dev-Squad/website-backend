@@ -5,7 +5,8 @@ const firestore = require("../../../utils/firestore");
 const userModel = firestore.collection("users");
 const cleanDb = require("../../utils/cleanDb");
 const userDataArray = require("../../fixtures/user/user")();
-const { archiveUsers } = require("../../../services/users");
+const { archiveUsers, generateUniqueUsername } = require("../../../services/users");
+const { addOrUpdate } = require("../../../models/users");
 
 describe("Users services", function () {
   describe("archive inactive discord users in bulk", function () {
@@ -79,6 +80,24 @@ describe("Users services", function () {
         updatedUserDetails: [],
         failedUserDetails: userDetails,
       });
+    });
+  });
+
+  describe("generateUniqueUsername", function () {
+    it("should generate a unique username when existing users are present", async function () {
+      const userData = userDataArray[15];
+      await addOrUpdate(userData);
+      const newUsername = await generateUniqueUsername("shubham", "sigdar");
+      expect(newUsername).to.deep.equal("shubham-sigdar-2");
+    });
+
+    it("should generate a unique username when no existing users are present", async function () {
+      const userData = userDataArray[15];
+      await addOrUpdate(userData);
+
+      const newUsername = await generateUniqueUsername("john", "doe");
+
+      expect(newUsername).to.equal("john-doe-1");
     });
   });
 });
