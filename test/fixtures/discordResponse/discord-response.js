@@ -108,7 +108,7 @@ const getDiscordMembers = [
       display_name: "goliath-1",
       avatar: "56yu6567uuju7636w4e6yr7e9utbw8r4", // avatar hash
       discriminator: "44551", // 4-digit discord-tag
-      public_flags: 0,
+      public_flags: 1,
       avatar_decoration: null,
     },
     mute: false,

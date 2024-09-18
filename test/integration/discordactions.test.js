@@ -1036,7 +1036,7 @@ describe("Discord actions", function () {
       await cleanDb();
     });
 
-    it("should update Idle Users successfully and return a 201 status code", function (done) {
+    it("should update Idle Users successfully and return a 201 status code!", function (done) {
       chai
         .request(app)
         .put(`/discord-actions/group-idle?dev=true`)

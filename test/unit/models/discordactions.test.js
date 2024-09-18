@@ -34,14 +34,7 @@ const {
   updateIdleUsersOnDiscord,
   updateIdle7dUsersOnDiscord,
 } = require("../../../models/discordactions");
-const {
-  groupData,
-  roleData,
-  existingRole,
-  memberGroupData,
-  groupIdle,
-  groupIdle7d,
-} = require("../../fixtures/discordactions/discordactions");
+const { groupData, roleData, existingRole, memberGroupData } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
 const { userPhotoVerificationData } = require("../../fixtures/user/photo-verification");
 const userData = require("../../fixtures/user/user")();

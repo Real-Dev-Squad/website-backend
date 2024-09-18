@@ -8,7 +8,7 @@ const groupData = [
 
 const groupIdle7d = { rolename: "group-idle-7d+", roleid: 4, createdBy: "1dad23q23j131j" };
 
-const groupIdle = { rolename: "group-idle", roleid: 3, createdBy: "1dad23q23j131j" };
+const groupIdle = { rolename: "group-idle", roleid: 3, createdBy: "1dad23q23j131jj" };
 
 const roleData = {
   roleid: "test-role-id",

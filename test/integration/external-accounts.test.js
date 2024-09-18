@@ -401,7 +401,7 @@ describe("External Accounts", function () {
       });
     });
 
-    it("Should Do Nothing to Users With Archived as True and Not in RDS Discord Server", async function () {
+    it("Should Do Nothing to Users With Archived as True and Not in RDS Discord Server ", async function () {
       await userModel.add(usersFromRds[3]); // archivedAndNotInDiscord
 
       fetchStub.returns(
