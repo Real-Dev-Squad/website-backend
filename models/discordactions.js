@@ -28,6 +28,7 @@ const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const discordService = require("../services/discordService");
 const { buildTasksQueryForMissedUpdates } = require("../utils/tasks");
 const { buildProgressQueryForMissedUpdates } = require("../utils/progresses");
+const allMavens = [];
 
 /**
  *

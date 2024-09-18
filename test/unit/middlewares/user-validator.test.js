@@ -94,7 +94,11 @@ describe("Middleware | Validators | User", function () {
   describe("Create user validator for updateUser", function () {
     it("lets the request pass to next", async function () {
       const req = {
-        body: userData[1],
+        body: {
+          ...userData[1],
+          first_name: "Ankush",
+          last_name: "Dharkar",
+        },
       };
 
       const res = {};
@@ -304,6 +308,62 @@ describe("Middleware | Validators | User", function () {
 
       const nextSpy = sinon.spy();
 
+      await updateUser(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+
+      expect(nextSpy.calledOnce).to.be.equal(false);
+    });
+
+    it("converts first_name to lowercase before passing to next", async function () {
+      const req = {
+        body: {
+          first_name: "Ankush",
+          last_name: "Dharkar",
+        },
+      };
+
+      const res = {};
+      const next = sinon.spy();
+      await updateUser(req, res, next);
+
+      expect(req.body.first_name).to.be.equal("ankush");
+      expect(req.body.last_name).to.be.equal("dharkar");
+      expect(next.calledOnce).to.be.equal(true);
+    });
+
+    it("converts last_name to lowercase before passing to next", async function () {
+      const req = {
+        body: {
+          first_name: "ANKUSH",
+          last_name: "DHARKAR",
+        },
+      };
+
+      const res = {};
+      const next = sinon.spy();
+      await updateUser(req, res, next);
+
+      expect(req.body.first_name).to.be.equal("ankush");
+      expect(req.body.last_name).to.be.equal("dharkar");
+      expect(next.calledOnce).to.be.equal(true);
+    });
+
+    it("stops the propagation of the next if first_name and last_name are not strings", async function () {
+      const req = {
+        body: {
+          first_name: 12345,
+          last_name: true,
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+
+      const nextSpy = sinon.spy();
       await updateUser(req, res, nextSpy).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
       });
