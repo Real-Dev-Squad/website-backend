@@ -92,9 +92,7 @@ describe("Create Request Validators", function () {
 
   describe("Get Request Validator", function () {
     it("Should pass validation for a valid get request", async function () {
-      req = {
-        query: {},
-      };
+      req = {};
       res = {};
       await getRequestsMiddleware(req as any, res as any, nextSpy);
       expect(nextSpy.calledOnce).to.equal(true);
