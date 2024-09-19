@@ -31,7 +31,6 @@ describe("Create Request Validators", function () {
     it("should pass validation for a valid create request", async function () {
       req = {
         body: validOooStatusRequests,
-        query: {},
       };
       res = {};
       await createRequestsMiddleware(req as OooRequestCreateRequest, res as OooRequestResponse, nextSpy);
@@ -41,7 +40,6 @@ describe("Create Request Validators", function () {
     it("should throw an error for an invalid create request", async function () {
       req = {
         body: invalidOooStatusRequests,
-        query: {},
       };
       res = {
         boom: {
