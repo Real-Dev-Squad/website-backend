@@ -4,6 +4,7 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const dataAccess = require("../services/dataAccessLayer");
 const userStatusModel = require("../models/userStatus");
 const { userState, CANCEL_OOO } = require("../constants/userStatus");
+const { migrateUserStatus } = require("../models/userStatusMigrationFinal");
 
 /**
  * Deletes a new User Status
@@ -240,6 +241,31 @@ const updateUserStatusController = async (req, res, next) => {
   }
 };
 
+/**
+ * Controller function for migrating user statuses.
+ *
+ * @param req {Object} - The express request object.
+ * @param res {Object} - The express response object.
+ * @returns {Promise<void>}
+ */
+
+const migrateUserStatusController = async (req, res) => {
+  try {
+    const migrationResult = await migrateUserStatus();
+    return res.status(200).json({
+      message: "User Status migration completed successfully.",
+      data: migrationResult,
+    });
+  } catch (error) {
+    logger.error(`Error during User Status migration: ${error}`);
+    return res.status(500).json({
+      message:
+        "An error occurred during the User Status migration. Please contact the administrator for more information.",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -250,4 +276,5 @@ module.exports = {
   getUserStatusControllers,
   batchUpdateUsersStatus,
   updateUserStatusController,
+  migrateUserStatusController,
 };
