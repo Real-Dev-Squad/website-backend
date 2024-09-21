@@ -470,7 +470,7 @@ describe("Discord actions", function () {
       );
       chai
         .request(app)
-        .post(`/discord-actions/nicknames/sync?dev=true`)
+        .post(`/discord-actions/nicknames/sync`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
