@@ -28,6 +28,7 @@ const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const discordService = require("../services/discordService");
 const { buildTasksQueryForMissedUpdates } = require("../utils/tasks");
 const { buildProgressQueryForMissedUpdates } = require("../utils/progresses");
+const allMavens = [];
 
 /**
  *
@@ -312,7 +313,7 @@ const fetchGroupToUserMapping = async (roleIds) => {
   }
 };
 
-const updateIdleUsersOnDiscord = async () => {
+const updateIdleUsersOnDiscord = async (dev) => {
   let totalIdleUsers = 0;
   const totalGroupIdleRolesApplied = { count: 0, response: [] };
   const totalGroupIdleRolesNotApplied = { count: 0, errors: [] };
@@ -335,6 +336,11 @@ const updateIdleUsersOnDiscord = async () => {
     discordUsers?.forEach((discordUser) => {
       const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
       const haveIdleRole = discordUser.roles.includes(groupIdleRole.role.roleid);
+      const isMaven = discordUser.roles.includes(discordMavenRoleId);
+
+      if (dev === "true" && isMaven) {
+        allMavens.push(discordUser.user.id);
+      }
 
       if (isDeveloper && haveIdleRole) {
         usersHavingIdleRole.push({ userid: discordUser.user.id });
@@ -349,7 +355,7 @@ const updateIdleUsersOnDiscord = async () => {
             if (userData.exists) {
               if (isUserArchived) {
                 totalArchivedUsers++;
-              } else {
+              } else if (dev === "true" && !allMavens.includes(userData.data().discordId)) {
                 userStatus.userid = userData.data().discordId;
                 allIdleUsers.push(userStatus);
               }
@@ -537,7 +543,7 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
   }
 };
 
-const updateIdle7dUsersOnDiscord = async () => {
+const updateIdle7dUsersOnDiscord = async (dev) => {
   let totalIdle7dUsers = 0;
   const totalGroupIdle7dRolesApplied = { count: 0, response: [] };
   const totalGroupIdle7dRolesNotApplied = { count: 0, errors: [] };
@@ -562,6 +568,11 @@ const updateIdle7dUsersOnDiscord = async () => {
     discordUsers?.forEach((discordUser) => {
       const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
       const haveIdle7dRole = discordUser.roles.includes(groupIdle7dRoleId);
+      const isMaven = discordUser.roles.includes(discordMavenRoleId);
+
+      if (dev === "true" && isMaven) {
+        allMavens.push(discordUser.user.id);
+      }
 
       if (isDeveloper && haveIdle7dRole) {
         usersHavingIdle7dRole.push({ userid: discordUser.user.id });
@@ -583,7 +594,7 @@ const updateIdle7dUsersOnDiscord = async () => {
               if (userData.exists) {
                 if (isUserArchived) {
                   totalArchivedUsers++;
-                } else {
+                } else if (dev === "true" && !allMavens.includes(userData.data().discordId)) {
                   userStatus.userid = userData.data().discordId;
                   allIdle7dUsers.push(userStatus);
                 }
