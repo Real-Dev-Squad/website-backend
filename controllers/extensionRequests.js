@@ -145,64 +145,49 @@ const getExtensionRequest = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const getSelfExtensionRequests = async (req, res) => {
-  const dev = req.query.dev === "true";
-
   try {
     const { id: userId } = req.userData;
     const { taskId, status } = req.query;
 
-    if (dev) {
-      if (userId) {
-        let allExtensionRequests;
-        if (taskId) {
-          const latestExtensionRequest = await extensionRequestsQuery.fetchLatestExtensionRequest({
-            taskId,
-          });
-
-          if (latestExtensionRequest && latestExtensionRequest.assigneeId !== userId) {
-            allExtensionRequests = [];
-          } else {
-            // Add reviewer's name if status is not PENDING
-            if (latestExtensionRequest.status === "APPROVED" || latestExtensionRequest.status === "DENIED") {
-              const logs = await logsQuery.fetchLogs(
-                { "meta.extensionRequestId": latestExtensionRequest.id, limit: 1 },
-                "extensionRequests"
-              );
-
-              if (
-                logs.length === 1 &&
-                logs[0]?.meta?.userId &&
-                (logs[0]?.body?.status === "APPROVED" || logs[0]?.body?.status === "DENIED") // Make sure log is only related to status change
-              ) {
-                const superUserId = logs[0].meta.userId;
-                const name = await getFullName(superUserId);
-                latestExtensionRequest.reviewedBy = `${name?.first_name} ${name?.last_name}`;
-                latestExtensionRequest.reviewedAt = logs[0].timestamp._seconds;
-              }
-            }
-            allExtensionRequests = [latestExtensionRequest];
-          }
-        } else {
-          allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
-            assignee: userId,
-            status: status || undefined,
-          });
-        }
-        return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
-      } else {
-        return res.boom.notFound("User doesn't exist");
-      }
-    } else {
-      if (userId) {
-        const allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
+    if (userId) {
+      let allExtensionRequests;
+      if (taskId) {
+        const latestExtensionRequest = await extensionRequestsQuery.fetchLatestExtensionRequest({
           taskId,
+        });
+
+        if (latestExtensionRequest && latestExtensionRequest.assigneeId !== userId) {
+          allExtensionRequests = [];
+        } else {
+          // Add reviewer's name if status is not PENDING
+          if (latestExtensionRequest.status === "APPROVED" || latestExtensionRequest.status === "DENIED") {
+            const logs = await logsQuery.fetchLogs(
+              { "meta.extensionRequestId": latestExtensionRequest.id, limit: 1 },
+              "extensionRequests"
+            );
+
+            if (
+              logs.length === 1 &&
+              logs[0]?.meta?.userId &&
+              (logs[0]?.body?.status === "APPROVED" || logs[0]?.body?.status === "DENIED") // Make sure log is only related to status change
+            ) {
+              const superUserId = logs[0].meta.userId;
+              const name = await getFullName(superUserId);
+              latestExtensionRequest.reviewedBy = `${name?.first_name} ${name?.last_name}`;
+              latestExtensionRequest.reviewedAt = logs[0].timestamp._seconds;
+            }
+          }
+          allExtensionRequests = [latestExtensionRequest];
+        }
+      } else {
+        allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
           assignee: userId,
           status: status || undefined,
         });
-        return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
-      } else {
-        return res.boom.notFound("User doesn't exist");
       }
+      return res.json({ message: "Extension Requests returned successfully!", allExtensionRequests });
+    } else {
+      return res.boom.notFound("User doesn't exist");
     }
   } catch (error) {
     logger.error(`Error while fetching extension requests: ${error}`);
