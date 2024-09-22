@@ -64,7 +64,7 @@ const getApplicationsBasedOnStatus = async (status: string, limit: number, lastD
       lastDoc = await ApplicationsModel.doc(lastDocId).get();
     }
 
-  dbQuery = dbQuery.orderBy("createdAt", "desc");
+    dbQuery = dbQuery.orderBy("createdAt", "desc");
 
     if (lastDoc) {
       dbQuery = dbQuery.startAfter(lastDoc);
@@ -81,7 +81,14 @@ const getApplicationsBasedOnStatus = async (status: string, limit: number, lastD
       });
     });
 
-    return { applications, lastDocId: lastApplicationDoc?.id };
+    // Count total number of applications matching the status and optional userId
+    let countQuery = ApplicationsModel.where("status", "==", status);
+
+    // Get the total count of applications matching the criteria
+    const totalApplications = await countQuery.get();
+    const totalCount = totalApplications.size; // Get the number of documents in the snapshot
+
+    return { applications, lastDocId: lastApplicationDoc?.id, totalCount };
   } catch (err) {
     logger.log("error in getting applications based on status", err);
     throw err;
@@ -92,9 +99,9 @@ const getUserApplications = async (userId: string) => {
   try {
     const applicationsResult = [];
     const applications = await ApplicationsModel.where("userId", "==", userId)
-    .orderBy("createdAt", "desc")
-    .limit(1)
-    .get();
+      .orderBy("createdAt", "desc")
+      .limit(1)
+      .get();
 
     applications.forEach((application) => {
       applicationsResult.push({
@@ -102,7 +109,7 @@ const getUserApplications = async (userId: string) => {
         ...application.data(),
       });
     });
-    
+
     return applicationsResult;
   } catch (err) {
     logger.log("error in getting user intro", err);

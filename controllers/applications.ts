@@ -9,9 +9,10 @@ const admin = require("firebase-admin");
 
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
-    const { userId, status, next, size } = req.query;
+    const { userId, status, next, size, dev } = req.query;
     const limit = Number(size) || 25;
     let nextPageUrl = null;
+    const isDevMode = dev === "true"; // Check if the 'dev' query param is true
 
     if (userId) {
       const applications = await ApplicationModel.getUserApplications(userId);
@@ -23,17 +24,27 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
     }
 
     if (status) {
-      const { applications, lastDocId } = await ApplicationModel.getApplicationsBasedOnStatus(status, limit, next);
+      const { applications, lastDocId, totalCount } = await ApplicationModel.getApplicationsBasedOnStatus(
+        status,
+        limit,
+        next
+      );
 
       if (applications.length === limit) {
         nextPageUrl = `/applications?next=${lastDocId}&size=${limit}&status=${status}`;
       }
 
-      return res.json({
+      // Include totalCount only if 'dev' is true
+      const response = {
         message: API_RESPONSE_MESSAGES.APPLICATION_RETURN_SUCCESS,
         applications,
         next: nextPageUrl,
-      });
+      };
+      if (isDevMode) {
+        response["totalCount"] = totalCount;
+      }
+
+      return res.json(response);
     }
 
     const { applications, lastDocId } = await ApplicationModel.getAllApplications(limit, next);

@@ -8,8 +8,8 @@ describe("application validator test", function () {
   describe("validateApplicationData", function () {
     it("should call next function if everything is according to the validator", async function () {
       const rawData = {
-        ...applicationsData[6]
-      }
+        ...applicationsData[6],
+      };
 
       const req = {
         body: rawData,
@@ -21,7 +21,7 @@ describe("application validator test", function () {
     });
 
     it("should not call the next function if a required field is missed", async function () {
-      const rawData = { ...applicationsData[6] }
+      const rawData = { ...applicationsData[6] };
       delete rawData.numberOfHours;
 
       const req = {
@@ -40,10 +40,10 @@ describe("application validator test", function () {
     });
 
     it("should not call the next function if any of the values which have a wordCount restriction doesn't contain the expected number of words", async function () {
-       const rawData = {
-         ...applicationsData[6],
-         whyRds: 'jfaskdfjsd'
-       };
+      const rawData = {
+        ...applicationsData[6],
+        whyRds: "jfaskdfjsd",
+      };
 
       const req = {
         body: rawData,
@@ -61,10 +61,10 @@ describe("application validator test", function () {
     });
 
     it("should not call the next function if number of hours is not a number", async function () {
-       const rawData = {
-         ...applicationsData[6],
-         numberOfHours: '10'
-       };
+      const rawData = {
+        ...applicationsData[6],
+        numberOfHours: "10",
+      };
 
       const req = {
         body: rawData,
@@ -143,6 +143,7 @@ describe("application validator test", function () {
           status: "accepted",
           size: "4",
           next: "kfsdfksdfjksd",
+          dev: "true",
         },
       };
       const res = {
