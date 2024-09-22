@@ -1,32 +1,74 @@
-const { profileStatus } = require("../constants/users");
 const firestore = require("../utils/firestore");
+const userModel = firestore.collection("users");
 const profileDiffsModel = firestore.collection("profileDiffs");
 const obfuscate = require("../utils/obfuscate");
+const { generateNextLink } = require("../utils/profileDiffs");
 
 /**
  * Add profileDiff
  * Fetches the pending profile diffs
  * @return {Promise<profileDiffsModel|Array>}
  */
-const fetchProfileDiffs = async () => {
+const fetchProfileDiffs = async (status, order, size, username, cursor) => {
   try {
-    const snapshot = await profileDiffsModel.where("approval", "==", profileStatus.PENDING).get();
+    let query = profileDiffsModel.where("approval", "==", status);
+
+    if (username) {
+      const userSnapshot = await userModel
+        .where("username", ">=", username)
+        .where("username", "<=", username + "\uf8ff")
+        .get();
+      const userIds = userSnapshot.docs.map((doc) => doc.id);
+      query = query.where("userId", "in", userIds);
+    }
+
+    query = query.orderBy("timestamp", order);
+
+    if (cursor) {
+      const cursorSnapshot = await profileDiffsModel.doc(cursor).get();
+      query = query.startAfter(cursorSnapshot);
+    }
+
+    const snapshot = await query.limit(size).get();
+
     const profileDiffs = [];
     snapshot.forEach((doc) => {
-      const { email = "", phone = "" } = doc.data();
-
-      const emailRedacted = obfuscate.obfuscateMail(email);
-
-      const phoneRedacted = obfuscate.obfuscatePhone(phone);
+      const data = doc.data();
+      let emailRedacted = "";
+      let phoneRedacted = "";
+      if (data.email) {
+        emailRedacted = obfuscate.obfuscateMail(data.email);
+      }
+      if (data.phone) {
+        phoneRedacted = obfuscate.obfuscatePhone(data.phone);
+      }
 
       profileDiffs.push({
         id: doc.id,
-        ...doc.data(),
+        ...data,
         email: emailRedacted,
         phone: phoneRedacted,
       });
     });
-    return profileDiffs;
+
+    const resultDataLength = profileDiffs.length;
+    const isNextLinkRequired = size && resultDataLength === size;
+    const lastVisible = isNextLinkRequired && profileDiffs[resultDataLength - 1];
+
+    const nextPageParams = {
+      status,
+      order,
+      size,
+      username,
+      cursor: lastVisible?.id,
+    };
+
+    let nextLink = "";
+    if (lastVisible) {
+      nextLink = generateNextLink(nextPageParams);
+    }
+
+    return { profileDiffs, next: nextLink };
   } catch (err) {
     logger.error("Error retrieving profile diffs ", err);
     throw err;
@@ -41,8 +83,7 @@ const fetchProfileDiffs = async () => {
 const fetchProfileDiff = async (profileDiffId) => {
   try {
     const profileDiff = await profileDiffsModel.doc(profileDiffId).get();
-    const profileDiffData = profileDiff.data();
-    return profileDiffData;
+    return { id: profileDiff.id, profileDiffExists: profileDiff.exists, ...profileDiff.data() };
   } catch (err) {
     logger.error("Error retrieving profile Diff", err);
     throw err;
