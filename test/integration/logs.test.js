@@ -72,7 +72,7 @@ describe("/logs", function () {
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
-        .get("/logs?dev=true")
+        .get("/logs")
         .end(function (err, res) {
           if (err) {
             return done(err);
@@ -97,26 +97,10 @@ describe("/logs", function () {
         });
     });
 
-    it("should return 400, if user has access and dev flag is not", function (done) {
-      chai
-        .request(app)
-        .get("/logs")
-        .set("cookie", `${cookieName}=${superUserToken}`)
-        .end(function (err, res) {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(400);
-          expect(res.body.error).to.equal("Bad Request");
-          expect(res.body.message).to.equal(`Please use feature flag to make this request!`);
-          return done();
-        });
-    });
-
     it("should return all Logs", function (done) {
       chai
         .request(app)
-        .get("/logs?dev=true")
+        .get("/logs")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
           if (err) {
@@ -132,7 +116,7 @@ describe("/logs", function () {
     it("should return all formatted Logs", function (done) {
       chai
         .request(app)
-        .get("/logs?dev=true&format=feed")
+        .get("/logs?format=feed")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
           if (err) {
@@ -159,7 +143,7 @@ describe("/logs", function () {
     it("should return logs of type = extensionRequests", function (done) {
       chai
         .request(app)
-        .get("/logs?type=extensionRequests&dev=true")
+        .get("/logs?type=extensionRequests")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end((err, res) => {
           if (err) {
@@ -174,7 +158,7 @@ describe("/logs", function () {
     it("if no logs are present, should return valid response", function (done) {
       chai
         .request(app)
-        .get("/logs?type=REQUEST_CREATED1&dev=true")
+        .get("/logs?type=REQUEST_CREATED1")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end((err, res) => {
           if (err) {
@@ -189,7 +173,7 @@ describe("/logs", function () {
     it("should return data if page param is passed in the quey", function (done) {
       chai
         .request(app)
-        .get("/logs?page=1&dev=true&size=3")
+        .get("/logs?page=1&size=3")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
           if (err) {
@@ -197,7 +181,7 @@ describe("/logs", function () {
           }
           expect(res.body.message).to.equal("All Logs fetched successfully");
           expect(res.body.data).to.lengthOf(3);
-          expect(res.body.page).to.equal("/logs?page=2&dev=true");
+          expect(res.body.page).to.equal("/logs?page=2");
           return done();
         });
     });
@@ -205,7 +189,7 @@ describe("/logs", function () {
     it("should return valid paginated link", function (done) {
       chai
         .request(app)
-        .get("/logs?dev=true&size=3")
+        .get("/logs?size=3")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
           if (err) {
@@ -213,7 +197,7 @@ describe("/logs", function () {
           }
           expect(res.body.message).to.equal("All Logs fetched successfully");
           expect(res.body.data).to.lengthOf(3);
-          expect(res.body.next).to.contain("/logs?dev=true&size=3&next=");
+          expect(res.body.next).to.contain("/logs?size=3&next=");
           return done();
         });
     });
