@@ -1,15 +1,18 @@
 import { userState } from "../constants/userStatus";
+import { Forbidden, NotFound } from "http-errors";
 import firestore from "../utils/firestore";
-import { convertTimestampsInUserStatusToUTC, getTomorrowTimeStamp } from "../utils/userStatus";
+import { checkIfUserHasLiveTasks, convertTimestampsInUserStatusToUTC, getTomorrowTimeStamp } from "../utils/userStatus";
 import admin from "firebase-admin";
 const userStatusModel = firestore.collection("userStatus");
 const futureStatusModel = firestore.collection("futureStatus");
 const memberRoleModel = firestore.collection("member-group-roles");
 const usersCollection = firestore.collection("users");
 const discordRoleModel = firestore.collection("discord-roles");
+const tasksModel = firestore.collection("tasks");
 // @ts-ignore
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 import { generateAuthTokenForCloudflare } from "../utils/discord-actions";
+import { generateNewStatus } from "../utils/newUserStatus";
 
 const getGroupRole = async (rolename: string) => {
   try {
@@ -108,10 +111,6 @@ const addGroupIdleRoleToDiscordUser = async (userId: string) => {
   }
 };
 
-/**
- * @params userId {string} : id of the user
- * @returns {Promise<userStatusModel|Object>} : returns the userStatus of a single user
- */
 export const getUserStatus = async (
   userId: string
 ): Promise<{ id: string; data: any; userStatusExists: boolean } | object> => {
@@ -199,12 +198,73 @@ export const updateUserStatus = async (userId: string, statusData: any) => {
   }
 };
 
-/**
- * @param userId { String }: Id of the User
- * @param newStatusData { Object }: Data to be Updated
- * @returns Promise<userStatusModel|Object>
- */
-// TODO: Fix this implementation
+export const cancelOooStatus = async (userId) => {
+  try {
+    let userStatusDoc: admin.firestore.QuerySnapshot<admin.firestore.DocumentData>;
+    let isActive: boolean;
+    try {
+      userStatusDoc = await userStatusModel
+        .where("userId", "==", userId)
+        .where("state", "==", "CURRENT")
+        .limit(1)
+        .get();
+    } catch (error) {
+      logger.error(`Unable to fetch user status document from the firestore : ${error.message}`);
+      throw error;
+    }
+    if (!userStatusDoc.size) {
+      throw new NotFound("No User status document found");
+    }
+    const [userStatusDocument] = userStatusDoc.docs;
+    const docId = userStatusDocument.id;
+    const docData = userStatusDocument.data();
+    if (docData.status !== userState.OOO) {
+      throw new Forbidden(
+        `The ${userState.OOO} Status cannot be canceled because the current status is ${docData.status}.`
+      );
+    }
+    try {
+      isActive = await checkIfUserHasLiveTasks(userId, tasksModel);
+    } catch (error) {
+      logger.error(`Unable to fetch user status based on the task : ${error.message}`);
+      throw error;
+    }
+    const newStatusData = generateNewStatus(isActive);
+
+    const futureStatus = await futureStatusModel
+      .where("userId", "==", userId)
+      .where("state", "==", "UPCOMING")
+      .limit(1)
+      .get();
+    if (futureStatus.size) {
+      const [futureStatusDoc] = futureStatus.docs;
+      await futureStatusModel.doc(futureStatusDoc.id).update({ state: "NOT_APPLIED" });
+    }
+
+    const today = new Date();
+    const todaysTime = Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate(),
+      today.getUTCHours(),
+      today.getUTCMinutes(),
+      today.getUTCSeconds()
+    );
+
+    const newDocRef = await userStatusModel.add({ userId, ...newStatusData });
+    await userStatusModel.doc(docId).update({ state: "PAST", endedOn: todaysTime });
+    if (!isActive) {
+      await addGroupIdleRoleToDiscordUser(userId);
+    } else {
+      await removeGroupIdleRoleFromDiscordUser(userId);
+    }
+    return { id: newDocRef.id, userStatusExists: true, data: { userId, ...newStatusData } };
+  } catch (error) {
+    logger.error(`Error while canceling ${userState.OOO} status: ${error.message}`);
+    throw error;
+  }
+};
+
 export const updateAllUserStatus = async () => {
   const summary = {
     noOfUserStatusUpdated: 0,
@@ -217,7 +277,7 @@ export const updateAllUserStatus = async () => {
     const batch = firestore.batch();
     const today = new Date().setUTCHours(0, 0, 0, 0);
 
-    const updateUserStatusFromFutureStatus = async (document: any, resolve: (value: unknown)=>void) => {
+    const updateUserStatusFromFutureStatus = async (document: any, resolve: (value: unknown) => void) => {
       const futureStatusData = document.data();
       const futureStatusRef = document.ref;
       const userId = futureStatusData.userId;
@@ -273,7 +333,7 @@ export const updateAllUserStatus = async () => {
 
     const promises = userFutureStatusDocs.docs.map((document) => {
       return new Promise((resolve, reject) => {
-        updateUserStatusFromFutureStatus(document, resolve)
+        updateUserStatusFromFutureStatus(document, resolve);
       });
     });
     await Promise.all(promises);
@@ -294,7 +354,7 @@ const getNextDayTimeStamp = (timeStamp: number) => {
   return nextDateDateTime.getTime();
 };
 
-export const batchUpdateUsersStatus = async (users: {userId: string, state: string}[]) => {
+export const batchUpdateUsersStatus = async (users: { userId: string; state: string }[]) => {
   const batch = firestore.batch();
   const summary = {
     usersCount: users.length,
@@ -335,11 +395,8 @@ export const batchUpdateUsersStatus = async (users: {userId: string, state: stri
       if (state === userState.IDLE) await addGroupIdleRoleToDiscordUser(userId);
       batch.set(newUserStatusRef, newUserStatusData);
     } else {
-      const {
-        status: currentStatus, 
-        endsOn
-      } = data;
-      
+      const { status: currentStatus, endsOn } = data;
+
       if (currentStatus === state) {
         currentStatus === userState.ACTIVE ? summary.activeUsersUnaltered++ : summary.idleUsersUnaltered++;
         continue;
@@ -407,5 +464,74 @@ export const batchUpdateUsersStatus = async (users: {userId: string, state: stri
     return summary;
   } catch (error) {
     throw new Error("Batch operation failed");
+  }
+};
+
+export const deleteUserStatus = async (userId: string) => {
+  try {
+    const userStatusDocs = await userStatusModel
+      .where("userId", "==", userId)
+      .where("state", "==", "CURRENT")
+      .limit(1)
+      .get();
+    const [userStatusDoc] = userStatusDocs.docs;
+    if (userStatusDoc) {
+      const today = new Date();
+      const todaysTime = Date.UTC(
+        today.getUTCFullYear(),
+        today.getUTCMonth(),
+        today.getUTCDate(),
+        today.getUTCHours(),
+        today.getUTCMinutes(),
+        today.getUTCSeconds()
+      );
+      const docId = userStatusDoc.id;
+      await userStatusModel.doc(docId).set({ state: "PAST", endedOn: todaysTime }, { merge: true });
+      return { id: userStatusDoc.id, userStatusExisted: true, userStatusDeleted: true };
+    } else {
+      return { id: null, userStatusExisted: false, userStatusDeleted: false };
+    }
+  } catch (error) {
+    logger.error(`error in deleting User Status Document . Reason - ${error}`);
+    throw error;
+  }
+};
+
+export const getAllUserStatus = async (query: { status: string }, limit = 10, lastDocId: any) => {
+  try {
+    const allUserStatus = [];
+    let lastDoc = null;
+
+    if (lastDocId) {
+      lastDoc = await userStatusModel.doc(lastDocId).get();
+    }
+
+    let dbQuery = userStatusModel.where("state", "==", "CURRENT");
+
+    if (query.status) {
+      dbQuery = dbQuery.where("status", "==", query.status);
+    }
+
+    if (lastDoc) {
+      dbQuery = dbQuery.startAfter(lastDoc);
+    }
+
+    const data = await dbQuery.limit(limit).get();
+    const lastUserStatusDoc = data.docs[data.docs.length - 1];
+
+    data.forEach((doc) => {
+      const currentUserStatus = {
+        id: doc.id,
+        userId: doc.data().userId,
+        status: doc.data().status,
+        monthlyHours: doc.data().monthlyHours,
+      };
+      allUserStatus.push(currentUserStatus);
+    });
+
+    return { allUserStatus, lastDocId: lastUserStatusDoc?.id };
+  } catch (error) {
+    logger.error(`error in fetching the User Status of all Users. ${error}`);
+    throw error;
   }
 };

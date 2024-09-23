@@ -1,14 +1,17 @@
 import express from "express";
 const router = express.Router();
 import authenticate from "../middlewares/authenticate";
-import usersStatusController from "../controllers/usersStatus";
-import { validateUsersStatus, validateMassUpdate } from "../middlewares/validators/usersStatus";
-import { authorizeOwnUserIdParamOrSuperUser } from "../middlewares/authorizeOwnOrSuperUser";
+import usersStatusController from "../controllers/newUserStatus";
+import { validateUsersStatus, validateMassUpdate, validateGetQueryParams } from "../middlewares/validators/newUserStatus";
 import { authorizeAndAuthenticate } from "../middlewares/authorizeUsersAndService";
+const authorizeRoles = require("../middlewares/authorizeRoles");
 const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
 
+router.get("/", validateGetQueryParams, usersStatusController.getAllUserStatus);
+router.get('/self', authenticate, usersStatusController.getUserStatus);
 router.get("/:userId", usersStatusController.getUserStatus);
+router.patch('/self', authenticate, usersStatusController.updateUserStatusController);
 router.patch(
   "/update",
   authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
@@ -17,9 +20,9 @@ router.patch(
 router.patch(
   "/:userId",
   authenticate,
-  authorizeOwnUserIdParamOrSuperUser,
+  authorizeRoles([ROLES.SUPERUSER]),
   validateUsersStatus,
-  usersStatusController.updateUserStatus
+  usersStatusController.updateUserStatusController
 );
 router.patch(
   "/batch",
@@ -27,4 +30,5 @@ router.patch(
   validateMassUpdate,
   usersStatusController.batchUpdateUsersStatus
 );
+router.delete("/:userId", authenticate, authorizeRoles([ROLES.SUPERUSER]), usersStatusController.deleteUserStatus);
 module.exports = router;
