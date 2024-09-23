@@ -107,16 +107,6 @@ describe("Profile Diffs API", function () {
       expect(response).to.have.status(200);
       expect(response.body.message).to.equal("Profile Diff returned successfully!");
       expect(response.body.profileDiff).to.be.an("object");
-      // chai
-      //   .request(app)
-      //   .get(`/profileDiffs/${profileDiffsSnapshot.docs[0].id}`)
-      //   .set("cookie", `${cookieName}=${superUserAuthToken}`)
-      //   .end((error, response) => {
-      //     expect(response).to.have.status(200);
-      //     expect(response.body.message).to.equal("Profile Diff returned successfully!");
-      //     expect(response.body.profileDiff).to.be.an("object");
-      //     done(error);
-      //   });
     });
 
     it("Should return not found for non-existent profile diff", function (done) {
