@@ -19,6 +19,7 @@ const fetchProfileDiffs = async (status, order, size, username, cursor) => {
         .where("username", "<=", username + "\uf8ff")
         .get();
       const userIds = userSnapshot.docs.map((doc) => doc.id);
+      if (userIds.length === 0) return { profileDiffs: [], next: "" };
       query = query.where("userId", "in", userIds);
     }
 
