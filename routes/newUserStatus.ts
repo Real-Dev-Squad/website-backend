@@ -1,8 +1,8 @@
 import express from "express";
 const router = express.Router();
 import authenticate from "../middlewares/authenticate";
-import usersStatusController from "../controllers/usersStatus";
-import { validateUsersStatus, validateMassUpdate, validateGetQueryParams } from "../middlewares/validators/usersStatus";
+import usersStatusController from "../controllers/newUserStatus";
+import { validateUsersStatus, validateMassUpdate, validateGetQueryParams } from "../middlewares/validators/newUserStatus";
 import { authorizeAndAuthenticate } from "../middlewares/authorizeUsersAndService";
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const ROLES = require("../constants/roles");

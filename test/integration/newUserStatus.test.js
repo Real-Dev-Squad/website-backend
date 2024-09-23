@@ -21,7 +21,7 @@ const superUser = userData[4];
 const { convertTimestampToUTCStartOrEndOfDay } = require("../../utils/time");
 
 const config = require("config");
-const { updateUserStatus } = require("../../models/usersStatus");
+const { updateUserStatus } = require("../../models/newUserStatus");
 
 const cookieName = config.get("userToken.cookieName");
 

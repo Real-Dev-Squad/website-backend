@@ -12,7 +12,7 @@ const tasksModel = firestore.collection("tasks");
 // @ts-ignore
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 import { generateAuthTokenForCloudflare } from "../utils/discord-actions";
-import { generateNewStatus } from "../utils/usersStatus";
+import { generateNewStatus } from "../utils/newUserStatus";
 
 const getGroupRole = async (rolename: string) => {
   try {

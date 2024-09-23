@@ -8,9 +8,8 @@ import {
   deleteUserStatus as deleteUserStatusModel,
   getAllUserStatus as getAllUserStatusModel,
   cancelOooStatus
-} from "../models/usersStatus";
-import { getUserIdBasedOnRoute } from "../utils/usersStatus";
-const dataAccess = require("../services/dataAccessLayer");
+} from "../models/newUserStatus";
+import { getUserIdBasedOnRoute } from "../utils/newUserStatus";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
