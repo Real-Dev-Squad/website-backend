@@ -14,7 +14,7 @@ const {
   generateUserStatusData,
   userStatusDataForOooState,
   oooStatusDataForShortDuration,
-} = require("../fixtures/usersStatus/usersStatus");
+} = require("../fixtures/newUserStatus/newUserStatus");
 const userData = require("../fixtures/user/user")();
 const superUser = userData[4];
 
