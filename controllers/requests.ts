@@ -57,7 +57,7 @@ export const getRequestsController = async (req: any, res: any) => {
     }
 
     if (page) {
-      const pageLink = `/requests?page=${page}&dev=${query.dev}`;
+      const pageLink = `/requests?page=${page}`;
       return res.status(200).json({
         message: REQUEST_FETCHED_SUCCESSFULLY,
         data: allRequests,

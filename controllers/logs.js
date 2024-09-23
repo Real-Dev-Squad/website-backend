@@ -25,16 +25,13 @@ const fetchLogs = async (req, res) => {
 const fetchAllLogs = async (req, res) => {
   const { query } = req;
   try {
-    if (query.dev !== "true") {
-      return res.boom.badRequest("Please use feature flag to make this request!");
-    }
     const logs = await logsQuery.fetchAllLogs(query);
     if (logs.length === 0) {
       return res.status(204).send();
     }
     const { allLogs, next, prev, page } = logs;
     if (page) {
-      const pageLink = `/logs?page=${page}&dev=${query.dev}`;
+      const pageLink = `/logs?page=${page}`;
       return res.status(200).json({
         message: ALL_LOGS_FETCHED_SUCCESSFULLY,
         data: allLogs,
