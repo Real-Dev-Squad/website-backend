@@ -13,3 +13,13 @@ export const generateNewStatus = (isActive: boolean) => {
   }
   return newStatusData;
 };
+
+export const getUserIdBasedOnRoute = (req) => {
+  let userId;
+  if (req.route.path === "/self") {
+    userId = req.userData.id;
+  } else {
+    userId = req.params.userId;
+  }
+  return userId;
+};

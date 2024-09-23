@@ -3,7 +3,6 @@ const router = express.Router();
 import authenticate from "../middlewares/authenticate";
 import usersStatusController from "../controllers/usersStatus";
 import { validateUsersStatus, validateMassUpdate, validateGetQueryParams } from "../middlewares/validators/usersStatus";
-import { authorizeOwnUserIdParamOrSuperUser } from "../middlewares/authorizeOwnOrSuperUser";
 import { authorizeAndAuthenticate } from "../middlewares/authorizeUsersAndService";
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const ROLES = require("../constants/roles");

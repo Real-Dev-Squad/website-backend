@@ -9,6 +9,7 @@ import {
   getAllUserStatus as getAllUserStatusModel,
   cancelOooStatus
 } from "../models/usersStatus";
+import { getUserIdBasedOnRoute } from "../utils/usersStatus";
 const dataAccess = require("../services/dataAccessLayer");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
@@ -20,7 +21,7 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
  */
 const getUserStatus = async (req: any, res: any) => {
   try {
-    let userId: string = req.params.userId;
+    let userId: string = getUserIdBasedOnRoute(req);
     if (userId) {
       const userData: any = await getUserStatusFromModel(userId);
       const { userStatusExists, id, data } = userData;
@@ -52,7 +53,7 @@ const getUserStatus = async (req: any, res: any) => {
  */
 const updateUserStatus = async (req: any, res: any) => {
   try {
-    let userId: string = req.params.userId;
+    let userId: string = getUserIdBasedOnRoute(req);
     if (userId) {
       const dataToUpdate = {
         state: "CURRENT",

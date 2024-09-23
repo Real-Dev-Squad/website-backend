@@ -27,7 +27,7 @@ const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
-describe("UserStatus", function () {
+describe("NewUserStatus", function () {
   let jwt;
   let superUserId;
   let superUserAuthToken;
@@ -63,7 +63,7 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should not return the User Status Document of the user requesting it", function (done) {
+    it("Should return the User Status Document of the user requesting it", function (done) {
       chai
         .request(app)
         .get(`/v1/users/status/self`)
@@ -72,11 +72,11 @@ describe("UserStatus", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(404);
+          expect(res).to.have.status(200);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("User Status doesn't exist.");
-          expect(res.body.userId).to.equal("self");
-          expect(res.body.data).to.equal(null);
+          expect(res.body.message).to.equal("User Status found successfully.");
+          expect(res.body.userId).to.equal(userId);
+          expect(res.body.data.state).to.equal("CURRENT");
           return done();
         });
     });
@@ -268,9 +268,10 @@ describe("UserStatus", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(403);
+          expect(res).to.have.status(201);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Unauthorized User");
+          expect(res.body.message).to.equal("User Status created successfully.");
+          expect(res.body.data.status).to.equal("OOO");
           return done();
         });
     });
