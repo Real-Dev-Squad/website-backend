@@ -83,6 +83,7 @@ const fetchProfileDiffsWithPagination = async (status, order, size, username, cu
     const lastVisible = isNextLinkRequired && profileDiffs[resultDataLength - 1];
 
     const nextPageParams = {
+      dev: true,
       status,
       order,
       size,
