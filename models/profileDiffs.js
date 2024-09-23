@@ -1,3 +1,4 @@
+const { profileStatus } = require("../constants/users");
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 const profileDiffsModel = firestore.collection("profileDiffs");
@@ -9,7 +10,32 @@ const { generateNextLink } = require("../utils/profileDiffs");
  * Fetches the pending profile diffs
  * @return {Promise<profileDiffsModel|Array>}
  */
-const fetchProfileDiffs = async (status, order, size, username, cursor) => {
+const fetchProfileDiffs = async () => {
+  try {
+    const snapshot = await profileDiffsModel.where("approval", "==", profileStatus.PENDING).get();
+    const profileDiffs = [];
+    snapshot.forEach((doc) => {
+      const { email = "", phone = "" } = doc.data();
+
+      const emailRedacted = obfuscate.obfuscateMail(email);
+
+      const phoneRedacted = obfuscate.obfuscatePhone(phone);
+
+      profileDiffs.push({
+        id: doc.id,
+        ...doc.data(),
+        email: emailRedacted,
+        phone: phoneRedacted,
+      });
+    });
+    return profileDiffs;
+  } catch (err) {
+    logger.error("Error retrieving profile diffs ", err);
+    throw err;
+  }
+};
+
+const fetchProfileDiffsWithPagination = async (status, order, size, username, cursor) => {
   try {
     let query = profileDiffsModel.where("approval", "==", status);
 
@@ -138,4 +164,5 @@ module.exports = {
   fetchProfileDiff,
   add,
   updateProfileDiff,
+  fetchProfileDiffsWithPagination,
 };

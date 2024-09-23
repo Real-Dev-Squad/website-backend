@@ -10,20 +10,29 @@ const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
 
 const getProfileDiffs = async (req, res) => {
   try {
-    const { status = "PENDING", order = "desc", size = 10, username = "", cursor = null } = req.query;
-    const { profileDiffs, next } = await profileDiffsQuery.fetchProfileDiffs(
-      status,
-      order,
-      parseInt(size),
-      username,
-      cursor
-    );
+    if (!req.query.dev) {
+      const pendingProfileDiffs = await profileDiffsQuery.fetchProfileDiffs();
 
-    return res.json({
-      message: "Profile Diffs returned successfully!",
-      profileDiffs,
-      next,
-    });
+      return res.json({
+        message: "Profile Diffs returned successfully!",
+        profileDiffs: pendingProfileDiffs,
+      });
+    } else {
+      const { status = "PENDING", order = "desc", size = 10, username = "", cursor = null } = req.query;
+      const { profileDiffs, next } = await profileDiffsQuery.fetchProfileDiffsWithPagination(
+        status,
+        order,
+        parseInt(size),
+        username,
+        cursor
+      );
+
+      return res.json({
+        message: "Profile Diffs returned successfully!",
+        profileDiffs,
+        next,
+      });
+    }
   } catch (error) {
     logger.error(`Error while fetching profile diffs: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
