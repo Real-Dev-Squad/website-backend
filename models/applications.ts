@@ -81,12 +81,10 @@ const getApplicationsBasedOnStatus = async (status: string, limit: number, lastD
       });
     });
 
-    // Count total number of applications matching the status and optional userId
     let countQuery = ApplicationsModel.where("status", "==", status);
 
-    // Get the total count of applications matching the criteria
     const totalApplications = await countQuery.get();
-    const totalCount = totalApplications.size; // Get the number of documents in the snapshot
+    const totalCount = totalApplications.size;
 
     return { applications, lastDocId: lastApplicationDoc?.id, totalCount };
   } catch (err) {

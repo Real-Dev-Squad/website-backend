@@ -202,11 +202,12 @@ describe("Application", function () {
           expect(res.body.next).to.be.equal(
             `/applications?next=${res.body.applications[res.body.applications.length - 1].id}&size=2&status=rejected`
           );
+          expect(res.body).to.not.have.property("totalCount");
           return done();
         });
     });
 
-    it("should return application with status rejected and the total count of the rejected applications if status rejected is passed in query params with dev = true and next url if the size provided is equal to the applications returned in query ", function (done) {
+    it("should return application with status rejected and the total count of the rejected applications if  dev = true ", function (done) {
       chai
         .request(app)
         .get("/applications?status=rejected&size=2&dev=true")
