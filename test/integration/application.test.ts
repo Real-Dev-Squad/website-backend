@@ -206,6 +206,28 @@ describe("Application", function () {
         });
     });
 
+    it("should return application with status rejected and the total count of the rejected applications if status rejected is passed in query params with dev = true and next url if the size provided is equal to the applications returned in query ", function (done) {
+      chai
+        .request(app)
+        .get("/applications?status=rejected&size=2&dev=true")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Applications returned successfully");
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.applications[0].status).to.be.equal("rejected");
+          expect(res.body.next).to.be.equal(
+            `/applications?next=${res.body.applications[res.body.applications.length - 1].id}&size=2&status=rejected`
+          );
+          expect(res.body.totalCount).to.be.a("number");
+          return done();
+        });
+    });
     it("should return application with status rejected if status rejected is passed in query params and next url should be null if the size provided is not equal to the applications returned in query ", function (done) {
       chai
         .request(app)
