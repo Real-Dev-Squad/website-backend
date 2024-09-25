@@ -19,7 +19,7 @@ const tasksModel = firestore.collection("tasks");
 
 const {
   createNewRole,
-  getAllGroupRoles,
+  getPaginatedGroupRoles,
   isGroupRoleExists,
   addGroupRoleToMember,
   deleteRoleFromDatabase,
@@ -85,27 +85,42 @@ describe("discordactions", function () {
     });
   });
 
-  describe("getAllGroupRoles", function () {
-    let getStub;
-
+  describe("getPaginatedGroupRoles", function () {
+    let orderByStub, startAfterStub, limitStub, getStub;
+  
     beforeEach(function () {
-      getStub = sinon.stub(discordRoleModel, "get").resolves({
-        forEach: (callback) => groupData.forEach(callback),
+      orderByStub = sinon.stub();
+      startAfterStub = sinon.stub();
+      limitStub = sinon.stub();
+      getStub = sinon.stub();
+  
+      orderByStub.returns({ startAfter: startAfterStub });
+      startAfterStub.returns({ limit: limitStub });
+      limitStub.returns({ get: getStub });
+      getStub.resolves({
+        docs: groupData.map(group => ({
+          id: group.id,
+          data: () => group
+        })),
       });
+  
+      sinon.stub(discordRoleModel, "orderBy").returns(orderByStub);
     });
-
+  
     afterEach(function () {
-      getStub.restore();
+      sinon.restore();
     });
-
-    it("should return all group-roles from the database", async function () {
-      const result = await getAllGroupRoles();
-      expect(result.groups).to.be.an("array");
+  
+    it("should return paginated group-roles from the database", async function () {
+      const result = await getPaginatedGroupRoles();
+      expect(result).to.have.property('groups').that.is.an('array');
+      expect(result).to.have.property('newLatestDoc');
+      expect(result.groups.length).to.be.at.most(18); // Assuming the limit is 18 as per the function
     });
-
+  
     it("should throw an error if getting group-roles fails", async function () {
       getStub.rejects(new Error("Database error"));
-      return getAllGroupRoles().catch((err) => {
+      return getPaginatedGroupRoles().catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Database error");
       });
