@@ -87,37 +87,37 @@ describe("discordactions", function () {
 
   describe("getPaginatedGroupRoles", function () {
     let orderByStub, startAfterStub, limitStub, getStub;
-  
+
     beforeEach(function () {
       orderByStub = sinon.stub();
       startAfterStub = sinon.stub();
       limitStub = sinon.stub();
       getStub = sinon.stub();
-  
+
       orderByStub.returns({ startAfter: startAfterStub });
       startAfterStub.returns({ limit: limitStub });
       limitStub.returns({ get: getStub });
       getStub.resolves({
-        docs: groupData.map(group => ({
+        docs: groupData.map((group) => ({
           id: group.id,
-          data: () => group
+          data: () => group,
         })),
       });
-  
+
       sinon.stub(discordRoleModel, "orderBy").returns(orderByStub);
     });
-  
+
     afterEach(function () {
       sinon.restore();
     });
-  
+
     it("should return paginated group-roles from the database", async function () {
       const result = await getPaginatedGroupRoles();
-      expect(result).to.have.property('groups').that.is.an('array');
-      expect(result).to.have.property('newLatestDoc');
+      expect(result).to.have.property("groups").that.is.an("array");
+      expect(result).to.have.property("newLatestDoc");
       expect(result.groups.length).to.be.at.most(18); // Assuming the limit is 18 as per the function
     });
-  
+
     it("should throw an error if getting group-roles fails", async function () {
       getStub.rejects(new Error("Database error"));
       return getPaginatedGroupRoles().catch((err) => {
