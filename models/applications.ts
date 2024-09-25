@@ -64,7 +64,7 @@ const getApplicationsBasedOnStatus = async (status: string, limit: number, lastD
       lastDoc = await ApplicationsModel.doc(lastDocId).get();
     }
 
-    dbQuery = dbQuery.orderBy("createdAt", "desc");
+  dbQuery = dbQuery.orderBy("createdAt", "desc");
 
     if (lastDoc) {
       dbQuery = dbQuery.startAfter(lastDoc);
@@ -97,9 +97,9 @@ const getUserApplications = async (userId: string) => {
   try {
     const applicationsResult = [];
     const applications = await ApplicationsModel.where("userId", "==", userId)
-      .orderBy("createdAt", "desc")
-      .limit(1)
-      .get();
+    .orderBy("createdAt", "desc")
+    .limit(1)
+    .get();
 
     applications.forEach((application) => {
       applicationsResult.push({
