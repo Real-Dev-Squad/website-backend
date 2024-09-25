@@ -143,6 +143,7 @@ describe("application validator test", function () {
           status: "accepted",
           size: "4",
           next: "kfsdfksdfjksd",
+          dev: "true",
         },
       };
       const res = {
