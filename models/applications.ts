@@ -81,7 +81,12 @@ const getApplicationsBasedOnStatus = async (status: string, limit: number, lastD
       });
     });
 
-    return { applications, lastDocId: lastApplicationDoc?.id };
+    let countQuery = ApplicationsModel.where("status", "==", status);
+
+    const totalApplications = await countQuery.get();
+    const totalCount = totalApplications.size;
+
+    return { applications, lastDocId: lastApplicationDoc?.id, totalCount };
   } catch (err) {
     logger.log("error in getting applications based on status", err);
     throw err;
@@ -102,7 +107,7 @@ const getUserApplications = async (userId: string) => {
         ...application.data(),
       });
     });
-    
+
     return applicationsResult;
   } catch (err) {
     logger.log("error in getting user intro", err);
