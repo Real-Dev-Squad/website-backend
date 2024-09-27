@@ -265,7 +265,7 @@ describe("External Accounts", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.deep.equal({
             rdsUsers: 3,
-            discordUsers: 3,
+            discordUsers: 5,
             userUpdatedWithInDiscordFalse: 0,
             usersMarkedUnArchived: 1,
             message: "Data Sync Complete",
@@ -344,7 +344,7 @@ describe("External Accounts", function () {
         usersArchivedCount: 1,
         usersUnArchivedCount: 0,
         totalUsersProcessed: 2,
-        rdsDiscordServerUsers: 3,
+        rdsDiscordServerUsers: 5,
         backlogTasksCount: 2,
       });
     });
@@ -370,7 +370,7 @@ describe("External Accounts", function () {
         usersArchivedCount: 0,
         usersUnArchivedCount: 0,
         totalUsersProcessed: 2,
-        rdsDiscordServerUsers: 3,
+        rdsDiscordServerUsers: 5,
         backlogTasksCount: 0,
       });
     });
@@ -396,12 +396,12 @@ describe("External Accounts", function () {
         usersArchivedCount: 0,
         usersUnArchivedCount: 1,
         totalUsersProcessed: 2,
-        rdsDiscordServerUsers: 3,
+        rdsDiscordServerUsers: 5,
         backlogTasksCount: 0,
       });
     });
 
-    it("Should Do Nothing to Users With Archived as True and Not in RDS Discord Server", async function () {
+    it("Should Do Nothing to Users With Archived as True and Not in RDS Discord Server ", async function () {
       await userModel.add(usersFromRds[3]); // archivedAndNotInDiscord
 
       fetchStub.returns(
@@ -422,7 +422,7 @@ describe("External Accounts", function () {
         usersArchivedCount: 0,
         usersUnArchivedCount: 0,
         totalUsersProcessed: 1,
-        rdsDiscordServerUsers: 3,
+        rdsDiscordServerUsers: 5,
         backlogTasksCount: 0,
       });
     });

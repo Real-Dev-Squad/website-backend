@@ -31,9 +31,6 @@ describe("Create Request Validators", function () {
     it("should pass validation for a valid create request", async function () {
       req = {
         body: validOooStatusRequests,
-        query: {
-          dev: "true",
-        },
       };
       res = {};
       await createRequestsMiddleware(req as OooRequestCreateRequest, res as OooRequestResponse, nextSpy);
@@ -43,9 +40,6 @@ describe("Create Request Validators", function () {
     it("should throw an error for an invalid create request", async function () {
       req = {
         body: invalidOooStatusRequests,
-        query: {
-          dev: "true",
-        },
       };
       res = {
         boom: {
@@ -92,11 +86,7 @@ describe("Create Request Validators", function () {
 
   describe("Get Request Validator", function () {
     it("Should pass validation for a valid get request", async function () {
-      req = {
-        query: {
-          dev: "true",
-        },
-      };
+      req = {};
       res = {};
       await getRequestsMiddleware(req as any, res as any, nextSpy);
       expect(nextSpy.calledOnce).to.equal(true);
@@ -105,7 +95,6 @@ describe("Create Request Validators", function () {
     it("Should throw an error for an invalid get request", async function () {
       req = {
         query: {
-          dev: "true",
           type: "RANDOM",
           state: "RANDOM",
         },

@@ -213,7 +213,8 @@ const updateDiscordImageForVerification = async (req, res) => {
  */
 const setRoleIdleToIdleUsers = async (req, res) => {
   try {
-    const result = await discordRolesModel.updateIdleUsersOnDiscord();
+    const { dev } = req.query;
+    const result = await discordRolesModel.updateIdleUsersOnDiscord(dev);
     return res.status(201).json({
       message: "All Idle Users updated successfully.",
       ...result,
@@ -231,7 +232,8 @@ const setRoleIdleToIdleUsers = async (req, res) => {
  */
 const setRoleIdle7DToIdleUsers = async (req, res) => {
   try {
-    const result = await discordRolesModel.updateIdle7dUsersOnDiscord();
+    const { dev } = req.query;
+    const result = await discordRolesModel.updateIdle7dUsersOnDiscord(dev);
     return res.status(201).json({
       message: "All Idle 7d+ Users updated successfully.",
       ...result,
@@ -251,13 +253,6 @@ const setRoleIdle7DToIdleUsers = async (req, res) => {
 
 const updateDiscordNicknames = async (req, res) => {
   try {
-    const { dev } = req.query;
-    if (dev !== "true") {
-      return res.status(404).json({
-        message: "Users Nicknames not updated",
-      });
-    }
-
     const membersInDiscord = await getDiscordMembers();
     const usersInDB = await fetchAllUsers();
     const usersToBeEffected = [];
