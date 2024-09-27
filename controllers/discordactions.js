@@ -71,13 +71,23 @@ const createGroupRole = async (req, res) => {
 
 const getPaginatedGroupRoles = async (req, res) => {
   try {
-    const latestDoc = req.query?.latestDoc;
-    const { groups, newLatestDoc } = await discordRolesModel.getPaginatedGroupRoles(latestDoc);
+    const isDevMode = req.query?.dev === "true";
+    if (isDevMode) {
+      const latestDoc = req.query?.latestDoc;
+      const { groups, newLatestDoc } = await discordRolesModel.getPaginatedGroupRoles(latestDoc);
+      const discordId = req.userData?.discordId;
+      const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
+      return res.json({
+        message: "Roles fetched successfully!",
+        newLatestDoc: newLatestDoc,
+        groups: groupsWithMembershipInfo,
+      });
+    }
+    const { groups } = await discordRolesModel.getAllGroupRoles();
     const discordId = req.userData?.discordId;
     const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
     return res.json({
       message: "Roles fetched successfully!",
-      newLatestDoc: newLatestDoc,
       groups: groupsWithMembershipInfo,
     });
   } catch (err) {
