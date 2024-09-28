@@ -55,6 +55,11 @@ module.exports = async (req, res, next) => {
 
     // add user data to `req.userData` for further use
     const userData = await dataAccess.retrieveUsers({ id: userId });
+
+    if (!userData.userExists) {
+      throw new Error("User doesn't exists");
+    }
+
     req.userData = userData.user;
 
     return checkRestricted(req, res, next);
