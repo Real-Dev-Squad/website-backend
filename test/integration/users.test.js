@@ -125,7 +125,9 @@ describe("Users", function () {
   });
 
   describe("PATCH /users/self", function () {
-    beforeEach(function () {
+    let userId;
+
+    beforeEach(async function () {
       fetchStub = Sinon.stub(global, "fetch");
       fetchStub.returns(
         Promise.resolve({
@@ -133,6 +135,7 @@ describe("Users", function () {
           json: () => Promise.resolve(getDiscordMembers),
         })
       );
+      userId = await addUser(newUser);
     });
 
     afterEach(function () {
@@ -225,7 +228,7 @@ describe("Users", function () {
 
       const getUserResponseBeforeUpdate = await chai
         .request(app)
-        .get("/users/self")
+        .get(`/users/${userId}`)
         .set("cookie", `${cookieName}=${newUserJwt}`);
 
       expect(getUserResponseBeforeUpdate).to.have.status(200);
@@ -246,7 +249,7 @@ describe("Users", function () {
 
       const getUserResponseAfterUpdate = await chai
         .request(app)
-        .get("/users/self")
+        .get(`/users/${userId}`)
         .set("cookie", `${cookieName}=${newUserJwt}`);
 
       expect(getUserResponseAfterUpdate).to.have.status(200);
