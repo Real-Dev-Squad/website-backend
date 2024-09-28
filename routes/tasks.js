@@ -67,6 +67,5 @@ router.patch("/assign/self", authenticate, invalidateCache({ invalidationKeys: [
 router.get("/users/discord", verifyCronJob, getUsersValidator, tasks.getUsersHandler);
 
 router.post("/migration", authenticate, authorizeRoles([SUPERUSER]), tasks.updateStatus);
-router.post("/orphanTasks", authenticate, authorizeRoles([SUPERUSER]), tasks.orphanTasks);
 
 module.exports = router;

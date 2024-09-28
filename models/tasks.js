@@ -1,6 +1,5 @@
 const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
-const userModel = firestore.collection("users");
 const ItemModel = firestore.collection("itemTags");
 const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
@@ -647,36 +646,6 @@ const updateTaskStatus = async () => {
   }
 };
 
-const updateOrphanTasksStatus = async () => {
-  try {
-    const users = [];
-    const batch = firestore.batch();
-    const usersQuerySnapshot = await userModel.where("roles.in_discord", "==", false).get();
-
-    usersQuerySnapshot.forEach((user) => users.push({ ...user.data(), id: user.id }));
-
-    let orphanTasksUpdatedCount = 0;
-
-    for (const user of users) {
-      const tasksQuerySnapshot = await tasksModel
-        .where("assignee", "==", user.id)
-        .where("status", "not-in", [BACKLOG, COMPLETED, DONE])
-        .get();
-      tasksQuerySnapshot.forEach((taskDoc) => {
-        orphanTasksUpdatedCount++;
-        const taskRef = tasksModel.doc(taskDoc.id);
-        batch.update(taskRef, { status: BACKLOG, updated_at: Date.now() });
-      });
-    }
-
-    await batch.commit();
-    return { orphanTasksUpdatedCount };
-  } catch (error) {
-    logger.error("Error marking tasks as backlog:", error);
-    throw error;
-  }
-};
-
 const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
   try {
     let orphanTasksUpdatedCount = 0;
@@ -718,6 +687,5 @@ module.exports = {
   getBuiltTasks,
   getOverdueTasks,
   updateTaskStatus,
-  updateOrphanTasksStatus,
   markUnDoneTasksOfArchivedUsersBacklog,
 };
