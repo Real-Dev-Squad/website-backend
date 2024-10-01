@@ -15,6 +15,8 @@ const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const firestore = require("../../utils/firestore");
 const userData = require("../fixtures/user/user")();
 const userModel = firestore.collection("users");
+const discordRolesModel = firestore.collection("discord-roles");
+const memberRoleModel = firestore.collection("member-group-roles");
 const tasksModel = firestore.collection("tasks");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../constants/external-accounts");
 chai.use(chaiHttp);
@@ -448,12 +450,21 @@ describe("External Accounts", function () {
 
   describe("PATCH /external-accounts/link/:token", function () {
     let newUserJWT;
+    let discordId;
+    let roleid;
+    let rolename;
 
     beforeEach(async function () {
       const userId = await addUser(userData[3]);
       newUserJWT = authService.generateAuthToken({ userId });
       await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
       await externalAccountsModel.addExternalAccountData(externalAccountData[3]);
+
+      discordId = externalAccountData[2].attributes.discordId;
+      roleid = "unverifiedRoleId";
+      rolename = "unverified";
+      await discordRolesModel.add({ rolename, roleid });
+      await memberRoleModel.add({ roleid, userid: discordId });
     });
 
     afterEach(async function () {
