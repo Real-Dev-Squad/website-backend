@@ -6,6 +6,7 @@ const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/da
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
 const logger = require("../utils/logger");
 const { markUnDoneTasksOfArchivedUsersBacklog } = require("../models/tasks");
+const { removeDiscordRole } = require("../utils/removeDiscordRole");
 
 const addExternalAccountData = async (req, res) => {
   const createdOn = Date.now();
@@ -46,6 +47,7 @@ const getExternalAccountData = async (req, res) => {
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
+
 const linkExternalAccount = async (req, res) => {
   try {
     const { id: userId, roles } = req.userData;
@@ -68,6 +70,8 @@ const linkExternalAccount = async (req, res) => {
       },
       userId
     );
+
+    await removeDiscordRole(req.userData, attributes.discordId, undefined, "unverified");
 
     return res.status(204).json({ message: "Your discord profile has been linked successfully" });
   } catch (error) {
