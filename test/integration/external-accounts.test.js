@@ -556,6 +556,12 @@ describe("External Accounts", function () {
 
       expect(response).to.have.status(204);
 
+      const unverifiedRoleExists = await memberRoleModel
+        .where("roleid", "==", roleid)
+        .where("userid", "==", discordId)
+        .get();
+      expect(unverifiedRoleExists.empty).to.equal(true);
+
       const updatedUserDetails = await chai
         .request(app)
         .get("/users/self")
