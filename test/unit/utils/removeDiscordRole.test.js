@@ -37,9 +37,9 @@ describe("removeDiscordRole", function () {
   });
 
   it("should remove discord role successfully", async function () {
-    const result = await removeDiscordRole(userData[0], discordId, roleid, rolename);
+    const isDiscordRoleRemoved = await removeDiscordRole(userData[0], discordId, roleid, rolename);
 
-    expect(result).to.equal(undefined);
+    expect(isDiscordRoleRemoved).to.equal(true);
   });
 
   it("should throw an error if roleid and rolename doesn't exist in database when attempting to remove", async function () {

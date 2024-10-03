@@ -4,9 +4,10 @@ const { getDiscordMembers } = require("../services/discordService");
 const { addOrUpdate, getUsersByRole, updateUsersInBatch } = require("../models/users");
 const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/dataAccessLayer");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
+const { DISCORD_ROLES } = require("../constants/discordRoles");
 const logger = require("../utils/logger");
 const { markUnDoneTasksOfArchivedUsersBacklog } = require("../models/tasks");
-const { removeDiscordRole } = require("../utils/removeDiscordRole");
+const removeDiscordRoleUtils = require("../utils/removeDiscordRole");
 
 const addExternalAccountData = async (req, res) => {
   const createdOn = Date.now();
@@ -71,7 +72,16 @@ const linkExternalAccount = async (req, res) => {
       userId
     );
 
-    await removeDiscordRole(req.userData, attributes.discordId, undefined, "unverified");
+    const isUnverifiedRoleRemoved = await removeDiscordRoleUtils.removeDiscordRole(
+      req.userData,
+      attributes.discordId,
+      undefined,
+      DISCORD_ROLES.UNVERIFIED
+    );
+
+    if (!isUnverifiedRoleRemoved) {
+      return res.status(500).json({ message: "Role deletion failed. Please contact admin" });
+    }
 
     return res.status(204).json({ message: "Your discord profile has been linked successfully" });
   } catch (error) {

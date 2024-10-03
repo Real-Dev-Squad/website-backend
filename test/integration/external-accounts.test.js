@@ -19,6 +19,7 @@ const discordRolesModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const tasksModel = firestore.collection("tasks");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../constants/external-accounts");
+const removeDiscordRoleUtils = require("../../utils/removeDiscordRole");
 chai.use(chaiHttp);
 const cookieName = config.get("userToken.cookieName");
 
@@ -570,6 +571,25 @@ describe("External Accounts", function () {
       expect(updatedUserDetails.body.roles.in_discord).to.equal(true);
       expect(updatedUserDetails.body).to.have.property("discordId");
       expect(updatedUserDetails.body).to.have.property("discordJoinedAt");
+    });
+
+    it("Should return 500 when removeDiscordRole fails", async function () {
+      await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
+
+      const removeDiscordRoleStub = Sinon.stub(removeDiscordRoleUtils, "removeDiscordRole").resolves(false);
+
+      const response = await chai
+        .request(app)
+        .patch(`/external-accounts/link/${externalAccountData[2].token}`)
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
+        .set("Cookie", `${cookieName}=${newUserJWT}`);
+
+      expect(response).to.have.status(500);
+      expect(response.body).to.be.an("object");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal("Role deletion failed. Please contact admin");
+
+      removeDiscordRoleStub.restore();
     });
   });
 });
