@@ -587,7 +587,9 @@ describe("External Accounts", function () {
       expect(response).to.have.status(500);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.property("message");
-      expect(response.body.message).to.equal("Role deletion failed. Please contact admin");
+      expect(response.body.message).to.equal(
+        "User details updated successfully but unverified role deletion failed. Please contact admin"
+      );
 
       removeDiscordRoleStub.restore();
     });

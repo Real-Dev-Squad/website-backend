@@ -80,7 +80,9 @@ const linkExternalAccount = async (req, res) => {
     );
 
     if (!isUnverifiedRoleRemoved) {
-      return res.status(500).json({ message: "Role deletion failed. Please contact admin" });
+      return res.status(500).json({
+        message: "User details updated successfully but unverified role deletion failed. Please contact admin",
+      });
     }
 
     return res.status(204).json({ message: "Your discord profile has been linked successfully" });

@@ -75,6 +75,17 @@ describe("removeDiscordRole", function () {
     }
   });
 
+  it("should throw an error if rolename and roleid both are undefined", async function () {
+    roleid = undefined;
+    rolename = undefined;
+
+    try {
+      await removeDiscordRole(userData[0], discordId, roleid, rolename);
+    } catch (error) {
+      expect(error.message).to.equal("Role doesn't exist");
+    }
+  });
+
   it("should throw an error if role deletion failed", async function () {
     discordId = "randomDiscordId";
 
