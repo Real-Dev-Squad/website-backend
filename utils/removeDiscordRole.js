@@ -27,7 +27,8 @@ const removeDiscordRole = async (userData, discordId, roleid, rolename) => {
 
     return true;
   } catch (error) {
-    logger.error(`Error getting external account data: ${error}`);
+    llogger.error(`Error removing role ${rolename || roleid} for user ${discordId}: ${error.message}`);
+
     return false;
   }
 };
