@@ -18,6 +18,7 @@
   "dependencies": {
     "@aws-sdk/client-identitystore": "^3.665.0",
     "@types/nodemailer": "^6.4.15",
+    "@aws-sdk/client-identitystore": "^3.665.0",
     "axios": "1.7.2",
     "cloudinary": "2.0.3",
     "config": "3.3.7",
