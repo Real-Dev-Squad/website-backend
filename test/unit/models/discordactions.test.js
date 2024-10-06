@@ -1117,12 +1117,14 @@ describe("discordactions", function () {
       expect(res.roleId).to.be.equal("1234566777777");
       expect(res.wasSuccess).to.be.equal(true);
     });
+
     it("should return wasSuccess as false if role does not exist", async function () {
       const res = await removeMemberGroup("123", "2131234453456545656765767876");
 
       expect(res.roleId).to.be.equal("123");
       expect(res.wasSuccess).to.be.equal(false);
     });
+
     it("return error if something goes while deleting the role", async function () {
       deleteStub.rejects(new Error("Database error"));
 
