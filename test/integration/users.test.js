@@ -902,6 +902,62 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should return the logged user's details", function (done) {
+      chai
+        .request(app)
+        .get("/users?profile=true&dev=true") // Added dev=true
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.not.have.property("phone");
+          expect(res.body).to.not.have.property("email");
+          expect(res.body).to.not.have.property("chaincode");
+
+          return done();
+        });
+    });
+
+    it("Should return 400 if profile parameter is invalid", function (done) {
+      chai
+        .request(app)
+        .get("/users?profile=invalid&dev=true") // Added dev=true
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Invalid profile parameter/value passed");
+          return done();
+        });
+    });
+
+    it("Should return 401 if not logged in", function (done) {
+      chai
+        .request(app)
+        .get("/users?profile=true&dev=true") // Added dev=true
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+
+          return done();
+        });
+    });
   });
 
   describe("GET /users/self", function () {

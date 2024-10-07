@@ -30,6 +30,7 @@ const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const authService = require("../services/authService");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -112,6 +113,45 @@ const getUsers = async (req, res) => {
       });
     }
 
+    const profile = req.query.profile === "true" && dev;
+
+    if (!profile) {
+      return res.boom.badRequest("Profile/Dev query parameter is required to be 'true' to proceed.");
+    }
+
+    if (profile) {
+      let result, user;
+      let token = req.cookies[config.get("userToken.cookieName")];
+
+      // Extract token from authorization header if not in production and no token in cookies
+      if (process.env.NODE_ENV !== "production" && !token) {
+        token = req.headers.authorization ? req.headers.authorization.split(" ")[1] : null;
+      }
+
+      // Verify the token
+      let userId;
+      try {
+        ({ userId } = authService.verifyAuthToken(token));
+      } catch (error) {
+        logger.error(`Token verification failed: ${error}`);
+        return res.boom.unauthorized("Invalid token");
+      }
+
+      try {
+        result = await dataAccess.retrieveUsers({ id: userId });
+        user = result.user;
+      } catch (error) {
+        logger.error(`Error while fetching user: ${error}`);
+        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+      }
+
+      if (!result.userExists) {
+        return res.boom.notFound("User doesn't exist");
+      }
+
+      return res.send(user);
+    }
+
     if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
       return res.boom.badRequest(`Days is required for filterBy ${transformedQuery?.filterBy}`);
     }
@@ -144,7 +184,7 @@ const getUsers = async (req, res) => {
     // getting user details by discord id if present.
     const discordId = req.query.discordId;
 
-    if (req.query.discordId) {
+    if (discordId) {
       if (dev) {
         let result, user;
         try {
@@ -376,7 +416,11 @@ const getSelfDetails = async (req, res) => {
       const user = await dataAccess.retrieveUsers({
         userdata: req.userData,
       });
-      return res.send(user);
+      return res.send({
+        message:
+          "Attention Developers⚠️❌🚫🔴 This API endpoint is soon going to be deprected and will ceaase to exist. Please replace this endpoint with new point named as 'users/newprofile' ⚠️❌🚫🔴",
+        user: user,
+      });
     }
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
@@ -392,10 +436,21 @@ const getSelfDetails = async (req, res) => {
  * @param req.body {Object} - User object
  * @param res {Object} - Express response object
  */
+
 const updateSelf = async (req, res) => {
   try {
     const { id: userId, roles: userRoles, discordId } = req.userData;
     const { user } = await dataAccess.retrieveUsers({ id: userId });
+
+    const { dev: devParam } = req.query;
+    const dev = devParam === "true";
+
+    const profile = req.query.profile === "true" && dev;
+
+    // If profile is not "true", exit early
+    if (!profile) {
+      return res.boom.forbidden("Profile query parameter is required to be 'true' to proceed.");
+    }
 
     if (req.body.username) {
       if (!user.incompleteUserDetails) {
@@ -676,6 +731,13 @@ const rejectProfileDiff = async (req, res) => {
 
 const addUserIntro = async (req, res) => {
   try {
+    const profile = req.query.profile === "true";
+
+    // If profile is not "true", exit early
+    if (!profile) {
+      return res.boom.forbidden("Profile query parameter is required to be 'true' to proceed.");
+    }
+
     const rawData = req.body;
     const joinData = await userQuery.getJoinData(req.userData.id);
 
