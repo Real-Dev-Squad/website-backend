@@ -907,7 +907,7 @@ describe("Users", function () {
     it("Should return the logged user's details", function (done) {
       chai
         .request(app)
-        .get("/users?profile=true&dev=true") // Added dev=true
+        .get("/users?profile=true&dev=true")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -923,10 +923,10 @@ describe("Users", function () {
         });
     });
 
-    it("Should return 400 if profile parameter is invalid", function (done) {
+    it("Should throw an error when there is no feature flag given", function (done) {
       chai
         .request(app)
-        .get("/users?profile=invalid&dev=true") // Added dev=true
+        .get("/users?profile=true")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -934,7 +934,7 @@ describe("Users", function () {
           }
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
-          expect(res.body.message).to.equal("Invalid profile parameter/value passed");
+          expect(res.body.message).to.equal("Route not found");
           return done();
         });
     });
@@ -942,7 +942,8 @@ describe("Users", function () {
     it("Should return 401 if not logged in", function (done) {
       chai
         .request(app)
-        .get("/users?profile=true&dev=true") // Added dev=true
+        .get("/users?profile=true&dev=true")
+        .set("cookie", `${cookieName}=invalid_token`)
         .end((err, res) => {
           if (err) {
             return done();

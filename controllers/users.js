@@ -114,43 +114,37 @@ const getUsers = async (req, res) => {
       });
     }
 
-    const profile = req.query.profile === "true" && dev;
+    if (req.query.profile) {
+      if (dev) {
+        let result, user;
+        let token = req.cookies[config.get("userToken.cookieName")];
 
-    if (!profile) {
-      return res.boom.badRequest("Profile/Dev query parameter is required to be 'true' to proceed.");
-    }
+        // Extract token from authorization header if not in production and no token in cookies
+        if (process.env.NODE_ENV !== "production" && !token) {
+          token = req.headers.authorization ? req.headers.authorization.split(" ")[1] : null;
+        }
 
-    if (profile) {
-      let result, user;
-      let token = req.cookies[config.get("userToken.cookieName")];
+        // Verify the token
+        let userId;
+        try {
+          ({ userId } = authService.verifyAuthToken(token));
+        } catch (error) {
+          logger.error(`Token verification failed: ${error}`);
+          return res.boom.unauthorized("Unauthenticated User");
+        }
 
-      // Extract token from authorization header if not in production and no token in cookies
-      if (process.env.NODE_ENV !== "production" && !token) {
-        token = req.headers.authorization ? req.headers.authorization.split(" ")[1] : null;
+        try {
+          result = await dataAccess.retrieveUsers({ id: userId });
+          user = result.user;
+        } catch (error) {
+          logger.error(`Error while fetching user: ${error}`);
+          return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
+        }
+
+        return res.send(user);
+      } else {
+        return res.boom.badRequest("Route not found");
       }
-
-      // Verify the token
-      let userId;
-      try {
-        ({ userId } = authService.verifyAuthToken(token));
-      } catch (error) {
-        logger.error(`Token verification failed: ${error}`);
-        return res.boom.unauthorized("Invalid token");
-      }
-
-      try {
-        result = await dataAccess.retrieveUsers({ id: userId });
-        user = result.user;
-      } catch (error) {
-        logger.error(`Error while fetching user: ${error}`);
-        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
-      }
-
-      if (!result.userExists) {
-        return res.boom.notFound("User doesn't exist");
-      }
-
-      return res.send(user);
     }
 
     if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
@@ -419,7 +413,7 @@ const getSelfDetails = async (req, res) => {
       });
       return res.send({
         message:
-          "Attention Developers⚠️❌🚫🔴 This API endpoint is soon going to be deprected and will ceaase to exist. Please replace this endpoint with new point named as 'users/newprofile' ⚠️❌🚫🔴",
+          "This API endpoint is scheduled for deprecation and will soon be discontinued. Please update your integrations to use the new endpoint: '/users?profile=true'⚠️🔴",
         user: user,
       });
     }
