@@ -72,16 +72,16 @@ const linkExternalAccount = async (req, res) => {
       userId
     );
 
-    const isUnverifiedRoleRemoved = await removeDiscordRoleUtils.removeDiscordRole(
+    const unverifiedRoleRemovalResponse = await removeDiscordRoleUtils.removeDiscordRole(
       req.userData,
       attributes.discordId,
       undefined,
       DISCORD_ROLES.UNVERIFIED
     );
 
-    if (!isUnverifiedRoleRemoved) {
+    if (!unverifiedRoleRemovalResponse.success) {
       return res.status(500).json({
-        message: "User details updated successfully but unverified role deletion failed. Please contact admin",
+        message: `User details updated successfully but ${unverifiedRoleRemovalResponse.message}. Please contact admin`,
       });
     }
 

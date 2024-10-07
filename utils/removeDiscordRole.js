@@ -25,11 +25,11 @@ const removeDiscordRole = async (userData, discordId, roleid, rolename) => {
       throw new Error("Role deletion failed");
     }
 
-    return true;
+    return { success: true, message: "Role deleted successfully" };
   } catch (error) {
     logger.error(`Error removing role ${rolename || roleid} for user ${discordId}: ${error.message}`);
 
-    return false;
+    return { success: false, message: error.message };
   }
 };
 
