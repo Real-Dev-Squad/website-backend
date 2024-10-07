@@ -21,8 +21,7 @@ const getUserId = async (username) => {
     const {
       userExists,
       user: { id },
-    } = await fetchUser({ username });
-
+    } = await dataAccessLayer.retrieveUsers({ username });
     return userExists ? id : false;
   } catch (error) {
     logger.error("Something went wrong", error);
@@ -58,7 +57,7 @@ const getFullName = async (userId) => {
     const {
       // eslint-disable-next-line camelcase
       user: { first_name, last_name },
-    } = await fetchUser({ userId });
+    } = await dataAccessLayer.retrieveUsers({ id: userId });
     // eslint-disable-next-line camelcase
     return { first_name, last_name };
   } catch (error) {
@@ -76,7 +75,7 @@ const getUsernameElseUndefined = async (userId) => {
   try {
     const {
       user: { username },
-    } = await fetchUser({ userId });
+    } = await dataAccessLayer.retrieveUsers({ id: userId });
     return username;
   } catch (error) {
     logger.error("Something went wrong", error);
@@ -92,17 +91,7 @@ const getUsernameElseUndefined = async (userId) => {
  */
 
 const getUserIdElseUndefined = async (username) => {
-  try {
-    const {
-      userExists,
-      user: { id },
-    } = await fetchUser({ username });
-
-    return userExists ? id : false;
-  } catch (error) {
-    logger.error("Something went wrong", error);
-    return undefined;
-  }
+  return await getUserId(username);
 };
 
 /**
