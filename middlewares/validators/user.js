@@ -51,6 +51,7 @@ const updateUser = async (req, res, next) => {
         .valid(...Object.values(USER_STATUS))
         .optional(),
       discordId: joi.string().optional(),
+      disabledRoles: joi.array().items(joi.string().valid("super_user", "member")).optional(),
       roles: joi.object().keys({
         designer: joi.boolean().optional(),
         maven: joi.boolean().optional(),
@@ -60,6 +61,14 @@ const updateUser = async (req, res, next) => {
 
   try {
     await schema.validateAsync(req.body);
+
+    if (req.body.first_name) {
+      req.body.first_name = req.body.first_name.toLowerCase();
+    }
+    if (req.body.last_name) {
+      req.body.last_name = req.body.last_name.toLowerCase();
+    }
+
     next();
   } catch (error) {
     logger.error(`Error validating updateUser payload : ${error}`);
@@ -316,8 +325,18 @@ const validateGenerateUsernameQuery = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      firstname: joi.string().min(1).required(),
-      lastname: joi.string().min(1).required(),
+      firstname: joi
+        .string()
+        .trim()
+        .pattern(/^[a-zA-Z]+$/)
+        .min(1)
+        .required(),
+      lastname: joi
+        .string()
+        .trim()
+        .pattern(/^[a-zA-Z]+$/)
+        .min(1)
+        .required(),
       dev: joi.string().valid("true").optional(),
     });
 
@@ -329,6 +348,7 @@ const validateGenerateUsernameQuery = async (req, res, next) => {
     res.boom.badRequest("Invalid Query Parameters Passed");
   }
 };
+
 const migrationsValidator = async (req, res, next) => {
   const { action, page, size } = req.query;
   const schema = joi
