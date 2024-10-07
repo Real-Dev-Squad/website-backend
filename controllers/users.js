@@ -185,7 +185,7 @@ const getUsers = async (req, res) => {
     // getting user details by discord id if present.
     const discordId = req.query.discordId;
 
-    if (discordId) {
+    if (req.query.discordId) {
       if (dev) {
         let result, user;
         try {
@@ -444,16 +444,6 @@ const updateSelf = async (req, res) => {
     const devFeatureFlag = req.query.dev === "true";
     const { user } = await dataAccess.retrieveUsers({ id: userId });
     let rolesToDisable = [];
-
-    const { dev: devParam } = req.query;
-    const dev = devParam === "true";
-
-    const profile = req.query.profile === "true" && dev;
-
-    // If profile is not "true", exit early
-    if (!profile) {
-      return res.boom.forbidden("Profile query parameter is required to be 'true' to proceed.");
-    }
 
     if (req.body.username) {
       if (!user.incompleteUserDetails) {
@@ -764,13 +754,6 @@ const rejectProfileDiff = async (req, res) => {
 
 const addUserIntro = async (req, res) => {
   try {
-    const profile = req.query.profile === "true";
-
-    // If profile is not "true", exit early
-    if (!profile) {
-      return res.boom.forbidden("Profile query parameter is required to be 'true' to proceed.");
-    }
-
     const rawData = req.body;
     const joinData = await userQuery.getJoinData(req.userData.id);
 
