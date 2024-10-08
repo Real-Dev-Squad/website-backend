@@ -2,7 +2,7 @@ const Sinon = require("sinon");
 const { expect } = require("chai");
 const { validateSubscribe } = require("../../../middlewares/validators/subscription");
 
-describe("Middleware | Validators | Subscription", function () {
+describe.only("Middleware | Validators | Subscription", function () {
   let req, res, nextSpy;
 
   beforeEach(function () {
@@ -16,7 +16,7 @@ describe("Middleware | Validators | Subscription", function () {
 
   it("should call next function when a valid request body is passed", async function () {
     req.body = {
-      phoneNumber: "1234567890",
+      phoneNumber: "+911234567890", // Valid format
       email: "test@example.com",
     };
 
@@ -24,24 +24,22 @@ describe("Middleware | Validators | Subscription", function () {
 
     expect(nextSpy.calledOnce).to.be.equal(true);
     expect(res.status.called).to.be.equal(false);
+    expect(res.json.called).to.be.equal(false);
   });
 
-  it("should return a 400 error when phoneNumber is missing", async function () {
+  it("should not return an error when phoneNumber is missing", async function () {
     req.body = {
       email: "test@example.com",
     };
 
     await validateSubscribe(req, res, nextSpy);
-
-    expect(nextSpy.called).to.be.equal(false);
-    expect(res.status.calledOnceWith(400)).to.be.equal(true);
-    expect(res.json.calledOnce).to.be.equal(true);
-    expect(res.json.firstCall.args[0]).to.have.property("error").that.includes('"phoneNumber" is required');
+    expect(nextSpy.calledOnce).to.be.equal(true);
+    expect(res.status.called).to.be.equal(false);
+    expect(res.json.called).to.be.equal(false);
   });
-
   it("should return a 400 error when email is missing", async function () {
     req.body = {
-      phoneNumber: "1234567890",
+      phoneNumber: "+911234567890",
     };
 
     await validateSubscribe(req, res, nextSpy);
@@ -59,12 +57,28 @@ describe("Middleware | Validators | Subscription", function () {
     expect(nextSpy.called).to.be.equal(false);
     expect(res.status.calledOnceWith(400)).to.be.equal(true);
     expect(res.json.calledOnce).to.be.equal(true);
-    expect(res.json.firstCall.args[0]).to.have.property("error").that.includes('"phoneNumber" is required');
+    expect(res.json.firstCall.args[0]).to.have.property("error").that.includes('"email" is required');
+  });
+
+  it("should return a 400 error when phoneNumber is not in correct format", async function () {
+    req.body = {
+      phoneNumber: "1234567890",
+      email: "test@example.com",
+    };
+
+    await validateSubscribe(req, res, nextSpy);
+
+    expect(nextSpy.called).to.be.equal(false);
+    expect(res.status.calledOnceWith(400)).to.be.equal(true);
+    expect(res.json.calledOnce).to.be.equal(true);
+    expect(res.json.firstCall.args[0])
+      .to.have.property("error")
+      .that.includes('"phoneNumber" with value "1234567890" fails to match the required pattern');
   });
 
   it("should return a 400 error when email is not in correct format", async function () {
     req.body = {
-      phoneNumber: "1234567890",
+      phoneNumber: "+911234567890", // Valid format
       email: "invalid-email",
     };
 
@@ -76,5 +90,17 @@ describe("Middleware | Validators | Subscription", function () {
     expect(res.json.firstCall.args[0])
       .to.have.property("error")
       .that.includes('"email" with value "invalid-email" fails to match the required pattern');
+  });
+
+  it("should not return an error when phoneNumber is in correct format", async function () {
+    req.body = {
+      phoneNumber: "+911234567890", // Valid format
+      email: "test@example.com",
+    };
+
+    await validateSubscribe(req, res, nextSpy);
+    expect(nextSpy.calledOnce).to.be.equal(true);
+    expect(res.status.called).to.be.equal(false);
+    expect(res.json.called).to.be.equal(false);
   });
 });

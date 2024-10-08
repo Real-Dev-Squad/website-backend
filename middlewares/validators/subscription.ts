@@ -4,8 +4,9 @@ import Joi from 'joi';
 
 export const validateSubscribe = (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const phoneNumberRegex = /^\+91\d{10}$/;
   const subscribeSchema = Joi.object({
-    phoneNumber: Joi.string().required(),
+    phoneNumber: Joi.string().optional().regex(phoneNumberRegex),
     email: Joi.string().required().regex(emailRegex)
   });
   const { error } = subscribeSchema.validate(req.body);
