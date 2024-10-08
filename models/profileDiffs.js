@@ -123,7 +123,7 @@ const fetchProfileDiff = async (profileDiffId) => {
     return {
       id: profileDiff.id,
       profileDiffExists: true,
-      ...profileDiff.data(),
+      ...profileDiffData,
       email: emailRedacted,
       phone: phoneRedacted,
     };
