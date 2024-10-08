@@ -40,7 +40,7 @@
     "winston": "3.13.0"
   },
   "devDependencies": {
-    "@types/chai": "4.3.16",
+    "@types/chai": "5.0.0",
     "@types/config": "3.3.4",
     "@types/express": "4.17.21",
     "@types/jest": "29.5.12",
@@ -48,7 +48,7 @@
     "@types/node": "20.11.24",
     "@types/sinon": "17.0.3",
     "@typescript-eslint/parser": "^7.1.1",
-    "chai": "4.4.1",
+    "chai": "5.1.1",
     "chai-http": "4.4.0",
     "cross-env": "7.0.3",
     "eslint": "^8.57.0",
