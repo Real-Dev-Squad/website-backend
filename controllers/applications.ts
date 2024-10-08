@@ -123,6 +123,7 @@ const updateApplication = async (req: CustomRequest, res: CustomResponse) => {
     await Promise.all(promises);
     return res.json({
       message: "Application updated successfully!",
+      data: rawBody,
     });
   } catch (err) {
     logger.error(`Error while updating the application: ${err}`);
