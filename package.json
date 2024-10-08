@@ -16,7 +16,7 @@
     "tdd:watch": "sh scripts/tests/tdd.sh"
   },
   "dependencies": {
-    "axios": "1.7.2",
+    "axios": "1.7.4",
     "cloudinary": "2.0.3",
     "config": "3.3.7",
     "cookie-parser": "1.4.6",
