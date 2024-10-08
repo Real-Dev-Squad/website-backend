@@ -111,7 +111,17 @@ const fetchProfileDiffsWithPagination = async (status, order, size, username, cu
 const fetchProfileDiff = async (profileDiffId) => {
   try {
     const profileDiff = await profileDiffsModel.doc(profileDiffId).get();
-    return { id: profileDiff.id, profileDiffExists: profileDiff.exists, ...profileDiff.data() };
+    const profileDiffData = profileDiff.data();
+    const emailRedacted = profileDiffData.email ? obfuscate.obfuscateMail(profileDiffData.email) : "";
+    const phoneRedacted = profileDiffData.phone ? obfuscate.obfuscatePhone(profileDiffData.phone) : "";
+
+    return {
+      id: profileDiff.id,
+      profileDiffExists: profileDiff.exists,
+      ...profileDiff.data(),
+      email: emailRedacted,
+      phone: phoneRedacted,
+    };
   } catch (err) {
     logger.error("Error retrieving profile Diff", err);
     throw err;
