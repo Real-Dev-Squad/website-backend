@@ -18,7 +18,7 @@
   "dependencies": {
     "axios": "1.7.2",
     "cloudinary": "2.0.3",
-    "config": "3.3.7",
+    "config": "3.3.12",
     "cookie-parser": "1.4.6",
     "cors": "2.8.5",
     "datauri": "4.1.0",
@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@types/chai": "4.3.16",
-    "@types/config": "3.3.4",
+    "@types/config": "3.3.5",
     "@types/express": "4.17.21",
     "@types/jest": "29.5.12",
     "@types/mocha": "10.0.6",
