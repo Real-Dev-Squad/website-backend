@@ -1,4 +1,3 @@
-const { fetchUser } = require("../models/users");
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 const { months, discordNicknameLength } = require("../constants/users");
@@ -21,8 +20,7 @@ const getUserId = async (username) => {
     const {
       userExists,
       user: { id },
-    } = await fetchUser({ username });
-
+    } = await dataAccessLayer.retrieveUsers({ username });
     return userExists ? id : false;
   } catch (error) {
     logger.error("Something went wrong", error);
@@ -37,10 +35,8 @@ const getUserId = async (username) => {
  */
 const getUsername = async (userId) => {
   try {
-    const {
-      user: { username },
-    } = await fetchUser({ userId });
-    return username;
+    const { userExists, user } = await dataAccessLayer.retrieveUsers({ id: userId });
+    return userExists ? user.username : undefined;
   } catch (error) {
     logger.error("Something went wrong", error);
     throw error;
@@ -58,7 +54,7 @@ const getFullName = async (userId) => {
     const {
       // eslint-disable-next-line camelcase
       user: { first_name, last_name },
-    } = await fetchUser({ userId });
+    } = await dataAccessLayer.retrieveUsers({ id: userId });
     // eslint-disable-next-line camelcase
     return { first_name, last_name };
   } catch (error) {
@@ -76,7 +72,7 @@ const getUsernameElseUndefined = async (userId) => {
   try {
     const {
       user: { username },
-    } = await fetchUser({ userId });
+    } = await dataAccessLayer.retrieveUsers({ id: userId });
     return username;
   } catch (error) {
     logger.error("Something went wrong", error);
@@ -92,17 +88,7 @@ const getUsernameElseUndefined = async (userId) => {
  */
 
 const getUserIdElseUndefined = async (username) => {
-  try {
-    const {
-      userExists,
-      user: { id },
-    } = await fetchUser({ username });
-
-    return userExists ? id : false;
-  } catch (error) {
-    logger.error("Something went wrong", error);
-    return undefined;
-  }
+  return await getUserId(username);
 };
 
 /**

@@ -27,9 +27,8 @@ const fetchAuctionById = async (auctionId) => {
       return { ...bidData, bidder: bidderUsername };
     });
     const biddersAndBids = await Promise.all(promises);
-
-    const seller = usersUtils.getUsername(auctionMetadata.seller);
-    const highestBidder = usersUtils.getUsername(auctionMetadata.highest_bidder);
+    const seller = await usersUtils.getUsername(auctionMetadata.seller);
+    const highestBidder = await usersUtils.getUsername(auctionMetadata.highest_bidder);
     const promise = await Promise.all([seller, highestBidder]);
     const [sellerUsername, highestBidderUsername] = promise;
 
