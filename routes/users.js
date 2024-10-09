@@ -17,22 +17,7 @@ router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), use
 router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
 /**
- * Route handler for updating the authenticated user's own profile
- * @deprecated [SCHEDULED] This endpoint will be deprecated in the next major version. Use `/api/v2/users/profile` instead.
- *
- * @route PATCH /self
- * @middleware {Function} authenticate - Verifies user authentication
- * @middleware {Function} userValidator.updateUser - Validates update payload
- * @function users.updateSelf - Handles the user update logic
- *
- * @example
- * // Example request
- * PATCH /self
- * Authorization: Bearer <token>
- * {
- *   "name": "John Doe",
- *   "email": "john@example.com"
- * }
+ * @deprecated [SCHEDULED] This endpoint will be deprecated in the near future. New EndPoint TBD.
  */
 router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
 router.get("/", userValidator.getUsers, users.getUsers);
