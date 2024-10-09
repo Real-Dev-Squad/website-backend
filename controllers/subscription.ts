@@ -7,21 +7,16 @@ const emailSubscriptionCredentials = config.get("emailSubscriptionCredentials");
 
 export const subscribe = async (req: CustomRequest, res: CustomResponse) => {
   try {
-    const { email, phoneNumber } = req.body;
+    const { email } = req.body;
+    const phoneNumber = req.body.phoneNumber || null;
     const userId = req.userData.id;
     const dev = req.query.dev === "true";
     if (!dev) {
       return res.boom.notFound("Route not found");
     }
 
-    await addOrUpdate(
-      {
-        phoneNumber,
-        email,
-        isSubscribed: true,
-      },
-      userId
-    );
+    const data = { email, isSubscribed: true, phoneNumber };
+    await addOrUpdate(data, userId);
     return res.status(201).json({
       message: "user subscribed successfully",
     });

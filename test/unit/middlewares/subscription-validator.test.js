@@ -2,7 +2,7 @@ const Sinon = require("sinon");
 const { expect } = require("chai");
 const { validateSubscribe } = require("../../../middlewares/validators/subscription");
 
-describe.only("Middleware | Validators | Subscription", function () {
+describe("Middleware | Validators | Subscription", function () {
   let req, res, nextSpy;
 
   beforeEach(function () {
@@ -16,7 +16,7 @@ describe.only("Middleware | Validators | Subscription", function () {
 
   it("should call next function when a valid request body is passed", async function () {
     req.body = {
-      phoneNumber: "+911234567890", // Valid format
+      phoneNumber: "+911234567890",
       email: "test@example.com",
     };
 
@@ -37,6 +37,7 @@ describe.only("Middleware | Validators | Subscription", function () {
     expect(res.status.called).to.be.equal(false);
     expect(res.json.called).to.be.equal(false);
   });
+
   it("should return a 400 error when email is missing", async function () {
     req.body = {
       phoneNumber: "+911234567890",
@@ -78,7 +79,7 @@ describe.only("Middleware | Validators | Subscription", function () {
 
   it("should return a 400 error when email is not in correct format", async function () {
     req.body = {
-      phoneNumber: "+911234567890", // Valid format
+      phoneNumber: "+911234567890",
       email: "invalid-email",
     };
 
@@ -94,7 +95,7 @@ describe.only("Middleware | Validators | Subscription", function () {
 
   it("should not return an error when phoneNumber is in correct format", async function () {
     req.body = {
-      phoneNumber: "+911234567890", // Valid format
+      phoneNumber: "+911234567890",
       email: "test@example.com",
     };
 
