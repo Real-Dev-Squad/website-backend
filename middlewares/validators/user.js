@@ -196,7 +196,7 @@ async function getUsers(req, res, next) {
         }),
       query: joi.string().optional(),
       q: joi.string().optional(),
-      profile: joi.string().optional(),
+      profile: joi.string().valid("true").optional(),
       filterBy: joi.string().optional(),
       days: joi.string().optional(),
       dev: joi.string().optional(),

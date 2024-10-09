@@ -114,7 +114,9 @@ const getUsers = async (req, res) => {
       });
     }
 
-    if (req.query.profile) {
+    const profile = req.query.profile === "true";
+
+    if (profile) {
       if (dev) {
         let result, user;
         let token = req.cookies[config.get("userToken.cookieName")];
@@ -411,11 +413,7 @@ const getSelfDetails = async (req, res) => {
       const user = await dataAccess.retrieveUsers({
         userdata: req.userData,
       });
-      return res.send({
-        message:
-          "This API endpoint is scheduled for deprecation and will soon be discontinued. Please update your integrations to use the new endpoint: '/users?profile=true'⚠️🔴",
-        user: user,
-      });
+      return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");
   } catch (error) {
