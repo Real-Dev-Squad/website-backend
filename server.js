@@ -3,7 +3,6 @@
  */
 const config = require("config");
 global.config = config;
-const { fetchUserIdFromUsername, createUser, addUserToGroup } = require("./utils/aws.js");
 
 const logger = require("./utils/logger");
 global.logger = logger;
@@ -74,17 +73,6 @@ function onError(error) {
  */
 
 function onListening() {
-  (async () => {
-    try {
-      const userResponse = await addUserToGroup({
-        groupId: "8498a458-0021-700f-00c2-6cdad57d17f1",
-        userId: "1468b498-20b1-70d9-2827-1a2ad9d99ffc",
-      });
-      console.log("User Response:", userResponse);
-    } catch (error) {
-      console.error("Failed to create user:", error);
-    }
-  })();
   logger.info(`Express API running on port:${port} with environment:${process.env.NODE_ENV}`);
 }
 
