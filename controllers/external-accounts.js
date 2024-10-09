@@ -81,7 +81,7 @@ const linkExternalAccount = async (req, res) => {
 
     if (!unverifiedRoleRemovalResponse.success) {
       return res.status(500).json({
-        message: `User details updated successfully but ${unverifiedRoleRemovalResponse.message}. Please contact admin`,
+        message: `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`,
       });
     }
 

@@ -593,7 +593,7 @@ describe("External Accounts", function () {
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.property("message");
       expect(response.body.message).to.equal(
-        `User details updated successfully but ${unverifiedRoleRemovalResponse.message}. Please contact admin`
+        `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`
       );
 
       removeDiscordRoleStub.restore();
@@ -619,7 +619,7 @@ describe("External Accounts", function () {
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.property("message");
       expect(response.body.message).to.equal(
-        `User details updated successfully but ${unverifiedRoleRemovalResponse.message}. Please contact admin`
+        `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`
       );
 
       removeDiscordRoleStub.restore();
