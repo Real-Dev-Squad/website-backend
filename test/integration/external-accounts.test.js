@@ -15,8 +15,11 @@ const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const firestore = require("../../utils/firestore");
 const userData = require("../fixtures/user/user")();
 const userModel = firestore.collection("users");
+const discordRolesModel = firestore.collection("discord-roles");
+const memberRoleModel = firestore.collection("member-group-roles");
 const tasksModel = firestore.collection("tasks");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../constants/external-accounts");
+const removeDiscordRoleUtils = require("../../utils/removeDiscordRole");
 chai.use(chaiHttp);
 const cookieName = config.get("userToken.cookieName");
 
@@ -448,12 +451,21 @@ describe("External Accounts", function () {
 
   describe("PATCH /external-accounts/link/:token", function () {
     let newUserJWT;
+    let discordId;
+    let roleid;
+    let rolename;
 
     beforeEach(async function () {
       const userId = await addUser(userData[3]);
       newUserJWT = authService.generateAuthToken({ userId });
       await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
       await externalAccountsModel.addExternalAccountData(externalAccountData[3]);
+
+      discordId = externalAccountData[2].attributes.discordId;
+      roleid = "unverifiedRoleId";
+      rolename = "unverified";
+      await discordRolesModel.add({ rolename, roleid });
+      await memberRoleModel.add({ roleid, userid: discordId });
     });
 
     afterEach(async function () {
@@ -545,6 +557,12 @@ describe("External Accounts", function () {
 
       expect(response).to.have.status(204);
 
+      const unverifiedRoleExists = await memberRoleModel
+        .where("roleid", "==", roleid)
+        .where("userid", "==", discordId)
+        .get();
+      expect(unverifiedRoleExists.empty).to.equal(true);
+
       const updatedUserDetails = await chai
         .request(app)
         .get("/users/self")
@@ -553,6 +571,58 @@ describe("External Accounts", function () {
       expect(updatedUserDetails.body.roles.in_discord).to.equal(true);
       expect(updatedUserDetails.body).to.have.property("discordId");
       expect(updatedUserDetails.body).to.have.property("discordJoinedAt");
+    });
+
+    it("Should return 500 when removeDiscordRole fails because role doesn't exist", async function () {
+      await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
+
+      const removeDiscordRoleStub = Sinon.stub(removeDiscordRoleUtils, "removeDiscordRole").resolves({
+        success: false,
+        message: "Role doesn't exist",
+      });
+
+      const response = await chai
+        .request(app)
+        .patch(`/external-accounts/link/${externalAccountData[2].token}`)
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
+        .set("Cookie", `${cookieName}=${newUserJWT}`);
+
+      const unverifiedRoleRemovalResponse = await removeDiscordRoleStub();
+
+      expect(response).to.have.status(500);
+      expect(response.body).to.be.an("object");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(
+        `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`
+      );
+
+      removeDiscordRoleStub.restore();
+    });
+
+    it("Should return 500 when removeDiscordRole fails because role deletion failed", async function () {
+      await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
+
+      const removeDiscordRoleStub = Sinon.stub(removeDiscordRoleUtils, "removeDiscordRole").resolves({
+        success: false,
+        message: "Role deletion failed",
+      });
+
+      const response = await chai
+        .request(app)
+        .patch(`/external-accounts/link/${externalAccountData[2].token}`)
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
+        .set("Cookie", `${cookieName}=${newUserJWT}`);
+
+      const unverifiedRoleRemovalResponse = await removeDiscordRoleStub();
+
+      expect(response).to.have.status(500);
+      expect(response.body).to.be.an("object");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(
+        `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`
+      );
+
+      removeDiscordRoleStub.restore();
     });
   });
 });
