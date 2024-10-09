@@ -16,6 +16,9 @@ router.post("/", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_
 router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), users.setInDiscordScript);
 router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
+/**
+ * @deprecated [SCHEDULED] This endpoint will be deprecated in the near future. New EndPoint TBD.
+ */
 router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
 router.get("/", userValidator.getUsers, users.getUsers);
 router.get("/self", authenticate, users.getSelfDetails);
