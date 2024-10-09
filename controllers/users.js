@@ -388,6 +388,7 @@ const getSelfDetails = async (req, res) => {
 
 /**
  * Update the user
+ * @deprecated [SCHEDULED] This Controller will be removed in the near Future, New controller TBD.
  *
  * @param req {Object} - Express request object
  * @param req.body {Object} - User object
