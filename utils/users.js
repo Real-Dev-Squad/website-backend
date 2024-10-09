@@ -1,4 +1,3 @@
-const { fetchUser } = require("../models/users");
 const firestore = require("../utils/firestore");
 const userModel = firestore.collection("users");
 const { months, discordNicknameLength } = require("../constants/users");
@@ -36,10 +35,8 @@ const getUserId = async (username) => {
  */
 const getUsername = async (userId) => {
   try {
-    const {
-      user: { username },
-    } = await fetchUser({ userId });
-    return username;
+    const { userExists, user } = await dataAccessLayer.retrieveUsers({ id: userId });
+    return userExists ? user.username : undefined;
   } catch (error) {
     logger.error("Something went wrong", error);
     throw error;
