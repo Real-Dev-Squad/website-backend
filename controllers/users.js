@@ -31,6 +31,7 @@ const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
 const { generateUniqueUsername } = require("../services/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const authService = require("../services/authService");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -111,6 +112,41 @@ const getUsers = async (req, res) => {
         message: "User returned successfully!",
         user,
       });
+    }
+
+    const profile = req.query.profile === "true";
+
+    if (profile) {
+      if (dev) {
+        let result, user;
+        let token = req.cookies[config.get("userToken.cookieName")];
+
+        // Extract token from authorization header if not in production and no token in cookies
+        if (process.env.NODE_ENV !== "production" && !token) {
+          token = req.headers.authorization ? req.headers.authorization.split(" ")[1] : null;
+        }
+
+        // Verify the token
+        let userId;
+        try {
+          ({ userId } = authService.verifyAuthToken(token));
+        } catch (error) {
+          logger.error(`Token verification failed: ${error}`);
+          return res.boom.unauthorized("Unauthenticated User");
+        }
+
+        try {
+          result = await dataAccess.retrieveUsers({ id: userId });
+          user = result.user;
+        } catch (error) {
+          logger.error(`Error while fetching user: ${error}`);
+          return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
+        }
+
+        return res.send(user);
+      } else {
+        return res.boom.badRequest("Route not found");
+      }
     }
 
     if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
@@ -393,6 +429,7 @@ const getSelfDetails = async (req, res) => {
  * @param req.body {Object} - User object
  * @param res {Object} - Express response object
  */
+
 const updateSelf = async (req, res) => {
   try {
     const { id: userId, roles: userRoles, discordId } = req.userData;
