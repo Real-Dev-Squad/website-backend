@@ -46,6 +46,31 @@ const createNewRole = async (roleData) => {
   }
 };
 
+/**
+ * Soft deletes a group role by marking it as deleted in the database.
+ * This function updates the role document in Firestore, setting isDeleted to true
+ * and recording who deleted it and when.
+ *
+ * @param {string} groupId - The ID of the group role to be deleted
+ * @param {string} deletedBy - The ID of the user performing the deletion for logging purpose
+ * @returns {Promise<Object>} An object indicating whether the operation was successful
+ */
+const deleteGroupRole = async (groupId, deletedBy) => {
+  try {
+    const roleRef = admin.firestore().collection("discord-roles").doc(groupId);
+    await roleRef.update({
+      isDeleted: true,
+      deletedAt: admin.firestore.Timestamp.fromDate(new Date()),
+      deletedBy: deletedBy,
+    });
+
+    return { isSuccess: true };
+  } catch (error) {
+    logger.error(`Error in deleteGroupRole: ${error}`);
+    return { isSuccess: false };
+  }
+};
+
 const removeMemberGroup = async (roleId, discordId) => {
   try {
     const backendResponse = await deleteRoleFromDatabase(roleId, discordId);
@@ -1075,4 +1100,5 @@ module.exports = {
   getUserDiscordInvite,
   addInviteToInviteModel,
   groupUpdateLastJoinDate,
+  deleteGroupRole,
 };
