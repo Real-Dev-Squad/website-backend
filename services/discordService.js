@@ -121,7 +121,7 @@ const setUserDiscordNickname = async (userName, discordId) => {
 const deleteGroupRoleFromDiscord = async (roleId) => {
   try {
     const authToken = generateAuthTokenForCloudflare();
-    console.log(`Attempting to delete role with ID: ${roleId}`);
+    // console.log(`Attempting to delete role with ID: ${roleId}`);
     const response = await fetch(`${DISCORD_BASE_URL}/roles/${roleId}`, {
       method: "DELETE",
       headers: {
@@ -131,20 +131,20 @@ const deleteGroupRoleFromDiscord = async (roleId) => {
     });
 
     if (!response.ok) {
-      const errorResponse = await response.json();
+      // const errorResponse = await response.json();
 
-      console.error(`Response status: ${response.status}`);
-      console.error(`Response body: ${JSON.stringify(errorResponse)}`);
+      // console.error(`Response status: ${response.status}`);
+      // console.error(`Response body: ${JSON.stringify(errorResponse)}`);
       throw new Error(`Failed to delete role from discord`);
     }
 
     const result = await response.json();
-    console.log(`Successfully deleted role: ${JSON.stringify(result)}`);
+    // console.log(`Successfully deleted role: ${JSON.stringify(result)}`);
 
     return result;
   } catch (err) {
     logger.error(`Error deleting role from Discord: ${err.message}`);
-    console.error(`Full error: ${err}`);
+    // console.error(`Full error: ${err}`);
     throw new Error(err);
   }
 };

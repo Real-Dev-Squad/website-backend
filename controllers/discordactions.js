@@ -75,25 +75,16 @@ const deleteGroupRole = async (req, res) => {
   try {
     const { groupId } = req.params;
     const { roleid } = req.body;
-    console.log(`Attempting to delete group role with ID: ${groupId}`);
-
-    console.log(roleid);
 
     const { roleExists, existingRoles } = await discordRolesModel.isGroupRoleExists({ roleid });
 
     if (!roleExists) {
-      console.log(`Role with ID ${groupId} does not exist in the database.`);
       return res.status(404).json({
         error: "Group role not found",
       });
     }
 
     const roleData = existingRoles.docs[0].data();
-    console.log(roleData);
-
-    console.log(`Deleting role from Discord with ID: ${roleid}`);
-
-    console.log(roleid);
 
     // const discordDeletionSuccess = await discordServices.deleteGroupRoleFromDiscord(roleid);
 
@@ -107,7 +98,6 @@ const deleteGroupRole = async (req, res) => {
     const { isSuccess } = await discordRolesModel.deleteGroupRole(groupId, req.userData.id);
 
     if (isSuccess) {
-      console.log("deletion log reached");
       const groupDeletionLog = {
         type: "group-role-deletion",
         meta: {
@@ -121,7 +111,6 @@ const deleteGroupRole = async (req, res) => {
         },
       };
       await addLog(groupDeletionLog.type, groupDeletionLog.meta, groupDeletionLog.body);
-      console.log("deletion log end before messge");
       return res.status(200).json({
         message: "Group role deleted succesfully",
       });
