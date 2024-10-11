@@ -57,7 +57,6 @@ const retrieveUsers = async ({
   } else {
     return {
       userExists: false,
-      user: { id: undefined },
     };
   }
 };
