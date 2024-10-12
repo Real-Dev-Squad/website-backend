@@ -69,6 +69,6 @@ export const sendEmail = async (req: CustomRequest, res: CustomResponse) => {
     return res.send({ message: "Email sent successfully", info });
   } catch (error) {
     logger.error("Error occurred while sending email:", error.message);
-    return res.status(500).send({ message: "Failed to send email", error });
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
