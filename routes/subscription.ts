@@ -7,6 +7,6 @@ const router = express.Router();
 const { SUPERUSER } = require("../constants/roles");
 
 router.post("/", authenticate, validateSubscribe, subscribe);
-router.put("/", authenticate, unsubscribe);
+router.patch("/", authenticate, unsubscribe);
 router.get("/notify", authenticate, authorizeRoles([SUPERUSER]), sendEmail);
 module.exports = router;

@@ -73,7 +73,7 @@ describe("/subscription email notifications", function () {
   it("should unsubscribe the user", function (done) {
     chai
       .request(app)
-      .put(`/subscription?dev=true`)
+      .patch(`/subscription?dev=true`)
       .set("cookie", `${cookieName}=${jwt}`)
       .end((err, res) => {
         if (err) {
@@ -89,7 +89,7 @@ describe("/subscription email notifications", function () {
   it("shouldn't unsubscribe the user return 404 when dev is not equal to true", function (done) {
     chai
       .request(app)
-      .put(`/subscription`)
+      .patch(`/subscription`)
       .set("cookie", `${cookieName}=${jwt}`)
       .end((err, res) => {
         if (err) {
@@ -135,7 +135,7 @@ describe("/subscription email notifications", function () {
 
       chai
         .request(app)
-        .get("/subscription/notify?dev=true") 
+        .get("/subscription/notify?dev=true")
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) return done(err);
