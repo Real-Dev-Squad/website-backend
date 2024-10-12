@@ -6,10 +6,6 @@ const config = require("config");
 const emailSubscriptionCredentials = config.get("emailSubscriptionCredentials");
 
 export const subscribe = async (req: CustomRequest, res: CustomResponse) => {
-  const dev = req.query.dev === "true";
-    if (!dev) {
-      return res.boom.notFound("Route not found");
-    }
     const { email } = req.body;
     const phoneNumber = req.body.phoneNumber || null;
     const userId = req.userData.id;
@@ -17,27 +13,22 @@ export const subscribe = async (req: CustomRequest, res: CustomResponse) => {
     const userAlreadySubscribed = req.userData.isSubscribed;
   try {
     if (userAlreadySubscribed) {
-      return res.boom.badRequest({message: "User is already subscribed"});
+      return res.boom.badRequest("User already subscribed");
     }
     await addOrUpdate(data, userId);
-    return res.status(201).json({
-      message: "user subscribed successfully",
-    });
+    return res.status(201).json("User subscribed successfully");
   } catch (error) {
-    res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    logger.error(`Error occurred while subscribing: ${error.message}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
 export const unsubscribe = async (req: CustomRequest, res: CustomResponse) => {
-  const dev = req.query.dev === "true";
-    if (!dev) {
-      return res.boom.notFound("Route not found");
-    }
     const userId = req.userData.id;
     const userAlreadySubscribed = req.userData.isSubscribed;
   try {
     if (!userAlreadySubscribed) {
-      return res.boom.badRequest({message: "User is already unsubscribed"});
+      return res.boom.badRequest("User is already unsubscribed");
     }
     await addOrUpdate(
       {
@@ -45,21 +36,16 @@ export const unsubscribe = async (req: CustomRequest, res: CustomResponse) => {
       },
       userId
     );
-    return res.status(200).json({
-      message: "user unsubscribed successfully",
-    });
+    return res.status(200).json("User unsubscribed successfully");
   } catch (error) {
-    res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    logger.error(`Error occurred while unsubscribing: ${error.message}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
 // TODO: currently we are sending test email to a user only (i.e., Tejas sir as decided)
 // later we need to make service which send email to all subscribed user
 export const sendEmail = async (req: CustomRequest, res: CustomResponse) => {
-  const dev = req.query.dev === "true";
-  if (!dev) {
-    return res.boom.notFound("Route not found");
-  }
   try { 
     const transporter = nodemailer.createTransport({
       host: emailSubscriptionCredentials.host,
@@ -80,10 +66,9 @@ export const sendEmail = async (req: CustomRequest, res: CustomResponse) => {
       html: "<b>Hello world!</b>",
     });
 
-    res.send({ message: "Email sent", info });
+    return res.send({ message: "Email sent successfully", info });
   } catch (error) {
-    console.error("Error occurred:", error);
-    res.status(500).send({ message: "Failed to send email", error });
+    logger.error("Error occurred while sending email:", error.message);
+    return res.status(500).send({ message: "Failed to send email", error });
   }
-  res.send(emailSubscriptionCredentials)
 };
