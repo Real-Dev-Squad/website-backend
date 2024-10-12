@@ -60,7 +60,7 @@ export const sendEmail = async (req: CustomRequest, res: CustomResponse) => {
 
     const info = await transporter.sendMail({
       from: `"Real Dev Squad" <${emailSubscriptionCredentials.email}>`,
-      to: "tejasatrds@gmail.com ",
+      to: "tejasatrds@gmail.com",
       subject: "Hello local, Testing in progress.",
       text: "working for notification feature",
       html: "<b>Hello world!</b>",

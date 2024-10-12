@@ -48,24 +48,7 @@ describe("/subscription email notifications", function () {
           return done(err);
         }
         expect(res).to.have.status(201);
-        expect(res.body).to.have.keys(["message"]);
-        expect(res.body.message).to.equal(subscribedMessage);
-        return done();
-      });
-  });
-
-  it("shouldn't add user's data and return 404 when dev is not equal to true", function (done) {
-    chai
-      .request(app)
-      .post(`/subscription`)
-      .set("cookie", `${cookieName}=${jwt}`)
-      .send(subscriptionData)
-      .end((err, res) => {
-        if (err) {
-          return done(err);
-        }
-        expect(res).to.have.status(404);
-        expect(res.body).to.have.property("message", "Route not found");
+        expect(res.body).to.equal(subscribedMessage);
         return done();
       });
   });
@@ -80,23 +63,7 @@ describe("/subscription email notifications", function () {
           return done(err);
         }
         expect(res).to.have.status(200);
-        expect(res.body).to.have.keys(["message"]);
-        expect(res.body.message).to.equal(unSubscribedMessage);
-        return done();
-      });
-  });
-
-  it("shouldn't unsubscribe the user return 404 when dev is not equal to true", function (done) {
-    chai
-      .request(app)
-      .patch(`/subscription`)
-      .set("cookie", `${cookieName}=${jwt}`)
-      .end((err, res) => {
-        if (err) {
-          return done(err);
-        }
-        expect(res).to.have.status(404);
-        expect(res.body).to.have.property("message", "Route not found");
+        expect(res.body).to.equal(unSubscribedMessage);
         return done();
       });
   });
@@ -142,23 +109,6 @@ describe("/subscription email notifications", function () {
           expect(res).to.have.status(500);
           expect(res.body).to.have.property("message", "Failed to send email");
           expect(res.body).to.have.property("error");
-          return done();
-        });
-    });
-
-    it("Sending mail should return 404 if dev is not equal to true", function (done) {
-      sinon.stub(nodemailer, "createTransport").callsFake(() => {
-        throw new Error("Transport error");
-      });
-
-      chai
-        .request(app)
-        .get("/subscription/notify")
-        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res).to.have.status(404);
-          expect(res.body).to.have.property("message", "Route not found");
           return done();
         });
     });

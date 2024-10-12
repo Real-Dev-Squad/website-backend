@@ -5,9 +5,8 @@ import { validateSubscribe } from "../middlewares/validators/subscription";
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const router = express.Router();
 const { SUPERUSER } = require("../constants/roles");
-import { devFlagMiddleware } from "../middlewares/devFlag";
 
-router.post("/", authenticate, devFlagMiddleware, validateSubscribe, subscribe);
-router.patch("/", authenticate,devFlagMiddleware, unsubscribe);
-router.get("/notify", authenticate, devFlagMiddleware, authorizeRoles([SUPERUSER]), sendEmail);
+router.post("/", authenticate,  validateSubscribe, subscribe);
+router.patch("/", authenticate, unsubscribe);
+router.get("/notify", authenticate, authorizeRoles([SUPERUSER]), sendEmail);
 module.exports = router;
