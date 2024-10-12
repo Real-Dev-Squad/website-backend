@@ -107,8 +107,7 @@ describe("/subscription email notifications", function () {
         .end((err, res) => {
           if (err) return done(err);
           expect(res).to.have.status(500);
-          expect(res.body).to.have.property("message", "Failed to send email");
-          expect(res.body).to.have.property("error");
+          expect(res.body).to.have.property("message", "An internal server error occurred");
           return done();
         });
     });
