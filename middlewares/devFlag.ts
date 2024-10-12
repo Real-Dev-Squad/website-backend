@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { CustomRequest, CustomResponse } from "../types/global";  // Assuming these types extend the default ones
+import { CustomRequest, CustomResponse } from "../types/global";
 
 export const devFlagMiddleware = (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   try {
