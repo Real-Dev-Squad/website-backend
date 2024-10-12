@@ -388,10 +388,12 @@ describe("Application", function () {
 
           expect(res).to.have.status(200);
           expect(res.body.message).to.be.equal("Application updated successfully!");
+          expect(res.body.data).to.deep.equal({
+            status: "accepted",
+          });
           return done();
         });
     });
-
     it("should return 401 if the user is not super user", function (done) {
       chai
         .request(app)
