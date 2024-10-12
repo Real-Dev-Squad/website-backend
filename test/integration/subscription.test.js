@@ -101,7 +101,7 @@ describe("/subscription email notifications", function () {
       });
   });
 
-  describe("/send-email endpoint", function () {
+  describe("/notify endpoint", function () {
     beforeEach(async function () {
       const superUserId = await addUser(superUser);
       superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
@@ -116,7 +116,7 @@ describe("/subscription email notifications", function () {
     it("Should return 401 if the super user is not logged in", function (done) {
       chai
         .request(app)
-        .post("/subscription?dev=true")
+        .get("/subscription/notify?dev=true")
         .end((err, res) => {
           if (err) {
             return done();
@@ -135,7 +135,7 @@ describe("/subscription email notifications", function () {
 
       chai
         .request(app)
-        .get("/subscription/send-email?dev=true")
+        .get("/subscription/notify?dev=true") 
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) return done(err);
@@ -153,7 +153,7 @@ describe("/subscription email notifications", function () {
 
       chai
         .request(app)
-        .get("/subscription/send-email")
+        .get("/subscription/notify")
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) return done(err);

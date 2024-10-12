@@ -6,16 +6,19 @@ const config = require("config");
 const emailSubscriptionCredentials = config.get("emailSubscriptionCredentials");
 
 export const subscribe = async (req: CustomRequest, res: CustomResponse) => {
-  try {
-    const { email } = req.body;
-    const phoneNumber = req.body.phoneNumber || null;
-    const userId = req.userData.id;
-    const dev = req.query.dev === "true";
+  const dev = req.query.dev === "true";
     if (!dev) {
       return res.boom.notFound("Route not found");
     }
-
+    const { email } = req.body;
+    const phoneNumber = req.body.phoneNumber || null;
+    const userId = req.userData.id;
     const data = { email, isSubscribed: true, phoneNumber };
+    const userAlreadySubscribed = req.userData.isSubscribed;
+  try {
+    if (userAlreadySubscribed) {
+      return res.boom.badRequest({message: "User is already subscribed"});
+    }
     await addOrUpdate(data, userId);
     return res.status(201).json({
       message: "user subscribed successfully",
@@ -26,11 +29,15 @@ export const subscribe = async (req: CustomRequest, res: CustomResponse) => {
 };
 
 export const unsubscribe = async (req: CustomRequest, res: CustomResponse) => {
-  try {
-    const userId = req.userData.id;
-    const dev = req.query.dev === "true";
+  const dev = req.query.dev === "true";
     if (!dev) {
       return res.boom.notFound("Route not found");
+    }
+    const userId = req.userData.id;
+    const userAlreadySubscribed = req.userData.isSubscribed;
+  try {
+    if (!userAlreadySubscribed) {
+      return res.boom.badRequest({message: "User is already unsubscribed"});
     }
     await addOrUpdate(
       {
@@ -46,13 +53,14 @@ export const unsubscribe = async (req: CustomRequest, res: CustomResponse) => {
   }
 };
 
+// TODO: currently we are sending test email to a user only (i.e., Tejas sir as decided)
+// later we need to make service which send email to all subscribed user
 export const sendEmail = async (req: CustomRequest, res: CustomResponse) => {
+  const dev = req.query.dev === "true";
+  if (!dev) {
+    return res.boom.notFound("Route not found");
+  }
   try { 
-    const dev = req.query.dev === "true";
-    if (!dev) {
-      return res.boom.notFound("Route not found");
-    }
-    
     const transporter = nodemailer.createTransport({
       host: emailSubscriptionCredentials.host,
       port:  emailSubscriptionCredentials.port,
