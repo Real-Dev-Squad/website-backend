@@ -400,6 +400,8 @@ const updateSelf = async (req, res) => {
     const { user } = await dataAccess.retrieveUsers({ id: userId });
     let rolesToDisable = [];
 
+    const originalUser = { ...user };
+
     if (req.body.username) {
       if (!user.incompleteUserDetails) {
         return res.boom.forbidden("Cannot update username again");
@@ -457,7 +459,18 @@ const updateSelf = async (req, res) => {
     const updatedUser = await userQuery.addOrUpdate(req.body, userId);
 
     if (!updatedUser.isNewUser) {
-      // Success criteria, user finished the sign-up process.
+      const changedFields = Object.keys(req.body).filter((field) => originalUser[field] !== req.body[field]);
+
+      if (changedFields.length > 0) {
+        const logData = {
+          type: logType.USER_DETAILS_UPDATED,
+          meta: { userId, updatedBy: userId },
+          body: { changedFields },
+          timestamp: new Date().toISOString(),
+        };
+        await logsQuery.addLog(logData.type, logData.meta, logData.body);
+      }
+
       userQuery.initializeUser(userId);
       return res.status(204).send();
     }
@@ -631,16 +644,22 @@ const updateUser = async (req, res) => {
     const user = await dataAccess.retrieveUsers({ id: userId });
     if (!user.userExists) return res.boom.notFound("User doesn't exist");
 
-    await profileDiffsQuery.updateProfileDiff({ approval: profileDiffStatus.APPROVED }, profileDiffId);
+    const originalUser = { ...user };
 
+    await profileDiffsQuery.updateProfileDiff({ approval: profileDiffStatus.APPROVED }, profileDiffId);
     await userQuery.addOrUpdate(profileDiff, userId);
 
-    const meta = {
-      approvedBy: req.userData.id,
-      userId: userId,
-    };
+    const changedFields = Object.keys(profileDiff).filter((field) => originalUser[field] !== profileDiff[field]);
 
-    await logsQuery.addLog(logType.PROFILE_DIFF_APPROVED, meta, { profileDiffId, message });
+    if (changedFields.length > 0) {
+      const logData = {
+        type: logType.USER_DETAILS_UPDATED,
+        meta: { approvedBy: req.userData.id, userId },
+        body: { profileDiffId, message, changedFields },
+        timestamp: new Date().toISOString(),
+      };
+      await logsQuery.addLog(logData.type, logData.meta, logData.body);
+    }
 
     return res.json({
       message: "Updated user's data successfully!",
