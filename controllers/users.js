@@ -31,7 +31,6 @@ const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
 const { generateUniqueUsername } = require("../services/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
-const authService = require("../services/authService");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -118,26 +117,15 @@ const getUsers = async (req, res) => {
 
     if (profile) {
       if (dev) {
-        let result, user;
-        let token = req.cookies[config.get("userToken.cookieName")];
-
-        // Extract token from authorization header if not in production and no token in cookies
-        if (process.env.NODE_ENV !== "production" && !token) {
-          token = req.headers.authorization ? req.headers.authorization.split(" ")[1] : null;
-        }
-
-        // Verify the token
-        let userId;
-        try {
-          ({ userId } = authService.verifyAuthToken(token));
-        } catch (error) {
-          logger.error(`Token verification failed: ${error}`);
-          return res.boom.unauthorized("Unauthenticated User");
-        }
+        let user;
 
         try {
-          result = await dataAccess.retrieveUsers({ id: userId });
-          user = result.user;
+          if (req.userData.id) {
+            const result = await dataAccess.retrieveUsers({ id: req.userData.id });
+            user = result.user;
+          } else {
+            return res.boom.badRequest("User ID not provided.");
+          }
         } catch (error) {
           logger.error(`Error while fetching user: ${error}`);
           return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
