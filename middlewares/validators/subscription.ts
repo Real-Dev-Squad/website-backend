@@ -1,6 +1,6 @@
 import { NextFunction } from "express";
 import { CustomRequest, CustomResponse } from "../../types/global";
-import { emailRegex, phoneNumberRegex } from "../../constants/subscription-validator"; // Removed phoneNumberRegex import
+import { emailRegex, phoneNumberRegex } from "../../constants/subscription-validator"; 
 import Joi from 'joi';
 
 export const validateSubscribe = (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
