@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction } from "express";
 import { CustomRequest, CustomResponse } from "../types/global";
 
 export const devFlagMiddleware = (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
@@ -9,6 +9,7 @@ export const devFlagMiddleware = (req: CustomRequest, res: CustomResponse, next:
     }
     next();
   } catch (err) {
+    logger.error("Error occurred in devFlagMiddleware:", err.message);
     next(err);
   }
 };

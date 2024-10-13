@@ -20,7 +20,7 @@ describe("Middleware | Validators | Subscription", function () {
       email: "test@example.com",
     };
 
-    await validateSubscribe(req, res, nextSpy);
+    validateSubscribe(req, res, nextSpy);
 
     expect(nextSpy.calledOnce).to.be.equal(true);
     expect(res.status.called).to.be.equal(false);
@@ -32,7 +32,7 @@ describe("Middleware | Validators | Subscription", function () {
       email: "test@example.com",
     };
 
-    await validateSubscribe(req, res, nextSpy);
+    validateSubscribe(req, res, nextSpy);
     expect(nextSpy.calledOnce).to.be.equal(true);
     expect(res.status.called).to.be.equal(false);
     expect(res.json.called).to.be.equal(false);
@@ -43,7 +43,7 @@ describe("Middleware | Validators | Subscription", function () {
       phoneNumber: "+911234567890",
     };
 
-    await validateSubscribe(req, res, nextSpy);
+    validateSubscribe(req, res, nextSpy);
 
     expect(nextSpy.called).to.be.equal(false);
     expect(res.status.calledOnceWith(400)).to.be.equal(true);
@@ -54,7 +54,7 @@ describe("Middleware | Validators | Subscription", function () {
   it("should return a 400 error when both phoneNumber and email are missing", async function () {
     req.body = {};
 
-    await validateSubscribe(req, res, nextSpy);
+    validateSubscribe(req, res, nextSpy);
     expect(nextSpy.called).to.be.equal(false);
     expect(res.status.calledOnceWith(400)).to.be.equal(true);
     expect(res.json.calledOnce).to.be.equal(true);
@@ -67,7 +67,7 @@ describe("Middleware | Validators | Subscription", function () {
       email: "invalid-email",
     };
 
-    await validateSubscribe(req, res, nextSpy);
+    validateSubscribe(req, res, nextSpy);
 
     expect(nextSpy.called).to.be.equal(false);
     expect(res.status.calledOnceWith(400)).to.be.equal(true);
@@ -83,9 +83,39 @@ describe("Middleware | Validators | Subscription", function () {
       email: "test@example.com",
     };
 
-    await validateSubscribe(req, res, nextSpy);
+    validateSubscribe(req, res, nextSpy);
     expect(nextSpy.calledOnce).to.be.equal(true);
     expect(res.status.called).to.be.equal(false);
     expect(res.json.called).to.be.equal(false);
+  });
+
+  it("should trim and validate phoneNumber if it contains leading or trailing spaces", async function () {
+    req.body = {
+      phoneNumber: "   +911234567890   ",
+      email: "test@example.com",
+    };
+
+    validateSubscribe(req, res, nextSpy);
+
+    expect(nextSpy.calledOnce).to.be.equal(true);
+    expect(res.status.called).to.be.equal(false);
+    expect(res.json.called).to.be.equal(false);
+    expect(req.body.phoneNumber).to.equal("+911234567890");
+  });
+
+  it("should return a 400 error when phoneNumber is in incorrect format", async function () {
+    req.body = {
+      phoneNumber: "invalid-number",
+      email: "test@example.com",
+    };
+
+    validateSubscribe(req, res, nextSpy);
+
+    expect(nextSpy.called).to.be.equal(false);
+    expect(res.status.calledOnceWith(400)).to.be.equal(true);
+    expect(res.json.calledOnce).to.be.equal(true);
+    expect(res.json.firstCall.args[0])
+      .to.have.property("error")
+      .that.includes('"phoneNumber" with value "invalid-number" fails to match the required pattern');
   });
 });
