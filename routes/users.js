@@ -18,7 +18,7 @@ router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), use
 router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
 router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
-router.get("/", authCondition, userValidator.getUsers, users.getUsers);
+router.get("/", authCondition(authenticate), userValidator.getUsers, users.getUsers);
 router.get("/self", authenticate, users.getSelfDetails);
 router.get("/isDeveloper", authenticate, users.isDeveloper);
 router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
