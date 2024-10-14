@@ -1,11 +1,9 @@
-/* eslint-disable no-console */
-/* eslint-disable mocha/no-exclusive-tests */
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
 const authCondition = require("../../../middlewares/authCondition.js");
 
-describe.only("authCondition Middleware", function () {
+describe("authCondition Middleware", function () {
   let req, res, next, authenticateStub, auth;
 
   beforeEach(function () {
