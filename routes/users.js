@@ -18,6 +18,8 @@ router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
 /**
  * @deprecated [SCHEDULED] This endpoint will be deprecated in the near future. New EndPoint TBD.
+ * @todo vikas would be working on this as a sub part of his task issue #2126
+ * https://github.com/vikasosmium
  */
 router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
 router.get("/", userValidator.getUsers, users.getUsers);
