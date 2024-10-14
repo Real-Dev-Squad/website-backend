@@ -11,7 +11,7 @@ const discordServices = require("../services/discordService");
  *
  * @returns {Promise<Object>} - Result with success status and message.
  */
-const removeDiscordRole = async (userData, discordId, roleid, rolename) => {
+export const removeDiscordRole = async (userData, discordId, roleid, rolename) => {
   try {
     const role = await discordRolesModel.isGroupRoleExists({ roleid, rolename });
 
@@ -35,5 +35,3 @@ const removeDiscordRole = async (userData, discordId, roleid, rolename) => {
     return { success: false, message: error.message };
   }
 };
-
-module.exports = { removeDiscordRole };
