@@ -3,7 +3,7 @@ const { addOrUpdate } = require("../models/users");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const nodemailer = require("nodemailer");
 const config = require("config");
-const emailSubscriptionCredentials = config.get("emailSubscriptionCredentials");
+const emailServiceConfig = config.get("emailServiceConfig");
 
 export const subscribe = async (req: CustomRequest, res: CustomResponse) => {
     const { email } = req.body;
@@ -48,18 +48,18 @@ export const unsubscribe = async (req: CustomRequest, res: CustomResponse) => {
 export const sendEmail = async (req: CustomRequest, res: CustomResponse) => {
   try { 
     const transporter = nodemailer.createTransport({
-      host: emailSubscriptionCredentials.host,
-      port:  emailSubscriptionCredentials.port,
+      host: emailServiceConfig.host,
+      port:  emailServiceConfig.port,
       secure: false,
 
       auth: {
-        user: emailSubscriptionCredentials.email,
-        pass: emailSubscriptionCredentials.password,
+        user: emailServiceConfig.email,
+        pass: emailServiceConfig.password,
       },
     });
 
     const info = await transporter.sendMail({
-      from: `"Real Dev Squad" <${emailSubscriptionCredentials.email}>`,
+      from: `"Real Dev Squad" <${emailServiceConfig.email}>`,
       to: "tejasatrds@gmail.com",
       subject: "Hello local, Testing in progress.",
       text: "working for notification feature",

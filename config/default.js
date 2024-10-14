@@ -25,7 +25,7 @@ module.exports = {
     clientSecret: "<clientSecret>",
   },
 
-  emailSubscriptionCredentials: {
+  emailServiceConfig: {
     email: "<RDS_EMAIL>",
     password: "<EMAIL PASSWORD GENERATED AFTER 2FA>",
     host: "<smtp host>",

@@ -55,7 +55,7 @@ module.exports = {
     },
   },
 
-  emailSubscriptionCredentials: {
+  emailServiceConfig: {
     email: "RDS_EMAIL",
     password: "RDS_EMAIL_PASSWORD",
     host: "SMTP_HOST",
