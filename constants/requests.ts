@@ -18,11 +18,11 @@ export const REQUEST_TYPE = {
 };
 
 export const REQUEST_LOG_TYPE = {
-  REQUEST_CREATED: "request_created",
-  REQUEST_APPROVED: "request_approved",
-  REQUEST_REJECTED: "request_rejected",
-  REQUEST_BLOCKED: "request_blocked",
-  REQUEST_CANCELLED: "request_cancelled",
+  REQUEST_CREATED: "REQUEST_CREATED",
+  REQUEST_APPROVED: "REQUEST_APPROVED",
+  REQUEST_REJECTED: "REQUEST_REJECTED",
+  REQUEST_BLOCKED: "REQUEST_BLOCKED",
+  REQUEST_CANCELLED: "REQUEST_CANCELLED",
 };
 
 export const REQUEST_CREATED_SUCCESSFULLY = "Request created successfully";
