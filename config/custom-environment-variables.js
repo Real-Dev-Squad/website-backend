@@ -56,10 +56,13 @@ module.exports = {
   },
 
   emailSubscriptionCredentials: {
-    email: "<RDS_EMAIL>",
-    password: "<EMAIL PASSWORD GENERATED AFTER 2FA>",
-    host: "<smtp host>",
-    port: "<number>",
+    email: "RDS_EMAIL",
+    password: "RDS_EMAIL_PASSWORD",
+    host: "SMTP_HOST",
+    port: {
+      __name: "SMTP_PORT",
+      __format: "number",
+    },
   },
 
   userToken: {

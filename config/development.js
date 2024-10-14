@@ -30,13 +30,6 @@ module.exports = {
     },
   },
 
-  emailSubscriptionCredentials: {
-    email: "<RDS_EMAIL>",
-    password: "<EMAIL PASSWORD GENERATED AFTER 2FA>",
-    host: "<smtp host>",
-    port: "<number>",
-  },
-
   userToken: {
     publicKey:
       "-----BEGIN PUBLIC KEY-----\n" +
