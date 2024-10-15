@@ -4,6 +4,7 @@ const chaiHttp = require("chai-http");
 const sinon = require("sinon");
 const firestore = require("../../utils/firestore");
 const profileDiffsModel = firestore.collection("profileDiffs");
+const obfuscate = require("../../utils/obfuscate");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -38,18 +39,33 @@ describe("Profile Diffs API Behind Feature Flag", function () {
   });
 
   describe("GET /profileDiffs", function () {
-    it("Should return pending profileDiffs, using authorized user (super_user)", function (done) {
-      chai
+    it("Should return pending profileDiffs with obfuscated email and phone, using authorized user (super_user)", async function () {
+      const response = await chai
         .request(app)
         .get("/profileDiffs?dev=true")
-        .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((error, response) => {
-          expect(response).to.have.status(200);
-          expect(response.body.message).to.equal("Profile Diffs returned successfully!");
-          expect(response.body.profileDiffs).to.be.an("array");
-          expect(response.body).to.have.property("next");
-          done(error);
-        });
+        .set("cookie", `${cookieName}=${superUserAuthToken}`);
+
+      expect(response).to.have.status(200);
+      expect(response.body.message).to.equal("Profile Diffs returned successfully!");
+      expect(response.body).to.have.property("next");
+
+      const profileDiffs = response.body.profileDiffs;
+      expect(profileDiffs).to.be.an("array");
+
+      for (const profileDiff of profileDiffs) {
+        const { id, email, phone } = profileDiff;
+        const originalProfileDiffDoc = await profileDiffsModel.doc(id).get();
+        const originalProfileDiff = originalProfileDiffDoc.data();
+
+        if (originalProfileDiff?.email) {
+          const expectedObfuscatedEmail = obfuscate.obfuscateMail(originalProfileDiff.email);
+          expect(email).to.equal(expectedObfuscatedEmail);
+        }
+        if (originalProfileDiff?.phone) {
+          const expectedObfuscatedPhone = obfuscate.obfuscatePhone(originalProfileDiff.phone);
+          expect(phone).to.equal(expectedObfuscatedPhone);
+        }
+      }
     });
 
     it("Should return unauthorized error when not authorized", function (done) {
@@ -65,7 +81,7 @@ describe("Profile Diffs API Behind Feature Flag", function () {
         });
     });
 
-    it("Should handle query parameters correctly", async function () {
+    it("Should handle query parameters correctly and obfuscate email and phone", async function () {
       const profileDiffsSnapshot = await profileDiffsModel.where("approval", "==", "APPROVED").limit(1).get();
 
       const res = await chai
@@ -76,8 +92,25 @@ describe("Profile Diffs API Behind Feature Flag", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(res).to.have.status(200);
       expect(res.body.message).to.equal("Profile Diffs returned successfully!");
-      expect(res.body.profileDiffs).to.be.an("array");
       expect(res.body).to.have.property("next");
+
+      const profileDiffs = res.body.profileDiffs;
+      expect(profileDiffs).to.be.an("array");
+
+      profileDiffs.forEach(async (profileDiff) => {
+        const { id, email, phone } = profileDiff;
+        const originalProfileDiffDoc = await profileDiffsModel.doc(id).get();
+        const originalProfileDiff = originalProfileDiffDoc.data();
+
+        if (originalProfileDiff?.email) {
+          const obfuscatedEmail = obfuscate.obfuscateMail(originalProfileDiff.email);
+          expect(email).to.equal(obfuscatedEmail);
+        }
+        if (originalProfileDiff?.phone) {
+          const obfuscatedPhone = obfuscate.obfuscatePhone(originalProfileDiff.phone);
+          expect(phone).to.equal(obfuscatedPhone);
+        }
+      });
     });
 
     it("Should handle server errors", function (done) {
@@ -97,7 +130,7 @@ describe("Profile Diffs API Behind Feature Flag", function () {
   });
 
   describe("GET /profileDiffs/:id", function () {
-    it("Should return a specific profile diff for authorized user", async function () {
+    it("Should return a specific profile diff with obfuscated email and phone for authorized user", async function () {
       const profileDiffsSnapshot = await profileDiffsModel.where("approval", "==", "PENDING").limit(1).get();
 
       const response = await chai
@@ -107,6 +140,17 @@ describe("Profile Diffs API Behind Feature Flag", function () {
       expect(response).to.have.status(200);
       expect(response.body.message).to.equal("Profile Diff returned successfully!");
       expect(response.body.profileDiff).to.be.an("object");
+
+      const { email, phone } = response.body.profileDiff;
+      const originalProfileDiff = profileDiffsSnapshot.docs[0].data();
+      if (originalProfileDiff?.email) {
+        const obfuscatedEmail = obfuscate.obfuscateMail(originalProfileDiff.email);
+        expect(email).to.equal(obfuscatedEmail);
+      }
+      if (originalProfileDiff?.phone) {
+        const obfuscatedPhone = obfuscate.obfuscatePhone(originalProfileDiff.phone);
+        expect(phone).to.equal(obfuscatedPhone);
+      }
     });
 
     it("Should return not found for non-existent profile diff", function (done) {
