@@ -117,21 +117,17 @@ const getUsers = async (req, res) => {
 
     if (profile) {
       if (dev) {
-        let user;
+        if (!req.userData.id) {
+          return res.boom.badRequest("User ID not provided.");
+        }
 
         try {
-          if (req.userData.id) {
-            const result = await dataAccess.retrieveUsers({ id: req.userData.id });
-            user = result.user;
-          } else {
-            return res.boom.badRequest("User ID not provided.");
-          }
+          const result = await dataAccess.retrieveUsers({ id: req.userData.id });
+          return res.send(result.user);
         } catch (error) {
           logger.error(`Error while fetching user: ${error}`);
           return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
         }
-
-        return res.send(user);
       } else {
         return res.boom.badRequest("Route not found");
       }

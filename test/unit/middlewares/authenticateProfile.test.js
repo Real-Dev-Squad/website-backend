@@ -1,14 +1,14 @@
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
-const authCondition = require("../../../middlewares/authCondition.js");
+const authenticateProfile = require("../../../middlewares/authenticateProfile.js");
 
-describe("authCondition Middleware", function () {
+describe("authenticateProfile Middleware", function () {
   let req, res, next, authenticateStub, auth;
 
   beforeEach(function () {
     authenticateStub = sinon.spy();
-    auth = authCondition(authenticateStub);
+    auth = authenticateProfile(authenticateStub);
 
     req = {
       query: {},

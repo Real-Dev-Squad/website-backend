@@ -1,4 +1,4 @@
-const authCondition = (authenticate) => {
+const authenticateProfile = (authenticate) => {
   return async (req, res, next) => {
     if (req.query.profile === "true") {
       return await authenticate(req, res, next);
@@ -7,4 +7,4 @@ const authCondition = (authenticate) => {
   };
 };
 
-module.exports = authCondition;
+module.exports = authenticateProfile;

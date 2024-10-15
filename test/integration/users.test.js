@@ -904,7 +904,7 @@ describe("Users", function () {
         });
     });
 
-    it("Should return the logged user's details", function (done) {
+    it("Should return the logged-in user's details when profile and dev is true", function (done) {
       chai
         .request(app)
         .get("/users?profile=true&dev=true")
