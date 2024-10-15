@@ -1,0 +1,58 @@
+paths:
+  /healthcheck:
+    get:
+      summary: Returns the health status of the server
+      tags:
+        - Health Check
+      responses:
+        200:
+          description: Returns the uptime of the process
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uptime:
+                    type: number
+                    format: float
+                    description: The uptime of the process in seconds
+                    example: 0.0
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /healthcheck/v2:
+    get:
+      summary: Returns the health status of the server
+      tags:
+        - Health Check
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Returns the uptime of the process
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uptime:
+                    type: number
+                    format: float
+                    description: The uptime of the process in seconds
+                    example: 0.0
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"

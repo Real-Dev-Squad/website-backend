@@ -1,0 +1,205 @@
+components:
+  schemas:
+    Recruiter:
+      type: object
+      properties:
+        company:
+          type: string
+          description: Company of the recruiter
+        first_name:
+          type: string
+          description: First name of the recruiter
+        last_name:
+          type: string
+          description: Last name of the recruiter
+        designation:
+          type: string
+          description: Designation of the recruiter
+        reason:
+          type: string
+          description: Reason for hiring
+        email:
+          type: string
+          description: Email of the recruiter
+        currency:
+          type: string
+          description: Currency of the recruiter
+        package:
+          type: number
+          description: Salary of the recruiter
+    Log:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the log
+        timestamp:
+          type: object
+          description: Timestamp of the log
+          properties:
+            _seconds:
+              type: integer
+            _nanoseconds:
+              type: integer
+        meta:
+          type: object
+          description: Meta data of the log
+        body:
+          type: string
+          description: Body of the request
+    Auction:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the auction
+          example: 1234567890
+        item_type:
+          type: string
+          description: Type of the item
+          example: Car
+        quantity:
+          type: integer
+          description: Quantity of the item
+          example: 1
+        initial_price:
+          type: number
+          description: Initial price of the item
+          example: 1000
+        end_time:
+          type: number
+          description: End time of the auction
+          example: 1620000000
+    AuctionInput:
+      type: object
+      properties:
+        item_type:
+          type: string
+          description: Type of the item
+          example: Car
+        quantity:
+          type: integer
+          description: Quantity of the item
+          example: 1
+        initial_price:
+          type: number
+          description: Initial price of the item
+          example: 1000
+        end_time:
+          type: number
+          description: End time of the auction
+          example: 1620000000
+    Art:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the art
+          example: 1234567890
+        title:
+          type: string
+          description: Title of the art
+          example: Mona Lisa
+        price:
+          type: number
+          description: Price of the art
+          example: 1000000
+        css:
+          type: string
+          description: CSS of the art
+          example: https://example.com/mona-lisa.css
+        userId:
+          type: string
+          description: ID of the user
+          example: 1234567890
+    QrCodeAuth:
+      type: object
+      properties:
+        device_id:
+          type: string
+          description: The device ID
+          example: 123456789
+        user_id:
+          type: string
+          description: The user ID
+          example: 123456789
+        device_info:
+          type: string
+          description: The device information
+          example: Windows 10, Chrome 91.0.4472.124
+        authorization_status:
+          type: string
+          description: The authorization status
+          example: authorized
+  responses:
+    400-BadRequest:
+      description: Bad Request
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+          example: Bad Request
+    401-Unauthorized:
+      description: Unauthorized
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 401
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+          example: Unauthenticated User
+    403-Forbidden:
+      description: Forbidden
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 403
+        error:
+          type: string
+          example: Forbidden
+        message:
+          type: string
+          example: Forbidden
+    404-NotFound:
+      description: Not Found
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Not Found
+    500-InternalServerError:
+      description: Internal Server Error
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 500
+        error:
+          type: string
+          example: Internal Server Error
+        message:
+          type: string
+          example: Internal Server Error
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,0 +1,269 @@
+paths:
+  /auth/github/login:
+    get:
+      summary: Github login
+      description: Github login
+      tags:
+        - Authentication
+      responses:
+        302:
+          description: Redirects to the UI on successful login
+          headers:
+            Cookie:
+              type: string
+              description: Cookie containing authentication token
+            Location:
+              type: string
+              description: Redirection URL
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /auth/github/callback:
+    get:
+      summary: Authenticates the user using the GitHub Oauth 2.0. Redirects to the UI on successful login
+      tags:
+        - Authentication
+      responses:
+        302:
+          description: Redirects to the UI on successful login
+          headers:
+            Cookie:
+              type: string
+              description: Cookie containing authentication token
+            Location:
+              type: string
+              description: Redirection URL
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /auth/signout:
+    get:
+      summary: Signout
+      description: Signout
+      tags:
+        - Authentication
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Signed out successfully"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /auth/qr-code-auth:
+    get:
+      summary: QR code authentication
+      description: QR code authentication
+      tags:
+        - Authentication
+      parameters:
+        - name: device_id
+          in: query
+          required: true
+          schema:
+            type: string
+            description: The code to authenticate the user
+      responses:
+        200:
+          description: Authentication Successfull
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Showing the status of the authentication
+                    example: Authentication document retrieved successfully.
+                  data:
+                    $ref: "../components.yaml#/components/schemas/QrCodeAuth"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+    post:
+      summary: Add device information
+      description: Add device information
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                device_id:
+                  type: string
+                  description: The device ID
+                  example: 123456789
+                user_id:
+                  type: string
+                  description: The user ID
+                  example: 123456789
+                device_info:
+                  type: string
+                  description: The device information
+                  example: Windows 10, Chrome 91.0.4472.124
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Showing the status of the authentication
+                    example: Authentication document retrieved successfully.
+                  userDeviceInfoData:
+                    $ref: "../components.yaml#/components/schemas/QrCodeAuth"
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /auth/device:
+    get:
+      summary: Get device information
+      description: Get device information
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Showing the status of the authentication
+                    example: Authentication document retrieved successfully.
+                  data:
+                    type: object
+                    properties:
+                      device_info:
+                        type: string
+                        description: The device information
+                        example: Windows 10, Chrome 91.0.4472.124
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /auth/qr-code-auth/authorization_status/{authorization_status}:
+    patch:
+      summary: Update authorization status
+      description: Update authorization status
+      tags:
+        - Authentication
+      parameters:
+        - name: authorization_status
+          in: path
+          required: true
+          schema:
+            type: string
+            description: The authorization status
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Showing the status of the authentication
+                    example: Authentication document updated successfully.
+                  data:
+                    $ref: "../components.yaml#/components/schemas/QrCodeAuth"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
