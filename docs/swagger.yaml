@@ -1,0 +1,15 @@
+openapi: 3.0.0
+info:
+  title: RDS Website Backend
+  version: 1.0.0
+  description: Documentation for the RDS Website Backend APIs
+
+servers:
+  - url: "http://localhost:5000"
+    description: Local development server
+
+paths:
+  $ref: "./routes/index.yaml#/paths"
+
+components:
+  $ref: "./components.yaml#/components"
