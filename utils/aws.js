@@ -30,10 +30,6 @@ function configureAWSCredentials() {
           secretAccessKey: secretAccessKey,
         },
       });
-    } else {
-      // Use default credentials chain (IAM role, etc.)
-      logger.error("No AWS credentials provided, using default IAM role or credentials chain.");
-      client = new IdentitystoreClient({ region: region });
     }
   }
   return client;
@@ -137,4 +133,41 @@ const addUserToGroup = async (groupId, userId) => {
   }
 };
 
-module.exports = { fetchUserIdFromUsername, createUser, addUserToGroup };
+/**
+ * Function to get UserId by username from AWS Identity Store
+ * @param {string} username - The username of the user
+ * @returns {Promise<string|null>} - The UserId if found, otherwise null
+ */
+const fetchAwsUserIdByUsername = async (username) => {
+  const client = configureAWSCredentials(); // reusing the same instance - (Singleton object)
+  try {
+    // Define the command to list users
+    const command = new ListUsersCommand({
+      IdentityStoreId: identityStoreId,
+      Filters: [
+        {
+          AttributePath: "UserName",  // Filter by UserName attribute
+          AttributeValue: username,   // The username value to search for
+        },
+      ],
+    });
+    console.log("COmmand passed = ", username);
+    // Send the command to AWS
+    const response = await client.send(command);
+
+    // Check if the user was found
+    if (response.Users && response.Users.length > 0) {
+      const userId = response.Users[0].UserId;
+      console.log(`UserId for username "${username}" is: ${userId}`);
+      return userId;
+    } else {
+      console.log(`No user found with username: ${username}`);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching UserId:", error);
+    return null;
+  }
+};
+
+module.exports = { fetchUserIdFromUsername, createUser, addUserToGroup, fetchAwsUserIdByUsername };
