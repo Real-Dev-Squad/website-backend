@@ -25,6 +25,24 @@ paths:
     $ref: "./auth.yaml#/paths/~1auth~1device"
   /auth/qr-code-auth/authorization_status/{authorization_status}:
     $ref: "./auth.yaml#/paths/~1auth~1qr-code-auth~1authorization_status~1{authorization_status}"
+  /badges:
+    $ref: "./badges.yaml#/paths/~1badges"
+  /badges/assign:
+    $ref: "./badges.yaml#/paths/~1badges~1assign"
+  /badges/remove:
+    $ref: "./badges.yaml#/paths/~1badges~1remove"
+  /challenges:
+    $ref: "./challenges.yaml#/paths/~1challenges"
+  /challenges/subscribe:
+    $ref: "./challenges.yaml#/paths/~1challenges~1subscribe"
+  /contributions/{username}:
+    $ref: "./contributions.yaml#/paths/~1contributions~1{username}"
+  /pullrequests/open:
+    $ref: "./pullrequests.yaml#/paths/~1pullrequests~1open"
+  /pullrequests/stale:
+    $ref: "./pullrequests.yaml#/paths/~1pullrequests~1stale"
+  /pullrequests/user/{username}:
+    $ref: "./pullrequests.yaml#/paths/~1pullrequests~1user~1{username}"
   /healthcheck:
     $ref: "./healthCheck.yaml#/paths/~1healthcheck"
   /healthcheck/v2:

@@ -1,0 +1,159 @@
+paths:
+  /challenges:
+    get:
+      summary: Get all challenges
+      tags:
+        - Challenges
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "../components.yaml#/components/schemas/Challenge"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+    post:
+      summary: Create a new challenge
+      description: This method creates a new challenge.
+      tags:
+        - Challenges
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: The title of the challenge
+                  example: "Challenge Title"
+                level:
+                  type: string
+                  description: The level of the challenge
+                  example: "Easy"
+                start_date:
+                  type: number
+                  description: The start date of the challenge
+                  example: 1234567890
+                end_date:
+                  type: number
+                  description: The end date of the challenge
+                  example: 1234567890
+      responses:
+        201:
+          description: Challenge created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the success of the operation
+                    example: "Challenge created successfully"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/400-BadRequest"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /challenges/subscribe:
+    post:
+      summary: Subscribe to a challenge
+      description: This method allows a user to subscribe to a challenge.
+      tags:
+        - Challenges
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                challenge_id:
+                  type: string
+                  description: The ID of the challenge to subscribe to
+                  example: bvvg4u4ij
+                user_id:
+                  type: string
+                  description: The ID of the user subscribing to the challenge
+                  example: 34d32423
+      responses:
+        200:
+          description: Subscription successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  challenge_id:
+                    type: string
+                    description: The ID of the subscribed challenge
+                    example: bvvg4u4ij
+                  is_user_subscribed:
+                    type: number
+                    description: Indicates if the user is subscribed to the challenge
+                    example: 1
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/400-BadRequest"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"

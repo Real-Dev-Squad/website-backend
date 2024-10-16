@@ -1,0 +1,2043 @@
+openapi: 3.0.0
+info:
+  title: RDS Website Backend
+  version: 1.0.0
+  description: Documentation for the RDS Website Backend APIs
+servers:
+  - url: 'http://localhost:5000'
+    description: Local development server
+paths:
+  /arts:
+    get:
+      summary: Get all the arts
+      description: This endpoint retrieves all the arts
+      tags:
+        - Arts
+      responses:
+        '200':
+          description: All the arts returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  arts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: ID of the art
+                          example: 1234567890
+                        title:
+                          type: string
+                          description: Title of the art
+                          example: Mona Lisa
+                        price:
+                          type: number
+                          description: Price of the art
+                          example: 1000000
+                        css:
+                          type: string
+                          description: CSS of the art
+                          example: 'https://example.com/mona-lisa.css'
+                        userId:
+                          type: string
+                          description: ID of the user
+                          example: 1234567890
+                  message:
+                    type: string
+                    description: A message describing the result of the operation
+                    example: Arts returned successfully!
+                    default: No arts found
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  /arts/user/self:
+    get:
+      summary: Get all the arts created by the current user
+      description: This endpoint retrieves all the arts created by the current user
+      tags:
+        - Arts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All the arts of the current user returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  arts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: ID of the art
+                          example: 1234567890
+                        title:
+                          type: string
+                          description: Title of the art
+                          example: Mona Lisa
+                        price:
+                          type: number
+                          description: Price of the art
+                          example: 1000000
+                        css:
+                          type: string
+                          description: CSS of the art
+                          example: 'https://example.com/mona-lisa.css'
+                        userId:
+                          type: string
+                          description: ID of the user
+                          example: 1234567890
+                  message:
+                    type: string
+                    description: A message describing the result of the operation
+                    example: Arts returned successfully!
+                    default: No arts found
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  '/arts/user/{userId}':
+    get:
+      summary: Get all the arts created by a specific user
+      description: This endpoint retrieves all the arts created by a specific user
+      tags:
+        - Arts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: The ID of the user
+      responses:
+        '200':
+          description: All the arts of the particular user returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  arts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: ID of the art
+                          example: 1234567890
+                        title:
+                          type: string
+                          description: Title of the art
+                          example: Mona Lisa
+                        price:
+                          type: number
+                          description: Price of the art
+                          example: 1000000
+                        css:
+                          type: string
+                          description: CSS of the art
+                          example: 'https://example.com/mona-lisa.css'
+                        userId:
+                          type: string
+                          description: ID of the user
+                          example: 1234567890
+                  message:
+                    type: string
+                    description: A message describing the result of the operation
+                    example: User Arts of userId 3423 returned successfully!
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  /arts/user/add:
+    post:
+      summary: Add an art
+      description: This endpoint adds an art
+      tags:
+        - Arts
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: ID of the art
+                  example: 1234567890
+                title:
+                  type: string
+                  description: Title of the art
+                  example: Mona Lisa
+                price:
+                  type: number
+                  description: Price of the art
+                  example: 1000000
+                css:
+                  type: string
+                  description: CSS of the art
+                  example: 'https://example.com/mona-lisa.css'
+                userId:
+                  type: string
+                  description: ID of the user
+                  example: 1234567890
+      responses:
+        '200':
+          description: Art added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message describing the result of the operation
+                    example: Art added successfully!
+                  id:
+                    type: string
+                    description: The ID of the added art
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  /auctions:
+    get:
+      summary: Get all auctions
+      tags:
+        - Auctions
+      responses:
+        '200':
+          description: All the auctions returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auctions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: ID of the auction
+                          example: 1234567890
+                        item_type:
+                          type: string
+                          description: Type of the item
+                          example: Car
+                        quantity:
+                          type: integer
+                          description: Quantity of the item
+                          example: 1
+                        initial_price:
+                          type: number
+                          description: Initial price of the item
+                          example: 1000
+                        end_time:
+                          type: number
+                          description: End time of the auction
+                          example: 1620000000
+                  message:
+                    type: string
+                    example: Auctions retrieved successfully!
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+    post:
+      summary: Creates a new auction
+      tags:
+        - Auctions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item_type:
+                  type: string
+                  description: Type of the item
+                  example: Car
+                quantity:
+                  type: integer
+                  description: Quantity of the item
+                  example: 1
+                initial_price:
+                  type: number
+                  description: Initial price of the item
+                  example: 1000
+                end_time:
+                  type: number
+                  description: End time of the auction
+                  example: 1620000000
+      responses:
+        '204':
+          description: New auction
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Message indicating successful creation of the auction
+                    example: Auction created successfully!
+                  id:
+                    type: string
+                    description: The ID of the newly created auction
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  '/auctions/{id}':
+    get:
+      summary: Get auction by ID
+      tags:
+        - Auctions
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the auction
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ID of the auction
+                    example: 1234567890
+                  item_type:
+                    type: string
+                    description: Type of the item
+                    example: Car
+                  quantity:
+                    type: integer
+                    description: Quantity of the item
+                    example: 1
+                  initial_price:
+                    type: number
+                    description: Initial price of the item
+                    example: 1000
+                  end_time:
+                    type: number
+                    description: End time of the auction
+                    example: 1620000000
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  '/auctions/bid/{id}':
+    post:
+      summary: Makes a new bid given auctionId
+      tags:
+        - Auctions
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the auction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bid:
+                  type: number
+                  description: The bid amount
+                  example: 100
+      responses:
+        '204':
+          description: New bid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Message indicating successful creation of the bid
+                    example: Successfully placed bid!
+                  id:
+                    type: string
+                    description: The ID of the newly created bid
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+        '403':
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                description: Forbidden
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 403
+                  error:
+                    type: string
+                    example: Forbidden
+                  message:
+                    type: string
+                    example: Forbidden
+        '404':
+          description: Auction not found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  /auth/github/login:
+    get:
+      summary: Github login
+      description: Github login
+      tags:
+        - Authentication
+      responses:
+        '302':
+          description: Redirects to the UI on successful login
+          headers:
+            Cookie:
+              type: string
+              description: Cookie containing authentication token
+            Location:
+              type: string
+              description: Redirection URL
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  /auth/github/callback:
+    get:
+      summary: Authenticates the user using the GitHub Oauth 2.0. Redirects to the UI on successful login
+      tags:
+        - Authentication
+      responses:
+        '302':
+          description: Redirects to the UI on successful login
+          headers:
+            Cookie:
+              type: string
+              description: Cookie containing authentication token
+            Location:
+              type: string
+              description: Redirection URL
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  /auth/signout:
+    get:
+      summary: Signout
+      description: Signout
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Signed out successfully
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  /auth/qr-code-auth:
+    get:
+      summary: QR code authentication
+      description: QR code authentication
+      tags:
+        - Authentication
+      parameters:
+        - name: device_id
+          in: query
+          required: true
+          schema:
+            type: string
+            description: The code to authenticate the user
+      responses:
+        '200':
+          description: Authentication Successfull
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Showing the status of the authentication
+                    example: Authentication document retrieved successfully.
+                  data:
+                    type: object
+                    properties:
+                      device_id:
+                        type: string
+                        description: The device ID
+                        example: 123456789
+                      user_id:
+                        type: string
+                        description: The user ID
+                        example: 123456789
+                      device_info:
+                        type: string
+                        description: The device information
+                        example: 'Windows 10, Chrome 91.0.4472.124'
+                      authorization_status:
+                        type: string
+                        description: The authorization status
+                        example: authorized
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+    post:
+      summary: Add device information
+      description: Add device information
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                device_id:
+                  type: string
+                  description: The device ID
+                  example: 123456789
+                user_id:
+                  type: string
+                  description: The user ID
+                  example: 123456789
+                device_info:
+                  type: string
+                  description: The device information
+                  example: 'Windows 10, Chrome 91.0.4472.124'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Showing the status of the authentication
+                    example: Authentication document retrieved successfully.
+                  userDeviceInfoData:
+                    type: object
+                    properties:
+                      device_id:
+                        type: string
+                        description: The device ID
+                        example: 123456789
+                      user_id:
+                        type: string
+                        description: The user ID
+                        example: 123456789
+                      device_info:
+                        type: string
+                        description: The device information
+                        example: 'Windows 10, Chrome 91.0.4472.124'
+                      authorization_status:
+                        type: string
+                        description: The authorization status
+                        example: authorized
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  /auth/device:
+    get:
+      summary: Get device information
+      description: Get device information
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Showing the status of the authentication
+                    example: Authentication document retrieved successfully.
+                  data:
+                    type: object
+                    properties:
+                      device_info:
+                        type: string
+                        description: The device information
+                        example: 'Windows 10, Chrome 91.0.4472.124'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  '/auth/qr-code-auth/authorization_status/{authorization_status}':
+    patch:
+      summary: Update authorization status
+      description: Update authorization status
+      tags:
+        - Authentication
+      parameters:
+        - name: authorization_status
+          in: path
+          required: true
+          schema:
+            type: string
+            description: The authorization status
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Showing the status of the authentication
+                    example: Authentication document updated successfully.
+                  data:
+                    type: object
+                    properties:
+                      device_id:
+                        type: string
+                        description: The device ID
+                        example: 123456789
+                      user_id:
+                        type: string
+                        description: The user ID
+                        example: 123456789
+                      device_info:
+                        type: string
+                        description: The device information
+                        example: 'Windows 10, Chrome 91.0.4472.124'
+                      authorization_status:
+                        type: string
+                        description: The authorization status
+                        example: authorized
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  /healthcheck:
+    get:
+      summary: Returns the health status of the server
+      tags:
+        - Health Check
+      responses:
+        '200':
+          description: Returns the uptime of the process
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uptime:
+                    type: number
+                    format: float
+                    description: The uptime of the process in seconds
+                    example: 0
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  /healthcheck/v2:
+    get:
+      summary: Returns the health status of the server
+      tags:
+        - Health Check
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Returns the uptime of the process
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uptime:
+                    type: number
+                    format: float
+                    description: The uptime of the process in seconds
+                    example: 0
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  /logs:
+    get:
+      summary: Get logs
+      description: Fetches all logs
+      tags:
+        - Logs
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Fetched the logs successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Message describing the response
+                    example: All Logs fetched successfully
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: Type of the log
+                        timestamp:
+                          type: object
+                          description: Timestamp of the log
+                          properties:
+                            _seconds:
+                              type: integer
+                            _nanoseconds:
+                              type: integer
+                        meta:
+                          type: object
+                          description: Meta data of the log
+                        body:
+                          type: string
+                          description: Body of the request
+                  next:
+                    type: string
+                    description: URL for the next page of logs
+                    example: /logs?page=2
+                  prev:
+                    type: string
+                    description: URL for the previous page of logs
+                    example: /logs?page=1
+        '401':
+          description: User is not authorized to view the logs
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  '/logs/{type}':
+    get:
+      summary: Get logs by type
+      description: Fetches logs by type
+      tags:
+        - Logs
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: type
+          required: true
+          schema:
+            type: string
+          description: Type of log to fetch
+      responses:
+        '200':
+          description: Fetched the logs successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Message describing the response
+                    example: Logs fetched successfully
+                  logs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: Type of the log
+                        timestamp:
+                          type: object
+                          description: Timestamp of the log
+                          properties:
+                            _seconds:
+                              type: integer
+                            _nanoseconds:
+                              type: integer
+                        meta:
+                          type: object
+                          description: Meta data of the log
+                        body:
+                          type: string
+                          description: Body of the request
+        '401':
+          description: User is not authorized to view the logs
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                description: Internal Server Error
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal Server Error
+  /members:
+    get:
+      summary: Returns the members list
+      description: Returns the members list present on the server
+      tags:
+        - Members
+      responses:
+        '200':
+          description: A list of members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    desciption: message describing the status of the request
+                  members:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Unique id of the member
+                        github_created_at:
+                          type: number
+                          description: Timestamp of the github id creation
+                        incompleteUserDetails:
+                          type: boolean
+                          description: Indicated if user has filled in all the details
+                        github_display_name:
+                          type: string
+                          description: The name of the user displayed on their github profile
+                        updated_at:
+                          type: string
+                          format: date-time
+                          description: Last updated timestamp of the member
+                        roles:
+                          type: object
+                          properties:
+                            archived:
+                              type: boolean
+                              description: Indicates if the member is archived or not
+                            in_discord:
+                              type: boolean
+                              description: Indicates if the member is in discord or not
+                        created_at:
+                          type: number
+                          description: Timestamp of the member creation
+                        github_id:
+                          type: string
+                          description: Github id of the member
+                        github_user_id:
+                          type: string
+                          description: Github user id of the member
+                        isMember:
+                          type: boolean
+                          description: Indicates if the user is a member or not
+  /members/idle:
+    get:
+      summary: Returns the idle members list
+      description: Returns the idle members list present on the server
+      tags:
+        - Members
+      responses:
+        '200':
+          description: A list of idle members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    desciption: message describing the status of the request
+                  idleMemberUserNames:
+                    type: array
+                    items:
+                      type: string
+                      description: Username of the idle member
+  '/members/intro/{username}':
+    post:
+      summary: Adds a recruiter to the recruiters collection
+      description: Adds a recruiter to the recruiters collection
+      tags:
+        - Members
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            description: The username of the recruiter to be added to the intro list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                company:
+                  type: string
+                  description: Company of the recruiter
+                first_name:
+                  type: string
+                  description: First name of the recruiter
+                last_name:
+                  type: string
+                  description: Last name of the recruiter
+                designation:
+                  type: string
+                  description: Designation of the recruiter
+                reason:
+                  type: string
+                  description: Reason for hiring
+                email:
+                  type: string
+                  description: Email of the recruiter
+                currency:
+                  type: string
+                  description: Currency of the recruiter
+                package:
+                  type: number
+                  description: Salary of the recruiter
+      responses:
+        '200':
+          description: Recruiter added to the intro list successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    desciption: message describing the status of the request
+                  result:
+                    type: object
+                    properties:
+                      recruiterId:
+                        type: string
+                        description: Id of the recruiter added
+                      recruiterName:
+                        type: string
+                        description: Name of the recruiter added
+                      userInfo:
+                        type: string
+                        description: User info (contactinated first name last name and email)
+                      timestamp:
+                        type: number
+                        description: Timestamp of the recruiter addition
+  /members/intro:
+    get:
+      summary: Returns the list of recruiters
+      description: Returns the list of recruiters
+      tags:
+        - Members
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of all the recruiters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    desciption: message describing the status of the request
+                  recruiters:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        company:
+                          type: string
+                          description: Company of the recruiter
+                        first_name:
+                          type: string
+                          description: First name of the recruiter
+                        last_name:
+                          type: string
+                          description: Last name of the recruiter
+                        designation:
+                          type: string
+                          description: Designation of the recruiter
+                        reason:
+                          type: string
+                          description: Reason for hiring
+                        email:
+                          type: string
+                          description: Email of the recruiter
+                        currency:
+                          type: string
+                          description: Currency of the recruiter
+                        package:
+                          type: number
+                          description: Salary of the recruiter
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+  '/members/moveToMembers/{username}':
+    patch:
+      summary: Moves a recruiter from the intro list to the members list
+      description: Moves a recruiter from the intro list to the members list
+      tags:
+        - Members
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            description: The username of the recruiter to be moved to the members list
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Recruiter moved to the members list successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    desciption: message describing the status of the request
+        '400':
+          description: User is already a member
+          content:
+            application/json:
+              schema:
+                description: Bad Request
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 400
+                  error:
+                    type: string
+                    example: Bad Request
+                  message:
+                    type: string
+                    example: Bad Request
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+        '404':
+          description: Recruiter not found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+  '/members/archiveMembers/{username}':
+    patch:
+      summary: Archives a member
+      description: Archives a member
+      tags:
+        - Members
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            description: The username of the member to be archived
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Member archived successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    desciption: message describing the status of the request
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: Unauthorized
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthenticated User
+        '404':
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                description: Not Found
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+components:
+  schemas:
+    Recruiter:
+      type: object
+      properties:
+        company:
+          type: string
+          description: Company of the recruiter
+        first_name:
+          type: string
+          description: First name of the recruiter
+        last_name:
+          type: string
+          description: Last name of the recruiter
+        designation:
+          type: string
+          description: Designation of the recruiter
+        reason:
+          type: string
+          description: Reason for hiring
+        email:
+          type: string
+          description: Email of the recruiter
+        currency:
+          type: string
+          description: Currency of the recruiter
+        package:
+          type: number
+          description: Salary of the recruiter
+    Log:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the log
+        timestamp:
+          type: object
+          description: Timestamp of the log
+          properties:
+            _seconds:
+              type: integer
+            _nanoseconds:
+              type: integer
+        meta:
+          type: object
+          description: Meta data of the log
+        body:
+          type: string
+          description: Body of the request
+    Auction:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the auction
+          example: 1234567890
+        item_type:
+          type: string
+          description: Type of the item
+          example: Car
+        quantity:
+          type: integer
+          description: Quantity of the item
+          example: 1
+        initial_price:
+          type: number
+          description: Initial price of the item
+          example: 1000
+        end_time:
+          type: number
+          description: End time of the auction
+          example: 1620000000
+    AuctionInput:
+      type: object
+      properties:
+        item_type:
+          type: string
+          description: Type of the item
+          example: Car
+        quantity:
+          type: integer
+          description: Quantity of the item
+          example: 1
+        initial_price:
+          type: number
+          description: Initial price of the item
+          example: 1000
+        end_time:
+          type: number
+          description: End time of the auction
+          example: 1620000000
+    Art:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the art
+          example: 1234567890
+        title:
+          type: string
+          description: Title of the art
+          example: Mona Lisa
+        price:
+          type: number
+          description: Price of the art
+          example: 1000000
+        css:
+          type: string
+          description: CSS of the art
+          example: 'https://example.com/mona-lisa.css'
+        userId:
+          type: string
+          description: ID of the user
+          example: 1234567890
+    QrCodeAuth:
+      type: object
+      properties:
+        device_id:
+          type: string
+          description: The device ID
+          example: 123456789
+        user_id:
+          type: string
+          description: The user ID
+          example: 123456789
+        device_info:
+          type: string
+          description: The device information
+          example: 'Windows 10, Chrome 91.0.4472.124'
+        authorization_status:
+          type: string
+          description: The authorization status
+          example: authorized
+  responses:
+    400-BadRequest:
+      description: Bad Request
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+          example: Bad Request
+    401-Unauthorized:
+      description: Unauthorized
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 401
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+          example: Unauthenticated User
+    403-Forbidden:
+      description: Forbidden
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 403
+        error:
+          type: string
+          example: Forbidden
+        message:
+          type: string
+          example: Forbidden
+    404-NotFound:
+      description: Not Found
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Not Found
+    500-InternalServerError:
+      description: Internal Server Error
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 500
+        error:
+          type: string
+          example: Internal Server Error
+        message:
+          type: string
+          example: Internal Server Error
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
