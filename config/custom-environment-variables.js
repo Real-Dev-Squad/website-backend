@@ -55,6 +55,16 @@ module.exports = {
     },
   },
 
+  emailServiceConfig: {
+    email: "RDS_EMAIL",
+    password: "RDS_EMAIL_PASSWORD",
+    host: "SMTP_HOST",
+    port: {
+      __name: "SMTP_PORT",
+      __format: "number",
+    },
+  },
+
   userToken: {
     cookieName: "COOKIE_NAME",
     ttl: {
