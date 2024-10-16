@@ -113,6 +113,26 @@ const getUsers = async (req, res) => {
       });
     }
 
+    const profile = req.query.profile === "true";
+
+    if (profile) {
+      if (dev) {
+        if (!req.userData.id) {
+          return res.boom.badRequest("User ID not provided.");
+        }
+
+        try {
+          const result = await dataAccess.retrieveUsers({ id: req.userData.id });
+          return res.send(result.user);
+        } catch (error) {
+          logger.error(`Error while fetching user: ${error}`);
+          return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
+        }
+      } else {
+        return res.boom.badRequest("Route not found");
+      }
+    }
+
     if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
       return res.boom.badRequest(`Days is required for filterBy ${transformedQuery?.filterBy}`);
     }
@@ -393,6 +413,7 @@ const getSelfDetails = async (req, res) => {
  * @param req.body {Object} - User object
  * @param res {Object} - Express response object
  */
+
 const updateSelf = async (req, res) => {
   try {
     const { id: userId, roles: userRoles, discordId } = req.userData;
