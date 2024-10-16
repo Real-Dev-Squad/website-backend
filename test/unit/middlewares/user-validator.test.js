@@ -472,6 +472,41 @@ describe("Middleware | Validators | User", function () {
       });
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
+
+    it("Allows the request pass to next", async function () {
+      const req = {
+        query: {
+          profile: "true",
+          dev: "true",
+        },
+      };
+
+      const res = {};
+      const next = sinon.spy();
+
+      await getUsers(req, res, next);
+      expect(next.calledOnce).to.be.equal(true);
+    });
+
+    it("Stops the request for passing on to next", async function () {
+      const req = {
+        query: {
+          profile: "false",
+        },
+      };
+
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = sinon.spy();
+
+      await getUsers(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+      expect(nextSpy.calledOnce).to.be.equal(false);
+    });
   });
 
   describe("validateGenerateUsernameQuery Middleware", function () {
